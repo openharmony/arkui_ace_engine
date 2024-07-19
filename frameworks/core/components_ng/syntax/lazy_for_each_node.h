@@ -163,6 +163,7 @@ public:
     int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true) override;
     void InitDragManager(const RefPtr<FrameNode>& childNode);
     void InitAllChilrenDragManager(bool init);
+    void NotifyCountChange(int32_t index, int32_t count);
 private:
     void OnAttachToMainTree(bool recursive) override
     {

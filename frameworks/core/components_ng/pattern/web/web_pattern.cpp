@@ -1000,10 +1000,16 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
         // get drag pixel map successfully, disable next drag util received web kernel drag callback
         frameNode->SetDraggable(false);
         RefPtr<UnifiedData> aceUnifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
+        std::string fileName = delegate_->dragData_->GetImageFileName();
         std::string plainContent = delegate_->dragData_->GetFragmentText();
         std::string htmlContent = delegate_->dragData_->GetFragmentHtml();
         std::string linkUrl = delegate_->dragData_->GetLinkURL();
         std::string linkTitle = delegate_->dragData_->GetLinkTitle();
+        if (!fileName.empty()) {
+            OnDragFileNameStart(aceUnifiedData, fileName);
+        } else {
+            TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop event start, dragdata has no image file uri, just pass");
+        }
         if (!plainContent.empty()) {
             isDragEndMenuShow_ = true;
             UdmfClient::GetInstance()->AddPlainTextRecord(aceUnifiedData, plainContent);
@@ -1016,12 +1022,6 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
             isDragEndMenuShow_ = false;
             UdmfClient::GetInstance()->AddLinkRecord(aceUnifiedData, linkUrl, linkTitle);
             TAG_LOGI(AceLogTag::ACE_WEB, "web DragDrop event Start, linkUrl size:%{public}zu", linkUrl.size());
-        }
-        std::string fileName = delegate_->dragData_->GetImageFileName();
-        if (!fileName.empty()) {
-            OnDragFileNameStart(aceUnifiedData, fileName);
-        } else {
-            TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop event start, dragdata has no image file uri, just pass");
         }
         info->SetData(aceUnifiedData);
         HandleOnDragEnter(info);
@@ -3151,6 +3151,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     CHECK_NULL_RETURN(theme, false);
     selectHotZone_ = theme->GetHandleHotZoneRadius().ConvertToPx();
     SelectOverlayInfo selectInfo;
+    RegisterSelectOverLayOnClose(selectInfo);
     selectInfo.isSingleHandle = (overlayType == INSERT_OVERLAY);
     UpdateRunQuickMenuSelectInfo(selectInfo, params, insertTouchHandle, beginTouchHandle, endTouchHandle);
     if (isQuickMenuMouseTrigger_) {
@@ -3171,6 +3172,20 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     startSelectionHandle_ = beginTouchHandle;
     endSelectionHandle_ = endTouchHandle;
     return selectOverlayProxy_ ? true : false;
+}
+
+void WebPattern::RegisterSelectOverLayOnClose(SelectOverlayInfo& selectInfo)
+{
+    selectInfo.onClose = [weak = AceType::WeakClaim(this)] (bool isGlobalTouchEvent) {
+        if (!isGlobalTouchEvent) {
+            return;
+        }
+        TAG_LOGI(AceLogTag::ACE_WEB, "globalTouchEvent, close web select overLayer.");
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->CloseSelectOverlay();
+        webPattern->SelectCancel();
+    };
 }
 
 void WebPattern::DragDropSelectionMenu()

@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
+#include "base/i18n/localization.h"
 #include "core/components_ng/pattern/patternlock/patternlock_pattern.h"
 
 #include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -50,6 +52,16 @@ void PatternLockPattern::OnModifyDone()
     InitPatternLockController();
     InitFocusEvent();
     InitMouseEvent();
+    InitAccessibilityHoverEvent();
+    if (isInitVirtualNode_) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddAfterRenderTask([weak = WeakClaim(this)]() {
+            auto patternLock = weak.Upgrade();
+            CHECK_NULL_VOID(patternLock);
+            patternLock->ModifyAccessibilityVirtualNode();
+        });
+    }
 }
 
 void PatternLockPattern::InitTouchEvent(RefPtr<GestureEventHub>& gestureHub, RefPtr<TouchEventImpl>& touchDownListener)
@@ -96,6 +108,155 @@ void PatternLockPattern::InitPatternLockController()
         });
 }
 
+void PatternLockPattern::InitAccessibilityHoverEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetOrCreateInputEventHub();
+    eventHub->SetAccessibilityHoverEvent([weak = WeakClaim(this)](bool isHover, AccessibilityHoverInfo& info) {
+        auto patternLock = weak.Upgrade();
+        CHECK_NULL_VOID(patternLock);
+        patternLock->HandleAccessibilityHoverEvent(isHover, info);
+    });
+}
+
+void PatternLockPattern::HandleAccessibilityHoverEvent(bool isHover, AccessibilityHoverInfo& info)
+{
+    auto accessibilityHoverAction = info.GetActionType();
+    if (isHover && (accessibilityHoverAction == AccessibilityHoverAction::HOVER_ENTER ||
+                     accessibilityHoverAction == AccessibilityHoverAction::HOVER_MOVE)) {
+        for (const auto& accessibilityProperty : accessibilityPropertyVec_) {
+            accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES);
+        }
+        if (!CheckAutoReset()) {
+            return;
+        }
+        HandleReset();
+    } else if (!isHover) {
+        for (const auto& accessibilityProperty : accessibilityPropertyVec_) {
+            accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO);
+        }
+        AddPointEnd();
+        auto host = GetHost();
+        auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+        accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES);
+    }
+}
+
+bool PatternLockPattern::InitVirtualNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    float handleCircleRadius = 0.0f;
+    if (!GetHandleCircleRadius(handleCircleRadius)) {
+        return false;
+    }
+    auto lineNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto renderContext = lineNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    renderContext->UpdatePosition(OffsetT(Dimension(0.0f), Dimension(0.0f)));
+    for (int32_t y = 0; y < PATTERN_LOCK_COL_COUNT; y++) {
+        for (int32_t x = 0; x < PATTERN_LOCK_COL_COUNT; x++) {
+            auto textNode = AddTextNodeIntoVirtual(x + 1, y + 1, handleCircleRadius);
+            lineNode->AddChild(textNode);
+            textAccessibilityNodeVec_.emplace_back(textNode);
+        }
+    }
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityText(" ");
+    auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(lineNode);
+    CHECK_NULL_RETURN(virtualFrameNode, false);
+    virtualFrameNode->SetAccessibilityNodeVirtual();
+    virtualFrameNode->SetAccessibilityVirtualNodeParent(AceType::DynamicCast<NG::UINode>(host));
+    virtualFrameNode->SetFirstAccessibilityVirtualNode();
+    FrameNode::ProcessOffscreenNode(virtualFrameNode);
+    accessibilityProperty->SaveAccessibilityVirtualNode(lineNode);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    ModifyAccessibilityVirtualNode();
+    return true;
+}
+
+RefPtr<FrameNode> PatternLockPattern::AddTextNodeIntoVirtual(int32_t x, int32_t y, float handleCircleRadius)
+{
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    UpdateAccessibilityTextNode(textNode, handleCircleRadius, x, y);
+    auto textAccessibilityProperty = textNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityPropertyVec_.emplace_back(textAccessibilityProperty);
+    textAccessibilityProperty->SetOnAccessibilityFocusCallback([weak = WeakClaim(this), x, y](bool focus) {
+        if (focus) {
+            auto patternLock = weak.Upgrade();
+            CHECK_NULL_VOID(patternLock);
+            patternLock->HandleTextOnAccessibilityFocusCallback(x, y);
+        }
+    });
+    return textNode;
+}
+
+
+void PatternLockPattern::HandleTextOnAccessibilityFocusCallback(int32_t x, int32_t y)
+{
+    if (!CheckChoosePoint(x, y)) {
+        AddPassPoint(x, y);
+        choosePoint_.emplace_back(x, y);
+        StartModifierConnectedAnimate(x, y);
+        auto host = GetHost();
+        auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+        accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+
+void PatternLockPattern::ModifyAccessibilityVirtualNode()
+{
+    if (textAccessibilityNodeVec_.size() < 1) {
+        return;
+    }
+    float handleCircleRadius = 0.0f;
+    if (!GetHandleCircleRadius(handleCircleRadius)) {
+        return;
+    }
+    for (int32_t y = 0; y < PATTERN_LOCK_COL_COUNT; y++) {
+        for (int32_t x = 0; x < PATTERN_LOCK_COL_COUNT; x++) {
+            auto textNode = textAccessibilityNodeVec_[y * PATTERN_LOCK_COL_COUNT + x];
+            UpdateAccessibilityTextNode(textNode, handleCircleRadius, x, y);
+        }
+    }
+    auto host = GetHost();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
+void PatternLockPattern::UpdateAccessibilityTextNode(
+    RefPtr<FrameNode> frameNode, float handleCircleRadius, int32_t x, int32_t y)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    OffsetF contentOffset = host->GetGeometryNode()->GetContentOffset();
+    float sideLength = host->GetGeometryNode()->GetContentSize().Width();
+    int32_t scale = RADIUS_TO_DIAMETER;
+    float offsetX = sideLength / PATTERN_LOCK_COL_COUNT / scale * (scale * (x + 1) - 1);
+    float offsetY = sideLength / PATTERN_LOCK_COL_COUNT / scale * (scale * (y + 1) - 1);
+    int32_t index = y * PATTERN_LOCK_COL_COUNT + x + 1;
+    std::string message = Localization::GetInstance()->GetEntryLetters("patternlock.accessibilitypasspoint");
+    std::string text = message + std::to_string(index);
+    CHECK_NULL_VOID(frameNode);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateContent(text);
+    Dimension focusPaddingRadius = Dimension(handleCircleRadius * RADIUS_TO_DIAMETER);
+    CalcLength width = CalcLength(focusPaddingRadius);
+    CalcLength height = CalcLength(focusPaddingRadius);
+    textLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    Dimension textOffsetX = Dimension(offsetX - handleCircleRadius + contentOffset.GetX());
+    Dimension textOffsetY = Dimension(offsetY - handleCircleRadius + contentOffset.GetY());
+    renderContext->UpdatePosition(OffsetT(textOffsetX, textOffsetY));
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void PatternLockPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     auto touchList = info.GetChangedTouches();
@@ -118,13 +279,12 @@ void PatternLockPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
 }
 
-bool PatternLockPattern::CheckInHotSpot(const OffsetF& offset, int32_t x, int32_t y)
+bool PatternLockPattern::GetHandleCircleRadius(float& handleCircleRadius)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto patternLockPaintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
     float sideLength = host->GetGeometryNode()->GetContentSize().Width();
-    OffsetF contentOffset = host->GetGeometryNode()->GetContentOffset();
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto patternLockTheme = pipelineContext->GetTheme<V2::PatternLockTheme>();
@@ -138,12 +298,26 @@ bool PatternLockPattern::CheckInHotSpot(const OffsetF& offset, int32_t x, int32_
         return false;
     }
     auto activeCircleRadiusScale = patternLockTheme->GetActiveCircleRadiusScale();
-    auto handleCircleRadius = std::min(static_cast<float>(circleRadius_.ConvertToPxWithSize(sideLength)),
+    handleCircleRadius = std::min(static_cast<float>(circleRadius_.ConvertToPxWithSize(sideLength)),
         sideLength / backgroundRadiusScale / RADIUS_COUNT);
     auto hotSpotCircleRadius = patternLockTheme->GetHotSpotCircleRadius();
     handleCircleRadius = std::max(handleCircleRadius * activeCircleRadiusScale,
         std::min(
             static_cast<float>(hotSpotCircleRadius.ConvertToPx()) / RADIUS_TO_DIAMETER, sideLength / RADIUS_COUNT));
+    return true;
+}
+
+
+bool PatternLockPattern::CheckInHotSpot(const OffsetF& offset, int32_t x, int32_t y)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    float sideLength = host->GetGeometryNode()->GetContentSize().Width();
+    OffsetF contentOffset = host->GetGeometryNode()->GetContentOffset();
+    auto handleCircleRadius = 0.0f;
+    if (!GetHandleCircleRadius(handleCircleRadius)) {
+        return false;
+    }
     const int32_t scale = RADIUS_TO_DIAMETER;
     float offsetX = sideLength / PATTERN_LOCK_COL_COUNT / scale * (scale * x - 1);
     float offsetY = sideLength / PATTERN_LOCK_COL_COUNT / scale * (scale * y - 1);

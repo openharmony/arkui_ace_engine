@@ -62,6 +62,7 @@ public:
     void FireOnResult(const std::string& result)
     {
         if (onResult_) {
+            TAG_LOGD(AceLogTag::ACE_TEXT, "Data detect result: %{public}s.", result.c_str());
             onResult_(result);
         }
     }
@@ -78,21 +79,19 @@ public:
         }
         aiDetectInitialized_ = false;
     }
-    bool ShowUIExtensionMenu(
-        const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode, bool isShowSelectText = true);
+    bool ShowAIEntityMenu(const AISpan& aiSpan, const NG::RectF& aiRect, const RefPtr<NG::FrameNode>& targetNode,
+        bool isShowSelectText = true);
     void ResponseBestMatchItem(const AISpan& aiSpan);
-    void StartAbilityByType(const std::string& type, AAFwk::WantParams& wantParams);
 
 private:
     friend class NG::TextPattern;
     friend class NG::RichEditorPattern;
 
-    std::function<void(const AAFwk::WantParams&)> GetOnReceive(
-        NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode);
     std::function<void()> GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap);
-    void SetWantParamaters(const AISpan& aiSpan, AAFwk::Want& want);
+    void OnClickAIMenuOption(const AISpan& aiSpan, const std::pair<std::string, FuncVariant>& menuOption,
+        const RefPtr<NG::FrameNode>& targetNode = nullptr);
+    void GetAIEntityMenu();
 
-    RefPtr<NG::FrameNode> uiExtNode_;
     WeakPtr<NG::FrameNode> frameNode_;
     bool aiDetectInitialized_ = false;
     bool hasClickedAISpan_ = false;
@@ -103,16 +102,15 @@ private:
     std::string textForAI_;
     std::string lastTextForAI_;
     std::set<std::string> textDetectTypesSet_;
-    std::optional<TextDataDetectResult> textDetectResult_;
+    TextDataDetectResult textDetectResult_;
     std::function<void(const std::string&)> onResult_;
     std::function<void(const std::string&)> onClickMenu_;
     std::map<int32_t, AISpan> aiSpanMap_;
     CancelableCallback<void()> aiDetectDelayTask_;
-    std::string uiExtensionBundleName_;
-    std::string uiExtensionAbilityName_;
     std::unordered_map<int32_t, std::string> entityJson_;
     TimeStamp startDetectorTimeStamp_;
     std::vector<std::string> detectTexts_;
+    int32_t mainContainerId_ = -1;
 };
 } // namespace OHOS::Ace
 

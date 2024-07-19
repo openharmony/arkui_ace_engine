@@ -60,6 +60,9 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
@@ -5471,10 +5474,36 @@ void OverlayManager::CloseModalUIExtension(int32_t sessionId)
     ResetRootNode(-(sessionId));
 }
 
-RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,
-    const RefPtr<NG::FrameNode>& targetNode, const std::string& longestContent, int32_t menuSize)
+RefPtr<FrameNode> OverlayManager::BuildAIEntityMenu(
+    const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions)
 {
-    CHECK_NULL_RETURN(uiExtNode, nullptr);
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "build AI entity menu enter");
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<InnerMenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU));
+    CHECK_NULL_RETURN(menuNode, nullptr);
+    for (const auto& menuOption : menuOptions) {
+        MenuItemGroupView::Create();
+        auto menuItemGroupNode = DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        CHECK_NULL_RETURN(menuItemGroupNode, nullptr);
+        MenuItemProperties menuItemProperties;
+        menuItemProperties.content = menuOption.first;
+        MenuItemModelNG menuItemModel;
+        menuItemModel.Create(menuItemProperties);
+        auto menuItemNode = DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        CHECK_NULL_RETURN(menuItemNode, nullptr);
+        auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+        CHECK_NULL_RETURN(menuItemPattern, nullptr);
+        menuItemPattern->SetOnClickAIMenuItem(menuOption.second);
+        menuItemNode->MountToParent(menuItemGroupNode);
+        menuItemGroupNode->MountToParent(menuNode);
+    }
+    return menuNode;
+}
+
+RefPtr<FrameNode> OverlayManager::CreateAIEntityMenu(
+    const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions, const RefPtr<FrameNode>& targetNode)
+{
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "create AI entity menu enter");
     CHECK_NULL_RETURN(targetNode, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -5482,106 +5511,15 @@ RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>&
     menuParam.type = MenuType::MENU;
     menuParam.placement = Placement::BOTTOM_LEFT;
     auto menuWrapperNode =
-        MenuView::Create(uiExtNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true);
-    CHECK_NULL_RETURN(menuWrapperNode, nullptr);
-    auto menuNode = DynamicCast<FrameNode>(menuWrapperNode->GetFirstChild());
-    CHECK_NULL_RETURN(menuNode, nullptr);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_RETURN(theme, nullptr);
-    auto expandDisplay = theme->GetExpandDisplay();
-    if (expandDisplay) {
-        auto menuPattern = menuNode->GetPattern<MenuPattern>();
-        CHECK_NULL_RETURN(menuPattern, nullptr);
-        menuPattern->SetNeedHideAfterTouch(false);
-    }
-    auto idealSize = CaculateMenuSize(menuNode, longestContent, menuSize);
-    auto uiExtLayoutProperty = uiExtNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(uiExtLayoutProperty, nullptr);
-    uiExtLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(idealSize.Width()),  CalcLength(idealSize.Height())));
-    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_RETURN(menuLayoutProperty, nullptr);
-    menuLayoutProperty->UpdateMargin(MarginProperty());
-    menuLayoutProperty->UpdatePadding(PaddingProperty());
-    auto scollNode = DynamicCast<FrameNode>(menuNode->GetFirstChild());
-    CHECK_NULL_RETURN(scollNode, menuNode);
-    auto scollLayoutProperty = scollNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(scollLayoutProperty, menuNode);
-    scollLayoutProperty->UpdateMargin(MarginProperty());
-    scollLayoutProperty->UpdatePadding(PaddingProperty());
-
-    auto destructor = [id = targetNode->GetId()]() {
-        auto pipeline = NG::PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->DeleteMenu(id);
-    };
-    targetNode->PushDestroyCallback(destructor);
+        MenuView::Create(BuildAIEntityMenu(menuOptions), targetNode->GetId(), targetNode->GetTag(), menuParam, true);
     return menuWrapperNode;
 }
 
-SizeF OverlayManager::CaculateMenuSize(
-    const RefPtr<FrameNode>& menuNode, const std::string& longestContent, int32_t menuSize)
+bool OverlayManager::ShowAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
+    const RectF& aiRect, const RefPtr<FrameNode>& targetNode)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "caculate menu size enter");
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, SizeF());
-    auto textTheme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_RETURN(textTheme, SizeF());
-    TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
-    MeasureContext measureContext;
-    measureContext.textContent = longestContent;
-    measureContext.fontSize = textStyle.GetFontSize();
-    auto fontweight = StringUtils::FontWeightToString(textStyle.GetFontWeight());
-    measureContext.fontWeight = fontweight;
-    auto fontFamilies = textStyle.GetFontFamilies();
-    measureContext.fontFamily = V2::ConvertFontFamily(fontFamilies);
-    auto measureSize = MeasureUtil::MeasureTextSize(measureContext);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_RETURN(selectTheme, SizeF());
-    auto minItemHeight = static_cast<float>(selectTheme->GetOptionMinHeight().ConvertToPx());
-    auto menuItemHeight = std::max(minItemHeight, static_cast<float>(measureSize.Height()));
-
-    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_RETURN(menuLayoutProperty, SizeF());
-    auto horInterval = static_cast<float>(selectTheme->GetMenuIconPadding().ConvertToPx()) -
-                       static_cast<float>(selectTheme->GetOutPadding().ConvertToPx());
-    const auto& menuItemPadding = menuLayoutProperty->CreatePaddingAndBorderWithDefault(horInterval, 0.0f, 0.0f, 0.0f);
-    auto middleSpace = static_cast<float>(selectTheme->GetIconContentPadding().ConvertToPx());
-    float contentWidth = static_cast<float>(measureSize.Width()) + menuItemPadding.Width() + middleSpace;
-
-    PaddingProperty menuPadding;
-    menuPadding.SetEdges(CalcLength(selectTheme->GetOutPadding()));
-    menuLayoutProperty->UpdatePadding(menuPadding);
-    const auto& padding = menuLayoutProperty->CreatePaddingAndBorder();
-    auto childConstraint = menuLayoutProperty->CreateChildConstraint();
-    auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
-    CHECK_NULL_RETURN(columnInfo, SizeF());
-    CHECK_NULL_RETURN(columnInfo->GetParent(), SizeF());
-    columnInfo->GetParent()->BuildColumnWidth();
-    auto minWidth = static_cast<float>(columnInfo->GetWidth()) - padding.Width();
-    childConstraint.minSize.SetWidth(minWidth);
-    auto idealWidth = std::max(contentWidth, childConstraint.minSize.Width());
-    auto idealHeight = menuItemHeight * menuSize;
-    auto contentSize = SizeF(idealWidth, idealHeight);
-    AddPaddingToSize(padding, contentSize);
-    return contentSize;
-}
-
-bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, const NG::RectF& aiRect,
-    const std::string& longestContent, int32_t menuSize, const RefPtr<NG::FrameNode>& targetNode)
-{
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "show ui extension menu enter");
-    CHECK_NULL_RETURN(uiExtNode, false);
-    auto root = rootNodeWeak_.Upgrade();
-    CHECK_NULL_RETURN(root, false);
-    for (const auto& child : root->GetChildren()) {
-        if (child->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-            return false;
-        }
-    }
-    auto menuWrapperNode = BindUIExtensionToMenu(uiExtNode, targetNode, longestContent, menuSize);
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "show AI entity menu enter");
+    auto menuWrapperNode = CreateAIEntityMenu(menuOptions, targetNode);
     CHECK_NULL_RETURN(menuWrapperNode, false);
     auto menuNode = DynamicCast<FrameNode>(menuWrapperNode->GetFirstChild());
     CHECK_NULL_RETURN(menuNode, false);
@@ -5604,7 +5542,7 @@ bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode,
     return true;
 }
 
-void OverlayManager::CloseUIExtensionMenu(int32_t targetId)
+void OverlayManager::CloseAIEntityMenu(int32_t targetId)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

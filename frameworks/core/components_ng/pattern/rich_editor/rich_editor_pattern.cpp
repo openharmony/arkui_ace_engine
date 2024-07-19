@@ -24,6 +24,9 @@
 #include <string>
 #include <utility>
 
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -593,8 +596,10 @@ void RichEditorPattern::SupplementIdealSizeWidth(const RefPtr<FrameNode>& frameN
 void RichEditorPattern::MoveCaretOnLayoutSwap(bool isReduceSize)
 {
     MoveCaretAfterTextChange();
-    if (HasFocus() && !isReduceSize) {
+    bool needScroll = (needMoveCaretToContentRect_ || isEditing_) && !isReduceSize;
+    if (needScroll) {
         MoveCaretToContentRect();
+        needMoveCaretToContentRect_ = false;
     }
 }
 
@@ -669,7 +674,8 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "options=%{public}s", options.ToString().c_str());
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isPaste=%{public}d, index=%{public}d", isPaste, index);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isPaste=%{public}d, index=%{public}d, updateCaret=%{public}d",
+        isPaste, index, updateCaret);
     auto imageNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto pattern = imageNode->GetPattern<ImagePattern>();
@@ -710,7 +716,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     placeholderCount_++;
     if (updateCaret) {
         SetCaretPosition(insertIndex + spanItem->content.length());
-        MoveCaretToContentRect();
+        needMoveCaretToContentRect_ = true;
     }
     ResetSelectionAfterAddSpan(isPaste);
     AfterAddImage(changeValue);
@@ -2566,7 +2572,7 @@ bool RichEditorPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSp
                 return true;
             }
             dataDetectorAdapter_->hasClickedAISpan_ = true;
-            ShowUIExtensionMenu(aiSpan, calculateHandleFunc, showSelectOverlayFunc);
+            ShowAIEntityMenu(aiSpan, calculateHandleFunc, showSelectOverlayFunc);
             return true;
         }
     }
@@ -4142,40 +4148,28 @@ const PreviewTextInfo RichEditorPattern::GetPreviewTextInfo() const
 
 void RichEditorPattern::FinishTextPreview()
 {
-    FinishTextPreviewOperation(true);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "FinishTextPreview byImf");
+    CHECK_NULL_VOID(IsPreviewTextInputting());
+    CHECK_NULL_VOID(!previewTextRecord_.previewContent.empty());
+    auto previewContent = previewTextRecord_.previewContent;
+    FinishTextPreviewInner();
+    ProcessInsertValue(previewContent, true, false);
 }
 
-void RichEditorPattern::FinishTextPreviewOperation(bool calledbyImf)
+void RichEditorPattern::FinishTextPreviewInner()
 {
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "called by imf :[%{public}d]", calledbyImf);
     CHECK_NULL_VOID(IsPreviewTextInputting());
-    auto& record = previewTextRecord_;
-    auto previewContent = record.previewContent;
-    RemoveEmptySpans();
-    UpdateSpanPosition();
-    auto start = record.startOffset;
-    auto end = record.endOffset;
-    record.hasDiff = false;
-    if (calledbyImf) {
-        if (!previewContent.empty()) {
-            record.replacedRange.Set(start, end);
-            ProcessInsertValue(previewContent, true, false);
-        }
-    } else {
-        OperationRecord operationRecord;
-        DeleteByRange(&operationRecord, start, end);
-    }
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "FinishTextPreviewInner");
+    DeleteByRange(nullptr, previewTextRecord_.startOffset, previewTextRecord_.endOffset);
     previewTextRecord_.Reset();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void RichEditorPattern::NotifyExitTextPreview()
 {
     CHECK_NULL_VOID(IsPreviewTextInputting());
     CHECK_NULL_VOID(HasFocus());
-    FinishTextPreviewOperation(false);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NotifyExitTextPreview");
+    FinishTextPreviewInner();
     std::string text = "";
 #if defined(ENABLE_STANDARD_INPUT)
     MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
@@ -4239,9 +4233,16 @@ void RichEditorPattern::InsertValue(const std::string& insertValue, bool isIME)
     ProcessInsertValue(insertValue, isIME, true);
 }
 
+// isIME: controls whether to perform ime callbacks
+// calledByImf: true means real input; false means preview input
 void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, bool isIME, bool calledByImf)
 {
-    if (isIME && !IsEditing()) {
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+        "insertLen=%{public}zu, isIME=%{public}d, calledByImf=%{public}d, isSpanString=%{public}d",
+        StringUtils::ToWstring(insertValue).length(), isIME, calledByImf, isSpanStringMode_);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "insertValue=[%{public}s]", StringUtils::RestoreEscape(insertValue).c_str());
+
+    if (isIME && calledByImf && !IsEditing()) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NOT allow physical keyboard input in preview state");
         return;
     }
@@ -4249,7 +4250,6 @@ void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, bool 
         InsertValueInStyledString(insertValue);
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "insertValue=[%{public}s]", StringUtils::RestoreEscape(insertValue).c_str());
     OperationRecord record;
     record.beforeCaretPosition = caretPosition_ + moveLength_;
     if (textSelector_.IsValid()) {
@@ -4259,12 +4259,12 @@ void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, bool 
 
     RichEditorChangeValue changeValue;
     bool allowContentChange = BeforeChangeText(changeValue, record, RecordType::INSERT);
-    if (calledByImf) {
-        FinishTextPreviewOperation(false);
+    if (calledByImf && previewTextRecord_.IsValid()) {
+        FinishTextPreviewInner();
     }
     bool allowImeInput = isIME ? BeforeIMEInsertValue(insertValue) : true;
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "allowContentChange=%{public}d, allowImeInput=%{public}d",
-        allowContentChange, allowImeInput);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "allowContentChange=%{public}d, allowImeInput=%{public}d, hasDiff=%{public}d",
+        allowContentChange, allowImeInput, previewTextRecord_.hasDiff);
     CHECK_NULL_VOID(allowContentChange && allowImeInput || previewTextRecord_.hasDiff);
 
     ClearRedoOperationRecords();
@@ -4628,6 +4628,9 @@ void RichEditorPattern::FireOnDeleteComplete(const RichEditorDeleteValue& info)
         DeleteByDeleteValueInfo(info);
         eventHub->FireOnDeleteComplete();
     }
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+    UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "RichEditor.OnDeleteComplete");
+#endif
 }
 
 std::pair<bool, bool> RichEditorPattern::IsEmojiOnCaretPosition(int32_t& emojiLength, bool isBackward, int32_t length)
@@ -6660,6 +6663,16 @@ void RichEditorPattern::DumpInfo()
                                        : GetCaretRect().Height())));
     dumpLog.AddDesc(std::string("text rect: ").append(richTextRect_.ToString()));
     dumpLog.AddDesc(std::string("content rect: ").append(contentRect_.ToString()));
+    auto richEditorPaintOffset = host->GetPaintRectOffset();
+    bool hasRenderTransform = selectOverlay_->HasRenderTransform();
+    if (hasRenderTransform) {
+        richEditorPaintOffset = selectOverlay_->GetPaintOffsetWithoutTransform();
+    }
+    dumpLog.AddDesc(std::string("hasRenderTransform: ").append(std::to_string(hasRenderTransform)));
+    dumpLog.AddDesc(std::string("richEditorPaintOffset: ").append(richEditorPaintOffset.ToString()));
+    auto selectOverlayInfo = selectOverlay_->GetSelectOverlayInfo();
+    CHECK_NULL_VOID(selectOverlayInfo);
+    dumpLog.AddDesc(std::string("selectOverlay info: ").append(selectOverlayInfo->ToString()));
 }
 
 bool RichEditorPattern::HasFocus() const

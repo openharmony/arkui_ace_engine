@@ -311,6 +311,8 @@ public:
     void DoDragMoveAnimate(const PointerEvent& pointerEvent);
     void DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager,
         const GestureEvent& event, bool isSubwindowOverlay = false);
+    void DragStartAnimation(
+        const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager, const OffsetF& gatherNodeCenter);
     void SetDragResult(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void SetDragBehavior(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void ResetDragPreviewInfo()

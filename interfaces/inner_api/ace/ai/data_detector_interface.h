@@ -18,12 +18,14 @@
 
 #include <functional>
 #include <string>
+#include <variant>
 #include <vector>
 
 #include "base/utils/type_definition.h"
 
 namespace OHOS::Ace {
 constexpr int32_t UNSUPPORTED_CODE = 801;
+using FuncVariant = std::variant<std::function<void(std::string)>, std::function<void(int32_t, std::string)>>;
 
 struct TextDataDetectInfo {
     std::string text;
@@ -35,8 +37,7 @@ struct TextDataDetectResult {
     int32_t code = UNSUPPORTED_CODE;
     std::string entity;
     std::string wordPos;
-    std::string menuOption;
-    std::string entityMenuServiceInfo;
+    std::unordered_map<std::string, std::vector<std::pair<std::string, FuncVariant>>> menuOptionAndAction;
 };
 
 using TextDetectResultFunc = std::function<void(const TextDataDetectResult)>;
@@ -44,6 +45,7 @@ using TextDetectResultFunc = std::function<void(const TextDataDetectResult)>;
 class DataDetectorInterface {
 public:
     virtual bool IsDataDetectorSupported() = 0;
+    virtual void GetAIEntityMenu(TextDataDetectResult& textDataDetectResult) = 0;
     virtual void DataDetect(const TextDataDetectInfo& info, const TextDetectResultFunc& resultFunc) = 0;
 
     virtual int8_t GetCursorPosition(const std::string& text, int8_t offset)

@@ -368,4 +368,16 @@ void ImageAnalyzerManager::UpdateOverlayStatus(bool status, int offsetX, int off
     }
     ImageAnalyzerMgr::GetInstance().UpdateOverlayStatus(&overlayData_, &analyzerUIConfig_);
 }
+
+void ImageAnalyzerManager::UpdateAIButtonConfig(AIButtonConfig config)
+{
+    CHECK_NULL_VOID(isAnalyzerOverlayBuild_);
+    ImageAnalyzerMgr::GetInstance().UpdateAIButtonConfig(&overlayData_, &config);
+}
+
+void ImageAnalyzerManager::UpdateOverlayActiveStatus(bool status)
+{
+    CHECK_NULL_VOID(isAnalyzerOverlayBuild_);
+    ImageAnalyzerMgr::GetInstance().UpdateOverlayActiveStatus(&overlayData_, status);
+}
 } // namespace OHOS::Ace
