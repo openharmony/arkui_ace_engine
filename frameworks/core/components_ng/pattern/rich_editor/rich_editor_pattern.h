@@ -395,7 +395,7 @@ public:
     int32_t GetParagraphEndPosition(int32_t caretPosition);
     int32_t CaretPositionSelectEmoji(CaretMoveIntent direction);
     void HandleSelect(CaretMoveIntent direction) override;
-    bool SetCaretPosition(int32_t pos);
+    bool SetCaretPosition(int32_t pos, bool needNotifyImf = true);
     int32_t GetCaretPosition();
     int32_t GetTextContentLength() override;
     bool GetCaretVisible() const;
