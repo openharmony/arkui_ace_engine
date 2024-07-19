@@ -214,7 +214,11 @@ void LoadingProgressPattern::InitFocusEvent()
 
 void LoadingProgressPattern::HandleFocusEvent()
 {
-    SetFocusStyle();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetIsFocusActive()) {
+        SetFocusStyle();
+    }
     AddIsFocusActiveUpdateEvent();
 }
 

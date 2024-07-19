@@ -154,7 +154,11 @@ void ProgressPattern::InitFocusEvent()
 
 void ProgressPattern::HandleFocusEvent()
 {
-    SetFocusStyle();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetIsFocusActive()) {
+        SetFocusStyle();
+    }
     AddIsFocusActiveUpdateEvent();
 }
 
