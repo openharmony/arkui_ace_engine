@@ -5296,7 +5296,7 @@ void RichEditorPattern::HandleSelect(CaretMoveIntent direction)
         fixedPos = (caretPosition_ == textSelector_.GetTextStart() ? textSelector_.GetTextEnd()
                                                                    : textSelector_.GetTextStart());
     }
-    newPos = HandleSelectWrapper(direction);
+    newPos = HandleSelectWrapper(direction, fixedPos);
     if (newPos == -1) {
         return;
     }
@@ -9053,6 +9053,68 @@ int32_t RichEditorPattern::CalcLineEndPosition()
     return position;
 }
 
+int32_t RichEditorPattern::CalcSingleLineBeginPosition(int32_t fixedPos)
+{
+    float caretHeightDown = 0.0f;
+    OffsetF caretOffsetDown = CalcCursorOffsetByPosition(fixedPos, caretHeightDown, true, false);
+    float caretHeightUp = 0.0f;
+    OffsetF caretOffsetUp = CalcCursorOffsetByPosition(fixedPos, caretHeightUp, false, false);
+    bool isCaretPosInLineEnd = !NearEqual(caretOffsetDown.GetX(), caretOffsetUp.GetX(), 0.5f);
+
+    auto overlayMod = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+    CHECK_NULL_RETURN(overlayMod_, false);
+    auto caretOffsetOverlay = overlayMod->GetCaretOffset();
+    bool cursorNotAtLineStart = NearEqual(caretOffsetOverlay.GetX(), caretOffsetUp.GetX(), 0.5f);
+
+    Offset textOffset;
+    if (!cursorNotAtLineStart && !lastClickOffset_.IsNegative()) {
+        return fixedPos;
+    } else if (isCaretPosInLineEnd && lastClickOffset_.IsNegative()) {
+        return lastSelectionRange_.start_;
+    } else {
+        float caretHeight = 0.0f;
+        OffsetF caretOffsetFixed = CalcCursorOffsetByPosition(fixedPos, caretHeight, false, false);
+        textOffset = { 0, caretOffsetFixed.GetY() };
+    }
+    auto position = paragraphs_.GetIndex(textOffset);
+    return position;
+}
+
+int32_t RichEditorPattern::CalcSingleLineEndPosition(int32_t fixedPos)
+{
+    auto rectLineInfo = CalcLineInfoByPosition();
+    float textWidth = richTextRect_.Width() + rectLineInfo.GetX();
+
+    float caretHeightDown = 0.0f;
+    OffsetF caretOffsetDown = CalcCursorOffsetByPosition(fixedPos, caretHeightDown, true, false);
+    float caretHeightUp = 0.0f;
+    OffsetF caretOffsetUp = CalcCursorOffsetByPosition(fixedPos, caretHeightUp, false, false);
+    bool isCaretPosInLineEnd = !NearEqual(caretOffsetDown.GetX(), caretOffsetUp.GetX(), 0.5f);
+
+    auto overlayMod = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+    CHECK_NULL_RETURN(overlayMod_, false);
+    auto caretOffsetOverlay = overlayMod->GetCaretOffset();
+    bool cursorNotAtLineStart = NearEqual(caretOffsetOverlay.GetX(), caretOffsetUp.GetX(), 0.5f);
+
+    Offset textOffset;
+    if (isCaretPosInLineEnd && lastClickOffset_.IsNegative() && lastSelectionRange_.end_ > fixedPos) {
+        return lastSelectionRange_.end_;
+    } else if (!cursorNotAtLineStart && isCaretPosInLineEnd && fixedPos == caretPosition_) {
+        textOffset = { textWidth, caretOffsetOverlay.GetY() };
+    } else if (isCaretPosInLineEnd && lastSelectionRange_.end_ <= fixedPos) {
+        CursorMoveLineEnd();
+        return fixedPos;
+    } else if (cursorNotAtLineStart && isCaretPosInLineEnd) {
+        return fixedPos;
+    } else {
+        float caretHeight = 0.0f;
+        OffsetF caretOffsetFixed = CalcCursorOffsetByPosition(fixedPos, caretHeight, false, false);
+        textOffset = { textWidth, caretOffsetFixed.GetY() };
+    }
+    auto position = paragraphs_.GetIndex(textOffset);
+    return position;
+}
+
 bool RichEditorPattern::CursorMoveLineBegin()
 {
     CloseSelectOverlay();
@@ -9130,7 +9192,7 @@ void RichEditorPattern::HandleOnShowMenu()
     ShowSelectOverlay(RectF(), RectF(), IsSelectAll(), TextResponseType::RIGHT_CLICK);
 }
 
-int32_t RichEditorPattern::HandleSelectWrapper(CaretMoveIntent direction)
+int32_t RichEditorPattern::HandleSelectWrapper(CaretMoveIntent direction, int32_t fixedPos)
 {
     int32_t index = GetCaretPosition();
     switch (direction) {
@@ -9161,9 +9223,9 @@ int32_t RichEditorPattern::HandleSelectWrapper(CaretMoveIntent direction)
         case CaretMoveIntent::ParagraghEnd:
             return HandleSelectParagraghPos(false);
         case CaretMoveIntent::LineBegin:
-            return CalcLineBeginPosition();
+            return CalcSingleLineBeginPosition(fixedPos);
         case CaretMoveIntent::LineEnd:
-            return CalcLineEndPosition();
+            return CalcSingleLineEndPosition(fixedPos);
         default:
             return NONE_SELECT_TYPE;
     }

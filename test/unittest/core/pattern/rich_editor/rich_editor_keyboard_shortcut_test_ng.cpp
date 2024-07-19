@@ -527,7 +527,8 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectWrapper101, TestSize.Leve
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     OHOS::Ace::CaretMoveIntent direction = OHOS::Ace::CaretMoveIntent::Home;
-    auto ret = richEditorPattern->HandleSelectWrapper(direction);
+    int32_t fixedPos = 0;
+    auto ret = richEditorPattern->HandleSelectWrapper(direction, fixedPos);
     EXPECT_EQ(ret, -1);
 }
 
