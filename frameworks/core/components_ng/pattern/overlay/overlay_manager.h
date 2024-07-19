@@ -440,15 +440,6 @@ public:
     {
         return dismissSheetId_;
     }
-    bool IsRootExpansive() const
-    {
-        auto rootNode = rootNodeWeak_.Upgrade();
-        CHECK_NULL_RETURN(rootNode, false);
-        auto layoutProp = DynamicCast<FrameNode>(rootNode)->GetLayoutProperty();
-        CHECK_NULL_RETURN(layoutProp, false);
-        const auto& opts = layoutProp->GetSafeAreaExpandOpts();
-        return opts && opts->Expansive();
-    }
     void RemoveSheetNode(const RefPtr<FrameNode>& sheetNode);
 
     void DestroySheet(const RefPtr<FrameNode>& sheetNode, const SheetKey& sheetKey);
@@ -568,6 +559,8 @@ public:
             menuMap_.erase(targetId);
         }
     }
+
+    bool IsRootExpansive() const;
     void DumpOverlayInfo() const;
     void ReloadBuilderNodeConfig();
 
@@ -629,6 +622,7 @@ private:
         std::function<void()>&& sheetSpringBack = nullptr);
     SheetStyle UpdateSheetStyle(
         const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle, bool isPartialUpdate);
+    void UpdateSheetProperty(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& currentStyle, bool isPartialUpdate);
     void UpdateSheetMaskBackgroundColor(const RefPtr<FrameNode>& maskNode,
         const RefPtr<RenderContext>& maskRenderContext, const SheetStyle& sheetStyle);
     void UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
