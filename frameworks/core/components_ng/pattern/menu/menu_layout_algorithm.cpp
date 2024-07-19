@@ -1207,9 +1207,11 @@ void MenuLayoutAlgorithm::UpdatePreviewPositionAndOffset(
     previewOffset_ = previewGeometryNode->GetFrameOffset();
     auto previewOffsetX = previewOffset_.GetX();
     auto previewOffsetY = previewOffset_.GetY();
-    targetSize_ = previewSize * previewScale_;
-    targetOffset_ = OffsetF(previewOffsetX + (previewSize.Width() - targetSize_.Width()) / HALF,
-        previewOffsetY + (previewSize.Height() - targetSize_.Height()) / HALF);
+    if (previewSize.IsPositive()) {
+        targetSize_ = previewSize * previewScale_;
+        targetOffset_ = OffsetF(previewOffsetX + (previewSize.Width() - targetSize_.Width()) / HALF,
+            previewOffsetY + (previewSize.Height() - targetSize_.Height()) / HALF);
+    }
     auto previewHostNode = previewLayoutWrapper->GetHostNode();
     CHECK_NULL_VOID(previewHostNode);
     auto renderContext = previewHostNode->GetRenderContext();
