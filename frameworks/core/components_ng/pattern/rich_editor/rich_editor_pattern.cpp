@@ -8409,7 +8409,7 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
     if (textStyle || containNextLine) { // SpanNode Fission
         GetReplacedSpanFission(changeValue, innerPosition, content, spanIndex, offsetInSpan, textStyle, paraStyle);
     } else {
-        std::optional<TextStyle> spanTextStyle = textStyle;
+        std::optional<TextStyle> spanTextStyle = textStyle ? textStyle : typingTextStyle_;
         std::optional<struct UpdateParagraphStyle> spanParaStyle = paraStyle;
         GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, spanNode, spanIndex);
         CreateSpanResult(changeValue, innerPosition, spanIndex, offsetInSpan, offsetInSpan + wInsertValue.length(),
