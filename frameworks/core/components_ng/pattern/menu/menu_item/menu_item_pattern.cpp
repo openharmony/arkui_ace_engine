@@ -665,15 +665,15 @@ void MenuItemPattern::OnClick()
     if (lastSelectedItem && lastSelectedItem != host) {
         auto pattern = lastSelectedItem->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
-        SetChange();
+        pattern->SetChange();
     }
+    menuPattern->SetLastSelectedItem(host);
     if (GetSubBuilder() != nullptr && (expandingMode_ == SubMenuExpandingMode::SIDE ||
         (expandingMode_ == SubMenuExpandingMode::STACK && !IsSubMenu() && !hasSubMenu) ||
         (expandingMode_ == SubMenuExpandingMode::EMBEDDED && !IsEmbedded()))) {
         ShowSubMenu();
         return;
     }
-    menuPattern->SetLastSelectedItem(host);
     // hide menu when menu item is clicked
     CloseMenu();
 }
