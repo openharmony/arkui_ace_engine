@@ -94,10 +94,8 @@ constexpr float OFFSET_FIRST = 20.0f;
 constexpr float OFFSET_THIRD = 200.0f;
 constexpr float OFFSET_FORTH = 300.0f;
 constexpr float OFFSET_FIFTH = 50.0f;
-constexpr int OFFSET_X_THIRD = 100;
 constexpr int OFFSET_Y_THIRD = 20;
 constexpr int TOP_LEFT_Y = 18;
-constexpr int PLACEMENT_LEFT_BOTTOM_X = 99;
 constexpr int PLACEMENT_RIGHT_Y = 29;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 constexpr float PREVIEW_HEIGHT = 125.0f;
@@ -570,10 +568,10 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4600, TestSize.Level1)
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
     auto expectPreviewOffset = OffsetF(OFFSET_THIRD, OFFSET_THIRD + (TARGET_SIZE_HEIGHT - OFFSET_THIRD) / 2);
     EXPECT_EQ(previewGeometryNode->GetFrameOffset(), OffsetF(0, 0));
-    EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(TARGET_SIZE_WIDTH, OFFSET_THIRD));
-    auto expectMenuOffset = OffsetF(-TARGET_SIZE_WIDTH, -TARGET_SIZE_WIDTH);
+    EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(0, 0));
+    auto expectMenuOffset = OffsetF(-TARGET_SIZE_WIDTH, -CONST_DOUBLE_ZREO);
     EXPECT_EQ(menuGeometryNode->GetFrameOffset(), expectMenuOffset);
-    EXPECT_EQ(menuGeometryNode->GetFrameSize(), SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_WIDTH));
+    EXPECT_EQ(menuGeometryNode->GetFrameSize(), SizeF(TARGET_SIZE_WIDTH, CONST_DOUBLE_ZREO));
     /**
      * @tc.steps: step3. the window can accommodate preview, placement is LEFT_TOP, layout preview and menu
      * @tc.expected: menu and preview left border distance TARGET_SECURITY, align the menu with the top border of the
@@ -643,11 +641,11 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4700, TestSize.Level1)
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
     auto expectPreviewOffset = OffsetF(CONST_DOUBLE_ZREO, CONST_DOUBLE_ZREO);
     EXPECT_EQ(previewGeometryNode->GetFrameOffset(), expectPreviewOffset);
-    EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(POSITION_OFFSET, OFFSET_THIRD));
-    auto expectMenuOffset = OffsetF((OFFSET_X_THIRD - PLACEMENT_LEFT_BOTTOM_X) - OFFSET_THIRD, -POSITION_OFFSET);
+    EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(-MENU_SIZE_WIDTH_SECOND, -MENU_SIZE_WIDTH_SECOND * 2));
+    auto expectMenuOffset = OffsetF(-MENU_SIZE_WIDTH_SECOND, CONST_DOUBLE_ZREO);
     EXPECT_EQ(menuGeometryNode->GetFrameOffset(), expectMenuOffset);
     EXPECT_EQ(menuGeometryNode->GetFrameSize(),
-        SizeF(OFFSET_THIRD - (OFFSET_X_THIRD - PLACEMENT_LEFT_BOTTOM_X), POSITION_OFFSET));
+        SizeF(MENU_SIZE_WIDTH_SECOND, CONST_DOUBLE_ZREO));
     /**
      * @tc.steps: step3. the window can not accommodate preview, placement is RIGHT, layout preview and menu
      * @tc.expected: menu and preview bottom right distance TARGET_SECURITY, align the menu with the preview in the
@@ -1374,7 +1372,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5910, TestSize.Level1)
     ASSERT_NE(menuPattern, nullptr);
     EXPECT_EQ(menuPattern->GetPreviewBeforeAnimationScale(), scaleOptions.scaleFrom);
     EXPECT_EQ(menuPattern->GetPreviewAfterAnimationScale(), scaleOptions.scaleTo);
-    layoutAlgorithm->LayoutNormalPreviewMenu(&layoutWrapper);
+    layoutAlgorithm->LayoutPreviewMenu(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->previewScale_, scaleOptions.scaleTo - 1);
 }
 
@@ -1425,7 +1423,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5920, TestSize.Level1)
     ASSERT_NE(menuPattern, nullptr);
     EXPECT_EQ(menuPattern->GetPreviewBeforeAnimationScale(), scaleOptions.scaleFrom);
     EXPECT_EQ(menuPattern->GetPreviewAfterAnimationScale(), scaleOptions.scaleTo);
-    layoutAlgorithm->LayoutNormalPreviewMenu(&layoutWrapper);
+    layoutAlgorithm->LayoutPreviewMenu(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->previewScale_, scaleOptions.scaleTo - 1);
 }
 
