@@ -303,8 +303,8 @@ static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
             "Can'nt get delegate of ace_engine. param: %{public}s",
             componentId.c_str());
-        NapiThrow(env, "ace engine delegate is null", ERROR_CODE_INTERNAL_ERROR);
-        napi_close_escapable_handle_scope(env, scope);
+        auto callback = helper.CreateCallback(&result);
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         return result;
     }
 
