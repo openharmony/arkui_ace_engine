@@ -314,10 +314,11 @@ bool DragDropManager::CheckDragDropProxy(int64_t id) const
     return currentId_ == id;
 }
 
-void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior)
+void DragDropManager::UpdateDragAllowDrop(
+    const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior, const int32_t eventId)
 {
     if (!IsDropAllowed(dragFrameNode)) {
-        UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
+        UpdateDragStyle(DragCursorStyleCore::FORBIDDEN, eventId);
         return;
     }
     
@@ -326,7 +327,7 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
     // special handling for no drag data present situation, always show as move
     if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
-        UpdateDragStyle(DragCursorStyleCore::MOVE);
+        UpdateDragStyle(DragCursorStyleCore::MOVE, eventId);
         return;
     }
 
@@ -337,33 +338,34 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
             // draggedFrameNode or frameNode is disabled, otherwise use copy
             auto eventHub = dragFrameNode->GetEventHub<EventHub>();
             if (draggedFrameNode_ == dragFrameNode || !(eventHub && eventHub->IsEnabled())) {
-                UpdateDragStyle(DragCursorStyleCore::MOVE);
+                UpdateDragStyle(DragCursorStyleCore::MOVE, eventId);
             } else {
-                UpdateDragStyle(DragCursorStyleCore::COPY);
+                UpdateDragStyle(DragCursorStyleCore::COPY, eventId);
             }
             break;
         }
         case DragBehavior::MOVE: {
-            UpdateDragStyle(DragCursorStyleCore::MOVE);
+            UpdateDragStyle(DragCursorStyleCore::MOVE, eventId);
             break;
         }
         case DragBehavior::COPY: {
-            UpdateDragStyle(DragCursorStyleCore::COPY);
+            UpdateDragStyle(DragCursorStyleCore::COPY, eventId);
             break;
         }
         default: {
-            UpdateDragStyle(DragCursorStyleCore::COPY);
+            UpdateDragStyle(DragCursorStyleCore::COPY, eventId);
             break;
         }
     }
 }
 
-void DragDropManager::UpdateDragStyle(const DragCursorStyleCore& dragStyle)
+void DragDropManager::UpdateDragStyle(const DragCursorStyleCore& dragStyle, int32_t eventId)
 {
     if (dragStyle != dragCursorStyleCore_) {
         dragCursorStyleCore_ = dragStyle;
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Update DragStyle to %{public}d.", dragCursorStyleCore_);
-        InteractionInterface::GetInstance()->UpdateDragStyle(dragCursorStyleCore_);
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Update DragStyle to %{public}d, pointerEventId: %{public}d.",
+            dragCursorStyleCore_, eventId);
+        InteractionInterface::GetInstance()->UpdateDragStyle(dragCursorStyleCore_, eventId);
     }
 }
 
@@ -675,7 +677,7 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
         }
 
         if (!isMouseDragged_ || isDragWindowShow_) {
-            UpdateDragStyle(DragCursorStyleCore::MOVE);
+            UpdateDragStyle(DragCursorStyleCore::MOVE, pointerEvent.pointerEventId);
         }
         return;
     }
@@ -949,7 +951,7 @@ void DragDropManager::RequireSummary()
             std::string str = udkey + "-" + std::to_string(recordSize) + ";";
             summarys += str;
         }
-        TAG_LOGD(AceLogTag::ACE_DRAG, "require summary: %{public}s", summarys.c_str());
+        TAG_LOGI(AceLogTag::ACE_DRAG, "require summary: %{public}s", summarys.c_str());
     }
     std::string extraInfo;
     ret = InteractionInterface::GetInstance()->GetDragExtraInfo(extraInfo);
@@ -1089,14 +1091,14 @@ void DragDropManager::FireOnDragEvent(
     }
     if (event->GetResult() == DragRet::ENABLE_DROP) {
         if (event->GetDragBehavior() == DragBehavior::MOVE) {
-            UpdateDragStyle(DragCursorStyleCore::MOVE);
+            UpdateDragStyle(DragCursorStyleCore::MOVE, pointerEvent.pointerEventId);
         } else {
-            UpdateDragStyle(DragCursorStyleCore::COPY);
+            UpdateDragStyle(DragCursorStyleCore::COPY, pointerEvent.pointerEventId);
         }
     } else if (event->GetResult() == DragRet::DISABLE_DROP) {
-        UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
+        UpdateDragStyle(DragCursorStyleCore::FORBIDDEN, pointerEvent.pointerEventId);
     } else {
-        UpdateDragAllowDrop(frameNode, event->GetDragBehavior());
+        UpdateDragAllowDrop(frameNode, event->GetDragBehavior(), pointerEvent.pointerEventId);
     }
 }
 

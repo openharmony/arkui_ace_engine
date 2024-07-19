@@ -2217,7 +2217,9 @@ void PipelineContext::ResetDraggingStatus(const TouchEvent& touchPoint, const Re
         manager->SetDraggingPressedState(false);
     }
     if (manager->IsDragging() && manager->IsSameDraggingPointer(touchPoint.id)) {
-        manager->OnDragEnd(PointerEvent(touchPoint.x, touchPoint.y), "");
+        manager->OnDragEnd(
+            PointerEvent(touchPoint.touchEventId, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY),
+            "");
     }
 }
 
