@@ -74,7 +74,7 @@ public:
 #ifdef ARKUI_CIRCLE_FEATURE
         if (shapeMode == ShapeMode::ROUND) {
             paint = MakeRefPtr<ArcScrollPaintMethod>();
-        } 
+        }
 #endif
         if (paint == nullptr) {
             paint = MakeRefPtr<ScrollPaintMethod>();
