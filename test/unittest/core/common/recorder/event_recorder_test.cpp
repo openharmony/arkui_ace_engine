@@ -598,6 +598,7 @@ HWTEST_F(EventRecorderTest, SetContainerInfo001, TestSize.Level1)
 {
     std::string windowName = "$HA_FLOAT_WINDOW$";
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, 0, true);
+    EXPECT_EQ(Recorder::EventRecorder::Get().containerId_, -1);
 }
 
 /**
@@ -609,6 +610,7 @@ HWTEST_F(EventRecorderTest, SetContainerInfo002, TestSize.Level1)
 {
     std::string windowName = "";
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, 0, true);
+    EXPECT_EQ(Recorder::EventRecorder::Get().containerId_, 0);
 }
 
 /**
@@ -620,6 +622,7 @@ HWTEST_F(EventRecorderTest, SetContainerInfo003, TestSize.Level1)
 {
     std::string windowName = "";
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, 0, false);
+    EXPECT_EQ(Recorder::EventRecorder::Get().containerId_, -1);
 }
 
 /**
@@ -631,6 +634,7 @@ HWTEST_F(EventRecorderTest, SetFocusContainerInfo001, TestSize.Level1)
 {
     std::string windowName = "$HA_FLOAT_WINDOW$";
     Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, 0);
+    EXPECT_EQ(Recorder::EventRecorder::Get().focusContainerId_, -1);
 }
 
 /**
@@ -642,6 +646,7 @@ HWTEST_F(EventRecorderTest, SetFocusContainerInfo002, TestSize.Level1)
 {
     std::string windowName = "";
     Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, 0);
+    EXPECT_EQ(Recorder::EventRecorder::Get().focusContainerId_, 0);
 }
 
 /**
@@ -651,9 +656,10 @@ HWTEST_F(EventRecorderTest, SetFocusContainerInfo002, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, Init001, TestSize.Level1)
 {
-    std::string windowName = "";
+    std::string config = "";
     Recorder::EventConfig* config = new Recorder::EventConfig();
-    config->Init("");
+    config->Init(config);
+    EXPECT_EQ(!JsonUtil::ParseJsonString(config)->IsValid(), true);
 }
 
 /**
@@ -719,6 +725,7 @@ HWTEST_F(EventRecorderTest, PutString002, TestSize.Level1)
 HWTEST_F(EventRecorderTest, OnBeforePagePop001, TestSize.Level1)
 {
     Recorder::NodeDataCache::Get().OnBeforePagePop(true);
+    EXPECT_FALSE(Recorder::NodeDataCache::Get().shouldCollectFull_);
 }
 
 /**
@@ -729,7 +736,9 @@ HWTEST_F(EventRecorderTest, OnBeforePagePop001, TestSize.Level1)
 HWTEST_F(EventRecorderTest, GetExposureCfg001, TestSize.Level1)
 {
     Recorder::ExposureCfg cfg;
-    Recorder::NodeDataCache::Get().GetExposureCfg("", "", cfg);
+    string pageUrl = "";
+    Recorder::NodeDataCache::Get().GetExposureCfg(pageUrl, "", cfg);
+    EXPECT_TRUE(pageUrl.empty());
 }
 
 /**
@@ -741,6 +750,7 @@ HWTEST_F(EventRecorderTest, Clear001, TestSize.Level1)
 {
     Recorder::ExposureCfg cfg;
     Recorder::NodeDataCache::Get().Clear("");
+    EXPECT_TRUE(Recorder::NodeDataCache::Get().container_.empty());
 }
 
 /**
@@ -752,5 +762,6 @@ HWTEST_F(EventRecorderTest, GetNodeData001, TestSize.Level1)
 {
     std::unordered_map<std::string, std::string> nodes;
     Recorder::NodeDataCache::Get().GetNodeData("", nodes);
+    EXPECT_TRUE(Recorder::NodeDataCache::Get().container_.empty());
 }
 } // namespace OHOS::Ace

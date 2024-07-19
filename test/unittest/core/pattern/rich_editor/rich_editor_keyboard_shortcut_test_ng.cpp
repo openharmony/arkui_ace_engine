@@ -1355,5 +1355,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, SetCustomKeyboard001, TestSize.Level1
     richEditorModel.Create();
     auto func = []() {};
     richEditorModel.SetCustomKeyboard(func, true);
+    EXPECT_TRUE(ViewStackProcessor::GetInstance()->GetMainFrameNode()->GetPattern<RichEditorPattern>()->keyboardAvoidance_);
 }
 } // namespace OHOS::Ace::NG

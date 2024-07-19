@@ -1781,6 +1781,7 @@ HWTEST_F(TextPickerTestUpdate, UpdateForwardButtonMargin001, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     TextPickerDialogView::UpdateForwardButtonMargin(buttonForwardNode, dialogTheme);
+    EXPECT_NE(buttonBackwardNode->GetLayoutProperty()->margin_, nullptr);
 }
 
 /**
@@ -1793,6 +1794,7 @@ HWTEST_F(TextPickerTestUpdate, SetDialogButtonActive001, TestSize.Level1)
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     TextPickerDialogView::SetDialogButtonActive(contentColumn, 0, 0);
+    EXPECT_NE(contentColumn->GetLastChild(), nullptr);
 }
 
 /**
@@ -1845,6 +1847,7 @@ HWTEST_F(TextPickerTestUpdate, SetRange001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     TextPickerModelNG::SetRange(frameNode, range);
+    ASSERT_NE(frameNode->GetPattern<TextPickerPattern>()->GetRange(), nullptr);
 }
 
 /**
@@ -1863,6 +1866,7 @@ HWTEST_F(TextPickerTestUpdate, SetValue001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     TextPickerModelNG::SetValue(frameNode, value);
+    ASSERT_NE(frameNode->GetPattern<TextPickerPattern>()->values_, nullptr);
 }
 
 /**
@@ -1884,5 +1888,6 @@ HWTEST_F(TextPickerTestUpdate, SetValues001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     TextPickerModelNG::SetValues(frameNode, value);
+    ASSERT_NE(frameNode->GetPattern<TextPickerPattern>()->values_, nullptr);
 }
 } // namespace OHOS::Ace::NG

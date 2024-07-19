@@ -1450,6 +1450,7 @@ HWTEST_F(RichEditorOverlayTestNg, SetCaretWidth001, TestSize.Level1)
     auto overlayMod = richEditorNode_->GetOverlayNode();
     auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
     richEditorOverlay->SetCaretWidth(-1);
+    EXPECT_NE(richEditorOverlay->caretWidth_, -1);
 }
 
 /**
@@ -1467,6 +1468,7 @@ HWTEST_F(RichEditorOverlayTestNg, PaintPreviewTextDecoration001, TestSize.Level1
     Testing::MockCanvas canvas;
     DrawingContext context { canvas, 100, 100 };
     richEditorOverlay->PaintPreviewTextDecoration(context);
+    EXPECT_NE(richEditorOverlay->previewTextUnderlineWidth_, 0);
 }
 
 /**
@@ -1553,7 +1555,8 @@ HWTEST_F(RichEditorOverlayTestNg, GetGlyphPositionAtCoordinate001, TestSize.Leve
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->paragraphs_.GetGlyphPositionAtCoordinate(offset);
+    PositionWithAffinity position = richEditorPattern->paragraphs_.GetGlyphPositionAtCoordinate(offset);
+    EXPECT_EQ(position.position_, 0);
 }
 
 /**

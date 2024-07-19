@@ -2008,6 +2008,10 @@ HWTEST_F(DatePickerTestUpdate, ShowContentRowButton001, TestSize.Level1)
     bool isFirstPage = true;
     CreateDatePickerColumnNode();
     DatePickerDialogView::ShowContentRowButton(columnNode_, isFirstPage);
+    EXPECT_EQ(AceType::DynamicCast<FrameNode>(columnNode_->GetFirstChild())
+                  ->GetLayoutProperty<LayoutProperty>()
+                  ->propVisibility_,
+        VisibleType::VISIBLE);
 }
 
 /**
@@ -2020,6 +2024,10 @@ HWTEST_F(DatePickerTestUpdate, ShowContentRowButton002, TestSize.Level1)
     bool isFirstPage = false;
     CreateDatePickerColumnNode();
     DatePickerDialogView::ShowContentRowButton(columnNode_, isFirstPage);
+    EXPECT_EQ(AceType::DynamicCast<FrameNode>(columnNode_->GetChildAtIndex(2))
+                  ->GetLayoutProperty<LayoutProperty>()
+                  ->propVisibility_,
+        VisibleType::VISIBLE);
 }
 
 /**
@@ -2036,6 +2044,7 @@ HWTEST_F(DatePickerTestUpdate, UpdateNextButtonMargin001, TestSize.Level1)
     RefPtr<ButtonLayoutProperty> buttonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(layoutProperty);
     ASSERT_NE(buttonLayoutProperty, nullptr);
     DatePickerDialogView::UpdateNextButtonMargin(buttonLayoutProperty);
+    ASSERT_NE(buttonLayoutProperty->GetMarginProperty(), nullptr);
 }
 
 /**
@@ -2048,6 +2057,8 @@ HWTEST_F(DatePickerTestUpdate, HandleMouseEvent001, TestSize.Level1)
     bool isHover = true;
     auto titleButtonRow = DatePickerDialogView::CreateTitleButtonRowNode();
     DatePickerDialogView::HandleMouseEvent(titleButtonRow, isHover);
+    EXPECT_EQ(AceType::DynamicCast<FrameNode>(titleButtonRow)->GetRenderContext()->GetBackgroundColor(),
+        PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>()->GetHoverColor());
 }
 
 /**
@@ -2060,6 +2071,8 @@ HWTEST_F(DatePickerTestUpdate, HandleMouseEvent002, TestSize.Level1)
     bool isHover = false;
     auto titleButtonRow = DatePickerDialogView::CreateTitleButtonRowNode();
     DatePickerDialogView::HandleMouseEvent(titleButtonRow, isHover);
+    EXPECT_EQ(
+        AceType::DynamicCast<FrameNode>(titleButtonRow)->GetRenderContext()->GetBackgroundColor(), Color::TRANSPARENT);
 }
 
 /**
