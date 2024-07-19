@@ -64,8 +64,8 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr double DIMENSION_VALUE = 16.0;
-constexpr const char COPY_ACTION[] = "copy";
-constexpr const char SELECT_ACTION[] = "select";
+constexpr const char COPY_ACTION[] = "复制";
+constexpr const char SELECT_ACTION[] = "选择文本";
 constexpr const char SYMBOL_COLOR[] = "BLACK";
 constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
 constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
@@ -853,7 +853,7 @@ bool TextPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSpan)
                 dataDetectorAdapter_->ResponseBestMatchItem(aiSpan);
                 return true;
             }
-            return ShowUIExtensionMenu(aiSpan);
+            return ShowAIEntityMenu(aiSpan);
         }
     }
     return false;
@@ -871,15 +871,14 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
             return;
         }
         pattern->CloseSelectOverlay();
+        pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
         if (action == std::string(COPY_ACTION)) {
-            pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
             pattern->HandleOnCopy();
+            pattern->ResetSelection();
         } else if (action == std::string(SELECT_ACTION)) {
             if (calculateHandleFunc == nullptr) {
-                pattern->SetTextSelection(aiSpan.start, aiSpan.end);
                 pattern->CalculateHandleOffsetAndShowOverlay();
             } else {
-                pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
                 calculateHandleFunc();
             }
             if (showSelectOverlayFunc == nullptr) {
@@ -894,7 +893,7 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
     };
 }
 
-bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
+bool TextPattern::ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
     const ShowSelectOverlayFunc& showSelectOverlayFunc)
 {
     auto host = GetHost();
@@ -922,7 +921,7 @@ bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
         aiRect = textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
     }
 
-    return dataDetectorAdapter_->ShowUIExtensionMenu(aiSpan, aiRect, host, IsSelectableAndCopy());
+    return dataDetectorAdapter_->ShowAIEntityMenu(aiSpan, aiRect, host, IsSelectableAndCopy());
 }
 
 void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
@@ -1068,10 +1067,6 @@ void TextPattern::InitHoverEvent()
 
 void TextPattern::HandleMouseEvent(const MouseInfo& info)
 {
-    if (!IsSelectableAndCopy()) {
-        return;
-    }
-
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
@@ -1162,6 +1157,11 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
 
 void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset)
 {
+    if (!IsSelectableAndCopy()) {
+        isMousePressed_ = false;
+        leftMousePressed_ = false;
+        return;
+    }
     if (blockPress_) {
         dragBoxes_ = GetTextBoxes();
         return;
@@ -1185,6 +1185,9 @@ void TextPattern::HandleMouseRightButton(const MouseInfo& info, const Offset& te
                 isMousePressed_ = false;
                 return;
             }
+        }
+        if (!IsSelectableAndCopy()) {
+            return;
         }
 
         CalculateHandleOffsetAndShowOverlay(true);
@@ -2097,6 +2100,7 @@ void TextPattern::OnModifyDone()
 
         if (textDetectEnable_) {
             auto entityJson = JsonUtil::ParseJsonString(textForDisplay_);
+            TAG_LOGI(AceLogTag::ACE_TEXT, "text content is the json format: %{public}d", entityJson->IsNull());
             if (!entityJson->IsNull() && !entityJson->GetValue("bundleName")->IsNull() &&
                 dataDetectorAdapter_->ParseOriText(entityJson, textForDisplay_)) {
                 textLayoutProperty->UpdateContent(textForDisplay_);
@@ -2167,6 +2171,9 @@ void TextPattern::InitCopyOption()
     }
     if (onClick_ || IsSelectableAndCopy() || CanStartAITask()) {
         InitClickEvent(gestureEventHub);
+        if (CanStartAITask()) {
+            InitMouseEvent();
+        }
     }
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
