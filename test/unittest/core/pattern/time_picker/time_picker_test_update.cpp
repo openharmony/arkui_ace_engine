@@ -1455,8 +1455,6 @@ HWTEST_F(TimePickerPatternTestUpdate, SetDisappearTextStyle001, TestSize.Level1)
     } else {
         textStyle.fontStyle = FONT_STYLES[0];
     }
-    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
-    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
     textStyle.textColor = Color(color);
     TimePickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
 }
@@ -1495,8 +1493,6 @@ HWTEST_F(TimePickerPatternTestUpdate, SetNormalTextStyle001, TestSize.Level1)
     } else {
         textStyle.fontStyle = FONT_STYLES[0];
     }
-    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
-    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
     textStyle.textColor = Color(color);
     TimePickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
 }
@@ -1535,8 +1531,6 @@ HWTEST_F(TimePickerPatternTestUpdate, SetNormalTextStyle002, TestSize.Level1)
     } else {
         textStyle.fontStyle = FONT_STYLES[0];
     }
-    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
-    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
     textStyle.textColor = Color(color);
     TimePickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
 }
@@ -1575,8 +1569,6 @@ HWTEST_F(TimePickerPatternTestUpdate, SetSelectedTextStyle001, TestSize.Level1)
     } else {
         textStyle.fontStyle = FONT_STYLES[0];
     }
-    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
-    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
     textStyle.textColor = Color(color);
     TimePickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
 }
@@ -1615,8 +1607,6 @@ HWTEST_F(TimePickerPatternTestUpdate, SetSelectedTextStyle002, TestSize.Level1)
     } else {
         textStyle.fontStyle = FONT_STYLES[0];
     }
-    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
-    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
     textStyle.textColor = Color(color);
     TimePickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
 }
