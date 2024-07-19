@@ -74,7 +74,6 @@ const float MINIMUM_AMPLITUDE_RATION = 0.08f;
 constexpr double MOUNT_MENU_FINAL_SCALE = 0.95f;
 constexpr double SEMI_CIRCLE_ANGEL = 90.0f;
 constexpr Dimension PADDING = 4.0_vp;
-constexpr Dimension MENU_DEFAULT_RADIUS = 20.0_vp;
 
 
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
@@ -910,7 +909,7 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     // make menu round rect
     BorderRadiusProperty borderRadius;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        borderRadius.SetRadius(MENU_DEFAULT_RADIUS);
+        borderRadius.SetRadius(theme->GetMenuDefaultRadius());
     } else {
         borderRadius.SetRadius(theme->GetMenuBorderRadius());
     }
