@@ -665,7 +665,9 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     AceExtraInputData::InsertInterpolatePoints(info);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->RequestFocusImmediately();
+    if (pipeline->IsWindowFocused()) {
+        focusHub->RequestFocusImmediately();
+    }
     DispatchPointerEvent(pointerEvent);
 }
 
