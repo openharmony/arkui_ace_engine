@@ -1065,6 +1065,20 @@ private:
     void TripleClickSection(GestureEvent& info, int32_t start, int32_t end, int32_t pos);
     SelectType CheckResult(const Offset& pos, int32_t currentPosition);
     void RequestKeyboardToEdit();
+    void HandleTasksOnLayoutSwap()
+    {
+        while (!tasks_.empty()) {
+            const auto& task = tasks_.front();
+            if (task) {
+                task();
+            }
+            tasks_.pop();
+        }
+    }
+    void PostTaskToLayutSwap(std::function<void()>&& task)
+    {
+        tasks_.emplace(std::forward<std::function<void()>>(task));
+    }
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1168,6 +1182,7 @@ private:
     bool previewLongPress_ = false;
     bool editingLongPress_ = false;
     bool needMoveCaretToContentRect_ = false;
+    std::queue<std::function<void()>> tasks_;
 };
 } // namespace OHOS::Ace::NG
 
