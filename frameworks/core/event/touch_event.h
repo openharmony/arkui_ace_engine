@@ -114,6 +114,7 @@ struct TouchEvent final : public UIInputEvent {
     float localY = 0.0f;
     int32_t originalId = 0;
     bool isInjected = false;
+    bool isPrivacyMode = false;
 
     TouchEvent() {}
 
@@ -267,30 +268,32 @@ struct TouchEvent final : public UIInputEvent {
 
     TouchEvent CloneWith(float scale, float offsetX, float offsetY, std::optional<int32_t> pointId) const
     {
-        return TouchEvent {}
-            .SetId(pointId.has_value() ? pointId.value() : id)
-            .SetX((x - offsetX) / scale)
-            .SetY((y - offsetY) / scale)
-            .SetScreenX((screenX - offsetX) / scale)
-            .SetScreenY((screenY - offsetY) / scale)
-            .SetType(type)
-            .SetPullType(pullType)
-            .SetTime(time)
-            .SetSize(size)
-            .SetForce(force)
-            .SetTiltX(tiltX)
-            .SetTiltY(tiltY)
-            .SetDeviceId(deviceId)
-            .SetTargetDisplayId(targetDisplayId)
-            .SetSourceType(sourceType)
-            .SetSourceTool(sourceTool)
-            .SetTouchEventId(touchEventId)
-            .SetIsInterpolated(isInterpolated)
-            .SetPointers(pointers)
-            .SetPointerEvent(pointerEvent)
-            .SetOriginalId(originalId)
-            .SetPressedKeyCodes(pressedKeyCodes_)
-            .SetIsInjected(isInjected);
+        TouchEvent event;
+        event.id = pointId.has_value() ? pointId.value() : id;
+        event.x = (x - offsetX) / scale;
+        event.y = (y - offsetY) / scale;
+        event.screenX = (screenX - offsetX) / scale;
+        event.screenY = (screenY - offsetY) / scale;
+        event.type = type;
+        event.pullType = pullType;
+        event.time = time;
+        event.size = size;
+        event.force = force;
+        event.tiltX = tiltX;
+        event.tiltY = tiltY;
+        event.deviceId = deviceId;
+        event.targetDisplayId = targetDisplayId;
+        event.sourceType = sourceType;
+        event.sourceTool = sourceTool;
+        event.touchEventId = touchEventId;
+        event.isInterpolated = isInterpolated;
+        event.pointers = std::move(pointers);
+        event.pointerEvent = std::move(pointerEvent);
+        event.originalId = originalId;
+        event.pressedKeyCodes_ = pressedKeyCodes_;
+        event.isInjected = isInjected;
+        event.isPrivacyMode = isPrivacyMode;
+        return event;
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
