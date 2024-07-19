@@ -384,7 +384,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         UpdateDefaultSymbol(tabTheme, symbolProperty);
         auto modifierOnApply = tabBarParam.GetSymbol().value().onApply;
         if (myIndex == indicator) {
-            tabBarPattern->SetImageColorOnIndex(indicator);
             symbolProperty->UpdateSymbolColorList({tabTheme->GetBottomTabSymbolOn()});
             if (modifierOnApply != nullptr) {
                 modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)), "normal");
@@ -416,7 +415,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         auto imagePaintProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
         CHECK_NULL_VOID(imagePaintProperty);
         if (imageSourceInfo.IsSvg() && myIndex == indicator) {
-            tabBarPattern->SetImageColorOnIndex(indicator);
             if (iconStyle.selectedColor.has_value()) {
                 imagePaintProperty->UpdateSvgFillColor(iconStyle.selectedColor.value());
             } else {
@@ -432,6 +430,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         }
         imageProperty->UpdateImageSourceInfo(imageSourceInfo);
     }
+    tabBarPattern->SetImageColorOnIndex(indicator);
+    
     columnNode->MarkModifyDone();
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
