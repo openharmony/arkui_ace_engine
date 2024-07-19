@@ -1436,8 +1436,6 @@ HWTEST_F(TimePickerPatternTestUpdate, SetDisappearTextStyle001, TestSize.Level1)
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
     uint32_t color = 0;
     int32_t POS_0 = 0;
-    int32_t POS_1 = 1;
-    int32_t POS_2 = 2;
     const char delimiter = '|';
     int32_t style = 0;
     const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL,
@@ -1474,8 +1472,6 @@ HWTEST_F(TimePickerPatternTestUpdate, SetNormalTextStyle001, TestSize.Level1)
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
     uint32_t color = 0;
     int32_t POS_0 = 0;
-    int32_t POS_1 = 1;
-    int32_t POS_2 = 2;
     const char delimiter = '|';
     int32_t style = 0;
     const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL,
@@ -1512,8 +1508,6 @@ HWTEST_F(TimePickerPatternTestUpdate, SetNormalTextStyle002, TestSize.Level1)
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
     uint32_t color = 0;
     int32_t POS_0 = 0;
-    int32_t POS_1 = 1;
-    int32_t POS_2 = 2;
     const char delimiter = '|';
     int32_t style = 0;
     const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL,
@@ -1550,8 +1544,6 @@ HWTEST_F(TimePickerPatternTestUpdate, SetSelectedTextStyle001, TestSize.Level1)
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
     uint32_t color = 0;
     int32_t POS_0 = 0;
-    int32_t POS_1 = 1;
-    int32_t POS_2 = 2;
     const char delimiter = '|';
     int32_t style = 0;
     const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL,
@@ -1588,8 +1580,6 @@ HWTEST_F(TimePickerPatternTestUpdate, SetSelectedTextStyle002, TestSize.Level1)
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
     uint32_t color = 0;
     int32_t POS_0 = 0;
-    int32_t POS_1 = 1;
-    int32_t POS_2 = 2;
     const char delimiter = '|';
     int32_t style = 0;
     const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL,
