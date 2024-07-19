@@ -1442,7 +1442,7 @@ private:
     void CursorMoveOnClick(const Offset& offset);
 
     void DelayProcessOverlay(const OverlayRequest& request = OverlayRequest());
-    void ProcessOverlayAfterLayout(bool isGlobalAreaChanged);
+    void ProcessOverlayAfterLayout(const OffsetF& prevOffset);
     void ProcessOverlay(const OverlayRequest& request = OverlayRequest());
 
     bool SelectOverlayIsOn()
