@@ -49,6 +49,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr Dimension RESERVE_BOTTOM_HEIGHT = 24.0_vp;
+constexpr float SCROLL_SNAP_VELOCITY_TH = 780;
 } // namespace
 
 void ListLayoutAlgorithm::UpdateListItemConstraint(
@@ -1115,7 +1116,7 @@ void ListLayoutAlgorithm::ReMeasureListItemGroup(LayoutWrapper* layoutWrapper, b
 
 void ListLayoutAlgorithm::FixPredictSnapOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty)
 {
-    if (!predictSnapOffset_.has_value()) {
+    if (!predictSnapOffset_.has_value() || itemPosition_.empty()) {
         return;
     }
     auto scrollSnapAlign = listLayoutProperty->GetScrollSnapAlign().value_or(V2::ScrollSnapAlign::NONE);
@@ -1128,7 +1129,7 @@ void ListLayoutAlgorithm::FixPredictSnapOffset(const RefPtr<ListLayoutProperty>&
 
     auto predictEndPos = totalOffset_ - predictSnapOffset_.value();
     int32_t endIndex = FindPredictSnapEndIndexInItemPositions(predictEndPos, scrollSnapAlign);
-    if (endIndex != -1) {
+    if (GetStartIndex() <= endIndex && endIndex <= GetEndIndex()) {
         predictEndPos = CalculatePredictSnapEndPositionByIndex(endIndex, scrollSnapAlign);
         predictSnapOffset_ = totalOffset_ - predictEndPos + currentOffset_;
         predictSnapEndPos_.reset();
@@ -1974,7 +1975,7 @@ void ListLayoutAlgorithm::PostIdleTaskV2(RefPtr<FrameNode> frameNode, const List
     });
 }
 
-float ListLayoutAlgorithm::GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign)
+float ListLayoutAlgorithm::GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign) const
 {
     float stopOnScreen = 0;
     if (scrollSnapAlign == V2::ScrollSnapAlign::START) {
@@ -1987,46 +1988,88 @@ float ListLayoutAlgorithm::GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapA
     return stopOnScreen;
 }
 
+void ListLayoutAlgorithm::FindPredictSnapIndexInItemPositionsStart(
+    float predictEndPos, int32_t& endIndex, int32_t& currIndex) const
+{
+    float stopOnScreen = GetStopOnScreenOffset(V2::ScrollSnapAlign::START);
+    float itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+    for (const auto& positionInfo : itemPosition_) {
+        auto startPos = positionInfo.second.startPos - itemHeight / 2.0f - spaceWidth_;
+        float itemHeight = positionInfo.second.endPos - positionInfo.second.startPos;
+        auto endPos = positionInfo.second.startPos + itemHeight / 2.0f;
+        if (GreatOrEqual(predictEndPos + stopOnScreen, totalOffset_ + startPos) &&
+            LessNotEqual(predictEndPos + stopOnScreen, totalOffset_ + endPos)) {
+            endIndex = positionInfo.first;
+        }
+        if (GreatOrEqual(stopOnScreen, startPos) && LessNotEqual(stopOnScreen, endPos)) {
+            currIndex = positionInfo.first;
+        }
+        if (endIndex >= 0 && currIndex >= 0) {
+            break;
+        }
+    }
+}
+
+void ListLayoutAlgorithm::FindPredictSnapIndexInItemPositionsCenter(
+    float predictEndPos, int32_t& endIndex, int32_t& currIndex) const
+{
+    float stopOnScreen = GetStopOnScreenOffset(V2::ScrollSnapAlign::CENTER);
+    for (const auto& positionInfo : itemPosition_) {
+        auto startPos = positionInfo.second.startPos - spaceWidth_ / 2.0f;
+        auto endPos = positionInfo.second.endPos + spaceWidth_ / 2.0f;
+        if (GreatOrEqual(predictEndPos + stopOnScreen, totalOffset_ + startPos) &&
+            LessNotEqual(predictEndPos + stopOnScreen, totalOffset_ + endPos)) {
+            endIndex = positionInfo.first;
+        }
+        if (GreatOrEqual(stopOnScreen, startPos) && LessNotEqual(stopOnScreen, endPos)) {
+            currIndex = positionInfo.first;
+        }
+        if (endIndex >= 0 && currIndex >= 0) {
+            break;
+        }
+    }
+}
+
+void ListLayoutAlgorithm::FindPredictSnapIndexInItemPositionsEnd(
+    float predictEndPos, int32_t& endIndex, int32_t& currIndex) const
+{
+    float stopOnScreen = GetStopOnScreenOffset(V2::ScrollSnapAlign::END);
+    float itemHeight = itemPosition_.rbegin()->second.endPos - itemPosition_.rbegin()->second.startPos;
+    for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
+        auto endPos = pos->second.endPos + itemHeight / 2.0f + spaceWidth_;
+        itemHeight = pos->second.endPos - pos->second.startPos;
+        auto startPos = pos->second.endPos - itemHeight / 2.0f;
+        if (GreatOrEqual(predictEndPos + stopOnScreen, totalOffset_ + startPos) &&
+            LessNotEqual(predictEndPos + stopOnScreen, totalOffset_ + endPos)) {
+            endIndex = pos->first;
+        }
+        if (GreatOrEqual(stopOnScreen, startPos) && LessNotEqual(stopOnScreen, endPos)) {
+            currIndex = pos->first;
+        }
+        if (endIndex >= 0 && currIndex >= 0) {
+            break;
+        }
+    }
+}
+
 int32_t ListLayoutAlgorithm::FindPredictSnapEndIndexInItemPositions(
     float predictEndPos, V2::ScrollSnapAlign scrollSnapAlign)
 {
     int32_t endIndex = -1;
-    float stopOnScreen = GetStopOnScreenOffset(scrollSnapAlign);
-    float startPos = 0.0f;
-    float endPos = 0.0f;
-    float itemHeight = 0.0f;
+    int32_t currIndex = -1;
 
     if (scrollSnapAlign == V2::ScrollSnapAlign::START) {
-        for (const auto& positionInfo : itemPosition_) {
-            startPos = totalOffset_ + positionInfo.second.startPos - itemHeight / 2.0f - spaceWidth_;
-            itemHeight = positionInfo.second.endPos - positionInfo.second.startPos;
-            endPos = totalOffset_ + positionInfo.second.startPos + itemHeight / 2.0f;
-            if (GreatOrEqual(predictEndPos + stopOnScreen, startPos) &&
-                LessNotEqual(predictEndPos + stopOnScreen, endPos)) {
-                endIndex = positionInfo.first;
-                break;
-            }
-        }
+        FindPredictSnapIndexInItemPositionsStart(predictEndPos, endIndex, currIndex);
     } else if (scrollSnapAlign == V2::ScrollSnapAlign::CENTER) {
-        for (const auto& positionInfo : itemPosition_) {
-            startPos = totalOffset_ + positionInfo.second.startPos - spaceWidth_ / 2.0f;
-            endPos = totalOffset_ + positionInfo.second.endPos + spaceWidth_ / 2.0f;
-            if (GreatOrEqual(predictEndPos + stopOnScreen, startPos) &&
-                LessNotEqual(predictEndPos + stopOnScreen, endPos)) {
-                endIndex = positionInfo.first;
-                break;
-            }
-        }
+        FindPredictSnapIndexInItemPositionsCenter(predictEndPos, endIndex, currIndex);
     } else if (scrollSnapAlign == V2::ScrollSnapAlign::END) {
-        for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
-            endPos = totalOffset_ + pos->second.endPos + itemHeight / 2.0f + spaceWidth_;
-            itemHeight = pos->second.endPos - pos->second.startPos;
-            startPos = totalOffset_ + pos->second.endPos - itemHeight / 2.0f;
-            if (GreatOrEqual(predictEndPos + stopOnScreen, startPos) &&
-                LessNotEqual(predictEndPos + stopOnScreen, endPos)) {
-                endIndex = pos->first;
-                break;
-            }
+        FindPredictSnapIndexInItemPositionsEnd(predictEndPos, endIndex, currIndex);
+    }
+    if (endIndex == currIndex && currIndex >= 0) {
+        if (scrollSnapVelocity_ < -SCROLL_SNAP_VELOCITY_TH * Scrollable::GetVelocityScale()) {
+            endIndex++;
+        } else if (scrollSnapVelocity_ > SCROLL_SNAP_VELOCITY_TH * Scrollable::GetVelocityScale()) {
+            endIndex--;
         }
     }
     return endIndex;

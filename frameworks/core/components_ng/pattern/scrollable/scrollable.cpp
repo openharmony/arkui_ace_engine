@@ -78,6 +78,12 @@ void Scrollable::SetVelocityScale(double sVelocityScale)
     sVelocityScale_ = sVelocityScale;
 }
 
+double Scrollable::GetVelocityScale()
+{
+    return Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ?
+        NEW_VELOCITY_SCALE : VELOCITY_SCALE;
+}
+
 void Scrollable::SetFriction(double sFriction)
 {
     if (LessOrEqual(sFriction, 0.0)) {
@@ -679,12 +685,14 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
     snapOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     ACE_SCOPED_TRACE("List snap animation start, start:%f, end:%f, vel:%f, id:%d", currentPos_, endPos_,
         scrollSnapVelocity, nodeId_);
+    updateSnapAnimationCount_++;
     snapOffsetProperty_->AnimateWithVelocity(option, endPos_, scrollSnapVelocity,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
             auto scroll = weak.Upgrade();
             CHECK_NULL_VOID(scroll);
             ACE_SCOPED_TRACE("List snap animation finish, id:%d", scroll->nodeId_);
+            scroll->updateSnapAnimationCount_--;
             if (scroll->updateSnapAnimationCount_ == 0) {
                 scroll->isSnapScrollAnimationStop_ = true;
                 scroll->ProcessScrollSnapStop();
