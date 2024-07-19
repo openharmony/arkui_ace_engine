@@ -200,6 +200,14 @@ void ContainerModalPatternEnhance::ChangeFloatingTitle(bool isFocus)
         windowManager->SetCurrentWindowMaximizeMode(MaximizeMode::MODE_RECOVER);
     }
 
+    auto floatingTitleRow = GetFloatingTitleRow();
+    CHECK_NULL_VOID(floatingTitleRow);
+    auto floatingContext = floatingTitleRow->GetRenderContext();
+    CHECK_NULL_VOID(floatingContext);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
+    floatingContext->UpdateBackgroundColor(theme->GetBackGroundColor(isFocus));
     // update floating custom title label
     auto customFloatingTitleNode = GetFloatingTitleNode();
     CHECK_NULL_VOID(customFloatingTitleNode);
