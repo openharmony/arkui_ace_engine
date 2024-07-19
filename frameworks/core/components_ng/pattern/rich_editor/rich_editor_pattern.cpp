@@ -1490,7 +1490,7 @@ bool RichEditorPattern::IsCustomSpanInCaretPos(int32_t position, bool downStream
     return false;
 }
 
-bool RichEditorPattern::SetCaretPosition(int32_t pos)
+bool RichEditorPattern::SetCaretPosition(int32_t pos, bool needNotifyImf)
 {
     auto correctPos = std::clamp(pos, 0, GetTextContentLength());
     ResetLastClickOffset();
@@ -1503,9 +1503,9 @@ bool RichEditorPattern::SetCaretPosition(int32_t pos)
             caretChangeListener_(caretPosition_);
         }
     }
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, true);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    if (needNotifyImf) {
+        UpdateCaretInfoToController();
+    }
     return true;
 }
 
@@ -5774,11 +5774,11 @@ void RichEditorPattern::MoveCaretAfterTextChange()
     switch (moveDirection_) {
         case MoveDirection::BACKWARD:
             SetCaretPosition(
-                std::clamp((caretPosition_ - moveLength_), 0, static_cast<int32_t>(GetTextContentLength())));
+                std::clamp((caretPosition_ - moveLength_), 0, static_cast<int32_t>(GetTextContentLength())), false);
             break;
         case MoveDirection::FORWARD:
             SetCaretPosition(
-                std::clamp((caretPosition_ + moveLength_), 0, static_cast<int32_t>(GetTextContentLength())));
+                std::clamp((caretPosition_ + moveLength_), 0, static_cast<int32_t>(GetTextContentLength())), false);
             break;
         default:
             break;
