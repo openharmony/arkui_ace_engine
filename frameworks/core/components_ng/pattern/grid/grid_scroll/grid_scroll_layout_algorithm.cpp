@@ -1229,6 +1229,7 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
         } else {
             SkipIrregularLines(layoutWrapper, true);
         }
+        gridLayoutInfo_.startIndex_ = std::clamp(gridLayoutInfo_.startIndex_, 0, gridLayoutInfo_.childrenCount_ - 1);
         TAG_LOGI(AceLogTag::ACE_GRID, "estimatedIndex:%{public}d", gridLayoutInfo_.startIndex_);
         auto grid = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(grid);
@@ -1281,6 +1282,7 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
         } else {
             SkipIrregularLines(layoutWrapper, false);
         }
+        gridLayoutInfo_.startIndex_ = std::clamp(gridLayoutInfo_.startIndex_, 0, gridLayoutInfo_.childrenCount_ - 1);
         TAG_LOGI(AceLogTag::ACE_GRID, "estimatedIndex:%{public}d, currentOffset:%{public}f",
             gridLayoutInfo_.startIndex_, gridLayoutInfo_.currentOffset_);
         auto grid = layoutWrapper->GetHostNode();
