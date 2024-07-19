@@ -1773,31 +1773,176 @@ HWTEST_F(ImageTestOneNg, ImagePatternTest001, TestSize.Level1)
 {
     CreatePixelMapAnimator(1);
     auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
-    auto contain = "CONTAIN";
-    auto cover = "COVER";
-    auto fill = "FILL";
-    auto fitWidth = "FITWIDTH";
-    auto fitHeight = "FITHEIGHT";
-    auto none = "NONE";
-    auto scaleDown = "SCALE_DOWN";
-    auto topLeft = "TOP_LEFT";
-    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::CONTAIN), contain);
-    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::COVER), cover);
-    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::FILL), fill);
-    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::FITWIDTH), fitWidth);
-    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::FITHEIGHT), fitHeight);
-    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::NONE), none);
-    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::SCALE_DOWN), scaleDown);
-    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::TOP_LEFT), topLeft);
-    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::START), cover);
 
-    auto noRepeat = "NO_REPEAT";
-    auto repeat = "REPEAT_XY";
-    auto repeatX = "REPEAT_X";
-    auto repeatY = "REPEAT_Y";
-    EXPECT_EQ(imagePattern->GetImageRepeatStr(ImageRepeat::NO_REPEAT), noRepeat);
-    EXPECT_EQ(imagePattern->GetImageRepeatStr(ImageRepeat::REPEAT), repeat);
-    EXPECT_EQ(imagePattern->GetImageRepeatStr(ImageRepeat::REPEAT_X), repeatX);
-    EXPECT_EQ(imagePattern->GetImageRepeatStr(ImageRepeat::REPEAT_Y), repeatY);
+    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::CONTAIN), "CONTAIN");
+    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::COVER), "COVER");
+    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::FILL), "FILL");
+    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::FITWIDTH), "FITWIDTH");
+    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::FITHEIGHT), "FITHEIGHT");
+    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::NONE), "NONE");
+    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::SCALE_DOWN), "SCALE_DOWN");
+    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::TOP_LEFT), "TOP_LEFT");
+    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::START), "COVER");
+
+    EXPECT_EQ(imagePattern->GetImageRepeatStr(ImageRepeat::NO_REPEAT), "NO_REPEAT");
+    EXPECT_EQ(imagePattern->GetImageRepeatStr(ImageRepeat::REPEAT), "REPEAT_XY");
+    EXPECT_EQ(imagePattern->GetImageRepeatStr(ImageRepeat::REPEAT_X), "REPEAT_X");
+    EXPECT_EQ(imagePattern->GetImageRepeatStr(ImageRepeat::REPEAT_Y), "REPEAT_Y");
+}
+
+void ImageModelNGFailedTest001_Properties01(ImageModelNG &image)
+{
+    auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
+    /**
+     * pop node
+     * All of the following property settings will fail
+    */
+    auto uiNode = ViewStackProcessor::GetInstance()->Finish();
+    FrameNode *frameNodeNull = nullptr;
+    image.SetAlt(ImageSourceInfo { RESOURCE_URL });
+    EXPECT_EQ(imageLayoutProperty->GetAlt().has_value(), false);
+
+    image.SetSmoothEdge(1.1f);
+    EXPECT_EQ(imageRenderProperty->GetSmoothEdge().has_value(), false);
+
+    ImageModelNG::SetSmoothEdge(frameNodeNull, 1.1f);
+    EXPECT_EQ(imageRenderProperty->GetSmoothEdge().has_value(), false);
+
+    image.SetDynamicRangeMode(DynamicRangeMode::HIGH);
+    EXPECT_EQ(imageRenderProperty->GetDynamicMode().has_value(), false);
+
+    ImageModelNG::SetDynamicRangeMode(frameNodeNull, DynamicRangeMode::HIGH);
+    EXPECT_EQ(imageRenderProperty->GetDynamicMode().has_value(), false);
+
+    image.SetEnhancedImageQuality(AIImageQuality::HIGH);
+    EXPECT_NE(imagePattern->GetImageQuality(), AIImageQuality::HIGH);
+
+    ImageModelNG::SetEnhancedImageQuality(frameNodeNull, AIImageQuality::HIGH);
+    EXPECT_NE(imagePattern->GetImageQuality(), AIImageQuality::HIGH);
+
+    image.SetBackBorder();
+    EXPECT_EQ(imagePattern->needBorderRadius_, false);
+
+    ImageModelNG::SetBackBorder(frameNodeNull);
+    EXPECT_EQ(imagePattern->needBorderRadius_, false);
+
+    image.SetImageFit(ImageFit::BOTTOM);
+    EXPECT_EQ(imageLayoutProperty->GetImageFit().has_value(), false);
+
+    ImageModelNG::SetImageFit(frameNodeNull, ImageFit::BOTTOM);
+    EXPECT_EQ(imageLayoutProperty->GetImageFit().has_value(), false);
+
+    image.SetMatchTextDirection(true);
+    EXPECT_EQ(imageRenderProperty->GetMatchTextDirection().has_value(), false);
+
+    ImageModelNG::SetMatchTextDirection(frameNodeNull, true);
+    EXPECT_EQ(imageRenderProperty->GetMatchTextDirection().has_value(), false);
+
+    /* recover node*/
+    ViewStackProcessor::GetInstance()->Push(uiNode);
+}
+
+void ImageModelNGFailedTest001_Properties02(ImageModelNG &image)
+{
+    auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
+    /**
+     * pop node
+     * All of the following property settings will fail
+    */
+    auto uiNode = ViewStackProcessor::GetInstance()->Finish();
+    FrameNode *frameNodeNull = nullptr;
+    image.SetFitOriginSize(true);
+    EXPECT_EQ(imageLayoutProperty->GetFitOriginalSize().has_value(), false);
+
+    ImageModelNG::SetFitOriginSize(frameNodeNull, true);
+    EXPECT_EQ(imageLayoutProperty->GetFitOriginalSize().has_value(), false);
+
+    int testData = 0;
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
+    auto onError = [&testData](const LoadImageFailEvent& info) { testData = 1; };
+    image.SetOnError(std::move(onError));
+    eventHub->FireErrorEvent(LoadImageFailEvent(WIDTH, HEIGHT, "image load error!"));
+    EXPECT_NE(testData, 1);
+
+    auto onComplete = [&testData](const LoadImageSuccessEvent& info) { testData = 1; };
+    image.SetOnComplete(std::move(onComplete));
+    LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT, 1);
+    eventHub->FireCompleteEvent(loadImageSuccessEvent);
+    EXPECT_NE(testData, 1);
+
+    auto svgAnimatorFinishEvent = [&testData]() { testData = 1; };
+    image.SetSvgAnimatorFinishEvent(svgAnimatorFinishEvent);
+    eventHub->FireFinishEvent();
+    EXPECT_NE(testData, 1);
+
+    auto pairSize = std::make_pair(Dimension(1.1), Dimension(1.2));
+    image.SetImageSourceSize(pairSize);
+    EXPECT_EQ(imageLayoutProperty->GetSourceSize().has_value(), false);
+
+    ImageModelNG::SetImageSourceSize(frameNodeNull, pairSize);
+    EXPECT_EQ(imageLayoutProperty->GetSourceSize().has_value(), false);
+
+    image.SetImageFill(Color::BLUE);
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor().has_value(), false);
+
+    ImageModelNG::SetImageFill(frameNodeNull, Color::BLUE);
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor().has_value(), false);
+
+    /* recover node*/
+    ViewStackProcessor::GetInstance()->Push(uiNode);
+}
+
+void ImageModelNGFailedTest001_Properties03(ImageModelNG &image)
+{
+    auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
+    /**
+     * pop node
+     * All of the following property settings will fail
+    */
+    auto uiNode = ViewStackProcessor::GetInstance()->Finish();
+    FrameNode *frameNodeNull = nullptr;
+
+    image.SetImageInterpolation(ImageInterpolation::HIGH);
+    EXPECT_EQ(imageRenderProperty->GetImageInterpolation().has_value(), false);
+
+    ImageModelNG::SetImageInterpolation(frameNodeNull, ImageInterpolation::HIGH);
+    EXPECT_EQ(imageRenderProperty->GetImageInterpolation().has_value(), false);
+
+    image.SetImageRepeat(ImageRepeat::REPEAT_X);
+    EXPECT_EQ(imageRenderProperty->GetImageRepeat().has_value(), false);
+
+    ImageModelNG::SetImageRepeat(frameNodeNull, ImageRepeat::REPEAT_X);
+    EXPECT_EQ(imageRenderProperty->GetImageRepeat().has_value(), false);
+
+    image.SetImageRenderMode(ImageRenderMode::TEMPLATE);
+    EXPECT_EQ(imageRenderProperty->GetImageRenderMode().has_value(), false);
+
+    ImageModelNG::SetImageRenderMode(frameNodeNull, ImageRenderMode::TEMPLATE);
+    EXPECT_EQ(imageRenderProperty->GetImageRenderMode().has_value(), false);
+
+    /* recover node*/
+    ViewStackProcessor::GetInstance()->Push(uiNode);
+}
+
+/**
+ * @tc.name: ImageModelNGFailedTest001
+ * @tc.desc: Test Image related method calls.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, ImageModelNGFailedTest001, TestSize.Level1)
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+
+    auto [frameNode, v1, v2, v3] = GetCompoment();
+    ImageModelNGFailedTest001_Properties01(image);
+    ImageModelNGFailedTest001_Properties02(image);
+    ImageModelNGFailedTest001_Properties03(image);
+    frameNode->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG
