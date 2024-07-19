@@ -535,6 +535,10 @@ void PatternLockPattern::OnTouchUp()
 {
     CHECK_NULL_VOID(patternLockModifier_);
     patternLockModifier_->SetIsTouchDown(false);
+    size_t count = patternLockModifier_->GetChoosePointCount();
+    if (count < 1) {
+        return;
+    }
     StartModifierCanceledAnimate();
     AddPointEnd();
     fingerId_ = -1;
