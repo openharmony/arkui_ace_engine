@@ -555,6 +555,16 @@ void ScrollBar::HandleDragStart(const GestureEvent& info)
 
 void ScrollBar::HandleDragUpdate(const GestureEvent& info)
 {
+    // if historical touch point slope is zero but delta is not zero, no need to update.
+    auto mainDelta = info.GetMainDelta();
+    if (info.IsInterpolated()) {
+        if (GetPanDirection() == Axis::VERTICAL && NearZero(info.GetInputYDeltaSlope()) && !NearZero(mainDelta)) {
+            return;
+        } else if (GetPanDirection() == Axis::HORIZONTAL && NearZero(info.GetInputXDeltaSlope()) &&
+                   !NearZero(mainDelta)) {
+            return;
+        }
+    }
     if (scrollPositionCallback_) {
         // The offset of the mouse wheel and gesture is opposite.
         auto offset = info.GetInputEventType() == InputEventType::AXIS ?

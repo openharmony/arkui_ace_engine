@@ -637,6 +637,9 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetRawGlobalLocation(GetRawGlobalLocation(touchPoint.postEventNodeId));
     info.SetPointerId(touchPoint.id);
     info.SetTargetDisplayId(touchPoint.targetDisplayId);
+    info.SetIsInterpolated(touchPoint.isInterpolated);
+    info.SetInputXDeltaSlope(touchPoint.inputXDeltaSlope);
+    info.SetInputYDeltaSlope(touchPoint.inputYDeltaSlope);
     info.SetMainDelta(mainDelta_ / static_cast<double>(touchPoints_.size()));
     if (inputEventType_ == InputEventType::AXIS) {
         info.SetScreenLocation(lastAxisEvent_.GetScreenOffset());

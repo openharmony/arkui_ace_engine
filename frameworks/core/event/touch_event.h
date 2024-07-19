@@ -116,6 +116,10 @@ struct TouchEvent final : public UIInputEvent {
     bool isInjected = false;
     bool isPrivacyMode = false;
 
+    // Save historical touch point slope.
+    float inputXDeltaSlope = 0.0f;
+    float inputYDeltaSlope = 0.0f;
+
     TouchEvent() {}
 
     TouchEvent& SetId(int32_t id)
@@ -255,6 +259,18 @@ struct TouchEvent final : public UIInputEvent {
         return *this;
     }
 
+    TouchEvent& SetInputXDeltaSlope(float inputXDeltaSlope)
+    {
+        this->inputXDeltaSlope = inputXDeltaSlope;
+        return *this;
+    }
+
+    TouchEvent& SetInputYDeltaSlope(float inputYDeltaSlope)
+    {
+        this->inputYDeltaSlope = inputYDeltaSlope;
+        return *this;
+    }
+
     TouchEvent& SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes)
     {
         this->pressedKeyCodes_ = pressedKeyCodes;
@@ -293,6 +309,8 @@ struct TouchEvent final : public UIInputEvent {
         event.pressedKeyCodes_ = pressedKeyCodes_;
         event.isInjected = isInjected;
         event.isPrivacyMode = isPrivacyMode;
+        event.inputXDeltaSlope = inputXDeltaSlope;
+        event.inputYDeltaSlope = inputYDeltaSlope;
         return event;
     }
 
