@@ -1568,11 +1568,12 @@ void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance,
+    bool forceChange)
 {
     CHECK_RUN_ON(UI);
     // prevent repeated trigger with same keyboardHeight
-    if (NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length())) {
+    if (!forceChange && NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length())) {
         return;
     }
 
@@ -1637,6 +1638,11 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         if (scrollResult) {
             FlushUITasks();
         }
+
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+            "AvoidanceLogic keyboardHeight: %{public}f, positionY: %{public}f, safeHeight: %{public}f, "
+            "rootHeight_ %{public}f final calculate keyboard offset is %{public}f",
+            keyboardHeight, positionY, safeHeight, rootHeight_, safeAreaManager_->GetKeyboardOffset());
     };
     FlushUITasks();
     DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);

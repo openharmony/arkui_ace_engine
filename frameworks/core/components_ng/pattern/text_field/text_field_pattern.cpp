@@ -510,7 +510,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
 
     auto oldParentGlobalOffset = parentGlobalOffset_;
-    parentGlobalOffset_ = GetPaintRectGlobalOffset(true);
+    parentGlobalOffset_ = GetPaintRectGlobalOffset();
     inlineMeasureItem_ = textFieldLayoutAlgorithm->GetInlineMeasureItem();
     auto isEditorValueChanged = FireOnTextChangeEvent();
     UpdateCancelNode();
@@ -546,6 +546,41 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     SetAccessibilityClearAction();
     SetAccessibilityPasswordIconAction();
     return true;
+}
+
+void TextFieldPattern::OnDirectionConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [weak = WeakClaim(this)] {
+            auto textField = weak.Upgrade();
+            CHECK_NULL_VOID(textField);
+            textField->parentGlobalOffset_ = textField->GetPaintRectGlobalOffset();
+            textField->UpdateTextFieldManager(Offset(textField->parentGlobalOffset_.GetX(),
+                textField->parentGlobalOffset_.GetY()), textField->frameRect_.Height());
+            TAG_LOGI(ACE_TEXT_FIELD, "onDirectionUpdate change parentGlobalOffset to: %{public}s",
+                textField->parentGlobalOffset_.ToString().c_str());
+        },
+        TaskExecutor::TaskType::UI, "ArkUITextFieldOnDirectionConfigurationUpdate");
+
+    if (isCustomKeyboardAttached_) {
+        auto caretHeight = selectController_->GetCaretRect().Height();
+        auto safeHeight = caretHeight + selectController_->GetCaretRect().GetY();
+        if (selectController_->GetCaretRect().GetY() > caretHeight) {
+            safeHeight = caretHeight;
+        }
+        auto nodeId = host->GetId();
+        context->AddAfterLayoutTask([keyboardWeak = WeakPtr<OverlayManager>(keyboardOverlay_), nodeId, safeHeight]() {
+            auto keyboardOverlay = keyboardWeak.Upgrade();
+            CHECK_NULL_VOID(keyboardOverlay);
+            keyboardOverlay->AvoidCustomKeyboard(nodeId, safeHeight);
+        });
+    }
 }
 
 void TextFieldPattern::SetAccessibilityPasswordIconAction()
@@ -6690,7 +6725,7 @@ OffsetF TextFieldPattern::GetTextPaintOffset() const
     return GetPaintRectGlobalOffset();
 }
 
-OffsetF TextFieldPattern::GetPaintRectGlobalOffset(bool duringLayout) const
+OffsetF TextFieldPattern::GetPaintRectGlobalOffset() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, OffsetF(0.0f, 0.0f));
@@ -6698,11 +6733,7 @@ OffsetF TextFieldPattern::GetPaintRectGlobalOffset(bool duringLayout) const
     CHECK_NULL_RETURN(pipeline, OffsetF(0.0f, 0.0f));
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     OffsetF textPaintOffset;
-    if (duringLayout) {
-        textPaintOffset = host->GetParentGlobalOffsetDuringLayout();
-    } else {
-        textPaintOffset = host->GetPaintRectOffset();
-    }
+    textPaintOffset = host->GetPaintRectOffset();
     return textPaintOffset - rootOffset;
 }
 
