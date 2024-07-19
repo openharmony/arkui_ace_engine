@@ -1381,7 +1381,7 @@ protected:
         isDetachFromMainTree_ = true;
     }
     
-    virtual bool IsReverse() const override
+    bool IsReverse() const override
     {
         return false;
     };
