@@ -45,8 +45,7 @@ void WaterFlowLayoutInfo::UpdateStartIndex()
         // don't use in new segmented layout
         return;
     }
-    auto nextPosition = GetCrossIndexForNextItem(GetSegment(endIndex_));
-    auto mainHeight = GetMainHeight(nextPosition.crossIndex, nextPosition.lastItemIndex);
+    auto mainHeight = GetMaxMainHeight();
     // need more items for currentOffset_
     if (LessOrEqual(currentOffset_ + mainHeight, 0.0f)) {
         return;
@@ -265,12 +264,9 @@ void WaterFlowLayoutInfo::Reset()
 void WaterFlowLayoutInfo::Reset(int32_t resetFrom)
 {
     TAG_LOGI(AceLogTag::ACE_WATERFLOW, "reset. updateIdx:%{public}d,endIndex:%{public}d", resetFrom, endIndex_);
-    if (resetFrom > endIndex_) {
-        return;
-    }
     maxHeight_ = 0.0f;
     jumpIndex_ = EMPTY_JUMP_INDEX;
-    startIndex_ = 0;
+    startIndex_ = resetFrom;
     ClearCacheAfterIndex(resetFrom - 1);
 }
 
