@@ -344,8 +344,8 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
         .ellipsisMode = textStyle.GetEllipsisMode(),
-        .textOverflow = textStyle.GetTextOverflow(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
+        .textOverflow = textStyle.GetTextOverflow(),
         .indent = textStyle.GetTextIndent()
     };
 }

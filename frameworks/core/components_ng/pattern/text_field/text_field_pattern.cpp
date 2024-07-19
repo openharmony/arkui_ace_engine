@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 #include <algorithm>
+#include <atomic>
 #include <cstdint>
 #include <optional>
 #include <ratio>
@@ -135,7 +136,7 @@ constexpr uint32_t RECORD_MAX_LENGTH = 20;
 constexpr uint32_t OBSCURE_SHOW_TICKS = 1;
 constexpr Dimension ERROR_TEXT_TOP_MARGIN = 8.0_vp;
 constexpr Dimension ERROR_TEXT_BOTTOM_MARGIN = 8.0_vp;
-constexpr uint32_t FIND_TEXT_ZERO_INDEX = 1;
+constexpr int32_t FIND_TEXT_ZERO_INDEX = 1;
 constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
 const std::string NEWLINE = "\n";
@@ -1413,8 +1414,8 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnSelectAll");
     auto textSize = static_cast<int32_t>(contentController_->GetWideText().length());
     if (inlineStyle) {
-        if (static_cast<int32_t>(contentController_->GetWideText().rfind(L".")) < textSize - FIND_TEXT_ZERO_INDEX) {
-            textSize = contentController_->GetWideText().rfind(L".");
+        if (static_cast<int32_t>(contentController_->GetWideText().rfind(L'.')) < textSize - FIND_TEXT_ZERO_INDEX) {
+            textSize = static_cast<int32_t>(contentController_->GetWideText().rfind(L'.'));
         }
         UpdateSelection(0, textSize);
     } else {
