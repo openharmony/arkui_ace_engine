@@ -265,7 +265,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 if (gestureHub->GetTextDraggable()) {
                     HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 } else {
-                    HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+                    pipeline->AddAfterRenderTask([weak, info]() {
+                        auto actuator = weak.Upgrade();
+                        CHECK_NULL_VOID(actuator);
+                        actuator->HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+                    });
                     HideFilter();
                     HideMenu(frameNode->GetId());
                     SubwindowManager::GetInstance()->HideMenuNG(false, true);
