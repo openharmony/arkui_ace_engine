@@ -126,7 +126,7 @@ void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
             },
             TaskExecutor::TaskType::UI, "ArkUIListItemDragStart");
     };
-    NG::ComponentSnapshot::Create(customNode, std::move(callback), false, 
+    NG::ComponentSnapshot::Create(customNode, std::move(callback), false,
         SnapshotParam(CREATE_PIXELMAP_TIME));
 #else
     DragDropInfo dragDropInfo;

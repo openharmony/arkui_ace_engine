@@ -135,6 +135,7 @@ const PaddingProperty MARGIN_1 = {
     .bottom = CalcLength(5.0_vp),
     .top = CalcLength(1.0_vp),
     .right = CalcLength(3.0_vp),
+    .left = CalcLength(5.0_vp),
 };
 
 const std::vector<WaterFlowSections::Section> SECTION_5 = {
@@ -162,7 +163,7 @@ const std::vector<float> CROSS_GAP_5 = { 0.0f, 0.0f, 0.0f, 2.0f, 0.0f };
 const std::vector<float> MAIN_GAP_5 = { 5.0f, 0.0f, 0.0f, 1.0f, 2.0f };
 // assuming WaterFlow width = 400.0f
 const std::vector<std::vector<float>> ITEM_CROSS_SIZE_5 = { { 400.0f / 3, 400.0f / 3, 400.0f / 3 },
-    { 79.4f, 79.4f, 79.4f, 79.4f, 79.4f }, { 400.0f }, { 400.0f }, { 200.0f, 200.0f } };
+    { 78.4f, 78.4f, 78.4f, 78.4f, 78.4f }, { 400.0f }, { 400.0f }, { 200.0f, 200.0f } };
 
 const std::vector<WaterFlowSections::Section> ADD_SECTION_6 = {
     WaterFlowSections::Section { .itemsCount = 10,

@@ -1157,6 +1157,24 @@ typedef enum {
     ARKUI_OBJECT_FIT_SCALE_DOWN,
     /** The original size is retained. */
     ARKUI_OBJECT_FIT_NONE,
+    /** Not resized, the image is aligned with the start edge of the top of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_TOP_START,
+    /** Not resized, the image is horizontally centered at the top of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_TOP,
+    /** Not resized, the image is aligned with the end edge at the top of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_TOP_END,
+    /** Not resized, the image is vertically centered on the start edge of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_START,
+    /** Not resized, the image is horizontally and vertically centered in the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_CENTER,
+    /** Not resized, the image is vertically centered on the end edge of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_END,
+    /** Not resized, the image is aligned with the start edge at the bottom of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM_START,
+    /** Not resized, the image is horizontally centered at the bottom of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM,
+    /** Not resized, the image is aligned with the end edge at the bottom of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM_END,
 } ArkUI_ObjectFit;
 
 /**
@@ -1633,20 +1651,19 @@ typedef enum {
     ARKUI_FINISH_CALLBACK_LOGICALLY,
 } ArkUI_FinishCallbackType;
 
-
 /**
- * @brief 定义屏障线的方向。
+ * @brief defines the direction of the barrier line.
  *
  * @since 12
  */
 typedef enum {
-    /** 屏障在其所有referencedId的最左侧。*/
-    ARKUI_BARRIER_DIRECTION_LEFT = 0,
-    /** 屏障在其所有referencedId的最右侧。*/
-    ARKUI_BARRIER_DIRECTION_RIGHT,
-    /** 屏障在其所有referencedId的最上方。*/
+    /** The barrier is the leftmost of all its referencedIds. */
+    ARKUI_BARRIER_DIRECTION_START = 0,
+    /** The barrier is on the rightmost side of all its referencedIds. */
+    ARKUI_BARRIER_DIRECTION_END,
+    /** The barrier is at the top of all its referencedIds. */
     ARKUI_BARRIER_DIRECTION_TOP,
-    /** 屏障在其所有referencedId的最下方。*/
+    /** The barrier is at the bottom of all its referencedIds. */
     ARKUI_BARRIER_DIRECTION_BOTTOM
 } ArkUI_BarrierDirection;
 
@@ -1792,6 +1809,50 @@ typedef enum {
 } ArkUI_TextInputStyle;
 
 /**
+ * @brief Defines the state of the NavDestination component.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** The NavDestination show. */
+    ARKUI_NAV_DESTINATION_STATE_ON_SHOW = 0,
+    /** The NavDestination hide. */
+    ARKUI_NAV_DESTINATION_STATE_ON_HIDE = 1,
+    /** The NavDestination is mounted to the component tree. */
+    ARKUI_NAV_DESTINATION_STATE_ON_APPEAR = 2,
+    /** The NavDestination removed from the component tree. */
+    ARKUI_NAV_DESTINATION_STATE_ON_DISAPPEAR = 3,
+    /** Before the NavDestination show. */
+    ARKUI_NAV_DESTINATION_STATE_ON_WILL_SHOW = 4,
+    /** Before the NavDestination hide. */
+    ARKUI_NAV_DESTINATION_STATE_ON_WILL_HIDE = 5,
+    /** Before the NavDestination mount to the component tree. */
+    ARKUI_NAV_DESTINATION_STATE_ON_WILL_APPEAR = 6,
+    /** Before the NavDestination removed from the component tree. */
+    ARKUI_NAV_DESTINATION_STATE_ON_WILL_DISAPPEAR = 7,
+    /** The NavDestination returns from the component.*/
+    ARKUI_NAV_DESTINATION_STATE_ON_BACK_PRESS = 100,
+} ArkUI_NavDestinationState;
+
+/**
+ * @brief Define the state of Router Page.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** The Router Page is about to be created. */
+    ARKUI_ROUTER_PAGE_STATE_ABOUT_TO_APPEAR = 0,
+    /** The Router Page is about to be destroyed. */
+    ARKUI_ROUTER_PAGE_STATE_ABOUT_TO_DISAPPEAR = 1,
+    /** The Router Page show. */
+    ARKUI_ROUTER_PAGE_STATE_ON_SHOW = 2,
+    /** The Router Page hide. */
+    ARKUI_ROUTER_PAGE_STATE_ON_HIDE = 3,
+    /** The Router Page returns. */
+    ARKUI_ROUTER_PAGE_STATE_ON_BACK_PRESS = 4,
+} ArkUI_RouterPageState;
+
+/**
  * @brief 定义文本识别的实体类型。
  *
  * @since 12
@@ -1915,6 +1976,12 @@ typedef enum {
     ARKUI_ERROR_CODE_NODE_ADAPTER_EXIST_IN_HOST = 106105,
     /** Failed to add the adapter because the corresponding node already has a subnode. */
     ARKUI_ERROR_CODE_NODE_ADAPTER_CHILD_NODE_EXIST = 106106,
+    /** The index value is invalid. */
+    ARKUI_ERROR_CODE_NODE_INDEX_INVALID = 106200,
+    /**  Failed to query route navigation information. */
+    ARKUI_ERROR_CODE_GET_INFO_FAILED = 106201,
+    /** The buffer size is not large enough. */
+    ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR = 106202,
 } ArkUI_ErrorCode;
 
 /**

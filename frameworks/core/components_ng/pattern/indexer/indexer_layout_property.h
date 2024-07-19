@@ -41,6 +41,7 @@ public:
         auto value = MakeRefPtr<IndexerLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propArrayValue_ = CloneArrayValue();
+        value->propActualArrayValue_ = CloneActualArrayValue();
         value->propSelected_ = CloneSelected();
         value->propColor_ = CloneColor();
         value->propSelectedColor_ = CloneSelectedColor();
@@ -67,6 +68,7 @@ public:
     {
         LayoutProperty::Reset();
         ResetArrayValue();
+        ResetActualArrayValue();
         ResetSelected();
         ResetColor();
         ResetSelectedColor();
@@ -91,6 +93,7 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrayValue, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ActualArrayValue, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Selected, int32_t, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Color, Color, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedColor, Color, PROPERTY_UPDATE_NORMAL);

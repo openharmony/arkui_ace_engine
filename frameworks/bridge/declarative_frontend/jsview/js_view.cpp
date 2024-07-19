@@ -1120,8 +1120,6 @@ void JSViewPartialUpdate::JSGetProxiedItemRenderState(const JSCallbackInfo& info
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
     }
-
-    // TODO: Check this return value
     auto result = false;
 
     // set boolean return value to JS

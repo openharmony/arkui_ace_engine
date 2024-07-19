@@ -33,12 +33,19 @@ namespace OHOS::Ace::NG {
 class PipelineContext;
 class ListPositionMap;
 
+struct ListItemGroupLayoutInfo {
+    bool atStart = false;
+    bool atEnd = false;
+    float averageHeight = -1;
+};
+
 struct ListItemInfo {
     int32_t id;
     float startPos;
     float endPos;
     bool isGroup;
     bool isPressed = false;
+    std::optional<ListItemGroupLayoutInfo> groupInfo;
 };
 
 struct ListPredictLayoutParam {
@@ -163,7 +170,7 @@ public:
 
     float GetCurrentOffset() const
     {
-        return currentOffset_ - adjustOffset_;
+        return currentOffset_ + adjustOffset_;
     }
 
     void SetIsNeedCheckOffset(bool isNeedCheckOffset)
@@ -465,6 +472,8 @@ private:
     bool IsUniformHeightProbably();
     float CalculatePredictSnapEndPositionByIndex(uint32_t index, V2::ScrollSnapAlign scrollSnapAlign);
     void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper);
+    std::optional<ListItemGroupLayoutInfo> GetListItemGroupLayoutInfo(
+        const RefPtr<LayoutWrapper>& wrapper) const;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
@@ -507,6 +516,7 @@ private:
     bool mainSizeIsDefined_ = false;
     bool crossMatchChild_ = false;
     bool isSnapCenter_ = false;
+    bool isReverse_ = false;
     float contentMainSize_ = 0.0f;
     float prevContentMainSize_ = 0.0f;
     float paddingBeforeContent_ = 0.0f;

@@ -105,12 +105,14 @@ void AbilityComponentDelegate::Stop()
     if (platformTaskExecutor.IsRunOnCurrentThread()) {
         UnregisterEvent();
     } else {
-        platformTaskExecutor.PostTask([weak = WeakClaim(this)] {
-            auto delegate = weak.Upgrade();
-            if (delegate) {
-                delegate->UnregisterEvent();
-            }
-        }, "ArkUIAbilityComponentStop");
+        platformTaskExecutor.PostTask(
+            [weak = WeakClaim(this)] {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->UnregisterEvent();
+                }
+            },
+            "ArkUIAbilityComponentStop");
     }
 }
 
@@ -223,45 +225,47 @@ void AbilityComponentDelegate::CreatePluginResource(const WeakPtr<PipelineContex
         SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
     auto resRegister = pipelineContext->GetPlatformResRegister();
     auto weakRes = AceType::WeakClaim(AceType::RawPtr(resRegister));
-    platformTaskExecutor.PostTask([weak = WeakClaim(this), weakRes, rect] {
-        auto delegate = weak.Upgrade();
-        if (!delegate) {
-            return;
-        }
-        auto component = delegate->abilityComponent_;
-        if (!component) {
-            return;
-        }
-        auto resRegister = weakRes.Upgrade();
-        if (!resRegister) {
-            return;
-        }
-        auto context = delegate->context_.Upgrade();
-        if (!context) {
-            return;
-        }
+    platformTaskExecutor.PostTask(
+        [weak = WeakClaim(this), weakRes, rect] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            auto component = delegate->abilityComponent_;
+            if (!component) {
+                return;
+            }
+            auto resRegister = weakRes.Upgrade();
+            if (!resRegister) {
+                return;
+            }
+            auto context = delegate->context_.Upgrade();
+            if (!context) {
+                return;
+            }
 
-        delegate->id_ = CREATING_ID;
+            delegate->id_ = CREATING_ID;
 
-        std::stringstream paramStream;
-        paramStream << NTC_PARAM_ABILITY_COMPONENT << ABILITY_COMPONENT_PARAM_EQUALS << delegate->id_
-                    << ABILITY_COMPONENT_PARAM_AND << NTC_PARAM_LEFT << ABILITY_COMPONENT_PARAM_EQUALS
-                    << (int32_t)rect.Left() << ABILITY_COMPONENT_PARAM_AND << NTC_PARAM_TOP
-                    << ABILITY_COMPONENT_PARAM_EQUALS << (int32_t)rect.Top() << ABILITY_COMPONENT_PARAM_AND
-                    << NTC_PARAM_WIDTH << ABILITY_COMPONENT_PARAM_EQUALS << (int32_t)rect.Width()
-                    << ABILITY_COMPONENT_PARAM_AND << NTC_PARAM_HEIGHT << ABILITY_COMPONENT_PARAM_EQUALS
-                    << (int32_t)rect.Height() << ABILITY_COMPONENT_PARAM_AND << NTC_PARAM_WANT
-                    << ABILITY_COMPONENT_PARAM_EQUALS << component->GetWant();
+            std::stringstream paramStream;
+            paramStream << NTC_PARAM_ABILITY_COMPONENT << ABILITY_COMPONENT_PARAM_EQUALS << delegate->id_
+                        << ABILITY_COMPONENT_PARAM_AND << NTC_PARAM_LEFT << ABILITY_COMPONENT_PARAM_EQUALS
+                        << (int32_t)rect.Left() << ABILITY_COMPONENT_PARAM_AND << NTC_PARAM_TOP
+                        << ABILITY_COMPONENT_PARAM_EQUALS << (int32_t)rect.Top() << ABILITY_COMPONENT_PARAM_AND
+                        << NTC_PARAM_WIDTH << ABILITY_COMPONENT_PARAM_EQUALS << (int32_t)rect.Width()
+                        << ABILITY_COMPONENT_PARAM_AND << NTC_PARAM_HEIGHT << ABILITY_COMPONENT_PARAM_EQUALS
+                        << (int32_t)rect.Height() << ABILITY_COMPONENT_PARAM_AND << NTC_PARAM_WANT
+                        << ABILITY_COMPONENT_PARAM_EQUALS << component->GetWant();
 
-        std::string param = paramStream.str();
-        delegate->id_ = resRegister->CreateResource(ABILITY_COMPONENT_RESOURCE_NAME, param);
-        if (delegate->id_ == INVALID_ID) {
-            return;
-        }
-        delegate->state_ = State::CREATED;
-        delegate->hash_ = delegate->MakeResourceHash();
-        delegate->RegisterEvent();
-    }, "ArkUIAbilityComponentCreatePluginResource");
+            std::string param = paramStream.str();
+            delegate->id_ = resRegister->CreateResource(ABILITY_COMPONENT_RESOURCE_NAME, param);
+            if (delegate->id_ == INVALID_ID) {
+                return;
+            }
+            delegate->state_ = State::CREATED;
+            delegate->hash_ = delegate->MakeResourceHash();
+            delegate->RegisterEvent();
+        },
+        "ArkUIAbilityComponentCreatePluginResource");
 }
 
 void AbilityComponentDelegate::OnReady() const

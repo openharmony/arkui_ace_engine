@@ -303,7 +303,7 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
     if (!forward) {
         // measure appearing items when scrolling upwards
         auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
-        int32_t bound = std::min(oldStart, info_->endIndex_);
+        const int32_t bound = std::min(oldStart, info_->endIndex_);
         for (int32_t i = info_->startIndex_; i <= bound; ++i) {
             MeasureItem(props, i, info_->itemInfos_[i].crossIdx,
                 WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(i), i));

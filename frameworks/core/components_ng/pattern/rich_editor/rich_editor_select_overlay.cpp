@@ -81,6 +81,10 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
     CHECK_NULL_RETURN(pattern, false);
     auto host = pattern->GetHost();
     CHECK_NULL_RETURN(host, false);
+    if (IsUsingMouse()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "No need to show handle when using mouse");
+        return false;
+    }
 
     auto contentRect = pattern->GetTextContentRect();
     auto parentGlobalOffset = pattern->GetParentGlobalOffset();
@@ -405,8 +409,10 @@ std::optional<SelectOverlayInfo> RichEditorSelectOverlay::GetSelectOverlayInfo()
 bool RichEditorSelectOverlay::IsSingleHandleShow()
 {
     auto manager = GetManager<SelectContentOverlayManager>();
-    CHECK_NULL_RETURN(manager, false);
-    return manager->IsSingleHandle();
+    CHECK_NULL_RETURN(manager && manager->IsSingleHandle(), false);
+    auto overlayInfo = manager->GetSelectOverlayInfo();
+    CHECK_NULL_RETURN(overlayInfo, false);
+    return overlayInfo->secondHandle.isShow;
 }
 
 void RichEditorSelectOverlay::UpdateMenuOffset()
@@ -416,11 +422,18 @@ void RichEditorSelectOverlay::UpdateMenuOffset()
     manager->MarkInfoChange(DIRTY_SELECT_AREA | DIRTY_ALL_MENU_ITEM);
 }
 
-bool RichEditorSelectOverlay::IsHandlesShow()
+bool RichEditorSelectOverlay::IsBothHandlesShow()
 {
     auto manager = GetManager<SelectContentOverlayManager>();
-    CHECK_NULL_RETURN(manager, false);
-    return manager->IsHandlesShow();
+    CHECK_NULL_RETURN(manager && manager->IsHandlesShow(), false);
+    auto overlayInfo = manager->GetSelectOverlayInfo();
+    CHECK_NULL_RETURN(overlayInfo, false);
+    return overlayInfo->firstHandle.isShow && overlayInfo->secondHandle.isShow;
+}
+
+bool RichEditorSelectOverlay::IsHandleShow()
+{
+    return IsBothHandlesShow() || IsSingleHandleShow();
 }
 
 void RichEditorSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)

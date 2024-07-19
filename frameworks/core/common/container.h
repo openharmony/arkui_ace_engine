@@ -16,12 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONTAINER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONTAINER_H
 
+#include <atomic>
 #include <functional>
 #include <mutex>
 #include <unordered_map>
-#include <atomic>
 
 #include "interfaces/inner_api/ace/ace_forward_compatibility.h"
+#include "interfaces/inner_api/ace/constants.h"
 #include "interfaces/inner_api/ace/navigation_controller.h"
 
 #include "base/memory/ace_type.h"
@@ -33,6 +34,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/container_consts.h"
 #include "core/common/display_info.h"
 #include "core/common/frontend.h"
 #include "core/common/page_url_checker.h"
@@ -43,11 +45,10 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
-#include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_route.h"
+#include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/event/pointer_event.h"
 #include "core/pipeline/pipeline_base.h"
-#include "core/common/container_consts.h"
 
 namespace OHOS::Ace {
 
@@ -82,7 +83,8 @@ public:
     }
 
     virtual void DestroyView() {}
-    virtual bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node, uint32_t autoFillSessionId)
+    virtual bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
+        uint32_t autoFillSessionId, bool isNative = true)
     {
         return false;
     }
@@ -246,7 +248,7 @@ public:
     {
         return false;
     }
-    
+
     virtual void SetIsFormRender(bool isFormRender) {};
 
     const std::string& GetCardHapPath() const
@@ -298,6 +300,7 @@ public:
     static int32_t SafelyId();
     static int32_t CurrentId();
     static int32_t CurrentIdSafely();
+    static int32_t CurrentIdSafelyWithCheck();
     static RefPtr<Container> Current();
     static RefPtr<Container> CurrentSafely();
     static RefPtr<Container> CurrentSafelyWithCheck();
@@ -475,20 +478,30 @@ public:
     }
 
     virtual bool GetCurPointerEventInfo(
-        int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
+        int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
         int32_t& sourceTool, StopDragCallback&& stopDragCallback)
     {
         return false;
     }
 
+    virtual bool GetCurPointerEventSourceType(int32_t& sourceType)
+    {
+        return false;
+    }
+
     virtual bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
-        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId)
+        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true)
+    {
+        return false;
+    }
+
+    virtual bool IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType)
     {
         return false;
     }
 
     virtual bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish = nullptr,
-        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr)
+        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr, bool isNative = true)
     {
         return false;
     }
@@ -521,7 +534,10 @@ public:
     static bool GreatOrEqualAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
-        CHECK_NULL_RETURN(container, false);
+        if (!container) {
+            auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
+            return apiTargetVersion >= static_cast<int32_t>(version);
+        }
         auto apiTargetVersion = container->GetApiTargetVersion();
         return apiTargetVersion >= static_cast<int32_t>(version);
     }
@@ -540,6 +556,8 @@ public:
 
     template<ContainerType type>
     static int32_t GenerateId();
+    static void SetFontScale(int32_t instanceId, float fontScale);
+    static void SetFontWeightScale(int32_t instanceId, float fontScale);
 
     int32_t GetApiTargetVersion() const
     {
@@ -549,6 +567,16 @@ public:
     void SetApiTargetVersion(int32_t apiTargetVersion)
     {
         apiTargetVersion_ = apiTargetVersion % 1000;
+    }
+
+    UIContentType GetUIContentType() const
+    {
+        return uIContentType_;
+    }
+
+    void SetUIContentType(UIContentType uIContentType)
+    {
+        uIContentType_ = uIContentType;
     }
 
 private:
@@ -578,6 +606,8 @@ private:
     std::shared_ptr<NG::DistributedUI> distributedUI_;
     RefPtr<NG::AppBarView> appBar_;
     int32_t apiTargetVersion_ = 0;
+    // Define the type of UI Content, for example, Security UIExtension.
+    UIContentType uIContentType_ = UIContentType::UNDEFINED;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

@@ -38,6 +38,7 @@ ohos_shared_library("ui_service_mgr") {
   sources = [
     "$ace_root/adapter/ohos/services/uiservice/src/ui_service_mgr_client.cpp",
     "$ace_root/adapter/ohos/services/uiservice/src/ui_service_mgr_proxy.cpp",
+    "$ace_root/adapter/ohos/services/uiservice/src/ui_service_mgr_xcollie.cpp",
     "$ace_root/adapter/ohos/services/uiservice/src/ui_service_proxy.cpp",
     "$ace_root/adapter/ohos/services/uiservice/src/ui_service_stub.cpp",
   ]
@@ -60,6 +61,13 @@ ohos_shared_library("ui_service_mgr") {
     "samgr:samgr_proxy",
     "window_manager:libwm",
   ]
+
+  defines = []
+
+  if (uiservice_xcollie_enable) {
+    external_deps += [ "hicollie:libhicollie" ]
+    defines += [ "UISERVICE_MGR_XCOLLIE_ENABLE" ]
+  }
 
   subsystem_name = ace_engine_subsystem
   innerapi_tags = [ "platformsdk_indirect" ]

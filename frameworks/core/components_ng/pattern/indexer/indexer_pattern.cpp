@@ -14,8 +14,10 @@
  */
 
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
-#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/dump_log.h"
@@ -34,6 +36,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
+#include "core/components_ng/pattern/indexer/vibrator_impl.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
@@ -82,7 +85,7 @@ void IndexerPattern::OnModifyDone()
         removeBubble = !isPopup_;
     }
     // Remove bubble if auto-collapse mode switched on/off or if items count changed
-    removeBubble |= autoCollapseModeChanged || itemCountChanged;
+    removeBubble = removeBubble || autoCollapseModeChanged || itemCountChanged;
     if (removeBubble) {
         RemoveBubble();
     }
@@ -110,10 +113,10 @@ void IndexerPattern::InitArrayValue(bool& autoCollapseModeChanged, bool& itemCou
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(true);
     if (!isNewHeightCalculated_) {
-        auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(false);
-        autoCollapseModeChanged = autoCollapse != autoCollapse_;
-        autoCollapse_ = autoCollapse;
+        autoCollapseModeChanged = autoCollapse != lastAutoCollapse_;
+        lastAutoCollapse_ = autoCollapse;
         auto newArray = layoutProperty->GetArrayValue().value_or(std::vector<std::string>());
         bool arrayValueChanged = newArray.size() != fullArrayValue_.size() || newArray != fullArrayValue_;
         if (arrayValueChanged || autoCollapseModeChanged) {
@@ -123,7 +126,7 @@ void IndexerPattern::InitArrayValue(bool& autoCollapseModeChanged, bool& itemCou
     }
     auto propSelect = layoutProperty->GetSelected().value();
     if (fullArrayValue_.size() > 0) {
-        if (autoCollapse_) {
+        if (autoCollapse) {
             sharpItemCount_ = fullArrayValue_.at(0) == StringUtils::Str16ToStr8(INDEXER_STR_SHARP) ? 1 : 0;
             CollapseArrayValue();
             if ((lastCollapsingMode_ == IndexerCollapsingMode::SEVEN ||
@@ -183,7 +186,7 @@ bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     CHECK_NULL_RETURN(indexerLayoutAlgorithm, false);
     itemSizeRender_ = indexerLayoutAlgorithm->GetItemSizeRender();
     auto height = indexerLayoutAlgorithm->GetActualHeight();
-    if (actualIndexerHeight_ != height && autoCollapse_) {
+    if (actualIndexerHeight_ != height && lastAutoCollapse_) {
         actualIndexerHeight_ = height;
         isNewHeightCalculated_ = true;
         auto hostNode = dirty->GetHostNode();
@@ -219,13 +222,13 @@ void IndexerPattern::BuildArrayValueItems()
     for (auto indexerItem : arrayValue_) {
         arrayValueStrs.push_back(indexerItem.first);
     }
-    layoutProperty->UpdateArrayValue(arrayValueStrs);
+    layoutProperty->UpdateActualArrayValue(arrayValueStrs);
 }
 
 void IndexerPattern::BuildFullArrayValue()
 {
     arrayValue_.clear();
-    
+    autoCollapse_ = false;
     for (auto indexerLetter : fullArrayValue_) {
         arrayValue_.push_back(std::pair(indexerLetter, false));
     }
@@ -306,6 +309,7 @@ void IndexerPattern::ApplySevenPlusOneMode(int32_t fullArraySize)
         arrayValue_.push_back(std::pair(fullArrayValue_.at(lastIndex), false));
         lastPushedIndex = lastIndex;
     }
+    autoCollapse_ = true;
 }
 
 void IndexerPattern::ApplyFivePlusOneMode(int32_t fullArraySize)
@@ -341,6 +345,7 @@ void IndexerPattern::ApplyFivePlusOneMode(int32_t fullArraySize)
         arrayValue_.push_back(std::pair(fullArrayValue_.at(lastIndex), false));
         lastPushedIndex = lastIndex;
     }
+    autoCollapse_ = true;
 }
 
 int32_t IndexerPattern::GetAutoCollapseIndex(int32_t propSelect)
@@ -1427,8 +1432,8 @@ void IndexerPattern::UpdateBubbleListItem(
         textLayoutProperty->UpdateFontSize(popupItemTextFontSize);
         textLayoutProperty->UpdateFontWeight(popupItemTextFontWeight);
         textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateTextColor(i == popupClickedIndex_ ?
-            popupSelectedTextColor : popupUnselectedTextColor);
+        textLayoutProperty->UpdateTextColor(
+            static_cast<int32_t>(i) == popupClickedIndex_ ? popupSelectedTextColor : popupUnselectedTextColor);
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
         UpdateBubbleListItemContext(listNode, indexerTheme, i);
@@ -1456,13 +1461,14 @@ void IndexerPattern::UpdateBubbleListItemContext(
         listItemContext->UpdateBorderRadius({ popupItemRadius, popupItemRadius, popupItemRadius, popupItemRadius });
         auto popupItemBackground =
             paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupUnclickedBgAreaColor());
-        listItemContext->UpdateBackgroundColor(
-            pos == popupClickedIndex_ ? (indexerTheme->GetPopupClickedBgAreaColor()) : popupItemBackground);
+        listItemContext->UpdateBackgroundColor(static_cast<int32_t>(pos) == popupClickedIndex_
+                                                   ? (indexerTheme->GetPopupClickedBgAreaColor())
+                                                   : popupItemBackground);
     } else {
         auto popupItemBackground =
             paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupBackgroundColor());
         listItemContext->UpdateBackgroundColor(
-            pos == popupClickedIndex_ ? Color(POPUP_LISTITEM_CLICKED_BG) : popupItemBackground);
+            static_cast<int32_t>(pos) == popupClickedIndex_ ? Color(POPUP_LISTITEM_CLICKED_BG) : popupItemBackground);
     }
 }
 
@@ -1573,6 +1579,9 @@ void IndexerPattern::OnListItemClick(int32_t index)
     auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
     if (onPopupSelected) {
         onPopupSelected(index);
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPopupSelected");
+#endif
     }
     ChangeListItemsSelectedStyle(index);
 }

@@ -206,7 +206,6 @@ void GridRowLayoutAlgorithm::CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper
             if (alignSelf == FlexAlign::AUTO) {
                 alignSelf = gridRowAlignItem;
             }
-
         } else {
             alignSelf = gridRowAlignItem;
         }
@@ -302,6 +301,7 @@ void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 offsetWidth = ((newLineOffset.span + newLineOffset.offset) * columnUnitWidth_ +
                                ((newLineOffset.span + newLineOffset.offset) - 1) * gutterInDouble_.first);
                 offsetWidth = width - offsetWidth;
+                paddingOffset = { -padding.right.value_or(0.0f), padding.top.value_or(0.0f) };
             } else { // V2::GridRowDirection::Row
                 offsetWidth = newLineOffset.offset * columnUnitWidth_ + newLineOffset.offset * gutterInDouble_.first;
             }

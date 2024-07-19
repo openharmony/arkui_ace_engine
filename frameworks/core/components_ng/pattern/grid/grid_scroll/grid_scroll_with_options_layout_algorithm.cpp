@@ -142,13 +142,14 @@ std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartA
         }
         int32_t crossStart = -1;
         auto iter = options.irregularIndexes.upper_bound(itemIndex);
+        auto crossCount = static_cast<int32_t>(crossCount_);
         if (iter == options.irregularIndexes.end()) {
-            crossStart = (itemIndex - (*(options.irregularIndexes.rbegin()) + 1)) % crossCount_;
+            crossStart = (itemIndex - (*(options.irregularIndexes.rbegin()) + 1)) % crossCount;
         } else {
             if (iter != options.irregularIndexes.begin()) {
-                crossStart = (itemIndex - (*(--iter) + 1)) % crossCount_;
+                crossStart = (itemIndex - (*(--iter) + 1)) % crossCount;
             } else {
-                crossStart = itemIndex % crossCount_;
+                crossStart = itemIndex % crossCount;
             }
         }
         return std::make_pair(crossStart, 1);
@@ -228,10 +229,10 @@ std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartA
 
         auto crossSpan = options.getSizeByIndex(index).GetCrossSize(gridLayoutInfo_.axis_);
         ResetInvalidCrossSpan(crossCount_, crossSpan);
-        auto irregularStart = (sum + index - lastIndex - 1) % crossCount_;
+        auto irregularStart = (sum + index - lastIndex - 1) % static_cast<int32_t>(crossCount_);
         // put it into next line
         if (irregularStart + crossSpan > crossCount_) {
-            sum += (crossCount_ - irregularStart);
+            sum += (static_cast<int32_t>(crossCount_) - irregularStart);
         }
         sum += (index - lastIndex - 1);
         sum += crossSpan;
@@ -239,12 +240,12 @@ std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartA
         gridLayoutInfo_.irregularItemsPosition_.emplace(index, sum);
     }
     sum += ((itemIndex > lastIndex) ? (itemIndex - lastIndex - 1) : 0);
-    auto crossStart = sum % crossCount_;
+    auto crossStart = sum % static_cast<int32_t>(crossCount_);
     bool isRegularItem = (options.irregularIndexes.find(itemIndex) == options.irregularIndexes.end());
     auto crossSpan = isRegularItem ? 1 : options.getSizeByIndex(itemIndex).GetCrossSize(gridLayoutInfo_.axis_);
     ResetInvalidCrossSpan(crossCount_, crossSpan);
     if (crossStart + crossSpan > crossCount_) {
-        sum += (crossCount_ - crossStart);
+        sum += (static_cast<int32_t>(crossCount_) - crossStart);
         crossStart = 0;
     }
     if (!isRegularItem) {

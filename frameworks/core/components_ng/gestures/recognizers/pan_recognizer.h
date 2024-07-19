@@ -116,7 +116,7 @@ private:
     bool CalculateTruthFingers(bool isDirectionUp) const;
     void UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end = false);
     void UpdateAxisPointInVelocityTracker(const AxisEvent& event, bool end = false);
-    void UpdateTouchEventInfo(const TouchEvent& event);
+    void UpdateTouchEventInfo(const TouchEvent& event, bool updateVelocity);
     Offset GetRawGlobalLocation(int32_t postEventNodeId);
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
@@ -133,6 +133,8 @@ private:
     void OnSucceedCancel() override;
 
     void AddOverTimeTrace();
+
+    void DispatchPanStartedToPerf(const TouchEvent& event);
 
     const TouchRestrict& GetTouchRestrict() const
     {

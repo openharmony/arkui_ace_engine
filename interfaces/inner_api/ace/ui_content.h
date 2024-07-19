@@ -418,6 +418,8 @@ public:
     virtual void PreLayout() {};
     
     virtual void SetStatusBarItemColor(uint32_t color) {};
+
+    virtual void SetForceSplitEnable(bool isForceSplit) {};
 };
 
 } // namespace OHOS::Ace

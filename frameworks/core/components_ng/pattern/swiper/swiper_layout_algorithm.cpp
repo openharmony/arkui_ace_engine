@@ -140,6 +140,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     // calculate main size.
     auto contentConstraint = swiperLayoutProperty->GetContentLayoutConstraint().value();
+    swiperLayoutProperty->ResetIgnorePrevMarginAndNextMargin();
     auto isSingleCase = CheckIsSingleCase(swiperLayoutProperty);
     OptionalSizeF contentIdealSize;
     if (isSingleCase) {
@@ -223,7 +224,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else if (itemPositionInAnimation_.empty()) {
         int32_t startIndex = GetLoopIndex(GetStartIndex());
         int32_t endIndex = GetLoopIndex(GetEndIndex());
-        CheckCachedItem(startIndex, endIndex);
+        CheckCachedItem(startIndex, endIndex, layoutWrapper);
         // startIndex maybe target to invalid blank items in group mode, need to be adjusted.
         startIndex = startIndex < realTotalCount_ ? startIndex : 0;
         endIndex = std::min(endIndex, realTotalCount_ - 1);
@@ -238,7 +239,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         while (endIndex - 1 >= 0 && itemPositionInAnimation_.find(endIndex - 1) != itemPositionInAnimation_.end()) {
             endIndex--;
         }
-        CheckCachedItem(endIndex, startIndex);
+        CheckCachedItem(endIndex, startIndex, layoutWrapper);
         layoutWrapper->SetActiveChildRange(endIndex, startIndex, cachedCount_, cachedCount_);
     }
 
@@ -311,18 +312,31 @@ void SwiperLayoutAlgorithm::MeasureTabsCustomAnimation(LayoutWrapper* layoutWrap
     auto contentConstraint = layoutProperty->GetContentLayoutConstraint().value();
     auto contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis, MeasureType::MATCH_PARENT_MAIN_AXIS);
     auto childLayoutConstraint = SwiperUtils::CreateChildConstraint(layoutProperty, contentIdealSize, false);
+    auto childCrossSize = 0.0f;
 
     auto currentIndex = layoutProperty->GetIndex().value_or(0);
     auto currentIndexWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
     CHECK_NULL_VOID(currentIndexWrapper);
     currentIndexWrapper->Measure(childLayoutConstraint);
+    auto currentIndexGeometryNode = currentIndexWrapper->GetGeometryNode();
+    if (currentIndexGeometryNode) {
+        childCrossSize = std::max(childCrossSize, currentIndexGeometryNode->GetMarginFrameSize().CrossSize(axis));
+    }
 
     if (customAnimationToIndex_) {
         auto toIndexWrapper = layoutWrapper->GetOrCreateChildByIndex(customAnimationToIndex_.value());
         CHECK_NULL_VOID(toIndexWrapper);
         toIndexWrapper->Measure(childLayoutConstraint);
+        auto toIndexGeometryNode = toIndexWrapper->GetGeometryNode();
+        if (toIndexGeometryNode) {
+            childCrossSize = std::max(childCrossSize, toIndexGeometryNode->GetMarginFrameSize().CrossSize(axis));
+        }
     }
 
+    auto crossSize = contentIdealSize.CrossSize(axis);
+    if ((crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) || !crossSize.has_value()) {
+        contentIdealSize.SetCrossSize(childCrossSize, axis);
+    }
     layoutWrapper->GetGeometryNode()->SetFrameSize(contentIdealSize.ConvertToSizeT());
 
     std::set<int32_t> removeIndexs;
@@ -762,7 +776,7 @@ void SwiperLayoutAlgorithm::SetInactive(
             continue;
         }
         if (LessOrEqual(
-                pos->second.endPos, prevMargin_ != 0.0f ? startMainPos - prevMargin_ - spaceWidth_ : startMainPos) ||
+            pos->second.endPos, prevMargin_ != 0.0f ? startMainPos - prevMargin_ - spaceWidth_ : startMainPos) ||
             GreatOrEqual(
                 pos->second.startPos, nextMargin_ != 0.0f ? endMainPos + nextMargin_ + spaceWidth_ : endMainPos)) {
             removeIndexes.emplace_back(pos->first);
@@ -915,6 +929,18 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             LayoutItem(layoutWrapper, axis, paddingOffset, pos);
         }
     }
+    LayoutSwiperIndicator(layoutWrapper, swiperLayoutProperty, padding);
+    CaptureLayout(layoutWrapper);
+}
+
+void SwiperLayoutAlgorithm::LayoutSwiperIndicator(
+    LayoutWrapper* layoutWrapper, const RefPtr<SwiperLayoutProperty>& swiperLayoutProperty,
+    const PaddingPropertyF& padding)
+{
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
 
     // Layout swiper indicator
     if (swiperLayoutProperty->GetShowIndicatorValue(true)) {
@@ -939,8 +965,6 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
         }
     }
-
-    CaptureLayout(layoutWrapper);
 }
 
 void SwiperLayoutAlgorithm::LayoutItem(
@@ -1268,8 +1292,7 @@ void SwiperLayoutAlgorithm::ArrowLayout(
                 static_cast<float>(theme->GetIndicatorDotItemSpace().ConvertToPx()) * (itemCount - 1);
             auto indicatorWidth = indicatorPadding + allPointDiameterSum + allPointSpaceSum + indicatorPadding;
             normalArrowMargin = ((axis == Axis::HORIZONTAL ? indicatorFrameSize.Width() : indicatorFrameSize.Height()) -
-                                    indicatorWidth) *
-                                0.5f;
+                                    indicatorWidth) * 0.5f;
         }
     }
     auto isLeftArrow = arrowWrapper->GetHostTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG;
@@ -1299,7 +1322,7 @@ void SwiperLayoutAlgorithm::ArrowLayout(
             arrowOffset.SetX(padding.left.value_or(0.0f));
         }
         if (GreatOrEqual(
-                arrowOffset.GetX() + arrowFrameSize.Width(), swiperFrameSize.Width() - padding.right.value_or(0.0f))) {
+            arrowOffset.GetX() + arrowFrameSize.Width(), swiperFrameSize.Width() - padding.right.value_or(0.0f))) {
             arrowOffset.SetX(swiperFrameSize.Width() - arrowFrameSize.Width() - padding.right.value_or(0.0f));
         }
         arrowOffset.SetY(indicatorFrameRect.Top() + (indicatorFrameSize.Height() - arrowFrameSize.Height()) * 0.5f);
@@ -1335,7 +1358,7 @@ void SwiperLayoutAlgorithm::ArrowLayout(
             arrowOffset.SetY(padding.top.value_or(0.0f));
         }
         if (GreatOrEqual(arrowOffset.GetY() + arrowFrameSize.Height(),
-                swiperFrameSize.Height() - padding.bottom.value_or(0.0f))) {
+            swiperFrameSize.Height() - padding.bottom.value_or(0.0f))) {
             arrowOffset.SetY(swiperFrameSize.Height() - arrowFrameSize.Height() - padding.bottom.value_or(0.0f));
         }
     } else {
@@ -1394,8 +1417,11 @@ bool SwiperLayoutAlgorithm::IsNormalItem(const RefPtr<LayoutWrapper>& wrapper) c
     return true;
 }
 
-void SwiperLayoutAlgorithm::CheckCachedItem(int32_t startIndex, int32_t endIndex)
+void SwiperLayoutAlgorithm::CheckCachedItem(int32_t startIndex, int32_t endIndex, LayoutWrapper* layoutWrapper)
 {
+    if (!layoutWrapper) {
+        return;
+    }
     if (startIndex <= endIndex) {
         for (auto i = startIndex; i <= endIndex; ++i) {
             activeItems_.insert(i);
@@ -1410,29 +1436,24 @@ void SwiperLayoutAlgorithm::CheckCachedItem(int32_t startIndex, int32_t endIndex
     }
     auto cachedCount = cachedCount_;
     while (cachedCount > 0) {
-        --startIndex;
-        if (!isLoop_ && startIndex < 0) {
-            break;
+        if (isLoop_) {
+            startIndex = GetLoopIndex(startIndex - 1);
+            endIndex = GetLoopIndex(endIndex + 1);
+        } else {
+            startIndex = startIndex >= 0 ? startIndex - 1 : startIndex;
+            endIndex = endIndex < totalItemCount_ ? endIndex + 1 : endIndex;
         }
-        if (isLoop_ && startIndex < 0) {
-            startIndex = GetLoopIndex(startIndex);
+        if (startIndex >= 0) {
+            if (activeItems_.find(startIndex) == activeItems_.end()
+                && layoutWrapper->GetChildByIndex(startIndex) == nullptr) {
+                cachedItems_.insert(startIndex);
+            }
         }
-        if (activeItems_.find(startIndex) == activeItems_.end()) {
-            cachedItems_.insert(startIndex);
-        }
-        --cachedCount;
-    }
-    cachedCount = cachedCount_;
-    while (cachedCount > 0) {
-        ++endIndex;
-        if (!isLoop_ && endIndex >= totalItemCount_) {
-            break;
-        }
-        if (isLoop_ && endIndex >= totalItemCount_) {
-            endIndex = GetLoopIndex(endIndex);
-        }
-        if (activeItems_.find(endIndex) == activeItems_.end()) {
-            cachedItems_.insert(endIndex);
+        if (endIndex < totalItemCount_) {
+            if (activeItems_.find(endIndex) == activeItems_.end()
+                && layoutWrapper->GetChildByIndex(endIndex) == nullptr) {
+                cachedItems_.insert(endIndex);
+            }
         }
         --cachedCount;
     }

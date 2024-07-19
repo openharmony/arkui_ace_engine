@@ -69,7 +69,9 @@ inline std::wstring ToWstring(const std::string& str)
     if (str == DEFAULT_STRING) {
         return DEFAULT_WSTRING;
     }
-#ifdef WINDOWS_PLATFORM
+#ifdef PREVIEW
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> convert(DEFAULT_STRING, DEFAULT_WSTRING);
+#elif WINDOWS_PLATFORM
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> convert(DEFAULT_STRING, DEFAULT_WSTRING);
 #else
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> convert(DEFAULT_STRING, DEFAULT_WSTRING);
@@ -88,7 +90,9 @@ inline std::string ToString(const std::wstring& str)
     if (str == DEFAULT_WSTRING) {
         return DEFAULT_STRING;
     }
-#ifdef WINDOWS_PLATFORM
+#ifdef PREVIEW
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> convert(DEFAULT_STRING);
+#elif WINDOWS_PLATFORM
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> convert(DEFAULT_STRING);
 #else
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> convert(DEFAULT_STRING);

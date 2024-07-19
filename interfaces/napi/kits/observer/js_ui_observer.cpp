@@ -611,17 +611,18 @@ napi_value ObserverProcess::ProcessDensityUnRegister(napi_env env, napi_callback
 
 napi_value ObserverProcess::ProcessDrawCommandSendRegister(napi_env env, napi_callback_info info)
 {
-    GET_PARAMS(env, info, 3);
+    GET_PARAMS(env, info, 3); // 3: Param Size Three
 
-    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
+    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) { // 2: Param Size Two
         auto listener = std::make_shared<UIObserverListener>(env, argv[1]);
         int32_t instanceId = ContainerScope::CurrentId();
         UIObserver::RegisterDrawCallback(instanceId, listener);
     }
-    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
+    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && // 3: Param Size Three
+        MatchValueType(env, argv[2], napi_function)) { // 2: Param Index Two
         auto context = argv[1];
         if (context) {
-            auto listener = std::make_shared<UIObserverListener>(env, argv[2]);
+            auto listener = std::make_shared<UIObserverListener>(env, argv[2]); // 2: Param Index Two
             auto uiContextInstanceId = GetUIContextInstanceId(env, context);
             UIObserver::RegisterDrawCallback(uiContextInstanceId, listener);
         }
@@ -632,14 +633,14 @@ napi_value ObserverProcess::ProcessDrawCommandSendRegister(napi_env env, napi_ca
 
 napi_value ObserverProcess::ProcessDrawCommandSendUnRegister(napi_env env, napi_callback_info info)
 {
-    GET_PARAMS(env, info, 3);
+    GET_PARAMS(env, info, 3); // 3: Param Size Three
 
     if (argc == 1) {
         int32_t instanceId = ContainerScope::CurrentId();
         UIObserver::UnRegisterDrawCallback(instanceId, nullptr);
     }
 
-    if (argc == 2 && MatchValueType(env, argv[1], napi_object)) {
+    if (argc == 2 && MatchValueType(env, argv[1], napi_object)) { // 2: Param Size Two
         napi_value context = argv[1];
         if (context) {
             auto uiContextInstanceId = GetUIContextInstanceId(env, context);
@@ -647,16 +648,17 @@ napi_value ObserverProcess::ProcessDrawCommandSendUnRegister(napi_env env, napi_
         }
     }
 
-    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
+    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) { // 2: Param Size Two
         int32_t instanceId = ContainerScope::CurrentId();
         UIObserver::UnRegisterDrawCallback(instanceId, argv[1]);
     }
 
-    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
+    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && // 3: Param Size Three
+        MatchValueType(env, argv[2], napi_function)) { // 2: Param Index Two
         napi_value context = argv[1];
         if (context) {
             auto uiContextInstanceId = GetUIContextInstanceId(env, context);
-            UIObserver::UnRegisterDrawCallback(uiContextInstanceId, argv[2]);
+            UIObserver::UnRegisterDrawCallback(uiContextInstanceId, argv[2]); // 2: Param Index Two
         }
     }
 
@@ -666,17 +668,18 @@ napi_value ObserverProcess::ProcessDrawCommandSendUnRegister(napi_env env, napi_
 
 napi_value ObserverProcess::ProcessLayoutDoneRegister(napi_env env, napi_callback_info info)
 {
-    GET_PARAMS(env, info, 3);
+    GET_PARAMS(env, info, 3); // 3: Param Size Three
 
-    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
+    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) { // 2: Param Size Two
         auto listener = std::make_shared<UIObserverListener>(env, argv[1]);
         int32_t instanceId = ContainerScope::CurrentId();
         UIObserver::RegisterLayoutCallback(instanceId, listener);
     }
-    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
+    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && // 3: Param Size Three
+        MatchValueType(env, argv[2], napi_function)) { // 2: Param Index Two
         auto context = argv[1];
         if (context) {
-            auto listener = std::make_shared<UIObserverListener>(env, argv[2]);
+            auto listener = std::make_shared<UIObserverListener>(env, argv[2]); // 2: Param Index Two
             auto uiContextInstanceId = GetUIContextInstanceId(env, context);
             UIObserver::RegisterLayoutCallback(uiContextInstanceId, listener);
         }
@@ -687,14 +690,14 @@ napi_value ObserverProcess::ProcessLayoutDoneRegister(napi_env env, napi_callbac
 
 napi_value ObserverProcess::ProcessLayoutDoneUnRegister(napi_env env, napi_callback_info info)
 {
-    GET_PARAMS(env, info, 3);
+    GET_PARAMS(env, info, 3); // 3: Param Size Three
 
     if (argc == 1) {
         int32_t instanceId = ContainerScope::CurrentId();
         UIObserver::UnRegisterLayoutCallback(instanceId, nullptr);
     }
 
-    if (argc == 2 && MatchValueType(env, argv[1], napi_object)) {
+    if (argc == 2 && MatchValueType(env, argv[1], napi_object)) { // 2: Param Size Two
         napi_value context = argv[1];
         if (context) {
             auto uiContextInstanceId = GetUIContextInstanceId(env, context);
@@ -702,16 +705,17 @@ napi_value ObserverProcess::ProcessLayoutDoneUnRegister(napi_env env, napi_callb
         }
     }
 
-    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
+    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) { // 2: Param Size Two
         int32_t instanceId = ContainerScope::CurrentId();
         UIObserver::UnRegisterLayoutCallback(instanceId, argv[1]);
     }
 
-    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
+    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && // 3: Param Size Three
+        MatchValueType(env, argv[2], napi_function)) { // 2: Param Index Two
         napi_value context = argv[1];
         if (context) {
             auto uiContextInstanceId = GetUIContextInstanceId(env, context);
-            UIObserver::UnRegisterLayoutCallback(uiContextInstanceId, argv[2]);
+            UIObserver::UnRegisterLayoutCallback(uiContextInstanceId, argv[2]); // 2: Param Index Two
         }
     }
 

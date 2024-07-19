@@ -213,7 +213,7 @@ void MutableSpanString::ApplyReplaceStringToSpanBase(
                 spans.insert(it, newSpan);
                 continue;
             }
-            auto newEnd = (op != SpanStringOperation::REMOVE) ? std::max(intersection->second, spanEnd) : start;
+            auto newEnd = (op != SpanStringOperation::REMOVE) ? std::max(end, spanEnd) : start;
             if (intersection->first > spanStart) {
                 (*it)->UpdateEndIndex(newEnd);
             } else {

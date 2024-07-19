@@ -101,6 +101,10 @@ public:
         navigationMode_ = navigationMode;
     }
 
+    bool IsFoldStateChange();
+
+    void UpdateFoldState();
+
     void SetNavigationStack(const RefPtr<NavigationStack>& navigationStack);
 
     const RefPtr<NavigationStack>& GetNavigationStack()
@@ -383,6 +387,11 @@ public:
     bool IsTopNavDestination(const RefPtr<UINode>& node) const;
     void TryRestoreSystemBarStyle(const RefPtr<WindowManager>& windowManager);
 
+    bool IsFinishInteractiveAnimation() const
+    {
+        return isFinishInteractiveAnimation_;
+    }
+
     bool IsCurTopNewInstance() const
     {
         return isCurTopNewInstance_;
@@ -500,7 +509,9 @@ private:
     bool isInDividerDrag_ = false;
     bool isDividerDraggable_ = true;
     bool isAnimated_ = false;
+    FoldStatus currentfoldStatus_ = FoldStatus::UNKNOWN;  // only used for mode-switch animation
     bool isReplace_ = false;
+    bool isFinishInteractiveAnimation_ = true;
     int32_t lastPreIndex_ = false;
     std::shared_ptr<NavigationController> navigationController_;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;

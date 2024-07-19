@@ -26,6 +26,7 @@ class JSListItem : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& args);
+    static void Pop();
     static void CreateForPartialUpdate(const JSCallbackInfo& args);
     static void SetSticky(int32_t sticky);
     static void SetEditable(const JSCallbackInfo& args);

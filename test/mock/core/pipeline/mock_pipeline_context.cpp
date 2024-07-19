@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/pipeline/pipeline_base.h"
@@ -29,6 +30,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double DISPLAY_WIDTH = 720;
 constexpr double DISPLAY_HEIGHT = 1280;
+static std::list<PipelineContext::PredictTask> predictTasks_;
+static Rect windowRect_;
 } // namespace
 
 RefPtr<MockPipelineContext> MockPipelineContext::pipeline_;
@@ -43,6 +46,7 @@ void MockPipelineContext::SetUp()
     pipeline_->rootWidth_ = DISPLAY_WIDTH;
     pipeline_->rootHeight_ = DISPLAY_HEIGHT;
     pipeline_->SetupRootElement();
+    windowRect_ = { 0., 0., NG::DISPLAY_WIDTH, NG::DISPLAY_HEIGHT };
 }
 
 void MockPipelineContext::TearDown()
@@ -51,6 +55,7 @@ void MockPipelineContext::TearDown()
         pipeline_->Destroy();
         pipeline_ = nullptr;
     }
+    predictTasks_.clear();
 }
 
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
@@ -62,6 +67,11 @@ void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
 {
     rootWidth_ = rootWidth;
     rootHeight_ = rootHeight;
+}
+
+void MockPipelineContext::SetCurrentWindowRect(Rect rect)
+{
+    windowRect_ = rect;
 }
 // mock_pipeline_context =======================================================
 
@@ -124,6 +134,8 @@ RefPtr<PipelineContext> PipelineContext::GetContextByContainerId(int32_t /* cont
 
 void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId) {}
 
+void PipelineContext::RemoveWindowFocusChangedCallback(int32_t nodeId) {}
+
 void PipelineContext::SetupRootElement()
 {
     rootNode_ = FrameNode::CreateFrameNodeWithTree(
@@ -152,8 +164,42 @@ void PipelineContext::SetupRootElement()
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
 }
 
+void PipelineContext::SetupSubRootElement()
+{
+    CHECK_RUN_ON(UI);
+    appBgColor_ = Color::TRANSPARENT;
+    rootNode_ = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<RootPattern>());
+    rootNode_->SetHostRootId(GetInstanceId());
+    rootNode_->SetHostPageId(-1);
+    rootNode_->SetActive(true);
+    CalcSize idealSize { CalcLength(rootWidth_), CalcLength(rootHeight_) };
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    layoutConstraint.maxSize = idealSize;
+    rootNode_->UpdateLayoutConstraint(layoutConstraint);
+    auto rootFocusHub = rootNode_->GetOrCreateFocusHub();
+    rootFocusHub->SetFocusType(FocusType::SCOPE);
+    rootFocusHub->SetFocusable(true);
+    window_->SetRootFrameNode(rootNode_);
+    rootNode_->AttachToMainTree(false, this);
+    accessibilityManagerNG_ = MakeRefPtr<AccessibilityManagerNG>();
+    // the subwindow for overlay not need stage
+    stageManager_ = ViewAdvancedRegister::GetInstance()->GenerateStageManager(nullptr);
+    if (!stageManager_) {
+        stageManager_ = MakeRefPtr<StageManager>(nullptr);
+    }
+    overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
+    fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
+    selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
+    dragDropManager_ = MakeRefPtr<DragDropManager>();
+    focusManager_ = GetOrCreateFocusManager();
+    postEventManager_ = MakeRefPtr<PostEventManager>();
+}
+
 void PipelineContext::SendEventToAccessibilityWithNode(
-    const AccessibilityEvent& accessibilityEvent, const RefPtr<FrameNode>& node) {}
+    const AccessibilityEvent& accessibilityEvent, const RefPtr<FrameNode>& node)
+{}
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe) {}
 
@@ -163,16 +209,25 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
 
+void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
+
 void PipelineContext::OnMouseEvent(const MouseEvent& event) {}
 
 void PipelineContext::FlushTouchEvents() {}
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event) {}
 
-void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
-    const RefPtr<NG::FrameNode>& node) {}
+void PipelineContext::OnDragEvent(
+    const PointerEvent& pointerEvent, DragEventAction action, const RefPtr<NG::FrameNode>& node)
+{}
 
-void PipelineContext::OnIdle(int64_t deadline) {}
+void PipelineContext::OnIdle(int64_t deadline)
+{
+    const auto tasks(std::move(predictTasks_));
+    for (const auto& task : tasks) {
+        task(deadline, false);
+    }
+}
 
 void PipelineContext::Destroy()
 {
@@ -260,7 +315,10 @@ void PipelineContext::FlushRequestFocus() {}
 
 void PipelineContext::CheckNeedUpdateBackgroundColor(Color& color) {}
 
-bool PipelineContext::CheckNeedDisableUpdateBackgroundImage() { return false; }
+bool PipelineContext::CheckNeedDisableUpdateBackgroundImage()
+{
+    return false;
+}
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
@@ -405,7 +463,10 @@ void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)
     buildFinishCallbacks_.emplace_back(std::move(callback));
 }
 
-void PipelineContext::AddPredictTask(PredictTask&& task) {}
+void PipelineContext::AddPredictTask(PredictTask&& task)
+{
+    predictTasks_.emplace_back(task);
+}
 
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask)
 {
@@ -444,7 +505,7 @@ void PipelineContext::DumpPipelineInfo() const {}
 void PipelineContext::AddVisibleAreaChangeNode(int32_t nodeId) {}
 
 void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, const std::vector<double>& ratio,
-    const VisibleRatioCallback& callback, bool isUserCallback)
+    const VisibleRatioCallback& callback, bool isUserCallback, bool isCalculateInnerClip)
 {
     CHECK_NULL_VOID(callback);
     callback(false, 0.0);
@@ -453,7 +514,7 @@ void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, co
 
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 
-void PipelineContext::HandleVisibleAreaChangeEvent() {}
+void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp) {}
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isBypass)
 {
@@ -484,8 +545,14 @@ void PipelineContext::AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigati
 
 void PipelineContext::RemoveNavigationNode(int32_t pageId, int32_t nodeId) {}
 void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow) {}
-void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) {};
-void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {};
+void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea)
+{
+    safeAreaManager_->UpdateSystemSafeArea(systemSafeArea);
+}
+void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
+{
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea);
+}
 void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) {};
 void PipelineContext::SetEnableKeyBoardAvoidMode(bool value) {};
 bool PipelineContext::IsEnableKeyBoardAvoidMode()
@@ -601,10 +668,14 @@ void PipelineContext::FlushFocusView()
 
 void PipelineContext::SetOverlayNodePositions(std::vector<Ace::RectF> rects) {}
 
-std::vector<Ace::RectF> PipelineContext::GetOverlayNodePositions() { return {}; }
+std::vector<Ace::RectF> PipelineContext::GetOverlayNodePositions()
+{
+    return {};
+}
 
 void PipelineContext::RegisterOverlayNodePositionsUpdateCallback(
-    const std::function<void(std::vector<Ace::RectF>)>&& callback) {}
+    const std::function<void(std::vector<Ace::RectF>)>&& callback)
+{}
 
 void PipelineContext::TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects) {}
 
@@ -740,11 +811,11 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
 
 void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, const std::string& name, TaskExecutor::TaskType type) {}
 
-void PipelineBase::PostAsyncEvent(
-    const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type) {}
+void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type)
+{}
 
-void PipelineBase::PostSyncEvent(
-    const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type) {}
+void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type)
+{}
 
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {
@@ -752,10 +823,10 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 }
 
 #ifdef WINDOW_SCENE_SUPPORTED
-    const RefPtr<UIExtensionManager>& GetUIExtensionManager()
-    {
-        return AceType::MakeRefPtr<UIExtensionManager>();
-    }
+const RefPtr<UIExtensionManager>& GetUIExtensionManager()
+{
+    return AceType::MakeRefPtr<UIExtensionManager>();
+}
 #endif
 
 bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
@@ -786,7 +857,7 @@ void PipelineBase::RequestFrame() {}
 
 Rect PipelineBase::GetCurrentWindowRect() const
 {
-    return { 0., 0., NG::DISPLAY_WIDTH, NG::DISPLAY_HEIGHT };
+    return NG::windowRect_;
 }
 
 void PipelineBase::SetTextFieldManager(const RefPtr<ManagerInterface>& manager)
@@ -809,8 +880,6 @@ void PipelineBase::SetFontScale(float fontScale)
     fontScale_ = fontScale;
 }
 
-void PipelineBase::SetUiDvsyncSwitch(bool on)
-{
-}
+void PipelineBase::SetUiDvsyncSwitch(bool on) {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

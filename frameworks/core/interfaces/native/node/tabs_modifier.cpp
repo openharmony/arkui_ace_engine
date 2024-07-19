@@ -288,6 +288,20 @@ void ResetTabClip(ArkUINodeHandle node)
     TabsModelNG::SetClipEdge(frameNode, false);
 }
 
+void SetTabEdgeEffect(ArkUINodeHandle node, ArkUI_Uint32 edgeEffect)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetEdgeEffect(frameNode, edgeEffect);
+}
+
+void ResetTabEdgeEffect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetEdgeEffect(frameNode, NUM_0);
+}
+
 void SetTabWidthAuto(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -368,6 +382,8 @@ const ArkUITabsModifier* GetTabsModifier()
         ResetAnimationDuration,
         SetTabClip,
         ResetTabClip,
+        SetTabEdgeEffect,
+        ResetTabEdgeEffect,
         SetTabWidthAuto,
         ResetTabWidthAuto,
         SetTabHeightAuto,

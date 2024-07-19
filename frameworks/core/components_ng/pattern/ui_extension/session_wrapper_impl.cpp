@@ -276,7 +276,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
         wantPtr->SetParam(UI_EXTENSION_TYPE_KEY, EMBEDDED_UI);
     }
     isNotifyOccupiedAreaChange_ = want.GetBoolParam(OCCUPIED_AREA_CHANGE_KEY, true);
-    UIEXT_LOGI("Want param isNotifyOccupiedAreaChange is %{public}d.", isNotifyOccupiedAreaChange_);
+    UIEXT_LOGD("Want param isNotifyOccupiedAreaChange is %{public}d.", isNotifyOccupiedAreaChange_);
     auto callerToken = container->GetToken();
     auto parentToken = container->GetParentToken();
     Rosen::SessionInfo extensionSessionInfo = {
@@ -523,46 +523,31 @@ void SessionWrapperImpl::OnAccessibilityEvent(const Accessibility::Accessibility
 /************************************************** End: The interface for responsing provider ************************/
 
 /************************************************ Begin: The interface about the accessibility ************************/
-bool SessionWrapperImpl::TransferExecuteAction(
-    int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset)
-{
-    CHECK_NULL_RETURN(session_, false);
-    return OHOS::Rosen::WSError::WS_OK == session_->TransferExecuteAction(elementId, actionArguments, action, offset);
-}
-
-void SessionWrapperImpl::SearchExtensionElementInfoByAccessibilityId(
-    int64_t elementId, int32_t mode, int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
-{
-    CHECK_NULL_VOID(session_);
-    session_->TransferSearchElementInfo(elementId, mode, baseParent, output);
-}
-
-void SessionWrapperImpl::SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
-    std::list<Accessibility::AccessibilityElementInfo>& output)
-{
-    CHECK_NULL_VOID(session_);
-    session_->TransferSearchElementInfosByText(elementId, text, baseParent, output);
-}
-
-void SessionWrapperImpl::FindFocusedElementInfo(
-    int64_t elementId, int32_t focusType, int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
-{
-    CHECK_NULL_VOID(session_);
-    session_->TransferFindFocusedElementInfo(elementId, focusType, baseParent, output);
-}
-
-void SessionWrapperImpl::FocusMoveSearch(
-    int64_t elementId, int32_t direction, int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
-{
-    CHECK_NULL_VOID(session_);
-    session_->TransferFocusMoveSearch(elementId, direction, baseParent, output);
-}
-
 void SessionWrapperImpl::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
     int32_t eventType, int64_t timeMs)
 {
     CHECK_NULL_VOID(session_);
     session_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+}
+
+void SessionWrapperImpl::TransferAccessibilityChildTreeRegister(
+    uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+}
+
+void SessionWrapperImpl::TransferAccessibilityChildTreeDeregister()
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityChildTreeUnregister();
+}
+
+void SessionWrapperImpl::TransferAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityDumpChildInfo(params, info);
 }
 /************************************************ End: The interface about the accessibility **************************/
 
@@ -596,17 +581,8 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
         } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
             transaction = transactionController->GetRSTransaction();
         }
-        if (transaction) {
-            auto extensionCount = transaction->GetExtensionCount();
-            if (extensionCount == 0) {
-                // Update the pid when encounter the first UIextension.
-                transaction->SetParentPid(transaction->GetChildPid());
-                transaction->SetChildPid(AceApplicationInfo::GetInstance().GetPid());
-            }
-            transaction->SetExtensionCount(++extensionCount);
-            if (parentSession) {
-                transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
-            }
+        if (transaction && parentSession) {
+            transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
         }
     }
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
@@ -642,8 +618,11 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaCh
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, false);
         auto curWindow = pipeline->GetCurrentWindowRect();
-        int32_t spaceWindow = std::max(curWindow.Bottom() - displayArea_.Bottom(), .0);
-        keyboardHeight = static_cast<int32_t>(std::max(keyboardHeight - spaceWindow, 0));
+        if (curWindow.Bottom() >= displayArea_.Bottom()) {
+            keyboardHeight = keyboardHeight - (curWindow.Bottom() - displayArea_.Bottom());
+        } else {
+            keyboardHeight = keyboardHeight + (displayArea_.Bottom() - curWindow.Bottom());
+        }
     }
     info->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
     UIEXT_LOGI("Occcupied area with 'keyboardHeight = %{public}d' notified to uiextension, persistentid = %{public}d.",

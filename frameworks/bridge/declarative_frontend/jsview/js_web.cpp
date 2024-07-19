@@ -1936,6 +1936,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onInterceptKeyboardAttach", &JSWeb::OnInterceptKeyboardAttach);
     JSClass<JSWeb>::StaticMethod("onAdsBlocked", &JSWeb::OnAdsBlocked);
     JSClass<JSWeb>::StaticMethod("forceDisplayScrollBar", &JSWeb::ForceDisplayScrollBar);
+    JSClass<JSWeb>::StaticMethod("keyboardAvoidMode", &JSWeb::KeyboardAvoidMode);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -3891,6 +3892,7 @@ JSRef<JSVal> PageVisibleEventToJSValue(const PageVisibleEvent& eventInfo)
 
 void JSWeb::OnPageVisible(const JSCallbackInfo& args)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPageVisible init by developer");
     if (!args[0]->IsFunction()) {
         return;
     }
@@ -3901,12 +3903,14 @@ void JSWeb::OnPageVisible(const JSCallbackInfo& args)
     auto instanceId = Container::CurrentId();
     auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const std::shared_ptr<BaseEventInfo>& info) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPageVisible uiCallback enter");
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->UpdateCurrentActiveNode(node);
         context->PostAsyncEvent([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPageVisible async event execute");
             auto* eventInfo = TypeInfoHelper::DynamicCast<PageVisibleEvent>(info.get());
             postFunc->Execute(*eventInfo);
         }, "ArkUIWebPageVisible");
@@ -5051,5 +5055,16 @@ void JSWeb::ForceDisplayScrollBar(const JSCallbackInfo& args)
     }
     bool isEnabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetOverlayScrollbarEnabled(isEnabled);
+}
+
+void JSWeb::KeyboardAvoidMode(int32_t mode)
+{
+    if (mode < static_cast<int32_t>(WebKeyboardAvoidMode::RESIZE_VISUAL) ||
+        mode > static_cast<int32_t>(WebKeyboardAvoidMode::DEFAULT)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "KeyboardAvoidMode param err");
+        return;
+    }
+    WebKeyboardAvoidMode avoidMode = static_cast<WebKeyboardAvoidMode>(mode);
+    WebModel::GetInstance()->SetKeyboardAvoidMode(avoidMode);
 }
 } // namespace OHOS::Ace::Framework

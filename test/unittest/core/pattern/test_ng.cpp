@@ -52,6 +52,15 @@ RefPtr<PaintWrapper> TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
     return wrapper;
 }
 
+void TestNG::FlushExpandSafeAreaTask()
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    safeAreaManager->ExpandSafeArea();
+}
+
 RefPtr<PaintWrapper> TestNG::CreateDone(const RefPtr<FrameNode>& frameNode)
 {
     auto& elementsStack = ViewStackProcessor::GetInstance()->elementsStack_;

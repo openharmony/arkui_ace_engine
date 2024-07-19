@@ -75,7 +75,7 @@ void IfElseNode::SetBranchId(int32_t value, std::list<int32_t>& removedElmtId)
         // collect elmtIds of all children and their children up to CustomNode object
         // these will be removed, but possibly with a delay if their is an animation
         // list of elmtIds is sent back to calling TS ViewPU.ifElseBranchUpdateFunction()
-        Clean(false, true);
+        Clean(false, true, branchId_);
         CollectRemovedChildren(GetChildren(), removedElmtId, true);
         branchId_ = value;
     }
@@ -101,7 +101,7 @@ void IfElseNode::FlushUpdateAndMarkDirty()
 
 bool IfElseNode::TryRetake(const std::string& id)
 {
-    auto node = GetDisappearingChildById(id);
+    auto node = GetDisappearingChildById(id, branchId_);
     if (node) {
         ACE_SCOPED_TRACE("IfElse TryRetake validate.");
         AddChild(node);

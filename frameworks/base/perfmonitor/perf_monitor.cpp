@@ -524,7 +524,8 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
         PerfConstants::PC_EXIT_RECENT, PerfConstants::PC_SHORTCUT_TO_APP_CENTER_ON_RECENT,
         PerfConstants::PC_SHORTCUT_TO_APP_CENTER, PerfConstants::PC_SHORTCUT_EXIT_APP_CENTER,
         PerfConstants::WINDOW_TITLE_BAR_MINIMIZED,
-        PerfConstants::APP_EXIT_FROM_WINDOW_TITLE_BAR_CLOSED
+        PerfConstants::APP_EXIT_FROM_WINDOW_TITLE_BAR_CLOSED,
+        PerfConstants::LAUNCHER_APP_LAUNCH_FROM_OTHER
     };
     if (exceptSceneSet.find(sceneId) != exceptSceneSet.end()) {
         return true;
@@ -610,6 +611,7 @@ bool PerfMonitor::IsSceneIdInSceneWhiteList(const std::string& sceneId)
         sceneId == PerfConstants::LAUNCHER_APP_SWIPE_TO_HOME ||
         sceneId == PerfConstants::LAUNCHER_APP_BACK_TO_HOME ||
         sceneId == PerfConstants::EXIT_RECENT_2_HOME_ANI ||
+        sceneId == PerfConstants::APP_SWIPER_FLING ||
         sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
             return true;
         }

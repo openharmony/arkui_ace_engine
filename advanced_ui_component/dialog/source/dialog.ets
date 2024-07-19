@@ -20,7 +20,7 @@ import hilog from '@ohos.hilog';
 import measure from '@ohos.measure';
 import resourceManager from '@ohos.resourceManager';
 import { CustomColors, CustomTheme, Theme } from '@ohos.arkui.theme';
-import { LengthMetrics } from '@ohos.arkui.node';
+import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 
 class CustomThemeImpl implements CustomTheme {
@@ -58,29 +58,29 @@ const VERSION_TWELVE: number = 50000012;
 const BUTTON_MIN_FONT_SIZE = 9;
 const MAX_FONT_SCALE: number = 2;
 // 'sys.float.alert_container_max_width'
-const MAX_DIALOG_WIDTH: number = getNumberByResourceId(125831042) ?? 400;
+const MAX_DIALOG_WIDTH: number = getNumberByResourceId(125831042, 400);
 // 'sys.float.alert_right_padding_horizontal'
-const BUTTON_HORIZONTAL_MARGIN: number = getNumberByResourceId(125831054) ?? 16;
+const BUTTON_HORIZONTAL_MARGIN: number = getNumberByResourceId(125831054, 16);
 // 'sys.float.padding_level8'
-const BUTTON_HORIZONTAL_PADDING: number = getNumberByResourceId(125830927) ?? 16;
+const BUTTON_HORIZONTAL_PADDING: number = getNumberByResourceId(125830927, 16);
 // 'sys.float.alert_button_horizontal_space'
-const BUTTON_HORIZONTAL_SPACE: number = getNumberByResourceId(125831051) ?? 8;
+const BUTTON_HORIZONTAL_SPACE: number = getNumberByResourceId(125831051, 8);
 // 'sys.float.Body_L'
-const BODY_L = getNumberByResourceId(125830970) ?? 16;
+const BODY_L = getNumberByResourceId(125830970, 16);
 // 'sys.float.Body_S'
-const BODY_S = getNumberByResourceId(125830972) ?? 12;
+const BODY_S = getNumberByResourceId(125830972, 12);
 // 'sys.float.Title_S'
-const TITLE_S = getNumberByResourceId(125830966) ?? 20;
+const TITLE_S = getNumberByResourceId(125830966, 20);
 // 'sys.float.Subtitle_S'
-const SUBTITLE_S = getNumberByResourceId(125830969) ?? 14;
+const SUBTITLE_S = getNumberByResourceId(125830969, 14);
 // 'sys.float.padding_level8'
-const PADDING_LEVEL_8 = getNumberByResourceId(125830927);
+const PADDING_LEVEL_8 = getNumberByResourceId(125830927, 16);
 // 'sys.float.dialog_divider_show'
-const DIALOG_DIVIDER_SHOW = getNumberByResourceId(125831202);
+const DIALOG_DIVIDER_SHOW = getNumberByResourceId(125831202, 1);
 // 'sys.float.alert_button_style'
-const ALERT_BUTTON_STYLE = getNumberByResourceId(125831085);
+const ALERT_BUTTON_STYLE = getNumberByResourceId(125831085, 2);
 // 'sys.float.alert_title_alignment'
-const ALERT_TITLE_ALIGNMENT = getEnumNumberByResourceId(125831126);
+const ALERT_TITLE_ALIGNMENT = getEnumNumberByResourceId(125831126, 1);
 
 @CustomDialog
 export struct TipsDialog {
@@ -146,7 +146,9 @@ export struct TipsDialog {
           }
           .padding({ top: $r('sys.float.padding_level8') })
         } else {
-          this.checkBoxPart();
+          WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+            this.checkBoxPart();
+          }
         }
       });
     }
@@ -361,7 +363,6 @@ export struct SelectDialog {
   controller: CustomDialogController;
   title: ResourceStr = '';
   content?: ResourceStr = '';
-  selectedIndex?: number = -1;
   confirm?: ButtonOptions | null = null;
   radioContent: Array<SheetInfo> = [];
   buttons?: ButtonOptions[] = [];
@@ -370,6 +371,7 @@ export struct SelectDialog {
   currentFocusIndex?: number = -1;
   radioHeight: number = 0;
   itemHeight: number = 0;
+  @State selectedIndex?: number = -1;
   @BuilderParam contentBuilder: () => void = this.buildContent;
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @State dividerColorWithTheme: ResourceColor = $r('sys.color.comp_divider');
@@ -426,6 +428,7 @@ export struct SelectDialog {
                       .checked(this.selectedIndex === index)
                       .hitTestBehavior(HitTestMode.None)
                       .id(String(index))
+                      .focusable(false)
                       .onFocus(() => {
                         this.isFocus = true;
                         this.currentFocusIndex = index;
@@ -445,9 +448,13 @@ export struct SelectDialog {
                 .borderRadius($r('sys.float.corner_radius_level8'))
                 .buttonStyle(ButtonStyleMode.TEXTUAL)
                 .paddingStyle()
+                .focusBox({
+                  margin: { value: -2, unit: LengthUnit.VP }
+                })
                 .onClick(() => {
+                  this.selectedIndex = index;
                   item.action && item.action();
-                  this.controller.close();
+                  this.controller?.close();
                 })
 
                 if (index < this.radioContent.length - 1) {
@@ -850,6 +857,7 @@ export struct CustomContentDialog {
   secondaryTitle?: ResourceStr;
   @BuilderParam contentBuilder: () => void;
   contentAreaPadding?: Padding;
+  localizedContentAreaPadding?: LocalizedPadding;
   buttons?: ButtonOptions[];
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
   themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
@@ -865,11 +873,13 @@ export struct CustomContentDialog {
         this.contentBuilder();
       },
       contentAreaPadding: this.contentAreaPadding,
+      localizedContentAreaPadding: this.localizedContentAreaPadding,
       buttons: this.buttons,
       theme: this.theme,
       themeColorMode: this.themeColorMode,
       fontSizeScale: this.fontSizeScale,
       minContentHeight: this.minContentHeight,
+      customStyle: false
     }).constraintSize({ maxHeight: '100%' });
   }
 }
@@ -954,6 +964,7 @@ struct CustomDialogContentComponent {
   controller?: CustomDialogController;
   primaryTitle?: ResourceStr;
   secondaryTitle?: ResourceStr;
+  localizedContentAreaPadding?: LocalizedPadding;
   @BuilderParam contentBuilder: () => void = this.defaultContentBuilder;
   buttons?: ButtonOptions[];
   contentAreaPadding?: Padding;
@@ -970,7 +981,7 @@ struct CustomDialogContentComponent {
   @State buttonHeight: number = 0;
   @State contentMaxHeight: Length = '100%';
   @Link fontSizeScale: number;
-  @State customStyle: boolean = false;
+  @State customStyle: boolean | undefined = undefined;
   @State buttonMaxFontSize: Length = $r('sys.float.Body_L');
   @State buttonMinFontSize: Length = 9;
   @State primaryTitleMaxFontSize: Length = $r('sys.float.Title_S');
@@ -1036,8 +1047,7 @@ struct CustomDialogContentComponent {
     let maxHeight: number = Number(constraint.maxHeight);
     this.updateFontScale();
     this.updateFontSize();
-    this.isButtonVertical = this.isVerticalAlignButton(Math.min(maxWidth - BUTTON_HORIZONTAL_MARGIN * 2,
-      MAX_DIALOG_WIDTH));
+    this.isButtonVertical = this.isVerticalAlignButton(maxWidth - BUTTON_HORIZONTAL_MARGIN * 2);
     this.titleMinHeight = this.getTitleAreaMinHeight();
     let height: number = 0;
     children.forEach((child) => {
@@ -1056,11 +1066,14 @@ struct CustomDialogContentComponent {
 
   aboutToAppear(): void {
     this.updateFontScale();
-    if (this.controller) {
+    if (this.controller && this.customStyle === undefined) {
       let customController: CustomDialogControllerExtend = this.controller as CustomDialogControllerExtend;
       if (customController.arg_ && customController.arg_.customStyle && customController.arg_.customStyle === true) {
         this.customStyle = true;
       }
+    }
+    if (this.customStyle === undefined) {
+      this.customStyle = false;
     }
     this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
     this.theme.colors.fontPrimary : $r('sys.color.font_primary');
@@ -1103,7 +1116,10 @@ struct CustomDialogContentComponent {
    *
    * @returns content padding
    */
-  private getContentPadding(): Padding {
+  private getContentPadding(): Padding | LocalizedPadding {
+    if (this.localizedContentAreaPadding) {
+      return this.localizedContentAreaPadding;
+    }
     if (this.contentAreaPadding) {
       return this.contentAreaPadding;
     }
@@ -1435,16 +1451,22 @@ function setButtonProperties(buttonOptions: ButtonOptions, controller?: CustomDi
  * get resource size
  *
  * @param resourceId resource id
+ * @param defaultValue default value
  * @returns resource size
  */
-function getNumberByResourceId(resourceId: number): number {
+function getNumberByResourceId(resourceId: number, defaultValue: number): number {
   try {
-    return resourceManager.getSystemResourceManager().getNumber(resourceId);
+    let sourceValue: number = resourceManager.getSystemResourceManager().getNumber(resourceId);
+    if (sourceValue > 0) {
+      return sourceValue;
+    } else {
+      return defaultValue;
+    }
   } catch (error) {
     let code: number = (error as BusinessError).code;
     let message: string = (error as BusinessError).message;
     hilog.error(0x3900, 'Ace', `CustomContentDialog getNumberByResourceId error, code: ${code}, message: ${message}`);
-    return 0;
+    return defaultValue;
   }
 }
 
@@ -1452,16 +1474,22 @@ function getNumberByResourceId(resourceId: number): number {
  * get enum number
  *
  * @param resourceId resource id
+ * @param defaultValue default value
  * @returns number
  */
-function getEnumNumberByResourceId(resourceId: number): number {
+function getEnumNumberByResourceId(resourceId: number, defaultValue: number): number {
   try {
-    return getContext().resourceManager.getNumber(resourceId);
+    let sourceValue: number = getContext().resourceManager.getNumber(resourceId);
+    if (sourceValue > 0) {
+      return sourceValue;
+    } else {
+      return defaultValue;
+    }
   } catch (error) {
     let code: number = (error as BusinessError).code;
     let message: string = (error as BusinessError).message;
     hilog.error(0x3900, 'Ace', `getEnumNumberByResourceId error, code: ${code}, message: ${message}`);
-    return -1;
+    return defaultValue;
   }
 }
 

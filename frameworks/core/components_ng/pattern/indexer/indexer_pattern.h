@@ -216,12 +216,13 @@ private:
     uint32_t lastPopupSize_ = 0;
     int32_t currentPopupIndex_ = -1;
     float itemSizeRender_ = 0.0f;
-    uint32_t popupClickedIndex_ = -1;
+    int32_t popupClickedIndex_ = -1;
     int32_t lastFireSelectIndex_ = -1;
     float lastItemSize_ = -1.0f;
     bool lastIndexFromPress_ = false;
     bool selectChanged_ = false;
-    bool autoCollapse_ = false;
+    bool autoCollapse_ = true;
+    bool lastAutoCollapse_ = true;
     bool enableHapticFeedback_ = true;
     float actualIndexerHeight_ = 0.0f;
     bool isNewHeightCalculated_ = false;

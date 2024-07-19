@@ -255,6 +255,7 @@ void SelectContentOverlayManager::UpdateExistOverlay(const SelectOverlayInfo& in
             menuPattern->SetSelectInfo(info.selectText);
         }
         menuPattern->UpdateMenuInfo(info.menuInfo);
+        menuPattern->UpdateViewPort(info.ancestorViewPort);
     }
     // update handle node
     auto handlePattern = GetSelectHandlePattern(WeakClaim(this));
@@ -347,11 +348,16 @@ void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
             selectOverlayHolder_->OnUpdateMenuInfo(menuInfo, DIRTY_COPY_ALL_ITEM);
             auto oldMenuInfo = menuPattern->GetSelectMenuInfo();
             oldMenuInfo.showCopyAll = menuInfo.showCopyAll;
+            oldMenuInfo.showCopy = menuInfo.showCopy;
             menuPattern->UpdateSelectMenuInfo(oldMenuInfo);
         }
         if ((dirty & DIRTY_SELECT_TEXT) == DIRTY_SELECT_TEXT) {
             auto selectedInfo = selectOverlayHolder_->GetSelectedText();
             menuPattern->SetSelectInfo(selectedInfo);
+        }
+        if ((dirty & DIRTY_VIEWPORT) == DIRTY_VIEWPORT) {
+            auto viewPort = selectOverlayHolder_->GetAncestorNodeViewPort();
+            menuPattern->UpdateViewPort(viewPort);
         }
     }
     UpdateHandleInfosWithFlag(dirty);
@@ -464,6 +470,10 @@ void SelectContentOverlayManager::MountNodeToRoot(const RefPtr<FrameNode>& overl
             slot = index;
             break;
         }
+        if (it->GetTag() == V2::TEXTINPUT_ETS_TAG) {
+            slot = index;
+            break;
+        }
         index++;
     }
 
@@ -558,6 +568,7 @@ void SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
     CHECK_NULL_VOID(selectOverlayHolder_->GetOwnerId() == id);
     LOGI("SelectOverlay: Close selectoverlay by id %{public}d, reason %{public}d", id, reason);
     auto callback = selectOverlayHolder_->GetCallback();
+    CHECK_NULL_VOID(shareOverlayInfo_);
     auto menuType = shareOverlayInfo_->menuInfo.menuType;
     auto pattern = GetSelectHandlePattern(WeakClaim(this));
     RefPtr<OverlayInfo> info = nullptr;
@@ -570,7 +581,7 @@ void SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
     auto selectOverlayNode = selectOverlayNode_.Upgrade();
     auto menuNode = menuNode_.Upgrade();
     auto handleNode = handleNode_.Upgrade();
-    if (animation) {
+    if (animation && !shareOverlayInfo_->isUsingMouse) {
         ClearAllStatus();
         DestroySelectOverlayNodeWithAnimation(selectOverlayNode);
         DestroySelectOverlayNodeWithAnimation(menuNode);

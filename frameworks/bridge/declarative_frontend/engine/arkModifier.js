@@ -206,6 +206,7 @@ class AttributeUpdater {
     this._state = value;
   }
   initializeModifier(instance) {}
+  onComponentChanged(instance) {}
   updateConstructorParams(...args) {
     if (!this.attribute) {
       ArkLogConsole.info("AttributeUpdater has not been initialized before updateConstructorParams.");

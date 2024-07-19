@@ -1509,4 +1509,236 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerColumnPatternOnClickEventTest012, Te
     textPickerColumnPattern_->HandleMouseEvent(false);
     textPickerColumnPattern_->HandleMouseEvent(true);
 }
+
+/**
+ * @tc.name: TextPickerPatternHandleDirectionKey001
+ * @tc.desc: Test HandleDirectionKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternHandleDirectionKey001, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern_->SetOptions(range);
+    /**
+     * @tc.cases: case. cover KeyCode == KEY_DPAD_UP.
+     */
+    EXPECT_TRUE(textPickerPattern_->HandleDirectionKey(KeyCode::KEY_DPAD_UP));
+    /**
+     * @tc.cases: case. cover KeyCode == KEY_DPAD_DOWN.
+     */
+    EXPECT_TRUE(textPickerPattern_->HandleDirectionKey(KeyCode::KEY_DPAD_DOWN));
+    /**
+     * @tc.cases: case. cover KeyCode == KEY_ENTER.
+     */
+    EXPECT_TRUE(textPickerPattern_->HandleDirectionKey(KeyCode::KEY_ENTER));
+    /**
+     * @tc.cases: case. cover KeyCode == KEY_DPAD_LEFT.
+     */
+    textPickerPattern_->focusKeyID_ = 0;
+    EXPECT_TRUE(textPickerPattern_->HandleDirectionKey(KeyCode::KEY_DPAD_LEFT));
+}
+
+/**
+ * @tc.name: TextPickerPatternHandleDirectionKey002
+ * @tc.desc: Test HandleDirectionKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternHandleDirectionKey002, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker pattern.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_PICKER_ETS_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<TextPickerPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto stackNode1 = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<StackPattern>(); });
+    ASSERT_NE(stackNode1, nullptr);
+    auto stackNode2 = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<StackPattern>(); });
+    ASSERT_NE(stackNode2, nullptr);
+    auto blendNode1 = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(blendNode1, nullptr);
+    auto blendNode2 = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(blendNode2, nullptr);
+    auto columnNode1 = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPickerColumnPattern>(); });
+    ASSERT_NE(columnNode1, nullptr);
+    auto columnNode2 = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPickerColumnPattern>(); });
+    ASSERT_NE(columnNode2, nullptr);
+    columnNode1->MountToParent(blendNode1);
+    blendNode1->MountToParent(stackNode1);
+    stackNode1->MountToParent(frameNode);
+    columnNode2->MountToParent(blendNode2);
+    blendNode2->MountToParent(stackNode2);
+    stackNode2->MountToParent(frameNode);
+    auto textPickerColumnPattern2 = columnNode2->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern2, nullptr);
+    /**
+     * @tc.step: step2. SetOptions and call HandleDirectionKey.
+     */
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern2->SetOptions(range);
+    textPickerPattern->focusKeyID_ = 1;
+    bool result = textPickerPattern->HandleDirectionKey(KeyCode::KEY_DPAD_LEFT);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: TextPickerPatternPlayResetAnimation001
+ * @tc.desc: Test PlayResetAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternPlayResetAnimation001, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    /**
+     * @tc.cases: case. cover isDownScroll_ == false
+     */
+    textPickerColumnPattern_->PlayResetAnimation();
+    EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, 0.0f);
+
+    textPickerColumnPattern_->scrollDelta_ = 10.0f;
+    textPickerColumnPattern_->PlayResetAnimation();
+    EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, 15.0f);
+}
+
+/**
+ * @tc.name: TextPickerPatternPlayResetAnimation002
+ * @tc.desc: Test PlayResetAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternPlayResetAnimation002, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    /**
+     * @tc.cases: case. cover isDownScroll_ == true
+     */
+    textPickerColumnPattern_->SetScrollDirection(true);
+    textPickerColumnPattern_->PlayResetAnimation();
+    EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, 0.0f);
+
+    textPickerColumnPattern_->SetScrollDirection(true);
+    textPickerColumnPattern_->scrollDelta_ = 10.0f;
+    textPickerColumnPattern_->PlayResetAnimation();
+    EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, 3.0f);
+}
+
+/**
+ * @tc.name: TextPickerPatternUpdateColumnChildPosition001
+ * @tc.desc: Test UpdateColumnChildPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternUpdateColumnChildPosition001, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    /**
+     * @tc.cases: case. cover isReboundInProgress_ == true && canLoop_ == true
+     */
+    textPickerColumnPattern_->isReboundInProgress_ = true;
+    textPickerColumnPattern_->SetYLast(1.0);
+    textPickerColumnPattern_->UpdateColumnChildPosition(2.0);
+    EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, 1.0f);
+    /**
+     * @tc.cases: case. cover isReboundInProgress_ == true && canLoop_ == false
+     */
+    auto property = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateCanLoop(false);
+    textPickerColumnPattern_->isReboundInProgress_ = true;
+    textPickerColumnPattern_->SetYLast(1.0);
+    textPickerColumnPattern_->UpdateColumnChildPosition(2.0);
+    EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, 2.0f);
+    /**
+     * @tc.cases: case. cover isReboundInProgress_ == false && canLoop_ == false
+     */
+    property->UpdateCanLoop(false);
+    textPickerColumnPattern_->isReboundInProgress_ = false;
+    textPickerColumnPattern_->SetYLast(1.0);
+    textPickerColumnPattern_->UpdateColumnChildPosition(2.0);
+    EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, 0.0f);
+}
+
+/**
+ * @tc.name: TextPickerPatternUpdateColumnChildPosition002
+ * @tc.desc: Test UpdateColumnChildPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternUpdateColumnChildPosition002, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern_->optionProperties_.emplace_back(prop);
+    /**
+     * @tc.cases: case. covering the false branch
+     */
+    textPickerColumnPattern_->pressed_ = true;
+    textPickerColumnPattern_->SetTossStatus(true);
+    textPickerColumnPattern_->overscroller_.SetOverScroll(1.0);
+    textPickerColumnPattern_->SetYLast(1.0);
+    textPickerColumnPattern_->UpdateColumnChildPosition(2.0);
+    EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, 1.0f);
+    /**
+     * @tc.cases: case. covering the true branch
+     */
+    auto property = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateCanLoop(false);
+    textPickerColumnPattern_->pressed_ = false;
+    textPickerColumnPattern_->SetTossStatus(true);
+    textPickerColumnPattern_->overscroller_.SetOverScroll(10.0);
+    textPickerColumnPattern_->SetYLast(1.0);
+    textPickerColumnPattern_->UpdateColumnChildPosition(2.0);
+    EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, 0.0f);
+    /**
+     * @tc.cases: case. covering the return branch
+     */
+    textPickerColumnPattern_->SetYLast(1.0);
+    textPickerColumnPattern_->UpdateColumnChildPosition(1.0);
+    EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, 0.0f);
+}
 } // namespace OHOS::Ace::NG

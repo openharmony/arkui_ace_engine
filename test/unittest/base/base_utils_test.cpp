@@ -29,8 +29,8 @@
 #include "base/utils/string_expression.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/time_util.h"
-#include "base/utils/utils.h"
 #include "base/utils/utf.h"
+#include "base/utils/utils.h"
 
 #ifndef WINDOWS_PLATFORM
 #include "securec.h"
@@ -818,7 +818,6 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest042, TestSize.Level1)
     ASSERT_EQ(StringUtils::EndWith(startWithValue, prefixString), true);
 }
 
-
 /**
  * @tc.name: BaseUtilsTest043
  * @tc.desc: utf8 string
@@ -872,7 +871,7 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest046, TestSize.Level1)
  */
 HWTEST_F(BaseUtilsTest, BaseUtilsTest047, TestSize.Level1)
 {
-    uint8_t data[2] = {0xC3, 0x81};
+    uint8_t data[2] = { 0xC3, 0x81 };
     auto result = ConvertMUtf8ToUtf16Pair(data, 2);
     EXPECT_EQ(result.first, 0xc1);
     EXPECT_EQ(result.second, 2);
@@ -885,7 +884,7 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest047, TestSize.Level1)
  */
 HWTEST_F(BaseUtilsTest, BaseUtilsTest048, TestSize.Level1)
 {
-    uint8_t data[3] = {0xE1, 0x82, 0x81};
+    uint8_t data[3] = { 0xE1, 0x82, 0x81 };
     auto result = ConvertMUtf8ToUtf16Pair(data, 3);
     EXPECT_EQ(result.first, 0x1081);
     EXPECT_EQ(result.second, 3);
@@ -898,7 +897,7 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest048, TestSize.Level1)
  */
 HWTEST_F(BaseUtilsTest, BaseUtilsTest049, TestSize.Level1)
 {
-    uint8_t data[4] = {0xF1, 0x80, 0x80, 0x81};
+    uint8_t data[4] = { 0xF1, 0x80, 0x80, 0x81 };
     auto result = ConvertMUtf8ToUtf16Pair(data, 4);
     EXPECT_EQ(result.first, 0xD8C0DC01);
     EXPECT_EQ(result.second, 4);
@@ -948,7 +947,7 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest052, TestSize.Level1)
 HWTEST_F(BaseUtilsTest, BaseUtilsTest053, TestSize.Level1)
 {
     const uint8_t* emptyInput = nullptr;
-    uint16_t output[10] = {0};
+    uint16_t output[10] = { 0 };
     size_t result = ConvertRegionUtf8ToUtf16(emptyInput, output, 0, 10, 0);
     EXPECT_EQ(result, 0);
 }
@@ -961,7 +960,7 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest053, TestSize.Level1)
 HWTEST_F(BaseUtilsTest, BaseUtilsTest054, TestSize.Level1)
 {
     const uint8_t* input = reinterpret_cast<const uint8_t*>(u8"a");
-    uint16_t output[10] = {0};
+    uint16_t output[10] = { 0 };
     size_t result = ConvertRegionUtf8ToUtf16(input, output, 1, 10, 0);
     EXPECT_EQ(result, 1);
     EXPECT_EQ(output[0], 'a');
@@ -975,7 +974,7 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest054, TestSize.Level1)
 HWTEST_F(BaseUtilsTest, BaseUtilsTest055, TestSize.Level1)
 {
     const uint8_t* input = reinterpret_cast<const uint8_t*>(u8"Hello, 世界!");
-    uint16_t output[50] = {0};
+    uint16_t output[50] = { 0 };
     size_t result = ConvertRegionUtf8ToUtf16(input, output, strlen(reinterpret_cast<const char*>(input)), 50, 0);
     EXPECT_EQ(result, 10);
 }
@@ -988,7 +987,7 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest055, TestSize.Level1)
 HWTEST_F(BaseUtilsTest, BaseUtilsTest056, TestSize.Level1)
 {
     const uint8_t* input = reinterpret_cast<const uint8_t*>(u8"XXXX");
-    uint16_t output[10] = {0};
+    uint16_t output[10] = { 0 };
     size_t result = ConvertRegionUtf8ToUtf16(input, output, 4, 10, 0);
     EXPECT_EQ(result, 4);
 }
@@ -1001,7 +1000,7 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest056, TestSize.Level1)
 HWTEST_F(BaseUtilsTest, BaseUtilsTest057, TestSize.Level1)
 {
     const uint16_t* emptyInput = nullptr;
-    uint8_t output[10] = {0};
+    uint8_t output[10] = { 0 };
     size_t result = DebuggerConvertRegionUtf16ToUtf8(emptyInput, output, 0, 10, 0);
     EXPECT_EQ(result, 0);
 }
@@ -1013,8 +1012,8 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest057, TestSize.Level1)
  */
 HWTEST_F(BaseUtilsTest, BaseUtilsTest058, TestSize.Level1)
 {
-    const uint16_t input[] = {0x0061};
-    uint8_t output[10] = {0};
+    const uint16_t input[] = { 0x0061 };
+    uint8_t output[10] = { 0 };
     size_t result = DebuggerConvertRegionUtf16ToUtf8(input, output, 1, 10, 0);
     EXPECT_EQ(result, 1);
     EXPECT_EQ(output[0], 0x61);
@@ -1027,8 +1026,8 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest058, TestSize.Level1)
  */
 HWTEST_F(BaseUtilsTest, BaseUtilsTest059, TestSize.Level1)
 {
-    const uint16_t input[] = {0xD800, 0xDC00};
-    uint8_t output[10] = {0};
+    const uint16_t input[] = { 0xD800, 0xDC00 };
+    uint8_t output[10] = { 0 };
     size_t result = DebuggerConvertRegionUtf16ToUtf8(input, output, 2, 10, 0);
     EXPECT_EQ(result, 4);
 }
@@ -1040,8 +1039,8 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest059, TestSize.Level1)
  */
 HWTEST_F(BaseUtilsTest, BaseUtilsTest060, TestSize.Level1)
 {
-    const uint16_t input[] = {0xD800, 0xD800};
-    uint8_t output[10] = {0};
+    const uint16_t input[] = { 0xD800, 0xD800 };
+    uint8_t output[10] = { 0 };
     size_t result = DebuggerConvertRegionUtf16ToUtf8(input, output, 2, 10, 0);
     EXPECT_EQ(result, 6);
 }
@@ -1243,5 +1242,76 @@ HWTEST_F(BaseUtilsTest, StringExpressionTest006, TestSize.Level1)
     rpnexp = { "2", "*", "3", "-", "(", "2", "3", "+", "5", "6", "/" };
     EXPECT_FALSE(StringExpression::CalculateExpImpl(
         rpnexp, [](const Dimension& dim) -> double { return dim.Value(); }, result, opRes));
+}
+
+/**
+ * @tc.name: StringExpressionTest007
+ * @tc.desc: ConvertDal2Rpn: ReplaceSignNumberWithUnit()/FilterCalcSpecialString
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest007, TestSize.Level1)
+{
+    // replace sign number with unit with formula == ""
+    std::string formula = "";
+    std::vector<std::string> ret = StringExpression::ConvertDal2Rpn(formula);
+    EXPECT_EQ(formula, "");
+    EXPECT_EQ(ret.size(), 0);
+
+    // replace sign number with unit normal case
+    formula = "+1.1px";
+    std::vector<std::string> ret2 = StringExpression::ConvertDal2Rpn(formula);
+    EXPECT_EQ(ret2.size(), 0);
+
+    formula = "calc(2 * 3 - (2 + 3) / 5 + 6 / 2 + (1 + 2))";
+    std::vector<std::string> ret3 = StringExpression::ConvertDal2Rpn(formula);
+    EXPECT_EQ(ret3.size(), 17);
+}
+
+/**
+ * @tc.name: DateUtilsTest001
+ * @tc.desc: GetMilliSecondsByDateTime
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, DateUtilsTest001, TestSize.Level1)
+{
+    std::tm dateTime;
+    Date::GetMilliSecondsByDateTime(dateTime);
+    EXPECT_EQ(dateTime.tm_year != 0, true);
+    EXPECT_EQ(dateTime.tm_mday != 0, true);
+    dateTime.tm_mday = 5;
+    Date::GetMilliSecondsByDateTime(dateTime);
+    EXPECT_EQ(dateTime.tm_year != 0, true);
+    EXPECT_EQ(dateTime.tm_mday == 5, true);
+    dateTime.tm_year = 8;
+    Date::GetMilliSecondsByDateTime(dateTime);
+    EXPECT_EQ(dateTime.tm_year == 8, true);
+    EXPECT_EQ(dateTime.tm_mday == 5, true);
+}
+
+/**
+ * @tc.name: StringUtilsTest001
+ * @tc.desc: IsAscii
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest001, TestSize.Level1)
+{
+    std::string str = "abcde";
+    bool ret = StringUtils::IsAscii(str);
+    EXPECT_EQ(ret, true);
+    str = "中文";
+    bool ret2 = StringUtils::IsAscii(str);
+    EXPECT_EQ(ret2, false);
+}
+
+/**
+ * @tc.name: TimeUtilsTest001
+ * @tc.desc: ConvertTimestampToStr
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest001, TestSize.Level1)
+{
+    int64_t timestamp = 1626211200;
+    std::string ret = ConvertTimestampToStr(timestamp);
+    EXPECT_EQ(ret, "1970-01-20 03:43:31.200");
 }
 } // namespace OHOS::Ace

@@ -161,7 +161,7 @@ public:
     RefPtr<FrameNode> GetHostNode() const;
     virtual const std::string& GetHostTag() const = 0;
     virtual bool IsActive() const = 0;
-    virtual void SetActive(bool active = true) = 0;
+    virtual void SetActive(bool active = true, bool needRebuildRenderContext = false) = 0;
 
     bool IsRootMeasureNode() const
     {
@@ -226,6 +226,8 @@ public:
     bool AvoidKeyboard(bool isFocusOnPage = true);
     // expand the SafeArea of expansive nodes, which are previously recorded during Layout traversal
     void ExpandSafeArea();
+    ExpandEdges GetAccumulatedSafeAreaExpand(bool includingSelf = false);
+    void ResetSafeAreaPadding();
 
     bool SkipSyncGeometryNode() const
     {
@@ -250,6 +252,8 @@ protected:
     OffsetF ExpandIntoKeyboard();
     bool CheckValidSafeArea();
     float GetPageCurrentOffset();
+    bool AccumulateExpandCacheHit(ExpandEdges& totalExpand);
+    void GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, ExpandEdges& totalExpand);
 
     WeakPtr<FrameNode> hostNode_;
 
@@ -264,8 +268,8 @@ protected:
     std::optional<bool> needForceMeasureAndLayout_;
 
 private:
-    void AdjustChildren(const OffsetF& offset);
-    void AdjustChild(RefPtr<UINode> node, const OffsetF& offset);
+    void AdjustChildren(const OffsetF& offset, bool parentScrollable);
+    void AdjustChild(RefPtr<UINode> node, const OffsetF& offset, bool parentScrollable);
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapper);
 };

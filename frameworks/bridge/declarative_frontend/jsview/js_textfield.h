@@ -70,7 +70,7 @@ public:
     static void JsHoverEffect(const JSCallbackInfo& info);
     static void SetOnEditChanged(const JSCallbackInfo& info);
     static void SetOnSubmit(const JSCallbackInfo& info);
-    static JSRef<JSVal> CreateJsOnChangeObj(const TextRange& textRange);
+    static JSRef<JSVal> CreateJsOnChangeObj(const PreviewText& previewText);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
     static void SetOnSecurityStateChange(const JSCallbackInfo& info);

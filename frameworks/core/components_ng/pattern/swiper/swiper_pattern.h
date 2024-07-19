@@ -96,109 +96,10 @@ public:
         return MakeRefPtr<SwiperEventHub>();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
-    {
-        Pattern::ToJsonValue(json, filter);
-        /* no fixed attr below, just return */
-        if (filter.IsFastFilter()) {
-            return;
-        }
-        json->PutExtAttr("currentIndex", currentIndex_, filter);
-        json->PutExtAttr("currentOffset", currentOffset_, filter);
-        json->PutExtAttr("uiCastJumpIndex", uiCastJumpIndex_.value_or(-1), filter);
-
-        if (indicatorIsBoolean_) {
-            return;
-        }
-
-        auto indicatorType = GetIndicatorType();
-        const char* indicator = "indicator";
-        if (indicatorType == SwiperIndicatorType::DOT) {
-            json->PutExtAttr(indicator, GetDotIndicatorStyle().c_str(), filter);
-        } else if (indicatorType == SwiperIndicatorType::ARC_DOT) {
-            json->PutExtAttr(indicator, GetArcDotIndicatorStyle().c_str(), filter);
-        } else {
-            json->PutExtAttr(indicator, GetDigitIndicatorStyle().c_str(), filter);
-        }
-    }
-
-    void FromJson(const std::unique_ptr<JsonValue>& json) override
-    {
-        currentIndex_ = json->GetInt("currentIndex");
-        auto currentOffset = json->GetDouble("currentOffset");
-        auto jumpIndex = json->GetInt("uiCastJumpIndex");
-        if (currentOffset != currentOffset_) {
-            auto delta = currentOffset - currentOffset_;
-            UpdateCurrentOffset(delta);
-        } else if (jumpIndex >= 0) {
-            jumpIndex_ = jumpIndex;
-            MarkDirtyNodeSelf();
-        }
-        Pattern::FromJson(json);
-    }
-
-    std::string GetDotIndicatorStyle() const
-    {
-        auto swiperParameters = GetSwiperParameters();
-        CHECK_NULL_RETURN(swiperParameters, "");
-        auto jsonValue = JsonUtil::Create(true);
-        jsonValue->Put("left", swiperParameters_->dimLeft.value_or(0.0_vp).ToString().c_str());
-        jsonValue->Put("top", swiperParameters_->dimTop.value_or(0.0_vp).ToString().c_str());
-        jsonValue->Put("right", swiperParameters_->dimRight.value_or(0.0_vp).ToString().c_str());
-        jsonValue->Put("bottom", swiperParameters_->dimBottom.value_or(0.0_vp).ToString().c_str());
-        jsonValue->Put("itemWidth", swiperParameters_->itemWidth.value_or(6.0_vp).ToString().c_str());
-        jsonValue->Put("itemHeight", swiperParameters_->itemHeight.value_or(6.0_vp).ToString().c_str());
-        jsonValue->Put("selectedItemWidth", swiperParameters_->selectedItemWidth.value_or(6.0_vp).ToString().c_str());
-        jsonValue->Put("selectedItemHeight", swiperParameters_->selectedItemHeight.value_or(6.0_vp).ToString().c_str());
-        jsonValue->Put("selectedColor",
-            swiperParameters_->selectedColorVal.value_or(Color::FromString("#ff007dff")).ColorToString().c_str());
-        jsonValue->Put(
-            "color", swiperParameters_->colorVal.value_or(Color::FromString("#19182431")).ColorToString().c_str());
-        jsonValue->Put("mask", swiperParameters_->maskValue ? "true" : "false");
-        jsonValue->Put("maxDisplayCount",
-            (swiperParameters_->maxDisplayCountVal.has_value()) ? swiperParameters_->maxDisplayCountVal.value() : 0);
-        return jsonValue->ToString();
-    }
-
-    std::string GetDigitIndicatorStyle() const
-    {
-        auto swiperParameters = GetSwiperDigitalParameters();
-        CHECK_NULL_RETURN(swiperParameters, "");
-        auto jsonValue = JsonUtil::Create(true);
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, "");
-        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-        CHECK_NULL_RETURN(swiperIndicatorTheme, "");
-        jsonValue->Put("left", swiperDigitalParameters_->dimLeft.value_or(0.0_vp).ToString().c_str());
-        jsonValue->Put("top", swiperDigitalParameters_->dimTop.value_or(0.0_vp).ToString().c_str());
-        jsonValue->Put("right", swiperDigitalParameters_->dimRight.value_or(0.0_vp).ToString().c_str());
-        jsonValue->Put("bottom", swiperDigitalParameters_->dimBottom.value_or(0.0_vp).ToString().c_str());
-        jsonValue->Put("fontSize", swiperDigitalParameters_->fontSize
-                                       .value_or(swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize())
-                                       .ToString()
-                                       .c_str());
-        jsonValue->Put("fontColor", swiperDigitalParameters_->fontColor
-                                        .value_or(swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor())
-                                        .ColorToString()
-                                        .c_str());
-        jsonValue->Put("fontWeight",
-            V2::ConvertWrapFontWeightToStirng(swiperDigitalParameters_->fontWeight.value_or(FontWeight::NORMAL))
-                .c_str());
-        jsonValue->Put(
-            "selectedFontSize", swiperDigitalParameters_->selectedFontSize
-                                    .value_or(swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize())
-                                    .ToString()
-                                    .c_str());
-        jsonValue->Put(
-            "selectedFontColor", swiperDigitalParameters_->selectedFontColor
-                                     .value_or(swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor())
-                                     .ColorToString()
-                                     .c_str());
-        jsonValue->Put("selectedFontWeight",
-            V2::ConvertWrapFontWeightToStirng(swiperDigitalParameters_->selectedFontWeight.value_or(FontWeight::NORMAL))
-                .c_str());
-        return jsonValue->ToString();
-    }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void FromJson(const std::unique_ptr<JsonValue>& json) override;
+    std::string GetDotIndicatorStyle() const;
+    std::string GetDigitIndicatorStyle() const;
 
     virtual std::string GetArcDotIndicatorStyle() const { return ""; }
 
@@ -233,16 +134,7 @@ public:
         return turnPageRate_;
     }
 
-    GestureState GetGestureState()
-    {
-        auto gestureState = gestureState_;
-        if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT ||
-            gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
-            gestureState_ = GestureState::GESTURE_STATE_NONE;
-        }
-
-        return gestureState;
-    }
+    GestureState GetGestureState();
 
     TouchBottomTypeLoop GetTouchBottomTypeLoop() const
     {
@@ -534,11 +426,11 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     bool IsAutoFill() const;
-    void OnTouchTestHit(SourceType hitTestType) override;
     void SwipeToWithoutAnimation(int32_t index);
     void StopAutoPlay();
     void StartAutoPlay();
     void StopTranslateAnimation();
+    void StopSpringAnimationImmediately();
     void StopSpringAnimation();
     void DumpAdvanceInfo() override;
     int32_t GetLoopIndex(int32_t originalIndex) const;
@@ -710,6 +602,11 @@ public:
         return isTouchDown_;
     }
 
+    bool IsTouchDownOnOverlong() const
+    {
+        return isTouchDownOnOverlong_;
+    }
+
 protected:
     void MarkDirtyNodeSelf();
 
@@ -780,7 +677,7 @@ private:
     float GetDistanceToEdge() const;
     float MainSize() const;
     float GetMainContentSize() const;
-    void FireChangeEvent() const;
+    void FireChangeEvent(int32_t preIndex, int32_t currentIndex) const;
     void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
     void FireAnimationEndEvent(int32_t currentIndex,
         const AnimationCallbackInfo& info, bool isInterrupt = false) const;
@@ -838,6 +735,7 @@ private:
     void TriggerEventOnFinish(int32_t nextIndex);
     bool IsVisibleChildrenSizeLessThanSwiper() const;
     void BeforeCreateLayoutWrapper() override;
+    int32_t CheckUserSetIndex(int32_t index);
 
     void SetLazyLoadFeature(bool useLazyLoad);
     void SetLazyForEachLongPredict(bool useLazyLoad) const;
@@ -879,11 +777,9 @@ private:
      */
     void StopAnimationOnScrollStart(bool flushImmediately);
     /**
-     * @brief Checks if the animation is currently running.
-     *
-     * @return true if the animation is running, false otherwise.
+     * @return true if any translate animation (switching page / spring) is running, false otherwise.
      */
-    inline bool AnimationRunning() const;
+    inline bool DuringTranslateAnimation() const;
 
     /**
      *  NestableScrollContainer implementations
@@ -916,7 +812,7 @@ private:
 
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
 
-    void OnScrollStartRecursive(float position, float velocity = 0.f) override;
+    void OnScrollStartRecursive(float position, float velocity) override;
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
 
     /**
@@ -1012,13 +908,11 @@ private:
 
     std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
     bool NeedForceMeasure() const;
-    void SetIndicatorChangeIndexStatus(bool withAnimation);
+    void SetIndicatorChangeIndexStatus(bool withAnimation, std::optional<int32_t> startIndex = std::nullopt);
     void SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex);
     bool ParseTabsIsRtl();
 
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
-
-    void TabContentStateCallBack(int32_t oldIndex, int32_t nextIndex) const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -1087,6 +981,7 @@ private:
      */
     bool childScrolling_ = false;
     bool isTouchDown_ = false;
+    bool isTouchDownOnOverlong_ = false;
     std::optional<bool> preLoop_;
 
     Axis direction_ = Axis::HORIZONTAL;

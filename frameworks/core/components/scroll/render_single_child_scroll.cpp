@@ -150,13 +150,12 @@ void RenderSingleChildScroll::MoveChildToViewPort(
     const Size& size, const Offset& childOffset, const Offset& effectOffset)
 {
     auto selfOffset = GetGlobalOffset();
-    auto itemActualRect = Rect(childOffset, size);
     auto viewRect = Rect(selfOffset, viewPort_);
+    auto itemActualRect = Rect(childOffset, size);
     // rect is in viewport
     if (itemActualRect.IsWrappedBy(viewRect)) {
         return;
     }
-
     double childPosition = GetMainOffset(childOffset);
     double viewMin = GetMainOffset(selfOffset);
     double viewMax = GetMainOffset(selfOffset + viewPort_);
@@ -206,8 +205,7 @@ void RenderSingleChildScroll::PerformLayout()
 
     auto child = GetChildren().front();
 
-    LayoutParam layout;
-    layout = MakeInnerLayoutParam();
+    LayoutParam layout = MakeInnerLayoutParam();
     child->Layout(layout);
 
     // Get layout result of child.

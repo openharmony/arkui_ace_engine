@@ -153,13 +153,6 @@ public:
                                    .value_or(layoutProperty->HasLabel() ? textStyle.GetTextColor() : Color::BLACK)
                                    .ColorToString()
                                    .c_str(), filter);
-        auto fontFamilyVector =
-            layoutProperty->GetFontFamily().value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
-        std::string fontFamily = fontFamilyVector.at(0);
-        for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
-            fontFamily += ',' + fontFamilyVector.at(i);
-        }
-        json->PutExtAttr("fontFamily", fontFamily.c_str(), filter);
         json->PutExtAttr("fontStyle",
             layoutProperty->GetFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL ?
                 "FontStyle.Normal" : "FontStyle.Italic", filter);
@@ -173,7 +166,22 @@ public:
             "type", ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
         optionJson->Put("stateEffect", eventHub->GetStateEffect() ? "true" : "false");
         json->PutExtAttr("options", optionJson->ToString().c_str(), filter);
+        ToJsonValueAttribute(json, filter);
+    }
 
+    void ToJsonValueAttribute(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto fontFamilyVector =
+            layoutProperty->GetFontFamily().value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
+        std::string fontFamily = fontFamilyVector.at(0);
+        for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
+            fontFamily += ',' + fontFamilyVector.at(i);
+        }
+        json->PutExtAttr("fontFamily", fontFamily.c_str(), filter);
         auto fontJsValue = JsonUtil::Create(true);
         fontJsValue->Put("size", layoutProperty->GetFontSizeValue(Dimension(0)).ToString().c_str());
         fontJsValue->Put("weight",

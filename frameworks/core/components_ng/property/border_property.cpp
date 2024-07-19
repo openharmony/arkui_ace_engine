@@ -86,6 +86,27 @@ void BorderWidthPropertyT<Dimension>::ToJsonValue(std::unique_ptr<JsonValue>& js
     }
 }
 
+void BorderWidthPropertyT<Dimension>::ToDashJsonValue(std::unique_ptr<JsonValue>& json,
+    std::unique_ptr<JsonValue>& borderJson, const InspectorFilter& filter, const std::string& keyValue) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    if (multiValued) {
+        auto res = JsonUtil::Create(true);
+        res->Put("left", leftDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
+        res->Put("top", topDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
+        res->Put("right", rightDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
+        res->Put("bottom", bottomDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
+
+        borderJson->Put(keyValue.c_str(), res);
+    } else {
+        auto left = leftDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString();
+        borderJson->Put(keyValue.c_str(), left.c_str());
+    }
+}
+
 bool BorderWidthPropertyT<Dimension>::UpdateWithCheck(const BorderWidthPropertyT& value)
 {
     bool isModified = false;

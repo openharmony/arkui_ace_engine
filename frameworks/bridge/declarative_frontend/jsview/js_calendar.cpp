@@ -630,7 +630,7 @@ void JSCalendar::SetWorkStateStyle(const JSCallbackInfo& info)
     }
     CalcDimension workStateHorizontalMovingDistance;
     if (ConvertFromJSValue(
-            obj->GetProperty("workStateHorizontalMovingDistance"), workStateHorizontalMovingDistance)) {
+        obj->GetProperty("workStateHorizontalMovingDistance"), workStateHorizontalMovingDistance)) {
         workStateStyle.workStateHorizontalMovingDistance = workStateHorizontalMovingDistance;
     }
     CalcDimension workStateVerticalMovingDistance;

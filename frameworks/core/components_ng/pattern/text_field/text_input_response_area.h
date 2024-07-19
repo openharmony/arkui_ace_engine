@@ -54,6 +54,7 @@ public:
     SizeF GetFrameSize(bool withSafeArea = false);
 
 protected:
+    Alignment GetStackAlignment(const TextDirection& userDirection);
     void LayoutChild(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth);
     WeakPtr<Pattern> hostPattern_;
     RectF areaRect_;
@@ -86,6 +87,11 @@ public:
         ChangeObscuredState();
     }
 
+    bool IsObscured() const
+    {
+        return isObscured_;
+    }
+
     void Refresh() override;
 
     void ClearArea() override
@@ -97,6 +103,7 @@ public:
         CHECK_NULL_VOID(stackNode_);
         host->RemoveChildAndReturnIndex(stackNode_);
         passwordNode_.Reset();
+        areaRect_.Reset();
     }
 
     const RefPtr<FrameNode> GetFrameNode() override;
@@ -152,6 +159,7 @@ public:
         CHECK_NULL_VOID(host);
         CHECK_NULL_VOID(unitNode_);
         host->RemoveChildAndReturnIndex(unitNode_);
+        areaRect_.Reset();
     }
 
 private:

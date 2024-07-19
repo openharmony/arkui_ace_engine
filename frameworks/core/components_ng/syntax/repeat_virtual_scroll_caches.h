@@ -90,10 +90,10 @@ public:
 
     /**
      * for given index get key
-     * fetch from TS if not in cache
+     * fetch from TS if not in cache (if allowFetch == true)
      * return false if index out of range
      */
-    std::optional<std::string> GetKey4Index(uint32_t index);
+    std::optional<std::string> GetKey4Index(uint32_t index, bool allowFetch);
 
     /**
      * iterate over all entries of L1 and call function for each entry
@@ -102,6 +102,14 @@ public:
      * cbFunc returns false, enqueue key in L2
      */
     bool RebuildL1(const std::function<bool(int32_t index, const RefPtr<UINode>& node)>& cbFunc);
+
+    /*
+        drop L1 entry with given index from L1
+        keep it in L2
+        return the affected UINode
+        caller responsibility to detach this UINode from the UI tree!
+    */
+    RefPtr<UINode> DropFromL1(const std::string& key);
 
     int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& frameNode) const;
 
@@ -117,12 +125,12 @@ public:
     bool Purge();
 
     /**
-     * return the UINode for given index
+     * return the cached UINode for given index
      *
      * resolve index -> key -> UINode
      *
      */
-    RefPtr<UINode> GetNode4Index(uint32_t forIndex);
+    RefPtr<UINode> GetCachedNode4Index(uint32_t forIndex);
 
     void AddKeyToL1(const std::string& key)
     {
@@ -166,7 +174,7 @@ private:
      * the given ttype must match the template type the UINode for this key
      * has been rendered for (this info is available from node4key4ttype_)
      */
-    std::optional<std::string> GetL2KeyToUpdate(const std::string& ttype) const;
+    std::optional<std::string> GetL2KeyToUpdate(const std::optional<std::string>& ttype) const;
 
     /**
      * scenario: UI rebuild following key invalidation by TS side
@@ -185,7 +193,7 @@ private:
      *     the template type (ttype) remains unchanged
      *     update node4key4ttype_ and node4key_ entries to use new key point to same UINode
      */
-    RefPtr<UINode> HasUINodeBeenUpdated(
+    RefPtr<UINode> UINodeHasBeenUpdated(
         const std::string& ttype, const std::string& fromKey, const std::string& forKey);
 
     /** scenario: keys cache has been updated
@@ -208,11 +216,27 @@ private:
     uint32_t GetIndex4Key(const std::string& key) const;
 
     /**
+     * find UINode for given key, irrespective of ttype in ttype4index_
+     */
+    std::optional<std::string> GetTType4Index(uint32_t index);
+
+    /** find in node4key_ */
+    std::optional<CacheItem> GetCachedNode4Key(const std::optional<std::string>& key);
+    
+    /**
+     *  if key and ttype given, search for UINode of given key and ttype
+     * in caches, i.e. in node4key4ttype
+    * return nullptr in all other cases
+    */
+    RefPtr<UINode> GetCachedNode4Key4Ttype(
+        const std::optional<std::string>& key, const std::optional<std::string>& ttype);
+
+    /**
      *  for given index return distance from active range,
      *  or 0 if within active range
      *  distance is int max for invalidated keys
      */
-    int32_t GetDistanceFromRange(uint32_t index) const;
+    uint32_t GetDistanceFromRange(uint32_t index) const;
     /**
      * scenario: find L1 key that should be updated
      * choose the key whose index is the furthest away from active range

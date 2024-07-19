@@ -166,12 +166,24 @@ public:
         isSwiperTouchDown_ = isSwiperTouchDown;
     }
 
+    void SetIsHorizontalAndRTL(bool isHorizontalAndRTL)
+    {
+        isHorizontalAndRTL_ = isHorizontalAndRTL;
+    }
+
     void SetKeepStatus(bool keepStatus)
     {
         keepStatus_ = keepStatus;
     }
 
+    void UpdateCurrentStatus()
+    {
+        currentSelectedIndex_ = targetSelectedIndex_;
+        currentOverlongType_ = targetOverlongType_;
+    }
+
     void InitOverlongStatus(int32_t pageIndex);
+    void InitOverlongSelectedIndex(int32_t pageIndex);
     void CalcTargetSelectedIndex(int32_t currentPageIndex, int32_t targetPageIndex);
     void CalcTargetSelectedIndexOnForward(int32_t currentPageIndex, int32_t targetPageIndex);
     void CalcTargetSelectedIndexOnBackward(int32_t currentPageIndex, int32_t targetPageIndex);
@@ -185,15 +197,18 @@ private:
     void CalcTargetStatusOnAllPointMoveForward(const LinearVector<float>& itemHalfSizes);
     void CalcTargetStatusOnAllPointMoveBackward(const LinearVector<float>& itemHalfSizes);
     std::pair<LinearVector<float>, std::pair<float, float>> CalcIndicatorCenterX(
-        const LinearVector<float>& itemHalfSizes, int32_t selectedIndex, OverlongType overlongType, int32_t pageIndex);
+        const LinearVector<float>& itemHalfSizes, int32_t selectedIndex, OverlongType overlongType);
     LinearVector<float> CalcIndicatorSize(
-        const LinearVector<float>& itemHalfSizes, OverlongType overlongType, int32_t pageIndex, bool isWidth);
+        const LinearVector<float>& itemHalfSizes, OverlongType overlongType, bool isWidth);
     void UpdateSelectedCenterXOnDrag(const LinearVector<float>& itemHalfSizes);
     void UpdateUnselectedCenterXOnDrag();
     int32_t CalcTargetIndexOnDrag() const;
     std::pair<float, float> CalcLongPointEndCenterXWithBlack(int32_t index, const LinearVector<float>& itemHalfSizes);
     float GetMoveRateOnAllMove() const;
     int32_t GetBlackPointsAnimationDuration() const;
+    void AdjustTargetStatus(int32_t targetPageIndex);
+    std::pair<float, float> GetTouchBottomCenterX(ContentProperty& contentProperty);
+    OverlongType RevertOverlongType(OverlongType overlongType) const;
 
     RefPtr<AnimatablePropertyUint8> firstPointOpacity_;
     RefPtr<AnimatablePropertyUint8> newPointOpacity_;
@@ -228,6 +243,7 @@ private:
     bool isSwiperTouchDown_ = false;
     bool keepStatus_ = false;
     bool blackPointsAnimEnd_ = true;
+    bool isHorizontalAndRTL_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(OverlengthDotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG

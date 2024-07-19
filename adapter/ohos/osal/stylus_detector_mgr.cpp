@@ -28,6 +28,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/components_ng/pattern/search/search_text_field.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -51,6 +52,12 @@ void StylusDetectorMgr::StylusDetectorCallBack::RequestFocus(int32_t nodeId)
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
+    if (frameNode->GetTag() == V2::SEARCH_Field_ETS_TAG) {
+        auto searchTextFieldPattern = frameNode->GetPattern<NG::SearchTextFieldPattern>();
+        CHECK_NULL_VOID(searchTextFieldPattern);
+        focusHub = searchTextFieldPattern->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+    }
     if (!focusHub->IsCurrentFocus()) {
         focusHub->RequestFocusImmediately();
     }
@@ -59,7 +66,7 @@ void StylusDetectorMgr::StylusDetectorCallBack::RequestFocus(int32_t nodeId)
     }
     auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    bool needToRequestKeyBoardOnFocus = pattern->GetNeedToRequestKeyboardOnFocus();
+    bool needToRequestKeyBoardOnFocus = pattern->NeedToRequestKeyboardOnFocus();
     if (!needToRequestKeyBoardOnFocus) {
         pattern->RequestKeyboard(false, true, true);
     }
@@ -224,6 +231,7 @@ void StylusDetectorMgr::RemoveTextFieldFrameNode(const int32_t id)
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
         auto bundleName = container->GetBundleName();
+        isRegistered_ = false;
         UnRegisterStylusInteractionListener(bundleName);
     }
 }
@@ -311,7 +319,7 @@ RefPtr<NG::FrameNode> StylusDetectorMgr::FindTextInputFrameNodeByPosition(float 
         auto globalFrameRect = geometryNode->GetFrameRect() + NG::SizeF(0, HOT_AREA_ADJUST_SIZE.ConvertToPx() * 2);
         globalFrameRect.SetOffset(frameNode->CalculateCachedTransformRelativeOffset(nanoTimestamp) +
                                   NG::OffsetF(0, -HOT_AREA_ADJUST_SIZE.ConvertToPx()));
-        if (globalFrameRect.IsInRegion(point)) {
+        if (globalFrameRect.IsInRegion(point) && !IsHitCleanNodeResponseArea(point, frameNode, nanoTimestamp)) {
             hitFrameNodes.insert(frameNode);
         }
     }
@@ -336,5 +344,31 @@ RefPtr<NG::FrameNode> StylusDetectorMgr::FindTextInputFrameNodeByPosition(float 
 bool StylusDetectorMgr::IsStylusTouchEvent(const TouchEvent& touchEvent) const
 {
     return touchEvent.sourceTool == SourceTool::PEN && touchEvent.type == TouchType::DOWN;
+}
+
+bool StylusDetectorMgr::IsHitCleanNodeResponseArea(
+    const NG::PointF& point, const RefPtr<NG::FrameNode>& frameNode, uint64_t nanoTimestamp)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    if (frameNode->GetTag() != V2::TEXTINPUT_ETS_TAG) {
+        return false;
+    }
+
+    auto textFieldPattern = frameNode->GetPattern<NG::TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    auto responseArea = textFieldPattern->GetCleanNodeResponseArea();
+    CHECK_NULL_RETURN(responseArea, false);
+    auto cleanNodeResponseArea = AceType::DynamicCast<NG::CleanNodeResponseArea>(responseArea);
+    if (!cleanNodeResponseArea->IsShow()) {
+        return false;
+    }
+
+    auto cleanNodeFrameNode = cleanNodeResponseArea->GetFrameNode();
+    CHECK_NULL_RETURN(cleanNodeFrameNode, false);
+    auto cleanNodeGeometryNode = cleanNodeFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(cleanNodeGeometryNode, false);
+    auto globalFrameRect = cleanNodeGeometryNode->GetFrameRect();
+    globalFrameRect.SetOffset(cleanNodeFrameNode->CalculateCachedTransformRelativeOffset(nanoTimestamp));
+    return globalFrameRect.IsInRegion(point);
 }
 } // namespace OHOS::Ace

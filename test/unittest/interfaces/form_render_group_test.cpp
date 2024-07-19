@@ -14,12 +14,13 @@
  */
 #include <thread>
 #include <chrono>
-#define private public
 #include "test/mock/interfaces/mock_uicontent.h"
 #include "ui_content.h"
 #include "interfaces/inner_api/form_render/include/form_renderer.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
+#define private public
 #include "interfaces/inner_api/form_render/include/form_renderer_group.h"
+#undef private
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;

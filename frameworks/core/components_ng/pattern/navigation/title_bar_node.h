@@ -92,15 +92,6 @@ public:
         moreMenuNode_ = moreMenuNode;
     }
 
-    void SetIsTitleMenuNodeShowing(const bool isTitleMenuNodeShowing)
-    {
-        isTitleMenuNodeShowing_ = isTitleMenuNodeShowing;
-    }
-
-    bool IsTitleMenuNodeShowing() const
-    {
-        return isTitleMenuNodeShowing_;
-    }
     // The function is only used for fast preview.
     void FastPreviewUpdateChild(int32_t slot, const RefPtr<UINode>& newChild) override;
 
@@ -120,7 +111,6 @@ private:
     RefPtr<UINode> menu_;
     RefPtr<UINode> prevMenu_;
     RefPtr<UINode> moreMenuNode_;
-    bool isTitleMenuNodeShowing_ = false;
 };
 
 } // namespace OHOS::Ace::NG

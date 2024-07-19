@@ -16,7 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CANVAS_MODEL_IMPL_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CANVAS_MODEL_IMPL_H
 
-#include "core/components_ng/pattern/custom_paint/canvas_model.h"
+#include "core/components_ng/pattern/canvas/canvas_model.h"
 
 namespace OHOS::Ace::Framework {
 class CanvasModelImpl : public OHOS::Ace::CanvasModel {

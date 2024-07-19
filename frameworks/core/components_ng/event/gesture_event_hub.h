@@ -270,6 +270,11 @@ public:
         return clickEventActuator_ != nullptr;
     }
 
+    bool IsUserClickable() const
+    {
+        return clickEventActuator_ != nullptr && clickEventActuator_->IsUserClickable();
+    }
+
     bool IsAccessibilityClickable();
     bool IsAccessibilityLongClickable();
 

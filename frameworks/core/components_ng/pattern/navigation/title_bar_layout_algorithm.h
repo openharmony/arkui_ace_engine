@@ -84,7 +84,9 @@ public:
     }
 
 private:
-    void BackButtonLayout(const RefPtr<FrameNode>& backButtonNode, const RefPtr<LayoutProperty>& buttonLayoutProperty);
+    void BackButtonLayout(LayoutWrapper* layoutWrapper);
+
+    void UpdateIconSize(const RefPtr<FrameNode>& backButtonNode);
 
     void MeasureBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);

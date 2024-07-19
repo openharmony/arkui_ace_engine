@@ -630,6 +630,7 @@ HWTEST_F(SearchTestTwoNg, Pattern023, TestSize.Level1)
     ASSERT_NE(textFieldFrameNode, nullptr);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
+    frameNode->onMainTree_ = true;
 
     /**
      * @tc.step: step2. create column layout.
@@ -939,7 +940,7 @@ HWTEST_F(SearchTestTwoNg, SetProperty001, TestSize.Level1)
     searchModelInstance.SetHeight(Dimension(2.5, DimensionUnit::VP));
 
     //test SetOnChange
-    searchModelInstance.SetOnChange([](const std::string str, TextRange range) {});
+    searchModelInstance.SetOnChange([](const std::string str, PreviewText previewText) {});
     EXPECT_NE(eventHub->GetOnChange(), nullptr);
 
     //test SetOnTextSelectionChange
@@ -1339,5 +1340,28 @@ HWTEST_F(SearchTestTwoNg, UpdateInspectorId001, TestSize.Level1)
         auto result4 = INSPECTOR_PREFIX + SPECIALIZED_INSPECTOR_INDEX[CANCEL_IMAGE_INDEX] + idNames[i];
         EXPECT_TRUE(cancelImageFrameNode->GetInspectorIdValue() == result4);
     }
+}
+
+/**
+ * @tc.name: SearchTypeToString001
+ * @tc.desc: test search pattern UpdateInspectorId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, SearchTypeToString001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.SetType(TextInputType::URL);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+
+    /**
+     * @tc.step: step2.  Call SearchTypeToString.
+     */
+    EXPECT_EQ(pattern->SearchTypeToString(), "SearchType.URL");
 }
 } // namespace OHOS::Ace::NG

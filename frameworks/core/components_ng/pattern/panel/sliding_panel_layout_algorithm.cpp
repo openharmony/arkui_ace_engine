@@ -58,11 +58,10 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto idealSize =
         !invisibleFlag_
             ? ((PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9)
-                      ? CreateIdealSizeByPercentRef(layoutConstraint.value(), Axis::HORIZONTAL,
-                            layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT))
-                            .ConvertToSizeT()
-                      : CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL,
-                            layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true))
+                ? CreateIdealSizeByPercentRef(layoutConstraint.value(), Axis::HORIZONTAL,
+                    layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT()
+                : CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL,
+                    layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true))
             : SizeF();
     auto width = GetMaxWidthByScreenSizeType(maxSize, idealSize);
     maxWidth_ = width;
@@ -206,7 +205,7 @@ float SlidingPanelLayoutAlgorithm::GetMaxWidthByScreenSizeType(const SizeF& maxS
     columnInfo->GetParent()->BuildColumnWidth(maxSize.Width());
     auto gridSizeType = ScreenSystemManager::GetInstance().GetSize(maxSize.Width());
     auto width = 0.0f;
-    auto columns = 0;
+    uint32_t columns = 0;
     switch (gridSizeType) {
         case ScreenSizeType::UNDEFINED:
         case ScreenSizeType::XS:
