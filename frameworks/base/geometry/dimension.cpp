@@ -168,8 +168,8 @@ double Dimension::ConvertToPxWithSize(double size) const
 
 double Dimension::ConvertToPxDistribute(std::optional<float> minOptional, std::optional<float> maxOptional) const
 {
-    auto minFontScale = minOptional.value_or(0.85f);
-    auto maxFontScale = maxOptional.value_or(3.2f);
+    auto minFontScale = minOptional.value_or(0.0f);
+    auto maxFontScale = maxOptional.value_or(static_cast<float>(INT32_MAX));
     if (!maxOptional.has_value()) {
         return ConvertToPxByAppFontScale(minFontScale);
     }
@@ -194,7 +194,10 @@ double Dimension::ConvertToPxByAppFontScale(float minFontScale) const
     }
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, value_);
-    float maxFontScale = 3.2f;
+    if (!pipeline->IsFollowSystem()) {
+        return value_ * pipeline->GetDipScale();
+    }
+    float maxFontScale = pipeline->GetMaxAppFontScale();
     float fontScale = std::clamp(pipeline->GetFontScale(), minFontScale, maxFontScale);
     return value_ * pipeline->GetDipScale() * fontScale;
 }

@@ -190,10 +190,13 @@ void JSText::SetMinFontScale(const JSCallbackInfo& info)
 {
     double minFontScale;
     if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale)) {
-        TextModel::GetInstance()->SetMinFontScale(1.0f);
         return;
     }
-    if (LessOrEqual(minFontScale, 0.0f) || GreatOrEqual(minFontScale, 1.0f)) {
+    if (LessOrEqual(minFontScale, 0.0f)) {
+        TextModel::GetInstance()->SetMinFontScale(0.0f);
+        return;
+    }
+    if (GreatOrEqual(minFontScale, 1.0f)) {
         TextModel::GetInstance()->SetMinFontScale(1.0f);
         return;
     }
@@ -204,7 +207,6 @@ void JSText::SetMaxFontScale(const JSCallbackInfo& info)
 {
     double maxFontScale;
     if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale)) {
-        TextModel::GetInstance()->SetMaxFontScale(1.0f);
         return;
     }
     if (LessOrEqual(maxFontScale, 1.0f)) {

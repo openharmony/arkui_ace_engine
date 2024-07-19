@@ -369,6 +369,26 @@ public:
 
     void UpdateFontWeightScale();
 
+    void SetFollowSystem(bool followSystem)
+    {
+        followSystem_ = followSystem;
+    }
+
+    void SetMaxAppFontScale(float maxAppFontScale)
+    {
+        maxAppFontScale_ = maxAppFontScale;
+    }
+
+    float GetMaxAppFontScale()
+    {
+        return maxAppFontScale_;
+    }
+
+    bool IsFollowSystem()
+    {
+        return followSystem_;
+    }
+
     double NormalizeToPx(const Dimension& dimension) const;
 
     double ConvertPxToVp(const Dimension& dimension) const;
@@ -1460,6 +1480,9 @@ private:
     WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     uint32_t frameCount_ = 0;
+
+    bool followSystem_ = true;
+    float maxAppFontScale_ = static_cast<float>(INT32_MAX);
 
     // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
     std::mutex densityChangeMutex_;
