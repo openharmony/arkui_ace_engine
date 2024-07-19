@@ -148,7 +148,7 @@ void ToastView::UpdateTextContext(const RefPtr<FrameNode>& textNode)
         textContext->UpdateBackgroundColor(Color::TRANSPARENT);
         BlurStyleOption styleOption;
         styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
-        styleOption.policy = BlurStyleActivePolicy::ALAWYS_ACTIVE;
+        styleOption.policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
         textContext->UpdateBackBlurStyle(styleOption);
     } else {
         auto toastBackgroundColor = toastTheme->GetBackgroundColor();

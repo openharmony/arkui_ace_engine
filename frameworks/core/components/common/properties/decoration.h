@@ -155,7 +155,7 @@ struct BlurStyleOption {
         static const char* COLOR_MODE[] = { "ThemeColorMode.System", "ThemeColorMode.Light", "ThemeColorMode.Dark" };
         static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
         static const char* POLICY[] = { "BlurStyleActivePolicy.FOLLOWS_WINDOW_ACTIVE_STATE",
-            "BlurStyleActivePolicy.ALAWYS_ACTIVE", "BlurStyleActivePolicy.ALAWYS_INACTIVE" };
+            "BlurStyleActivePolicy.ALWAYS_ACTIVE", "BlurStyleActivePolicy.ALWAYS_INACTIVE" };
         static const char* BLUR_TYPE[] = { "BlurType.WITHIN_WINDOW", "BlurType.BEHIND_WINDOW" };
         auto jsonBlurStyle = JsonUtil::Create(true);
         jsonBlurStyle->Put("value", STYLE[static_cast<int>(blurStyle)]);
