@@ -89,6 +89,13 @@ constexpr uint8_t CAPTURE_PIXEL_ROUND_VALUE = static_cast<uint8_t>(PixelRoundPol
                                               static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
                                               static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
                                               static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+constexpr char APP_SWIPER_NO_ANIMATION_SWITCH[] = "APP_SWIPER_NO_ANIMATION_SWITCH";
+constexpr char APP_SWIPER_FRAME_ANIMATION[] = "APP_SWIPER_FRAME_ANIMATION";
+constexpr char APP_TABS_FLING[] = "APP_TABS_FLING";
+constexpr char APP_TABS_SCROLL[] = "APP_TABS_SCROLL";
+constexpr char APP_TABS_NO_ANIMATION_SWITCH[] = "APP_TABS_NO_ANIMATION_SWITCH";
+constexpr char APP_TABS_FRAME_ANIMATION[] = "APP_TABS_FRAME_ANIMATION";
+
 // TODO define as common method
 float CalculateFriction(float gamma)
 {
@@ -343,6 +350,11 @@ void SwiperPattern::OnModifyDone()
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+
+    auto index = CurrentIndex();
+    if (currentIndex_ != index && index >= 0) {
+        AceAsyncTraceBegin(0, hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
+    }
 
     InitIndicator();
     InitArrow();
@@ -928,6 +940,15 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
 
     if (jumpIndex_) {
+        auto pipeline = GetContext();
+        if (pipeline) {
+            pipeline->AddAfterRenderTask([weak = WeakClaim(this)]() {
+                auto swiper = weak.Upgrade();
+                CHECK_NULL_VOID(swiper);
+                AceAsyncTraceEnd(
+                    0, swiper->hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
+            });
+        }
         isJump = true;
         UpdateCurrentIndex(swiperLayoutAlgorithm->GetCurrentIndex());
         AdjustCurrentFocusIndex();
@@ -1368,6 +1389,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     StopSpringAnimationImmediately();
     StopIndicatorAnimation(true);
     jumpIndex_ = index;
+    AceAsyncTraceBegin(0, hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
     uiCastJumpIndex_ = index;
     MarkDirtyNodeSelf();
     FireAndCleanScrollingListener();
@@ -2662,8 +2684,9 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
 {
     if (!hasTabsAncestor_) {
         PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_SCROLL, PerfActionType::FIRST_MOVE, "");
+    } else {
+        AceAsyncTraceBegin(0, APP_TABS_SCROLL);
     }
-    ACE_SCOPED_TRACE_COMMERCIAL("%s drag start", hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG);
     UpdateDragFRCSceneInfo(info.GetMainVelocity(), SceneStatus::START);
 
     StopAnimationOnScrollStart(
@@ -2739,8 +2762,9 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
 {
     if (!hasTabsAncestor_) {
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_SCROLL, false);
+    } else {
+        AceAsyncTraceEnd(0, APP_TABS_SCROLL);
     }
-    ACE_SCOPED_TRACE_COMMERCIAL("%s drag end", hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG);
     isTouchDown_ = false;
     isTouchDownOnOverlong_ = false;
     if (!CheckSwiperPanEvent(dragVelocity)) {
@@ -3060,6 +3084,8 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
 #endif
         if (!swiper->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, true);
+        } else {
+            AceAsyncTraceEnd(0, APP_TABS_FLING);
         }
         OffsetF finalOffset =
             swiper->itemPosition_.empty() ? OffsetF()
@@ -3095,6 +3121,8 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
 #endif
         if (!swiperPattern->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::LAST_UP, "");
+        } else {
+            AceAsyncTraceBegin(0, APP_TABS_FLING);
         }
         TAG_LOGI(AceLogTag::ACE_SWIPER,
             "Swiper start property translate animation with offsetX: %{public}f, offsetY: %{public}f", offset.GetX(),
@@ -3365,8 +3393,7 @@ void SwiperPattern::PlayTranslateAnimation(
             host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, endPos);
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
-            ACE_SCOPED_TRACE_COMMERCIAL("%s start translate animation",
-                swiper->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG);
+            AceAsyncTraceBegin(0, swiper->hasTabsAncestor_ ? APP_TABS_FRAME_ANIMATION : APP_SWIPER_FRAME_ANIMATION);
             AnimationCallbackInfo info;
             info.velocity = Dimension(velocity, DimensionUnit::PX).ConvertToVp();
             info.currentOffset = swiper->GetCustomPropertyOffset() +
@@ -3384,8 +3411,7 @@ void SwiperPattern::PlayTranslateAnimation(
         [weak, nextIndex, restartAutoPlay, finishAnimation]() {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
-            ACE_SCOPED_TRACE_COMMERCIAL("%s finish translate animation",
-                swiper->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG);
+            AceAsyncTraceEnd(0, swiper->hasTabsAncestor_ ? APP_TABS_FRAME_ANIMATION : APP_SWIPER_FRAME_ANIMATION);
             if (finishAnimation && swiper->translateAnimationIsRunning_) {
                 swiper->isFinishAnimation_ = true;
             }
