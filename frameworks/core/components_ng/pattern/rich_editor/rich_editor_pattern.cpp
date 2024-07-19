@@ -6079,8 +6079,9 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
     TextInsertValueInfo spanInfo;
     CalcInsertValueObj(spanInfo);
     auto spanNode = DynamicCast<FrameNode>(GetChildByIndex(spanInfo.GetSpanIndex() - 1));
-    if (spanNode && spanNode->GetTag() == V2::IMAGE_ETS_TAG && spanInfo.GetOffsetInSpan() == 0 &&
-        selectEnd == selectStart + 1 && BetweenSelectedPosition(info.GetGlobalLocation())) {
+    auto isNeedSelected = spanNode && (spanNode->GetTag() == V2::IMAGE_ETS_TAG ||
+        spanNode->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG);
+    if (isNeedSelected && BetweenSelectedPosition(info.GetGlobalLocation())) {
         selectedType_ = TextSpanType::IMAGE;
         FireOnSelect(selectStart, selectEnd);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

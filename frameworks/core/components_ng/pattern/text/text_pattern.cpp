@@ -1475,6 +1475,19 @@ void TextPattern::AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& r
 void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
 {
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
+    if (isSpanStringMode_) {
+        std::vector<uint8_t> arr;
+        auto dragSpanString = styledString_->GetSubSpanString(recoverStart_, recoverEnd_ - recoverStart_);
+        dragSpanString->EncodeTlv(arr);
+        UdmfClient::GetInstance()->AddSpanStringRecord(unifiedData, arr);
+    } else {
+        ProcessNormalUdmfData(unifiedData);
+    }
+    event->SetData(unifiedData);
+}
+
+void TextPattern::ProcessNormalUdmfData(const RefPtr<UnifiedData>& unifiedData)
+{
     std::list<ResultObject> finalResult;
     auto type = SelectSpanType::TYPESPAN;
     for (const auto& resultObj : dragResultObjects_) {
@@ -1497,29 +1510,32 @@ void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
         }
         if (result.type == SelectSpanType::TYPEIMAGE) {
             if (result.valuePixelMap) {
-                const uint8_t* pixels = result.valuePixelMap->GetPixels();
-                CHECK_NULL_VOID(pixels);
-                int32_t length = result.valuePixelMap->GetByteCount();
-                std::vector<uint8_t> data(pixels, pixels + length);
-                PixelMapRecordDetails details = { result.valuePixelMap->GetWidth(), result.valuePixelMap->GetHeight(),
-                    result.valuePixelMap->GetPixelFormat(), result.valuePixelMap->GetAlphaType() };
-                UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data, details);
+                pattern->AddPixelMapToUdmfData(result.valuePixelMap, unifiedData);
             } else if (result.valueString.size() > 1) {
                 UdmfClient::GetInstance()->AddImageRecord(unifiedData, result.valueString);
+            } else {
+                // builder span, fill pixelmap data
+                auto builderNode = DynamicCast<FrameNode>(pattern->GetChildByIndex(result.spanPosition.spanIndex));
+                CHECK_NULL_VOID(builderNode);
+                pattern->AddPixelMapToUdmfData(builderNode->GetPixelMap(), unifiedData);
             }
         }
     };
-    if (isSpanStringMode_) {
-        std::vector<uint8_t> arr;
-        auto dragSpanString = styledString_->GetSubSpanString(recoverStart_, recoverEnd_ - recoverStart_);
-        dragSpanString->EncodeTlv(arr);
-        UdmfClient::GetInstance()->AddSpanStringRecord(unifiedData, arr);
-    } else {
-        for (const auto& resultObj : finalResult) {
-            resultProcessor(resultObj);
-        }
+    for (const auto& resultObj : finalResult) {
+        resultProcessor(resultObj);
     }
-    event->SetData(unifiedData);
+}
+
+void TextPattern::AddPixelMapToUdmfData(const RefPtr<PixelMap>& pixelMap, const RefPtr<UnifiedData>& unifiedData)
+{
+    CHECK_NULL_VOID(pixelMap && unifiedData);
+    const uint8_t* pixels = pixelMap->GetPixels();
+    CHECK_NULL_VOID(pixels);
+    int32_t length = pixelMap->GetByteCount();
+    std::vector<uint8_t> data(pixels, pixels + length);
+    PixelMapRecordDetails details = { pixelMap->GetWidth(), pixelMap->GetHeight(),
+        pixelMap->GetPixelFormat(), pixelMap->GetAlphaType() };
+    UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data, details);
 }
 
 void TextPattern::CloseOperate()
