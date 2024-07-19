@@ -258,11 +258,11 @@ public:
             downloadCondition->cv.notify_all();
         });
         task->OnFail([downloadCondition](const NetStackRequest& request, const NetStackResponse& response,
-                         const NetStackError& error) { OnFail(downloadCondition, request, response, error); });
+                        const NetStackError& error) { OnFail(downloadCondition, request, response, error); });
         if (downloadCallback.onProgressCallback) {
             task->OnProgress([onProgressCallback = downloadCallback.onProgressCallback, instanceId](
-                                 const NetStackRequest& request, u_long dlTotal, u_long dlNow, u_long ulTotal,
-                                 u_long ulNow) { onProgressCallback(dlTotal, dlNow, false, instanceId); });
+                                const NetStackRequest& request, u_long dlTotal, u_long dlNow, u_long ulTotal,
+                                u_long ulNow) { onProgressCallback(dlTotal, dlNow, false, instanceId); });
         }
         AddDownloadTask(url, task, nodeId);
         auto result = task->Start();
