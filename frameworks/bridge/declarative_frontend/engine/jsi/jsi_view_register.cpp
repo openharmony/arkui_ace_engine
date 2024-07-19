@@ -1626,7 +1626,12 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
 
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "MainAxisAlign"), *mainAxisAlign);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "CrossAxisAlign"), *crossAxisAlign);
-    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Direction"), *direction);
+
+    auto container = Container::Current();
+    if (container == nullptr || !container->IsDynamicRender()) {
+        globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Direction"), *direction);
+    }
+
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "StackFit"), *stackFit);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Align"), *alignment);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Overflow"), *overflow);
