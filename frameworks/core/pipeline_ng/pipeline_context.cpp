@@ -3093,9 +3093,9 @@ void PipelineContext::OnHide()
     RequestFrame();
     OnVirtualKeyboardAreaChange(Rect());
     FlushWindowStateChangedCallback(false);
-    AccessibilityEvent event;
-    event.type = AccessibilityEventType::PAGE_CHANGE;
-    SendEventToAccessibility(event);
+    auto rootNode = GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    rootNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE);
 }
 
 void PipelineContext::WindowFocus(bool isFocus)
