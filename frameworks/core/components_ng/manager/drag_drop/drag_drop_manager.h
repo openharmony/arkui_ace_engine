@@ -445,6 +445,20 @@ public:
 
     bool IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode);
 
+    void AddNewDragAnimation()
+    {
+        currentAnimationCnt_++;
+        allAnimationCnt_++;
+    }
+
+    bool IsAllAnimationFinished()
+    {
+        currentAnimationCnt_--;
+        return currentAnimationCnt_ == 0;
+    }
+
+    float GetCurrentDistance(float x, float y);
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -498,7 +512,6 @@ private:
     RefPtr<Clipboard> clipboard_;
     Point preMovePoint_ = Point(0, 0);
     uint64_t preTimeStamp_ = 0L;
-    int64_t nanoPreDragMoveAnimationTime_ = 0L;
     WeakPtr<FrameNode> prepareDragFrameNode_;
     std::function<void(const std::string&)> addDataCallback_ = nullptr;
     std::function<void(const std::string&)> getDataCallback_ = nullptr;
@@ -532,12 +545,15 @@ private:
     bool isDragFwkShow_ { false };
     OffsetF pixelMapOffset_;
     OffsetF prePointerOffset_;
+    OffsetF curPointerOffset_;
     std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
     bool hasGatherNode_ = false;
     bool isTouchGatherAnimationPlaying_ = false;
     bool isShowBadgeAnimation_ = true;
     bool eventStrictReportingEnabled_ = false;
     int32_t badgeNumber_ = -1;
+    int32_t currentAnimationCnt_ = 0;
+    int32_t allAnimationCnt_ = 0;
     bool isDragWithContextMenu_ = false;
     Point dragDampStartPoint_ { 1, 1 };
     OffsetF dragMovePosition_ = OffsetF(0.0f, 0.0f);
