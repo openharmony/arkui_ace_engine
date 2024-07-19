@@ -1117,6 +1117,7 @@ void TabBarPattern::HandleBottomTabBarChange(int32_t index)
 {
     AnimationUtils::CloseImplicitAnimation();
     auto preIndex = GetImageColorOnIndex().value_or(indicator_);
+    SetImageColorOnIndex(index);
     UpdateImageColor(index);
     UpdateSymbolStats(index, preIndex);
     if (preIndex < 0 || preIndex >= static_cast<int32_t>(tabBarStyles_.size()) ||
