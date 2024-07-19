@@ -111,7 +111,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto scrollNode = layoutWrapper->GetHostNode();
     auto geometryNode = layoutWrapper->GetGeometryNode();
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID((scrollNode || geometryNode || childWrapper);
+    CHECK_NULL_VOID((scrollNode || geometryNode || childWrapper));
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(scrollNode->GetPattern());
     auto childGeometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_VOID(childGeometryNode);
