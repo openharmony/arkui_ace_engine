@@ -609,13 +609,15 @@ bool WaterFlowLayoutInfoSW::AdjustLanes(const std::vector<WaterFlowSections::Sec
 
 bool WaterFlowLayoutInfoSW::PrepareNewStartIndex()
 {
-    if (newStartIndex_ == INVALID_NEW_START_INDEX) {
-        return false;
-    }
     if (newStartIndex_ == EMPTY_NEW_START_INDEX) {
         newStartIndex_ = StartIndex();
     }
-    
+    if (newStartIndex_ == Infinity<int32_t>()) {
+        newStartIndex_ = INVALID_NEW_START_INDEX;
+    }
+    if (newStartIndex_ == INVALID_NEW_START_INDEX) {
+        return false;
+    }
     return true;
 }
 
