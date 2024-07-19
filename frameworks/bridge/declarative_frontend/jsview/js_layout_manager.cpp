@@ -45,7 +45,7 @@ void JSLayoutManager::GetLineMetrics(const JSCallbackInfo& args)
     }
     int32_t lineIndex = 0;
     JSViewAbstract::ParseJsInteger<int32_t>(args[0], lineIndex);
-    if (lineIndex < 0 || lineIndex >= layoutInfoInterface->GetLineCount()) {
+    if (lineIndex < 0 || lineIndex >= static_cast<int32_t>(layoutInfoInterface->GetLineCount())) {
         return;
     }
     auto lineMetrics = layoutInfoInterface->GetLineMetrics(lineIndex);
