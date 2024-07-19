@@ -1347,9 +1347,9 @@ struct CustomDialogContentComponent {
   buildVerticalAlignButtons(): void {
     if (this.buttons) {
       Column() {
-        ForEach(this.buttons.length === HORIZON_BUTTON_MAX_COUNT ? this.buttons.reverse() :
-        this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), (item: ButtonOptions, index: number) => {
-          this.buildButtonWithDivider(index);
+        ForEach(this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), (item: ButtonOptions, index: number) => {
+          this.buildButtonWithDivider(this.buttons.length === HORIZON_BUTTON_MAX_COUNT ?
+            HORIZON_BUTTON_MAX_COUNT - index - 1 : index);
         }, (item: ButtonOptions) => item.value.toString());
       }
     }
@@ -1401,7 +1401,8 @@ struct CustomDialogContentComponent {
         this.buildSingleButton(this.buttons[index]);
       }
 
-      if (index < Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
+      if ((this.buttons.length === HORIZON_BUTTON_MAX_COUNT ? HORIZON_BUTTON_MAX_COUNT - index - 1 : index) <
+        Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
         Row() {
         }
         .height($r('sys.float.alert_button_vertical_space'))

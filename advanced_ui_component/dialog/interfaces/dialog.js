@@ -3624,10 +3624,10 @@ class CustomDialogContentComponent extends ViewPU {
                         ForEach.create();
                         const forEachItemGenFunction = (_item, index) => {
                             const item = _item;
-                            this.buildButtonWithDivider.bind(this)(index, parent ? parent : this);
+                            this.buildButtonWithDivider.bind(this)(this.buttons.length === HORIZON_BUTTON_MAX_COUNT ?
+                                HORIZON_BUTTON_MAX_COUNT - index - 1 : index, parent ? parent : this);
                         };
-                        this.forEachUpdateFunction(elmtId, this.buttons.length === HORIZON_BUTTON_MAX_COUNT ?
-                        this.buttons.reverse() : this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT),
+                        this.forEachUpdateFunction(elmtId, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT),
                             forEachItemGenFunction, (item) => item.value.toString(), true, false);
                     }, ForEach);
                     ForEach.pop();
@@ -3686,7 +3686,8 @@ class CustomDialogContentComponent extends ViewPU {
                     Row.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (index < Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
+                        if ((this.buttons.length === HORIZON_BUTTON_MAX_COUNT ? HORIZON_BUTTON_MAX_COUNT - index - 1 :
+                            index) < Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Row.create();
@@ -3963,7 +3964,7 @@ export class LoadingDialog extends ViewPU {
                         fontSizeScale: this.__fontSizeScale,
                         minContentHeight: this.__minContentHeight,
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 1570 });
+                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 1573 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
