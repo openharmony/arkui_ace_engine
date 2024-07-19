@@ -1664,6 +1664,13 @@ void DragDropManager::UpdateDragPreviewScale()
 void DragDropManager::DoDragStartAnimation(
     const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event, bool isSubwindowOverlay)
 {
+    auto containerId = Container::CurrentId();
+    auto deviceId = event.GetDeviceId();
+    if (deviceId == 0xFFFFFFFF) {
+        isDragFwkShow_ = false;
+        TransDragWindowToDragFwk(containerId);
+        return;
+    }
     CHECK_NULL_VOID(overlayManager);
     if (!(GetDragPreviewInfo(overlayManager, info_))
         || (!IsNeedDisplayInSubwindow() && !isSubwindowOverlay && !isDragWithContextMenu_)) {
@@ -1674,7 +1681,6 @@ void DragDropManager::DoDragStartAnimation(
         return;
     }
     CHECK_NULL_VOID(info_.imageNode);
-    auto containerId = Container::CurrentId();
     isDragFwkShow_ = false;
     ResetPullMoveReceivedForCurrentDrag();
     auto distance = CalcDragPreviewDistanceWithPoint(PRESERVE_HEIGHT, event.GetGlobalLocation().GetX(),
@@ -1692,6 +1698,13 @@ void DragDropManager::DoDragStartAnimation(
         static_cast<int32_t>(event.GetGlobalLocation().GetY()), info_);
     nanoPreDragMoveAnimationTime_ = GetSysTimestamp();
     prePointerOffset_ = { newOffset.GetX(), newOffset.GetY() };
+    DragStartAnimation(newOffset, overlayManager, gatherNodeCenter);
+}
+
+void DragDropManager::DragStartAnimation(
+    const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager, const OffsetF& gatherNodeCenter)
+{
+    auto containerId = Container::CurrentId();
     AnimationOption option;
     const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.347f, 0.99f, 0.0f);
     constexpr int32_t animateDuration = 300;
