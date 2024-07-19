@@ -602,6 +602,8 @@ public:
         isKeyboardClosedByUser_ = false;
     }
 
+    void OnDirectionConfigurationUpdate() override;
+
     void NotifyKeyboardClosed() override
     {
         if (HasFocus()) {
@@ -1197,7 +1199,7 @@ public:
 
     OffsetF GetTextPaintOffset() const override;
 
-    OffsetF GetPaintRectGlobalOffset(bool duringLayout = false) const;
+    OffsetF GetPaintRectGlobalOffset() const;
 
     void NeedRequestKeyboard()
     {
