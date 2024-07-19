@@ -496,8 +496,8 @@ private:
 
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
-    double defaultPickerItemHeight_;
-    double resizePickerItemHeight_;
+    double defaultPickerItemHeight_ = 0.0;
+    double resizePickerItemHeight_ = 0.0;
     uint32_t selectedIndex_ = 0;
     std::vector<NG::RangeContent> range_;
     std::vector<NG::RangeContent> options_;
