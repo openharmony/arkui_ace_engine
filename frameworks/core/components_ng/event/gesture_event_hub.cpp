@@ -1308,6 +1308,46 @@ OnAccessibilityEventFunc GestureEventHub::GetOnAccessibilityEventFunc()
     return callback;
 }
 
+template<typename T>
+const RefPtr<T> GestureEventHub::AccessibilityRecursionSearchRecognizer(const RefPtr<NGGestureRecognizer>& recognizer)
+{
+    auto CheckRecognizer = [](const RefPtr<NGGestureRecognizer>& recognizer) {
+        const auto re = AceType::DynamicCast<ClickRecognizer>(recognizer);
+        if (re != nullptr && re->GetFingers() == 1 && re->GetCount() == 1) {
+            return true;
+        } else if (AceType::DynamicCast<LongPressRecognizer>(recognizer) != nullptr &&
+                   AceType::DynamicCast<LongPressRecognizer>(recognizer)->GetFingers() == 1) {
+            return true;
+        }
+        return false;
+    };
+
+    const auto re = AceType::DynamicCast<T>(recognizer);
+    if (re != nullptr && CheckRecognizer(recognizer)) {
+        return re;
+    } else if (AceType::DynamicCast<RecognizerGroup>(recognizer) != nullptr) {
+        for (const auto& recognizerElement : AceType::DynamicCast<RecognizerGroup>(recognizer)->GetGroupRecognizer()) {
+            const auto& tmpRecognizer = AccessibilityRecursionSearchRecognizer<T>(recognizerElement);
+            if (tmpRecognizer != nullptr) {
+                return tmpRecognizer;
+            }
+        }
+    }
+    return nullptr;
+}
+
+template<typename T>
+const RefPtr<T> GestureEventHub::GetAccessibilityRecognizer()
+{
+    for (const auto& recognizer : gestureHierarchy_) {
+        const auto& re = AccessibilityRecursionSearchRecognizer<T>(recognizer);
+        if (re != nullptr) {
+            return re;
+        }
+    }
+    return nullptr;
+}
+
 bool GestureEventHub::ActClick(std::shared_ptr<JsonValue> secComphandle)
 {
     auto host = GetFrameNode();
@@ -1340,15 +1380,12 @@ bool GestureEventHub::ActClick(std::shared_ptr<JsonValue> secComphandle)
         click(info);
         return true;
     }
-    RefPtr<ClickRecognizer> clickRecognizer;
-    for (auto gestureRecognizer : gestureHierarchy_) {
-        clickRecognizer = AceType::DynamicCast<ClickRecognizer>(gestureRecognizer);
-        if (clickRecognizer && clickRecognizer->GetFingers() == 1 && clickRecognizer->GetCount() == 1) {
-            click = clickRecognizer->GetTapActionFunc();
-            click(info);
-            host->OnAccessibilityEvent(AccessibilityEventType::CLICK);
-            return true;
-        }
+    const RefPtr<ClickRecognizer> clickRecognizer = GetAccessibilityRecognizer<ClickRecognizer>();
+    if (clickRecognizer) {
+        click = clickRecognizer->GetTapActionFunc();
+        click(info);
+        host->OnAccessibilityEvent(AccessibilityEventType::CLICK);
+        return true;
     }
     return false;
 }
@@ -1482,28 +1519,12 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
 
 bool GestureEventHub::IsAccessibilityClickable()
 {
-    bool ret = IsClickable();
-    RefPtr<ClickRecognizer> clickRecognizer;
-    for (auto gestureRecognizer : gestureHierarchy_) {
-        clickRecognizer = AceType::DynamicCast<ClickRecognizer>(gestureRecognizer);
-        if (clickRecognizer && clickRecognizer->GetFingers() == 1 && clickRecognizer->GetCount() == 1) {
-            return true;
-        }
-    }
-    return ret;
+    return IsClickable() || GetAccessibilityRecognizer<ClickRecognizer>() != nullptr;
 }
 
 bool GestureEventHub::IsAccessibilityLongClickable()
 {
-    bool ret = IsLongClickable();
-    RefPtr<LongPressRecognizer> longPressRecognizer;
-    for (auto gestureRecognizer : gestureHierarchy_) {
-        longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(gestureRecognizer);
-        if (longPressRecognizer && longPressRecognizer->GetFingers() == 1) {
-            return true;
-        }
-    }
-    return ret;
+    return IsLongClickable() || GetAccessibilityRecognizer<LongPressRecognizer>() != nullptr;
 }
 
 bool GestureEventHub::GetMonopolizeEvents() const
