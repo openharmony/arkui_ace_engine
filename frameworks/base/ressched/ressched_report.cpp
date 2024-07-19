@@ -220,7 +220,7 @@ void ResSchedReport::HandleTouchMove(const TouchEvent& touchEvent)
     if (averageDistance_.GetDistance() >= ResDefine::JUDGE_DISTANCE && !isInSilde) {
         std::unordered_map<std::string, std::string> payload;
         LoadAceApplicationContext(payload);
-        reportDataFunc_(RES_TYPE_SLIDE, SLIDE_DETECTING, payload);
+        ResSchedDataReport(RES_TYPE_SLIDE, SLIDE_DETECTING, payload);
         isInSilde = true;
     }
 }
@@ -249,7 +249,7 @@ void ResSchedReport::HandleTouchPullMove(const TouchEvent& touchEvent)
     if (!isInSilde) {
         std::unordered_map<std::string, std::string> payload;
         LoadAceApplicationContext(payload);
-        reportDataFunc_(RES_TYPE_SLIDE, SLIDE_DETECTING, payload);
+        ResSchedDataReport(RES_TYPE_SLIDE, SLIDE_DETECTING, payload);
         isInSilde = true;
     }
     RecordTouchEvent(touchEvent);
