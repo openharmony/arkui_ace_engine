@@ -411,16 +411,6 @@ void WebPattern::SetRotation(uint32_t rotation)
     renderSurface_->SetTransformHint(rotation);
 }
 
-void WebPattern::OnAttachToMainTree()
-{
-    isAttachedToMainTree_ = true;
-}
-
-void WebPattern::OnDetachFromMainTree()
-{
-    isAttachedToMainTree_ = false;
-}
-
 void WebPattern::InitEvent()
 {
     auto host = GetHost();
@@ -1741,12 +1731,12 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     } else {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnDirtyLayoutWrapperSwap safeArea is set, no need setbounds");
     }
-    if (isOfflineMode_) {
-        TAG_LOGE(AceLogTag::ACE_WEB,
+    if (offlineWebInited_ && !offlineWebRendered_) {
+        TAG_LOGI(AceLogTag::ACE_WEB,
             "OnDirtyLayoutWrapperSwap; WebPattern is Offline Mode, WebId:%{public}d", GetWebId());
-        isOfflineMode_ = false;
-        isVisible_ = true;
-        OnWindowShow();
+        offlineWebRendered_ = true;
+        delegate_->OnRenderToForeground();
+        delegate_->ShowWebView();
     }
 
     // first update size to load url.
@@ -2342,10 +2332,8 @@ void WebPattern::OnModifyDone()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetHandleChildBounds(true);
-    bool isFirstCreate = false;
     if (!delegate_) {
         // first create case,
-        isFirstCreate = true;
         delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "",
             Container::CurrentId());
         CHECK_NULL_VOID(delegate_);
@@ -2521,16 +2509,20 @@ void WebPattern::OnModifyDone()
     CHECK_NULL_VOID(pipelineContext);
 
     // offline mode
-    if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE && isFirstCreate) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type");
-        isOfflineMode_ = true;
-        OfflineMode();
-        isVisible_ = false;
+    if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
+        InitInOfflineMode();
     }
 }
 
-void WebPattern::OfflineMode()
+void WebPattern::InitInOfflineMode()
 {
+    if (offlineWebInited_) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type, webId:%{public}d", GetWebId());
+    offlineWebInited_ = true;
+    isActive_ = false;
+    isVisible_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int width = 0;
@@ -2553,13 +2545,17 @@ void WebPattern::OfflineMode()
     Size drawSize = Size(width, height);
     Offset offset = Offset(0, 0);
     delegate_->SetBoundsOrResize(drawSize, offset);
-    if (webSrc_) {
-        delegate_->LoadUrl();
-    } else if (webData_) {
-        delegate_->LoadDataWithRichText();
+    
+    if (!isUrlLoaded_) {
+        isUrlLoaded_ = true;
+        if (webSrc_) {
+            delegate_->LoadUrl();
+        } else if (webData_) {
+            delegate_->LoadDataWithRichText();
+        }
     }
-    isUrlLoaded_ = true;
-    OnWindowHide();
+    delegate_->HideWebView();
+    CloseContextSelectionMenu();
 }
 
 bool WebPattern::IsNeedResizeVisibleViewport()
@@ -4249,30 +4245,28 @@ void WebPattern::UpdateLocale()
 
 void WebPattern::OnWindowShow()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowShow");
+    CHECK_NULL_VOID(delegate_);
     delegate_->OnRenderToForeground();
-    if (!isOfflineMode_) {
-        delegate_->OnOnlineRenderToForeground();
-    }
+    delegate_->OnOnlineRenderToForeground();
 
     if (isWindowShow_ || !isVisible_) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowShow");
 
-    CHECK_NULL_VOID(delegate_);
     delegate_->ShowWebView();
     isWindowShow_ = true;
 }
 
 void WebPattern::OnWindowHide()
 {
-    if (!isOfflineMode_) {
-        delegate_->OnRenderToBackground();
-    }
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowHide");
+    CHECK_NULL_VOID(delegate_);
+    delegate_->OnRenderToBackground();
+
     if (!isWindowShow_ || !isVisible_) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowHide");
 
     CHECK_NULL_VOID(delegate_);
     delegate_->HideWebView();
@@ -4397,10 +4391,11 @@ void WebPattern::SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterE
 
 void WebPattern::OnInActive()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "WebPattern::OnInActive webId:%{public}d, isActive:%{public}d", GetWebId(), isActive_);
     if (!isActive_) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnInActive");
 
     CHECK_NULL_VOID(delegate_);
     delegate_->OnInactive();
@@ -4409,10 +4404,11 @@ void WebPattern::OnInActive()
 
 void WebPattern::OnActive()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "WebPattern::OnActive webId:%{public}d, isActive:%{public}d", GetWebId(), isActive_);
     if (isActive_) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnActive");
 
     CHECK_NULL_VOID(delegate_);
     delegate_->OnActive();
@@ -4554,11 +4550,9 @@ void WebPattern::OnScrollStartRecursive(std::vector<float> positions)
 
 void WebPattern::OnAttachToBuilderNode(NodeStatus nodeStatus)
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnAttachToBuilderNode");
     if (nodeStatus != NodeStatus::NORMAL_NODE) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type");
-        isOfflineMode_ = true;
-        OfflineMode();
-        isVisible_ = false;
+        InitInOfflineMode();
     }
 }
 
