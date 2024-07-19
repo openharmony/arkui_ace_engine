@@ -322,10 +322,13 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
         task_.Cancel();
     }
     SetDragStartPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
-    const auto dragPositionInMainAxis =
+    const double dragPositionInMainAxis =
         axis_ == Axis::VERTICAL ? info.GetGlobalLocation().GetY() : info.GetGlobalLocation().GetX();
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag start, localLocation: %{public}s, globalLocation: %{public}s",
         info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
+    
+    skipRestartSpring_ = false; // reset flags. Extract method if more flags need to be reset
+
 #ifdef OHOS_PLATFORM
     // Increase the cpu frequency when sliding start.
     auto currentTime = GetSysTimestamp();
