@@ -36,7 +36,6 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
-#include "core/components_ng/base/navigation_register.h"
 
 using namespace testing;
 using namespace testing::ext;
