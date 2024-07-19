@@ -2232,7 +2232,8 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
         return;
     }
     if (!IsUsingMouse() && SelectOverlayIsOn() && BetweenSelectedPosition(info.GetGlobalLocation())) {
-        selectOverlay_->ShowMenu();
+        // click selected area to switch show/hide state
+        selectOverlay_->ToggleMenu();
         return;
     }
     auto host = GetHost();
