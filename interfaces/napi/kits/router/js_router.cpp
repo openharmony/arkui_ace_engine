@@ -309,7 +309,8 @@ bool ParseParamWithCallback(napi_env env, std::shared_ptr<RouterAsyncContext> as
             TAG_LOGW(AceLogTag::ACE_ROUTER, "create return promise failed!");
         }
     }
-    if (parseParamsSuccess == false) {
+
+    if (!parseParamsSuccess) {
         asyncContext->callbackCode = ERROR_CODE_PARAM_INVALID;
         asyncContext->callbackMsg = "The 'params' parameter is invalid.";
         TriggerCallback(asyncContext);
