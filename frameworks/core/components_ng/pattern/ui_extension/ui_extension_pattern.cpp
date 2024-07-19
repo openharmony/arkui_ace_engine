@@ -400,19 +400,9 @@ void UIExtensionPattern::OnAreaChangedInner()
     DispatchDisplayArea();
 }
 
-bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+void UIExtensionPattern::OnSyncGeometryNode(const DirtySwapConfig& config)
 {
-    CHECK_NULL_RETURN(sessionWrapper_, false);
-    CHECK_NULL_RETURN(dirty, false);
-    auto host = dirty->GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate();
-    auto geometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto displaySize = geometryNode->GetFrameSize();
-    displayArea_ = RectF(displayOffset, displaySize);
-    sessionWrapper_->NotifyDisplayArea(displayArea_);
-    return false;
+    DispatchDisplayArea(true);
 }
 
 void UIExtensionPattern::OnWindowShow()

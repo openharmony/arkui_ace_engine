@@ -95,7 +95,7 @@ int32_t KeyframeAnimateTo(ArkUI_ContextHandle context, ArkUI_KeyframeAnimateOpti
         keyframes[i].curveType = curve->type;
     }
     animateOption.keyframes = keyframes;
-    animateOption.keyframeSize = option->keyframes.size();
+    animateOption.keyframeSize = static_cast<int32_t>(option->keyframes.size());
 
     impl->getAnimation()->keyframeAnimateTo(reinterpret_cast<ArkUIContext*>(context), &animateOption);
     return ERROR_CODE_NO_ERROR;

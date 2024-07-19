@@ -270,6 +270,8 @@ public:
     static void SetOnDidDeleteEvent(FrameNode* frameNode, std::function<void(const DeleteValueInfo&)>&& func);
     static void SetEnablePreviewText(FrameNode* frameNode, bool enablePreviewText);
     static PaddingProperty GetPadding(FrameNode* frameNode);
+    static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick);
 
 private:
     void AddDragFrameNodeToManager() const;

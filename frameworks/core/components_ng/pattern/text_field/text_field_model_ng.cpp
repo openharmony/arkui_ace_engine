@@ -1961,6 +1961,14 @@ void TextFieldModelNG::SetSelectionMenuOptions(
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
+void TextFieldModelNG::SetSelectionMenuOptions(FrameNode* frameNode,
+    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
 void TextFieldModelNG::SetEnablePreviewText(FrameNode* frameNode, bool enablePreviewText)
 {
     CHECK_NULL_VOID(frameNode);

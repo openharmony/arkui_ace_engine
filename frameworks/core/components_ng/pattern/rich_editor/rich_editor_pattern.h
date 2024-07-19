@@ -1059,7 +1059,7 @@ private:
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event);
     void NotifyExitTextPreview();
     void ProcessInsertValue(const std::string& insertValue, bool isIME = false, bool calledbyImf = false);
-    void FinishTextPreviewOperation(bool calledbyImf = true);
+    void FinishTextPreviewInner();
     void TripleClickSection(GestureEvent& info, int32_t start, int32_t end, int32_t pos);
     SelectType CheckResult(const Offset& pos, int32_t currentPosition);
     void RequestKeyboardToEdit();
@@ -1165,6 +1165,7 @@ private:
     std::vector<TimeStamp> clickInfo_;
     bool previewLongPress_ = false;
     bool editingLongPress_ = false;
+    bool needMoveCaretToContentRect_ = false;
 };
 } // namespace OHOS::Ace::NG
 

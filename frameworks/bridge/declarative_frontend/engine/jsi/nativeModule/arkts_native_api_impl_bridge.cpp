@@ -1238,6 +1238,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetOnTextSelectionChange));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnTextSelectionChange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetOnTextSelectionChange));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectionMenuOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetSelectionMenuOptions));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectionMenuOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetSelectionMenuOptions));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
 
     auto search = panda::ObjectRef::New(vm);
@@ -1405,6 +1409,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetEnablePreviewText));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnablePreviewText"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetEnablePreviewText));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectionMenuOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSelectionMenuOptions));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectionMenuOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSelectionMenuOptions));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "search"), search);
 
     auto stack = panda::ObjectRef::New(vm);
@@ -1890,6 +1898,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetEnablePreviewText));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnablePreviewText"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetEnablePreviewText));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectionMenuOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetSelectionMenuOptions));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectionMenuOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetSelectionMenuOptions));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
 
     auto video = panda::ObjectRef::New(vm);
@@ -2309,6 +2321,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetEnablePreviewText));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnablePreviewText"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetEnablePreviewText));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectionMenuOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetSelectionMenuOptions));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectionMenuOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetSelectionMenuOptions));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textInput"), textInput);
 
     auto navDestination = panda::ObjectRef::New(vm);

@@ -300,6 +300,7 @@ public:
     }
 
     virtual void BeforeSyncGeometryProperties(const DirtySwapConfig& config) {}
+    virtual void OnSyncGeometryNode(const DirtySwapConfig& config) {}
 
     // Called on main thread to check if need rerender of the content.
     virtual bool OnDirtyLayoutWrapperSwap(

@@ -272,6 +272,7 @@ public:
             margin_ = std::make_unique<MarginPropertyF>(margin);
             return;
         }
+        margin_->Reset();
         if (margin.left) {
             margin_->left = margin.left;
         }
@@ -292,6 +293,7 @@ public:
             padding_ = std::make_unique<PaddingPropertyF>(padding);
             return;
         }
+        padding_->Reset();
         if (padding.left) {
             padding_->left = padding.left;
         }

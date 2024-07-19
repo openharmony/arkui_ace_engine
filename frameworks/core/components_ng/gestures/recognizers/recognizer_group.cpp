@@ -114,10 +114,14 @@ void RecognizerGroup::ForceReject()
 {
     for (auto& recognizer : recognizers_) {
         if (!AceType::InstanceOf<RecognizerGroup>(recognizer)) {
+            if (recognizer->IsBridgeMode()) {
+                continue;
+            }
             if (recognizer->GetRefereeState() != RefereeState::SUCCEED_BLOCKED &&
                 recognizer->GetRefereeState() != RefereeState::SUCCEED &&
                 recognizer->GetRefereeState() != RefereeState::FAIL) {
                 recognizer->OnRejected();
+                recognizer->OnRejectBridgeObj();
             }
             continue;
         }

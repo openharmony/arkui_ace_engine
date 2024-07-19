@@ -47,9 +47,12 @@ public:
         int rectHeight, int pointX, int pointY, OnTextSelectedCallback callback);
     void UpdateOverlayTouchInfo(int touchPointX, int touchPointY, TouchType touchType);
     void UpdateOverlayStatus(bool status, int offsetX, int offsetY, int rectWidth, int rectHeight);
-    bool UpdateVideoConfig(const PixelMapInfo& info);
+    void UpdateAIButtonConfig(AIButtonConfig config);
+    void UpdateOverlayActiveStatus(bool status);
 
 private:
+    bool UpdateVideoConfig(const PixelMapInfo& info);
+
     WeakPtr<NG::FrameNode> frameNode_;
     ImageAnalyzerHolder holder_;
     ImageAnalyzerInnerConfig analyzerUIConfig_;

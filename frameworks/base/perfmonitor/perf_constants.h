@@ -131,6 +131,12 @@ public:
 
     // scroller animation
     static constexpr char SCROLLER_ANIMATION[] = "SCROLLER_ANIMATION";
+
+    // pc title bar maximized
+    static constexpr char WINDOW_TITLE_BAR_MAXIMIZED[] = "WINDOW_TITLE_BAR_MAXIMIZED";
+
+    // pc title bar recover
+    static constexpr char WINDOW_TITLE_BAR_RECOVER[] = "WINDOW_TITLE_BAR_RECOVER";
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_SCENE_ID_H

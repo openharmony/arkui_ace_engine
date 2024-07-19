@@ -169,13 +169,13 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     swiperLayoutAlgorithm->SetIsFrameAnimation(translateAnimationIsRunning_);
 
     auto swiperPaintProperty = host->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_RETURN(host, nullptr);
     auto effect = swiperPaintProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
     bool canOverScroll = effect == EdgeEffect::SPRING;
     swiperLayoutAlgorithm->SetCanOverScroll(canOverScroll);
     swiperLayoutAlgorithm->SetHasCachedCapture(hasCachedCapture_);
     swiperLayoutAlgorithm->SetIsCaptureReverse(isCaptureReverse_);
     swiperLayoutAlgorithm->SetCachedCount(GetCachedCount());
+    swiperLayoutAlgorithm->SetNextMarginIgnoreBlank(nextMarginIgnoreBlank_);
     return swiperLayoutAlgorithm;
 }
 
@@ -923,8 +923,11 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         isCaptureReverse_ = swiperLayoutAlgorithm->GetIsCaptureReverse();
         UpdateTargetCapture(swiperLayoutAlgorithm->GetIsNeedUpdateCapture());
     }
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
+
+    if (jumpIndex_) {
+        ignoreBlankSpringOffset_ = IgnoreBlankOffset(true);
+    }
+
     if (!targetIndex_) {
         SetIndicatorJumpIndex(jumpIndex_);
         CheckMarkDirtyNodeForRenderIndicator();
@@ -944,7 +947,6 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         if (!isInit) {
             OnIndexChange();
         }
-        ignoreBlankSpringOffset_ = IgnoreBlankOffset(true);
         jumpIndex_.reset();
         pauseTargetIndex_.reset();
         auto delayTime = GetInterval() - GetDuration();
@@ -2529,7 +2531,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset,
     currentFirstIndex_ = nextIndex.value_or(currentFirstIndex_);
     UpdateNextValidIndex();
     currentFirstIndex_ = GetLoopIndex(currentFirstIndex_);
-    CalculateGestureState(additionalOffset, currentTurnPageRate, preFirstIndex);
+    CalculateGestureState(additionalOffset - ignoreBlankSpringOffset_, currentTurnPageRate, preFirstIndex);
     turnPageRate_ = (currentTurnPageRate == FLT_MAX ? turnPageRate_ : currentTurnPageRate);
     touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     CheckMarkForIndicatorBoundary();
@@ -3066,12 +3068,9 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
 #ifdef OHOS_PLATFORM
-        if (!swiper->isInAutoPlay_) {
-            ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
-        } else {
+        if (swiper->isInAutoPlay_) {
             ResSchedReport::GetInstance().ResSchedDataReport("auto_play_off");
         }
-
 #endif
         if (!swiper->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, true);
@@ -3104,12 +3103,9 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         auto swiperPattern = swiper.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
 #ifdef OHOS_PLATFORM
-        if (!swiperPattern->isInAutoPlay_) {
-            ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-        } else {
+        if (swiperPattern->isInAutoPlay_) {
             ResSchedReport::GetInstance().ResSchedDataReport("auto_play_on");
         }
-
 #endif
         if (!swiperPattern->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::LAST_UP, "");

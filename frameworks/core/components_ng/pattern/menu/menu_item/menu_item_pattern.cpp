@@ -629,6 +629,9 @@ void MenuItemPattern::OnClick()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (onClickAIMenuItem_) {
+        onClickAIMenuItem_();
+    }
     auto menuWrapper = GetMenuWrapper();
     auto menuWrapperPattern = menuWrapper ? menuWrapper->GetPattern<MenuWrapperPattern>() : nullptr;
     auto hasSubMenu = menuWrapperPattern ? menuWrapperPattern->HasStackSubMenu() : false;
@@ -664,8 +667,7 @@ void MenuItemPattern::OnClick()
         CHECK_NULL_VOID(pattern);
         SetChange();
     }
-    if (GetSubBuilder() != nullptr &&
-        (expandingMode_ == SubMenuExpandingMode::SIDE ||
+    if (GetSubBuilder() != nullptr && (expandingMode_ == SubMenuExpandingMode::SIDE ||
         (expandingMode_ == SubMenuExpandingMode::STACK && !IsSubMenu() && !hasSubMenu) ||
         (expandingMode_ == SubMenuExpandingMode::EMBEDDED && !IsEmbedded()))) {
         ShowSubMenu();

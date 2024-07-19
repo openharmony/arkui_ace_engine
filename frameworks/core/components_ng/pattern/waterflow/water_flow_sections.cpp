@@ -29,6 +29,8 @@ void WaterFlowSections::ChangeData(
     TAG_LOGI(AceLogTag::ACE_WATERFLOW,
         "section changed, start:%{public}zu, deleteCount:%{public}zu, newSections:%{public}zu", start, deleteCount,
         newSections.size());
+    NotifySectionChange(start, deleteCount, newSections);
+
     if (start < sections_.size()) {
         auto it = sections_.begin() + static_cast<int32_t>(start);
         sections_.erase(it, it + static_cast<int32_t>(deleteCount));
@@ -51,7 +53,6 @@ void WaterFlowSections::ChangeData(
             break;
         }
     }
-    prevSections_.clear();
 
     if (onSectionDataChange_) {
         onSectionDataChange_(static_cast<int32_t>(start));
@@ -61,5 +62,25 @@ void WaterFlowSections::ChangeData(
 void WaterFlowSections::ReplaceFrom(size_t start, const std::vector<WaterFlowSections::Section>& newSections)
 {
     ChangeData(start, sections_.size(), newSections);
+}
+
+void WaterFlowSections::NotifySectionChange(
+    int32_t start, int32_t deleteCount, const std::vector<WaterFlowSections::Section>& newSections)
+{
+    int32_t addItemCount = 0;
+    for (int i = 0; i < static_cast<int32_t>(newSections.size()) - 1; i++) {
+        addItemCount += newSections[i].itemsCount;
+    }
+    int32_t deleteItemCount = 0;
+    for (int i = start; i < start + deleteCount - 1; i++) {
+        deleteItemCount += sections_[i].itemsCount;
+    }
+    int32_t itemCount = 0;
+    for (int i = 0; i < start; i++) {
+        itemCount += sections_[i].itemsCount;
+    }
+    if (notifyDataChange_) {
+        notifyDataChange_(itemCount + std::max(addItemCount, deleteItemCount), 0);
+    }
 }
 } // namespace OHOS::Ace::NG

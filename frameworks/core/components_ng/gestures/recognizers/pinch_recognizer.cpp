@@ -436,6 +436,7 @@ GestureJudgeResult PinchRecognizer::TriggerGestureJudgeCallback()
     }
     auto info = std::make_shared<PinchGestureEvent>();
     info->SetTimeStamp(time_);
+    info->SetDeviceId(deviceId_);
     UpdateFingerListInfo();
     info->SetFingerList(fingerList_);
     info->SetScale(scale_);

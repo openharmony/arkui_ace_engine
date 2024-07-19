@@ -510,8 +510,10 @@ ohos_unittest("native_node_napi_test") {
   module_out_path = interface_test_output_path
 
   sources = [
-    "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
-    "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/frame_rate/frame_rate_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/shared_overlay/shared_overlay_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/shared_overlay/shared_transition_effect.cpp",
     "$ace_root/interfaces/native/node/animate_impl.cpp",
     "$ace_root/interfaces/native/node/dialog_model.cpp",
     "$ace_root/interfaces/native/node/event_converter.cpp",
@@ -523,7 +525,6 @@ ohos_unittest("native_node_napi_test") {
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
-    "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
     "native_gesture_test.cpp",
     "native_node_napi_test.cpp",
     "native_node_test.cpp",
@@ -543,7 +544,21 @@ ohos_unittest("native_node_napi_test") {
     "$ace_root/interfaces/inner_api/drawable_descriptor",
   ]
 
-  deps = [ "//third_party/googletest:gmock_main" ]
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_event",
+    "$ace_root/test/unittest:ace_components_gestures",
+    "$ace_root/test/unittest:ace_components_layout",
+    "$ace_root/test/unittest:ace_components_mock",
+    "$ace_root/test/unittest:ace_components_pattern",
+    "$ace_root/test/unittest:ace_components_property",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_components_syntax",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+    "//third_party/googletest:gmock_main",
+  ]
 
   public_deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",

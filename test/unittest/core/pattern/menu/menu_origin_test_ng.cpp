@@ -91,6 +91,7 @@ constexpr double MENU_OFFSET_Y = 10.0;
 constexpr float MENU_ITEM_SIZE_WIDTH = 100.0f;
 constexpr float MENU_ITEM_SIZE_HEIGHT = 50.0f;
 constexpr float GREATER_WINDOW_MENU_HEIGHT = 1190.0f;
+constexpr float CONST_FLOAT_ZREO = 0.0f;
 
 constexpr float OFFSET_THIRD = 200.0f;
 constexpr int NODEID = 1;
@@ -2107,7 +2108,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAvoidWithPreview, TestSize.Level1)
     previewGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
     menuGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
-    EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(-TARGET_SIZE_WIDTH, -TARGET_SIZE_WIDTH));
+    EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(-TARGET_SIZE_WIDTH, CONST_FLOAT_ZREO));
 }
 /**
  * @tc.name: MenuLayoutAlgorithmAdjustMenuTest

@@ -56,6 +56,7 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
     auto target = CreateEventTargetObject(info);
     eventObj->SetPropertyObject("target", target);
     eventObj->SetProperty<double>("pressure", info.GetForce());
+    eventObj->SetProperty<double>("deviceId", info.GetDeviceId());
     eventObj->SetPropertyObject("preventDefault", JSRef<JSFunc>::New<FunctionCallback>(JsTouchPreventDefault));
     eventObj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
     eventObj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));

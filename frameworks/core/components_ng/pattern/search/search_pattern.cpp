@@ -16,7 +16,9 @@
 #include "core/components_ng/pattern/search/search_pattern.h"
 
 #include <cstdint>
-
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 #include "base/geometry/rect.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
@@ -664,6 +666,9 @@ void SearchPattern::OnClickButtonAndImage()
     searchEventHub->UpdateSubmitEvent(text);
     // close keyboard and select background color
     textFieldPattern->StopEditing();
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+    UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Search.onSubmit");
+#endif
 }
 
 void SearchPattern::OnClickCancelButton()
@@ -704,6 +709,15 @@ void SearchPattern::OnClickTextField()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->PaintInnerFocusState(focusRect);
+
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    auto textFiledFocusHub = textFieldPattern->GetFocusHub();
+    if (!textFiledFocusHub->IsCurrentFocus()) {
+        textFiledFocusHub->RequestFocusImmediately();
+    }
     host->MarkModifyDone();
 }
 
@@ -1884,8 +1898,22 @@ void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode,
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(iconFrameNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
     auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    symbolLayoutProperty->UpdateSymbolSourceInfo(index == IMAGE_INDEX
+                                                     ? SymbolSourceInfo(searchTheme->GetSearchSymbolId())
+                                                     : SymbolSourceInfo(searchTheme->GetCancelSymbolId()));
+    symbolLayoutProperty->UpdateFontSize(
+        index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconSize() : GetSearchNode()->GetCancelSymbolIconSize());
+    symbolLayoutProperty->UpdateSymbolColorList({ index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconColor()
+                                                                       : GetSearchNode()->GetCancelSymbolIconColor() });
+    auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
+    iconFrameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
     if (index == IMAGE_INDEX) {
         auto iconSymbol = layoutProperty->GetSearchIconSymbol();
         if (iconSymbol != nullptr) {
@@ -1898,7 +1926,6 @@ void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode,
         }
     }
     // reset symbol effect
-    auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
     auto symbolEffectOptions = symbolLayoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
     symbolEffectOptions.SetIsTxtActive(false);
     symbolLayoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);

@@ -449,7 +449,7 @@ private:
     std::list<RefPtr<LayoutWrapper>> allFrameNodeChildren_;
     std::map<uint32_t, RefPtr<LayoutWrapper>> partFrameNodeChildren_;
     std::unique_ptr<FrameProxy> prevFrameProxy_;
-    uint32_t totalCount_ = 0;
+    int32_t totalCount_ = 0;
     FrameNode* hostNode_ { nullptr };
     uint32_t inUse_ = 0;
     bool delayReset_ = false;
@@ -1544,7 +1544,7 @@ void FrameNode::ProcessVisibleAreaChangeEvent(const RectF& visibleRect, const Re
 
 double FrameNode::CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect)
 {
-    if (!visibleRect.IsValid() || !renderRect.IsValid()) {
+    if (visibleRect.IsEmpty() || renderRect.IsEmpty()) {
         return 0.0;
     }
     return visibleRect.Width() * visibleRect.Height() / (renderRect.Width() * renderRect.Height());
@@ -1602,8 +1602,7 @@ void FrameNode::ThrottledVisibleTask()
     GetVisibleRect(visibleRect, frameRect);
     double ratio = IsFrameDisappear() ? VISIBLE_RATIO_MIN
                                       : std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect),
-                                      VISIBLE_RATIO_MIN,
-                                      VISIBLE_RATIO_MAX);
+                                          VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
     if (NearEqual(ratio, lastThrottledVisibleRatio_)) {
         throttledCallbackOnTheWay_ = false;
         return;
@@ -2701,11 +2700,17 @@ void FrameNode::OnWindowHide()
 
 void FrameNode::OnWindowFocused()
 {
+    if (renderContext_) {
+        renderContext_->UpdateWindowFocusState(true);
+    }
     pattern_->OnWindowFocused();
 }
 
 void FrameNode::OnWindowUnfocused()
 {
+    if (renderContext_) {
+        renderContext_->UpdateWindowFocusState(false);
+    }
     pattern_->OnWindowUnfocused();
 }
 
@@ -3720,6 +3725,8 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
                 ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth()));
         }
     }
+
+    pattern_->OnSyncGeometryNode(config);
     if (needSyncRsNode) {
         pattern_->BeforeSyncGeometryProperties(config);
         renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true, layoutProperty_->GetPixelRound());
@@ -4310,6 +4317,7 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     CHECK_NULL_RETURN(onTouchIntercept, HitTestMode::HTMDEFAULT);
     TouchEventInfo event("touchEvent");
     event.SetTimeStamp(touchEvent.time);
+    event.SetDeviceId(touchEvent.deviceId);
     event.SetPointerEvent(touchEvent.pointerEvent);
     TouchLocationInfo changedInfo("onTouch", touchEvent.originalId);
     PointF lastLocalPoint(touchEvent.x, touchEvent.y);

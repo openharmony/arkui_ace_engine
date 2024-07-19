@@ -320,7 +320,7 @@ void AceAbility::InitEnv()
         }
     }
     AceContainer::SetResourcesPathAndThemeStyle(ACE_INSTANCE_ID, runArgs_.systemResourcesPath,
-        runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
+        runArgs_.containerSdkPath, runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
 
     auto view = AceViewPreview::CreateView(ACE_INSTANCE_ID);
     auto window = GetWindow();

@@ -515,7 +515,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
     // when text_ ends with a \n, return the top position of the next line.
     auto preIsPlaceholder = CalCulateAndCheckPreIsPlaceholder(extent - 1, extent);
     prevChar = text_[std::max(0, extent - 1)];
-    if (prevChar == NEWLINE_CODE && !text_[extent] && !preIsPlaceholder) {
+    if (prevChar == NEWLINE_CODE && !text_[static_cast<size_t>(extent)] && !preIsPlaceholder) {
         // Return the start of next line.
         result.offset.SetX(MakeEmptyOffsetX());
 #ifndef USE_GRAPHIC_TEXT_GINE

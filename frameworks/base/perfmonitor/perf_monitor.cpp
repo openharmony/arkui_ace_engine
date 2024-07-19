@@ -523,9 +523,10 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
         PerfConstants::PC_SHORTCUT_RESTORE_DESKTOP, PerfConstants::PC_SHORTCUT_TO_RECENT,
         PerfConstants::PC_EXIT_RECENT, PerfConstants::PC_SHORTCUT_TO_APP_CENTER_ON_RECENT,
         PerfConstants::PC_SHORTCUT_TO_APP_CENTER, PerfConstants::PC_SHORTCUT_EXIT_APP_CENTER,
-        PerfConstants::WINDOW_TITLE_BAR_MINIMIZED,
-        PerfConstants::APP_EXIT_FROM_WINDOW_TITLE_BAR_CLOSED,
-        PerfConstants::LAUNCHER_APP_LAUNCH_FROM_OTHER
+        PerfConstants::WINDOW_TITLE_BAR_MINIMIZED, PerfConstants::WINDOW_RECT_MOVE,
+        PerfConstants::APP_EXIT_FROM_WINDOW_TITLE_BAR_CLOSED, PerfConstants::WINDOW_TITLE_BAR_RECOVER,
+        PerfConstants::LAUNCHER_APP_LAUNCH_FROM_OTHER, PerfConstants::WINDOW_RECT_RESIZE,
+        PerfConstants::WINDOW_TITLE_BAR_MAXIMIZED
     };
     if (exceptSceneSet.find(sceneId) != exceptSceneSet.end()) {
         return true;
@@ -540,11 +541,14 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
 // for jank frame app
 bool PerfMonitor::IsExclusionFrame()
 {
+    ACE_SCOPED_TRACE("IsExclusionFrame: isResponse(%d) isStartApp(%d) isBg(%d) isExcluWindow(%d) isExcAni(%d)",
+        isResponseExclusion, isStartAppFrame, isBackgroundApp, isExclusionWindow, isExceptAnimator);
     return isResponseExclusion || isStartAppFrame || isBackgroundApp || isExclusionWindow || isExceptAnimator;
 }
 
 void PerfMonitor::SetAppStartStatus()
 {
+    ACE_FUNCTION_TRACE();
     isStartAppFrame = true;
     startAppTime = GetCurrentRealTimeNs();
 }

@@ -50,6 +50,9 @@
         "navigation":{
             "back":"返回",
             "more":"更多"
+        },
+        "patternlock":{
+            "accessibilitypasspoint":"已连接圆点"
         }
     },
     "en-US":{

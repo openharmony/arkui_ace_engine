@@ -312,6 +312,9 @@ void JSScroll::OnScrollStopCallback(const JSCallbackInfo& args)
         auto scrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Call(JSRef<JSObject>(), 0, nullptr);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onScrollStop");
+#endif
         };
         ScrollModel::GetInstance()->SetOnScrollStop(std::move(scrollStop));
     }

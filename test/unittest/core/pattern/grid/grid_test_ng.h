@@ -23,6 +23,7 @@
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
@@ -77,6 +78,7 @@ public:
     void AddFixedHeightItems(int32_t cnt, float height);
     void ScrollTo(float position);
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
+    void CreateAdaptChildSizeGridItems(int32_t itemNumber, GridItemStyle gridItemStyle = GridItemStyle::NONE);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<GridPattern> pattern_;

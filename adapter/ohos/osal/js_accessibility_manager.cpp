@@ -1316,6 +1316,7 @@ static void UpdateWebAccessibilityElementInfo(
             nodeInfo.AddAction(action);
         }
     }
+    nodeInfo.SetAccessibilityGroup(false);
 }
 
 void UpdateWebAccessibilityElementInfo(RefPtr<NG::WebAccessibilityNode> node,
@@ -1811,17 +1812,7 @@ bool ActClick(RefPtr<NG::FrameNode>& frameNode)
 {
     auto gesture = frameNode->GetEventHub<NG::EventHub>()->GetGestureEventHub();
     CHECK_NULL_RETURN(gesture, false);
-    bool result = gesture->ActClick();
-    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    CHECK_NULL_RETURN(accessibilityProperty, result);
-    auto accessibilityAction = ACTIONS.find(ACCESSIBILITY_ACTION_CLICK);
-    if (accessibilityAction == ACTIONS.end()) {
-        return result;
-    }
-    AccessibilityActionParam param;
-    param.accessibilityProperty = accessibilityProperty;
-    result |= accessibilityAction->second(param);
-    return result;
+    return gesture->ActClick();
 }
 
 bool ActLongClick(RefPtr<NG::FrameNode>& frameNode)

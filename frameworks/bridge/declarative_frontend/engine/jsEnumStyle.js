@@ -1441,8 +1441,8 @@ var BlurStyle;
 var BlurStyleActivePolicy;
 (function (BlurStyleActivePolicy) {
   BlurStyleActivePolicy[BlurStyleActivePolicy["FOLLOWS_WINDOW_ACTIVE_STATE"] = 0] = "FOLLOWS_WINDOW_ACTIVE_STATE";
-  BlurStyleActivePolicy[BlurStyleActivePolicy["ALAWYS_ACTIVE"] = 1] = "ALAWYS_ACTIVE";
-  BlurStyleActivePolicy[BlurStyleActivePolicy["ALAWYS_INACTIVE"] = 2] = "ALAWYS_INACTIVE";
+  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_ACTIVE"] = 1] = "ALWAYS_ACTIVE";
+  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_INACTIVE"] = 2] = "ALWAYS_INACTIVE";
 })(BlurStyleActivePolicy || (BlurStyleActivePolicy = {}));
 
 var BlurType;
@@ -1982,7 +1982,7 @@ class TextMenuItemId {
   }
 
   equals(id) {
-    return id.id_ == this.id_;
+    return id.id_ === this.id_;
   }
 
   static get CUT() {

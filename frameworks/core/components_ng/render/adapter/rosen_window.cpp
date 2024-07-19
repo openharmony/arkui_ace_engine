@@ -74,7 +74,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushEnd();
             }
-            pipeline->UpdateLastVsyncEndTimestamp(GetSysTimestamp());
+            window->SetLastVsyncEndTimestamp(GetSysTimestamp());
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
@@ -143,7 +143,7 @@ void RosenWindow::RequestFrame()
     if (rsWindow_) {
         isRequestVsync_ = true;
         rsWindow_->RequestVsync(vsyncCallback_);
-        lastRequestVsyncTime_ = GetSysTimestamp();
+        lastRequestVsyncTime_ = static_cast<uint64_t>(GetSysTimestamp());
 #ifdef VSYNC_TIMEOUT_CHECK
         if (taskExecutor) {
             auto windowId = rsWindow_->GetWindowId();

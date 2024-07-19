@@ -88,7 +88,6 @@ const std::string BOTTOMSTRING = "test";
 constexpr int32_t START_YEAR_BEFORE = 1990;
 constexpr int32_t SELECTED_YEAR = 2000;
 constexpr int32_t END_YEAR = 2090;
-const std::string LONGEST_CONTENT = "新建文件夹";
 const int VERSION_TWELVE = 12;
 const int VERSION_ELEVEN = 11;
 const Dimension ADAPT_TOAST_MIN_FONT_SIZE = 12.0_fp;

@@ -717,14 +717,14 @@ void JSImage::SetDynamicRangeMode(const JSCallbackInfo& info)
 void JSImage::SetEnhancedImageQuality(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        ImageModel::GetInstance()->SetEnhancedImageQuality(AIImageQuality::NONE);
+        ImageModel::GetInstance()->SetEnhancedImageQuality(AIImageQuality::LOW);
         return;
     }
-    int32_t parseRes = static_cast<int32_t>(AIImageQuality::NONE);
+    int32_t parseRes = static_cast<int32_t>(AIImageQuality::LOW);
     ParseJsInteger(info[0], parseRes);
-    if (parseRes < static_cast<int32_t>(AIImageQuality::NONE) ||
+    if (parseRes < static_cast<int32_t>(AIImageQuality::LOW) ||
         parseRes > static_cast<int32_t>(AIImageQuality::HIGH)) {
-        parseRes = static_cast<int32_t>(AIImageQuality::NONE);
+        parseRes = static_cast<int32_t>(AIImageQuality::LOW);
     }
     AIImageQuality resolutionQuality  = static_cast<AIImageQuality>(parseRes);
     ImageModel::GetInstance()->SetEnhancedImageQuality(resolutionQuality);
