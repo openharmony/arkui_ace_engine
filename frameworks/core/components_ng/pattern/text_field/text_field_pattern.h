@@ -1380,6 +1380,11 @@ protected:
     {
         isDetachFromMainTree_ = true;
     }
+    
+    virtual bool IsReverse() const override
+    {
+        return false;
+    };
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
