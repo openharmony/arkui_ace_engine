@@ -1156,4 +1156,41 @@ HWTEST_F(ListGroupAlgTestNg, InfinityCrossSize001, TestSize.Level1)
     CreateDone(frameNode_);
     EXPECT_EQ(GetChildWidth(frameNode_, 0), 150.f);
 }
+
+/**
+ * @tc.name: SetHeaderFooter001
+ * @tc.desc: test SetHeader/SetFooter to null, will not has header/footer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, SetHeaderFooter001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set header footer to null
+     * @tc.expected: Will not has header/footer node
+     */
+    CreateList();
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    groupModel.SetHeader(nullptr);
+    groupModel.SetFooter(nullptr);
+    auto groupNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_EQ(groupNode->GetTotalChildCount(), 0);
+
+    /**
+     * @tc.steps: step2. Set header
+     * @tc.expected: Has header node
+     */
+    auto header = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+    groupModel.SetHeader(std::move(header));
+    EXPECT_EQ(groupNode->GetTotalChildCount(), 1);
+
+    /**
+     * @tc.steps: step3. Set footer
+     * @tc.expected: Has header and footer nodes
+     */
+    auto footer = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+    groupModel.SetFooter(std::move(footer));
+    EXPECT_EQ(groupNode->GetTotalChildCount(), 2);
+    // pop frameNode
+    CreateDone(frameNode_);
+}
 } // namespace OHOS::Ace::NG
