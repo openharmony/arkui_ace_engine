@@ -93,6 +93,7 @@ public:
     std::vector<std::string> GetAllPathName() override;
     std::vector<int32_t> GetAllPathIndex() override;
     void InitNavPathIndex(const std::vector<std::string>& pathNames) override;
+    void UpdateNavPathId(const std::vector<std::string>& ids) override;
     RefPtr<NG::UINode> CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& node) override;
     RefPtr<NG::UINode> CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo,
         const WeakPtr<NG::UINode>& node) override;

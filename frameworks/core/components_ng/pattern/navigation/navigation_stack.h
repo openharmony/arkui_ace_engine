@@ -127,6 +127,7 @@ public:
     virtual std::vector<std::string> GetAllPathName();
     virtual std::vector<int32_t> GetAllPathIndex();
     virtual void InitNavPathIndex(const std::vector<std::string>& pathNames) {}
+    virtual void UpdateNavPathId(const std::vector<std::string>& ids) {}
     virtual void Pop();
     virtual void Push(const std::string& name, const RefPtr<RouteInfo>& routeInfo = nullptr);
     virtual void Push(const std::string& name, int32_t index);

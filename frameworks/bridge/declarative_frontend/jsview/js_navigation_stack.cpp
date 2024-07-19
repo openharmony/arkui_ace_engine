@@ -312,6 +312,11 @@ void JSNavigationStack::InitNavPathIndex(const std::vector<std::string>& pathNam
     func->Call(dataSourceObj_, 1, params);
 }
 
+void JSNavigationStack::UpdateNavPathId(const std::vector<std::string>& ids)
+{
+    // not-impl
+}
+
 RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& customNode)
 {
     auto name = GetNameByIndex(index);

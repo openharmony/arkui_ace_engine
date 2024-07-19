@@ -643,6 +643,8 @@ void NavigationPattern::UpdateNavPathList()
     navigationStack_->ClearPreBuildNodeList();
     navigationStack_->SetNavPathList(navPathList);
     navigationStack_->InitNavPathIndex(pathNames);
+    // not-impl
+    navigationStack_->UpdateNavPathId({});
 }
 
 void NavigationPattern::RefreshNavDestination()

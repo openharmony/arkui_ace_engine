@@ -2107,6 +2107,7 @@ class NavPathStack {
     this.parentStack = undefined;
     this.popArray = [];
     this.interception = undefined;
+    this.id = undefined;
   }
   getJsIndexFromNativeIndex(index) {
     for (let i = 0; i < this.pathArray.length; i++) {
@@ -2474,6 +2475,23 @@ class NavPathStack {
       this.nativeStack?.onStateChanged();
     }
     return cnt;
+  }
+  removeByNavDestinationId(id) {
+    console.log('[removeById][debug] reached removeById')
+    let index = this.pathArray.findIndex(element => element.id === id);
+    if (index === -1) {
+      console.log('[removeById][debug] -- create reject')
+      return new Promise((resolve, reject) => {
+        reject({ message: 'reject.', code: 99999 });
+      })
+    }
+    this.pathArray.splice(index, 1);
+    this.isReplace = 0;
+    this.nativeStack?.onStateChanged();
+    console.log('[removeById][debug] -- create resolve')
+    return new Promise((resolve, reject) => {
+      resolve({ message: 'resolve.', code: 99999 });
+    })
   }
   removeIndex(index) {
     if (index >= this.pathArray.length) {
