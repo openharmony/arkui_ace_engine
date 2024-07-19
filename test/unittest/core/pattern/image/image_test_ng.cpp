@@ -1914,4 +1914,52 @@ HWTEST_F(ImageTestNg, ImageModifierTest001, TestSize.Level1)
     imageModifier.UpdatePaintConfig(1);
     imageModifier.UpdatePaintConfig(2);
 }
+
+/**
+ * @tc.name: TestImageFit001
+ * @tc.desc: Test image fit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestImageFit001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set image fit
+     */
+    image.SetImageFit(ImageFit::TOP_END);
+
+    /**
+     * @tc.steps: step3. get ImageLayoutProperty and ImageRenderProperty image fit
+     */
+
+    EXPECT_EQ(imageLayoutProperty->GetImageFitValue(), ImageFit::TOP_END);
+    EXPECT_EQ(imageRenderProperty->GetImageFitValue(), ImageFit::TOP_END);
+
+    /**
+     * @tc.steps: step4. set image fit
+     */
+    image.SetImageFit(ImageFit::BOTTOM_END);
+
+    /**
+     * @tc.steps: step5. get ImageLayoutProperty and ImageRenderProperty image fit
+     */
+    EXPECT_EQ(imageLayoutProperty->GetImageFitValue(), ImageFit::BOTTOM_END);
+    EXPECT_EQ(imageRenderProperty->GetImageFitValue(), ImageFit::BOTTOM_END);
+}
 } // namespace OHOS::Ace::NG

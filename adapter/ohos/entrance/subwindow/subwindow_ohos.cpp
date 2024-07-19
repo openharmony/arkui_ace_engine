@@ -222,6 +222,7 @@ bool SubwindowOhos::InitContainer()
     subPipelineContext->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
     subPipelineContext->SetupSubRootElement();
     subPipelineContext->SetKeyboardAnimationConfig(parentPipeline->GetKeyboardAnimationConfig());
+    subPipelineContext->SetDragNodeGrayscale(parentPipeline->GetDragNodeGrayscale());
     return true;
 }
 
@@ -301,10 +302,10 @@ void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
+    ResizeWindow();
     ShowWindow(popupInfo.focusable);
     CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
-    ResizeWindow();
     ContainerScope scope(childContainerId_);
     overlayManager->ShowPopup(targetId, popupInfo, std::move(onWillDismiss), interactiveDismiss);
     window_->SetFocusable(true);

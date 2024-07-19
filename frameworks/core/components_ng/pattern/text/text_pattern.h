@@ -226,7 +226,7 @@ public:
     {
         dataDetectorAdapter_->onResult_ = std::move(onResult);
     }
-    std::optional<TextDataDetectResult> GetTextDetectResult()
+    TextDataDetectResult GetTextDetectResult()
     {
         return dataDetectorAdapter_->textDetectResult_;
     }
@@ -644,7 +644,7 @@ protected:
     void HandleSpanSingleClickEvent(GestureEvent& info, RectF textContentRect, bool& isClickOnSpan);
     void HandleDoubleClickEvent(GestureEvent& info);
     void CheckOnClickEvent(GestureEvent& info);
-    bool ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
+    bool ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
         const ShowSelectOverlayFunc& showSelectOverlayFunc = nullptr);
     void SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
         const ShowSelectOverlayFunc& showSelectOverlayFunc);

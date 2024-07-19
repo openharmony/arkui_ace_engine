@@ -141,6 +141,8 @@ private:
      */
     int32_t SkipLinesBackward() const;
 
+    bool IsIrregularLine(int32_t lineIndex) const override;
+
     LayoutWrapper* wrapper_ = nullptr;
 
     std::vector<float> crossLens_; /**< The column widths of the GridItems. */

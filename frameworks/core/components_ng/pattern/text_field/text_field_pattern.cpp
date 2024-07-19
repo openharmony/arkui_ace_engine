@@ -510,7 +510,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
 
     auto oldParentGlobalOffset = parentGlobalOffset_;
-    parentGlobalOffset_ = GetPaintRectGlobalOffset(true);
+    parentGlobalOffset_ = GetPaintRectGlobalOffset();
     inlineMeasureItem_ = textFieldLayoutAlgorithm->GetInlineMeasureItem();
     auto isEditorValueChanged = FireOnTextChangeEvent();
     UpdateCancelNode();
@@ -546,6 +546,41 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     SetAccessibilityClearAction();
     SetAccessibilityPasswordIconAction();
     return true;
+}
+
+void TextFieldPattern::OnDirectionConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [weak = WeakClaim(this)] {
+            auto textField = weak.Upgrade();
+            CHECK_NULL_VOID(textField);
+            textField->parentGlobalOffset_ = textField->GetPaintRectGlobalOffset();
+            textField->UpdateTextFieldManager(Offset(textField->parentGlobalOffset_.GetX(),
+                textField->parentGlobalOffset_.GetY()), textField->frameRect_.Height());
+            TAG_LOGI(ACE_TEXT_FIELD, "onDirectionUpdate change parentGlobalOffset to: %{public}s",
+                textField->parentGlobalOffset_.ToString().c_str());
+        },
+        TaskExecutor::TaskType::UI, "ArkUITextFieldOnDirectionConfigurationUpdate");
+
+    if (isCustomKeyboardAttached_) {
+        auto caretHeight = selectController_->GetCaretRect().Height();
+        auto safeHeight = caretHeight + selectController_->GetCaretRect().GetY();
+        if (selectController_->GetCaretRect().GetY() > caretHeight) {
+            safeHeight = caretHeight;
+        }
+        auto nodeId = host->GetId();
+        context->AddAfterLayoutTask([keyboardWeak = WeakPtr<OverlayManager>(keyboardOverlay_), nodeId, safeHeight]() {
+            auto keyboardOverlay = keyboardWeak.Upgrade();
+            CHECK_NULL_VOID(keyboardOverlay);
+            keyboardOverlay->AvoidCustomKeyboard(nodeId, safeHeight);
+        });
+    }
 }
 
 void TextFieldPattern::SetAccessibilityPasswordIconAction()
@@ -893,7 +928,8 @@ void TextFieldPattern::HandleFocusEvent()
     context->AddOnAreaChangeNode(host->GetId());
     auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
-    needToRequestKeyboardInner_ = !isLongPress_ && (dragRecipientStatus_ != DragStatus::DRAGGING);
+    needToRequestKeyboardInner_ = !isLongPress_ && (dragRecipientStatus_ != DragStatus::DRAGGING) &&
+                                    (dragStatus_ != DragStatus::DRAGGING);
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -2231,7 +2267,8 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
         return;
     }
     if (!IsUsingMouse() && SelectOverlayIsOn() && BetweenSelectedPosition(info.GetGlobalLocation())) {
-        selectOverlay_->ShowMenu();
+        // click selected area to switch show/hide state
+        selectOverlay_->ToggleMenu();
         return;
     }
     auto host = GetHost();
@@ -2421,7 +2458,9 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
     if (RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
     }
-    selectController_->UpdateSelectByOffset(info.GetLocalLocation());
+    if (CanChangeSelectState()) {
+        selectController_->UpdateSelectByOffset(info.GetLocalLocation());
+    }
     if (IsSelected()) {
         StopTwinkling();
         SetIsSingleHandle(false);
@@ -3045,7 +3084,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     auto localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
     if (selectController_->IsTouchAtLineEnd(localOffset)) {
         selectController_->UpdateCaretInfoByOffset(localOffset);
-    } else {
+    } else if (CanChangeSelectState()) {
         selectController_->UpdateSelectByOffset(localOffset);
     }
     if (IsSelected()) {
@@ -3058,6 +3097,17 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
         ProcessOverlay({ .animation = true });
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool TextFieldPattern::CanChangeSelectState()
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto theme = GetTheme();
+    CHECK_NULL_RETURN(theme, false);
+    Dimension fontSize = layoutProperty->GetFontSizeValue(theme->GetFontSize());
+    // fontSize == 0 can not change
+    return fontSize.Value() != 0.0f;
 }
 
 bool TextFieldPattern::IsOnUnitByPosition(const Offset& globalOffset)
@@ -4577,18 +4627,16 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
     TextFieldCommonEvent event;
     event.SetText(contentController_->GetTextValue());
     if (IsNormalInlineState() && action != TextInputAction::NEW_LINE) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         RecordSubmitEvent();
         eventHub->FireOnSubmit(static_cast<int32_t>(action), event);
         if (event.IsKeepEditable()) {
             return;
         }
-        auto focusHub = host->GetOrCreateFocusHub();
-        focusHub->LostFocus();
+        FocusHub::LostFocusToViewRoot();
         return;
     }
     if (IsTextArea() && action == TextInputAction::NEW_LINE) {
@@ -6689,7 +6737,7 @@ OffsetF TextFieldPattern::GetTextPaintOffset() const
     return GetPaintRectGlobalOffset();
 }
 
-OffsetF TextFieldPattern::GetPaintRectGlobalOffset(bool duringLayout) const
+OffsetF TextFieldPattern::GetPaintRectGlobalOffset() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, OffsetF(0.0f, 0.0f));
@@ -6697,11 +6745,7 @@ OffsetF TextFieldPattern::GetPaintRectGlobalOffset(bool duringLayout) const
     CHECK_NULL_RETURN(pipeline, OffsetF(0.0f, 0.0f));
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     OffsetF textPaintOffset;
-    if (duringLayout) {
-        textPaintOffset = host->GetParentGlobalOffsetDuringLayout();
-    } else {
-        textPaintOffset = host->GetPaintRectOffset();
-    }
+    textPaintOffset = host->GetPaintRectOffset();
     return textPaintOffset - rootOffset;
 }
 

@@ -602,6 +602,8 @@ public:
         isKeyboardClosedByUser_ = false;
     }
 
+    void OnDirectionConfigurationUpdate() override;
+
     void NotifyKeyboardClosed() override
     {
         if (HasFocus()) {
@@ -1197,7 +1199,7 @@ public:
 
     OffsetF GetTextPaintOffset() const override;
 
-    OffsetF GetPaintRectGlobalOffset(bool duringLayout = false) const;
+    OffsetF GetPaintRectGlobalOffset() const;
 
     void NeedRequestKeyboard()
     {
@@ -1430,6 +1432,7 @@ private:
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
+    bool CanChangeSelectState();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void CursorMoveOnClick(const Offset& offset);
 

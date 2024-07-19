@@ -691,6 +691,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
             if (point.type == TouchType::CANCEL && point.pullType == TouchType::PULL_MOVE) {
                 CleanRecognizersForDragBegin(point);
                 lastEventTime_ = point.time;
+                lastTouchEventEndTimestamp_ = GetSysTimestamp();
                 return true;
             }
             // Need update here: onTouch/Recognizer need update
@@ -730,6 +731,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     }
 
     lastEventTime_ = point.time;
+    lastTouchEventEndTimestamp_ = GetSysTimestamp();
     lastDownFingerNumber_ = static_cast<int32_t>(downFingerIds_.size());
     return true;
 }
@@ -860,6 +862,7 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
         axisTouchTestResults_.erase(event.id);
     }
     lastEventTime_ = event.time;
+    lastTouchEventEndTimestamp_ = GetSysTimestamp();
     return true;
 }
 

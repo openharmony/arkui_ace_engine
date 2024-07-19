@@ -170,7 +170,8 @@ void ImageModelNG::CreateAnimation(const std::vector<ImageProperties>& imageList
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetChildren().empty()) {
-        auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+        auto imageNode = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_VOID(imageNode);
         auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
         CHECK_NULL_VOID(imageLayoutProperty);

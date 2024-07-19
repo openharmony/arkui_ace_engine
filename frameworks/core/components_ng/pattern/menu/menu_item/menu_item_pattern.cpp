@@ -629,6 +629,9 @@ void MenuItemPattern::OnClick()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (onClickAIMenuItem_) {
+        onClickAIMenuItem_();
+    }
     auto menuWrapper = GetMenuWrapper();
     auto menuWrapperPattern = menuWrapper ? menuWrapper->GetPattern<MenuWrapperPattern>() : nullptr;
     auto hasSubMenu = menuWrapperPattern ? menuWrapperPattern->HasStackSubMenu() : false;
@@ -662,16 +665,15 @@ void MenuItemPattern::OnClick()
     if (lastSelectedItem && lastSelectedItem != host) {
         auto pattern = lastSelectedItem->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
-        SetChange();
+        pattern->SetChange();
     }
-    if (GetSubBuilder() != nullptr &&
-        (expandingMode_ == SubMenuExpandingMode::SIDE ||
+    menuPattern->SetLastSelectedItem(host);
+    if (GetSubBuilder() != nullptr && (expandingMode_ == SubMenuExpandingMode::SIDE ||
         (expandingMode_ == SubMenuExpandingMode::STACK && !IsSubMenu() && !hasSubMenu) ||
         (expandingMode_ == SubMenuExpandingMode::EMBEDDED && !IsEmbedded()))) {
         ShowSubMenu();
         return;
     }
-    menuPattern->SetLastSelectedItem(host);
     // hide menu when menu item is clicked
     CloseMenu();
 }
@@ -1425,17 +1427,11 @@ void MenuItemPattern::UpdateDisabledStyle()
     auto theme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     if (content_) {
-        content_->GetRenderContext()->UpdateForegroundColor(theme->GetDisabledMenuFontColor());
-        auto textLayoutProperty = content_->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
+        content_->GetRenderContext()->UpdateOpacity(theme->GetDisabledFontColorAlpha());
         content_->MarkModifyDone();
     }
     if (label_) {
-        label_->GetRenderContext()->UpdateForegroundColor(theme->GetDisabledMenuFontColor());
-        auto labelTextLayoutProperty = label_->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(labelTextLayoutProperty);
-        labelTextLayoutProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
+        label_->GetRenderContext()->UpdateOpacity(theme->GetDisabledFontColorAlpha());
         label_->MarkModifyDone();
     }
     if (startIcon_) {

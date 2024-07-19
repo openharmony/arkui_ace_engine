@@ -19,6 +19,7 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/grid/grid_item_accessibility_property.h"
 #include "core/components_ng/pattern/grid/grid_item_event_hub.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_model.h"
 #include "core/components_ng/pattern/grid/grid_item_theme.h"
@@ -36,6 +37,11 @@ public:
         : shallowBuilder_(shallowBuilder), gridItemStyle_(gridItemStyle)
     {}
     ~GridItemPattern() override = default;
+
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<GridItemLayoutAlgorithm>();
+    }
 
     bool IsAtomicNode() const override
     {

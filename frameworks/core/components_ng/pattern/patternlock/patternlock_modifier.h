@@ -81,6 +81,10 @@ public:
     void SetCellCenterOffset(const OffsetF& cellCenter);
     void SetContentOffset(const OffsetF& offset);
     void SetChoosePoint(const std::vector<PatternLockCell>& choosePoint);
+    size_t GetChoosePointCount()
+    {
+        return choosePoint_.size();
+    }
     void SetActiveCircleRadiusScale(float scale);
     void SetBackgroundCircleRadiusScale(float scale);
     void SetLightRingRadiusStartScale(float scale);

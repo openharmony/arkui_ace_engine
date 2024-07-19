@@ -54,8 +54,8 @@
 #include "core/common/font_manager.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/layout_inspector.h"
-#include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/stylus/stylus_detector_default.h"
+#include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
@@ -635,7 +635,8 @@ void PipelineContext::InspectDrew()
     CHECK_RUN_ON(UI);
     if (!needRenderNode_.empty()) {
         auto needRenderNode = std::move(needRenderNode_);
-        for (auto&& node : needRenderNode) {
+        for (auto&& nodeWeak : needRenderNode) {
+            auto node = nodeWeak.Upgrade();
             if (node) {
                 OnDrawCompleted(node->GetInspectorId()->c_str());
             }
@@ -733,7 +734,7 @@ void PipelineContext::FlushAfterLayoutCallbackInImplicitAnimationTask()
     window_->Unlock();
 }
 
-void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node)
+void PipelineContext::SetNeedRenderNode(const WeakPtr<FrameNode>& node)
 {
     CHECK_RUN_ON(UI);
     needRenderNode_.insert(node);
@@ -1544,7 +1545,7 @@ void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
 
     CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
     dirtyPropertyNodes_.erase(frameNode);
-    needRenderNode_.erase(frameNode);
+    needRenderNode_.erase(WeakPtr<FrameNode>(frameNode));
 
     if (dirtyFocusNode_ == frameNode) {
         dirtyFocusNode_.Reset();
@@ -1568,11 +1569,12 @@ void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance,
+    bool forceChange)
 {
     CHECK_RUN_ON(UI);
     // prevent repeated trigger with same keyboardHeight
-    if (NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length())) {
+    if (!forceChange && NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length())) {
         return;
     }
 
@@ -1637,6 +1639,11 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         if (scrollResult) {
             FlushUITasks();
         }
+
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+            "AvoidanceLogic keyboardHeight: %{public}f, positionY: %{public}f, safeHeight: %{public}f, "
+            "rootHeight_ %{public}f final calculate keyboard offset is %{public}f",
+            keyboardHeight, positionY, safeHeight, rootHeight_, safeAreaManager_->GetKeyboardOffset());
     };
     FlushUITasks();
     DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
@@ -2548,6 +2555,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     lastMouseEvent_->action = event.action;
     lastMouseEvent_->sourceType = event.sourceType;
     lastMouseEvent_->time = event.time;
+    lastMouseEvent_->touchEventId = event.touchEventId;
 
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
         // Mouse right button press event set focus inactive here.
@@ -2609,9 +2617,10 @@ void PipelineContext::FlushMouseEvent()
         auto result = container->GetCurPointerEventSourceType(sourceType);
         if (result) {
             TAG_LOGI(AceLogTag::ACE_MOUSE,
-                "FlushMouseEvent: last pointer event sourceType:%{public}d last mouse event time:%{public}" PRId64
-                " current time %{public}" PRId64 "",
-                sourceType, static_cast<int64_t>(lastMouseEvent_->time.time_since_epoch().count()), GetSysTimestamp());
+                "FlushMouseEvent: last pointer event id %{public}d sourceType:%{public}d last mouse event "
+                "time:%{public}" PRId64 " current time %{public}" PRId64 "",
+                lastMouseEvent_->touchEventId, sourceType,
+                static_cast<int64_t>(lastMouseEvent_->time.time_since_epoch().count()), GetSysTimestamp());
         }
     }
     MouseEvent event;
@@ -3128,6 +3137,7 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
     const int32_t duration = 400;
     option.SetDuration(duration);
     option.SetCurve(Curves::FRICTION);
+    RecycleManager::Notify(configurationChange);
     AnimationUtils::Animate(option, [weak = WeakClaim(this), configurationChange,
         weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), fullUpdate]() {
         auto pipeline = weak.Upgrade();
@@ -3374,11 +3384,17 @@ void PipelineContext::AddPredictTask(PredictTask&& task)
 void PipelineContext::OnIdle(int64_t deadline)
 {
     int64_t currentTime = GetSysTimestamp();
-    if (deadline == 0 && lastVsyncEndTimestamp_ > 0 && currentTime > static_cast<int64_t>(lastVsyncEndTimestamp_) &&
-        currentTime - static_cast<int64_t>(lastVsyncEndTimestamp_) > VSYNC_PERIOD_COUNT * window_->GetVSyncPeriod()) {
-        auto frontend = weakFrontend_.Upgrade();
-        if (frontend) {
-            frontend->NotifyUIIdle();
+    if (deadline == 0) {
+        int64_t lastTaskEndTimestamp = window_->GetLastVsyncEndTimestamp();
+        if (eventManager_) {
+            lastTaskEndTimestamp = std::max(lastTaskEndTimestamp, eventManager_->GetLastTouchEventEndTimestamp());
+        }
+        if (lastTaskEndTimestamp > 0 && currentTime > lastTaskEndTimestamp
+            && currentTime - lastTaskEndTimestamp > VSYNC_PERIOD_COUNT * window_->GetVSyncPeriod()) {
+            auto frontend = weakFrontend_.Upgrade();
+            if (frontend) {
+                frontend->NotifyUIIdle();
+            }
         }
     }
     if (deadline == 0 || isWindowAnimation_) {

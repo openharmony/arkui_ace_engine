@@ -19,8 +19,6 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
-static const std::string DEFAULT_PASSWORD = "******";
-
 int32_t TextFieldAccessibilityProperty::GetTextLengthLimit() const
 {
     auto frameNode = host_.Upgrade();
@@ -132,7 +130,7 @@ std::string TextFieldAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(textFieldLayoutProperty, "");
     std::string text = textFieldLayoutProperty->GetValueValue("");
     if (IsPassword() && !text.empty()) {
-        text = DEFAULT_PASSWORD;
+        return std::string(text.size(), '*');
     }
     return text;
 }

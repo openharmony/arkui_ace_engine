@@ -103,8 +103,8 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     CHECK_NULL_RETURN(toastProp, Dimension(0.0));
     auto textHeight = text->GetGeometryNode()->GetMarginFrameSize().Height();
     Dimension offsetY;
-    const auto& safeArea = toastProp->GetSafeAreaInsets();
-    auto safeAreaOffset = safeArea ? safeArea->bottom_.Length() : 0.0f;
+    auto safeAreaManager = context->GetSafeAreaManager();
+    auto safeAreaOffset = safeAreaManager ? safeAreaManager->GetSystemSafeArea().bottom_.Length() : 0.0f;
     if (!toastProp->HasToastAlignment()) {
         auto toastBottom = GetBottomValue(layoutWrapper);
         toastBottom_ = toastBottom;
@@ -281,9 +281,8 @@ double ToastPattern::GetTextMaxHeight()
     }
 
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-    CHECK_NULL_RETURN(safeAreaManager, 0.0);
-    auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
-    auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
+    auto bottom = safeAreaManager ? safeAreaManager->GetSystemSafeArea().bottom_.Length() : 0.0f;
+    auto top = safeAreaManager ? safeAreaManager->GetSystemSafeArea().top_.Length() : 0.0f;
     auto maxHeight = deviceHeight - bottom - top - toastBottom_;
     auto limitHeight = (deviceHeight - bottom - top) * 0.65;
     if (GreatNotEqual(maxHeight, limitHeight)) {

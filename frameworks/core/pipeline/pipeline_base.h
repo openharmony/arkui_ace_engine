@@ -866,7 +866,7 @@ public:
 
     void OnVirtualKeyboardAreaChange(Rect keyboardArea,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
-        bool supportAvoidance = false);
+        bool supportAvoidance = false, bool forceChange = false);
     void OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false);
 
@@ -1298,8 +1298,6 @@ public:
 
     void SetDestroyed();
 
-    virtual void UpdateLastVsyncEndTimestamp(uint64_t lastVsyncEndTimestamp) {}
-
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     // Called by hittest to find touch node is equal target.
     virtual bool OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe = false,
@@ -1310,6 +1308,15 @@ public:
         return GetOnFoucs();
     }
 
+    void SetDragNodeGrayscale(float dragNodeGrayscale)
+    {
+        dragNodeGrayscale_ = dragNodeGrayscale;
+    }
+
+    float GetDragNodeGrayscale() const
+    {
+        return dragNodeGrayscale_;
+    }
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1331,7 +1338,7 @@ protected:
 
     virtual void OnVirtualKeyboardHeightChange(float keyboardHeight,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
-        const bool supportAvoidance = false)
+        const bool supportAvoidance = false, bool forceChange = false)
     {}
     virtual void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false)
@@ -1480,10 +1487,10 @@ private:
     WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     uint32_t frameCount_ = 0;
-
     bool followSystem_ = true;
     float maxAppFontScale_ = static_cast<float>(INT32_MAX);
-
+    float dragNodeGrayscale_ = 0.0f;
+    
     // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
     std::mutex densityChangeMutex_;
     int32_t densityChangeCallbackId_ = 0;

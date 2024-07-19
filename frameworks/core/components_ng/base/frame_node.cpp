@@ -1729,7 +1729,7 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
         if (self->GetInspectorId()) {
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
-            pipeline->SetNeedRenderNode(self);
+            pipeline->SetNeedRenderNode(weak);
         }
     };
     if (forceUseMainThread || wrapper->CheckShouldRunOnMain()) {
@@ -3725,6 +3725,8 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
                 ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth()));
         }
     }
+
+    pattern_->OnSyncGeometryNode(config);
     if (needSyncRsNode) {
         pattern_->BeforeSyncGeometryProperties(config);
         renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true, layoutProperty_->GetPixelRound());

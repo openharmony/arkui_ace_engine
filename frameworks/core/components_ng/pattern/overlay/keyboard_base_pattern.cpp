@@ -89,8 +89,9 @@ void KeyboardPattern::OnAreaChangedInner()
         auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, customHeight);
-        TAG_LOGI(ACE_KEYBOARD, "customKeyboardHeight Change to %{public}f", customHeight);
-        pipeline->OnVirtualKeyboardAreaChange(keyboardRect, nullptr, safeHeight_, supportAvoidance_);
+        TAG_LOGI(ACE_KEYBOARD, "customKeyboardHeight Change to %{public}f, safeHeight: %{public}f",
+            customHeight, safeHeight_);
+        pipeline->OnVirtualKeyboardAreaChange(keyboardRect, nullptr, safeHeight_, supportAvoidance_, true);
     }
     keyboardHeight_ = customHeight;
 }
@@ -104,8 +105,9 @@ void KeyboardPattern::SetKeyboardAreaChange(bool keyboardAvoidance)
         auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, keyboardHeight);
-        TAG_LOGI(ACE_KEYBOARD, "customKeyboardHeight Change to %{public}f", keyboardHeight);
-        pipeline->OnVirtualKeyboardAreaChange(keyboardRect, nullptr, safeHeight_, supportAvoidance_);
+        TAG_LOGI(ACE_KEYBOARD, "customKeyboardHeight Change to %{public}f, safeHeight: %{public}f",
+            keyboardHeight, safeHeight_);
+        pipeline->OnVirtualKeyboardAreaChange(keyboardRect, nullptr, safeHeight_, supportAvoidance_, true);
     }
 }
 

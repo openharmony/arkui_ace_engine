@@ -94,7 +94,6 @@ const std::string MESSAGE = "hello world";
 const std::string BOTTOMSTRING = "test";
 constexpr int32_t DURATION = 2;
 constexpr float MINUS_HEIGHT = -5.0f;
-const std::string LONGEST_CONTENT = "新建文件夹";
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 } // namespace
 

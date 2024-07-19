@@ -3476,6 +3476,9 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto container = Container::Current();
+    if (container == nullptr) {
+        container = Container::GetActive();
+    }
     CHECK_NULL_RETURN(container, false);
     bool isPopup = false;
     return container->RequestAutoFill(host, autoFillType, false, isPopup, autoFillSessionId_, false);
@@ -3487,6 +3490,9 @@ bool WebPattern::RequestAutoSave()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto container = Container::Current();
+    if (container == nullptr) {
+        container = Container::GetActive();
+    }
     CHECK_NULL_RETURN(container, false);
     return container->RequestAutoSave(host, nullptr, nullptr, false);
 }
@@ -3497,6 +3503,9 @@ bool WebPattern::UpdateAutoFillPopup()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto container = Container::Current();
+    if (container == nullptr) {
+        container = Container::GetActive();
+    }
     CHECK_NULL_RETURN(container, false);
     return container->UpdatePopupUIExtension(host, autoFillSessionId_, false);
 }

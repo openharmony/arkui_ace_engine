@@ -379,6 +379,8 @@ public:
     int32_t CalcLineBeginPosition();
     float GetTextThemeFontSize();
     int32_t CalcLineEndPosition();
+    int32_t CalcSingleLineBeginPosition(int32_t fixedPos);
+    int32_t CalcSingleLineEndPosition(int32_t fixedPos);
     bool CursorMoveLineBegin();
     bool CursorMoveLineEnd();
     void HandleSelectFontStyle(KeyCode code) override;
@@ -386,7 +388,7 @@ public:
     void HandleOnShowMenu() override;
     int32_t HandleSelectPosition(bool isForward);
     int32_t HandleSelectParagraghPos(bool direction);
-    int32_t HandleSelectWrapper(CaretMoveIntent direction);
+    int32_t HandleSelectWrapper(CaretMoveIntent direction, int32_t fixedPos);
     void AIDeleteComb(int32_t start, int32_t end, int32_t& aiPosition, bool direction);
     bool HandleOnDeleteComb(bool backward) override;
     int32_t GetLeftWordPosition(int32_t caretPosition);
@@ -1059,7 +1061,7 @@ private:
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event);
     void NotifyExitTextPreview();
     void ProcessInsertValue(const std::string& insertValue, bool isIME = false, bool calledbyImf = false);
-    void FinishTextPreviewOperation(bool calledbyImf = true);
+    void FinishTextPreviewInner();
     void TripleClickSection(GestureEvent& info, int32_t start, int32_t end, int32_t pos);
     SelectType CheckResult(const Offset& pos, int32_t currentPosition);
     void RequestKeyboardToEdit();
@@ -1165,6 +1167,7 @@ private:
     std::vector<TimeStamp> clickInfo_;
     bool previewLongPress_ = false;
     bool editingLongPress_ = false;
+    bool needMoveCaretToContentRect_ = false;
 };
 } // namespace OHOS::Ace::NG
 

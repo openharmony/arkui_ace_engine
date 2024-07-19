@@ -48,6 +48,9 @@ void OH_ArkUI_WaterFlowSectionOption_Destroy(ArkUI_WaterFlowSectionOption* optio
 void OH_ArkUI_WaterFlowSectionOption_SetSize(ArkUI_WaterFlowSectionOption* option, int32_t size)
 {
     CHECK_NULL_VOID(option);
+    if (size < 0) {
+        return;
+    }
     option->sections.resize(size);
 }
 

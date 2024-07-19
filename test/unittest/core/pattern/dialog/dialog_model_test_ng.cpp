@@ -95,6 +95,7 @@ void DialogModelTestNg::TearDownTestCase()
 {
     MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 /**

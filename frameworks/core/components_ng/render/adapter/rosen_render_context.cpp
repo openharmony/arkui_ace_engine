@@ -308,6 +308,10 @@ void RosenRenderContext::DetachModifiers()
     if (scaleXYUserModifier_) {
         rsNode_->RemoveModifier(scaleXYUserModifier_);
     }
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    if (pipeline) {
+        pipeline->RequestFrame();
+    }
 }
 
 void RosenRenderContext::StartRecording()
@@ -983,7 +987,7 @@ bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<BlurStyle
     if (!bgBlurStyle.has_value()) {
         return false;
     }
-    bool blurEnable = bgBlurStyle->policy == BlurStyleActivePolicy::ALAWYS_ACTIVE ||
+    bool blurEnable = bgBlurStyle->policy == BlurStyleActivePolicy::ALWAYS_ACTIVE ||
         (bgBlurStyle->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE && bgBlurStyle->isWindowFocused);
     if (bgBlurStyle->isValidColor) {
         if (blurEnable) {
@@ -997,7 +1001,7 @@ bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<BlurStyle
 
 bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<EffectOption>& efffectOption)
 {
-    bool blurEnable = efffectOption->policy == BlurStyleActivePolicy::ALAWYS_ACTIVE ||
+    bool blurEnable = efffectOption->policy == BlurStyleActivePolicy::ALWAYS_ACTIVE ||
         (efffectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE && efffectOption->isWindowFocused);
     if (efffectOption->isValidColor) {
         if (blurEnable) {

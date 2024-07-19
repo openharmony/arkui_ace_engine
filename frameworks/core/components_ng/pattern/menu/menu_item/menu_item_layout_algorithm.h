@@ -49,6 +49,7 @@ private:
     float horInterval_ = 0.0f;
     float verInterval_ = 0.0f;
     float idealWidth_ = 0.0f;
+    float idealHeight_ = 0.0f;
     float emptyWidth_ = 0.0f;
     float maxRowWidth_ = 0.0f;
     float middleSpace_ = 0.0f;

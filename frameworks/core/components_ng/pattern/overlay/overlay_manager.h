@@ -440,15 +440,6 @@ public:
     {
         return dismissSheetId_;
     }
-    bool IsRootExpansive() const
-    {
-        auto rootNode = rootNodeWeak_.Upgrade();
-        CHECK_NULL_RETURN(rootNode, false);
-        auto layoutProp = DynamicCast<FrameNode>(rootNode)->GetLayoutProperty();
-        CHECK_NULL_RETURN(layoutProp, false);
-        const auto& opts = layoutProp->GetSafeAreaExpandOpts();
-        return opts && opts->Expansive();
-    }
     void RemoveSheetNode(const RefPtr<FrameNode>& sheetNode);
 
     void DestroySheet(const RefPtr<FrameNode>& sheetNode, const SheetKey& sheetKey);
@@ -481,12 +472,12 @@ public:
         const ModalUIExtensionConfig& config);
     void CloseModalUIExtension(int32_t sessionId);
 
-    RefPtr<FrameNode> BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,
-        const RefPtr<NG::FrameNode>& targetNode, const std::string& longestContent, int32_t menuSize);
-    SizeF CaculateMenuSize(const RefPtr<FrameNode>& menuNode, const std::string& longestContent, int32_t menuSize);
-    bool ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, const NG::RectF& aiRect,
-        const std::string& longestContent, int32_t menuSize, const RefPtr<NG::FrameNode>& targetNode);
-    void CloseUIExtensionMenu(int32_t targetId);
+    RefPtr<FrameNode> BuildAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions);
+    RefPtr<FrameNode> CreateAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
+        const RefPtr<FrameNode>& targetNode);
+    bool ShowAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
+        const RectF& aiRect, const RefPtr<FrameNode>& targetNode);
+    void CloseAIEntityMenu(int32_t targetId);
 
     void MarkDirty(PropertyChangeFlag flag);
     void MarkDirtyOverlay();
@@ -568,6 +559,8 @@ public:
             menuMap_.erase(targetId);
         }
     }
+
+    bool IsRootExpansive() const;
     void DumpOverlayInfo() const;
     void ReloadBuilderNodeConfig();
 
@@ -629,6 +622,7 @@ private:
         std::function<void()>&& sheetSpringBack = nullptr);
     SheetStyle UpdateSheetStyle(
         const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle, bool isPartialUpdate);
+    void UpdateSheetProperty(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& currentStyle, bool isPartialUpdate);
     void UpdateSheetMaskBackgroundColor(const RefPtr<FrameNode>& maskNode,
         const RefPtr<RenderContext>& maskRenderContext, const SheetStyle& sheetStyle);
     void UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
