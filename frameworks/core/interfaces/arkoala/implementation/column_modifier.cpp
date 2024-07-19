@@ -38,16 +38,7 @@ void _setColumnOptionsImpl(
 namespace ColumnAttribute {
 void AlignItemsImpl(Ark_NativePointer node, Ark_Int32 value) {
   auto frameNode = reinterpret_cast<FrameNode *>(node);
-  if ((value == static_cast<int32_t>(FlexAlign::FLEX_START)) ||
-      (value == static_cast<int32_t>(FlexAlign::FLEX_END)) ||
-      (value == static_cast<int32_t>(FlexAlign::CENTER)) ||
-      (value == static_cast<int32_t>(FlexAlign::STRETCH))) {
-    ColumnModelNG::SetAlignItems(frameNode, static_cast<FlexAlign>(value));
-  } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-    ColumnModelNG::SetAlignItems(frameNode, FlexAlign::CENTER);
-  }
-  FlexAlign value_flexAlign = static_cast<FlexAlign>(value);
-  ColumnModelNG::SetAlignItems(frameNode, value_flexAlign);
+  ColumnModelNG::SetAlignItems(frameNode, static_cast<FlexAlign>(value + 1));
 }
 
 void JustifyContentImpl(Ark_NativePointer node,

@@ -146,13 +146,16 @@ namespace OHOS::Ace::NG::Converter
 
     template<>
     inline Color Convert(const Ark_Number& src) {
-        return src.tag == ARK_TAG_FLOAT32 ? Color(static_cast<int>(src.f32)) : Color(src.i32);
+        uint32_t value = src.tag == ARK_TAG_FLOAT32 ? static_cast<int>(src.f32) : src.i32;
+        if (value <= 0xFFFFFF && value > 0) {
+            return Color((unsigned) value + 0xFF000000U);
+        }
+        return Color(value);
     }
 
     template<>
     inline Color Convert(const Ark_String& src) {
-        LOGE("ARKOALA Converter -> Need converter from String to Color.");
-        return Color();
+        return Color::FromString(src.chars);
     }
     
     template<>
