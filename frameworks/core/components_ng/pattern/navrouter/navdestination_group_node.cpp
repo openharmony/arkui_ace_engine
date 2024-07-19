@@ -111,26 +111,14 @@ void NavDestinationGroupNode::ProcessShallowBuilder()
     }
 }
 
+/**
+ * @brief Find and return the nearest custom node, which is of type 'JsView'
+ */
 RefPtr<CustomNodeBase> NavDestinationGroupNode::GetNavDestinationCustomNode()
 {
     auto pattern = GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
-    auto navDestinationNode = pattern->GetCustomNode();
-    CHECK_NULL_RETURN(navDestinationNode, nullptr);
-
-    auto child = navDestinationNode->GetFirstChild();
-    while (child) {
-        if (AceType::InstanceOf<NavDestinationGroupNode>(child)) {
-            break;
-        }
-
-        if (AceType::InstanceOf<CustomNodeBase>(child)) {
-            auto customNode = DynamicCast<CustomNodeBase>(child);
-            return customNode;
-        }
-        child = child->GetFirstChild();
-    }
-    return nullptr;
+    return DynamicCast<CustomNodeBase>(pattern->GetCustomNode());
 }
 
 void NavDestinationGroupNode::SetNavDestinationMode(NavDestinationMode mode)
