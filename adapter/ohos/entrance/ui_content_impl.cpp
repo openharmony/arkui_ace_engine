@@ -3360,6 +3360,7 @@ void UIContentImpl::SetContentNodeGrayScale(float grayscale)
     auto renderContext = rootElement->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateFrontGrayScale(Dimension(grayscale));
+    pipelineContext->SetDragNodeGrayscale(grayscale);
 }
 
 void UIContentImpl::PreLayout()

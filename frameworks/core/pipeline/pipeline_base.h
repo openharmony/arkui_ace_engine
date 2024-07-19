@@ -1288,6 +1288,15 @@ public:
         return GetOnFoucs();
     }
 
+    void SetDragNodeGrayscale(float dragNodeGrayscale)
+    {
+        dragNodeGrayscale_ = dragNodeGrayscale;
+    }
+
+    float GetDragNodeGrayscale() const
+    {
+        return dragNodeGrayscale_;
+    }
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1458,7 +1467,8 @@ private:
     WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     uint32_t frameCount_ = 0;
-
+    float dragNodeGrayscale_ = 0.0f;
+    
     // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
     std::mutex densityChangeMutex_;
     int32_t densityChangeCallbackId_ = 0;
