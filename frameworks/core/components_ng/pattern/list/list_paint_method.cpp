@@ -192,26 +192,6 @@ ListDivider ListPaintMethod::HandleLastLineIndex(int32_t index, int32_t laneIdx,
 
 void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 {
-#ifdef ARKUI_CIRCLE_FEATURE
-    CHECK_NULL_VOID(paintWrapper);
-    auto scrollBarOverlayModifier =
-        AceType::DynamicCast<ArcScrollBarOverlayModifier>(scrollBarOverlayModifier_.Upgrade());
-    CHECK_NULL_VOID(scrollBarOverlayModifier);
-    auto scrollBar = AceType::DynamicCast<ArcScrollBar>(scrollBar_.Upgrade());
-    CHECK_NULL_VOID(scrollBar);
-    if (scrollBar->GetPositionModeUpdate()) {
-        scrollBarOverlayModifier->SetPositionMode(scrollBar->GetPositionMode());
-    }
-    scrollBarOverlayModifier->SetBackgroundBarColor(scrollBar->GetBackgroundColor());
-    scrollBarOverlayModifier->StartArcBarAnimation(scrollBar->GetHoverAnimationType(),
-        scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetArcActiveRect(),
-        scrollBar->GetArcBarRect());
-
-    scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
-
-    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
-    scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
-#else
     CHECK_NULL_VOID(paintWrapper);
     auto scrollBarOverlayModifier = scrollBarOverlayModifier_.Upgrade();
     CHECK_NULL_VOID(scrollBarOverlayModifier);
@@ -220,13 +200,36 @@ void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     if (scrollBar->GetPositionModeUpdate()) {
         scrollBarOverlayModifier->SetPositionMode(scrollBar->GetPositionMode());
     }
-    OffsetF fgOffset(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top());
+
+#ifdef ARKUI_CIRCLE_FEATURE
+    auto shapeMode = scrollBar->GetShapeMode();
+    if (shapeMode == ShapeMode::ROUND) {
+        auto arcScrollBarOverlayModifier = AceType::DynamicCast<ArcScrollBarOverlayModifier>(scrollBarOverlayModifier);
+        CHECK_NULL_VOID(arcScrollBarOverlayModifier);
+        auto arcScrollBar = AceType::DynamicCast<ArcScrollBar>(scrollBar);
+        CHECK_NULL_VOID(arcScrollBar);
+        arcScrollBarOverlayModifier->SetBackgroundBarColor(arcScrollBar->GetBackgroundColor());
+        arcScrollBarOverlayModifier->StartArcBarAnimation(arcScrollBar->GetHoverAnimationType(),
+            arcScrollBar->GetOpacityAnimationType(), arcScrollBar->GetNeedAdaptAnimation(), arcScrollBar->GetArcActiveRect(),
+            arcScrollBar->GetArcBarRect());
+    } else {
+        scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
+        scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
+        scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
+        scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
+        scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
+    }
+#else
     scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
         scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
-#endif
+#endif // ARKUI_CIRCLE_FEATURE
+
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
+    scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
+    scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
 
 void ListPaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& listRenderContext)

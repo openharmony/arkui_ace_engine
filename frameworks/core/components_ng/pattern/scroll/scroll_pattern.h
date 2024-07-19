@@ -65,12 +65,21 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        ShapeMode shapeMode = ShapeMode::RECT;
+        auto scrollBar = GetScrollBar();
+        if (scrollBar) {
+            shapeMode = scrollBar->GetShapeMode();
+        }
+        RefPtr<ScrollPaintMethod> paint = nullptr;
 #ifdef ARKUI_CIRCLE_FEATURE
-        auto paint = MakeRefPtr<ArcScrollPaintMethod>();
-#else
-        auto paint = MakeRefPtr<ScrollPaintMethod>();
+        if (shapeMode == ShapeMode::ROUND) {
+            paint = MakeRefPtr<ArcScrollPaintMethod>();
+        } 
 #endif
-        paint->SetScrollBar(GetScrollBar());
+        if (paint == nullptr) {
+            paint = MakeRefPtr<ScrollPaintMethod>();
+        }
+        paint->SetScrollBar(scrollBar);
         CreateScrollBarOverlayModifier();
         paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
         auto scrollEffect = GetScrollEdgeEffect();
