@@ -8546,9 +8546,7 @@ void RichEditorPattern::GetDeletedSpan(
     }
     const std::list<RichEditorAbstractSpanResult>& resultList = info.GetRichEditorDeleteSpans();
     for (auto& it : resultList) {
-        if (it.GetType() == SpanResultType::TEXT) {
-            changeValue.SetRichEditorOriginalSpans(it);
-        }
+        changeValue.SetRichEditorOriginalSpans(it);
     }
 }
 
