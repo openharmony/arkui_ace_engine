@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_THEME_STYLE_H
 
 #include <map>
-#include <future>
 
 #include "core/components/theme/theme_style.h"
 #include "core/components/theme/resource_adapter.h"
@@ -36,17 +35,11 @@ public:
     ~ResourceThemeStyle() override = default;
 
     void ParseContent() override;
-    void CheckThemeStyleLoaded() override;
-    void SetPromiseValue()
-    {
-        promise_.set_value();
-    }
+
 protected:
     void OnParseStyle();
     void OnParseResourceMedia(const std::string& attrName, const std::string& attrValue);
-    std::promise<void> promise_;
-    std::shared_future<void> future_ = promise_.get_future();
-    std::mutex checkThemeStyleLoadedMutex_;
+
 private:
     RawAttrMap rawAttrs_; // key and value read from global resource api.
     RawPatternMap patternAttrs_;
