@@ -393,36 +393,58 @@ void SelectPattern::CreateSelectedCallback()
 
 void SelectPattern::InitFocusEvent()
 {
+    CHECK_NULL_VOID(!focusEventInitialized_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
+
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusStyleTask();
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurStyleTask();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+    focusEventInitialized_ = true;
+}
+
+void SelectPattern::HandleFocusStyleTask()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    AddIsFocusActiveUpdateEvent();
+
+    if (pipeline->GetIsFocusActive()) {
+        SetFocusStyle();
+    }
+}
+
+void SelectPattern::HandleBlurStyleTask()
+{
+    RemoveIsFocusActiveUpdateEvent();
+    ClearFocusStyle();
+}
+
+void SelectPattern::SetFocusStyle()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(selectRenderContext);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
-    auto focusTask = [weak = WeakClaim(this), selectRenderContext = renderContext,
-        theme = selectTheme]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleFocusStyleTask(selectRenderContext, theme);
-    };
-    focusHub->SetOnFocusInternal(focusTask);
-    auto blurTask = [weak = WeakClaim(this), selectRenderContext = renderContext,
-        theme = selectTheme]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleBlurStyleTask(selectRenderContext, theme);
-    };
-    focusHub->SetOnBlurInternal(blurTask);
-}
-
-void SelectPattern::HandleFocusStyleTask(RefPtr<RenderContext> selectRenderContext, RefPtr<SelectTheme> selectTheme)
-{
-    auto && graphics = selectRenderContext->GetOrCreateGraphics();
-    auto && transform = selectRenderContext->GetOrCreateTransform();
+    auto&& graphics = selectRenderContext->GetOrCreateGraphics();
+    auto&& transform = selectRenderContext->GetOrCreateTransform();
     CHECK_NULL_VOID(graphics);
     CHECK_NULL_VOID(transform);
 
@@ -458,11 +480,19 @@ void SelectPattern::HandleFocusStyleTask(RefPtr<RenderContext> selectRenderConte
         textRenderContext->UpdateForegroundColor(selectTheme->GetSelectFocusTextColor());
         text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
-    isFocus_ = true;
 }
 
-void SelectPattern::HandleBlurStyleTask(RefPtr<RenderContext> selectRenderContext, RefPtr<SelectTheme> selectTheme)
+void SelectPattern::ClearFocusStyle()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(selectRenderContext);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+
     if (shadowModify_) {
         ShadowStyle shadowStyle = static_cast<ShadowStyle>(selectTheme->GetSelectNormalShadow());
         Shadow shadow = Shadow::CreateShadow(shadowStyle);
@@ -494,7 +524,32 @@ void SelectPattern::HandleBlurStyleTask(RefPtr<RenderContext> selectRenderContex
         textRenderContext->UpdateForegroundColor(selectTheme->GetFontColor());
         text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
-    isFocus_ = false;
+}
+
+void SelectPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto selectPattern = weak.Upgrade();
+            CHECK_NULL_VOID(selectPattern);
+            if (isFocusAcitve) {
+                selectPattern->SetFocusStyle();
+            } else {
+                selectPattern->ClearFocusStyle();
+            }
+        };
+    }
+
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void SelectPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
 }
 
 void SelectPattern::RegisterOnKeyEvent()

@@ -217,9 +217,13 @@ private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void HandleFocusStyleTask(RefPtr<RenderContext> selectRenderContext, RefPtr<SelectTheme> selectTheme);
-    void HandleBlurStyleTask(RefPtr<RenderContext> selectRenderContext, RefPtr<SelectTheme> selectTheme);
+    void HandleFocusStyleTask();
+    void HandleBlurStyleTask();
+    void SetFocusStyle();
+    void ClearFocusStyle();
     void InitFocusEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
     bool HasRowNode() const
     {
         return rowId_.has_value();
@@ -330,8 +334,9 @@ private:
     bool bgColorModify_ = false;
     bool scaleModify_ = false;
     bool shadowModify_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
+    bool focusEventInitialized_ = false;
     bool focusTextColorModify_ = false;
-    bool isFocus_ = false;
 };
 
 } // namespace OHOS::Ace::NG
