@@ -1847,7 +1847,7 @@ HWTEST_F(TextPickerTestUpdate, SetRange001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     TextPickerModelNG::SetRange(frameNode, range);
-    ASSERT_NE(frameNode->GetPattern<TextPickerPattern>()->GetRange(), nullptr);
+    ASSERT_FALSE(frameNode->GetPattern<TextPickerPattern>()->GetRange().empty());
 }
 
 /**
@@ -1866,7 +1866,7 @@ HWTEST_F(TextPickerTestUpdate, SetValue001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     TextPickerModelNG::SetValue(frameNode, value);
-    ASSERT_NE(frameNode->GetPattern<TextPickerPattern>()->values_, nullptr);
+    ASSERT_NE(frameNode->GetPattern<TextPickerPattern>()->GetSelected(), 0);
 }
 
 /**
@@ -1888,6 +1888,6 @@ HWTEST_F(TextPickerTestUpdate, SetValues001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     TextPickerModelNG::SetValues(frameNode, value);
-    ASSERT_NE(frameNode->GetPattern<TextPickerPattern>()->values_, nullptr);
+    ASSERT_NE(frameNode->GetPattern<TextPickerPattern>()->GetSelected(), 0);
 }
 } // namespace OHOS::Ace::NG
