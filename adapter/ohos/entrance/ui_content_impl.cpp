@@ -3402,13 +3402,13 @@ void UIContentImpl::SetStatusBarItemColor(uint32_t color)
     appBar->SetStatusBarItemColor(IsDarkColor(color));
 }
 
-void UIContentImpl::SetForceSplitEnable(bool isForceSplit)
+void UIContentImpl::SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
 {
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(context);
-    context->SetForceSplitEnable(isForceSplit);
+    context->SetForceSplitEnable(isForceSplit, homePage);
 }
 } // namespace OHOS::Ace

@@ -149,7 +149,7 @@ public:
     
     void SetStatusBarItemColor(uint32_t color) override;
 
-    void SetForceSplitEnable(bool isForceSplit) override {};
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override {};
 
 private:
     UIContentErrorCode CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo,
