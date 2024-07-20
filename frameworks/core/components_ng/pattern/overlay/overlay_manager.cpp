@@ -5268,14 +5268,22 @@ void OverlayManager::RemoveFilter()
 void OverlayManager::RemoveEventColumn()
 {
     if (!hasEvent_) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "remove eventColumn, hasEvent is false.");
         return;
     }
     auto columnNode = eventColumnNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(columnNode);
+    if (!columnNode) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "remove eventColumn, columnNode is null.");
+        return;
+    }
     auto rootNode = columnNode->GetParent();
-    CHECK_NULL_VOID(rootNode);
+    if (!rootNode) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "remove eventColumn, cannot find rootNode.");
+        return;
+    }
     rootNode->RemoveChild(columnNode);
     hasEvent_ = false;
+    TAG_LOGI(AceLogTag::ACE_DRAG, "remove eventColumn success, id %{public}d.", columnNode->GetId());
 }
 
 void OverlayManager::ResetRootNode(int32_t sessionId)
