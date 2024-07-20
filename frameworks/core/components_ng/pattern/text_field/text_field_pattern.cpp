@@ -525,7 +525,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (hostLayoutProperty) {
         hostLayoutProperty->ResetTextAlignChanged();
     }
-    ProcessOverlayAfterLayout(oldParentGlobalOffset != parentGlobalOffset_);
+    ProcessOverlayAfterLayout(oldParentGlobalOffset);
     if (inlineSelectAllFlag_) {
         HandleOnSelectAll(false, true);
         inlineSelectAllFlag_ = false;
@@ -638,23 +638,37 @@ void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
     }
 }
 
-void TextFieldPattern::ProcessOverlayAfterLayout(bool isGlobalAreaChanged)
+void TextFieldPattern::ProcessOverlayAfterLayout(const OffsetF& prevOffset)
 {
-    if (processOverlayDelayTask_) {
-        CHECK_NULL_VOID(HasFocus());
-        processOverlayDelayTask_();
-        processOverlayDelayTask_ = nullptr;
-        return;
-    }
-    if (isGlobalAreaChanged) {
-        HandleParentGlobalOffsetChange();
-        return;
-    }
-    if (needToRefreshSelectOverlay_ && SelectOverlayIsOn()) {
-        StopTwinkling();
-        ProcessOverlay();
-        needToRefreshSelectOverlay_ = false;
-    }
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterLayoutTask([weak = WeakClaim(this), prevOffset]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->parentGlobalOffset_ = pattern->GetPaintRectGlobalOffset();
+        if (pattern->SelectOverlayIsOn()) {
+            if (pattern->IsSelected()) {
+                pattern->selectOverlay_->UpdateAllHandlesOffset();
+            } else {
+                pattern->selectOverlay_->UpdateSecondHandleOffset();
+            }
+        }
+        if (pattern->processOverlayDelayTask_) {
+            CHECK_NULL_VOID(pattern->HasFocus());
+            pattern->processOverlayDelayTask_();
+            pattern->processOverlayDelayTask_ = nullptr;
+        } else if (prevOffset != pattern->parentGlobalOffset_) {
+            pattern->HandleParentGlobalOffsetChange();
+        } else if (pattern->needToRefreshSelectOverlay_ && pattern->SelectOverlayIsOn()) {
+            if (pattern->IsSelected()) {
+                pattern->StopTwinkling();
+            } else {
+                pattern->StartTwinkling();
+            }
+            pattern->ProcessOverlay({ .menuIsShow = pattern->selectOverlay_->IsCurrentMenuVisibile() });
+            pattern->needToRefreshSelectOverlay_ = false;
+        }
+    });
 }
 
 bool TextFieldPattern::HasFocus() const
@@ -711,9 +725,6 @@ void TextFieldPattern::UpdateCaretRect(bool isEditorValueChanged)
     if (IsSelected()) {
         selectController_->MoveFirstHandleToContentRect(selectController_->GetFirstHandleIndex());
         selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex());
-        if (SelectOverlayIsOn()) {
-            selectOverlay_->UpdateAllHandlesOffset();
-        }
         return;
     }
     if (focusHub && !focusHub->IsCurrentFocus() && !obscuredChange_) {
@@ -2789,6 +2800,7 @@ void TextFieldPattern::OnModifyDone()
         needToRefreshSelectOverlay_ = textWidth > 0;
         UpdateSelection(std::clamp(selectController_->GetStartIndex(), 0, textWidth),
             std::clamp(selectController_->GetEndIndex(), 0, textWidth));
+        SetIsSingleHandle(!IsSelected());
         if (isTextChangedAtCreation_ && textWidth == 0) {
             CloseSelectOverlay();
             StartTwinkling();
