@@ -542,6 +542,9 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
             scroll->ProcessScrollMotionStop(true);
         });
     isFrictionAnimationStop_ = false;
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->RequestFrame();
 }
 
 void Scrollable::SetDelayedTask()
@@ -812,9 +815,7 @@ void Scrollable::StartSpringMotion(
     springOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     ACE_SCOPED_TRACE("Scrollable spring animation start, start:%f, end:%f, vel:%f, id:%d, tag:%s", mainPosition,
         finalPosition_, mainVelocity, nodeId_, nodeTag_.c_str());
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    lastVsyncTime_ = context->GetVsyncTime();
+    lastVsyncTime_ = GetSysTimestamp();
     springOffsetProperty_->AnimateWithVelocity(
         option, finalPosition_, mainVelocity, [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
@@ -833,6 +834,9 @@ void Scrollable::StartSpringMotion(
         });
     isSpringAnimationStop_ = false;
     skipRestartSpring_ = false;
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->RequestFrame();
 }
 
 void Scrollable::UpdateSpringMotion(
