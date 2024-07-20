@@ -182,8 +182,9 @@ bool SceneRecord::IsTimeOut(int64_t nowTime)
 
 void SceneRecord::RecordFrame(int64_t vsyncTime, int64_t duration, int32_t skippedFrames)
 {
+    int64_t currentTimeNs = GetCurrentRealTimeNs();
     if (totalFrames == 0) {
-        beginVsyncTime = GetCurrentRealTimeNs();
+        beginVsyncTime = currentTimeNs;
         isFirstFrame = true;
     } else {
         isFirstFrame = false;
@@ -206,6 +207,7 @@ void SceneRecord::RecordFrame(int64_t vsyncTime, int64_t duration, int32_t skipp
     }
     if (!isFirstFrame && duration > maxFrameTime) {
         maxFrameTime = duration;
+        maxFrameTimeSinceStart = currentTimeNs - beginVsyncTime;
     }
     totalFrames++;
 }
@@ -242,6 +244,9 @@ void SceneRecord::Reset()
     beginVsyncTime = 0;
     endVsyncTime = 0;
     maxFrameTime = 0;
+    maxFrameTimeSinceStart = 0;
+    maxHitchTime = 0;
+    maxHitchTimeSinceStart = 0;
     maxSuccessiveFrames = 0;
     seqMissFrames = 0;
     totalMissed = 0;
@@ -481,6 +486,9 @@ void PerfMonitor::FlushDataBase(SceneRecord* record, DataBase& data)
         data.endVsyncTime = data.beginVsyncTime;
     }
     data.maxFrameTime = record->maxFrameTime;
+    data.maxFrameTimeSinceStart = record->maxFrameTimeSinceStart;
+    data.maxHitchTime = record->maxHitchTime;
+    data.maxHitchTimeSinceStart = record->maxHitchTimeSinceStart;
     data.maxSuccessiveFrames = record->maxSuccessiveFrames;
     data.totalMissed = record->totalMissed;
     data.totalFrames = record->totalFrames;
