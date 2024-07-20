@@ -2325,4 +2325,138 @@ HWTEST_F(MenuTestNg, MenuViewTestNgTextMaxLines001, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_EQ(textLayoutProperty->GetMaxLines().value(), menuTheme->GetTextMaxLines());
 }
+
+/**
+ * @tc.name: MenuViewTestNg001
+ * @tc.desc: Verify UpdateMenuBackgroundEffect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuViewTestNg001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    RefPtr<MenuTheme> menuTheme = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
+
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE));
+    ASSERT_NE(menuNode, nullptr);
+
+    menuTheme->bgBlurEffectEnable_ = 0;
+    MenuView::UpdateMenuBackgroundEffect(menuNode);
+
+    menuTheme->bgBlurEffectEnable_ = 1;
+    MenuView::UpdateMenuBackgroundEffect(menuNode);
+    auto renderContext = menuNode->GetRenderContext();
+    auto effectOption = renderContext->GetBackgroundEffect();
+    ASSERT_EQ(effectOption->color, Color::TRANSPARENT);
+}
+
+/**
+ * @tc.name: MenuViewTestNg002
+ * @tc.desc: Verify MenuView::Create when symbol not is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuViewTestNg002, TestSize.Level1)
+{
+    std::function<void()> action = [] {};
+    std::function<void(WeakPtr<NG::FrameNode>)> symbol = [](const WeakPtr<NG::FrameNode>& node) {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", action);
+    optionParams.begin()->symbol = symbol;
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: MenuViewTestNg003
+ * @tc.desc: Verify MenuView::Create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuViewTestNg003, TestSize.Level1)
+{
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto customNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(customNode, nullptr);
+    auto customSonNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(customSonNode, nullptr);
+
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.isShowHoverImage = true;
+    menuParam.previewAnimationOptions = { 0.5f, 2.0f };
+    menuParam.borderRadius.emplace(Dimension(2));
+
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    RefPtr<MenuTheme> menuTheme = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
+
+    auto gestureHub = customNode->GetOrCreateGestureEventHub();
+    menuTheme->doubleBorderEnable_ = 1;
+
+    auto menuWrapperNode1 = MenuView::Create(textNode, TARGET_ID, "", menuParam, true, customNode);
+    ASSERT_NE(menuWrapperNode1, nullptr);
+    ASSERT_EQ(menuWrapperNode1->GetChildren().size(), 2);
+
+    menuTheme->doubleBorderEnable_ = 0;
+    menuParam.previewAnimationOptions = { 0.5f, 0.0009f };
+    customSonNode->MountToParent(customNode);
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+
+    auto menuWrapperNode2 = MenuView::Create(textNode, TARGET_ID, "", menuParam, true, customNode);
+    ASSERT_NE(menuWrapperNode2, nullptr);
+    ASSERT_EQ(menuWrapperNode2->GetChildren().size(), 2);
+}
+
+/**
+ * @tc.name: MenuViewTestNg004
+ * @tc.desc: Verify SetPreviewInfoToMenu with MenuView::Create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuViewTestNg004, TestSize.Level1)
+{
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto customNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(customNode, nullptr);
+
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 11, AceType::MakeRefPtr<TextPattern>());
+    auto targetGestureHub = targetNode->GetOrCreateGestureEventHub();
+
+    targetNode->draggable_ = true;
+    auto menuWrapperNode1 = MenuView::Create(textNode, 11, V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    ASSERT_NE(menuWrapperNode1, nullptr);
+    ASSERT_EQ(menuWrapperNode1->GetChildren().size(), 1);
+
+    menuParam.isShowHoverImage = false;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    auto menuWrapperNode2 = MenuView::Create(textNode, 11, V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    ASSERT_NE(menuWrapperNode2, nullptr);
+    ASSERT_EQ(menuWrapperNode2->GetChildren().size(), 2);
+
+    menuParam.isShowHoverImage = true;
+    targetNode->GetPattern<TextPattern>()->copyOption_ = CopyOptions::Local;
+    auto menuWrapperNode3 = MenuView::Create(textNode, 11, V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    ASSERT_NE(menuWrapperNode3, nullptr);
+    ASSERT_EQ(menuWrapperNode3->GetChildren().size(), 2);
+
+    menuParam.previewMode = MenuPreviewMode::NONE;
+    targetNode->tag_ = "UINode";
+    auto menuWrapperNode4 = MenuView::Create(textNode, 11, "UINode", menuParam, true, customNode);
+    ASSERT_NE(menuWrapperNode4, nullptr);
+    ASSERT_EQ(menuWrapperNode4->GetChildren().size(), 2);
+}
 } // namespace OHOS::Ace::NG
