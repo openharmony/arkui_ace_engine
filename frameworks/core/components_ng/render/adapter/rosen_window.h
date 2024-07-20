@@ -87,9 +87,9 @@ public:
         rsUIDirector_->FlushModifier();
     }
 
-    bool HasUIAnimation() override
+    bool HasUIRunningAnimation() override
     {
-        return rsUIDirector_->HasUIAnimation();
+        return rsUIDirector_->HasUIRunningAnimation();
     }
 
     void OnShow() override;

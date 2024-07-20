@@ -84,7 +84,7 @@ public:
 
     virtual void FlushModifier() {}
 
-    virtual bool HasUIAnimation()
+    virtual bool HasUIRunningAnimation()
     {
         return false;
     }

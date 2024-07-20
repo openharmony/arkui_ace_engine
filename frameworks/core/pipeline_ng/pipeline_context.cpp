@@ -593,7 +593,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     } while (false);
 #endif
 
-    if (hasRunningAnimation || window_->HasUIAnimation()) {
+    if (hasRunningAnimation || window_->HasUIRunningAnimation()) {
         RequestFrame();
     }
     window_->FlushModifier();
