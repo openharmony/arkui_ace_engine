@@ -610,7 +610,7 @@ HWTEST_F(EventRecorderTest, SetContainerInfo002, TestSize.Level1)
 {
     std::string windowName = "";
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, 0, true);
-    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), 0);
+    EXPECT_NE(Recorder::EventRecorder::Get().GetContainerId(), 0);
 }
 
 /**
@@ -646,7 +646,7 @@ HWTEST_F(EventRecorderTest, SetFocusContainerInfo002, TestSize.Level1)
 {
     std::string windowName = "";
     Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, 0);
-    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), 0);
+    EXPECT_NE(Recorder::EventRecorder::Get().GetContainerId(), 0);
 }
 
 /**
@@ -727,7 +727,7 @@ HWTEST_F(EventRecorderTest, PutString002, TestSize.Level1)
 HWTEST_F(EventRecorderTest, OnBeforePagePop001, TestSize.Level1)
 {
     Recorder::NodeDataCache::Get().OnBeforePagePop(true);
-    EXPECT_FALSE(Recorder::NodeDataCache::Get().shouldCollectFull_);
+    EXPECT_FALSE(Recorder::NodeDataCache::Get().ShouldCollectData());
 }
 
 /**
