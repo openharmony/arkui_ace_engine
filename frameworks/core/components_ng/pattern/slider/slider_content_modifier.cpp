@@ -46,8 +46,7 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     trackThickness_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(parameters.trackThickness);
     trackBackgroundColor_ =
         AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic(parameters.trackBackgroundColor));
-    selectGradientColor_ =
-        AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic(parameters.selectGradientColor));
+    selectColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(parameters.selectColor));
     blockColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(parameters.blockColor));
     trackBorderRadius_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(parameters.trackThickness * HALF);
     selectedBorderRadius_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(trackBorderRadius_->Get());
@@ -78,7 +77,7 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     AttachProperty(blockCenterY_);
     AttachProperty(trackThickness_);
     AttachProperty(trackBackgroundColor_);
-    AttachProperty(selectGradientColor_);
+    AttachProperty(selectColor_);
     AttachProperty(blockColor_);
     AttachProperty(boardColor_);
     AttachProperty(trackBorderRadius_);
@@ -280,7 +279,9 @@ void SliderContentModifier::DrawSelect(DrawingContext& context)
         }
 
         RSBrush brush;
-        DrawSelectColor(brush, rect);
+        brush.SetAntiAlias(true);
+        brush.SetColor(ToRSColor(selectColor_->Get()));
+
         canvas.AttachBrush(brush);
         canvas.DrawRoundRect(RSRoundRect(rect, selectedBorderRadius, selectedBorderRadius));
         canvas.DetachBrush();
@@ -896,49 +897,5 @@ Gradient SliderContentModifier::SortGradientColorsByOffset(const Gradient& gradi
     }
 
     return sortedGradient;
-}
-
-void SliderContentModifier::DrawSelectColor(RSBrush& brush, RSRect& rect)
-{
-    Gradient gradient = SortGradientColorsByOffset(selectGradientColor_->Get().GetGradient());
-    std::vector<GradientColor> gradientColors = gradient.GetColors();
-
-    if (gradientColors.empty()) {
-        auto pipeline = PipelineBase::GetCurrentContextSafely();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<SliderTheme>();
-        CHECK_NULL_VOID(theme);
-        gradientColors = SliderModelNG::CreateSolidGradient(theme->GetTrackSelectedColor()).GetColors();
-    }
-
-    std::vector<RSColorQuad> colors;
-    std::vector<float> pos;
-    for (size_t i = 0; i < gradientColors.size(); i++) {
-        colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
-        pos.emplace_back(gradientColors[i].GetDimension().Value());
-    }
-    RSPoint startPoint;
-    RSPoint endPoint;
-    auto direction = static_cast<Axis>(directionAxis_->Get());
-    SetStartEndPointLocation(direction, rect, startPoint, endPoint);
-
-    brush.SetAntiAlias(true);
-    if (reverse_) {
-#ifndef USE_ROSEN_DRAWING
-        brush.SetShaderEffect(
-            RSShaderEffect::CreateLinearGradient(endPoint, startPoint, colors, pos, RSTileMode::CLAMP));
-#else
-        brush.SetShaderEffect(
-            RSRecordingShaderEffect::CreateLinearGradient(endPoint, startPoint, colors, pos, RSTileMode::CLAMP));
-#endif
-    } else {
-#ifndef USE_ROSEN_DRAWING
-        brush.SetShaderEffect(
-            RSShaderEffect::CreateLinearGradient(startPoint, endPoint, colors, pos, RSTileMode::CLAMP));
-#else
-        brush.SetShaderEffect(
-            RSRecordingShaderEffect::CreateLinearGradient(startPoint, endPoint, colors, pos, RSTileMode::CLAMP));
-#endif
-    }
 }
 } // namespace OHOS::Ace::NG

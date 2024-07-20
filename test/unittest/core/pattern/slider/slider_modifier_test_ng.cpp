@@ -151,7 +151,7 @@ void SliderModifierTestNg::SetSliderContentModifier(SliderContentModifier& slide
     sliderContentModifier.SetStepColor(TEST_COLOR);
     sliderContentModifier.SetStepRatio(SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     sliderContentModifier.SetBackgroundSize(POINTF_START, POINTF_END);
-    sliderContentModifier.SetSelectColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
+    sliderContentModifier.SetSelectColor(TEST_COLOR);
     sliderContentModifier.SetBlockColor(TEST_COLOR);
     SizeF blockSize;
     sliderContentModifier.SetBlockSize(blockSize);
@@ -248,8 +248,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest001, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.stepColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.stepRatio_->Get(), SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     EXPECT_EQ(sliderContentModifier.directionAxis_->Get(), static_cast<int>(Axis::HORIZONTAL));
-    EXPECT_EQ(sliderContentModifier.selectGradientColor_->Get().GetGradient(),
-        SliderModelNG::CreateSolidGradient(TEST_COLOR));
+    EXPECT_EQ(sliderContentModifier.selectColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::DEFAULT));
     EXPECT_EQ(sliderContentModifier.shape_, basicShape);
     EXPECT_EQ(sliderContentModifier.sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::OUTSET));
@@ -306,8 +305,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest002, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.stepColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.stepRatio_->Get(), SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     EXPECT_EQ(sliderContentModifier.directionAxis_->Get(), static_cast<int>(Axis::HORIZONTAL));
-    EXPECT_EQ(sliderContentModifier.selectGradientColor_->Get().GetGradient(),
-        SliderModelNG::CreateSolidGradient(TEST_COLOR));
+    EXPECT_EQ(sliderContentModifier.selectColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::SHAPE));
     EXPECT_EQ(sliderContentModifier.shape_, basicShape);
     EXPECT_EQ(sliderContentModifier.sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::OUTSET));
@@ -362,8 +360,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest003, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.stepColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.stepRatio_->Get(), SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     EXPECT_EQ(sliderContentModifier.directionAxis_->Get(), static_cast<int>(Axis::FREE));
-    EXPECT_EQ(sliderContentModifier.selectGradientColor_->Get().GetGradient(),
-        SliderModelNG::CreateSolidGradient(TEST_COLOR));
+    EXPECT_EQ(sliderContentModifier.selectColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::SHAPE));
     EXPECT_EQ(sliderContentModifier.shape_, basicShape);
     EXPECT_EQ(sliderContentModifier.sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::OUTSET));
@@ -423,8 +420,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest004, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.stepColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.stepRatio_->Get(), SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     EXPECT_EQ(sliderContentModifier.directionAxis_->Get(), static_cast<int>(Axis::HORIZONTAL));
-    EXPECT_EQ(sliderContentModifier.selectGradientColor_->Get().GetGradient(),
-        SliderModelNG::CreateSolidGradient(TEST_COLOR));
+    EXPECT_EQ(sliderContentModifier.selectColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::SHAPE));
     EXPECT_EQ(sliderContentModifier.shape_, basicShape);
     EXPECT_EQ(sliderContentModifier.sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::INSET));
@@ -477,8 +473,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest005, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.stepColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.stepRatio_->Get(), SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     EXPECT_EQ(sliderContentModifier.directionAxis_->Get(), static_cast<int>(Axis::FREE));
-    EXPECT_EQ(sliderContentModifier.selectGradientColor_->Get().GetGradient(),
-        SliderModelNG::CreateSolidGradient(TEST_COLOR));
+    EXPECT_EQ(sliderContentModifier.selectColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::SHAPE));
     EXPECT_EQ(sliderContentModifier.shape_, basicShape);
     EXPECT_EQ(sliderContentModifier.sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::OUTSET));
@@ -533,8 +528,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest006, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.stepColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.stepRatio_->Get(), SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     EXPECT_EQ(sliderContentModifier.directionAxis_->Get(), static_cast<int>(Axis::FREE));
-    EXPECT_EQ(sliderContentModifier.selectGradientColor_->Get().GetGradient(),
-        SliderModelNG::CreateSolidGradient(TEST_COLOR));
+    EXPECT_EQ(sliderContentModifier.selectColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::SHAPE));
     EXPECT_EQ(sliderContentModifier.shape_, basicShape);
     EXPECT_EQ(sliderContentModifier.sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::OUTSET));
@@ -589,8 +583,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest007, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.stepColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.stepRatio_->Get(), SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     EXPECT_EQ(sliderContentModifier.directionAxis_->Get(), static_cast<int>(Axis::FREE));
-    EXPECT_EQ(sliderContentModifier.selectGradientColor_->Get().GetGradient(),
-        SliderModelNG::CreateSolidGradient(TEST_COLOR));
+    EXPECT_EQ(sliderContentModifier.selectColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::SHAPE));
     EXPECT_EQ(sliderContentModifier.shape_, basicShape);
     EXPECT_EQ(sliderContentModifier.sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::INSET));
@@ -643,8 +636,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest008, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.stepColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.stepRatio_->Get(), SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     EXPECT_EQ(sliderContentModifier.directionAxis_->Get(), static_cast<int>(Axis::FREE));
-    EXPECT_EQ(sliderContentModifier.selectGradientColor_->Get().GetGradient(),
-        SliderModelNG::CreateSolidGradient(TEST_COLOR));
+    EXPECT_EQ(sliderContentModifier.selectColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::SHAPE));
     EXPECT_EQ(sliderContentModifier.shape_, basicShape);
     EXPECT_EQ(sliderContentModifier.sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::OUTSET));
