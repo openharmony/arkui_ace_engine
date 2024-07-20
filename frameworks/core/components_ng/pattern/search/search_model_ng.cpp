@@ -521,7 +521,7 @@ void SearchModelNG::SetOnChange(std::function<void(const std::string&, PreviewTe
         CHECK_NULL_VOID(pattern);
         auto searchPattern = AceType::DynamicCast<SearchPattern>(pattern);
         CHECK_NULL_VOID(searchPattern);
-        searchPattern->UpdateChangeEvent(value);
+        searchPattern->UpdateChangeEvent(value + previewText.value);
     };
     eventHub->SetOnChange(std::move(searchChangeFunc));
 }
@@ -1535,7 +1535,7 @@ void SearchModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const s
         CHECK_NULL_VOID(pattern);
         auto searchPattern = AceType::DynamicCast<SearchPattern>(pattern);
         CHECK_NULL_VOID(searchPattern);
-        searchPattern->UpdateChangeEvent(value);
+        searchPattern->UpdateChangeEvent(value + previewText.value);
     };
     eventHub->SetOnChange(std::move(searchChangeFunc));
 }
