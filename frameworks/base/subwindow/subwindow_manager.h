@@ -144,6 +144,8 @@ public:
     void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
     bool IsSubwindowExist(RefPtr<Subwindow> subwindow);
 
+    RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
+
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
     RefPtr<Subwindow> GetOrCreateSystemSubWindow();

@@ -985,4 +985,19 @@ bool SubwindowManager::IsSubwindowExist(RefPtr<Subwindow> subwindow)
 {
     return subwindow && subwindow->GetIsRosenWindowCreate();
 }
+
+RefPtr<NG::FrameNode> SubwindowManager::GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node)
+{
+    auto iter = subwindowMap_.begin();
+    while (iter != subwindowMap_.end()) {
+        auto overlay = iter->second->GetOverlayManager();
+        CHECK_NULL_RETURN(overlay, nullptr);
+        auto dialogNode = overlay->GetDialogNodeWithExistContent(node);
+        if (dialogNode) {
+            return dialogNode;
+        }
+        ++iter;
+    }
+    return nullptr;
+}
 } // namespace OHOS::Ace

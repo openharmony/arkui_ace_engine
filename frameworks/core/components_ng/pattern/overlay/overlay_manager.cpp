@@ -2333,6 +2333,9 @@ void OverlayManager::CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::fun
     }
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "CloseCustomDialog ComponentContent id: %{public}d", contentNode->GetId());
     auto dialogNode = GetDialogNodeWithExistContent(contentNode);
+    if (!dialogNode) {
+        dialogNode = SubwindowManager::GetInstance()->GetSubwindowDialogNodeWithExistContent(contentNode);
+    }
     if (dialogNode) {
         DeleteDialogHotAreas(dialogNode);
         CloseDialogInner(dialogNode);
@@ -2357,6 +2360,9 @@ void OverlayManager::UpdateCustomDialog(
     }
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "UpdateCustomDialog ComponentContent id: %{public}d", contentNode->GetId());
     auto dialogNode = GetDialogNodeWithExistContent(contentNode);
+    if (!dialogNode) {
+        dialogNode = SubwindowManager::GetInstance()->GetSubwindowDialogNodeWithExistContent(contentNode);
+    }
     if (dialogNode) {
         auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
         CHECK_NULL_VOID(dialogLayoutProp);

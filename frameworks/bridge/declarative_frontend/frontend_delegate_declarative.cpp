@@ -1867,7 +1867,6 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const WeakPtr<NG::UINode>& n
         CHECK_NULL_VOID(overlayManager);
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
         overlayManager->CloseCustomDialog(node, std::move(callback));
-        SubwindowManager::GetInstance()->CloseCustomDialogNG(node, std::move(callback));
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog");
     return;
@@ -1887,12 +1886,11 @@ void FrontendDelegateDeclarative::UpdateCustomDialog(
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
     }
-    auto task = [dialogAttr, dialogProperties, node, callback]
+    auto task = [dialogProperties, node, callback]
         (const RefPtr<NG::OverlayManager>& overlayManager) mutable {
         CHECK_NULL_VOID(overlayManager);
         LOGI("begin to update custom dialog.");
         overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
-        SubwindowManager::GetInstance()->UpdateCustomDialogNG(node, dialogAttr, std::move(callback));
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayUpdateCustomDialog");
     return;
