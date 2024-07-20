@@ -1097,6 +1097,9 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
     CHECK_NULL_VOID(tabsNode);
     auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabsPattern);
+    CHECK_NULL_VOID(swiperController_);
+    swiperController_->FinishAnimation();
+
     UpdateAnimationDuration();
     auto duration = GetAnimationDuration().value_or(0);
     if (tabsPattern->GetIsCustomAnimation()) {
