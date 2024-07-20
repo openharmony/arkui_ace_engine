@@ -987,7 +987,6 @@ Offset MenuPattern::GetTransformCenter() const
     auto placement = layoutAlgorithm->GetPlacement();
     switch (placement) {
         case Placement::BOTTOM_LEFT:
-            return Offset(size.Width(), 0.0f);
         case Placement::RIGHT_TOP:
             return Offset();
         case Placement::BOTTOM_RIGHT:
