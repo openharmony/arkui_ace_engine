@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "base/utils/utils.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/render/drawing.h"
@@ -315,5 +316,14 @@ void TextDragPattern::CalculateLine(std::vector<TextPoint>& points, std::shared_
         auto crossPoint = points[i + 1];
         path->LineTo(crossPoint.x, crossPoint.y);
     }
+}
+
+Color TextDragPattern::GetDragBackgroundColor()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, Color(TEXT_DRAG_COLOR_BG));
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, Color(TEXT_DRAG_COLOR_BG));
+    return textTheme->GetDragBackgroundColor();
 }
 } // namespace OHOS::Ace::NG
