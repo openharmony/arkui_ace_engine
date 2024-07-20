@@ -1697,6 +1697,7 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = title,
         .content = message,
         .autoCancel = autoCancel,
@@ -1711,6 +1712,7 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter with status changed");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = title,
         .content = message,
         .autoCancel = autoCancel,
@@ -1725,6 +1727,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter with attr");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
@@ -1765,6 +1768,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter with attr for status changed");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
