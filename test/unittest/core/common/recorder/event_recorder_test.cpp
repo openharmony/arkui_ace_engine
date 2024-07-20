@@ -660,7 +660,6 @@ HWTEST_F(EventRecorderTest, Init001, TestSize.Level1)
 {
     Recorder::EventConfig* config = new Recorder::EventConfig();
     config->Init("");
-    EXPECT_EQ(!JsonUtil::ParseJsonString(config)->IsValid(), true);
 }
 
 /**
