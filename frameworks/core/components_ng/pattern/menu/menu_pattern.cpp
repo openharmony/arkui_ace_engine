@@ -1347,24 +1347,8 @@ void MenuPattern::ShowMenuDisappearAnimation()
     });
 }
 
-void MenuPattern::CallMenuAboutToAppearCallback()
-{
-    auto menuWrapper = GetMenuWrapper();
-    CHECK_NULL_VOID(menuWrapper);
-    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    menuWrapperPattern->CallMenuAboutToAppearCallback();
-    menuWrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
-    auto pipeline = menuWrapper->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    overlayManager->SetIsMenuShow(true);
-}
-
 bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    CallMenuAboutToAppearCallback();
     ShowPreviewMenuAnimation();
     ShowMenuAppearAnimation();
     ShowStackExpandMenu();
