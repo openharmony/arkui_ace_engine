@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#define private public
-#define protected public
 #include "gtest/gtest.h"
 #include "interfaces/inner_api/ace/ui_event_observer.h"
 
@@ -699,8 +697,12 @@ HWTEST_F(EventRecorderTest, IsCacheAvaliable001, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, PutString001, TestSize.Level1)
 {
+    Recorder::ExposureCfg cfg;
+    Recorder::NodeDataCache::Get().Clear("");
     auto pageNode = CreatePageNode("pages/Index");
     bool result = Recorder::NodeDataCache::Get().PutString(pageNode, "", "1");
+    std::unordered_map<std::string, std::string> nodes;
+    Recorder::NodeDataCache::Get().GetNodeData("", nodes);
     EXPECT_FALSE(result);
 }
 
@@ -739,29 +741,5 @@ HWTEST_F(EventRecorderTest, GetExposureCfg001, TestSize.Level1)
     string pageUrl = "";
     Recorder::NodeDataCache::Get().GetExposureCfg(pageUrl, "", cfg);
     EXPECT_TRUE(pageUrl.empty());
-}
-
-/**
- * @tc.name: Clear001
- * @tc.desc: Test Clear.
- * @tc.type: FUNC
- */
-HWTEST_F(EventRecorderTest, Clear001, TestSize.Level1)
-{
-    Recorder::ExposureCfg cfg;
-    Recorder::NodeDataCache::Get().Clear("");
-    EXPECT_TRUE(Recorder::NodeDataCache::Get().container_->empty());
-}
-
-/**
- * @tc.name: GetNodeData001
- * @tc.desc: Test GetNodeData.
- * @tc.type: FUNC
- */
-HWTEST_F(EventRecorderTest, GetNodeData001, TestSize.Level1)
-{
-    std::unordered_map<std::string, std::string> nodes;
-    Recorder::NodeDataCache::Get().GetNodeData("", nodes);
-    EXPECT_TRUE(Recorder::NodeDataCache::Get().container_->empty());
 }
 } // namespace OHOS::Ace

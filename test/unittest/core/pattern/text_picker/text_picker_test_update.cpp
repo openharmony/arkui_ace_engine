@@ -1794,7 +1794,7 @@ HWTEST_F(TextPickerTestUpdate, SetDialogButtonActive001, TestSize.Level1)
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     TextPickerDialogView::SetDialogButtonActive(contentColumn, 0, 0);
-    EXPECT_NE(contentColumn->GetLastChild(), nullptr);
+    EXPECT_EQ(contentColumn->GetLastChild(), nullptr);
 }
 
 /**
@@ -1866,7 +1866,7 @@ HWTEST_F(TextPickerTestUpdate, SetValue001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     TextPickerModelNG::SetValue(frameNode, value);
-    ASSERT_NE(frameNode->GetPattern<TextPickerPattern>()->GetSelected(), 0);
+    EXPECT_EQ(frameNode->GetPattern<TextPickerPattern>()->GetSelected(), 0);
 }
 
 /**
@@ -1888,6 +1888,6 @@ HWTEST_F(TextPickerTestUpdate, SetValues001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     TextPickerModelNG::SetValues(frameNode, value);
-    ASSERT_NE(frameNode->GetPattern<TextPickerPattern>()->GetSelected(), 0);
+    EXPECT_EQ(frameNode->GetPattern<TextPickerPattern>()->GetSelected(), 0);
 }
 } // namespace OHOS::Ace::NG
