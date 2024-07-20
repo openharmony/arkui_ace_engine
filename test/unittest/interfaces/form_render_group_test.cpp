@@ -28,6 +28,7 @@ using namespace testing::ext;
 namespace OHOS::Ace {
 namespace {
 constexpr char FORM_RENDER_STATE[] = "ohos.extra.param.key.form_render_state";
+constexpr char FORM_RENDERER_COMP_ID[] = "ohos.extra.param.key.form_comp_id";
 } // namespace
 class FormRenderGroupTest : public testing::Test {
 public:
@@ -490,5 +491,86 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_021, TestSize.Level1)
     }
     EXPECT_TRUE(flag);
     GTEST_LOG_(INFO) << "FormRenderGroupTest_021 end";
+}
+
+/**
+ * @tc.name: FormRenderGroupTest_022
+ * @tc.desc: Test GetOrderedAndCurrentCompIds() function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_022, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_022 start";
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_022");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    EXPECT_TRUE(group);
+    std::pair<std::vector<std::string>, std::string> compIdPair = group->GetOrderedAndCurrentCompIds();
+    EXPECT_EQ(true, compIdPair.first.empty());
+    EXPECT_EQ(true, compIdPair.second.empty());
+    OHOS::AAFwk::Want want;
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+    formJsInfo.formId = 1;
+    std::string compId1 = "comp1";
+    want.SetParam(FORM_RENDERER_COMP_ID, compId1);
+    group->AddForm(want, formJsInfo);
+    formJsInfo.formId = 2;
+    std::string compId2 = "comp2";
+    want.SetParam(FORM_RENDERER_COMP_ID, compId2);
+    group->AddForm(want, formJsInfo);
+    compIdPair = group->GetOrderedAndCurrentCompIds();
+    EXPECT_EQ(2, compIdPair.first.size());
+    EXPECT_EQ(compId1, compIdPair.first[0]);
+    EXPECT_EQ(compId2, compIdPair.first[1]);
+    EXPECT_EQ(compId2, compIdPair.second);
+    group->DeleteForm(compId2);
+    compIdPair = group->GetOrderedAndCurrentCompIds();
+    EXPECT_EQ(1, compIdPair.first.size());
+    EXPECT_EQ(compId1, compIdPair.second);
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_022 end";
+}
+
+/**
+ * @tc.name: FormRenderGroupTest_023
+ * @tc.desc: Test RecoverRenderer() function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_023, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_023 start";
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_023");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    EXPECT_TRUE(group);
+    OHOS::AAFwk::Want want;
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+    formJsInfo.formId = 1;
+    std::string compId1 = "comp1";
+    want.SetParam(FORM_RENDERER_COMP_ID, compId1);
+    group->AddForm(want, formJsInfo);
+    formJsInfo.formId = 2;
+    std::string compId2 = "comp2";
+    want.SetParam(FORM_RENDERER_COMP_ID, compId2);
+    group->AddForm(want, formJsInfo);
+    std::pair<std::vector<std::string>, std::string> compIdPair = group->GetOrderedAndCurrentCompIds();
+    group->DeleteForm();
+    EXPECT_EQ(true, group->GetAllRendererFormRequests().empty());
+    std::vector<FormRequest> requests;
+    group->RecoverRenderer(requests, 0);
+    EXPECT_EQ(true, group->GetAllRendererFormRequests().empty());
+    for (auto compId: compIdPair.first) {
+        FormRequest formRequest;
+        formRequest.compId = compId;
+        requests.emplace_back(formRequest);
+    }
+    group->RecoverRenderer(requests, requests.size());
+    EXPECT_EQ(true, group->GetAllRendererFormRequests().empty());
+    group->RecoverRenderer(requests, requests.size() - 1);
+    EXPECT_EQ(2, group->GetAllRendererFormRequests().size());
+    compIdPair = group->GetOrderedAndCurrentCompIds();
+    EXPECT_EQ(compId2, compIdPair.second);
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_023 end";
 }
 }
