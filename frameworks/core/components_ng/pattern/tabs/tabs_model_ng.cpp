@@ -85,7 +85,7 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
         }
     }
     if ((index != preIndex) && (index >= 0)) {
-        AceAsyncTraceBegin(0, APP_TABS_NO_ANIMATION_SWITCH);
+        AceAsyncTraceBeginCommercial(0, APP_TABS_NO_ANIMATION_SWITCH);
         SetIndex(index);
         auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
         auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();

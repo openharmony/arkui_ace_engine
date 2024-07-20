@@ -25,6 +25,7 @@
 namespace OHOS::Ace {
 namespace {
 static constexpr uint64_t ACE_TRACE_COMMERCIAL = HITRACE_TAG_ACE | HITRACE_TAG_COMMERCIAL;
+static constexpr uint64_t ANIMATION_TRACE_COMMERCIAL = HITRACE_TAG_ANIMATION | HITRACE_TAG_COMMERCIAL;
 }
 
 void AceTraceBegin(const char* name)
@@ -68,6 +69,28 @@ void AceAsyncTraceEnd(int32_t taskId, const char* name, bool isAnimationTrace)
         FinishAsyncTrace(HITRACE_TAG_ANIMATION, nameStr, taskId);
     } else {
         FinishAsyncTrace(HITRACE_TAG_ACE, nameStr, taskId);
+    }
+}
+
+void AceAsyncTraceBeginCommercial(int32_t taskId, const char* name, bool isAnimationTrace)
+{
+    CHECK_NULL_VOID(name);
+    std::string nameStr(name);
+    if (isAnimationTrace) {
+        StartAsyncTrace(ANIMATION_TRACE_COMMERCIAL, nameStr, taskId);
+    } else {
+        StartAsyncTrace(ACE_TRACE_COMMERCIAL, nameStr, taskId);
+    }
+}
+
+void AceAsyncTraceEndCommercial(int32_t taskId, const char* name, bool isAnimationTrace)
+{
+    CHECK_NULL_VOID(name);
+    std::string nameStr(name);
+    if (isAnimationTrace) {
+        FinishAsyncTrace(ANIMATION_TRACE_COMMERCIAL, nameStr, taskId);
+    } else {
+        FinishAsyncTrace(ACE_TRACE_COMMERCIAL, nameStr, taskId);
     }
 }
 
