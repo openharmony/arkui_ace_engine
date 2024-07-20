@@ -639,9 +639,12 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
             return;
         }
         ACE_SCOPED_TRACE("ohos.animator finishCallback, id:%d", id);
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "ohos.animator call finish callback, id:%{public}d", id);
         result = napi_call_function(env, NULL, onfinish, 0, NULL, &ret);
-        TAG_LOGI(AceLogTag::ACE_ANIMATION, "ohos.animator call finish callback done, id:%{public}d, succeed:%{public}d",
-            id, result == napi_ok);
+        if (result != napi_ok) {
+            TAG_LOGW(
+                AceLogTag::ACE_ANIMATION, "ohos.animator call finish callback failed, napi error, id:%{public}d", id);
+        }
         napi_close_handle_scope(env, scope);
     });
     napi_value undefined;
