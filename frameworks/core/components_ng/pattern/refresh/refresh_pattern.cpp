@@ -82,6 +82,19 @@ void RefreshPattern::OnAttachToFrameNode()
     host->GetRenderContext()->UpdateClipEdge(true);
 }
 
+bool RefreshPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    if (isRemoveCustomBuilder_) {
+        UpdateFirstChildPlacement();
+        if (isRefreshing_) {
+            UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
+        }
+        isRemoveCustomBuilder_ = false;
+    }
+    return false;
+}
+
 void RefreshPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -308,11 +321,8 @@ void RefreshPattern::InitChildNode()
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             auto progressContext = progressChild_->GetRenderContext();
             CHECK_NULL_VOID(progressContext);
-            UpdateFirstChildPlacement();
-            if (isRefreshing_) {
-                UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
-            }
-            UpdateLoadingTextOpacity(1.0f);
+            progressContext->UpdateOpacity(0.0f);
+            UpdateLoadingTextOpacity(0.0f);
         } else {
             UpdateLoadingProgress();
         }
@@ -523,9 +533,12 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!builder) {
-        host->RemoveChild(customBuilder_);
-        isCustomBuilderExist_ = false;
-        customBuilder_ = nullptr;
+        if (isCustomBuilderExist_) {
+            host->RemoveChild(customBuilder_);
+            isCustomBuilderExist_ = false;
+            customBuilder_ = nullptr;
+            isRemoveCustomBuilder_ = true;
+        }
         return;
     }
 
