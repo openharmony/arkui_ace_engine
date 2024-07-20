@@ -21,13 +21,10 @@
 
 namespace OHOS::Ace {
 std::unique_ptr<RecycleViewModel> RecycleViewModel::instance_ = nullptr;
-std::mutex RecycleViewModel::mutex_;
 
 RecycleViewModel* RecycleViewModel::GetInstance()
 {
     if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
             instance_.reset(new NG::RecycleViewModelNG());
 #else
@@ -37,7 +34,6 @@ RecycleViewModel* RecycleViewModel::GetInstance()
                 instance_.reset(nullptr);
             }
 #endif
-        }
     }
     return instance_.get();
 }
