@@ -1382,6 +1382,11 @@ protected:
     {
         isDetachFromMainTree_ = true;
     }
+    
+    bool IsReverse() const override
+    {
+        return false;
+    };
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
