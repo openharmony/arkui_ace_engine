@@ -455,13 +455,21 @@ bool NavigationGroupNode::HandleBack(const RefPtr<FrameNode>& node, bool isLastC
     return true;
 }
 
-void NavigationGroupNode::CreateAnimationWithPop(
-    const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, const RefPtr<TitleBarNode>& preTitleNode,
-    const RefPtr<TitleBarNode>& curTitleBarNode, const AnimationFinishCallback callback)
+void NavigationGroupNode::CreateAnimationWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+    const AnimationFinishCallback finishCallback, bool isNavBar)
 {
-    auto preFrameSize = preNode->GetGeometryNode()->GetFrameSize();
+    CHECK_NULL_VOID(preNode);
+    auto preNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
+    CHECK_NULL_VOID(preNavDestination);
+    auto preTitleNode = AceType::DynamicCast<TitleBarNode>(preNavDestination->GetTitleBarNode());
+    CHECK_NULL_VOID(preTitleNode);
     auto preBackIcon = AceType::DynamicCast<FrameNode>(preTitleNode->GetBackButton());
     CHECK_NULL_VOID(preBackIcon);
+    RefPtr<TitleBarNode> curTitleBarNode;
+    if (!GetCurTitleBarNode(curTitleBarNode, curNode, isNavBar)) {
+        return;
+    }
+    auto preFrameSize = preNode->GetGeometryNode()->GetFrameSize();
     /* set initial status of animation */
     preNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
     preNode->GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, preFrameSize.Width(), REMOVE_CLIP_SIZE),
@@ -481,7 +489,7 @@ void NavigationGroupNode::CreateAnimationWithPop(
 
     /* start transition animation */
     AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
-        callback);
+        finishCallback);
     auto newPopAnimation = AnimationUtils::StartAnimation(option, [
         this, preNode, preTitleNode, preFrameSize, curNode, curTitleBarNode]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
@@ -608,7 +616,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
         };
 
     preNavDestination->SetIsOnAnimation(true);
-    CreateAnimationWithPop(preNode, curNode, preTitleNode, curTitleBarNode, callback);
+    CreateAnimationWithPop(preNode, curNode, callback, isNavBar);
 
     // clear this flag for navBar layout only
     if (isNavBar) {
@@ -620,10 +628,24 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
 #endif
 }
 
-void NavigationGroupNode::CreateAnimationWithPush(
-    const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, const RefPtr<TitleBarNode>& preTitleNode,
-    const RefPtr<TitleBarNode>& curTitleNode, const AnimationFinishCallback callback)
+void NavigationGroupNode::CreateAnimationWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+    const AnimationFinishCallback finishCallback, bool isNavBar)
 {
+    CHECK_NULL_VOID(preNode);
+    CHECK_NULL_VOID(curNode);
+    RefPtr<TitleBarNode> preTitleNode;
+    if (isNavBar) {
+        auto navBarNode = AceType::DynamicCast<NavBarNode>(preNode);
+        preTitleNode = navBarNode ? AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode()) : nullptr;
+    } else {
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
+        preTitleNode = navDestination ? AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode()) : nullptr;
+    }
+    CHECK_NULL_VOID(preTitleNode);
+    auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+    CHECK_NULL_VOID(curNavDestination);
+    auto curTitleNode = AceType::DynamicCast<TitleBarNode>(curNavDestination->GetTitleBarNode());
+    CHECK_NULL_VOID(curTitleNode);
     auto preFrameSize = preNode->GetGeometryNode()->GetFrameSize();
     auto curFrameSize = curNode->GetGeometryNode()->GetFrameSize();
     auto mode = GetNavigationMode();
@@ -646,7 +668,7 @@ void NavigationGroupNode::CreateAnimationWithPush(
 
     /* start transition animation */
     AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
-        callback);
+        finishCallback);
     auto newPushAnimation = AnimationUtils::StartAnimation(option, [
         this, preNode, preTitleNode, curNode, curTitleNode, preFrameSize, curFrameSize, mode]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
@@ -784,7 +806,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
         }
     }
     curNavDestination->SetIsOnAnimation(true);
-    CreateAnimationWithPush(preNode, curNode, preTitleNode, curTitleNode, callback);
+    CreateAnimationWithPush(preNode, curNode, callback, isNavBar);
 
     isOnAnimation_ = true;
     if (AceChecker::IsPerformanceCheckEnabled()) {

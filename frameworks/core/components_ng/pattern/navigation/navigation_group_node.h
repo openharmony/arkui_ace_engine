@@ -155,12 +155,10 @@ public:
 
     void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
     void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
-    virtual void CreateAnimationWithPop(
-        const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, const RefPtr<TitleBarNode>& preTitleNode,
-        const RefPtr<TitleBarNode>& curTitleBarNode, const AnimationFinishCallback callback);
-    virtual void CreateAnimationWithPush(
-        const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, const RefPtr<TitleBarNode>& preTitleNode,
-        const RefPtr<TitleBarNode>& curTitleNode, const AnimationFinishCallback callback);
+    virtual void CreateAnimationWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+        const AnimationFinishCallback finishCallback, bool isNavBar = false);
+    virtual void CreateAnimationWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+        const AnimationFinishCallback finishCallback, bool isNavBar = false);
 
     std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(
         const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
