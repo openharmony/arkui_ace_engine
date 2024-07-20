@@ -92,6 +92,10 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     isSuitableForElderly_ = dialogPattern->GetIsSuitableForAging() &&
                             windowManager->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING &&
                             GreatOrEqual(pipeline->GetFontScale(), 1.75f);
+    auto isPickekDiaglog = dialogPattern->GetIsPickerDiaglog();
+    if (isPickekDiaglog) {
+        isSuitableForElderly_ = false;
+    }
     if (isSuitableForElderly_ || GreatOrEqual(pipeline->GetFontScale(), 1.75f)) {
         dialogPattern->UpdateDeviceOrientation(SystemProperties::GetDeviceOrientation());
     }
