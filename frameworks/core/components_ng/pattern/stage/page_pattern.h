@@ -243,6 +243,11 @@ protected:
         return true;
     }
 
+    bool AvoidCutout() const override
+    {
+        return true;
+    }
+
     void NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std::string& bundleName);
 
     RefPtr<PageInfo> pageInfo_;
