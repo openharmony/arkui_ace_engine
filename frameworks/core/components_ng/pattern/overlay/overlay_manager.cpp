@@ -3297,6 +3297,13 @@ void OverlayManager::FireNavigationStateChange(bool show, const RefPtr<UINode>& 
     }
 
     auto lastPage = GetLastPage();
+    CHECK_NULL_VOID(lastPage);
+    auto pagePattern = lastPage->GetPattern<PagePattern>();
+    bool notTriggerNavigationStateChange = show && pagePattern && !pagePattern->IsOnShow();
+    if (notTriggerNavigationStateChange) {
+        // navdestination will not fire onShow When parent page is hide.
+        return;
+    }
     NavigationPattern::FireNavigationStateChange(lastPage, show);
 }
 
