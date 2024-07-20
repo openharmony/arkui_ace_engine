@@ -696,4 +696,163 @@ HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest010, TestSize.Level1)
     result = sequencedRecognizer.ReconcileFrom(sequencedRecognizerPtr);
     EXPECT_EQ(result, false);
 }
+
+/**
+ * @tc.name: SequencedRecognizerTest011
+ * @tc.desc: Test HandleEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest011, TestSize.Level1)
+{
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    SequencedRecognizer sequencedRecognizer = SequencedRecognizer(recognizers);
+    RefPtr<SequencedRecognizer> sequencedRecognizerPtr = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    AxisEvent point;
+    point.action = AxisAction::BEGIN;
+    auto result = sequencedRecognizerPtr->HandleEvent(point);
+    EXPECT_EQ(result, true);
+    point.action = AxisAction::UPDATE;
+    result = sequencedRecognizerPtr->HandleEvent(point);
+    EXPECT_EQ(result, true);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    sequencedRecognizer.recognizers_.clear();
+    sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
+    result = sequencedRecognizerPtr->HandleEvent(point);
+    EXPECT_EQ(result, true);
+    sequencedRecognizer.recognizers_.clear();
+    sequencedRecognizer.recognizers_.push_back(nullptr);
+    result = sequencedRecognizerPtr->HandleEvent(point);
+    EXPECT_EQ(result, true);
+    sequencedRecognizer.currentIndex_ = 0;
+    sequencedRecognizer.recognizers_.clear();
+    sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
+    result = sequencedRecognizerPtr->HandleEvent(point);
+    EXPECT_EQ(result, true);
+    sequencedRecognizer.currentIndex_ = 2;
+    sequencedRecognizer.recognizers_.clear();
+    sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
+    result = sequencedRecognizerPtr->HandleEvent(point);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest012
+ * @tc.desc: Test HandleEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest012, TestSize.Level1)
+{
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    SequencedRecognizer sequencedRecognizer = SequencedRecognizer(recognizers);
+    RefPtr<SequencedRecognizer> sequencedRecognizerPtr = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    AxisEvent point;
+    point.action = AxisAction::NONE;
+    std::cout << "action = none" << std::endl;
+    auto result = sequencedRecognizerPtr->HandleEvent(point);
+    EXPECT_EQ(result, true);
+    sequencedRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    point.action = AxisAction::END;
+    std::cout << "action = END refereeState_ = PENDING" << std::endl;
+    result = sequencedRecognizerPtr->HandleEvent(point);
+    EXPECT_EQ(result, true);
+    sequencedRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    point.action = AxisAction::UPDATE;
+    std::cout << "action = UPDATE refereeState_ = PENDING" << std::endl;
+    result = sequencedRecognizerPtr->HandleEvent(point);
+    EXPECT_EQ(result, true);
+    sequencedRecognizerPtr->refereeState_ = RefereeState::PENDING_BLOCKED;
+    point.action = AxisAction::END;
+    std::cout << "action = END refereeState_ = PENDING_BLOCKED" << std::endl;
+    result = sequencedRecognizerPtr->HandleEvent(point);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest013
+ * @tc.desc: Test CleanRecognizerState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest013, TestSize.Level1)
+{
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    SequencedRecognizer sequencedRecognizer = SequencedRecognizer(recognizers);
+    RefPtr<SequencedRecognizer> sequencedRecognizerPtr = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    AxisEvent point;
+    point.action = AxisAction::NONE;
+    std::cout << "action = none" << std::endl;
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    sequencedRecognizer.recognizers_.clear();
+    sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
+    std::cout << "shaokf child nullptr" << std::endl;
+    sequencedRecognizer.CleanRecognizerState();
+    SUCCEED();
+    sequencedRecognizer.refereeState_ = RefereeState::SUCCEED;
+    sequencedRecognizer.currentFingers_ = 0;
+    std::cout << "shaokf refereeState_=SUCCEED currentFingers_=0" << std::endl;
+    sequencedRecognizer.CleanRecognizerState();
+    SUCCEED();
+    sequencedRecognizer.refereeState_ = RefereeState::FAIL;
+    sequencedRecognizer.currentFingers_ = 0;
+    std::cout << "shaokf refereeState_=FAIL currentFingers_=0" << std::endl;
+    sequencedRecognizer.CleanRecognizerState();
+    SUCCEED();
+    sequencedRecognizer.refereeState_ = RefereeState::DETECTING;
+    sequencedRecognizer.currentFingers_ = 0;
+    std::cout << "shaokf refereeState_=DETECTING currentFingers_=0" << std::endl;
+    sequencedRecognizer.CleanRecognizerState();
+    SUCCEED();
+    sequencedRecognizer.refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    sequencedRecognizer.currentFingers_ = 0;
+    std::cout << "shaokf refereeState_=SUCCEED_BLOCKED currentFingers_=0" << std::endl;
+    sequencedRecognizer.CleanRecognizerState();
+    SUCCEED();
+    sequencedRecognizer.refereeState_ = RefereeState::FAIL;
+    sequencedRecognizer.currentFingers_ = 1;
+    std::cout << "shaokf refereeState_=FAIL currentFingers_=1" << std::endl;
+    sequencedRecognizer.CleanRecognizerState();
+    SUCCEED();
+    sequencedRecognizer.recognizers_.clear();
+    std::cout << "shaokf child nullptr" << std::endl;
+    sequencedRecognizer.CleanRecognizerState();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest014
+ * @tc.desc: Test ForceCleanRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest014, TestSize.Level1)
+{
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    SequencedRecognizer sequencedRecognizer = SequencedRecognizer(recognizers);
+    RefPtr<SequencedRecognizer> sequencedRecognizerPtr = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    AxisEvent point;
+    point.action = AxisAction::NONE;
+    std::cout << "action = none" << std::endl;
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    sequencedRecognizer.recognizers_.clear();
+    sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
+    sequencedRecognizer.ForceCleanRecognizer();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest015
+ * @tc.desc: Test ForceCleanRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest015, TestSize.Level1)
+{
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    SequencedRecognizer sequencedRecognizer = SequencedRecognizer(recognizers);
+    RefPtr<SequencedRecognizer> sequencedRecognizerPtr = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    AxisEvent point;
+    point.action = AxisAction::NONE;
+    std::cout << "action = none" << std::endl;
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    sequencedRecognizer.recognizers_.clear();
+    sequencedRecognizer.ForceCleanRecognizer();
+    SUCCEED();
+}
 } // namespace OHOS::Ace::NG
