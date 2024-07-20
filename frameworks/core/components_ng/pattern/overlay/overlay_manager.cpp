@@ -1480,6 +1480,7 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
 
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(popupPattern);
+    popupPattern->AddPipelineCallBack();
     popupPattern->SetInteractiveDismiss(interactiveDismiss);
     popupPattern->UpdateOnWillDismiss(move(onWillDismiss));
     if ((isTypeWithOption && !isShowInSubWindow) ||
