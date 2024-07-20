@@ -232,6 +232,7 @@ protected:
     RefPtr<FrameNode> GetMenuWrapper();
 
 private:
+    friend class ServiceCollaborationMenuAceHelper;
     // register menu item's callback
     void RegisterOnClick();
     void RegisterOnHover();

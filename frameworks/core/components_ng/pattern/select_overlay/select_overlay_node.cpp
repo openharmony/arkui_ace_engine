@@ -46,6 +46,7 @@
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/select_content_overlay/select_content_overlay_pattern.h"
+#include "core/components_ng/pattern/select_overlay/expanded_menu_plugin_loader.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
@@ -1761,6 +1762,7 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
     menuWrapper = MenuView::Create(std::move(params), -1, "SelectOverlayMenuByRightClick",
         MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU, { .isShowInSubWindow = false });
     CHECK_NULL_RETURN(menuWrapper, nullptr);
+    ExpandedMenuPluginLoader::GetInstance().CreateServiceCollaborationMenu(menuWrapper, info);
     auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
     // set click position to menu
     CHECK_NULL_RETURN(menu, nullptr);
