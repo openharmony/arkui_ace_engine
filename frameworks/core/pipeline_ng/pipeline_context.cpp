@@ -1748,20 +1748,30 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         float offsetFix = (rootSize.Height() - positionY - height) < keyboardHeight
                               ? keyboardHeight - (rootSize.Height() - positionY - height)
                               : keyboardHeight;
+        auto lastKeyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
+        float newKeyboardOffset = 0.0f;
         if (NearZero(keyboardHeight)) {
-            context->safeAreaManager_->UpdateKeyboardOffset(0.0f);
+            newKeyboardOffset = 0.0f;
         } else if (positionYWithOffset + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0f) {
-            context->safeAreaManager_->UpdateKeyboardOffset(-offsetFix);
+            newKeyboardOffset = -offsetFix;
         } else if (LessOrEqual(rootSize.Height() - positionYWithOffset - height, height) &&
                    LessOrEqual(rootSize.Height() - positionYWithOffset, keyboardHeight)) {
-            context->safeAreaManager_->UpdateKeyboardOffset(-keyboardHeight);
+            newKeyboardOffset = -keyboardHeight;
         } else if ((positionYWithOffset + height > rootSize.Height() - keyboardHeight &&
                        positionYWithOffset < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
                    NearZero(context->rootNode_->GetGeometryNode()->GetFrameOffset().GetY())) {
-            context->safeAreaManager_->UpdateKeyboardOffset(-height - offsetFix / 2.0f);
+            newKeyboardOffset = -height - offsetFix / 2.0f;
         } else {
-            context->safeAreaManager_->UpdateKeyboardOffset(0.0f);
+            newKeyboardOffset = 0.0f;
         }
+
+        if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset)) {
+            context->safeAreaManager_->UpdateKeyboardOffset(newKeyboardOffset);
+        } else {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Calculated keyboardOffset %{public}f is smaller than current"
+                "keyboardOffset, so keep current keyboardOffset", newKeyboardOffset);
+        }
+
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
             "keyboardHeight: %{public}f, positionY: %{public}f, textHeight: %{public}f, "
             "rootSize.Height() %{public}f final calculate keyboard offset is %{public}f",
