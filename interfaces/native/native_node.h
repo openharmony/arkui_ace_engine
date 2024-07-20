@@ -1598,7 +1598,6 @@ typedef enum {
      */
     NODE_ACCESSIBILITY_VALUE = 91,
     
-    
     /**
      * @brief 定义控制组件扩展其安全区域，支持属性设置，属性重置和属性获取。
      *
