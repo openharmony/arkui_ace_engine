@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#define private public
+#define protected public
 #include "gtest/gtest.h"
 #include "interfaces/inner_api/ace/ui_event_observer.h"
 
