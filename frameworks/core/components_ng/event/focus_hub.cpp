@@ -1683,6 +1683,7 @@ bool FocusHub::CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) con
 
     //  Calculate currentNode -> childNode offset
     auto uiNode = frameNode->GetParent();
+    CHECK_NULL_RETURN(uiNode, false);
     while (uiNode != GetFrameNode()) {
         auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
         if (!frameNode) {
