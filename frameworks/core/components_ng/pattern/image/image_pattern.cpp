@@ -520,7 +520,7 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
         return MakeRefPtr<ImagePaintMethod>(
             obscuredImage_, isSelected_, overlayMod_, sensitive, interpolationDefault_);
     }
-    return nullptr;
+    return MakeRefPtr<ImagePaintMethod>(nullptr, isSelected_, overlayMod_, sensitive, interpolationDefault_);
 }
 
 bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -2027,6 +2027,8 @@ void ImagePattern::ResetImageAndAlt()
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->ClearDrawCommands();
+    CloseSelectOverlay();
+    DestroyAnalyzerOverlay();
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
