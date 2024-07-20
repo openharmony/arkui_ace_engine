@@ -1205,8 +1205,23 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
                 reinterpret_cast<NativeReference*>(ref), context);
         }
     }
-
+    UpdateFontScale(context->GetConfiguration());
     return UIContentErrorCode::NO_ERRORS;
+}
+
+void UIContentImpl::UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
+{
+    CHECK_NULL_VOID(config);
+    auto maxAppFontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::APP_FONT_MAX_SCALE);
+    auto followSystem = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
+    auto context = NG::PipelineContext::GetContextByContainerId(instanceId_);
+    CHECK_NULL_VOID(context);
+    if (!followSystem.empty()) {
+        context->SetFollowSystem(followSystem == "followSystem");
+    }
+    if (!maxAppFontScale.empty()) {
+        context->SetMaxAppFontScale(std::stof(maxAppFontScale));
+    }
 }
 
 void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
@@ -1788,6 +1803,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                                                      .append(moduleName)
                                                      .append(",abilityName:")
                                                      .append(abilityName));
+    UpdateFontScale(context->GetConfiguration());
     return errorCode;
 }
 
