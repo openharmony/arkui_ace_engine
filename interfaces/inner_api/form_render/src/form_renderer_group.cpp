@@ -214,6 +214,15 @@ const std::vector<FormRequest>& FormRendererGroup::GetAllRendererFormRequests() 
     return formRequests_;
 }
 
+std::pair<std::vector<std::string>, std::string> FormRendererGroup::GetOrderedAndCurrentCompIds() const
+{
+    std::vector<std::string> orderedCompIds;
+    for (auto formRequest: formRequests_) {
+        orderedCompIds.emplace_back(formRequest.compId);
+    }
+    return std::make_pair(orderedCompIds, currentCompId_);
+}
+
 void FormRendererGroup::DeleteForm()
 {
     if (formRenderer_ == nullptr) {
@@ -246,6 +255,29 @@ void FormRendererGroup::RecycleForm(std::string& statusData) const
         return;
     }
     formRenderer_->RecycleForm(statusData);
+}
+
+void FormRendererGroup::RecoverRenderer(const std::vector<FormRequest>& formRequests, size_t currentCompIndex)
+{
+    if (currentCompIndex >= formRequests.size()) {
+        HILOG_ERROR("current comp index %{public}zu invalid", currentCompIndex);
+        return;
+    }
+    
+    const FormRequest &currentComp = formRequests[currentCompIndex];
+    for (auto formRequest: formRequests) {
+        formRequests_.emplace_back(formRequest);
+    }
+    currentCompId_ = currentComp.compId;
+
+    bool isVerified = currentComp.want.GetBoolParam(FORM_RENDER_STATE, false);
+    if (isVerified) {
+        HILOG_DEBUG("user verified, start recover renderer");
+        InnerAddForm(currentComp);
+        return;
+    }
+    HILOG_INFO("user not verified, delay recover renderer");
+    PreInitAddForm(currentComp);
 }
 }  // namespace Ace
 }  // namespace OHOS

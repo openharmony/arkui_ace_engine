@@ -1307,11 +1307,11 @@ var EffectFillStyle;
   EffectFillStyle[EffectFillStyle["ITERATIVE"] = 1] = "ITERATIVE";
 })(EffectFillStyle || (EffectFillStyle = {}));
 
-var WebKeyboardAvoidMode;
+let WebKeyboardAvoidMode;
 (function (WebKeyboardAvoidMode) {
-  WebKeyboardAvoidMode[WebKeyboardAvoidMode["RESIZE_VISUAL"] = 0] = "RESIZE_VISUAL";
-  WebKeyboardAvoidMode[WebKeyboardAvoidMode["RESIZE_CONTENT"] = 1] = "RESIZE_CONTENT";
-  WebKeyboardAvoidMode[WebKeyboardAvoidMode["OVERLAYS_CONTENT"] = 2] = "OVERLAYS_CONTENT";
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode.RESIZE_VISUAL = 0] = 'RESIZE_VISUAL';
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode.RESIZE_CONTENT = 1] = 'RESIZE_CONTENT';
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode.OVERLAYS_CONTENT = 2] = 'OVERLAYS_CONTENT';
 })(WebKeyboardAvoidMode || (WebKeyboardAvoidMode = {}));
 
 class SymbolEffect {
@@ -1441,8 +1441,8 @@ var BlurStyle;
 var BlurStyleActivePolicy;
 (function (BlurStyleActivePolicy) {
   BlurStyleActivePolicy[BlurStyleActivePolicy["FOLLOWS_WINDOW_ACTIVE_STATE"] = 0] = "FOLLOWS_WINDOW_ACTIVE_STATE";
-  BlurStyleActivePolicy[BlurStyleActivePolicy["ALAWYS_ACTIVE"] = 1] = "ALAWYS_ACTIVE";
-  BlurStyleActivePolicy[BlurStyleActivePolicy["ALAWYS_INACTIVE"] = 2] = "ALAWYS_INACTIVE";
+  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_ACTIVE"] = 1] = "ALWAYS_ACTIVE";
+  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_INACTIVE"] = 2] = "ALWAYS_INACTIVE";
 })(BlurStyleActivePolicy || (BlurStyleActivePolicy = {}));
 
 var BlurType;
@@ -1982,7 +1982,7 @@ class TextMenuItemId {
   }
 
   equals(id) {
-    return id.id_ == this.id_;
+    return id.id_ === this.id_;
   }
 
   static get CUT() {
@@ -2072,10 +2072,10 @@ var MarqueeUpdateStrategy;
 
 var LaunchMode;
 (function (LaunchMode) {
-  LaunchMode[LaunchMode.STANDARD = 0] = "STANDARD";
-  LaunchMode[LaunchMode.MOVE_TO_TOP_SINGLETON = 1] = "MOVE_TO_TOP_SINGLETON";
-  LaunchMode[LaunchMode.POP_TO_SINGLETON = 2] = "POP_TO_SINGLETON";
-  LaunchMode[LaunchMode.NEW_INSTANCE = 3] = "NEW_INSTANCE";
+  LaunchMode[LaunchMode.STANDARD = 0] = 'STANDARD';
+  LaunchMode[LaunchMode.MOVE_TO_TOP_SINGLETON = 1] = 'MOVE_TO_TOP_SINGLETON';
+  LaunchMode[LaunchMode.POP_TO_SINGLETON = 2] = 'POP_TO_SINGLETON';
+  LaunchMode[LaunchMode.NEW_INSTANCE = 3] = 'NEW_INSTANCE';
 })(LaunchMode || (LaunchMode = {}));
 
 class NavPathInfo {
@@ -3296,6 +3296,12 @@ var GestureRecognizerState;
   GestureRecognizerState[GestureRecognizerState["SUCCESSFUL"] = 4] = "SUCCESSFUL";
   GestureRecognizerState[GestureRecognizerState["FAILED"] = 5] = "FAILED";
 })(GestureRecognizerState || (GestureRecognizerState = {}));
+
+var GridItemAlignment;
+(function (GridItemAlignment) {
+  GridItemAlignment[GridItemAlignment["DEFAULT"] = 0] = "DEFAULT";
+  GridItemAlignment[GridItemAlignment["STRETCH"] = 1] = "STRETCH";
+})(GridItemAlignment || (GridItemAlignment = {}));
 
 class ImageAnalyzerController {
   constructor() {

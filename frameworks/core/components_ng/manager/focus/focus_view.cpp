@@ -51,6 +51,11 @@ void FocusView::FocusViewHide()
 
 void FocusView::FocusViewClose()
 {
+    if (!isViewHasShow_) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d has not been shown",
+            GetFrameName().c_str(), GetFrameId());
+        return;
+    }
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d close", GetFrameName().c_str(), GetFrameId());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

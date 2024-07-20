@@ -50,6 +50,7 @@ constexpr float LOOP_TRANSLATE_DURATION_PERCENT = 0.5f;
 constexpr float LOOP_OPACITY_DURATION_PERCENT = 0.25f;
 constexpr uint8_t TARGET_ALPHA = 255;
 constexpr int32_t BLACK_POINT_DURATION = 400;
+constexpr float DEFAULT_MINIMUM_AMPLITUDE_PX = 1.0f;
 } // namespace
 
 void DotIndicatorModifier::onDraw(DrawingContext& context)
@@ -753,6 +754,22 @@ void DotIndicatorModifier::PlayTouchBottomAnimation(const std::vector<std::pair<
     }
 }
 
+float DotIndicatorModifier::CalculateMinimumAmplitudeRatio(
+    const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState) const
+{
+    auto minimumAmplitudeRatio =
+        NearEqual(longPointCenterX[0].first, longPointLeftCenterX_->Get())
+            ? InterpolatingSpring::DEFAULT_INTERPOLATING_SPRING_AMPLITUDE_RATIO
+            : DEFAULT_MINIMUM_AMPLITUDE_PX / std::abs(longPointCenterX[0].first - longPointLeftCenterX_->Get());
+    if (gestureState == GestureState::GESTURE_STATE_RELEASE_LEFT) {
+        minimumAmplitudeRatio =
+            NearEqual(longPointCenterX[0].second, longPointRightCenterX_->Get())
+                ? InterpolatingSpring::DEFAULT_INTERPOLATING_SPRING_AMPLITUDE_RATIO
+                : DEFAULT_MINIMUM_AMPLITUDE_PX / std::abs(longPointCenterX[0].second - longPointRightCenterX_->Get());
+    }
+    return std::max(minimumAmplitudeRatio, InterpolatingSpring::DEFAULT_INTERPOLATING_SPRING_AMPLITUDE_RATIO);
+}
+
 void DotIndicatorModifier::PlayLongPointAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
     GestureState gestureState, TouchBottomTypeLoop touchBottomTypeLoop,
     const LinearVector<float>& vectorBlackPointCenterX)
@@ -773,7 +790,9 @@ void DotIndicatorModifier::PlayLongPointAnimation(const std::vector<std::pair<fl
 
     AnimationOption optionTail;
     // velocity:0, mass:1, stiffness:81, damping:11
-    optionTail.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 81, 11));
+    auto interpolatingSpring = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 81, 11);
+    interpolatingSpring->UpdateMinimumAmplitudeRatio(CalculateMinimumAmplitudeRatio(longPointCenterX, gestureState));
+    optionTail.SetCurve(interpolatingSpring);
     optionTail.SetDuration(animationDuration_);
     AnimationOption optionLeft = optionTail;
     AnimationOption optionRight = optionHead;

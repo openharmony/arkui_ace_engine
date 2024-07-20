@@ -24,6 +24,8 @@ public:
     void UpdateContentModifier();
     RefPtr<ListPaintMethod> UpdateOverlayModifier();
     void UpdateDividerMap();
+    void onDraw(RefPtr<PaintWrapper> paintWrapper, int32_t lineNumber, bool isClip = false);
+    void GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t lineNumber);
 };
 
 void ListLayoutTestNg::UpdateContentModifier()
@@ -51,6 +53,35 @@ void ListLayoutTestNg::UpdateDividerMap()
         cur++;
     }
     UpdateContentModifier();
+}
+
+void ListLayoutTestNg::onDraw(RefPtr<PaintWrapper> paintWrapper, int32_t lineNumber, bool isClip)
+{
+    auto paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
+    auto modifier = paintMethod->GetContentModifier(nullptr);
+    auto listContentModifier = AceType::DynamicCast<ListContentModifier>(modifier);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(isClip ? 1 : 0);
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawLine(_, _)).Times(lineNumber); // DrawLine
+    DrawingContext drawingContext = { canvas, LIST_WIDTH, LIST_HEIGHT };
+    paintMethod->UpdateContentModifier(AceType::RawPtr(paintWrapper));
+    listContentModifier->onDraw(drawingContext);
+}
+
+void ListLayoutTestNg::GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t lineNumber)
+{
+    auto paintMethod = AceType::DynamicCast<ListItemGroupPaintMethod>(paintWrapper->nodePaintImpl_);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawLine(_, _)).Times(lineNumber); // DrawLine
+    paintMethod->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
 }
 
 /**
@@ -771,51 +802,43 @@ HWTEST_F(ListLayoutTestNg, PaintMethod003, TestSize.Level1)
  */
 HWTEST_F(ListLayoutTestNg, PaintMethod004, TestSize.Level1)
 {
-    Testing::MockCanvas canvas;
-    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(AnyNumber());
-    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawLine(_, _)).Times(AnyNumber());
-    DrawingContext ctx = { canvas, 1, 1 };
-
     /**
-     * @tc.steps: step1. No divider
+     * @tc.steps: step1. Not set divider
      * @tc.expected: Not DrawLine
      */
     ListModelNG model = CreateList();
     CreateGroupWithSetting(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
     CreateListItems(TOTAL_ITEM_NUMBER);
     auto paintWrapper = CreateDone(frameNode_);
-    auto paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
-    paintMethod->UpdateContentModifier(AceType::RawPtr(paintWrapper));
-    pattern_->listContentModifier_->onDraw(ctx);
+    onDraw(paintWrapper, 0);
 
     /**
      * @tc.steps: step2. Set divider
-     * @tc.expected: DrawLine
+     * @tc.expected: DrawLine, call times depends on the divider number in view
      */
-    layoutProperty_->UpdateDivider(ITEM_DIVIDER);
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
-    paintMethod->UpdateContentModifier(AceType::RawPtr(paintWrapper));
-    pattern_->listContentModifier_->onDraw(ctx);
+    model.SetDivider(AceType::RawPtr(frameNode_), ITEM_DIVIDER);
+    paintWrapper = FlushLayoutTask(frameNode_);
+    onDraw(paintWrapper, 2);
 
     /**
      * @tc.steps: step3. Set lanes>1
-     * @tc.expected: DrawLine
+     * @tc.expected: DrawLine, call times depends on the divider number in view
      */
-    layoutProperty_->UpdateLanes(2);
-    layoutProperty_->UpdateDivider(ITEM_DIVIDER);
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
-    paintMethod->UpdateContentModifier(AceType::RawPtr(paintWrapper));
-    pattern_->listContentModifier_->onDraw(ctx);
+    model.SetLanes(AceType::RawPtr(frameNode_), 2);
+    paintWrapper = FlushLayoutTask(frameNode_);
+    onDraw(paintWrapper, 2);
 
     /**
-     * @tc.steps: step4. Set lanes>1 and lastIsItemGroup
-     * @tc.expected: DrawLine
+     * @tc.steps: step4. Set padding
+     * @tc.expected: Trigger ClipRect
+     */
+    ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(10.f));
+    paintWrapper = FlushLayoutTask(frameNode_);
+    onDraw(paintWrapper, 2, true);
+
+    /**
+     * @tc.steps: step5. Set lanes>1 and lastIsItemGroup
+     * @tc.expected: DrawLine, call times depends on the divider number in view
      */
     ClearOldNodes();
     model = CreateList();
@@ -824,9 +847,7 @@ HWTEST_F(ListLayoutTestNg, PaintMethod004, TestSize.Level1)
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateGroupWithSetting(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
     paintWrapper = CreateDone(frameNode_);
-    paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
-    paintMethod->UpdateContentModifier(AceType::RawPtr(paintWrapper));
-    pattern_->listContentModifier_->onDraw(ctx);
+    onDraw(paintWrapper, 6);
 }
 
 /**
@@ -836,38 +857,52 @@ HWTEST_F(ListLayoutTestNg, PaintMethod004, TestSize.Level1)
  */
 HWTEST_F(ListLayoutTestNg, PaintMethod005, TestSize.Level1)
 {
-    Testing::MockCanvas canvas;
-    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawLine(_, _)).Times(2);
-
     CreateList();
     CreateGroupWithSetting(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
     auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
-    RefPtr<NodePaintMethod> paint = groupPattern->CreateNodePaintMethod();
-    RefPtr<ListItemGroupPaintMethod> groupPaint = AceType::DynamicCast<ListItemGroupPaintMethod>(paint);
-    auto paintWrapper = groupFrameNode->CreatePaintWrapper();
-    groupPaint->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
+    auto paintWrapper = FlushLayoutTask(groupFrameNode);
+    auto groupPaint = AceType::DynamicCast<ListItemGroupPaintMethod>(paintWrapper->nodePaintImpl_);
 
-    groupPaint->divider_.strokeWidth = Dimension(-1);
-    groupPaint->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
+    /**
+     * @tc.steps: step1. strokeWidth > 0
+     * @tc.expected: DrawLine
+     */
+    groupPaint->divider_.strokeWidth = Dimension(STROKE_WIDTH);
+    GroupPaintDivider(paintWrapper, 1);
 
+    /**
+     * @tc.steps: step2. strokeWidth > 0, but PERCENT
+     * @tc.expected: Not DrawLine
+     */
     groupPaint->divider_.strokeWidth = Dimension(STROKE_WIDTH, DimensionUnit::PERCENT);
-    groupPaint->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
+    GroupPaintDivider(paintWrapper, 0);
 
+    /**
+     * @tc.steps: step3. strokeWidth < 0
+     * @tc.expected: Not DrawLine
+     */
+    groupPaint->divider_.strokeWidth = Dimension(-1);
+    GroupPaintDivider(paintWrapper, 0);
+
+    /**
+     * @tc.steps: step4. startMargin + endMargin == LIST_WIDTH
+     * @tc.expected: Not DrawLine
+     */
     groupPaint->divider_ = ITEM_DIVIDER;
     groupPaint->divider_.startMargin = Dimension(LIST_WIDTH / 2);
     groupPaint->divider_.endMargin = Dimension(LIST_WIDTH / 2);
-    groupPaint->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
+    GroupPaintDivider(paintWrapper, 0);
 
+    /**
+     * @tc.steps: step5. startMargin + endMargin > LIST_WIDTH
+     * @tc.expected: Rest margin and DrawLine
+     */
     groupPaint->divider_ = ITEM_DIVIDER;
     groupPaint->divider_.startMargin = Dimension(LIST_WIDTH / 2);
     groupPaint->divider_.endMargin = Dimension(LIST_WIDTH / 2 + 1);
-    groupPaint->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
+    GroupPaintDivider(paintWrapper, 1);
 }
 
 /**

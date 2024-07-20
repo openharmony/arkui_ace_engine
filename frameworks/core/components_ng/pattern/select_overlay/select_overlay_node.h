@@ -118,6 +118,8 @@ private:
     void AddExtensionMenuOptions(const std::shared_ptr<SelectOverlayInfo>& info, int32_t index);
     void AddCreateMenuExtensionMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems,
         const std::shared_ptr<SelectOverlayInfo>& info, int32_t startIndex);
+    void AddCreateMenuExtensionMenuParams(const std::vector<MenuOptionsParam>& menuOptionItems,
+        const std::shared_ptr<SelectOverlayInfo>& info, int32_t startIndex, std::vector<OptionParam>& params);
     void CreatExtensionMenu(std::vector<OptionParam>&& params);
     void GetDefaultButtonAndMenuWidth(float& maxWidth);
 

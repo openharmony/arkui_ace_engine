@@ -38,6 +38,7 @@ void JsHoverFunction::HoverExecute(bool isHover, HoverInfo& hoverInfo)
     hoverObj->SetProperty<double>("axisHorizontal", 0.0f);
     hoverObj->SetProperty<double>("tiltX", 0.0f);
     hoverObj->SetProperty<double>("tiltY", 0.0f);
+    hoverObj->SetProperty<double>("deviceId", hoverInfo.GetDeviceId());
     hoverObj->Wrap<HoverInfo>(&hoverInfo);
     JSRef<JSVal> hoverVal = JSRef<JSObject>::Cast(hoverObj);
     JSRef<JSVal> params[] = { isHoverParam, hoverVal };

@@ -110,6 +110,29 @@ bool TextEmojiProcessor::IsIndexInEmoji(int32_t index,
     return false;
 }
 
+int32_t TextEmojiProcessor::GetCharacterNum(const std::string& content)
+{
+    CHECK_NULL_RETURN(!content.empty(), 0);
+    int32_t charNum = 0;
+    std::u16string u16Content = StringUtils::Str8ToStr16(content);
+    int32_t pos = 0;
+    while (pos < u16Content.length()) {
+        std::u32string u32Content;
+        int32_t forwardLenU16 = GetEmojiLengthU16Forward(u32Content, pos, u16Content);
+        if (forwardLenU16 > 1) {
+            // emoji exsit
+            pos += forwardLenU16;
+        } else {
+            // char after pos is not emoji, move one pos forward
+            pos++;
+        }
+        charNum++;
+    }
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ByteNumToCharNum contentLength=%{public}zu pos=%{public}d charNum=%{public}d",
+        content.length(), pos, charNum);
+    return charNum;
+}
+
 EmojiRelation TextEmojiProcessor::GetIndexRelationToEmoji(int32_t index,
     const std::string& content, int32_t& startIndex, int32_t& endIndex)
 {

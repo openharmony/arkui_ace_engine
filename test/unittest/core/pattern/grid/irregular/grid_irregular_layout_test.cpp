@@ -1909,4 +1909,90 @@ HWTEST_F(GridIrregularLayoutTest, Add001, TestSize.Level1)
     EXPECT_EQ(info.startIndex_, 3);
     EXPECT_EQ(info.endIndex_, 21);
 }
+
+/**
+ * @tc.name: Stretch001
+ * @tc.desc: Test Grid AlignItems STRETCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, Stretch001, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = {
+        1, // [1 x 2]
+    };
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize {
+        if (index == 1) {
+            return { .rows = 2, .columns = 1 };
+        }
+        return { .rows = 1, .columns = 1 };
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+
+    GridModelNG model = CreateGrid();
+    model.SetAlignItems(GridItemAlignment::STRETCH);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(option);
+
+    CreateAdaptChildSizeGridItems(1);
+    CreateFixedHeightItems(1, 150);
+    CreateAdaptChildSizeGridItems(2);
+    CreateFixedHeightItems(1, 150);
+
+    CreateDone(frameNode_);
+    FlushLayoutTask(frameNode_);
+
+    auto childRect0 = pattern_->GetItemRect(0);
+    EXPECT_EQ(childRect0.Height(), 0);
+
+    auto childRect2 = pattern_->GetItemRect(2);
+    EXPECT_EQ(childRect2.Height(), 0);
+
+    auto childRect3 = pattern_->GetItemRect(3);
+    auto childRect4 = pattern_->GetItemRect(4);
+    EXPECT_EQ(childRect3.Height(), childRect4.Height());
+}
+
+/**
+ * @tc.name: Stretch002
+ * @tc.desc: Test Grid AlignItems STRETCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, Stretch002, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = {
+        0, // [2 x 2]
+        3, // [2 x 1]
+    };
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize {
+        if (index == 0) {
+            return { .rows = 2, .columns = 2 };
+        }
+        return { .rows = 1, .columns = 2 };
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+
+    GridModelNG model = CreateGrid();
+    model.SetAlignItems(GridItemAlignment::STRETCH);
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+
+    CreateFixedHeightItems(1, 150);
+    CreateAdaptChildSizeGridItems(2);
+    CreateFixedHeightItems(1, 150);
+    CreateAdaptChildSizeGridItems(1);
+
+    CreateDone(frameNode_);
+    FlushLayoutTask(frameNode_);
+
+    auto childRect1 = pattern_->GetItemRect(1);
+    EXPECT_EQ(childRect1.Height(), 0);
+
+    auto childRect2 = pattern_->GetItemRect(2);
+    EXPECT_EQ(childRect2.Height(), 0);
+
+    auto childRect4 = pattern_->GetItemRect(4);
+    EXPECT_EQ(childRect4.Height(), 0);
+}
 } // namespace OHOS::Ace::NG

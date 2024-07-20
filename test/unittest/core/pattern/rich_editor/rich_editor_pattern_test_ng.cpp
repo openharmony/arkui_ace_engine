@@ -383,7 +383,7 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestUpdatePreviewText001, Tes
 
     previewRange.start = richEditorPattern->previewTextRecord_.startOffset;
     previewRange.end = richEditorPattern->previewTextRecord_.endOffset;
-    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), false);
+    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), true);
 }
 
 /**
@@ -1841,7 +1841,7 @@ HWTEST_F(RichEditorPatternTestNg, GetPreviewTextRects001, TestSize.Level1)
 
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     std::vector<RectF> firstRects { RectF(testNumber0, testNumber0, testNumber5, testNumber5) };
-    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(firstRects));
+    EXPECT_CALL(*paragraph, GetTightRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(firstRects));
     richEditorPattern->paragraphs_.AddParagraph(
         { .paragraph = paragraph, .start = testNumber0, .end = testNumber2 });
     richEditorPattern->paragraphs_.AddParagraph(

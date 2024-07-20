@@ -306,6 +306,7 @@ public:
     virtual void ClipWithCircle(const Circle& circle) {}
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
     virtual void RemoveClipWithRRect() {}
+    virtual void UpdateWindowFocusState(bool isFocused) {}
 
     // visual
     virtual void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) {}
@@ -541,6 +542,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, HasBorderImageOutset, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, HasBorderImageRepeat, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderImageGradient, Gradient);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderSourceFromImage, bool);
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
@@ -706,6 +708,11 @@ public:
     // The additional opacity will be multiplied with the base opacity.
     virtual void SetOpacityMultiplier(float opacity) {}
 
+    void SetNeedAnimateFlag(bool isNeedAnimate)
+    {
+        isNeedAnimate_ = isNeedAnimate;
+    }
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
@@ -714,6 +721,7 @@ protected:
     bool isSynced_ = false;
     bool isNeedRebuildRSTree_ = true;
     bool handleChildBounds_ = false;
+    bool isNeedAnimate_ = true;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
@@ -735,6 +743,7 @@ protected:
     virtual void OnHasBorderImageOutsetUpdate(bool tag) {}
     virtual void OnHasBorderImageRepeatUpdate(bool tag) {}
     virtual void OnBorderImageGradientUpdate(const Gradient& gradient) {}
+    virtual void OnBorderSourceFromImageUpdate(bool sourceFromImage) {}
 
     virtual void OnBorderWidthUpdate(const BorderWidthProperty& value) {}
     virtual void OnBorderRadiusUpdate(const BorderRadiusProperty& value) {}

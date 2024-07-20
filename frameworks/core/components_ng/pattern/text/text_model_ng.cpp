@@ -230,11 +230,20 @@ void TextModelNG::SetTextAlign(FrameNode* frameNode, Ace::TextAlign value)
 void TextModelNG::SetTextOverflow(Ace::TextOverflow value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextOverflow, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->UnregisterNodeChangeListenerWithoutSelect();
 }
 
 void TextModelNG::SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextOverflow, value, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->UnregisterNodeChangeListenerWithoutSelect();
 }
 
 void TextModelNG::SetMaxLines(uint32_t value)
@@ -1076,6 +1085,15 @@ void TextModelNG::SetOnTextSelectionChange(FrameNode* frameNode, std::function<v
 void TextModelNG::SetSelectionMenuOptions(
     const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
 {
+    auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+
+void TextModelNG::SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+    const NG::OnMenuItemClickCallback&& onMenuItemClick)
+{
+    CHECK_NULL_VOID(frameNode);
     auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));

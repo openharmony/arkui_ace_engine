@@ -102,10 +102,10 @@ bool TextAdaptFontSizer::AdaptMinFontSize(TextStyle& textStyle, const std::strin
 void TextAdaptFontSizer::GetAdaptMaxMinFontSize(
     const TextStyle& textStyle, double& maxFontSize, double& minFontSize, const LayoutConstraintF& contentConstraint)
 {
-    maxFontSize = TextLayoutadapter::TextConvertToPx(textStyle.GetAdaptMaxFontSize(),
-        { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
-    minFontSize = TextLayoutadapter::TextConvertToPx(textStyle.GetAdaptMinFontSize(),
-        { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+    maxFontSize = textStyle.GetAdaptMaxFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+    minFontSize = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
 }
 
 void TextAdaptFontSizer::GetAdaptFontSizeStep(
@@ -115,8 +115,7 @@ void TextAdaptFontSizer::GetAdaptFontSizeStep(
     if (GreatNotEqual(textStyle.GetAdaptFontSizeStep().Value(), 0.0)) {
         step = textStyle.GetAdaptFontSizeStep();
     }
-    stepSize = TextLayoutadapter::TextConvertToPx(
-        step, { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+    stepSize = step.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
 }
 
 SizeF TextAdaptFontSizer::GetMaxMeasureSize(const LayoutConstraintF& contentConstraint)
@@ -162,8 +161,7 @@ bool TextAdaptFontSizer::IsNeedAdaptFontSize(const TextStyle& textStyle, const L
 
 void TextAdaptFontSizer::SetAdaptFontSizeLineHeight(const Dimension& lineHeight, const TextStyle& textStyle)
 {
-    lineHeight_ = TextLayoutadapter::TextConvertToPx(
-        lineHeight, { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+    lineHeight_ = lineHeight.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
 }
 
 bool TextAdaptFontSizer::IsAdaptFontSizeExceedLineHeight(const RefPtr<Paragraph>& paragraph)

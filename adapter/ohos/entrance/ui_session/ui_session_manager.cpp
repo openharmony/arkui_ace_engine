@@ -193,8 +193,8 @@ void UiSessionManager::ReportInspectorTreeValue(const std::string& data)
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
-            int partSize = data.size() / ONCE_IPC_SEND_DATA_MAX_SIZE;
-            for (int i = 0; i <= partSize; i++) {
+            size_t partSize = data.size() / ONCE_IPC_SEND_DATA_MAX_SIZE;
+            for (size_t i = 0; i <= partSize; i++) {
                 if (i != partSize) {
                     reportService->ReportInspectorTreeValue(
                         data.substr(i * ONCE_IPC_SEND_DATA_MAX_SIZE, ONCE_IPC_SEND_DATA_MAX_SIZE), i + 1, false);

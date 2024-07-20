@@ -121,6 +121,8 @@ public:
         }
     }
 
+    void DumpVelocityPoints() const;
+
 private:
     void UpdateVelocity();
 

@@ -23,19 +23,11 @@
 
 namespace OHOS::Ace::NG {
 
-struct FontScaleParameter {
-    bool allowScale = false;
-    float minFontScale = 0.0f;
-    float maxFontScale = static_cast<float>(INT32_MAX);
-    float height = 0.0f;
-};
-
 class TextLayoutadapter {
 public:
     static bool IsLeftToRight(int32_t charOfShowingText);
     static bool IsRightToLeft(int32_t charOfShowingText);
     static bool IsRightTOLeftArabic(int32_t charOfShowingText);
-    static double TextConvertToPx(const Dimension& value, FontScaleParameter parameter);
 };
 } // namespace OHOS::Ace::NG
 

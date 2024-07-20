@@ -218,7 +218,10 @@ void TimePickerModelNG::SetSelectedTime(const PickerTime& value)
 
 void TimePickerModelNG::SetIsEnableHapticFeedback(bool isEnableHapticFeedback)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, IsEnableHapticFeedback, isEnableHapticFeedback);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    timePickerRowPattern->SetIsEnableHaptic(isEnableHapticFeedback);
 }
 
 void TimePickerModelNG::SetHour24(bool isUseMilitaryTime)

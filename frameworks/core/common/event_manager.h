@@ -258,6 +258,11 @@ public:
         }
     }
 
+    int64_t GetLastTouchEventEndTimestamp()
+    {
+        return lastTouchEventEndTimestamp_;
+    }
+
     void RecordHitEmptyMessage(
         const TouchEvent& touchPoint, const std::string& resultInfo, const RefPtr<NG::FrameNode>& frameNode);
 
@@ -277,6 +282,11 @@ public:
 
     void CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImmediately = false);
 
+#if defined(SUPPORT_TOUCH_TARGET_TEST)
+    bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
+        TouchRestrict& touchRestrict, const Offset& offset = Offset(), float viewScale = 1.0f,
+        bool needAppend = false, const std::string& target = "");
+#endif
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
     void CleanGestureEventHub();
@@ -323,6 +333,7 @@ private:
     NG::EventTreeRecord eventTree_;
     RefPtr<NG::ResponseCtrl> responseCtrl_;
     TimeStamp lastEventTime_;
+    int64_t lastTouchEventEndTimestamp_ = 0;
     std::set<int32_t> downFingerIds_;
     std::set<WeakPtr<NG::FrameNode>> hittedFrameNode_;
     MarkProcessedEventInfo lastReceivedEvent_;

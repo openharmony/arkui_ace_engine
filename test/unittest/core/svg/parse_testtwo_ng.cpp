@@ -629,4 +629,189 @@ HWTEST_F(ParseTestTwoNg, ParseImageTest001, TestSize.Level1)
     EXPECT_FLOAT_EQ(imageDeclaration.height.ConvertToPx(), RECT_HEIGHT);
     EXPECT_STREQ(imageDeclaration.href.c_str(), IMAGE_HREF.c_str());
 }
+
+/**
+ * @tc.name: ParseGradientTest001
+ * @tc.desc: parse Gradient set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseGradientTest001, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(CIRCLE_SVG_LABEL.c_str(), CIRCLE_SVG_LABEL.length());
+    EXPECT_NE(svgStream, nullptr);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(svg->children_.size(), 0);
+    auto svgCircle = AceType::DynamicCast<SvgCircle>(svg->children_.at(0));
+    EXPECT_NE(svgCircle, nullptr);
+
+    Gradient gradient;
+    LinearGradient linearGradientLocal;
+    linearGradientLocal.x1 = Dimension(static_cast<double>(DimensionUnit::PERCENT));
+    linearGradientLocal.x2 = Dimension(static_cast<double>(DimensionUnit::PERCENT));
+    linearGradientLocal.y1 = Dimension(static_cast<double>(DimensionUnit::PERCENT));
+    linearGradientLocal.y2 = Dimension(static_cast<double>(DimensionUnit::PERCENT));
+    gradient.SetLinearGradient(linearGradientLocal);
+    auto linearGradientInfo = gradient.GetLinearGradientInfo();
+    EXPECT_EQ(linearGradientInfo.x1, 0.0);
+    EXPECT_EQ(linearGradientInfo.x2, 0.0);
+    EXPECT_EQ(linearGradientInfo.y1, 0.0);
+    EXPECT_EQ(linearGradientInfo.y2, 0.0);
+    svgCircle->SetLinearGradient(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), gradient);
+    linearGradientInfo = gradient.GetLinearGradientInfo();
+    EXPECT_NE(linearGradientInfo.x1, 0.0);
+    EXPECT_NE(linearGradientInfo.x2, 0.0);
+    EXPECT_NE(linearGradientInfo.y1, 0.0);
+    EXPECT_NE(linearGradientInfo.y2, 0.0);
+
+    RadialGradient radialGradientLocal;
+    radialGradientLocal.radialHorizontalSize = AnimatableDimension(1);
+    radialGradientLocal.radialCenterX = AnimatableDimension(1);
+    radialGradientLocal.radialCenterY = AnimatableDimension(1);
+    radialGradientLocal.fRadialCenterX = Dimension(1);
+    radialGradientLocal.fRadialCenterY = Dimension(1);
+    gradient.SetRadialGradient(radialGradientLocal);
+    auto radialGradientInfo = gradient.GetRadialGradientInfo();
+    EXPECT_EQ(radialGradientInfo.r, 0.0);
+    EXPECT_EQ(radialGradientInfo.cx, 0.0);
+    EXPECT_EQ(radialGradientInfo.cy, 0.0);
+    EXPECT_EQ(radialGradientInfo.fx, 0.0);
+    EXPECT_EQ(radialGradientInfo.fy, 0.0);
+    svgCircle->SetRadialGradient(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), gradient);
+    radialGradientInfo = gradient.GetRadialGradientInfo();
+    EXPECT_NE(radialGradientInfo.r, 0.0);
+    EXPECT_NE(radialGradientInfo.cx, 0.0);
+    EXPECT_NE(radialGradientInfo.cy, 0.0);
+    EXPECT_NE(radialGradientInfo.fx, 0.0);
+    EXPECT_NE(radialGradientInfo.fy, 0.0);
+}
+
+/**
+ * @tc.name: ParseGradientTest002
+ * @tc.desc: parse Gradient set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseGradientTest002, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(CIRCLE_SVG_LABEL.c_str(), CIRCLE_SVG_LABEL.length());
+    EXPECT_NE(svgStream, nullptr);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(svg->children_.size(), 0);
+    auto svgCircle = AceType::DynamicCast<SvgCircle>(svg->children_.at(0));
+    EXPECT_NE(svgCircle, nullptr);
+
+    auto viewPort = Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT);
+    auto baseAttr = svgCircle->GetBaseAttributes();
+    Gradient gradient;
+    gradient.SetType(GradientType::LINEAR);
+    baseAttr.fillState.SetGradient(gradient);
+    baseAttr.strokeState.SetGradient(gradient);
+    svgCircle->SetBaseAttributes(baseAttr);
+    svgCircle->SetGradientStyle(0);
+    svgCircle->SetStrokeGradientStyle(0);
+    svgCircle->UpdateFillGradient(viewPort);
+    svgCircle->UpdateStrokeGradient(viewPort);
+
+    RadialGradient radialGradientLocal;
+    radialGradientLocal.radialHorizontalSize = AnimatableDimension(1);
+    radialGradientLocal.radialCenterX = AnimatableDimension(1);
+    radialGradientLocal.radialCenterY = AnimatableDimension(1);
+    radialGradientLocal.fRadialCenterX = Dimension(1);
+    radialGradientLocal.fRadialCenterY = Dimension(1);
+    gradient.SetRadialGradient(radialGradientLocal);
+    gradient.SetType(GradientType::RADIAL);
+    baseAttr.fillState.SetGradient(gradient);
+    baseAttr.strokeState.SetGradient(gradient);
+    svgCircle->SetBaseAttributes(baseAttr);
+    svgCircle->SetGradientStyle(1);
+    svgCircle->SetStrokeGradientStyle(1);
+    svgCircle->UpdateFillGradient(viewPort);
+    svgCircle->UpdateStrokeGradient(viewPort);
+}
+
+/**
+ * @tc.name: ParseNodeTest001
+ * @tc.desc: SvgNode SetAttr Parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseNodeTest001, TestSize.Level1)
+{
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    svgNode->SetAttr("stroke-dasharray", "");
+
+    svgNode->SetAttr("stroke-linecap", "round");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineCap(), LineCapStyle::ROUND);
+
+    svgNode->SetAttr("strokeLinecap", "square");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineCap(), LineCapStyle::SQUARE);
+
+    svgNode->SetAttr("stroke-linejoin", "bevel");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineJoin(), LineJoinStyle::BEVEL);
+
+    svgNode->SetAttr("strokeLinejoin", "round");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineJoin(), LineJoinStyle::ROUND);
+
+    svgNode->SetAttr("stroke-miterlimit", "0.1");
+    EXPECT_NE(svgNode->GetBaseAttributes().strokeState.GetMiterLimit(), 0.1);
+
+    svgNode->SetAttr("stroke-miterlimit", "1.1");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetMiterLimit(), 1.1);
+
+    svgNode->SetAttr("strokeMiterlimit", "0.2");
+    EXPECT_NE(svgNode->GetBaseAttributes().strokeState.GetMiterLimit(), 0.2);
+
+    svgNode->SetAttr("strokeMiterlimit", "1.2");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetMiterLimit(), 1.2);
+
+    svgNode->SetAttr("strokeOpacity", "0.321");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetOpacity().GetValue(), 0.321);
+
+    svgNode->SetAttr("strokeWidth", "1.2");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineWidth().Value(), 1.2);
+    
+    svgNode->SetAttr("strokeWidth", "-1.2");
+    EXPECT_NE(svgNode->GetBaseAttributes().strokeState.GetLineWidth().Value(), -1.2);
+
+    svgNode->SetAttr("strokeDasharray", "");
+    svgNode->SetAttr("strokeDasharray", "1.1 1.2");
+    auto tesData = std::vector{1.1, 1.2};
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineDash().lineDash, tesData);
+
+    svgNode->SetAttr("strokeDashoffset", "2.0");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineDash().dashOffset, 2.0);
+
+    svgNode->SetAttr("transform-origin", "test_transform-origin");
+    EXPECT_EQ(svgNode->GetBaseAttributes().transformOrigin, "test_transform-origin");
+}
+
+/**
+ * @tc.name: ParseSvgDomTest001
+ * @tc.desc: SvgDom test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseNodeTest002, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(USE_SVG_LABEL.c_str(), USE_SVG_LABEL.length());
+    ImageSourceInfo src;
+    src.SetFillColor(Color::GREEN);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+
+    auto containerSize = svgDom->GetContainerSize();
+    EXPECT_EQ(containerSize, SizeF(24.0f, 24.0f));
+
+    svgDom->SetFillColor(Color::RED);
+    EXPECT_EQ(svgDom->fillColor_.value(), Color::RED);
+
+    svgDom->SetSmoothEdge(1.1f);
+    EXPECT_EQ(svgDom->smoothEdge_, 1.1f);
+
+    svgDom->ControlAnimation(true);
+    EXPECT_EQ(svgDom->IsStatic(), true);
+}
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,9 @@ var NodeRenderType;
     NodeRenderType[NodeRenderType["RENDER_TYPE_DISPLAY"] = 0] = "RENDER_TYPE_DISPLAY";
     NodeRenderType[NodeRenderType["RENDER_TYPE_TEXTURE"] = 1] = "RENDER_TYPE_TEXTURE";
 })(NodeRenderType || (NodeRenderType = {}));
+if (!globalThis.__hasUIFramework__) {
+    globalThis.requireNapi('arkui.mock');
+}
 class BaseNode extends __JSBaseNode__ {
     constructor(uiContext, options) {
         super(options);
@@ -393,6 +396,9 @@ class JSBuilderNode extends BaseNode {
         this.updateNodePtr(nodePtr);
         this.updateInstanceId(instanceId);
     }
+    observeRecycleComponentCreation(name, recycleUpdateFunc) {
+        throw new Error('custom component in @Builder used by BuilderNode does not support @Reusable');
+    }
 }
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
@@ -541,7 +547,7 @@ class NodeAdapter {
         if (!node.isModifiable()) {
             return false;
         }
-        if (node.attribute_ !==  undefined) {
+        if (node.attribute_ !== undefined) {
             if (node.attribute_.allowChildCount !== undefined) {
                 const allowCount = node.attribute_.allowChildCount();
                 if (allowCount <= 1) {
@@ -1631,8 +1637,8 @@ class BaseShape {
 class ShapeClip extends BaseShape {
 }
 class ShapeMask extends BaseShape {
-    constructor() {
-        super(...arguments);
+    constructor(...args) {
+        super(...args);
         this.fillColor = 0XFF000000;
         this.strokeColor = 0XFF000000;
         this.strokeWidth = 0;

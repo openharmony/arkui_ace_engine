@@ -146,9 +146,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         if (currentTimeStamp > eventTimeStamp) {
             // nanoseconds to millisceond.
             curDuration = curDuration - static_cast<int32_t>((currentTimeStamp - eventTimeStamp) / (1000 * 1000));
-            if (curDuration < 0) {
-                curDuration = 0;
-            }
+            curDuration = curDuration < 0 ? 0 : curDuration;
         }
     }
 #endif
@@ -167,8 +165,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
     UpdateFingerListInfo();
-    auto pointsCount = GetValidFingersCount();
-    if (pointsCount == fingers_) {
+    if (GetValidFingersCount() == fingers_) {
         refereeState_ = RefereeState::DETECTING;
         if (useCatchMode_) {
             DeadlineTimer(curDuration, true);
@@ -454,6 +451,7 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
     }
     auto info = std::make_shared<LongPressGestureEvent>();
     info->SetTimeStamp(time_);
+    info->SetDeviceId(deviceId_);
     info->SetRepeat(repeat_);
     info->SetFingerList(fingerList_);
     TouchEvent trackPoint = {};

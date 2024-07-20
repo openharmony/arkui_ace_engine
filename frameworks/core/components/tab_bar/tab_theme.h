@@ -28,6 +28,11 @@ namespace OHOS::Ace {
  * TabTheme defines color and styles of tab. TabTheme should be built
  * using TabTheme::Builder.
  */
+namespace {
+constexpr double BIGFONT_DEFAULT_VALUE = 1.75;
+constexpr double LARGEFONT_DEFAULT_VALUE = 2.0;
+constexpr double MAXFONT_DEFAULT_VALUE = 3.2;
+} // namespace
 class TabTheme : public virtual Theme {
     DECLARE_ACE_TYPE(TabTheme, Theme);
 
@@ -84,11 +89,11 @@ public:
                     pattern->GetAttr<Dimension>("horizontal_bottom_tab_bar_space", 0.0_vp);
                 theme->subTabBarHoverDuration_ = pattern->GetAttr<double>("sub_tab_bar_hover_duration", 0.0);
                 theme->subTabBarBigFontSizeScale_ =
-                    pattern->GetAttr<double>("sub_tab_bar_big_font_size_scale", 1.0);
+                    pattern->GetAttr<double>("sub_tab_bar_big_font_size_scale", BIGFONT_DEFAULT_VALUE);
                 theme->subTabBarLargeFontSizeScale_ =
-                    pattern->GetAttr<double>("sub_tab_bar_large_font_size_scale", 1.0);
+                    pattern->GetAttr<double>("sub_tab_bar_large_font_size_scale", LARGEFONT_DEFAULT_VALUE);
                 theme->subTabBarMaxFontSizeScale_ =
-                    pattern->GetAttr<double>("sub_tab_bar_max_font_size_scale", 1.0);
+                    pattern->GetAttr<double>("sub_tab_bar_max_font_size_scale", MAXFONT_DEFAULT_VALUE);
                 theme->subTabBarOriginFontSizeScale_ =
                     pattern->GetAttr<double>("sub_tab_bar_origin_font_size_scale", 1.0);
                 theme->subTabBarLeftRightMargin_ =
@@ -523,9 +528,9 @@ private:
     Color dialog_iconColor_;
     Color dialog_fontColor_;
     int bottomTabBackgroundBlurStyle_;
-    float subTabBarBigFontSizeScale_ = 1.0f;
-    float subTabBarLargeFontSizeScale_ = 1.0f;
-    float subTabBarMaxFontSizeScale_ = 1.0f;
+    float subTabBarBigFontSizeScale_ = 1.75f;
+    float subTabBarLargeFontSizeScale_ = 2.0f;
+    float subTabBarMaxFontSizeScale_ = 3.2f;
     float subTabBarOriginFontSizeScale_ = 1.0f;
     Dimension subTabBarLeftRightMargin_;
     Dimension subTabBarIndicatorstyleMarginTop_;

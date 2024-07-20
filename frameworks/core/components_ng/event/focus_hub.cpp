@@ -1183,8 +1183,7 @@ void FocusHub::OnBlurNode()
     CHECK_NULL_VOID(frameNode);
     auto* pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
-        auto focusHub = weak.Upgrade();
+    pipeline->AddAfterLayoutTask([focusHub = Claim(this)]() {
         CHECK_NULL_VOID(focusHub);
         auto onBlurCallback = focusHub->GetOnBlurCallback();
         if (onBlurCallback) {
@@ -1681,6 +1680,18 @@ bool FocusHub::CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) con
     auto frameNode = childNode->GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
     rect = frameNode->GetPaintRectWithTransform();
+
+    //  Calculate currentNode -> childNode offset
+    auto uiNode = frameNode->GetParent();
+    while (uiNode != GetFrameNode()) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+        if (!frameNode) {
+            uiNode = uiNode -> GetParent();
+            continue;
+        }
+        rect += frameNode->GetPaintRectWithTransform().GetOffset();
+        uiNode = frameNode->GetParent();
+    }
     return true;
 }
 

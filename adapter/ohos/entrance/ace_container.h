@@ -98,7 +98,8 @@ public:
 
     ~AceContainer() override;
 
-    bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node, uint32_t autoFillSessionId) override;
+    bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
+        uint32_t autoFillSessionId, bool isNative = true) override;
 
     void Initialize() override;
 
@@ -282,6 +283,12 @@ public:
     }
 
     RefPtr<DisplayInfo> GetDisplayInfo() override;
+
+    void InitIsFoldable() override;
+
+    bool IsFoldable() const override;
+
+    FoldStatus GetCurrentFoldStatus() override;
 
     void SetHapPath(const std::string& hapPath);
 
@@ -556,17 +563,18 @@ public:
     bool IsSceneBoardEnabled() override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
-    bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
+    bool GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
         int32_t& sourceTool, StopDragCallback&& stopDragCallback) override;
 
     bool GetCurPointerEventSourceType(int32_t& sourceType) override;
 
     bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
-        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId) override;
+        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true) override;
     bool IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
-        const std::function<void()>& onUIExtNodeBindingCompleted) override;
+        const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative = true) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
+    void OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode, AbilityBase::ViewData& viewData);
     bool ChangeType(AbilityBase::ViewData& viewData);
     AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder) override;
 
@@ -744,6 +752,7 @@ private:
     std::mutex pointerEventMutex_;
     std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
     std::unordered_map<int32_t, std::list<StopDragCallback>> stopDragCallbackMap_;
+    std::map<int32_t, std::shared_ptr<MMI::PointerEvent>> currentEvents_;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };
 

@@ -75,37 +75,45 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
         }
         bool clickJudge = event->ClickJudge(localPoint);
         if (event->GetEnabled() || clickJudge) {
-            if (!clickRecognizer_) {
-                clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
-            }
-            bool isHitTestBlock = event->IsHitTestBlock();
-            clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-            clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
-            clickRecognizer_->SetNodeId(frameNode->GetId());
-            clickRecognizer_->AttachFrameNode(frameNode);
-            clickRecognizer_->SetTargetComponent(targetComponent);
-            clickRecognizer_->SetIsSystemGesture(true);
-            clickRecognizer_->SetRecognizerType(GestureTypeName::TAP_GESTURE);
-            clickRecognizer_->SetSysGestureJudge([isHitTestBlock, clickJudge](const RefPtr<GestureInfo>& gestureInfo,
-                                                     const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
-                TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
-                    "Scrollable GestureJudge:%{public}d, %{public}d", isHitTestBlock, clickJudge);
-                return isHitTestBlock || clickJudge ? GestureJudgeResult::CONTINUE : GestureJudgeResult::REJECT;
-            });
-            clickRecognizer_->SetOnClick([weak = WeakClaim(RawPtr(frameNode))](const ClickInfo&) {
-                auto frameNode = weak.Upgrade();
-                CHECK_NULL_VOID(frameNode);
-                auto pattern = frameNode->GetPattern<ListPattern>();
-                CHECK_NULL_VOID(pattern);
-                auto item = pattern->GetSwiperItem().Upgrade();
-                CHECK_NULL_VOID(item);
-                item->ResetSwipeStatus();
-            });
+            InitClickRecognizer(coordinateOffset, getEventTargetImpl, frameNode, targetComponent, event, clickJudge);
             result.emplace_front(clickRecognizer_);
             responseLinkResult.emplace_back(clickRecognizer_);
         }
         break;
     }
+}
+
+void ScrollableActuator::InitClickRecognizer(const OffsetF& coordinateOffset,
+    const GetEventTargetImpl& getEventTargetImpl, const RefPtr<FrameNode>& frameNode,
+    const RefPtr<TargetComponent>& targetComponent,
+    const RefPtr<ScrollableEvent>& event, bool clickJudge)
+{
+    if (!clickRecognizer_) {
+        clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
+    }
+    bool isHitTestBlock = event->IsHitTestBlock();
+    clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+    clickRecognizer_->SetNodeId(frameNode->GetId());
+    clickRecognizer_->AttachFrameNode(frameNode);
+    clickRecognizer_->SetTargetComponent(targetComponent);
+    clickRecognizer_->SetIsSystemGesture(true);
+    clickRecognizer_->SetRecognizerType(GestureTypeName::TAP_GESTURE);
+    clickRecognizer_->SetSysGestureJudge([isHitTestBlock, clickJudge](const RefPtr<GestureInfo>& gestureInfo,
+                                             const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
+        TAG_LOGI(
+            AceLogTag::ACE_SCROLLABLE, "Scrollable GestureJudge:%{public}d, %{public}d", isHitTestBlock, clickJudge);
+        return isHitTestBlock || clickJudge ? GestureJudgeResult::CONTINUE : GestureJudgeResult::REJECT;
+    });
+    clickRecognizer_->SetOnClick([weak = WeakClaim(RawPtr(frameNode))](const ClickInfo&) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<ListPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto item = pattern->GetSwiperItem().Upgrade();
+        CHECK_NULL_VOID(item);
+        item->ResetSwipeStatus();
+    });
 }
 
 void ScrollableEvent::CollectScrollableTouchTarget(const OffsetF& coordinateOffset,

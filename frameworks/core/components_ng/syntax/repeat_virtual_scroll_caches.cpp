@@ -81,7 +81,6 @@ bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to)
     // optimism by merging the two calls into one
     const std::list<std::string> keysFrom = onGetKeys4Range_(from, to);
     const std::list<std::string> ttypesFrom = onGetTypes4Range_(from, to);
-
     if ((keysFrom.size() == 0) || (ttypesFrom.size() == 0) || (keysFrom.size() != ttypesFrom.size())) {
         TAG_LOGE(AceLogTag::ACE_REPEAT,
             "fail to fetch keys and/or ttyypes: requested range %{public}d - %{public}d. "

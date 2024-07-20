@@ -63,6 +63,7 @@ public:
     static ArkUINativeModuleValue ResetEdgeAntialiasing(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetResizable(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetResizable(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetResizableLattice(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetDynamicRangeMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetDynamicRangeMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetEnhancedImageQuality(ArkUIRuntimeCallInfo* runtimeCallInfo);

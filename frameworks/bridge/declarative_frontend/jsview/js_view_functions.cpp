@@ -21,7 +21,6 @@
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "base/log/ace_performance_check.h"
-#include "base/log/ace_performance_monitor.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
@@ -401,13 +400,11 @@ void ViewFunctions::ExecuteRender()
 
 void ViewFunctions::ExecuteAppear()
 {
-    COMPONENT_LIFECYCLE_DURATION();
     ExecuteFunction(jsAppearFunc_, "aboutToAppear");
 }
 
 void ViewFunctions::ExecuteDisappear()
 {
-    COMPONENT_LIFECYCLE_DURATION();
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     if (jsDisappearFunc_.IsEmpty()) {
         return;
@@ -425,13 +422,11 @@ void ViewFunctions::ExecuteDisappear()
 
 void ViewFunctions::ExecuteDidBuild()
 {
-    COMPONENT_LIFECYCLE_DURATION();
     ExecuteFunction(jsDidBuildFunc_, "onDidBuild");
 }
 
 void ViewFunctions::ExecuteAboutToRecycle()
 {
-    COMPONENT_LIFECYCLE_DURATION();
     ExecuteFunction(jsAboutToRecycleFunc_, "aboutToRecycleInternal");
 }
 

@@ -340,15 +340,15 @@ private:
     int32_t currentChildIndex_ = 0;
     double yLast_ = 0.0;
     double yOffset_ = 0.0;
-    double jumpInterval_;
+    double jumpInterval_ = 0.0;
     uint32_t showCount_ = 0;
     float gradientHeight_ = 0.0f;
     float dividerHeight_ = 0.0f;
     float dividerSpacingWidth_ = 0.0f;
     double mainVelocity_ = 0.0;
     float dividerSpacing_ = 0.0f;
-    FontWeight SelectedWeight_;
-    FontWeight CandidateWeight_;
+    FontWeight SelectedWeight_ = FontWeight::MEDIUM;
+    FontWeight CandidateWeight_ = FontWeight::REGULAR;
     double offsetCurSet_ = 0.0;
     double distancePercent_ = 0.0;
     Color pressColor_;

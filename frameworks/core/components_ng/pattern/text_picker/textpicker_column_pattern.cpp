@@ -55,6 +55,7 @@ const std::vector<std::string> FONT_FAMILY_DEFAULT = { "sans-serif" };
 const std::string MEASURE_STRING = "TEST";
 const int32_t HALF_NUMBER = 2;
 const int32_t BUFFER_NODE_NUMBER = 2;
+const double CURVE_MOVE_THRESHOLD = 0.5;
 constexpr char PICKER_DRAG_SCENE[] = "picker_drag_scene";
 } // namespace
 
@@ -1133,7 +1134,7 @@ void TextPickerColumnPattern::HandleDragEnd()
         ScrollOption(0.0);
         return;
     }
-    int32_t middleIndex = GetShowOptionCount() / HALF_NUMBER;
+    int32_t middleIndex = static_cast<int32_t>(GetShowOptionCount()) / HALF_NUMBER;
     auto shiftDistance = isDownScroll_ ? optionProperties_[middleIndex].nextDistance
                                        : optionProperties_[middleIndex].prevDistance;
     auto shiftThreshold = shiftDistance / HALF_NUMBER;
@@ -1258,7 +1259,7 @@ void TextPickerColumnPattern::CalcAlgorithmOffset(double distancePercent)
 
 double TextPickerColumnPattern::GetShiftDistance(int32_t index, ScrollDirection dir)
 {
-    int32_t optionCounts = GetShowOptionCount();
+    int32_t optionCounts = static_cast<int32_t>(GetShowOptionCount());
     if (optionCounts == 0) {
         return 0.0;
     }
@@ -1371,7 +1372,7 @@ double TextPickerColumnPattern::GetDownCandidateDistance(int32_t index, int32_t 
 
 double TextPickerColumnPattern::GetShiftDistanceForLandscape(int32_t index, ScrollDirection dir)
 {
-    int32_t optionCounts = GetShowOptionCount();
+    int32_t optionCounts = static_cast<int32_t>(GetShowOptionCount());
     if (optionCounts == 0) {
         return 0.0;
     }
@@ -1400,7 +1401,7 @@ double TextPickerColumnPattern::GetShiftDistanceForLandscape(int32_t index, Scro
 
 void TextPickerColumnPattern::SetOptionShiftDistance()
 {
-    int32_t itemCounts = GetShowOptionCount();
+    int32_t itemCounts = static_cast<int32_t>(GetShowOptionCount());
     bool isLanscape = itemCounts == OPTION_COUNT_PHONE_LANDSCAPE + BUFFER_NODE_NUMBER;
     for (int32_t i = 0; i < itemCounts; i++) {
         TextPickerOptionProperty& prop = optionProperties_[i];
@@ -1457,24 +1458,59 @@ std::string TextPickerColumnPattern::GetSelectedObject(bool isColumnChange, int3
     }
 }
 
-void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
+void TextPickerColumnPattern::ResetTotalDelta()
 {
-    offsetY = std::trunc(offsetY);
-    int32_t dragDelta = offsetY - yLast_;
-    if (dragDelta == 0) {
+    totalDragDelta_ = 0.0;
+}
+
+bool TextPickerColumnPattern::SpringCurveTailMoveProcess(bool useRebound, double& dragDelta)
+{
+    if (useRebound) {
+        return false;
+    }
+    auto toss = GetToss();
+    if (toss && toss->GetTossPlaying()) {
+        if (std::abs(dragDelta) < CURVE_MOVE_THRESHOLD) {
+            dragDelta = dragDelta > 0 ? CURVE_MOVE_THRESHOLD : -CURVE_MOVE_THRESHOLD;
+        }
+        totalDragDelta_ += dragDelta;
+        if (std::abs(totalDragDelta_) >= std::abs(toss->GetTossEndPosition())) {
+            dragDelta -= (totalDragDelta_ - toss->GetTossEndPosition());
+            ResetTotalDelta();
+            return true;
+        }
+    }
+    return false;
+}
+
+void TextPickerColumnPattern::SpringCurveTailEndProcess(bool useRebound, bool stopMove)
+{
+    if (useRebound || !stopMove) {
         return;
     }
-    offsetCurSet_ = 0.0;
+    auto toss = GetToss();
+    if (toss) {
+        toss->SetTossPlaying(false);
+        toss->StopTossAnimation();
+    }
+}
+
+void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
+{
+    double dragDelta = offsetY - yLast_;
     auto midIndex = GetShowOptionCount() / HALF_NUMBER;
     auto shiftDistance = isDownScroll_ ? optionProperties_[midIndex].nextDistance
                                        : optionProperties_[midIndex].prevDistance;
+    auto useRebound = NotLoopOptions();
+    auto stopMove = SpringCurveTailMoveProcess(useRebound, dragDelta);
+    offsetCurSet_ = 0.0;
+
     // the abs of drag delta is less than jump interval.
     dragDelta = dragDelta + yOffset_;
-    auto useRebound = NotLoopOptions();
     auto isOverScroll = useRebound && overscroller_.IsOverScroll();
     if ((std::abs(dragDelta) >= std::abs(shiftDistance)) && !isOverScroll) {
-        int32_t shiftDistanceCount = std::abs(dragDelta) / static_cast<int>(std::abs(shiftDistance));
-        int32_t additionalShift = dragDelta % static_cast<int>(std::abs(shiftDistance));
+        int32_t shiftDistanceCount = static_cast<int>(std::abs(dragDelta) / std::abs(shiftDistance));
+        double additionalShift = dragDelta - shiftDistanceCount * shiftDistance;
         for (int32_t i = 0; i < shiftDistanceCount; i++) {
             ScrollOption(shiftDistance);
             InnerHandleScroll(dragDelta < 0, true, false);
@@ -1502,6 +1538,7 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
             toss->StopTossAnimation(); // Stop fling animation and start rebound animation implicitly
         }
     }
+    SpringCurveTailEndProcess(useRebound, stopMove);
 }
 
 bool TextPickerColumnPattern::CanMove(bool isDown) const
@@ -1632,7 +1669,7 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
     if (clickBreak_) {
         return;
     }
-    int32_t middleIndex = GetShowOptionCount() / HALF_NUMBER;
+    int32_t middleIndex = static_cast<int32_t>(GetShowOptionCount()) / HALF_NUMBER;
     int32_t step = param->itemIndex - middleIndex;
     auto overFirst = static_cast<int32_t>(currentIndex_) + step < 0 && step < 0;
     auto overLast =

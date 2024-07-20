@@ -123,6 +123,15 @@ public:
         return true;
     }
 
+    void OnClearRegisterFlag() override
+    {
+        auto pattern = weakPattern_.Upgrade();
+        if (pattern == nullptr) {
+            return;
+        }
+        isReg_ = false;
+    }
+
 private:
     bool isReg_ = false;
     WeakPtr<UIExtensionPattern> weakPattern_;
@@ -261,6 +270,8 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     }
 
     CHECK_NULL_VOID(sessionWrapper_);
+    UIEXT_LOGI("The current state is '%{public}s' when UpdateWant.", ToString(state_));
+    bool isBackground = state_ == AbilityState::BACKGROUND;
     // Prohibit rebuilding the session unless the Want is updated.
     if (sessionWrapper_->IsSessionValid()) {
         if (sessionWrapper_->GetWant()->IsEquals(want)) {
@@ -283,6 +294,10 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     config.isAsyncModalBinding = isAsyncModalBinding_;
     config.uiExtensionUsage = uIExtensionUsage;
     sessionWrapper_->CreateSession(want, config);
+    if (isBackground) {
+        UIEXT_LOGW("Unable to StartUiextensionAbility while in the background.");
+        return;
+    }
     NotifyForeground();
 }
 
@@ -385,19 +400,9 @@ void UIExtensionPattern::OnAreaChangedInner()
     DispatchDisplayArea();
 }
 
-bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+void UIExtensionPattern::OnSyncGeometryNode(const DirtySwapConfig& config)
 {
-    CHECK_NULL_RETURN(sessionWrapper_, false);
-    CHECK_NULL_RETURN(dirty, false);
-    auto host = dirty->GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate();
-    auto geometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto displaySize = geometryNode->GetFrameSize();
-    displayArea_ = RectF(displayOffset, displaySize);
-    sessionWrapper_->NotifyDisplayArea(displayArea_);
-    return false;
+    DispatchDisplayArea(true);
 }
 
 void UIExtensionPattern::OnWindowShow()
@@ -650,7 +655,9 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     AceExtraInputData::InsertInterpolatePoints(info);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->RequestFocusImmediately();
+    if (pipeline->IsWindowFocused()) {
+        focusHub->RequestFocusImmediately();
+    }
     DispatchPointerEvent(pointerEvent);
 }
 

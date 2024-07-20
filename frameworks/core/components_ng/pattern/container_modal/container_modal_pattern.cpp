@@ -165,7 +165,9 @@ void ContainerModalPattern::InitContainerEvent()
     auto floatingContext = floatingTitleRow->GetRenderContext();
     CHECK_NULL_VOID(floatingContext);
 
-    auto titlePopupDistance = TITLE_POPUP_DISTANCE * containerNode->GetContext()->GetDensity();
+    auto containerNodeContext = containerNode->GetContext();
+    CHECK_NULL_VOID(containerNodeContext);
+    auto titlePopupDistance = TITLE_POPUP_DISTANCE * containerNodeContext->GetDensity();
     AnimationOption option;
     option.SetDuration(TITLE_POPUP_DURATION);
     option.SetCurve(Curves::EASE_IN_OUT);

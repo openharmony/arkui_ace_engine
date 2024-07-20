@@ -496,12 +496,12 @@ private:
 
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
-    double defaultPickerItemHeight_;
-    double resizePickerItemHeight_;
+    double defaultPickerItemHeight_ = 0.0;
+    double resizePickerItemHeight_ = 0.0;
     uint32_t selectedIndex_ = 0;
     std::vector<NG::RangeContent> range_;
     std::vector<NG::RangeContent> options_;
-    uint32_t columnsKind_;
+    uint32_t columnsKind_ = 0;
     std::vector<NG::TextCascadePickerOptions> cascadeOptions_;
     std::map<WeakPtr<FrameNode>, std::vector<NG::RangeContent>> optionsWithNode_;
     std::vector<NG::TextCascadePickerOptions> cascadeOriginptions_;

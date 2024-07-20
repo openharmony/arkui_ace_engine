@@ -56,10 +56,10 @@ static void ParseUri(napi_env env, napi_value uriNApi, std::string& uriString)
     }
 }
 
-static void ParseParams(napi_env env, napi_value params, std::string& paramsString)
+static bool ParseParams(napi_env env, napi_value params, std::string& paramsString)
 {
     if (params == nullptr) {
-        return;
+        return false;
     }
     napi_value globalValue;
     napi_get_global(env, &globalValue);
@@ -69,12 +69,16 @@ static void ParseParams(napi_env env, napi_value params, std::string& paramsStri
     napi_get_named_property(env, jsonValue, "stringify", &stringifyValue);
     napi_value funcArgv[1] = { params };
     napi_value returnValue;
-    napi_call_function(env, jsonValue, stringifyValue, 1, funcArgv, &returnValue);
+    if (napi_call_function(env, jsonValue, stringifyValue, 1, funcArgv, &returnValue) != napi_ok) {
+        napi_get_and_clear_last_exception(env, &returnValue);
+        return false;
+    }
     size_t len = 0;
     napi_get_value_string_utf8(env, returnValue, nullptr, 0, &len);
     std::unique_ptr<char[]> paramsChar = std::make_unique<char[]>(len + 1);
     napi_get_value_string_utf8(env, returnValue, paramsChar.get(), len + 1, &len);
     paramsString = paramsChar.get();
+    return true;
 }
 
 static napi_value ParseJSONParams(napi_env env, const std::string& paramsStr)
@@ -141,6 +145,48 @@ struct RouterAsyncContext {
         }
     }
 };
+
+void TriggerCallback(std::shared_ptr<RouterAsyncContext> asyncContext)
+{
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(asyncContext->env, &scope);
+    if (scope == nullptr) {
+        return;
+    }
+
+    if (asyncContext->callbackCode == ERROR_CODE_NO_ERROR) {
+        napi_value result = nullptr;
+        napi_get_undefined(asyncContext->env, &result);
+        if (asyncContext->deferred) {
+            napi_resolve_deferred(asyncContext->env, asyncContext->deferred, result);
+        } else {
+            napi_value callback = nullptr;
+            napi_get_reference_value(asyncContext->env, asyncContext->callbackRef, &callback);
+            napi_value ret;
+            napi_call_function(asyncContext->env, nullptr, callback, 1, &result, &ret);
+        }
+    } else {
+        napi_value code = nullptr;
+        std::string strCode = std::to_string(asyncContext->callbackCode);
+        napi_create_string_utf8(asyncContext->env, strCode.c_str(), strCode.length(), &code);
+
+        napi_value msg = nullptr;
+        std::string strMsg = ErrorToMessage(asyncContext->callbackCode) + asyncContext->callbackMsg;
+        napi_create_string_utf8(asyncContext->env, strMsg.c_str(), strMsg.length(), &msg);
+
+        napi_value error = nullptr;
+        napi_create_error(asyncContext->env, code, msg, &error);
+        if (asyncContext->deferred) {
+            napi_reject_deferred(asyncContext->env, asyncContext->deferred, error);
+        } else {
+            napi_value callback = nullptr;
+            napi_get_reference_value(asyncContext->env, asyncContext->callbackRef, &callback);
+            napi_value ret;
+            napi_call_function(asyncContext->env, nullptr, callback, 1, &error, &ret);
+        }
+    }
+    napi_close_handle_scope(asyncContext->env, scope);
+}
 
 using RouterFunc = std::function<void(const std::string&, const std::string&, int32_t)>;
 
@@ -221,6 +267,7 @@ bool ParseParamWithCallback(napi_env env, std::shared_ptr<RouterAsyncContext> as
     napi_value* argv, napi_value* result)
 {
     asyncContext->env = env;
+    bool parseParamsSuccess = false;
     for (size_t i = 0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
@@ -240,7 +287,7 @@ bool ParseParamWithCallback(napi_env env, std::shared_ptr<RouterAsyncContext> as
             }
             ParseUri(env, uriNApi, asyncContext->uriString);
             napi_get_named_property(env, argv[i], "params", &params);
-            ParseParams(env, params, asyncContext->paramsString);
+            parseParamsSuccess = ParseParams(env, params, asyncContext->paramsString);
             napi_get_named_property(env, argv[i], "recoverable", &recoverable);
             ParseRecoverable(env, recoverable, asyncContext->recoverable);
         } else if (valueType == napi_number) {
@@ -258,51 +305,18 @@ bool ParseParamWithCallback(napi_env env, std::shared_ptr<RouterAsyncContext> as
             NapiThrow(env, "The largest number of parameters is 2 in Promise.", ERROR_CODE_PARAM_INVALID);
             return false;
         }
-        napi_create_promise(env, &asyncContext->deferred, result);
+        if (napi_create_promise(env, &asyncContext->deferred, result) != napi_ok) {
+            TAG_LOGW(AceLogTag::ACE_ROUTER, "create return promise failed!");
+        }
+    }
+
+    if (!parseParamsSuccess) {
+        asyncContext->callbackCode = ERROR_CODE_PARAM_INVALID;
+        asyncContext->callbackMsg = "The 'params' parameter is invalid.";
+        TriggerCallback(asyncContext);
+        return false;
     }
     return true;
-}
-
-void TriggerCallback(std::shared_ptr<RouterAsyncContext> asyncContext)
-{
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(asyncContext->env, &scope);
-    if (scope == nullptr) {
-        return;
-    }
-
-    if (asyncContext->callbackCode == ERROR_CODE_NO_ERROR) {
-        napi_value result = nullptr;
-        napi_get_undefined(asyncContext->env, &result);
-        if (asyncContext->deferred) {
-            napi_resolve_deferred(asyncContext->env, asyncContext->deferred, result);
-        } else {
-            napi_value callback = nullptr;
-            napi_get_reference_value(asyncContext->env, asyncContext->callbackRef, &callback);
-            napi_value ret;
-            napi_call_function(asyncContext->env, nullptr, callback, 1, &result, &ret);
-        }
-    } else {
-        napi_value code = nullptr;
-        std::string strCode = std::to_string(asyncContext->callbackCode);
-        napi_create_string_utf8(asyncContext->env, strCode.c_str(), strCode.length(), &code);
-
-        napi_value msg = nullptr;
-        std::string strMsg = ErrorToMessage(asyncContext->callbackCode) + asyncContext->callbackMsg;
-        napi_create_string_utf8(asyncContext->env, strMsg.c_str(), strMsg.length(), &msg);
-
-        napi_value error = nullptr;
-        napi_create_error(asyncContext->env, code, msg, &error);
-        if (asyncContext->deferred) {
-            napi_reject_deferred(asyncContext->env, asyncContext->deferred, error);
-        } else {
-            napi_value callback = nullptr;
-            napi_get_reference_value(asyncContext->env, asyncContext->callbackRef, &callback);
-            napi_value ret;
-            napi_call_function(asyncContext->env, nullptr, callback, 1, &error, &ret);
-        }
-    }
-    napi_close_handle_scope(asyncContext->env, scope);
 }
 
 using ErrorCallback = std::function<void(const std::string&, int32_t)>;

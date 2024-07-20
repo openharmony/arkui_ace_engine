@@ -130,6 +130,7 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
 {
     std::string appResPath = resourceInfo.GetPackagePath();
     std::string sysResPath = resourceInfo.GetSystemPackagePath();
+    std::string hmsResPath = resourceInfo.GetHmsPackagePath();
     auto resConfig = ConvertConfigToGlobal(resourceInfo.GetResourceConfiguration());
     std::shared_ptr<Global::Resource::ResourceManager> newResMgr(Global::Resource::CreateResourceManager());
 
@@ -137,6 +138,11 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     auto appResRet = newResMgr->AddResource(appResIndexPath.c_str());
     std::string sysResIndexPath = sysResPath + DELIMITER + "resources.index";
     auto sysResRet = newResMgr->AddResource(sysResIndexPath.c_str());
+    if (!hmsResPath.empty()) {
+        std::string hmsResIndexPath =
+            hmsResPath + DELIMITER + "resources" + DELIMITER + "resources" + DELIMITER + "resources.index";
+        newResMgr->AddResource(hmsResIndexPath.c_str());
+    }
 
     if (resConfig != nullptr) {
         auto configRet = newResMgr->UpdateResConfig(*resConfig);

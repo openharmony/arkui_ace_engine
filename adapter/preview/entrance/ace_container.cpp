@@ -723,7 +723,8 @@ void AceContainer::AddAssetPath(
 #endif
 
 void AceContainer::SetResourcesPathAndThemeStyle(int32_t instanceId, const std::string& systemResourcesPath,
-    const std::string& appResourcesPath, const int32_t& themeId, const ColorMode& colorMode)
+    const std::string& hmsResourcesPath, const std::string& appResourcesPath, const int32_t& themeId,
+    const ColorMode& colorMode)
 {
     auto container = GetContainerInstance(instanceId);
     if (!container) {
@@ -735,6 +736,9 @@ void AceContainer::SetResourcesPathAndThemeStyle(int32_t instanceId, const std::
     container->resourceInfo_.SetResourceConfiguration(resConfig);
     container->resourceInfo_.SetPackagePath(appResourcesPath);
     container->resourceInfo_.SetSystemPackagePath(systemResourcesPath);
+    if (!hmsResourcesPath.empty()) {
+        container->resourceInfo_.SetHmsPackagePath(hmsResourcesPath);
+    }
     container->resourceInfo_.SetThemeId(themeId);
 }
 

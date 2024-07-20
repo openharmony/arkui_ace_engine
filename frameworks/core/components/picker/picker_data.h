@@ -205,12 +205,13 @@ public:
         }
         uint32_t month = static_cast<uint32_t>(lunarMonth);
         // big month 30 days other 29
-        return ((LUNAR_INFO[lunarYear - YEAR_START] & (0x10000u >> month)) != 0) ? 30 : 29;
+        return ((LUNAR_INFO[lunarYear - YEAR_START] & (0x10000u >> (month % MAX_MONTH))) != 0) ? 30 : 29;
     }
 
 private:
     static constexpr uint32_t YEAR_START = 1897; // start year reference with LUNAR_INFO
     static constexpr int32_t LUNAR_INFO_SIZE = 207;
+    static constexpr uint32_t MAX_MONTH = 12;
     static const uint16_t LUNAR_INFO[];
 };
 

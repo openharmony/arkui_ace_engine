@@ -22,11 +22,11 @@ class BasicPrefetcher implements IPrefetcher {
     }
   }
 
-  setDataSource(ds: IDataSourcePrefetching) {
+  setDataSource(ds: IDataSourcePrefetching): void {
     this.prefetcher.setDataSource(ds);
   }
 
-  visibleAreaChanged(minVisible: number, maxVisible: number) {
+  visibleAreaChanged(minVisible: number, maxVisible: number): void {
     this.prefetcher.visibleAreaChanged(minVisible, maxVisible);
   }
 }

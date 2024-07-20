@@ -188,42 +188,32 @@ void JSText::SetFontWeight(const std::string& value)
 
 void JSText::SetMinFontScale(const JSCallbackInfo& info)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    float minFontSizeDefault = theme->GetTextStyle().GetMinFontScale();
-    if (info.Length() < 1) {
-        TextModel::GetInstance()->SetMinFontScale(minFontSizeDefault);
-        return;
-    }
-    JSRef<JSVal> jValue = info[0];
     double minFontScale;
-    if (ParseJsDouble(jValue, minFontScale) && GreatOrEqual(minFontScale, 0.0f)) {
-        TextModel::GetInstance()->SetMinFontScale(static_cast<float>(minFontScale));
+    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale)) {
         return;
     }
-    TextModel::GetInstance()->SetMinFontScale(minFontSizeDefault);
+    if (LessOrEqual(minFontScale, 0.0f)) {
+        TextModel::GetInstance()->SetMinFontScale(0.0f);
+        return;
+    }
+    if (GreatOrEqual(minFontScale, 1.0f)) {
+        TextModel::GetInstance()->SetMinFontScale(1.0f);
+        return;
+    }
+    TextModel::GetInstance()->SetMinFontScale(static_cast<float>(minFontScale));
 }
 
 void JSText::SetMaxFontScale(const JSCallbackInfo& info)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    float maxFontSizeDefault = theme->GetTextStyle().GetMaxFontScale();
-    if (info.Length() < 1) {
-        TextModel::GetInstance()->SetMaxFontScale(maxFontSizeDefault);
-        return;
-    }
-    JSRef<JSVal> jValue = info[0];
     double maxFontScale;
-    if (ParseJsDouble(jValue, maxFontScale) && GreatOrEqual(maxFontScale, 0.0f)) {
-        TextModel::GetInstance()->SetMaxFontScale(static_cast<float>(maxFontScale));
+    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale)) {
         return;
     }
-    TextModel::GetInstance()->SetMaxFontScale(maxFontSizeDefault);
+    if (LessOrEqual(maxFontScale, 1.0f)) {
+        TextModel::GetInstance()->SetMaxFontScale(1.0f);
+        return;
+    }
+    TextModel::GetInstance()->SetMaxFontScale(static_cast<float>(maxFontScale));
 }
 
 void JSText::SetForegroundColor(const JSCallbackInfo& info)
@@ -377,7 +367,7 @@ void JSText::SetTextSelectableMode(const JSCallbackInfo& info)
 void JSText::SetMaxLines(const JSCallbackInfo& info)
 {
     JSRef<JSVal> args = info[0];
-    int32_t value = Infinity<uint32_t>();
+    auto value = Infinity<int32_t>();
     if (args->ToString() != "Infinity") {
         ParseJsInt32(args, value);
     }
@@ -637,28 +627,34 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
         CHECK_NULL_VOID(focusHub);
         focusHub->SetFocusable(true, false);
     } else {
-#ifndef NG_BUILD
-        if (args->IsFunction()) {
-            auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-            auto impl = inspector ? inspector->GetInspectorFunctionImpl() : nullptr;
-            auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(args));
-            auto onClickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl,
-                                 node = frameNode](const BaseEventInfo* info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
-                auto newInfo = *clickInfo;
-                if (impl) {
-                    impl->UpdateEventInfo(newInfo);
-                }
-                ACE_SCORING_EVENT("Text.onClick");
-                PipelineContext::SetCallBackNode(node);
-                func->Execute(newInfo);
-            };
-            TextModel::GetInstance()->SetOnClick(std::move(onClickId));
-        }
-#endif
+        JsOnClickWithoutNGBUILD(info);
     }
+}
+
+void JSText::JsOnClickWithoutNGBUILD(const JSCallbackInfo& info)
+{
+#ifndef NG_BUILD
+    JSRef<JSVal> args = info[0];
+    if (args->IsFunction()) {
+        auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+        auto impl = inspector ? inspector->GetInspectorFunctionImpl() : nullptr;
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(args));
+        auto onClickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl,
+                             node = frameNode](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+            auto newInfo = *clickInfo;
+            if (impl) {
+                impl->UpdateEventInfo(newInfo);
+            }
+            ACE_SCORING_EVENT("Text.onClick");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute(newInfo);
+        };
+        TextModel::GetInstance()->SetOnClick(std::move(onClickId));
+    }
+#endif
 }
 
 void JSText::JsRemoteMessage(const JSCallbackInfo& info)

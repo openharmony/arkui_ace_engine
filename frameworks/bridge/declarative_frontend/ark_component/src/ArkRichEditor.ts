@@ -280,9 +280,9 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
     return this;
   }
 
-  dataDetectorConfig(config: any): this {
+  dataDetectorConfig(config: TextDataDetectorConfig): this {
     let detectorConfig = new TextDataDetectorConfig();
-    detectorConfig.types = config.type;
+    detectorConfig.types = config.types;
     detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
     modifierWithKey(this._modifiersWithKeys, RichEditorDataDetectorConfigModifier.identity, RichEditorDataDetectorConfigModifier, detectorConfig);
     return this;

@@ -617,10 +617,12 @@ HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup001, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsAtTop());
     int32_t index = 0;
     int32_t indexInGroup = 0;
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::NONE, 0.f));
     EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 0.f));
     EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 0.f));
     EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 0.f));
     EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::NONE, 0.f));
     EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::START, 0.f));
     EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER, 0.f));
     EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::END, 0.f));
@@ -790,22 +792,27 @@ HWTEST_F(ListScrollerTestNg, DISABLED_ScrollToItemInGroup006, TestSize.Level1)
 HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup007, TestSize.Level1)
 {
     /**
-     * @tc.cases: ScrollTo invalid index:4 indexInGroup:-2, text each ScrollAlign
+     * @tc.cases: ScrollTo invalid index:1 indexInGroup:-2, text each ScrollAlign
      * @tc.expected: Each test scroll the correct distance
      */
     CreateList();
     CreateListItemGroups(8);
     CreateDone(frameNode_);
-    int32_t index = 4;
-    int32_t indexInGroup = -2;
+    int32_t index = 1;
+    int32_t indexInGroup = -2; // invalid
     EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 0.f));
-    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 0.f));
-    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 0.f));
-    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, 0.f));
-    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::START, 0.f));
-    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER, 0.f));
-    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::END, 0.f));
-    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO, 0.f));
+
+    index = 1;
+    indexInGroup = 100; // invalid
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 0.f));
+
+    index = -2; // invalid
+    indexInGroup = 2;
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 0.f));
+
+    index = 4; // invalid
+    indexInGroup = 2;
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 0.f));
 }
 
 /**
@@ -931,7 +938,6 @@ HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup010, TestSize.Level1)
     EXPECT_EQ(pattern_->endIndex_, 2);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -100);
     EXPECT_EQ(pattern_->itemPosition_[1].endPos, 300);
-    pattern_->DumpAdvanceInfo();
 }
 
 /**
@@ -2286,5 +2292,68 @@ HWTEST_F(ListScrollerTestNg, ChildrenMainSize004, TestSize.Level1)
     EXPECT_TRUE(ScrollToIndex(21, false, ScrollAlign::START, 1810));
     EXPECT_TRUE(ScrollToIndex(21, false, ScrollAlign::CENTER, 1710));
     EXPECT_TRUE(ScrollToIndex(21, false, ScrollAlign::END, 1610));
+}
+
+/**
+ * @tc.name: ScrollToEdge001
+ * @tc.desc: Test List model ng ScrollToEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, ScrollToEdge001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. ScrollToEdge to bottom
+     * @tc.expected: Scroll to bottom
+     */
+    model.ScrollToEdge(AceType::RawPtr(frameNode_), ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 2);
+
+    /**
+     * @tc.steps: step2. ScrollToEdge to Top in Axis::NONE
+     * @tc.expected: Can not scroll
+     */
+    pattern_->axis_ = Axis::NONE;
+    model.ScrollToEdge(AceType::RawPtr(frameNode_), ScrollEdgeType::SCROLL_TOP, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 2);
+}
+
+/**
+ * @tc.name: GetScrollEnabled001
+ * @tc.desc: Test List model ng GetScrollEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, GetScrollEnabled001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    EXPECT_EQ(model.GetScrollEnabled(AceType::RawPtr(frameNode_)), 1);
+    model.SetScrollEnabled(AceType::RawPtr(frameNode_), false);
+    EXPECT_EQ(model.GetScrollEnabled(AceType::RawPtr(frameNode_)), 0);
+}
+
+/**
+ * @tc.name: SetScrollBy001
+ * @tc.desc: Test List model ng SetScrollBy
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, SetScrollBy001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    const double x = 1.0;
+    const double y = 2.0;
+    model.SetScrollBy(AceType::RawPtr(frameNode_), x, y);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), y);
+    model.SetScrollBy(AceType::RawPtr(frameNode_), x, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), y);
 }
 } // namespace OHOS::Ace::NG

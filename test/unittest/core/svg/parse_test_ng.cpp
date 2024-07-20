@@ -1507,6 +1507,17 @@ HWTEST_F(ParseTestNg, ParseCircleTest002, TestSize.Level1)
     svgAnimation->SetCalcMode(static_cast<CalcMode>(10));
     svgCircle->PrepareAnimation(svgAnimation);
     EXPECT_EQ(static_cast<int>(svgAnimation->GetCalcMode()), 10);
+
+    /* *
+     * @tc.steps: step4. AddOnFinishCallBack
+     * @tc.expected: Execute CallBack Function
+     */
+    int testData = 0;
+    std::function<void()> callback = [&testData](){ testData = 1; };
+    svgAnimation->AddOnFinishCallBack(callback);
+    RefPtr<Animator> animation = svgAnimation->animator_;
+    animation->NotifyStopListener();
+    EXPECT_EQ(testData, 1);
 }
 
 /**
@@ -1913,5 +1924,62 @@ HWTEST_F(ParseTestNg, ParseNodeTest008, TestSize.Level1)
     int cnt = 150;
     svg->AsRSPath(Size(cnt, cnt));
     EXPECT_EQ(svgAnimation->GetAttributeName(), "opacity");
+}
+
+/**
+ * @tc.name: ParseNodeTest009
+ * @tc.desc: SvgNode SetAttr Parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseNodeTest009, TestSize.Level1)
+{
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    svgNode->SetAttr("clip-path", "url(#testClip)");
+    EXPECT_EQ(svgNode->GetBaseAttributes().clipState.GetHref(), "testClip");
+
+    svgNode->SetAttr("clip-path", "#testClipFaild");
+    EXPECT_NE(svgNode->GetBaseAttributes().clipState.GetHref(), "testClipFaild");
+
+    svgNode->SetAttr("clipPath", "url(#testClipPath)");
+    EXPECT_EQ(svgNode->GetBaseAttributes().clipState.GetHref(), "testClipPath");
+
+    svgNode->SetAttr("clipPath", "#testClipPathFaild");
+    EXPECT_NE(svgNode->GetBaseAttributes().clipState.GetHref(), "testClipPathFaild");
+
+    svgNode->SetAttr("clip-rule", "evenodd");
+    EXPECT_EQ(svgNode->GetBaseAttributes().clipState.GetClipRule(), "evenodd");
+
+    svgNode->SetAttr("clipRule", "evenodd1");
+    EXPECT_EQ(svgNode->GetBaseAttributes().clipState.GetClipRule(), "evenodd1");
+
+    svgNode->SetAttr("fill", "url(#testFill)");
+    EXPECT_EQ(svgNode->GetBaseAttributes().fillState.GetHref(), "testFill");
+
+    svgNode->SetAttr("fill", "none");
+    EXPECT_EQ(svgNode->GetBaseAttributes().fillState.GetColor(), Color(0x00000000));
+    
+    svgNode->SetAttr("fillOpacity", "0.123");
+    EXPECT_EQ(svgNode->GetBaseAttributes().fillState.GetOpacity().GetValue(), 0.123);
+
+    svgNode->SetAttr("fillRule", "evenodd");
+    EXPECT_EQ(svgNode->GetBaseAttributes().fillState.GetFillRule(), "evenodd");
+
+    svgNode->SetAttr("fontSize", "1");
+    EXPECT_EQ(svgNode->GetBaseAttributes().textStyle.GetFontSize().Value(), 1.0);
+
+    svgNode->SetAttr("fontSize", "-1");
+    EXPECT_NE(svgNode->GetBaseAttributes().textStyle.GetFontSize().Value(), -1.0);
+
+    svgNode->SetAttr("href", "#testHref");
+    EXPECT_EQ(svgNode->GetBaseAttributes().href, "testHref");
+
+    svgNode->SetAttr("href", "testHref111");
+    EXPECT_NE(svgNode->GetBaseAttributes().href, "testHref111");
+
+    svgNode->SetAttr("mask", "testMask");
+    EXPECT_EQ(svgNode->GetBaseAttributes().maskId, "testMask");
+
+    svgNode->SetAttr("patterntransform", "testPatterntransform");
+    EXPECT_EQ(svgNode->GetBaseAttributes().transform, "testPatterntransform");
 }
 } // namespace OHOS::Ace::NG
