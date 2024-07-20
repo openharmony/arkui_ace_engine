@@ -1781,7 +1781,7 @@ HWTEST_F(TextPickerTestUpdate, UpdateForwardButtonMargin001, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     TextPickerDialogView::UpdateForwardButtonMargin(buttonForwardNode, dialogTheme);
-    EXPECT_NE(buttonBackwardNode->GetLayoutProperty()->margin_, nullptr);
+    EXPECT_NE(buttonForwardNode->GetLayoutProperty()->margin_, nullptr);
 }
 
 /**
