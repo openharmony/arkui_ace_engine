@@ -214,6 +214,10 @@ public:
     // Called by view when touch event received.
     void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
 
+#if defined(SUPPORT_TOUCH_TARGET_TEST)
+    // Used to determine whether the touched frameNode is the target
+    bool OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe = false, const std::string& target = "") override;
+#endif
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
     bool OnKeyEvent(const KeyEvent& event) override;
