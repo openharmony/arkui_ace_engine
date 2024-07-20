@@ -45,6 +45,7 @@ if (is_arkui_x) {
       "${ace_root}/interfaces/napi/kits/drawabledescriptor",
       "${graphic_2d_path}/utils/color_manager/export",
       "${ace_root}/frameworks/core/interfaces/native/svg",
+      "//third_party/bounds_checking_function/include",
     ]
 
     include_dirs += drawable_native_include
