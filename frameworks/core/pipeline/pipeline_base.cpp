@@ -681,6 +681,10 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
     ACE_SCOPED_TRACE("OnVsyncEvent now:%" PRIu64 "", nanoTimestamp);
     frameCount_ = frameCount;
 
+    recvTime_ = GetSysTimestamp();
+    compensationValue_ =
+        nanoTimestamp > static_cast<uint64_t>(recvTime_) ? (nanoTimestamp - static_cast<uint64_t>(recvTime_)) : 0;
+
     for (auto& callback : subWindowVsyncCallbacks_) {
         callback.second(nanoTimestamp, frameCount);
     }
