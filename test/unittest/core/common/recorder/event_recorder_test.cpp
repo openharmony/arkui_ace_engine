@@ -598,7 +598,7 @@ HWTEST_F(EventRecorderTest, SetContainerInfo001, TestSize.Level1)
 {
     std::string windowName = "$HA_FLOAT_WINDOW$";
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, 0, true);
-    EXPECT_EQ(Recorder::EventRecorder::Get().containerId_, -1);
+    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), -1);
 }
 
 /**
@@ -610,7 +610,7 @@ HWTEST_F(EventRecorderTest, SetContainerInfo002, TestSize.Level1)
 {
     std::string windowName = "";
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, 0, true);
-    EXPECT_EQ(Recorder::EventRecorder::Get().containerId_, 0);
+    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), 0);
 }
 
 /**
@@ -622,7 +622,7 @@ HWTEST_F(EventRecorderTest, SetContainerInfo003, TestSize.Level1)
 {
     std::string windowName = "";
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, 0, false);
-    EXPECT_EQ(Recorder::EventRecorder::Get().containerId_, -1);
+    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), -1);
 }
 
 /**
@@ -634,7 +634,7 @@ HWTEST_F(EventRecorderTest, SetFocusContainerInfo001, TestSize.Level1)
 {
     std::string windowName = "$HA_FLOAT_WINDOW$";
     Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, 0);
-    EXPECT_EQ(Recorder::EventRecorder::Get().focusContainerId_, -1);
+    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), -1);
 }
 
 /**
@@ -646,7 +646,7 @@ HWTEST_F(EventRecorderTest, SetFocusContainerInfo002, TestSize.Level1)
 {
     std::string windowName = "";
     Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, 0);
-    EXPECT_EQ(Recorder::EventRecorder::Get().focusContainerId_, 0);
+    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), 0);
 }
 
 /**
