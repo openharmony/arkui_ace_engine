@@ -45,8 +45,7 @@ namespace {
 constexpr int32_t MAXIMUM_WAITING_PERIOD = 2800;
 
 #define PRINT_LOG(level, fmt, ...)                                                                               \
-    HILOG_IMPL(LOG_CORE, LOG_##level, 0xD00393A, "DownloadManager", "[%{public}s:%{public}d]" fmt, __FUNCTION__, \
-        __LINE__, ##__VA_ARGS__)
+    HILOG_IMPL(LOG_CORE, LOG_##level, 0xD00393A, "DownloadManager", "[%{public}d]" fmt, __LINE__, ##__VA_ARGS__) \
 
 #define LOGE(fmt, ...) PRINT_LOG(ERROR, fmt, ##__VA_ARGS__)
 #define LOGW(fmt, ...) PRINT_LOG(WARN, fmt, ##__VA_ARGS__)
