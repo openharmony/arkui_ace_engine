@@ -203,6 +203,13 @@ void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animat
 void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
 {
     CHECK_NULL_VOID(animation);
+    if (animation->animations_.empty()) {
+        return;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (pipeline) {
+        pipeline->RequestFrame();
+    }
     for (auto& ani : animation->animations_) {
         ani->Resume();
     }
