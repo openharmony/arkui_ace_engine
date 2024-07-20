@@ -46,8 +46,15 @@ void RefreshLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         if (HasCustomBuilderIndex() && index == customBuilderIndex_.value_or(0)) {
             auto builderLayoutConstraint = layoutConstraint;
-            builderLayoutConstraint.UpdateIllegalSelfIdealSizeWithCheck(
-                CalculateBuilderSize(child, builderLayoutConstraint, builderBaseHeight_));
+            bool isCustomBuilderExist = layoutProperty->GetIsCustomBuilderExistValue(false);
+            if (isCustomBuilderExist) {
+                builderLayoutConstraint.UpdateIllegalSelfIdealSizeWithCheck(
+                    CalculateBuilderSize(child, builderLayoutConstraint, builderBaseHeight_));
+            } else {
+                builderLayoutConstraint.minSize.SetHeight(builderBaseHeight_);
+                builderLayoutConstraint.maxSize.SetHeight(builderBaseHeight_);
+                builderLayoutConstraint.percentReference.SetHeight(builderBaseHeight_);
+            }
             child->Measure(builderLayoutConstraint);
             ++index;
             continue;

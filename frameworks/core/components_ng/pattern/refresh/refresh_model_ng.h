@@ -43,6 +43,7 @@ public:
     void SetLoadingText(const std::string& loadingText) override;
     void SetRefreshOffset(const Dimension& offset) override;
     void SetPullToRefresh(bool isPullToRefresh) override;
+    void SetIsCustomBuilderExist(bool isCustomBuilderExist) override;
     // @deprecated
     void Pop() override {}
     void SetRefreshDistance(const Dimension& refreshDistance) override {}
