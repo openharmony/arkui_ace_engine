@@ -315,10 +315,8 @@ namespace OHOS::Ace::NG {
         decltype(cachedItems_) cachedTemp(std::move(cachedItems_));
         std::map<int32_t, int32_t> indexChangedMap;
         CollectIndexChangedCount(indexChangedMap);
-        if (!indexChangedMap.empty()) {
-            RepairDatasetItems(cachedTemp, cachedItems_, indexChangedMap);
-            RepairDatasetItems(expiringTemp, expiringTempItem_, indexChangedMap);
-        }
+        RepairDatasetItems(cachedTemp, cachedItems_, indexChangedMap);
+        RepairDatasetItems(expiringTemp, expiringTempItem_, indexChangedMap);
         for (auto& [index, node] : expiringTempItem_) {
             expiringItem_.emplace(node.first, LazyForEachCacheChild(index, node.second));
         }
@@ -333,9 +331,11 @@ namespace OHOS::Ace::NG {
         for (auto& [index, child] : cachedTemp) {
             auto iter = indexChangedMap.find(index);
             if (iter == indexChangedMap.end()) {
-                iter--;
-                if (iter->first < index) {
-                    changedIndex = iter->second;
+                if (!indexChangedMap.empty()) {
+                    iter--;
+                    if (iter->first < index) {
+                        changedIndex = iter->second;
+                    }
                 }
             } else {
                 changedIndex = iter->second;
@@ -344,7 +344,9 @@ namespace OHOS::Ace::NG {
                 expiringTempItem_.try_emplace(index + changedIndex, child);
                 continue;
             }
-            changedIndex = iter->second;
+            if (!indexChangedMap.empty()) {
+                changedIndex = iter->second;
+            }
             auto info = operationList_.find(index)->second;
             if (info.isDeleting) {
                 nodeList_.emplace_back(child.first, child.second);
