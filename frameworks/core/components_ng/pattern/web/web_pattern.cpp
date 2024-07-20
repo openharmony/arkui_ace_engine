@@ -1708,8 +1708,13 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     }
     CHECK_NULL_RETURN(delegate_, false);
     CHECK_NULL_RETURN(dirty, false);
-    auto geometryNode = dirty->GetGeometryNode();
-    auto drawSize = Size(geometryNode->GetContentSize().Width(), geometryNode->GetContentSize().Height());
+
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto rect = renderContext->GetPaintRectWithoutTransform();
+    auto drawSize = Size(rect.Width(), rect.Height());
     if (drawSize.IsInfinite() || drawSize.IsEmpty()) {
         return false;
     }
@@ -1725,6 +1730,7 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     drawSizeCache_ = drawSize_;
     auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     if (!CheckSafeAreaIsExpand()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "Not safe area, drawsize_ : %{public}s", drawSize_.ToString().c_str());
         delegate_->SetBoundsOrResize(drawSize_, offset, isKeyboardInSafeArea_);
         IsNeedResizeVisibleViewport();
         isKeyboardInSafeArea_ = false;
@@ -1799,15 +1805,15 @@ void WebPattern::OnAreaChangedInner()
     CHECK_NULL_VOID(geometryNode);
     auto rect = renderContext->GetPaintRectWithoutTransform();
     auto size = Size(rect.Width(), rect.Height());
-
+    drawSize_ = size;
     delegate_->OnAreaChange({ resizeOffset.GetX(), resizeOffset.GetY(), size.Width(), size.Height() });
     if (CheckSafeAreaIsExpand() &&
         ((size.Width() != areaChangeSize_.Width()) || (size.Height() != areaChangeSize_.Height()))) {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnAreaChangedInner setbounds: height:%{public}f, offsetY:%{public}f",
             size.Height(), resizeOffset.GetY());
         areaChangeSize_ = size;
-        drawSize_ = size;
         drawSizeCache_ = drawSize_;
+        TAG_LOGD(AceLogTag::ACE_WEB, "Safe area, drawsize_ : %{public}s", drawSize_.ToString().c_str());
         delegate_->SetBoundsOrResize(drawSize_, resizeOffset, isKeyboardInSafeArea_);
         IsNeedResizeVisibleViewport();
         isKeyboardInSafeArea_ = false;
@@ -1821,6 +1827,7 @@ void WebPattern::OnAreaChangedInner()
     UpdateTouchHandleForOverlay();
     if (isInWindowDrag_)
         return;
+    TAG_LOGD(AceLogTag::ACE_WEB, "Normal state, drawsize_ : %{public}s", drawSize_.ToString().c_str());
     delegate_->SetBoundsOrResize(drawSize_, resizeOffset, isKeyboardInSafeArea_);
     IsNeedResizeVisibleViewport();
     isKeyboardInSafeArea_ = false;
@@ -2544,6 +2551,7 @@ void WebPattern::InitInOfflineMode()
     }
     Size drawSize = Size(width, height);
     Offset offset = Offset(0, 0);
+    TAG_LOGD(AceLogTag::ACE_WEB, "InitInOfflineMode drawsize_ : %{public}s", drawSize_.ToString().c_str());
     delegate_->SetBoundsOrResize(drawSize, offset);
     
     if (!isUrlLoaded_) {
@@ -2695,6 +2703,7 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
     auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
 
     // Scroll focused node into view when keyboard show.
+    TAG_LOGD(AceLogTag::ACE_WEB, "UpdateWebLayoutSize drawsize_ : %{public}s", drawSize_.ToString().c_str());
     delegate_->SetBoundsOrResize(drawSize_, offset, isKeyboard);
     delegate_->ResizeVisibleViewport(visibleViewportSize_, isKeyboard);
 
