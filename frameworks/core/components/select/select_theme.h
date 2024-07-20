@@ -292,6 +292,12 @@ public:
             theme->optionTextStyle_.SetTextDecoration(TextDecoration::NONE);
             theme->menuLargeMargin_ = pattern->GetAttr<Dimension>("menu_large_margin", theme->menuLargeMargin_);
             theme->menuMediumMargin_ = pattern->GetAttr<Dimension>("menu_medium_margin", theme->menuMediumMargin_);
+            theme->menuItemChildMinHeight_ = pattern->GetAttr<Dimension>("menu_item_child_min_height", 32.0_vp);
+            theme->menuItemVerticalPadding_ = pattern->GetAttr<Dimension>("menu_item_vertical_padding", 8.0_vp);
+            theme->menuItemGroupTitleTextFontSize_ =
+                pattern->GetAttr<Dimension>("menu_item_group_title_text_font_size", 18.0_vp);
+            theme->menuDefaultRadius_ = pattern->GetAttr<Dimension>("menu_default_radius", 20.0_vp);
+            theme->menuTextColor_= pattern->GetAttr<Color>("menu_text_color", Color(0xe5000000));
         }
     };
 
@@ -410,6 +416,11 @@ public:
         theme->maxPaddingEnd_ = maxPaddingEnd_;
         theme->menuLargeMargin_ = menuLargeMargin_;
         theme->menuMediumMargin_ = menuMediumMargin_;
+        theme->menuItemChildMinHeight_ = menuItemChildMinHeight_;
+        theme->menuItemVerticalPadding_ = menuItemVerticalPadding_;
+        theme->menuItemGroupTitleTextFontSize_ = menuItemGroupTitleTextFontSize_;
+        theme->menuDefaultRadius_ = menuDefaultRadius_;
+        theme->menuTextColor_ = menuTextColor_;
     }
 
     const Color& GetSelectedColorText() const
@@ -1064,6 +1075,31 @@ public:
         return menuMediumMargin_;
     }
 
+    const Dimension& GetMenuChildMinHeight() const
+    {
+        return menuItemChildMinHeight_;
+    }
+
+    const Dimension& GetMenuItemVerticalPadding() const
+    {
+        return menuItemVerticalPadding_;
+    }
+
+    const Dimension& GetMenuItemGroupTitleTextFontSize() const
+    {
+        return menuItemGroupTitleTextFontSize_;
+    }
+
+    const Dimension& GetMenuDefaultRadius() const
+    {
+        return menuDefaultRadius_;
+    }
+
+    const Color& GetMenuTextColor() const
+    {
+        return menuTextColor_;
+    }
+
     const uint32_t& GetMenuItemContentAlign() const
     {
         return menuItemContentAlign_;
@@ -1183,6 +1219,11 @@ private:
     std::unordered_map<ControlSize, Dimension> selectFontSizeMap_;
     Dimension menuLargeMargin_;
     Dimension menuMediumMargin_;
+    Dimension menuItemChildMinHeight_;
+    Dimension menuItemVerticalPadding_;
+    Dimension menuItemGroupTitleTextFontSize_;
+    Dimension menuDefaultRadius_;
+    Color menuTextColor_;
     uint32_t menuItemContentAlign_ = CONTENT_ALIGN_LEFT;
 };
 
