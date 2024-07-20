@@ -750,7 +750,7 @@ HWTEST_F(EventRecorderTest, Clear001, TestSize.Level1)
 {
     Recorder::ExposureCfg cfg;
     Recorder::NodeDataCache::Get().Clear("");
-    EXPECT_TRUE(Recorder::NodeDataCache::Get().container_.empty());
+    EXPECT_TRUE(Recorder::NodeDataCache::Get().container_->empty());
 }
 
 /**
@@ -762,6 +762,6 @@ HWTEST_F(EventRecorderTest, GetNodeData001, TestSize.Level1)
 {
     std::unordered_map<std::string, std::string> nodes;
     Recorder::NodeDataCache::Get().GetNodeData("", nodes);
-    EXPECT_TRUE(Recorder::NodeDataCache::Get().container_.empty());
+    EXPECT_TRUE(Recorder::NodeDataCache::Get().container_->empty());
 }
 } // namespace OHOS::Ace
