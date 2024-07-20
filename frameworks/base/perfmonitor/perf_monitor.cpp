@@ -207,7 +207,7 @@ void SceneRecord::RecordFrame(int64_t vsyncTime, int64_t duration, int32_t skipp
     }
     if (!isFirstFrame && duration > maxFrameTime) {
         maxFrameTime = duration;
-        maxFrameTimeSinceStart = currentTimeNs - beginVsyncTime;
+        maxFrameTimeSinceStart = (currentTimeNs - beginVsyncTime) / NS_TO_MS;
     }
     totalFrames++;
 }
