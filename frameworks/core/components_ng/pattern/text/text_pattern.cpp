@@ -2456,7 +2456,24 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
         InitClickEvent(gestureEventHub);
     }
     if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
-        dataDetectorAdapter_->StartAITask();
+        ParseOriText(textLayoutProperty->GetContent().value_or(""));
+        if (!dataDetectorAdapter_->aiDetectInitialized_) {
+            dataDetectorAdapter_->StartAITask();
+        }
+    }
+}
+
+void TextPattern::ParseOriText(const std::string& currentText)
+{
+    auto entityJson = JsonUtil::ParseJsonString(currentText);
+    TAG_LOGI(AceLogTag::ACE_TEXT, "text content is the json format: %{public}d", entityJson->IsNull());
+    if (!entityJson->IsNull() && !entityJson->GetValue("bundleName")->IsNull() &&
+        dataDetectorAdapter_->ParseOriText(entityJson, textForDisplay_)) {
+        if (childNodes_.empty()) {
+            auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(textLayoutProperty);
+            textLayoutProperty->UpdateContent(textForDisplay_);
+        }
     }
 }
 

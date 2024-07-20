@@ -795,6 +795,7 @@ private:
     void RegisterMarqueeNodeChangeListener();
     void UnregisterMarqueeNodeChangeListener();
     void HandleMarqueeWithIsVisible(FrameNodeChangeInfoFlag flag);
+    void ParseOriText(const std::string& currentText);
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
