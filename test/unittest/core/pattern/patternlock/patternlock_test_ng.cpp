@@ -1645,4 +1645,79 @@ HWTEST_F(PatternLockTestNg, PatternLockLayoutAlgorithmTest001, TestSize.Level1)
     auto size3 = layoutAlgorithm.MeasureContent(constraint3, &layoutWrapper);
     EXPECT_EQ(size3.value(), SizeF(30.0f, 30.0f));
 }
+
+/**
+ * @tc.name: PatternLockAccessibilityTest001
+ * @tc.desc: Test PatternLockAccessibility .
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockAccessibilityTest001, TestSize.Level1)
+{
+    Create([](PatternLockModelNG model) {
+        model.SetCircleRadius(CIRCLE_RADIUS);
+        model.SetRegularColor(REGULAR_COLOR);
+        model.SetSelectedColor(SELECTED_COLOR);
+        model.SetActiveColor(ACTIVE_COLOR);
+        model.SetPathColor(PATH_COLOR);
+        model.SetStrokeWidth(PATH_STROKE_WIDTH);
+        model.SetAutoReset(true);
+        model.SetSideLength(SIDE_LENGTH);
+        model.SetActiveCircleColor(ACTIVE_CIRCLE_COLOR);
+        model.SetActiveCircleRadius(ACTIVE_CIRCLE_RADIUS);
+        model.SetEnableWaveEffect(false);
+    });
+    /**
+     * @tc.case: case1 InitVirtualNode .
+     */
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    pattern_->CreateNodePaintMethod();
+    pattern_->OnModifyDone();
+    EXPECT_TRUE(pattern_->accessibilityPropertyVec_.size() > 0);
+    /**
+     * @tc.case: case2 HandleAccessibilityHoverEvent 1.
+     */
+    AccessibilityHoverInfo info;
+    info.SetActionType(AccessibilityHoverAction::HOVER_ENTER);
+    pattern_->HandleAccessibilityHoverEvent(true, info);
+    EXPECT_TRUE(pattern_->accessibilityPropertyVec_[0]->GetAccessibilityLevel() == AccessibilityProperty::Level::YES);
+    /**
+     * @tc.case: case3 HandleTextOnAccessibilityFocusCallback 1.
+     */
+    pattern_->HandleTextOnAccessibilityFocusCallback(0, 0);
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    EXPECT_TRUE(accessibilityProperty->GetAccessibilityLevel() == AccessibilityProperty::Level::NO);
+    /**
+     * @tc.case: case4 HandleTextOnAccessibilityFocusCallback 2.
+     */
+    pattern_->HandleTextOnAccessibilityFocusCallback(0, 1);
+    pattern_->HandleTextOnAccessibilityFocusCallback(0, 2);
+    pattern_->HandleTextOnAccessibilityFocusCallback(1, 0);
+    pattern_->HandleTextOnAccessibilityFocusCallback(1, 1);
+    pattern_->HandleTextOnAccessibilityFocusCallback(1, 2);
+    pattern_->HandleTextOnAccessibilityFocusCallback(2, 0);
+    pattern_->HandleTextOnAccessibilityFocusCallback(2, 1);
+    pattern_->HandleTextOnAccessibilityFocusCallback(2, 2);
+    EXPECT_TRUE(pattern_->choosePoint_.size() == 9);
+    EXPECT_TRUE(pattern_->choosePoint_[0].GetColumn() == 0);
+    EXPECT_TRUE(pattern_->choosePoint_[0].GetRow() == 0);
+    EXPECT_TRUE(pattern_->choosePoint_[3].GetColumn() == 1);
+    EXPECT_TRUE(pattern_->choosePoint_[3].GetRow() == 0);
+    EXPECT_TRUE(pattern_->choosePoint_[8].GetColumn() == 2);
+    EXPECT_TRUE(pattern_->choosePoint_[8].GetRow() == 2);
+    /**
+     * @tc.case: case5 HandleAccessibilityHoverEvent 2.
+     */
+    info.SetActionType(AccessibilityHoverAction::HOVER_MOVE);
+    pattern_->HandleAccessibilityHoverEvent(false, info);
+    EXPECT_TRUE(pattern_->accessibilityPropertyVec_[0]->GetAccessibilityLevel() == AccessibilityProperty::Level::NO);
+    EXPECT_TRUE(accessibilityProperty->GetAccessibilityLevel() == AccessibilityProperty::Level::YES);
+    /**
+     * @tc.case: case6 HandleAccessibilityHoverEvent 3.
+     */
+    info.SetActionType(AccessibilityHoverAction::HOVER_ENTER);
+    pattern_->HandleAccessibilityHoverEvent(true, info);
+    info.SetActionType(AccessibilityHoverAction::HOVER_MOVE);
+    pattern_->HandleAccessibilityHoverEvent(false, info);
+    EXPECT_TRUE(pattern_->choosePoint_.size() == 0);
+}
 } // namespace OHOS::Ace::NG
