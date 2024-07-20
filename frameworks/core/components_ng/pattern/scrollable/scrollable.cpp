@@ -767,9 +767,7 @@ void Scrollable::ProcessScrollSnapStop()
 
 void Scrollable::OnAnimateStop()
 {
-    if (moved_) {
-        HandleScrollEnd(std::nullopt);
-    }
+    HandleScrollEnd(std::nullopt);
     currentVelocity_ = 0.0;
     if (isTouching_ || isDragUpdateStop_) {
         return;
@@ -1241,7 +1239,6 @@ void Scrollable::StopSpringAnimation()
                 scroll->springOffsetProperty_->Set(scroll->currentPos_);
             },
             nullptr);
-        OnAnimateStop();
     }
     currentVelocity_ = 0.0;
 }
