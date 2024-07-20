@@ -2069,6 +2069,7 @@ void RichEditorPattern::CloseSystemMenu()
 void RichEditorPattern::SetAccessibilityAction()
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto property = host->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(property);
     property->SetActionSetSelection([weakPtr = WeakClaim(this)](int32_t start, int32_t end, bool isForward) {
@@ -2091,6 +2092,54 @@ void RichEditorPattern::SetAccessibilityAction()
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_RETURN(pattern, -1);
         return pattern->GetCaretPosition();
+    });
+    SetAccessibilityEditAction();
+}
+
+void RichEditorPattern::SetAccessibilityEditAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto property = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(property);
+    property->SetActionSetText([weakPtr = WeakClaim(this)](const std::string& value) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "EditAction setText, length: %{public}d",
+            static_cast<int32_t>(StringUtils::ToWstring(value).length()));
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->InsertValue(value);
+    });
+
+    property->SetActionCopy([weakPtr = WeakClaim(this)]() {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "EditAction copy");
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleOnCopy();
+        pattern->CloseSelectionMenu();
+    });
+
+    property->SetActionCut([weakPtr = WeakClaim(this)]() {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "EditAction cut");
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleOnCut();
+    });
+
+    property->SetActionPaste([weakPtr = WeakClaim(this)]() {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "EditAction paste");
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleOnPaste();
+        pattern->CloseSelectionMenu();
+    });
+
+    property->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "EditAction clearSelection");
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->CloseSelectionMenu();
+        pattern->ResetSelection();
+        pattern->StartTwinkling();
     });
 }
 
