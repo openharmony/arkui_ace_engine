@@ -492,7 +492,7 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
     context->MarkNeedFlushMouseEvent();
 }
 
-void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType)
+void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType, bool needFocus)
 {
     auto pageNode = DynamicCast<FrameNode>(node);
     CHECK_NULL_VOID(pageNode);
@@ -500,7 +500,9 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
 
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    pagePattern->FocusViewShow();
+    if (needFocus) {
+        pagePattern->FocusViewShow();
+    }
     pagePattern->OnShow();
     // With or without a page transition, we need to make the coming page visible first
     pagePattern->ProcessShowState();
