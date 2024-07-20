@@ -88,6 +88,12 @@ struct DismissTarget {
     bool targetIsSheet = false;
 };
 
+struct CustomKeyboardOffsetInfo {
+    float finalOffset = 0.0f;
+    float inAniStartOffset = 0.0f;
+    float outAniEndOffset = 0.0f;
+};
+
 // StageManager is the base class for root render node to perform page switch.
 class ACE_FORCE_EXPORT OverlayManager : public virtual AceType {
     DECLARE_ACE_TYPE(OverlayManager, AceType);
@@ -755,6 +761,7 @@ private:
     RefPtr<FrameNode> GetOverlayFrameNode();
     void MountToParentWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     void RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
+    CustomKeyboardOffsetInfo CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index

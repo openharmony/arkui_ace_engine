@@ -4857,25 +4857,10 @@ void OverlayManager::PlayKeyboardTransition(const RefPtr<FrameNode>& customKeybo
     option.SetFillMode(FillMode::FORWARDS);
     auto context = customKeyboard->GetRenderContext();
     CHECK_NULL_VOID(context);
-    auto pipeline = PipelineContext::GetMainPipelineContext();
-    CHECK_NULL_VOID(pipeline);
-    auto pageNode = pipeline->GetStageManager()->GetLastPage();
-    if (pageNode == nullptr) {
-        auto parent = customKeyboard->GetParent();
-        CHECK_NULL_VOID(parent);
-        parent->RemoveChild(customKeyboard);
-        return;
-    }
-    auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
-    auto keyboardHeight = customKeyboard->GetGeometryNode()->GetFrameSize().Height();
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    auto finalOffset = rootNode->GetTag() == "Stack"
-                           ? (pageHeight - keyboardHeight) - (pageHeight - keyboardHeight) / NUM_FLOAT_2
-                           : 0.0f;
+    auto keyboardOffsetInfo = CalcCustomKeyboardOffset(customKeyboard);
     if (isTransitionIn) {
-        context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
-        AnimationUtils::Animate(option, [context, finalOffset]() {
+        context->OnTransformTranslateUpdate({ 0.0f, keyboardOffsetInfo.inAniStartOffset, 0.0f });
+        AnimationUtils::Animate(option, [context, finalOffset = keyboardOffsetInfo.finalOffset]() {
             if (context) {
                 context->OnTransformTranslateUpdate({ 0.0f, finalOffset, 0.0f });
             }
@@ -4889,11 +4874,12 @@ void OverlayManager::PlayKeyboardTransition(const RefPtr<FrameNode>& customKeybo
         });
         AnimationUtils::Animate(
             option,
-            [context, keyboardHeight, finalOffset]() {
+            [context, outAniEndOffset = keyboardOffsetInfo.outAniEndOffset]() {
                 if (context) {
-                    context->OnTransformTranslateUpdate({ 0.0f, finalOffset + keyboardHeight, 0.0f });
+                    context->OnTransformTranslateUpdate({ 0.0f, outAniEndOffset, 0.0f });
                 }
-            }, option.GetOnFinishEvent());
+            },
+            option.GetOnFinishEvent());
     }
 }
 
@@ -4910,19 +4896,33 @@ void OverlayManager::UpdateCustomKeyboardPosition()
         }
         auto renderContext = customKeyboardNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        auto pipeline = PipelineContext::GetMainPipelineContext();
-        CHECK_NULL_VOID(pipeline);
-        auto pageNode = pipeline->GetStageManager()->GetLastPage();
-        CHECK_NULL_VOID(pageNode);
-        auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
-        auto keyboardHeight = customKeyboardNode->GetGeometryNode()->GetFrameSize().Height();
-        auto rootNode = rootNodeWeak_.Upgrade();
-        CHECK_NULL_VOID(rootNode);
-        auto finalOffset = rootNode->GetTag() == V2::STACK_ETS_TAG
-                               ? (pageHeight - keyboardHeight) - (pageHeight - keyboardHeight) / NUM_FLOAT_2
-                               : 0.0f;
-        renderContext->OnTransformTranslateUpdate({ 0.0f, finalOffset, 0.0f });
+        auto keyboardOffsetInfo = CalcCustomKeyboardOffset(customKeyboardNode);
+        renderContext->OnTransformTranslateUpdate({ 0.0f, keyboardOffsetInfo.finalOffset, 0.0f });
     }
+}
+
+CustomKeyboardOffsetInfo OverlayManager::CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard)
+{
+    CustomKeyboardOffsetInfo keyboardOffsetInfo;
+    CHECK_NULL_RETURN(customKeyboard, keyboardOffsetInfo);
+    auto pipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_RETURN(pipeline, keyboardOffsetInfo);
+    auto pageNode = pipeline->GetStageManager()->GetLastPage();
+    CHECK_NULL_RETURN(pageNode, keyboardOffsetInfo);
+    auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
+    auto keyboardHeight = customKeyboard->GetGeometryNode()->GetFrameSize().Height();
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, keyboardOffsetInfo);
+    auto finalOffset = 0.0f;
+    if (rootNode->GetTag() == V2::STACK_ETS_TAG) {
+        auto rootNd = AceType::DynamicCast<FrameNode>(rootNode);
+        pageHeight = rootNd->GetGeometryNode()->GetFrameSize().Height();
+        finalOffset = (pageHeight - keyboardHeight) - (pageHeight - keyboardHeight) / NUM_FLOAT_2;
+    }
+    keyboardOffsetInfo.finalOffset = finalOffset;
+    keyboardOffsetInfo.inAniStartOffset = pageHeight;
+    keyboardOffsetInfo.outAniEndOffset = finalOffset + keyboardHeight;
+    return keyboardOffsetInfo;
 }
 
 void OverlayManager::BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId)
