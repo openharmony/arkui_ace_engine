@@ -55,6 +55,7 @@ public:
         value->propPullToRefresh_ = ClonePullToRefresh();
         value->propRefreshOffset_ = CloneRefreshOffset();
         value->propPullDownRatio_ = ClonePullDownRatio();
+        value->propIsCustomBuilderExist_ = CloneIsCustomBuilderExist();
         return value;
     }
 
@@ -69,6 +70,7 @@ public:
         ResetPullToRefresh();
         ResetRefreshOffset();
         ResetPullDownRatio();
+        ResetIsCustomBuilderExist();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -100,6 +102,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PullToRefresh, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RefreshOffset, Dimension, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PullDownRatio, float, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCustomBuilderExist, bool, PROPERTY_UPDATE_LAYOUT);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(RefreshLayoutProperty);
