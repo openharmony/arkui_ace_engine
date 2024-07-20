@@ -64,6 +64,12 @@ inline bool NearEqual(const double left, const double right)
     constexpr double epsilon = 0.001f;
     return NearEqual(left, right, epsilon);
 }
+
+inline bool GreatNotEqual(double left, double right)
+{
+    constexpr double epsilon = 0.001f;
+    return (left - right) > epsilon;
+}
 #endif
 const int DEFAULT_DURATION = 1000;
 const std::string DEFAULT_MASK = "ohos_icon_mask";
@@ -503,18 +509,30 @@ void LayeredDrawableDescriptor::CompositeIconAdaptive(std::shared_ptr<Rosen::Dra
         bitmapCanvas.DetachBrush();
     }
     if (foreground) {
-        srcRect = Rosen::Drawing::Rect(
-            0.0, 0.0, static_cast<float>(foreground->GetWidth()), static_cast<float>(foreground->GetHeight()));
         auto x = static_cast<float>((background->GetWidth() - foreground->GetWidth()) / 2);
         auto y = static_cast<float>((background->GetHeight() - foreground->GetHeight()) / 2);
-        dstRect = Rosen::Drawing::Rect(
-            x, y, static_cast<float>(foreground->GetWidth()), static_cast<float>(foreground->GetHeight())
-        );
-
+        auto srcOffsetX = 0.0f;
+        auto srcOffsetY = 0.0f;
+        auto dstOffsetX = 0.0f;
+        auto dstOffsetY = 0.0f;
+        if (GreatNotEqual(background->GetWidth(), foreground->GetWidth())) {
+            dstOffsetX = x;
+        } else {
+            srcOffsetX = -1 * x;
+        }
+        if (GreatNotEqual(background->GetHeight(), foreground->GetHeight())) {
+            dstOffsetY = y;
+        } else {
+            srcOffsetY = -1 * y;
+        }
+        Rosen::Drawing::Rect rsSrcRect(srcOffsetX, srcOffsetY,
+            foreground->GetWidth() + srcOffsetX, foreground->GetHeight() + srcOffsetY);
+        Rosen::Drawing::Rect rsDstRect(dstOffsetX, dstOffsetY,
+            foreground->GetWidth() + dstOffsetX, foreground->GetHeight() + dstOffsetY);
         brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC_ATOP);
         bitmapCanvas.AttachBrush(brush);
         image.BuildFromBitmap(*foreground);
-        bitmapCanvas.DrawImageRect(image, srcRect, dstRect, Rosen::Drawing::SamplingOptions(),
+        bitmapCanvas.DrawImageRect(image, rsSrcRect, rsDstRect, Rosen::Drawing::SamplingOptions(),
             Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
         bitmapCanvas.DetachBrush();
     }
