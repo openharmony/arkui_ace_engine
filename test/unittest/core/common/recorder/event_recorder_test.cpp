@@ -658,9 +658,8 @@ HWTEST_F(EventRecorderTest, SetFocusContainerInfo002, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, Init001, TestSize.Level1)
 {
-    std::string config = "";
     Recorder::EventConfig* config = new Recorder::EventConfig();
-    config->Init(config);
+    config->Init("");
     EXPECT_EQ(!JsonUtil::ParseJsonString(config)->IsValid(), true);
 }
 
