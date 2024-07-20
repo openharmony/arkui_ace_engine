@@ -562,7 +562,7 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
     if (!ParseJsColor(colorValue, result)) {
         auto theme = GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
-        result = theme->GetTextStyle().GetTextDecorationColor();
+        result = theme->GetTextStyle().GetTextColor();
     }
     std::optional<TextDecorationStyle> textDecorationStyle;
     if (styleValue->IsNumber()) {
