@@ -1751,7 +1751,7 @@ HWTEST_F(TextPickerPatternTestNg, LinearFontSize001, TestSize.Level1)
 {
     InitTextPickerPatternTestNg();
     Dimension dimension = Dimension(FONT_SIZE_10);
-    Dimension dimension1 = textPickerColumnPattern_->LinearFontSize(dimension1, dimension1, 1);
+    Dimension dimension1 = textPickerColumnPattern_->LinearFontSize(dimension, dimension, 1);
     EXPECT_TRUE(dimension < dimension1);
 }
 
@@ -1764,7 +1764,7 @@ HWTEST_F(TextPickerPatternTestNg, LinearFontSize002, TestSize.Level1)
 {
     InitTextPickerPatternTestNg();
     Dimension dimension = Dimension(FONT_SIZE_10);
-    Dimension dimension1 = textPickerColumnPattern_->LinearFontSize(dimension1, dimension1, 2);
+    Dimension dimension1 = textPickerColumnPattern_->LinearFontSize(dimension, dimension, 2);
     EXPECT_TRUE(dimension < dimension1);
 }
 
