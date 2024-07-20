@@ -21,7 +21,7 @@ abstract class ViewPU {
     aboutToRecycleInternal(): void {}
     updateDirtyElements(): void {}
 }
-(globalThis as any).ViewPU = ViewPU;
+globalThis.ViewPU = ViewPU;
 
 class __JSBaseNode__ {
     constructor(options?: RenderOptions) {}
@@ -35,13 +35,13 @@ class __JSBaseNode__ {
     updateStart(): void {}
     updateEnd(): void {}
 }
-(globalThis as any).__JSBaseNode__ = __JSBaseNode__;
+globalThis.__JSBaseNode__ = __JSBaseNode__;
 
 class __JSScopeUtil__ {
     static syncInstanceId(instanceId: number): void {}
     static restoreInstanceId(): void {}
 }
-(globalThis as any).__JSScopeUtil__ = __JSScopeUtil__;
+globalThis.__JSScopeUtil__ = __JSScopeUtil__;
 
 interface CustomDialogControllerConstructorArg {
     builder: () => void;
@@ -53,14 +53,14 @@ class CustomDialogController {
     private view_: ViewPU;
 
     constructor(arg: CustomDialogControllerConstructorArg, view: ViewPU) {}
-    open() {}
-    close() {}
+    open(): void {}
+    close(): void {}
 }
-(globalThis as any).CustomDialogController = CustomDialogController;
+globalThis.CustomDialogController = CustomDialogController;
 
 class TextModifier {
     constructor(nativePtr: KNode, classType: ModifierType) {}
-    applyNormalAttribute(instance: TextAttribute) {}
+    applyNormalAttribute(instance: TextAttribute): void {}
 }
 
 export default { ViewPU, __JSBaseNode__, __JSScopeUtil__, CustomDialogController, TextModifier };
