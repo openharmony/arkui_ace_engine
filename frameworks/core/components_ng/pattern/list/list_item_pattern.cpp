@@ -153,7 +153,7 @@ void ListItemPattern::SetStartNode(const RefPtr<NG::UINode>& startNode)
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
     } else if (HasStartNode()) {
-        if (Positive(curOffset_)) {
+        if (NonNegative(curOffset_)) {
             curOffset_ = 0.0f;
             isDragging_ = false;
         }
@@ -188,7 +188,7 @@ void ListItemPattern::SetEndNode(const RefPtr<NG::UINode>& endNode)
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
     } else if (HasEndNode()) {
-        if (Negative(curOffset_)) {
+        if (NonPositive(curOffset_)) {
             curOffset_ = 0.0f;
             isDragging_ = false;
         }
@@ -352,7 +352,6 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
         auto weak = AceType::WeakClaim(this);
         auto actionStartTask = [weak](const GestureEvent& info) {
             auto pattern = weak.Upgrade();
-            pattern->isDragging_ = true;
             CHECK_NULL_VOID(pattern);
             auto frameNode = pattern->GetListFrameNode();
             CHECK_NULL_VOID(frameNode);
@@ -379,13 +378,12 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
 
         auto actionEndTask = [weak](const GestureEvent& info) {
             auto pattern = weak.Upgrade();
-            pattern->isDragging_ = false;
             CHECK_NULL_VOID(pattern);
             auto frameNode = pattern->GetListFrameNode();
             CHECK_NULL_VOID(frameNode);
             auto listPattern = frameNode->GetPattern<ListPattern>();
             CHECK_NULL_VOID(listPattern);
-            if (!listPattern->IsCurrentSwiperItem(weak)) {
+            if (!listPattern->IsCurrentSwiperItem(weak) || !pattern->isDragging_) {
                 return;
             }
             pattern->HandleDragEnd(info);
@@ -393,13 +391,12 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
 
         auto actionCancelTask = [weak]() {
             auto pattern = weak.Upgrade();
-            pattern->isDragging_ = false;
             CHECK_NULL_VOID(pattern);
             auto frameNode = pattern->GetListFrameNode();
             CHECK_NULL_VOID(frameNode);
             auto listPattern = frameNode->GetPattern<ListPattern>();
             CHECK_NULL_VOID(listPattern);
-            if (!listPattern->IsCurrentSwiperItem(weak)) {
+            if (!listPattern->IsCurrentSwiperItem(weak) || !pattern->isDragging_) {
                 return;
             }
             GestureEvent info;
@@ -444,6 +441,7 @@ void ListItemPattern::HandleDragStart(const GestureEvent& info)
         springController_->ClearStopListeners();
         springController_->Stop();
     }
+    isDragging_ = true;
     SetSwiperItemForList();
 }
 
@@ -781,6 +779,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
     float velocity = IsRTLAndVertical() ? -info.GetMainVelocity() : info.GetMainVelocity();
     bool reachRightSpeed = velocity > SWIPER_SPEED_TH;
     bool reachLeftSpeed = -velocity > SWIPER_SPEED_TH;
+    isDragging_ = false;
 
     TAG_LOGI(AceLogTag::ACE_LIST, "ListItem HandleDragEnd, velocity:%{public}f, curPos:%{public}f",
         velocity, curOffset_);
