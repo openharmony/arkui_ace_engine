@@ -386,6 +386,7 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         FirePageShow(newPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
         inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
     }
+    PageChangeCloseKeyboard();
     AddPageTransitionTrace(outPageNode, inPageNode);
 
     FireAutoSave(outPageNode, inPageNode);
