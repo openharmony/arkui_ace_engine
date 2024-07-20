@@ -549,6 +549,7 @@ void SubwindowManager::HideDialogSubWindow(int32_t instanceId)
     auto subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
     CHECK_NULL_VOID(subwindow);
     auto overlay = subwindow->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
     if (overlay->GetDialogMap().size() == 0) {
         subwindow->HideSubWindowNG();
     }
