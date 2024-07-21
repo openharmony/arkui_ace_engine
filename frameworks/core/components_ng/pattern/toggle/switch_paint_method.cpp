@@ -35,7 +35,8 @@ constexpr uint8_t ENABLED_ALPHA = 255;
 constexpr uint8_t DISABLED_ALPHA = 102;
 } // namespace
 
-SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float dragOffsetX)
+SwitchModifier::SwitchModifier(const SizeF& size, const OffsetF& offset, float pointOffset, bool isSelect,
+    const Color& boardColor, float dragOffsetX)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -44,14 +45,14 @@ SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float dra
     animatableBoardColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(boardColor));
     animateTouchHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
     animatePointColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(switchTheme->GetPointColor()));
-    pointOffset_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f);
+    pointOffset_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(pointOffset);
     dragOffsetX_ = AceType::MakeRefPtr<PropertyFloat>(dragOffsetX);
     isSelect_ = AceType::MakeRefPtr<PropertyBool>(isSelect);
     isHover_ = AceType::MakeRefPtr<PropertyBool>(false);
     isFocused_ = AceType::MakeRefPtr<PropertyBool>(false);
     isOn_ = AceType::MakeRefPtr<PropertyBool>(false);
-    offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
-    size_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF());
+    offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(offset);
+    size_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(size);
     enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
     useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
     animatePointRadius_ = AceType::MakeRefPtr<PropertyFloat>(SWITCH_ERROR_RADIUS);

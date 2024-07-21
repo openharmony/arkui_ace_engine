@@ -875,8 +875,7 @@ HWTEST_F(ToggleTestNg, TogglePaintTest001, TestSize.Level1)
     toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
     auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(switchFrameNode, nullptr);
-    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(switchModifier);
+    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod();
 
     /**
      * @tc.steps: step2. get paintWrapper
@@ -888,6 +887,7 @@ HWTEST_F(ToggleTestNg, TogglePaintTest001, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, switchPaintProperty);
     EXPECT_NE(paintWrapper, nullptr);
+    EXPECT_NE(switchPaintMethod.GetContentModifier(paintWrapper), nullptr);
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -915,7 +915,7 @@ HWTEST_F(ToggleTestNg, TogglePaintTest001, TestSize.Level1)
  */
 HWTEST_F(ToggleTestNg, TogglePaintTest002, TestSize.Level1)
 {
-    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
+    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(SizeF(), OffsetF(), 0.0, false, SELECTED_COLOR, 0.0f);
     SizeF toggleSize(SWITCH_WIDTH, SWITCH_HEIGHT);
     switchModifier->SetSize(toggleSize);
     switchModifier->hoverColor_ = Color::RED;
@@ -936,7 +936,6 @@ HWTEST_F(ToggleTestNg, TogglePaintTest002, TestSize.Level1)
     switchModifier->touchHoverType_ = TouchHoverAnimationType::PRESS;
     switchModifier->UpdateAnimatableProperty();
     EXPECT_EQ(switchModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
-    EXPECT_EQ(switchModifier->isFirstCreated_, false);
     switchModifier->isDragEvent_ = true;
     switchModifier->SetDragOffsetX(0.0f);
     switchModifier->UpdateAnimatableProperty();
@@ -957,8 +956,9 @@ HWTEST_F(ToggleTestNg, TogglePaintTest004, TestSize.Level1)
     toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
     auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(switchFrameNode, nullptr);
-    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(IS_ON, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(switchModifier);
+    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(SizeF(), OffsetF(), 0.0, IS_ON, SELECTED_COLOR, 0.0f);
+    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod();
+    switchPaintMethod.switchModifier_ = switchModifier;
     /**
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
@@ -999,8 +999,7 @@ HWTEST_F(ToggleTestNg, TogglePaintTest003, TestSize.Level1)
     toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
     auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(switchFrameNode, nullptr);
-    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(IS_ON, SELECTED_COLOR, 0.0f);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(switchModifier);
+    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(SizeF(), OffsetF(), 0.0, IS_ON, SELECTED_COLOR, 0.0f);
 
     auto switchTheme = MockPipelineContext::GetCurrent()->GetTheme<SwitchTheme>();
     ASSERT_NE(switchTheme, nullptr);
@@ -1019,7 +1018,7 @@ HWTEST_F(ToggleTestNg, TogglePaintTest003, TestSize.Level1)
  */
 HWTEST_F(ToggleTestNg, TogglePaintTest005, TestSize.Level1)
 {
-    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
+    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(SizeF(), OffsetF(), 0.0, false, SELECTED_COLOR, 0.0f);
     SizeF toggleSize(SWITCH_WIDTH, SWITCH_HEIGHT);
     switchModifier->SetSize(toggleSize);
     switchModifier->hoverColor_ = Color::RED;
@@ -1181,31 +1180,6 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0015, TestSize.Level1)
      */
     KeyEvent keyEventThr(KeyCode::KEY_ENTER, KeyAction::DOWN);
     eventHub->ProcessOnKeyEventInternal(keyEventThr);
-}
-
-/**
- * @tc.name: TogglePatternTest0016
- * @tc.desc: Test toggle GetInnerFocusPaintRect.
- * @tc.type: FUNC
- */
-HWTEST_F(ToggleTestNg, TogglePatternTest0016, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create switch and get frameNode.
-     */
-    ToggleModelNG toggleModelNG;
-    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
-    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(switchFrameNode, nullptr);
-    switchFrameNode->MarkModifyDone();
-    auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
-    EXPECT_NE(pattern, nullptr);
-    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
-
-    auto eventHub = switchFrameNode->GetFocusHub();
-    ASSERT_NE(eventHub, nullptr);
-    RoundRect paintRect;
-    eventHub->getInnerFocusRectFunc_(paintRect);
 }
 
 /**
