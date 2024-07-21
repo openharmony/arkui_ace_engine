@@ -1256,7 +1256,7 @@ void DragEventActuator::ApplyNewestOptionExecutedFromModifierToNode(
 
 void DragEventActuator::SetEventColumn(const RefPtr<DragEventActuator>& actuator)
 {
-    TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent start set eventColumn.");
+    TAG_LOGI(AceLogTag::ACE_DRAG, "DragEvent start set eventColumn.");
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
@@ -1289,7 +1289,8 @@ void DragEventActuator::SetEventColumn(const RefPtr<DragEventActuator>& actuator
     } else {
         manager->MountEventToRootNode(columnNode);
     }
-    TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set eventColumn success.");
+    TAG_LOGI(AceLogTag::ACE_DRAG, "DragEvent set eventColumn success. depth %{public}d, id %{public}d.",
+        columnNode->GetDepth(), columnNode->GetId());
 }
 
 void DragEventActuator::HideFilter()
@@ -1368,6 +1369,7 @@ void DragEventActuator::HideEventColumn()
 void DragEventActuator::BindClickEvent(const RefPtr<FrameNode>& columnNode)
 {
     auto callback = [weak = WeakClaim(this)](GestureEvent& /* info */) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "start click event callback");
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
