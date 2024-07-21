@@ -963,4 +963,19 @@ void SubwindowManager::OnWindowSizeChanged(int32_t instanceId, Rect windowRect, 
     overlayManager->OnUIExtensionWindowSizeChange();
     uiExtensionWindowRect_ = windowRect;
 }
+
+RefPtr<NG::FrameNode> SubwindowManager::GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node)
+{
+    auto iter = subwindowMap_.begin();
+    while (iter != subwindowMap_.end()) {
+        auto overlay = iter->second->GetOverlayManager();
+        CHECK_NULL_RETURN(overlay, nullptr);
+        auto dialogNode = overlay->GetDialogNodeWithExistContent(node);
+        if (dialogNode) {
+            return dialogNode;
+        }
+        ++iter;
+    }
+    return nullptr;
+}
 } // namespace OHOS::Ace

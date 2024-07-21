@@ -591,6 +591,8 @@ public:
     void ResetRootNode(int32_t sessionId);
     void OnUIExtensionWindowSizeChange();
 
+    RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
+
 private:
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
         const RefPtr<FrameNode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
@@ -741,7 +743,6 @@ private:
     int32_t WebBackward(RefPtr<NG::FrameNode>& overlay);
     void FindWebNode(const RefPtr<NG::UINode>& node, RefPtr<NG::FrameNode>& webNode);
 
-    RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
     void RegisterDialogLifeCycleCallback(const RefPtr<FrameNode>& dialog, const DialogProperties& dialogProps);
     void CustomDialogRecordEvent(const DialogProperties& dialogProps);
     RefPtr<UINode> RebuildCustomBuilder(RefPtr<UINode>& contentNode);
