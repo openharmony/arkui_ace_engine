@@ -6298,7 +6298,7 @@ typedef enum {
 *
 * @since 12
 */
-ArkUI_NodeAdapterHandle OH_ArkUI_NodeAdapter_Create();
+ArkUI_NodeAdapterHandle OH_ArkUI_NodeAdapter_Create(void);
 
 /**
 * @brief Destroys a component adapter.
