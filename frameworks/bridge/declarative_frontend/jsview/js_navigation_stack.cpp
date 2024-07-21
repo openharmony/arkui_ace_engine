@@ -312,9 +312,13 @@ void JSNavigationStack::InitNavPathIndex(const std::vector<std::string>& pathNam
     func->Call(dataSourceObj_, 1, params);
 }
 
-void JSNavigationStack::UpdateNavPathId(const std::vector<std::string>& ids)
+void JSNavigationStack::SetDestinationIdToJsStack(int32_t index, const std::string& navDestinationId)
 {
-    // not-impl
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return;
+    }
+    pathInfo->SetProperty<std::string>("navDestinationId", navDestinationId);
 }
 
 RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& customNode)
@@ -964,7 +968,7 @@ void JSNavigationStack::RecoveryNavigationStack()
         return;
     }
     JSRef<JSArray> pathArray = JSRef<JSArray>::New();
-    for (uint32_t index = 0; index < navPathList_.size(); index++) {
+    for (int32_t index = 0; index < static_cast<int32_t>(navPathList_.size()); index++) {
         auto node = navPathList_[index].second;
         auto navDestinationGroupNode = AceType::DynamicCast<NG::NavDestinationGroupNode>(
             NG::NavigationGroupNode::GetNavDestinationNode(node));
