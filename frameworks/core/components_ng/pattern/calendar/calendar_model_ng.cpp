@@ -112,7 +112,9 @@ RefPtr<FrameNode> CalendarModelNG::Create()
 void CalendarModelNG::SetOffDays(const std::string& offDays)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperNode = stack->GetMainFrameNode()->GetChildren().front();
+    auto frameNode = stack->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto swiperNode = frameNode->GetChildren().front();
     CHECK_NULL_VOID(swiperNode);
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
@@ -126,7 +128,9 @@ void CalendarModelNG::SetOffDays(const std::string& offDays)
 void CalendarModelNG::SetShowHoliday(const bool showHoliday)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperNode = stack->GetMainFrameNode()->GetChildren().front();
+    auto frameNode = stack->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto swiperNode = frameNode->GetChildren().front();
     CHECK_NULL_VOID(swiperNode);
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
