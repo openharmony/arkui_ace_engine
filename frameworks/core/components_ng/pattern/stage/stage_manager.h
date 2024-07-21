@@ -51,7 +51,8 @@ public:
     void PageChangeCloseKeyboard();
 
     static void FirePageHide(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
-    static void FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
+    static void FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE,
+        bool needFocus = true);
 
     virtual RefPtr<FrameNode> GetLastPage() const;
     RefPtr<FrameNode> GetPageById(int32_t pageId);
