@@ -24,6 +24,8 @@ int32_t testAboutToIMEInput = 0;
 int32_t testOnIMEInputComplete = 0;
 int32_t testAboutToDelete = 0;
 int32_t testOnDeleteComplete = 0;
+int32_t testNumber0 = 0;
+int32_t testNumber5 = 5;
 const std::string TEST_IMAGE_SOURCE = "src/image.png";
 } // namespace
 
@@ -1434,5 +1436,142 @@ HWTEST_F(RichEditorOverlayTestNg, HandleLevel002, TestSize.Level1)
     richEditorNode_->AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_END_SCROLL);
     richEditorNode_->ProcessFrameNodeChangeFlag();
     EXPECT_EQ(richEditorPattern->selectOverlay_->handleLevelMode_, HandleLevelMode::OVERLAY);
+}
+
+/**
+ * @tc.name: SetCaretWidth001
+ * @tc.desc: test SetCaretWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, SetCaretWidth001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto overlayMod = richEditorNode_->GetOverlayNode();
+    auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    richEditorOverlay->SetCaretWidth(-1);
+    EXPECT_NE(richEditorOverlay->caretWidth_, -1);
+}
+
+/**
+ * @tc.name: PaintPreviewTextDecoration001
+ * @tc.desc: test PaintPreviewTextDecoration
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, PaintPreviewTextDecoration001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto overlayMod = richEditorNode_->GetOverlayNode();
+    auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    richEditorOverlay->SetPreviewTextStyle(PreviewTextStyle::NORMAL);
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, 100, 100 };
+    richEditorOverlay->PaintPreviewTextDecoration(context);
+    EXPECT_NE(richEditorOverlay->previewTextUnderlineWidth_, 0);
+}
+
+/**
+ * @tc.name: OnMenuItemAction004
+ * @tc.desc: test OnMenuItemAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, OnMenuItemAction004, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
+    auto offsetF = OffsetF(5.0f, 30.0f);
+    RectF rect(testNumber0, testNumber0, testNumber5, testNumber5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, testNumber5);
+    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::DISAPPEAR, OptionMenuType::MOUSE_MENU);
+}
+
+/**
+ * @tc.name: OnMenuItemAction005
+ * @tc.desc: test OnMenuItemAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, OnMenuItemAction005, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
+    auto offsetF = OffsetF(5.0f, 30.0f);
+    RectF rect(testNumber0, testNumber0, testNumber5, testNumber5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, testNumber5);
+    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::APPEAR, OptionMenuType::MOUSE_MENU);
+}
+
+/**
+ * @tc.name: OnMenuItemAction006
+ * @tc.desc: test OnMenuItemAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, OnMenuItemAction006, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
+    auto offsetF = OffsetF(5.0f, 30.0f);
+    RectF rect(testNumber0, testNumber0, testNumber5, testNumber5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, testNumber5);
+    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::CAMERA_INPUT, OptionMenuType::MOUSE_MENU);
+}
+
+/**
+ * @tc.name: OnCloseOverlay001
+ * @tc.desc: test OnCloseOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, OnCloseOverlay001, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    RefPtr<OverlayInfo> info = nullptr;
+    info = AceType::MakeRefPtr<OverlayInfo>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
+    auto offsetF = OffsetF(5.0f, 30.0f);
+    RectF rect(testNumber0, testNumber0, testNumber5, testNumber5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, testNumber5);
+    richEditorPattern->selectOverlay_->OnCloseOverlay(
+        OptionMenuType::MOUSE_MENU, CloseReason::CLOSE_REASON_BACK_PRESSED, info);
+}
+
+/**
+ * @tc.name: GetGlyphPositionAtCoordinate001
+ * @tc.desc: Test GetGlyphPositionAtCoordinate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, GetGlyphPositionAtCoordinate001, TestSize.Level1)
+{
+    auto offset = Offset(50.0, -80.0);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    PositionWithAffinity position = richEditorPattern->paragraphs_.GetGlyphPositionAtCoordinate(offset);
+    EXPECT_EQ(position.position_, 0);
+}
+
+/**
+ * @tc.name: IsSelectLineHeadAndUseLeadingMargin001
+ * @tc.desc: Test IsSelectLineHeadAndUseLeadingMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, IsSelectLineHeadAndUseLeadingMargin001, TestSize.Level1)
+{
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    bool ret =richEditorPattern->paragraphs_.IsSelectLineHeadAndUseLeadingMargin(0);
+    EXPECT_EQ(ret, false);
 }
 } // namespace OHOS::Ace::NG

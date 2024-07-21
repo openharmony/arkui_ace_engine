@@ -1344,4 +1344,20 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchUp001, TestSize.Level1)
     EXPECT_FALSE(richEditorPattern->isTouchCaret_);
     EXPECT_FALSE(richEditorPattern->isMoveCaretAnywhere_);
 }
+
+/**
+ * @tc.name: SetCustomKeyboard001
+ * @tc.desc: test SetCustomKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, SetCustomKeyboard001, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto func = []() {};
+    richEditorModel.SetCustomKeyboard(func, true);
+    bool result =
+        ViewStackProcessor::GetInstance()->GetMainFrameNode()->GetPattern<RichEditorPattern>()->keyboardAvoidance_;
+    EXPECT_TRUE(result);
+}
 } // namespace OHOS::Ace::NG
