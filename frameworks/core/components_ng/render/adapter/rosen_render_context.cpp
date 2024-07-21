@@ -1656,7 +1656,7 @@ public:
 #endif // PIXEL_MAP_SUPPORTED
         } else {
             g_pixelMap = nullptr;
-            TAG_LOGE(AceLogTag::ACE_DRAG, "get drag thumbnail pixelMap failed!");
+            TAG_LOGE(AceLogTag::ACE_DRAG, "get thumbnail pixelMap failed!");
         }
 
         if (callback_ == nullptr) {
@@ -1685,11 +1685,12 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale)
     auto ret =
         RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY, true);
     if (!ret) {
-        TAG_LOGE(AceLogTag::ACE_DRAG, "TakeSurfaceCaptureForUI failed!");
+        LOGE("TakeSurfaceCaptureForUI failed!");
         return nullptr;
     }
     std::unique_lock<std::mutex> lock(g_mutex);
     if (thumbnailGet.wait_for(lock, PIXELMAP_TIMEOUT_DURATION) == std::cv_status::timeout) {
+        LOGE("get thumbnail pixelMap timeout!");
         return nullptr;
     }
     return g_pixelMap;
