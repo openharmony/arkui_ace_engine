@@ -1416,8 +1416,9 @@ void GridScrollLayoutAlgorithm::AddForwardLines(
     decltype(gridLayoutInfo_.lineHeightMap_) gridLineHeightMap(std::move(gridLayoutInfo_.lineHeightMap_));
     decltype(gridLayoutInfo_.gridMatrix_) gridMatrix(std::move(gridLayoutInfo_.gridMatrix_));
     bool addLine = false;
+    float newLineHeight = -1.0f;
     while (gridLayoutInfo_.endIndex_ < currentIndex - 1 || mainSpan > measureNumber) {
-        auto newLineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, true);
+        newLineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, true);
         measureNumber++;
         if (LessNotEqual(newLineHeight, 0.0)) {
             gridLayoutInfo_.reachEnd_ = true;
@@ -1456,8 +1457,10 @@ void GridScrollLayoutAlgorithm::AddForwardLines(
     gridLayoutInfo_.startMainLineIndex_ = gridLayoutInfo_.endMainLineIndex_ - (forwardLines > 0 ? forwardLines : 0);
     gridLayoutInfo_.endMainLineIndex_ = endMainLineIndex + (forwardLines < 0 ? forwardLines : 0);
     gridLayoutInfo_.endIndex_ = endIndex;
-    TAG_LOGI(AceLogTag::ACE_GRID, "after load forward:start main line %{public}d end main line %{public}d",
-        gridLayoutInfo_.startMainLineIndex_, gridLayoutInfo_.endMainLineIndex_);
+    TAG_LOGI(AceLogTag::ACE_GRID,
+        "after load forward:start main line %{public}d end main line %{public}d, new line height:%{public}f, "
+        "gridMainSize:%{public}f",
+        gridLayoutInfo_.startMainLineIndex_, gridLayoutInfo_.endMainLineIndex_, newLineHeight, mainSize);
 }
 
 float GridScrollLayoutAlgorithm::FillNewLineBackward(
