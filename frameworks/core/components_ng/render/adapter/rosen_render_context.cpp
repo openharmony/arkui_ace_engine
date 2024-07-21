@@ -2629,7 +2629,9 @@ void RosenRenderContext::PaintAccessibilityFocus()
     Dimension paintWidth(lineWidth, DimensionUnit::PX);
     const auto& bounds = rsNode_->GetStagingProperties().GetBounds();
     RoundRect frameRect;
-    frameRect.SetRect(RectF(lineWidth, lineWidth, bounds.z_ - (2 * lineWidth), bounds.w_ - (2 * lineWidth)));
+    double noGreenBorderWidth = (bounds.w_ - (2 * lineWidth)) > 0 ? (bounds.w_ - (2 * lineWidth)) : 0;
+    double noGreenBorderHeight = (bounds.z_ - (2 * lineWidth)) > 0 ? (bounds.z_ - (2 * lineWidth)) : 0;
+    frameRect.SetRect(RectF(lineWidth, lineWidth, noGreenBorderHeight, noGreenBorderWidth));
     RectT<int32_t> localRect = GetAccessibilityFocusRect().value_or(RectT<int32_t>());
     if (localRect != RectT<int32_t>()) {
         RectF globalRect = frameRect.GetRect();
