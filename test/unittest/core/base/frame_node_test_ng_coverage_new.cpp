@@ -149,9 +149,11 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsOutOfTouchTestRegion01, TestSize.Level1)
      */
     NG::PointF point { 1.0, 1.0 };
     frameNode->renderContext_->UpdateClipEdge(true);
-    frameNode->IsOutOfTouchTestRegion(point, 1);
+    TouchEvent touchEvent;
+    touchEvent.sourceType = static_cast<SourceType>(1);
+    frameNode->IsOutOfTouchTestRegion(point, touchEvent);
     testNode->renderContext_->UpdateClipEdge(false);
-    testNode->IsOutOfTouchTestRegion(point, 1);
+    testNode->IsOutOfTouchTestRegion(point, touchEvent);
 }
 
 /**

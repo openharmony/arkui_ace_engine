@@ -1373,6 +1373,11 @@ public:
     {
         isTextChangedAtCreation_ = changed;
     }
+
+    bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const override;
+
+    RectF ExpandDefaultResponseRegion(RectF& rect) override;
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override
