@@ -110,7 +110,6 @@ void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     float contentHeight = 0.0f;
     float contentWidth = childConstraint.selfIdealSize.Width().value();
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Measure(ResetLayoutConstraintMinWidth(child, childConstraint));
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         contentHeight += childSize.Height();
     }
