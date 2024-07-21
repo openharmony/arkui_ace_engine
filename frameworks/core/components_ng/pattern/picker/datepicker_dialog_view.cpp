@@ -1531,10 +1531,12 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountMonthDaysNode(const DatePi
         CHECK_NULL_VOID(dateNode);
         auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
         CHECK_NULL_VOID(datePickerPattern);
-        SetSelectedDate(dateNode, datePickerPattern->GetCurrentDate());
         auto monthDaysPattern = monthDaysNode->GetPattern<DatePickerPattern>();
         CHECK_NULL_VOID(monthDaysPattern);
-        SetSelectedDate(monthDaysNode, monthDaysPattern->GetCurrentDate());
+        PickerDate selectedDate =
+            switchFlag_ ? datePickerPattern->GetCurrentDate() : monthDaysPattern->GetCurrentDate();
+        SetSelectedDate(dateNode, selectedDate);
+        SetSelectedDate(monthDaysNode, selectedDate);
         SetShowLunar(monthDaysNode, selected);
         SetShowLunar(dateNode, selected);
         monthDaysNode->MarkModifyDone();
