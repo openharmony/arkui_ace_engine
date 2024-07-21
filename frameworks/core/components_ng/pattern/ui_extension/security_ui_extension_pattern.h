@@ -105,6 +105,7 @@ private:
     void HandleFocusEvent() override;
     void HandleBlurEvent() override;
     void DispatchFocusActiveEvent(bool isFocusActive) override;
+    void HandleTouchEvent(const TouchEventInfo& info) override;
     void DispatchFocusState(bool focusState);
 
     enum class AbilityState {
