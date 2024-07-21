@@ -3297,10 +3297,10 @@ var GestureRecognizerState;
   GestureRecognizerState[GestureRecognizerState["FAILED"] = 5] = "FAILED";
 })(GestureRecognizerState || (GestureRecognizerState = {}));
 
-var GridItemAlignment;
+let GridItemAlignment;
 (function (GridItemAlignment) {
-  GridItemAlignment[GridItemAlignment["DEFAULT"] = 0] = "DEFAULT";
-  GridItemAlignment[GridItemAlignment["STRETCH"] = 1] = "STRETCH";
+  GridItemAlignment[GridItemAlignment['DEFAULT'] = 0] = 'DEFAULT';
+  GridItemAlignment[GridItemAlignment['STRETCH'] = 1] = 'STRETCH';
 })(GridItemAlignment || (GridItemAlignment = {}));
 
 class ImageAnalyzerController {
