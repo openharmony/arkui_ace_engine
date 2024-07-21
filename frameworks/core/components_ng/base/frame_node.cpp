@@ -3850,6 +3850,13 @@ OffsetF FrameNode::GetOffsetInScreen()
     return frameOffset;
 }
 
+OffsetF FrameNode::GetOffsetInSubwindow(const OffsetF& subwindowOffset)
+{
+    auto frameOffset = GetOffsetInScreen();
+    frameOffset -= subwindowOffset;
+    return frameOffset;
+}
+
 RefPtr<PixelMap> FrameNode::GetPixelMap()
 {
     auto gestureHub = GetOrCreateGestureEventHub();

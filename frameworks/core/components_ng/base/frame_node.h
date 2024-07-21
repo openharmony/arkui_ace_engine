@@ -813,6 +813,7 @@ public:
         return localMat_;
     }
     OffsetF GetOffsetInScreen();
+    OffsetF GetOffsetInSubwindow(const OffsetF& subwindowOffset);
     RefPtr<PixelMap> GetPixelMap();
     RefPtr<FrameNode> GetPageNode();
     RefPtr<FrameNode> GetFirstAutoFillContainerNode();
