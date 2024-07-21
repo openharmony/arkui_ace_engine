@@ -76,7 +76,7 @@ private:
     void CancelFrameNodePropertyAnimation(RefPtr<FrameNode>& frameNode) override;
     void PlayPropertyTranslateAnimation(
         float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false) override;
-    void PlayScrollAnimation() override;
+    void PlayScrollAnimation(float offset) override;
     void HorizontalScrollAnimation();
     void PlayHorizontalScrollExitAnimation(float swiperWidth, float startPos, RefPtr<FrameNode>& frameNode);
     void PlayHorizontalScrollEntryAnimation(float swiperWidth, float startPos, RefPtr<FrameNode>& frameNode);
@@ -88,7 +88,7 @@ private:
     void PlayScrollScaleAnimation(float scale, RefPtr<RenderContext>& renderContext);
     void PlayScrollBlurAnimation(float blur, RefPtr<RenderContext>& renderContext);
     void PlayScrollAlpahAnimation(float alpha, RefPtr<RenderContext>& renderContext);
-    void PlayScrollBackgroundAnimation(const Color& color, RefPtr<RenderContext>& renderContext);
+    void PlayScrollBackgroundAnimation(const std::shared_ptr<Color>& color, RefPtr<RenderContext>& renderContext);
 
     void PlayPropertyTranslateFlipAnimation(const OffsetF& offset);
 
@@ -110,19 +110,19 @@ private:
 
     bool IsPreItem(int32_t index, float translate);
     bool IsScrollOverCritical();
-    Color GetBackgroundColorValue(const RefPtr<FrameNode>& frameNode);
+    std::shared_ptr<Color> GetBackgroundColorValue(const RefPtr<FrameNode>& frameNode);
     std::shared_ptr<AnimationUtils::Animation> Animation(bool exit, AnimationParam& param);
     void ResetBackcolor();
-
-    Color preNodeBackgroundColor_;
-    Color entryNodeBackground_;
-    Color parentNodeBackground_;
+    void ResetScrollAnimation();
+    
+    std::shared_ptr<Color> preNodeBackgroundColor_;
+    std::shared_ptr<Color> entryNodeBackground_;
     OffsetF offset_;
     std::vector<std::shared_ptr<AnimationUtils::Animation>> animationVector_;
     std::vector<AnimationFinishType> animationFinishList_;
     std::vector<std::shared_ptr<AnimationUtils::Animation>> scrollAnimationVector_;
-    std::map<WeakPtr<FrameNode>, Color> exitNodes_;
-    std::map<WeakPtr<FrameNode>, Color> entryNodes_;
+    std::map<WeakPtr<FrameNode>, std::shared_ptr<Color>> exitNodes_;
+    std::map<WeakPtr<FrameNode>, std::shared_ptr<Color>> entryNodes_;
     float horizontalExitNodeScale_ = 0;
     float horizontalExitNodeBlur_ = 0;
     float horizontalExitNodeOpacity_ = 0;
@@ -137,7 +137,6 @@ private:
     float verticalEntryNodeOpacity_ = 0;
     bool hasGetExitColor_ = false;
     bool hasGetEntryColor_ = false;
-    bool hasChangeColor_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_ARC_SWIPER_PATTERN_H
