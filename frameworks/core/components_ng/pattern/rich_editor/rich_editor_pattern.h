@@ -812,6 +812,11 @@ public:
         selectOverlay_->OnAncestorNodeChanged(flag);
     }
 
+    bool IsTouchCaret() const
+    {
+        return isTouchCaret_;
+    }
+
 protected:
     bool CanStartAITask() override;
 
@@ -829,8 +834,8 @@ private:
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
-    bool RepeatClickCaret(const Offset& offset, int32_t lastCaretPosition, const RectF& lastCaretRect);
-    void CreateAndShowSingleHandle(GestureEvent& info);
+    bool RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect);
+    void CreateAndShowSingleHandle(bool isShowMenu = true);
     void MoveCaretAndStartFocus(const Offset& offset);
     void HandleDoubleClickEvent(GestureEvent& info);
     bool HandleUserClickEvent(GestureEvent& info);

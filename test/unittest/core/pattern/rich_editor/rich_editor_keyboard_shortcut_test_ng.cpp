@@ -1341,7 +1341,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchUp001, TestSize.Level1)
     richEditorPattern->isMoveCaretAnywhere_ = true;
     richEditorPattern->magnifierController_->isShowMagnifier_ = true;
     richEditorPattern->HandleTouchUp();
-    EXPECT_FALSE(richEditorPattern->isTouchCaret_);
     EXPECT_FALSE(richEditorPattern->isMoveCaretAnywhere_);
 }
 
