@@ -3007,9 +3007,7 @@ class ArkComponent {
     } else {
       this._modifiersWithKeys = new Map();
     }
-    if (classType === ModifierType.STATE) {
-      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
-    }
+    this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     this._nativePtrChanged = false;
   }
   setNodePtr(nodePtr) {
@@ -3038,7 +3036,7 @@ class ArkComponent {
       ArkLogConsole.info("modifier pointer changed");
       this.nativePtr = instance.nativePtr;
       this._nativePtrChanged = true;
-      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(instance.nativePtr);
+      this._weakPtr = instance._weakPtr;
     }
   }
   applyModifierPatch() {
@@ -9234,9 +9232,7 @@ class ArkSpanComponent {
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
-    if (classType === ModifierType.STATE) {
-      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
-    }
+    this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     this._nativePtrChanged = false;
   }
   initialize(value) {
@@ -9266,7 +9262,7 @@ class ArkSpanComponent {
     if (this.nativePtr !== instance.nativePtr) {
       this.nativePtr = instance.nativePtr;
       this._nativePtrChanged = true;
-      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(instance.nativePtr);
+      this._weakPtr = instance._weakPtr;
     }
   }
   onGestureJudgeBegin(callback) {
