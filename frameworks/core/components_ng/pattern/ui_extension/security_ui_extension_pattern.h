@@ -64,8 +64,7 @@ public:
     int32_t GetInstanceId();
 
     void OnAreaChangedInner() override;
-    bool OnDirtyLayoutWrapperSwap(
-        const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnSyncGeometryNode(const DirtySwapConfig& config) override;
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnAttachToFrameNode() override;
