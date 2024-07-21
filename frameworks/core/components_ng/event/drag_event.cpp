@@ -447,6 +447,19 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             customActionCancel();
         }
     };
+    auto panOnReject = [weak = WeakClaim(this)]() {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Tragger pan onReject");
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        actuator->SetGatherNode(nullptr);
+        actuator->ClearGatherNodeChildrenInfo();
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto manager = pipelineContext->GetOverlayManager();
+        CHECK_NULL_VOID(manager);
+        manager->RemoveGatherNode();
+    };
+    panRecognizer_->SetOnReject(panOnReject);
     panRecognizer_->SetIsForDrag(true);
     panRecognizer_->SetMouseDistance(DRAG_PAN_DISTANCE_MOUSE.ConvertToPx());
     actionCancel_ = actionCancel;
@@ -615,6 +628,24 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_DETECTING_STATUS, frameNode);
         }
     };
+    auto longpressOnReject = [weak = WeakClaim(this)]() {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto dragDropManager = pipelineContext->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        if (dragDropManager->IsDragging()) {
+            return;
+        }
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Tragger long press onReject");
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        actuator->SetGatherNode(nullptr);
+        actuator->ClearGatherNodeChildrenInfo();
+        auto manager = pipelineContext->GetOverlayManager();
+        CHECK_NULL_VOID(manager);
+        manager->RemoveGatherNode();
+    };
+    previewLongPressRecognizer_->SetOnReject(panOnReject);
     previewLongPressRecognizer_->SetOnAction(longPressUpdate);
     previewLongPressRecognizer_->SetOnActionCancel(longPressCancel);
     previewLongPressRecognizer_->SetThumbnailCallback(std::move(preDragCallback));

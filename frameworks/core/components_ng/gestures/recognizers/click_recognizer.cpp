@@ -183,6 +183,7 @@ void ClickRecognizer::OnAccepted()
 
 void ClickRecognizer::OnRejected()
 {
+    SendRejectMsg();
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
 }
