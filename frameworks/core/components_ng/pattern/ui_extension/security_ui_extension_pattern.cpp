@@ -617,6 +617,15 @@ void SecurityUIExtensionPattern::RegisterVisibleAreaChange()
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
 }
 
+void SecurityUIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocusImmediately();
+}
+
 void SecurityUIExtensionPattern::OnLanguageConfigurationUpdate()
 {
     CHECK_NULL_VOID(sessionWrapper_);
