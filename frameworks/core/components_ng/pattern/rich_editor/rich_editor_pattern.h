@@ -351,7 +351,9 @@ public:
     void NotifyKeyboardClosed() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
-        FocusHub::LostFocusToViewRoot();
+        if (!isCustomKeyboardAttached_) {
+            FocusHub::LostFocusToViewRoot();
+        }
     }
     void ClearOperationRecords();
     void ClearRedoOperationRecords();
