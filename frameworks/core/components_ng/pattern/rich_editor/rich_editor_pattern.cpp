@@ -2427,17 +2427,14 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     HandleUserClickEvent(info);
     CHECK_NULL_VOID(!info.IsPreventDefault());
 
-    if (textSelector_.IsValid() && !isMouseSelect_) {
+    if (textSelector_.IsValid() && !isMouseSelect_ && !isTouchCaret_) {
         CloseSelectOverlay();
         ResetSelection();
     }
-
+    isTouchCaret_ = false;
     caretUpdateType_ = CaretUpdateType::PRESSED;
     CHECK_NULL_VOID(overlayMod_);
-    auto lastCaretPosition = caretPosition_;
-    float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretHeight();
-    OffsetF caretOffset = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretOffset();
-    RectF lastCaretRect = RectF{ caretOffset.GetX() - caretHeight / 2, caretOffset.GetY(), caretHeight, caretHeight };
+    RectF lastCaretRect = GetCaretRect();
     bool isCaretTwinkling = caretTwinkling_;
     auto position = paragraphs_.GetIndex(textOffset);
     AdjustCursorPosition(position);
@@ -2453,8 +2450,9 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     }
     UseHostToUpdateTextFieldManager();
     CalcCaretInfoByClick(info.GetLocalLocation());
-    if (RepeatClickCaret(info.GetLocalLocation(), lastCaretPosition, lastCaretRect) && isCaretTwinkling) {
-        CreateAndShowSingleHandle(info);
+    CHECK_NULL_VOID(info.GetSourceDevice() != SourceType::MOUSE);
+    if (RepeatClickCaret(info.GetLocalLocation(), lastCaretRect) && isCaretTwinkling) {
+        CreateAndShowSingleHandle();
     }
 }
 
@@ -2465,30 +2463,27 @@ Offset RichEditorPattern::ConvertTouchOffsetToTextOffset(const Offset& touchOffs
     return touchOffset - Offset(richTextRect_.GetX(), richTextRect_.GetY());
 }
 
-bool RichEditorPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaretPosition, const RectF& lastCaretRect)
+bool RichEditorPattern::RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect)
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "caretTwinkling=%{public}d offset=%{public}s lastCaretRect=%{public}s",
+        caretTwinkling_, offset.ToString().c_str(), lastCaretRect.ToString().c_str());
     CHECK_NULL_RETURN(caretTwinkling_, false);
-    if (lastCaretPosition != GetTextContentLength() && lastCaretPosition != 0) {
-        Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
-        auto position = paragraphs_.GetIndex(textOffset);
-        return lastCaretPosition == position && HasFocus();
-    }
-    return lastCaretRect.IsInRegion(PointF(offset.GetX(), offset.GetY()));
+    auto lastCaretHeight = lastCaretRect.Height();
+    auto caretRect =
+        RectF(lastCaretRect.GetX() - lastCaretHeight / 2.0f, lastCaretRect.GetY(), lastCaretHeight, lastCaretHeight);
+    return caretRect.IsInRegion(PointF(offset.GetX(), offset.GetY()));
 }
 
-void RichEditorPattern::CreateAndShowSingleHandle(GestureEvent& info)
+void RichEditorPattern::CreateAndShowSingleHandle(bool isShowMenu)
 {
-    if (info.GetSourceDevice() == SourceType::MOUSE) {
-        return;
-    }
     if (IsPreviewTextInputting()) {
         return;
     }
+    textResponseType_ = TextResponseType::LONG_PRESS;
     selectOverlay_->SetIsSingleHandle(true);
-    isSingleHandle_ = true;
     textSelector_.Update(caretPosition_);
     CalculateHandleOffsetAndShowOverlay();
-    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    selectOverlay_->ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
 }
 
 void RichEditorPattern::MoveCaretAndStartFocus(const Offset& textOffset)
@@ -2736,10 +2731,9 @@ void RichEditorPattern::HandleBlurEvent()
         CloseKeyboard(true);
     }
 
-    if (textSelector_.IsValid()) {
-        CloseSelectOverlay();
-        ResetSelection();
-    }
+    CloseSelectOverlay();
+    ResetSelection();
+
     if (reason != BlurReason::WINDOW_BLUR) {
         lastSelectionRange_.reset();
     }
@@ -5872,12 +5866,13 @@ void RichEditorPattern::HandleTouchDown(const Offset& offset)
     isMoveCaretAnywhere_ = false;
     previewLongPress_ = false;
     editingLongPress_ = false;
+    isTouchCaret_ = false;
     CHECK_NULL_VOID(HasFocus());
-    CHECK_NULL_VOID(overlayMod_);
-    float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretHeight();
-    OffsetF caretOffset = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretOffset();
-    RectF lastCaretRect = RectF{ caretOffset.GetX() - caretHeight / 2, caretOffset.GetY(), caretHeight, caretHeight };
-    isTouchCaret_ = RepeatClickCaret(offset, caretPosition_, lastCaretRect);
+    RectF lastCaretRect = GetCaretRect();
+    isTouchCaret_ = RepeatClickCaret(offset, lastCaretRect);
+    if (isTouchCaret_ && !selectOverlay_->IsSingleHandleShow()) {
+        CreateAndShowSingleHandle(false);
+    }
 }
 
 void RichEditorPattern::HandleTouchUp()
@@ -5891,11 +5886,13 @@ void RichEditorPattern::HandleTouchUp()
             StartTwinkling();
         }
     }
-    if ((isTouchCaret_ && selectOverlay_->IsSingleHandleShow()) || previewLongPress_) {
+    if (isTouchCaret_ && selectOverlay_->IsSingleHandleShow()) {
+        CreateAndShowSingleHandle();
+    }
+    if (previewLongPress_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "show menu, previewLongPress_=%{public}d", previewLongPress_);
         selectOverlay_->ShowMenu();
     }
-    isTouchCaret_ = false;
     isMoveCaretAnywhere_ = false;
     editingLongPress_ = false;
     if (magnifierController_->GetShowMagnifier()) {
