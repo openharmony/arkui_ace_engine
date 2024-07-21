@@ -301,6 +301,8 @@ private:
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     void ResetAllDirectionsStep();
 
+    std::string GetIrregularIndexesString() const;
+
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
 
