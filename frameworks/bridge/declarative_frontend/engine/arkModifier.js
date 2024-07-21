@@ -101,6 +101,7 @@ class ModifierUtils {
   static putDirtyModifier(arkModifier, attributeModifierWithKey) {
     attributeModifierWithKey.value = attributeModifierWithKey.stageValue;
     if (!arkModifier._weakPtr.invalid()) {
+      ArkLogConsole.info("pointer is invalid when putDirtyModifier");
       attributeModifierWithKey.applyPeer(arkModifier.nativePtr,
         (attributeModifierWithKey.value === undefined ||
           attributeModifierWithKey.value === null)
@@ -206,6 +207,7 @@ class AttributeUpdater {
     this._state = value;
   }
   initializeModifier(instance) {}
+  onComponentChanged(instance) {}
   updateConstructorParams(...args) {
     if (!this.attribute) {
       ArkLogConsole.info("AttributeUpdater has not been initialized before updateConstructorParams.");

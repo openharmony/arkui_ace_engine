@@ -64,7 +64,7 @@ ArkUINativeModuleValue TextAreaBridge::SetStyle(ArkUIRuntimeCallInfo *runtimeCal
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsString(vm)) {
-        auto str = secondArg->ToString(vm)->ToString();
+        auto str = secondArg->ToString(vm)->ToString(vm);
         if (str == "Inline") {
             GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaStyle(nativeNode,
                 static_cast<int32_t>(InputStyle::INLINE));
@@ -252,7 +252,7 @@ ArkUINativeModuleValue TextAreaBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo *
         if (fontWeightArg->IsNumber()) {
             fontWeight = std::to_string(fontWeightArg->Int32Value(vm));
         } else if (fontWeightArg->IsString(vm)) {
-            fontWeight = fontWeightArg->ToString(vm)->ToString();
+            fontWeight = fontWeightArg->ToString(vm)->ToString(vm);
         }
     }
     std::vector<std::string> fontFamilies;
@@ -380,11 +380,11 @@ ArkUINativeModuleValue TextAreaBridge::SetShowCounter(ArkUIRuntimeCallInfo *runt
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto showCounter = false;
     if (showCounterArg->IsBoolean()) {
-        showCounter = showCounterArg->BooleaValue();
+        showCounter = showCounterArg->BooleaValue(vm);
     }
     auto highlightBorder = true;
     if (highlightBorderArg->IsBoolean()) {
-        highlightBorder = highlightBorderArg->BooleaValue();
+        highlightBorder = highlightBorderArg->BooleaValue(vm);
     }
     auto thresholdValue = static_cast<int32_t>(DEFAULT_MODE);
     if (thresholdArg->IsNumber()) {
@@ -529,7 +529,7 @@ ArkUINativeModuleValue TextAreaBridge::SetFontWeight(ArkUIRuntimeCallInfo *runti
         if (secondArg->IsNumber()) {
             fontWeight = std::to_string(secondArg->Int32Value(vm));
         } else if (secondArg->IsString(vm)) {
-            fontWeight = secondArg->ToString(vm)->ToString();
+            fontWeight = secondArg->ToString(vm)->ToString(vm);
         }
     }
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaFontWeightStr(nativeNode, fontWeight.c_str());
@@ -747,7 +747,7 @@ ArkUINativeModuleValue TextAreaBridge::SetFontFeature(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsString(vm)) {
-        auto value = secondArg->ToString(vm)->ToString();
+        auto value = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaFontFeature(nativeNode, value.c_str());
     } else {
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaFontFeature(nativeNode);
@@ -1028,14 +1028,14 @@ ArkUINativeModuleValue TextAreaBridge::SetOnChange(ArkUIRuntimeCallInfo* runtime
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const std::string&, TextRange&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](const std::string& changeValue, TextRange& range) {
+    std::function<void(const std::string&, PreviewText&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const std::string& changeValue, PreviewText& previewText) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        const char* keys[] = { "start", "end" };
-        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, range.start),
-            panda::NumberRef::New(vm, range.end) };
+        const char* keys[] = { "offset", "value" };
+        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, previewText.offset),
+            panda::StringRef::NewFromUtf8(vm, previewText.value.c_str()) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
             panda::StringRef::NewFromUtf8(vm, changeValue.c_str()), eventObject };
@@ -1097,7 +1097,7 @@ ArkUINativeModuleValue TextAreaBridge::SetInputFilter(ArkUIRuntimeCallInfo* runt
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaInputFilter(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    std::string inputFilter = inputFilterArg->ToString(vm)->ToString();
+    std::string inputFilter = inputFilterArg->ToString(vm)->ToString(vm);
     if (errorCallbackArg->IsUndefined() || errorCallbackArg->IsNull() ||
         !errorCallbackArg->IsFunction(vm)) {
         GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaInputFilter(
@@ -1652,7 +1652,7 @@ ArkUINativeModuleValue TextAreaBridge::SetBorderStyle(ArkUIRuntimeCallInfo *runt
     auto bottomArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     auto leftArg = runtimeCallInfo->GetCallArgRef(NUM_6);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if ((!typeArg->IsBoolean()) || (!typeArg->BooleaValue())) {
+    if ((!typeArg->IsBoolean()) || (!typeArg->BooleaValue(vm))) {
         int32_t styles[] = { static_cast<int32_t>(BorderStyle::SOLID) };
         GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBorderStyle(nativeNode, styles,
             (sizeof(styles) / sizeof(styles[NUM_0])));
@@ -1998,6 +1998,33 @@ ArkUINativeModuleValue TextAreaBridge::ResetEnablePreviewText(ArkUIRuntimeCallIn
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaEnablePreviewText(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextAreaBridge::SetSelectionMenuOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClickCallback;
+    if (!ArkTSUtils::ParseSelectionMenuOptions(runtimeCallInfo, vm, onCreateMenuCallback, onMenuItemClickCallback)) {
+        GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaSelectionMenuOptions(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaSelectionMenuOptions(
+        nativeNode, reinterpret_cast<void*>(&onCreateMenuCallback), reinterpret_cast<void*>(&onMenuItemClickCallback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextAreaBridge::ResetSelectionMenuOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaSelectionMenuOptions(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

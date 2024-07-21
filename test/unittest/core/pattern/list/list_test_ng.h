@@ -88,7 +88,10 @@ constexpr float STROKE_WIDTH = 5.f;
 const V2::ItemDivider ITEM_DIVIDER = { Dimension(STROKE_WIDTH), Dimension(10), Dimension(20), Color(0x000000) };
 constexpr int32_t HEADER_INDEX = 0;
 constexpr int32_t FOOTER_INDEX = 1;
-
+const Color ITEMDEFAULT_COLOR = Color::WHITE;
+const Color HOVER_COLOR = Color::RED;
+const Color PRESS_COLOR = Color::BLACK;
+constexpr double DISABLED_ALPHA = 0.4;
 
 class ListTestNg : public TestNG {
 public:
@@ -107,21 +110,18 @@ public:
     void CreateItemWithSize(int32_t itemNumber, SizeT<Dimension> itemSize);
     void CreateGroupChildrenMainSize(int32_t groupNumber);
     void CreateGroupWithItem(int32_t groupNumber, Axis axis = Axis::VERTICAL);
-    void CreateGroupWithSetting(int32_t groupNumber, Axis axis, V2::ListItemGroupStyle listItemGroupStyle,
+    void CreateGroupWithSetting(int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle,
         int32_t itemNumber = GROUP_ITEM_NUMBER);
     void CreateGroupWithSettingChildrenMainSize(int32_t groupNumber);
     void CreateSwipeItems(std::function<void()> startAction, std::function<void()> endAction,
         V2::SwipeEdgeEffect effect, int32_t itemNumber = TOTAL_ITEM_NUMBER);
     void CreateRepeatVirtualScrollNode(int32_t itemNumber, const std::function<void(uint32_t)>& createFunc);
-    std::function<void()> GetRowOrColBuilder(float width, float height);
+    std::function<void()> GetRowOrColBuilder(float crossSize, float mainSize);
     std::function<void()> GetRowOrColBuilder(Dimension crossSize, Dimension mainSize);
 
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
-    float GetInterval();
-    void ScrollUp(float itemNumber = 1);
-    void ScrollDown(float itemNumber = 1);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
-    void ScrollToIndex(int32_t index, bool smooth, ScrollAlign align);
+    void ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset = std::nullopt);
     void ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align);
     void DragSwiperItem(int32_t index, float mainDelta, float mainVelocity = SWIPER_SPEED_TH);
     void HandleDragStart(int32_t index);
@@ -131,13 +131,6 @@ public:
     void ScrollSnapForEqualHeightItem(float offset, float velocity);
     void FlushIdleTask(const RefPtr<ListPattern>& listPattern);
 
-    AssertionResult VerifyPosition(
-        const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, float startOffset);
-    AssertionResult VerifyItemPosition(
-        const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, int32_t initialIndex);
-    AssertionResult VerifyGroupItemPosition(
-        const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, float startOffset);
-    AssertionResult IsEqualTotalOffset(float expectOffset);
     AssertionResult ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset);
     AssertionResult JumpToItemInGroup(
         int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align, float expectOffset);

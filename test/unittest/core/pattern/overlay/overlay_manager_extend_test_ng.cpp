@@ -83,7 +83,6 @@ const NG::BorderColorProperty BORDER_COLOR_TEST = { Color::BLUE,
 const std::string TEXT_TAG = "text";
 const std::string MESSAGE = "hello world";
 const std::string BOTTOMSTRING = "test";
-const std::string LONGEST_CONTENT = "新建文件夹";
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 const OffsetF DRAG_OFFSET_BEGIN(10.0, 10.0);
 const OffsetF DRAG_OFFSET_END(15.0, 15.0);

@@ -114,7 +114,7 @@ public:
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
     void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
 
-    const std::list<RefPtr<UINode>>& GetChildren() const override;
+    const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override
     {
         itemConstraint_ = itemConstraint;
@@ -163,11 +163,19 @@ public:
     int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true) override;
     void InitDragManager(const RefPtr<FrameNode>& childNode);
     void InitAllChilrenDragManager(bool init);
+    void NotifyCountChange(int32_t index, int32_t count);
 private:
     void OnAttachToMainTree(bool recursive) override
     {
         UINode::OnAttachToMainTree(recursive);
         RegisterBuilderListener();
+        if (builder_) {
+            for (const auto& item : builder_->GetCachedUINodeMap()) {
+                if (item.second.second != nullptr) {
+                    builder_->ProcessOffscreenNode(item.second.second, false);
+                }
+            }
+        }
     }
 
     void OnDetachFromMainTree(bool recursive) override
@@ -177,6 +185,7 @@ private:
             for (const auto& item : builder_->GetCachedUINodeMap()) {
                 if (item.second.second != nullptr) {
                     item.second.second->DetachFromMainTree(recursive);
+                    builder_->ProcessOffscreenNode(item.second.second, true);
                 }
             }
         }
@@ -206,6 +215,7 @@ private:
     bool isRegisterListener_ = false;
     bool isLoop_ = false;
 
+    mutable std::list<RefPtr<UINode>> tempChildren_;
     mutable std::list<RefPtr<UINode>> children_;
     mutable bool needPredict_ = false;
     bool needMarkParent_ = true;

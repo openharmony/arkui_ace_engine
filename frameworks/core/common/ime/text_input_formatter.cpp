@@ -14,6 +14,7 @@
  */
 
 #include "core/common/ime/text_input_formatter.h"
+#include <cstdint>
 
 #include "base/utils/macros.h"
 #include "base/utils/string_utils.h"
@@ -68,7 +69,7 @@ void LengthLimitingFormatter::Format(const TextEditingValue& oldValue, TextEditi
             newValue.selection.Update(eraseStart);
         }
         if (removeAfterExtent > 0) {
-            int32_t eraseStart = text.length() - removeAfterExtent;
+            int32_t eraseStart = static_cast<int32_t>(text.length()) - removeAfterExtent;
             auto preCharIndex = eraseStart - 1;
             if (preCharIndex >= 0 && preCharIndex < static_cast<int32_t>(text.length()) &&
                 StringUtils::NotInBmp(text[preCharIndex])) {

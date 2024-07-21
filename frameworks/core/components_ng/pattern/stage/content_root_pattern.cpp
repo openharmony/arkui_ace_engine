@@ -35,14 +35,20 @@ SafeAreaInsets ContentRootPattern::CreateSafeAreaInsets() const
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, {});
 
-    auto inset = pipeline->GetSafeArea();
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(manager, {});
+    auto inset = manager->GetSafeAreaWithoutCutout();
+
+    // popups does not avoid cutout area here
+    if (AvoidCutout()) {
+        inset = inset.Combine(manager->GetCutoutSafeArea());
+    }
 
     if (!AvoidBottom()) {
         inset.bottom_ = { 0, 0 };
     }
 
     if (AvoidKeyboard()) {
-        auto manager = pipeline->GetSafeAreaManager();
         inset.bottom_ = inset.bottom_.Combine(manager->GetKeyboardInset());
     }
 
@@ -59,8 +65,9 @@ SafeAreaInsets ContentRootPattern::CreateSafeAreaInsets() const
     if (!AvoidTop()) {
         inset.top_ = { 0, 0 };
     }
-    LOGD("create root content safeAreaInsets: AvoidKeyboard %{public}d, AvoidTop %{public}d, inset %{public}s",
-        AvoidKeyboard(), AvoidTop(), inset.ToString().c_str());
+    LOGD("create root content safeAreaInsets: AvoidKeyboard %{public}d, AvoidTop %{public}d, AvoidCutout %{public}d, "
+         "inset %{public}s",
+        AvoidKeyboard(), AvoidTop(), AvoidCutout(), inset.ToString().c_str());
     return inset;
 }
 } // namespace OHOS::Ace::NG

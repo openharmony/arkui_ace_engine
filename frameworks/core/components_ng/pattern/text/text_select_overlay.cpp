@@ -22,6 +22,7 @@
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
+#include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -50,7 +51,7 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetFirstHandleInfo()
     handleInfo.paintRect = textPattern->GetTextSelector().firstHandle;
     handleInfo.isShow = CheckAndAdjustHandle(handleInfo.paintRect);
 
-    auto localPaintRect = handleInfo.paintRect;
+    auto localPaintRect = textPattern->GetTextSelector().firstHandle;
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
     handleInfo.localPaintRect = localPaintRect;
     SetTransformPaintInfo(handleInfo, localPaintRect);
@@ -65,7 +66,7 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetSecondHandleInfo()
     handleInfo.paintRect = textPattern->GetTextSelector().secondHandle;
     handleInfo.isShow = CheckAndAdjustHandle(handleInfo.paintRect);
 
-    auto localPaintRect = handleInfo.paintRect;
+    auto localPaintRect = textPattern->GetTextSelector().secondHandle;
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
     handleInfo.localPaintRect = localPaintRect;
     SetTransformPaintInfo(handleInfo, localPaintRect);
@@ -95,18 +96,18 @@ bool TextSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
-    auto handleRadius = theme->GetHandleDiameter().ConvertToPx();
-    // If the handle is incomplete at the top, not show.
-    if (LessNotEqual(paintRect.Top() - handleRadius, 0.0f)) {
-        return false;
-    }
-
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, false);
     auto host = textPattern->GetHost();
     CHECK_NULL_RETURN(host, false);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
+    auto textStyle = textPattern->GetTextStyle();
+    auto handleRadius = pipeline->NormalizeToPx(theme->GetHandleDiameter());
+    // If the handle is incomplete at the top, not show.
+    if (LessNotEqual(paintRect.Top() - handleRadius, 0.0f) && handleLevelMode_ != HandleLevelMode::EMBED) {
+        return false;
+    }
     auto clip = false;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         clip = true;
@@ -311,11 +312,11 @@ void TextSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlay
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     menuInfo.showCopyAll = !textPattern->IsSelectAll();
+    menuInfo.showCopy = !textPattern->GetTextSelector().SelectNothing();
     if (dirtyFlag == DIRTY_COPY_ALL_ITEM) {
         return;
     }
     menuInfo.menuIsShow = IsShowMenu();
-    menuInfo.showCopy = !textPattern->GetTextSelector().SelectNothing();
     menuInfo.showCut = false;
     menuInfo.showPaste = false;
 }

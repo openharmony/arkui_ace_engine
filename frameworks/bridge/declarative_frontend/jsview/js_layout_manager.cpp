@@ -22,14 +22,16 @@
 #include "native_engine/impl/ark/ark_native_engine.h"
 
 namespace OHOS::Ace::Framework {
-const int32_t ARG_NUMBER = 2;
 
 void JSLayoutManager::GetLineCount(const JSCallbackInfo& args)
 {
     auto layoutInfoInterface = layoutInfoInterface_.Upgrade();
     CHECK_NULL_VOID(layoutInfoInterface);
     auto lineCount = layoutInfoInterface->GetLineCount();
-    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(lineCount)));
+    auto vm = args.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto lineCountObj = panda::NumberRef::New(vm, static_cast<int32_t>(lineCount));
+    args.SetReturnValue(JsiRef<JsiObject>(JsiObject(lineCountObj)));
 }
 
 void JSLayoutManager::GetLineMetrics(const JSCallbackInfo& args)
@@ -45,13 +47,33 @@ void JSLayoutManager::GetLineMetrics(const JSCallbackInfo& args)
     }
     int32_t lineIndex = 0;
     JSViewAbstract::ParseJsInteger<int32_t>(args[0], lineIndex);
-    if (lineIndex < 0 || lineIndex >= layoutInfoInterface->GetLineCount()) {
+    if (lineIndex < 0 || lineIndex >= static_cast<int32_t>(layoutInfoInterface->GetLineCount())) {
         return;
     }
     auto lineMetrics = layoutInfoInterface->GetLineMetrics(lineIndex);
-    JSRef<JSObject> lineMetricsObj = JSRef<JSObject>::New();
-    CreateJSLineMetrics(lineMetricsObj, lineMetrics);
-    args.SetReturnValue(JSRef<JSVal>::Cast(lineMetricsObj));
+
+    auto vm = args.GetVm();
+    CHECK_NULL_VOID(vm);
+    const char* keysMetrics[] = { "startIndex", "endIndex", "ascent", "descent",
+        "height", "width", "left", "baseline", "lineNumber", "topHeight"};
+
+    Local<JSValueRef> valuesOfMetrics[] = { panda::NumberRef::New(vm, static_cast<uint32_t>(lineMetrics.startIndex)),
+        panda::NumberRef::New(vm, static_cast<uint32_t>(lineMetrics.endIndex)),
+        panda::NumberRef::New(vm, lineMetrics.ascender),
+        panda::NumberRef::New(vm, lineMetrics.descender),
+        panda::NumberRef::New(vm, lineMetrics.height),
+        panda::NumberRef::New(vm, lineMetrics.width),
+        panda::NumberRef::New(vm, lineMetrics.x),
+        panda::NumberRef::New(vm, lineMetrics.baseline),
+        panda::NumberRef::New(vm, static_cast<uint32_t>(lineMetrics.lineNumber)),
+        panda::NumberRef::New(vm, lineMetrics.y)};
+
+    auto lineMetricsObj = panda::ObjectRef::NewWithNamedProperties(
+        vm, ArraySize(keysMetrics), keysMetrics, valuesOfMetrics);
+    lineMetricsObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "runMetrics"),
+        CreateJSRunMetrics(lineMetrics.runMetrics, args));
+
+    args.SetReturnValue(JsiRef<JsiObject>(JsiObject(lineMetricsObj)));
 }
 
 void JSLayoutManager::DidExceedMaxLines(const JSCallbackInfo& args)
@@ -59,135 +81,101 @@ void JSLayoutManager::DidExceedMaxLines(const JSCallbackInfo& args)
     auto layoutInfoInterface = layoutInfoInterface_.Upgrade();
     CHECK_NULL_VOID(layoutInfoInterface);
     auto exceedMaxLines = layoutInfoInterface->DidExceedMaxLines();
-    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(exceedMaxLines)));
+
+    auto vm = args.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto exceedMaxLineObj = panda::BooleanRef::New(vm, exceedMaxLines);
+    args.SetReturnValue(JsiRef<JsiObject>(JsiObject(exceedMaxLineObj)));
 }
 
-void JSLayoutManager::CreateJSLineMetrics(JSRef<JSObject>& lineMetricsObj, const TextLineMetrics& lineMetrics)
+Local<panda::ObjectRef> JSLayoutManager::CreateJSRunMetrics(const std::map<size_t,
+    RunMetrics>& mapRunMetrics, const JSCallbackInfo& args)
 {
-    lineMetricsObj->SetProperty<int32_t>("startIndex", lineMetrics.startIndex);
-    lineMetricsObj->SetProperty<int32_t>("endIndex",  lineMetrics.endIndex);
-    lineMetricsObj->SetProperty<double>("ascent",  lineMetrics.ascender);
-    lineMetricsObj->SetProperty<double>("descent", lineMetrics.descender);
-    lineMetricsObj->SetProperty<double>("height",  lineMetrics.height);
-    lineMetricsObj->SetProperty<double>("width",  lineMetrics.width);
-    lineMetricsObj->SetProperty<double>("left",  lineMetrics.x);
-    lineMetricsObj->SetProperty<double>("baseline",  lineMetrics.baseline);
-    lineMetricsObj->SetProperty<int32_t>("lineNumber",  lineMetrics.lineNumber);
-    lineMetricsObj->SetProperty<double>("topHeight",  lineMetrics.y);
-    lineMetricsObj->SetPropertyObject("runMetrics", ConvertMapToJSMap(lineMetrics.runMetrics));
-}
+    Local<panda::ObjectRef> obj;
+    auto vm = args.GetVm();
+    CHECK_NULL_RETURN(vm, obj);
+    auto mapRunMetricsObj = panda::MapRef::New(vm);
 
-NapiMap JSLayoutManager::CreateNapiMap(napi_env env)
-{
-    NapiMap res = { nullptr, nullptr };
-    napi_valuetype valueType;
-
-    napi_value global = nullptr;
-    CHECK_NULL_RETURN(!napi_get_global(env, &global) && global, res);
-
-    napi_value constructor = nullptr;
-    CHECK_NULL_RETURN(!napi_get_named_property(env, global, "Map", &constructor) && constructor, res);
-    CHECK_NULL_RETURN(!napi_typeof(env, constructor, &valueType) && valueType == napi_valuetype::napi_function, res);
-
-    napi_value mapInstance = nullptr;
-    CHECK_NULL_RETURN(!napi_new_instance(env, constructor, 0, nullptr, &mapInstance) && mapInstance, res);
-
-    napi_value mapSet = nullptr;
-    CHECK_NULL_RETURN(!napi_get_named_property(env, mapInstance, "set", &mapSet) && mapSet, res);
-    CHECK_NULL_RETURN(!napi_typeof(env, mapSet, &valueType) && valueType == napi_valuetype::napi_function, res);
-
-    res.instance = mapInstance;
-    res.setFunction = mapSet;
-
-    return res;
-}
-
-bool JSLayoutManager::NapiMapSet(napi_env& env, NapiMap& map, uint32_t key, const RunMetrics& runMetrics)
-{
-    napi_value keyValue = nullptr;
-    napi_create_int32(env, static_cast<int32_t>(key), &keyValue);
-    napi_value runMetricsValue = nullptr;
-    napi_create_object(env, &runMetricsValue);
-    napi_set_named_property(env, runMetricsValue, "textStyle",
-        JsConverter::ConvertJsValToNapiValue(CreateJSTextStyleResult(runMetrics.textStyle)));
-    napi_set_named_property(env, runMetricsValue, "fontMetrics",
-        JsConverter::ConvertJsValToNapiValue(CreateJSFontMetrics(runMetrics.fontMetrics)));
-    napi_value args[ARG_NUMBER] = { keyValue, runMetricsValue };
-    CHECK_NULL_RETURN(!napi_call_function(env, map.instance, map.setFunction, ARG_NUMBER, args, nullptr), false);
-    return true;
-}
-
-JSRef<JSVal> JSLayoutManager::ConvertMapToJSMap(const std::map<size_t, RunMetrics>& map)
-{
-    JSRef<JSVal> mapVal;
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_RETURN(engine, mapVal);
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    CHECK_NULL_RETURN(nativeEngine, mapVal);
-    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-    auto mapReturn = CreateNapiMap(env);
-    for (const auto& [key, val] : map) {
-        NapiMapSet(env, mapReturn, static_cast<uint32_t>(key), val);
+    for (const auto& [key, val] : mapRunMetrics) {
+        auto runMetricsObj = panda::ObjectRef::New(vm);
+        runMetricsObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "textStyle"),
+            CreateJSTextStyleResult(val.textStyle, args));
+        runMetricsObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "fontMetrics"),
+            CreateJSFontMetrics(val.fontMetrics, args));
+        mapRunMetricsObj->Set(vm, panda::NumberRef::New(vm, static_cast<uint32_t>(key)), runMetricsObj);
     }
-    mapVal = JsConverter::ConvertNapiValueToJsVal(mapReturn.instance);
-    return mapVal;
+    return mapRunMetricsObj;
 }
 
-JSRef<JSObject> JSLayoutManager::CreateJSRunMetrics(const RunMetrics& runMetrics)
+Local<panda::ObjectRef> JSLayoutManager::CreateJSFontMetrics(const FontMetrics& fontMetrics,
+    const JSCallbackInfo& args)
 {
-    auto runMetricsObj = JSRef<JSObject>::New();
-    runMetricsObj->SetPropertyObject("textStyle", CreateJSTextStyleResult(runMetrics.textStyle));
-    runMetricsObj->SetPropertyObject("fontMetrics", CreateJSFontMetrics(runMetrics.fontMetrics));
-    return runMetricsObj;
-}
+    Local<panda::ObjectRef> obj;
+    auto vm = args.GetVm();
+    CHECK_NULL_RETURN(vm, obj);
 
-JSRef<JSObject> JSLayoutManager::CreateJSFontMetrics(const FontMetrics& fontMetrics)
-{
-    auto fontMetricsObj = JSRef<JSObject>::New();
-    fontMetricsObj->SetProperty<uint32_t>("flags", fontMetrics.fFlags);
-    fontMetricsObj->SetProperty<double>("top", fontMetrics.fTop);
-    fontMetricsObj->SetProperty<double>("ascent", fontMetrics.fAscent);
-    fontMetricsObj->SetProperty<double>("descent", fontMetrics.fDescent);
-    fontMetricsObj->SetProperty<double>("bottom", fontMetrics.fBottom);
-    fontMetricsObj->SetProperty<double>("leading", fontMetrics.fLeading);
-    fontMetricsObj->SetProperty<double>("avgCharWidth", fontMetrics.fAvgCharWidth);
-    fontMetricsObj->SetProperty<double>("maxCharWidth", fontMetrics.fMaxCharWidth);
-    fontMetricsObj->SetProperty<double>("xMin", fontMetrics.fXMin);
-    fontMetricsObj->SetProperty<double>("xMax", fontMetrics.fXMax);
-    fontMetricsObj->SetProperty<double>("xHeight", fontMetrics.fXHeight);
-    fontMetricsObj->SetProperty<double>("capHeight", fontMetrics.fCapHeight);
-    fontMetricsObj->SetProperty<double>("underlineThickness", fontMetrics.fUnderlineThickness);
-    fontMetricsObj->SetProperty<double>("underlinePosition", fontMetrics.fUnderlinePosition);
-    fontMetricsObj->SetProperty<double>("strikethroughThickness", fontMetrics.fStrikeoutThickness);
-    fontMetricsObj->SetProperty<double>("strikethroughPosition", fontMetrics.fStrikeoutPosition);
+    const char* keysFontMetrics[] = { "flags", "top", "ascent", "descent",
+        "bottom", "leading", "avgCharWidth", "maxCharWidth", "xMin", "xMax", "xHeight", "capHeight",
+        "underlineThickness", "underlinePosition", "strikethroughThickness", "strikethroughPosition"};
+
+    Local<JSValueRef> valuesOfFontMetrics[] = { panda::NumberRef::New(vm, fontMetrics.fFlags),
+        panda::NumberRef::New(vm, fontMetrics.fTop),
+        panda::NumberRef::New(vm, fontMetrics.fAscent),
+        panda::NumberRef::New(vm, fontMetrics.fDescent),
+        panda::NumberRef::New(vm, fontMetrics.fBottom),
+        panda::NumberRef::New(vm, fontMetrics.fLeading),
+        panda::NumberRef::New(vm, fontMetrics.fAvgCharWidth),
+        panda::NumberRef::New(vm, fontMetrics.fMaxCharWidth),
+        panda::NumberRef::New(vm, fontMetrics.fXMin),
+        panda::NumberRef::New(vm, fontMetrics.fXMax),
+        panda::NumberRef::New(vm, fontMetrics.fXHeight),
+        panda::NumberRef::New(vm, fontMetrics.fCapHeight),
+        panda::NumberRef::New(vm, fontMetrics.fUnderlineThickness),
+        panda::NumberRef::New(vm, fontMetrics.fUnderlinePosition),
+        panda::NumberRef::New(vm, fontMetrics.fStrikeoutThickness),
+        panda::NumberRef::New(vm, fontMetrics.fStrikeoutPosition) };
+
+    auto fontMetricsObj = panda::ObjectRef::NewWithNamedProperties(
+        vm, ArraySize(keysFontMetrics), keysFontMetrics, valuesOfFontMetrics);
+
     return fontMetricsObj;
 }
 
-JSRef<JSObject> JSLayoutManager::CreateJSTextStyleResult(const TextStyle& textStyle)
+Local<panda::ObjectRef> JSLayoutManager::CreateJSTextStyleResult(const TextStyle& textStyle,
+    const JSCallbackInfo& args)
 {
-    JSRef<JSObject> textStyleObj = JSRef<JSObject>::New();
-    textStyleObj->SetProperty<int32_t>("decoration", static_cast<int32_t>(textStyle.GetTextDecoration()));
-    textStyleObj->SetProperty<uint32_t>("color", textStyle.GetTextColor().GetValue());
-    textStyleObj->SetProperty<int32_t>("fontWeight", static_cast<int32_t>(textStyle.GetFontWeight()));
-    textStyleObj->SetProperty<int32_t>("fontStyle", static_cast<int32_t>(textStyle.GetFontStyle()));
-    textStyleObj->SetProperty<int32_t>("baseline", static_cast<int32_t>(textStyle.GetTextBaseline()));
-    JSRef<JSArray> fontFamiliesArray = JSRef<JSArray>::New();
-    int32_t index = 0;
-    for (const auto& item : textStyle.GetFontFamilies()) {
-        fontFamiliesArray->SetValueAt(index, JSRef<JSVal>::Make(ToJSValue(item)));
-        index++;
-    }
-    textStyleObj->SetPropertyObject("fontFamilies", fontFamiliesArray);
-    textStyleObj->SetProperty<double>("fontSize", textStyle.GetFontSize().Value());
+    Local<panda::ObjectRef> obj;
+    auto vm = args.GetVm();
+    CHECK_NULL_RETURN(vm, obj);
 
-    textStyleObj->SetProperty<double>("letterSpacing", textStyle.GetLetterSpacing().Value());
-    textStyleObj->SetProperty<double>("wordSpacing", textStyle.GetWordSpacing().Value());
-    textStyleObj->SetProperty<double>("heightScale", textStyle.GetHeightScale());
-    textStyleObj->SetProperty<int32_t>("halfLeading", textStyle.GetHalfLeading());
-    textStyleObj->SetProperty<int32_t>("heightOnly", textStyle.GetHeightOnly());
-    textStyleObj->SetProperty<std::string>("ellipsis", StringUtils::Str16ToStr8(textStyle.GetEllipsis()));
-    textStyleObj->SetProperty<int32_t>("ellipsisMode", static_cast<int32_t>(textStyle.GetEllipsisMode()));
-    textStyleObj->SetProperty<std::string>("locale", textStyle.GetLocale());
+    auto fontFamiliesArray = panda::ArrayRef::New(vm, textStyle.GetFontFamilies().size());
+    for (uint32_t i = 0; i<textStyle.GetFontFamilies().size(); i++) {
+        panda::ArrayRef::SetValueAt(vm, fontFamiliesArray, i, panda::StringRef::NewFromUtf8(
+            vm, textStyle.GetFontFamilies().at(i).c_str()));
+    }
+
+    const char* keysTextStyle[] = { "decoration", "color", "fontWeight", "fontStyle", "baseline", "fontSize",
+        "letterSpacing", "wordSpacing", "heightScale", "halfLeading", "heightOnly", "ellipsisMode", "locale"};
+
+    Local<JSValueRef> valuesOfFontMetrics[] = { panda::NumberRef::New(
+        vm, static_cast<int32_t>(textStyle.GetTextDecoration())),
+        panda::NumberRef::New(vm, textStyle.GetTextColor().GetValue()),
+        panda::NumberRef::New(vm, static_cast<int32_t>(textStyle.GetFontWeight())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(textStyle.GetFontStyle())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(textStyle.GetTextBaseline())),
+        panda::NumberRef::New(vm, textStyle.GetFontSize().Value()),
+        panda::NumberRef::New(vm, textStyle.GetLetterSpacing().Value()),
+        panda::NumberRef::New(vm, textStyle.GetWordSpacing().Value()),
+        panda::NumberRef::New(vm, textStyle.GetHeightScale()),
+        panda::NumberRef::New(vm, textStyle.GetHalfLeading()),
+        panda::NumberRef::New(vm, textStyle.GetHeightOnly()),
+        panda::StringRef::NewFromUtf8(vm, StringUtils::Str16ToStr8(textStyle.GetEllipsis()).c_str()),
+        panda::NumberRef::New(vm, static_cast<int32_t>(textStyle.GetEllipsisMode())),
+        panda::StringRef::NewFromUtf8(vm, textStyle.GetLocale().c_str()) };
+
+    auto textStyleObj = panda::ObjectRef::NewWithNamedProperties(
+        vm, ArraySize(keysTextStyle), keysTextStyle, valuesOfFontMetrics);
+    textStyleObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "fontFamilies"), fontFamiliesArray);
     return textStyleObj;
 }
 
@@ -204,11 +192,16 @@ void JSLayoutManager::GetGlyphPositionAtCoordinate(const JSCallbackInfo& args)
     JSContainerBase::ParseJsInt32(args[0], coordinateX);
     JSContainerBase::ParseJsInt32(args[1], coordinateY);
     auto value = layoutInfoInterface->GetGlyphPositionAtCoordinate(coordinateX, coordinateY);
-    auto positionWithAffinityObj = JSRef<JSObject>::New();
-    positionWithAffinityObj->SetPropertyObject("position", JSRef<JSVal>::Make(ToJSValue(value.position_)));
-    auto affinity = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(value.affinity_)));
-    positionWithAffinityObj->SetPropertyObject("affinity", affinity);
-    args.SetReturnValue(JSRef<JSVal>::Cast(positionWithAffinityObj));
+    
+    auto vm = args.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto positionObj = panda::NumberRef::New(vm, static_cast<int32_t>(value.position_));
+    auto affinityObj = panda::NumberRef::New(vm, static_cast<int32_t>(value.affinity_));
+
+    auto positionWithAffinityObj = panda::ObjectRef::New(vm);
+    positionWithAffinityObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "position"), positionObj);
+    positionWithAffinityObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "affinity"), affinityObj);
+    args.SetReturnValue(JsiRef<JsiObject>(JsiObject(positionWithAffinityObj)));
 }
 
 void JSLayoutManager::JSBind(BindingTarget globalObj)

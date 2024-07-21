@@ -34,6 +34,7 @@ type AttributeModifierWithKey = ModifierWithKey<number | string | boolean | obje
 class ObservedMap {
   private map_: Map<Symbol, AttributeModifierWithKey>;
   private changeCallback: ((key: Symbol, value: AttributeModifierWithKey) => void) | undefined;
+  private isFrameNode_: boolean = false;
 
   constructor() {
     this.map_ = new Map();
@@ -85,6 +86,12 @@ class ObservedMap {
     if (this.changeCallback === undefined) {
       this.changeCallback = callback;
     }
+  }
+  public setFrameNode(isFrameNode: boolean): void {
+    this.isFrameNode_ = isFrameNode;
+  }
+  public isFrameNode(): boolean {
+    return this.isFrameNode_;
   }
 }
 
@@ -204,6 +211,15 @@ class ModifierWithKey<T extends number | string | boolean | object | Function> {
       this.applyPeer(node, false, component);
     }
     return false;
+  }
+
+  applyStageImmediately(node: KNode, component?: ArkComponent): void {
+    this.value = this.stageValue;
+    if (this.stageValue === undefined || this.stageValue === null) {
+      this.applyPeer(node, true, component);
+      return;
+    }
+    this.applyPeer(node, false, component);
   }
 
   applyPeer(node: KNode, reset: boolean, component?: ArkComponent): void { }
@@ -2545,6 +2561,24 @@ class DragPreviewOptionsModifier extends ModifierWithKey<ArkDragPreviewOptions> 
   }
 }
 
+class DragPreviewModifier extends ModifierWithKey<ArkDragPreview> {
+  constructor(value: ArkDragPreview) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('dragPreview');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetDragPreview(node);
+    } else {
+      getUINativeModule().common.setDragPreview(node, this.value.inspetorId);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return this.value.inspetorId !== this.stageValue.inspetorId;
+  }
+}
+
 class MouseResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rectangle> {
   constructor(value: Array<Rectangle> | Rectangle) {
     super(value);
@@ -3013,6 +3047,15 @@ function modifierWithKey<T extends number | string | boolean | object, M extends
   modifierClass: new (value: T) => M,
   value: T
 ) {
+  if (typeof (modifiers as ObservedMap).isFrameNode === 'function' && (modifiers as ObservedMap).isFrameNode()) {
+    if (!(modifierClass as any).instance) {
+      (modifierClass as any).instance = new modifierClass(value);
+    } else {
+      (modifierClass as any).instance.stageValue = value;
+    }
+    modifiers.set(identity, (modifierClass as any).instance);
+    return;
+  }
   const item = modifiers.get(identity);
   if (item) {
     item.stageValue = value;
@@ -3051,12 +3094,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         if (this._instanceId !== -1) {
           __JSScopeUtil__.syncInstanceId(this._instanceId);
         }
-        value.applyStage(this.nativePtr, this);
+        value.applyStageImmediately(this.nativePtr, this);
         getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
         if (this._instanceId !== -1) {
           __JSScopeUtil__.restoreInstanceId();
         }
-      })
+      });
+      (this._modifiersWithKeys as ObservedMap).setFrameNode(true);
     } else if (classType === ModifierType.EXPOSE_MODIFIER || classType === ModifierType.STATE) {
       this._modifiersWithKeys = new ObservedMap();
     } else {
@@ -4072,6 +4116,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   dragPreview(value: CustomBuilder | DragItemInfo | string): this {
+    if (typeof value === 'string') {
+      let arkDragPreview = new ArkDragPreview();
+      arkDragPreview.inspetorId = value;
+      modifierWithKey(this._modifiersWithKeys, DragPreviewModifier.identity, DragPreviewModifier, arkDragPreview);
+      return this;
+    }
     throw new Error('Method not implemented.');
   }
 
@@ -4455,6 +4505,9 @@ function attributeModifierFunc<T>(modifier: AttributeModifier<T>,
       component.applyModifierPatch();
     } else {
       modifier.attribute.applyStateUpdatePtr(component);
+      if (modifier.attribute._nativePtrChanged) {
+        modifier.onComponentChanged(modifier.attribute);
+      }
       modifier.attribute.applyNormalAttribute(component);
       applyUIAttributes(modifier, nativeNode, component);
       component.applyModifierPatch();

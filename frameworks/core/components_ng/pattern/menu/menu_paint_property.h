@@ -30,7 +30,7 @@ constexpr Dimension ARROW_WIDTH = 32.0_vp;
 constexpr Dimension ARROW_HIGHT = 7.4_vp;
 constexpr Dimension TARGET_SECURITY = 8.0_vp;
 // space from menu to target for arrow display
-constexpr Dimension TARGET_SPACE = 16.0_vp;
+constexpr Dimension TARGET_SPACE = 8.0_vp;
 constexpr Dimension ARROW_ZERO_PERCENT_VALUE = Dimension(0.0, DimensionUnit::PERCENT);
 constexpr Dimension ARROW_HALF_PERCENT_VALUE = Dimension(0.5, DimensionUnit::PERCENT);
 constexpr Dimension ARROW_ONE_HUNDRED_PERCENT_VALUE = Dimension(1.0, DimensionUnit::PERCENT);

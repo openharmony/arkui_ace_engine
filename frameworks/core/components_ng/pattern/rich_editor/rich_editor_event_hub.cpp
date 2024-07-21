@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -259,6 +259,16 @@ void RichEditorAbstractSpanResult::SetColor(const std::string& color)
 const std::string& RichEditorAbstractSpanResult::GetColor() const
 {
     return color_;
+}
+
+void RichEditorAbstractSpanResult::SetTextDecorationStyle(TextDecorationStyle textDecorationStyle)
+{
+    textDecorationStyle_ = textDecorationStyle;
+}
+
+TextDecorationStyle RichEditorAbstractSpanResult::GetTextDecorationStyle() const
+{
+    return textDecorationStyle_;
 }
 
 void RichEditorAbstractSpanResult::SetValuePixelMap(const RefPtr<PixelMap>& valuePixelMap)
@@ -507,7 +517,7 @@ void RichEditorEventHub::FireOnDeleteComplete()
 {
     if (onDeleteComplete_) {
         onDeleteComplete_();
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Radio.onChange");
 #endif
     }

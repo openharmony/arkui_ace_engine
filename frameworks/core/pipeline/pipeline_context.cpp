@@ -908,7 +908,7 @@ void PipelineContext::SetupRootElement()
     requestedRenderNode_.Reset();
 }
 
-RefPtr<Element> PipelineContext::SetupSubRootElement()
+void PipelineContext::SetupSubRootElement()
 {
     LOGI("Set up SubRootElement!");
 
@@ -935,7 +935,7 @@ RefPtr<Element> PipelineContext::SetupSubRootElement()
     if (!rootElement_) {
         LOGE("Set up SubRootElement failed!");
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
-        return RefPtr<Element>();
+        return;
     }
     const auto& rootRenderNode = rootElement_->GetRenderNode();
     window_->SetRootRenderNode(rootRenderNode);
@@ -952,7 +952,7 @@ RefPtr<Element> PipelineContext::SetupSubRootElement()
     cardTransitionController_->RegisterTransitionListener();
     requestedRenderNode_.Reset();
     LOGI("Set up SubRootElement success!");
-    return rootElement_;
+    return;
 }
 
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
@@ -1577,7 +1577,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         return;
     }
     auto scalePoint = point.CreateScalePoint(viewScale_);
-    ResSchedReport::GetInstance().OnTouchEvent(scalePoint.type);
+    ResSchedReport::GetInstance().OnTouchEvent(scalePoint);
     if (scalePoint.type == TouchType::DOWN) {
         eventManager_->HandleOutOfRectCallback(
             { scalePoint.x, scalePoint.y, scalePoint.sourceType }, rectCallbackList_);
@@ -2021,7 +2021,8 @@ void PipelineContext::OnIdle(int64_t deadline)
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance,
+    bool forceChange)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();

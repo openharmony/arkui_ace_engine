@@ -726,7 +726,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0014, TestSiz
     FRAME_NODE3->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
     FRAME_NODE2->TriggerVisibleAreaChangeCallback(8);
     EXPECT_TRUE(context->GetOnShow());
-    EXPECT_EQ(FRAME_NODE2->lastVisibleRatio_, 0);
+    EXPECT_EQ(FRAME_NODE2->lastVisibleRatio_, 1);
 }
 
 /**
@@ -1622,5 +1622,37 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback053, TestSize
     FRAME_NODE2->SetCanSuggestOpInc(false);
     FRAME_NODE2->SetOpIncGroupCheckedThrough(false);
     EXPECT_TRUE(FRAME_NODE2->MarkSuggestOpIncGroup(true, true));
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_IsPaintRectWithTransformValid054
+ * @tc.desc: Test frame node method IsPaintRectWithTransformValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeIsPaintRectWithTransformValid054, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. callback IsPaintRectWithTransformValid.
+     * @tc.expected: expect The function return value is true when width or height is nearZero.
+     */
+    auto node = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    node->renderContext_ = mockRenderContext;
+
+    mockRenderContext->rect_ = RectF(0, 0, 0, 10);
+    auto test1 = node->IsPaintRectWithTransformValid();
+    EXPECT_TRUE(test1);
+
+    mockRenderContext->rect_ = RectF(0, 0, 10, 0);
+    auto test2 = node->IsPaintRectWithTransformValid();
+    EXPECT_TRUE(test2);
+
+    mockRenderContext->rect_ = RectF(0, 0, 10, 10);
+    auto test3 = node->IsPaintRectWithTransformValid();
+    EXPECT_FALSE(test3);
+
+    mockRenderContext->rect_ = RectF(0, 0, 0, 0);
+    auto test4 = node->IsPaintRectWithTransformValid();
+    EXPECT_TRUE(test4);
 }
 } // namespace OHOS::Ace::NG

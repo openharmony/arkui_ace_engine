@@ -59,6 +59,7 @@ void WaterFlowTestNg::SetUpTestSuite()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*MockPipelineContext::GetCurrent(), FlushUITasks).Times(AnyNumber());
 
 #ifndef TEST_SEGMENTED_WATER_FLOW
     g_segmentedWaterflow = false;
@@ -157,8 +158,10 @@ void WaterFlowTestNg::CreateFocusableItem(int32_t number)
             ButtonModelNG buttonModelNG;
             std::list<RefPtr<Component>> buttonChildren;
             buttonModelNG.CreateWithLabel({ .label = "label" }, buttonChildren);
+            ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
             ViewStackProcessor::GetInstance()->Pop();
         }
+        ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
         ViewStackProcessor::GetInstance()->Pop();
     }
 }

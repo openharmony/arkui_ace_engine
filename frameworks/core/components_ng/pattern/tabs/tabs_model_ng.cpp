@@ -17,6 +17,7 @@
 
 #include <type_traits>
 
+#include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -47,7 +48,11 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension BAR_BLUR_RADIUS = 200.0_vp;
 constexpr Dimension BAR_SATURATE = 1.3_vp;
-const uint8_t PIXEL_ROUND = 18;
+constexpr uint8_t PIXEL_ROUND = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
+                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
+                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
+                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+constexpr char APP_TABS_NO_ANIMATION_SWITCH[] = "APP_TABS_NO_ANIMATION_SWITCH";
 } // namespace
 
 void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<TabController>& /*tabController*/,
@@ -80,11 +85,14 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
         }
     }
     if ((index != preIndex) && (index >= 0)) {
+        AceAsyncTraceBeginCommercial(0, APP_TABS_NO_ANIMATION_SWITCH);
         SetIndex(index);
         auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
         auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
         tabBarPattern->SetMaskAnimationByCreate(true);
         tabBarPattern->UpdateImageColor(index);
+        tabBarPattern->UpdateSymbolStats(index, -1);
+        tabBarPattern->UpdateSymbolStats(-1, preIndex);
     }
 }
 

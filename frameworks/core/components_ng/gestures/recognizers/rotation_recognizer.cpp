@@ -376,6 +376,7 @@ GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
     }
     auto info = std::make_shared<RotationGestureEvent>();
     info->SetTimeStamp(time_);
+    info->SetDeviceId(deviceId_);
     UpdateFingerListInfo();
     info->SetFingerList(fingerList_);
     info->SetAngle(resultAngle_);

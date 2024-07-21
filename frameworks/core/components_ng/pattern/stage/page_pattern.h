@@ -153,6 +153,11 @@ public:
         isPageInTransition_ = pageTransition;
     }
 
+    bool GetPageInTransition() const
+    {
+        return isPageInTransition_;
+    }
+
     // Mark current page node invisible in render tree.
     void ProcessHideState();
     // Mark current page node visible in render tree.
@@ -234,6 +239,11 @@ protected:
         return true;
     }
     bool AvoidBottom() const override
+    {
+        return true;
+    }
+
+    bool AvoidCutout() const override
     {
         return true;
     }

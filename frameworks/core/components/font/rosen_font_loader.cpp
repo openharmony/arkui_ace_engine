@@ -99,8 +99,8 @@ void RosenFontLoader::LoadFromNetwork(const RefPtr<PipelineBase>& context)
                     AceLogTag::ACE_FONT, "Sync Download font Failed,errorMessage is %{public}s", errorMessage.c_str());
             };
             downloadCallback.cancelCallback = downloadCallback.failCallback;
-            if (!DownloadManager::GetInstance()->DownloadSync(
-                    std::move(downloadCallback), fontLoader->familySrc_, context->GetInstanceId())) {
+            if (!DownloadManager::GetInstance()->DownloadSync(std::move(downloadCallback),
+                fontLoader->familySrc_, context->GetInstanceId(), -1)) {
                 return;
             }
         },

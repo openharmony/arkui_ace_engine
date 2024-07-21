@@ -251,16 +251,6 @@ public:
         return content_ ? content_->rect_.GetOffset() : OffsetF();
     }
 
-    const OffsetF& GetPixelRoundResult() const
-    {
-        return pixelRoundResult_;
-    }
-
-    void SetPixelRoundResult(const OffsetF& pixelRoundResult)
-    {
-        pixelRoundResult_ = pixelRoundResult;
-    }
-
     const std::unique_ptr<GeometryProperty>& GetContent() const
     {
         return content_;
@@ -282,6 +272,7 @@ public:
             margin_ = std::make_unique<MarginPropertyF>(margin);
             return;
         }
+        margin_->Reset();
         if (margin.left) {
             margin_->left = margin.left;
         }
@@ -302,6 +293,7 @@ public:
             padding_ = std::make_unique<PaddingPropertyF>(padding);
             return;
         }
+        padding_->Reset();
         if (padding.left) {
             padding_->left = padding.left;
         }
@@ -429,7 +421,6 @@ private:
     OffsetF parentGlobalOffset_;
     OffsetF parentAbsoluteOffset_;
     OffsetF pixelGridRoundOffset_;
-    OffsetF pixelRoundResult_;
     SizeF pixelGridRoundSize_;
 };
 } // namespace OHOS::Ace::NG

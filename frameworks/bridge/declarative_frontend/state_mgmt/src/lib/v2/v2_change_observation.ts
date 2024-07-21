@@ -69,7 +69,7 @@ class ObserveV2 {
   public static readonly MONITOR_REFS = Symbol('___monitor_refs_');
   public static readonly COMPUTED_REFS = Symbol('___computed_refs_');
 
-  private static readonly SYMBOL_PROXY_GET_TARGET = Symbol('__proxy_get_target');
+  public static readonly SYMBOL_PROXY_GET_TARGET = Symbol('__proxy_get_target');
 
   public static readonly OB_PREFIX = '__ob_'; // OB_PREFIX + attrName => backing store attribute name
   public static readonly OB_PREFIX_LEN = 5;

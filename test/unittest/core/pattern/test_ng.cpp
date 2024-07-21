@@ -37,8 +37,11 @@ void TestNG::TearDownTestSuite()
     MockContainer::TearDown();
 }
 
-RefPtr<PaintWrapper> TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
+RefPtr<PaintWrapper> TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode, bool markDirty)
 {
+    if (markDirty) {
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
     frameNode->SetActive();
     frameNode->isLayoutDirtyMarked_ = true;
     frameNode->CreateLayoutTask();
@@ -50,6 +53,15 @@ RefPtr<PaintWrapper> TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
     paintProperty->CleanDirty();
     frameNode->SetActive(false);
     return wrapper;
+}
+
+void TestNG::FlushExpandSafeAreaTask()
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    safeAreaManager->ExpandSafeArea();
 }
 
 RefPtr<PaintWrapper> TestNG::CreateDone(const RefPtr<FrameNode>& frameNode)

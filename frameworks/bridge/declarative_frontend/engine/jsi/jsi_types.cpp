@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 
+#include "base/log/ace_performance_monitor.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
@@ -129,14 +130,14 @@ std::string JsiValue::ToString() const
     auto vm = GetEcmaVM();
     panda::LocalScope scope(vm);
     if (IsObject()) {
-        return JSON::Stringify(vm, GetLocalHandle())->ToString(vm)->ToString();
+        return JSON::Stringify(vm, GetLocalHandle())->ToString(vm)->ToString(vm);
     }
-    return GetHandle()->ToString(vm)->ToString();
+    return GetHandle()->ToString(vm)->ToString(vm);
 }
 
 bool JsiValue::ToBoolean() const
 {
-    return GetHandle()->BooleaValue();
+    return GetHandle()->BooleaValue(GetEcmaVM());
 }
 
 JsiRef<JsiValue> JsiValue::Undefined()
@@ -367,12 +368,13 @@ JsiFunction::JsiFunction(const EcmaVM *vm, panda::Local<panda::FunctionRef> val)
 
 JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<JsiValue> argv[]) const
 {
+    JS_CALLBACK_DURATION();
     auto vm = GetEcmaVM();
     LocalScope scope(vm);
     panda::TryCatch trycatch(vm);
     bool traceEnabled = false;
     if (SystemProperties::GetDebugEnabled()) {
-        traceEnabled = AceTraceBeginWithArgs("ExecuteJS[%s]", GetHandle()->GetName(vm)->ToString().c_str());
+        traceEnabled = AceTraceBeginWithArgs("ExecuteJS[%s]", GetHandle()->GetName(vm)->ToString(vm).c_str());
     }
     std::vector<panda::Local<panda::JSValueRef>> arguments;
     for (int i = 0; i < argc; ++i) {
@@ -500,7 +502,7 @@ bool JsiCallbackInfo::GetStringArg(size_t index, std::string& value) const
     if (arg.IsEmpty() || !arg->IsString(info_->GetVM())) {
         return false;
     }
-    value = arg->ToString(info_->GetVM())->ToString();
+    value = arg->ToString(info_->GetVM())->ToString(info_->GetVM());
     return true;
 }
 

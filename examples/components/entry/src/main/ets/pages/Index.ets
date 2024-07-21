@@ -15,7 +15,7 @@
 
 import curves from '@ohos.curves';
 import { Route, RouteGroup } from '../common/route';
-import { operatesRoute, OperatesDestination } from './operates';
+import { OperatesDestination, operatesRoute } from './operates';
 
 @Styles
 function CardPressedStyle() {
@@ -70,7 +70,12 @@ struct Index {
     }
     .borderRadius(20)
     .width('100%')
-    .padding({ left: 8, right: 8, top: 18, bottom: 18 })
+    .padding({
+      left: 8,
+      right: 8,
+      top: 18,
+      bottom: 18
+    })
     .enabled(!!route.children.length)
     .stateStyles({
       pressed: CardPressedStyle,
@@ -121,7 +126,12 @@ struct Index {
                     disabled: CardDisabledStyle,
                   })
                   .borderRadius(20)
-                  .padding({ left: 8, right: 8, top: 13, bottom: 13 })
+                  .padding({
+                    left: 8,
+                    right: 8,
+                    top: 13,
+                    bottom: 13
+                  })
                   .transition(
                     TransitionEffect.OPACITY.animation({
                       curve: curves.interpolatingSpring(0, 1, 228, 30)
@@ -132,7 +142,7 @@ struct Index {
                     const name = `${routeGroup.name}/${route.name}`;
                     const pathNames = this.router.getAllPathName();
                     if (pathNames[pathNames.length-1] !== name) {
-                      this.router.pushPath({ name });
+                      this.router.pushPath({ name, param: route });
                     }
                   })
                 }

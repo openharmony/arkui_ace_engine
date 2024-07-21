@@ -544,22 +544,6 @@ export class ChipGroup extends ViewPU {
             return ChipGroupHeight.NORMAL;
         }
     }
-    getIconGroupSuffixHeight() {
-        if (typeof this.chipSize === 'string') {
-            if (this.chipSize === ChipSize.SMALL) {
-                return iconGroupSuffixTheme.smallBackgroundSize;
-            }
-            else {
-                return iconGroupSuffixTheme.normalBackgroundSize;
-            }
-        }
-        else if (typeof this.chipSize === 'object') {
-            return this.chipSize.height;
-        }
-        else {
-            return ChipGroupHeight.NORMAL;
-        }
-    }
     getPaddingTop() {
         if (!this.chipGroupPadding || !this.chipGroupPadding.top) {
             return defaultTheme.chipGroupPadding.top;
@@ -582,6 +566,7 @@ export class ChipGroup extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
+            Stack.height(this.getChipGroupHeight() + this.getPaddingTop() + this.getPaddingBottom());
             Stack.layoutWeight(1);
             Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN);
             Stack.alignContent(Alignment.End);
@@ -592,6 +577,7 @@ export class ChipGroup extends ViewPU {
             Scroll.scrollBar(BarState.Off);
             Scroll.align(Alignment.Start);
             Scroll.width('100%');
+            Scroll.clip(false);
             Scroll.onScroll(() => {
                 this.isReachEnd = this.scroller.isAtEnd();
             });
@@ -666,7 +652,7 @@ export class ChipGroup extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Stack.create();
                         Stack.width(iconGroupSuffixTheme.normalBackgroundSize);
-                        Stack.height(this.getIconGroupSuffixHeight());
+                        Stack.height(this.getChipGroupHeight() + this.getPaddingTop() + this.getPaddingBottom());
                         Stack.linearGradient({ angle: 90, colors: colorStops });
                         Stack.blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN);
                         Stack.hitTestBehavior(HitTestMode.None);

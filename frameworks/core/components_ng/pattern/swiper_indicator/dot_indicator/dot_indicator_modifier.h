@@ -332,6 +332,8 @@ protected:
     std::pair<float, float> GetTouchBottomCenterX(ContentProperty& contentProperty);
     int32_t GetLoopTranslateDuration() const;
     int32_t GetLoopOpacityDuration() const;
+    float CalculateMinimumAmplitudeRatio(
+        const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState) const;
 
     RefPtr<AnimatablePropertyColor> backgroundColor_;
     RefPtr<AnimatablePropertyVectorFloat> vectorBlackPointCenterX_;

@@ -1074,34 +1074,6 @@ HWTEST_F(GridAttrTestNg, GridItemPressEventTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridItemDumpAdvanceInfoTest001
- * @tc.desc: GirdItem dumpadvanceinfo test.
- * @tc.type: FUNC
- */
-HWTEST_F(GridAttrTestNg, GridItemDumpAdvanceInfoTest001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetRowsTemplate("1fr 1fr 1fr");
-    model.SetColumnsGap(Dimension(COL_GAP));
-    model.SetRowsGap(Dimension(ROW_GAP));
-    CreateFixedItems(10);
-    CreateDone(frameNode_);
-
-    /**
-     * @tc.steps: step1. Get gridItemPattern and call dumpAdvanceInfo.
-     * @tc.expected: Related function is called.
-     */
-    auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
-    gridItemPattern->DumpAdvanceInfo();
-    EXPECT_EQ(gridItemPattern->gridItemStyle_, GridItemStyle::NONE);
-
-    gridItemPattern->gridItemStyle_ = GridItemStyle::PLAIN;
-    gridItemPattern->DumpAdvanceInfo();
-    EXPECT_EQ(gridItemPattern->gridItemStyle_, GridItemStyle::PLAIN);
-}
-
-/**
  * @tc.name: GridItemSetSelectableTest001
  * @tc.desc: GirdItem setselectable test.
  * @tc.type: FUNC

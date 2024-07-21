@@ -165,7 +165,9 @@ void ContainerModalPattern::InitContainerEvent()
     auto floatingContext = floatingTitleRow->GetRenderContext();
     CHECK_NULL_VOID(floatingContext);
 
-    auto titlePopupDistance = TITLE_POPUP_DISTANCE * containerNode->GetContext()->GetDensity();
+    auto containerNodeContext = containerNode->GetContext();
+    CHECK_NULL_VOID(containerNodeContext);
+    auto titlePopupDistance = TITLE_POPUP_DISTANCE * containerNodeContext->GetDensity();
     AnimationOption option;
     option.SetDuration(TITLE_POPUP_DURATION);
     option.SetCurve(Curves::EASE_IN_OUT);
@@ -702,8 +704,9 @@ void ContainerModalPattern::InitLayoutProperty()
     contentProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT)));
     buttonsRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto buttonHeight = (CONTAINER_TITLE_HEIGHT == titleHeight_) ? CONTAINER_TITLE_HEIGHT : titleHeight_;
     buttonsRowProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(buttonHeight)));
     buttonsRowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_END);
     buttonsRowProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
 
@@ -775,7 +778,7 @@ void ContainerModalPattern::InitButtonsLayoutProperty()
     auto isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     auto buttons = buttonsRow->GetChildren();
     for (uint64_t index = 0; index < buttons.size(); index++) {
-        auto space = (index == CLOSE_BUTTON_INDEX) ? TITLE_PADDING_END : TITLE_ELEMENT_MARGIN_HORIZONTAL;
+        auto space = (index == buttons.size() - 1) ? TITLE_PADDING_END : TITLE_ELEMENT_MARGIN_HORIZONTAL;
         MarginProperty margin;
         if (isRtl) {
             margin.left = CalcLength(space);

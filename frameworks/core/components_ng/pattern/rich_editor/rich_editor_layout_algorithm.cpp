@@ -67,7 +67,7 @@ void RichEditorLayoutAlgorithm::AppendNewLineSpan()
     if (StringUtils::ToWstring(lastSpan->content).back() == L'\n') {
         std::list<RefPtr<SpanItem>> newGroup;
         auto tailNewLineSpan = AceType::MakeRefPtr<SpanItem>();
-        tailNewLineSpan->content = " \n";
+        tailNewLineSpan->content = "\n";
         tailNewLineSpan->SetNeedRemoveNewLine(true);
         CopySpanStyle(lastSpan, tailNewLineSpan);
         newGroup.push_back(tailNewLineSpan);
@@ -183,7 +183,7 @@ bool RichEditorLayoutAlgorithm::CreateParagraph(
     CHECK_NULL_RETURN(pipeline, false);
     // default paragraph style
     auto paraStyle = GetParagraphStyle(textStyle, content, layoutWrapper);
-    return UpdateParagraphBySpan(layoutWrapper, paraStyle, maxWidth);
+    return UpdateParagraphBySpan(layoutWrapper, paraStyle, maxWidth, textStyle);
 }
 
 void RichEditorLayoutAlgorithm::UpdateRichTextRect(
@@ -285,4 +285,30 @@ void RichEditorLayoutAlgorithm::GetSpanParagraphStyle(
 {
     MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(lineStyle, pStyle);
 }
+
+void RichEditorLayoutAlgorithm::HandleEmptyParagraph(RefPtr<Paragraph> paragraph,
+    const std::list<RefPtr<SpanItem>>& spanGroup)
+{
+    CHECK_NULL_VOID(paragraph && spanGroup.size() == 1);
+    auto spanItem = spanGroup.front();
+    CHECK_NULL_VOID(spanItem);
+    auto content = spanItem->GetSpanContent(spanItem->GetSpanContent());
+    CHECK_NULL_VOID(content.empty());
+    auto textStyle = spanItem->GetTextStyle();
+    CHECK_NULL_VOID(textStyle);
+    paragraph->PushStyle(textStyle.value());
+}
+
+RefPtr<SpanItem> RichEditorLayoutAlgorithm::GetParagraphStyleSpanItem(const std::list<RefPtr<SpanItem>>& spanGroup)
+{
+    auto it = spanGroup.begin();
+    while (it != spanGroup.end()) {
+        if (!AceType::DynamicCast<PlaceholderSpanItem>(*it)) {
+            return *it;
+        }
+        ++it;
+    }
+    return *spanGroup.begin();
+}
+
 } // namespace OHOS::Ace::NG

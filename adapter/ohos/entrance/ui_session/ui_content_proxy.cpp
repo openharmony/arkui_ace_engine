@@ -42,7 +42,7 @@ int32_t UIContentServiceProxy::GetInspectorTree(const std::function<void(std::st
     return NO_ERROR;
 }
 
-int32_t UIContentServiceProxy::Connect()
+int32_t UIContentServiceProxy::Connect(const EventCallback& eventCallback)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -57,6 +57,7 @@ int32_t UIContentServiceProxy::Connect()
         LOGW("connect failed,create reportStub failed");
         return FAILED;
     }
+    report_->RegisterGetBaseInfoCallback(eventCallback);
     if (!data.WriteRemoteObject(report_)) {
         LOGW("write reportStub failed");
         return FAILED;

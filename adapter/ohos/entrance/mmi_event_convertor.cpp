@@ -211,6 +211,9 @@ void SetTouchEventType(int32_t orgAction, TouchEvent& event)
         case OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_EXIT:
             event.type = TouchType::HOVER_EXIT;
             return;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL:
+            event.type = TouchType::HOVER_CANCEL;
+            return;
         default:
             LOGW("unknown type");
             return;
@@ -308,6 +311,7 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     GetEventDevice(orgDevice, events);
     events.targetDisplayId = pointerEvent->GetTargetDisplayId();
     events.originalId = item.GetOriginPointerId();
+    events.deviceId = pointerEvent->GetDeviceId();
 
     std::set<int32_t> pressedSet = pointerEvent->GetPressedButtons();
     uint32_t pressedButtons = 0;
@@ -323,8 +327,7 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     events.pressedButtons = static_cast<int32_t>(pressedButtons);
 
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
-    TimeStamp time(microseconds);
-    events.time = time;
+    events.time = TimeStamp(microseconds);
     events.pointerEvent = pointerEvent;
     events.sourceTool = GetSourceTool(item.GetToolType());
     if (events.sourceType == SourceType::TOUCH && events.sourceTool == SourceTool::PEN) {
@@ -392,6 +395,7 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     event.sourceTool = GetSourceTool(item.GetToolType());
     event.pointerEvent = pointerEvent;
     event.originalId = item.GetOriginPointerId();
+    event.deviceId = pointerEvent->GetDeviceId();
 
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
@@ -431,6 +435,49 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     }
 }
 
+void GetPointerEventAction(int32_t action,  PointerEvent& event)
+{
+    switch (action) {
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
+            event.action = PointerAction::CANCEL;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN:
+            event.action = PointerAction::DOWN;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
+            event.action = PointerAction::MOVE;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_UP:
+            event.action = PointerAction::UP;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
+            event.action = PointerAction::PULL_MOVE;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
+            event.action = PointerAction::PULL_UP;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW:
+            event.action = PointerAction::PULL_IN_WINDOW;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW:
+            event.action = PointerAction::PULL_OUT_WINDOW;
+            break;
+        default:
+            event.action = PointerAction::UNKNOWN;
+            break;
+    }
+}
+
+void UpdatePointerAction(std::shared_ptr<MMI::PointerEvent>& pointerEvent, const PointerAction action)
+{
+    if (action == PointerAction::PULL_IN_WINDOW) {
+        pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW);
+    }
+    if (action == PointerAction::PULL_OUT_WINDOW) {
+        pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW);
+    }
+}
+
 void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, PointerEvent& event)
 {
     event.rawPointerEvent = pointerEvent;
@@ -456,6 +503,8 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     for (const auto& curCode : pointerEvent->GetPressedKeys()) {
         event.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
     }
+    int32_t orgAction = pointerEvent->GetPointerAction();
+    GetPointerEventAction(orgAction, event);
 }
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t instanceId)

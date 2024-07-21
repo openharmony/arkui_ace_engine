@@ -93,6 +93,7 @@ constexpr Dimension ADAPT_SUBTITLE_MIN_FONT_SIZE = 12.0_fp;
 constexpr uint32_t ADAPT_TITLE_MAX_LINES = 2;
 constexpr int32_t TEXT_ALIGN_TITLE_CENTER = 1;
 constexpr int32_t BUTTON_TYPE_NORMAL = 1;
+constexpr Dimension DIALOG_BUTTON_BORDER_RADIUS = 20.0_vp;
 
 std::string GetBoolStr(bool isTure)
 {
@@ -770,6 +771,8 @@ void DialogPattern::UpdateDialogButtonProperty(
     if (dialogTheme_->GetButtonType() == BUTTON_TYPE_NORMAL) {
         buttonProp->UpdateButtonStyle(ButtonStyleMode::NORMAL);
     }
+    buttonProp->UpdateType(ButtonType::NORMAL);
+    buttonProp->UpdateBorderRadius(BorderRadiusProperty(DIALOG_BUTTON_BORDER_RADIUS));
     PaddingProperty buttonPadding;
     buttonPadding.left = CalcLength(SHEET_LIST_PADDING);
     buttonPadding.right = CalcLength(SHEET_LIST_PADDING);
@@ -1357,10 +1360,17 @@ bool DialogPattern::NeedsButtonDirectionChange(const std::vector<ButtonInfo>& bu
             MeasureContext measureContext;
             measureContext.textContent = textDisplay;
             measureContext.fontSize = buttonTextSize;
+            auto pipeline = GetContext();
+            CHECK_NULL_RETURN(pipeline, false);
+            if (isSuitableForElderly_ && pipeline->GetFontScale() >= dialogTheme_->GetTitleMaxFontScale() &&
+                SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+                measureContext.fontSize =
+                    Dimension(buttonTextSize.Value() * dialogTheme_->GetTitleMaxFontScale(), DimensionUnit::VP);
+            }
             auto fontweight = StringUtils::FontWeightToString(FontWeight::MEDIUM);
             measureContext.fontWeight = fontweight;
             Size measureSize = MeasureUtil::MeasureTextSize(measureContext);
-            if (GreatNotEqual(measureSize.Width(), textFarmeSize.Width())) {
+            if (measureSize.Width() != textFarmeSize.Width()) {
                 return true;
             }
         }
@@ -1461,6 +1471,20 @@ void DialogPattern::UpdateTextFontScale()
                 textProp->UpdateMargin(margin);
             }
         }
+    }
+}
+
+void DialogPattern::UpdateFontScale()
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetFontScale() != fontScaleForElderly_) {
+        OnFontConfigurationUpdate();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        fontScaleForElderly_ = pipeline->GetFontScale();
     }
 }
 

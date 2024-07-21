@@ -37,6 +37,8 @@ public:
     void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
+    void SetMinFontScale(const float value) override;
+    void SetMaxFontScale(const float value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetTextAlign(TextAlign value) override;
     void SetTextOverflow(TextOverflow value) override;
@@ -80,12 +82,15 @@ public:
     void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override;
     void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
+    void SetResponseRegion(bool isUserSetResponseRegion) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
     static void InitText(FrameNode* frameNode, std::string& value);
     static void InitSpanStringController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase);
     static RefPtr<TextControllerBase> InitTextController(FrameNode* frameNode);
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
+    static void SetMinFontScale(FrameNode* frameNode, const float value);
+    static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
     static void SetTextColor(FrameNode* frameNode, const Color& value);
@@ -160,6 +165,8 @@ public:
         FrameNode* frameNode, const std::string& value, std::function<void(const std::string&)>&& onResult);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
+    static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick);
 };
 } // namespace OHOS::Ace::NG
 

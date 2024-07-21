@@ -74,11 +74,15 @@ struct PointerEvent final {
     int32_t y = 0;
     std::shared_ptr<MMI::PointerEvent> rawPointerEvent;
     std::vector<KeyCode> pressedKeyCodes_;
+    PointerAction action = PointerAction::UNKNOWN;
 
     PointerEvent() = default;
     PointerEvent(int32_t x, int32_t y) : x(x), y(y) {}
     PointerEvent(int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY)
         : windowX(windowX), windowY(windowY), displayX(displayX), displayY(displayY)
+    {}
+    PointerEvent(int32_t pointerEventId, int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY)
+        : pointerEventId(pointerEventId), windowX(windowX), windowY(windowY), displayX(displayX), displayY(displayY)
     {}
 
     Point GetPoint() const
@@ -88,6 +92,16 @@ struct PointerEvent final {
         } else {
             return Point(x, y, x, y);
         }
+    }
+
+    int32_t GetDisplayX() const
+    {
+        return displayX;
+    }
+
+    int32_t GetDisplayY() const
+    {
+        return displayY;
     }
 };
 } // namespace OHOS::Ace

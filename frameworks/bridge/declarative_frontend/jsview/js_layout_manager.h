@@ -63,19 +63,12 @@ public:
  
     void GetLineMetrics(const JSCallbackInfo& info);
  
-    JSRef<JSObject> CreateJSTextStyleResult(const TextStyle& textStyle);
- 
-    JSRef<JSObject> CreateJSFontMetrics(const FontMetrics& fontMetrics);
- 
-    JSRef<JSObject> CreateJSRunMetrics(const RunMetrics& runMetrics);
- 
-    void CreateJSLineMetrics(JSRef<JSObject>& lineMetricsObj, const TextLineMetrics& lineMetrics);
+    Local<panda::ObjectRef> CreateJSRunMetrics(const std::map<size_t, RunMetrics>& mapRunMetrics,
+        const JSCallbackInfo& args);
 
-    NapiMap CreateNapiMap(napi_env env);
-
-    bool NapiMapSet(napi_env& env, NapiMap& map, uint32_t key, const RunMetrics& runMetrics);
-
-    JSRef<JSVal> ConvertMapToJSMap(const std::map<size_t, RunMetrics>& map);
+    Local<panda::ObjectRef> CreateJSFontMetrics(const FontMetrics& fontMetrics, const JSCallbackInfo& args);
+    
+    Local<panda::ObjectRef> CreateJSTextStyleResult(const TextStyle& textStyle, const JSCallbackInfo& args);
  
 private:
     WeakPtr<OHOS::Ace::NG::LayoutInfoInterface> layoutInfoInterface_;

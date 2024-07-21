@@ -336,28 +336,7 @@ int32_t WaterFlowPattern::GetColumns() const
     return layoutProperty->GetAxis() == Axis::VERTICAL ? layoutInfo_->GetCrossCount() : layoutInfo_->GetMainCount();
 }
 
-void WaterFlowPattern::SetAccessibilityAction()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
-        const auto& pattern = weakPtr.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        CHECK_NULL_VOID(pattern->IsScrollable());
-        pattern->ScrollPage(false);
-    });
-
-    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
-        const auto& pattern = weakPtr.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        CHECK_NULL_VOID(pattern->IsScrollable());
-        pattern->ScrollPage(true);
-    });
-}
-
-void WaterFlowPattern::ScrollPage(bool reverse, bool smooth)
+void WaterFlowPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
     CHECK_NULL_VOID(IsScrollable());
 
@@ -370,12 +349,15 @@ void WaterFlowPattern::ScrollPage(bool reverse, bool smooth)
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto mainContentSize = geometryNode->GetPaddingSize().MainSize(axis);
+    float distance = reverse ? mainContentSize : -mainContentSize;
+    if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
+        distance = distance / 2.f;
+    }
     if (smooth) {
-        float distance = reverse ? mainContentSize : -mainContentSize;
         float position = layoutInfo_->Offset() + distance;
         ScrollablePattern::AnimateTo(-position, -1, nullptr, true, false, false);
     } else {
-        UpdateCurrentOffset(reverse ? mainContentSize : -mainContentSize, SCROLL_FROM_JUMP);
+        UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
     }
     // AccessibilityEventType::SCROLL_END
 }
@@ -428,6 +410,11 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
         return sections_;
     }
     sections_ = AceType::MakeRefPtr<WaterFlowSections>();
+    auto sectionChangeCallback = [weakPattern = WeakClaim(this)](int32_t start, int32_t count) {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->NotifyDataChange(start, count);
+    };
     auto callback = [weakPattern = WeakClaim(this)](int32_t start) {
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -441,12 +428,18 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
         context->RequestFrame();
     };
     sections_->SetOnDataChange(callback);
+    sections_->SetNotifyDataChange(sectionChangeCallback);
     return sections_;
 }
 
 void WaterFlowPattern::OnSectionChanged(int32_t start)
 {
-    layoutInfo_->InitSegments(sections_->GetSectionInfo(), start);
+    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW && keepContentPosition_) {
+        layoutInfo_->InitSegmentsForKeepPositionMode(
+            sections_->GetSectionInfo(), sections_->GetPrevSectionInfo(), start);
+    } else {
+        layoutInfo_->InitSegments(sections_->GetSectionInfo(), start);
+    }
 
     MarkDirtyNodeSelf();
 }
@@ -606,6 +599,7 @@ void WaterFlowPattern::SetLayoutMode(LayoutMode mode)
 {
     if (!layoutInfo_ || mode != layoutInfo_->Mode()) {
         layoutInfo_ = WaterFlowLayoutInfoBase::Create(mode);
+        MarkDirtyNodeSelf();
     }
     // footer index only set during first AddFooter call
     if (footer_.Upgrade()) {
@@ -620,6 +614,13 @@ int32_t WaterFlowPattern::GetChildrenCount() const
         return host->GetTotalChildCount();
     }
     return 0;
+}
+
+void WaterFlowPattern::NotifyDataChange(int32_t index, int32_t count)
+{
+    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW && keepContentPosition_) {
+        layoutInfo_->NotifyDataChange(index, count);
+    }
 }
 
 void WaterFlowPattern::DumpAdvanceInfo()

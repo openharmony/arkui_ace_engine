@@ -50,6 +50,7 @@
 #endif
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/recycle_view/recycle_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/web/itouch_event_callback.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -102,7 +103,7 @@ public:
 
     void SetupRootElement() override;
 
-    void SetupSubRootElement();
+    void SetupSubRootElement() override;
 
     bool NeedSoftKeyboard() override;
 
@@ -134,6 +135,8 @@ public:
 
     void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) override;
 
+    void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) override;
+
     void OnMouseEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) override;
 
     void OnAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) override;
@@ -141,6 +144,10 @@ public:
     // Called by view when touch event received.
     void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
 
+#if defined(SUPPORT_TOUCH_TARGET_TEST)
+    // Used to determine whether the touched frameNode is the target
+    bool OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe = false, const std::string& target = "") override;
+#endif
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
     bool OnKeyEvent(const KeyEvent& event) override;
@@ -558,7 +565,7 @@ public:
     {
         storeNode_.erase(restoreId);
     }
-    void SetNeedRenderNode(const RefPtr<FrameNode>& node);
+    void SetNeedRenderNode(const WeakPtr<FrameNode>& node);
 
     void SetIgnoreViewSafeArea(bool value) override;
     void SetIsLayoutFullScreen(bool value) override;
@@ -703,6 +710,11 @@ public:
         return navigationMgr_;
     }
 
+    const std::unique_ptr<RecycleManager>& GetRecycleManager() const
+    {
+        return recycleManager_;
+    }
+
     RefPtr<PrivacySensitiveManager> GetPrivacySensitiveManager() const
     {
         return privacySensitiveManager_;
@@ -802,16 +814,12 @@ public:
         return isDensityChanged_;
     }
 
-
-    void UpdateLastVsyncEndTimestamp(uint64_t lastVsyncEndTimestamp) override
-    {
-        lastVsyncEndTimestamp_ = lastVsyncEndTimestamp;
-    }
     void GetInspectorTree();
     void NotifyAllWebPattern(bool isRegister);
-    void AddFrameNodeChangeListener(const RefPtr<FrameNode>& node);
-    void RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node);
-    void AddChangedFrameNode(const RefPtr<FrameNode>& node);
+    void AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node);
+    void RemoveFrameNodeChangeListener(int32_t nodeId);
+    bool AddChangedFrameNode(const WeakPtr<FrameNode>& node);
+    void RemoveChangedFrameNode(int32_t nodeId);
     void SetForceSplitEnable(bool isForceSplit)
     {
         isForceSplit_ = isForceSplit;
@@ -822,6 +830,10 @@ public:
         return isForceSplit_;
     }
 
+    bool IsWindowFocused() const override
+    {
+        return isWindowHasFocused_ && GetOnFoucs();
+    }
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -840,7 +852,7 @@ protected:
 
     void OnVirtualKeyboardHeightChange(float keyboardHeight,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
-        const bool supportAvoidance = false) override;
+        const bool supportAvoidance = false, bool forceChange = false) override;
     void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false) override;
 
@@ -949,7 +961,7 @@ private:
     // window on show or on hide
     std::set<int32_t> onWindowStateChangedCallbacks_;
     // window on focused or on unfocused
-    std::list<int32_t> onWindowFocusChangedCallbacks_;
+    std::set<int32_t> onWindowFocusChangedCallbacks_;
     // window on drag
     std::list<int32_t> onWindowSizeChangeCallbacks_;
 
@@ -963,7 +975,7 @@ private:
 
     int32_t curFocusNodeId_ = -1;
 
-    std::set<RefPtr<FrameNode>> needRenderNode_;
+    std::set<WeakPtr<FrameNode>> needRenderNode_;
 
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
@@ -1001,7 +1013,6 @@ private:
     uint32_t nextScheduleTaskId_ = 0;
     int32_t mouseStyleNodeId_ = -1;
     uint64_t resampleTimeStamp_ = 0;
-    uint64_t lastVsyncEndTimestamp_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
@@ -1057,18 +1068,19 @@ private:
     int32_t preNodeId_ = -1;
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
+    std::unique_ptr<RecycleManager> recycleManager_ = std::make_unique<RecycleManager>();
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
     bool customTitleSettedShow_ = true;
     bool isShowTitle_ = false;
-    bool lastAnimationStatus_ = true;
+    int32_t lastAnimatorExpectedFrameRate_ = -1;
     bool isDoKeyboardAvoidAnimate_ = true;
     bool isForceSplit_ = false;
 
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
     uint32_t transform_ = 0;
-    std::list<RefPtr<FrameNode>> changeInfoListeners_;
-    std::list<RefPtr<FrameNode>> changedNodes_;
+    std::list<WeakPtr<FrameNode>> changeInfoListeners_;
+    std::list<WeakPtr<FrameNode>> changedNodes_;
 };
 } // namespace OHOS::Ace::NG
 

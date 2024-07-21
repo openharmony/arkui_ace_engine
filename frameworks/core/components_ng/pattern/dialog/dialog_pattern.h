@@ -255,8 +255,19 @@ public:
         return fontScaleForElderly_;
     }
 
+    void SetIsPickerDiaglog(bool value)
+    {
+        isPickerDiaglog_ = value;
+    }
+
+    bool GetIsPickerDiaglog()
+    {
+        return isPickerDiaglog_;
+    }
+
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
     void InitHostWindowRect();
+    void UpdateFontScale();
 
 private:
     bool AvoidKeyboard() const override
@@ -347,6 +358,7 @@ private:
     RefPtr<FrameNode> contentColumn_;
     RefPtr<RenderContext> contentRenderContext_;
     bool isSuitableForElderly_ = false;
+    bool isPickerDiaglog_ = false;
     bool notAdapationAging_ = false;
     float fontScaleForElderly_ = 1.0f;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;

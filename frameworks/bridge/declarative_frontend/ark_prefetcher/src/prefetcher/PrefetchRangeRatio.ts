@@ -63,7 +63,7 @@ class PrefetchRangeRatio {
     return this._maxRatio;
   }
 
-  private updateTiming(prefetchDuration: number) {
+  private updateTiming(prefetchDuration: number): void {
     // Check if not from file storage
     if (prefetchDuration > 20) {
       const weight = 0.95;
@@ -88,7 +88,7 @@ class PrefetchRangeRatio {
           ratioChanged = true;
           this._maxRatio = limit.prefetchCountMaxRatioRight;
           this.leftToleranceEdge = limit.leftToleranceEdge;
-          if (i + 1 != this.TOLERANCE_RANGES.length) {
+          if (i + 1 !== this.TOLERANCE_RANGES.length) {
             this.rightToleranceEdge = this.TOLERANCE_RANGES[i + 1].rightToleranceEdge;
           } else {
             this.rightToleranceEdge = Number.MAX_VALUE;
@@ -102,7 +102,7 @@ class PrefetchRangeRatio {
           ratioChanged = true;
           this._maxRatio = limit.prefetchCountMaxRatioLeft;
           this.rightToleranceEdge = limit.rightToleranceEdge;
-          if (i != 0) {
+          if (i !== 0) {
             this.leftToleranceEdge = this.TOLERANCE_RANGES[i - 1].leftToleranceEdge;
           } else {
             this.leftToleranceEdge = Number.MIN_VALUE;
@@ -130,7 +130,7 @@ class PrefetchRangeRatio {
     );
   }
 
-  updateRatioRange(ratio: number) {
+  updateRatioRange(ratio: number): void {
     if (ratio > this.oldRatio) {
       this._range = new RatioRange(new RangeEdge(this.oldRatio, false), new RangeEdge(ratio, true));
     } else {

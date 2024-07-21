@@ -226,7 +226,7 @@ public:
     {
         dataDetectorAdapter_->onResult_ = std::move(onResult);
     }
-    std::optional<TextDataDetectResult> GetTextDetectResult()
+    TextDataDetectResult GetTextDetectResult()
     {
         return dataDetectorAdapter_->textDetectResult_;
     }
@@ -323,6 +323,8 @@ public:
     void CloseOperate();
     void OnDragMove(const RefPtr<Ace::DragEvent>& event);
     virtual void AddUdmfData(const RefPtr<Ace::DragEvent>& event);
+    void ProcessNormalUdmfData(const RefPtr<UnifiedData>& unifiedData);
+    void AddPixelMapToUdmfData(const RefPtr<PixelMap>& pixelMap, const RefPtr<UnifiedData>& unifiedData);
 
     std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;
     TextStyleResult GetTextStyleObject(const RefPtr<SpanNode>& node);
@@ -594,6 +596,11 @@ public:
         externalParagraphStyle_ = paragraphStyle;
     }
 
+    TextStyle GetTextStyle()
+    {
+        return textStyle_.value_or(TextStyle());
+    }
+
     std::optional<ParagraphStyle> GetExternalParagraphStyle()
     {
         return externalParagraphStyle_;
@@ -604,16 +611,20 @@ public:
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
 
     void OnSelectionMenuOptionsUpdate(
-        const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
-    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override
-    {
-        selectOverlay_->OnAncestorNodeChanged(flag);
-    }
+        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
 
     void UpdateParentGlobalOffset()
     {
         parentGlobalOffset_ = GetParentGlobalOffset();
     }
+
+    void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
+    {
+        isUserSetResponseRegion_ = isUserSetResponseRegion;
+    }
+
+    void UnregisterNodeChangeListenerWithoutSelect();
 
 protected:
     void OnAttachToFrameNode() override;
@@ -635,7 +646,7 @@ protected:
     void HandleSpanSingleClickEvent(GestureEvent& info, RectF textContentRect, bool& isClickOnSpan);
     void HandleDoubleClickEvent(GestureEvent& info);
     void CheckOnClickEvent(GestureEvent& info);
-    bool ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
+    bool ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
         const ShowSelectOverlayFunc& showSelectOverlayFunc = nullptr);
     void SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
         const ShowSelectOverlayFunc& showSelectOverlayFunc);
@@ -663,10 +674,11 @@ protected:
     int32_t GetActualTextLength();
     bool IsSelectableAndCopy();
     void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
+    void SetResponseRegion(const SizeF& frameSize, const SizeF& boundsSize);
 
     virtual bool CanStartAITask()
     {
-        return copyOption_ != CopyOptions::None && textDetectEnable_ && enabled_ && dataDetectorAdapter_;
+        return textDetectEnable_ && enabled_ && dataDetectorAdapter_;
     };
 
     void OnAttachToMainTree() override
@@ -780,6 +792,10 @@ private:
     void ProcessOverlayAfterLayout();
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     Offset ConvertLocalOffsetToParagraphOffset(const Offset& offset);
+    void RegisterMarqueeNodeChangeListener();
+    void UnregisterMarqueeNodeChangeListener();
+    void HandleMarqueeWithIsVisible(FrameNodeChangeInfoFlag flag);
+    void ParseOriText(const std::string& currentText);
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -819,6 +835,7 @@ private:
     bool isDetachFromMainTree_ = false;
     std::optional<void*> externalParagraph_;
     std::optional<ParagraphStyle> externalParagraphStyle_;
+    bool isUserSetResponseRegion_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

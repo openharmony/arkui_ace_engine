@@ -76,7 +76,9 @@ bool TextPickerTossAnimationController::Play()
     if (std::abs(speed_) < PICKER_SPEED_TH) {
         return false;
     }
+    column->ResetTotalDelta();
     StartSpringMotion();
+    SetTossPlaying(true);
     return true;
 }
 
@@ -197,5 +199,15 @@ double TextPickerTossAnimationController::GetTossOffset() const
     }
 
     return end_ - property_->Get();
+}
+
+bool TextPickerTossAnimationController::GetTossPlaying() const
+{
+    return isTossPlaying_;
+}
+
+void TextPickerTossAnimationController::SetTossPlaying(bool playing)
+{
+    isTossPlaying_ = playing;
 }
 } // namespace OHOS::Ace::NG

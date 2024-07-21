@@ -32,7 +32,7 @@ namespace {
 constexpr int32_t MAX_RECOVER_BUTTON_INDEX = 0;
 constexpr int32_t MINIMIZE_BUTTON_INDEX = 1;
 constexpr int32_t CLOSE_BUTTON_INDEX = 2;
-constexpr int32_t TITLE_POPUP_DURATION = 200;
+constexpr int32_t TITLE_POPUP_DURATION = 400;
 } // namespace
 
 void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
@@ -66,12 +66,6 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
     bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
-    PaddingProperty padding;
-    if (isShow && customTitleSettedShow_ && isFloatingWindow) {
-        padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
-            CalcLength(CONTENT_PADDING) };
-    }
-    layoutProperty->UpdatePadding(padding);
     BorderWidthProperty borderWidth;
     borderWidth.SetBorderWidth((isFloatingWindow && isShow) ? CONTAINER_BORDER_WIDTH : 0.0_vp);
     layoutProperty->UpdateBorderWidth(borderWidth);
@@ -206,6 +200,14 @@ void ContainerModalPatternEnhance::ChangeFloatingTitle(bool isFocus)
         windowManager->SetCurrentWindowMaximizeMode(MaximizeMode::MODE_RECOVER);
     }
 
+    auto floatingTitleRow = GetFloatingTitleRow();
+    CHECK_NULL_VOID(floatingTitleRow);
+    auto floatingContext = floatingTitleRow->GetRenderContext();
+    CHECK_NULL_VOID(floatingContext);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
+    floatingContext->UpdateBackgroundColor(theme->GetBackGroundColor(isFocus));
     // update floating custom title label
     auto customFloatingTitleNode = GetFloatingTitleNode();
     CHECK_NULL_VOID(customFloatingTitleNode);
@@ -261,9 +263,10 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
     CHECK_NULL_VOID(buttonsContext);
 
     auto titlePopupDistance = titleHeight_.ConvertToPx();
+    auto cubicBezierCurve = AceType::MakeRefPtr<CubicCurve>(0.00, 0.00, 0.20, 1.00);
     AnimationOption option;
     option.SetDuration(TITLE_POPUP_DURATION);
-    option.SetCurve(Curves::EASE_IN_OUT);
+    option.SetCurve(cubicBezierCurve);
 
     if (isShow && CanShowFloatingTitle()) {
         floatingContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });

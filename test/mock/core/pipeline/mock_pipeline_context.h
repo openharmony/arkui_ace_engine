@@ -30,6 +30,7 @@ public:
 
     static void SetUp();
     static void TearDown();
+    static void SetCurrentWindowRect(Rect rect);
     static RefPtr<MockPipelineContext> GetCurrent();
     void SetRootSize(double rootWidth, double rootHeight);
 

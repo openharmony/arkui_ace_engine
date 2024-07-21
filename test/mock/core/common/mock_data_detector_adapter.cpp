@@ -26,21 +26,20 @@ void DataDetectorAdapter::ParseAIJson(
     const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos) {}
 void DataDetectorAdapter::StartAITask() {}
 
-bool DataDetectorAdapter::ShowUIExtensionMenu(
-    const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode)
+bool DataDetectorAdapter::ShowAIEntityMenu(
+    const AISpan& aiSpan, const NG::RectF& aiRect, const RefPtr<NG::FrameNode>& targetNode, bool isShowSelectText)
 {
     return true;
 }
 
 void DataDetectorAdapter::ResponseBestMatchItem(const AISpan& aiSpan) {}
 
-void DataDetectorAdapter::StartAbilityByType(const std::string& type, AAFwk::WantParams& wantParams) {}
+void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
+    const std::pair<std::string, FuncVariant>& menuOption, const RefPtr<NG::FrameNode>& targetNode)
+{}
 
-std::function<void(const AAFwk::WantParams&)> DataDetectorAdapter::GetOnReceive(
-    NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode)
-{
-    return [](const AAFwk::WantParams& wantParams) {};
-}
+void DataDetectorAdapter::GetAIEntityMenu() {}
+
 std::function<void()> GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap)
 {
     return []() {};

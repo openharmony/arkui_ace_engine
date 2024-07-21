@@ -90,6 +90,10 @@ private:
         void Reset(int32_t id);
         void ResetAll();
         void SetDirection(int32_t directionType);
+        const std::map<int32_t, VelocityTracker>& GetVelocityMap() const
+        {
+            return trackerMap_;
+        }
 
     private:
         int32_t GetFastestTracker(std::function<double(VelocityTracker&)>&& func);
@@ -133,6 +137,8 @@ private:
     void OnSucceedCancel() override;
 
     void AddOverTimeTrace();
+
+    void DispatchPanStartedToPerf(const TouchEvent& event);
 
     const TouchRestrict& GetTouchRestrict() const
     {

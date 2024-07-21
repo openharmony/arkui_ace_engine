@@ -60,7 +60,7 @@ public:
     void SetOnEditChanged(std::function<void(bool)>&& func) override;
     void SetOnSubmit(std::function<void(int32_t)>&& func) override {};
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;
-    void SetOnChange(std::function<void(const std::string&, TextRange&)>&& func) override;
+    void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& func) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     void SetOnSecurityStateChange(std::function<void(bool)>&& func) override;
     void SetOnContentScroll(std::function<void(float, float)>&& func) override;
@@ -173,7 +173,7 @@ public:
     static void SetShowCounter(FrameNode* frameNode, bool value);
     static void SetShowError(FrameNode* frameNode, const std::string& errorText, bool visible);
     static void SetCounterType(FrameNode* frameNode, int32_t value);
-    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, TextRange&)>&& func);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, PreviewText&)>&& func);
     static void SetOnContentSizeChange(FrameNode* frameNode, std::function<void(float, float)>&& func);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
     static void SetTextFieldText(FrameNode* frameNode, const std::string& value);
@@ -270,6 +270,8 @@ public:
     static void SetOnDidDeleteEvent(FrameNode* frameNode, std::function<void(const DeleteValueInfo&)>&& func);
     static void SetEnablePreviewText(FrameNode* frameNode, bool enablePreviewText);
     static PaddingProperty GetPadding(FrameNode* frameNode);
+    static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick);
 
 private:
     void AddDragFrameNodeToManager() const;

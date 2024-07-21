@@ -244,6 +244,10 @@ public:
     {
         isAnalyzerCreated_ = isCreated;
     }
+    void SetIsSeeking(bool isSeeking)
+    {
+        isSeeking_ = isSeeking;
+    }
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
@@ -372,6 +376,7 @@ private:
     bool isAnalyzerCreated_ = false;
     bool isPaused_ = false;
     bool isContentSizeChanged_ = false;
+    bool isSeeking_ = false;
 
     uint32_t currentPos_ = 0;
     uint32_t duration_ = 0;

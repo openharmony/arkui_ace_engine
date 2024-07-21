@@ -19,7 +19,7 @@
 #include <optional>
 #include <string>
 #include <utility>
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -301,16 +301,7 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto target = frameNode->GetRenderContext();
-    if (target) {
-        if (target->GetBackgroundEffect().has_value()) {
-            target->UpdateBackgroundEffect(std::nullopt);
-        }
-        target->UpdateBackBlurStyle(bgBlurStyle);
-        if (target->GetBackBlurRadius().has_value()) {
-            target->UpdateBackBlurRadius(Dimension());
-        }
-    }
+    SetBackgroundBlurStyle(frameNode, bgBlurStyle);
 }
 
 void ViewAbstract::SetForegroundEffect(float radius)
@@ -339,18 +330,7 @@ void ViewAbstract::SetBackgroundEffect(const EffectOption& effectOption)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto target = frameNode->GetRenderContext();
-    if (target) {
-        if (target->GetBackBlurRadius().has_value()) {
-            target->UpdateBackBlurRadius(Dimension());
-        }
-        if (target->GetBackBlurStyle().has_value()) {
-            target->UpdateBackBlurStyle(std::nullopt);
-        }
-        target->UpdateBackgroundEffect(effectOption);
-    }
+    SetBackgroundEffect(ViewStackProcessor::GetInstance()->GetMainFrameNode(), effectOption);
 }
 
 void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle)
@@ -893,6 +873,13 @@ void ViewAbstract::DisableOnHover()
     eventHub->ClearUserOnHover();
 }
 
+void ViewAbstract::DisableOnAccessibilityHover()
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnAccessibilityHover();
+}
+
 void ViewAbstract::DisableOnMouse()
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
@@ -1095,6 +1082,13 @@ void ViewAbstract::SetOnHover(OnHoverFunc&& onHoverEventFunc)
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetHoverEvent(std::move(onHoverEventFunc));
+}
+
+void ViewAbstract::SetOnAccessibilityHover(OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetAccessibilityHoverEvent(std::move(onAccessibilityHoverEventFunc));
 }
 
 void ViewAbstract::SetHoverEffect(HoverEffectType hoverEffect)
@@ -1785,7 +1779,7 @@ void ViewAbstract::DismissDialog()
         if (overlayManager->isMaskNode(dialogPattern->GetHost()->GetId())) {
             overlayManager->PopModalDialog(dialogPattern->GetHost()->GetId());
         }
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "destroy");
 #endif
     }
@@ -1870,6 +1864,7 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
                 std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
         } else {
             auto menuNode = overlayManager->GetMenuNode(targetNode->GetId());
+            TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetNode->GetId());
             SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetNode->GetId());
         }
         return;
@@ -2354,6 +2349,7 @@ void ViewAbstract::SetBorderImageSource(const std::string& bdImageSrc)
     }
     ImageSourceInfo imageSourceInfo(bdImageSrc);
     ACE_UPDATE_RENDER_CONTEXT(BorderImageSource, imageSourceInfo);
+    ACE_UPDATE_RENDER_CONTEXT(BorderSourceFromImage, true);
 }
 
 void ViewAbstract::SetHasBorderImageSlice(bool tag)
@@ -2394,6 +2390,7 @@ void ViewAbstract::SetBorderImageGradient(const Gradient& gradient)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BorderImageGradient, gradient);
+    ACE_UPDATE_RENDER_CONTEXT(BorderSourceFromImage, false);
 }
 
 void ViewAbstract::SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect)
@@ -2868,6 +2865,7 @@ void ViewAbstract::SetBorderImageSource(FrameNode* frameNode, const std::string&
 {
     ImageSourceInfo imageSourceInfo(bdImageSrc);
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderImageSource, imageSourceInfo, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderSourceFromImage, true, frameNode);
 }
 
 void ViewAbstract::SetHasBorderImageSlice(FrameNode* frameNode, bool tag)
@@ -2893,6 +2891,7 @@ void ViewAbstract::SetHasBorderImageRepeat(FrameNode* frameNode, bool tag)
 void ViewAbstract::SetBorderImageGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderImageGradient, gradient, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderSourceFromImage, false, frameNode);
 }
 
 void ViewAbstract::SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle)
@@ -2913,6 +2912,13 @@ void ViewAbstract::SetLinearGradientBlur(FrameNode *frameNode, const NG::LinearG
 
 void ViewAbstract::SetBackgroundBlurStyle(FrameNode *frameNode, const BlurStyleOption& bgBlurStyle)
 {
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (bgBlurStyle.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        pipeline->AddWindowFocusChangedCallback(frameNode->GetId());
+    } else {
+        pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
+    }
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->GetBackgroundEffect().has_value()) {
@@ -3399,6 +3405,13 @@ void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, float radius)
 void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption& effectOption)
 {
     CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (effectOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        pipeline->AddWindowFocusChangedCallback(frameNode->GetId());
+    } else {
+        pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
+    }
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->GetBackBlurRadius().has_value()) {
@@ -3433,6 +3446,12 @@ void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreview
 {
     CHECK_NULL_VOID(frameNode);
     frameNode->SetDragPreviewOptions(previewOption);
+}
+
+void ViewAbstract::SetDragPreview(FrameNode* frameNode, const DragDropInfo& dragDropInfo)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDragPreview(dragDropInfo);
 }
 
 void ViewAbstract::SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion)
@@ -4471,7 +4490,7 @@ void ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frame
     frameNode->CleanVisibleAreaUserCallback(true);
 
     constexpr uint32_t minInterval = 100; // 100ms
-    if (interval < 0 || interval < minInterval) {
+    if (interval < 0 || static_cast<uint32_t>(interval) < minInterval) {
         interval = minInterval;
     }
     VisibleCallbackInfo callback;

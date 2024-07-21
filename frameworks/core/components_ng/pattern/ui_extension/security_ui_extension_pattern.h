@@ -80,6 +80,8 @@ public:
     void RegisterVisibleAreaChange();
     void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
+    void FireOnErrorCallback(
+        int32_t code, const std::string& name, const std::string& message) override;
 
     void FireOnRemoteReadyCallback();
     void FireBindModalCallback();
@@ -126,7 +128,6 @@ private:
     bool densityDpi_ = false;
     int32_t callbackId_ = 0;
     RectF displayArea_;
-    bool isKeyAsync_ = false;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     int32_t uiExtensionId_ = 0;
 

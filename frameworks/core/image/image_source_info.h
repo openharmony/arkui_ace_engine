@@ -78,13 +78,10 @@ public:
     {
         isUriPureNumber_ = isUriPureNumber;
     }
-    void SetIsConfigurationChange(bool isConfigurationChange)
-    {
-        isConfigurationChange_ = isConfigurationChange;
-    }
     void Reset();
 
     // interfaces to get infomation from [ImageSourceInfo]
+    void GenerateCacheKey();
     bool IsInternalResource() const;
     bool IsValid() const;
     bool IsPng() const;
@@ -105,11 +102,6 @@ public:
     {
         return isUriPureNumber_;
     }
-    bool GetIsConfigurationChange() const
-    {
-        return isConfigurationChange_;
-    }
-
     bool SupportObjCache() const;
     void SetNeedCache(bool needCache)
     {
@@ -132,7 +124,6 @@ public:
 
 private:
     SrcType ResolveSrcType() const;
-    void GenerateCacheKey();
 
     std::string src_;
     std::shared_ptr<std::string> srcRef_ = nullptr;
@@ -147,7 +138,6 @@ private:
     bool isSvg_ = false;
     bool isPng_ = false;
     bool needCache_ = true;
-    bool isConfigurationChange_ = false;
     bool isUriPureNumber_ = false;
     bool isFromReset_ = false;
     [[deprecated("in NG")]]

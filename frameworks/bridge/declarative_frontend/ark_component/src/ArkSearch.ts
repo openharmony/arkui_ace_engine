@@ -707,6 +707,20 @@ class SearchEnablePreviewTextModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class SearchEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> {
+  constructor(value: EditMenuOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textEditMenuOptions');
+  applyPeer(node: KNode, reset: boolean) {
+    if (reset) {
+      getUINativeModule().search.resetSelectionMenuOptions(node);
+    } else {
+      getUINativeModule().search.setSelectionMenuOptions(node, this.value);
+    }
+  }
+}
+
 interface SearchParam {
   value?: string;
   placeholder?: ResourceStr;
@@ -924,6 +938,11 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
   enablePreviewText(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, SearchEnablePreviewTextModifier.identity, SearchEnablePreviewTextModifier, value);
+    return this;
+  }
+  editMenuOptions(value: EditMenuOptions) {
+    modifierWithKey(this._modifiersWithKeys, SearchEditMenuOptionsModifier.identity,
+      SearchEditMenuOptionsModifier, value);
     return this;
   }
 }

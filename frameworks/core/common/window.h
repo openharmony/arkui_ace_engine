@@ -48,7 +48,7 @@ public:
 
     virtual void RequestFrame();
 
-    virtual void FlushFrameRate(int32_t rate, bool isAnimatorStopped, int32_t rateTyte) {}
+    virtual void FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateTyte) {}
 
     virtual void SetTaskExecutor(const RefPtr<TaskExecutor>& taskExecutor) {}
 
@@ -139,6 +139,16 @@ public:
         return lastRequestVsyncTime_;
     }
 
+    int64_t GetLastVsyncEndTimestamp() const
+    {
+        return lastVsyncEndTimestamp_;
+    }
+
+    void SetLastVsyncEndTimestamp(int64_t lastVsyncEndTimestamp)
+    {
+        lastVsyncEndTimestamp_ = lastVsyncEndTimestamp;
+    }
+
     virtual void SetKeepScreenOn(bool keepScreenOn) {};
 
     virtual int64_t GetVSyncPeriod() const
@@ -202,6 +212,7 @@ protected:
     std::list<struct VsyncCallback> callbacks_;
 
     uint64_t lastRequestVsyncTime_ = 0;
+    int64_t lastVsyncEndTimestamp_ = 0;
     uint32_t windowId_ = 0;
 
 private:

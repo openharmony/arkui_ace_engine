@@ -308,6 +308,10 @@ void RosenRenderContext::DetachModifiers()
     if (scaleXYUserModifier_) {
         rsNode_->RemoveModifier(scaleXYUserModifier_);
     }
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    if (pipeline) {
+        pipeline->RequestFrame();
+    }
 }
 
 void RosenRenderContext::StartRecording()
@@ -556,8 +560,7 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
 void RosenRenderContext::SetFrameWithoutAnimation(const RectF& paintRect)
 {
     CHECK_NULL_VOID(rsNode_ && paintRect.IsValid());
-    RSNode::ExecuteWithoutAnimation(
-        [&]() { rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height()); });
+    RSNode::ExecuteWithoutAnimation([&]() { SyncGeometryFrame(paintRect); });
 }
 
 void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, bool /* isRound */, uint8_t /* flag */)
@@ -565,7 +568,11 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, 
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    SyncGeometryProperties(paintRect_);
+    if (isNeedAnimate_) {
+        SyncGeometryProperties(paintRect_);
+    } else {
+        RSNode::ExecuteWithoutAnimation([&]() { SyncGeometryProperties(paintRect_); });
+    }
     host->OnPixelRoundFinish(paintRect_.GetSize());
 }
 
@@ -644,11 +651,10 @@ void RosenRenderContext::SyncAdditionalGeometryProperties(const RectF& paintRect
         PaintBackground();
     }
 
-    if (bdImageLoadingCtx_ && bdImage_) {
+    auto sourceFromImage = GetBorderSourceFromImage().value_or(false);
+    if (sourceFromImage && bdImageLoadingCtx_ && bdImage_) {
         PaintBorderImage();
-    }
-
-    if (GetBorderImageGradient()) {
+    } else if (!sourceFromImage && GetBorderImageGradient()) {
         PaintBorderImageGradient();
     }
 
@@ -849,6 +855,10 @@ void RosenRenderContext::OnBackgroundImageUpdate(const ImageSourceInfo& src)
     if (src.GetSrc().empty() && src.GetPixmap() == nullptr) {
         bgImage_ = nullptr;
         bgLoadingCtx_ = nullptr;
+        auto frameNode = GetHost();
+        if (frameNode) {
+            frameNode->SetColorModeUpdateCallback(nullptr);
+        }
         PaintBackground();
         return;
     }
@@ -929,6 +939,22 @@ void RosenRenderContext::SetBackBlurFilter()
     rsNode_->SetBackgroundFilter(backFilter);
 }
 
+void RosenRenderContext::UpdateWindowFocusState(bool isFocused)
+{
+    if (GetBackBlurStyle().has_value() &&
+        GetBackBlurStyle()->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        auto blurStyle = GetBackBlurStyle().value();
+        blurStyle.isWindowFocused = isFocused;
+        UpdateBackBlurStyle(blurStyle);
+    }
+    if (GetBackgroundEffect().has_value() &&
+        GetBackgroundEffect()->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        auto effect = GetBackgroundEffect().value();
+        effect.isWindowFocused = isFocused;
+        UpdateBackgroundEffect(effect);
+    }
+}
+
 void RosenRenderContext::SetFrontBlurFilter()
 {
     CHECK_NULL_VOID(rsNode_);
@@ -956,6 +982,38 @@ void RosenRenderContext::SetFrontBlurFilter()
     rsNode_->SetFilter(frontFilter);
 }
 
+bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<BlurStyleOption>& bgBlurStyle)
+{
+    if (!bgBlurStyle.has_value()) {
+        return false;
+    }
+    bool blurEnable = bgBlurStyle->policy == BlurStyleActivePolicy::ALWAYS_ACTIVE ||
+        (bgBlurStyle->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE && bgBlurStyle->isWindowFocused);
+    if (bgBlurStyle->isValidColor) {
+        if (blurEnable) {
+            rsNode_->SetBackgroundColor(GetBackgroundColor().value_or(Color::TRANSPARENT).GetValue());
+        } else {
+            rsNode_->SetBackgroundColor(bgBlurStyle->inactiveColor.GetValue());
+        }
+    }
+    return blurEnable;
+}
+
+bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<EffectOption>& efffectOption)
+{
+    bool blurEnable = efffectOption->policy == BlurStyleActivePolicy::ALWAYS_ACTIVE ||
+        (efffectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE && efffectOption->isWindowFocused);
+    if (efffectOption->isValidColor) {
+        if (blurEnable) {
+            rsNode_->SetBackgroundColor(GetBackgroundColor().value_or(Color::TRANSPARENT).GetValue());
+        } else {
+            rsNode_->SetBackgroundColor(efffectOption->inactiveColor.GetValue());
+        }
+    }
+    return blurEnable;
+}
+
+
 void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -973,6 +1031,11 @@ void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption
     } else {
         groupProperty->propBlurStyleOption = bgBlurStyle;
     }
+
+    if (!UpdateBlurBackgroundColor(bgBlurStyle)) {
+        rsNode_->SetBackgroundFilter(nullptr);
+        return;
+    }
     SetBackBlurFilter();
 }
 
@@ -985,6 +1048,10 @@ void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption
     }
     groupProperty->propEffectOption = effectOption;
     if (!effectOption.has_value()) {
+        return;
+    }
+    if (!UpdateBlurBackgroundColor(effectOption)) {
+        rsNode_->SetBackgroundFilter(nullptr);
         return;
     }
     auto context = PipelineBase::GetCurrentContext();
@@ -2503,7 +2570,8 @@ void RosenRenderContext::SetOuterBorderStyle(const BorderStyleProperty& value)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
+void RosenRenderContext::OnAccessibilityFocusUpdate(
+    bool isAccessibilityFocus, const int64_t accessibilityIdForVirtualNode)
 {
     auto uiNode = GetHost();
     CHECK_NULL_VOID(uiNode);
@@ -2513,8 +2581,15 @@ void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
     } else {
         ClearAccessibilityFocus();
     }
-    uiNode->OnAccessibilityEvent(isAccessibilityFocus ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
-                                                      : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
+    if (accessibilityIdForVirtualNode == INVALID_PARENT_ID) {
+        uiNode->OnAccessibilityEvent(isAccessibilityFocus ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
+                                                          : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
+    } else {
+        uiNode->OnAccessibilityEventForVirtualNode(isAccessibilityFocus
+                                                       ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
+                                                       : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED,
+            accessibilityIdForVirtualNode);
+    }
 }
 
 void RosenRenderContext::OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibilityFocusRect)
@@ -3191,21 +3266,6 @@ void RosenRenderContext::OnePixelRounding()
     float nodeTopI = OnePixelValueRounding(relativeTop);
     roundToPixelErrorX += nodeLeftI - relativeLeft;
     roundToPixelErrorY += nodeTopI - relativeTop;
-
-    OffsetF roundResult;
-    auto parentNode = frameNode->GetAncestorNodeOfFrame();
-    if (parentNode) {
-        auto parentGeometryNode = parentNode->GetGeometryNode();
-        roundResult = parentGeometryNode->GetPixelRoundResult();
-        if (nodeLeftI == roundResult.GetX() - 1.0f) {
-            nodeLeftI += 1.0f;
-            roundToPixelErrorX += 1.0f;
-        }
-        if (nodeTopI == roundResult.GetY() - 1.0f) {
-            nodeTopI += 1.0f;
-            roundToPixelErrorY += 1.0f;
-        }
-    }
     geometryNode->SetPixelGridRoundOffset(OffsetF(nodeLeftI, nodeTopI));
 
     float nodeWidthI = OnePixelValueRounding(absoluteRight) - nodeLeftI;
@@ -3240,10 +3300,6 @@ void RosenRenderContext::OnePixelRounding()
         nodeHeightI = nodeHeightTemp;
     }
     geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
-    if (parentNode) {
-        auto parentGeometryNode = parentNode->GetGeometryNode();
-        parentGeometryNode->SetPixelRoundResult(OffsetF(nodeLeftI + nodeWidthI, nodeTopI + nodeHeightI));
-    }
 }
 
 void RosenRenderContext::OnePixelRounding(bool isRound, uint8_t flag)
@@ -3272,21 +3328,6 @@ void RosenRenderContext::OnePixelRounding(bool isRound, uint8_t flag)
     float nodeTopI = OnePixelValueRounding(relativeTop, isRound, ceilTop, floorTop);
     roundToPixelErrorX += nodeLeftI - relativeLeft;
     roundToPixelErrorY += nodeTopI - relativeTop;
-
-    OffsetF roundResult;
-    auto parentNode = frameNode->GetAncestorNodeOfFrame();
-    if (parentNode) {
-        auto parentGeometryNode = parentNode->GetGeometryNode();
-        roundResult = parentGeometryNode->GetPixelRoundResult();
-        if (nodeLeftI == roundResult.GetX() - 1.0f) {
-            nodeLeftI += 1.0f;
-            roundToPixelErrorX += 1.0f;
-        }
-        if (nodeTopI == roundResult.GetY() - 1.0f) {
-            nodeTopI += 1.0f;
-            roundToPixelErrorY += 1.0f;
-        }
-    }
     geometryNode->SetPixelGridRoundOffset(OffsetF(nodeLeftI, nodeTopI));
 
     float nodeWidthI = OnePixelValueRounding(absoluteRight, isRound, ceilRight, floorRight) - nodeLeftI;
@@ -3321,10 +3362,6 @@ void RosenRenderContext::OnePixelRounding(bool isRound, uint8_t flag)
         nodeHeightI = nodeHeightTemp;
     }
     geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
-    if (parentNode) {
-        auto parentGeometryNode = parentNode->GetGeometryNode();
-        parentGeometryNode->SetPixelRoundResult(OffsetF(nodeLeftI + nodeWidthI, nodeTopI + nodeHeightI));
-    }
 }
 
 

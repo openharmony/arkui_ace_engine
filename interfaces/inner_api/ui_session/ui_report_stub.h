@@ -87,6 +87,12 @@ public:
         const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback);
 
     /**
+     * @description: register a callback when get base info
+     * @param eventCallback callback to be performed
+     */
+    void RegisterGetBaseInfoCallback(const EventCallback& eventCallback);
+
+    /**
      * @description: unregister the click callback last register
      */
     void UnregisterClickEventCallback();
@@ -116,11 +122,17 @@ public:
      */
     void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) override;
 
+    /**
+     * @description: report whole inspectorTree for SA
+     */
+    void SendBaseInfo(const std::string& data) override;
+
 private:
     EventCallback clickEventCallback_;
     EventCallback searchEventCallback_;
     EventCallback RouterChangeEventCallback_;
     EventCallback ComponentChangeEventCallback_;
+    EventCallback sendBaseInfoCallback_;
     std::function<void(std::string, int32_t, bool)> inspectorTreeCallback_;
     std::function<void(int64_t accessibilityId, const std::string& data)> unfocusEvent_;
 };

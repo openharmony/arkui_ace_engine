@@ -2094,7 +2094,7 @@ export class SegmentButton extends ViewPU {
             TapGesture.pop();
             SwipeGesture.create();
             SwipeGesture.onAction((p34) => {
-                if (this.options === void 0 || this.options.buttons === void 0) {
+                if (this.options === void 0 || this.options.buttons === void 0 || p34.sourceTool === SourceTool.TOUCHPAD) {
                     return;
                 }
                 if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {

@@ -18,46 +18,71 @@
 
 
 import argparse
+import os
+import subprocess
+import sys
 
 from src.content_parser import ContentParser
-from src.graph.graph_converter import generate_event_trees_graph
+from src.graph.graph_converter import generate_all_graphs
 from src.pre_process import handle_file_preprocess
-from src.utils.log_wrapper import log_info, log_error
+from src.utils.log_wrapper import log_info, log_error, enable_debug
 
 
 def usage():
-    print("python main.py -i input.txt")
-    print('\n Usage: main.py <cmd> <input> <output>')
+    print('python main.py -i input.txt')
+    print('\n Usage: main.py <cmd> <input>')
     print('         <cmd>: TODO')
     print('         <input>: input dump file')
-    print('         <output>: ouput image file\n')
     return
 
+
 def parse_args():
-    parser = argparse.ArgumentParser(description="")
-    parser.add_argument("-i", type=str, default="input.txt", help="input the dump source file")
-    parser.add_argument("-o", type=str, default="dump_temp.txt", help="output the generated image")
-    parser.add_argument("-m", action='store_true', default=False, help="是否生成详细信息")
+    parser = argparse.ArgumentParser(description='')
+    parser.add_argument('-d', action='store_true', default=False, help='enable debug info')
+    parser.add_argument('-r', action='store_true', default=False, help='dump event tree with device')
+    parser.add_argument('-i',
+                        type=str, default='./resources/dumpfile/input.txt', help='input the dump source file')
+    parser.add_argument('-m', action='store_true', default=False, help='add details info')
     argument = parser.parse_args()
     argument.input_file = argument.i
-    argument.output_file = argument.o
     argument.detailed = argument.m
+    argument.dump_from_device = argument.r
+    argument.debug = argument.d
     return argument
 
 
-"""
-python main.py -i input.txt -o dump_temp.txt
-"""
+def dump_from_device():
+    bat_file_path = r'src\bats\dump_event.bat'
+    try:
+        subprocess.call([bat_file_path])
+        print('capture event tree done.')
+    except FileNotFoundError:
+        print(f'file not found: {bat_file_path}')
+    except Exception as e:
+        print(f'exception: {e}')
+
+
+# python main.py -i input.txt
 if __name__ == '__main__':
-    # 解析参数
+    # parse the args
     args = parse_args()
-    # 预处理
-    handle_file_preprocess(args.input_file, args.output_file)
-    # 读取文件，并解析
-    dump_result = ContentParser(args.output_file).do_parse()
+    # config log model
+    if args.debug:
+        enable_debug(True)
+    # dump trace from device if needed
+    if args.dump_from_device:
+        if os.name == 'nt':
+            dump_from_device()
+        else:
+            log_error('only support dump from device on windows')
+            sys.exit(1)
+    # pre process
+    handle_file_preprocess(args.input_file, 'dump_temp.txt')
+    # read the dump file and parse
+    dump_result = ContentParser('dump_temp.txt').do_parse()
     if dump_result.is_succeed():
-        log_info("解析成功")
+        log_info('parse done')
         dump_result.dump()
     else:
-        log_error("解析失败")
-    generate_event_trees_graph(dump_result, args.detailed)
+        log_error('parse failed')
+    generate_all_graphs(dump_result, args.detailed)

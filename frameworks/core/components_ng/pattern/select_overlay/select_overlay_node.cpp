@@ -46,6 +46,7 @@
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/select_content_overlay/select_content_overlay_pattern.h"
+#include "core/components_ng/pattern/select_overlay/expanded_menu_plugin_loader.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
@@ -83,6 +84,7 @@ constexpr Dimension MAX_DIAMETER = 3.5_vp;
 constexpr Dimension MIN_DIAMETER = 1.5_vp;
 constexpr Dimension MIN_ARROWHEAD_DIAMETER = 2.0_vp;
 constexpr Dimension ANIMATION_TEXT_OFFSET = 12.0_vp;
+constexpr Dimension OVERLAY_MAX_WIDTH = 280.0_vp;
 constexpr float AGING_MIN_SCALE = 1.75f;
 
 const std::string OH_DEFAULT_CUT = "OH_DEFAULT_CUT";
@@ -90,6 +92,7 @@ const std::string OH_DEFAULT_COPY = "OH_DEFAULT_COPY";
 const std::string OH_DEFAULT_PASTE = "OH_DEFAULT_PASTE";
 const std::string OH_DEFAULT_SELECT_ALL = "OH_DEFAULT_SELECT_ALL";
 const std::string OH_DEFAULT_CAMERA_INPUT = "OH_DEFAULT_CAMERA_INPUT";
+const std::string OH_DEFAULT_COLLABORATION_SERVICE = "OH_DEFAULT_COLLABORATION_SERVICE";
 
 void SetResponseRegion(RefPtr<FrameNode>& node)
 {
@@ -398,7 +401,8 @@ RefPtr<FrameNode> BuildCreateMenuItemButton(const MenuOptionsParam& menuOptionsP
     auto top = CalcLength(padding.Top().ConvertToPx());
     auto bottom = CalcLength(padding.Bottom().ConvertToPx());
     contentWidth = contentWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
-    CHECK_NULL_RETURN(GreatOrEqual(remainderWidth, contentWidth), nullptr);
+    CHECK_NULL_RETURN(GreatOrEqual(remainderWidth, contentWidth) || menuOptionsParam.isFirstOption, nullptr);
+    contentWidth = std::min(contentWidth, remainderWidth);
 
     auto button = FrameNode::GetOrCreateFrameNode("SelectMenuButton", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -412,6 +416,8 @@ RefPtr<FrameNode> BuildCreateMenuItemButton(const MenuOptionsParam& menuOptionsP
     textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
     textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
+    textLayoutProperty->UpdateMaxLines(1);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     text->MarkModifyDone();
 
     // Update button property.
@@ -1163,10 +1169,17 @@ void SelectOverlayNode::CreatExtensionMenu(std::vector<OptionParam>&& params)
 void SelectOverlayNode::AddCreateMenuExtensionMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems,
     const std::shared_ptr<SelectOverlayInfo>& info, int32_t startIndex)
 {
-    CHECK_NULL_VOID(!extensionMenu_);
     std::vector<OptionParam> params;
-    auto id = GetId();
+    AddCreateMenuExtensionMenuParams(menuOptionItems, info, startIndex, params);
+    CreatExtensionMenu(std::move(params));
+}
+
+void SelectOverlayNode::AddCreateMenuExtensionMenuParams(const std::vector<MenuOptionsParam>& menuOptionItems,
+    const std::shared_ptr<SelectOverlayInfo>& info, int32_t startIndex, std::vector<OptionParam>& params)
+{
+    CHECK_NULL_VOID(!extensionMenu_);
     const auto systemCallback = GetSystemCallback(info);
+    auto id = GetId();
     int32_t itemNum = 0;
     for (auto item : menuOptionItems) {
         if (itemNum < startIndex) {
@@ -1205,10 +1218,13 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuOptions(const std::vector<Menu
                 newOverlayManager->HideOptionMenu(true);
             }
         };
-        params.emplace_back(item.content.value_or("null"), item.icon.value_or(" "), callback);
+        auto param = OptionParam(item.content.value_or("null"), item.icon.value_or(" "), callback);
+        if (item.id == OH_DEFAULT_PASTE) {
+            param.isPasteOption = true;
+        }
+        params.emplace_back(param);
         itemNum++;
     }
-    CreatExtensionMenu(std::move(params));
 }
 
 void SelectOverlayNode::CreateToolBar()
@@ -1292,12 +1308,15 @@ void SelectOverlayNode::GetDefaultButtonAndMenuWidth(float& maxWidth)
     CHECK_NULL_VOID(pipeline);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
-    auto selectOverlayMaxWidth = textOverlayTheme->GetSelectOverlayMaxWidth().ConvertToPx();
+    auto selectOverlayMaxWidth = OVERLAY_MAX_WIDTH.ConvertToPx();
 
     const auto& menuPadding = textOverlayTheme->GetMenuPadding();
 
-    maxWidth = selectOverlayMaxWidth - menuPadding.Left().ConvertToPx() - menuPadding.Right().ConvertToPx() -
-               textOverlayTheme->GetMoreButtonHeight().ConvertToPx();
+    auto backButtonWidth = textOverlayTheme->GetMenuToolbarHeight().ConvertToPx() - menuPadding.Top().ConvertToPx() -
+                           menuPadding.Bottom().ConvertToPx();
+
+    maxWidth =
+        selectOverlayMaxWidth - menuPadding.Left().ConvertToPx() - menuPadding.Right().ConvertToPx() - backButtonWidth;
 }
 
 bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocatedSize)
@@ -1491,7 +1510,7 @@ void SelectOverlayNode::AddMenuItemByCreateMenuCallback(const std::shared_ptr<Se
         RemoveChild(extensionMenu_);
         extensionMenu_.Reset();
     }
-    if (extensionOptionStartIndex < createMenuItems.size()) {
+    if (static_cast<size_t>(extensionOptionStartIndex) < createMenuItems.size()) {
         auto moreButton = BuildMoreOrBackButton(GetId(), true);
         moreButton->MountToParent(selectMenuInner_);
         // add back button
@@ -1513,7 +1532,7 @@ int32_t SelectOverlayNode::AddCreateMenuItems(
     const auto systemCallback = GetSystemCallback(info);
     float remainderWidth = maxWidth;
     int32_t index = -1;
-    for (const auto& item : menuItems) {
+    for (auto item : menuItems) {
         auto callback = systemCallback.find(item.id);
         RefPtr<FrameNode> button;
         if (item.id == "OH_DEFAULT_PASTE") {
@@ -1539,6 +1558,7 @@ int32_t SelectOverlayNode::AddCreateMenuItems(
             }
 #endif
         } else {
+            item.isFirstOption = index == -1;
             button = BuildCreateMenuItemButton(item, callback != systemCallback.end() ? callback->second : nullptr,
                 info->onCreateCallback, id, remainderWidth);
             if (button) {
@@ -1650,7 +1670,7 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
     CHECK_NULL_VOID(selectMenuInner_);
     selectMenuInner_->Clean();
     selectMenuInner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    if (isExtensionMenu_) {
+    if (isExtensionMenu_ && info->menuInfo.menuIsShow) {
         MoreOrBackAnimation(false);
     }
     auto selectProperty = selectMenu_->GetLayoutProperty();
@@ -1713,6 +1733,21 @@ void SelectOverlayNode::LandscapeMenuAddMenuOptions(const std::vector<MenuOption
     }
 }
 
+std::pair<std::vector<MenuOptionsParam>, bool> SelectOverlayNode::HandleCollaborationMenuItem(
+    const std::vector<MenuOptionsParam>& params)
+{
+    std::vector<MenuOptionsParam> newParams;
+    bool needCollaboration = false;
+    for (const auto& item : params) {
+        if (item.id == OH_DEFAULT_COLLABORATION_SERVICE) {
+            needCollaboration = true;
+            continue;
+        }
+        newParams.push_back(item);
+    }
+    return { newParams, needCollaboration };
+}
+
 RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info)
 {
     RefPtr<FrameNode> menuWrapper;
@@ -1727,6 +1762,7 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
     menuWrapper = MenuView::Create(std::move(params), -1, "SelectOverlayMenuByRightClick",
         MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU, { .isShowInSubWindow = false });
     CHECK_NULL_RETURN(menuWrapper, nullptr);
+    ExpandedMenuPluginLoader::GetInstance().CreateServiceCollaborationMenu(menuWrapper, info);
     auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
     // set click position to menu
     CHECK_NULL_RETURN(menu, nullptr);

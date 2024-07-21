@@ -128,8 +128,8 @@ DateTime RenderTextClock::GetDateTime() const
     dateTime.month = static_cast<uint32_t>(local->tm_mon);
     dateTime.day = static_cast<uint32_t>(local->tm_mday);
     TimeOfNow timeOfNow = GetTimeOfNow(hoursWest_);
-    dateTime.hour = timeOfNow.hour24_;
-    dateTime.minute = timeOfNow.minute_;
+    dateTime.hour = static_cast<uint32_t>(timeOfNow.hour24_);
+    dateTime.minute = static_cast<uint32_t>(timeOfNow.minute_);
     dateTime.second = static_cast<uint32_t>(timeOfNow.second_);
     return dateTime;
 }

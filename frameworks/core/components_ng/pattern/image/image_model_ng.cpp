@@ -21,6 +21,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/image/image_source_info.h"
 #ifndef ACE_UNITTEST
 #include "core/components_ng/base/view_abstract.h"
@@ -109,9 +110,53 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
             frameNode->RemoveChild(imageFrameNode);
         }
     }
+    pattern->SetNeedLoadAlt(true);
     pattern->SetImageType(ImagePattern::ImageType::BASE);
 
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo);
+}
+
+void ImageModelNG::ResetImage()
+{
+    auto *stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    RefPtr<FrameNode> frameNode;
+    frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    stack->Push(frameNode);
+    ImageSourceInfo sourceInfo("");
+    sourceInfo.SetIsFromReset(true);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, sourceInfo, frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNeedLoadAlt(false);
+    pattern->ResetImageAndAlt();
+    if (pattern->GetImageType() == ImagePattern::ImageType::ANIMATION) {
+        if (pattern->GetHasSizeChanged()) {
+            pattern->ResetPictureSize();
+        }
+        pattern->StopAnimation();
+        pattern->ResetImages();
+        if (!frameNode->GetChildren().empty()) {
+            auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+            ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageFrameNode);
+            frameNode->RemoveChild(imageFrameNode);
+        }
+        pattern->SetImageType(ImagePattern::ImageType::BASE);
+    }
+}
+
+void ImageModelNG::ResetImage(FrameNode* frameNode)
+{
+    ImageSourceInfo sourceInfo("");
+    sourceInfo.SetIsFromReset(true);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, sourceInfo, frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNeedLoadAlt(false);
+    pattern->ResetImageAndAlt();
 }
 
 void ImageModelNG::SetInitialSrc(FrameNode *frameNode, const std::string &src, const std::string &bundleName,
@@ -138,7 +183,8 @@ void ImageModelNG::CreateAnimation(const std::vector<ImageProperties>& imageList
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetChildren().empty()) {
-        auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+        auto imageNode = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_VOID(imageNode);
         auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
         CHECK_NULL_VOID(imageLayoutProperty);
@@ -525,6 +571,26 @@ void ImageModelNG::SetResizableSlice(const ImageResizableSlice& slice)
 void ImageModelNG::SetResizableSlice(FrameNode *frameNode, const ImageResizableSlice& slice)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableSlice, slice, frameNode);
+}
+
+void ImageModelNG::SetResizableLattice(const RefPtr<DrawingLattice>& lattice)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableLattice, lattice);
+}
+
+void ImageModelNG::SetResizableLattice(FrameNode* frameNode, const RefPtr<DrawingLattice>& lattice)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableLattice, lattice, frameNode);
+}
+
+void ImageModelNG::ResetResizableLattice()
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableLattice, nullptr);
+}
+
+void ImageModelNG::ResetResizableLattice(FrameNode *frameNode)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableLattice, nullptr, frameNode);
 }
 
 void ImageModelNG::SetImageRepeat(FrameNode *frameNode, ImageRepeat imageRepeat)

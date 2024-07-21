@@ -605,13 +605,13 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent
         OnClickAfterFirstUseDialog = [] (int32_t) {};
     } else {
         OnClickAfterFirstUseDialog = [weak = WeakClaim(this), weakContext = WeakPtr(pipeline),
-            node = frameNode](int32_t result) {
+            node = frameNode](int32_t result) mutable {
             auto context = weakContext.Upgrade();
             CHECK_NULL_RETURN(context, -1);
             auto taskExecutor = context->GetTaskExecutor();
             CHECK_NULL_RETURN(taskExecutor, -1);
             taskExecutor->PostTask(
-                [weak, instanceId = context->GetInstanceId(), result, nodeInner = node] {
+                [weak, instanceId = context->GetInstanceId(), result, nodeInner = std::move(node)] {
                     ContainerScope scope(instanceId);
                     auto pattern = weak.Upgrade();
                     CHECK_NULL_VOID(pattern);
@@ -652,13 +652,13 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEve
         OnClickAfterFirstUseDialog = [] (int32_t) {};
     } else {
         OnClickAfterFirstUseDialog = [weak = WeakClaim(this), weakContext = WeakPtr(pipeline),
-            node = frameNode](int32_t result) {
+            node = frameNode](int32_t result) mutable {
             auto context = weakContext.Upgrade();
             CHECK_NULL_RETURN(context, -1);
             auto taskExecutor = context->GetTaskExecutor();
             CHECK_NULL_RETURN(taskExecutor, -1);
             taskExecutor->PostTask(
-                [weak, instanceId = context->GetInstanceId(), result, nodeInner = node] {
+                [weak, instanceId = context->GetInstanceId(), result, nodeInner = std::move(node)] {
                     ContainerScope scope(instanceId);
                     auto pattern = weak.Upgrade();
                     CHECK_NULL_VOID(pattern);

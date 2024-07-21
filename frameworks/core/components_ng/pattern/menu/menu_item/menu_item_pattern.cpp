@@ -523,6 +523,7 @@ void MenuItemPattern::CloseMenu()
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->UpdateMenuAnimation(menuWrapper);
+    TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu.");
     menuWrapperPattern->HideMenu();
 }
 
@@ -628,6 +629,9 @@ void MenuItemPattern::OnClick()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (onClickAIMenuItem_) {
+        onClickAIMenuItem_();
+    }
     auto menuWrapper = GetMenuWrapper();
     auto menuWrapperPattern = menuWrapper ? menuWrapper->GetPattern<MenuWrapperPattern>() : nullptr;
     auto hasSubMenu = menuWrapperPattern ? menuWrapperPattern->HasStackSubMenu() : false;
@@ -661,16 +665,15 @@ void MenuItemPattern::OnClick()
     if (lastSelectedItem && lastSelectedItem != host) {
         auto pattern = lastSelectedItem->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
-        SetChange();
+        pattern->SetChange();
     }
-    if (GetSubBuilder() != nullptr &&
-        (expandingMode_ == SubMenuExpandingMode::SIDE ||
+    menuPattern->SetLastSelectedItem(host);
+    if (GetSubBuilder() != nullptr && (expandingMode_ == SubMenuExpandingMode::SIDE ||
         (expandingMode_ == SubMenuExpandingMode::STACK && !IsSubMenu() && !hasSubMenu) ||
         (expandingMode_ == SubMenuExpandingMode::EMBEDDED && !IsEmbedded()))) {
         ShowSubMenu();
         return;
     }
-    menuPattern->SetLastSelectedItem(host);
     // hide menu when menu item is clicked
     CloseMenu();
 }
@@ -738,9 +741,31 @@ void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
     } else if (touchType == TouchType::UP) {
         auto touchUpOffset = info.GetTouches().front().GetLocalLocation();
         if (lastTouchOffset_ && (touchUpOffset - *lastTouchOffset_).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                HandleOnChange();
+            }
             CloseMenu();
         }
         lastTouchOffset_.reset();
+    }
+}
+
+void CustomMenuItemPattern::HandleOnChange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<MenuItemEventHub>();
+    CHECK_NULL_VOID(hub);
+    auto onChange = hub->GetOnChange();
+    auto selectedChangeEvent = hub->GetSelectedChangeEvent();
+    SetChange();
+    if (selectedChangeEvent) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "trigger selectedChangeEvent");
+        selectedChangeEvent(IsSelected());
+    }
+    if (onChange) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "trigger onChange");
+        onChange(IsSelected());
     }
 }
 
@@ -766,11 +791,11 @@ void MenuItemPattern::OnHover(bool isHover)
         SetBgBlendColor(theme->GetHoverColor());
         ShowSubMenu();
         props->UpdateHover(true);
-        menuPattern->OnItemPressed(parent, index_, true);
+        menuPattern->OnItemPressed(parent, index_, true, true);
     } else {
         SetBgBlendColor(Color::TRANSPARENT);
         props->UpdateHover(false);
-        menuPattern->OnItemPressed(parent, index_, false);
+        menuPattern->OnItemPressed(parent, index_, false, true);
     }
     PlayBgColorAnimation();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1402,17 +1427,11 @@ void MenuItemPattern::UpdateDisabledStyle()
     auto theme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     if (content_) {
-        content_->GetRenderContext()->UpdateForegroundColor(theme->GetDisabledMenuFontColor());
-        auto textLayoutProperty = content_->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
+        content_->GetRenderContext()->UpdateOpacity(theme->GetDisabledFontColorAlpha());
         content_->MarkModifyDone();
     }
     if (label_) {
-        label_->GetRenderContext()->UpdateForegroundColor(theme->GetDisabledMenuFontColor());
-        auto labelTextLayoutProperty = label_->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(labelTextLayoutProperty);
-        labelTextLayoutProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
+        label_->GetRenderContext()->UpdateOpacity(theme->GetDisabledFontColorAlpha());
         label_->MarkModifyDone();
     }
     if (startIcon_) {

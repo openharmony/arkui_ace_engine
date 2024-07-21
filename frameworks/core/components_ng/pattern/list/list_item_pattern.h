@@ -117,6 +117,8 @@ public:
         return endNodeIndex_ >= 0;
     }
 
+    void OnDidPop();
+
     ListItemSwipeIndex GetSwiperIndex()
     {
         return swiperIndex_;
@@ -301,6 +303,7 @@ private:
     OnFinishFunc onFinishEvent_;
     bool isLayouted_ = false;
     bool springMotionTraceFlag_ = false;
+    bool isDragging_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListItemPattern);
 };

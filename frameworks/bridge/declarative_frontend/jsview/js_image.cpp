@@ -17,7 +17,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 #include "base/utils/utils.h"
@@ -28,6 +28,7 @@
 
 #include "base/geometry/ng/vector.h"
 #include "base/image/drawing_color_filter.h"
+#include "base/image/drawing_lattice.h"
 #include "base/image/pixel_map.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
@@ -74,7 +75,7 @@ ImageSourceInfo CreateSourceInfo(const std::shared_ptr<std::string>& srcRef, Ref
 std::unique_ptr<ImageModel> ImageModel::instance_ = nullptr;
 std::mutex ImageModel::mutex_;
 
-ImageModel* ImageModel::GetInstance()
+ImageModel* __attribute__((optnone)) ImageModel::GetInstance()
 {
     if (!instance_) {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -177,7 +178,7 @@ void JSImage::SetObjectFit(const JSCallbackInfo& args)
     }
     int32_t parseRes = 2;
     ParseJsInteger(args[0], parseRes);
-    if (parseRes < static_cast<int32_t>(ImageFit::FILL) || parseRes > static_cast<int32_t>(ImageFit::SCALE_DOWN)) {
+    if (parseRes < static_cast<int32_t>(ImageFit::FILL) || parseRes > static_cast<int32_t>(ImageFit::BOTTOM_END)) {
         parseRes = 2;
     }
     auto fit = static_cast<ImageFit>(parseRes);
@@ -216,7 +217,7 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onComplete");
             func->Execute(info);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Image.onComplete");
 #endif
         };
@@ -234,7 +235,7 @@ void JSImage::OnError(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onError");
             func->Execute(info);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Image.onError");
 #endif
         };
@@ -278,8 +279,21 @@ bool JSImage::CheckIsCard()
     return container->IsFormRender() && !container->IsDynamicRender();
 }
 
+bool JSImage::CheckResetImage(const JSCallbackInfo& info)
+{
+    int32_t parseRes = -1;
+    if (info.Length() < 1 || !ParseJsInteger(info[0], parseRes)) {
+        return false;
+    }
+    ImageModel::GetInstance()->ResetImage();
+    return true;
+}
+
 void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
 {
+    if (CheckResetImage(info)) {
+        return;
+    }
     bool isCard = CheckIsCard();
 
     // Interim programme
@@ -357,18 +371,9 @@ void JSImage::JsBorder(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetBackBorder();
 }
 
-void JSImage::JsImageResizable(const JSCallbackInfo& info)
+void JSImage::ParseResizableSlice(const JSRef<JSObject>& resizableObject)
 {
-    if (ImageModel::GetInstance()->GetIsAnimation()) {
-        return;
-    }
-    auto infoObj = info[0];
     ImageResizableSlice sliceResult;
-    if (!infoObj->IsObject()) {
-        ImageModel::GetInstance()->SetResizableSlice(sliceResult);
-        return;
-    }
-    JSRef<JSObject> resizableObject = JSRef<JSObject>::Cast(infoObj);
     if (resizableObject->IsEmpty()) {
         ImageModel::GetInstance()->SetResizableSlice(sliceResult);
         return;
@@ -386,6 +391,36 @@ void JSImage::JsImageResizable(const JSCallbackInfo& info)
     UpdateSliceResult(sliceObj, sliceResult);
 
     ImageModel::GetInstance()->SetResizableSlice(sliceResult);
+}
+
+void JSImage::ParseResizableLattice(const JSRef<JSObject>& resizableObject)
+{
+    auto latticeValue = resizableObject->GetProperty("lattice");
+    if (latticeValue->IsUndefined() || latticeValue->IsNull()) {
+        ImageModel::GetInstance()->ResetResizableLattice();
+    }
+    CHECK_NULL_VOID(latticeValue->IsObject());
+    auto drawingLattice = CreateDrawingLattice(latticeValue);
+    if (drawingLattice) {
+        ImageModel::GetInstance()->SetResizableLattice(drawingLattice);
+    } else {
+        ImageModel::GetInstance()->ResetResizableLattice();
+    }
+}
+
+void JSImage::JsImageResizable(const JSCallbackInfo& info)
+{
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
+    auto infoObj = info[0];
+    if (!infoObj->IsObject()) {
+        ImageModel::GetInstance()->SetResizableSlice(ImageResizableSlice());
+        return;
+    }
+    JSRef<JSObject> resizableObject = JSRef<JSObject>::Cast(infoObj);
+    ParseResizableSlice(resizableObject);
+    ParseResizableLattice(resizableObject);
 }
 
 void JSImage::UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableSlice& sliceResult)
@@ -682,14 +717,14 @@ void JSImage::SetDynamicRangeMode(const JSCallbackInfo& info)
 void JSImage::SetEnhancedImageQuality(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        ImageModel::GetInstance()->SetEnhancedImageQuality(AIImageQuality::NONE);
+        ImageModel::GetInstance()->SetEnhancedImageQuality(AIImageQuality::LOW);
         return;
     }
-    int32_t parseRes = static_cast<int32_t>(AIImageQuality::NONE);
+    int32_t parseRes = static_cast<int32_t>(AIImageQuality::LOW);
     ParseJsInteger(info[0], parseRes);
-    if (parseRes < static_cast<int32_t>(AIImageQuality::NONE) ||
+    if (parseRes < static_cast<int32_t>(AIImageQuality::LOW) ||
         parseRes > static_cast<int32_t>(AIImageQuality::HIGH)) {
-        parseRes = static_cast<int32_t>(AIImageQuality::NONE);
+        parseRes = static_cast<int32_t>(AIImageQuality::LOW);
     }
     AIImageQuality resolutionQuality  = static_cast<AIImageQuality>(parseRes);
     ImageModel::GetInstance()->SetEnhancedImageQuality(resolutionQuality);

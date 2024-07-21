@@ -152,6 +152,9 @@ protected:
     Dimension textIndent_ = 0.0_px;
     float indent_ = 0.0f;
 private:
+    TextAlign GetCounterNodeAlignment(LayoutWrapper* layoutWrapper);
+    void InlineFocusMeasure(const LayoutConstraintF& contentConstraint,
+        LayoutWrapper* layoutWrapper, double& safeBoundary, float& contentWidth);
     static void UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& textStyle, bool isDisabled);
@@ -173,20 +176,15 @@ private:
         const RefPtr<TextFieldPattern>& pattern);
     void HandleNonTextArea(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& counterNode,
         const RefPtr<TextFieldPattern>& pattern, bool isRTL, float& countX);
-    void HandleRTLNonTextArea(const RectF& contentRect, const RefPtr<GeometryNode>& textGeometryNode,
-        const RectF& frameRect, float& countX);
-    void HandleLTRNonTextArea(const RectF& contentRect, const RefPtr<GeometryNode>& textGeometryNode,
-        const RectF& frameRect, float& countX);
     void HandleTextArea(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& counterNode,
         const RefPtr<TextFieldPattern>& pattern, bool isRTL, float& countX);
     void HandleRTLTextArea(const std::unique_ptr<GeometryProperty>& content,
         const RefPtr<GeometryNode>& textGeometryNode, float& countX, float errTextWidth);
     void HandleLTRTextArea(const std::unique_ptr<GeometryProperty>& content,
         const RefPtr<GeometryNode>& textGeometryNode, float &countX);
-    float CalculateLongestLine(LayoutWrapper* layoutWrapper);
     float CalculateContentWidth(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
-        float imageWidth, float longestLine);
-    float CalculateContentHeight(const LayoutConstraintF& contentConstraint, float longestLine);
+        float imageWidth);
+    float CalculateContentHeight(const LayoutConstraintF& contentConstraint);
     LayoutConstraintF BuildInfinityLayoutConstraint(const LayoutConstraintF& contentConstraint);
     LayoutConstraintF BuildInlineFocusLayoutConstraint(const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper);

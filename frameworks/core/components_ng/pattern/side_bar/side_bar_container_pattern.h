@@ -154,6 +154,7 @@ private:
     void WindowFocus(bool isFocus);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
     void OnColorConfigurationUpdate() override;
     void UpdateAnimDir();
@@ -195,6 +196,7 @@ private:
     void SetSideBarActive(bool isActive, bool onlyJsActive) const;
     void OnLanguageConfigurationUpdate() override;
     void SetSideBarMask(bool isWindowFocus) const;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> dividerMouseEvent_;

@@ -109,6 +109,7 @@ struct GradientMask {
           this.context2D.fillRect(0, 0, GRADIENT_WIDTH, LIST_ROW_HEIGHT)
         })
     }
+    .blendMode(BlendMode.DST_OUT)
     .width(GRADIENT_WIDTH)
     .height(LIST_ROW_HEIGHT)
   }
@@ -929,6 +930,7 @@ export struct Filter {
           y1: LIST_ROW_HEIGHT / 2
         })
       }
+      .blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
     }
 
   }

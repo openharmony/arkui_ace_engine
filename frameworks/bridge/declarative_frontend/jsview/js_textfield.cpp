@@ -19,7 +19,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -900,7 +900,7 @@ Local<JSValueRef> JSTextField::JsKeepEditableState(panda::JsiRuntimeCallInfo *in
 {
     Local<JSValueRef> thisObj = info->GetThisRef();
     auto eventInfo = static_cast<NG::TextFieldCommonEvent*>(
-        panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+        panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
     if (eventInfo) {
         eventInfo->SetKeepEditable(true);
     }
@@ -931,7 +931,7 @@ void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
         JSRef<JSVal> dataObject = JSRef<JSVal>::Cast(object);
         JSRef<JSVal> param[2] = {keyEvent, dataObject};
         func->Execute(param);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onSubmit");
 #endif
     };
@@ -954,25 +954,25 @@ void JSTextField::SetOnSubmit(const JSCallbackInfo& info)
 #endif
 }
 
-JSRef<JSVal> JSTextField::CreateJsOnChangeObj(const TextRange& textRange)
+JSRef<JSVal> JSTextField::CreateJsOnChangeObj(const PreviewText& previewText)
 {
-    JSRef<JSObject> range = JSRef<JSObject>::New();
-    range->SetPropertyObject("start", JSRef<JSVal>::Make(ToJSValue(textRange.start)));
-    range->SetPropertyObject("end", JSRef<JSVal>::Make(ToJSValue(textRange.end)));
-    return JSRef<JSVal>::Cast(range);
+    JSRef<JSObject> previewTextObj = JSRef<JSObject>::New();
+    previewTextObj->SetProperty<int32_t>("offset", previewText.offset);
+    previewTextObj->SetProperty<std::string>("value", previewText.value);
+    return JSRef<JSVal>::Cast(previewTextObj);
 }
 
 void JSTextField::SetOnChange(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
     CHECK_NULL_VOID(jsValue->IsFunction());
-    auto jsChangeFunc = AceType::MakeRefPtr<JsCitedEventFunction<TextRange, 2>>(
+    auto jsChangeFunc = AceType::MakeRefPtr<JsCitedEventFunction<PreviewText, 2>>(
         JSRef<JSFunc>::Cast(jsValue), CreateJsOnChangeObj);
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsChangeFunc)](
-        const std::string& val, TextRange& range) {
+        const std::string& val, PreviewText& previewText) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onChange");
-        func->Execute(val, range);
+        func->Execute(val, previewText);
     };
     TextFieldModel::GetInstance()->SetOnChange(std::move(onChange));
 }
@@ -1039,7 +1039,7 @@ void JSTextField::SetOnPaste(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onPaste");
         func->Execute(val, info);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPaste");
 #endif
     };

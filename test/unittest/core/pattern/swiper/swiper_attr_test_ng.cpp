@@ -691,6 +691,8 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin001, TestSize.Level1)
     CreateWithItem([](SwiperModelNG model) {});
     EXPECT_EQ(pattern_->GetNextMargin(), 0.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), 0.f);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), SWIPER_WIDTH);
 }
 
 /**
@@ -701,15 +703,16 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin001, TestSize.Level1)
 HWTEST_F(SwiperAttrTestNg, AttrMargin002, TestSize.Level1)
 {
     /**
-     * @tc.cases: Set margin to 10,5
-     * @tc.expected: Margin is 10,5
+     * @tc.cases: Set margin
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(10.f), false);
-        model.SetPreviousMargin(Dimension(5.f), false);
+        model.SetPreviousMargin(Dimension(PRE_MARGIN), false);
+        model.SetNextMargin(Dimension(NEXT_MARGIN), false);
     });
-    EXPECT_EQ(pattern_->GetNextMargin(), 10.f);
-    EXPECT_EQ(pattern_->GetPrevMargin(), 5.f);
+    EXPECT_EQ(pattern_->GetPrevMargin(), PRE_MARGIN);
+    EXPECT_EQ(pattern_->GetNextMargin(), NEXT_MARGIN);
+    EXPECT_EQ(GetChildX(frameNode_, 0), PRE_MARGIN);
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), SWIPER_WIDTH - PRE_MARGIN - NEXT_MARGIN);
 }
 
 /**
@@ -761,9 +764,9 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin005, TestSize.Level1)
      * @tc.cases: Only set nextMargin
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(10.f), false);
+        model.SetNextMargin(Dimension(NEXT_MARGIN), false);
     });
-    EXPECT_EQ(pattern_->GetNextMargin(), 10.f);
+    EXPECT_EQ(pattern_->GetNextMargin(), NEXT_MARGIN);
     EXPECT_EQ(pattern_->GetPrevMargin(), 0.f);
 }
 
@@ -778,10 +781,10 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin006, TestSize.Level1)
      * @tc.cases: Only set preMargin
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetPreviousMargin(Dimension(5.f), false);
+        model.SetPreviousMargin(Dimension(PRE_MARGIN), false);
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 0.f);
-    EXPECT_EQ(pattern_->GetPrevMargin(), 5.f);
+    EXPECT_EQ(pattern_->GetPrevMargin(), PRE_MARGIN);
 }
 /**
  * @tc.name: AttrNestedScroll001

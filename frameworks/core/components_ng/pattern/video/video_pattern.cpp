@@ -279,6 +279,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
             CHECK_NULL_VOID(video);
             ContainerScope scope(video->instanceId_);
             video->OnCurrentTimeChange(currentPos);
+            video->StartUpdateImageAnalyzer();
         }, "ArkUIVideoCurrentTimeChange");
     };
 
@@ -320,6 +321,19 @@ void VideoPattern::RegisterMediaPlayerEvent()
 
     mediaPlayer_->RegisterMediaPlayerEvent(
         positionUpdatedEvent, stateChangedEvent, errorEvent, resolutionChangeEvent, startRenderFrameEvent);
+
+    auto&& seekDoneEvent = [videoPattern, uiTaskExecutor](uint32_t currentPos) {
+        uiTaskExecutor.PostSyncTask(
+            [&videoPattern, currentPos] {
+                auto video = videoPattern.Upgrade();
+                CHECK_NULL_VOID(video);
+                ContainerScope scope(video->instanceId_);
+                video->SetIsSeeking(false);
+                video->OnCurrentTimeChange(currentPos);
+            },
+            "ArkUIVideoSeekDone");
+    };
+    mediaPlayer_->RegisterMediaPlayerSeekDoneEvent(std::move(seekDoneEvent));
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     auto&& textureRefreshEvent = [videoPattern, uiTaskExecutor](int32_t instanceId, int64_t textureId) {
@@ -697,7 +711,8 @@ void VideoPattern::OnUpdateTime(uint32_t time, int pos) const
     textLayoutProperty->UpdateContent(timeText);
     durationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     durationNode->MarkModifyDone();
-    if (pos == CURRENT_POS) {
+    // if current status is seeking, no need to update slider's value
+    if (pos == CURRENT_POS && !isSeeking_) {
         auto sliderNode = DynamicCast<FrameNode>(controlBar->GetChildAtIndex(SLIDER_POS));
         CHECK_NULL_VOID(sliderNode);
         auto sliderPattern = sliderNode->GetPattern<SliderPattern>();
@@ -1534,6 +1549,7 @@ void VideoPattern::SetCurrentTime(float currentPos, OHOS::Ace::SeekMode seekMode
         return;
     }
     if (GreatOrEqual(currentPos, 0.0)) {
+        SetIsSeeking(true);
         mediaPlayer_->Seek(static_cast<int32_t>(currentPos * MILLISECONDS_TO_SECONDS), seekMode);
     }
 }
@@ -1937,6 +1953,7 @@ void VideoPattern::OnWindowHide()
 {
 #if defined(OHOS_PLATFORM)
     if (!BackgroundTaskHelper::GetInstance().HasBackgroundTask()) {
+        autoPlay_ = false;
         Pause();
     }
 #else

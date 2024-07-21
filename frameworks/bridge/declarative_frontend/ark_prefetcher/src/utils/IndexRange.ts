@@ -54,7 +54,7 @@ class IndexRange {
     return new IndexRange(Math.min(this.start, other.start), Math.max(this.end, other.end));
   }
 
-  forEachIndex(callback: (index: number) => void) {
+  forEachIndex(callback: (index: number) => void): void {
     for (let i = this.start; i < this.end; ++i) {
       callback(i);
     }
@@ -66,7 +66,7 @@ class IndexRange {
 }
 
 class IndexRangeArray extends Array<IndexRange> {
-  forEachIndex(callback: (index: number) => void) {
+  forEachIndex(callback: (index: number) => void): void {
     this.forEach((range) => {
       range.forEachIndex(callback);
     });

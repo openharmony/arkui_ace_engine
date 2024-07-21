@@ -14,7 +14,7 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_grid.h"
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -387,6 +387,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("nestedScroll", &JSGrid::SetNestedScroll);
     JSClass<JSGrid>::StaticMethod("enableScrollInteraction", &JSGrid::SetScrollEnabled);
     JSClass<JSGrid>::StaticMethod("friction", &JSGrid::SetFriction);
+    JSClass<JSGrid>::StaticMethod("alignItems", &JSGrid::SetAlignItems);
 
     JSClass<JSGrid>::StaticMethod("onScroll", &JSGrid::JsOnScroll);
     JSClass<JSGrid>::StaticMethod("onReachStart", &JSGrid::JsOnReachStart);
@@ -405,9 +406,9 @@ void JSGrid::SetScrollBar(const JSCallbackInfo& info)
     GridModel::GetInstance()->SetScrollBarMode(displayMode);
 }
 
-void JSGrid::SetScrollBarColor(const std::string& color)
+void JSGrid::SetScrollBarColor(const JSCallbackInfo& info)
 {
-    auto scrollBarColor = JSScrollable::ParseBarColor(color);
+    auto scrollBarColor = JSScrollable::ParseBarColor(info);
     if (!scrollBarColor.empty()) {
         GridModel::GetInstance()->SetScrollBarColor(scrollBarColor);
     }
@@ -609,7 +610,7 @@ void JSGrid::JsOnGridDrop(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Grid.onItemDrop");
         func->ItemDropExecute(dragInfo, itemIndex, insertIndex, isSuccess);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Grid.onItemDrop");
 #endif
     };
@@ -659,6 +660,24 @@ void JSGrid::SetFriction(const JSCallbackInfo& info)
     GridModel::GetInstance()->SetFriction(friction);
 }
 
+void JSGrid::SetAlignItems(const JSCallbackInfo& info)
+{
+    if (info.Length() > 0) {
+        GridModel::GetInstance()->SetAlignItems(GridItemAlignment::DEFAULT);
+        return;
+    }
+
+    if (info[0]->IsNumber()) {
+        auto itemAlign = static_cast<GridItemAlignment>(info[0]->ToNumber<int32_t>());
+        if (itemAlign < GridItemAlignment::DEFAULT || itemAlign > GridItemAlignment::STRETCH) {
+            itemAlign = GridItemAlignment::DEFAULT;
+        }
+        GridModel::GetInstance()->SetAlignItems(itemAlign);
+    } else {
+        GridModel::GetInstance()->SetAlignItems(GridItemAlignment::DEFAULT);
+    }
+}
+
 void JSGrid::JsOnScroll(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
@@ -690,7 +709,7 @@ void JSGrid::JsOnScrollStop(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Grid.onScrollStop");
 #endif
             return;
@@ -753,7 +772,7 @@ void JSGrid::JsOnReachStart(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Grid.onReachStart");
 #endif
             return;
@@ -768,7 +787,7 @@ void JSGrid::JsOnReachEnd(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Grid.onReachEnd");
 #endif
             return;

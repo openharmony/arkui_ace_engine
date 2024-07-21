@@ -237,6 +237,7 @@
       OHOS::Ace::NG::RichEditorAbstractSpanResult::*;
       OHOS::Ace::NG::RichEditorInsertValue::*;
       OHOS::Ace::NG::RichEditorDeleteValue::*;
+      OHOS::Ace::NG::RichEditorChangeValue::*;
       OHOS::Ace::TabController::*;
       OHOS::Ace::ParseFontFeatureSettings*;
       OHOS::Ace::StorageProxy::*;
@@ -244,6 +245,11 @@
       OHOS::Ace::AceScoringLog::*;
       "OHOS::Ace::NG::CustomNode::FlushReload()";
       "OHOS::Ace::CanvasModel::GetInstance()";
+
+      OHOS::Ace::NG::InspectorFilter::*;
+      OHOS::Ace::NG::ServiceCollaborationMenuAceHelper::*;
+      OHOS::Ace::NG::ServiceCollaborationAceCallback::*;
+      OHOS::Ace::DumpLog::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
