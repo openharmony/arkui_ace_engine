@@ -508,6 +508,9 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
         case MIXED_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->mixedEvent.subKind);
             break;
+        case DRAG_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->dragEvent.subKind);
+            break;
         default:
             break; /* Empty */
     }

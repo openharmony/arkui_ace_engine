@@ -53,6 +53,7 @@ ohos_shared_library("ace_ndk") {
   sources = [
     "//foundation/arkui/ace_engine/frameworks/core/components/common/properties/color.cpp",
     "//foundation/arkui/ace_engine/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
+    "event/drag_and_drop_impl.cpp",
     "event/ui_input_event.cpp",
     "native_interface_xcomponent.cpp",
     "node/animate_impl.cpp",
@@ -96,6 +97,7 @@ ohos_shared_library("ace_ndk") {
       "hilog:libhilog",
       "image_framework:pixelmap",
       "napi:ace_napi",
+      "udmf:udmf_client",
     ]
     version_script =
         get_label_info(":libace_ndk_rom", "target_gen_dir") + "/" +

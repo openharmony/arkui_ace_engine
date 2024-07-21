@@ -31,6 +31,8 @@ class UdmfClientImpl : public UdmfClient {
 public:
     RefPtr<UnifiedData> CreateUnifiedData() override;
     RefPtr<UnifiedData> TransformUnifiedData(napi_value napiValue) override;
+    RefPtr<UnifiedData> TransformUnifiedDataForNative(void* rawData) override;
+    void* TransformUnifiedDataPtr(RefPtr<UnifiedData>& unifiedData) override;
     napi_value TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData) override;
     napi_value TransformSummary(std::map<std::string, int64_t>& summary) override;
     int32_t SetData(const RefPtr<UnifiedData>& unifiedData, std::string& key) override;

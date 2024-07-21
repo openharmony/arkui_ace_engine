@@ -5299,6 +5299,67 @@ typedef enum {
      *
      */
     NODE_ON_ACCESSIBILITY_ACTIONS,
+
+    /**
+     * @brief Notifies the listener of the interaction state prior to a drop and drop operation.
+     *
+     * This event is triggered when a drag operation is about to start on a draggable item. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: corresponds to {@link ArkUI_PreViewDragStatus}. \n
+     */
+    NODE_ON_PRE_DRAG = 14,
+    /**
+     * @brief Called when the user starts to drag an ite
+     *
+     * A drag operation is recognized only when the dragged item is moved far enough. \n
+     * When the event callback occurs, the {@link ArkUI_DragEvent} object can be obtained from the
+     * {@link ArkUI_NodeEvent} object. \n
+     */
+    NODE_ON_DRAG_START = 15,
+    /**
+     * @brief Called when a dragged item enters the boundaries of the current component.
+     *
+     * The current component refers to the component that listens for this event. \n
+     * When the event callback occurs, the {@link ArkUI_DragEvent} object can be obtained from the
+     * {@link ArkUI_NodeEvent} object. \n
+     */
+    NODE_ON_DRAG_ENTER = 16,
+    /**
+     * @brief Called  when a dragged item moves in the current component.
+     *
+     * The current component refers to the component that listens for this event. \n
+     * When the event callback occurs, the {@link ArkUI_DragEvent} object can be obtained from the
+     * {@link ArkUI_NodeEvent} object. \n
+     */
+    NODE_ON_DRAG_MOVE = 17,
+    /**
+     * @brief Called when a dragged item leaves the boundaries of the current component.
+     *
+     * The current component refers to the component that listens for this event. \n
+     * When the event callback occurs, the {@link ArkUI_DragEvent} object can be obtained from the
+     * {@link ArkUI_NodeEvent} object. \n
+     */
+    NODE_ON_DRAG_LEAVE = 18,
+    /**
+     * @brief Called when a dragged item is dropped on the current component.
+     * The component can obtain the drag data for processing through the callback.
+     *
+     * The current component refers to the component that listens for this event. \n
+     * When the event callback occurs, the {@link ArkUI_DragEvent} object can be obtained from the
+     * {@link ArkUI_NodeEvent} object. \n
+     */
+    NODE_ON_DROP = 19,
+    /**
+     * @brief Called when a drag operation ends.
+     * The drag source can obtain the drag result by registering this callback.
+     *
+     * A drag operation ends when the dragged item is released.
+     * When the event callback occurs, the {@link ArkUI_DragEvent} object can be obtained from the
+     * {@link ArkUI_NodeEvent} object. \n
+     */
+    NODE_ON_DRAG_END = 20,
     /**
      * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
      *
