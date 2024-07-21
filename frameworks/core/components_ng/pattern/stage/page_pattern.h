@@ -270,6 +270,10 @@ protected:
     bool isRenderDone_ = false;
     bool isModalCovered_ = false;
 
+#if defined(ENABLE_SPLIT_MODE)
+    bool needFireObserver_ = true;
+#endif
+
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;
     RouterPageState state_ = RouterPageState::ABOUT_TO_APPEAR;
