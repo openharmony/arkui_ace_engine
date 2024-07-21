@@ -1651,16 +1651,16 @@ public:
     void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
     {
         if (pixelMap) {
-            std::unique_lock<std::mutex> lock(g_mutex);
 #ifdef PIXEL_MAP_SUPPORTED
             g_pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
 #endif // PIXEL_MAP_SUPPORTED
         } else {
             g_pixelMap = nullptr;
-            TAG_LOGW(AceLogTag::ACE_DRAG, "get drag thumbnail pixelMap failed!");
+            TAG_LOGE(AceLogTag::ACE_DRAG, "get drag thumbnail pixelMap failed!");
         }
 
         if (callback_ == nullptr) {
+            std::unique_lock<std::mutex> lock(g_mutex);
             thumbnailGet.notify_all();
             return;
         }
@@ -1685,6 +1685,7 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale)
     auto ret =
         RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY, true);
     if (!ret) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "TakeSurfaceCaptureForUI failed!");
         return nullptr;
     }
     std::unique_lock<std::mutex> lock(g_mutex);
