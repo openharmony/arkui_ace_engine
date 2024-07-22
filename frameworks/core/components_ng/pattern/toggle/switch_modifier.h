@@ -35,7 +35,8 @@ class SwitchModifier : public ContentModifier {
     DECLARE_ACE_TYPE(SwitchModifier, ContentModifier);
 
 public:
-    SwitchModifier(bool isSelect, const Color& boardColor, float dragOffsetX);
+    SwitchModifier(const SizeF& size, const OffsetF& offset, float pointOffset, bool isSelect, const Color& boardColor,
+        float dragOffsetX);
     ~SwitchModifier() override = default;
 
     void onDraw(DrawingContext& context) override
@@ -72,17 +73,7 @@ public:
             return;
         }
         bool isRtl = direction_ == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft()
-                                                   : direction_ == TextDirection::RTL;
-        // Animation is not displayed when created for the first time.
-        if (isFirstCreated_) {
-            animatableBoardColor_->Set(isSelect_->Get() ? LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
-            if (isRtl) {
-                pointOffset_->Set(isSelect_->Get() ? 0.0f : actualSize_.Width() - actualSize_.Height());
-            } else {
-                pointOffset_->Set(isSelect_->Get() ? actualSize_.Width() - actualSize_.Height() : 0.0f);
-            }
-            isFirstCreated_ = false;
-        }
+                                                       : direction_ == TextDirection::RTL;
         AnimationOption colorOption = AnimationOption();
         colorOption.SetDuration(colorAnimationDuration_);
         colorOption.SetCurve(Curves::FAST_OUT_SLOW_IN);

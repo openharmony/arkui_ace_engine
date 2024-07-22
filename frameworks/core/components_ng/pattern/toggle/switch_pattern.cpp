@@ -134,10 +134,12 @@ void SwitchPattern::HandleBlurEvent(const RefPtr<SwitchPaintProperty>& switchPai
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(switchModifier_);
+    CHECK_NULL_VOID(paintMethod_);
+    auto switchModifier = paintMethod_->GetSwitchModifier();
+    CHECK_NULL_VOID(switchModifier);
     RemoveIsFocusActiveUpdateEvent();
     isFocus_ = false;
-    switchModifier_->SetIsFocused(false);
+    switchModifier->SetIsFocused(false);
     if (isBgColorUnselectFocus_) {
         isBgColorUnselectFocus_ = false;
         switchPaintProperty->UpdateUnselectedColor(switchTheme->GetInactiveColor());
@@ -154,10 +156,12 @@ void SwitchPattern::HandleFocusEvent(const RefPtr<SwitchPaintProperty>& switchPa
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(switchModifier_);
+    CHECK_NULL_VOID(paintMethod_);
+    auto switchModifier = paintMethod_->GetSwitchModifier();
+    CHECK_NULL_VOID(switchModifier);
     AddIsFocusActiveUpdateEvent();
     isFocus_ = true;
-    switchModifier_->SetIsFocused(true);
+    switchModifier->SetIsFocused(true);
     Color bgColor = switchTheme->GetInactiveColor();
     if (!isOn_.value_or(false)) {
         if (!switchPaintProperty->HasUnselectedColor() || switchPaintProperty->GetUnselectedColor() == bgColor) {
@@ -199,8 +203,10 @@ void SwitchPattern::RemoveIsFocusActiveUpdateEvent()
 
 void SwitchPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
 {
-    CHECK_NULL_VOID(switchModifier_);
-    switchModifier_->SetIsFocused(isFocusAcitve);
+    CHECK_NULL_VOID(paintMethod_);
+    auto switchModifier = paintMethod_->GetSwitchModifier();
+    CHECK_NULL_VOID(switchModifier);
+    switchModifier->SetIsFocused(isFocusAcitve);
 }
 void SwitchPattern::UpdateSwitchPaintProperty()
 {
@@ -337,8 +343,10 @@ void SwitchPattern::OnChange()
     CHECK_NULL_VOID(host);
     auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_VOID(switchPaintProperty);
-    CHECK_NULL_VOID(switchModifier_);
-    switchModifier_->SetIsOn(isOn_.value());
+    CHECK_NULL_VOID(paintMethod_);
+    auto switchModifier = paintMethod_->GetSwitchModifier();
+    CHECK_NULL_VOID(switchModifier);
+    switchModifier->SetIsOn(isOn_.value());
     switchPaintProperty->UpdateIsOn(isOn_.value_or(false));
     UpdateChangeEvent();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -597,9 +605,11 @@ void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto radio = height / 2.0;
     auto offsetX = offset_.GetX() - focusPaintPadding;
     auto offsetY = offset_.GetY() - focusPaintPadding;
-    CHECK_NULL_VOID(switchModifier_);
-    auto trackRadius = switchModifier_->GetTrackRadius();
-    auto pointRadius = switchModifier_->GetPointRadius();
+    CHECK_NULL_VOID(paintMethod_);
+    auto switchModifier = paintMethod_->GetSwitchModifier();
+    CHECK_NULL_VOID(switchModifier);
+    auto trackRadius = switchModifier->GetTrackRadius();
+    auto pointRadius = switchModifier->GetPointRadius();
     if (pointRadius * NUMBER_TWO > height_) {
         width = width_ - height_ + pointRadius * NUMBER_TWO + focusPaintPadding * NUMBER_TWO;
         height = pointRadius * NUMBER_TWO + focusPaintPadding * NUMBER_TWO;

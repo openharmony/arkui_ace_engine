@@ -32,21 +32,36 @@ constexpr double NUM_TWO = 2.0;
 class ACE_EXPORT SwitchPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SwitchPaintMethod, NodePaintMethod)
 public:
-    explicit SwitchPaintMethod(const RefPtr<SwitchModifier>& switchModifier) : switchModifier_(switchModifier) {}
+    SwitchPaintMethod() = default;
 
     ~SwitchPaintMethod() override = default;
 
     RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
     {
-        CHECK_NULL_RETURN(switchModifier_, nullptr);
+        if (!switchModifier_) {
+            auto paintProperty = DynamicCast<SwitchPaintProperty>(paintWrapper->GetPaintProperty());
+            auto size = paintWrapper->GetContentSize();
+            auto offset = paintWrapper->GetContentOffset();
+            bool isRtl = direction_ == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft()
+                                                           : direction_ == TextDirection::RTL;
+            auto pointOffset = isSelect_ ^ isRtl ? size.Width() - size.Height() : 0.0f;
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_RETURN(pipeline, nullptr);
+            auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+            auto boardColor = isSelect_ ? paintProperty->GetSelectedColorValue(switchTheme->GetActiveColor())
+                                        : switchTheme->GetInactivePointColor();
+            switchModifier_ =
+                AceType::MakeRefPtr<SwitchModifier>(size, offset, pointOffset, isSelect_, boardColor, dragOffsetX_);
+            switchModifier_->InitializeParam();
+        }
         return switchModifier_;
     }
 
     void UpdateContentModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_VOID(switchModifier_);
-        switchModifier_->InitializeParam();
         auto paintProperty = DynamicCast<SwitchPaintProperty>(paintWrapper->GetPaintProperty());
+        switchModifier_->SetUseContentModifier(useContentModifier_);
         if (paintProperty->HasUnselectedColor()) {
             switchModifier_->SetInactiveColor(paintProperty->GetUnselectedColor().value());
         }
@@ -149,6 +164,16 @@ public:
         direction_ = direction;
     }
 
+    void SetUseContentModifier(bool useContentModifier)
+    {
+        useContentModifier_ = useContentModifier;
+    }
+
+    RefPtr<SwitchModifier> GetSwitchModifier()
+    {
+        return switchModifier_;
+    }
+
 private:
     float dragOffsetX_ = 0.0f;
     float hoverPercent_ = 0.0f;
@@ -159,6 +184,7 @@ private:
     Color hoverColor_ = Color::WHITE;
     Dimension hoverRadius_ = 8.0_vp;
     bool showHoverEffect_ = true;
+    bool useContentModifier_ = false;
 
     bool isHover_ = false;
     OffsetF hotZoneOffset_;
