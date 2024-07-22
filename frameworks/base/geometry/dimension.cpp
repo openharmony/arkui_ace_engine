@@ -166,6 +166,11 @@ double Dimension::ConvertToPxWithSize(double size) const
     return ConvertToPx();
 }
 
+DimensionUnit Dimension::GetAdaptDimensionUnit(const Dimension& dimension)
+{
+    return static_cast<int32_t>(unit_) <= static_cast<int32_t>(dimension.unit_) ? unit_ : dimension.unit_;
+}
+
 double Dimension::ConvertToPxDistribute(std::optional<float> minOptional, std::optional<float> maxOptional) const
 {
     auto minFontScale = minOptional.value_or(0.0f);
