@@ -276,18 +276,7 @@ public:
         clickBreak_ = value;
     }
 
-    void SetButtonBgColor(const Color& color)
-    {
-        buttonBgColor_ = color;
-    }
-
-    void UpdateFocusColumnState(bool haveFocus)
-    {
-        if (isFocusColumn_ != haveFocus) {
-            isFocusColumn_ = haveFocus;
-            FlushCurrentOptions();
-        }
-    }
+    void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
 
 private:
     void OnModifyDone() override;
@@ -303,6 +292,9 @@ private:
     void SetButtonBackgroundColor(const Color& pressColor);
     void PlayPressAnimation(const Color& pressColor);
     void PlayHoverAnimation(const Color& color);
+    void InitSelectorButtonProperties(const RefPtr<PickerTheme>& pickerTheme);
+    void UpdateSelectorButtonProps(bool haveFocus, bool needMarkDirty);
+    const Color& GetButtonHoverColor() const;
 
     std::vector<DatePickerOptionProperty> optionProperties_;
     RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<DatePickerEventParam> param);
@@ -375,6 +367,15 @@ private:
     Color pressColor_;
     Color hoverColor_;
     Color buttonBgColor_ = Color::TRANSPARENT;
+    Color buttonDefaultBgColor_ = Color::TRANSPARENT;
+    Color buttonFocusBgColor_ = Color::TRANSPARENT;
+    Color buttonDefaultBorderColor_ = Color::TRANSPARENT;
+    Color buttonFocusBorderColor_ = Color::TRANSPARENT;
+    Color selectorTextFocusColor_ = Color::WHITE;
+    Dimension buttonDefaultBorderWidth_ = 0.0_vp;
+    Dimension buttonFocusBorderWidth_ = 0.0_vp;
+    bool isFirstTimeUpdateButtonProps_ = true;
+    bool useButtonFocusArea_ = false;
     bool isFocusColumn_ = false;
     bool isTossStatus_ = false;
     bool clickBreak_ = false;

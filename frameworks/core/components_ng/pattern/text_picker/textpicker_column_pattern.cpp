@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 #include "core/components/text/text_theme.h"
 
@@ -101,6 +102,8 @@ void TextPickerColumnPattern::OnModifyDone()
     auto theme = pipeline->GetTheme<PickerTheme>();
     pressColor_ = theme->GetPressColor();
     hoverColor_ = theme->GetHoverColor();
+    useButtonFocusArea_ = theme->NeedButtonFocusAreaType();
+    InitSelectorButtonProperties(theme);
     auto showCount = GetShowOptionCount();
     InitMouseAndPressEvent();
     SetAccessibilityAction();
@@ -155,9 +158,86 @@ void TextPickerColumnPattern::OnMiddleButtonTouchMove()
 void TextPickerColumnPattern::OnMiddleButtonTouchUp()
 {
     if (isHover_) {
-        PlayPressAnimation(hoverColor_);
+        PlayPressAnimation(GetButtonHoverColor());
     } else {
         PlayPressAnimation(buttonBgColor_);
+    }
+}
+
+void TextPickerColumnPattern::InitSelectorButtonProperties(const RefPtr<PickerTheme>& pickerTheme)
+{
+    CHECK_NULL_VOID(pickerTheme);
+    if (useButtonFocusArea_) {
+        buttonDefaultBgColor_ = pickerTheme->GetSelectorItemNormalBgColor();
+        buttonFocusBgColor_ = pickerTheme->GetSelectorItemFocusBgColor();
+        buttonDefaultBorderColor_ = pickerTheme->GetSelectorItemBorderColor();
+        buttonFocusBorderColor_ = pickerTheme->GetSelectorItemFocusBorderColor();
+        selectorTextFocusColor_ = pickerTheme->GetOptionStyle(true, true).GetTextColor();
+        pressColor_ = buttonDefaultBgColor_.BlendColor(pickerTheme->GetPressColor());
+        hoverColor_ = buttonDefaultBgColor_.BlendColor(pickerTheme->GetHoverColor());
+
+        buttonDefaultBorderWidth_ = pickerTheme->GetSelectorItemFocusBorderWidth();
+        buttonFocusBorderWidth_ = pickerTheme->GetSelectorItemBorderWidth();
+    }
+}
+
+const Color& TextPickerColumnPattern::GetButtonHoverColor() const
+{
+    return useButtonFocusArea_ && isFocusColumn_ ? buttonFocusBgColor_ : hoverColor_;
+}
+
+void TextPickerColumnPattern::UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty)
+{
+    auto isInitUpdate = isFirstTimeUpdateButtonProps_ && (!haveFocus);
+    auto isFocusChanged = isFocusColumn_ != haveFocus;
+
+    if (isFocusChanged || isInitUpdate) {
+        isFocusColumn_ = haveFocus;
+        UpdateSelectorButtonProps(isFocusColumn_, needMarkDirty);
+    }
+    if (isFocusChanged) {
+        FlushCurrentOptions();
+    }
+    if (isInitUpdate) {
+        isFirstTimeUpdateButtonProps_ = false;
+    }
+}
+
+void TextPickerColumnPattern::UpdateSelectorButtonProps(bool haveFocus, bool needMarkDirty)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blend = host->GetParent();
+    CHECK_NULL_VOID(blend);
+    auto stack = blend->GetParent();
+    CHECK_NULL_VOID(stack);
+    auto buttonNode = DynamicCast<FrameNode>(stack->GetFirstChild());
+    CHECK_NULL_VOID(buttonNode);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    auto renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    BorderWidthProperty borderWidth;
+    BorderColorProperty borderColor;
+
+    if (haveFocus) {
+        buttonBgColor_ = buttonFocusBgColor_;
+        borderWidth.SetBorderWidth(buttonFocusBorderWidth_);
+        borderColor.SetColor(buttonFocusBorderColor_);
+    } else {
+        buttonBgColor_ = buttonDefaultBgColor_;
+        borderWidth.SetBorderWidth(buttonDefaultBorderWidth_);
+        borderColor.SetColor(buttonDefaultBorderColor_);
+    }
+
+    buttonLayoutProperty->UpdateBorderWidth(borderWidth);
+    renderContext->UpdateBorderColor(borderColor);
+    renderContext->UpdateBackgroundColor(buttonBgColor_);
+
+    if (needMarkDirty) {
+        buttonNode->MarkModifyDone();
+        buttonNode->MarkDirtyNode();
     }
 }
 
@@ -310,7 +390,7 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
 void TextPickerColumnPattern::HandleMouseEvent(bool isHover)
 {
     if (isHover) {
-        PlayPressAnimation(hoverColor_);
+        PlayPressAnimation(GetButtonHoverColor());
     } else {
         PlayPressAnimation(buttonBgColor_);
     }
@@ -826,6 +906,12 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     const RefPtr<TextLayoutProperty>& textLayoutProperty,
     const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
 {
+    if (useButtonFocusArea_) {
+        auto padding = pickerTheme->GetSelectorItemSpace();
+        PaddingProperty defaultPadding = { CalcLength(padding), CalcLength(padding),
+            CalcLength(0.0_vp), CalcLength(0.0_vp) };
+        textLayoutProperty->UpdatePadding(defaultPadding);
+    }
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
     if (selectedMarkPaint_) {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());

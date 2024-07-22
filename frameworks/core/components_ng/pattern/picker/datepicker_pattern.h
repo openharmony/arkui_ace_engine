@@ -626,8 +626,7 @@ private:
     void GetInnerFocusButtonPaintRect(RoundRect& paintRect);
     void UpdateFocusButtonState();
     void SetHaveFocus(bool haveFocus);
-    void UpdateButtonStyles(const RefPtr<FrameNode>& buttonNode, const RefPtr<FrameNode>& columnNode,
-        const RefPtr<PickerTheme>& pickerTheme, bool haveFocus);
+    void UpdateColumnButtonStyles(const RefPtr<FrameNode>& columnNode, bool haveFocus, bool needMarkDirty);
     PickerDate GetCurrentDateByMonthDaysColumn() const;
     PickerDate GetCurrentDateByYearMonthDayColumn() const;
     void OrderCurrentDateByYearMonthDayColumn(
@@ -666,6 +665,7 @@ private:
     bool isShowInDialog_ = false;
     bool focusEventInitialized_ = false;
     bool haveFocus_ = false;
+    bool useButtonFocusArea_ = false;
     Dimension selectorItemRadius_ = 8.0_vp;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     EventMarker OnDialogAccept_;
