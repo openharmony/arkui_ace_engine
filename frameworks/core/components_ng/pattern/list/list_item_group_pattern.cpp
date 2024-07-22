@@ -163,6 +163,19 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     return listLayoutProperty && listLayoutProperty->GetDivider().has_value() && !itemPosition_.empty();
 }
 
+float ListItemGroupPattern::GetPaddingAndMargin() const
+{
+    auto layoutProperty = GetLayoutProperty<ListItemGroupLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    const auto& margin = layoutProperty->CreateMargin();
+    auto offsetBeforeContent = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
+    auto offsetAfterContent = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
+    offsetBeforeContent += axis_ == Axis::HORIZONTAL ? margin.left.value_or(0) : margin.top.value_or(0);
+    offsetAfterContent += axis_ == Axis::HORIZONTAL ? margin.right.value_or(0) : margin.bottom.value_or(0);
+    return offsetBeforeContent + offsetAfterContent;
+}
+
 float ListItemGroupPattern::GetEstimateOffset(float height, const std::pair<float, float>& targetPos) const
 {
     if (layoutedItemInfo_.has_value() && layoutedItemInfo_.value().startIndex > 0) {
@@ -181,6 +194,7 @@ float ListItemGroupPattern::GetEstimateHeight(float& averageHeight) const
     if (visible == VisibleType::GONE) {
         return 0.0f;
     }
+    float paddingAndMargin = GetPaddingAndMargin();
     if (layoutedItemInfo_.has_value()) {
         auto totalHeight = (layoutedItemInfo_.value().endPos - layoutedItemInfo_.value().startPos + spaceWidth_);
         auto itemCount = layoutedItemInfo_.value().endIndex - layoutedItemInfo_.value().startIndex + 1;
@@ -188,14 +202,14 @@ float ListItemGroupPattern::GetEstimateHeight(float& averageHeight) const
     }
     if (layouted_) {
         if (itemTotalCount_ > 0) {
-            return itemTotalCount_ * averageHeight + headerMainSize_ + footerMainSize_ - spaceWidth_;
+            return itemTotalCount_ * averageHeight + headerMainSize_ + footerMainSize_ + paddingAndMargin - spaceWidth_;
         } else {
-            return headerMainSize_ + footerMainSize_;
+            return headerMainSize_ + footerMainSize_ + paddingAndMargin;
         }
     }
     auto host = GetHost();
     auto totalItem = host->GetTotalChildCount();
-    return averageHeight * totalItem;
+    return averageHeight * totalItem + paddingAndMargin;
 }
 
 void ListItemGroupPattern::CheckListDirectionInCardStyle()
