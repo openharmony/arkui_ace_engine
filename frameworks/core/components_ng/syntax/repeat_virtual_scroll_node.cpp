@@ -56,7 +56,7 @@ RepeatVirtualScrollNode::RepeatVirtualScrollNode(int32_t nodeId, int32_t totalCo
       caches_(templateCachedCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range),
       postUpdateTaskHasBeenScheduled_(false)
 {
-    // no preduct task scheduled
+    recycleItems_ = std::pair<int32_t, int32_t>(-100, -100);
 }
 
 void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
@@ -65,6 +65,8 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, 
         "DoSetActiveChildRange: nodeId: %{public}d: start: %{public}d, end: %{public}d, cacheStart: %{public}d, "
         "cacheEnd: %{public}d",
         GetId(), start, end, cacheStart, cacheEnd);
+
+    recycleItems_ = std::pair<int32_t, int32_t>(-100, -100);
 
     // STATE_MGMT_NOTE: Guido REview: I believe should use cacheStart and cacheEnd here, not start and end
     // memorize active range
@@ -93,9 +95,12 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, 
                     index, frameNode->GetId());
                 frameNode->SetActive(false);
             }
-            if (((start - cacheStart <= index) && (index <= end + cacheEnd)) ||
-                ((end < start) && (index <= end + cacheEnd || start - cacheStart <= index))) {
+            if (((start <= index) && (index <= end)) ||
+                ((end < start) && (index <= end || start <= index))) {
                 // keep in L1
+                TAG_LOGD(AceLogTag::ACE_REPEAT,
+                    "      ... keep in L1: index %{public}d -> nodeId  %{public}d: SetActive(false)",
+                    index, frameNode->GetId());
                 return true;
             }
 
@@ -108,6 +113,9 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, 
                 // else move child into disappearing children, skip syncing render tree
                 AddDisappearingChild(node);
             }
+            TAG_LOGD(AceLogTag::ACE_REPEAT,
+              "      ... remove from L1: index %{public}d -> nodeId  %{public}d: SetActive(false)",
+              index, frameNode->GetId());
             return false;
         });
     if (needSync) {
@@ -235,12 +243,28 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
         return nullptr;
     }
 
-    TAG_LOGD(AceLogTag::ACE_REPEAT,
+
+    if (index >= recycleItems_.first && index < recycleItems_.second) { 
+            TAG_LOGD(AceLogTag::ACE_REPEAT,
+        "nodeId: %{public}d: GetFrameChildByIndex(index: %{public}d, "
+        "key %{public}s, needBuild:  %{public}d, isCache: %{public}d, "
+        "addToRenderTree: %{public}d) -- ERROR index was just informed by recycleItems(%{public}d-%{public}d)...",
+        (int)GetId(), (int)index, key->c_str(),
+        (int)needBuild, (int)isCache, (int)addToRenderTree, (int)recycleItems_.first, (int) recycleItems_.second);
+
+     ACE_SCOPED_TRACE("RepeatVirtualScrollNode::GetFrameChildByIndex index[%d] -> key [%s], needBuild[%d] isCache[%d] addToRenderTree[%d] ERROR recycleItems[%d..<%dd]",
+        index, key->c_str(),  (int)needBuild, (int)isCache, (int)addToRenderTree, (int)recycleItems_.first, (int) recycleItems_.second);
+    } else {
+      TAG_LOGD(AceLogTag::ACE_REPEAT,
         "nodeId: %{public}d: GetFrameChildByIndex(index: %{public}d, "
         "key %{public}s, needBuild:  %{public}d, isCache: %{public}d, "
         "addToRenderTree: %{public}d) ...",
         (int)GetId(), (int)index, key->c_str(),
         (int)needBuild, (int)isCache, (int)addToRenderTree);
+
+     ACE_SCOPED_TRACE("RepeatVirtualScrollNode::GetFrameChildByIndex index[%d] -> key [%s], needBuild[%d] isCache[%d] addToRenderTree[%d]",
+        index, key->c_str(),  (int)needBuild, (int)isCache, (int)addToRenderTree);
+    }
 
     // search if index -> key -> Node exist
     // will update the same key item if needs.
@@ -328,9 +352,9 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren(bool /*not
         return children_;
     }
 
-    TAG_LOGD(AceLogTag::ACE_REPEAT, "Before rebuilding L1 ...");
-    TAG_LOGD(AceLogTag::ACE_REPEAT, "L1: \n %{public}s", caches_.DumpL1().c_str());
-    TAG_LOGD(AceLogTag::ACE_REPEAT, "L2: \n %{public}s", caches_.DumpL2().c_str());
+  //  TAG_LOGD(AceLogTag::ACE_REPEAT, "Before rebuilding L1 ...");
+  //  TAG_LOGD(AceLogTag::ACE_REPEAT, "L1: \n %{public}s", caches_.DumpL1().c_str());
+  //  TAG_LOGD(AceLogTag::ACE_REPEAT, "L2: \n %{public}s", caches_.DumpL2().c_str());
 
     // can not modify l1_cache while iterating
     // GetChildren is overloaded, can not change it to non-const
@@ -342,9 +366,9 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren(bool /*not
         children_.emplace_back(child);
     }
 
-    TAG_LOGD(AceLogTag::ACE_REPEAT, "After rebuilding L1 ...");
-    TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", caches_.DumpL1().c_str());
-    TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", caches_.DumpL2().c_str());
+//    TAG_LOGD(AceLogTag::ACE_REPEAT, "After rebuilding L1 ...");
+//    TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", caches_.DumpL1().c_str());
+//    TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", caches_.DumpL2().c_str());
     return children_;
 }
 
@@ -352,7 +376,10 @@ void RepeatVirtualScrollNode::RecycleItems(int32_t from, int32_t to)
 {
     TAG_LOGD(AceLogTag::ACE_REPEAT,
         "from: %{public}d, to: %{public}d",
-        from, to);
+        from-startIndex_, to-startIndex_);
+    
+    recycleItems_= std::pair<int32_t, int32_t>(from-startIndex_, to-startIndex_);
+
     offscreenItems_.from = from;
     offscreenItems_.to = to;
     for (auto i = from; i < to; i++) {
@@ -391,17 +418,17 @@ void RepeatVirtualScrollNode::PostIdleTask()
         node->postUpdateTaskHasBeenScheduled_ = false;
         TAG_LOGD(AceLogTag::ACE_REPEAT, "idle task calls GetChildren");
         node->GetChildren();
-        TAG_LOGD(AceLogTag::ACE_REPEAT, " ============ before caches.purge ============= ");
-        TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", node->caches_.DumpL1().c_str());
-        TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", node->caches_.DumpL2().c_str());
-        TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", node->caches_.DumpKey4Index().c_str());
-        TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", node->caches_.DumpUINode4Key().c_str());
+//        TAG_LOGD(AceLogTag::ACE_REPEAT, " ============ before caches.purge ============= ");
+//        TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", node->caches_.DumpL1().c_str());
+//        TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", node->caches_.DumpL2().c_str());
+//        TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", node->caches_.DumpKey4Index().c_str());
+//        TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", node->caches_.DumpUINode4Key().c_str());
         node->caches_.Purge();
         TAG_LOGD(AceLogTag::ACE_REPEAT, " ============ after caches.purge ============= ");
         TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", node->caches_.DumpL1().c_str());
         TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", node->caches_.DumpL2().c_str());
-        TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", node->caches_.DumpKey4Index().c_str());
-        TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", node->caches_.DumpUINode4Key().c_str());
+      //  TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", node->caches_.DumpKey4Index().c_str());
+      //  TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", node->caches_.DumpUINode4Key().c_str());
     });
 }
 

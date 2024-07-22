@@ -267,6 +267,8 @@ RefPtr<UINode> RepeatVirtualScrollCaches::CreateNewNode(uint32_t forIndex)
     }
     const auto& forKey = iter->second;
 
+    ACE_SCOPED_TRACE("RepeatVirtualScrollCaches::CreateNewNode index[%d] -> key[%s]", forIndex, forKey.c_str());
+
     // see if node already created, just for safety
     const auto nodeIter = node4key_.find(forKey);
     if (nodeIter != node4key_.end()) {
@@ -341,6 +343,13 @@ void RepeatVirtualScrollCaches::RecycleItemsByIndex(int32_t index)
         // STATE_MGMT_NOTE
         // can not just remove from L1, also need to detach from tree!
         // how to fix cause a call to RepeatVirtualScrollNode::DropFromL1 in
+        TAG_LOGD(AceLogTag::ACE_REPEAT,
+            "remove index %{public}d -> key %{public}s from L1",
+            index, keyIter->second.c_str());
+        
+        ACE_SCOPED_TRACE("RepeatVirtualScrollCaches::RecycleItemsByIndex index[%d] -> key [%s]",
+          index, keyIter->second.c_str());
+
         activeNodeKeysInL1_.erase(keyIter->second);
     }
 }
@@ -549,11 +558,15 @@ void RepeatVirtualScrollCaches::FindUnusedKeys(std::set<std::pair<bool, std::str
  */
 bool RepeatVirtualScrollCaches::Purge()
 {
-    bool didMakeChanges = false;
+    uint32_t deletedCount = 0;
     for (auto& itTType : node4key4ttype_) {
         const auto& ttype = itTType.first;
         auto& uiNode4Key = itTType.second;
-        const uint32_t cacheCount = cacheCountL24ttype_[ttype];
+        
+        // cacheCount specifies the number of extra items per side 
+        // of the visible area, hence need to multuply by 2.
+        uint32_t cacheCount = 2*cacheCountL24ttype_[ttype];
+
         std::set<std::string, KeySorterClass> l2Keys = GetSortedL2KeysForTType(uiNode4Key);
 
         // l2_keys is sorted by increasing distance from lastActiveRange
@@ -569,10 +582,14 @@ bool RepeatVirtualScrollCaches::Purge()
             node4key_.erase(*itL2Key);
             // check out transition case.
             itL2Key++;
-            didMakeChanges = true;
+            deletedCount+=1;
         }
+    } 
+    if (deletedCount > 0) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "WARN: Purged %d items", (int) deletedCount);
+        ACE_SCOPED_TRACE("RepeatVirtualScrollCaches::Purge %d items", (int) deletedCount);
     }
-    return didMakeChanges;
+    return (deletedCount > 0);
 }
 
 /**

@@ -197,6 +197,8 @@ private:
     OffscreenItems offscreenItems_;
     int32_t startIndex_ = 0;
 
+    std::pair<int, int> recycleItems_;
+
     ACE_DISALLOW_COPY_AND_MOVE(RepeatVirtualScrollNode);
 };
 } // namespace OHOS::Ace::NG
