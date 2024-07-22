@@ -184,6 +184,7 @@ void TextPickerPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     InitDisabled();
+    isNeedUpdateSelectedIndex_ = true;
 }
 
 void TextPickerPattern::SetEventCallback(EventCallback&& value)
@@ -287,7 +288,8 @@ void TextPickerPattern::OnColumnsBuildingCascade()
         if (cascadeOptions_.size() > index) {
             selectedIndex_ = selecteds_.size() <= index || cascadeOptions_[index].rangeResult.empty()
                                  ? 0 : selecteds_[index] % cascadeOptions_[index].rangeResult.size();
-            textPickerColumnPattern->SetCurrentIndex(selectedIndex_);
+            textPickerColumnPattern->SetCurrentIndex(
+                isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
             std::vector<NG::RangeContent> rangeContents;
             for (uint32_t i = 0; i < cascadeOptions_[index].rangeResult.size(); i++) {
                 NG::RangeContent rangeContent;
@@ -312,7 +314,8 @@ void TextPickerPattern::OnColumnsBuildingUnCascade()
         if (cascadeOptions_.size() > it.first) {
             selectedIndex_ = selecteds_.size() <= it.first || cascadeOptions_[it.first].rangeResult.empty()
                                  ? 0 : selecteds_[it.first] % cascadeOptions_[it.first].rangeResult.size();
-            textPickerColumnPattern->SetCurrentIndex(selectedIndex_);
+            textPickerColumnPattern->SetCurrentIndex(
+                isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
             std::vector<NG::RangeContent> rangeContents;
             for (uint32_t i = 0; i < cascadeOptions_[it.first].rangeResult.size(); i++) {
                 NG::RangeContent rangeContent;
@@ -329,7 +332,8 @@ void TextPickerPattern::OnColumnsBuildingUnCascade()
                 AppendOption(item);
             }
             selectedIndex_ = range_.empty() ? 0 : GetSelected() % range_.size();
-            textPickerColumnPattern->SetCurrentIndex(selectedIndex_);
+            textPickerColumnPattern->SetCurrentIndex(
+                isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
             textPickerColumnPattern->SetOptions(options_);
             textPickerColumnPattern->SetColumnKind(columnsKind_);
             it.second->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -964,6 +968,11 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(frameNode);
     FrameNode::ProcessOffscreenNode(frameNode);
     host->MarkModifyDone();
+}
+
+void TextPickerPattern::OnDirectionConfigurationUpdate()
+{
+    isNeedUpdateSelectedIndex_ = false;
 }
 
 void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size)

@@ -322,6 +322,8 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    void OnDirectionConfigurationUpdate() override;
+
     void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
     {
         contentRowNode_ = contentRowNode;
@@ -541,6 +543,7 @@ private:
     Dimension gradientHeight_;
     Dimension dividerSpacing_;
     float paintDividerSpacing_ = 1.0f;
+    bool isNeedUpdateSelectedIndex_ = true;
 };
 } // namespace OHOS::Ace::NG
 
