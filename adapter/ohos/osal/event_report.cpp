@@ -61,6 +61,9 @@ constexpr char EVENT_KEY_DURITION[] = "DURITION";
 constexpr char EVENT_KEY_TOTAL_FRAMES[] = "TOTAL_FRAMES";
 constexpr char EVENT_KEY_TOTAL_MISSED_FRAMES[] = "TOTAL_MISSED_FRAMES";
 constexpr char EVENT_KEY_MAX_FRAMETIME[] = "MAX_FRAMETIME";
+constexpr char EVENT_KEY_MAX_FRAMETIME_SINCE_START[] = "MAX_FRAMETIME_SINCE_START";
+constexpr char EVENT_KEY_MAX_HITCH_TIME[] = "MAX_HITCH_TIME";
+constexpr char EVENT_KEY_MAX_HITCH_TIME_SINCE_START[] = "MAX_HITCH_TIME_SINCE_START";
 constexpr char EVENT_KEY_MAX_SEQ_MISSED_FRAMES[] = "MAX_SEQ_MISSED_FRAMES";
 constexpr char EVENT_KEY_SOURCE_TYPE[] = "SOURCE_TYPE";
 constexpr char EVENT_KEY_NOTE[] = "NOTE";
@@ -409,6 +412,9 @@ void EventReport::ReportEventJankFrame(DataBase& data)
     const auto& totalFrames = data.totalFrames;
     const auto& totalMissedFrames = data.totalMissed;
     const auto& maxFrameTime = data.maxFrameTime / NS_TO_MS;
+    const auto& maxFrameTimeSinceStart = data.maxFrameTimeSinceStart;
+    const auto& maxHitchTime = data.maxHitchTime;
+    const auto& maxHitchTimeSinceStart = data.maxHitchTimeSinceStart;
     const auto& maxSeqMissedFrames = data.maxSuccessiveFrames;
     const auto& note = data.baseInfo.note;
     const auto& isDisplayAnimator = data.isDisplayAnimator;
@@ -428,6 +434,9 @@ void EventReport::ReportEventJankFrame(DataBase& data)
         EVENT_KEY_TOTAL_FRAMES, totalFrames,
         EVENT_KEY_TOTAL_MISSED_FRAMES, totalMissedFrames,
         EVENT_KEY_MAX_FRAMETIME, static_cast<uint64_t>(maxFrameTime),
+        EVENT_KEY_MAX_FRAMETIME_SINCE_START, static_cast<uint64_t>(maxFrameTimeSinceStart),
+        EVENT_KEY_MAX_HITCH_TIME, static_cast<uint64_t>(maxHitchTime),
+        EVENT_KEY_MAX_HITCH_TIME_SINCE_START, static_cast<uint64_t>(maxHitchTimeSinceStart),
         EVENT_KEY_MAX_SEQ_MISSED_FRAMES, maxSeqMissedFrames,
         EVENT_KEY_NOTE, note,
         EVENT_KEY_DISPLAY_ANIMATOR, isDisplayAnimator);
