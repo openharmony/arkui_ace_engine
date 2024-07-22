@@ -16,7 +16,7 @@
 class UIUtilsImpl {
     private static instance_: UIUtilsImpl = undefined;
 
-    public static getTarget<T extends Object>(source: T): T {
+    public getTarget<T extends Object>(source: T): T {
       if (!source || typeof source !== 'object') {
         return source;
       }

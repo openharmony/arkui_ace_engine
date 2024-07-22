@@ -10646,7 +10646,7 @@ PersistenceV2Impl.instance_ = undefined;
  * limitations under the License.
  */
 class UIUtilsImpl {
-    static getTarget(source) {
+    getTarget(source) {
         if (!source || typeof source !== 'object') {
             return source;
         }
