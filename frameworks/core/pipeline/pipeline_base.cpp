@@ -929,6 +929,8 @@ void PipelineBase::Destroy()
     virtualKeyBoardCallback_.clear();
     etsCardTouchEventCallback_.clear();
     formLinkInfoMap_.clear();
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "pipeline destroyed, has %{public}zu finish callbacks not executed",
+        finishFunctions_.size());
     finishFunctions_.clear();
     {
         // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
