@@ -838,11 +838,13 @@ void DragDropManager::DoDropAction(const RefPtr<FrameNode>& dragFrameNode, const
 RefPtr<UnifiedData> DragDropManager::RequestUDMFDataWithUDKey(const std::string& udKey)
 {
     if (udKey.empty()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "udKey is empty");
         return nullptr;
     }
     RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->CreateUnifiedData();
     auto ret = UdmfClient::GetInstance()->GetData(udData, udKey);
     if (ret != 0) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Get udmfData failed");
         return nullptr;
     }
     return udData;
