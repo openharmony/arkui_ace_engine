@@ -160,7 +160,7 @@ void OptionView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>&
 {
     auto pasteNode =
         PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
-            static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::NORMAL), true);
+            static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE), static_cast<int32_t>(ButtonType::NORMAL), true);
     CHECK_NULL_VOID(pasteNode);
     auto pattern = option->GetPattern<OptionPattern>();
     CHECK_NULL_VOID(pattern);
@@ -173,16 +173,15 @@ void OptionView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>&
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    if (optionsHasIcon) {
-        auto left = theme->GetIconSideLength().ConvertToPx() + theme->GetIconContentPadding().ConvertToPx();
-        pasteLayoutProperty->UpdateLeftSpace(Dimension(left));
-    }
 
     pasteLayoutProperty->UpdateFontSize(theme->GetMenuFontSize());
     pasteLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
     pastePaintProperty->UpdateFontColor(theme->GetMenuFontColor());
     pastePaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
     pasteLayoutProperty->UpdateBackgroundBorderRadius(theme->GetInnerBorderRadius());
+    pasteLayoutProperty->UpdateIconSize(theme->GetIconSideLength());
+    pastePaintProperty->UpdateIconColor(theme->GetMenuIconColor());
+    pasteLayoutProperty->UpdateTextIconSpace(theme->GetIconContentPadding());
     pasteNode->MountToParent(row);
     pasteNode->MarkModifyDone();
 
