@@ -506,6 +506,10 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest011, TestSize.Lev
 
     root->SetActive(true);
     root->isInternal_ = false;
+
+    debugInfo = nullptr;
+    result = accessibilityProperty.HoverTestRecursive(hoverPoint, root, path, debugInfo);
+    EXPECT_EQ(result, false);
 }
 
 /**
