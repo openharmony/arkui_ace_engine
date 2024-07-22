@@ -52,11 +52,6 @@ public:
         return false;
     }
 
-    bool StopExpandMark() override
-    {
-        return true;
-    }
-
     bool IsNeedPercent() const override
     {
         return true;

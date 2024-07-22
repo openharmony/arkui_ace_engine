@@ -227,7 +227,8 @@ public:
     // expand the SafeArea of expansive nodes, which are previously recorded during Layout traversal
     void ExpandSafeArea();
     void AdjustNotExpandNode();
-    void AdjustNotExpandNode(RectF& frame);
+    void AdjustFixedSizeNode(RectF& frame);
+    void ExpandHelper(const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame);
     ExpandEdges GetAccumulatedSafeAreaExpand(bool includingSelf = false);
     void ResetSafeAreaPadding();
 

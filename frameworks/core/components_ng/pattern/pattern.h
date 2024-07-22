@@ -85,7 +85,7 @@ public:
         return true;
     }
 
-    virtual bool StopExpandMark()
+    virtual bool ConsumeChildrenAdjustment(const OffsetF& /* offset */)
     {
         return false;
     }
