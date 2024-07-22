@@ -269,6 +269,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest001, TestSize.Level1)
      */
     auto offset = DimensionOffset(MENU_OFFSET);
     ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, false, ToastShowMode::TOP_MOST, 0, offset };
+    const std::optional<Color> textColor = Color::RED;
     /**
      * @tc.steps: step2. create ToastNode toastPattern1.
      */
@@ -295,7 +296,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest001, TestSize.Level1)
     /**
      * @tc.steps: step6. test UpdateTextLayoutProperty.
      */
-    ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false);
+    ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false, textColor);
     EXPECT_EQ(textLayoutProperty->GetTextOverflow(), TextOverflow::ELLIPSIS);
     EXPECT_EQ(textLayoutProperty->GetEllipsisMode(), EllipsisMode::TAIL);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
@@ -313,6 +314,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest002, TestSize.Level1)
      */
     auto offset = DimensionOffset(MENU_OFFSET);
     ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::TOP_MOST, 0, offset };
+    const std::optional<Color> textColor = Color::RED;
     auto toastNode = ToastView::CreateToastNode(toastInfo);
     ASSERT_NE(toastNode, nullptr);
     auto toastPattern1 = toastNode->GetPattern<ToastPattern>();
@@ -333,7 +335,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest002, TestSize.Level1)
     /**
      * @tc.steps: step4. test VERSION_TWELVEversion and UpdateTextLayoutProperty.
      */
-    ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false);
+    ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false, textColor);
     EXPECT_EQ(textLayoutProperty->GetTextOverflow(), TextOverflow::ELLIPSIS);
     EXPECT_EQ(textLayoutProperty->GetEllipsisMode(), EllipsisMode::TAIL);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
@@ -351,6 +353,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest003, TestSize.Level1)
      */
     auto offset = DimensionOffset(MENU_OFFSET);
     ToastInfo toastInfo = { MESSAGE, 1, BOTTOMSTRING, false, ToastShowMode::DEFAULT, 0, offset };
+    const std::optional<Color> textColor = Color::RED;
     /**
      * @tc.steps: step2. CreateToastNode toastPattern1.
      */
@@ -374,7 +377,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest003, TestSize.Level1)
     /**
      * @tc.steps: step5. test UpdateTextLayoutProperty .
      */
-    ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false);
+    ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false, textColor);
     auto textval = textLayoutProperty->GetTextOverflow();
     auto textva2 = textLayoutProperty->GetEllipsisMode();
     EXPECT_EQ(textval, TextOverflow::ELLIPSIS);
@@ -394,6 +397,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest004, TestSize.Level1)
      */
     auto offset = DimensionOffset(MENU_OFFSET);
     ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0, offset };
+    const std::optional<Color> textColor = Color::RED;
     auto toastNode = ToastView::CreateToastNode(toastInfo);
     ASSERT_NE(toastNode, nullptr);
     auto toastPattern = toastNode->GetPattern<ToastPattern>();
@@ -414,7 +418,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest004, TestSize.Level1)
     /**
      * @tc.steps: step4.Test UpdateTextLayoutProperty for diff toastInfo.
      */
-    ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, true);
+    ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, true, textColor);
     auto textval1 = textLayoutProperty->GetLayoutDirection();
     auto textval2 = textLayoutProperty->GetTextOverflow();
     auto textval3 = textLayoutProperty->GetEllipsisMode();
