@@ -215,16 +215,10 @@ void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     } else {
         scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
             scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
-        scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
-        scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
-        scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
     }
 #else
     scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
         scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
-    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
-    scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
-    scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 #endif // ARKUI_CIRCLE_FEATURE
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
