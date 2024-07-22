@@ -209,7 +209,6 @@ private:
     bool expandSafeArea_ = false;
     bool canOverScroll_ = false;
     bool enableSkipping_ = true; // enables skipping lines on a large offset change.
-    bool clearStretch_ = false;
     GridLayoutInfo scrollGridLayoutInfo_;
 
     // Map structure: [index, crossPosition], store cross position of each item.
