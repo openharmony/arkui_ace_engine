@@ -542,6 +542,7 @@ void ScrollBar::HandleDragStart(const GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR,"inner scrollBar drag start, localLocation: %{public}s, "
         "globalLocation: %{public}s",
         info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
+    ACE_SCOPED_TRACE("inner scrollBar HandleDragStart");
     if (scrollPositionCallback_) {
         scrollPositionCallback_(0, SCROLL_FROM_START);
         if (dragFRCSceneCallback_) {
@@ -561,6 +562,7 @@ void ScrollBar::HandleDragUpdate(const GestureEvent& info)
         if (IsReverse()) {
             offset = -offset;
         }
+        ACE_SCOPED_TRACE("inner scrollBar HandleDragUpdate offset:%f", offset);
         scrollPositionCallback_(offset, SCROLL_FROM_BAR);
         if (dragFRCSceneCallback_) {
             dragFRCSceneCallback_(NearZero(info.GetMainDelta()) ? info.GetMainVelocity()
@@ -579,6 +581,7 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar drag end, position is %{public}f and %{public}f, "
         "velocity is %{public}f",
         info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), velocity);
+    ACE_SCOPED_TRACE("inner scrollBar HandleDragEnd velocity:%f", velocity);
     if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
         if (scrollEndCallback_) {
             scrollEndCallback_();
