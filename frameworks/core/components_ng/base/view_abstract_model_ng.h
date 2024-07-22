@@ -360,7 +360,7 @@ public:
             return;
         }
         NG::BorderWidthProperty borderWidth {
-            .startDimen = start, .endDimen = end, .topDimen = top, .bottomDimen = bottom, .multiValued = true
+            .topDimen = top, .bottomDimen = bottom, .startDimen = start, .endDimen = end, .multiValued = true
         };
         ViewAbstract::SetBorderWidth(borderWidth);
     }
