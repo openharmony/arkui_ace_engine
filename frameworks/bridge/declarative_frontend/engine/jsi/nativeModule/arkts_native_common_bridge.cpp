@@ -1393,6 +1393,22 @@ std::function<void(bool)> ParseTransitionCallback(
     };
     return finishCallback;
 }
+
+bool ParseColorMetricsToColor(const EcmaVM *vm, const Local<JSValueRef> &jsValue, Color& result)
+{
+    if (!jsValue->IsObject(vm)) {
+        return false;
+    }
+    auto obj = jsValue->ToObject(vm);
+    auto toNumericProp = obj->Get(vm, "toNumeric");
+    if (toNumericProp->IsFunction(vm)) {
+        panda::Local<panda::FunctionRef> func = toNumericProp;
+            auto colorVal = func->Call(vm, obj, nullptr, 0);
+        result.SetValue(colorVal->Uint32Value(vm));
+        return true;
+    }
+    return false;
+}
 } // namespace
 
 ArkUINativeModuleValue CommonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
@@ -7351,5 +7367,53 @@ ArkUINativeModuleValue CommonBridge::GetApiTargetVersion(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
     int32_t apiTargetVersion = container->GetApiTargetVersion();
     return panda::NumberRef::New(vm, apiTargetVersion);
+}
+
+ArkUINativeModuleValue CommonBridge::SetFocusBox(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto marginArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto widthArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto colorArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    int32_t hasValue = 0;
+    CalcDimension margin;
+    if (!marginArg->IsUndefined() && !marginArg->IsNull()) {
+        if (ArkTSUtils::ParseJsDimensionVpNG(vm, marginArg, margin, true)) {
+            hasValue = 1;
+        } else if (ArkTSUtils::ParseJsLengthMetrics(vm, marginArg, margin)) {
+            hasValue = 1;
+        }
+    }
+    hasValue = hasValue << 1;
+    CalcDimension width;
+    if (!widthArg->IsUndefined() && !widthArg->IsNull()) {
+        if (ArkTSUtils::ParseJsDimensionVpNG(vm, widthArg, width, true) && GreatOrEqual(width.Value(), 0.0f)) {
+            hasValue += 1;
+        } else if (ArkTSUtils::ParseJsLengthMetrics(vm, widthArg, width) && GreatOrEqual(width.Value(), 0.0f)) {
+            hasValue += 1;
+        }
+    }
+    hasValue = hasValue << 1;
+    Color strokeColor;
+    if (!colorArg->IsUndefined() && !colorArg->IsNull() && ParseColorMetricsToColor(vm, colorArg, strokeColor)) {
+        hasValue += 1;
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setFocusBoxStyle(
+        nativeNode, margin.Value(), width.Value(), strokeColor.GetValue(), hasValue);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetFocusBox(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetFocusBoxStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
