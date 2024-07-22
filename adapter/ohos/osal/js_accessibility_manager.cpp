@@ -77,8 +77,12 @@ struct ActionTable {
 struct FillEventInfoParam {
     int64_t elementId;
     int64_t stackNodeId;
+};
+
+struct FillElementInfoParam {
     uint32_t windowId;
 };
+
 
 struct AccessibilityActionParam {
     RefPtr<NG::AccessibilityProperty> accessibilityProperty;
@@ -1041,7 +1045,7 @@ int64_t GetParentId(const RefPtr<NG::UINode>& uiNode)
 }
 
 void FillElementInfo(int64_t elementId, AccessibilityElementInfo& elementInfo, const RefPtr<PipelineBase>& context,
-    const RefPtr<JsAccessibilityManager>& jsAccessibilityManager, const FillEventInfoParam& param)
+    const RefPtr<JsAccessibilityManager>& jsAccessibilityManager, const FillElementInfoParam& param)
 {
     std::list<AccessibilityElementInfo> elementInfos;
     int32_t mode = 0;
@@ -1070,7 +1074,8 @@ void FillEventInfo(const RefPtr<NG::FrameNode>& node,
         eventInfo.SetPageId(webAccessibilityNode->GetPageId());
         eventInfo.AddContent(webAccessibilityNode->GetContent());
         AccessibilityElementInfo elementInfo;
-        FillElementInfo(param.elementId, elementInfo, context, jsAccessibilityManager, param);
+        FillElementInfo(param.elementId, elementInfo, context, jsAccessibilityManager,
+            FillElementInfoParam { eventInfo.GetWindowId() });
         eventInfo.SetElementInfo(elementInfo);
         return;
     }
@@ -1083,7 +1088,8 @@ void FillEventInfo(const RefPtr<NG::FrameNode>& node,
     eventInfo.SetBeginIndex(accessibilityProperty->GetBeginIndex());
     eventInfo.SetEndIndex(accessibilityProperty->GetEndIndex());
     AccessibilityElementInfo elementInfo;
-    FillElementInfo(param.elementId, elementInfo, context, jsAccessibilityManager, param);
+    FillElementInfo(param.elementId, elementInfo, context, jsAccessibilityManager,
+        FillElementInfoParam { eventInfo.GetWindowId() });
     elementInfo.SetNavDestinationId(param.stackNodeId);
     eventInfo.SetElementInfo(elementInfo);
 }
@@ -2307,8 +2313,7 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
     eventInfoNew.SetSource(uiExtensionOffset + eventInfo.GetViewId());
     AccessibilityElementInfo elementInfo;
     FillElementInfo(eventInfoNew.GetAccessibilityId(), elementInfo, pipeline, Claim(this),
-        FillEventInfoParam {
-            accessibilityEvent.nodeId, accessibilityEvent.stackNodeId, ngPipeline->GetFocusWindowId() });
+        FillElementInfoParam { eventInfoNew.GetWindowId() });
     eventInfoNew.SetElementInfo(elementInfo);
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d accessibilityId:%{public}" PRId64,
         eventInfoNew.GetEventType(), eventInfoNew.GetAccessibilityId());
