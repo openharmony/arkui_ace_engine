@@ -234,10 +234,10 @@ void Scrollable::HandleTouchUp()
     // outBoundaryCallback_ is only set in ScrollablePattern::SetEdgeEffect and when the edge effect is spring
     if (outBoundaryCallback_ && outBoundaryCallback_()) {
         if (isSpringAnimationStop_ && scrollOverCallback_) {
-            ProcessScrollOverCallback(0.0);
             if (onScrollStartRec_) {
                 onScrollStartRec_(static_cast<float>(axis_));
             }
+            ProcessScrollOverCallback(0.0);
         }
         return;
     }
