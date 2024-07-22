@@ -99,6 +99,14 @@ void TextPattern::OnWindowHide()
 void TextPattern::OnWindowShow()
 {
     CHECK_NULL_VOID(contentMod_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RectF frameRect;
+    RectF visibleRect;
+    host->GetVisibleRect(visibleRect, frameRect);
+    if (visibleRect.IsEmpty()) {
+        return;
+    }
     contentMod_->ResumeAnimation();
 }
 
