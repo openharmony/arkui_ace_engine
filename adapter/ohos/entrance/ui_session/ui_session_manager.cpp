@@ -93,7 +93,7 @@ void UiSessionManager::ReportWebUnfocusEvent(int64_t accessibilityId, const std:
 
 void UiSessionManager::SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId)
 {
-    reportObjectMap_.emplace(processId, reportStub);
+    reportObjectMap_[processId] = reportStub;
 }
 
 void UiSessionManager::SetClickEventRegistered(bool status)
