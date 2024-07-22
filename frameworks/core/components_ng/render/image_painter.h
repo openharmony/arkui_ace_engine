@@ -44,6 +44,9 @@ public:
 
 private:
     RefPtr<CanvasImage> canvasImage_;
+    static void ApplyImageAlignmentFit(
+        ImageFit imageFit, const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect);
+    static const std::unordered_map<ImageFit, std::function<Alignment(bool)>> ALIMENT_OPERATIONS;
 };
 
 } // namespace OHOS::Ace::NG
