@@ -83,7 +83,6 @@ struct FillElementInfoParam {
     uint32_t windowId;
 };
 
-
 struct AccessibilityActionParam {
     RefPtr<NG::AccessibilityProperty> accessibilityProperty;
     std::string setTextArgument = "";
