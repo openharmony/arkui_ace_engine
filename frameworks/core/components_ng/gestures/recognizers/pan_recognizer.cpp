@@ -143,6 +143,7 @@ void PanRecognizer::OnRejected()
     if (refereeState_ != RefereeState::SUCCEED) {
         refereeState_ = RefereeState::FAIL;
     }
+    SendRejectMsg();
     firstInputTime_.reset();
 }
 

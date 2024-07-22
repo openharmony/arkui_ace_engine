@@ -204,10 +204,22 @@ public:
         onActionCancel_ = std::make_unique<GestureEventNoParameter>(onActionCancel);
     }
 
+    void SetOnReject(const GestureEventNoParameter& onReject)
+    {
+        onReject_ = std::make_unique<GestureEventNoParameter>(onReject);
+    }
+
     inline void SendCancelMsg()
     {
         if (onActionCancel_ && *onActionCancel_) {
             (*onActionCancel_)();
+        }
+    }
+
+    inline void SendRejectMsg()
+    {
+        if (onReject_ && *onReject_) {
+            (*onReject_)();
         }
     }
 
@@ -437,6 +449,8 @@ protected:
     std::unique_ptr<GestureEventFunc> onActionUpdate_;
     std::unique_ptr<GestureEventFunc> onActionEnd_;
     std::unique_ptr<GestureEventNoParameter> onActionCancel_;
+    // triggered when the recongnizer is rejected
+    std::unique_ptr<GestureEventNoParameter> onReject_;
 
     int64_t deviceId_ = 0;
     SourceType deviceType_ = SourceType::NONE;

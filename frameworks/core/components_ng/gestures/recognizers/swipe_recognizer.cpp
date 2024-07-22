@@ -89,6 +89,7 @@ void SwipeRecognizer::OnAccepted()
 
 void SwipeRecognizer::OnRejected()
 {
+    SendRejectMsg();
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
 }
