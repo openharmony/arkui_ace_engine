@@ -24,7 +24,7 @@
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
-constexpr Dimension TEXT_DRAG_RADIUS = 12.0_vp;
+constexpr Dimension TEXT_DRAG_RADIUS = 18.0_vp;
 constexpr Dimension TEXT_DRAG_OFFSET = 8.0_vp;
 constexpr Dimension TEXT_DRAG_MIN_WIDTH = 64.0_vp;
 constexpr uint32_t TEXT_DRAG_COLOR_BG = 0xf2ffffff;
@@ -206,6 +206,12 @@ public:
         return rectsForPlaceholders_;
     }
 
+    virtual Dimension GetDragCornerRadius()
+    {
+        return TEXT_DRAG_RADIUS;
+    }
+
+    Color GetDragBackgroundColor();
 protected:
     static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode);
     static RectF GetHandler(const bool isLeftHandler, const std::vector<RectF> boxes, const RectF contentRect,

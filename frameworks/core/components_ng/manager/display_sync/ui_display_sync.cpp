@@ -84,10 +84,12 @@ void UIDisplaySync::OnFrame()
         data_->onFrame_();
     }
 
+    // Callback from JS_DisplaySync and Native_XComponent
     if (data_->noSkip_ && data_->onFrameWithData_) {
         data_->onFrameWithData_(data_);
     }
 
+    // Callback from Animator
     if (data_->noSkip_ && data_->onFrameWithTimestamp_) {
         data_->onFrameWithTimestamp_(data_->timestamp_);
     }
@@ -338,6 +340,20 @@ bool UIDisplaySync::SetVsyncRate(int32_t vsyncRate)
 RefPtr<DisplaySyncData> UIDisplaySync::GetDisplaySyncData() const
 {
     return data_;
+}
+
+int32_t UIDisplaySync::GetAnimatorExpectedRate()
+{
+    // Callback from Animator
+    if (data_ && data_->onFrameWithTimestamp_ == nullptr) {
+        return INVALID_ANIMATOR_EXPECTED_RATE;
+    }
+
+    int32_t animatorExpectedRate = 0;
+    if (data_ && data_->rateRange_) {
+        animatorExpectedRate = data_->rateRange_->preferred_;
+    }
+    return animatorExpectedRate;
 }
 
 bool UIDisplaySync::IsCommonDivisor(int32_t expectedRate, int32_t vsyncRate)

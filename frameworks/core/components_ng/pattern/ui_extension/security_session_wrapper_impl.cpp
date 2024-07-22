@@ -363,7 +363,12 @@ bool SecuritySessionWrapperImpl::NotifyFocusStateSync(bool focusState)
 
 bool SecuritySessionWrapperImpl::NotifyBackPressedSync()
 {
-    return false;
+    CHECK_NULL_RETURN(session_, false);
+    bool isConsumed = false;
+    session_->TransferBackPressedEventForConsumed(isConsumed);
+    PLATFORM_LOGI("BackPressed, persistentid = %{public}d and %{public}s consumed.",
+        GetSessionId(), isConsumed ? "is" : "is not");
+    return isConsumed;
 }
 
 bool SecuritySessionWrapperImpl::NotifyPointerEventSync(
@@ -577,14 +582,13 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     CHECK_NULL_VOID(pipeline);
     auto curWindow = pipeline->GetCurrentWindowRect();
     displayArea_ = displayArea + OffsetF(curWindow.Left(), curWindow.Top());
-    PLATFORM_LOGD("The display area with '%{public}s' is notified to the provider.",
-        displayArea_.ToString().c_str());
     std::shared_ptr<Rosen::RSTransaction> transaction;
     auto parentSession = session_->GetParentSession();
     auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
     auto persistentId = parentSession ? parentSession->GetPersistentId() : session_->GetPersistentId();
     ACE_SCOPED_TRACE("NotifyDisplayArea id: %d, reason [%d]", persistentId, reason);
-    PLATFORM_LOGD("NotifyDisplayArea id: %{public}d, reason = %{public}d", persistentId, reason);
+    PLATFORM_LOGI("DisplayArea: %{public}s, persistentId: %{public}d, reason: %{public}d",
+        displayArea_.ToString().c_str(), persistentId, reason);
     if (reason == Rosen::SizeChangeReason::ROTATION) {
         if (transaction_.lock()) {
             transaction = transaction_.lock();
@@ -592,12 +596,8 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
         } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
             transaction = transactionController->GetRSTransaction();
         }
-        if (transaction) {
-            transaction->SetParentPid(transaction->GetChildPid());
-            transaction->SetChildPid(AceApplicationInfo::GetInstance().GetPid());
-            if (parentSession) {
-                transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
-            }
+        if (transaction && parentSession) {
+            transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
         }
     }
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),

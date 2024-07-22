@@ -447,8 +447,12 @@ std::optional<Color> JSIndexer::PaseColor(const JSCallbackInfo& args)
     return colorOpt;
 }
 
-void JSIndexer::SetAutoCollapse(bool state)
+void JSIndexer::SetAutoCollapse(const JSCallbackInfo& args)
 {
+    bool state = true;
+    if (args[0]->IsBoolean()) {
+        state = args[0]->ToBoolean();
+    }
     IndexerModel::GetInstance()->SetAutoCollapse(state);
 }
 

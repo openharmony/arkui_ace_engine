@@ -397,7 +397,7 @@ class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
     return this;
   }
   allowChildTypes(): string[] {
-    return ["FlowItem"];
+    return ['FlowItem'];
   }
 }
 

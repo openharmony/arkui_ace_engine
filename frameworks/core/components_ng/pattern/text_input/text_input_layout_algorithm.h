@@ -59,7 +59,7 @@ private:
         bool isRTL = false;
         RefPtr<TextInputResponseArea> responseArea = nullptr;
         RefPtr<TextInputResponseArea> cleanResponseArea = nullptr;
-        OffsetF offsetBase = OffsetF(0.0f, 0.0f);
+        OffsetF contentOffset = OffsetF(0.0f, 0.0f);
     };
     void UpdateContentPosition(const UpdateContentPositionParams& params,
         const std::unique_ptr<GeometryProperty>& content);

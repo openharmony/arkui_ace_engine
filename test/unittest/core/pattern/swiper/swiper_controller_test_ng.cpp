@@ -31,6 +31,7 @@ class SwiperControllerTestNg : public SwiperTestNg {
 public:
     AssertionResult VerifyShowNext(int32_t expectIndex);
     AssertionResult VerifyShowPrevious(int32_t expectIndex);
+    AssertionResult VerifyChangeIndex(int32_t targetIndex, bool useAnimation, int32_t expectIndex);
     void CreateForEachSwiper(int32_t itemNumber = ITEM_NUMBER);
     void CreateLazyForEachSwiper(int32_t itemNumber = ITEM_NUMBER);
 };
@@ -39,14 +40,21 @@ AssertionResult SwiperControllerTestNg::VerifyShowNext(int32_t expectIndex)
 {
     controller_->ShowNext();
     FlushLayoutTask(frameNode_);
-    return IsEqual(pattern_->GetCurrentIndex(), expectIndex);
+    return IsEqual(pattern_->GetCurrentShownIndex(), expectIndex);
 }
 
 AssertionResult SwiperControllerTestNg::VerifyShowPrevious(int32_t expectIndex)
 {
     controller_->ShowPrevious();
     FlushLayoutTask(frameNode_);
-    return IsEqual(pattern_->GetCurrentIndex(), expectIndex);
+    return IsEqual(pattern_->GetCurrentShownIndex(), expectIndex);
+}
+
+AssertionResult SwiperControllerTestNg::VerifyChangeIndex(int32_t targetIndex, bool useAnimation, int32_t expectIndex)
+{
+    controller_->ChangeIndex(targetIndex, useAnimation);
+    FlushLayoutTask(frameNode_);
+    return IsEqual(pattern_->GetCurrentShownIndex(), expectIndex);
 }
 
 void SwiperControllerTestNg::CreateForEachSwiper(int32_t itemNumber)
@@ -108,86 +116,191 @@ void SwiperControllerTestNg::CreateLazyForEachSwiper(int32_t itemNumber)
 }
 
 /**
- * @tc.name: ShowNext001
- * @tc.desc: Test ShowNext with loop:true and invisible/gone items
+ * @tc.name: ShowNextShowPreviousChangeIndex001
+ * @tc.desc: Test ShowPrevious with no items, can not swipe
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Empty items
+     * @tc.expected: Can not swipe
+     */
+    Create([](SwiperModelNG model) {});
+    EXPECT_TRUE(VerifyShowNext(0));
+    EXPECT_TRUE(VerifyShowPrevious(0));
+    EXPECT_TRUE(VerifyChangeIndex(1, false, 0));
+    EXPECT_TRUE(VerifyChangeIndex(1, true, 0));
+}
+
+/**
+ * @tc.name: ShowNextShowPreviousChangeIndex002
+ * @tc.desc: Test ShowNext with DisplayCount bigger than total items
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set DisplayCount(5) > totalItems(4)
+     * @tc.expected: Can not swipe
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayCount(ITEM_NUMBER + 1);
+    });
+    EXPECT_TRUE(VerifyShowNext(0));
+    EXPECT_TRUE(VerifyShowPrevious(0));
+    EXPECT_TRUE(VerifyChangeIndex(1, false, 0));
+    EXPECT_TRUE(VerifyChangeIndex(1, true, 0));
+}
+
+/**
+ * @tc.name: ShowNextShowPreviousChangeIndex003
+ * @tc.desc: Test ShowNext/ShowPrevious/ChangeIndex Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Swiper, set isVisibleArea_:false for without animation
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    pattern_->isVisibleArea_ = false; // for without animation
+
+    /**
+     * @tc.steps: step2. Call ShowNext
+     * @tc.expected: Show next page
+     */
+    EXPECT_TRUE(VerifyShowNext(1));
+    EXPECT_EQ(GetChildX(frameNode_, 1), 0.f);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 1)->IsActive());
+
+    /**
+     * @tc.steps: step3. Call ShowPrevious
+     * @tc.expected: Show ShowPrevious page
+     */
+    EXPECT_TRUE(VerifyShowPrevious(0));
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.f);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 1)->IsActive());
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
+
+    /**
+     * @tc.steps: step4. Call ChangeIndex without animation
+     * @tc.expected: Show ChangeIndex page
+     */
+    EXPECT_TRUE(VerifyChangeIndex(3, false, 3));
+    EXPECT_EQ(GetChildX(frameNode_, 3), 0.f);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 3)->IsActive());
+}
+
+/**
+ * @tc.name: ShowNextShowPreviousChangeIndex004
+ * @tc.desc: Test ShowNext/ShowPrevious/ChangeIndex with loop:true and invisible/gone items
  * will show first item when ShowNext from last item, the invisible/gone item still take a place
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperControllerTestNg, ShowNext001, TestSize.Level1)
+HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex004, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. SetIndex:3(last item), loop default is true
-     */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetIndex(3);
-    });
-
-    /**
-     * @tc.steps: step2. Set item(index:1,2) INVISIBLE and GONE
+     * @tc.steps: step1. Loop default is true, Set item(index:1,2) INVISIBLE and GONE
      * @tc.expected: The item still take a place
      */
+    CreateWithItem([](SwiperModelNG model) {});
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
     FlushLayoutTask(frameNode_);
 
     /**
-     * @tc.steps: step3. Call ShowNext
-     * @tc.expected: Show first page because of loop
-     */
-    EXPECT_TRUE(VerifyShowNext(0));
-
-    /**
-     * @tc.steps: step4. Call ShowNext
-     * @tc.expected: Show next page(INVISIBLE item)
+     * @tc.steps: step2. Call ShowNext
+     * @tc.expected: Show next page, include INVISIBLE/GONE page
      */
     EXPECT_TRUE(VerifyShowNext(1));
+    EXPECT_TRUE(VerifyShowNext(2));
+    EXPECT_TRUE(VerifyShowNext(3));
+    EXPECT_TRUE(VerifyShowNext(4)); // because of loop, equal to index:0
 
     /**
-     * @tc.steps: step5. Call ShowNext
-     * @tc.expected: Show next page(GONE item)
+     * @tc.steps: step3. Call ShowPrevious
+     * @tc.expected: Show ShowPrevious page, include INVISIBLE/GONE page
      */
-    EXPECT_TRUE(VerifyShowNext(2));
+    EXPECT_TRUE(VerifyShowPrevious(3));
+    EXPECT_TRUE(VerifyShowPrevious(2));
+    EXPECT_TRUE(VerifyShowPrevious(1));
+    EXPECT_TRUE(VerifyShowPrevious(0));
+
+    /**
+     * @tc.steps: step4. Call ChangeIndex without animation
+     * @tc.expected: Show ChangeIndex page, include INVISIBLE/GONE page
+     */
+    EXPECT_TRUE(VerifyChangeIndex(0, false, 0)); // same index
+    EXPECT_TRUE(VerifyChangeIndex(1, false, 1));
+    EXPECT_TRUE(VerifyChangeIndex(3, false, 3));
+    EXPECT_TRUE(VerifyChangeIndex(-1, false, 3)); // invalid index
+    EXPECT_TRUE(VerifyChangeIndex(100, false, 3)); // invalid index
+    // with animation
+    EXPECT_TRUE(VerifyChangeIndex(1, true, 1));
+    EXPECT_TRUE(VerifyChangeIndex(3, true, 3));
 }
 
 /**
- * @tc.name: ShowNext002
- * @tc.desc: Test ShowNext with loop:false, will still show last item when ShowNext from last item
+ * @tc.name: ShowNextShowPreviousChangeIndex005
+ * @tc.desc: Test ShowNext/ShowPrevious/ChangeIndex with loop:false,
+ * will still show last item when ShowNext from last item
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperControllerTestNg, ShowNext002, TestSize.Level1)
+HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex005, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Set loop:false, index:3(last item)
+     * @tc.steps: step1. Set loop:false
      */
     CreateWithItem([](SwiperModelNG model) {
         model.SetLoop(false);
-        model.SetIndex(3);
     });
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
 
     /**
      * @tc.steps: step2. Call ShowNext
-     * @tc.expected: Show last page because loop is false
+     * @tc.expected: Show next page
      */
+    EXPECT_TRUE(VerifyShowNext(1));
+    EXPECT_TRUE(VerifyShowNext(2));
     EXPECT_TRUE(VerifyShowNext(3));
+    EXPECT_TRUE(VerifyShowNext(3));
+
+    /**
+     * @tc.steps: step3. Call ShowPrevious
+     * @tc.expected: Show ShowPrevious page
+     */
+    EXPECT_TRUE(VerifyShowPrevious(2));
+    EXPECT_TRUE(VerifyShowPrevious(1));
+    EXPECT_TRUE(VerifyShowPrevious(0));
+    EXPECT_TRUE(VerifyShowPrevious(0));
+
+    /**
+     * @tc.steps: step4. Call ChangeIndex without animation
+     * @tc.expected: Show ChangeIndex page
+     */
+    EXPECT_TRUE(VerifyChangeIndex(1, false, 1));
+    EXPECT_TRUE(VerifyChangeIndex(3, false, 3));
+    // with animation
+    EXPECT_TRUE(VerifyChangeIndex(1, true, 1));
+    EXPECT_TRUE(VerifyChangeIndex(3, true, 3));
 }
 
 /**
- * @tc.name: ShowNext003
- * @tc.desc: Test ShowNext with DisplayCount, the gone item not take a place, but still exist page
+ * @tc.name: ShowNextShowPreviousChangeIndex006
+ * @tc.desc: Test ShowNext/ShowPrevious/ChangeIndex with DisplayCount,
+ * the gone item not take a place, but still exist page
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperControllerTestNg, ShowNext003, TestSize.Level1)
+HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex006, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Set DisplayCount:3, set index:1
+     * @tc.steps: step1. Set DisplayCount:3
      * @tc.expected: Has 3 items in 1 page
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetIndex(1);
         model.SetDisplayCount(3);
     });
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
 
     /**
      * @tc.steps: step2. Set item(index:1,2) visibility:false
@@ -198,47 +311,113 @@ HWTEST_F(SwiperControllerTestNg, ShowNext003, TestSize.Level1)
     FlushLayoutTask(frameNode_);
 
     /**
-     * @tc.steps: step3. Call ShowNext
-     * @tc.expected: Show next item in first page
+     * @tc.steps: step2. Call ShowNext
+     * @tc.expected: Show next page, include INVISIBLE/GONE page
      */
+    EXPECT_TRUE(VerifyShowNext(1));
     EXPECT_TRUE(VerifyShowNext(2));
-
-    /**
-     * @tc.steps: step4. Call ShowNext
-     * @tc.expected: Show next item in second page
-     */
     EXPECT_TRUE(VerifyShowNext(3));
+    EXPECT_TRUE(VerifyShowNext(4)); // because of loop, equal to index:0
 
     /**
-     * @tc.steps: step5. Call ShowNext
-     * @tc.expected: Show first item in first page because of loop
+     * @tc.steps: step3. Call ShowPrevious
+     * @tc.expected: Show ShowPrevious page, include INVISIBLE/GONE page
      */
-    EXPECT_TRUE(VerifyShowNext(0));
+    EXPECT_TRUE(VerifyShowPrevious(3));
+    EXPECT_TRUE(VerifyShowPrevious(2));
+    EXPECT_TRUE(VerifyShowPrevious(1));
+    EXPECT_TRUE(VerifyShowPrevious(0));
+
+    /**
+     * @tc.steps: step4. Call ChangeIndex without animation
+     * @tc.expected: Show ChangeIndex page, include INVISIBLE/GONE page
+     */
+    EXPECT_TRUE(VerifyChangeIndex(1, false, 1));
+    EXPECT_TRUE(VerifyChangeIndex(3, false, 3));
+    // with animation
+    EXPECT_TRUE(VerifyChangeIndex(1, true, 1));
+    EXPECT_TRUE(VerifyChangeIndex(3, true, 3));
 }
 
 /**
- * @tc.name: ShowNext004
- * @tc.desc: Test ShowNext with DisplayCount and SwipeByGroup
+ * @tc.name: ShowNextShowPreviousChangeIndex007
+ * @tc.desc: Test ShowNext/ShowPrevious/ChangeIndex with DisplayCount and SwipeByGroup
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperControllerTestNg, ShowNext004, TestSize.Level1)
+HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex007, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Set DisplayCount:3, SwipeByGroup:true
+     * @tc.expected: Has 3 items in 1 page and SwipeByGroup
+     */
     CreateWithItem([](SwiperModelNG model) {
         model.SetDisplayCount(3);
         model.SetSwipeByGroup(true);
     });
 
     /**
-     * @tc.steps: step1. Call ShowNext
+     * @tc.steps: step2. Call ShowNext
      * @tc.expected: Show next page
      */
     EXPECT_TRUE(VerifyShowNext(3));
+    EXPECT_TRUE(VerifyShowNext(6)); // because of loop, equal to index:0
+
+    /**
+     * @tc.steps: step3. Call ShowPrevious
+     * @tc.expected: Show ShowPrevious page
+     */
+    EXPECT_TRUE(VerifyShowPrevious(3));
+    EXPECT_TRUE(VerifyShowPrevious(0));
+
+    /**
+     * @tc.steps: step4. Call ChangeIndex
+     * @tc.expected: Show ChangeIndex page
+     */
+    EXPECT_TRUE(VerifyChangeIndex(3, false, 3));
+    EXPECT_TRUE(VerifyChangeIndex(3, true, 3));
+}
+
+/**
+ * @tc.name: ShowNextShowPreviousChangeIndex008
+ * @tc.desc: Test ShowNext/ShowPrevious/ChangeIndex with next/pre margin
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set DisplayCount:3
+     */
+    const float preMargin = 10.f;
+    const float nextMargin = 20.f;
+    CreateWithItem([=](SwiperModelNG model) {
+        model.SetLoop(false);
+        model.SetDisplayCount(3);
+        model.SetPreviousMargin(Dimension(preMargin), true);
+        model.SetNextMargin(Dimension(nextMargin), true);
+    });
 
     /**
      * @tc.steps: step2. Call ShowNext
-     * @tc.expected: Show first page because of loop
+     * @tc.expected: Show next page
      */
-    EXPECT_TRUE(VerifyShowNext(0));
+    EXPECT_TRUE(VerifyShowNext(1));
+
+    /**
+     * @tc.steps: step3. Call ShowPrevious
+     * @tc.expected: Show ShowPrevious page
+     */
+    EXPECT_TRUE(VerifyShowPrevious(0));
+
+    /**
+     * @tc.steps: step4. Call ChangeIndex
+     * @tc.expected: Show ChangeIndex page
+     */
+    EXPECT_TRUE(VerifyChangeIndex(0, false, 0));
+    EXPECT_TRUE(VerifyChangeIndex(2, false, 2));
+    EXPECT_TRUE(VerifyChangeIndex(3, false, 3));
+    EXPECT_TRUE(VerifyChangeIndex(0, true, 0));
+    EXPECT_TRUE(VerifyChangeIndex(2, true, 1));
+    EXPECT_TRUE(VerifyChangeIndex(3, true, 1));
 }
 
 /**
@@ -328,129 +507,6 @@ HWTEST_F(SwiperControllerTestNg, ShowNext006, TestSize.Level1)
 }
 
 /**
- * @tc.name: ShowPrevious001
- * @tc.desc: Test ShowPrevious with loop:true and invisible/gone items
- * will show last item when ShowPrevious from first item, the invisible/gone item still take a place
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperControllerTestNg, ShowPrevious001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-
-    /**
-     * @tc.steps: step1. Set item(index:1) INVISIBLE
-     */
-    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::INVISIBLE);
-    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::GONE);
-    FlushLayoutTask(frameNode_);
-
-    /**
-     * @tc.steps: step2. Call ShowPrevious
-     * @tc.expected: Show last page because of loop
-     */
-    EXPECT_TRUE(VerifyShowPrevious(3));
-
-    /**
-     * @tc.steps: step3. Call ShowPrevious
-     * @tc.expected: Show pre page
-     */
-    EXPECT_TRUE(VerifyShowPrevious(2));
-
-    /**
-     * @tc.steps: step4. Call ShowPrevious
-     * @tc.expected: Show pre page
-     */
-    EXPECT_TRUE(VerifyShowPrevious(1));
-}
-
-/**
- * @tc.name: ShowPrevious002
- * @tc.desc: Test ShowPrevious with loop:false, will still show first item when ShowPrevious from first item
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperControllerTestNg, ShowPrevious002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Set loop:false
-     */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetLoop(false);
-    });
-
-    /**
-     * @tc.steps: step2. Call ShowPrevious
-     * @tc.expected: Show first page because loop is false
-     */
-    EXPECT_TRUE(VerifyShowPrevious(0));
-}
-
-/**
- * @tc.name: ShowPrevious003
- * @tc.desc: Test ShowPrevious with DisplayCount, the gone item not take a place, but still exist page
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperControllerTestNg, ShowPrevious003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. SetDisplayCount
-     */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayCount(3);
-    });
-
-    /**
-     * @tc.steps: step2. Set item(index:1,2) visibility:false
-     * @tc.expected: item(index:1,2) still place, have two page
-     */
-    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
-    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
-    FlushLayoutTask(frameNode_);
-
-    /**
-     * @tc.steps: step3. Call ShowPrevious
-     * @tc.expected: Show last page in second page because of loop
-     */
-    EXPECT_TRUE(VerifyShowPrevious(3));
-
-    /**
-     * @tc.steps: step4. Call ShowPrevious
-     * @tc.expected: Show pre page in first page
-     */
-    EXPECT_TRUE(VerifyShowPrevious(2));
-
-    /**
-     * @tc.steps: step5. Call ShowPrevious
-     * @tc.expected: Show pre page in first page
-     */
-    EXPECT_TRUE(VerifyShowPrevious(1));
-}
-
-/**
- * @tc.name: ShowPrevious004
- * @tc.desc: Test ShowPrevious with DisplayCount and SwipeByGroup
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperControllerTestNg, ShowPrevious004, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayCount(3);
-        model.SetSwipeByGroup(true);
-    });
-
-    /**
-     * @tc.steps: step1. Call ShowPrevious
-     * @tc.expected: Show last page because of loop
-     */
-    EXPECT_TRUE(VerifyShowPrevious(3));
-
-    /**
-     * @tc.steps: step2. Call ShowPrevious
-     * @tc.expected: Show pre page
-     */
-    EXPECT_TRUE(VerifyShowPrevious(0));
-}
-
-/**
  * @tc.name: ShowPrevious005
  * @tc.desc: Test ShowPrevious with SwiperDisplayMode::AUTO_LINEAR, swipe distance by the item width in the view
  * @tc.type: FUNC
@@ -468,7 +524,7 @@ HWTEST_F(SwiperControllerTestNg, ShowPrevious005, TestSize.Level1)
         CreateItemWithSize(400.f, SWIPER_HEIGHT);
         CreateItemWithSize(500.f, SWIPER_HEIGHT);
     });
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
 
     /**
      * @tc.steps: step2. Set item(index:1,2) visibility:false
@@ -540,40 +596,6 @@ HWTEST_F(SwiperControllerTestNg, ShowPrevious006, TestSize.Level1)
 }
 
 /**
- * @tc.name: ShowNextPrevious001
- * @tc.desc: Test ShowPrevious with no items, can not swipe
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperControllerTestNg, ShowNextPrevious001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Call ShowPrevious
-     * @tc.expected: Can not swipe
-     */
-    Create([](SwiperModelNG model) {});
-    EXPECT_TRUE(VerifyShowNext(0));
-    EXPECT_TRUE(VerifyShowPrevious(0));
-}
-
-/**
- * @tc.name: ShowNextPrevious002
- * @tc.desc: Test ShowNext with DisplayCount bigger than total items
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperControllerTestNg, ShowNextPrevious002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Set DisplayCount(5) > totalItems(4)
-     * @tc.expected: Can not swipe
-     */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayCount(5);
-    });
-    EXPECT_TRUE(VerifyShowNext(0));
-    EXPECT_TRUE(VerifyShowPrevious(0));
-}
-
-/**
  * @tc.name: FinishAnimation001
  * @tc.desc: Test SwiperController func
  * @tc.type: FUNC
@@ -586,91 +608,17 @@ HWTEST_F(SwiperControllerTestNg, FinishAnimation001, TestSize.Level1)
      * @tc.steps: step1. Call FinishAnimation
      * @tc.expected: Animation stoped
      */
+    pattern_->translateAnimationIsRunning_ = true;
     controller_->FinishAnimation();
+    EXPECT_FALSE(pattern_->translateAnimationIsRunning_);
     EXPECT_TRUE(pattern_->isUserFinish_);
-}
+    EXPECT_FALSE(pattern_->isFinishAnimation_);
 
-/**
- * @tc.name: ChangeIndex001
- * @tc.desc: Test ChangeIndex
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperControllerTestNg, ChangeIndex001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-
-    /**
-     * @tc.steps: step1. Call ChangeIndex without useAnimation
-     * @tc.expected: Swipe to item(index:1)
-     */
-    controller_->ChangeIndex(1, false);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
-
-    /**
-     * @tc.steps: step2. Call ChangeIndex without useAnimation again
-     * @tc.expected: Still is item(index:1)
-     */
-    controller_->ChangeIndex(1, false);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
-
-    /**
-     * @tc.steps: step3. Call ChangeIndex with useAnimation
-     * @tc.expected: Swipe to item(index:3)
-     */
-    controller_->ChangeIndex(3, true);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
-}
-
-/**
- * @tc.name: ChangeIndex002
- * @tc.desc: Test ChangeIndex invalid args
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperControllerTestNg, ChangeIndex002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Call ChangeIndex ITEM_NUMBER
-     * @tc.expected: Can not swipe
-     */
-    CreateWithItem([](SwiperModelNG model) {});
-    pattern_->ChangeIndex(ITEM_NUMBER, false);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
-}
-
-/**
- * @tc.name: ChangeIndex003
- * @tc.desc: Test SwiperPattern ChangeIndex On SwipeByGroup
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperControllerTestNg, ChangeIndex003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Set DisplayCount:3, SwipeByGroup:true
-     */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayCount(3);
-        model.SetSwipeByGroup(true);
-    });
-
-    /**
-     * @tc.steps: step2. Call ChangeIndex:2
-     * @tc.expected: Can not swipe
-     */
-    pattern_->ChangeIndex(2, false);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
-
-    /**
-     * @tc.steps: step2. Call ChangeIndex:3
-     * @tc.expected: Swipe to item(index:3)
-     */
-    pattern_->ChangeIndex(3, false);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
+    pattern_->usePropertyAnimation_ = true;
+    controller_->SetFinishCallback([]() {});
+    controller_->FinishAnimation();
+    EXPECT_EQ(controller_->GetFinishCallback(), nullptr);
+    EXPECT_FALSE(pattern_->isFinishAnimation_);
 }
 
 /**

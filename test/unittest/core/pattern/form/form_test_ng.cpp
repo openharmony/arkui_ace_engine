@@ -1496,4 +1496,34 @@ HWTEST_F(FormTestNg, CreateTimeLimitNode, TestSize.Level1)
     pattern->CreateTimeLimitNode();
     ASSERT_NE(host, nullptr);
 }
+
+/**
+ * @tc.name: UpdateChildNodeOpacity
+ * @tc.desc: Test UpdateChildNodeOpacity in Form Pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, UpdateChildNodeOpacity, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    pattern->UpdateChildNodeOpacity(FormChildNodeType::FORM_SURFACE_NODE, 0);
+    ASSERT_NE(host, nullptr);
+}
+
+/**
+ * @tc.name: SnapshotSurfaceNode
+ * @tc.desc: Test SnapshotSurfaceNode in Form Pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, SnapshotSurfaceNode, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    pattern->SnapshotSurfaceNode();
+    ASSERT_NE(host, nullptr);
+}
 } // namespace OHOS::Ace::NG

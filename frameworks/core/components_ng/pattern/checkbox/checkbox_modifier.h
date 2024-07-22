@@ -37,7 +37,7 @@ class CheckBoxModifier : public ContentModifier {
 
 public:
     CheckBoxModifier(bool isSelect, const Color& boardColor, const Color& checkColor, const Color& borderColor,
-        const Color& shadowColor);
+        const Color& shadowColor, const SizeF& size, const OffsetF& offset, float checkStroke, float strokeSize);
     ~CheckBoxModifier() override = default;
 
     void onDraw(DrawingContext& context) override

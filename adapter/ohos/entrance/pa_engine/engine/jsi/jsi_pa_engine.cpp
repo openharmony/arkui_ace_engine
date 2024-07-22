@@ -410,7 +410,6 @@ bool JsiPaEngine::Initialize(BackendType type, SrcLanguage language)
         }
         paEngine->InitializeInner(type, language);
     }, "ArkUIPaEngineInit");
-
     return true;
 }
 
@@ -1440,7 +1439,6 @@ int32_t JsiPaEngine::OnAcquireFormState(const OHOS::AAFwk::Want& want)
     shared_ptr<JsRuntime> runtime = GetJsRuntime();
     const std::vector<shared_ptr<JsValue>>& argv = { WantToJsValue(want) };
     auto func = GetPaFunc("onAcquireFormState");
-
     if (func == nullptr) {
         LOGW("no OnAcquireFormState!");
         return (int32_t)AppExecFwk::FormState::DEFAULT;

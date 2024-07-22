@@ -209,4 +209,12 @@ OffsetF SelectContentOverlayPattern::GetHandleHotZoneOffset(bool isFirst, float 
     auto endPoint = isFirst ? info_->firstHandle.paintInfo.endPoint : info_->secondHandle.paintInfo.endPoint;
     return SelectOverlayContentModifier::CalculateCenterPoint(startPoint, endPoint, raidus, handleOnTop);
 }
+
+void SelectContentOverlayPattern::UpdateViewPort(const std::optional<RectF>& viewPort)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    info_->ancestorViewPort = viewPort;
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
 } // namespace OHOS::Ace::NG

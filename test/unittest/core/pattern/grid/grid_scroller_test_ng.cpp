@@ -22,6 +22,7 @@ namespace {} // namespace
 class GridScrollerTestNg : public GridTestNg {
 public:
     AssertionResult ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset);
+    void ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset);
 };
 
 AssertionResult GridScrollerTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset)
@@ -39,6 +40,12 @@ AssertionResult GridScrollerTestNg::ScrollToIndex(int32_t index, bool smooth, Sc
     pattern_->ScrollTo(startOffset); // reset currentOffset_
     FlushLayoutTask(frameNode_);
     return IsEqual(currentOffset, expectOffset);
+}
+
+void GridScrollerTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
+{
+    pattern_->ScrollToIndex(index, smooth, align, extraOffset);
+    FlushLayoutTask(frameNode_);
 }
 
 /**
@@ -385,6 +392,78 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex014, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     int32_t index = 6;
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, position));
+}
+
+/**
+ * @tc.name: ScrollToIndex015
+ * @tc.desc: Test ScrollToIndex with extraOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollToIndex015, TestSize.Level1)
+{
+    /**
+     * @tc.cases: ScrollToIndex without animation
+     * @tc.expected: GetTotalOffset is right
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
+    std::optional<float> extraOffset = -400.f;
+    ScrollToIndex(2, false, ScrollAlign::START, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 0.f);
+    ScrollToIndex(17, false, ScrollAlign::START, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 1200.f); // 10 * ITEM_HEIGHT -  GRID_HEIGHT
+    ScrollToIndex(17, false, ScrollAlign::END, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 600.f); // 1200.f - ITEM_HEIGHT - 400.f
+    ScrollToIndex(LAST_ITEM, false, ScrollAlign::END, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 800.f); // 1200.f - 400.f
+
+    extraOffset = 400.f;
+    ScrollToIndex(2, false, ScrollAlign::START, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 600.f); // ITEM_HEIGHT + 400.f
+    ScrollToIndex(2, false, ScrollAlign::END, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 0.f);
+    ScrollToIndex(17, false, ScrollAlign::END, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 1200.f);
+    ScrollToIndex(LAST_ITEM, false, ScrollAlign::END, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 1200.f);
+}
+
+/**
+ * @tc.name: ScrollToIndex016
+ * @tc.desc: Test ScrollToIndex with extraOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollToIndex016, TestSize.Level1)
+{
+    /**
+     * @tc.cases: ScrollToIndex with animation
+     * @tc.expected: GetFinalPosition is right
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    CreateFixedItems(20);
+    CreateDone(frameNode_);
+
+    std::optional<float> extraOffset = -400.f;
+    ScrollToIndex(2, true, ScrollAlign::START, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), -200.f); // ITEM_HEIGHT - 400.f
+    ScrollToIndex(17, true, ScrollAlign::START, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 1200.f); // 10 * ITEM_HEIGHT - GRID_HEIGHT
+    ScrollToIndex(17, true, ScrollAlign::END, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 600.f); // 1200.f - ITEM_HEIGHT - 400.f
+    ScrollToIndex(LAST_ITEM, true, ScrollAlign::END, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), -400.f); // extraOffset
+
+    extraOffset = 400.f;
+    ScrollToIndex(2, true, ScrollAlign::START, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 600.f); // ITEM_HEIGHT + 400.f
+    ScrollToIndex(17, true, ScrollAlign::END, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 1400.f); // 1200.f - ITEM_HEIGHT + 400.f
+    ScrollToIndex(LAST_ITEM, true, ScrollAlign::END, extraOffset);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 400.f); // extraOffset
 }
 
 /**
@@ -1570,34 +1649,6 @@ HWTEST_F(GridScrollerTestNg, ScrollBy001, TestSize.Level1)
      */
     pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false);
     EXPECT_FALSE(pattern_->isAnimationStop_);
-}
-
-/**
- * @tc.name: DumpAdvanceInfo001
- * @tc.desc: Test ScrollBy
- * @tc.type: FUNC
- */
-HWTEST_F(GridScrollerTestNg, DumpAdvanceInfo001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr");
-    CreateDone(frameNode_);
-    pattern_->DumpAdvanceInfo();
-    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::NONE;
-    pattern_->DumpAdvanceInfo();
-    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::CENTER;
-    pattern_->DumpAdvanceInfo();
-    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::END;
-    pattern_->DumpAdvanceInfo();
-    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::START;
-    pattern_->DumpAdvanceInfo();
-
-    ClearOldNodes();
-    model = CreateGrid();
-    model.SetColumnsTemplate("1fr");
-    CreateFixedItems(1);
-    CreateDone(frameNode_);
-    pattern_->DumpAdvanceInfo();
 }
 
 /**

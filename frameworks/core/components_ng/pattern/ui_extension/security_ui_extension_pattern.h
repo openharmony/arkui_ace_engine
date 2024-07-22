@@ -64,8 +64,7 @@ public:
     int32_t GetInstanceId();
 
     void OnAreaChangedInner() override;
-    bool OnDirtyLayoutWrapperSwap(
-        const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnSyncGeometryNode(const DirtySwapConfig& config) override;
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnAttachToFrameNode() override;
@@ -80,6 +79,8 @@ public:
     void RegisterVisibleAreaChange();
     void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
+    void FireOnErrorCallback(
+        int32_t code, const std::string& name, const std::string& message) override;
 
     void FireOnRemoteReadyCallback();
     void FireBindModalCallback();
@@ -103,6 +104,7 @@ private:
     void HandleFocusEvent() override;
     void HandleBlurEvent() override;
     void DispatchFocusActiveEvent(bool isFocusActive) override;
+    void HandleTouchEvent(const TouchEventInfo& info) override;
     void DispatchFocusState(bool focusState);
 
     enum class AbilityState {
@@ -126,7 +128,6 @@ private:
     bool densityDpi_ = false;
     int32_t callbackId_ = 0;
     RectF displayArea_;
-    bool isKeyAsync_ = false;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     int32_t uiExtensionId_ = 0;
 

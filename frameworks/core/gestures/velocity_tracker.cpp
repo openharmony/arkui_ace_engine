@@ -127,8 +127,8 @@ void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end)
         if (isFirstPoint_) {
             oriDelta = delta_;
         } else {
-            Offset lastMoveEvent = Platform::GetTouchEventOriginOffset(lastTrackPoint);
-            Offset upEvent = Platform::GetTouchEventOriginOffset(event);
+            Offset lastMoveEvent = lastTrackPoint.GetOffset();
+            Offset upEvent = event.GetOffset();
             oriDelta = upEvent - lastMoveEvent;
         }
         if (oriDelta.IsZero() && (diffTime.count() < range)) {
@@ -183,4 +183,18 @@ void VelocityTracker::UpdateVelocity()
     isVelocityDone_ = true;
 }
 
+void VelocityTracker::DumpVelocityPoints() const
+{
+    auto func = [](const LeastSquareImpl &axis, const char* str) {
+        const auto& xVal = axis.GetXVals();
+        const auto& yVal = axis.GetYVals();
+        int32_t i = static_cast<int32_t>(xVal.size());
+        for (int32_t cnt = VelocityTracker::POINT_NUMBER; i > 0 && cnt > 0; --cnt) {
+            --i;
+            LOGI("%{public}s last tracker points[%{public}d] x=%{public}f y=%{public}f", str, cnt, xVal[i], yVal[i]);
+        }
+    };
+    func(xAxis_, "xAxis");
+    func(yAxis_, "yAxis");
+}
 } // namespace OHOS::Ace

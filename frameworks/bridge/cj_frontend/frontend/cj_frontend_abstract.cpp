@@ -231,7 +231,14 @@ void CJFrontendAbstract::ShowToast(
                     const RefPtr<NG::OverlayManager>& overlayManager) {
         CHECK_NULL_VOID(overlayManager);
         ContainerScope scope(containerId);
-        overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode);
+        auto toastInfo = NG::ToastInfo { .message = message,
+            .duration = durationTime,
+            .bottom = bottom,
+            .showMode = showMode,
+            .isRightToLeft = isRightToLeft,
+            .alignment = -1,
+            .offset = std::nullopt };
+        overlayManager->ShowToast(toastInfo, nullptr);
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayShowToast");
 }

@@ -14,6 +14,8 @@
  */
 
 #include "search_base.h"
+#include "core/components_ng/pattern/search/search_node.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -889,6 +891,68 @@ HWTEST_F(SearchTestNg, SetSearchSrcPath002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSearchImageIcon001
+ * @tc.desc: Set search image icon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchImageIcon001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto searchLayoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(searchLayoutProperty, nullptr);
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
+    auto imageRenderProperty = imageFrameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    NG::IconOptions iconOptions = NG::IconOptions(Color::RED, 14.0_vp, "/common/icon.png", "", "");
+    searchModelInstance.SetSearchImageIcon(iconOptions);
+    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_STREQ(imageLayoutProperty->GetImageSourceInfo()->GetSrc().c_str(), "/common/icon.png");
+    EXPECT_EQ(searchLayoutProperty->GetSearchIconUDSize(), 14.0_vp);
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor(), Color::RED);
+}
+
+/**
+ * @tc.name: SetSearchIconSymbolGlyphModofier001
+ * @tc.desc: Set search icon symbolGlyphModifier is not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchIconSymbolGlyphModofier001, TestSize.Level1)
+{
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        EXPECT_NE(node, nullptr);
+    };
+    SearchModelNG searchModelInstance;
+    searchModelInstance.SetSearchSymbolIcon(onApply);
+    auto search = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(search, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    ASSERT_NE(searchTheme, nullptr);
+
+    auto searchLayoutProperty = search->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(searchLayoutProperty, nullptr);
+    ASSERT_NE(searchLayoutProperty->GetSearchIconSymbol(), nullptr);
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(search->GetChildAtIndex(IMAGE_INDEX));
+    EXPECT_TRUE(iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG);
+    auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(symbolLayoutProperty, nullptr);
+
+    const std::unique_ptr<FontStyle>& symbolStyle = symbolLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+    EXPECT_EQ(symbolStyle->GetFontSize(), Dimension(16, DimensionUnit::FP));
+    std::vector<Color> color = { searchTheme->GetSymbolIconColor() };
+    EXPECT_EQ(symbolStyle->GetSymbolColorList(), color);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
+}
+
+/**
  * @tc.name: SetRightIconSrcPath001
  * @tc.desc: Set search icon src path and src is empty
  * @tc.type: FUNC
@@ -970,6 +1034,68 @@ HWTEST_F(SearchTestNg, SetCancelIconSize001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetCancelImageIcon001
+ * @tc.desc: Set cancel image icon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetCancelImageIcon001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto searchLayoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(searchLayoutProperty, nullptr);
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    auto imageRenderProperty = imageFrameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    NG::IconOptions iconOptions = NG::IconOptions(Color::RED, 14.0_vp, "/common/icon.png", "", "");
+    searchModelInstance.SetCancelImageIcon(iconOptions);
+    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_STREQ(imageLayoutProperty->GetImageSourceInfo()->GetSrc().c_str(), "/common/icon.png");
+    EXPECT_EQ(searchLayoutProperty->GetCancelButtonUDSize(), 14.0_vp);
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor(), Color::RED);
+}
+
+/**
+ * @tc.name: SetCancelIconSymbolGlyphModofier001
+ * @tc.desc: Set cancel icon symbolGlyphModifier is not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetCancelIconSymbolGlyphModofier001, TestSize.Level1)
+{
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        EXPECT_NE(node, nullptr);
+    };
+    SearchModelNG searchModelInstance;
+    searchModelInstance.SetCancelSymbolIcon(onApply);
+    auto search = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(search, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    ASSERT_NE(searchTheme, nullptr);
+
+    auto searchLayoutProperty = search->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(searchLayoutProperty, nullptr);
+    ASSERT_NE(searchLayoutProperty->GetCancelIconSymbol(), nullptr);
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(search->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    EXPECT_TRUE(iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG);
+    auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(symbolLayoutProperty, nullptr);
+
+    const std::unique_ptr<FontStyle>& symbolStyle = symbolLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+    EXPECT_EQ(symbolStyle->GetFontSize(), Dimension(16, DimensionUnit::FP));
+    std::vector<Color> color = { searchTheme->GetSymbolIconColor() };
+    EXPECT_EQ(symbolStyle->GetSymbolColorList(), color);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
+}
+
+/**
  * @tc.name: SetSearchButtonFontSize001
  * @tc.desc: Set search button font size and color
  * @tc.type: FUNC
@@ -1029,7 +1155,7 @@ HWTEST_F(SearchTestNg, Create001, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     auto searchIconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
     ASSERT_NE(searchIconFrameNode, nullptr);
-    EXPECT_EQ(searchIconFrameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    EXPECT_EQ(searchIconFrameNode->GetTag(), V2::SYMBOL_ETS_TAG);
     auto cancelIconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
     ASSERT_NE(cancelIconFrameNode, nullptr);
     EXPECT_EQ(cancelIconFrameNode->GetTag(), V2::SYMBOL_ETS_TAG);

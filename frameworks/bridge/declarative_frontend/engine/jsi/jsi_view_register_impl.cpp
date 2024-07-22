@@ -102,6 +102,8 @@
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "bridge/declarative_frontend/jsview/js_line.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
+#include "bridge/declarative_frontend/jsview/js_linear_indicator.h"
+#include "bridge/declarative_frontend/jsview/js_linear_indicator_controller.h"
 #include "bridge/declarative_frontend/jsview/js_list.h"
 #include "bridge/declarative_frontend/jsview/js_list_item.h"
 #include "bridge/declarative_frontend/jsview/js_list_item_group.h"
@@ -264,7 +266,9 @@ namespace OHOS::Ace::Framework {
 
 void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj)
 {
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
+    const auto object = JSRef<JSObject>::Make(obj);
+    const EcmaVM* vm = object->GetEcmaVM();
+    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return;
     }
@@ -273,14 +277,12 @@ void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj)
     auto customNode = AceType::DynamicCast<NG::CustomTitleNode>(uiNode);
     CHECK_NULL_VOID(customNode);
 
-    const auto object = JSRef<JSObject>::Make(obj);
     auto id = ContainerScope::CurrentId();
     const JSRef<JSVal> setAppTitle = object->GetProperty("setAppTitle");
     if (setAppTitle->IsFunction()) {
         JSRef<JSFunc> jsSetAppTitleFunc = JSRef<JSFunc>::Cast(setAppTitle);
-        auto callback = [obj = object, jsFunc = jsSetAppTitleFunc, id](const std::string& title) {
+        auto callback = [obj = object, jsFunc = jsSetAppTitleFunc, id, vm](const std::string& title) {
             ContainerScope scope(id);
-            const EcmaVM* vm = obj->GetEcmaVM();
             CHECK_NULL_VOID(vm);
             JSRef<JSVal> param = JSRef<JSVal>::Make(JsiValueConvertor::toJsiValueWithVM(vm, title));
             jsFunc->Call(obj, 1, &param);
@@ -339,9 +341,9 @@ void CleanPageNode(const RefPtr<NG::FrameNode>& pageNode)
     pageNode->Clean();
 }
 
-void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
+void UpdateRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj)
 {
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
+    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return;
     }
@@ -843,7 +845,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "GestureRecognizer", JSGestureRecognizer::JSBind },
     { "EventTargetInfo", JSEventTargetInfo::JSBind },
     { "ScrollableTargetInfo", JSScrollableTargetInfo::JSBind },
-    { "PanRecognizer", JSPanRecognizer::JSBind }
+    { "PanRecognizer", JSPanRecognizer::JSBind },
+    { "LinearIndicator", JSLinearIndicator::JSBind },
+    { "LinearIndicatorController", JSLinearIndicatorController::JSBind }
 };
 
 void RegisterBindFuncs(BindingTarget globalObj)

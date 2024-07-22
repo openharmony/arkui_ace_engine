@@ -299,6 +299,11 @@ public:
         return childLayoutConstraint_;
     }
 
+    void SetNextMarginIgnoreBlank(bool nextMarginIgnoreBlank)
+    {
+        nextMarginIgnoreBlank_ = nextMarginIgnoreBlank;
+    }
+
 private:
     void LayoutSwiperIndicator(
         LayoutWrapper* layoutWrapper, const RefPtr<SwiperLayoutProperty>& swiperLayoutProperty,
@@ -334,7 +339,7 @@ private:
     float GetChildMainAxisSize(
         const RefPtr<LayoutWrapper>& childWrapper, const RefPtr<SwiperLayoutProperty>& swiperProperty, Axis axis);
 
-    void CheckCachedItem(int32_t startIndex, int32_t endIndex);
+    void CheckCachedItem(int32_t startIndex, int32_t endIndex, LayoutWrapper* layoutWrapper);
 
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;
@@ -382,6 +387,7 @@ private:
     bool isNeedUpdateCapture_ = false;
     bool isMeasureOneMoreItem_ = false;
     bool isFrameAnimation_ = false;
+    bool nextMarginIgnoreBlank_ = false;
     std::set<int32_t> measuredItems_;
     std::set<int32_t> activeItems_;
     std::set<int32_t> cachedItems_;

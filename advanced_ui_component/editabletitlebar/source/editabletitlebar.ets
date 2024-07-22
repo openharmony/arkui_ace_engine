@@ -70,9 +70,9 @@ const TITLE_VP: number = 20;
 const SUBTITLE_VP: number = 14;
 
 // 'sys.float.titlebar_title_tertiary_size' id,value: 20vp
-const TITLE_F: number = getNumberByResource(125831095) ?? 20;
+const TITLE_F: number = getNumberByResource(125831095, TITLE_VP);
 // 'sys.float.titlebar_subheader_size' id,value: 14vp
-const SUBTITLE_F: number = getNumberByResource(125831097) ?? 14;
+const SUBTITLE_F: number = getNumberByResource(125831097, SUBTITLE_VP);
 
 const TITLE_F_VP: string = (TITLE_F > 0 ? TITLE_F : TITLE_VP) + 'vp';
 const SUBTITLE_F_VP: string = (SUBTITLE_F > 0 ? SUBTITLE_F : SUBTITLE_VP) + 'vp';
@@ -107,9 +107,9 @@ export struct EditableTitleBar {
   public static readonly commonZero = 0;
   public static readonly noneColor = '#00000000';
   // 'sys.float.titlebar_default_height' id,value: 56vp
-  public static readonly defaultHeight: number = getNumberByResource(125831115) ?? 56;
+  public static readonly defaultHeight: number = getNumberByResource(125831115, DEFAULT_TITLE_BAR_HEIGHT);
   // 'sys.float.padding_level1' id,value: 2vp
-  public static readonly defaultTitlePadding: number = getNumberByResource(125830920) ?? 2;
+  public static readonly defaultTitlePadding: number = getNumberByResource(125830920, DEFAULT_TITLE_PADDING);
   public static readonly totalHeight: number =
     EditableTitleBar.defaultHeight === EditableTitleBar.commonZero ? DEFAULT_TITLE_BAR_HEIGHT :
     EditableTitleBar.defaultHeight;
@@ -262,7 +262,7 @@ export struct EditableTitleBar {
     .justifyContent(FlexAlign.Center)
     .margin({
       // 'sys.float.titlebar_icon_background_space_horizontal' id,value: 8vp
-      start: LengthMetrics.vp(getNumberByResource(125831103) ?? 8),
+      start: LengthMetrics.resource($r('sys.float.titlebar_icon_background_space_horizontal')),
     })
     .alignItems(HorizontalAlign.Start)
   }
@@ -651,13 +651,18 @@ struct EditableTitleBarDialog {
  * @param resourceId resource id
  * @return resource size
  */
-function getNumberByResource(resourceId: number): number | null {
+function getNumberByResource(resourceId: number, defaultNumber: number): number {
   try {
-    return resourceManager.getSystemResourceManager().getNumber(resourceId);
+    let resourceNumber: number = resourceManager.getSystemResourceManager().getNumber(resourceId);
+    if (resourceNumber === 0) {
+      return defaultNumber;
+    } else {
+      return resourceNumber;
+    }
   } catch (error) {
     let code: number = (error as BusinessError).code;
     let message: string = (error as BusinessError).message;
     hilog.error(0x3900, 'Ace', `EditableTitleBar getNumberByResource error, code: ${code},message:${message}`);
-    return null;
+    return 0;
   }
 }

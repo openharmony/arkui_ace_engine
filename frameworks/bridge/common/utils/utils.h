@@ -628,7 +628,6 @@ inline int32_t ParseUtf8TextSubstrStartPos(std::string& text, int32_t targetPos)
             truePos++;
         }
     }
-
     return stringPos;
 }
 
@@ -642,7 +641,6 @@ inline int32_t ParseUtf8TextSubstrEndPos(std::string& text, int32_t targetPos)
         }
         stringPos++;
     }
-
     return stringPos;
 }
 

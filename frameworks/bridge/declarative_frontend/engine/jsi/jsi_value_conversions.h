@@ -54,7 +54,7 @@ T fromJsiValue(const EcmaVM* vm, Local<panda::JSValueRef> val)
     } else if constexpr (std::is_floating_point_v<T>) {
         return val->ToNumber(vm)->Value();
     } else if constexpr (std::is_same_v<T, std::string>) {
-        return val->ToString(vm)->ToString();
+        return val->ToString(vm)->ToString(vm);
     }
 
     return T();

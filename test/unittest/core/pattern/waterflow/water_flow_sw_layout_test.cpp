@@ -692,4 +692,39 @@ HWTEST_F(WaterFlowSWTest, ResetSections001, TestSize.Level1)
     EXPECT_EQ(info_->segmentTails_.size(), 1);
     EXPECT_EQ(info_->margins_.size(), 1);
 }
+
+/**
+ * @tc.name: ChangeLayoutMode001
+ * @tc.desc: change WaterFlow layout mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ChangeLayoutMode001, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(60);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_5);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+
+    UpdateCurrentOffset(-205.0f);
+    EXPECT_EQ(info_->startIndex_, 3);
+    EXPECT_EQ(info_->endIndex_, 11);
+
+    EXPECT_EQ(pattern_->layoutInfo_->Mode(), WaterFlowLayoutMode::SLIDING_WINDOW);
+    pattern_->SetLayoutMode(WaterFlowLayoutMode::TOP_DOWN);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+
+    UpdateCurrentOffset(-205.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 3);
+    pattern_->SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+}
 } // namespace OHOS::Ace::NG

@@ -538,6 +538,9 @@ ScrollAlign GridLayoutInfo::TransformAutoScrollAlign(
 
 float GridLayoutInfo::GetAnimatePosIrregular(int32_t targetIdx, int32_t height, ScrollAlign align, float mainGap) const
 {
+    if (targetIdx == LAST_ITEM) {
+        targetIdx = childrenCount_ - 1;
+    }
     auto it = FindInMatrix(targetIdx);
     if (it == gridMatrix_.end()) {
         return -1.0f;

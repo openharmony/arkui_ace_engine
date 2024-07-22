@@ -156,8 +156,7 @@ void ImageProvider::SuccessCallback(
         } else {
             // NOTE: contexts may belong to different arkui pipelines
             auto notifyLoadSuccess = [ctx, canvasImage] { ctx->SuccessCallback(canvasImage->Clone()); };
-            ImageUtils::PostToUI(std::move(notifyLoadSuccess), "ArkUIImageProviderSuccess", ctx->GetContainerId(),
-                loadInVipChannel ? PriorityType::VIP : PriorityType::LOW);
+            ImageUtils::PostToUI(std::move(notifyLoadSuccess), "ArkUIImageProviderSuccess", ctx->GetContainerId());
         }
     }
 }

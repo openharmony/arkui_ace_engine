@@ -16,7 +16,6 @@
 #include "core/components_ng/render/image_painter.h"
 
 #include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -84,14 +83,6 @@ void ApplyNone(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, Re
     SizeF srcSize(std::min(dstSize.Width(), rawPicSize.Width()), std::min(dstSize.Height(), rawPicSize.Height()));
     dstRect.SetRect(Alignment::GetAlignPosition(dstSize, srcSize, Alignment::CENTER), srcSize);
     srcRect.SetRect(Alignment::GetAlignPosition(rawPicSize, srcSize, Alignment::CENTER), srcSize);
-}
-
-void ApplyAlignment(
-    const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect, const Alignment& alignMent)
-{
-    SizeF srcSize(std::min(dstSize.Width(), rawPicSize.Width()), std::min(dstSize.Height(), rawPicSize.Height()));
-    dstRect.SetRect(Alignment::GetAlignPosition(dstSize, srcSize, alignMent), srcSize);
-    srcRect.SetRect(Alignment::GetAlignPosition(rawPicSize, srcSize, alignMent), srcSize);
 }
 } // namespace
 
@@ -236,49 +227,6 @@ void ImagePainter::DrawImageWithRepeat(RSCanvas& canvas, const RectF& contentRec
     canvas.Restore();
 }
 
-void ImagePainter::ApplyImageAlignmentFit(
-    ImageFit imageFit, const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
-{
-    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-    switch (imageFit) {
-        case ImageFit::TOP_LEFT:
-            ApplyAlignment(
-                rawPicSize, dstSize, srcRect, dstRect, isRightToLeft ? Alignment::TOP_RIGHT : Alignment::TOP_LEFT);
-            break;
-        case ImageFit::TOP:
-            ApplyAlignment(rawPicSize, dstSize, srcRect, dstRect, Alignment::TOP_CENTER);
-            break;
-        case ImageFit::TOP_END:
-            ApplyAlignment(
-                rawPicSize, dstSize, srcRect, dstRect, isRightToLeft ? Alignment::TOP_LEFT : Alignment::TOP_RIGHT);
-            break;
-        case ImageFit::START:
-            ApplyAlignment(rawPicSize, dstSize, srcRect, dstRect,
-                isRightToLeft ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT);
-            break;
-        case ImageFit::CENTER:
-            ApplyAlignment(rawPicSize, dstSize, srcRect, dstRect, Alignment::CENTER);
-            break;
-        case ImageFit::END:
-            ApplyAlignment(rawPicSize, dstSize, srcRect, dstRect,
-                isRightToLeft ? Alignment::CENTER_LEFT : Alignment::CENTER_RIGHT);
-            break;
-        case ImageFit::BOTTOM_START:
-            ApplyAlignment(rawPicSize, dstSize, srcRect, dstRect,
-                isRightToLeft ? Alignment::BOTTOM_RIGHT : Alignment::BOTTOM_LEFT);
-            break;
-        case ImageFit::BOTTOM:
-            ApplyAlignment(rawPicSize, dstSize, srcRect, dstRect, Alignment::BOTTOM_CENTER);
-            break;
-        case ImageFit::BOTTOM_END:
-            ApplyAlignment(rawPicSize, dstSize, srcRect, dstRect,
-                isRightToLeft ? Alignment::BOTTOM_LEFT : Alignment::BOTTOM_RIGHT);
-            break;
-        default:
-            break;
-    }
-}
-
 void ImagePainter::ApplyImageFit(
     ImageFit imageFit, const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
 {
@@ -289,11 +237,6 @@ void ImagePainter::ApplyImageFit(
     srcRect.ApplyScale(1.0 / viewScale);
     dstRect.SetOffset(OffsetF());
     dstRect.SetSize(dstSize);
-    if (imageFit >= ImageFit::TOP_LEFT && imageFit <= ImageFit::BOTTOM_END) {
-        ApplyImageAlignmentFit(imageFit, rawPicSize, dstSize, srcRect, dstRect);
-        srcRect.ApplyScale(viewScale);
-        return;
-    }
     switch (imageFit) {
         case ImageFit::FILL:
             break;

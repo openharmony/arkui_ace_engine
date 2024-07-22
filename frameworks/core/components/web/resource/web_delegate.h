@@ -792,6 +792,8 @@ public:
         richtextData_ = richtextData;
     }
     void HandleAccessibilityHoverEvent(int32_t x, int32_t y);
+    void NotifyAutoFillViewData(const std::string& jsonStr);
+    void HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -799,6 +801,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response);
     RefPtr<WebResponse> OnInterceptRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool IsEmptyOnInterceptRequest();
+    void ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart);
     void RecordWebEvent(Recorder::EventType eventType, const std::string& param) const;
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
@@ -996,6 +999,8 @@ public:
 
     void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
 
+    void OnCursorUpdate(double x, double y, double width, double height);
+
     void CloseCustomKeyboard()
     {
         if (keyboardHandler_) {
@@ -1017,8 +1022,9 @@ private:
     void BindRouterBackMethod();
     void BindPopPageSuccessMethod();
     void BindIsPagePathInvalidMethod();
-    void TextBlurReport(int64_t accessibilityId);
+    void TextBlurReportByFocusEvent(int64_t accessibilityId);
     void WebComponentClickReport(int64_t accessibilityId);
+    void TextBlurReportByBlurEvent(int64_t accessibilityId);
 
 #ifdef OHOS_STANDARD_SYSTEM
     sptr<OHOS::Rosen::Window> CreateWindow();
@@ -1209,6 +1215,7 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler_ = nullptr;
     std::string sharedRenderProcessToken_;
     int64_t lastFocusInputId_ = 0;
+    int64_t lastFocusReportId_ = 0;
 #endif
 };
 

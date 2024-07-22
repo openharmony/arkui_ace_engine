@@ -109,7 +109,7 @@ public:
         return the affected UINode
         caller responsibility to detach this UINode from the UI tree!
     */
-    RefPtr<UINode> DropFromL1(std::string key);
+    RefPtr<UINode> DropFromL1(const std::string& key);
 
     int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& frameNode) const;
 
@@ -236,7 +236,7 @@ private:
      *  or 0 if within active range
      *  distance is int max for invalidated keys
      */
-    int32_t GetDistanceFromRange(uint32_t index) const;
+    uint32_t GetDistanceFromRange(uint32_t index) const;
     /**
      * scenario: find L1 key that should be updated
      * choose the key whose index is the furthest away from active range

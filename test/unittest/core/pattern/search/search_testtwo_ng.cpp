@@ -630,6 +630,7 @@ HWTEST_F(SearchTestTwoNg, Pattern023, TestSize.Level1)
     ASSERT_NE(textFieldFrameNode, nullptr);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
+    frameNode->onMainTree_ = true;
 
     /**
      * @tc.step: step2. create column layout.
@@ -939,7 +940,7 @@ HWTEST_F(SearchTestTwoNg, SetProperty001, TestSize.Level1)
     searchModelInstance.SetHeight(Dimension(2.5, DimensionUnit::VP));
 
     //test SetOnChange
-    searchModelInstance.SetOnChange([](const std::string str, TextRange range) {});
+    searchModelInstance.SetOnChange([](const std::string str, PreviewText previewText) {});
     EXPECT_NE(eventHub->GetOnChange(), nullptr);
 
     //test SetOnTextSelectionChange

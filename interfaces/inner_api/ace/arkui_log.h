@@ -19,8 +19,7 @@
 #include "hilog/log.h"
 
 #define PRINT_LOG(level, fmt, ...) \
-    HILOG_IMPL(LOG_CORE, LOG_##level, 0xD003900, "ACE_UIContent", "[%{public}s:%{public}d]" fmt, \
-        __FUNCTION__, __LINE__, ##__VA_ARGS__)
+    HILOG_IMPL(LOG_CORE, LOG_##level, 0xD003900, "ACE_UIContent", "[%{public}d]" fmt, __LINE__, ##__VA_ARGS__)
 
 #define LOGE(fmt, ...) PRINT_LOG(ERROR, fmt, ##__VA_ARGS__)
 #define LOGW(fmt, ...) PRINT_LOG(WARN, fmt, ##__VA_ARGS__)

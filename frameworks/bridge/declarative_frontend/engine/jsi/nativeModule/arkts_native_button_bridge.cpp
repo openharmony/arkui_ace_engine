@@ -69,10 +69,10 @@ panda::Local<panda::JSValueRef> JsButtonClickCallback(panda::JsiRuntimeCallInfo*
     double yPos = secondArg->ToNumber(vm)->Value();
     auto ref = runtimeCallInfo->GetThisRef();
     auto obj = ref->ToObject(vm);
-    if (obj->GetNativePointerFieldCount() < CALL_ARG_1) {
+    if (obj->GetNativePointerFieldCount(vm) < CALL_ARG_1) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(0));
+    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(vm, 0));
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     ButtonModelNG::TriggerClick(frameNode, xPos, yPos);
     return panda::JSValueRef::Undefined(vm);
@@ -285,7 +285,7 @@ ArkUINativeModuleValue ButtonBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtime
             fontWeight = std::to_string(fontWeightArg->Int32Value(vm));
         } else if (fontWeightArg->IsString(vm)) {
             // enum FontWeight is string.
-            fontWeight = fontWeightArg->ToString(vm)->ToString();
+            fontWeight = fontWeightArg->ToString(vm)->ToString(vm);
         }
     }
     GetArkUINodeModifiers()->getButtonModifier()->setButtonFontWeight(nativeNode, fontWeight.c_str());
@@ -462,36 +462,6 @@ void ButtonBridge::PutButtonDimensionParameters(
     }
 }
 
-void ButtonBridge::PutButtonStringParameters(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<const char*>& stringParameters)
-{
-    std::vector<std::string> stringsVector;
-    Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(FONT_WEIGHT_ARG_7);
-    std::string fontWeight = DEFAULT_FONT_WEIGHT;
-    if (!fontWeightArg->IsNull()) {
-        if (fontWeightArg->IsNumber()) {
-            fontWeight = std::to_string(fontWeightArg->Int32Value(vm));
-        } else if (fontWeightArg->IsString(vm)) {
-            // enum FontWeight is sent as string.
-            fontWeight = fontWeightArg->ToString(vm)->ToString();
-        }
-    }
-    stringsVector.push_back(fontWeight);
-
-    Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(FONT_FAMILY_ARG_9);
-    std::string strFontFamilies;
-    if (ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, strFontFamilies)) {
-        stringsVector.push_back(strFontFamilies);
-    } else {
-        strFontFamilies = NONE_FONT_FAMILY;
-        stringsVector.push_back(strFontFamilies);
-    }
-
-    for (size_t index = 0; index < stringsVector.size(); index++) {
-        stringParameters.push_back(stringsVector[index].c_str());
-    }
-}
-
 ArkUINativeModuleValue ButtonBridge::SetLabelStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -503,7 +473,26 @@ ArkUINativeModuleValue ButtonBridge::SetLabelStyle(ArkUIRuntimeCallInfo* runtime
     std::vector<ArkUI_Float32> fontSizesVector;
     PutButtonDimensionParameters(runtimeCallInfo, vm, fontSizesVector);
     std::vector<ArkUI_CharPtr> stringParameters;
-    PutButtonStringParameters(runtimeCallInfo, vm, stringParameters);
+    Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(FONT_WEIGHT_ARG_7);
+    std::string fontWeight = DEFAULT_FONT_WEIGHT;
+    if (!fontWeightArg->IsNull()) {
+        if (fontWeightArg->IsNumber()) {
+            fontWeight = std::to_string(fontWeightArg->Int32Value(vm));
+        } else if (fontWeightArg->IsString(vm)) {
+            // enum FontWeight is sent as string.
+            fontWeight = fontWeightArg->ToString(vm)->ToString(vm);
+        }
+    }
+    stringParameters.push_back(fontWeight.c_str());
+
+    Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(FONT_FAMILY_ARG_9);
+    std::string strFontFamilies;
+    if (ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, strFontFamilies)) {
+        stringParameters.push_back(strFontFamilies.c_str());
+    } else {
+        strFontFamilies = NONE_FONT_FAMILY;
+        stringParameters.push_back(strFontFamilies.c_str());
+    }
     std::vector<ArkUI_Uint32> dataCountVector;
     dataCountVector.push_back(stringParameters.size());
     dataCountVector.push_back(valuesVector.size());

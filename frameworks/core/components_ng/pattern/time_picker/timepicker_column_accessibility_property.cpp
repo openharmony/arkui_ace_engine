@@ -79,7 +79,9 @@ int32_t TimePickerColumnAccessibilityProperty::GetBeginIndex() const
         return 0;
     }
     auto currentIndex = pattern->GetCurrentIndex();
-    return (itemCounts + currentIndex - pattern->GetShowCount() / MIDDLE_OF_COUNTS) % itemCounts;
+    return (itemCounts + static_cast<int32_t>(currentIndex) -
+               static_cast<int32_t>(pattern->GetShowCount()) / MIDDLE_OF_COUNTS) %
+           itemCounts;
 }
 
 std::string TimePickerColumnAccessibilityProperty::GetText() const

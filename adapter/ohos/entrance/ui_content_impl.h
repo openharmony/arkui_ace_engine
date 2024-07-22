@@ -78,6 +78,7 @@ public:
     std::string GetContentInfo(ContentInfoType type) const override;
     void DestroyUIDirector() override;
     void SetUIContentType(UIContentType uIContentType) override;
+    void UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
     // UI content event process
     bool ProcessBackPressed() override;
@@ -325,6 +326,8 @@ public:
     void SetStatusBarItemColor(uint32_t color) override;
 
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
+
+    void SetForceSplitEnable(bool isForceSplit) override;
 
 private:
     UIContentErrorCode InitializeInner(

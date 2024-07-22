@@ -46,11 +46,12 @@ class TestNG : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    RefPtr<PaintWrapper> FlushLayoutTask(const RefPtr<FrameNode>& frameNode);
+    RefPtr<PaintWrapper> FlushLayoutTask(const RefPtr<FrameNode>& frameNode, bool markDirty = false);
     RefPtr<PaintWrapper> CreateDone(const RefPtr<FrameNode>& frameNode = nullptr);
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
     TouchEventInfo CreateTouchEventInfo(TouchType touchType, Offset location);
     static RefPtr<ThemeConstants> CreateThemeConstants(const std::string& patternName);
+    void FlushExpandSafeAreaTask();
 
     AssertionResult IsEqual(const SizeF& actual, const SizeF& expected)
     {

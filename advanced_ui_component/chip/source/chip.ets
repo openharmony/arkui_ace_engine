@@ -620,14 +620,7 @@ export struct ChipComponent {
       sourceColor = ColorMetrics.resourceColor(currentColor);
     } catch (err) {
       hilog.error(0x3900, 'Ace', `Chip resourceColor, error: ${err.toString()}`);
-      if (this.getChipActive()) {
-        sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor);
-      } else {
-        sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor);
-      }
-      if (!this.isShowPressedBackGroundColor) {
-        return Color.Transparent
-      }
+      sourceColor = ColorMetrics.resourceColor(Color.Transparent);
     }
     if (!this.isShowPressedBackGroundColor) {
       return sourceColor.color

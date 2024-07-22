@@ -49,7 +49,7 @@ public:
     static void JsCommonRemoteMessage(const JSCallbackInfo& info);
 
     static std::function<void()> GetRemoteMessageEventCallback(const JSCallbackInfo& info);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
     static void ReportClickEvent(const WeakPtr<NG::FrameNode>& node, const std::string text = "");
 #endif
 

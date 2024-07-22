@@ -89,6 +89,7 @@ void SwipeRecognizer::OnAccepted()
 
 void SwipeRecognizer::OnRejected()
 {
+    SendRejectMsg();
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
 }
@@ -427,6 +428,7 @@ GestureJudgeResult SwipeRecognizer::TriggerGestureJudgeCallback()
     }
     auto info = std::make_shared<SwipeGestureEvent>();
     info->SetTimeStamp(time_);
+    info->SetDeviceId(deviceId_);
     UpdateFingerListInfo();
     info->SetFingerList(fingerList_);
     if (deviceType_ == SourceType::MOUSE) {

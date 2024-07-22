@@ -27,11 +27,11 @@
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UIContentServiceStubImpl : public UiContentStub {
 public:
-    int32_t Connect() override
+    int32_t Connect(const EventCallback& eventCallback) override
     {
         return 0;
     }
-    int32_t GetInspectorTree(const EventCallback& eventCallback) override;
+    int32_t GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback) override;
     int32_t RegisterClickEventCallback(const EventCallback& eventCallback) override;
     int32_t RegisterRouterChangeEventCallback(const EventCallback& eventCallback) override;
     int32_t RegisterSearchEventCallback(const EventCallback& eventCallback) override;

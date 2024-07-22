@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
@@ -86,6 +87,15 @@ void PushDimensionsToVector(std::vector<ArkUIStringAndFloat>& results,
     }
 }
 
+bool ImageBridge::CheckIsCard()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    return context->IsFormRender() && !container->IsDynamicRender();
+}
+
 ArkUINativeModuleValue ImageBridge::SetImageShowSrc(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -95,13 +105,13 @@ ArkUINativeModuleValue ImageBridge::SetImageShowSrc(ArkUIRuntimeCallInfo* runtim
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
 
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, panda::NativePointerRef::New(vm, nullptr));
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(context, panda::NativePointerRef::New(vm, nullptr));
-    bool isCard = context->IsFormRender() && !container->IsDynamicRender();
+    bool isCard = CheckIsCard();
     std::string src;
     int32_t resId = 0;
+    if (info[1]->IsNumber()) {
+        GetArkUINodeModifiers()->getImageModifier()->resetImageContent(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
     if (info[0]->IsObject()) {
         Framework::JSRef<Framework::JSObject> jsObj = Framework::JSRef<Framework::JSObject>::Cast(info[0]);
         Framework::JSRef<Framework::JSVal> tmp = jsObj->GetProperty("id");
@@ -240,6 +250,22 @@ ArkUINativeModuleValue ImageBridge::ResetEdgeAntialiasing(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getImageModifier()->resetEdgeAntialiasing(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::SetResizableLattice(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        auto drawingLattice = Ace::Framework::CreateDrawingLattice(info[1]);
+        if (drawingLattice) {
+            Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(INDEX_0);
+            auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+            ImageModelNG::SetResizableLattice(reinterpret_cast<FrameNode*>(nativeNode), drawingLattice);
+        }
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -591,7 +617,7 @@ void SetColorFilterObject(const EcmaVM* vm, const Local<JSValueRef>& jsObjArg, A
 {
     Framework::JSColorFilter* colorFilter;
     if (!jsObjArg->IsUndefined() && !jsObjArg->IsNull()) {
-        colorFilter = static_cast<Framework::JSColorFilter*>(jsObjArg->ToObject(vm)->GetNativePointerField(0));
+        colorFilter = static_cast<Framework::JSColorFilter*>(jsObjArg->ToObject(vm)->GetNativePointerField(vm, 0));
     } else {
         GetArkUINodeModifiers()->getImageModifier()->setColorFilter(
             nativeNode, &(*DEFAULT_COLOR_FILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);

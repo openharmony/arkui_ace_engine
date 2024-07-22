@@ -72,23 +72,11 @@ void MagnifierController::OpenMagnifier()
 void MagnifierController::CloseMagnifier()
 {
     CHECK_NULL_VOID(magnifierFrameNode_);
-    auto pattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    auto textBasePattern = DynamicCast<TextBase>(pattern);
-    CHECK_NULL_VOID(textBasePattern);
-
-    auto layoutProperty = magnifierFrameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateVisibility(VisibleType::GONE);
-
-    auto childContext = magnifierFrameNode_->GetRenderContext();
-    CHECK_NULL_VOID(childContext);
-
-    auto paintOffset = textBasePattern->GetTextPaintOffset();
-    childContext->UpdatePosition(OffsetT<Dimension>(Dimension(paintOffset.GetX()), Dimension(paintOffset.GetY())));
-    childContext->SetContentRectToFrame(RectF(paintOffset.GetX(), paintOffset.GetY(), 0.0f, 0.0f));
-    magnifierFrameNode_->ForceSyncGeometryNode();
-    magnifierFrameNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto parentNode = magnifierFrameNode_->GetParent();
+    CHECK_NULL_VOID(parentNode);
+    parentNode->RemoveChild(magnifierFrameNode_);
+    parentNode->MarkNeedSyncRenderTree();
+    parentNode->RebuildRenderContextTree();
 }
 
 void MagnifierController::CreateMagnifierChildNode()

@@ -103,7 +103,9 @@ public:
         if (type_ == XComponentType::NODE) {
             return { FocusType::SCOPE, true };
         }
-        return { FocusType::NODE, false };
+        FocusPattern focusPattern = { FocusType::NODE, false };
+        focusPattern.SetIsFocusActiveWhenFocused(true);
+        return focusPattern;
     }
 
     bool NeedSoftKeyboard() const override
@@ -360,11 +362,6 @@ private:
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void ReleaseImageAnalyzer();
     void SetRotation(uint32_t rotation);
-#ifdef OHOS_PLATFORM
-    float GetUpVelocity(OH_NativeXComponent_TouchEvent lastMoveInfo, OH_NativeXComponent_TouchEvent upEventInfo);
-    int GetFlingDuration(float velocity);
-    void ReportSlideToRss();
-#endif
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);
@@ -436,12 +433,6 @@ private:
     bool isEnableAnalyzer_ = false;
     std::optional<int32_t> transformHintChangedCallbackId_;
     uint32_t rotation_ = 0;
-#ifdef OHOS_PLATFORM
-    int64_t startIncreaseTime_ = 0;
-    OH_NativeXComponent_TouchEvent lastTouchInfo_;
-    std::atomic<int32_t> slideCount_ {0};
-    double physicalCoeff_ = 0.0;
-#endif
 };
 } // namespace OHOS::Ace::NG
 

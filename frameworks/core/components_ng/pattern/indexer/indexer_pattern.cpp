@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -1432,8 +1432,8 @@ void IndexerPattern::UpdateBubbleListItem(
         textLayoutProperty->UpdateFontSize(popupItemTextFontSize);
         textLayoutProperty->UpdateFontWeight(popupItemTextFontWeight);
         textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateTextColor(i == popupClickedIndex_ ?
-            popupSelectedTextColor : popupUnselectedTextColor);
+        textLayoutProperty->UpdateTextColor(
+            static_cast<int32_t>(i) == popupClickedIndex_ ? popupSelectedTextColor : popupUnselectedTextColor);
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
         UpdateBubbleListItemContext(listNode, indexerTheme, i);
@@ -1461,13 +1461,14 @@ void IndexerPattern::UpdateBubbleListItemContext(
         listItemContext->UpdateBorderRadius({ popupItemRadius, popupItemRadius, popupItemRadius, popupItemRadius });
         auto popupItemBackground =
             paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupUnclickedBgAreaColor());
-        listItemContext->UpdateBackgroundColor(
-            pos == popupClickedIndex_ ? (indexerTheme->GetPopupClickedBgAreaColor()) : popupItemBackground);
+        listItemContext->UpdateBackgroundColor(static_cast<int32_t>(pos) == popupClickedIndex_
+                                                   ? (indexerTheme->GetPopupClickedBgAreaColor())
+                                                   : popupItemBackground);
     } else {
         auto popupItemBackground =
             paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupBackgroundColor());
         listItemContext->UpdateBackgroundColor(
-            pos == popupClickedIndex_ ? Color(POPUP_LISTITEM_CLICKED_BG) : popupItemBackground);
+            static_cast<int32_t>(pos) == popupClickedIndex_ ? Color(POPUP_LISTITEM_CLICKED_BG) : popupItemBackground);
     }
 }
 
@@ -1578,7 +1579,7 @@ void IndexerPattern::OnListItemClick(int32_t index)
     auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
     if (onPopupSelected) {
         onPopupSelected(index);
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPopupSelected");
 #endif
     }

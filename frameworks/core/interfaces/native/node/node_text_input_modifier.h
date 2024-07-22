@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_TEXT_INPUT_MODIFIER_H
+#define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_TEXT_INPUT_MODIFIER_H
 
 #include "core/interfaces/native/node/node_api.h"
 
@@ -44,3 +45,4 @@ namespace OHOS::Ace::NG::NodeModifier {
     void ResetTextInputOnTextContentScroll(ArkUINodeHandle node);
 
 } // namespace OHOS::Ace::NG::NodeModifier
+#endif // FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_TEXT_INPUT_MODIFIER_H

@@ -817,6 +817,10 @@ void CalendarDialogView::SetCalendarPaintProperties(const CalendarSettingData& s
         defaultDayRadius = theme->GetCalendarPickerDayLargeWidthOrHeight() / 2;
     }
 
+    if (AceApplicationInfo::GetInstance().GetLanguage() != "zh") {
+        ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekFontSize, theme->GetCalendarSmallDayFontSize());
+    }
+
     if (settingData.dayRadius.has_value() && NonNegative(settingData.dayRadius.value().ConvertToPx()) &&
         LessOrEqual(settingData.dayRadius.value().ConvertToPx(), defaultDayRadius.ConvertToPx())) {
         ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayRadius, settingData.dayRadius.value());

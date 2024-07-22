@@ -21,6 +21,7 @@
 #define private public
 #define protected public
 
+#include "test/mock/base/mock_foldable_window.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -28,6 +29,9 @@
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
+#include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -40,7 +44,9 @@ constexpr int32_t SHEET_DETENTS_THREE = 3;
 class SheetCoverageTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
+    static void SetSheetTheme(RefPtr<SheetTheme> sheetTheme);
     static void TearDownTestCase();
+    static void SetSheetType(RefPtr<SheetPresentationPattern> sheetPattern, SheetType sheetType);
 };
 
 void SheetCoverageTestNg::SetUpTestCase()
@@ -55,6 +61,40 @@ void SheetCoverageTestNg::SetUpTestCase()
         }
     });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+}
+
+void SheetCoverageTestNg::SetSheetTheme(RefPtr<SheetTheme> sheetTheme)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(
+        [sheetTheme = AceType::WeakClaim(AceType::RawPtr(sheetTheme))](ThemeType type) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            return sheetTheme.Upgrade();
+        } else {
+            return nullptr;
+        }
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+}
+
+void SheetCoverageTestNg::SetSheetType(RefPtr<SheetPresentationPattern> sheetPattern, SheetType sheetType)
+{
+    PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    pipelineContext->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = sheetType;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    sheetPattern->sheetThemeType_ = "popup";
+    Rect windowRect = { 0.0f, 0.0f, SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx(), 0.0f };
+    MockPipelineContext::SetCurrentWindowRect(windowRect);
+    sheetPattern->sheetKey_.hasValidTargetNode = true;
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->sheetType_ = "popup";
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    SheetCoverageTestNg::SetSheetTheme(sheetTheme);
 }
 
 void SheetCoverageTestNg::TearDownTestCase()
@@ -615,6 +655,716 @@ HWTEST_F(SheetCoverageTestNg, HandleScrollWithSheet001, TestSize.Level1)
     sheetPattern->sheetDetentHeight_.clear();
     EXPECT_EQ(sheetPattern->sheetDetentHeight_.size(), 0);
     sheetPattern->HandleScrollWithSheet(scrollOffset);
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap001
+ * @tc.desc: Increase the coverage of OnDirtyLayoutWrapperSwap function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->propSheetStyle_ = SheetStyle();
+    auto dirty = sheetNode->CreateLayoutWrapper();
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithmWrapper, nullptr);
+    auto sheetLayoutAlgorithm =
+        AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(sheetLayoutAlgorithm, nullptr);
+    sheetLayoutAlgorithm->sheetMaxHeight_ = 1.0f;
+    sheetPattern->sheetOffsetX_ = sheetLayoutAlgorithm->sheetOffsetX_;
+    sheetPattern->sheetOffsetY_ = sheetLayoutAlgorithm->sheetOffsetY_;
+    SheetCoverageTestNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
+    EXPECT_FALSE(config.skipMeasure);
+    EXPECT_TRUE(sheetLayoutAlgorithm->GetSheetMaxHeight() > 0);
+    EXPECT_TRUE(NearEqual(sheetPattern->sheetOffsetX_, sheetLayoutAlgorithm->GetSheetOffsetX()));
+    EXPECT_TRUE(NearEqual(sheetPattern->sheetOffsetY_, sheetLayoutAlgorithm->GetSheetOffsetY()));
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_POPUP);
+    sheetPattern->OnDirtyLayoutWrapperSwap(dirty, config);
+    
+    config.skipMeasure = true;
+    config.skipLayout = false;
+    sheetPattern->sheetOffsetY_ = sheetLayoutAlgorithm->sheetOffsetY_ + 1.0f;
+    SheetCoverageTestNg::SetSheetType(sheetPattern, SheetType::SHEET_BOTTOM);
+    sheetPattern->windowRotate_ = false;
+    AceApplicationInfo::GetInstance().packageName_ = "com.hua";
+    AceApplicationInfo::GetInstance().packageName_.append("wei.hms.hua");
+    AceApplicationInfo::GetInstance().packageName_.append("weiid");
+    EXPECT_TRUE(config.skipMeasure && !config.skipLayout);
+    EXPECT_TRUE(!NearEqual(sheetPattern->sheetOffsetY_, sheetLayoutAlgorithm->GetSheetOffsetY()));
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_BOTTOM);
+    sheetPattern->OnDirtyLayoutWrapperSwap(dirty, config);
+
+    sheetPattern->sheetOffsetY_ = sheetLayoutAlgorithm->sheetOffsetY_ + 1.0f;
+    sheetPattern->sheetOffsetX_ = sheetLayoutAlgorithm->sheetOffsetX_ + 1.0f;
+    EXPECT_TRUE(!NearEqual(sheetPattern->sheetOffsetX_, sheetLayoutAlgorithm->GetSheetOffsetX()));
+    sheetPattern->OnDirtyLayoutWrapperSwap(dirty, config);
+
+    config.skipLayout = true;
+    EXPECT_TRUE(config.skipMeasure && config.skipLayout);
+    sheetPattern->OnDirtyLayoutWrapperSwap(dirty, config);
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CheckBuilderChange001
+ * @tc.desc: Increase the coverage of CheckBuilderChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, CheckBuilderChange001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto rootNode = FrameNode::CreateFrameNode("Root", 301, AceType::MakeRefPtr<RootPattern>());
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    sheetNode->MountToParent(rootNode);
+    auto dragBarNode = FrameNode::CreateFrameNode("SheetDragBar", 401, AceType::MakeRefPtr<SheetDragBarPattern>());
+    dragBarNode->MountToParent(sheetNode);
+    auto scrollNode = FrameNode::CreateFrameNode("Scroll", 501, AceType::MakeRefPtr<ScrollPattern>());
+    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 601,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    contentNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(sheetNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    auto eventHub = contentNode->GetEventHub<EventHub>();
+    RectF oldRect, rect;
+    OffsetF oldOrigin, origin;
+    sheetPattern->CheckBuilderChange();
+    EXPECT_NE(sheetStyle.sheetMode, SheetMode::AUTO);
+    auto innerCallbackInfo = eventHub->onAreaChangedInnerCallbacks_[contentNode->GetId()];
+    ASSERT_NE(innerCallbackInfo, nullptr);
+    innerCallbackInfo(oldRect, oldOrigin, rect, origin);
+
+    sheetStyle.sheetMode = SheetMode::AUTO;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    EXPECT_EQ(sheetStyle.sheetMode, SheetMode::AUTO);
+    innerCallbackInfo(oldRect, oldOrigin, rect, origin);
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: OnAttachToFrameNode001
+ * @tc.desc: Increase the coverage of OnAttachToFrameNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, OnAttachToFrameNode001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->targetTag_ = "Sheet";
+    sheetPattern->targetId_ = 101;
+    auto targetNode = FrameNode::GetFrameNode(sheetPattern->targetTag_, sheetPattern->targetId_);
+    ASSERT_NE(targetNode, nullptr);
+    sheetPattern->OnAttachToFrameNode();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    RectF oldRect, rect;
+    OffsetF oldOrigin, origin;
+    EXPECT_NE(sheetPattern->GetSheetType(), SheetType::SHEET_POPUP);
+    eventHub->onAreaChanged_(oldRect, oldOrigin, rect, origin);
+
+    SheetCoverageTestNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
+    sheetPattern->OnAttachToFrameNode();
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_POPUP);
+    eventHub->onAreaChanged_(oldRect, oldOrigin, rect, origin);
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: InitPanEvent001
+ * @tc.desc: Increase the coverage of InitPanEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, InitPanEvent001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->InitPanEvent();
+    GestureEvent event;
+    auto panEvent = sheetPattern->panEvent_;
+    ASSERT_NE(panEvent, nullptr);
+    panEvent->actionStart_(event);
+    panEvent->actionUpdate_(event);
+    panEvent->actionEnd_(event);
+    panEvent->actionCancel_();
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: HandleDragStartAndOnCoordScrollStart001
+ * @tc.desc: Increase the coverage of HandleDragStart and OnCoordScrollStart function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, HandleDragStartAndOnCoordScrollStart001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->animation_ = nullptr;
+    EXPECT_EQ(sheetPattern->animation_, nullptr);
+    sheetPattern->HandleDragStart();
+    sheetPattern->OnCoordScrollStart();
+
+    sheetPattern->animation_ = AnimationUtils::StartAnimation(AnimationOption(), []() {}, []() {});;
+    sheetPattern->isAnimationProcess_ = false;
+    EXPECT_NE(sheetPattern->animation_, nullptr);
+    EXPECT_FALSE(sheetPattern->isAnimationProcess_);
+    sheetPattern->HandleDragStart();
+    sheetPattern->OnCoordScrollStart();
+
+    sheetPattern->isAnimationProcess_ = true;
+    EXPECT_TRUE(sheetPattern->isAnimationProcess_);
+    sheetPattern->HandleDragStart();
+    sheetPattern->OnCoordScrollStart();
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetSheetType001
+ * @tc.desc: Increase the coverage of GetSheetType function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, GetSheetType001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->minPlatformVersion_;
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    pipelineContext->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
+    sheetPattern->sheetThemeType_ = "center";
+    EXPECT_TRUE(pipelineContext->GetDisplayWindowRectInfo().Width() >= SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx());
+    EXPECT_FALSE(sheetStyle.sheetType.has_value());
+    EXPECT_NE(sheetPattern->sheetThemeType_, "auto");
+    EXPECT_NE(sheetPattern->sheetThemeType_, "popup");
+    sheetPattern->GetSheetType();
+
+    sheetStyle.sheetType = SheetType::SHEET_CENTER;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    sheetPattern->sheetThemeType_ = "popup";
+    EXPECT_TRUE(sheetStyle.sheetType.has_value());
+    EXPECT_NE(sheetStyle.sheetType.value(), SheetType::SHEET_BOTTOM);
+    EXPECT_EQ(sheetPattern->sheetThemeType_, "popup");
+    sheetPattern->GetSheetType();
+
+    sheetPattern->sheetThemeType_ = "auto";
+    EXPECT_EQ(sheetPattern->sheetThemeType_, "auto");
+    sheetPattern->GetSheetType();
+
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    EXPECT_EQ(sheetStyle.sheetType.value(), SheetType::SHEET_BOTTOM);
+    sheetPattern->GetSheetType();
+
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    pipelineContext->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx() - 5.0f;
+    EXPECT_FALSE(pipelineContext->GetDisplayWindowRectInfo().Width() >= SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx());
+    sheetPattern->GetSheetType();
+    PipelineBase::GetCurrentContext()->minPlatformVersion_ = minPlatformVersion;
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetSheetTypeWithAuto001
+ * @tc.desc: Increase the coverage of GetSheetTypeWithAuto function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, GetSheetTypeWithAuto001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    auto containerId = Container::CurrentId();
+    auto foldablewindow = AceType::DynamicCast<MockFoldableWindow>(FoldableWindow::CreateFoldableWindow(containerId));
+    EXPECT_CALL(*foldablewindow, IsFoldExpand()).WillRepeatedly([]() -> bool { return false; });
+    MockPipelineContext::GetCurrent()->rootHeight_ = 6.0f;
+    MockPipelineContext::GetCurrent()->rootWidth_ = 5.0f;
+    EXPECT_FALSE(sheetPattern->IsFold());
+    EXPECT_FALSE(LessNotEqual(PipelineContext::GetCurrentRootHeight(), PipelineContext::GetCurrentRootWidth()));
+    SheetType sheetType;
+    sheetPattern->GetSheetTypeWithAuto(sheetType);
+    EXPECT_EQ(sheetType, SheetType::SHEET_BOTTOM);
+    
+    EXPECT_CALL(*foldablewindow, IsFoldExpand()).WillRepeatedly([]() -> bool { return true; });
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->sheetBottom_ = "bottom";
+    SheetCoverageTestNg::SetSheetTheme(sheetTheme);
+    MockPipelineContext::GetCurrent()->rootHeight_ = 4.0f;
+    EXPECT_TRUE(sheetPattern->IsFold());
+    EXPECT_TRUE(sheetTheme->IsOnlyBottom());
+    EXPECT_TRUE(LessNotEqual(PipelineContext::GetCurrentRootHeight(), PipelineContext::GetCurrentRootWidth()));
+    sheetPattern->GetSheetTypeWithAuto(sheetType);
+    EXPECT_EQ(sheetType, SheetType::SHEET_BOTTOMLANDSPACE);
+
+    sheetTheme->sheetBottom_ = "undefined";
+    EXPECT_FALSE(sheetTheme->IsOnlyBottom());
+    sheetPattern->GetSheetTypeWithAuto(sheetType);
+    EXPECT_EQ(sheetType, SheetType::SHEET_CENTER);
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetSheetTypeWithAuto002
+ * @tc.desc: Increase the coverage of GetSheetTypeWithAuto function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, GetSheetTypeWithAuto002, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    auto containerId = Container::CurrentId();
+    auto foldablewindow = AceType::DynamicCast<MockFoldableWindow>(FoldableWindow::CreateFoldableWindow(containerId));
+    EXPECT_CALL(*foldablewindow, IsFoldExpand()).WillRepeatedly([]() -> bool { return true; });
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->sheetBottom_ = "undefined";
+    SheetCoverageTestNg::SetSheetTheme(sheetTheme);
+    AceApplicationInfo::GetInstance().packageName_ = "com.ohos.useriam.authwidget";
+    EXPECT_TRUE(sheetPattern->IsFold());
+    EXPECT_FALSE(sheetTheme->IsOnlyBottom());
+    EXPECT_FALSE(sheetStyle.sheetType.has_value());
+    SheetType sheetType;
+    sheetPattern->GetSheetTypeWithAuto(sheetType);
+
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    EXPECT_TRUE(sheetStyle.sheetType.has_value());
+    EXPECT_NE(sheetStyle.sheetType.value(), SheetType::SHEET_CENTER);
+    sheetPattern->GetSheetTypeWithAuto(sheetType);
+
+    sheetStyle.sheetType = SheetType::SHEET_CENTER;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    EXPECT_TRUE(sheetStyle.sheetType.has_value());
+    EXPECT_EQ(sheetStyle.sheetType.value(), SheetType::SHEET_CENTER);
+    sheetPattern->GetSheetTypeWithAuto(sheetType);
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetSheetTypeWithPopup001
+ * @tc.desc: Increase the coverage of GetSheetTypeWithPopup function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, GetSheetTypeWithPopup001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    Rect originWindowRect = pipelineContext->GetCurrentWindowRect();
+    Rect windowRect = { 0.0f, 0.0f, 0.0f, 0.0f };
+    MockPipelineContext::SetCurrentWindowRect(windowRect);
+    auto currentWindowRect = pipelineContext->GetCurrentWindowRect();
+    EXPECT_FALSE(GreatOrEqual(currentWindowRect.Width(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
+    EXPECT_FALSE(GreatOrEqual(currentWindowRect.Width(), SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
+    SheetType sheetType;
+    sheetPattern->GetSheetTypeWithPopup(sheetType);
+    EXPECT_EQ(sheetType, SheetType::SHEET_BOTTOM_FREE_WINDOW);
+
+    windowRect.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
+    MockPipelineContext::SetCurrentWindowRect(windowRect);
+    AceApplicationInfo::GetInstance().packageName_ = "";
+    currentWindowRect = pipelineContext->GetCurrentWindowRect();
+    EXPECT_TRUE(GreatOrEqual(currentWindowRect.Width(), SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
+    EXPECT_TRUE(LessNotEqual(currentWindowRect.Width(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
+    EXPECT_FALSE(sheetStyle.sheetType.has_value());
+    sheetPattern->GetSheetTypeWithPopup(sheetType);
+    EXPECT_EQ(sheetType, SheetType::SHEET_CENTER);
+
+    AceApplicationInfo::GetInstance().packageName_ = "com.ohos.useriam.authwidget";
+    sheetPattern->GetSheetTypeWithPopup(sheetType);
+
+    sheetStyle.sheetType = SheetType::SHEET_POPUP;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    EXPECT_TRUE(sheetStyle.sheetType.has_value());
+    EXPECT_TRUE(sheetPattern->sheetKey_.hasValidTargetNode);
+    sheetPattern->GetSheetTypeWithPopup(sheetType);
+    EXPECT_EQ(sheetType, SheetType::SHEET_POPUP);
+    MockPipelineContext::SetCurrentWindowRect(originWindowRect);
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetSheetTypeWithPopup002
+ * @tc.desc: Increase the coverage of GetSheetTypeWithPopup function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, GetSheetTypeWithPopup002, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    Rect originWindowRect = pipelineContext->GetCurrentWindowRect();
+    Rect windowRect = { 0.0f, 0.0f, SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx(), 0.0f };
+    MockPipelineContext::SetCurrentWindowRect(windowRect);
+    AceApplicationInfo::GetInstance().packageName_ = "";
+    auto currentWindowRect = pipelineContext->GetCurrentWindowRect();
+    EXPECT_TRUE(GreatOrEqual(currentWindowRect.Width(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
+    EXPECT_FALSE(sheetStyle.sheetType.has_value());
+    SheetType sheetType;
+    sheetPattern->GetSheetTypeWithPopup(sheetType);
+    EXPECT_EQ(sheetType, SheetType::SHEET_POPUP);
+
+    AceApplicationInfo::GetInstance().packageName_ = "com.ohos.useriam.authwidget";
+    sheetPattern->GetSheetTypeWithPopup(sheetType);
+
+    sheetStyle.sheetType = SheetType::SHEET_POPUP;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    sheetPattern->sheetKey_.hasValidTargetNode = false;
+    EXPECT_TRUE(sheetStyle.sheetType.has_value());
+    EXPECT_FALSE(sheetPattern->sheetKey_.hasValidTargetNode);
+    sheetPattern->GetSheetTypeWithPopup(sheetType);
+    EXPECT_EQ(sheetType, SheetType::SHEET_CENTER);
+    MockPipelineContext::SetCurrentWindowRect(originWindowRect);
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: IsTypeNeedAvoidAiBar001
+ * @tc.desc: Increase the coverage of IsTypeNeedAvoidAiBar function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, IsTypeNeedAvoidAiBar001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    SheetStyle sheetStyle;
+    sheetStyle.showInPage = false;
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto overlayManager = pipelineContext->overlayManager_;
+    pipelineContext->overlayManager_ = nullptr;
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
+    EXPECT_EQ(sheetPattern->GetOverlayManager(), nullptr);
+    bool ret = sheetPattern->IsTypeNeedAvoidAiBar();
+    EXPECT_TRUE(ret);
+
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    pipelineContext->overlayManager_ = overlayManager;
+    ASSERT_NE(sheetPattern->GetOverlayManager(), nullptr);
+    EXPECT_FALSE(sheetPattern->GetOverlayManager()->IsRootExpansive());
+    ret = sheetPattern->IsTypeNeedAvoidAiBar();
+    EXPECT_TRUE(ret);
+
+    auto rootLayoutProperty = AceType::DynamicCast<FrameNode>(pipelineContext->rootNode_)->GetLayoutProperty();
+    rootLayoutProperty->safeAreaExpandOpts_ = std::make_unique<SafeAreaExpandOpts>();
+    rootLayoutProperty->safeAreaExpandOpts_->type = SAFE_AREA_TYPE_SYSTEM;
+    rootLayoutProperty->safeAreaExpandOpts_->edges = SAFE_AREA_EDGE_TOP;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    EXPECT_TRUE(sheetPattern->GetOverlayManager()->IsRootExpansive());
+    EXPECT_FALSE(layoutProperty->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false));
+    ret = sheetPattern->IsTypeNeedAvoidAiBar();
+    EXPECT_TRUE(ret);
+
+    sheetPattern->overlayManager_ = AceType::WeakClaim(AceType::RawPtr(overlayManager));
+    auto rootNode = FrameNode::CreateFrameNode("Root", 101, AceType::MakeRefPtr<RootPattern>());
+    auto stageNode = FrameNode::CreateFrameNode("Stage", 201, AceType::MakeRefPtr<StagePattern>());
+    stageNode->MountToParent(rootNode);
+    sheetNode->MountToParent(stageNode);
+    sheetStyle.showInPage = true;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    EXPECT_TRUE(layoutProperty->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false));
+    ret = sheetPattern->IsTypeNeedAvoidAiBar();
+    EXPECT_FALSE(ret);
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: OnScrollEndRecursiveAndHandleScrollVelocity001
+ * @tc.desc: Increase the coverage of OnScrollEndRecursive and HandleScrollVelocity function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, OnScrollEndRecursiveAndHandleScrollVelocity001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->isSheetPosChanged_ = false;
+    sheetPattern->OnScrollEndRecursive(std::nullopt);
+    sheetPattern->isSheetNeedScroll_ = true;
+    bool ret = sheetPattern->HandleScrollVelocity(1.0f, sheetPattern);
+    EXPECT_TRUE(ret);
+
+    sheetPattern->isSheetPosChanged_ = true;
+    sheetPattern->OnScrollEndRecursive(std::nullopt);
+    sheetPattern->isSheetPosChanged_ = true;
+    sheetPattern->isSheetNeedScroll_ = false;
+    ret = sheetPattern->HandleScrollVelocity(1.0f, sheetPattern);
+    EXPECT_FALSE(ret);
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: FireOnTypeDidChange001
+ * @tc.desc: Increase the coverage of FireOnTypeDidChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, FireOnTypeDidChange001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
+    sheetPattern->preType_ = SheetType::SHEET_CENTER;
+    EXPECT_EQ(sheetPattern->sheetType_, SheetType::SHEET_CENTER);
+    EXPECT_EQ(sheetPattern->preType_, sheetPattern->sheetType_);
+    sheetPattern->FireOnTypeDidChange();
+
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM_FREE_WINDOW;
+    EXPECT_EQ(sheetPattern->sheetType_, SheetType::SHEET_BOTTOM_FREE_WINDOW);
+    EXPECT_NE(sheetPattern->preType_, sheetPattern->sheetType_);
+    sheetPattern->FireOnTypeDidChange();
+
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOMLANDSPACE;
+    EXPECT_EQ(sheetPattern->sheetType_, SheetType::SHEET_BOTTOMLANDSPACE);
+    sheetPattern->FireOnTypeDidChange();
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetOverlayRoot001
+ * @tc.desc: Increase the coverage of GetOverlayRoot function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, GetOverlayRoot001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    SheetStyle sheetStyle;
+    sheetStyle.showInPage = true;
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    EXPECT_TRUE(layoutProperty->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false));
+    sheetPattern->GetOverlayRoot();
+
+    sheetStyle.showInPage = false;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    EXPECT_FALSE(layoutProperty->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false));
+    sheetPattern->GetOverlayRoot();
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetOverlayManagerAndDeleteOverlay001
+ * @tc.desc: Increase the coverage of GetOverlayManager and DeleteOverlay function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, GetOverlayManagerAndDeleteOverlay001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    SheetStyle sheetStyle;
+    sheetStyle.showInPage = true;
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    auto rootNode = FrameNode::CreateFrameNode("Root", 101, AceType::MakeRefPtr<RootPattern>());
+    auto stageNode = FrameNode::CreateFrameNode("Stage", 201, AceType::MakeRefPtr<StagePattern>());
+    stageNode->MountToParent(rootNode);
+    sheetNode->MountToParent(stageNode);
+    EXPECT_TRUE(layoutProperty->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false));
+    EXPECT_NE(rootNode->GetTag(), V2::PAGE_ETS_TAG);
+    EXPECT_NE(rootNode->GetTag(), V2::NAVDESTINATION_VIEW_ETS_TAG);
+    EXPECT_NE(rootNode->GetTag(), V2::WINDOW_SCENE_ETS_TAG);
+    sheetPattern->GetOverlayManager();
+    sheetPattern->DeleteOverlay();
+
+    rootNode->tag_ = V2::WINDOW_SCENE_ETS_TAG;
+    EXPECT_EQ(rootNode->GetTag(), V2::WINDOW_SCENE_ETS_TAG);
+    sheetPattern->DeleteOverlay();
+
+    rootNode->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
+    PipelineContext::GetCurrentContext();
+    EXPECT_EQ(rootNode->GetTag(), V2::NAVDESTINATION_VIEW_ETS_TAG);
+    sheetPattern->GetOverlayManager();
+    sheetPattern->DeleteOverlay();
+
+    rootNode->tag_ = V2::PAGE_ETS_TAG;
+    EXPECT_EQ(rootNode->GetTag(), V2::PAGE_ETS_TAG);
+    rootNode->pattern_ = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    rootNode->GetPattern<PagePattern>()->overlayManager_ = PipelineContext::GetCurrentContext()->overlayManager_;
+    sheetPattern->GetOverlayManager();
+    sheetPattern->DeleteOverlay();
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: OnWindowSizeChanged001
+ * @tc.desc: Increase the coverage of OnWindowSizeChanged function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, OnWindowSizeChanged001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto windowManager = pipelineContext->windowManager_;
+    pipelineContext->windowManager_ = nullptr;
+    sheetPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::MOVE);
+
+    SheetCoverageTestNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_POPUP);
+    pipelineContext->windowManager_ = windowManager;
+    pipelineContext->windowManager_->windowGetModeCallback_ = []() { return WindowMode::WINDOW_MODE_UNDEFINED; };
+    sheetPattern->OnWindowSizeChanged(0, 0,  WindowSizeChangeReason::ROTATION);
+
+    SheetCoverageTestNg::SetSheetType(sheetPattern, SheetType::SHEET_BOTTOMLANDSPACE);
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_BOTTOMLANDSPACE);
+    sheetPattern->isScrolling_ = false;
+    pipelineContext->windowManager_->windowGetModeCallback_ = []() { return WindowMode::WINDOW_MODE_FLOATING; };
+    sheetPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
+
+    SheetCoverageTestNg::SetSheetType(sheetPattern, SheetType::SHEET_BOTTOM);
+    sheetPattern->isScrolling_ = true;
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_BOTTOM);
+    sheetPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
+    sheetPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
+    sheetPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::DRAG);
+    sheetPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::RESIZE);
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: HandleFitContontChange001
+ * @tc.desc: Increase the coverage of HandleFitContontChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, HandleFitContontChange001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->height_ = sheetPattern->sheetFitContentHeight_ + 1.0f;
+    float height = sheetPattern->sheetFitContentHeight_;
+    EXPECT_FALSE(NearEqual(sheetPattern->height_, sheetPattern->sheetFitContentHeight_));
+    sheetPattern->HandleFitContontChange(height);
+
+    sheetPattern->height_ = sheetPattern->sheetFitContentHeight_;
+    EXPECT_TRUE(NearEqual(sheetPattern->height_, sheetPattern->sheetFitContentHeight_));
+    EXPECT_TRUE(NearEqual(height, sheetPattern->sheetFitContentHeight_));
+    sheetPattern->HandleFitContontChange(height);
+
+    height = sheetPattern->sheetFitContentHeight_ + 1.0f;
+    EXPECT_FALSE(NearEqual(height, sheetPattern->sheetFitContentHeight_));
+    sheetPattern->HandleFitContontChange(height);
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: DismissTransition001
+ * @tc.desc: Increase the coverage of DismissTransition function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, DismissTransition001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto rootNode = FrameNode::CreateFrameNode("Root", 101,
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto stageNode = FrameNode::CreateFrameNode("Stage", 201, AceType::MakeRefPtr<StagePattern>());
+    stageNode->MountToParent(rootNode);
+    sheetNode->MountToParent(stageNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    sheetPattern->overlayManager_ = AceType::WeakClaim(AceType::RawPtr(pipelineContext->overlayManager_));
+    SheetCoverageTestNg::SetSheetType(sheetPattern, SheetType::SHEET_BOTTOM);
+    EXPECT_NE(sheetPattern->GetSheetType(), SheetType::SHEET_POPUP);
+    sheetPattern->DismissTransition(true, 1);
+
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    SheetCoverageTestNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
+    EXPECT_FALSE(layoutProperty->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false));
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_POPUP);
+    sheetPattern->DismissTransition(false, 1);
+
+    sheetStyle.showInPage = true;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    EXPECT_TRUE(layoutProperty->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false));
+    EXPECT_NE(rootNode->GetTag(), V2::PAGE_ETS_TAG);
+    sheetPattern->DismissTransition(false, 1);
+
+    rootNode->tag_ = V2::PAGE_ETS_TAG;
+    EXPECT_EQ(rootNode->GetTag(), V2::PAGE_ETS_TAG);
+    sheetPattern->DismissTransition(false, 1);
     SheetCoverageTestNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG

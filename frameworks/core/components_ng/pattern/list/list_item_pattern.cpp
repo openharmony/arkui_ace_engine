@@ -153,6 +153,10 @@ void ListItemPattern::SetStartNode(const RefPtr<NG::UINode>& startNode)
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
     } else if (HasStartNode()) {
+        if (NonNegative(curOffset_)) {
+            curOffset_ = 0.0f;
+            isDragging_ = false;
+        }
         host->RemoveChildAtIndex(startNodeIndex_);
         host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         if (endNodeIndex_ > startNodeIndex_) {
@@ -184,6 +188,10 @@ void ListItemPattern::SetEndNode(const RefPtr<NG::UINode>& endNode)
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
     } else if (HasEndNode()) {
+        if (NonPositive(curOffset_)) {
+            curOffset_ = 0.0f;
+            isDragging_ = false;
+        }
         host->RemoveChildAtIndex(endNodeIndex_);
         host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         if (startNodeIndex_ > endNodeIndex_) {
@@ -193,6 +201,21 @@ void ListItemPattern::SetEndNode(const RefPtr<NG::UINode>& endNode)
             childNodeIndex_--;
         }
         endNodeIndex_ = -1;
+    }
+}
+
+void ListItemPattern::OnDidPop()
+{
+    if (endNodeIndex_ >= 0 && endNodeIndex_ < childNodeIndex_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto childNode = host->GetChildAtIndex(childNodeIndex_);
+        CHECK_NULL_VOID(childNode);
+        auto endNode = host->GetChildAtIndex(endNodeIndex_);
+        CHECK_NULL_VOID(endNode);
+        endNode->MovePosition(-1);
+        endNodeIndex_ = host->GetChildIndexById(endNode->GetId());
+        childNodeIndex_--;
     }
 }
 
@@ -347,7 +370,7 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
             CHECK_NULL_VOID(frameNode);
             auto listPattern = frameNode->GetPattern<ListPattern>();
             CHECK_NULL_VOID(listPattern);
-            if (!listPattern->IsCurrentSwiperItem(weak)) {
+            if (!listPattern->IsCurrentSwiperItem(weak) || !pattern->isDragging_) {
                 return;
             }
             pattern->HandleDragUpdate(info);
@@ -360,7 +383,7 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
             CHECK_NULL_VOID(frameNode);
             auto listPattern = frameNode->GetPattern<ListPattern>();
             CHECK_NULL_VOID(listPattern);
-            if (!listPattern->IsCurrentSwiperItem(weak)) {
+            if (!listPattern->IsCurrentSwiperItem(weak) || !pattern->isDragging_) {
                 return;
             }
             pattern->HandleDragEnd(info);
@@ -373,7 +396,7 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
             CHECK_NULL_VOID(frameNode);
             auto listPattern = frameNode->GetPattern<ListPattern>();
             CHECK_NULL_VOID(listPattern);
-            if (!listPattern->IsCurrentSwiperItem(weak)) {
+            if (!listPattern->IsCurrentSwiperItem(weak) || !pattern->isDragging_) {
                 return;
             }
             GestureEvent info;
@@ -418,6 +441,7 @@ void ListItemPattern::HandleDragStart(const GestureEvent& info)
         springController_->ClearStopListeners();
         springController_->Stop();
     }
+    isDragging_ = true;
     SetSwiperItemForList();
 }
 
@@ -755,6 +779,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
     float velocity = IsRTLAndVertical() ? -info.GetMainVelocity() : info.GetMainVelocity();
     bool reachRightSpeed = velocity > SWIPER_SPEED_TH;
     bool reachLeftSpeed = -velocity > SWIPER_SPEED_TH;
+    isDragging_ = false;
 
     TAG_LOGI(AceLogTag::ACE_LIST, "ListItem HandleDragEnd, velocity:%{public}f, curPos:%{public}f",
         velocity, curOffset_);

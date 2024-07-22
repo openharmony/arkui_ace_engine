@@ -1288,6 +1288,20 @@ class TextInputEnablePreviewTextModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextInputEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> {
+  constructor(value: EditMenuOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textEditMenuOptions');
+  applyPeer(node: KNode, reset: boolean) {
+    if (reset) {
+      getUINativeModule().textInput.resetSelectionMenuOptions(node);
+    } else {
+      getUINativeModule().textInput.setSelectionMenuOptions(node, this.value);
+    }
+  }
+}
+
 interface TextInputParam {
   placeholder?: ResourceStr;
   text?: ResourceStr;
@@ -1742,6 +1756,11 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   enablePreviewText(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextInputEnablePreviewTextModifier.identity, TextInputEnablePreviewTextModifier, value);
+    return this;
+  }
+  editMenuOptions(value: EditMenuOptions) {
+    modifierWithKey(this._modifiersWithKeys, TextInputEditMenuOptionsModifier.identity,
+      TextInputEditMenuOptionsModifier, value);
     return this;
   }
 }

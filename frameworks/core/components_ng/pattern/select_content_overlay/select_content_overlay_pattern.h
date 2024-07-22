@@ -37,6 +37,7 @@ public:
     void RestartHiddenHandleTask(bool isDelay);
     void CancelHiddenHandleTask();
     SelectMenuInfo GetSelectMenuInfo();
+    void UpdateViewPort(const std::optional<RectF>& viewPort);
 protected:
     void CheckHandleReverse() override;
     void UpdateHandleHotZone() override;

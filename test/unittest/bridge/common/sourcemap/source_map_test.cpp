@@ -301,4 +301,84 @@ HWTEST_F(SourceMapTest, SourceMapTest008, TestSize.Level1)
     revSourceMap.StageModeSourceMapSplit(sourceMap, sourceMaps);
     EXPECT_EQ(sourceMaps.size(), 1);
 }
+
+/**
+ * @tc.name: SourceMapTest009
+ * @tc.desc: GetOriginalNames()
+ * @tc.type: FUNC
+ */
+HWTEST_F(SourceMapTest, SourceMapTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct posDiff > 0,lineBreakPos + 1 < jsCode.length() - 1 is true
+     */
+    RevSourceMap revSourceMap;
+    revSourceMap.nameMap_.push_back("param1");
+    revSourceMap.nameMap_.push_back("param111");
+    revSourceMap.nameMap_.push_back("param2");
+    revSourceMap.nameMap_.push_back("param222");
+    std::string sourceCode = "SourceCode:\nvar param1 = 1;\nvar param2 = 2;\n";
+    uint32_t errorPos = 20;
+    std::string result = revSourceMap.GetOriginalNames(sourceCode, errorPos);
+    EXPECT_EQ(result, "SourceCode:\nvar param111 = 1;\n  var param222 = 2;\n");
+
+    /**
+     * @tc.steps: step2. construct posDiff < 0,flagPos < jsCode.length() false
+     */
+    sourceCode = "SourceCode:\nvar param111 = 1;\nvar param222 = 2;\n";
+    revSourceMap.nameMap_.clear();
+    revSourceMap.nameMap_.push_back("param111");
+    revSourceMap.nameMap_.push_back("param1");
+    revSourceMap.nameMap_.push_back("param222");
+    revSourceMap.nameMap_.push_back("param2");
+    std::string result2 = revSourceMap.GetOriginalNames(sourceCode, errorPos);
+    EXPECT_EQ(result2, "SourceCode:\nvar param1 = 1;\nvar param2 = 2;\n");
+    // flagPos < jsCode.length() true, false
+    sourceCode = "SourceCode:\nvar param111 = 1;var param222 = 2;\n";
+    std::string result3 = revSourceMap.GetOriginalNames(sourceCode, errorPos);
+    EXPECT_EQ(result3, "SourceCode:\nvar param1 = 1;var param2 = 2;\n");
+    // flagPos < jsCode.length() true, true,true
+    sourceCode = "SourceCode:\nvar param111 = 1;var^param222 = 2;\n";
+    uint32_t errorPos2 = 19;
+    std::string result4 = revSourceMap.GetOriginalNames(sourceCode, errorPos2);
+    EXPECT_EQ(result4, "SourceCode:\nvar param1 = 1;r^param2 = 2;\n");
+}
+
+/**
+ * @tc.name: SourceMapTest010
+ * @tc.desc: VlqRevCode()
+ * @tc.type: FUNC
+ */
+HWTEST_F(SourceMapTest, SourceMapTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. VlqRevCode vStr.size() == 0
+     */
+    RevSourceMap revSourceMap;
+    std::string vStr = "";
+    std::vector<int32_t> ans;
+    bool ret = revSourceMap.VlqRevCode(vStr, ans);
+    EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step2. VlqRevCode vStr.size() != 0,include invalid char
+     */
+    std::string vStr2 = "abc/&";
+    bool ret2 = revSourceMap.VlqRevCode(vStr2, ans);
+    EXPECT_FALSE(ret2);
+
+    /**
+     * @tc.steps: step3. HandleMappings mapping = ""
+     */
+    std::string mapping;
+    std::vector<std::string> ret3 = revSourceMap.HandleMappings(mapping);
+    EXPECT_EQ(ret3.size(), 0);
+
+    /**
+     * @tc.steps: step4. HandleMappings mapping contain ';'
+     */
+    std::string mapping2 = ";";
+    std::vector<std::string> ret4 = revSourceMap.HandleMappings(mapping2);
+    EXPECT_EQ(ret4.size(), 1);
+}
 } // namespace OHOS::Ace::Framework

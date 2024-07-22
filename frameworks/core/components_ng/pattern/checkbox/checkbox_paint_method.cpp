@@ -44,27 +44,22 @@ constexpr float CHECKBOX_DOUBLE_RATIO = 2.0f;
 constexpr float CHECKBOX_LENGTH_ZERO = 0.0f;
 } // namespace
 
-CheckBoxModifier::CheckBoxModifier(
-    bool isSelect, const Color& boardColor, const Color& checkColor, const Color& borderColor, const Color& shadowColor)
+CheckBoxModifier::CheckBoxModifier(bool isSelect, const Color& boardColor, const Color& checkColor,
+    const Color& borderColor, const Color& shadowColor, const SizeF& size, const OffsetF& offset, float checkStroke,
+    float strokeSize)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
-    CHECK_NULL_VOID(checkBoxTheme);
-
     animatableBoardColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(boardColor));
     animatableCheckColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(checkColor));
     animatableBorderColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(borderColor));
     animatableShadowColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(shadowColor));
-    checkStroke_ =
-        AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(checkBoxTheme->GetCheckStroke().ConvertToPx()));
-    strokeSize_ =
-        AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(checkBoxTheme->GetWidth().ConvertToPx()));
+    checkStroke_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(checkStroke);
+    strokeSize_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(strokeSize);
+    offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(offset);
+    size_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(size);
     animateTouchHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
+
     isSelect_ = AceType::MakeRefPtr<PropertyBool>(isSelect);
     isFocused_ = AceType::MakeRefPtr<PropertyBool>(false);
-    offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
-    size_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF());
     enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
     hasBuilder_ = AceType::MakeRefPtr<PropertyBool>(false);
     useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);

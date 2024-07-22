@@ -17,7 +17,7 @@
 
 #include <cstdint>
 #include <vector>
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -395,7 +395,7 @@ void JSWaterFlow::ReachStartCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onReachStart");
 #endif
             return;
@@ -410,7 +410,7 @@ void JSWaterFlow::ReachEndCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onReachEnd");
 #endif
             return;
@@ -525,7 +525,7 @@ void JSWaterFlow::JsOnScrollIndex(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(first, last);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onScrollIndex");
 #endif
             return;
@@ -541,9 +541,9 @@ void JSWaterFlow::SetScrollBar(const JSCallbackInfo& info)
     WaterFlowModel::GetInstance()->SetScrollBarMode(displayMode);
 }
 
-void JSWaterFlow::SetScrollBarColor(const std::string& color)
+void JSWaterFlow::SetScrollBarColor(const JSCallbackInfo& info)
 {
-    auto scrollBarColor = JSScrollable::ParseBarColor(color);
+    auto scrollBarColor = JSScrollable::ParseBarColor(info);
     if (!scrollBarColor.empty()) {
         WaterFlowModel::GetInstance()->SetScrollBarColor(scrollBarColor);
     }

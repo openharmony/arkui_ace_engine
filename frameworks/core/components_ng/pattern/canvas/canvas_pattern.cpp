@@ -956,7 +956,7 @@ std::string CanvasPattern::ToDataURL(const std::string& args)
 {
     // Rely on the single-threaded model. Should guarantee the timing between Render Task of pipeline and ToDataURL
     if (paintMethod_->HasTask()) {
-        paintMethod_->FlushPipelineImmediately();
+        paintMethod_->FlushUITasks();
     }
     auto host = GetHost();
     if (!host) {

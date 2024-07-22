@@ -181,7 +181,7 @@ void WindowPattern::OnAttachToFrameNode()
     if (surfaceNode && !surfaceNode->IsBufferAvailable()) {
         CreateStartingWindow();
         AddChild(host, startingWindow_, startingWindowName_);
-        surfaceNode->SetBufferAvailableCallback(callback_);
+        surfaceNode->SetBufferAvailableCallback(coldStartCallback_);
     }
 }
 
@@ -213,6 +213,7 @@ void WindowPattern::CreateAppWindow()
         auto context = AceType::DynamicCast<NG::RosenRenderContext>(appWindow_->GetRenderContext());
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
+        context->SetOpacity(1);
     }
 }
 

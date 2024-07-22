@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -602,4 +602,8 @@ const char NODE_CONTAINER_ETS_TAG[] = "NodeContainer";
 // MovingPhoto
 const char MOVING_PHOTO_COMPONENT_TAG[] = "MovingPhotoComponent";
 const char MOVING_PHOTO_ETS_TAG[] = "MovingPhoto";
+
+// LinearIndicator
+const char LINEARINDICATOR_COMPONENT_TAG[] = "LinearIndicatorComponent";
+const char LINEARINDICATOR_ETS_TAG[] = "LinearIndicator";
 } // namespace OHOS::Ace::V2

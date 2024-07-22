@@ -57,7 +57,7 @@ declare_args() {
   use_origin_scope = false
 
   # Enable split_mode support
-  enable_split_mode = false
+  ace_engine_feature_enable_split_mode = false
 }
 
 enable_dump_drawcmd = false
@@ -224,6 +224,13 @@ if (defined(global_parts_info.multimedia_player_framework)) {
   enable_player_framework = false
 }
 
+if (defined(global_parts_info.multimedia_audio_framework)) {
+  enable_audio_framework = true
+  ace_common_defines += [ "AUDIO_FRAMEWORK_EXISTS" ]
+} else {
+  enable_audio_framework = false
+}
+
 if (!defined(global_parts_info) ||
     defined(global_parts_info.security_security_component_manager)) {
   security_component_enable = true
@@ -237,6 +244,13 @@ if (!defined(global_parts_info) ||
   form_fwk_enable = true
 } else {
   form_fwk_enable = false
+}
+
+if (defined(global_parts_info) &&
+    defined(global_parts_info.hiviewdfx_hicollie)) {
+  uiservice_xcollie_enable = true
+} else {
+  uiservice_xcollie_enable = false
 }
 
 ace_platforms = []
@@ -275,4 +289,8 @@ foreach(item, ace_platforms) {
 if ((defined(use_origin_scope) && use_origin_scope) ||
     (defined(force_scope) && force_scope)) {
   ace_common_defines += [ "USE_ORIGIN_SCOPE" ]
+}
+
+if (ace_engine_feature_enable_split_mode) {
+  ace_common_defines += [ "ENABLE_SPLIT_MODE" ]
 }

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/log/dump_log.h"
 #include "core/components_ng/pattern/badge/badge_pattern.h"
 
 #include "core/components/badge/badge_theme.h"
@@ -154,5 +155,31 @@ void BadgePattern::BadgeAnimation(RefPtr<FrameNode>& frameNode, bool isShowBadge
                 textLayoutProperty->ResetContent();
             }
     });
+}
+
+void BadgePattern::DumpInfo()
+{
+    auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
+    auto badgeCount = layoutProperty->GetBadgeCount();
+    auto badgeValue = layoutProperty->GetBadgeValue();
+    auto circleSize = layoutProperty->GetBadgeCircleSize();
+    auto badgeTextColor = layoutProperty->GetBadgeTextColor();
+    auto badgeFontSize = layoutProperty->GetBadgeFontSize();
+    if (badgeCount.has_value()) {
+        const int32_t maxCountNum = 99;
+        auto badgeMaxCount = layoutProperty->GetBadgeMaxCount().value_or(maxCountNum);
+        DumpLog::GetInstance().AddDesc(std::string("badgeCount: ").append(std::to_string(badgeCount.value())));
+        DumpLog::GetInstance().AddDesc(std::string("badgeMaxCount: ").append(std::to_string(badgeMaxCount)));
+    }
+    if (badgeValue.has_value()) {
+        if (badgeValue.value().empty()) {
+            DumpLog::GetInstance().AddDesc(std::string("badgeValue is empty"));
+        } else {
+            DumpLog::GetInstance().AddDesc(std::string("badgeValue: ").append(badgeValue.value()));
+        }
+    }
+    DumpLog::GetInstance().AddDesc(std::string("badgeTextColor: ").append(badgeTextColor.value().ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("circleSize: ").append(std::to_string(circleSize->ConvertToPx())));
+    DumpLog::GetInstance().AddDesc(std::string("badgeFontSize: ").append(badgeFontSize.value().ToString()));
 }
 } // namespace OHOS::Ace::NG

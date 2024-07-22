@@ -308,6 +308,8 @@ public:
         }
     }
 
+    void OnColorConfigurationUpdate() override;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -352,6 +354,7 @@ private:
     CancelableCallback<void()> disapplearDelayTask_;
     std::shared_ptr<AnimationUtils::Animation> disappearAnimation_;
     bool isMousePressed_ = false;
+    bool isScrolling_ = false;
     RefPtr<ClickEvent> clickListener_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<InputEvent> mouseEvent_;

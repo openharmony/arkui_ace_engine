@@ -47,6 +47,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double DOUBLENESS = 2.0;
 constexpr Dimension OUT_RANGE_SPACE = 40.0_vp;
+constexpr Dimension MIN_BUTTON_FONT_SIZE = 9.0_vp;
+constexpr int32_t BUTTON_MAX_LINE = 2;
 OffsetF GetDisplayWindowRectOffset()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -758,6 +760,10 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     auto buttonTextNode = BubbleView::CreateMessage(buttonParam.value, isUseCustom);
     auto textLayoutProperty = buttonTextNode->GetLayoutProperty<TextLayoutProperty>();
     textLayoutProperty->UpdateFontSize(popupTheme->GetButtonFontSize());
+    textLayoutProperty->UpdateMaxLines(BUTTON_MAX_LINE);
+    textLayoutProperty->UpdateAdaptMaxFontSize(popupTheme->GetButtonFontSize());
+    textLayoutProperty->UpdateAdaptMinFontSize(MIN_BUTTON_FONT_SIZE);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     if (!(Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
         textLayoutProperty->UpdateTextColor(popupTheme->GetButtonFontColor());
     }

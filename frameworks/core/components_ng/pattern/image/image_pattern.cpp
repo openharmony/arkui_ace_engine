@@ -171,9 +171,10 @@ void ImagePattern::TriggerFirstVisibleAreaChange()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     RectF frameRect;
+    RectF visibleInnerRect;
     RectF visibleRect;
-    host->GetVisibleRect(visibleRect, frameRect);
-    OnVisibleAreaChange(GreatNotEqual(visibleRect.Width(), 0.0) && GreatNotEqual(visibleRect.Height(), 0.0));
+    host->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
+    OnVisibleAreaChange(GreatNotEqual(visibleInnerRect.Width(), 0.0) && GreatNotEqual(visibleInnerRect.Height(), 0.0));
 }
 
 void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
@@ -227,7 +228,7 @@ void ImagePattern::RegisterVisibleAreaChange()
     CHECK_NULL_VOID(host);
     // add visibleAreaChangeNode(inner callback)
     std::vector<double> ratioList = {0.0};
-    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
 }
 
 void ImagePattern::CheckHandles(SelectHandleInfo& handleInfo)
@@ -450,7 +451,7 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     ImageFit imageFit = props->GetImageFit().value_or(ImageFit::COVER);
     const std::optional<SizeF>& sourceSize = props->GetSourceSize();
     auto renderProp = host->GetPaintProperty<ImageRenderProperty>();
-    bool hasValidSlice = renderProp && renderProp->HasImageResizableSlice();
+    bool hasValidSlice = renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice());
     DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
     bool isHdrDecoderNeed = false;
     if (renderProp && renderProp->HasDynamicMode()) {
@@ -519,7 +520,7 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
         return MakeRefPtr<ImagePaintMethod>(
             obscuredImage_, isSelected_, overlayMod_, sensitive, interpolationDefault_);
     }
-    return nullptr;
+    return MakeRefPtr<ImagePaintMethod>(nullptr, isSelected_, overlayMod_, sensitive, interpolationDefault_);
 }
 
 bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -543,7 +544,7 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     StartDecoding(dstSize);
     if (loadingCtx_) {
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
-        if (renderProp && renderProp->HasImageResizableSlice() && image_) {
+        if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) && image_) {
             loadingCtx_->ResizableCalcDstSize();
             SetImagePaintConfig(image_, loadingCtx_->GetSrcRect(), loadingCtx_->GetDstRect(), loadingCtx_->GetSrc(),
                 loadingCtx_->GetFrameCount());
@@ -552,7 +553,8 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 
     if (altLoadingCtx_) {
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
-        if (renderProp && renderProp->HasImageResizableSlice() && altImage_) {
+        if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) &&
+            altImage_) {
             altLoadingCtx_->ResizableCalcDstSize();
             SetImagePaintConfig(altImage_, altLoadingCtx_->GetSrcRect(), altLoadingCtx_->GetDstRect(),
                 altLoadingCtx_->GetSrc(), altLoadingCtx_->GetFrameCount());
@@ -601,6 +603,7 @@ void ImagePattern::LoadImage(
         TAG_LOGD(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
     }
     loadingCtx_->SetLoadInVipChannel(GetLoadInVipChannel());
+    loadingCtx_->SetNodeId(GetHost()->GetId());
     if (onProgressCallback_) {
         loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
     }
@@ -613,6 +616,7 @@ void ImagePattern::LoadImage(
 
 void ImagePattern::LoadAltImage(const ImageSourceInfo& altImageSourceInfo)
 {
+    CHECK_NULL_VOID(GetNeedLoadAlt());
     LoadNotifier altLoadNotifier(CreateDataReadyCallbackForAlt(), CreateLoadSuccessCallbackForAlt(), nullptr);
     if (!altLoadingCtx_ || altLoadingCtx_->GetSourceInfo() != altImageSourceInfo ||
         (altLoadingCtx_ && altImageSourceInfo.IsSvg())) {
@@ -1404,34 +1408,24 @@ void ImagePattern::OnIconConfigurationUpdate()
     OnConfigurationUpdate();
 }
 
-void ImagePattern::ClearImageCache()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto imageCache = pipeline->GetImageCache();
-    CHECK_NULL_VOID(imageCache);
-    imageCache->Clear();
-}
-
 void ImagePattern::OnConfigurationUpdate()
 {
-    ClearImageCache();
     CHECK_NULL_VOID(loadingCtx_);
 
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    src.GenerateCacheKey();
     UpdateInternalResource(src);
-    src.SetIsConfigurationChange(true);
 
     LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag(),
         imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE));
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
+        altImageSourceInfo.GenerateCacheKey();
         if (altLoadingCtx_ && altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
             altLoadingCtx_.Reset();
         }
-        altImageSourceInfo.SetIsConfigurationChange(true);
         LoadAltImage(altImageSourceInfo);
     }
 }
@@ -2033,6 +2027,8 @@ void ImagePattern::ResetImageAndAlt()
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->ClearDrawCommands();
+    CloseSelectOverlay();
+    DestroyAnalyzerOverlay();
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

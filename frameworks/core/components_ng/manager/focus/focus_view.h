@@ -95,10 +95,21 @@ public:
         rootScopeSpecified_ = AceType::WeakClaim(AceType::RawPtr(viewRootScope));
     }
 
+    void SetIsViewHasShow(bool isViewHasShow)
+    {
+        isViewHasShow_ = isViewHasShow;
+    }
+
+    bool GetIsViewHasShow() const
+    {
+        return isViewHasShow_;
+    }
+
 private:
     bool isDefaultHasBeFocused_ = false;
     bool isViewRootScopeFocused_ = true;
     bool isViewHasFocused_ = false;
+    bool isViewHasShow_ = false;
 
     WeakPtr<FocusHub> rootScopeSpecified_;
 

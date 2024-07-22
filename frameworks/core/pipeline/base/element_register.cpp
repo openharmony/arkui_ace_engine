@@ -87,6 +87,7 @@ bool ElementRegister::AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>
     if (!result.second) {
         LOGE("Duplicate elmtId %{public}d error.", elmtId);
     }
+    lastestElementId_ = elmtId;
     return result.second;
 }
 

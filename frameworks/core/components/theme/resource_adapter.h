@@ -225,6 +225,11 @@ public:
         const std::string& bundleName, const std::string& moduleName);
 
     virtual void UpdateColorMode(ColorMode colorMode) {}
+
+    virtual ColorMode GetResourceColorMode() const
+    {
+        return ColorMode::LIGHT;
+    }
 };
 
 } // namespace OHOS::Ace

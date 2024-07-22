@@ -814,4 +814,12 @@ V2::ItemDivider ListModelNG::GetDivider(FrameNode* frameNode)
     return value;
 }
 
+void ListModelNG::SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPositionController(AceType::DynamicCast<ListPositionController>(scroller));
+    pattern->SetScrollBarProxy(AceType::DynamicCast<ScrollBarProxy>(proxy));
+}
 } // namespace OHOS::Ace::NG

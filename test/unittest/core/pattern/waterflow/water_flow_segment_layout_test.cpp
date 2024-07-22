@@ -1393,7 +1393,7 @@ HWTEST_F(WaterFlowSegmentTest, Constraint001, TestSize.Level1)
         EXPECT_EQ(GetChildWidth(frameNode_, i), 500.f / 3);
     }
     for (int i = 5; i < 10; i++) {
-        EXPECT_EQ(GetChildWidth(frameNode_, i), (500.f - 3) / 5);
+        EXPECT_EQ(GetChildWidth(frameNode_, i), (500.f - 8.0f) / 5);
     }
     EXPECT_EQ(GetChildWidth(frameNode_, 10), 500.f);
     EXPECT_EQ(info->endIndex_, 10);

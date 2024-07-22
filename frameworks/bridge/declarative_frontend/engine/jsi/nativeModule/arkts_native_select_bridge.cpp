@@ -60,11 +60,11 @@ panda::Local<panda::JSValueRef> JsSelectChangeCallback(panda::JsiRuntimeCallInfo
         return panda::JSValueRef::Undefined(vm);
     }
     auto index = firstArg->ToNumber(vm)->Value();
-    auto value = secondArg->ToString(vm)->ToString();
+    auto value = secondArg->ToString(vm)->ToString(vm);
     auto ref = runtimeCallInfo->GetThisRef();
     auto obj = ref->ToObject(vm);
     FrameNode* frameNode = nullptr;
-    if (obj->GetNativePointerFieldCount() < 1) {
+    if (obj->GetNativePointerFieldCount(vm) < 1) {
         if (!ref->IsProxy(vm)) {
             return panda::JSValueRef::Undefined(vm);
         }
@@ -74,7 +74,7 @@ panda::Local<panda::JSValueRef> JsSelectChangeCallback(panda::JsiRuntimeCallInfo
         auto frameNodeId = frameNodeIdValue->Int32Value(vm);
         frameNode = ElementRegister::GetInstance()->GetFrameNodePtrById(frameNodeId);
     } else {
-        frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(0));
+        frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(vm, 0));
     }
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     SelectModelNG::SetChangeValue(frameNode, index, value);
@@ -540,7 +540,7 @@ ArkUINativeModuleValue SelectBridge::SetOptionWidth(ArkUIRuntimeCallInfo* runtim
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CalcDimension width;
     if (optionWidthArg->IsString(vm)) {
-        std::string modeFlag = optionWidthArg->ToString(vm)->ToString();
+        std::string modeFlag = optionWidthArg->ToString(vm)->ToString(vm);
         if (modeFlag.compare("fit_content") == 0) {
             GetArkUINodeModifiers()->getSelectModifier()->setOptionWidthFitTrigger(nativeNode, false);
             return panda::JSValueRef::Undefined(vm);
@@ -586,7 +586,7 @@ ArkUINativeModuleValue SelectBridge::SetOptionHeight(ArkUIRuntimeCallInfo* runti
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CalcDimension height;
     if (optionHeightArg->IsString(vm)) {
-        std::string modeFlag = optionHeightArg->ToString(vm)->ToString();
+        std::string modeFlag = optionHeightArg->ToString(vm)->ToString(vm);
         if (ArkTSUtils::IsPercentStr(modeFlag)) {
             return panda::JSValueRef::Undefined(vm);
         }

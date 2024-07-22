@@ -55,7 +55,7 @@ ArkUINativeModuleValue TabsBridge::SetTabBarMode(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     TabBarMode barMode = TabBarMode::FIXED;
-    barMode = Framework::ConvertStrToTabBarMode(barModeArg->ToString(vm)->ToString());
+    barMode = Framework::ConvertStrToTabBarMode(barModeArg->ToString(vm)->ToString(vm));
     int32_t tabBarMode = static_cast<int32_t>(barMode);
     GetArkUINodeModifiers()->getTabsModifier()->setTabBarMode(nativeNode, tabBarMode);
 

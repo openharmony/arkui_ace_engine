@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "base/utils/utils.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/render/drawing.h"
@@ -84,6 +85,9 @@ RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostN
     }
     auto dragPattern = dragNode->GetPattern<TextDragPattern>();
     auto data = CalculateTextDragData(hostPattern, dragNode);
+    TAG_LOGI(AceLogTag::ACE_TEXT, "CreateDragNode SelectPositionInfo startX = %{public}f, startY = %{public}f,\
+             endX = %{public}f, endY = %{public}f", data.selectPosition_.startX_, data.selectPosition_.startY_,
+             data.selectPosition_.endX_, data.selectPosition_.endY_);
     dragPattern->Initialize(hostPattern->GetDragParagraph(), data);
     dragPattern->SetLastLineHeight(data.lineHeight_);
 
@@ -124,7 +128,7 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
         globalX = contentRect.Left() + globalOffset.GetX() - dragOffset;
         width = contentRect.Width();
     }
-    float contentX = leftHandler.GetY() == rightHandler.GetY() ? box.Left() : 0 - dragOffset - delta / CONSTANT_HALF;
+    float contentX = (leftHandler.GetY() == rightHandler.GetY() ? box.Left() : 0) - dragOffset - delta / CONSTANT_HALF;
     dragPattern->SetContentOffset({contentX, box.Top() - dragOffset});
     dragContext->UpdatePosition(OffsetT<Dimension>(Dimension(globalX), Dimension(globalY)));
     auto offsetXValue = globalOffset.GetX() - globalX;
@@ -144,7 +148,7 @@ RectF TextDragPattern::GetHandler(const bool isLeftHandler, const std::vector<Re
     auto adjustedTextStartY = textStartOffset.GetY() + std::min(globalOffset.GetY(), 0.0f);
     auto box = isLeftHandler ? GetFirstBoxRect(boxes, contentRect, adjustedTextStartY) :
         GetLastBoxRect(boxes, contentRect, adjustedTextStartY);
-    auto handlerX = isLeftHandler ? box.Left() : box.Right() + textStartOffset.GetX();
+    auto handlerX = (isLeftHandler ? box.Left() : box.Right()) + textStartOffset.GetX();
     return {handlerX, box.Top() + textStartOffset.GetY(), 0, box.Height()};
 }
 
@@ -209,7 +213,7 @@ std::shared_ptr<RSPath> TextDragPattern::GenerateSelBackgroundPath(float offset)
 
 void TextDragPattern::GenerateBackgroundPoints(std::vector<TextPoint>& points, float offset, bool needAdjust)
 {
-    auto radius = TEXT_DRAG_RADIUS.ConvertToPx();
+    auto radius = GetDragCornerRadius().ConvertToPx();
     auto bothOffset = offset * 2; // 2 : double
     auto minWidth = TEXT_DRAG_MIN_WIDTH.ConvertToPx();
     auto selectPosition = GetSelectPosition();
@@ -258,7 +262,7 @@ void TextDragPattern::GenerateBackgroundPoints(std::vector<TextPoint>& points, f
 void TextDragPattern::CalculateLineAndArc(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path,
     float radiusRatio)
 {
-    auto originRadius = TEXT_DRAG_RADIUS.ConvertToPx();
+    auto originRadius = GetDragCornerRadius().ConvertToPx();
     auto radius = originRadius * radiusRatio;
     path->MoveTo(points[0].x + radius, points[0].y);
     auto frontPoint = points[0];
@@ -305,12 +309,21 @@ void TextDragPattern::CalculateLineAndArc(std::vector<TextPoint>& points, std::s
 
 void TextDragPattern::CalculateLine(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path)
 {
-    auto radius = TEXT_DRAG_RADIUS.ConvertToPx();
+    auto radius = GetDragCornerRadius().ConvertToPx();
     path->MoveTo(points[0].x + radius, points[0].y);
     size_t step = 2;
     for (size_t i = 0; i + step < points.size(); i++) {
         auto crossPoint = points[i + 1];
         path->LineTo(crossPoint.x, crossPoint.y);
     }
+}
+
+Color TextDragPattern::GetDragBackgroundColor()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, Color(TEXT_DRAG_COLOR_BG));
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, Color(TEXT_DRAG_COLOR_BG));
+    return textTheme->GetDragBackgroundColor();
 }
 } // namespace OHOS::Ace::NG

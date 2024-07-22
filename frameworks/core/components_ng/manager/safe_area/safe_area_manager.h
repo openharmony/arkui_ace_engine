@@ -82,6 +82,13 @@ public:
     SafeAreaInsets GetSafeArea() const;
 
     /**
+     * @brief Retrieves the safe area insets only System.
+     *
+     * @return The System safe area insets.
+     */
+    SafeAreaInsets GetSafeAreaWithoutCutout() const;
+
+    /**
      * @brief Updates the safe area to accommodate the keyboard.
      *
      * This function is called to update the safe area when the keyboard is shown or hidden.

@@ -148,4 +148,21 @@ HWTEST_F(AnimatableMatrix4Test, AnimatableMatrix4Test005, TestSize.Level1)
     animatableMatrix4Obj1.ResetAnimatableMatrix();
     EXPECT_TRUE(animatableMatrix4Obj1.isFirstAssign_);
 }
+
+/**
+ * @tc.name: AnimatableMatrix4Test006
+ * @tc.desc: Test the function reload operator=
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnimatableMatrix4Test, AnimatableMatrix4Test006, TestSize.Level1)
+{
+    AnimatableMatrix4 animatableMatrix4Obj1;
+    AnimatableMatrix4 animatableMatrix4Obj2;
+    // true true, both animationCallback_ and pipelineContext nullptr
+    animatableMatrix4Obj2 = animatableMatrix4Obj1;
+    // false true, animationCallback_ not nullptr, pipelineContext  nullptr
+    bool flagEventCbk = false;
+    animatableMatrix4Obj2.SetContextAndCallback(nullptr, [&flagEventCbk]() { flagEventCbk = true; });
+    animatableMatrix4Obj2 = animatableMatrix4Obj1;
+}
 } // namespace OHOS::Ace

@@ -507,11 +507,11 @@ HWTEST_F(TextInputUpdateTestNg, ProcessOverlayAfterLayout, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
 
-    pattern_->ProcessOverlayAfterLayout(true);
+    pattern_->ProcessOverlayAfterLayout(OffsetF());
     GetFocus();
     pattern_->HandleSetSelection(5, 10, true);
     pattern_->needToRefreshSelectOverlay_ = true;
-    pattern_->ProcessOverlayAfterLayout(false);
+    pattern_->ProcessOverlayAfterLayout(OffsetF());
     EXPECT_FALSE(pattern_->needToRefreshSelectOverlay_);
 }
 

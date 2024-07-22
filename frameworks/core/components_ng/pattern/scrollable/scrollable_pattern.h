@@ -354,7 +354,7 @@ public:
     bool CanOverScroll(int32_t source)
     {
         auto canOverScroll = (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
-            IsScrollable() && (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_ || nestedScrolling_));
+            IsScrollable() && (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_));
         if (canOverScroll != lastCanOverScroll_) {
             lastCanOverScroll_ = canOverScroll;
             AddScrollableFrameInfo(source);
@@ -558,7 +558,8 @@ public:
     void HandleClickEvent(GestureEvent& info);
     void InitScrollBarGestureEvent();
     void InitScrollBarMouseEvent();
-    virtual void ScrollPage(bool reverse, bool smooth = false);
+    virtual void ScrollPage(
+        bool reverse, bool smooth = false, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
 
     void SetScrollToSafeAreaHelper(bool isScrollToSafeAreaHelper)
@@ -585,7 +586,7 @@ public:
         return nullptr;
     }
 
-    void CheckRestartSpring(bool sizeDiminished);
+    void CheckRestartSpring(bool sizeDiminished, bool needNestedScrolling = true);
 
     Axis GetScrollablePanDirection()
     {
@@ -617,6 +618,17 @@ public:
     {
         hotZoneScrollCallback_ = func;
     }
+
+    virtual void SetAccessibilityAction();
+
+    /**
+     * @brief Notify component the position and count when data has changed.
+     *        This function should not be implemented here.
+     *
+     * @param index the position of change.
+     * @param count the count of change. nagative/0/positive implies delete/change/add respectively.
+     */
+    virtual void NotifyDataChange(int32_t index, int32_t count) {};
 
 protected:
     void SuggestOpIncGroup(bool flag);
@@ -709,11 +721,13 @@ private:
     void ProcessNavBarReactOnStart();
     float ProcessNavBarReactOnUpdate(float offset);
     void ProcessNavBarReactOnEnd();
-    void InitSpringOffsetProperty(bool useTotalOffset = true);
+    void InitSpringOffsetProperty();
     void InitCurveOffsetProperty();
+    void OnAnimateFinish();
     void StopAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
     void PauseAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
     void InitOption(AnimationOption &option, float duration, const RefPtr<Curve>& curve);
+    float GetScrollDelta(float offset, bool& stopAnimation);
 
     void OnAttachToFrameNode() override;
     void AttachAnimatableProperty(RefPtr<Scrollable> scrollable);
@@ -756,13 +770,14 @@ private:
     void OnScrollEndRecursiveInner(const std::optional<float>& velocity);
     void OnScrollStartRecursive(float position, float velocity = 0.f) override;
     void OnScrollStartRecursiveInner(float position, float velocity = 0.f);
+    void OnScrollDragEndRecursive() override;
 
     ScrollResult HandleScrollParentFirst(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollSelfFirst(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollSelfOnly(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollParallel(float& offset, int32_t source, NestedState state);
     bool HandleOutBoundary(float& offset, int32_t source, NestedState state, ScrollResult& result);
-    void HandleSelfOutBoundary(float& offset, int32_t source);
+    bool HandleSelfOutBoundary(float& offset, int32_t source, const float backOverOffset, float oppositeOverOffset);
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
 
@@ -800,6 +815,7 @@ private:
     ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
     bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
     void SetUiDvsyncSwitch(bool on);
+    void SetNestedScrolling(bool nestedScrolling);
 
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -860,6 +876,8 @@ private:
     float currentVelocity_ = 0.0f;
     float lastPosition_ = 0.0f;
     float finalPosition_ = 0.0f;
+    bool useTotalOffset_ = true;
+    bool animateToTraceFlag_ = false;
     std::optional<float> extraOffset_;
 
     RefPtr<Animator> hotzoneAnimator_;
@@ -877,7 +895,6 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
     bool lastCanOverScroll_ = false;
-    bool nestedScrolling_ = false;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

@@ -96,6 +96,14 @@ public:
         hoverEventActuator_->ReplaceInputEvent(std::move(onHoverEventFunc));
     }
 
+    void SetAccessibilityHoverEvent(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc)
+    {
+        if (!accessibilityHoverEventActuator_) {
+            accessibilityHoverEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+        }
+        accessibilityHoverEventActuator_->ReplaceInputEvent(std::move(onAccessibilityHoverEventFunc));
+    }
+
     void SetJSFrameNodeOnHoverEvent(OnHoverFunc&& onHoverEventFunc)
     {
         if (!hoverEventActuator_) {
@@ -155,6 +163,13 @@ public:
         }
     }
 
+    void ClearUserOnAccessibilityHover()
+    {
+        if (accessibilityHoverEventActuator_) {
+            accessibilityHoverEventActuator_->ClearUserCallback();
+        }
+    }
+
     void ClearJSFrameNodeOnHover()
     {
         if (hoverEventActuator_) {
@@ -182,6 +197,7 @@ private:
     RefPtr<InputEventActuator> hoverEventActuator_;
     RefPtr<InputEventActuator> hoverEffectActuator_;
     RefPtr<InputEventActuator> axisEventActuator_;
+    RefPtr<InputEventActuator> accessibilityHoverEventActuator_;
 
     RefPtr<InputEvent> showMenu_;
 

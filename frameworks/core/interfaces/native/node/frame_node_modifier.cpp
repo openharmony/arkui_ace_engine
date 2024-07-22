@@ -393,7 +393,7 @@ ArkUINodeHandle GetFrameNodeByUniqueId(ArkUI_Int32 uniqueId)
 
 ArkUINodeHandle GetFrameNodeByKey(ArkUI_CharPtr key)
 {
-    auto node = NG::Inspector::GetFrameNodeByKey(key);
+    auto node = NG::Inspector::GetFrameNodeByKey(key, true);
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 

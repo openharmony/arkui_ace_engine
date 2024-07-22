@@ -80,13 +80,14 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto childSize = item->GetGeometryNode()->GetMarginFrameSize();
         // set minimum size
         childSize.SetWidth(maxChildrenWidth);
-        MinusPaddingToSize(item->GetLayoutProperty()->CreateMargin(), childSize);
+        auto margin = item->GetLayoutProperty()->CreateMargin();
+        MinusPaddingToSize(margin, childSize);
         if (item->GetLayoutProperty()->GetLayoutConstraint().has_value() &&
             !item->GetLayoutProperty()->GetLayoutConstraint()->selfIdealSize.Width().has_value()) {
             item->GetGeometryNode()->SetFrameSize(childSize);
         }
 
-        float itemHeight = childSize.Height();
+        float itemHeight = childSize.Height() + margin.Height();
         float endPos = totalHeight + itemHeight;
         itemPosition_[currentIndex] = { totalHeight, endPos };
         totalHeight = endPos;

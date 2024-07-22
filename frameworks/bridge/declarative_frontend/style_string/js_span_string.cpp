@@ -67,6 +67,9 @@ void JSSpanString::Constructor(const JSCallbackInfo& args)
                 RefPtr<CustomSpan> customSpan = JSSpanString::ParseJsCustomSpan(args);
                 spanString = AceType::MakeRefPtr<SpanString>(customSpan);
             }
+            if (args.Length() > 1) {
+                TAG_LOGW(ACE_TEXT, "initialization of styledstring with image or custom span will only use first arg");
+            }
         }
     }
     jsSpanString->SetController(spanString);
@@ -473,7 +476,7 @@ RefPtr<SpanBase> JSSpanString::ParseJsExtSpan(int32_t start, int32_t length, con
 bool JSSpanString::CheckSpanType(int32_t spanType)
 {
     if (types.find(static_cast<SpanType>(spanType)) == types.end()) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input span type check failed.");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "CheckSpanType failed: Ilegal span type");
         return false;
     }
     return true;
@@ -483,7 +486,7 @@ bool JSSpanString::CheckParameters(int32_t start, int32_t length)
 {
     // The input parameter must not cross the boundary.
     if (!spanString_->CheckRange(start, length)) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s start:%d length:%d", "CheckBoundary failed:", start, length);
         return false;
     }
     return true;
@@ -547,7 +550,7 @@ ImageSpanOptions JSSpanString::ParseJsImageAttachment(const JSRef<JSObject>& inf
     auto* base = info->Unwrap<AceType>();
     auto* imageAttachment = AceType::DynamicCast<JSImageAttachment>(base);
     if (!imageAttachment) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Parse JsImageAttachment Failed");
         return options;
     }
     return imageAttachment->GetImageOptions();
@@ -656,7 +659,8 @@ void JSMutableSpanString::InsertString(const JSCallbackInfo& info)
     // The input parameter must not cross the boundary.
     auto characterLength = controller->GetLength();
     if (start < 0 || start > characterLength) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s start: %d StyledStringLength: %d",
+            "Out of bounds", start, characterLength);
         return;
     }
     controller->InsertString(start, data);
@@ -695,11 +699,11 @@ bool JSMutableSpanString::IsCustomSpanNode(int32_t location)
 bool JSMutableSpanString::VerifyImageParameters(int32_t start, int32_t length)
 {
     if (length != 1) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input span type check failed.");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "VerifyImageParameters failed: length should be one");
         return false;
     }
     if (!IsImageNode(start)) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input span type check failed.");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "VerifyCustomSpanParameters failed: Not ImageNode");
         return false;
     }
     return true;
@@ -708,11 +712,11 @@ bool JSMutableSpanString::VerifyImageParameters(int32_t start, int32_t length)
 bool JSMutableSpanString::VerifyCustomSpanParameters(int32_t start, int32_t length)
 {
     if (length != 1) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input span type check failed.");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "VerifyCustomSpanParameters failed: length should be one");
         return false;
     }
     if (!IsCustomSpanNode(start)) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input span type check failed.");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "VerifyCustomSpanParameters failed: Not CustomSpanNode");
         return false;
     }
     return true;
@@ -751,7 +755,8 @@ void JSMutableSpanString::ReplaceSpan(const JSCallbackInfo& info)
     }
     auto spanBase = ParseJsSpanBaseWithoutSpecialSpan(start, length, type, JSRef<JSObject>::Cast(styleValueObj), info);
     if (!spanBase) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s",
+            "ReplaceSpan failed: maybe styledKey & corresponding value not match");
         return;
     }
     auto controller = GetMutableController().Upgrade();
@@ -795,7 +800,8 @@ void JSMutableSpanString::AddSpan(const JSCallbackInfo& info)
     }
     auto spanBase = ParseJsSpanBaseWithoutSpecialSpan(start, length, type, JSRef<JSObject>::Cast(styleValueObj), info);
     if (!spanBase) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s",
+            "AddSpan failed: maybe styledKey & corresponding value not match");
         return;
     }
     auto controller = GetMutableController().Upgrade();
@@ -865,7 +871,7 @@ void JSMutableSpanString::ReplaceSpanString(const JSCallbackInfo& info)
     auto length = info[1]->ToNumber<int32_t>();
     auto* spanString = JSRef<JSObject>::Cast(info[2])->Unwrap<JSSpanString>();
     if (!spanString) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Failed To Parse StyledString");
         return;
     }
     auto spanStringController = spanString->GetController();
@@ -887,7 +893,7 @@ void JSMutableSpanString::InsertSpanString(const JSCallbackInfo& info)
     auto start = info[0]->ToNumber<int32_t>();
     auto* spanString = JSRef<JSObject>::Cast(info[1])->Unwrap<JSSpanString>();
     if (!spanString) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Failed To Parse StyledString");
         return;
     }
     auto spanStringController = spanString->GetController();
@@ -897,7 +903,8 @@ void JSMutableSpanString::InsertSpanString(const JSCallbackInfo& info)
     // The input parameter must not cross the boundary.
     auto characterLength = controller->GetLength();
     if (start < 0 || start > characterLength) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s start: %d StyledStringLength: %d",
+            "Out of bounds", start, characterLength);
         return;
     }
     controller->InsertSpanString(start, spanStringController);
@@ -911,7 +918,7 @@ void JSMutableSpanString::AppendSpanString(const JSCallbackInfo& info)
     }
     auto* spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
     if (!spanString) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Failed To Parse StyledString");
         return;
     }
     auto spanStringController = spanString->GetController();

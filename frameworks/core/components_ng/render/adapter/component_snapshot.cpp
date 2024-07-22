@@ -150,29 +150,18 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
         return;
     }
 
+    auto rsNode = GetRsNode(node);
+
     if (node->GetIsLayoutNode()) {
         std::list<RefPtr<FrameNode>> children;
         node->GetOneDepthVisibleFrame(children);
         if (children.empty()) {
             return;
         }
-
-        auto rsNode = GetRsNode(children.front());
-        if (!rsNode) {
-            callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
-            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-                "RsNode is null from FrameNode(id=%{public}s)",
-                componentId.c_str());
-            return;
-        }
-        auto& rsInterface = Rosen::RSInterfaces::GetInstance();
-        rsInterface.TakeSurfaceCaptureForUI(
-            rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr),
-            options.scale, options.scale, options.waitUntilRenderFinished);
-        return;
+        node = children.front();
+        rsNode = GetRsNode(children.front());
     }
 
-    auto rsNode = GetRsNode(node);
     if (!rsNode) {
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
@@ -180,6 +169,9 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
             componentId.c_str());
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+        "Get ComponentSnapshot key=%{public}s Id=%{public}d Tag=%{public}s RsNodeId=%{public}" PRIu64 "",
+        componentId.c_str(), node->GetId(), node->GetTag().c_str(), rsNode->GetId());
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr),
         options.scale, options.scale, options.waitUntilRenderFinished);
@@ -217,8 +209,14 @@ void ComponentSnapshot::Create(
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
     if (flag) {
-        pipeline->FlushUITasks();
-        pipeline->FlushMessages();
+        executor->PostTask(
+            [node]() {
+                auto pipeline = node->GetContext();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->FlushUITasks();
+                pipeline->FlushMessages();
+            },
+            TaskExecutor::TaskType::UI, "ArkUIComponentSnapshotFlushUITasks", PriorityType::VIP);
     }
     PostDelayedTaskOfBuiler(executor, std::move(callback), node, enableInspector, pipeline, param);
 }

@@ -35,6 +35,8 @@ public:
     static ArkUINativeModuleValue ResetOnComplete(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetOnError(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnError(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetColorFilter(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetColorFilter(ArkUIRuntimeCallInfo *runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

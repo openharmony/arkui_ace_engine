@@ -63,7 +63,7 @@ napi_value AttachImageBitmap(napi_env env, void* value, void*)
         LOGW("Invalid parameter.");
         return nullptr;
     }
-    auto image = reinterpret_cast<std::weak_ptr<JSRenderImage>*>(value)->lock();
+    auto image = (JSRenderImage*)value;
     if (image == nullptr) {
         LOGW("Invalid context.");
         return nullptr;
@@ -82,7 +82,7 @@ napi_value AttachImageBitmap(napi_env env, void* value, void*)
     napi_define_properties(env, imageBitmap, sizeof(desc) / sizeof(*desc), desc);
 
     napi_coerce_to_native_binding_object(env, imageBitmap, DetachImageBitmap, AttachImageBitmap, value, nullptr);
-    napi_wrap(env, imageBitmap, value, JSRenderImage::Finalizer, nullptr, nullptr);
+    napi_wrap_with_size(env, imageBitmap, value, JSRenderImage::Finalizer, nullptr, nullptr, image->GetBindingSize());
     return imageBitmap;
 }
 
@@ -144,7 +144,7 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
 #endif
     }
     napi_coerce_to_native_binding_object(env, thisVar, DetachImageBitmap, AttachImageBitmap, wrapper, nullptr);
-    napi_wrap(env, thisVar, wrapper, Finalizer, nullptr, nullptr);
+    napi_wrap_with_size(env, thisVar, wrapper, Finalizer, nullptr, nullptr, wrapper->GetBindingSize());
     return thisVar;
 }
 
@@ -306,6 +306,7 @@ void JSRenderImage::OnImageLoadSuccess()
     svgDom_ = imageObj_->GetSVGDom();
     imageFit_ = loadingCtx_->GetImageFit();
     imageSize_ = loadingCtx_->GetImageSize();
+    bindingSize_ = pixelMap_ ? pixelMap_->GetByteCount() : 0;
 }
 
 void JSRenderImage::OnImageLoadFail(const std::string& errorMsg)

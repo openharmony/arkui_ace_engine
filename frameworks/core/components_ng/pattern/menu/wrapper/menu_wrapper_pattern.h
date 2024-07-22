@@ -121,7 +121,7 @@ public:
         return menu;
     }
 
-    RefPtr<FrameNode> GetHoverImageColNode() const
+    RefPtr<FrameNode> GetHoverImageFlexNode() const
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
@@ -135,7 +135,7 @@ public:
 
     RefPtr<FrameNode> GetHoverImageStackNode() const
     {
-        auto node = AceType::DynamicCast<FrameNode>(GetHoverImageColNode()->GetChildAtIndex(0));
+        auto node = AceType::DynamicCast<FrameNode>(GetHoverImageFlexNode()->GetChildAtIndex(0));
         CHECK_NULL_RETURN(node, nullptr);
         if (node->GetTag() != V2::STACK_ETS_TAG) {
             return nullptr;
@@ -208,9 +208,19 @@ public:
         isShowHoverImage_ = isShow;
     }
 
-    bool GetIsShowHoverImage()
+    bool GetIsShowHoverImage() const
     {
         return isShowHoverImage_;
+    }
+
+    void SetIsStopHoverImageAnimation(bool isStop)
+    {
+        isStopHoverImageAnimation_ = isStop;
+    }
+
+    bool IsStopHoverImageAnimation() const
+    {
+        return isStopHoverImageAnimation_;
     }
 
     void SetIsShowHoverImagePreviewStartDrag(bool isStart)
@@ -218,7 +228,7 @@ public:
         isShowHoverImagePreviewStartDrag_ = isStart;
     }
 
-    bool GetIsShowHoverImagePreviewStartDrag()
+    bool GetIsShowHoverImagePreviewStartDrag() const
     {
         return isShowHoverImagePreviewStartDrag_;
     }
@@ -421,6 +431,8 @@ private:
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
     void StartShowAnimation();
     void HandleInteraction(const TouchEventInfo& info);
+    void ChangeCurMenuItemBgColor();
+    void ClearLastMenuItem();
     RectF GetMenuZone(RefPtr<UINode>& innerMenuNode);
     RefPtr<FrameNode> FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const OffsetF& position);
 
@@ -443,6 +455,7 @@ private:
     bool isFirstShow_ = true;
     bool isShowInSubWindow_ = true;
     bool isShowHoverImage_ = false;
+    bool isStopHoverImageAnimation_ = false;
     bool isShowHoverImagePreviewStartDrag_ = false;
     MenuStatus menuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;

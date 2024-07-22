@@ -18,9 +18,8 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
-#include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "test/unittest/core/rosen/rosen_render_context_test.h"
 #undef private
 #undef protected
 
@@ -30,23 +29,19 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {} // namespace
 
-class RosenRenderContextTest : public testing::Test {
-public:
-    void SetUp() override;
-    void TearDown() override;
-};
-
 void RosenRenderContextTest::SetUp()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
 }
 
 void RosenRenderContextTest::TearDown()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
-RefPtr<RosenRenderContext> InitRosenRenderContext()
+RefPtr<RosenRenderContext> RosenRenderContextTest::InitRosenRenderContext(const RefPtr<FrameNode>& frameNode)
 {
     auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
     RenderContext::ContextParam contextParam;
@@ -54,7 +49,6 @@ RefPtr<RosenRenderContext> InitRosenRenderContext()
     contextParam.surfaceName.emplace("test");
     std::optional<RenderContext::ContextParam> contextParamValue = std::make_optional(contextParam);
     rosenRenderContext->InitContext(false, contextParamValue);
-    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
     rosenRenderContext->SetHostNode(frameNode);
     return rosenRenderContext;
 }
@@ -66,7 +60,8 @@ RefPtr<RosenRenderContext> InitRosenRenderContext()
  */
 HWTEST_F(RosenRenderContextTest, RosenRenderContextTest001, TestSize.Level1)
 {
-    auto rosenRenderContext = InitRosenRenderContext();
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
     float xPivot = 10.0;
     float yPivot = 10.0;
     float zPivot = 10.0;
@@ -86,7 +81,8 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest001, TestSize.Level1)
  */
 HWTEST_F(RosenRenderContextTest, RosenRenderContextTest002, TestSize.Level1)
 {
-    auto rosenRenderContext = InitRosenRenderContext();
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
     rosenRenderContext->SetTransitionPivot(SizeF(100.0, 100.0), true);
     ScaleOptions scaleOptions;
     scaleOptions.centerX = CalcDimension(50.0, DimensionUnit::PX);
@@ -114,17 +110,18 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest002, TestSize.Level1)
  */
 HWTEST_F(RosenRenderContextTest, RosenRenderContextTest003, TestSize.Level1)
 {
-    auto rosenRenderContext = InitRosenRenderContext();
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
     std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(100.0, 100.0));
     rosenRenderContext->SetSandBox(parentPosition, false);
-    EXPECT_EQ(rosenRenderContext->sandBoxCount_, 0);
+    EXPECT_EQ(rosenRenderContext->sandBoxCount_, 1);
     rosenRenderContext->SetSandBox(parentPosition, true);
-    EXPECT_EQ(rosenRenderContext->sandBoxCount_, 0);
+    EXPECT_EQ(rosenRenderContext->sandBoxCount_, 1);
     rosenRenderContext->SetSandBox(std::nullopt, true);
     EXPECT_EQ(rosenRenderContext->sandBoxCount_, 0);
     rosenRenderContext->sandBoxCount_ = 2;
     rosenRenderContext->SetSandBox(std::nullopt, true);
-    EXPECT_EQ(rosenRenderContext->sandBoxCount_, 2);
+    EXPECT_EQ(rosenRenderContext->sandBoxCount_, 0);
 }
 
 /**
@@ -134,7 +131,8 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest003, TestSize.Level1)
  */
 HWTEST_F(RosenRenderContextTest, RosenRenderContextTest004, TestSize.Level1)
 {
-    auto rosenRenderContext = InitRosenRenderContext();
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
     RectF paintRect = { 10.0f, 10.0f, 10.0f, 10.0f };
     rosenRenderContext->SetFrameWithoutAnimation(paintRect);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetFrame()[0], paintRect.GetX());
@@ -150,7 +148,8 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest004, TestSize.Level1)
  */
 HWTEST_F(RosenRenderContextTest, RosenRenderContextTest005, TestSize.Level1)
 {
-    auto rosenRenderContext = InitRosenRenderContext();
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
     RectF paintRect = { 10.0f, 10.0f, 10.0f, 10.0f };
     rosenRenderContext->SyncGeometryFrame(paintRect);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetFrame()[0], paintRect.GetX());
@@ -172,7 +171,8 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest005, TestSize.Level1)
  */
 HWTEST_F(RosenRenderContextTest, RosenRenderContextTest006, TestSize.Level1)
 {
-    auto rosenRenderContext = InitRosenRenderContext();
+    auto hostNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(hostNode);
     RectF paintRect = { 10.0f, 10.0f, 10.0f, 10.0f };
     rosenRenderContext->SetChildBounds(paintRect);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetChildren().size(), 0);
@@ -199,7 +199,8 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest006, TestSize.Level1)
  */
 HWTEST_F(RosenRenderContextTest, RosenRenderContextTest008, TestSize.Level1)
 {
-    auto rosenRenderContext = InitRosenRenderContext();
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
     rosenRenderContext->OnForegroundEffectUpdate(1.0f);
     EXPECT_TRUE(rosenRenderContext->GetRSNode()->GetStagingProperties().GetForegroundEffectRadius() - 1.0 < 1);
 }
@@ -211,7 +212,8 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest008, TestSize.Level1)
  */
 HWTEST_F(RosenRenderContextTest, RosenRenderContextTest011, TestSize.Level1)
 {
-    auto rosenRenderContext = InitRosenRenderContext();
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
     rosenRenderContext->OnOpacityUpdate(10.0);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetAlpha(), 10.0);
 }

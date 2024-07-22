@@ -42,6 +42,7 @@ build_component_ng("web_pattern_ng") {
     ]
 
     external_deps = [
+      "ability_base:view_data",
       "ability_runtime:app_manager",
       "app_file_service:fileuri_native",
       "c_utils:utils",

@@ -27,6 +27,7 @@ public:
     {
         return false;
     }
+    void GetAIEntityMenu(TextDataDetectResult& textDataDetectResult) override {}
     void DataDetect(const TextDataDetectInfo& info, const TextDetectResultFunc& resultFunc) override {}
 
     void AdjustCursorPosition(int32_t& caretPos, const std::string& content, TimeStamp& lastAiPosTimeStamp,

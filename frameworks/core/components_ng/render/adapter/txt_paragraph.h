@@ -125,6 +125,7 @@ public:
     PositionWithAffinity GetGlyphPositionAtCoordinate(const Offset& offset) override;
     void AdjustIndexForward(const Offset& offset, bool compareOffset, int32_t& index);
     void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) override;
+    void GetTightRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) override;
     void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) override;
     bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) override;
     bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) override;
@@ -163,7 +164,8 @@ private:
     bool HandleCaretWhenEmpty(CaretMetricsF& result);
     void HandleTextAlign(CaretMetricsF& result, TextAlign align);
     void HandleLeadingMargin(CaretMetricsF& result, LeadingMargin leadingMargin);
-    void GetRectsForRangeInner(int32_t start, int32_t end, std::vector<RectF>& selectedRects);
+    void GetRectsForRangeInner(int32_t start, int32_t end, std::vector<RectF>& selectedRects,
+        RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE);
     int32_t AdjustIndexForEmoji(int32_t index);
     bool IsIndexInEmoji(int32_t index, int32_t& emojiStart, int32_t& emojiEnd);
 

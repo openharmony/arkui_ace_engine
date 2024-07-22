@@ -32,6 +32,18 @@ void BorderImage::SetEdgeSlice(BorderImageDirection direction, const Dimension& 
         case BorderImageDirection::RIGHT:
             borderImageRight_.SetBorderImageSlice(sliceDimension);
             break;
+        case BorderImageDirection::START:
+            if (!borderImageStart_.has_value()) {
+                borderImageStart_ = BorderImageEdge();
+            }
+            borderImageStart_->SetBorderImageSlice(sliceDimension);
+            break;
+        case BorderImageDirection::END:
+            if (!borderImageEnd_.has_value()) {
+                borderImageEnd_ = BorderImageEdge();
+            }
+            borderImageEnd_->SetBorderImageSlice(sliceDimension);
+            break;
         default:
             LOGE("Unsupported border image direction");
     }
@@ -52,6 +64,18 @@ void BorderImage::SetEdgeOutset(BorderImageDirection direction, const Dimension&
         case BorderImageDirection::RIGHT:
             borderImageRight_.SetBorderImageOutset(outsetDimension);
             break;
+        case BorderImageDirection::START:
+            if (!borderImageStart_.has_value()) {
+                borderImageStart_ = BorderImageEdge();
+            }
+            borderImageStart_->SetBorderImageOutset(outsetDimension);
+            break;
+        case BorderImageDirection::END:
+            if (!borderImageEnd_.has_value()) {
+                borderImageEnd_ = BorderImageEdge();
+            }
+            borderImageEnd_->SetBorderImageOutset(outsetDimension);
+            break;
         default:
             LOGE("Unsupported border image direction");
     }
@@ -71,6 +95,18 @@ void BorderImage::SetEdgeWidth(BorderImageDirection direction, const Dimension& 
             break;
         case BorderImageDirection::RIGHT:
             borderImageRight_.SetBorderImageWidth(widthDimension);
+            break;
+        case BorderImageDirection::START:
+            if (!borderImageStart_.has_value()) {
+                borderImageStart_ = BorderImageEdge();
+            }
+            borderImageStart_->SetBorderImageWidth(widthDimension);
+            break;
+        case BorderImageDirection::END:
+            if (!borderImageEnd_.has_value()) {
+                borderImageEnd_ = BorderImageEdge();
+            }
+            borderImageEnd_->SetBorderImageWidth(widthDimension);
             break;
         default:
             LOGE("Unsupported border image direction");

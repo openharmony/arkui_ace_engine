@@ -263,7 +263,7 @@ TextLineMetrics ParagraphManager::GetLineMetrics(size_t lineNumber)
     return TextLineMetrics();
 }
 
-std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end) const
+std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const
 {
     std::vector<RectF> res;
     float y = 0.0f;
@@ -274,7 +274,12 @@ std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end) const
         }
         if (info.end > start) {
             auto relativeStart = (start < info.start) ? 0 : start - info.start;
-            info.paragraph->GetRectsForRange(relativeStart, end - info.start, rects);
+            if (rectHeightPolicy == RectHeightPolicy::COVER_TEXT) {
+                info.paragraph->GetTightRectsForRange(relativeStart, end - info.start, rects);
+            } else {
+                info.paragraph->GetRectsForRange(relativeStart, end - info.start, rects);
+            }
+
             for (auto&& rect : rects) {
                 rect.SetTop(rect.Top() + y);
             }

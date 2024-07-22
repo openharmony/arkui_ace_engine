@@ -113,6 +113,20 @@ public:
         return edgeLength;
     }
 
+    static int32_t GetLoopIndex(int32_t index, int32_t totalCount)
+    {
+        if (totalCount <= 0) {
+            return index;
+        }
+
+        auto loopIndex = index;
+        while (loopIndex < 0) {
+            loopIndex = loopIndex + totalCount;
+        }
+        loopIndex %= totalCount;
+        return loopIndex;
+    }
+
 private:
     static float CalcIndicatrOffSetX(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
                                     float swiperPaddingLeft, float swiperPaddingRight,

@@ -136,6 +136,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     // Pause GC during long frame
     std::unique_ptr<ILongFrame> longFrame = std::make_unique<ILongFrame>();
     if (is64BitSystem_) {
+        ACE_LAYOUT_SCOPED_TRACE("ReportStartEvent");
         longFrame->ReportStartEvent();
     }
 #endif
@@ -161,6 +162,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     FlushSyncGeometryNodeTasks();
 #ifdef FFRT_EXISTS
     if (is64BitSystem_) {
+        ACE_LAYOUT_SCOPED_TRACE("ReportEndEvent");
         longFrame->ReportEndEvent();
     }
 #endif

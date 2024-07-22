@@ -27,6 +27,7 @@ public:
     MockCanvasImage() = default;
     ~MockCanvasImage() override = default;
     MOCK_METHOD4(DrawToRSCanvas, void(RSCanvas&, const RSRect&, const RSRect&, const BorderRadiusArray&));
+    MOCK_METHOD3(DrawRect, void(RSCanvas&, const RSRect&, const RSRect&));
     MOCK_CONST_METHOD0(GetWidth, int32_t());
     MOCK_CONST_METHOD0(GetHeight, int32_t());
 };

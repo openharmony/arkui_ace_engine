@@ -959,6 +959,11 @@ HWTEST_F(SelectTestNg, SelectModel002, TestSize.Level1)
      * @tc.steps: step4. Get the select frame node and select pattern.
      * @tc.expected: Objects are gotten successfully and should not be null.
      */
+    selectModelInstance.SetPaddingLeft(CalcDimension(20.00, DimensionUnit::CALC));
+    selectModelInstance.SetPaddingTop(CalcDimension(20.00, DimensionUnit::CALC));
+    selectModelInstance.SetPaddingRight(CalcDimension(20.00, DimensionUnit::CALC));
+    selectModelInstance.SetPaddingBottom(CalcDimension(20.00, DimensionUnit::CALC));
+    selectModelInstance.SetPaddings(std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     ASSERT_NE(select, nullptr);
     auto pattern = select->GetPattern<SelectPattern>();
     ASSERT_NE(pattern, nullptr);

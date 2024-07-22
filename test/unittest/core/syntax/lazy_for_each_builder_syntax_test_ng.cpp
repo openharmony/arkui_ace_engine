@@ -932,4 +932,55 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder06, TestSize.Level1)
     lazyForEachBuilder->OnDataBulkDeleted(2, 5);
     EXPECT_NE(lazyForEachBuilder->nodeList_.size(), 0);
 }
+
+/**
+ * @tc.name: LazyForEachBuilder07
+ * @tc.desc: LazyForEachBuilder::OnDataBulkDeleted
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder07, TestSize.Level1)
+{
+    LazyForEachModelNG lazyForEach;
+    const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    lazyForEach.Create(mockLazyForEachActuator);
+    auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+
+    /**
+     * @tc.steps: step1. operation.index >= totalCountForDataset_;
+     */
+    V2::Operation operation;
+    operation.index = 0;
+    int32_t initialIndex = 0;
+    std::map<int32_t, LazyForEachChild> cachedTemp;
+    std::map<int32_t, LazyForEachChild> expiringTemp;
+    lazyForEachBuilder->OperateChange(operation, initialIndex, cachedTemp, expiringTemp);
+    EXPECT_EQ(lazyForEachBuilder->operationList_.size(), 0);
+
+    /**
+     * @tc.steps: step2. !indexExist == operationList_.end();
+     */
+    lazyForEachBuilder->totalCountForDataset_ = 1;
+    OperationInfo operationinfo;
+    lazyForEachBuilder->operationList_[1] = operationinfo;
+    lazyForEachBuilder->OperateChange(operation, initialIndex, cachedTemp, expiringTemp);
+    EXPECT_EQ(lazyForEachBuilder->operationList_.size(), 1);
+
+    /**
+     * @tc.steps: step3. !operation.key.empty();
+     */
+    std::string str0 = "0";
+    expiringTemp[0] = LazyForEachChild(str0, nullptr);
+    cachedTemp[0] = LazyForEachChild(str0, nullptr);
+    operation.key = "0";
+    lazyForEachBuilder->OperateChange(operation, initialIndex, cachedTemp, expiringTemp);
+    EXPECT_EQ(lazyForEachBuilder->operationList_.size(), 2);
+
+    /**
+     * @tc.steps: step4. !indexExist == operationList_.end();
+     */
+    lazyForEachBuilder->operationList_[0] = operationinfo;
+    lazyForEachBuilder->OperateChange(operation, initialIndex, cachedTemp, expiringTemp);
+    EXPECT_EQ(lazyForEachBuilder->operationList_.size(), 2);
+}
 } // namespace OHOS::Ace::NG

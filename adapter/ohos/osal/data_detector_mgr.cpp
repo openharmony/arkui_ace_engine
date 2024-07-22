@@ -44,6 +44,13 @@ bool DataDetectorMgr::IsDataDetectorSupported()
     return false;
 }
 
+void DataDetectorMgr::GetAIEntityMenu(TextDataDetectResult& textDataDetectResult)
+{
+    if (engine_) {
+        engine_->GetAIEntityMenu(textDataDetectResult);
+    }
+}
+
 void DataDetectorMgr::DataDetect(const TextDataDetectInfo& info, const TextDetectResultFunc& resultFunc)
 {
     if (!IsDataDetectorSupported()) {

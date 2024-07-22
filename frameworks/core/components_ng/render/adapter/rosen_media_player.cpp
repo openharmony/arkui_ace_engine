@@ -346,6 +346,13 @@ void RosenMediaPlayer::RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionU
     mediaPlayer_->SetPlayerCallback(mediaPlayerCallback_);
 }
 
+void RosenMediaPlayer::RegisterMediaPlayerSeekDoneEvent(SeekDoneEvent&& seekDoneEvent)
+{
+    if (mediaPlayerCallback_) {
+        mediaPlayerCallback_->SetSeekDoneEvent(std::move(seekDoneEvent));
+    }
+}
+
 int32_t RosenMediaPlayer::GetDuration(int32_t& duration)
 {
     CHECK_NULL_RETURN(mediaPlayer_, -1);

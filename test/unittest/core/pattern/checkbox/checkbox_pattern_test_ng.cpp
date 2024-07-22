@@ -46,10 +46,6 @@ namespace {
 const std::string NAME = "checkbox";
 const std::string GROUP_NAME = "checkboxGroup";
 const std::string TAG = "CHECKBOX_TAG";
-const Color BOARD_COLOR = Color::BLUE;
-const Color CHECK_COLOR = Color::WHITE;
-const Color BORDER_COLOR = Color::GRAY;
-const Color SHADOW_COLOR = Color::BLUE;
 } // namespace
 
 class CheckBoxPatternTestNG : public testing::Test {
@@ -1113,9 +1109,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest036, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->isFirstCreated_ = true;
     pattern->StartExitAnimation();
-    pattern->checkboxModifier_ =
-        AceType::MakeRefPtr<CheckBoxModifier>(false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
-    CheckBoxPaintMethod checkBoxPaintMethod = CheckBoxPaintMethod(pattern->checkboxModifier_);
+    pattern->paintMethod_ = AceType::MakeRefPtr<CheckBoxPaintMethod>();
 
     /**
      * @tc.steps: step3. get paintWrapper
@@ -1133,9 +1127,9 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest036, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
-    EXPECT_EQ(pattern->checkboxModifier_, checkBoxPaintMethod.GetContentModifier(paintWrapper));
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->size_ = SizeF(200, 200); //200 is width of checkbox, 200 is height of checkbox
-    checkBoxPaintMethod.UpdateContentModifier(paintWrapper);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
     auto eventHub = frameNode->GetFocusHub();
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
@@ -1167,9 +1161,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest037, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->isFirstCreated_ = true;
     pattern->StartExitAnimation();
-    pattern->checkboxModifier_ =
-        AceType::MakeRefPtr<CheckBoxModifier>(false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
-    CheckBoxPaintMethod checkBoxPaintMethod = CheckBoxPaintMethod(pattern->checkboxModifier_);
+    pattern->paintMethod_ = AceType::MakeRefPtr<CheckBoxPaintMethod>();
 
     /**
      * @tc.steps: step3. get paintWrapper
@@ -1187,10 +1179,10 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest037, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
-    EXPECT_EQ(pattern->checkboxModifier_, checkBoxPaintMethod.GetContentModifier(paintWrapper));
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->offset_ = OffsetF(1, 1);
     pattern->size_ = SizeF(200, 200); //200 is width of checkbox, 200 is height of checkbox
-    checkBoxPaintMethod.UpdateContentModifier(paintWrapper);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
     auto eventHub = frameNode->GetFocusHub();
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
@@ -1222,9 +1214,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest038, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->isFirstCreated_ = true;
     pattern->StartExitAnimation();
-    pattern->checkboxModifier_ =
-        AceType::MakeRefPtr<CheckBoxModifier>(false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
-    CheckBoxPaintMethod checkBoxPaintMethod = CheckBoxPaintMethod(pattern->checkboxModifier_);
+    pattern->paintMethod_ = AceType::MakeRefPtr<CheckBoxPaintMethod>();
 
     /**
      * @tc.steps: step3. get paintWrapper
@@ -1242,11 +1232,11 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest038, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
-    EXPECT_EQ(pattern->checkboxModifier_, checkBoxPaintMethod.GetContentModifier(paintWrapper));
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     checkBoxTheme->focusPaintPadding_ = 10.0_px; //10.0_px is value of focusPaintPadding_
     pattern->offset_ = OffsetF(1, 1);
     pattern->size_ = SizeF(200, 200); //200 is width of checkbox, 200 is height of checkbox
-    checkBoxPaintMethod.UpdateContentModifier(paintWrapper);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
     auto eventHub = frameNode->GetFocusHub();
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
@@ -1278,9 +1268,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest039, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->isFirstCreated_ = true;
     pattern->StartExitAnimation();
-    pattern->checkboxModifier_ =
-        AceType::MakeRefPtr<CheckBoxModifier>(false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
-    CheckBoxPaintMethod checkBoxPaintMethod = CheckBoxPaintMethod(pattern->checkboxModifier_);
+    pattern->paintMethod_ = AceType::MakeRefPtr<CheckBoxPaintMethod>();
 
     /**
      * @tc.steps: step3. get paintWrapper
@@ -1298,11 +1286,11 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest039, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
-    EXPECT_EQ(pattern->checkboxModifier_, checkBoxPaintMethod.GetContentModifier(paintWrapper));
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     checkBoxTheme->focusPaintPadding_ = 10.0_px; //10.0_px is value of focusPaintPadding_
     pattern->offset_ = OffsetF(1, 1);
     pattern->size_ = SizeF(100, 150); //100 is width of checkbox, 150 is height of checkbox
-    checkBoxPaintMethod.UpdateContentModifier(paintWrapper);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
     auto eventHub = frameNode->GetFocusHub();
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
@@ -1334,9 +1322,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest040, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->isFirstCreated_ = true;
     pattern->StartExitAnimation();
-    pattern->checkboxModifier_ =
-        AceType::MakeRefPtr<CheckBoxModifier>(false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
-    CheckBoxPaintMethod checkBoxPaintMethod = CheckBoxPaintMethod(pattern->checkboxModifier_);
+    pattern->paintMethod_ = AceType::MakeRefPtr<CheckBoxPaintMethod>();
 
     /**
      * @tc.steps: step3. get paintWrapper
@@ -1354,11 +1340,11 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest040, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
-    EXPECT_EQ(pattern->checkboxModifier_, checkBoxPaintMethod.GetContentModifier(paintWrapper));
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     checkBoxTheme->focusPaintPadding_ = 10.0_px; //10.0_px is value of focusPaintPadding_
     pattern->offset_ = OffsetF(20, 30); //20 is x offset of checkbox, 30 is y offset of checkbox
     pattern->size_ = SizeF(100, 150); //100 is width of checkbox, 150 is height of checkbox
-    checkBoxPaintMethod.UpdateContentModifier(paintWrapper);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
     auto eventHub = frameNode->GetFocusHub();
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
@@ -1390,9 +1376,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest041, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->isFirstCreated_ = false;
     pattern->StartExitAnimation();
-    pattern->checkboxModifier_ =
-        AceType::MakeRefPtr<CheckBoxModifier>(false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
-    CheckBoxPaintMethod checkBoxPaintMethod = CheckBoxPaintMethod(pattern->checkboxModifier_);
+    pattern->paintMethod_ = AceType::MakeRefPtr<CheckBoxPaintMethod>();
 
     /**
      * @tc.steps: step3. get paintWrapper
@@ -1410,11 +1394,11 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest041, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
-    EXPECT_EQ(pattern->checkboxModifier_, checkBoxPaintMethod.GetContentModifier(paintWrapper));
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     checkBoxTheme->focusPaintPadding_ = 10.0_px; //10.0_px is value of focusPaintPadding_
     pattern->offset_ = OffsetF(20, 30); //20 is x offset of checkbox, 30 is y offset of checkbox
     pattern->size_ = SizeF(100, 150); //100 is width of checkbox, 150 is height of checkbox
-    checkBoxPaintMethod.UpdateContentModifier(paintWrapper);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
     auto eventHub = frameNode->GetFocusHub();
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
@@ -1446,9 +1430,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest042, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->isFirstCreated_ = false;
     pattern->StartExitAnimation();
-    pattern->checkboxModifier_ =
-        AceType::MakeRefPtr<CheckBoxModifier>(true, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
-    CheckBoxPaintMethod checkBoxPaintMethod = CheckBoxPaintMethod(pattern->checkboxModifier_);
+    pattern->paintMethod_ = AceType::MakeRefPtr<CheckBoxPaintMethod>();
 
     /**
      * @tc.steps: step3. get paintWrapper
@@ -1466,11 +1448,11 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest042, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
-    EXPECT_EQ(pattern->checkboxModifier_, checkBoxPaintMethod.GetContentModifier(paintWrapper));
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     checkBoxTheme->focusPaintPadding_ = 10.0_px; //10.0_px is value of focusPaintPadding_
     pattern->offset_ = OffsetF(20, 30); //20 is x offset of checkbox, 30 is y offset of checkbox
     pattern->size_ = SizeF(100, 150); //100 is width of checkbox, 150 is height of checkbox
-    checkBoxPaintMethod.UpdateContentModifier(paintWrapper);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
     auto eventHub = frameNode->GetFocusHub();
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
@@ -1502,9 +1484,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest043, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->isFirstCreated_ = false;
     pattern->StartExitAnimation();
-    pattern->checkboxModifier_ =
-        AceType::MakeRefPtr<CheckBoxModifier>(true, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
-    CheckBoxPaintMethod checkBoxPaintMethod = CheckBoxPaintMethod(pattern->checkboxModifier_);
+    pattern->paintMethod_ = AceType::MakeRefPtr<CheckBoxPaintMethod>();
 
     /**
      * @tc.steps: step3. get paintWrapper
@@ -1522,11 +1502,11 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest043, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
-    EXPECT_EQ(pattern->checkboxModifier_, checkBoxPaintMethod.GetContentModifier(paintWrapper));
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     checkBoxTheme->focusPaintPadding_ = 10.0_px; //10.0_px is value of focusPaintPadding_
     pattern->offset_ = OffsetF(1, 1);
     pattern->size_ = SizeF(200, 200); //200 is width of checkbox, 200 is height of checkbox
-    checkBoxPaintMethod.UpdateContentModifier(paintWrapper);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
     auto eventHub = frameNode->GetFocusHub();
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
@@ -1558,9 +1538,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest044, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->isFirstCreated_ = false;
     pattern->StartExitAnimation();
-    pattern->checkboxModifier_ =
-        AceType::MakeRefPtr<CheckBoxModifier>(true, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
-    CheckBoxPaintMethod checkBoxPaintMethod = CheckBoxPaintMethod(pattern->checkboxModifier_);
+    pattern->paintMethod_ = AceType::MakeRefPtr<CheckBoxPaintMethod>();
 
     /**
      * @tc.steps: step3. get paintWrapper
@@ -1578,9 +1556,9 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest044, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
-    EXPECT_EQ(pattern->checkboxModifier_, checkBoxPaintMethod.GetContentModifier(paintWrapper));
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->size_ = SizeF(200, 200); //200 is width of checkbox, 200 is height of checkbox
-    checkBoxPaintMethod.UpdateContentModifier(paintWrapper);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
     auto eventHub = frameNode->GetFocusHub();
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
@@ -1612,9 +1590,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest045, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->isFirstCreated_ = true;
     pattern->StartExitAnimation();
-    pattern->checkboxModifier_ =
-        AceType::MakeRefPtr<CheckBoxModifier>(false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
-    CheckBoxPaintMethod checkBoxPaintMethod = CheckBoxPaintMethod(pattern->checkboxModifier_);
+    pattern->paintMethod_ = AceType::MakeRefPtr<CheckBoxPaintMethod>();
 
     /**
      * @tc.steps: step3. get paintWrapper
@@ -1632,11 +1608,11 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest045, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
-    EXPECT_EQ(pattern->checkboxModifier_, checkBoxPaintMethod.GetContentModifier(paintWrapper));
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     checkBoxTheme->focusPaintPadding_ = 100.0_px; //10.0_px is value of focusPaintPadding_
     pattern->offset_ = OffsetF(-5, -5); //-5 is value of offset_
     pattern->size_ = SizeF(200, 200); //200 is width of checkbox, 200 is height of checkbox
-    checkBoxPaintMethod.UpdateContentModifier(paintWrapper);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
     auto eventHub = frameNode->GetFocusHub();
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;

@@ -209,8 +209,8 @@ void UpdateOldBarItems(const RefPtr<UINode>& oldBarContainer, const std::vector<
         // if m < n, we add (n - m) children created by info in new item list
         for (int32_t i = 0; i < newChildrenSize - prevChildrenSize; i++) {
             auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-            auto barItemNode = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, nodeId);
-            barItemNode->InitializePatternAndContext();
+            auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+                V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
             UpdateBarItemNodeWithItem(barItemNode, *newIter);
             oldBarContainer->AddChild(barItemNode);
             newIter++;
@@ -473,8 +473,8 @@ RefPtr<FrameNode> CreateToolbarItemInContainer(
     toolBarItemLayoutProperty->UpdatePadding(padding);
 
     int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, barItemNodeId);
-    barItemNode->InitializePatternAndContext();
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
     UpdateToolbarItemNodeWithConfiguration(barItemNode, toolBarItem, toolBarItemNode);
     auto barItemLayoutProperty = barItemNode->GetLayoutProperty();
     CHECK_NULL_RETURN(barItemLayoutProperty, nullptr);
@@ -1255,8 +1255,8 @@ void NavigationModelNG::SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems)
     rowProperty->UpdateMainAxisAlign(FlexAlign::SPACE_EVENLY);
     for (const auto& toolBarItem : toolBarItems) {
         int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto barItemNode = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, barItemNodeId);
-        barItemNode->InitializePatternAndContext();
+        auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
         UpdateBarItemNodeWithItem(barItemNode, toolBarItem);
         toolBarNode->AddChild(barItemNode);
     }
@@ -1331,8 +1331,8 @@ void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolB
 
     if (needMoreButton) {
         int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto barItemNode = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, barItemNodeId);
-        barItemNode->InitializePatternAndContext();
+        auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
         auto barItemLayoutProperty = barItemNode->GetLayoutProperty();
         CHECK_NULL_VOID(barItemLayoutProperty);
         barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);

@@ -14,8 +14,9 @@
  */
 
 #include "core/common/container.h"
-#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -140,5 +141,24 @@ void NavDestinationGroupNode::SetNavDestinationMode(NavDestinationMode mode)
     auto context = pattern->GetNavDestinationContext();
     CHECK_NULL_VOID(context);
     context->SetMode(mode);
+}
+
+void NavDestinationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    FrameNode::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    auto titleBarNode = DynamicCast<TitleBarNode>(titleBarNode_);
+    if (titleBarNode) {
+        std::string title = NavigationTitleUtil::GetTitleString(titleBarNode, GetPrevTitleIsCustomValue(false));
+        std::string subtitle = NavigationTitleUtil::GetSubtitleString(titleBarNode);
+        json->PutExtAttr("title", title.c_str(), filter);
+        json->PutExtAttr("subtitle", subtitle.c_str(), filter);
+    }
+    json->PutExtAttr("mode", mode_ == NavDestinationMode::DIALOG
+        ? "NavDestinationMode::DIALOG"
+        : "NavDestinationMode::STANDARD", filter);
 }
 } // namespace OHOS::Ace::NG

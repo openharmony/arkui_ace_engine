@@ -216,6 +216,11 @@ Color Color::ColorFromString(const std::string& str)
     return Color(value);
 }
 
+std::string Color::ToString() const
+{
+    return ColorToString();
+}
+
 Color Color::FromARGB(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue)
 {
     ColorParam colorValue {

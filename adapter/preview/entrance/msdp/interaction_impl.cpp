@@ -39,7 +39,7 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
     return -1;
 }
 
-int32_t InteractionImpl::UpdateDragStyle(OHOS::Ace::DragCursorStyleCore style)
+int32_t InteractionImpl::UpdateDragStyle(OHOS::Ace::DragCursorStyleCore style, const int32_t eventId)
 {
     return -1;
 }

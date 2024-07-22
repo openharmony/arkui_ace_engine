@@ -134,7 +134,7 @@ class SubscribableHandler {
       stateMgmtConsole.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id__()}'.`);
       this.owningProperties_.add(subscriber.id__());
     } else {
-      stateMgmtConsole.warn(`SubscribableHandler: addOwningProperty: undefined subscriber. - Internal error?`);
+      stateMgmtConsole.warn(`SubscribableHandler: addOwningProperty: undefined subscriber.`);
     }
   }
 
@@ -506,7 +506,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
    * @returns false if given object is not an ObservedObject 
    */
   public static addOwningProperty(obj: Object, subscriber: IPropertySubscriber): boolean {
-    if (!ObservedObject.IsObservedObject(obj) || subscriber === undefined) {
+    if (!ObservedObject.IsObservedObject(obj) || !subscriber) {
       return false;
     }
 
@@ -629,7 +629,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
     if (ObservedObject.IsObservedObject(obj)) {
       stateMgmtConsole.error('ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already');
     }
-    if (objectOwningProperty !== undefined) {
+    if (objectOwningProperty) {
       this[SubscribableHandler.SUBSCRIBE] = objectOwningProperty;
     }
   } // end of constructor

@@ -468,7 +468,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem007, TestSize.Level1)
     GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_HEIGHT))();
     CreateDone(frameNode_);
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
-    EXPECT_NE(listItemPattern, nullptr);
+    ASSERT_NE(listItemPattern, nullptr);
     const float maxDistance = START_NODE_LEN + DELETE_AREA_DISTANCE;
 
     /**
@@ -1135,18 +1135,18 @@ HWTEST_F(ListSwipeTestNg, SwiperItem020, TestSize.Level1)
     CreateDone(frameNode_);
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
     const float maxDistance = END_NODE_LEN + DELETE_AREA_DISTANCE;
+
     /**
      * @tc.steps: step1. Swipe end greater than maxDistance
      * @tc.expected: Can continue to move
      */
-    float moveDelta = -1;
     HandleDragStart(FIRSTITEM_INDEX);
     HandleDragUpdate(FIRSTITEM_INDEX, -maxDistance);
-    HandleDragUpdate(FIRSTITEM_INDEX, moveDelta);
     HandleDragEnd(FIRSTITEM_INDEX);
     EXPECT_EQ(curState, SwipeActionState::EXPANDED);
+
     OnFinishFunc onFinishCallBack;
-    listItemPattern->CloseSwipeAction(std::move(onFinishCallBack));
+    pattern_->positionController_->CloseAllSwipeActions(std::move(onFinishCallBack));
     EXPECT_EQ(curState, SwipeActionState::COLLAPSED);
 }
 
@@ -1240,6 +1240,58 @@ HWTEST_F(ListSwipeTestNg, SwiperItem023, TestSize.Level1)
     EXPECT_EQ(listItemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
     DragSwiperItem(FIRSTITEM_INDEX, -END_NODE_LEN);
     EXPECT_EQ(listItemPattern->GetSwiperIndex(), ListItemSwipeIndex::SWIPER_END);
+}
+
+/**
+ * @tc.name: SwiperItem024
+ * @tc.desc: Test SetDeleteArea after create list done
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListSwipeTestNg, SwiperItem024, TestSize.Level1)
+{
+    CreateList();
+    ListItemModelNG itemModel = CreateListItem();
+    itemModel.SetSwiperAction(nullptr, nullptr, nullptr, V2::SwipeEdgeEffect::None);
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_HEIGHT);
+    itemModel.SetDeleteArea(std::move(startFunc), nullptr, nullptr, nullptr, nullptr,
+        Dimension(DELETE_AREA_DISTANCE), true);
+    GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_HEIGHT))();
+    CreateDone(frameNode_);
+    const RefPtr<FrameNode> listItem = GetChildFrameNode(frameNode_, FIRSTITEM_INDEX);
+    const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
+    ASSERT_NE(listItemPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. Set start node
+     * @tc.expected: Start node changed
+     */
+    startFunc();
+    auto startElement = ViewStackProcessor::GetInstance()->Finish();
+    auto startNode = AceType::DynamicCast<FrameNode>(startElement);
+    const float startDeleteDistance = DELETE_AREA_DISTANCE - 1.f;
+    itemModel.SetDeleteArea(AceType::RawPtr(listItem), AceType::RawPtr(startNode), nullptr, nullptr, nullptr, nullptr,
+        Dimension(startDeleteDistance), true);
+    FlushLayoutTask(frameNode_);
+    auto itemLayoutProperty = listItemPattern->GetLayoutProperty<ListItemLayoutProperty>();
+    EXPECT_EQ(itemLayoutProperty->GetStartDeleteAreaDistance(), Dimension(startDeleteDistance));
+    const int32_t startNodeIndex = 0;
+    EXPECT_EQ(GetChildFrameNode(listItem, startNodeIndex), startNode);
+
+    /**
+     * @tc.steps: step2. Set end node
+     * @tc.expected: End node was be setted
+     */
+    auto endFunc = GetRowOrColBuilder(END_NODE_LEN, ITEM_HEIGHT);
+    endFunc();
+    auto endElement = ViewStackProcessor::GetInstance()->Finish();
+    auto endNode = AceType::DynamicCast<FrameNode>(endElement);
+    const float endDeleteDistance = END_NODE_LEN - 1.f;
+    itemModel.SetDeleteArea(AceType::RawPtr(listItem), AceType::RawPtr(endNode), nullptr, nullptr, nullptr, nullptr,
+        Dimension(endDeleteDistance), false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(itemLayoutProperty->GetEndDeleteAreaDistance(), Dimension(endDeleteDistance));
+    const int32_t endNodeIndex = 2;
+    EXPECT_EQ(GetChildFrameNode(listItem, endNodeIndex), endNode);
 }
 
 /**

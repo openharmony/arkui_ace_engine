@@ -153,6 +153,11 @@ public:
         isPageInTransition_ = pageTransition;
     }
 
+    bool GetPageInTransition() const
+    {
+        return isPageInTransition_;
+    }
+
     // Mark current page node invisible in render tree.
     void ProcessHideState();
     // Mark current page node visible in render tree.
@@ -238,6 +243,11 @@ protected:
         return true;
     }
 
+    bool AvoidCutout() const override
+    {
+        return true;
+    }
+
     void NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std::string& bundleName);
 
     RefPtr<PageInfo> pageInfo_;
@@ -259,6 +269,10 @@ protected:
     bool isPageInTransition_ = false;
     bool isRenderDone_ = false;
     bool isModalCovered_ = false;
+
+#if defined(ENABLE_SPLIT_MODE)
+    bool needFireObserver_ = true;
+#endif
 
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;

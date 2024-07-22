@@ -45,6 +45,8 @@ public:
     bool IsSrcSvgImage() override;
     void SetAutoResize(bool autoResize) override;
     void SetResizableSlice(const ImageResizableSlice& slice) override {};
+    void SetResizableLattice(const RefPtr<DrawingLattice>& lattice) override {};
+    void ResetResizableLattice() override {};
     void SetSyncMode(bool syncMode) override;
     void SetColorFilterMatrix(const std::vector<float>& matrix) override;
     void SetDrawingColorFilter(RefPtr<DrawingColorFilter>& colorFilter) override {};
@@ -61,6 +63,7 @@ public:
     void SetImageAnalyzerConfig(void* config) override {}
     void SetImageAIOptions(void* config) override {}
     void SetSmoothEdge(float value)  override {}
+    void ResetImage() override {}
     void SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode) override {}
     void SetEnhancedImageQuality(AIImageQuality imageQuality) override {}
     void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override {}

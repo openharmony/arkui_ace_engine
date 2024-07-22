@@ -183,6 +183,7 @@ void ClickRecognizer::OnAccepted()
 
 void ClickRecognizer::OnRejected()
 {
+    SendRejectMsg();
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
 }
@@ -466,6 +467,7 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     }
     auto info = std::make_shared<TapGestureEvent>();
     info->SetTimeStamp(time_);
+    info->SetDeviceId(deviceId_);
     info->SetFingerList(fingerList_);
     TouchEvent touchPoint = {};
     if (!touchPoints_.empty()) {

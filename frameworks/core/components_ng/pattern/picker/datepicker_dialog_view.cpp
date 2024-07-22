@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
@@ -37,7 +38,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const int32_t TITLE_ROWS_TWO = 2;
 const int32_t MARGIN_HALF = 2;
 const int32_t NEXT_BUTTON_INDEX = 2;
 const int32_t DIVIDER_ROWS_THREE = 3;
@@ -59,7 +59,6 @@ constexpr int32_t RATIO_SEVEN = 7;
 constexpr int32_t RATIO_FOUR = 4;
 constexpr int32_t RATIO_THREE = 3;
 constexpr int32_t RATIO_TWO = 2;
-constexpr uint8_t PIXEL_ROUND = 18;
 constexpr size_t ACCEPT_BUTTON_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_INDEX = 1;
 } // namespace
@@ -68,18 +67,22 @@ bool DatePickerDialogView::switchTimePickerFlag_ = false;
 bool DatePickerDialogView::switchDatePickerFlag_ = false;
 bool DatePickerDialogView::isShowTime_ = false;
 bool DatePickerDialogView::isUserSetFont_ = false;
+Dimension DatePickerDialogView::selectedTextStyleFont_ = 40.0_vp;
+Dimension DatePickerDialogView::normalTextStyleFont_ = 32.0_vp;
+Dimension DatePickerDialogView::disappearTextStyleFont_ = 28.0_vp;
 
 RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogProperties,
     const DatePickerSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
     std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     ACE_LAYOUT_SCOPED_TRACE("Create[DatePickerDialogView]");
+    GetUserSettingLimit();
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto pickerStack = CreateStackNode();
-    GetIsUserSetTextProperties(settingData.properties);
     auto dateNode = CreateAndMountDateNode(settingData, pickerStack);
     auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_RETURN(pickerPattern, nullptr);
     DateTimeSequence sequence;
     auto language = AceApplicationInfo::GetInstance().GetLanguage();
     OrderResult orderResult = sequence.GetDateOrder(language);
@@ -89,8 +92,8 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         auto dateOrder = orderResult.dateOrder;
         pickerPattern->SetDateOrder(dateOrder);
     }
-    CHECK_NULL_RETURN(pickerPattern, nullptr);
     pickerPattern->SetIsShowInDialog(true);
+    pickerPattern->SetTextProperties(settingData.properties);
     auto buttonTitleNode = CreateAndMountButtonTitleNode(dateNode, contentColumn);
     CHECK_NULL_RETURN(buttonTitleNode, nullptr);
 
@@ -136,9 +139,11 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     }
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
-
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(dialogPattern, nullptr);
+    dialogPattern->SetIsPickerDiaglog(true);
     // build dialog accept and cancel button
-    if (NeedadaptForAging() && (!GetIsUserSetTextProperties(settingData.properties))) {
+    if (NeedAdaptForAging()) {
         BuildDialogAcceptAndCancelButtonForAging(buttonInfos, settingData, timePickerNode, acceptNode, dateNode,
                                                  dialogNode, contentColumn, dialogEvent, dialogCancelEvent);
     } else {
@@ -155,7 +160,7 @@ void DatePickerDialogView::SetTimeNodeColumnWeight(
     auto timeLayoutProperty = timeNode->GetLayoutProperty();
     CHECK_NULL_VOID(timeLayoutProperty);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        if (!switchTimePickerFlag_ && NeedadaptForAging() && (!settingData.useMilitary)) {
+        if (!switchTimePickerFlag_ && NeedAdaptForAging() && (!settingData.useMilitary)) {
             timeLayoutProperty->UpdateLayoutWeight(RATIO_THREE);
             auto child = timeNode->GetFirstChild();
             CHECK_NULL_VOID(child);
@@ -164,7 +169,7 @@ void DatePickerDialogView::SetTimeNodeColumnWeight(
             auto timeColumnLayoutProperty = frameNodeChild->GetLayoutProperty();
             CHECK_NULL_VOID(timeColumnLayoutProperty);
             timeColumnLayoutProperty->UpdateLayoutWeight(RATIO_THREE);
-        } else if (switchTimePickerFlag_ && NeedadaptForAging() && (!settingData.useMilitary)) {
+        } else if (switchTimePickerFlag_ && NeedAdaptForAging() && (!settingData.useMilitary)) {
             timeLayoutProperty->UpdateLayoutWeight(RATIO_FOUR);
             for (const auto& child : timeNode->GetChildren()) {
                 auto frameNodeChild = AceType::DynamicCast<NG::FrameNode>(child);
@@ -174,7 +179,7 @@ void DatePickerDialogView::SetTimeNodeColumnWeight(
                 timeColumnLayoutProperty->UpdateLayoutWeight(RATIO_TWO);
             }
         }
-        if (!NeedadaptForAging() || (settingData.useMilitary && NeedadaptForAging())) {
+        if (!NeedAdaptForAging() || (settingData.useMilitary && NeedAdaptForAging())) {
             timeLayoutProperty->UpdateLayoutWeight(settingData.useMilitary ? RATIO_FOUR : RATIO_SEVEN);
             for (const auto& child : timeNode->GetChildren()) {
                 auto frameNodeChild = AceType::DynamicCast<NG::FrameNode>(child);
@@ -214,7 +219,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateLunarSwitchTextNode()
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("datepicker.lunarSwitch"));
-    textLayoutProperty->UpdateFontSize(pickerTheme->GetLunarSwitchTextSize());
+    textLayoutProperty->UpdateFontSize(ConvertFontScaleValue(pickerTheme->GetLunarSwitchTextSize()));
     textLayoutProperty->UpdateTextColor(pickerTheme->GetLunarSwitchTextColor());
     textNode->MarkModifyDone();
     return textNode;
@@ -267,16 +272,11 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent("");
     textLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-
     textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
-    textLayoutProperty->UpdateFontSize(pickerTheme->GetTitleStyle().GetFontSize());
+    textLayoutProperty->UpdateFontSize(ConvertTitleFontScaleValue(pickerTheme->GetTitleStyle().GetFontSize()));
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetTitleStyle().GetFontWeight());
     textLayoutProperty->UpdateTextOverflow(pickerTheme->GetTitleStyle().GetTextOverflow());
-    if (!NeedadaptForAging()) {
-        textLayoutProperty->UpdateMaxLines(pickerTheme->GetTitleStyle().GetMaxLines());
-    } else {
-        textLayoutProperty->UpdateMaxLines(TITLE_ROWS_TWO);
-    }
+    textLayoutProperty->UpdateMaxLines(pickerTheme->GetTitleStyle().GetMaxLines());
     auto buttonTitleRenderContext = buttonTitleNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonTitleRenderContext, nullptr);
     buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
@@ -288,10 +288,8 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
         margin.bottom = CalcLength(dialogTheme->GetDividerHeight() / MARGIN_HALF);
         buttonTitleNode->GetLayoutProperty()->UpdateMargin(margin);
     } else {
-        if (!NeedadaptForAging()) {
-            buttonTitleNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(
-                CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_BUTTON_HEIGHT)));
-        }
+        buttonTitleNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(
+            CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_BUTTON_HEIGHT)));
     }
     textTitleNode->MountToParent(titleButtonRow);
     titleButtonRow->MountToParent(buttonTitleNode);
@@ -344,8 +342,8 @@ void DatePickerDialogView::CreateTitleIconNode(const RefPtr<FrameNode>& titleNod
     auto spinnerLayoutProperty = spinnerNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(spinnerLayoutProperty);
     spinnerLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    CalcSize idealSize = { CalcLength(pickerTheme->GetTitleStyle().GetFontSize()),
-        CalcLength(pickerTheme->GetTitleStyle().GetFontSize()) };
+    CalcSize idealSize = { CalcLength(ConvertTitleFontScaleValue(pickerTheme->GetTitleStyle().GetFontSize())),
+        CalcLength(ConvertTitleFontScaleValue(pickerTheme->GetTitleStyle().GetFontSize())) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     spinnerLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
@@ -547,7 +545,7 @@ void DatePickerDialogView::HideContentChildrenButton(const RefPtr<FrameNode>& co
 
 void DatePickerDialogView::SwitchContentRowButton(const RefPtr<FrameNode>& contentRow, bool useMilitary)
 {
-    if (!NeedadaptForAging()) {
+    if (!NeedAdaptForAging()) {
         return;
     }
     HideContentChildrenButton(contentRow);
@@ -767,8 +765,25 @@ void DatePickerDialogView::UpdateConfirmButtonTextLayoutProperty(
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
     textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
-    textLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
+    if (!NeedAdaptForAging()) {
+        textLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
+    }
+    textLayoutProperty->UpdateFontSize(
+        ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+}
+
+void DatePickerDialogView::UpdateCancelButtonTextLayoutProperty(
+    const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme)
+{
+    CHECK_NULL_VOID(textCancelLayoutProperty);
+    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    if (!NeedAdaptForAging()) {
+        textCancelLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
+    }
+    textCancelLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
+    textCancelLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
 }
 
 void DatePickerDialogView::UpdateButtonLayoutProperty(
@@ -867,7 +882,7 @@ void DatePickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& but
     }
     UpdateButtonStyleAndRole(buttonInfos, index, buttonLayoutProperty, buttonRenderContext, buttonTheme);
     if (buttonInfos[index].fontSize.has_value()) {
-        buttonLayoutProperty->UpdateFontSize(buttonInfos[index].fontSize.value());
+        buttonLayoutProperty->UpdateFontSize(ConvertFontScaleValue(buttonInfos[index].fontSize.value()));
     }
     if (buttonInfos[index].fontColor.has_value()) {
         buttonLayoutProperty->UpdateFontColor(buttonInfos[index].fontColor.value());
@@ -1049,9 +1064,17 @@ void DatePickerDialogView::CreateSingleDateNode(const RefPtr<FrameNode>& dateNod
         blendYearNode->MountToParent(stackYearNode);
         auto layoutProperty = stackYearNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
-        layoutProperty->UpdateVisibility(VisibleType::GONE);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto blendYearNodeLayoutProperty = blendYearNode->GetLayoutProperty<LayoutProperty>();
+            CHECK_NULL_VOID(blendYearNodeLayoutProperty);
+            blendYearNodeLayoutProperty->UpdateVisibility(VisibleType::GONE);
+            auto buttonYearNodeLayoutProperty = buttonYearNode->GetLayoutProperty<LayoutProperty>();
+            CHECK_NULL_VOID(buttonYearNodeLayoutProperty);
+            buttonYearNodeLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        } else {
+            layoutProperty->UpdateVisibility(VisibleType::GONE);
+        }
         stackYearNode->MountToParent(dateNode);
-        yearColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
 }
 
@@ -1113,7 +1136,6 @@ void DatePickerDialogView::MountColumnNodeToPicker(
     layoutProperty->UpdateAlignment(Alignment::CENTER);
     layoutProperty->UpdateLayoutWeight(columnWeight);
     stackNode->MountToParent(pickerNode);
-    columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
 }
 
 RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent& cancelEvent,
@@ -1132,10 +1154,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     CHECK_NULL_RETURN(textCancelNode, nullptr);
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textCancelLayoutProperty, nullptr);
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
-    textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
-    textCancelLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
-    textCancelLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+    UpdateCancelButtonTextLayoutProperty(textCancelLayoutProperty, pickerTheme);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     datePickerPattern->SetCancelNode(buttonCancelNode);
     textCancelNode->MountToParent(buttonCancelNode);
@@ -1310,9 +1329,10 @@ void DatePickerDialogView::SetDateTextProperties(
     CHECK_NULL_VOID(pickerProperty);
 
     if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
-        pickerProperty->UpdateDisappearFontSize(properties.disappearTextStyle_.fontSize.value());
+        pickerProperty->UpdateDisappearFontSize(
+            ConvertFontScaleValue(properties.disappearTextStyle_.fontSize.value(), disappearTextStyleFont_, true));
     } else {
-        pickerProperty->UpdateDisappearFontSize(disappearStyle.GetFontSize());
+        pickerProperty->UpdateDisappearFontSize(ConvertFontScaleValue(disappearStyle.GetFontSize()));
     }
     pickerProperty->UpdateDisappearColor(
         properties.disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
@@ -1324,9 +1344,10 @@ void DatePickerDialogView::SetDateTextProperties(
         properties.disappearTextStyle_.fontStyle.value_or(disappearStyle.GetFontStyle()));
 
     if (properties.normalTextStyle_.fontSize.has_value() && properties.normalTextStyle_.fontSize->IsValid()) {
-        pickerProperty->UpdateFontSize(properties.normalTextStyle_.fontSize.value());
+        pickerProperty->UpdateFontSize(
+            ConvertFontScaleValue(properties.normalTextStyle_.fontSize.value(), normalTextStyleFont_, true));
     } else {
-        pickerProperty->UpdateFontSize(normalStyle.GetFontSize());
+        pickerProperty->UpdateFontSize(ConvertFontScaleValue(normalStyle.GetFontSize()));
     }
     pickerProperty->UpdateColor(properties.normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
     pickerProperty->UpdateWeight(properties.normalTextStyle_.fontWeight.value_or(normalStyle.GetFontWeight()));
@@ -1334,9 +1355,10 @@ void DatePickerDialogView::SetDateTextProperties(
     pickerProperty->UpdateFontStyle(properties.normalTextStyle_.fontStyle.value_or(normalStyle.GetFontStyle()));
 
     if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
-        pickerProperty->UpdateSelectedFontSize(properties.selectedTextStyle_.fontSize.value());
+        pickerProperty->UpdateSelectedFontSize(
+            ConvertFontScaleValue(properties.selectedTextStyle_.fontSize.value(), selectedTextStyleFont_, true));
     } else {
-        pickerProperty->UpdateSelectedFontSize(selectedStyle.GetFontSize());
+        pickerProperty->UpdateSelectedFontSize(ConvertFontScaleValue(selectedStyle.GetFontSize()));
     }
     pickerProperty->UpdateSelectedColor(properties.selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
     pickerProperty->UpdateSelectedWeight(
@@ -1361,9 +1383,10 @@ void DatePickerDialogView::SetTimeTextProperties(
     CHECK_NULL_VOID(pickerProperty);
 
     if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
-        pickerProperty->UpdateDisappearFontSize(properties.disappearTextStyle_.fontSize.value());
+        pickerProperty->UpdateDisappearFontSize(
+            ConvertFontScaleValue(properties.disappearTextStyle_.fontSize.value(), disappearTextStyleFont_, true));
     } else {
-        pickerProperty->UpdateDisappearFontSize(disappearStyle.GetFontSize());
+        pickerProperty->UpdateDisappearFontSize(ConvertFontScaleValue(disappearStyle.GetFontSize()));
     }
     pickerProperty->UpdateDisappearColor(
         properties.disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
@@ -1371,17 +1394,19 @@ void DatePickerDialogView::SetTimeTextProperties(
         properties.disappearTextStyle_.fontWeight.value_or(disappearStyle.GetFontWeight()));
 
     if (properties.normalTextStyle_.fontSize.has_value() && properties.normalTextStyle_.fontSize->IsValid()) {
-        pickerProperty->UpdateFontSize(properties.normalTextStyle_.fontSize.value());
+        pickerProperty->UpdateFontSize(
+            ConvertFontScaleValue(properties.normalTextStyle_.fontSize.value(), normalTextStyleFont_, true));
     } else {
-        pickerProperty->UpdateFontSize(normalStyle.GetFontSize());
+        pickerProperty->UpdateFontSize(ConvertFontScaleValue(normalStyle.GetFontSize()));
     }
     pickerProperty->UpdateColor(properties.normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
     pickerProperty->UpdateWeight(properties.normalTextStyle_.fontWeight.value_or(normalStyle.GetFontWeight()));
 
     if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
-        pickerProperty->UpdateSelectedFontSize(properties.selectedTextStyle_.fontSize.value());
+        pickerProperty->UpdateSelectedFontSize(
+            ConvertFontScaleValue(properties.selectedTextStyle_.fontSize.value(), selectedTextStyleFont_, true));
     } else {
-        pickerProperty->UpdateSelectedFontSize(selectedStyle.GetFontSize());
+        pickerProperty->UpdateSelectedFontSize(ConvertFontScaleValue(selectedStyle.GetFontSize()));
     }
     pickerProperty->UpdateSelectedColor(properties.selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
     pickerProperty->UpdateSelectedWeight(
@@ -1466,10 +1491,8 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountButtonTitleNode(
         margin.top = CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
         margin.bottom = CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
         layoutProps->UpdateMargin(margin);
-        if (!NeedadaptForAging()) {
-            layoutProps->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_HEIGHT)));
-        }
+        layoutProps->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_HEIGHT)));
     }
 
     buttonTitleNode->MountToParent(contentColumn);
@@ -1574,7 +1597,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountTimeNode(const DatePickerS
     timeNode->MarkModifyDone();
     SetTimeNodeColumnWeight(timeNode, settingData);
     timeNode->MountToParent(pickerRow);
-    if (NeedadaptForAging() && (!settingData.useMilitary)) {
+    if (NeedAdaptForAging() && (!settingData.useMilitary)) {
         auto hourNode = AceType::DynamicCast<FrameNode>(timeNode->GetChildAtIndex(1));
         CHECK_NULL_RETURN(hourNode, nullptr);
         auto hourLayoutProperty = hourNode->GetLayoutProperty<LayoutProperty>();
@@ -1642,7 +1665,7 @@ void DatePickerDialogView::SwitchPickerPage(const RefPtr<FrameNode>& pickerStack
     animationController->SetDatePickerButtonHide(false);
     auto contentRow = AceType::DynamicCast<FrameNode>(contentColumn->GetLastChild());
     if (switchFlag_) {
-        if (NeedadaptForAging() && (!useMilitary)) {
+        if (NeedAdaptForAging() && (!useMilitary)) {
             switchTimePickerFlag_ = true;
             SwitchTimePickerPage(monthDaysNode, timeNode, contentRow);
         }
@@ -1654,7 +1677,7 @@ void DatePickerDialogView::SwitchPickerPage(const RefPtr<FrameNode>& pickerStack
         monthDaysPickerPattern->SetFocusDisable();
         timePickerPattern->SetFocusDisable();
         datePickerPattern->SetFocusEnable();
-        if (NeedadaptForAging()) {
+        if (NeedAdaptForAging()) {
             SwitchDatePickerPage(dateNode, true);
             animationController->SetDatePickerButtonHide(true);
         }
@@ -1724,12 +1747,9 @@ void DatePickerDialogView::BuildDialogAcceptAndCancelButton(const std::vector<Bu
     SetDialogDateChange(dateNode, std::move(dateChangeEvent));
     auto contentRow = CreateButtonNode(acceptNode, dateNode, buttonInfos, dialogEvent, std::move(dialogCancelEvent));
     CHECK_NULL_VOID(contentRow);
-    auto event = [weak = WeakPtr<FrameNode>(dialogNode)](const GestureEvent& /* info */) {
-        auto dialogNode = weak.Upgrade();
-        CHECK_NULL_VOID(dialogNode);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        auto overlayManager = pipeline->GetOverlayManager();
-        overlayManager->CloseDialog(dialogNode);
+    auto closeDiaglogEvent = CloseDiaglogEvent(dateNode, dialogNode);
+    auto event = [func = std::move(closeDiaglogEvent)](const GestureEvent& /* info */) {
+        func();
     };
     for (const auto& child : contentRow->GetChildren()) {
         auto firstChild = AceType::DynamicCast<FrameNode>(child);
@@ -1739,6 +1759,31 @@ void DatePickerDialogView::BuildDialogAcceptAndCancelButton(const std::vector<Bu
     }
     contentRow->AddChild(CreateDividerNode(dateNode), 1);
     contentRow->MountToParent(contentColumn);
+}
+
+std::function<void()> DatePickerDialogView::CloseDiaglogEvent(const RefPtr<FrameNode>& dateNode,
+    const RefPtr<FrameNode>& dialogNode)
+{
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    auto event = [weak = WeakPtr<FrameNode>(dialogNode),
+        weakDatePickerPattern = WeakPtr<DatePickerPattern>(datePickerPattern)]() {
+        auto dialogNode = weak.Upgrade();
+        CHECK_NULL_VOID(dialogNode);
+        auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+        CHECK_NULL_VOID(dialogPattern);
+        dialogPattern->SetIsPickerDiaglog(false);
+        auto datePickerPattern = weakDatePickerPattern.Upgrade();
+        CHECK_NULL_VOID(datePickerPattern);
+
+        if (datePickerPattern->GetIsShowInDialog()) {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            auto overlayManager = pipeline->GetOverlayManager();
+            overlayManager->CloseDialog(dialogNode);
+            datePickerPattern->SetIsShowInDialog(false);
+        }
+    };
+    datePickerPattern->updateFontConfigurationEvent(event);
+    return event;
 }
 
 void DatePickerDialogView::BuildDialogAcceptAndCancelButtonForAging(const std::vector<ButtonInfo>& buttonInfos,
@@ -1838,7 +1883,8 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
     textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
-    textLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
+    textLayoutProperty->UpdateFontSize(
+        ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
     textNextPrevNode->MountToParent(nextPrevButtonNode);
     auto nextPrevEventHub = nextPrevButtonNode->GetEventHub<ButtonEventHub>();
@@ -1942,16 +1988,134 @@ bool DatePickerDialogView::GetIsUserSetTextProperties(const PickerTextProperties
     isUserSetFont_ = false;
     return false;
 }
-bool DatePickerDialogView::NeedadaptForAging()
+
+bool DatePickerDialogView::NeedAdaptForAging()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    if (isUserSetFont_) {
-        return false;
-    }
-    if (GreatOrEqual(pipeline->GetFontScale(), 1.75f)) {
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, false);
+    if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale()) &&
+        Dimension(pipeline->GetRootHeight()).ConvertToVp() > pickerTheme->GetDeviceHeightLimit()) {
         return true;
     }
     return false;
 }
+
+const Dimension DatePickerDialogView::AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, fontSizeValue);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, fontSizeValue);
+
+    auto adjustedScale = std::clamp(fontScale, pickerTheme->GetNormalFontScale(),
+        pickerTheme->GetMaxTwoFontScale());
+    return fontSizeValue * adjustedScale;
+}
+
+const Dimension DatePickerDialogView::ConvertFontScaleValue(
+    const Dimension& fontSizeValue, const Dimension& fontSizeLimit, bool isUserSetFont)
+{
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, fontSizeValue);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, fontSizeValue);
+    float fontSizeScale = pipeline->GetFontScale();
+    Dimension fontSizeValueResult = fontSizeValue;
+
+    if (NeedAdaptForAging()) {
+        if (fontSizeValue.Unit() == DimensionUnit::VP) {
+            if (isUserSetFont) {
+                fontSizeValueResult = ConvertFontSizeLimit(fontSizeValue, fontSizeLimit, isUserSetFont);
+            }
+            fontSizeValueResult = AdjustFontSizeScale(fontSizeValueResult, fontSizeScale);
+        } else {
+            if (GreatOrEqualCustomPrecision(fontSizeScale, pickerTheme->GetMaxThirdFontScale())) {
+                fontSizeScale = pickerTheme->GetMaxTwoFontScale() / pickerTheme->GetMaxThirdFontScale();
+                fontSizeValueResult = fontSizeValue * fontSizeScale;
+            }
+            if (isUserSetFont) {
+                fontSizeValueResult = ConvertFontSizeLimit(fontSizeValueResult, fontSizeLimit, isUserSetFont);
+            }
+        }
+    } else {
+        if (isUserSetFont) {
+            fontSizeValueResult = ConvertFontSizeLimit(fontSizeValue, fontSizeLimit, isUserSetFont);
+        }
+
+        if (GreatOrEqualCustomPrecision(fontSizeScale, pickerTheme->GetMaxOneFontScale()) &&
+            fontSizeValueResult.Unit() != DimensionUnit::VP) {
+            if (!NearZero(fontSizeScale)) {
+                fontSizeValueResult = fontSizeValueResult / fontSizeScale;
+            }
+        }
+    }
+    return fontSizeValueResult;
+}
+
+const Dimension DatePickerDialogView::ConvertFontSizeLimit(
+    const Dimension& fontSizeValue, const Dimension& fontSizeLimit, bool isUserSetFont)
+{
+    if (isUserSetFont == false) {
+        return fontSizeValue;
+    }
+    Dimension fontSizeValueResult = fontSizeValue;
+    if (fontSizeValue.Unit() == DimensionUnit::VP) {
+        if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx(), fontSizeLimit.ConvertToPx() / MARGIN_HALF)) {
+            fontSizeValueResult = fontSizeLimit / MARGIN_HALF;
+        } else {
+            fontSizeValueResult = fontSizeValue;
+        }
+    } else {
+        if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx(), fontSizeLimit.ConvertToPx())) {
+            fontSizeValueResult = fontSizeLimit;
+        } else {
+            fontSizeValueResult = fontSizeValue;
+        }
+    }
+
+    return fontSizeValueResult;
+}
+
+const Dimension DatePickerDialogView::ConvertTitleFontScaleValue(const Dimension& fontSizeValue)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, fontSizeValue);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, fontSizeValue);
+
+    double fontScale = pipeline->GetFontScale();
+    auto adjustedScale =
+        std::clamp(fontScale, pickerTheme->GetNormalFontScale(), pickerTheme->GetTitleFontScaleLimit());
+
+    if (NeedAdaptForAging()) {
+        if (fontSizeValue.Unit() == DimensionUnit::VP) {
+            return (fontSizeValue * adjustedScale);
+        } else {
+            if (GreatOrEqualCustomPrecision(pipeline->GetFontScale(), pickerTheme->GetTitleFontScaleLimit())) {
+                auto fontSizeScale = pickerTheme->GetTitleFontScaleLimit() / pipeline->GetFontScale();
+                return (fontSizeValue * fontSizeScale);
+            }
+        }
+    } else {
+        if (GreatOrEqualCustomPrecision(fontScale, pickerTheme->GetMaxOneFontScale()) &&
+            fontSizeValue.Unit() != DimensionUnit::VP) {
+            return (fontSizeValue / pipeline->GetFontScale());
+        }
+    }
+    return fontSizeValue;
+}
+
+void DatePickerDialogView::GetUserSettingLimit()
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    selectedTextStyleFont_ = pickerTheme->GetUseSetSelectedTextStyle();
+    normalTextStyleFont_ = pickerTheme->GetUserSetNormalTextStyle();
+    disappearTextStyleFont_ = pickerTheme->GetUserSetDisappearTextStyle();
+}
+
 } // namespace OHOS::Ace::NG

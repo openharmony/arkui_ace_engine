@@ -33,7 +33,7 @@ class ItemsOnScreenProvider implements IItemsOnScreenProvider {
 
   private callbacks: VisibleRangeChangedCallback[] = [];
 
-  register(callback: VisibleRangeChangedCallback) {
+  register(callback: VisibleRangeChangedCallback): void {
     this.callbacks.push(callback);
   }
 
@@ -49,17 +49,17 @@ class ItemsOnScreenProvider implements IItemsOnScreenProvider {
     return this._direction;
   }
 
-  update(minVisible: number, maxVisible: number) {
-    if (minVisible == this.minVisible && maxVisible == this.maxVisible) {
+  update(minVisible: number, maxVisible: number): void {
+    if (minVisible === this.minVisible && maxVisible === this.maxVisible) {
       // Direction not changed
     } else if (
-      Math.max(minVisible, this.minVisible) == minVisible &&
-      Math.max(maxVisible, this.maxVisible) == maxVisible
+      Math.max(minVisible, this.minVisible) === minVisible &&
+      Math.max(maxVisible, this.maxVisible) === maxVisible
     ) {
       this._direction = 'DOWN';
     } else if (
-      Math.min(minVisible, this.minVisible) == minVisible &&
-      Math.min(maxVisible, this.maxVisible) == maxVisible
+      Math.min(minVisible, this.minVisible) === minVisible &&
+      Math.min(maxVisible, this.maxVisible) === maxVisible
     ) {
       this._direction = 'UP';
     }
@@ -84,7 +84,7 @@ class ItemsOnScreenProvider implements IItemsOnScreenProvider {
     }
   }
 
-  private notifyObservers() {
+  private notifyObservers(): void {
     this.callbacks.forEach((callback) => callback());
   }
 }

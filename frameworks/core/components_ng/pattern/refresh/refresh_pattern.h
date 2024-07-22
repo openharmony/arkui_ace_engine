@@ -105,6 +105,7 @@ public:
     }
 
 private:
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(bool isDrag = true, float mainSpeed = 0.0f);
     ScrollResult HandleDragUpdate(float delta, float mainSpeed = 0.0f);
@@ -156,6 +157,7 @@ private:
     bool isRefreshing_ = false;
     bool isKeyEventRegisted_ = false;
     bool hasLoadingText_ = false;
+    bool isRemoveCustomBuilder_ = false;
     RefPtr<FrameNode> progressChild_;
     RefPtr<FrameNode> loadingTextNode_;
     RefPtr<FrameNode> columnNode_;

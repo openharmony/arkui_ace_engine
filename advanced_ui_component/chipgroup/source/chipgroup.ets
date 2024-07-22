@@ -14,7 +14,6 @@
  */
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import { Chip, ChipSize, ChipSymbolGlyphOptions } from '@ohos.arkui.advanced.Chip';
-import DeviceType from '@ohos.resourceManager';
 
 interface ChipGroupTheme {
   itemStyle: ChipGroupStyleTheme;
@@ -452,20 +451,6 @@ export struct ChipGroup {
     }
   }
 
-  private getIconGroupSuffixHeight() {
-    if (typeof this.chipSize === 'string') {
-      if (this.chipSize === ChipSize.SMALL) {
-        return iconGroupSuffixTheme.smallBackgroundSize;
-      } else {
-        return iconGroupSuffixTheme.normalBackgroundSize;
-      }
-    } else if (typeof this.chipSize === 'object') {
-      return this.chipSize.height as number
-    } else {
-      return ChipGroupHeight.NORMAL
-    }
-  }
-
   private getPaddingTop() {
     if (!this.chipGroupPadding || !this.chipGroupPadding.top) {
       return defaultTheme.chipGroupPadding.top
@@ -555,6 +540,7 @@ export struct ChipGroup {
         .scrollBar(BarState.Off)
         .align(Alignment.Start)
         .width('100%')
+        .clip(false)
         .onScroll(() => {
           this.isReachEnd = this.scroller.isAtEnd();
         })
@@ -562,12 +548,13 @@ export struct ChipGroup {
         if (this.suffix && !this.isReachEnd) {
           Stack()
             .width(iconGroupSuffixTheme.normalBackgroundSize)
-            .height(this.getIconGroupSuffixHeight())
+            .height(this.getChipGroupHeight() + (this.getPaddingTop() as number) + (this.getPaddingBottom() as number))
             .linearGradient({ angle: 90, colors: colorStops })
             .blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN)
             .hitTestBehavior(HitTestMode.None)
         }
       }
+      .height(this.getChipGroupHeight() + (this.getPaddingTop() as number) + (this.getPaddingBottom() as number))
       .layoutWeight(1)
       .blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
       .alignContent(Alignment.End)

@@ -96,11 +96,11 @@ export class Index extends ViewPU {
     this.__iconOpacity.set(newValue);
   }
   onWindowFocused() {
-    this.textColor = $r("sys.color.ohos_id_color_primary");
+    this.textColor = { "id": 125829186, "type": 10001, params: [], "bundleName": "", "moduleName": "" };
     this.iconOpacity = 1;
   }
   onWindowUnfocused() {
-    this.textColor = $r("sys.color.ohos_id_color_primary");
+    this.textColor = { "id": 125829186, "type": 10001, params: [], "bundleName": "", "moduleName": "" };
     this.iconOpacity = 0.4;
   }
   setAppTitle(content) {

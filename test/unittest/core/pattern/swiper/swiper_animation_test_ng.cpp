@@ -166,29 +166,6 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation006, TestSize.Level1
 }
 
 /**
- * @tc.name: SwiperPatternFinishAnimation001
- * @tc.desc: FinishAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternFinishAnimation001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-
-    /**
-     * @tc.steps: step2. call FinishAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->FinishAnimation();
-            pattern_->usePropertyAnimation_ = true;
-            pattern_->isUserFinish_ = true;
-        }
-        pattern_->swiperController_->SetFinishCallback([]() {});
-    }
-}
-
-/**
  * @tc.name: SwiperPatternPlayFadeAnimation001
  * @tc.desc: PlayFadeAnimation
  * @tc.type: FUNC
@@ -938,7 +915,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPattern0010, TestSize.Level1)
     CreateWithItem([](SwiperModelNG model) {});
     bool isCustomSize = true;
     pattern_->SetIsIndicatorCustomSize(isCustomSize);
-    EXPECT_TRUE(pattern_->IsCustomSize_);
+    EXPECT_TRUE(pattern_->isCustomSize_);
 }
 
 /**

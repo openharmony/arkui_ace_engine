@@ -169,6 +169,7 @@ void ListItemGroupLayoutAlgorithm::SyncGeometry(RefPtr<LayoutWrapper>& wrapper)
     auto host = wrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     host->ForceSyncGeometryNode();
+    host->ResetLayoutAlgorithm();
 }
 
 bool ListItemGroupLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const
@@ -216,7 +217,7 @@ void ListItemGroupLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrap
         int32_t index = totalItemCount_ + itemStartIndex_;
         layoutWrapper->SetActiveChildRange(index, index, cacheCount * lanes_, 0);
     } else {
-        layoutWrapper->SetActiveChildRange(-1, -1, 0, cacheCount * lanes_);
+        layoutWrapper->SetActiveChildRange(-1, itemStartIndex_ - 1, 0, cacheCount * lanes_);
     }
 }
 
@@ -1124,6 +1125,25 @@ void ListItemGroupLayoutAlgorithm::SetListItemIndex(const LayoutWrapper* groupLa
     auto listItemGroup = host->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(listItemGroup);
     listItem->SetIndexInList(listItemGroup->GetIndexInList());
+}
+
+ListItemGroupLayoutInfo ListItemGroupLayoutAlgorithm::GetLayoutInfo() const
+{
+    ListItemGroupLayoutInfo info;
+    if (totalItemCount_ == 0) {
+        info.atStart = true;
+        info.atEnd = true;
+        return info;
+    }
+    if (layoutedItemInfo_.has_value()) {
+        const auto& itemInfo = layoutedItemInfo_.value();
+        info.atStart = itemInfo.startIndex == 0;
+        info.atEnd = itemInfo.endIndex == totalItemCount_ - 1;
+        auto totalHeight = (layoutedItemInfo_.value().endPos - layoutedItemInfo_.value().startPos + spaceWidth_);
+        auto itemCount = layoutedItemInfo_.value().endIndex - layoutedItemInfo_.value().startIndex + 1;
+        info.averageHeight = totalHeight / itemCount;
+    }
+    return info;
 }
 
 bool ListItemGroupLayoutAlgorithm::IsCardStyleForListItemGroup(const LayoutWrapper* groupLayoutWrapper)

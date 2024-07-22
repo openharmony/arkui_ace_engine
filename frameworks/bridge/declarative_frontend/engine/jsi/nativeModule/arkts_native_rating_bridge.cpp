@@ -40,10 +40,10 @@ panda::Local<panda::JSValueRef> JsRatingChangeCallback(panda::JsiRuntimeCallInfo
     double value = firstArg->ToNumber(vm)->Value();
     auto ref = runtimeCallInfo->GetThisRef();
     auto obj = ref->ToObject(vm);
-    if (obj->GetNativePointerFieldCount() < 1) {
+    if (obj->GetNativePointerFieldCount(vm) < 1) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(0));
+    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(vm, 0));
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     RatingModelNG::SetChangeValue(frameNode, value);
     return panda::JSValueRef::Undefined(vm);
@@ -115,17 +115,17 @@ ArkUINativeModuleValue RatingBridge::SetStarStyle(ArkUIRuntimeCallInfo* runtimeC
 
     std::string backgroundUri;
     if (backgroundUriArg->IsString(vm)) {
-        backgroundUri = backgroundUriArg->ToString(vm)->ToString();
+        backgroundUri = backgroundUriArg->ToString(vm)->ToString(vm);
     }
 
     std::string foregroundUri;
     if (foregroundUriArg->IsString(vm)) {
-        foregroundUri = foregroundUriArg->ToString(vm)->ToString();
+        foregroundUri = foregroundUriArg->ToString(vm)->ToString(vm);
     }
 
     std::string secondaryUri;
     if (secondaryUriArg->IsString(vm)) {
-        secondaryUri = secondaryUriArg->ToString(vm)->ToString();
+        secondaryUri = secondaryUriArg->ToString(vm)->ToString(vm);
     }
 
     if (secondaryUri.empty() && !backgroundUri.empty()) {

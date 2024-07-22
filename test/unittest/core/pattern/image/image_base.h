@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/image/image_modifier.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/mouse_event.h"
 #include "core/image/image_source_info.h"
@@ -127,6 +128,22 @@ public:
     static RefPtr<PixelMap> CreatePixelMap(const std::string& src);
     static RefPtr<FrameNode> CreatePixelMapAnimator(int32_t number = 1);
 };
+
+template <class LayoutPropertyCls = ImageLayoutProperty,
+          class PatternCls = ImagePattern,
+          class RenderPropertyCls = ImageRenderProperty>
+auto GetCompoment()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<LayoutPropertyCls>();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto pattern = frameNode->GetPattern<PatternCls>();
+    EXPECT_NE(pattern, nullptr);
+    auto renderProperty = frameNode->GetPaintProperty<RenderPropertyCls>();
+    EXPECT_NE(renderProperty, nullptr);
+    return std::make_tuple(frameNode, layoutProperty, pattern, renderProperty);
+}
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_TEXTFIELD_TEXTINPUT_TEST_NG_H

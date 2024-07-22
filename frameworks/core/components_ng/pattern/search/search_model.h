@@ -19,6 +19,7 @@
 #include <mutex>
 
 #include "core/components_ng/pattern/search/search_event_hub.h"
+#include "core/components_ng/pattern/search/search_node.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 
 namespace OHOS::Ace {
@@ -37,6 +38,12 @@ public:
     virtual void SetSearchIconSize(const Dimension& value);
     virtual void SetSearchIconColor(const Color& color);
     virtual void SetSearchSrcPath(const std::string& src, const std::string& bundleName, const std::string& moduleName);
+    virtual void SetSearchSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol);
+    virtual void SetSearchDefaultIcon();
+    virtual void SetSearchImageIcon(NG::IconOptions& iconOptions);
+    virtual void SetCancelSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol);
+    virtual void SetCancelDefaultIcon();
+    virtual void SetCancelImageIcon(NG::IconOptions &iconOptions);
     virtual void SetRightIconSrcPath(const std::string& src);
     virtual void SetCancelButtonStyle(CancelButtonStyle cancelButtonStyle);
     virtual void SetCancelIconSize(const Dimension& value);
@@ -54,7 +61,7 @@ public:
     virtual void SetHeight(const Dimension& height);
     virtual void SetBackBorder() {};
     virtual void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit);
-    virtual void SetOnChange(std::function<void(const std::string&, TextRange&)>&& onChange);
+    virtual void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& onChange);
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnScroll(std::function<void(float, float)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(const std::string&)>&& func);

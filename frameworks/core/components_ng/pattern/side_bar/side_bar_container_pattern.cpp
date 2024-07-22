@@ -17,7 +17,9 @@
 
 #include <optional>
 
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
 #include "accessibility_element_info.h"
+#endif
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/mousestyle/mouse_style.h"
@@ -92,12 +94,22 @@ void SideBarContainerPattern::OnAttachToFrameNode()
     auto layoutProperty = host->GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     userSetSidebarWidth_ = layoutProperty->GetSideBarWidth().value_or(SIDEBAR_WIDTH_NEGATIVE);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     auto sideBarTheme = pipelineContext->GetTheme<SideBarTheme>();
     if (sideBarTheme && sideBarTheme->GetSideBarUnfocusEffectEnable()) {
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
     }
+}
+
+void SideBarContainerPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
+    pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
 }
 
 void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty)
@@ -1072,15 +1084,15 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
 
 void SideBarContainerPattern::HandleDragEnd()
 {
-    if (!isDividerDraggable_ || sideBarStatus_ != SideBarStatus::SHOW) {
-        return;
-    }
     isInDividerDrag_ = false;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto windowId = pipeline->GetWindowId();
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::DEFAULT);
+    if (!isDividerDraggable_ || sideBarStatus_ != SideBarStatus::SHOW) {
+        return;
+    }
     preSidebarWidth_ = realSideBarWidth_;
 }
 
@@ -1362,19 +1374,27 @@ void SideBarContainerPattern::ShowDialogWithNode()
     isDialogShow_ = true;
 }
 
+void SideBarContainerPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    TAG_LOGI(AceLogTag::ACE_SIDEBAR, "mark need retrieve sidebar property because of window rotation or resize");
+    MarkNeedInitRealSideBarWidth(true);
+}
+
 void SideBarContainerPattern::RegisterElementInfoCallBack(const RefPtr<FrameNode>& buttonNode)
 {
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
     CHECK_NULL_VOID(buttonNode);
     auto accessibilityProperty = buttonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    auto callBack = [weak = WeakClaim(this)] (Accessibility::ExtraElementinfo& extraElementInfo) {
+    auto callBack = [weak = WeakClaim(this)] (Accessibility::ExtraElementInfo& extraElementInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto showSideBar = pattern->GetShowSideBar();
-        extraElementInfo.SetExtraElementinfo(
+        extraElementInfo.SetExtraElementInfo(
             "SideBarContainerStates", static_cast<int32_t>(showSideBar));
     };
     accessibilityProperty->SetRelatedElementInfoCallback(callBack);
+#endif
 }
 
 void SideBarContainerPattern::SetAccessibilityEvent()

@@ -1559,6 +1559,7 @@ HWTEST_F(ButtonTestNg, SetSizePropertyTest001, TestSize.Level1)
     buttonModelNG.SetSize(sizeWidth, sizeHeight);
     EXPECT_TRUE(sizeWidth.has_value());
     EXPECT_TRUE(sizeHeight.has_value());
+    buttonModelNG.SetSize(std::nullopt, std::nullopt);
 }
 
 /**

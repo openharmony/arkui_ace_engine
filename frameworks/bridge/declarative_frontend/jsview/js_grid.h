@@ -33,7 +33,7 @@ public:
     static void SetColumnsGap(const JSCallbackInfo& info);
     static void SetRowsGap(const JSCallbackInfo& info);
     static void SetScrollBar(const JSCallbackInfo& info);
-    static void SetScrollBarColor(const std::string& color);
+    static void SetScrollBarColor(const JSCallbackInfo& info);
     static void SetScrollBarWidth(const JSCallbackInfo& scrollWidth);
 
     static void JsOnScrollBarUpdate(const JSCallbackInfo& info);
@@ -57,6 +57,7 @@ public:
     static void SetNestedScroll(const JSCallbackInfo& args);
     static void SetScrollEnabled(const JSCallbackInfo& args);
     static void SetFriction(const JSCallbackInfo& info);
+    static void SetAlignItems(const JSCallbackInfo& info);
 
     static void JsOnScroll(const JSCallbackInfo& args);
     static void JsOnReachStart(const JSCallbackInfo& args);

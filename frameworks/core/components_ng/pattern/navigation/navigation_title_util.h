@@ -68,6 +68,9 @@ public:
         const GestureEvent& info, const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems);
     static void HandleLongPressActionEnd(const RefPtr<FrameNode>& buttonNode);
     static void InitDragAndLongPressEvent(const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems);
+
+    static std::string GetTitleString(const RefPtr<TitleBarNode>& titleBarNode, bool isCustom);
+    static std::string GetSubtitleString(const RefPtr<TitleBarNode>& titleBarNode);
 private:
     static RefPtr<FrameNode> CreatePopupDialogNode(
         const RefPtr<FrameNode> targetNode, const std::vector<NG::BarItem>& menuItems, int32_t index);

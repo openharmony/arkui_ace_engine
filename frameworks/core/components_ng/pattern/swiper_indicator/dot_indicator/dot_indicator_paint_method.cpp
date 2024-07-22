@@ -361,11 +361,16 @@ std::tuple<float, float, float> DotIndicatorPaintMethod::GetMoveRate()
         longPointRightCenterMoveRate = 1;
     } else if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT) {
         auto rateAbs = std::abs(turnPageRate_);
-        longPointLeftCenterMoveRate = longPointRightCenterMoveRate =
-            // x0:0.33, y0:0, x1:0.67, y1:1
-            CubicCurve(0.33, 0, 0.67, 1).MoveInternal(1.0 - rateAbs);
+        if (!isHorizontalAndRightToLeft_) {
+            rateAbs = 1.0f - rateAbs;
+        }
+        // x0:0.33, y0:0, x1:0.67, y1:1
+        longPointLeftCenterMoveRate = longPointRightCenterMoveRate = CubicCurve(0.33, 0, 0.67, 1).MoveInternal(rateAbs);
     } else if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT) {
         auto rateAbs = std::abs(turnPageRate_);
+        if (isHorizontalAndRightToLeft_) {
+            rateAbs = 1.0f - rateAbs;
+        }
         // x0:0.33, y0:0, x1:0.67, y1:1
         longPointLeftCenterMoveRate = longPointRightCenterMoveRate = CubicCurve(0.33, 0, 0.67, 1).MoveInternal(rateAbs);
     } else if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {

@@ -172,6 +172,7 @@ HWTEST_F(NavigationAnimationTest, NavigationInteractiveTest001, TestSize.Level1)
      * @tc.steps: step3. set navigation transition callback, set interactive value false
     */
     navigationPattern->currentProxy_->hasFinished_ = true;
+    navigationPattern->isFinishInteractiveAnimation_ = true;
     navigationPattern->SetNavigationTransition([](const RefPtr<NavDestinationContext>& preContext,
         const RefPtr<NavDestinationContext>& topContext, NavigationOperation operation) -> NavigationTransition {
             NavigationTransition transition;

@@ -200,7 +200,7 @@ void VideoElement::InitStatus(const RefPtr<VideoComponent>& videoComponent)
     if (isMediaPlayerFullStatus_) {
         pastPlayingStatus_ = videoComponent->GetPastPlayingStatus();
         if (startTime_ != 0) {
-            currentPos_ = startTime_;
+            currentPos_ = static_cast<uint32_t>(startTime_);
             IntTimeToText(currentPos_, currentPosText_);
         }
     }
@@ -1347,7 +1347,7 @@ void VideoElement::OnCurrentTimeChange(uint32_t currentPos)
 #ifdef OHOS_STANDARD_SYSTEM
     if (isMediaPlayerFullStatus_ && startTime_ != 0) {
         if (GreatNotEqual(startTime_, currentPos)) {
-            currentPos = startTime_;
+            currentPos = static_cast<uint32_t>(startTime_);
         }
     }
     if (currentPos == currentPos_ || isStop_) {
@@ -1356,7 +1356,7 @@ void VideoElement::OnCurrentTimeChange(uint32_t currentPos)
     if (duration_ == 0) {
         int32_t duration = 0;
         if (mediaPlayer_->GetDuration(duration) == 0) {
-            duration_ = duration / MILLISECONDS_TO_SECONDS;
+            duration_ = static_cast<int32_t>(duration / MILLISECONDS_TO_SECONDS);
             IntTimeToText(duration_, durationText_);
         }
     }

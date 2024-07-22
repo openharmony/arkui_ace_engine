@@ -123,8 +123,11 @@ void AnimationUtils::ContinueInteractiveAnimation(
     interactiveAnimation->finishCallback_();
 }
 
-void AnimationUtils::StartInteractiveAnimation(
-    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation) {}
+int32_t AnimationUtils::StartInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation)
+{
+    return 0;
+}
 
 void AnimationUtils::ReverseInteractiveAnimation(
     const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation)

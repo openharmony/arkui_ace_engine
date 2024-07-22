@@ -103,6 +103,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
     "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
     "rosen_render_context_test.cpp",
+    "rosen_render_context_test_new.cpp",
   ]
 
   configs = [ ":rosen_render_context_config" ]

@@ -399,6 +399,8 @@ struct GridLayoutInfo {
 
     std::optional<int32_t> targetIndex_;
 
+    std::map<int32_t, bool> irregularLines_;
+
 private:
     float GetCurrentOffsetOfRegularGrid(float mainGap) const;
     float GetContentHeightOfRegularGrid(float mainGap) const;

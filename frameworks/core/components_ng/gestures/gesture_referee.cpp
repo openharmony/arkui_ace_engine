@@ -81,14 +81,7 @@ void GestureScope::OnAcceptGesture(const RefPtr<NGGestureRecognizer>& recognizer
             continue;
         }
         gesture->OnRejected();
-        auto bridgeObjList = gesture->GetBridgeObj();
-        for (const auto& item : bridgeObjList) {
-            auto bridgeObj = item.Upgrade();
-            if (bridgeObj) {
-                bridgeObj->OnRejected();
-                bridgeObj->OnRejectBridgeObj();
-            }
-        }
+        gesture->OnRejectBridgeObj();
     }
     if (queryStateFunc_) {
         queryStateFunc_(touchId_);
@@ -132,7 +125,8 @@ bool DectectAllDone(const RefPtr<NGGestureRecognizer> recognizer)
     RefereeState state = recognizer->GetRefereeState();
     if (!AceType::InstanceOf<RecognizerGroup>(recognizer)) {
         if (state != RefereeState::SUCCEED && state != RefereeState::SUCCEED_BLOCKED &&
-            state != RefereeState::FAIL && state != RefereeState::READY) {
+            state != RefereeState::FAIL && state != RefereeState::READY &&
+            state != RefereeState::DETECTING) {
             return false;
         }
     } else {

@@ -77,9 +77,11 @@ public:
     void SetOuterBorderRadius(const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight) override {}
+    void SetOuterBorderRadius(const NG::BorderRadiusProperty& borderRadius) override {}
     void SetOuterBorderColor(const Color& value) override {}
     void SetOuterBorderColor(const std::optional<Color>& colorLeft, const std::optional<Color>& colorRight,
         const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) override {}
+    void SetOuterBorderColor(const NG::BorderColorProperty& borderColors) override {}
     void SetOuterBorderWidth(const Dimension& value) override {}
     void SetOuterBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) override {}
@@ -106,7 +108,12 @@ public:
     void SetPosition(const Dimension& x, const Dimension& y) override;
     void SetOffset(const Dimension& x, const Dimension& y) override;
     void MarkAnchor(const Dimension& x, const Dimension& y) override;
-
+    void SetPaddings(const NG::PaddingProperty& paddings) override {};
+    void SetMargins(const NG::MarginProperty& margins) override {};
+    void SetBorderRadius(const NG::BorderRadiusProperty& borderRadius) override {};
+    void SetBorderColor(const NG::BorderColorProperty& borderColors) override {};
+    void SetBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom, bool isLocalized) override {};
     void SetScale(float x, float y, float z) override;
     void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) override;
     void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override;
@@ -182,6 +189,7 @@ public:
     void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
+    void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) override {};
     void SetOnDelete(std::function<void()>&& onDeleteCallback) override;
     void SetOnAppear(std::function<void()>&& onAppearCallback) override;
     void SetOnAttach(std::function<void()>&& onAttachCallback) override {}
@@ -235,6 +243,7 @@ public:
     void DisableOnTouch() override {};
     void DisableOnKeyEvent() override {};
     void DisableOnHover() override {};
+    void DisableOnAccessibilityHover() override {};
     void DisableOnMouse() override {};
     void DisableOnAppear() override {};
     void DisableOnDisAppear() override {};

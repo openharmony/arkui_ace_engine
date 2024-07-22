@@ -1089,15 +1089,7 @@ export class ChipComponent extends ViewPU {
         }
         catch (n3) {
             hilog.error(0x3900, 'Ace', `Chip resourceColor, error: ${n3.toString()}`);
-            if (this.getChipActive()) {
-                m3 = ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor);
-            }
-            else {
-                m3 = ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor);
-            }
-            if (!this.isShowPressedBackGroundColor) {
-                return Color.Transparent;
-            }
+            m3 = ColorMetrics.resourceColor(Color.Transparent);
         }
         if (!this.isShowPressedBackGroundColor) {
             return m3.color;

@@ -1858,6 +1858,7 @@ HWTEST_F(ScrollableTestNg, HandleClickScroll001, TestSize.Level1)
     scrollPn->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
     scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
     scrollPn->isMousePressed_ = true;
+    scrollPn->scrollBar_->isScrollable_ = true;
     GestureEvent info;
     info.SetLocalLocation(Offset(1.0f, 150.0f));
     // /**
@@ -1903,6 +1904,7 @@ HWTEST_F(ScrollableTestNg, HandleLongPressScroll001, TestSize.Level1)
     scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
     scrollPn->scrollBar_->InitLongPressEvent();
     scrollPn->isMousePressed_ = true;
+    scrollPn->scrollBar_->isScrollable_ = true;
     /**
     * @tc.steps: step2. Test HandleClickEvent.
     * @tc.expect: CheckBarDirection equal to equal BarDirection's Value.
@@ -1965,5 +1967,38 @@ HWTEST_F(ScrollableTestNg, InitMouseEvent001, TestSize.Level1)
         }
     };
     EXPECT_FALSE(scrollPn->isMousePressed_);
+}
+
+/**
+ * @tc.name: SetEdgeEffect001
+ * @tc.desc: Test SetEdgeEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, SetEdgeEffect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize ScrollablePattern type pointer and set EdgeEffect to Spring.
+     * @tc.expected: spring animation is running.
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    scrollPn->SetEdgeEffect(EdgeEffect::SPRING);
+    auto scrollableEvent = scrollPn->GetScrollableEvent();
+    auto scrollable = scrollableEvent->GetScrollable();
+    scrollable->isSpringAnimationStop_ = false;
+    EXPECT_TRUE(scrollable->IsSpringMotionRunning());
+
+    /**
+     * @tc.steps: step2. set EdgeEffect to Spring.
+     * @tc.expected: spring animation is running.
+     */
+    scrollPn->SetEdgeEffect(EdgeEffect::SPRING);
+    EXPECT_TRUE(scrollable->IsSpringMotionRunning());
+
+    /**
+     * @tc.steps: step3. set EdgeEffect to None.
+     * @tc.expected: spring animation is stopped.
+     */
+    scrollPn->SetEdgeEffect(EdgeEffect::NONE);
+    EXPECT_FALSE(scrollable->IsSpringMotionRunning());
 }
 } // namespace OHOS::Ace::NG

@@ -387,8 +387,10 @@ void ContainerModalView::AddButtonHoverEvent(
             isHoverType = isFocus ? ControlBtnColorType::NORMAL : ControlBtnColorType::UNFOCUS;
         }
         sourceInfo->SetFillColor(theme->GetControlBtnColor(isCloseBtn, isHoverFillType));
-        auto renderContext = buttonNode->GetRenderContext();
-        renderContext->UpdateBackgroundColor(theme->GetControlBtnColor(isCloseBtn, isHoverType));
+        if (isCloseBtn) {
+            auto renderContext = buttonNode->GetRenderContext();
+            renderContext->UpdateBackgroundColor(theme->GetControlBtnColor(isCloseBtn, isHoverType));
+        }
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo.value());
         buttonNode->MarkModifyDone();
         imageNode->MarkModifyDone();

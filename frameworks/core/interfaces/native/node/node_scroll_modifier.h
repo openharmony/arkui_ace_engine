@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_SCROLL_MODIFIER_H
+#define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_SCROLL_MODIFIER_H
 
 #include "core/interfaces/native/node/node_api.h"
 
@@ -51,3 +52,4 @@ void SetScrollOnScrollEdge(ArkUINodeHandle node, void* callback);
 void ResetScrollOnScrollEdge(ArkUINodeHandle node);
 void SetScrollOnDidScrollCallBack(ArkUINodeHandle node, void* callback);
 } // namespace OHOS::Ace::NG::NodeModifier
+#endif // FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_SCROLL_MODIFIER_H

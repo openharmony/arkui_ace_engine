@@ -82,4 +82,10 @@ bool StylusDetectorMgr::IsStylusTouchEvent(const TouchEvent& touchEvent) const
 {
     return false;
 }
+
+bool StylusDetectorMgr::IsHitCleanNodeResponseArea(
+    const NG::PointF& point, const RefPtr<NG::FrameNode>& frameNode, uint64_t nanoTimestamp)
+{
+    return false;
+}
 } // namespace OHOS::Ace

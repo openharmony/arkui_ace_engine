@@ -37,7 +37,9 @@ public:
     explicit StageManager(const RefPtr<FrameNode>& stage);
     ~StageManager() override = default;
 
-    virtual bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
+    // PushUrl and ReplaceUrl both use PushPage function
+    virtual bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true,
+        bool isPush = false);
     virtual bool InsertPage(const RefPtr<FrameNode>& node, bool bellowTopOrBottom);
     virtual bool PopPage(bool needShowNext = true, bool needTransition = true);
     virtual bool PopPageToIndex(int32_t index, bool needShowNext = true, bool needTransition = true);
@@ -49,9 +51,10 @@ public:
     void PageChangeCloseKeyboard();
 
     static void FirePageHide(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
-    static void FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
+    static void FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE,
+        bool needFocus = true);
 
-    RefPtr<FrameNode> GetLastPage();
+    virtual RefPtr<FrameNode> GetLastPage() const;
     RefPtr<FrameNode> GetPageById(int32_t pageId);
     const RefPtr<FrameNode> GetStageNode() const
     {
@@ -60,12 +63,26 @@ public:
 
     void ReloadStage();
 
-    RefPtr<FrameNode> GetLastPageWithTransition() const;
-    RefPtr<FrameNode> GetPrevPageWithTransition() const;
+    virtual RefPtr<FrameNode> GetLastPageWithTransition() const;
+    virtual RefPtr<FrameNode> GetPrevPageWithTransition() const;
 
     void SetStageInTrasition (bool stageInTrasition) {
         stageInTrasition_ = stageInTrasition;
     }
+
+#if defined(ENABLE_SPLIT_MODE)
+    bool IsNewPageReplacing() const
+    {
+        return isNewPageReplacing_;
+    }
+
+    void SetIsNewPageReplacing(bool replacing)
+    {
+        isNewPageReplacing_ = replacing;
+    }
+#endif
+
+    virtual void SyncPageSafeArea(const RefPtr<FrameNode>& lastPage, PropertyChangeFlag changeFlag);
 
 protected:
     // ace performance check
@@ -79,6 +96,9 @@ protected:
     WeakPtr<FrameNode> destPageNode_;
     WeakPtr<FrameNode> srcPageNode_;
     bool stageInTrasition_ = false;
+#if defined(ENABLE_SPLIT_MODE)
+    bool isNewPageReplacing_ = false;
+#endif
 
     ACE_DISALLOW_COPY_AND_MOVE(StageManager);
 };

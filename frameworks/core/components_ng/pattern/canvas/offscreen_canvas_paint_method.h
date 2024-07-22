@@ -37,7 +37,6 @@ public:
     void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state);
     void StrokeText(
         const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state);
-    TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
     TransformParam GetTransform() const override;
     LineDashParam GetLineDash() const override;
     void UpdateSize(int32_t width, int32_t height);
@@ -62,8 +61,9 @@ private:
     void InitBitmap();
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
-    bool UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow = false);
-    void UpdateTextStyleForeground(bool isStroke, RSTextStyle& txtStyle, bool hasShadow);
+#ifndef ACE_UNITTEST
+    void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle) override;
+#endif
 
     RSBitmap bitmap_;
 

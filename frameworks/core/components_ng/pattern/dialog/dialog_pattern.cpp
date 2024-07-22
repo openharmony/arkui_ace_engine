@@ -93,6 +93,7 @@ constexpr Dimension ADAPT_SUBTITLE_MIN_FONT_SIZE = 12.0_fp;
 constexpr uint32_t ADAPT_TITLE_MAX_LINES = 2;
 constexpr int32_t TEXT_ALIGN_TITLE_CENTER = 1;
 constexpr int32_t BUTTON_TYPE_NORMAL = 1;
+constexpr Dimension DIALOG_BUTTON_BORDER_RADIUS = 20.0_vp;
 
 std::string GetBoolStr(bool isTure)
 {
@@ -158,6 +159,8 @@ void DialogPattern::OnFontConfigurationUpdate()
         auto buttonContainerNew = BuildButtons(dialogProperties_.buttons, DialogButtonDirection::VERTICAL);
         CHECK_NULL_VOID(buttonContainerNew);
         buttonContainerNew->MountToParent(contentColumn_);
+        buttonContainer_ = buttonContainerNew;
+        CheckScrollHeightIsNegative(contentColumn_, dialogProperties_);
         UpdateTextFontScale();
     }
 }
@@ -269,6 +272,8 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     CHECK_NULL_VOID(contentRenderContext);
     contentRenderContext_ = contentRenderContext;
     UpdateBgBlurStyle(contentRenderContext, props);
+    bool isCustomBorder = props.borderRadius.has_value() || props.borderWidth.has_value() ||
+        props.borderStyle.has_value() || props.borderColor.has_value();
     BorderRadiusProperty radius;
     if (props.borderRadius.has_value()) {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -281,20 +286,25 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     } else {
         radius.SetRadius(dialogTheme_->GetRadius().GetX());
         contentRenderContext->UpdateBorderRadius(radius);
+        if (!isCustomBorder && dialogTheme_->GetDialogDoubleBorderEnable()) {
+            contentRenderContext->UpdateOuterBorderRadius(radius);
+        }
     }
-    if (dialogTheme_->GetDialogDoubleBorderEnable()) {
-        contentRenderContext->UpdateOuterBorderRadius(radius);
-    }
-    auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_VOID(layoutProps);
     if (props.borderWidth.has_value()) {
+        auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_VOID(layoutProps);
         layoutProps->UpdateBorderWidth(props.borderWidth.value());
         contentRenderContext->UpdateBorderWidth(props.borderWidth.value());
     } else {
         BorderWidthProperty borderWidth;
-        if (dialogTheme_->GetDialogDoubleBorderEnable()) {
+        if (!isCustomBorder && dialogTheme_->GetDialogDoubleBorderEnable()) {
+            auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
+            CHECK_NULL_VOID(layoutProps);
             borderWidth.SetBorderWidth(Dimension(dialogTheme_->GetDialogInnerBorderWidth()));
             layoutProps->UpdateBorderWidth(borderWidth);
+            BorderWidthProperty outerWidthProp;
+            outerWidthProp.SetBorderWidth(Dimension(dialogTheme_->GetDialogOuterBorderWidth()));
+            contentRenderContext->UpdateOuterBorderWidth(outerWidthProp);
         } else {
             Dimension width = dialogTheme_->GetBackgroudBorderWidth();
             borderWidth.SetBorderWidth(width);
@@ -302,11 +312,6 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
         contentRenderContext->UpdateBorderWidth(borderWidth);
     }
     contentNodeMap_[DialogContentNode::BORDERWIDTH] = contentNode;
-    if (dialogTheme_->GetDialogDoubleBorderEnable()) {
-        BorderWidthProperty outerWidthProp;
-        outerWidthProp.SetBorderWidth(Dimension(dialogTheme_->GetDialogOuterBorderWidth()));
-        contentRenderContext->UpdateOuterBorderWidth(outerWidthProp);
-    }
     if (props.borderStyle.has_value()) {
         contentRenderContext->UpdateBorderStyle(props.borderStyle.value());
     }
@@ -314,18 +319,16 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
         contentRenderContext->UpdateBorderColor(props.borderColor.value());
     } else {
         BorderColorProperty borderColor;
-        if (dialogTheme_->GetDialogDoubleBorderEnable()) {
+        if (!isCustomBorder && dialogTheme_->GetDialogDoubleBorderEnable()) {
             borderColor.SetColor(dialogTheme_->GetDialogInnerBorderColor());
+            BorderColorProperty outerColorProp;
+            outerColorProp.SetColor(dialogTheme_->GetDialogOuterBorderColor());
+            contentRenderContext->UpdateOuterBorderColor(outerColorProp);
         } else {
             Color color = dialogTheme_->GetBackgroudBorderColor();
             borderColor.SetColor(color);
         }
         contentRenderContext->UpdateBorderColor(borderColor);
-    }
-    if (dialogTheme_->GetDialogDoubleBorderEnable()) {
-        BorderColorProperty outerColorProp;
-        outerColorProp.SetColor(dialogTheme_->GetDialogOuterBorderColor());
-        contentRenderContext->UpdateBorderColor(outerColorProp);
     }
     if (props.shadow.has_value()) {
         contentRenderContext->UpdateBackShadow(props.shadow.value());
@@ -462,6 +465,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
         auto buttonContainerNew = BuildButtons(props.buttons, DialogButtonDirection::VERTICAL);
         buttonContainerNew->MountToParent(contentColumn);
         buttonContainer_ = buttonContainerNew;
+        CheckScrollHeightIsNegative(contentColumn, props);
     }
     contentColumn_ = contentColumn;
     UpdateTextFontScale();
@@ -770,6 +774,8 @@ void DialogPattern::UpdateDialogButtonProperty(
     if (dialogTheme_->GetButtonType() == BUTTON_TYPE_NORMAL) {
         buttonProp->UpdateButtonStyle(ButtonStyleMode::NORMAL);
     }
+    buttonProp->UpdateType(ButtonType::NORMAL);
+    buttonProp->UpdateBorderRadius(BorderRadiusProperty(DIALOG_BUTTON_BORDER_RADIUS));
     PaddingProperty buttonPadding;
     buttonPadding.left = CalcLength(SHEET_LIST_PADDING);
     buttonPadding.right = CalcLength(SHEET_LIST_PADDING);
@@ -1337,7 +1343,9 @@ bool DialogPattern::NeedsButtonDirectionChange(const std::vector<ButtonInfo>& bu
     auto props = host->GetLayoutProperty<DialogLayoutProperty>();
     CHECK_NULL_RETURN(props, false);
     auto buttonLayoutConstraint = props->GetLayoutConstraint();
+    isSuitOldMeasure_ = true;
     host->Measure(buttonLayoutConstraint);
+    isSuitOldMeasure_ = false;
     const auto& children = buttonContainer_->GetChildren();
     for (const auto& child : children) {
         if (child->GetTag() == V2::BUTTON_ETS_TAG) {
@@ -1357,15 +1365,47 @@ bool DialogPattern::NeedsButtonDirectionChange(const std::vector<ButtonInfo>& bu
             MeasureContext measureContext;
             measureContext.textContent = textDisplay;
             measureContext.fontSize = buttonTextSize;
+            auto pipeline = GetContext();
+            CHECK_NULL_RETURN(pipeline, false);
+            if (isSuitableForElderly_ && pipeline->GetFontScale() >= dialogTheme_->GetTitleMaxFontScale() &&
+                SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+                measureContext.fontSize =
+                    Dimension(buttonTextSize.Value() * dialogTheme_->GetTitleMaxFontScale(), DimensionUnit::VP);
+            }
             auto fontweight = StringUtils::FontWeightToString(FontWeight::MEDIUM);
             measureContext.fontWeight = fontweight;
             Size measureSize = MeasureUtil::MeasureTextSize(measureContext);
-            if (GreatNotEqual(measureSize.Width(), textFarmeSize.Width())) {
+            if (measureSize.Width() != textFarmeSize.Width()) {
                 return true;
             }
         }
     }
     return false;
+}
+
+void DialogPattern::CheckScrollHeightIsNegative(
+    const RefPtr<UINode>& contentColumn, const DialogProperties& Dialogprops)
+{
+    CHECK_NULL_VOID(buttonContainer_);
+    if (Dialogprops.buttons.size() == ONE_BUTTON_MODE || buttonContainer_->GetTag() == V2::ROW_ETS_TAG) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto props = host->GetLayoutProperty<DialogLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    auto buttonLayoutConstraint = props->GetLayoutConstraint();
+    isSuitOldMeasure_ = true;
+    host->Measure(buttonLayoutConstraint);
+    isSuitOldMeasure_ = false;
+    if (isScrollHeightNegative_) {
+        isSuitableForElderly_ = false;
+        notAdapationAging_ = true;
+        contentColumn->RemoveChild(buttonContainer_);
+        auto buttonContainerNew = BuildButtons(Dialogprops.buttons, Dialogprops.buttonDirection);
+        buttonContainerNew->MountToParent(contentColumn);
+        buttonContainer_ = buttonContainerNew;
+    }
 }
 
 void DialogPattern::UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation)
@@ -1377,6 +1417,7 @@ void DialogPattern::UpdateDeviceOrientation(const DeviceOrientation& deviceOrien
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        CHECK_NULL_VOID(buttonContainer_);
         buttonContainer_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         deviceOrientation_ = deviceOrientation;
     }
@@ -1460,6 +1501,20 @@ void DialogPattern::UpdateTextFontScale()
                 textProp->UpdateMargin(margin);
             }
         }
+    }
+}
+
+void DialogPattern::UpdateFontScale()
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetFontScale() != fontScaleForElderly_) {
+        OnFontConfigurationUpdate();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        fontScaleForElderly_ = pipeline->GetFontScale();
     }
 }
 

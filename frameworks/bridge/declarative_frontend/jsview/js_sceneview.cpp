@@ -293,62 +293,6 @@ void JSSceneView::Create(const JSCallbackInfo& info)
     ModelView::GetInstance()->SetModelSource(ohosPath);
 }
 
-void JSSceneView::JsCamera(const JSCallbackInfo& info)
-{
-    // Parse the info object.
-    if (info.Length() <= 0 || !info[0]->IsObject()) {
-        return;
-    }
-
-    AnimationOption animOption = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
-    std::unordered_map<std::string, float> perspect { { "zNear", 0.5f }, { "zFar", 50.0f }, { "yFov", 60.0f } };
-    GetModelProperty(jsObj, "perspective", perspect);
-    ModelView::GetInstance()->SetCameraFrustum(perspect["zNear"], perspect["zFar"], perspect["yFov"]);
-    // cameraSpace
-    std::unordered_map<std::string, float> positionAng { { "theta", 0.0f }, { "phi", 0.0f }, { "radius", 4.0f } };
-    std::unordered_map<std::string, float> position { { "x", 0.0f }, { "y", 0.0f }, { "z", 4.0f } };
-    std::unordered_map<std::string, float> front { { "x", 0.0f }, { "y", 0.0f }, { "z", 0.0f } };
-    std::unordered_map<std::string, float> up { { "x", 0.0f }, { "y", 0.0f }, { "z", 0.0f } };
-    if (GetModelProperty(jsObj, "cameraSpace", positionAng)) {
-        ModelView::GetInstance()->SetCameraPosition(AnimatableFloat(positionAng["theta"], animOption),
-            AnimatableFloat(0, animOption), AnimatableFloat(positionAng["phi"], animOption),
-            AnimatableFloat(positionAng["radius"], animOption), true);
-        return;
-    }
-    auto itemCameraSpace = jsObj->GetProperty("cameraSpace");
-    if (itemCameraSpace->IsObject()) {
-        JSRef<JSObject> spaceObj = JSRef<JSObject>::Cast(itemCameraSpace);
-        // position
-        GetModelProperty(spaceObj, "position", position);
-        // front
-        GetModelProperty(spaceObj, "front", front);
-        // up
-        GetModelProperty(spaceObj, "up", up);
-    }
-    ModelView::GetInstance()->SetCameraPosition(AnimatableFloat(position["x"], animOption),
-        AnimatableFloat(position["y"], animOption), AnimatableFloat(position["z"], animOption),
-        AnimatableFloat(0.0f, animOption), false);
-    Vec3 lookVec(front["x"], front["y"], front["z"]);
-    ModelView::GetInstance()->SetCameraLookAt(lookVec);
-    Vec3 upVec(up["x"], up["y"], up["z"]);
-    ModelView::GetInstance()->SetCameraUp(upVec);
-}
-
-void JSSceneView::JsSetTransparent(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-
-    if (!info[0]->IsBoolean()) {
-        return;
-    }
-
-    bool value = info[0]->ToBoolean();
-    ModelView::GetInstance()->SetTransparent(value);
-}
-
 void JSSceneView::JsSetBackground(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -363,162 +307,6 @@ void JSSceneView::JsSetBackground(const JSCallbackInfo& info)
     std::string ohosPath("");
     SetOhosPath(srcPath, ohosPath);
     ModelView::GetInstance()->SetBackground(ohosPath);
-}
-
-void JSSceneView::JsLight(const JSCallbackInfo& info)
-{
-    // Parse the info object.
-    if (info.Length() <= 0 || !info[0]->IsObject()) {
-        return;
-    }
-
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
-    JSRef<JSVal> itemType = jsObj->GetProperty("type");
-    JSRef<JSVal> itemIntensity = jsObj->GetProperty("intensity");
-    JSRef<JSVal> itemShadow = jsObj->GetProperty("shadow");
-    auto type = static_cast<NG::ModelLightType>((itemType->IsNumber()) ? itemType->ToNumber<int32_t>() : 1);
-    int intensity = (itemIntensity->IsNumber()) ? itemIntensity->ToNumber<int32_t>() : 10;
-    bool shadow = (itemShadow->IsBoolean()) ? itemShadow->ToBoolean() : false;
-    JSRef<JSVal> lightColor = jsObj->GetProperty("color");
-    Color color(0xffffffff); // red:255, green:255, blue:255
-    ParseJsColor(lightColor, color);
-    AnimationOption animOption = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
-    Vec3 inputColor = Vec3(color.GetRed() / 255.0f, color.GetGreen() / 255.0f, color.GetBlue() / 255.0f, animOption);
-    OHOS::Ace::NG::ModelPosition position;
-    double maxInvalid = std::numeric_limits<double>::max();
-    Quaternion rotation = Quaternion(maxInvalid, maxInvalid, maxInvalid, maxInvalid);
-    std::unordered_map<std::string, float> positionAng { { "theta", 0.0f }, { "phi", 0.0f }, { "radius", 4.0f } };
-    std::unordered_map<std::string, float> pos { { "x", 0.0f }, { "y", 1.0f }, { "z", 0.0f } };
-    std::unordered_map<std::string, float> quat { { "x", 0.0f }, { "y", 1.0f }, { "z", 0.0f }, { "w", 1.0f } };
-    if (GetModelProperty(jsObj, "lightSpace", positionAng)) {
-        position.Set({ AnimatableFloat(positionAng["theta"], animOption), AnimatableFloat(0.0f, animOption),
-                         AnimatableFloat(positionAng["phi"], animOption) },
-            AnimatableFloat(positionAng["radius"], animOption), true);
-        ModelView::GetInstance()->AddLight(AceType::MakeRefPtr<NG::ModelLight>(
-            type, inputColor, AnimatableFloat(intensity, animOption), shadow, position, rotation));
-        return;
-    }
-    auto itemLightSpace = jsObj->GetProperty("lightSpace");
-    if (itemLightSpace->IsObject()) {
-        JSRef<JSObject> spaceObj = JSRef<JSObject>::Cast(itemLightSpace);
-        GetModelProperty(spaceObj, "position", pos);
-        position.Set({ AnimatableFloat(pos["x"], animOption), AnimatableFloat(pos["y"], animOption),
-                         AnimatableFloat(pos["z"], animOption) },
-            AnimatableFloat(0.0f, animOption), false);
-        GetModelProperty(spaceObj, "rotation", quat);
-        rotation = Quaternion(quat["x"], quat["y"], quat["z"], quat["w"]);
-    }
-    ModelView::GetInstance()->AddLight(AceType::MakeRefPtr<NG::ModelLight>(
-        type, inputColor, AnimatableFloat(intensity, animOption), shadow, position, rotation));
-}
-
-void JSSceneView::JsAddCube(const JSCallbackInfo& info)
-{
-    // Parse the info object.
-    if (info.Length() <= 0 || !info[0]->IsObject()) {
-        return;
-    }
-
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
-    auto name = jsObj->GetPropertyValue<std::string>("name", "");
-    auto width = jsObj->GetPropertyValue<double>("width", 0.0);
-    auto height = jsObj->GetPropertyValue<double>("height", 0.0);
-    auto depth = jsObj->GetPropertyValue<double>("depth", 0.0);
-
-    OHOS::Render3D::Vec3 position(0.0f, 0.0f, 0.0f);
-    if (jsObj->HasProperty("position")) {
-        JSRef<JSVal> positionArgs = jsObj->GetProperty("position");
-        if (positionArgs->IsObject()) {
-            JSRef<JSObject> posObj = JSRef<JSObject>::Cast(positionArgs);
-            position.SetX(posObj->GetPropertyValue<double>("x", 0.0));
-            position.SetY(posObj->GetPropertyValue<double>("y", 0.0));
-            position.SetZ(posObj->GetPropertyValue<double>("z", 0.0));
-        }
-    }
-
-    ModelView::GetInstance()->AddGeometry(
-        std::make_shared<OHOS::Render3D::Cube>(name.c_str(), width, height, depth, position));
-}
-
-void JSSceneView::JsAddSphere(const JSCallbackInfo& info)
-{
-    // Parse the info object.
-    if (info.Length() <= 0 || !info[0]->IsObject()) {
-        return;
-    }
-
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
-    auto name = jsObj->GetPropertyValue<std::string>("name", "");
-    auto radius = jsObj->GetPropertyValue<double>("radius", 0.0);
-    auto rings = jsObj->GetPropertyValue<int32_t>("rings", 0);
-    auto sectors = jsObj->GetPropertyValue<int32_t>("sectors", 0);
-
-    OHOS::Render3D::Vec3 position(0.0f, 0.0f, 0.0f);
-    if (jsObj->HasProperty("position")) {
-        JSRef<JSVal> positionArgs = jsObj->GetProperty("position");
-        if (positionArgs->IsObject()) {
-            JSRef<JSObject> posObj = JSRef<JSObject>::Cast(positionArgs);
-            position.SetX(posObj->GetPropertyValue<double>("x", 0.0));
-            position.SetY(posObj->GetPropertyValue<double>("y", 0.0));
-            position.SetZ(posObj->GetPropertyValue<double>("z", 0.0));
-        }
-    }
-
-    ModelView::GetInstance()->AddGeometry(
-        std::make_shared<OHOS::Render3D::Sphere>(name.c_str(), radius, rings, sectors, position));
-}
-
-void JSSceneView::JsAddCone(const JSCallbackInfo& info)
-{
-    // Parse the info object.
-    if (info.Length() <= 0 || !info[0]->IsObject()) {
-        return;
-    }
-
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
-    auto name = jsObj->GetPropertyValue<std::string>("name", "");
-    auto radius = jsObj->GetPropertyValue<double>("radius", 0.0);
-    auto length = jsObj->GetPropertyValue<int32_t>("length", 0);
-    auto sectors = jsObj->GetPropertyValue<int32_t>("sectors", 0);
-
-    OHOS::Render3D::Vec3 position(0.0f, 0.0f, 0.0f);
-    if (jsObj->HasProperty("position")) {
-        JSRef<JSVal> positionArgs = jsObj->GetProperty("position");
-        if (positionArgs->IsObject()) {
-            JSRef<JSObject> posObj = JSRef<JSObject>::Cast(positionArgs);
-            position.SetX(posObj->GetPropertyValue<double>("x", 0.0));
-            position.SetY(posObj->GetPropertyValue<double>("y", 0.0));
-            position.SetZ(posObj->GetPropertyValue<double>("z", 0.0));
-        }
-    }
-
-    ModelView::GetInstance()->AddGeometry(
-        std::make_shared<OHOS::Render3D::Cone>(name.c_str(), radius, length, sectors, position));
-}
-
-void JSSceneView::JsGLTFAnimation(const JSCallbackInfo& info)
-{
-    // Parse the info object.
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        return;
-    }
-
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
-    JSRef<JSVal> itemName = jsObj->GetProperty("name");
-    std::string name = (itemName->IsString()) ? itemName->ToString() : "";
-    JSRef<JSVal> itemState = jsObj->GetProperty("state");
-    auto state = (itemState->IsNumber()) ? itemState->ToNumber<int32_t>() : 0;
-    JSRef<JSVal> itemRepeat = jsObj->GetProperty("repeatCount");
-    auto repeatCount = (itemRepeat->IsNumber()) ? itemRepeat->ToNumber<int32_t>() : -1;
-    JSRef<JSVal> itemSpeed = jsObj->GetProperty("speed");
-    auto speed = (itemSpeed->IsNumber()) ? itemSpeed->ToNumber<float>() : 1.0f;
-    JSRef<JSVal> itemDuration = jsObj->GetProperty("duration");
-    auto duration = (itemDuration->IsNumber()) ? itemDuration->ToNumber<float>() : -1.0f;
-    JSRef<JSVal> itemReverse = jsObj->GetProperty("reverse");
-    auto reverse = (itemReverse->IsBoolean()) ? itemReverse->ToBoolean() : false;
-
-    ModelView::GetInstance()->AddGLTFAnimation(std::make_shared<Render3D::GLTFAnimation>(
-        name, static_cast<Render3D::AnimationState>(state), repeatCount, speed, duration, reverse));
 }
 
 void JSSceneView::JsAddCustomRender(const JSCallbackInfo& info)
@@ -541,40 +329,6 @@ void JSSceneView::JsAddCustomRender(const JSCallbackInfo& info)
     SetOhosPath(uri, ohosPath);
     auto desc = std::make_shared<Render3D::CustomRenderDescriptor>(ohosPath, info[1]->ToBoolean());
     ModelView::GetInstance()->AddCustomRender(desc);
-}
-
-void JSSceneView::JsWidth(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-
-    CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
-        return;
-    }
-
-    if (LessNotEqual(value.Value(), 0.0)) {
-        value.SetValue(0.0);
-    }
-    ModelView::GetInstance()->SetWidth(value);
-}
-
-void JSSceneView::JsHeight(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-
-    CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
-        return;
-    }
-
-    if (LessNotEqual(value.Value(), 0.0)) {
-        value.SetValue(0.0);
-    }
-    ModelView::GetInstance()->SetHeight(value);
 }
 
 void JSSceneView::JsRenderWidth(const JSCallbackInfo& info)
@@ -697,17 +451,8 @@ void JSSceneView::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSSceneView>::StaticMethod("create", &JSSceneView::Create, opt);
     JSClass<JSSceneView>::StaticMethod("gestureAccess", &JSSceneView::JsSetHandleCameraMove);
-    JSClass<JSSceneView>::StaticMethod("camera", &JSSceneView::JsCamera);
-    JSClass<JSSceneView>::StaticMethod("transparent", &JSSceneView::JsSetTransparent);
     JSClass<JSSceneView>::StaticMethod("environment", &JSSceneView::JsSetBackground);
-    JSClass<JSSceneView>::StaticMethod("light", &JSSceneView::JsLight);
-    JSClass<JSSceneView>::StaticMethod("cube", &JSSceneView::JsAddCube);
-    JSClass<JSSceneView>::StaticMethod("sphere", &JSSceneView::JsAddSphere);
-    JSClass<JSSceneView>::StaticMethod("cone", &JSSceneView::JsAddCone);
-    JSClass<JSSceneView>::StaticMethod("modelAnimation", &JSSceneView::JsGLTFAnimation);
     JSClass<JSSceneView>::StaticMethod("customRender", &JSSceneView::JsAddCustomRender);
-    JSClass<JSSceneView>::StaticMethod("width", &JSSceneView::JsWidth);
-    JSClass<JSSceneView>::StaticMethod("height", &JSSceneView::JsHeight);
     JSClass<JSSceneView>::StaticMethod("shader", &JSSceneView::JsShader);
     JSClass<JSSceneView>::StaticMethod("renderWidth", &JSSceneView::JsRenderWidth);
     JSClass<JSSceneView>::StaticMethod("renderHeight", &JSSceneView::JsRenderHeight);

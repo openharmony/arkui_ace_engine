@@ -65,6 +65,7 @@ public:
         return imageId_.value();
     }
 
+    void ClearAccessibilityChildTreeRegisterFlag();
 private:
     std::optional<int32_t> imageId_;
     std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;

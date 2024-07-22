@@ -1651,20 +1651,19 @@ typedef enum {
     ARKUI_FINISH_CALLBACK_LOGICALLY,
 } ArkUI_FinishCallbackType;
 
-
 /**
- * @brief 定义屏障线的方向。
+ * @brief defines the direction of the barrier line.
  *
  * @since 12
  */
 typedef enum {
-    /** 屏障在其所有referencedId的最左侧。*/
-    ARKUI_BARRIER_DIRECTION_LEFT = 0,
-    /** 屏障在其所有referencedId的最右侧。*/
-    ARKUI_BARRIER_DIRECTION_RIGHT,
-    /** 屏障在其所有referencedId的最上方。*/
+    /** The barrier is the leftmost of all its referencedIds. */
+    ARKUI_BARRIER_DIRECTION_START = 0,
+    /** The barrier is on the rightmost side of all its referencedIds. */
+    ARKUI_BARRIER_DIRECTION_END,
+    /** The barrier is at the top of all its referencedIds. */
     ARKUI_BARRIER_DIRECTION_TOP,
-    /** 屏障在其所有referencedId的最下方。*/
+    /** The barrier is at the bottom of all its referencedIds. */
     ARKUI_BARRIER_DIRECTION_BOTTOM
 } ArkUI_BarrierDirection;
 

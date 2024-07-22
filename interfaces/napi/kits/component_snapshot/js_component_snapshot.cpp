@@ -50,18 +50,12 @@ void OnComplete(SnapshotAsyncCtx* asyncCtx, std::function<void()> finishCallback
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     if (!container) {
         LOGW("container is null. %{public}d", asyncCtx->instanceId);
-        if (finishCallback) {
-            finishCallback();
-        }
         return;
     }
 
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
         LOGW("taskExecutor is null.");
-        if (finishCallback) {
-            finishCallback();
-        }
         return;
     }
     taskExecutor->PostTask(
@@ -309,8 +303,8 @@ static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
             "Can'nt get delegate of ace_engine. param: %{public}s",
             componentId.c_str());
-        NapiThrow(env, "ace engine delegate is null", ERROR_CODE_INTERNAL_ERROR);
-        napi_close_escapable_handle_scope(env, scope);
+        auto callback = helper.CreateCallback(&result);
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         return result;
     }
 

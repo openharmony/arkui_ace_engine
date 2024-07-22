@@ -29,9 +29,9 @@ export struct AtomicServiceTabs {
   @Prop index?: number | undefined = 0;
   @Prop barOverlap?: boolean = true;
   controller?: TabsController = new TabsController();
-  onChange?: (index: number) => void;
-  onTabBarClick?: (index: number) => void;
-  onContentWillChange?: (currentIndex: number, comingIndex: number) => boolean;
+  onChange?: Callback<number>;
+  onTabBarClick?: Callback<number>;
+  onContentWillChange?: OnContentWillChangeCallback;
 
   build() {
     Tabs({
@@ -89,3 +89,4 @@ export enum TabBarPosition {
 }
 
 export type TabContentBuilder = () => void;
+export type OnContentWillChangeCallback = (currentIndex: number, comingIndex: number) => boolean;

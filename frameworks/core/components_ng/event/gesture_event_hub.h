@@ -270,6 +270,11 @@ public:
         return clickEventActuator_ != nullptr;
     }
 
+    bool IsUserClickable() const
+    {
+        return clickEventActuator_ != nullptr && clickEventActuator_->IsUserClickable();
+    }
+
     bool IsAccessibilityClickable();
     bool IsAccessibilityLongClickable();
 
@@ -702,6 +707,12 @@ private:
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson,
         float scale);
+
+    template<typename T>
+    const RefPtr<T> GetAccessibilityRecognizer();
+
+    template<typename T>
+    const RefPtr<T> AccessibilityRecursionSearchRecognizer(const RefPtr<NGGestureRecognizer>& recognizer);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;

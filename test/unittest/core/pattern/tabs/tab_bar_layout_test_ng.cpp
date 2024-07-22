@@ -988,4 +988,563 @@ HWTEST_F(TabBarLayoutTestNg, TabBarPatternBeforeCreateLayoutWrapper003, TestSize
     CreateTabsDone(model);
     tabBarPattern_->BeforeCreateLayoutWrapper();
 }
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmMeasureScrollableMode001
+ * @tc.desc: test Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureScrollableMode001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+
+    /**
+     * @tc.steps: steps2. Set layoutStyle to LayoutStyle::ALWAYS_AVERAGE_SPLIT.
+     * @tc.expected: steps2. Verify visibleItemPosition.
+     */
+    auto margin = 100.0f;
+    ScrollableBarModeOptions option;
+    option.margin = Dimension(margin);
+    option.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_AVERAGE_SPLIT;
+    tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+
+    auto itemWidth = (TABS_WIDTH - margin * 2) / TABCONTENT_NUMBER;
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, margin);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, margin + itemWidth);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, TABCONTENT_NUMBER - 1);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, TABS_WIDTH - margin - itemWidth);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_WIDTH - margin);
+
+    /**
+     * @tc.steps: steps3. Set layoutStyle to LayoutStyle::SPACE_BETWEEN_OR_CENTER.
+     * @tc.expected: steps3. Verify visibleItemPosition.
+     */
+    option.nonScrollableLayoutStyle = LayoutStyle::SPACE_BETWEEN_OR_CENTER;
+    tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    itemWidth = TABS_WIDTH / 2 / TABCONTENT_NUMBER;
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, TABS_WIDTH / TABCONTENT_NUMBER);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, TABS_WIDTH / TABCONTENT_NUMBER + itemWidth);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, TABCONTENT_NUMBER - 1);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos,
+        TABS_WIDTH / TABCONTENT_NUMBER * 3 - itemWidth);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_WIDTH / TABCONTENT_NUMBER * 3);
+
+    /**
+     * @tc.steps: steps4. Set layoutStyle to LayoutStyle::ALWAYS_CENTER.
+     * @tc.expected: steps4. Verify visibleItemPosition.
+     */
+    option.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_CENTER;
+    tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    auto startPos = (TABS_WIDTH - BARITEM_SIZE * TABCONTENT_NUMBER) / 2;
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, startPos);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, startPos + BARITEM_SIZE);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, TABCONTENT_NUMBER - 1);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, startPos + BARITEM_SIZE * 3);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, startPos + BARITEM_SIZE * 4);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmMeasureScrollableMode002
+ * @tc.desc: test Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureScrollableMode002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+
+    /**
+     * @tc.steps: steps2. Set axis to horizontal, init child width and margin.
+     * @tc.expected: steps2. Verify visibleItemPosition.
+     */
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+    auto itemWidth = 200.0f;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        auto child = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(index));
+        ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
+    }
+    auto margin = 200.0f;
+    ScrollableBarModeOptions option;
+    option.margin = Dimension(200.0f);
+    tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, margin);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 2);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, margin + itemWidth * 3);
+
+    /**
+     * @tc.steps: steps3. Set barAdaptiveHeight to true.
+     * @tc.expected: steps3. Verify height of child node.
+     */
+    tabBarLayoutProperty_->UpdateBarAdaptiveHeight(true);
+    auto child1 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    auto child2 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
+    ViewAbstract::SetHeight(AceType::RawPtr(child1), CalcLength(60.0f));
+    ViewAbstract::SetHeight(AceType::RawPtr(child2), CalcLength(70.0f));
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(child1->GetGeometryNode()->GetMarginFrameSize().CrossSize(Axis::HORIZONTAL), 70.0f);
+
+    /**
+     * @tc.steps: steps4. Set axis to vertical.
+     * @tc.expected: steps4. Verify visibleItemPosition.
+     */
+    tabBarLayoutProperty_->UpdateAxis(Axis::VERTICAL);
+    auto itemHeight = 200.0f;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        auto child = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(index));
+        ViewAbstract::SetHeight(AceType::RawPtr(child), CalcLength(itemHeight));
+    }
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 1);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, itemWidth * 2);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmMeasureTargetIndex001
+ * @tc.desc: test Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureTargetIndex001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: steps2. Set tabBarMode to scrollable and axis to horizontal, init child item width.
+     * @tc.expected: steps2. Verify visibleItemPosition.
+     */
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+    auto itemWidth = 300.0f;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        auto child = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(index));
+        ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
+    }
+    /**
+     * @tc.steps: steps3. Set targetIndex to 3.
+     * @tc.expected: steps3. Verify visibleItemPosition.
+     */
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarPattern_->visibleItemPosition_[0] = { 0.0f, itemWidth };
+    tabBarPattern_->visibleItemPosition_[1] = { itemWidth, itemWidth * 2 };
+    tabBarPattern_->visibleItemPosition_[2] = { itemWidth * 2, itemWidth * 3 };
+    tabBarPattern_->targetIndex_ = 3;
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 3);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, itemWidth * 4);
+
+    /**
+     * @tc.steps: steps4. Set targetIndex to 0.
+     * @tc.expected: steps4. Verify visibleItemPosition.
+     */
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarPattern_->visibleItemPosition_[1] = { TABS_WIDTH - itemWidth * 3, TABS_WIDTH - itemWidth * 2 };
+    tabBarPattern_->visibleItemPosition_[2] = { TABS_WIDTH - itemWidth * 2, TABS_WIDTH - itemWidth };
+    tabBarPattern_->visibleItemPosition_[3] = { TABS_WIDTH - itemWidth, TABS_WIDTH };
+    tabBarPattern_->targetIndex_ = 0;
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, TABS_WIDTH - itemWidth * 4);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 3);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_WIDTH);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmMeasureJumpIndex001
+ * @tc.desc: test Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureJumpIndex001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: steps2. Set tabBarMode to scrollable and axis to horizontal, init child item width.
+     */
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+    auto itemWidth = 300.0f;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        auto child = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(index));
+        ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
+    }
+
+    /**
+     * @tc.steps: steps3. Jump to index 0.
+     * @tc.expected: steps3. Verify visibleItemPosition.
+     */
+    tabBarPattern_->jumpIndex_ = 0;
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 2);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, itemWidth * 3);
+
+    /**
+     * @tc.steps: steps4. Jump to index 1.
+     * @tc.expected: steps4. Verify visibleItemPosition.
+     */
+    tabBarPattern_->jumpIndex_ = 1;
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, (TABS_WIDTH - itemWidth) / 2 - itemWidth);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 2);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos,
+        TABS_WIDTH + itemWidth - (TABS_WIDTH - itemWidth) / 2);
+
+    /**
+     * @tc.steps: steps5. Jump to index 3.
+     * @tc.expected: steps5. Verify visibleItemPosition.
+     */
+    tabBarPattern_->jumpIndex_ = 3;
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 1);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, TABS_WIDTH - itemWidth * 3);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 3);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_WIDTH);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmMeasureWithOffset001
+ * @tc.desc: test Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureWithOffset001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: steps2. Set tabBarMode to scrollable and axis to horizontal, init child item width.
+     */
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+    auto itemWidth = 300.0f;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        auto child = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(index));
+        ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
+    }
+
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 2);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, itemWidth * 3);
+
+    /**
+     * @tc.steps: steps3. Set different currentDelta_.
+     * @tc.expected: steps3. Verify visibleItemPosition.
+     */
+    tabBarPattern_->canOverScroll_ = true;
+    auto currentDelta1 = 100.0f;
+    tabBarPattern_->currentDelta_ = currentDelta1;
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, currentDelta1);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 2);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, itemWidth * 3 + currentDelta1);
+
+    tabBarPattern_->canOverScroll_ = true;
+    auto currentDelta2 = -300.0f;
+    tabBarPattern_->currentDelta_ = currentDelta2;
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, currentDelta1 + currentDelta2);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 3);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos,
+        itemWidth * 4 + currentDelta1 + currentDelta2);
+
+    tabBarPattern_->canOverScroll_ = true;
+    auto currentDelta3 = -300.0f;
+    tabBarPattern_->currentDelta_ = currentDelta3;
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 1);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos,
+        itemWidth + currentDelta1 + currentDelta2 + currentDelta3);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 3);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos,
+        itemWidth * 4 + currentDelta1 + currentDelta2 + currentDelta3);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmMeasureWithOffset002
+ * @tc.desc: test Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureWithOffset002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: steps2. Set tabBarMode to scrollable and axis to horizontal, init child item width.
+     */
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+    auto itemWidth = 300.0f;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        auto child = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(index));
+        ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
+    }
+
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarPattern_->visibleItemPosition_[0] = { 0.0f, itemWidth };
+    tabBarPattern_->visibleItemPosition_[1] = { itemWidth, itemWidth * 2 };
+    tabBarPattern_->visibleItemPosition_[2] = { itemWidth * 2, itemWidth * 3 };
+
+    tabBarPattern_->canOverScroll_ = false;
+    auto currentDelta1 = 100.0f;
+    tabBarPattern_->currentDelta_ = currentDelta1;
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 2);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, itemWidth * 3);
+
+    tabBarPattern_->canOverScroll_ = false;
+    auto currentDelta2 = -500.0f;
+    tabBarPattern_->currentDelta_ = currentDelta2;
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 1);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, TABS_WIDTH - itemWidth * 3);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 3);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_WIDTH);
+
+    tabBarPattern_->canOverScroll_ = true;
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    tabBarPattern_->currentDelta_ = currentDelta1;
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 1);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos,
+        TABS_WIDTH - itemWidth * 3 - currentDelta1);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 3);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_WIDTH - currentDelta1);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmMeasureOverLengthItem001
+ * @tc.desc: test Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureOverLengthItem001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: steps2. Set tabBarMode to scrollable and axis to horizontal, init child item width.
+     */
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+    auto itemWidth = 800.0f;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        auto child = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(index));
+        ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
+    }
+
+    /**
+     * @tc.steps: steps3. Jump to index 1.
+     * @tc.expected: steps3. Verify visibleItemPosition.
+     */
+    tabBarPattern_->jumpIndex_ = 1;
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 1);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, itemWidth);
+
+    /**
+     * @tc.steps: steps3. Set targetIndex to 2.
+     * @tc.expected: steps3. Verify visibleItemPosition.
+     */
+    tabBarPattern_->targetIndex_ = 2;
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 1);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, itemWidth);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 2);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, itemWidth);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, itemWidth * 2);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmMeasureFixedMode001
+ * @tc.desc: test Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureFixedMode001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
+
+    /**
+     * @tc.steps: steps2. Set axis to horizontal.
+     * @tc.expected: steps2. Verify visibleItemPosition.
+     */
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, TABS_WIDTH / TABCONTENT_NUMBER);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, TABCONTENT_NUMBER - 1);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, TABS_WIDTH / TABCONTENT_NUMBER * 3);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_WIDTH);
+
+    /**
+     * @tc.steps: steps3. Set barAdaptiveHeight to true.
+     * @tc.expected: steps3. Verify height of child node.
+     */
+    tabBarLayoutProperty_->UpdateBarAdaptiveHeight(true);
+    auto child1 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    auto child2 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
+    ViewAbstract::SetHeight(AceType::RawPtr(child1), CalcLength(60.0f));
+    ViewAbstract::SetHeight(AceType::RawPtr(child2), CalcLength(70.0f));
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(child1->GetGeometryNode()->GetMarginFrameSize().CrossSize(Axis::HORIZONTAL), 70.0f);
+
+    /**
+     * @tc.steps: steps4. Set axis to vertical.
+     * @tc.expected: steps4. Verify visibleItemPosition.
+     */
+    tabBarLayoutProperty_->UpdateAxis(Axis::VERTICAL);
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, TABS_HEIGHT / TABCONTENT_NUMBER);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, TABCONTENT_NUMBER - 1);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, TABS_HEIGHT / TABCONTENT_NUMBER * 3);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_HEIGHT);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmMeasureFixedMode002
+ * @tc.desc: test Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureFixedMode002, TestSize.Level1)
+{
+    auto childCount = 3;
+    TabsModelNG model = CreateTabs();
+    for (int32_t index = 0; index < childCount; index++) {
+        CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    }
+    CreateTabsDone(model);
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
+
+    /**
+     * @tc.steps: steps2. Set axis to horizontal, init bottomTabBarStyle.
+     * @tc.expected: steps2. Verify visibleItemPosition.
+     */
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+    for (int32_t index = 0; index < childCount; index++) {
+        tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, index);
+        BottomTabBarStyle bottomTabBarStyle;
+        bottomTabBarStyle.symmetricExtensible = true;
+        tabBarPattern_->SetBottomTabBarStyle(bottomTabBarStyle, index);
+    }
+    auto child1 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    auto child2 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
+    auto child3 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(2));
+    ViewAbstract::SetWidth(AceType::RawPtr(child1), CalcLength(100.0f));
+    ViewAbstract::SetWidth(AceType::RawPtr(child2), CalcLength(300.0f));
+    ViewAbstract::SetWidth(AceType::RawPtr(child3), CalcLength(200.0f));
+
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, 220.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 2);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, 500.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_WIDTH);
+
+    /**
+     * @tc.steps: steps3. Set barAdaptiveHeight to true.
+     * @tc.expected: steps3. Verify height of child node.
+     */
+    tabBarLayoutProperty_->UpdateBarAdaptiveHeight(true);
+    ViewAbstract::SetHeight(AceType::RawPtr(child1), CalcLength(60.0f));
+    ViewAbstract::SetHeight(AceType::RawPtr(child2), CalcLength(70.0f));
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(tabBarNode_);
+    EXPECT_EQ(child1->GetGeometryNode()->GetMarginFrameSize().CrossSize(Axis::HORIZONTAL), 70.0f);
+
+    /**
+     * @tc.steps: steps4. Set axis to vertical.
+     * @tc.expected: steps4. Verify visibleItemPosition.
+     */
+    tabBarLayoutProperty_->UpdateAxis(Axis::VERTICAL);
+    tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(TABS_WIDTH));
+    tabBarPattern_->visibleItemPosition_.clear();
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    auto itemWidth = TABS_WIDTH / 2 / childCount;
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, TABS_WIDTH / 4);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, TABS_WIDTH / 4 + itemWidth);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, childCount - 1);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, TABS_WIDTH / 4 * 3 - itemWidth);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_WIDTH / 4 * 3);
+}
 } // namespace OHOS::Ace::NG

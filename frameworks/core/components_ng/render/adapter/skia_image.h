@@ -101,6 +101,7 @@ public:
     static SkColorType PixelFormatToSkColorType(const RefPtr<PixelMap>& pixmap);
 
 private:
+    void DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override {}
     void ClipRRect(RSCanvas& canvas, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
     bool DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusArray& radiusXY);
 

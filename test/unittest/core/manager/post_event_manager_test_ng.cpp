@@ -321,4 +321,63 @@ HWTEST_F(PostEventManagerTestNg, PostEventManagerTest005, TestSize.Level1)
     result = postEventManager_->PostEvent(root_, touchUpEvent);
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: HandlePostEventTest001
+ * @tc.desc: test HandlePostEvent func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, HandlePostEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a FrameNode and set gesture.
+     */
+    Init();
+
+    /**
+     * @tc.steps: step2. mock user touch event.
+     */
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 1,
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    TouchEvent touchEvent;
+
+    const std::vector<Ace::TouchType> touchTypeArray = { Ace::TouchType::DOWN, Ace::TouchType::UP };
+    int32_t touchStateCount = 4;
+    for (int32_t i = 0; i < touchStateCount; ++i) {
+        int32_t index = i % touchTypeArray.size();
+        touchEvent.type = touchTypeArray[index];
+        touchEvent.id = touchTypeArray.size() > 0 ? i / touchTypeArray.size() : i;
+        postEventManager_->HandlePostEvent(buttonNode, touchEvent);
+    }
+    EXPECT_TRUE(postEventManager_->lastEventMap_.empty());
+}
+
+/**
+ * @tc.name: PostDownEventTest001
+ * @tc.desc: test PostDownEvent func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostDownEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a FrameNode and set gesture.
+     */
+    Init();
+
+    /**
+     * @tc.steps: step2. Simulate when the user touchDown and then handles the out-of-hand
+     *                   action event through the PostDownEvent function.
+     */
+    int32_t nodeId = 1;
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    TouchEvent touchEvent;
+    touchEvent.type = Ace::TouchType::DOWN;
+    touchEvent.id = nodeId;
+    postEventManager_->HandlePostEvent(buttonNode, touchEvent);
+
+    postEventManager_->PostDownEvent(buttonNode, touchEvent);
+    EXPECT_TRUE(postEventManager_->postEventAction_.empty());
+    EXPECT_TRUE(postEventManager_->lastEventMap_.empty());
+}
 } // namespace OHOS::Ace::NG

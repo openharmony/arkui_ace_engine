@@ -24,6 +24,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const char DOM_SVG_SRC_VIEW_BOX[] = "viewBox";
+constexpr float HALF = 0.5f;
 }
 
 SvgSvg::SvgSvg() : SvgGroup() {}
@@ -54,6 +55,53 @@ RSRecordingPath SvgSvg::AsPath(const Size& viewPort) const
     return path;
 }
 #endif
+
+void SvgSvg::AdjustContentAreaByViewBox(RSCanvas& canvas, const Size& viewPort)
+{
+    auto svgSize = GetSize();
+    auto viewBox = GetViewBox();
+    if (LessOrEqual(viewBox.Width(), 0.0) || LessOrEqual(viewBox.Height(), 0.0)) {
+        RSRect clipRect(0.0f, 0.0f, LessNotEqual(svgSize.Width(), 0.0) ? viewPort.Width() : svgSize.Width(),
+            LessNotEqual(svgSize.Height(), 0.0) ? viewPort.Height() : svgSize.Height());
+        canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
+        return;
+    }
+    if (LessNotEqual(svgSize.Width(), 0.0) && LessNotEqual(svgSize.Height(), 0.0)) {
+        RSRect clipRect(0.0f, 0.0f, viewPort.Width(), viewPort.Height());
+        canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
+        auto scale = std::min(viewPort.Width() / viewBox.Width(), viewPort.Height() / viewBox.Height());
+        auto translateX = (viewPort.Width() - viewBox.Width() * scale) * HALF;
+        auto translateY = (viewPort.Height() - viewBox.Height() * scale) * HALF;
+        canvas.Translate(translateX, translateY);
+        canvas.Scale(scale, scale);
+        canvas.Translate(-1 * viewBox.Left(), -1 * viewBox.Top());
+        return;
+    }
+    if (LessNotEqual(svgSize.Width(), 0.0)) {
+        RSRect clipRect(0.0f, 0.0f, viewBox.Width() / viewBox.Height() * svgSize.Height(), svgSize.Height());
+        canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
+        auto scaleY = svgSize.Height() / viewBox.Height();
+        canvas.Scale(scaleY, scaleY);
+        canvas.Translate(-1 * viewBox.Left(), -1 * viewBox.Top());
+        return;
+    }
+    if (LessNotEqual(svgSize.Height(), 0.0)) {
+        RSRect clipRect(0.0f, 0.0f, svgSize.Width(), viewBox.Height() / viewBox.Width() * svgSize.Width());
+        canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
+        auto scaleX = svgSize.Width() / viewBox.Width();
+        canvas.Scale(scaleX, scaleX);
+        canvas.Translate(-1 * viewBox.Left(), -1 * viewBox.Top());
+        return;
+    }
+    RSRect clipRect(0.0f, 0.0f, svgSize.Width(), svgSize.Height());
+    canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
+    auto scale = std::min(svgSize.Width() / viewBox.Width(), svgSize.Height() / viewBox.Height());
+    auto translateX = (svgSize.Width() - viewBox.Width() * scale) * HALF;
+    auto translateY = (svgSize.Height() - viewBox.Height() * scale) * HALF;
+    canvas.Translate(translateX, translateY);
+    canvas.Scale(scale, scale);
+    canvas.Translate(-1 * viewBox.Left(), -1 * viewBox.Top());
+}
 
 Size SvgSvg::GetSize() const
 {

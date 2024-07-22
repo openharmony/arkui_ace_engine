@@ -33,13 +33,17 @@ constexpr double SELECT_OPTION_LEFT_LENGTH = 16.0;
 constexpr double SELECT_OPTION_TOP_LENGTH = 15.0;
 constexpr double SELECT_OPTION_RIGHT_LENGTH = 16.0;
 constexpr double SELECT_OPTION_BOTTOM_LENGTH = 15.0;
-constexpr double NONE_SHADOW_VALUE = 6.0;
-constexpr double CONTENT_ALIGN_LEFT = 4.0;
+constexpr uint32_t CONTENT_ALIGN_LEFT = 4;
 constexpr Dimension VERTICAL_INTERVAL = 14.4_vp;
 constexpr Dimension MENU_END_ICON_WIDTH = 24.0_vp;
 constexpr Dimension MENU_END_ICON_HEIGHT = 24.0_vp;
 constexpr Dimension DEFAULT_MENU_WIDTH = 0.0_vp;
 constexpr Dimension MIN_MENU_WIDTH = 64.0_vp;
+constexpr double TITLE_LEFT_PADDING = 16.0;
+constexpr double TITLE_TOP_PADDING = 8.0;
+constexpr double TITLE_RIGHT_PADDING = 8.0;
+constexpr double TITLE_BOTTOM_PADDING = 16.0;
+constexpr double SELECT_OPTION_INTERVAL = 6.0;
 
 /**
  * SelectTheme defines color and styles of SelectComponent. SelectTheme should be build
@@ -255,10 +259,10 @@ public:
 
         void ParseAttribute(const RefPtr<SelectTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
         {
-            theme->titleLeftPadding_ = Dimension(16.0, DimensionUnit::VP);
-            theme->titleTopPadding_ = Dimension(8.0, DimensionUnit::VP);
-            theme->titleRightPadding_ = Dimension(8.0, DimensionUnit::VP);
-            theme->titleBottomPadding_ = Dimension(16.0, DimensionUnit::VP);
+            theme->titleLeftPadding_ = Dimension(TITLE_LEFT_PADDING, DimensionUnit::VP);
+            theme->titleTopPadding_ = Dimension(TITLE_TOP_PADDING, DimensionUnit::VP);
+            theme->titleRightPadding_ = Dimension(TITLE_RIGHT_PADDING, DimensionUnit::VP);
+            theme->titleBottomPadding_ = Dimension(TITLE_BOTTOM_PADDING, DimensionUnit::VP);
             theme->titleStyle_.SetFontSize(pattern->GetAttr<Dimension>("text_size_headline7", 24.0_vp));
             std::vector<std::string> families;
             families.emplace_back("sans-serif");
@@ -268,7 +272,7 @@ public:
             theme->titleStyle_.SetTextDecoration(TextDecoration::NONE);
             theme->optionPadding_ = Edge(SELECT_OPTION_LEFT_LENGTH, SELECT_OPTION_TOP_LENGTH,
                 SELECT_OPTION_RIGHT_LENGTH, SELECT_OPTION_BOTTOM_LENGTH, DimensionUnit::VP);
-            theme->optionInterval_ = theme->isTV_ ? Dimension(6.0, DimensionUnit::VP) : 0.0_vp;
+            theme->optionInterval_ = theme->isTV_ ? Dimension(SELECT_OPTION_INTERVAL, DimensionUnit::VP) : 0.0_vp;
             theme->tvFocusTextColor_ = Color(0xE6000000);
             theme->tvNormalBackColor_ = Color(0x33FFFFFF);
             theme->tvBackColor_ = (theme->isTV_ ? Color(0x99000000) : Color::TRANSPARENT);
@@ -288,17 +292,12 @@ public:
             theme->optionTextStyle_.SetTextDecoration(TextDecoration::NONE);
             theme->menuLargeMargin_ = pattern->GetAttr<Dimension>("menu_large_margin", theme->menuLargeMargin_);
             theme->menuMediumMargin_ = pattern->GetAttr<Dimension>("menu_medium_margin", theme->menuMediumMargin_);
-            theme->menuItemTopBottomMargin_ = pattern->GetAttr<Dimension>("menu_item_top_bottom_margin", 0.0_vp);
-            theme->menuItemLeftRightMargin_ = pattern->GetAttr<Dimension>("menu_item_left_right_margin", 0.0_vp);
-            theme->menuTargetSecuritySpace_ = pattern->GetAttr<Dimension>("menu_target_security_space", 8.0_vp);
-            theme->menuItemFocusedBgColor_ =
-                pattern->GetAttr<Color>("menu_item_focused_bg_color", Color::TRANSPARENT);
-            theme->menuItemFocusedTextColor_ =
-                pattern->GetAttr<Color>("menu_item_focused_text_color", Color(0xff182431));
-            theme->menuItemFocusedShadowStyle_ =
-                static_cast<uint32_t>(pattern->GetAttr<double>("menu_item_focused_shadow_style", NONE_SHADOW_VALUE));
-            theme->menuItemContentAlign_ =
-                static_cast<uint32_t>(pattern->GetAttr<double>("menu_item_content_align", CONTENT_ALIGN_LEFT));
+            theme->menuItemChildMinHeight_ = pattern->GetAttr<Dimension>("menu_item_child_min_height", 32.0_vp);
+            theme->menuItemVerticalPadding_ = pattern->GetAttr<Dimension>("menu_item_vertical_padding", 8.0_vp);
+            theme->menuItemGroupTitleTextFontSize_ =
+                pattern->GetAttr<Dimension>("menu_item_group_title_text_font_size", 18.0_vp);
+            theme->menuDefaultRadius_ = pattern->GetAttr<Dimension>("menu_default_radius", 20.0_vp);
+            theme->menuTextColor_= pattern->GetAttr<Color>("menu_text_color", Color(0xe5000000));
         }
     };
 
@@ -417,13 +416,11 @@ public:
         theme->maxPaddingEnd_ = maxPaddingEnd_;
         theme->menuLargeMargin_ = menuLargeMargin_;
         theme->menuMediumMargin_ = menuMediumMargin_;
-        theme->menuItemTopBottomMargin_ = menuItemTopBottomMargin_;
-        theme->menuItemLeftRightMargin_ = menuItemLeftRightMargin_;
-        theme->menuTargetSecuritySpace_ = menuTargetSecuritySpace_;
-        theme->menuItemFocusedBgColor_ = menuItemFocusedBgColor_;
-        theme->menuItemFocusedTextColor_ = menuItemFocusedTextColor_;
-        theme->menuItemFocusedShadowStyle_ = menuItemFocusedShadowStyle_;
-        theme->menuItemContentAlign_ = menuItemContentAlign_;
+        theme->menuItemChildMinHeight_ = menuItemChildMinHeight_;
+        theme->menuItemVerticalPadding_ = menuItemVerticalPadding_;
+        theme->menuItemGroupTitleTextFontSize_ = menuItemGroupTitleTextFontSize_;
+        theme->menuDefaultRadius_ = menuDefaultRadius_;
+        theme->menuTextColor_ = menuTextColor_;
     }
 
     const Color& GetSelectedColorText() const
@@ -1078,34 +1075,29 @@ public:
         return menuMediumMargin_;
     }
 
-    const Dimension& GetMenuItemTopBottomMargin() const
+    const Dimension& GetMenuChildMinHeight() const
     {
-        return menuItemTopBottomMargin_;
+        return menuItemChildMinHeight_;
     }
 
-    const Dimension& GetMenuItemLeftRightMargin() const
+    const Dimension& GetMenuItemVerticalPadding() const
     {
-        return menuItemLeftRightMargin_;
+        return menuItemVerticalPadding_;
     }
 
-    const Dimension& GetMenuTargetSecuritySpace() const
+    const Dimension& GetMenuItemGroupTitleTextFontSize() const
     {
-        return menuTargetSecuritySpace_;
+        return menuItemGroupTitleTextFontSize_;
     }
 
-    const Color& GetMenuItemFocusedBgColor() const
+    const Dimension& GetMenuDefaultRadius() const
     {
-        return menuItemFocusedBgColor_;
+        return menuDefaultRadius_;
     }
 
-    const Color& GetMenuItemFocusedTextColor() const
+    const Color& GetMenuTextColor() const
     {
-        return menuItemFocusedTextColor_;
-    }
-
-    const uint32_t& GetMenuItemFocusedShadowStyle() const
-    {
-        return menuItemFocusedShadowStyle_;
+        return menuTextColor_;
     }
 
     const uint32_t& GetMenuItemContentAlign() const
@@ -1227,13 +1219,12 @@ private:
     std::unordered_map<ControlSize, Dimension> selectFontSizeMap_;
     Dimension menuLargeMargin_;
     Dimension menuMediumMargin_;
-    Dimension menuItemTopBottomMargin_;
-    Dimension menuItemLeftRightMargin_;
-    Dimension menuTargetSecuritySpace_;
-    Color menuItemFocusedBgColor_;
-    Color menuItemFocusedTextColor_;
-    uint32_t menuItemFocusedShadowStyle_;
-    uint32_t menuItemContentAlign_;
+    Dimension menuItemChildMinHeight_;
+    Dimension menuItemVerticalPadding_;
+    Dimension menuItemGroupTitleTextFontSize_;
+    Dimension menuDefaultRadius_;
+    Color menuTextColor_;
+    uint32_t menuItemContentAlign_ = CONTENT_ALIGN_LEFT;
 };
 
 } // namespace OHOS::Ace

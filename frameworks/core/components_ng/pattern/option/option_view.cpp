@@ -249,7 +249,8 @@ RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, std::vector<
 
 #ifdef OHOS_PLATFORM
     constexpr char BUTTON_PASTE[] = "textoverlay.paste";
-    if (params[index].value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
+    if (params[index].value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE) ||
+        params[index].isPasteOption) {
         CreatePasteButton(optionsHasIcon, option, row, params[index].action);
     } else {
         CreateOption(optionsHasIcon, params, index, row, option);
@@ -260,7 +261,7 @@ RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, std::vector<
     return option;
 }
 
-RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const std::string& value,
+RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const OptionValueInfo& value,
     const std::function<void()>& onClickFunc, int32_t index, const std::string& icon)
 {
     auto option = Create(index);
@@ -270,13 +271,13 @@ RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const std::s
 
 #ifdef OHOS_PLATFORM
     constexpr char BUTTON_PASTE[] = "textoverlay.paste";
-    if (value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
+    if (value.value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE) || value.isPasteOption) {
         CreatePasteButton(optionsHasIcon, option, row, onClickFunc, icon);
     } else {
-        CreateOption(optionsHasIcon, value, icon, row, option, onClickFunc);
+        CreateOption(optionsHasIcon, value.value, icon, row, option, onClickFunc);
     }
 #else
-    CreateOption(optionsHasIcon, value, icon, row, option, onClickFunc);
+    CreateOption(optionsHasIcon, value.value, icon, row, option, onClickFunc);
 #endif
     return option;
 }

@@ -89,13 +89,11 @@ void BadgeModelNG::UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefP
     } else {
         layoutProperty->UpdateBadgeColor(badgeTheme->GetBadgeColor());
     }
-
-    auto textColor = badgeParameters.badgeTextColor.has_value() ? badgeParameters.badgeTextColor.value()
-            : badgeTheme->GetBadgeTextColor();
-    layoutProperty->UpdateBadgeTextColor(textColor);
-    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, textColor);
-    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
-
+    if (badgeParameters.badgeTextColor.has_value()) {
+        layoutProperty->UpdateBadgeTextColor(badgeParameters.badgeTextColor.value());
+    } else {
+        layoutProperty->UpdateBadgeTextColor(badgeTheme->GetBadgeTextColor());
+    }
     if (badgeParameters.badgeFontSize.has_value()) {
         layoutProperty->UpdateBadgeFontSize(badgeParameters.badgeFontSize.value());
     }

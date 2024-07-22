@@ -51,7 +51,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr char ABILITY_KEY_ASYNC[] = "ability.want.params.KeyAsync";
 constexpr char PROHIBIT_NESTING_FAIL_NAME[] = "Prohibit_Nesting_SecurityUIExtensionComponent";
 constexpr char PROHIBIT_NESTING_FAIL_MESSAGE[] =
     "Prohibit nesting securityUIExtensionComponent in securityUIExtensionAbility";
@@ -171,6 +170,8 @@ void SecurityUIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     }
 
     CHECK_NULL_VOID(sessionWrapper_);
+    PLATFORM_LOGI("The current state is '%{public}s' when UpdateWant.", ToString(state_));
+    bool isBackground = state_ == AbilityState::BACKGROUND;
     // Prohibit rebuilding the session unless the Want is updated.
     if (sessionWrapper_->IsSessionValid()) {
         if (sessionWrapper_->GetWant()->IsEquals(want)) {
@@ -184,12 +185,14 @@ void SecurityUIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         NotifyDestroy();
     }
 
-    isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
-    PLATFORM_LOGI("The ability KeyAsync %{public}d.", isKeyAsync_);
     MountPlaceholderNode();
     SessionConfig config;
     config.uiExtensionUsage = UIExtensionUsage::CONSTRAINED_EMBEDDED;
     sessionWrapper_->CreateSession(want, config);
+    if (isBackground) {
+        PLATFORM_LOGW("Unable to StartUiextensionAbility while in the background.");
+        return;
+    }
     NotifyForeground();
 }
 
@@ -278,20 +281,9 @@ void SecurityUIExtensionPattern::OnAreaChangedInner()
 void SecurityUIExtensionPattern::FireBindModalCallback()
 {}
 
-bool SecurityUIExtensionPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+void SecurityUIExtensionPattern::OnSyncGeometryNode(const DirtySwapConfig& config)
 {
-    CHECK_NULL_RETURN(sessionWrapper_, false);
-    CHECK_NULL_RETURN(dirty, false);
-    auto host = dirty->GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate();
-    auto geometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto displaySize = geometryNode->GetFrameSize();
-    displayArea_ = RectF(displayOffset, displaySize);
-    sessionWrapper_->NotifyDisplayArea(displayArea_);
-    return false;
+    DispatchDisplayArea(true);
 }
 
 void SecurityUIExtensionPattern::OnWindowShow()
@@ -402,26 +394,32 @@ bool SecurityUIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
         event.IsKey({ KeyCode::KEY_MOVE_HOME }) || event.IsKey({ KeyCode::KEY_MOVE_END }) || event.IsEscapeKey())) {
         return false;
     }
-    if (isKeyAsync_) {
-        sessionWrapper_->NotifyKeyEventAsync(event.rawKeyEvent, false);
-        return true;
-    }
     return sessionWrapper_->NotifyKeyEventSync(event.rawKeyEvent, event.isPreIme);
 }
 
 void SecurityUIExtensionPattern::HandleFocusEvent()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     if (pipeline->GetIsFocusActive()) {
         DispatchFocusActiveEvent(true);
     }
     DispatchFocusState(true);
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    uiExtensionManager->RegisterSecurityUIExtensionInFocus(
+        WeakClaim(this), sessionWrapper_);
 }
 
 void SecurityUIExtensionPattern::HandleBlurEvent()
 {
     DispatchFocusActiveEvent(false);
     DispatchFocusState(false);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    uiExtensionManager->RegisterSecurityUIExtensionInFocus(nullptr, nullptr);
 }
 
 void SecurityUIExtensionPattern::DispatchFocusActiveEvent(bool isFocusActive)
@@ -482,6 +480,18 @@ void SecurityUIExtensionPattern::FireOnTerminatedCallback(
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnTerminatedCallback(code, wantWrap);
     state_ = AbilityState::DESTRUCTION;
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        sessionWrapper_->DestroySession();
+    }
+}
+
+void SecurityUIExtensionPattern::FireOnErrorCallback(
+    int32_t code, const std::string& name, const std::string& message)
+{
+    PlatformPattern::FireOnErrorCallback(code, name, message);
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        sessionWrapper_->DestroySession();
+    }
 }
 
 void SecurityUIExtensionPattern::FireOnReceiveCallback(const AAFwk::WantParams& params)
@@ -503,7 +513,7 @@ void SecurityUIExtensionPattern::SetSyncCallbacks(
 
 void SecurityUIExtensionPattern::FireSyncCallbacks()
 {
-    PLATFORM_LOGD("The size of sync callbacks = %{public}zu.", onSyncOnCallbackList_.size());
+    PLATFORM_LOGI("The size of sync callbacks = %{public}zu.", onSyncOnCallbackList_.size());
     ContainerScope scope(instanceId_);
     for (const auto& callback : onSyncOnCallbackList_) {
         if (callback) {
@@ -520,7 +530,7 @@ void SecurityUIExtensionPattern::SetAsyncCallbacks(
 
 void SecurityUIExtensionPattern::FireAsyncCallbacks()
 {
-    PLATFORM_LOGD("The size of async callbacks = %{public}zu.", onSyncOnCallbackList_.size());
+    PLATFORM_LOGI("The size of async callbacks = %{public}zu.", onSyncOnCallbackList_.size());
     ContainerScope scope(instanceId_);
     for (const auto& callback : onAsyncOnCallbackList_) {
         if (callback) {
@@ -573,6 +583,8 @@ void SecurityUIExtensionPattern::OnMountToParentDone()
         PLATFORM_LOGI("Frame node status is normal.");
         return;
     }
+
+    PLATFORM_LOGI("OnMountToParentDone");
     auto wantWrap = GetWantWrap();
     CHECK_NULL_VOID(wantWrap);
     UpdateWant(wantWrap);
@@ -592,6 +604,15 @@ void SecurityUIExtensionPattern::RegisterVisibleAreaChange()
     CHECK_NULL_VOID(host);
     std::vector<double> ratioList = { 0.0 };
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+}
+
+void SecurityUIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocusImmediately();
 }
 
 void SecurityUIExtensionPattern::OnLanguageConfigurationUpdate()

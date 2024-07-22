@@ -116,7 +116,7 @@ private:
     std::string icon_;
     std::optional<TabBarSymbol> symbol_;
     TabBarBuilderFunc builder_;
-    TabBarStyle tabBarStyle_;
+    TabBarStyle tabBarStyle_ = TabBarStyle::NOSTYLE;
     FrameNode* node_ = nullptr;
 };
 
@@ -536,8 +536,6 @@ private:
     void RemoveTabBarEventCallback();
     void AddTabBarEventCallback();
     void AddMaskItemClickEvent();
-    void TabBarSuitAging();
-    void SetMarginVP(MarginProperty& marginLeftOrRight, MarginProperty& marginTopOrBottom);
     bool CanScroll() const;
     bool ParseTabsIsRtl();
     bool IsValidIndex(int32_t index);
@@ -581,7 +579,7 @@ private:
     std::optional<int32_t> touchingIndex_;
     std::optional<int32_t> hoverIndex_;
     std::optional<int32_t> moveIndex_;
-    TabBarStyle tabBarStyle_;
+    TabBarStyle tabBarStyle_ = TabBarStyle::NOSTYLE;
     float currentIndicatorOffset_ = 0.0f;
     std::vector<SelectedMode> selectedModes_;
     std::vector<IndicatorStyle> indicatorStyles_;
@@ -616,8 +614,6 @@ private:
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     bool canOverScroll_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
-    MarginProperty marginLeftOrRight_;
-    MarginProperty marginTopOrBottom_;
 };
 } // namespace OHOS::Ace::NG
 

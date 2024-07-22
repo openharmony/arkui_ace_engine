@@ -628,6 +628,8 @@ void HtmlToSpan::HandleImgSpanOption(const Styles& styleMap, ImageSpanOptions& o
             options.imageAttribute->objectFit = ConvertStrToFit(value);
         } else if (key == "vertical-align") {
             options.imageAttribute->verticalAlign = StringToTextVerticalAlign(value);
+        } else if (key == "width" || key == "height") {
+            HandleImageSize(key, value, options);
         }
     }
 }
@@ -681,9 +683,7 @@ void HtmlToSpan::HandleImageSize(const std::string& key, const std::string& valu
 
 void HtmlToSpan::MakeImageSpanOptions(const std::string& key, const std::string& value, ImageSpanOptions& options)
 {
-    if (key == "width" || key == "height") {
-        HandleImageSize(key, value, options);
-    } else if (key == "src") {
+    if (key == "src") {
         options.image = value;
         HandleImagePixelMap(value, options);
     } else if (key == "style") {
@@ -814,7 +814,20 @@ std::map<std::string, HtmlToSpan::StyleValue> HtmlToSpan::ToTextSpanStyle(xmlAtt
     return styleValues;
 }
 
-void HtmlToSpan::ToTextSpan(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos)
+void HtmlToSpan::AddStyleSpan(const std::string& element, SpanInfo& info)
+{
+    std::map<std::string, StyleValue> styles;
+    if (element == "strong") {
+        InitFont("font-weight", "bold", "font", styles);
+    }
+
+    for (auto [key, value] : styles) {
+        info.values.emplace_back(value);
+    }
+}
+
+void HtmlToSpan::ToTextSpan(
+    const std::string& element, xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos)
 {
     SpanInfo info;
     info.type = HtmlType::TEXT;
@@ -826,6 +839,9 @@ void HtmlToSpan::ToTextSpan(xmlNodePtr node, size_t len, size_t& pos, std::vecto
         for (auto [key, value] : styles) {
             info.values.emplace_back(value);
         }
+    }
+    if (!element.empty()) {
+        AddStyleSpan(element, info);
     }
     spanInfos.emplace_back(std::move(info));
 }
@@ -922,7 +938,7 @@ void HtmlToSpan::ToSpan(
         ToImage(curNode, contentLen, pos, spanInfos);
         curNodeLen++;
     } else if (nameStr == "span" || nameStr == "strong" || nameStr == "figure") {
-        ToTextSpan(curNode, contentLen, pos, spanInfos);
+        ToTextSpan(nameStr, curNode, contentLen, pos, spanInfos);
     } else if (IsValidNode(nameStr)) {
         ToDefalutSpan(curNode, contentLen, pos, spanInfos);
     }

@@ -209,6 +209,10 @@ protected:
 private:
     void ExtractInfoToImage(CanvasImage& image, const JSCallbackInfo& info, bool isImage);
     JSRef<JSObject> createGradientObj(const std::shared_ptr<Gradient>& gradient);
+    void DrawSvgImage(const JSCallbackInfo& info, JSRenderImage* jsImage);
+    void DrawImage(const JSCallbackInfo& info, JSRenderImage* jsImage);
+    void DrawPixelMap(const JSCallbackInfo& info);
+
     PaintState paintState_;
     TextStyle style_;
     static std::unordered_map<int32_t, std::shared_ptr<Pattern>> pattern_;

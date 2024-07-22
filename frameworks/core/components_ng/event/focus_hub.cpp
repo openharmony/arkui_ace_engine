@@ -1183,8 +1183,7 @@ void FocusHub::OnBlurNode()
     CHECK_NULL_VOID(frameNode);
     auto* pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
-        auto focusHub = weak.Upgrade();
+    pipeline->AddAfterLayoutTask([focusHub = Claim(this)]() {
         CHECK_NULL_VOID(focusHub);
         auto onBlurCallback = focusHub->GetOnBlurCallback();
         if (onBlurCallback) {
@@ -1306,7 +1305,7 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
         return true;
     }
 
-    if (focusStyleType_ == FocusStyleType::NONE) {
+    if (focusStyleType_ == FocusStyleType::NONE && !box_.HasCustomStyle()) {
         return false;
     }
 
@@ -1468,7 +1467,7 @@ void FocusHub::ClearFocusState(bool isNeedStateStyles)
     if (onClearFocusStateCallback_) {
         onClearFocusStateCallback_();
     }
-    if (focusStyleType_ != FocusStyleType::NONE) {
+    if (focusStyleType_ != FocusStyleType::NONE || box_.HasCustomStyle()) {
         auto frameNode = GetFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto renderContext = frameNode->GetRenderContext();
@@ -1498,7 +1497,7 @@ bool FocusHub::IsNeedPaintFocusState()
 {
     if (currentFocus_ && IsFocusableNode() &&
         (focusDepend_ == FocusDependence::SELF || focusType_ == FocusType::NODE)) {
-        return focusStyleType_ != FocusStyleType::NONE || HasFocusStateStyle();
+        return focusStyleType_ != FocusStyleType::NONE || HasFocusStateStyle() || box_.HasCustomStyle();
     }
     auto lastFocusNode = GetLastWeakFocusNode().Upgrade();
     while (lastFocusNode) {
@@ -1510,7 +1509,7 @@ bool FocusHub::IsNeedPaintFocusState()
         }
         lastFocusNode = lastFocusNode->GetLastWeakFocusNode().Upgrade();
     }
-    return focusStyleType_ != FocusStyleType::NONE || HasFocusStateStyle();
+    return focusStyleType_ != FocusStyleType::NONE || HasFocusStateStyle() || box_.HasCustomStyle();
 }
 
 bool FocusHub::AcceptFocusOfSpecifyChild(FocusStep step)
@@ -1681,6 +1680,19 @@ bool FocusHub::CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) con
     auto frameNode = childNode->GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
     rect = frameNode->GetPaintRectWithTransform();
+
+    //  Calculate currentNode -> childNode offset
+    auto uiNode = frameNode->GetParent();
+    CHECK_NULL_RETURN(uiNode, false);
+    while (uiNode != GetFrameNode()) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+        if (!frameNode) {
+            uiNode = uiNode -> GetParent();
+            continue;
+        }
+        rect += frameNode->GetPaintRectWithTransform().GetOffset();
+        uiNode = frameNode->GetParent();
+    }
     return true;
 }
 

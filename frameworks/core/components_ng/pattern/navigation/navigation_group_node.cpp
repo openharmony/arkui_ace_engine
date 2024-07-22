@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 #include "base/log/ace_checker.h"
@@ -29,6 +29,11 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/theme/app_theme.h"
+
+#if !defined(ACE_UNITTEST)
+#include "core/components_ng/base/transparent_node_detector.h"
+#endif
+
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -250,13 +255,19 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
             ++slot;
             continue;
         }
+        // The NavDestination in the EXIT animation needs to be cleaned in the animation onfinish callback.
         if (navDestination->IsOnAnimation()) {
-            if (maxAnimatingDestination == nullptr) {
-                maxAnimatingDestination = navDestination;
+            if (navDestination->GetTransitionType() == PageTransitionType::EXIT_POP) {
+                ++animatingSize;
+                continue;
             }
-            // The NavDestination in the animation needs to be cleaned in the animation onfinish callback.
-            ++animatingSize;
-            continue;
+            if (navDestination->NeedRemoveInPush()) {
+                if (maxAnimatingDestination == nullptr) {
+                    maxAnimatingDestination = navDestination;
+                }
+                ++animatingSize;
+                continue;
+            }
         }
         // remove content child
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
@@ -595,7 +606,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
         SetNeedSetInvisible(false);
     }
     isOnAnimation_ = true;
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     UiSessionManager::GetInstance().OnRouterChange(navigationPathInfo_, "navigationPopPage");
 #endif
 }
@@ -777,8 +788,11 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                 nodeMap, endTime - startTime, navigation->GetNavigationPathInfo());
         });
     }
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     UiSessionManager::GetInstance().OnRouterChange(navigationPathInfo_, "navigationPushPage");
+#endif
+#if !defined(ACE_UNITTEST)
+    TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(curNode);
 #endif
 }
 

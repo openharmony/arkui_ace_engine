@@ -17,9 +17,7 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {
-const InspectorFilter filter;
-} // namespace
+namespace {} // namespace
 
 class ListAttrTestNg : public ListTestNg {
 public:
@@ -53,6 +51,7 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
      * @tc.steps: step1. Call ToJsonValue()
      * @tc.expected: The json value is correct
      */
+    InspectorFilter filter;
     auto json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(Dimension::FromString(json->GetString("space")), Dimension(10));
@@ -176,6 +175,23 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListLayoutProperty003
+ * @tc.desc: Test List layout properties with fastFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListLayoutProperty003, TestSize.Level1)
+{
+    CreateList();
+    CreateDone(frameNode_);
+    InspectorFilter filter;
+    std::string attr = "editable";
+    filter.AddFilterAttr(attr);
+    auto json = JsonUtil::Create(true);
+    layoutProperty_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->ToString(), "{}");
+}
+
+/**
  * @tc.name: ListItemLayoutProperty001
  * @tc.desc: Test ListItem layout properties.
  * @tc.type: FUNC
@@ -191,6 +207,7 @@ HWTEST_F(ListAttrTestNg, ListItemLayoutProperty001, TestSize.Level1)
      * @tc.steps: step1. Call ToJsonValue()
      * @tc.expected: The json value is correct
      */
+    InspectorFilter filter;
     auto json = JsonUtil::Create(true);
     layoutProperty->ToJsonValue(json, filter);
     EXPECT_EQ(static_cast<V2::StickyMode>(json->GetInt("sticky")), V2::StickyMode::NONE);
@@ -252,6 +269,51 @@ HWTEST_F(ListAttrTestNg, ListItemLayoutProperty001, TestSize.Level1)
     itemModel = CreateListItem();
     itemModel.SetEditMode(V2::EditMode::DELETABLE | V2::EditMode::MOVABLE);
     CreateDone(frameNode_);
+    json = JsonUtil::Create(true);
+    layoutProperty->ToJsonValue(json, filter);
+    EXPECT_TRUE(json->GetBool("editable"));
+}
+
+/**
+ * @tc.name: ListItemLayoutProperty002
+ * @tc.desc: Test ListItem layout properties with fastFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListItemLayoutProperty002, TestSize.Level1)
+{
+    CreateList();
+    ListItemModelNG itemModel = CreateListItem();
+    CreateDone(frameNode_);
+    auto layoutProperty = GetChildLayoutProperty<ListItemLayoutProperty>(frameNode_, 0);
+
+    /**
+     * @tc.steps: step1. IsFastFilter
+     * @tc.expected: Test editable
+     */
+    InspectorFilter filter;
+    std::string attr = "editable";
+    filter.AddFilterAttr(attr);
+    EXPECT_TRUE(filter.IsFastFilter());
+    auto json = JsonUtil::Create(true);
+    layoutProperty->ToJsonValue(json, filter);
+    EXPECT_FALSE(json->GetBool("editable"));
+
+    layoutProperty->UpdateEditMode(V2::EditMode::NONE);
+    json = JsonUtil::Create(true);
+    layoutProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("editable"), "EditMode.None");
+
+    layoutProperty->UpdateEditMode(V2::EditMode::MOVABLE);
+    json = JsonUtil::Create(true);
+    layoutProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("editable"), "EditMode.Movable");
+
+    layoutProperty->UpdateEditMode(V2::EditMode::DELETABLE);
+    json = JsonUtil::Create(true);
+    layoutProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("editable"), "EditMode.Deletable");
+
+    layoutProperty->UpdateEditMode(V2::EditMode::DELETABLE | V2::EditMode::MOVABLE);
     json = JsonUtil::Create(true);
     layoutProperty->ToJsonValue(json, filter);
     EXPECT_TRUE(json->GetBool("editable"));
@@ -959,6 +1021,48 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AttrScrollSnapAlign007
+ * @tc.desc: Test LayoutProperty about ScrollSnapAlign in UnScrollable List
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign007, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    CreateListItems(VIEW_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->GetScrollableDistance(), 0.f);
+
+    /**
+     * @tc.steps: stpe1. Scroll delta greater than half of ITEM_HEIGHT
+     * @tc.expected: The item(index:0) align to start
+     */
+    ScrollSnapForEqualHeightItem(-51.f, -1200.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+}
+
+/**
+ * @tc.name: AttrScrollSnapAlign008
+ * @tc.desc: Test LayoutProperty about ScrollSnapAlign::NONE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign008, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::NONE);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->GetScrollableDistance(), 200.f);
+
+    /**
+     * @tc.steps: stpe1. Scroll delta greater than half of ITEM_HEIGHT
+     * @tc.expected: Has no Snap effect
+     */
+    ScrollSnapForEqualHeightItem(-51.f, -1200.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 51.f);
+}
+
+/**
  * @tc.name: AttrSLECM001
  * @tc.desc: Test property about edgeEffect/chainAnimation/multiSelectable
  * @tc.type: FUNC
@@ -1446,5 +1550,44 @@ HWTEST_F(ListAttrTestNg, FadingEdge002, TestSize.Level1)
     EXPECT_EQ(pattern_->startMainPos_, -50.f);
     EXPECT_EQ(pattern_->endMainPos_, 490.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), 50.f);
+}
+
+/**
+ * @tc.name: GetOrCreateController001
+ * @tc.desc: Test GetOrCreateController
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, GetOrCreateController001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    auto controller = model.GetOrCreateController(AceType::RawPtr(frameNode));
+    EXPECT_NE(controller, nullptr);
+    controller = model.GetOrCreateController(AceType::RawPtr(frameNode));
+    EXPECT_NE(controller, nullptr);
+    CreateDone(frameNode);
+}
+
+/**
+ * @tc.name: ListItemCreate001
+ * @tc.desc: Test ListItemModelNG Create
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListItemCreate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItem without or with deepRenderFunc
+     * @tc.expected: Created successful
+     */
+    CreateList();
+    ListItemModelNG itemModel;
+    itemModel.Create(nullptr, V2::ListItemStyle::NONE);
+    ViewStackProcessor::GetInstance()->Pop();
+    itemModel.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone(frameNode_);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 2);
 }
 } // namespace OHOS::Ace::NG

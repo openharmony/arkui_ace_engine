@@ -139,7 +139,7 @@ void ToastView::UpdateTextContext(const RefPtr<FrameNode>& textNode)
         textContext->UpdateOuterBorderWidth(outerWidthProp);
         BorderColorProperty outerColorProp;
         outerColorProp.SetColor(toastTheme->GetToastOuterBorderColor());
-        textContext->UpdateBorderColor(outerColorProp);
+        textContext->UpdateOuterBorderColor(outerColorProp);
     }
     textContext->UpdateBackShadow(ShadowConfig::DefaultShadowL);
     textContext->UpdateClipEdge(false);
@@ -148,6 +148,7 @@ void ToastView::UpdateTextContext(const RefPtr<FrameNode>& textNode)
         textContext->UpdateBackgroundColor(Color::TRANSPARENT);
         BlurStyleOption styleOption;
         styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+        styleOption.policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
         textContext->UpdateBackBlurStyle(styleOption);
     } else {
         auto toastBackgroundColor = toastTheme->GetBackgroundColor();

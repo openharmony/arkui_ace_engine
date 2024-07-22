@@ -39,7 +39,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const uint8_t PIXEL_ROUND = 18;
+constexpr uint8_t PIXEL_ROUND = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
+                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
+                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
+                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
 constexpr uint32_t DEFAULT_RENDERING_STRATEGY = 2;
 }
 
@@ -269,7 +272,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     }
 
     bool isFrameNode = false;
-    bool isFirstCreate = false;
     if (static_cast<int32_t>(columnNode->GetChildren().size()) == 0) {
         if (tabBarParam.GetSymbol().has_value()) {
             iconNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
@@ -290,7 +292,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         columnNode->MountToParent(tabBarNode, position);
         iconNode->MountToParent(columnNode);
         textNode->MountToParent(columnNode);
-        isFirstCreate = true;
     } else {
         if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE && tabContentPattern->HasSubTabBarStyleNode()) {
             isFrameNode = true;
@@ -303,7 +304,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             auto icon = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
             columnNode->ReplaceChild(oldIcon, icon);
-                isFirstCreate = true;
         } else if (!tabBarParam.GetIcon().empty() && oldIcon->GetTag() != V2::IMAGE_ETS_TAG) {
             auto icon = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -387,9 +387,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         UpdateDefaultSymbol(tabTheme, symbolProperty);
         auto modifierOnApply = tabBarParam.GetSymbol().value().onApply;
         if (myIndex == indicator) {
-            tabBarPattern->SetImageColorOnIndex(indicator);
             symbolProperty->UpdateSymbolColorList({tabTheme->GetBottomTabSymbolOn()});
-            if (modifierOnApply != nullptr && isFirstCreate) {
+            if (modifierOnApply != nullptr) {
                 modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)), "normal");
                 UpdateDefaultSymbol(tabTheme, symbolProperty);
                 symbolProperty->UpdateSymbolColorList({tabTheme->GetBottomTabSymbolOn()});
@@ -419,7 +418,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         auto imagePaintProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
         CHECK_NULL_VOID(imagePaintProperty);
         if (imageSourceInfo.IsSvg() && myIndex == indicator) {
-            tabBarPattern->SetImageColorOnIndex(indicator);
             if (iconStyle.selectedColor.has_value()) {
                 imagePaintProperty->UpdateSvgFillColor(iconStyle.selectedColor.value());
             } else {
@@ -435,6 +433,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         }
         imageProperty->UpdateImageSourceInfo(imageSourceInfo);
     }
+    tabBarPattern->SetImageColorOnIndex(indicator);
+    
     columnNode->MarkModifyDone();
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();

@@ -23,6 +23,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/rect_t.h"
+#include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
@@ -65,6 +66,14 @@ class Pattern;
 class StateModifyTask;
 class UITask;
 struct DirtySwapConfig;
+
+struct CacheVisibleRectResult {
+    OffsetF windowOffset = OffsetF();
+    RectF visibleRect = RectF();
+    RectF innerVisibleRect = RectF();
+    VectorF cumulativeScale = {1.0f, 1.0f};
+    RectF frameRect = RectF();
+};
 
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
@@ -227,8 +236,10 @@ public:
         }
     }
 
-    void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
+    void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback,
+        bool isCalculateInnerClip = false)
     {
+        isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
     }
 
@@ -448,6 +459,8 @@ public:
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, WindowsContentChangeTypes windowsContentChangeType =
                                               WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID) const;
+
+    void OnAccessibilityEventForVirtualNode(AccessibilityEventType eventType, int64_t accessibilityId);
 
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
@@ -734,7 +747,7 @@ public:
         return isActive_;
     }
 
-    void SetActive(bool active = true) override;
+    void SetActive(bool active = true, bool needRebuildRenderContext = false) override;
 
     bool IsOutOfLayout() const override
     {
@@ -800,6 +813,7 @@ public:
         return localMat_;
     }
     OffsetF GetOffsetInScreen();
+    OffsetF GetOffsetInSubwindow(const OffsetF& subwindowOffset);
     RefPtr<PixelMap> GetPixelMap();
     RefPtr<FrameNode> GetPageNode();
     RefPtr<FrameNode> GetFirstAutoFillContainerNode();
@@ -871,6 +885,7 @@ public:
     }
 
     void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
+    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const;
 
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
@@ -900,7 +915,6 @@ public:
     void NotifyTransformInfoChanged()
     {
         isLocalRevertMatrixAvailable_ = false;
-        AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
     }
 
     void AddPredictLayoutNode(const RefPtr<FrameNode>& node)
@@ -910,6 +924,19 @@ public:
 
     bool CheckAccessibilityLevelNo() const {
         return false;
+    }
+
+    RectF GetVirtualNodeTransformRectRelativeToWindow()
+    {
+        auto parentUinode = GetVirtualNodeParent().Upgrade();
+        CHECK_NULL_RETURN(parentUinode, RectF {});
+        auto parentFrame = AceType::DynamicCast<FrameNode>(parentUinode);
+        CHECK_NULL_RETURN(parentFrame, RectF {});
+        auto parentRect = parentFrame->GetTransformRectRelativeToWindow();
+        auto currentRect = GetTransformRectRelativeToWindow();
+        currentRect.SetTop(currentRect.Top() + parentRect.Top());
+        currentRect.SetLeft(currentRect.Left() + parentRect.Left());
+        return currentRect;
     }
 
     // this method will check the cache state and return the cached revert matrix preferentially,
@@ -952,6 +979,13 @@ public:
     void RegisterNodeChangeListener();
     void UnregisterNodeChangeListener();
     void ProcessFrameNodeChangeFlag();
+    void OnNodeTransformInfoUpdate(bool changed);
+    void OnNodeTransitionInfoUpdate();
+
+    void ResetLayoutAlgorithm()
+    {
+        layoutAlgorithm_.Reset();
+    }
 
 protected:
     void DumpInfo() override;
@@ -992,6 +1026,8 @@ private:
     bool OnRemoveFromParent(bool allowTransition) override;
     bool RemoveImmediately() const override;
 
+    bool IsPaintRectWithTransformValid();
+
     // dump self info.
     void DumpDragInfo();
     void DumpOverlayInfo();
@@ -1010,9 +1046,11 @@ private:
     bool GetTouchable() const;
     bool OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config);
 
+    void ProcessVisibleAreaChangeEvent(const RectF& visibleRect, const RectF& frameRect,
+        const std::vector<double>& visibleAreaRatios, VisibleCallbackInfo& visibleAreaCallback, bool isUser);
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
-        double lastVisibleRatio, bool isThrottled = false);
+        double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
     void ProcessThrottledVisibleCallback();
     bool IsFrameDisappear();
     bool IsFrameDisappear(uint64_t timestamp);
@@ -1053,6 +1091,11 @@ private:
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
 
     RectF ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const;
+
+    CacheVisibleRectResult GetCacheVisibleRect(uint64_t timestamp);
+
+    CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
+        const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -1104,7 +1147,9 @@ private:
     bool isFirstBuilding_ = true;
 
     double lastVisibleRatio_ = 0.0;
+    double lastInnerVisibleRatio_ = 0.0;
     double lastVisibleCallbackRatio_ = 0.0;
+    double lastInnerVisibleCallbackRatio_ = 0.0;
     double lastThrottledVisibleRatio_ = 0.0;
     double lastThrottledVisibleCbRatio_ = 0.0;
     int64_t lastThrottledTriggerTime_ = 0;
@@ -1137,6 +1182,7 @@ private:
     bool isDisallowDropForcedly_ = false;
     bool isGeometryTransitionIn_ = false;
     bool isLayoutNode_ = false;
+    bool isCalculateInnerVisibleRectClip_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 
@@ -1149,6 +1195,7 @@ private:
     std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = { 0, OffsetF() };
     std::pair<uint64_t, OffsetF> cachedTransformRelativeOffset_ = { 0, OffsetF() };
     std::pair<uint64_t, bool> cachedIsFrameDisappear_ = { 0, false };
+    std::pair<uint64_t, CacheVisibleRectResult> cachedVisibleRectResult_ = { 0, CacheVisibleRectResult() };
 
     struct onSizeChangeDumpInfo {
         int64_t onSizeChangeTimeStamp;

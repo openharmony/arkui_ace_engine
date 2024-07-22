@@ -276,7 +276,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
         wantPtr->SetParam(UI_EXTENSION_TYPE_KEY, EMBEDDED_UI);
     }
     isNotifyOccupiedAreaChange_ = want.GetBoolParam(OCCUPIED_AREA_CHANGE_KEY, true);
-    UIEXT_LOGI("Want param isNotifyOccupiedAreaChange is %{public}d.", isNotifyOccupiedAreaChange_);
+    UIEXT_LOGD("Want param isNotifyOccupiedAreaChange is %{public}d.", isNotifyOccupiedAreaChange_);
     auto callerToken = container->GetToken();
     auto parentToken = container->GetParentToken();
     Rosen::SessionInfo extensionSessionInfo = {
@@ -581,17 +581,8 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
         } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
             transaction = transactionController->GetRSTransaction();
         }
-        if (transaction) {
-            auto extensionCount = transaction->GetExtensionCount();
-            if (extensionCount == 0) {
-                // Update the pid when encounter the first UIextension.
-                transaction->SetParentPid(transaction->GetChildPid());
-                transaction->SetChildPid(AceApplicationInfo::GetInstance().GetPid());
-            }
-            transaction->SetExtensionCount(++extensionCount);
-            if (parentSession) {
-                transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
-            }
+        if (transaction && parentSession) {
+            transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
         }
     }
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
@@ -627,8 +618,11 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaCh
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, false);
         auto curWindow = pipeline->GetCurrentWindowRect();
-        int32_t spaceWindow = std::max(curWindow.Bottom() - displayArea_.Bottom(), .0);
-        keyboardHeight = static_cast<int32_t>(std::max(keyboardHeight - spaceWindow, 0));
+        if (curWindow.Bottom() >= displayArea_.Bottom()) {
+            keyboardHeight = keyboardHeight - (curWindow.Bottom() - displayArea_.Bottom());
+        } else {
+            keyboardHeight = keyboardHeight + (displayArea_.Bottom() - curWindow.Bottom());
+        }
     }
     info->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
     UIEXT_LOGI("Occcupied area with 'keyboardHeight = %{public}d' notified to uiextension, persistentid = %{public}d.",

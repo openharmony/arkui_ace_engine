@@ -18,6 +18,39 @@
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
+namespace {
+RefPtr<FrameNode> CreateFrameNodeGroup(int32_t targetId, size_t childCount)
+{
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, targetId, pagePattern);
+    for (size_t i = 0; i < childCount; ++i) {
+        ++targetId;
+        auto childNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, targetId, nullptr);
+        childNode->MountToParent(pageNode);
+    }
+    return pageNode;
+}
+
+RefPtr<NG::NGGestureRecognizer> CreateRecognizerGroup(const RefPtr<NG::FrameNode>& parentNode)
+{
+    CHECK_NULL_RETURN(parentNode, nullptr);
+    std::list<RefPtr<NGGestureRecognizer>> recognizers;
+    for (const auto& childNode : parentNode->GetChildren()) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(childNode);
+        if (childFrameNode) {
+            auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+            clickRecognizer->AttachFrameNode(childFrameNode);
+            recognizers.emplace_back(clickRecognizer);
+        }
+    }
+    auto recognizerGroup = AceType::MakeRefPtr<NG::ParallelRecognizer>(std::move(recognizers));
+    if (recognizerGroup) {
+        recognizerGroup->AttachFrameNode(parentNode);
+    }
+    return recognizerGroup;
+}
+} // namespace
+
 /**
  * @tc.name: SequenceRecognizerAxisDirection001
  * @tc.desc: Test GetAxisDirection() of SequenceRecognizer.
@@ -987,5 +1020,608 @@ HWTEST_F(EventManagerTestNg, EventManagerTest062, TestSize.Level1)
 
     eventManager->SetResponseLinkRecognizers(result, responseLinkRecognizers);
     ASSERT_TRUE(responseLinkRecognizers.size() == 1);
+}
+
+/**
+ * @tc.name: EventManagerTest063
+ * @tc.desc: Test touchtest
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest063, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create FrameNode and Call TouchTest to add touchTestResults_[touchPoint.id].
+     * @tc.expected: touchTestResults_ has the touchPoint.id of instance.
+     */
+    TouchEvent touchPoint;
+    touchPoint.id = 1;
+    touchPoint.type = TouchType::DOWN;
+    touchPoint.sourceType = SourceType::TOUCH;
+    auto currentTime = GetSysTimestamp();
+    auto lastTime = currentTime - 1000 * 1000000 - 1000;
+    TimeStamp lastTimeStamp((std::chrono::milliseconds(lastTime)));
+    TimeStamp currentTimeStamp((std::chrono::milliseconds(currentTime)));
+    eventManager->lastEventTime_ = lastTimeStamp;
+    touchPoint.time = currentTimeStamp;
+    const int nodeId = 1;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, nodeId, nullptr);
+    TouchRestrict touchRestrict;
+    Offset offset;
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    ASSERT_NE(clickRecognizer, nullptr);
+    clickRecognizer->OnRejected();
+    auto gestureRefereeNg = eventManager->GetGestureRefereeNG(clickRecognizer);
+    ASSERT_NE(gestureRefereeNg, nullptr);
+    gestureRefereeNg->CheckSourceTypeChange(SourceType::NONE, true);
+    TouchTestResult resultList = { clickRecognizer };
+    eventManager->TouchTest(touchPoint, frameNode, touchRestrict, offset, 0, true);
+    EXPECT_GT(eventManager->touchTestResults_.count(touchPoint.id), 0);
+}
+
+/**
+ * @tc.name: EventManagerTest064
+ * @tc.desc: Test LogTouchTestResultRecognizers
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest064, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call LogTouchTestResultRecognizers.
+     * @tc.expected: ret is false.
+     */
+    TouchEvent event;
+    event.type = TouchType::DOWN;
+    event.id = 1;
+    TouchTestResult resultList;
+    auto panHorizontal = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panHorizontal, nullptr);
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pagePattern);
+    panHorizontal->AttachFrameNode(pageNode);
+    resultList.emplace_back(panHorizontal);
+    eventManager->LogTouchTestResultRecognizers(resultList, 1);
+    ASSERT_FALSE(panHorizontal->isFlushTouchEventsEnd_);
+}
+
+/**
+ * @tc.name: EventManagerTest065
+ * @tc.desc: Test HandleGlobalEventNG whith mouse
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest065, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create FrameNode and Call TouchTest to add touchTestResults_[touchPoint.id].
+     * @tc.expected: touchTestResults_ has the touchPoint.id of instance.
+     */
+    TouchEvent touchPoint;
+    touchPoint.id = 1000;
+    touchPoint.type = TouchType::DOWN;
+    touchPoint.sourceType = SourceType::MOUSE;
+
+    const int nodeId = 10003;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    TouchRestrict touchRestrict;
+    Offset offset;
+
+    auto eventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE_EVENT, nodeId);
+    eventManager->currMouseTestResults_.emplace_back(eventTarget);
+
+    /**
+     * @tc.steps: step3. Create FrameNode and Call HandleGlobalEventNG.
+     * @tc.expected: currMouseTestResults_.size is equal to 1.
+     */
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(frameNode);
+    NG::OffsetF rootOffset;
+    eventManager->HandleGlobalEventNG(touchPoint, selectOverlayManager, rootOffset);
+    EXPECT_EQ(eventManager->currMouseTestResults_.size(), 1);
+}
+
+/**
+ * @tc.name: EventManagerTest066
+ * @tc.desc: Test GetTouchTestIds function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest066, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent event;
+    event.type = TouchType::DOWN;
+    event.id = 1;
+    std::vector<std::string> touchTestIds;
+    auto panHorizontal = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panHorizontal, nullptr);
+    panHorizontal->SetGetEventTargetImpl([]() -> std::optional<EventTarget> {
+        struct EventTarget eventTarget = {
+            .id = "eventTargetCallback",
+            .type = "eventTargetType"
+        };
+        std::optional<EventTarget> eventTargetCallback = eventTarget;
+        return eventTargetCallback;
+    });
+
+    TouchTestResult hitTestResult;
+    hitTestResult.emplace_back(panHorizontal);
+    eventManager->touchTestResults_.insert({event.id, hitTestResult});
+    bool isMousePressAtSelectedNode = false;
+    eventManager->GetTouchTestIds(event, touchTestIds, isMousePressAtSelectedNode, 1);
+    ASSERT_FALSE(isMousePressAtSelectedNode);
+    ASSERT_FALSE(touchTestIds.empty());
+}
+
+/**
+ * @tc.name: EventManagerTest067
+ * @tc.desc: Test HandleOutOfRectCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest067, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create rectCallbackList
+     * @tc.expected: touchTestResults_ has the touchPoint.id of instance
+     */
+    Point point(10, 20);
+    point.SetSourceType(SourceType::TOUCH);
+
+    auto rectGetCallback = [](std::vector<Rect>& rectList) -> void { rectList.push_back(Rect()); };
+
+    auto touchCallback = []() -> void {};
+    auto mouseCallback = []() -> void {};
+    std::vector<RectCallback> rectCallbackList {
+        RectCallback(rectGetCallback, touchCallback, nullptr),
+        RectCallback(rectGetCallback, nullptr, mouseCallback)
+    };
+
+    /**
+     * @tc.steps: step3. Call HandleOutOfRectCallback with SourceType::TOUCH
+     * @tc.expected: rectCallbackList.size() is 1
+     */
+    eventManager->HandleOutOfRectCallback(point, rectCallbackList);
+    EXPECT_EQ(rectCallbackList.size(), 1);
+
+    /**
+     * @tc.steps: step3. Call HandleOutOfRectCallback with SourceType::MOUSE
+     * @tc.expected: rectCallbackList is empty
+     */
+    point.SetSourceType(SourceType::MOUSE);
+    eventManager->HandleOutOfRectCallback(point, rectCallbackList);
+    EXPECT_TRUE(rectCallbackList.empty());
+}
+
+/**
+ * @tc.name: EventManagerTest068
+ * @tc.desc: Test DispatchTouchEventToTouchTestResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest068, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    auto panHorizontal = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panHorizontal, nullptr);
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pagePattern);
+    int64_t deviceId = 20240711;
+    TouchEvent event;
+    event.type = TouchType::DOWN;
+    event.deviceId = deviceId;
+    event.sourceType = SourceType::TOUCH;
+    panHorizontal->AttachFrameNode(pageNode);
+
+    TouchTestResult resultList;
+    resultList.emplace_back(panHorizontal);
+    eventManager->DispatchTouchEventToTouchTestResult(event, resultList, false);
+    EXPECT_EQ(panHorizontal->deviceId_, deviceId);
+    EXPECT_TRUE(panHorizontal->deviceType_ == SourceType::TOUCH);
+}
+
+/**
+ * @tc.name: EventManagerTest069
+ * @tc.desc: Test PostEventDispatchTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest069, TestSize.Level2)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    auto rawHorizontal = AceType::MakeRefPtr<RawRecognizer>();
+    ASSERT_NE(rawHorizontal, nullptr);
+    auto panHorizontal = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    ASSERT_NE(panHorizontal, nullptr);
+    TouchEvent event;
+    event.id = 1024;
+    event.type = TouchType::DOWN;
+    event.sourceType = SourceType::TOUCH;
+    EXPECT_FALSE(eventManager->PostEventDispatchTouchEvent(event));
+
+    rawHorizontal->SetCatchEventCallback([]() {},
+        static_cast<int32_t>(EventStage::CAPTURE), static_cast<int32_t>(EventType::TOUCH_DOWN));
+    TouchTestResult resultList;
+    resultList.emplace_back(panHorizontal);
+    resultList.emplace_back(rawHorizontal);
+    eventManager->postEventTouchTestResults_.emplace(event.id, resultList);
+    EXPECT_TRUE(eventManager->PostEventDispatchTouchEvent(event));
+}
+
+/**
+ * @tc.name: EventManagerTest070
+ * @tc.desc: Test MouseTest For API12.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest070, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pagePattern);
+
+    MouseEvent event;
+    event.action = MouseAction::MOVE;
+    event.button = MouseButton::RIGHT_BUTTON;
+    TouchRestrict touchRestrict;
+    eventManager->MouseTest(event, pageNode, touchRestrict);
+    
+    event.action = MouseAction::WINDOW_ENTER;
+    eventManager->MouseTest(event, pageNode, touchRestrict);
+    EXPECT_TRUE(touchRestrict.touchEvent.isMouseTouchTest);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: EventManagerTest071
+ * @tc.desc: Test UpdateHoverNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest071, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    MouseEvent event;
+    auto hoverEffectTarget = AceType::MakeRefPtr<HoverEffectTarget>(CTRLSHIFT, NODEID);
+    std::list<RefPtr<TouchEventTarget>> testResult = { hoverEffectTarget };
+    eventManager->UpdateHoverNode(event, testResult);
+    EXPECT_TRUE(eventManager->currMouseTestResults_.empty());
+}
+
+/**
+ * @tc.name: EventManagerTest072
+ * @tc.desc: Test UpdateHoverNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest072, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pagePattern);
+    EXPECT_FALSE(eventManager->IsSkipEventNode(pageNode));
+}
+/**
+ * @tc.name: EventManagerTest073
+ * @tc.desc: Test AddKeyboardShortcutNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest073, TestSize.Level2)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    auto frameNodeCtrl = FrameNode::GetOrCreateFrameNode(CTRL, NODEID, nullptr);
+    auto frameNodeCtrlShift = FrameNode::GetOrCreateFrameNode(CTRLSHIFT, NODEID, nullptr);
+    frameNodeCtrl->SetActive(true);
+    frameNodeCtrlShift->SetActive(true);
+
+    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeCtrl));
+    eventManager->AddKeyboardShortcutNode(nullptr);
+    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeCtrlShift));
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
+}
+
+/**
+ * @tc.name: EventManagerTest074
+ * @tc.desc: Test DispatchKeyboardShortcut
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest074, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    KeyEvent event;
+    auto frameNodeCtrl = FrameNode::GetOrCreateFrameNode(CTRL, NODEID, nullptr);
+    auto frameNodeShift = FrameNode::GetOrCreateFrameNode(SHIFT, NODEID, nullptr);
+    auto frameNodeAlt = FrameNode::GetOrCreateFrameNode(ALT, NODEID, nullptr);
+    auto frameNodeCtrlShift = FrameNode::GetOrCreateFrameNode(CTRLSHIFT, NODEID, nullptr);
+    frameNodeCtrl->SetActive(true);
+    frameNodeShift->SetActive(true);
+    frameNodeAlt->SetActive(true);
+    frameNodeCtrlShift->SetActive(true);
+
+    auto eventHubCtrl = frameNodeCtrl->GetEventHub<NG::EventHub>();
+    auto eventHubShift = frameNodeShift->GetEventHub<NG::EventHub>();
+    auto eventHubAlt = frameNodeAlt->GetEventHub<NG::EventHub>();
+    auto eventHubCtrlShift = frameNodeCtrlShift->GetEventHub<NG::EventHub>();
+
+    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeCtrl));
+    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeShift));
+    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeAlt));
+    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeCtrlShift));
+    eventHubCtrl->SetKeyboardShortcut(CHARACTER_C, (NUM_CTRL_VALUE + NUM_SHIFT_VALUE + NUM_ALT_VALUE), nullptr);
+    event.code = KeyCode::KEY_C;
+    event.action = KeyAction::DOWN;
+    event.pressedCodes.emplace_back(KeyCode::KEY_CTRL_LEFT);
+    event.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
+    event.pressedCodes.emplace_back(KeyCode::KEY_ALT_LEFT);
+    event.pressedCodes.emplace_back(KeyCode::KEY_C);
+    eventManager->DispatchKeyboardShortcut(event);
+    EXPECT_EQ(event.action, KeyAction::DOWN);
+}
+
+/**
+ * @tc.name: EventManagerTest075
+ * @tc.desc: Test DispatchKeyboardShortcut
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest075, TestSize.Level2)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    KeyEvent event;
+    event.action = KeyAction::CLICK;
+    EXPECT_FALSE(eventManager->DispatchKeyboardShortcut(event));
+
+    auto frameNodeCtrl = FrameNode::GetOrCreateFrameNode(CTRL, NODEID, nullptr);
+    auto eventHubCtrl = frameNodeCtrl->GetEventHub<NG::EventHub>();
+    frameNodeCtrl->SetActive(true);
+
+    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeCtrl));
+    uint8_t singleKeys = 0;
+    eventHubCtrl->SetKeyboardShortcut(CTRL, singleKeys, nullptr);
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_ESCAPE;
+    EXPECT_FALSE(eventManager->DispatchKeyboardShortcut(event));
+
+    eventHubCtrl->SetKeyboardShortcut(std::string(), (NUM_CTRL_VALUE + NUM_SHIFT_VALUE), nullptr);
+    EXPECT_FALSE(eventManager->DispatchKeyboardShortcut(event));
+
+    eventHubCtrl->SetEnabled(false);
+    EXPECT_FALSE(eventManager->DispatchKeyboardShortcut(event));
+}
+
+/**
+ * @tc.name: EventManagerTest076
+ * @tc.desc: Test EventManager constructor fire callBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest076, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    auto referee = eventManager->GetGestureReferee();
+    ASSERT_NE(referee, nullptr);
+    int32_t touchId = 10;
+    ASSERT_NE(referee->queryStateFunc_, nullptr);
+    referee->queryStateFunc_(touchId);
+    auto gestureRefereeNg = eventManager->GetGestureRefereeNG(AceType::MakeRefPtr<ClickRecognizer>());
+    ASSERT_NE(gestureRefereeNg, nullptr);
+    ASSERT_NE(gestureRefereeNg->queryStateFunc_, nullptr);
+    gestureRefereeNg->queryStateFunc_(touchId);
+}
+
+/**
+ * @tc.name: EventManagerTest077
+ * @tc.desc: Test AddGestureSnapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest077, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    auto eventTree = eventManager->GetEventTreeRecord();
+    TouchEvent event;
+    event.type = Ace::TouchType::DOWN;
+    event.id = 1;
+    eventTree.AddTouchPoint(event);
+    eventManager->DumpEvent();
+
+    int32_t finger = 1;
+    int32_t depth = 0;
+    int32_t nodeId = 16;
+    eventManager->AddGestureSnapshot(finger, depth, nullptr);
+    auto parentNode = CreateFrameNodeGroup(nodeId, 3);
+    auto recognizerGroup = CreateRecognizerGroup(parentNode);
+    eventManager->AddGestureSnapshot(finger, depth, recognizerGroup);
+    EXPECT_FALSE(eventTree.eventTreeList.empty());
+}
+
+/**
+ * @tc.name: EventManagerTest078
+ * @tc.desc: Test SetHittedFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest078, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    int32_t nodeId = 16;
+    auto parentNode = CreateFrameNodeGroup(nodeId, 3);
+    auto recognizerGroup = CreateRecognizerGroup(parentNode);
+
+    std::list<RefPtr<NG::NGGestureRecognizer>> gestureRecognizers;
+    eventManager->SetHittedFrameNode(gestureRecognizers);
+    EXPECT_TRUE(eventManager->hittedFrameNode_.empty());
+
+    gestureRecognizers.emplace_back(recognizerGroup);
+    eventManager->SetHittedFrameNode(gestureRecognizers);
+    EXPECT_FALSE(eventManager->hittedFrameNode_.empty());
+}
+
+/**
+ * @tc.name: EventManagerTest079
+ * @tc.desc: Test CleanGestureEventHub
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest079, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    int32_t nodeId = 16;
+    auto parentNode = CreateFrameNodeGroup(nodeId, 3);
+    auto recognizerGroup = CreateRecognizerGroup(parentNode);
+
+    std::list<RefPtr<NG::NGGestureRecognizer>> gestureRecognizers;
+    gestureRecognizers.emplace_back(recognizerGroup);
+    eventManager->SetHittedFrameNode(gestureRecognizers);
+    EXPECT_FALSE(eventManager->hittedFrameNode_.empty());
+    eventManager->CleanGestureEventHub();
+    EXPECT_TRUE(eventManager->hittedFrameNode_.empty());
+}
+
+/**
+ * @tc.name: EventManagerTest080
+ * @tc.desc: Test SetResponseLinkRecognizers
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest080, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    int32_t nodeId = 16;
+    auto parentNode = CreateFrameNodeGroup(nodeId, 3);
+    auto recognizerGroup = CreateRecognizerGroup(parentNode);
+    auto panHorizontal = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    auto targetLinkHorizontal = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+
+    TouchTestResult resultList;
+    TouchTestResult responseLinkRecognizers;
+    resultList.emplace_back(recognizerGroup);
+    resultList.emplace_back(panHorizontal);
+    responseLinkRecognizers.emplace_back(targetLinkHorizontal);
+    eventManager->SetResponseLinkRecognizers(resultList, responseLinkRecognizers);
+    EXPECT_TRUE(responseLinkRecognizers.size() == 1);
+}
+
+/**
+ * @tc.name: EventManagerTest081
+ * @tc.desc: Test MockCancelEventAndDispatch
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest081, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    int32_t nodeId = 32;
+    auto parentNode = CreateFrameNodeGroup(nodeId, 3);
+    auto recognizerGroup = CreateRecognizerGroup(parentNode);
+    auto panHorizontal = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    TouchTestResult resultList;
+    resultList.emplace_back(recognizerGroup);
+    resultList.emplace_back(panHorizontal);
+    eventManager->axisTouchTestResults_.clear();
+    eventManager->axisTouchTestResults_[0] = resultList;
+    AxisEvent event;
+    eventManager->MockCancelEventAndDispatch(event);
+    EXPECT_TRUE(eventManager->axisTouchTestResults_.empty());
+}
+
+/**
+ * @tc.name: EventManagerAccessibilityHoverTest001
+ * @tc.desc: Test MouseTest (frameNode)
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerAccessibilityHoverTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call MouseTest with MouseAction::WINDOW_LEAVE
+     * @tc.expected: currHoverTestResults_ is empty
+     */
+    TouchEvent event;
+    const int nodeId = 10008;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    TouchRestrict touchRestrict;
+
+    event.type = TouchType::HOVER_EXIT;
+    auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId);
+    eventManager->curAccessibilityHoverResults_.push_back(hoverEventTarget);
+    ASSERT_FALSE(eventManager->curAccessibilityHoverResults_.empty());
+    eventManager->AccessibilityHoverTest(event, frameNode, touchRestrict);
+    ASSERT_TRUE(eventManager->curAccessibilityHoverResults_.empty());
+
+    /**
+     * @tc.steps: step3. Call MouseTest with MouseAction::WINDOW_ENTER
+     * @tc.expected: lastHoverTestResults_ is empty
+     */
+    event.type = TouchType::HOVER_ENTER;
+    eventManager->lastAccessibilityHoverResults_.push_back(hoverEventTarget);
+    ASSERT_FALSE(eventManager->lastAccessibilityHoverResults_.empty());
+    eventManager->AccessibilityHoverTest(event, frameNode, touchRestrict);
+    ASSERT_TRUE(eventManager->lastAccessibilityHoverResults_.empty());
+
+    /**
+     * @tc.steps: step4. Call MouseTest with MouseAction::HOVER
+     * @tc.expected: lastHoverTestResults_ is empty and currHoverTestResults_ is empty
+     */
+    event.type = TouchType::HOVER_MOVE;
+    eventManager->lastAccessibilityHoverResults_.push_back(hoverEventTarget);
+    eventManager->AccessibilityHoverTest(event, frameNode, touchRestrict);
+    ASSERT_TRUE(eventManager->lastAccessibilityHoverResults_.empty());
+    ASSERT_TRUE(eventManager->curAccessibilityHoverResults_.empty());
 }
 } // namespace OHOS::Ace::NG

@@ -447,7 +447,7 @@ void RenderList::CalculateLanes()
     if (lanes != lanes_) {  // if lanes changes, adjust startIndex_
         lanes_ = lanes;
         if (lanes > 1) {
-            size_t startIndex = startIndex_ - GetItemRelativeIndex(startIndex_) % lanes;
+            size_t startIndex = startIndex_ - GetItemRelativeIndex(startIndex_) % static_cast<size_t>(lanes);
             if (startIndex_ != startIndex) {
                 RemoveAllItems();
             }
@@ -565,7 +565,8 @@ void RenderList::RequestNewItemsAtStartForLaneList()
             ++newItemCntInLine;
         } while (0);
         bool singleLaneDoneAddItem = (lanes_ == 1) && !breakWhenRequestNewItem;
-        bool isLaneStart = !itemGroup && (lanes_ > 1) && (GetItemRelativeIndex(startIndex_ - 1) % lanes_ == 0);
+        bool isLaneStart =
+            !itemGroup && (lanes_ > 1) && (GetItemRelativeIndex(startIndex_ - 1) % static_cast<size_t>(lanes_) == 0);
         bool multiLaneSupplyLine = (itemGroup || breakWhenRequestNewItem || isLaneStart) && (newItemCntInLine >= 1);
         if (singleLaneDoneAddItem || multiLaneSupplyLine) {
             currentOffset_ -= lineMainSize + spaceWidth_;
@@ -1422,7 +1423,7 @@ double RenderList::LayoutOrRecycleCurrentItemsForLaneList(double mainSize)
                 if (lanes_ == 1) {
                     continue; // if list only has one lane, do not need to do suppliment for current row
                 }
-                size_t target = lackItemCount + items_.size() + startIndex_;
+                size_t target = static_cast<size_t>(lackItemCount) + items_.size() + startIndex_;
                 for (size_t newIndex = startIndex_ + items_.size(); newIndex < target; newIndex++) {
                     auto child = RequestAndLayoutNewItem(newIndex, curMainPos);
                     if (!child) {

@@ -290,23 +290,38 @@ void WaterFlowSegmentedLayout::InitFooter(float crossSize)
     }
 }
 
+namespace {
+inline float GetMeasuredHeight(const RefPtr<LayoutWrapper>& item, Axis axis)
+{
+    return GetMainAxisSize(item->GetGeometryNode()->GetMarginFrameSize(), axis);
+}
+} // namespace
+
 void WaterFlowSegmentedLayout::MeasureOnOffset()
 {
-    bool forward = LessOrEqual(info_->currentOffset_ - info_->prevOffset_, 0.0f) || info_->endIndex_ == -1;
+    const bool forward = LessOrEqual(info_->currentOffset_, info_->prevOffset_) || info_->endIndex_ == -1;
     if (forward) {
         Fill(info_->endIndex_ + 1);
     }
 
-    int32_t oldStart = info_->startIndex_;
+    const int32_t oldStart = info_->startIndex_;
     info_->Sync(mainSize_, overScroll_);
 
     if (!forward) {
         // measure appearing items when scrolling upwards
         auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
-        int32_t bound = std::min(oldStart, info_->endIndex_);
+        const int32_t bound = std::min(oldStart, info_->endIndex_);
         for (int32_t i = info_->startIndex_; i <= bound; ++i) {
-            MeasureItem(props, i, info_->itemInfos_[i].crossIdx,
+            auto item = MeasureItem(props, i, info_->itemInfos_[i].crossIdx,
                 WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(i), i));
+            CHECK_NULL_BREAK(item);
+            if (!NearEqual(GetMeasuredHeight(item, axis_), info_->itemInfos_[i].mainSize)) {
+                // refill from [i] if height doesn't match record
+                info_->ClearCacheAfterIndex(i - 1);
+                Fill(i);
+                info_->Sync(mainSize_, overScroll_);
+                break;
+            }
         }
     }
 }
@@ -355,8 +370,8 @@ void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
 
 ScrollAlign WaterFlowSegmentedLayout::TransformAutoScroll(const WaterFlowLayoutInfo::ItemInfo& item) const
 {
-    bool isAbove = LessNotEqual(info_->currentOffset_ + item.mainOffset, 0.0f);
-    bool isBelow = GreatNotEqual(info_->currentOffset_ + item.mainOffset + item.mainSize, mainSize_);
+    const bool isAbove = Negative(info_->currentOffset_ + item.mainOffset);
+    const bool isBelow = GreatNotEqual(info_->currentOffset_ + item.mainOffset + item.mainSize, mainSize_);
     if (isAbove && isBelow) {
         // possible when the item is larger than viewport
         return ScrollAlign::NONE;
@@ -403,7 +418,7 @@ void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx)
         if (itemHeight < 0.0f) {
             auto item = MeasureItem(props, i, position.crossIndex, -1.0f);
             if (item) {
-                itemHeight = GetMainAxisSize(item->GetGeometryNode()->GetMarginFrameSize(), axis_);
+                itemHeight = GetMeasuredHeight(item, axis_);
             }
         }
         info_->RecordItem(i, position, itemHeight);
@@ -424,7 +439,7 @@ void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
             continue;
         }
         if (info_->itemInfos_.size() <= static_cast<size_t>(i)) {
-            info_->RecordItem(i, position, GetMainAxisSize(item->GetGeometryNode()->GetMarginFrameSize(), axis_));
+            info_->RecordItem(i, position, GetMeasuredHeight(item, axis_));
         }
     }
 }

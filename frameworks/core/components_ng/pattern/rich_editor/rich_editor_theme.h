@@ -67,8 +67,12 @@ public:
             }
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
-            theme->dragBackgroundColor_ =
-                pattern->GetAttr<Color>("drag_background_color", Color::WHITE).ChangeOpacity(DRAG_BACKGROUND_OPACITY);
+            auto dragBackgroundColor = pattern->GetAttr<Color>("drag_background_color", Color::WHITE);
+            if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+                dragBackgroundColor = dragBackgroundColor.ChangeOpacity(DRAG_BACKGROUND_OPACITY);
+            }
+            theme->dragBackgroundColor_ = dragBackgroundColor;
+            theme->dragCornerRadius_ = pattern->GetAttr<Dimension>("drag_corner_radius", 18.0_vp);
             theme->defaultCaretHeight_ = pattern->GetAttr<Dimension>("default_caret_height", 18.5_vp);
             theme->disabledAlpha_ = static_cast<float>(pattern->GetAttr<double>("text_color_disabled_alpha", 0.0));
             theme->placeholderColor_ = pattern->GetAttr<Color>("tips_text_color", Color(0x99000000));
@@ -155,6 +159,11 @@ public:
         return dragBackgroundColor_;
     }
 
+    Dimension GetDragCornerRadius() const
+    {
+        return dragCornerRadius_;
+    }
+
 protected:
     RichEditorTheme() = default;
 
@@ -173,6 +182,7 @@ private:
     Color caretColor_ = Color(0xff007dff);
     Color selectedBackgroundColor_ = Color(0xff007dff);
     Color dragBackgroundColor_ = Color::WHITE;
+    Dimension dragCornerRadius_ = 18.0_vp;
     Color previewUnderlineColor_ = Color(0xff007dff);
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool richeditorShowHandle_ = false;

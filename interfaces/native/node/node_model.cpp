@@ -149,7 +149,7 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
         ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM, ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX,
         ARKUI_REFRESH, ARKUI_WATER_FLOW, ARKUI_FLOW_ITEM, ARKUI_RELATIVE_CONTAINER, ARKUI_GRID, ARKUI_GRID_ITEM };
     // already check in entry point.
-    int32_t nodeType = type < MAX_NODE_SCOPE_NUM ? type : (type - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
+    uint32_t nodeType = type < MAX_NODE_SCOPE_NUM ? type : (type - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     auto* impl = GetFullImpl();
     if (nodeType > sizeof(nodes) / sizeof(ArkUINodeType)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node type: %{public}d NOT IMPLEMENT", type);
@@ -352,8 +352,9 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
     }
     if (eventType == NODE_EVENT_ON_VISIBLE_AREA_CHANGE) {
         ArkUI_AttributeItem* radio = nodePtr->areaChangeRadio;
-        if (radio == nullptr) {
-            radio = static_cast<ArkUI_AttributeItem*>(userData);
+        radio = radio ? radio : static_cast<ArkUI_AttributeItem*>(userData);
+        if (!radio) {
+            return ERROR_CODE_PARAM_INVALID;
         }
         ArkUI_Int32 radioLength = radio->size;
         if (radioLength <= 0) {
@@ -423,24 +424,6 @@ void UnregisterOnEvent()
     g_eventReceiver = nullptr;
 }
 
-void SetNodeEvent(ArkUINodeEvent* innerEvent)
-{
-    auto nativeNodeEventType = GetNativeNodeEventType(innerEvent);
-    auto eventType = static_cast<ArkUI_NodeEventType>(nativeNodeEventType);
-    auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(innerEvent->extraParam);
-    auto extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
-    auto innerEventExtraParam = extraData->eventMap.find(eventType);
-    if (g_compatibleEventReceiver) {
-        ArkUI_CompatibleNodeEvent nodeEvent;
-        nodeEvent.node = nodePtr;
-        nodeEvent.eventId = innerEventExtraParam->second->targetId;
-        if (ConvertEvent(innerEvent, &nodeEvent)) {
-            g_compatibleEventReceiver(&nodeEvent);
-            ConvertEventResult(&nodeEvent, innerEvent);
-        }
-    }
-}
-
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
 {
     if (!innerEvent) {
@@ -487,7 +470,15 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
         }
         HandleNodeEvent(&event);
     }
-    SetNodeEvent(innerEvent);
+    if (g_compatibleEventReceiver) {
+        ArkUI_CompatibleNodeEvent event;
+        event.node = nodePtr;
+        event.eventId = innerEventExtraParam->second->targetId;
+        if (ConvertEvent(innerEvent, &event)) {
+            g_compatibleEventReceiver(&event);
+            ConvertEventResult(&event, innerEvent);
+        }
+    }
 }
 
 int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)

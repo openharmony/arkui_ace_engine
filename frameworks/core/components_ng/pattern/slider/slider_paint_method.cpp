@@ -31,9 +31,13 @@ void SliderPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(sliderTheme);
     sliderContentModifier_->UpdateData(parameters_);
     auto reverse = paintProperty->GetReverseValue(false);
-    auto isRTL = textDirection_ == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft() :
-        textDirection_ == TextDirection::RTL;
-    sliderContentModifier_->JudgeNeedAnimate(isRTL ? !reverse : reverse);
+    if (paintProperty->GetDirectionValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
+        auto isRTL = textDirection_ == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft() :
+                                                             textDirection_ == TextDirection::RTL;
+        reverse = isRTL ? !reverse : reverse;
+    }
+
+    sliderContentModifier_->JudgeNeedAnimate(reverse);
     sliderContentModifier_->SetBackgroundSize(parameters_.backStart, parameters_.backEnd);
     sliderContentModifier_->SetSelectSize(parameters_.selectStart, parameters_.selectEnd);
     sliderContentModifier_->SetCircleCenter(parameters_.circleCenter);

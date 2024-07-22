@@ -288,6 +288,17 @@ void NavigationPattern::OnAttachToMainTree()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     InitPageNode(host);
+    InitFoldState();
+}
+
+void NavigationPattern::InitFoldState()
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    container->InitIsFoldable();
+    if (container->IsFoldable()) {
+        currentfoldStatus_ = container->GetCurrentFoldStatus();
+    }
 }
 
 void NavigationPattern::OnDetachFromMainTree()
@@ -317,6 +328,18 @@ bool NavigationPattern::IsTopNavDestination(const RefPtr<UINode>& node) const
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
         NavigationGroupNode::GetNavDestinationNode(topPath->second));
     return navDestination == node;
+}
+
+bool NavigationPattern::JudgeFoldStateChangeAndUpdateState()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto foldStatus = container->GetCurrentFoldStatus();
+    if (foldStatus != currentfoldStatus_) {
+        currentfoldStatus_ = foldStatus;
+        return true;
+    }
+    return false;
 }
 
 void NavigationPattern::UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host)
@@ -685,8 +708,8 @@ void NavigationPattern::CheckTopNavPathChange(
             auto hostNode = AceType::DynamicCast<NavigationGroupNode>(pattern->GetHost());
             CHECK_NULL_VOID(hostNode);
             hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_HIDE);
-            pattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, true, true);
             hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_DISAPPEAR);
+            pattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, true, true);
             hostNode->RemoveDialogDestination();
         });
         navigationStack_->ClearRecoveryList();
@@ -981,7 +1004,6 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
     // navDestination push/pop navDestination
     if (newTopNavDestination && preTopNavDestination) {
         if (isPopPage) {
-            newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_POP);
             auto parent = preTopNavDestination->GetParent();
             CHECK_NULL_VOID(parent);
             auto preTopNavDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
@@ -995,8 +1017,6 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             parent->RemoveChild(preTopNavDestination, true);
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         } else {
-            preTopNavDestination->SetTransitionType(PageTransitionType::EXIT_PUSH);
-            newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
             DealTransitionVisibility(preTopNavDestination, needVisible, false);
         }
         navigationNode->RemoveDialogDestination();
@@ -1007,11 +1027,6 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
     // navBar push navDestination
     if (newTopNavDestination && newTopNavDestination->GetNavDestinationMode() == NavDestinationMode::STANDARD &&
         navigationMode_ == NavigationMode::STACK) {
-        auto navBar = AceType::DynamicCast<NavBarNode>(navBarNode);
-        if (navBar) {
-            navBar->SetTransitionType(PageTransitionType::EXIT_PUSH);
-        }
-        newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
         DealTransitionVisibility(navBarNode, false, true);
         navigationNode->SetNeedSetInvisible(true);
     }
@@ -1030,10 +1045,6 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
         }
         parent->RemoveChild(preTopNavDestination, true);
         navigationNode->SetNeedSetInvisible(false);
-        auto navBar = AceType::DynamicCast<NavBarNode>(navBarNode);
-        if (navBar) {
-            navBar->SetTransitionType(PageTransitionType::ENTER_POP);
-        }
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     navigationNode->RemoveDialogDestination();
@@ -1700,7 +1711,7 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
             navigationTransition.transition(proxy);
         };
         proxy->SetInteractiveAnimation(AnimationUtils::CreateInteractiveAnimation(
-            addAnimationCallback, finishCallback));
+            addAnimationCallback, finishCallback), finishCallback);
         isFinishInteractiveAnimation_ = false;
         proxy->StartAnimation();
     } else {
@@ -1979,17 +1990,6 @@ void NavigationPattern::DealTransitionVisibility(const RefPtr<FrameNode>& node, 
     renderContext->SetTransitionOutCallback([weakNode = WeakPtr<FrameNode>(node), isVisible, isNavBar] {
         auto curNode = weakNode.Upgrade();
         CHECK_NULL_VOID(curNode);
-        if (isNavBar) {
-            auto navBarNode = AceType::DynamicCast<NavBarNode>(curNode);
-            if (navBarNode->GetTransitionType() != PageTransitionType::EXIT_PUSH) {
-                return;
-            }
-        } else {
-            auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
-            if (navDestinationNode->GetTransitionType() != PageTransitionType::EXIT_PUSH) {
-                return;
-            }
-        }
         curNode->SetJSViewActive(isVisible);
     });
 }

@@ -224,6 +224,11 @@ protected:
     // page id manage
     int32_t GenerateNextPageId();
 
+    virtual int32_t GetLastPageIndex()
+    {
+        return static_cast<int32_t>(pageRouterStack_.size()) - 1;
+    }
+
     std::pair<int32_t, RefPtr<FrameNode>> FindPageInStack(const std::string& url, bool needIgnoreBegin = false);
     int32_t FindPageInRestoreStack(const std::string& url);
 
@@ -249,7 +254,7 @@ protected:
 
     // page operations
     virtual void LoadPage(int32_t pageId, const RouterPageInfo& target,
-        bool needHideLast = true, bool needTransition = true);
+        bool needHideLast = true, bool needTransition = true, bool isPush = false);
     void MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, const RouterPageInfo& target,
         bool needHideLast, bool forceShowCurrent = false, bool needTransition = true);
     void RefreshPageIndex(std::list<WeakPtr<FrameNode>>::iterator startIter, int32_t startIndex);
@@ -267,7 +272,7 @@ protected:
     virtual void ReplacePageInNewLifecycle(const RouterPageInfo& target);
 
     static bool OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition,
-        bool isCardRouter = false, int64_t cardId = 0);
+        bool isCardRouter = false, int64_t cardId = 0, bool isPush = false);
     static bool OnPopPage(bool needShowNext, bool needTransition);
     static bool OnPopPageToIndex(int32_t index, bool needShowNext, bool needTransition);
     static bool OnCleanPageStack();

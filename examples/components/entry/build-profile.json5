@@ -12,13 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 {
   "apiType": "stageMode",
   "buildOption": {
-    "arkOptions": {
-      // "apPath": "./modules.ap"  /* Profile used for profile-guided optimization (PGO), a compiler optimization technique to improve app runtime performance. */
-    }
   },
   "buildOptionSet": [
     {

@@ -434,7 +434,7 @@ int32_t OH_ArkUI_AnimatorOption_SetKeyframe(ArkUI_AnimatorOption* option, float 
     if (time < 0 || time > 1) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
-    if (index >= 0 && index < option->keyframes.size()) {
+    if (index >= 0 && static_cast<size_t>(index) < option->keyframes.size()) {
         option->keyframes[index].keyTime = time;
         option->keyframes[index].keyValue = value;
         return OHOS::Ace::ERROR_CODE_NO_ERROR;
@@ -454,7 +454,7 @@ int32_t OH_ArkUI_AnimatorOption_SetKeyframeCurve(ArkUI_AnimatorOption* option, A
         }
     }
 
-    if (index >= 0 && index < option->keyframes.size()) {
+    if (index >= 0 && static_cast<size_t>(index) < option->keyframes.size()) {
         option->keyframes[index].curve = value;
         return OHOS::Ace::ERROR_CODE_NO_ERROR;
     }
@@ -535,7 +535,7 @@ ArkUI_ExpectedFrameRateRange* OH_ArkUI_AnimatorOption_GetExpectedFrameRateRange(
 
 float OH_ArkUI_AnimatorOption_GetKeyframeTime(ArkUI_AnimatorOption* option, int32_t index)
 {
-    if (option != nullptr && index >= 0 && index < option->keyframes.size()) {
+    if (option != nullptr && index >= 0 && static_cast<size_t>(index) < option->keyframes.size()) {
         return option->keyframes[index].keyTime;
     }
     return -1.0f;
@@ -543,7 +543,7 @@ float OH_ArkUI_AnimatorOption_GetKeyframeTime(ArkUI_AnimatorOption* option, int3
 
 float OH_ArkUI_AnimatorOption_GetKeyframeValue(ArkUI_AnimatorOption* option, int32_t index)
 {
-    if (option != nullptr && index >= 0 && index < option->keyframes.size()) {
+    if (option != nullptr && index >= 0 && static_cast<size_t>(index) < option->keyframes.size()) {
         return option->keyframes[index].keyValue;
     }
     return -1.0f;
@@ -551,7 +551,7 @@ float OH_ArkUI_AnimatorOption_GetKeyframeValue(ArkUI_AnimatorOption* option, int
 
 ArkUI_CurveHandle OH_ArkUI_AnimatorOption_GetKeyframeCurve(ArkUI_AnimatorOption* option, int32_t index)
 {
-    if (option != nullptr && index >= 0 && index < option->keyframes.size()) {
+    if (option != nullptr && index >= 0 && static_cast<size_t>(index) < option->keyframes.size()) {
         return option->keyframes[index].curve;
     }
     return nullptr;

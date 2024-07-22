@@ -77,7 +77,7 @@ public:
      * @description: register a callback when get inspector tree
      * @param eventCallback callback to be performed
      */
-    void RegisterGetInspectorTreeCallback(const EventCallback& eventCallback);
+    void RegisterGetInspectorTreeCallback(const std::function<void(std::string, int32_t, bool)>& eventCallback);
 
     /**
      * @description: register a callback when get inspector tree
@@ -85,6 +85,12 @@ public:
      */
     void RegisterWebUnfocusEventCallback(
         const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback);
+
+    /**
+     * @description: register a callback when get base info
+     * @param eventCallback callback to be performed
+     */
+    void RegisterGetBaseInfoCallback(const EventCallback& eventCallback);
 
     /**
      * @description: unregister the click callback last register
@@ -109,19 +115,25 @@ public:
     /**
      * @description: report whole inspectorTree for SA
      */
-    void ReportInspectorTreeValue(const std::string& data) override;
+    void ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart) override;
 
     /**
      * @description: report web unfocus value for SA
      */
     void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) override;
 
+    /**
+     * @description: report whole inspectorTree for SA
+     */
+    void SendBaseInfo(const std::string& data) override;
+
 private:
     EventCallback clickEventCallback_;
     EventCallback searchEventCallback_;
     EventCallback RouterChangeEventCallback_;
     EventCallback ComponentChangeEventCallback_;
-    EventCallback inspectorTreeCallback_;
+    EventCallback sendBaseInfoCallback_;
+    std::function<void(std::string, int32_t, bool)> inspectorTreeCallback_;
     std::function<void(int64_t accessibilityId, const std::string& data)> unfocusEvent_;
 };
 } // namespace OHOS::Ace

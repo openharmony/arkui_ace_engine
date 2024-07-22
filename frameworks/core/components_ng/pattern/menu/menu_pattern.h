@@ -477,7 +477,7 @@ public:
 
     BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
 
-    void OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press);
+    void OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover = false);
     
     void BlockFurtherExpand()
     {
@@ -540,7 +540,6 @@ private:
     void DisableTabInMenu();
 
     Offset GetTransformCenter() const;
-    void CallMenuAboutToAppearCallback();
     void ShowPreviewMenuAnimation();
     void ShowPreviewMenuScaleAnimation();
     void ShowMenuAppearAnimation();
@@ -559,6 +558,8 @@ private:
     RefPtr<UINode> GetOutsideForEachMenuItem(const RefPtr<UINode>& forEachNode, bool next);
 
     RefPtr<FrameNode> BuildContentModifierNode(int index);
+    bool IsMenuScrollable() const;
+
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
     std::optional<Offset> lastTouchOffset_;

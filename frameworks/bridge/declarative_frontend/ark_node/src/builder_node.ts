@@ -15,6 +15,7 @@
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
 
+type RecycleUpdateFunc = (elmtId: number, isFirstRender: boolean, recycleNode: ViewPU) => void;
 
 class BuilderNode {
   private _JSBuilderNode: JSBuilderNode;
@@ -395,5 +396,9 @@ class JSBuilderNode extends BaseNode {
   {
     this.updateNodePtr(nodePtr);
     this.updateInstanceId(instanceId);
+  }
+
+  public observeRecycleComponentCreation(name: string, recycleUpdateFunc: RecycleUpdateFunc): void {
+    throw new Error('custom component in @Builder used by BuilderNode does not support @Reusable');
   }
 }

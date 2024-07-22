@@ -63,7 +63,19 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
     gestureInfoObj->SetPropertyObject(
         "getModifierKeyState",
         JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
+    gestureInfoObj->SetPropertyObject("fingerList", CreateFingerListArray(info));
+    gestureInfoObj->SetProperty<double>("deviceId", info.GetDeviceId());
 
+    auto target = CreateEventTargetObject(info);
+    gestureInfoObj->SetPropertyObject("target", target);
+    gestureInfoObj->SetProperty<float>("axisVertical", info.GetVerticalAxis());
+    gestureInfoObj->SetProperty<float>("axisHorizontal", info.GetHorizontalAxis());
+    gestureInfoObj->Wrap<GestureEvent>(const_cast<GestureEvent*> (&info));
+    return gestureInfoObj;
+}
+
+JSRef<JSArray> JsGestureFunction::CreateFingerListArray(const GestureEvent& info)
+{
     JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
     const std::list<FingerInfo>& fingerList = info.GetFingerList();
     std::list<FingerInfo> notTouchFingerList;
@@ -84,14 +96,7 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
         JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
         fingerArr->SetValueAt(idx++, element);
     }
-    gestureInfoObj->SetPropertyObject("fingerList", fingerArr);
-
-    auto target = CreateEventTargetObject(info);
-    gestureInfoObj->SetPropertyObject("target", target);
-    gestureInfoObj->SetProperty<float>("axisVertical", info.GetVerticalAxis());
-    gestureInfoObj->SetProperty<float>("axisHorizontal", info.GetHorizontalAxis());
-    gestureInfoObj->Wrap<GestureEvent>(const_cast<GestureEvent*> (&info));
-    return gestureInfoObj;
+    return fingerArr;
 }
 
 JSRef<JSObject> JsGestureFunction::CreateFingerInfo(const FingerInfo& fingerInfo)

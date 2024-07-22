@@ -17,7 +17,7 @@
 
 #include <cstddef>
 #include <string>
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -145,7 +145,10 @@ void JSToggle::JsWidth(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        JSViewAbstract::JsWidth(info[0]);
+        return;
+    }
     JsWidth(info[0]);
 }
 
@@ -176,7 +179,10 @@ void JSToggle::JsHeight(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        JSViewAbstract::JsHeight(info[0]);
+        return;
+    }
     JsHeight(info[0]);
 }
 
@@ -218,6 +224,10 @@ void JSToggle::JsResponseRegion(const JSCallbackInfo& info)
 
 void JSToggle::JsSize(const JSCallbackInfo& info)
 {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        JSViewAbstract::JsSize(info);
+        return;
+    }
     if (!info[0]->IsObject()) {
         return;
     }
@@ -241,7 +251,7 @@ void JSToggle::OnChange(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isOn));
         func->ExecuteJS(1, &newJSVal);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Toggle.onChange");
 #endif
     };

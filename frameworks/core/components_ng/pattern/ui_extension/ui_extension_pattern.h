@@ -93,8 +93,9 @@ public:
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnVisibleChange(bool visible) override;
+    void OnAreaChangedInner() override;
     void OnMountToParentDone() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnSyncGeometryNode(const DirtySwapConfig& config) override;
 
     void OnConnect();
     void OnDisconnect(bool isAbnormal);
@@ -138,6 +139,10 @@ public:
     int32_t GetSessionId();
     int32_t GetNodeId();
     int32_t GetUiExtensionId() override;
+    RefPtr<SessionWrapper> GetSessionWrapper()
+    {
+        return sessionWrapper_;
+    }
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
     void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
     void SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
@@ -148,6 +153,10 @@ public:
     }
 
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset);
+    void SetModalFlag(bool isModal)
+    {
+        isModal_ = isModal;
+    }
     void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
     void OnAccessibilityChildTreeDeregister();
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);

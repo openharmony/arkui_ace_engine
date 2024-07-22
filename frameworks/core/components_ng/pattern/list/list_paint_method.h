@@ -142,7 +142,7 @@ private:
     V2::ItemDivider divider_;
     bool vertical_ = false;
     int32_t lanes_ = 1;
-    int32_t totalItemCount_;
+    int32_t totalItemCount_ = 0;
     float space_;
     float laneGutter_ = 0.0f;
     PositionMap itemPosition_;

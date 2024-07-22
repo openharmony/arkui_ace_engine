@@ -20,6 +20,27 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+bool CheckBeforeAddNode(const RefPtr<UINode>& hostNode, const RefPtr<UINode>& newNode)
+{
+    CHECK_NULL_RETURN(hostNode, false);
+    CHECK_NULL_RETURN(newNode, true);
+    if (!(newNode->IsArkTsFrameNode()) && !newNode->GetIsRootBuilderNode()) {
+        TAG_LOGW(AceLogTag::ACE_NODE_CONTAINER, "Cannot return node created by declarative UI function");
+        return false;
+    }
+    auto parent = newNode->GetParent();
+    if (parent) {
+        TAG_LOGE(AceLogTag::ACE_NODE_CONTAINER,
+            "Add [id:%{public}d][tag:%{public}s] to [id:%{public}d][tag:%{public}s] with previous parent "
+            "[id:%{public}d][tag:%{public}s]",
+            newNode->GetId(), newNode->GetTag().c_str(), hostNode->GetId(), hostNode->GetTag().c_str(), parent->GetId(),
+            parent->GetTag().c_str());
+    }
+    return true;
+}
+} // namespace
+
 void NodeContainerPattern::RemakeNode()
 {
     auto host = GetHost();
@@ -30,12 +51,9 @@ void NodeContainerPattern::RemakeNode()
         return;
     }
     host->RemoveChildAtIndex(0);
-    if (newNode && !(newNode->IsArkTsFrameNode()) && !newNode->GetIsRootBuilderNode()) {
-        TAG_LOGW(AceLogTag::ACE_NODE_CONTAINER, "Cannot return node created by declarative UI function");
-        return;
-    }
-    host->AddChild(newNode, 0);
     if (newNode) {
+        CHECK_NULL_VOID(CheckBeforeAddNode(host, newNode));
+        host->AddChild(newNode, 0);
         newNode->UpdateGeometryTransition();
     }
     OnAddBaseNode();

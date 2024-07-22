@@ -169,7 +169,7 @@ int32_t NavigationStack::FindIndex(
     if (navPathList.empty()) {
         return NOT_EXIST;
     }
-    int32_t index = navPathList.size() - 1;
+    int32_t index = static_cast<int32_t>(navPathList.size()) - 1;
     // find from top to bottom
     for (auto it = navPathList.rbegin(); it != navPathList.rend(); ++it) {
         if ((*it).first == name && (*it).second == navDestinationNode) {
@@ -185,7 +185,7 @@ RefPtr<UINode> NavigationStack::Get()
     if (navPathList_.empty()) {
         return nullptr;
     }
-    int32_t top = navPathList_.size() - 1;
+    int32_t top = static_cast<int32_t>(navPathList_.size()) - 1;
     return navPathList_[top].second;
 }
 

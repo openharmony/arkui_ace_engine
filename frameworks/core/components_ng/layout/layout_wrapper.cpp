@@ -271,18 +271,19 @@ void LayoutWrapper::ExpandSafeArea()
     if (layoutProperty->HasAspectRatio()) {
         frame.SetHeight(frame.Width() / layoutProperty->GetAspectRatio());
     }
+    auto parent = host->GetAncestorNodeOfFrame();
+    auto parentScrollable = (parent && parent->GetPattern<ScrollablePattern>());
     // restore to local offset
     auto diff = originGlobal.GetOffset() - frame.GetOffset();
     frame -= parentGlobalOffset;
     // since adjustment is not accumulated and we did not track previous diff, diff need to be updated
-    AdjustChildren(diff);
+    AdjustChildren(diff, parentScrollable);
 
-    auto selfAdjust = frame - geometryNode->GetFrameRect();
-    geometryNode->SetSelfAdjust(selfAdjust);
-    auto parent = host->GetAncestorNodeOfFrame();
-    if (parent && parent->GetPattern<ScrollablePattern>()) {
+    if (parentScrollable) {
         return;
     }
+    auto selfAdjust = frame - geometryNode->GetFrameRect();
+    geometryNode->SetSelfAdjust(selfAdjust);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdatePaintRect(frame + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
@@ -426,14 +427,14 @@ void LayoutWrapper::GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, Exp
     parent->GetAccumulatedSafeAreaExpandHelper(adjustingRect, totalExpand);
 }
 
-void LayoutWrapper::AdjustChildren(const OffsetF& offset)
+void LayoutWrapper::AdjustChildren(const OffsetF& offset, bool parentScrollable)
 {
     for (const auto& childUI : GetHostNode()->GetChildren()) {
-        AdjustChild(childUI, offset);
+        AdjustChild(childUI, offset, parentScrollable);
     }
 }
 
-void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset)
+void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset, bool parentScrollable)
 {
     auto child = DynamicCast<FrameNode>(childUI);
     if (!child) {
@@ -441,7 +442,7 @@ void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset)
             return;
         }
         for (const auto& syntaxChild : childUI->GetChildren()) {
-            AdjustChild(syntaxChild, offset);
+            AdjustChild(syntaxChild, offset, parentScrollable);
         }
         return;
     }
@@ -450,7 +451,9 @@ void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset)
     if (parentAdjust.GetOffset() != offset) {
         AddChildToExpandListIfNeeded(AceType::WeakClaim(AceType::RawPtr(child)));
     }
-    childGeo->SetParentAdjust(RectF(offset, SizeF()));
+    if (!parentScrollable) {
+        childGeo->SetParentAdjust(RectF(offset, SizeF()));
+    }
 }
 
 void LayoutWrapper::AddChildToExpandListIfNeeded(const WeakPtr<FrameNode>& node)

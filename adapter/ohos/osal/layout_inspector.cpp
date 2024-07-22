@@ -291,7 +291,7 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
     message->Put("deviceWidth", deviceWidth);
     message->Put("deviceHeight", deviceHeight);
     message->Put("deviceDpi", deviceDpi);
-    int32_t encodeLength = SkBase64::Encode(data->data(), data->size(), nullptr);
+    int32_t encodeLength = static_cast<int32_t>(SkBase64::Encode(data->data(), data->size(), nullptr));
     message->Put("size", data->size());
     SkString info(encodeLength);
     SkBase64::Encode(data->data(), data->size(), info.writable_str());

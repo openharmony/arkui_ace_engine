@@ -427,9 +427,25 @@ class ListInitialIndexModifier extends ModifierWithKey<number> {
   }
 }
 
+class ListInitialScrollerModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listInitialScroller');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetInitialScroller(node);
+    }
+    else {
+      getUINativeModule().list.setInitialScroller(node, this.value);
+    }
+  }
+}
+
 interface ListParam {
   initialIndex?: number;
-  space?: number | string
+  space?: number | string;
+  scroller?: Scroller;
 }
 
 class ArkListComponent extends ArkComponent implements ListAttribute {
@@ -443,6 +459,9 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
       }
       if ((value[0] as ListParam).space !== undefined) {
         modifierWithKey(this._modifiersWithKeys, ListSpaceModifier.identity, ListSpaceModifier, (value[0] as ListParam).space);
+      }
+      if ((value[0] as ListParam).scroller !== undefined) {
+        modifierWithKey(this._modifiersWithKeys, ListInitialScrollerModifier.identity, ListInitialScrollerModifier, (value[0] as ListParam).scroller);
       }
     }
     return this;

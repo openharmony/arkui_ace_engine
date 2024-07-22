@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/render/drawing.h"
@@ -54,6 +55,22 @@ constexpr Dimension DEFAULT_FADEOUT_VP = 16.0_vp;
 inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 {
     return FONT_WEIGHT_CONVERT_MAP[(int)fontWeight];
+}
+
+float CalCounterWidth(const RefPtr<TextFieldPattern>& textFieldPattern)
+{
+    float counterWidth = 0.0f;
+    RefPtr<LayoutWrapper> counterNode = textFieldPattern->GetCounterNode().Upgrade();
+    auto counterFrameNode = counterNode->GetHostNode();
+    CHECK_NULL_RETURN(counterFrameNode, 0.0f);
+    auto counterTextPattern = counterFrameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(counterTextPattern, 0.0f);
+    auto counterParagraphs = counterTextPattern->GetParagraphs();
+    for (auto &&info : counterParagraphs) {
+        float width = info.paragraph->GetLongestLine();
+        counterWidth = std::max(counterWidth, width);
+    }
+    return counterWidth;
 }
 } // namespace
 
@@ -488,7 +505,20 @@ void TextFieldContentModifier::ProcessErrorParagraph(DrawingContext& context, fl
             padding = paddingProperty->left.value_or(CalcLength(0.0)).GetDimension().ConvertToPx() +
                 paddingProperty->right.value_or(CalcLength(0.0)).GetDimension().ConvertToPx();
         }
-        errorParagraph->Layout(textFrameRect.Width() - padding);
+        float layoutWidth = textFrameRect.Width() - padding;
+        // subtract border width
+        float borderWidth = textFieldPattern->GetBorderLeft() + textFieldPattern->GetBorderRight();
+        borderWidth = std::max(borderWidth, 0.0f);
+        layoutWidth -= borderWidth;
+        if (textFieldPattern->IsShowCount()) {
+            // subtract counter length
+            float counterWidth = CalCounterWidth(textFieldPattern);
+            layoutWidth -= counterWidth;
+        }
+        if (layoutWidth <= 0) {
+            return; // no enough space
+        }
+        errorParagraph->Layout(layoutWidth);
         auto isRTL = property->GetNonAutoLayoutDirection() == TextDirection::RTL;
         if (isRTL) {
             auto responseArea = textFieldPattern->GetResponseArea();

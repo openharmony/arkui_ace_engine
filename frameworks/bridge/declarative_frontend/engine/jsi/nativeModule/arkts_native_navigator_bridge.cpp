@@ -22,7 +22,7 @@ ArkUINativeModuleValue NavigatorBridge::SetTarget(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    std::string target = secondArg->ToString(vm)->ToString();
+    std::string target = secondArg->ToString(vm)->ToString(vm);
     GetArkUINodeModifiers()->getNavigatorModifier()->setTarget(nativeNode, target.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
@@ -94,7 +94,7 @@ ArkUINativeModuleValue NavigatorBridge::SetParams(ArkUIRuntimeCallInfo* runtimeC
     if (secondArg->IsUndefined()) {
         GetArkUINodeModifiers()->getNavigatorModifier()->resetParams(nativeNode);
     }
-    std::string params = secondArg->ToString(vm)->ToString();
+    std::string params = secondArg->ToString(vm)->ToString(vm);
     GetArkUINodeModifiers()->getNavigatorModifier()->setParams(nativeNode, params.c_str());
     return panda::JSValueRef::Undefined(vm);
 }

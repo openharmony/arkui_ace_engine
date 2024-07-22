@@ -55,7 +55,7 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
 
 bool MultiFingersRecognizer::IsNeedResetStatus()
 {
-    if (!touchPoints_.empty()) {
+    if (GetValidFingersCount() != 0) {
         return false;
     }
 

@@ -81,9 +81,9 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
         std::make_shared<StartDragListenerImpl>(callbackCore));
 }
 
-int32_t InteractionImpl::UpdateDragStyle(OHOS::Ace::DragCursorStyleCore style)
+int32_t InteractionImpl::UpdateDragStyle(OHOS::Ace::DragCursorStyleCore style, const int32_t eventId)
 {
-    return InteractionManager::GetInstance()->UpdateDragStyle(TranslateDragCursorStyle(style));
+    return InteractionManager::GetInstance()->UpdateDragStyle(TranslateDragCursorStyle(style), eventId);
 }
 
 int32_t InteractionImpl::UpdatePreviewStyle(const OHOS::Ace::PreviewStyle& previewStyle)

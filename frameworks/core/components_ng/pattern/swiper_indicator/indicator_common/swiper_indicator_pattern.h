@@ -192,6 +192,11 @@ public:
         jumpIndex_ = jumpIndex;
     }
 
+    void SetStartIndex(std::optional<int32_t> startIndex)
+    {
+        startIndex_ = startIndex;
+    }
+
     void DumpAdvanceInfo() override;
     void SetIndicatorInteractive(bool isInteractive);
 
@@ -270,6 +275,7 @@ private:
     SwiperIndicatorType swiperIndicatorType_ = SwiperIndicatorType::DOT;
 
     std::optional<int32_t> jumpIndex_;
+    std::optional<int32_t> startIndex_;
     std::optional<bool> changeIndexWithAnimation_;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);

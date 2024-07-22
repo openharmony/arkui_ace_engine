@@ -55,6 +55,7 @@ public:
     }
 
 private:
+    void ResetSurface();
     bool needResetSurface_ = false;
     WeakPtr<RenderContext> renderContext_;
     RefPtr<PropertyBool> needRender_;

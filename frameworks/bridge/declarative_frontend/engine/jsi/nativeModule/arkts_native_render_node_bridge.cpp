@@ -156,7 +156,7 @@ ArkUINativeModuleValue SetCommandPathShape(ArkUIRuntimeCallInfo* runtimeCallInfo
     Local<JSValueRef> path = runtimeCallInfo->GetCallArgRef(1);
     std::string pathValue;
     if (path->IsString(vm)) {
-        pathValue = path->ToString(vm)->ToString();
+        pathValue = path->ToString(vm)->ToString(vm);
     }
 
     if (isClip) {
@@ -386,7 +386,7 @@ ArkUINativeModuleValue RenderNodeBridge::SetLabel(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> label = runtimeCallInfo->GetCallArgRef(1);
     std::string labelValue;
     if (label->IsString(vm)) {
-        labelValue = label->ToString(vm)->ToString();
+        labelValue = label->ToString(vm)->ToString(vm);
     } else {
         labelValue = "";
         LOGW("The label of the node should be a string!");

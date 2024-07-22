@@ -1189,7 +1189,7 @@ void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
 
     auto paintMethodTemp = DynamicCast<DotIndicatorPaintMethod>(overlongPaintMethod);
     if (changeIndexWithAnimation_ && !changeIndexWithAnimation_.value()) {
-        animationStartIndex = overlongDotIndicatorModifier_->GetAnimationEndIndex();
+        animationStartIndex = startIndex_ ? startIndex_.value() : overlongDotIndicatorModifier_->GetAnimationEndIndex();
         paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
     }
 
@@ -1197,6 +1197,7 @@ void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
         paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
 
         if (!changeIndexWithAnimation_) {
+            overlongDotIndicatorModifier_->StopAnimation(true);
             overlongDotIndicatorModifier_->SetCurrentOverlongType(OverlongType::NONE);
         }
     }
@@ -1206,10 +1207,7 @@ void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
     auto keepStatus = !isSwiperTouchDown && !isSwiperAnimationRunning && animationStartIndex != animationEndIndex &&
                       !changeIndexWithAnimation_;
 
-    if (!changeIndexWithAnimation_ &&
-        (gestureState_ == GestureState::GESTURE_STATE_NONE ||
-            (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT && !isSwiperTouchDown) ||
-            (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT && !isSwiperTouchDown))) {
+    if (!changeIndexWithAnimation_ && gestureState_ == GestureState::GESTURE_STATE_NONE) {
         keepStatus = true;
     }
 
@@ -1237,5 +1235,6 @@ void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
     overlongDotIndicatorModifier_->SetBoundsRect(CalcBoundsRect());
     changeIndexWithAnimation_.reset();
     jumpIndex_.reset();
+    startIndex_.reset();
 }
 } // namespace OHOS::Ace::NG

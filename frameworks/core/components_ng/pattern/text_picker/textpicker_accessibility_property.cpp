@@ -74,7 +74,7 @@ int32_t TextPickerAccessibilityProperty::GetEndIndex() const
     if (textPickerColumnPattern->NotLoopOptions()) {
         return totalIndex - 1;
     }
-    return (currentIndex + middleIndex) % totalIndex;
+    return (static_cast<int32_t>(currentIndex) + middleIndex) % static_cast<int32_t>(totalIndex);
 }
 
 AccessibilityValue TextPickerAccessibilityProperty::GetAccessibilityValue() const

@@ -142,13 +142,14 @@ std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartA
         }
         int32_t crossStart = -1;
         auto iter = options.irregularIndexes.upper_bound(itemIndex);
+        auto crossCount = static_cast<int32_t>(crossCount_);
         if (iter == options.irregularIndexes.end()) {
-            crossStart = (itemIndex - (*(options.irregularIndexes.rbegin()) + 1)) % crossCount_;
+            crossStart = (itemIndex - (*(options.irregularIndexes.rbegin()) + 1)) % crossCount;
         } else {
             if (iter != options.irregularIndexes.begin()) {
-                crossStart = (itemIndex - (*(--iter) + 1)) % crossCount_;
+                crossStart = (itemIndex - (*(--iter) + 1)) % crossCount;
             } else {
-                crossStart = itemIndex % crossCount_;
+                crossStart = itemIndex % crossCount;
             }
         }
         return std::make_pair(crossStart, 1);
@@ -207,8 +208,9 @@ static void InitIrregularItemsPosition(std::map<int32_t, int32_t>& irregularItem
 std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartAndSpanWithUserFunction(
     int32_t itemIndex, const GridLayoutOptions& options, int32_t firstIrregularIndex)
 {
-    InitIrregularItemsPosition(gridLayoutInfo_.irregularItemsPosition_, options, firstIrregularIndex,
-        gridLayoutInfo_.axis_, static_cast<int32_t>(crossCount_));
+    auto crossCount = static_cast<int32_t>(crossCount_);
+    InitIrregularItemsPosition(
+        gridLayoutInfo_.irregularItemsPosition_, options, firstIrregularIndex, gridLayoutInfo_.axis_, crossCount);
     auto sum = firstIrregularIndex;
     auto lastIndex = firstIrregularIndex;
     JumpToLastIrregularItem(gridLayoutInfo_.irregularItemsPosition_, sum, lastIndex, itemIndex);
@@ -228,10 +230,10 @@ std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartA
 
         auto crossSpan = options.getSizeByIndex(index).GetCrossSize(gridLayoutInfo_.axis_);
         ResetInvalidCrossSpan(crossCount_, crossSpan);
-        auto irregularStart = (sum + index - lastIndex - 1) % crossCount_;
+        auto irregularStart = (sum + index - lastIndex - 1) % crossCount;
         // put it into next line
-        if (irregularStart + crossSpan > crossCount_) {
-            sum += (crossCount_ - irregularStart);
+        if (irregularStart + crossSpan > crossCount) {
+            sum += (crossCount - irregularStart);
         }
         sum += (index - lastIndex - 1);
         sum += crossSpan;
@@ -239,12 +241,12 @@ std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartA
         gridLayoutInfo_.irregularItemsPosition_.emplace(index, sum);
     }
     sum += ((itemIndex > lastIndex) ? (itemIndex - lastIndex - 1) : 0);
-    auto crossStart = sum % crossCount_;
+    auto crossStart = sum % crossCount;
     bool isRegularItem = (options.irregularIndexes.find(itemIndex) == options.irregularIndexes.end());
     auto crossSpan = isRegularItem ? 1 : options.getSizeByIndex(itemIndex).GetCrossSize(gridLayoutInfo_.axis_);
     ResetInvalidCrossSpan(crossCount_, crossSpan);
-    if (crossStart + crossSpan > crossCount_) {
-        sum += (crossCount_ - crossStart);
+    if (crossStart + crossSpan > crossCount) {
+        sum += (crossCount - crossStart);
         crossStart = 0;
     }
     if (!isRegularItem) {

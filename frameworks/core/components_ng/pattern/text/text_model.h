@@ -60,6 +60,8 @@ public:
     virtual void SetTextShadow(const std::vector<Shadow>& value) = 0;
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
+    virtual void SetMinFontScale(const float value) = 0;
+    virtual void SetMaxFontScale(const float value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
     virtual void SetWordBreak(WordBreak wordBreak) = 0;
     virtual void SetLineBreakStrategy(LineBreakStrategy lineBreakStrategy) = 0;
@@ -112,6 +114,7 @@ public:
     virtual void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) = 0;
     virtual void SetSelectionMenuOptions(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
+    virtual void SetResponseRegion(bool isUserSetResponseRegion) {};
 
 private:
     static std::unique_ptr<TextModel> instance_;

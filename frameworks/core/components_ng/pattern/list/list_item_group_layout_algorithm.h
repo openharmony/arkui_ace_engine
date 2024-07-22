@@ -26,6 +26,7 @@
 namespace OHOS::Ace::NG {
 class ListPositionMap;
 class ListChildrenMainSize;
+struct ListItemGroupLayoutInfo;
 struct LayoutedItemInfo {
     int32_t startIndex = 0;
     float startPos = 0.0f;
@@ -279,6 +280,8 @@ public:
     {
         return cacheParam_;
     }
+
+    ListItemGroupLayoutInfo GetLayoutInfo() const;
 
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
