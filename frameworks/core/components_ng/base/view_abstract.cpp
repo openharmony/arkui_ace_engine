@@ -4522,6 +4522,14 @@ void ViewAbstract::SetOnSizeChanged(
     frameNode->SetOnSizeChangeCallback(std::move(onSizeChanged));
 }
 
+void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->GetFocusBox().SetStyle(style);
+}
+
 void ViewAbstract::SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled)
 {
     auto pipeline = PipelineContext::GetCurrentContext();

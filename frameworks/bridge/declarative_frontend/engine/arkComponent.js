@@ -2858,6 +2858,21 @@ class PixelRoundModifier extends ModifierWithKey {
   }
 }
 PixelRoundModifier.identity = Symbol('pixelRound');
+class FocusBoxModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetFocusBox(node);
+    }
+    else {
+      getUINativeModule().common.setFocusBox(node, this.value?.margin,
+        this.value?.strokeWidth, this.value?.strokeColor);
+    }
+  }
+}
+FocusBoxModifier.identity = Symbol('focusBox');
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 const isString = (val) => typeof val === 'string';
 const isNumber = (val) => typeof val === 'number';
@@ -4166,6 +4181,10 @@ class ArkComponent {
   }
   pixelRound(value) {
     modifierWithKey(this._modifiersWithKeys, PixelRoundModifier.identity, PixelRoundModifier, value);
+    return this;
+  }
+  focusBox(value) {
+    modifierWithKey(this._modifiersWithKeys, FocusBoxModifier.identity, FocusBoxModifier, value);
     return this;
   }
 }
