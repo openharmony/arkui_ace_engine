@@ -14,6 +14,8 @@
  */
 
 #include "gtest/gtest.h"
+#define private public
+#define protected public
 #include "interfaces/inner_api/ace/ui_event_observer.h"
 
 #include "base/log/log.h"
@@ -517,6 +519,7 @@ HWTEST_F(EventRecorderTest, EventRecorderTest009, TestSize.Level1)
     EXPECT_EQ(observer->GetEventType(), static_cast<int32_t>(Recorder::EventType::PAGE_SHOW));
 
     Recorder::EventParamsBuilder builder5;
+    builder5.SetText("");
     builder5.SetText("tom");
     Recorder::EventRecorder::Get().OnNavDstHide(std::move(builder5));
     sleep(1);
@@ -720,6 +723,42 @@ HWTEST_F(EventRecorderTest, PutString002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PutString003
+ * @tc.desc: Test PutString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, PutString003, TestSize.Level1)
+{
+    std::string config;
+    GetConfig(config);
+    auto observer = std::make_shared<DemoUIEventObserver>();
+    Recorder::EventController::Get().Register(config, observer);
+    Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
+    auto pageNode = CreatePageNode("pages/Index");
+    Recorder::NodeDataCache::Get().mergedConfig_->shareNodes["element"] = { "element1", "element2", "element3" };
+    bool result = Recorder::NodeDataCache::Get().PutString(pageNode, "1", "1");
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: PutString004
+ * @tc.desc: Test PutString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, PutString004, TestSize.Level1)
+{
+    std::string config;
+    GetConfig(config);
+    auto observer = std::make_shared<DemoUIEventObserver>();
+    Recorder::EventController::Get().Register(config, observer);
+    Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
+    auto pageNode = CreatePageNode("pages/Index");
+    Recorder::NodeDataCache::Get().mergedConfig_->shareNodes.clear();
+    bool result = Recorder::NodeDataCache::Get().PutString(pageNode, "1", "1");
+    EXPECT_FALSE(result);
+}
+
+/**
  * @tc.name: OnBeforePagePop001
  * @tc.desc: Test OnBeforePagePop.
  * @tc.type: FUNC
@@ -738,8 +777,124 @@ HWTEST_F(EventRecorderTest, OnBeforePagePop001, TestSize.Level1)
 HWTEST_F(EventRecorderTest, GetExposureCfg001, TestSize.Level1)
 {
     Recorder::ExposureCfg cfg;
-    string pageUrl = "";
+    std::string pageUrl = "";
     Recorder::NodeDataCache::Get().GetExposureCfg(pageUrl, "", cfg);
     EXPECT_TRUE(pageUrl.empty());
+}
+
+/**
+ * @tc.name: SetExtra001
+ * @tc.desc: Test SetExtra.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, SetExtra001, TestSize.Level1)
+{
+    // EventParamsBuilder& EventParamsBuilder::SetExtra(const std::string& key, const std::string& value)
+    std::string key = "";
+    std::string value = "";
+    Recorder::EventParamsBuilder builder1;
+    builder1.SetExtra(key, value);
+    std::string result = builder1.GetText();
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: SetExtra002
+ * @tc.desc: Test SetExtra.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, SetExtra002, TestSize.Level1)
+{
+    // EventParamsBuilder& EventParamsBuilder::SetExtra(const std::string& key, const std::string& value)
+    std::string key = "123";
+    std::string value = "";
+    Recorder::EventParamsBuilder builder1;
+    builder1.SetExtra(key, value);
+    EXPECT_TRUE(builder1.params_->empty());
+}
+
+/**
+ * @tc.name: SetExtra003
+ * @tc.desc: Test SetExtra.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, SetExtra003, TestSize.Level1)
+{
+    // EventParamsBuilder& EventParamsBuilder::SetExtra(const std::string& key, const std::string& value)
+    std::string key = "";
+    std::string value = "123";
+    Recorder::EventParamsBuilder builder1;
+    builder1.SetExtra(key, value);
+    EXPECT_TRUE(builder1.params_->empty());
+}
+
+/**
+ * @tc.name: SetExtra004
+ * @tc.desc: Test SetExtra.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, SetExtra004, TestSize.Level1)
+{
+    // EventParamsBuilder& EventParamsBuilder::SetExtra(const std::string& key, const std::string& value)
+    std::string key = "123";
+    std::string value = "123";
+    Recorder::EventParamsBuilder builder1;
+    builder1.SetExtra(key, value);
+    std::string result = builder1.ToString();
+    EXPECT_NE(result, "");
+}
+
+/**
+ * @tc.name: SetTextArray001
+ * @tc.desc: Test SetTextArray.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, SetTextArray001, TestSize.Level1)
+{
+    std::vector<std::string> value = { "50", "100", "200", "300" };
+    Recorder::EventParamsBuilder builder1;
+    builder1.SetTextArray(value);
+    EXPECT_FALSE(builder1.params_->empty());
+}
+
+/**
+ * @tc.name: SetId001
+ * @tc.desc: Test SetId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, SetId001, TestSize.Level1)
+{
+    std::vector<std::string> value = { "50", "100", "200", "300" };
+    Recorder::EventParamsBuilder builder1;
+    builder1.SetId("");
+    EXPECT_TRUE(builder1.params_->empty());
+}
+
+/**
+ * @tc.name: OnNavDstHide001
+ * @tc.desc: Test OnNavDstHide.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, OnNavDstHide001, TestSize.Level1)
+{
+    Recorder::EventParamsBuilder builder1;
+    builder1.SetExtra("1", "1");
+    builder1.SetNavDst("1");
+    Recorder::EventRecorder::Get().navShowTime_ = 0;
+    Recorder::EventRecorder::Get().OnNavDstHide(std::move(builder1));
+    EXPECT_EQ(Recorder::EventRecorder::Get().GetNavDstName(), builder1.GetText());
+}
+
+/**
+ * @tc.name: IsCategoryEnable001
+ * @tc.desc: Test IsCategoryEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, IsCategoryEnable001, TestSize.Level1)
+{
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    config->switches_->emplace(Recorder::EventCategory::CATEGORY_COMPONENT, false);
+    bool result = config->IsCategoryEnable(Recorder::EventCategory::CATEGORY_PAGE);
+    EXPECT_FALSE(result);
 }
 } // namespace OHOS::Ace
