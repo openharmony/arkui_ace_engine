@@ -412,11 +412,12 @@ JSRef<JSVal> JSNavigationStack::GetOnPopByIndex(int32_t index) const
 }
 
 bool JSNavigationStack::GetNavDestinationNodeInUINode(
-    RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode)
+    RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode)
 {
+    RefPtr<NG::CustomNode> customNode;
     while (node) {
         if (node->GetTag() == V2::JS_VIEW_ETS_TAG) {
-            auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
+            customNode = AceType::DynamicCast<NG::CustomNode>(node);
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "render current custom node: %{public}s",
                 customNode->GetCustomTag().c_str());
             // record parent navigationNode before customNode is rendered in case of navDestinationNode
@@ -426,6 +427,9 @@ bool JSNavigationStack::GetNavDestinationNodeInUINode(
             customNode->Render();
         } else if (node->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
             desNode = AceType::DynamicCast<NG::NavDestinationGroupNode>(node);
+            if (customNode) {
+                node = customNode;
+            }
             return true;
         }
         auto children = node->GetChildren();
