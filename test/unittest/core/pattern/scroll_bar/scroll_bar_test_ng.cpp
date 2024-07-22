@@ -1253,8 +1253,7 @@ HWTEST_F(ScrollBarTestNg, HandleClickScroll001, TestSize.Level1)
     CreateScrollBar(true, false, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::ON), layoutConstraint);
     pattern_->scrollBarProxy_ = AceType::MakeRefPtr<ScrollBarProxy>();
     auto scrollBarProxy = pattern_->scrollBarProxy_;
-    GestureEvent info;
-    info.SetLocalLocation(Offset(1.0f, 1.0f));
+    pattern_->locationInfo_ = Offset(1.0f, 1.0f);
     pattern_->InitClickEvent();
     const RectF& rect = RectF(0.0f, 10.0f, 30.0f, 50.0f);
     const SizeF& size = SizeF(10.0f, 20.0f);
@@ -1283,15 +1282,13 @@ HWTEST_F(ScrollBarTestNg, HandleClickScroll001, TestSize.Level1)
     //  * @tc.steps: step2. Test HandleClickEvent.
     //  * @tc.expect: reverse is TRUE or FALSE.
     //  */
-    pattern_->HandleClickEvent(info);
+    pattern_->HandleClickEvent();
     EXPECT_TRUE(reverse);
-    GestureEvent info1;
-    info1.SetLocalLocation(Offset(1.0f, 70.0f));
-    pattern_->HandleClickEvent(info1);
+    pattern_->locationInfo_ = Offset(1.0f, 70.0f);
+    pattern_->HandleClickEvent();
     EXPECT_FALSE(reverse);
-    GestureEvent info2;
-    info2.SetLocalLocation(Offset(1.0f, 35.0f));
-    pattern_->HandleClickEvent(info2);
+    pattern_->locationInfo_ = Offset(1.0f, 35.0f);
+    pattern_->HandleClickEvent();
     EXPECT_FALSE(reverse);
 }
 
@@ -1429,7 +1426,7 @@ HWTEST_F(ScrollBarTestNg, BarCollectLongPressTarget001, TestSize.Level1)
         coordinateOffset, getEventTargetImpl, result, frameNode, nullptr, responseLinkResult);
     EXPECT_FLOAT_EQ(pattern_->longPressRecognizer_->GetCoordinateOffset().GetX(), coordinateOffset.GetX());
     EXPECT_FLOAT_EQ(pattern_->longPressRecognizer_->GetCoordinateOffset().GetY(), coordinateOffset.GetY());
-    EXPECT_EQ(result.size(), size + 1);
+    EXPECT_EQ(result.size(), size + 2);
 
     localPoint.SetX(localPoint.GetX() + 1);
     localPoint.SetY(localPoint.GetY() + 1);
@@ -1438,7 +1435,7 @@ HWTEST_F(ScrollBarTestNg, BarCollectLongPressTarget001, TestSize.Level1)
     pattern_->longPressRecognizer_ = nullptr;
     pattern_->scrollableEvent_->BarCollectLongPressTarget(
         coordinateOffset, getEventTargetImpl, result, frameNode, nullptr, responseLinkResult);
-    EXPECT_EQ(result.size(), size + 1);
+    EXPECT_EQ(result.size(), size + 3);
 }
 
 /**

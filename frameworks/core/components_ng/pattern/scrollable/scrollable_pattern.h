@@ -555,7 +555,7 @@ public:
         animateCanOverScroll_ = isScrollable && animateCanOverScroll;
     }
     virtual void InitScrollBarClickEvent();
-    void HandleClickEvent(GestureEvent& info);
+    void HandleClickEvent();
     void InitScrollBarGestureEvent();
     void InitScrollBarMouseEvent();
     virtual void ScrollPage(
@@ -618,6 +618,10 @@ public:
     {
         hotZoneScrollCallback_ = func;
     }
+
+    void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& responseLinkResult);
 
     virtual void SetAccessibilityAction();
 
@@ -895,6 +899,8 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
     bool lastCanOverScroll_ = false;
+    RefPtr<ClickRecognizer> clickRecognizer_;
+    Offset locationInfo_;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

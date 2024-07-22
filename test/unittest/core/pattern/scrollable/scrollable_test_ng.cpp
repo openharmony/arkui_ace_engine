@@ -1861,27 +1861,24 @@ HWTEST_F(ScrollableTestNg, HandleClickScroll001, TestSize.Level1)
     scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
     scrollPn->isMousePressed_ = true;
     scrollPn->scrollBar_->isScrollable_ = true;
-    GestureEvent info;
-    info.SetLocalLocation(Offset(1.0f, 150.0f));
+    scrollPn->locationInfo_ = Offset(1.0f, 150.0f);
     // /**
     //  * @tc.steps: step2. Test HandleClickEvent.
     //  * @tc.expect: finalPosition_ equal to expect value.
     //  */
     EXPECT_CALL(*scrollPn, GetMainContentSize).Times(2).WillRepeatedly(Return(50.0f));
     scrollPn->InitScrollBarClickEvent();
-    scrollPn->HandleClickEvent(info);
+    scrollPn->HandleClickEvent();
     EXPECT_EQ(scrollPn->finalPosition_, 0.0f);
 
-    GestureEvent info1;
-    info1.SetLocalLocation(Offset(15.0f, 1.0f));
+    scrollPn->locationInfo_ = Offset(15.0f, 1.0f);
     scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
-    scrollPn->HandleClickEvent(info1);
+    scrollPn->HandleClickEvent();
     EXPECT_EQ(scrollPn->finalPosition_, -50.0f);
 
-    GestureEvent info2;
-    info2.SetLocalLocation(Offset(15.0f, 350.0f));
+    scrollPn->locationInfo_ = Offset(15.0f, 350.0f);
     scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
-    scrollPn->HandleClickEvent(info2);
+    scrollPn->HandleClickEvent();
     EXPECT_EQ(scrollPn->finalPosition_, 50.0f);
 }
 
