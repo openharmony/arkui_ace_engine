@@ -35,6 +35,10 @@ struct ToastInfo {
     ToastShowMode showMode = ToastShowMode::DEFAULT;
     int32_t alignment = 0;
     std::optional<DimensionOffset> offset;
+    std::optional<Color> backgroundColor;
+    std::optional<Color> textColor;
+    std::optional<int32_t> backgroundBlurStyle;
+    std::optional<Shadow> shadow;
 };
 class ACE_EXPORT ToastLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ToastLayoutProperty, LayoutProperty);

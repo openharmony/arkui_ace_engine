@@ -1426,6 +1426,7 @@ HWTEST_F(OverlayTestNg, ToastTest006, TestSize.Level1)
 {
     auto offset = DimensionOffset(MENU_OFFSET);
     ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0, offset };
+    const std::optional<Color> textColor = Color::RED;
     auto toastNode = ToastView::CreateToastNode(toastInfo);
     ASSERT_NE(toastNode, nullptr);
     auto toastPattern = toastNode->GetPattern<ToastPattern>();
@@ -1439,7 +1440,7 @@ HWTEST_F(OverlayTestNg, ToastTest006, TestSize.Level1)
     int32_t settingApiVersion = 12;
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-    ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false);
+    ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false, textColor);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 

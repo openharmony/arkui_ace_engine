@@ -194,6 +194,147 @@ bool GetToastOffset(napi_env env, napi_value offsetApi, std::optional<DimensionO
     return true;
 }
 
+void GetToastBackgroundColor(napi_env env, napi_value backgroundColorNApi, std::optional<Color>& backgroundColor)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, backgroundColorNApi, &valueType);
+    Color color;
+    backgroundColor = std::nullopt;
+    if (ParseNapiColor(env, backgroundColorNApi, color)) {
+        backgroundColor = color;
+    }
+}
+
+void GetToastTextColor(napi_env env, napi_value textColorNApi, std::optional<Color>& textColor)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, textColorNApi, &valueType);
+    Color color;
+    textColor = std::nullopt;
+    if (ParseNapiColor(env, textColorNApi, color)) {
+        textColor = color;
+    }
+}
+
+void GetToastBackgroundBlurStyle(napi_env env,
+    napi_value backgroundBlurStyleNApi, std::optional<int32_t>& backgroundBlurStyle)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, backgroundBlurStyleNApi, &valueType);
+    if (valueType == napi_number) {
+        int32_t num;
+        napi_get_value_int32(env, backgroundBlurStyleNApi, &num);
+        if (num >= 0 && num < BG_BLUR_STYLE_MAX_INDEX) {
+            backgroundBlurStyle = num;
+        }
+    }
+}
+
+bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
+{
+    auto colorMode = SystemProperties::GetColorMode();
+    if (shadowStyle == ShadowStyle::None) {
+        return true;
+    }
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    if (!shadowTheme) {
+        return false;
+    }
+    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    return true;
+}
+
+void GetToastObjectShadow(napi_env env, napi_value shadowNApi, Shadow& shadowProps)
+{
+    napi_value radiusApi = nullptr;
+    napi_value colorApi = nullptr;
+    napi_value typeApi = nullptr;
+    napi_value fillApi = nullptr;
+    napi_get_named_property(env, shadowNApi, "radius", &radiusApi);
+    napi_get_named_property(env, shadowNApi, "color", &colorApi);
+    napi_get_named_property(env, shadowNApi, "type", &typeApi);
+    napi_get_named_property(env, shadowNApi, "fill", &fillApi);
+    double radius = 0.0;
+    napi_get_value_double(env, radiusApi, &radius);
+    if (LessNotEqual(radius, 0.0)) {
+        radius = 0.0;
+    }
+    shadowProps.SetBlurRadius(radius);
+    Color color;
+    ShadowColorStrategy shadowColorStrategy;
+    if (ParseShadowColorStrategy(env, colorApi, shadowColorStrategy)) {
+        shadowProps.SetShadowColorStrategy(shadowColorStrategy);
+    } else if (ParseNapiColor(env, colorApi, color)) {
+        shadowProps.SetColor(color);
+    }
+    napi_valuetype valueType = GetValueType(env, typeApi);
+    int32_t shadowType = static_cast<int32_t>(ShadowType::COLOR);
+    if (valueType == napi_number) {
+        napi_get_value_int32(env, typeApi, &shadowType);
+    }
+    if (shadowType != static_cast<int32_t>(ShadowType::BLUR)) {
+        shadowType = static_cast<int32_t>(ShadowType::COLOR);
+    }
+    shadowType =
+        std::clamp(shadowType, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
+    shadowProps.SetShadowType(static_cast<ShadowType>(shadowType));
+    valueType = GetValueType(env, fillApi);
+    bool isFilled = false;
+    if (valueType == napi_boolean) {
+        napi_get_value_bool(env, fillApi, &isFilled);
+    }
+    shadowProps.SetIsFilled(isFilled);
+}
+
+void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& shadow)
+{
+    Shadow shadowProps;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, shadowNApi, &valueType);
+    GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadowProps);
+    if (valueType == napi_number) {
+        int32_t num = 0;
+        napi_get_value_int32(env, shadowNApi, &num);
+        auto style = static_cast<ShadowStyle>(num);
+        GetShadowFromTheme(style, shadowProps);
+    } else if (valueType == napi_object) {
+        napi_value offsetXApi = nullptr;
+        napi_value offsetYApi = nullptr;
+        napi_get_named_property(env, shadowNApi, "offsetX", &offsetXApi);
+        napi_get_named_property(env, shadowNApi, "offsetY", &offsetYApi);
+        ResourceInfo recv;
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        if (ParseResourceParam(env, offsetXApi, recv)) {
+            auto resourceWrapper = CreateResourceWrapper(recv);
+            auto offsetX = resourceWrapper->GetDimension(recv.resId);
+            double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
+            shadowProps.SetOffsetX(xValue);
+        } else {
+            CalcDimension offsetX;
+            if (ParseNapiDimension(env, offsetX, offsetXApi, DimensionUnit::VP)) {
+                double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
+                shadowProps.SetOffsetX(xValue);
+            }
+        }
+        if (ParseResourceParam(env, offsetYApi, recv)) {
+            auto resourceWrapper = CreateResourceWrapper(recv);
+            auto offsetY = resourceWrapper->GetDimension(recv.resId);
+            shadowProps.SetOffsetY(offsetY.Value());
+        } else {
+            CalcDimension offsetY;
+            if (ParseNapiDimension(env, offsetY, offsetYApi, DimensionUnit::VP)) {
+                shadowProps.SetOffsetY(offsetY.Value());
+            }
+        }
+        GetToastObjectShadow(env, shadowNApi, shadowProps);
+    }
+    shadow = shadowProps;
+}
+
 bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
 {
     napi_value messageNApi = nullptr;
@@ -202,6 +343,10 @@ bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
     napi_value showModeNApi = nullptr;
     napi_value alignmentApi = nullptr;
     napi_value offsetApi = nullptr;
+    napi_value backgroundColorNApi = nullptr;
+    napi_value textColorNApi = nullptr;
+    napi_value backgroundBlurStyleNApi = nullptr;
+    napi_value shadowNApi = nullptr;
 
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv, &valueType);
@@ -217,6 +362,10 @@ bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
         napi_get_named_property(env, argv, "showMode", &showModeNApi);
         napi_get_named_property(env, argv, "alignment", &alignmentApi);
         napi_get_named_property(env, argv, "offset", &offsetApi);
+        napi_get_named_property(env, argv, "backgroundColor", &backgroundColorNApi);
+        napi_get_named_property(env, argv, "textColor", &textColorNApi);
+        napi_get_named_property(env, argv, "backgroundBlurStyle", &backgroundBlurStyleNApi);
+        napi_get_named_property(env, argv, "shadow", &shadowNApi);
     } else {
         NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
         return false;
@@ -229,6 +378,10 @@ bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
         !GetToastOffset(env, offsetApi, toastInfo.offset)) {
         return false;
     }
+    GetToastBackgroundColor(env, backgroundColorNApi, toastInfo.backgroundColor);
+    GetToastTextColor(env, textColorNApi, toastInfo.textColor);
+    GetToastBackgroundBlurStyle(env, backgroundBlurStyleNApi, toastInfo.backgroundBlurStyle);
+    GetToastShadow(env, shadowNApi, toastInfo.shadow);
     return true;
 }
 
@@ -811,24 +964,6 @@ std::optional<NG::BorderStyleProperty> GetBorderStyleProps(
         return styleProps;
     }
     return std::nullopt;
-}
-
-bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
-{
-    auto colorMode = SystemProperties::GetColorMode();
-    if (shadowStyle == ShadowStyle::None) {
-        return true;
-    }
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, false);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
-    if (!shadowTheme) {
-        return false;
-    }
-    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
-    return true;
 }
 
 void GetNapiObjectShadow(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext, Shadow& shadow)
