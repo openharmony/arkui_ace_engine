@@ -428,8 +428,8 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     isDragUpdateStop_ = false;
     touchUp_ = false;
     scrollPause_ = false;
-    lastVelocity_ = info.GetMainVelocity();
-    double gestureVelocity = info.GetMainVelocity();
+    lastVelocity_ = GetPanDirection() == Axis::NONE ? 0.0 : info.GetMainVelocity();
+    double gestureVelocity = GetPanDirection() == Axis::NONE ? 0.0 : info.GetMainVelocity();
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     LayoutDirectionEst(gestureVelocity);
     // Apply max fling velocity limit, it must be calculated after all fling velocity gain.
