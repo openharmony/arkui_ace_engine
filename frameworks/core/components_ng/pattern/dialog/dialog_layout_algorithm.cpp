@@ -64,6 +64,7 @@ constexpr int32_t DIALOG_DEVICE_COLUMN_TWO = 2;
 constexpr int32_t DIALOG_DEVICE_COLUMN_THREE = 3;
 constexpr int32_t DIALOG_DEVICE_COLUMN_FOUR = 4;
 constexpr double LANDSCAPE_DIALOG_WIDTH_RATIO = 0.75;
+constexpr Dimension SCROLL_MIN_HEIGHT_SUITOLD = 100.0_vp;
 } // namespace
 
 void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -89,6 +90,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
     dialogPattern->UpdateFontScale();
+    isSuitOldMeasure_ = dialogPattern->GetIsSuitOldMeasure();
     isSuitableForElderly_ = dialogPattern->GetIsSuitableForAging() &&
                             windowManager->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING &&
                             GreatOrEqual(pipeline->GetFontScale(), 1.75f);
@@ -117,6 +119,10 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // constraint child size unless developer is using customStyle
     if (!customSize_) {
         auto maxSize = layoutConstraint->maxSize;
+        if (isSuitOldMeasure_) {
+            maxSize.SetWidth(pipeline->GetRootWidth());
+            maxSize.SetHeight(pipeline->GetRootHeight());
+        }
         maxSize.MinusPadding(0, 0, safeAreaInsets_.top_.Length(), 0);
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && LessNotEqual(gridCount_, 0)) {
             maxSize.MinusPadding(0, 0, 0, safeAreaInsets_.bottom_.Length());
@@ -131,8 +137,10 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
-
     if (!layoutWrapper->GetHostNode()->GetPattern<DialogPattern>()->GetCustomNode()) {
+        if (isSuitOldMeasure_) {
+            dialogMaxHeight_ = childLayoutConstraint.maxSize.Height();
+        }
         AnalysisHeightOfChild(layoutWrapper);
     }
 }
@@ -190,6 +198,7 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
         if (scroll != nullptr) {
             auto childConstraint =
                 CreateDialogChildConstraint(layoutWrapper, std::min(restHeight, scrollHeight), restWidth);
+            UpdateIsScrollHeightNegative(layoutWrapper, std::min(restHeight, scrollHeight));
             scroll->Measure(childConstraint);
         }
         if (list != nullptr) {
@@ -898,6 +907,22 @@ void DialogLayoutAlgorithm::ClipUIExtensionSubWindowContent(const RefPtr<FrameNo
         dialogContext->UpdateClipShape(shapeRect);
     } else {
         dialogContext->UpdateClipShape(nullptr);
+    }
+}
+
+void DialogLayoutAlgorithm::UpdateIsScrollHeightNegative(LayoutWrapper* layoutWrapper, float height)
+{
+    if (height < SCROLL_MIN_HEIGHT_SUITOLD.ConvertToPx()) {
+        const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+        auto child = children.front();
+        auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
+        if (childSize.Height() == dialogMaxHeight_) {
+            auto hostNode = layoutWrapper->GetHostNode();
+            CHECK_NULL_VOID(hostNode);
+            auto dialogPattern = hostNode->GetPattern<DialogPattern>();
+            CHECK_NULL_VOID(dialogPattern);
+            dialogPattern->SetIsScrollHeightNegative(true);
+        }
     }
 }
 } // namespace OHOS::Ace::NG
