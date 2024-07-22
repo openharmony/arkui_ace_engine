@@ -882,7 +882,7 @@ void SelectOverlayNode::CreateCustomSelectOverlay(const std::shared_ptr<SelectOv
     selectMenu_->MarkModifyDone();
 }
 
-void SelectOverlayNode::MoreOrBackAnimation(bool isMore)
+void SelectOverlayNode::MoreOrBackAnimation(bool isMore, bool noAnimation)
 {
     CHECK_NULL_VOID(!isDoingAnimation_);
     CHECK_NULL_VOID(selectMenu_);
@@ -890,13 +890,13 @@ void SelectOverlayNode::MoreOrBackAnimation(bool isMore)
     CHECK_NULL_VOID(extensionMenu_);
     CHECK_NULL_VOID(backButton_);
     if (isMore && !isExtensionMenu_) {
-        MoreAnimation();
+        MoreAnimation(noAnimation);
     } else if (!isMore && isExtensionMenu_) {
-        BackAnimation();
+        BackAnimation(noAnimation);
     }
 }
 
-void SelectOverlayNode::MoreAnimation()
+void SelectOverlayNode::MoreAnimation(bool noAnimation)
 {
     auto extensionContext = extensionMenu_->GetRenderContext();
     CHECK_NULL_VOID(extensionContext);
@@ -949,9 +949,9 @@ void SelectOverlayNode::MoreAnimation()
             extensionContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
             selectMenuInnerContext->UpdateOpacity(0.0);
         });
-    modifier->SetOtherPointRadius(MIN_DIAMETER / 2.0f);
-    modifier->SetHeadPointRadius(MIN_ARROWHEAD_DIAMETER / 2.0f);
-    modifier->SetLineEndOffset(true);
+    modifier->SetOtherPointRadius(MIN_DIAMETER / 2.0f, noAnimation);
+    modifier->SetHeadPointRadius(MIN_ARROWHEAD_DIAMETER / 2.0f, noAnimation);
+    modifier->SetLineEndOffset(true, noAnimation);
     auto menuPattern = extensionMenu_->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->SetMenuShow();
@@ -980,7 +980,7 @@ void SelectOverlayNode::MoreAnimation()
     AnimationUtils::CloseImplicitAnimation();
 }
 
-void SelectOverlayNode::BackAnimation()
+void SelectOverlayNode::BackAnimation(bool noAnimation)
 {
     auto selectContext = selectMenu_->GetRenderContext();
     CHECK_NULL_VOID(selectContext);
@@ -1031,9 +1031,9 @@ void SelectOverlayNode::BackAnimation()
         selectMenuInnerContext->UpdateOpacity(1.0);
     });
 
-    modifier->SetOtherPointRadius(MAX_DIAMETER / 2.0f);
-    modifier->SetHeadPointRadius(MAX_DIAMETER / 2.0f);
-    modifier->SetLineEndOffset(false);
+    modifier->SetOtherPointRadius(MAX_DIAMETER / 2.0f, noAnimation);
+    modifier->SetHeadPointRadius(MAX_DIAMETER / 2.0f, noAnimation);
+    modifier->SetLineEndOffset(false, noAnimation);
 
     auto toolbarHeight = textOverlayTheme->GetMenuToolbarHeight();
     auto frameSize =
@@ -1702,7 +1702,7 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged, bool noAnimation)
     }
     auto info = pattern->GetSelectOverlayInfo();
     if (menuItemChanged && info->menuInfo.menuBuilder == nullptr) {
-        UpdateMenuInner(info);
+        UpdateMenuInner(info, noAnimation);
     }
     if (info->menuInfo.menuDisable || !info->menuInfo.menuIsShow) {
         (noAnimation) ? HideFrameNodeImmediately(FrameNodeType::SELECTMENU)
@@ -1728,13 +1728,13 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged, bool noAnimation)
     MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>& info)
+void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>& info, bool noAnimation)
 {
     CHECK_NULL_VOID(selectMenuInner_);
     selectMenuInner_->Clean();
     selectMenuInner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    if (isExtensionMenu_ && info->menuInfo.menuIsShow) {
-        MoreOrBackAnimation(false);
+    if (isExtensionMenu_) {
+        MoreOrBackAnimation(false, noAnimation);
     }
     auto selectProperty = selectMenu_->GetLayoutProperty();
     CHECK_NULL_VOID(selectProperty);
@@ -2046,12 +2046,17 @@ void SelectOverlayNode::HideFrameNodeImmediately(FrameNodeType type)
     SetFrameNodeStatus(type, FrameNodeStatus::GONE);
     SetFrameNodeVisibility(type, VisibleType::GONE);
     SetFrameNodeOpacity(type, 0.0f);
+    HideOrShowCirclesAndBackArrow(type, 0.0f);
+}
+
+void SelectOverlayNode::HideOrShowCirclesAndBackArrow(FrameNodeType type, float value)
+{
     if (type == FrameNodeType::SELECTMENU) { // select menu
         auto pattern = GetPattern<SelectOverlayPattern>();
         CHECK_NULL_VOID(pattern);
         auto overlayModifier = pattern->GetOverlayModifier();
         CHECK_NULL_VOID(overlayModifier);
-        overlayModifier->SetCirclesAndBackArrowOpacity(0.0);
+        overlayModifier->SetCirclesAndBackArrowOpacity(value);
     }
 }
 
@@ -2060,6 +2065,7 @@ void SelectOverlayNode::SetSelectMenuOpacity(float value)
     CHECK_NULL_VOID(selectMenu_);
     CHECK_NULL_VOID(selectMenu_->GetRenderContext());
     selectMenu_->GetRenderContext()->UpdateOpacity(value);
+    HideOrShowCirclesAndBackArrow(FrameNodeType::SELECTMENU, value);
 }
 
 void SelectOverlayNode::SetExtensionMenuOpacity(float value)
