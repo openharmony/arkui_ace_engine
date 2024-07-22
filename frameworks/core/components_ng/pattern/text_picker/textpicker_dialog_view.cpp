@@ -626,16 +626,28 @@ void TextPickerDialogView::UpdateConfirmButtonMargin(
     const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme)
 {
     MarginProperty margin;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
         margin.top = CalcLength(dialogTheme->GetDividerHeight());
         margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-        margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
+        if (isRtl) {
+            margin.right = CalcLength(0.0_vp);
+            margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
+        } else {
+            margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
+            margin.left = CalcLength(0.0_vp);
+        }
+
     } else {
-        margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
         margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
         margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
-        margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
+        if (isRtl) {
+            margin.right = CalcLength(0.0_vp);
+            margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
+        } else {
+            margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
+            margin.left = CalcLength(0.0_vp);
+        }
     }
     buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
 }
@@ -644,16 +656,27 @@ void TextPickerDialogView::UpdateCancelButtonMargin(
     const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme)
 {
     MarginProperty margin;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
         margin.top = CalcLength(dialogTheme->GetDividerHeight());
         margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-        margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
+        if (isRtl) {
+            margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
+            margin.left = CalcLength(0.0_vp);
+        } else {
+            margin.right = CalcLength(0.0_vp);
+            margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
+        }
     } else {
-        margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
         margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
         margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
-        margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
+        if (isRtl) {
+            margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
+            margin.left = CalcLength(0.0_vp);
+        } else {
+            margin.right = CalcLength(0.0_vp);
+            margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
+        }
     }
     buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
 }
