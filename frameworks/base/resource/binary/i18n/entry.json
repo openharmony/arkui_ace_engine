@@ -2199,6 +2199,9 @@
         "window":{
             "leftSide":"視窗顯示在屏幕左側",
             "rightSide":"視窗顯示在屏幕右側"
+        },
+        "datepicker":{
+            "lunarSwitch":"顯示農曆"
         }
     },
     "zh-TW":{
@@ -2232,6 +2235,9 @@
         "window":{
             "leftSide":"視窗顯示在螢幕左側",
             "rightSide":"視窗顯示在螢幕右側"
+        },
+        "datepicker":{
+            "lunarSwitch":"顯示農曆"
         }
     },
     "hr":{
