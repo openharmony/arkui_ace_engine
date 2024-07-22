@@ -894,7 +894,7 @@ void AceContainer::InitializeCallback()
                 ContainerScope scope(id);
                 result = context->OnKeyEvent(event);
             },
-            TaskExecutor::TaskType::UI, "ArkUIAceContainerKeyEvent");
+            TaskExecutor::TaskType::UI, "ArkUIAceContainerKeyEvent", PriorityType::VIP);
         return result;
     };
     aceView_->RegisterKeyEventCallback(keyEventCallback);
