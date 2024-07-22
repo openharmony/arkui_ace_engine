@@ -79,10 +79,6 @@ struct FillEventInfoParam {
     int64_t stackNodeId;
 };
 
-struct FillElementInfoParam {
-    uint32_t windowId;
-};
-
 struct AccessibilityActionParam {
     RefPtr<NG::AccessibilityProperty> accessibilityProperty;
     std::string setTextArgument = "";
@@ -1044,7 +1040,7 @@ int64_t GetParentId(const RefPtr<NG::UINode>& uiNode)
 }
 
 void FillElementInfo(int64_t elementId, AccessibilityElementInfo& elementInfo, const RefPtr<PipelineBase>& context,
-    const RefPtr<JsAccessibilityManager>& jsAccessibilityManager, const FillElementInfoParam& param)
+    const RefPtr<JsAccessibilityManager>& jsAccessibilityManager, uint32_t windowId)
 {
     std::list<AccessibilityElementInfo> elementInfos;
     int32_t mode = 0;
@@ -1056,7 +1052,7 @@ void FillElementInfo(int64_t elementId, AccessibilityElementInfo& elementInfo, c
         return;
     }
     elementInfo = elementInfos.front();
-    elementInfo.SetWindowId(param.windowId);
+    elementInfo.SetWindowId(windowId);
 }
 
 void FillEventInfo(const RefPtr<NG::FrameNode>& node,
@@ -1073,8 +1069,7 @@ void FillEventInfo(const RefPtr<NG::FrameNode>& node,
         eventInfo.SetPageId(webAccessibilityNode->GetPageId());
         eventInfo.AddContent(webAccessibilityNode->GetContent());
         AccessibilityElementInfo elementInfo;
-        FillElementInfo(param.elementId, elementInfo, context, jsAccessibilityManager,
-            FillElementInfoParam { eventInfo.GetWindowId() });
+        FillElementInfo(param.elementId, elementInfo, context, jsAccessibilityManager, eventInfo.GetWindowId());
         eventInfo.SetElementInfo(elementInfo);
         return;
     }
@@ -1087,8 +1082,7 @@ void FillEventInfo(const RefPtr<NG::FrameNode>& node,
     eventInfo.SetBeginIndex(accessibilityProperty->GetBeginIndex());
     eventInfo.SetEndIndex(accessibilityProperty->GetEndIndex());
     AccessibilityElementInfo elementInfo;
-    FillElementInfo(param.elementId, elementInfo, context, jsAccessibilityManager,
-        FillElementInfoParam { eventInfo.GetWindowId() });
+    FillElementInfo(param.elementId, elementInfo, context, jsAccessibilityManager, eventInfo.GetWindowId());
     elementInfo.SetNavDestinationId(param.stackNodeId);
     eventInfo.SetElementInfo(elementInfo);
 }
@@ -2311,8 +2305,7 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
     AccessibilityEventInfo eventInfoNew = eventInfo;
     eventInfoNew.SetSource(uiExtensionOffset + eventInfo.GetViewId());
     AccessibilityElementInfo elementInfo;
-    FillElementInfo(eventInfoNew.GetAccessibilityId(), elementInfo, pipeline, Claim(this),
-        FillElementInfoParam { eventInfoNew.GetWindowId() });
+    FillElementInfo(eventInfoNew.GetAccessibilityId(), elementInfo, pipeline, Claim(this), eventInfoNew.GetWindowId());
     eventInfoNew.SetElementInfo(elementInfo);
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d accessibilityId:%{public}" PRId64,
         eventInfoNew.GetEventType(), eventInfoNew.GetAccessibilityId());
