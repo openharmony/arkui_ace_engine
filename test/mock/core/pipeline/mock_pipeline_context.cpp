@@ -349,11 +349,6 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
 
 void PipelineContext::OnLayoutCompleted(const std::string& componentId) {}
 
-bool PipelineContext::CheckPageFocus()
-{
-    return true;
-}
-
 bool PipelineContext::CheckOverlayFocus()
 {
     return false;

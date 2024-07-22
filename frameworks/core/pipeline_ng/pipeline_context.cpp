@@ -1479,22 +1479,10 @@ float PipelineContext::GetPageAvoidOffset()
 
 void PipelineContext::SyncSafeArea(SafeAreaSyncType syncType)
 {
+    bool keyboardSafeArea =
+        syncType == SafeAreaSyncType::SYNC_TYPE_KEYBOARD && !safeAreaManager_->KeyboardSafeAreaEnabled();
     CHECK_NULL_VOID(stageManager_);
-    auto lastPage = stageManager_->GetLastPageWithTransition();
-    auto prevPage = stageManager_->GetPrevPageWithTransition();
-    if (lastPage) {
-        auto changeType =
-            syncType == SafeAreaSyncType::SYNC_TYPE_KEYBOARD && !safeAreaManager_->KeyboardSafeAreaEnabled()
-                ? PROPERTY_UPDATE_LAYOUT
-                : PROPERTY_UPDATE_MEASURE;
-        stageManager_->SyncPageSafeArea(lastPage, changeType);
-    }
-    if (prevPage) {
-        auto overlay = prevPage->GetPattern<PagePattern>();
-        if (overlay) {
-            overlay->MarkDirtyOverlay();
-        }
-    }
+    stageManager_->SyncPageSafeArea(keyboardSafeArea);
     SubwindowManager::GetInstance()->MarkDirtyDialogSafeArea();
     if (overlayManager_) {
         overlayManager_->MarkDirty(PROPERTY_UPDATE_MEASURE);
@@ -2288,14 +2276,6 @@ bool PipelineContext::CheckNeedAutoSave()
     auto pageNode = stageManager_->GetLastPage();
     CHECK_NULL_RETURN(pageNode, false);
     return pageNode->NeedRequestAutoSave();
-}
-
-bool PipelineContext::CheckPageFocus()
-{
-    CHECK_NULL_RETURN(stageManager_, true);
-    auto pageNode = stageManager_->GetLastPage();
-    CHECK_NULL_RETURN(pageNode, true);
-    return pageNode->GetFocusHub() && pageNode->GetFocusHub()->IsCurrentFocus();
 }
 
 bool PipelineContext::CheckOverlayFocus()

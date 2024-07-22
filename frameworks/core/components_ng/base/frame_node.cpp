@@ -3540,7 +3540,9 @@ void FrameNode::Layout()
 
     auto pipeline = GetContext();
     CHECK_NULL_VOID_LAYOUT_TRACE_END(pipeline);
-    bool isFocusOnPage = pipeline->CheckPageFocus();
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    bool isFocusOnPage = stageManager->CheckPageFocus();
     bool needSyncRsNode = false;
     DirtySwapConfig config;
     bool willSyncGeoProperties = OnLayoutFinish(needSyncRsNode, config);

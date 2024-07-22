@@ -66,6 +66,11 @@ public:
     virtual RefPtr<FrameNode> GetLastPageWithTransition() const;
     virtual RefPtr<FrameNode> GetPrevPageWithTransition() const;
 
+    virtual RefPtr<FrameNode> GetFocusPage() const
+    {
+        return nullptr;
+    }
+
     void SetStageInTrasition (bool stageInTrasition) {
         stageInTrasition_ = stageInTrasition;
     }
@@ -82,7 +87,9 @@ public:
     }
 #endif
 
-    virtual void SyncPageSafeArea(const RefPtr<FrameNode>& lastPage, PropertyChangeFlag changeFlag);
+    virtual void SyncPageSafeArea(bool keyboardSafeArea);
+    
+    virtual bool CheckPageFocus();
 
 protected:
     // ace performance check
