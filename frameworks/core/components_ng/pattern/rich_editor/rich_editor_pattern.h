@@ -1122,6 +1122,7 @@ private:
     OffsetF selectionMenuOffsetByMouse_;
     OffsetF selectionMenuOffsetClick_;
     OffsetF lastClickOffset_;
+    OffsetF lastOffsetInScreenByTouchCaret_;
     std::string pasteStr_;
 
     // still in progress
