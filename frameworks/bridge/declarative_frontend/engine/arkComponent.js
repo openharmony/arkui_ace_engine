@@ -15555,6 +15555,15 @@ class ButtonTypeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
+  applyStage(node, component) {
+    if (this.stageValue === undefined || this.stageValue === null) {
+      this.value = this.stageValue;
+      this.applyPeer(node, true, component);
+      return true;
+    }
+    this.applyPeer(node, false, component);
+    return false;
+  }
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().button.resetType(node);
