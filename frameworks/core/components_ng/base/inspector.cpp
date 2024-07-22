@@ -447,7 +447,7 @@ RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key, bool notD
         return nullptr;
     }
 
-    return AceType::DynamicCast<FrameNode>(GetInspectorByKey(rootNode, key));
+    return AceType::DynamicCast<FrameNode>(GetInspectorByKey(rootNode, key, notDetach));
 }
 
 std::string Inspector::GetInspectorNodeByKey(const std::string& key, const InspectorFilter& filter)
