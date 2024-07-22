@@ -1797,7 +1797,7 @@ void ImageModelNGFailedTest001_Properties01(ImageModelNG &image)
      * pop node
      * All of the following property settings will fail
     */
-    auto uiNode = ViewStackProcessor::GetInstance()->Finish();
+    auto uiNodes = PopUINodes();
     FrameNode *frameNodeNull = nullptr;
     image.SetAlt(ImageSourceInfo { RESOURCE_URL });
     EXPECT_EQ(imageLayoutProperty->GetAlt().has_value(), false);
@@ -1838,8 +1838,11 @@ void ImageModelNGFailedTest001_Properties01(ImageModelNG &image)
     ImageModelNG::SetMatchTextDirection(frameNodeNull, true);
     EXPECT_EQ(imageRenderProperty->GetMatchTextDirection().has_value(), false);
 
+    ImageModelNG::ResetImageInterpolation(frameNodeNull);
+    EXPECT_EQ(imageRenderProperty->GetMatchTextDirection().has_value(), false);
+
     /* recover node*/
-    ViewStackProcessor::GetInstance()->Push(uiNode);
+    PushUINodes(uiNodes);
 }
 
 void ImageModelNGFailedTest001_Properties02(ImageModelNG &image)
@@ -1849,8 +1852,10 @@ void ImageModelNGFailedTest001_Properties02(ImageModelNG &image)
      * pop node
      * All of the following property settings will fail
     */
-    auto uiNode = ViewStackProcessor::GetInstance()->Finish();
+    auto uiNodes = PopUINodes();
     FrameNode *frameNodeNull = nullptr;
+    auto imageName = RESOURCE_URL;
+    ImageModelNG::InitImage(frameNodeNull, imageName);
     image.SetFitOriginSize(true);
     EXPECT_EQ(imageLayoutProperty->GetFitOriginalSize().has_value(), false);
 
@@ -1888,8 +1893,14 @@ void ImageModelNGFailedTest001_Properties02(ImageModelNG &image)
     ImageModelNG::SetImageFill(frameNodeNull, Color::BLUE);
     EXPECT_EQ(imageRenderProperty->GetSvgFillColor().has_value(), false);
 
+    image.SetCopyOption(CopyOptions::InApp);
+    EXPECT_NE(imagePattern->copyOption_, CopyOptions::InApp);
+
+    ImageModelNG::SetCopyOption(frameNodeNull, CopyOptions::InApp);
+    EXPECT_NE(imagePattern->copyOption_, CopyOptions::InApp);
+
     /* recover node*/
-    ViewStackProcessor::GetInstance()->Push(uiNode);
+    PushUINodes(uiNodes);
 }
 
 void ImageModelNGFailedTest001_Properties03(ImageModelNG &image)
@@ -1899,7 +1910,7 @@ void ImageModelNGFailedTest001_Properties03(ImageModelNG &image)
      * pop node
      * All of the following property settings will fail
     */
-    auto uiNode = ViewStackProcessor::GetInstance()->Finish();
+    auto uiNodes = PopUINodes();
     FrameNode *frameNodeNull = nullptr;
 
     image.SetImageInterpolation(ImageInterpolation::HIGH);
@@ -1920,8 +1931,36 @@ void ImageModelNGFailedTest001_Properties03(ImageModelNG &image)
     ImageModelNG::SetImageRenderMode(frameNodeNull, ImageRenderMode::TEMPLATE);
     EXPECT_EQ(imageRenderProperty->GetImageRenderMode().has_value(), false);
 
+    image.SetAutoResize(true);
+    EXPECT_EQ(imageLayoutProperty->GetAutoResize().has_value(), false);
+
+    ImageModelNG::SetAutoResize(frameNodeNull, true);
+    EXPECT_EQ(imageLayoutProperty->GetAutoResize().has_value(), false);
+
+    image.SetSyncMode(true);
+    EXPECT_EQ(imagePattern->GetSyncLoad(), false);
+
+    ImageModelNG::SetSyncMode(frameNodeNull, true);
+    EXPECT_EQ(imagePattern->GetSyncLoad(), false);
+
+    image.SetColorFilterMatrix(COLOR_FILTER_DEFAULT);
+    EXPECT_EQ(imageRenderProperty->GetColorFilter().has_value(), false);
+
+    ImageModelNG::SetColorFilterMatrix(frameNodeNull, COLOR_FILTER_DEFAULT);
+    EXPECT_EQ(imageRenderProperty->GetColorFilter().has_value(), false);
+
+    RefPtr<DrawingColorFilter> drawingColorFilter = nullptr;
+    image.SetDrawingColorFilter(drawingColorFilter);
+    EXPECT_EQ(imageRenderProperty->GetDrawingColorFilter().has_value(), false);
+
+    ImageModelNG::SetDrawingColorFilter(frameNodeNull, drawingColorFilter);
+    EXPECT_EQ(imageRenderProperty->GetDrawingColorFilter().has_value(), false);
+
+    image.SetDraggable(false);
+    EXPECT_NE(frameNode->IsDraggable(), false);
+
     /* recover node*/
-    ViewStackProcessor::GetInstance()->Push(uiNode);
+    PushUINodes(uiNodes);
 }
 
 /**
