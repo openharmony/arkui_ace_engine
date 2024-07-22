@@ -306,7 +306,7 @@ void JSRenderImage::OnImageLoadSuccess()
     svgDom_ = imageObj_->GetSVGDom();
     imageFit_ = loadingCtx_->GetImageFit();
     imageSize_ = loadingCtx_->GetImageSize();
-    bindingSize_ = pixelMap_ ? pixelMap_->GetByteCount() : 0;
+    bindingSize_ = pixelMap_ ? static_cast<size_t>(pixelMap_->GetByteCount()) : 0;
 }
 
 void JSRenderImage::OnImageLoadFail(const std::string& errorMsg)

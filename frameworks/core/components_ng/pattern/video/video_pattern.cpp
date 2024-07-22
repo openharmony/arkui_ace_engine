@@ -414,7 +414,7 @@ void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
     if (duration_ == 0) {
         int32_t duration = 0;
         if (mediaPlayer_ && mediaPlayer_->GetDuration(duration) == 0) {
-            duration_ = duration / MILLISECONDS_TO_SECONDS;
+            duration_ = static_cast<uint32_t>(duration / MILLISECONDS_TO_SECONDS);
             OnUpdateTime(duration_, DURATION_POS);
         }
     }
