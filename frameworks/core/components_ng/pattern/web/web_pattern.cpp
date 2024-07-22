@@ -1757,6 +1757,32 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     return false;
 }
 
+void WebPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
+{
+    if (!config.contentSizeChange || isInWindowDrag_) {
+        return;
+    }
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto rect = renderContext->GetPaintRectWithoutTransform();
+    auto drawSize = Size(rect.Width(), rect.Height());
+    if (drawSize.IsInfinite() || drawSize.IsEmpty()) {
+        return;
+    }
+
+    if (GreatOrEqual(drawSize.Width(), Infinity<double>())) {
+        drawSize.SetWidth(DEFAULT_WEB_WIDTH);
+    }
+    if (GreatOrEqual(drawSize.Height(), Infinity<double>())) {
+        drawSize.SetHeight(DEFAULT_WEB_HEIGHT);
+    }
+
+    drawSize_ = drawSize;
+    drawSizeCache_ = drawSize_;
+}
+
 void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight)
 {
     lastKeyboardHeight_ = keyboard;
