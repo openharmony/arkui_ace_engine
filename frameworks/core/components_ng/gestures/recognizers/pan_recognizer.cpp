@@ -923,6 +923,11 @@ void PanRecognizer::UpdateTouchEventInfo(const TouchEvent& event, bool updateVel
         windowTouchPoint, GetAttachedNode(), false, isPostEventResult_, event.postEventNodeId);
     delta_ =
         (Offset(windowPoint.GetX(), windowPoint.GetY()) - Offset(windowTouchPoint.GetX(), windowTouchPoint.GetY()));
+    if ((direction_.type & PanDirection::VERTICAL) == 0) {
+        delta_.SetY(0.0);
+    } else if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
+        delta_.SetX(0.0);
+    }
 
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_GESTURE, "Delta is x %{public}f, y %{public}f ", delta_.GetX(), delta_.GetY());
