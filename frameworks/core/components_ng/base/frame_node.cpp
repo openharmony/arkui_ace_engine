@@ -883,10 +883,10 @@ void FrameNode::DumpAdvanceInfo()
     }
 }
 
-void FrameNode::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap)
+void FrameNode::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData)
 {
     if (pattern_) {
-        pattern_->DumpViewDataPageNode(viewDataWrap);
+        pattern_->DumpViewDataPageNode(viewDataWrap, needsRecordData);
     }
 }
 

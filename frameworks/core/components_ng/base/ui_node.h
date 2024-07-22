@@ -189,7 +189,8 @@ public:
     virtual void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout);
 
     bool IsAutoFillContainerNode();
-    void DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer = false);
+    void DumpViewDataPageNodes(
+        RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer = false, bool needsRecordData = false);
     bool NeedRequestAutoSave();
     // DFX info.
     void DumpTree(int32_t depth);
@@ -771,7 +772,7 @@ protected:
     // dump self info.
     virtual void DumpInfo() {}
     virtual void DumpAdvanceInfo() {}
-    virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
+    virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
     virtual bool CheckAutoSave()
     {
         return false;

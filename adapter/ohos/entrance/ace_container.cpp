@@ -1555,7 +1555,7 @@ bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std:
     auto uiContentImpl = reinterpret_cast<UIContentImpl*>(uiContent);
     CHECK_NULL_RETURN(uiContentImpl, false);
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
-    uiContentImpl->DumpViewData(node, viewDataWrap);
+    uiContentImpl->DumpViewData(node, viewDataWrap, false, true);
 
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
     CHECK_NULL_RETURN(pipelineContext, false);

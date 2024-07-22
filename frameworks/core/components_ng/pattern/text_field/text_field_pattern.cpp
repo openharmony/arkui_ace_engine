@@ -6534,7 +6534,7 @@ void TextFieldPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
 }
 
-void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap)
+void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData)
 {
     CHECK_NULL_VOID(viewDataWrap);
     auto host = GetHost();
@@ -6554,6 +6554,9 @@ void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap)
         autoFillOtherAccount_ = false;
     } else {
         info->SetValue(contentController_->GetTextValue());
+    }
+    if (needsRecordData) {
+        lastAutoFillTextValue_ = contentController_->GetTextValue();
     }
     info->SetPlaceholder(GetPlaceHolder());
     info->SetPasswordRules(layoutProperty->GetPasswordRulesValue(""));
@@ -6587,6 +6590,13 @@ void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWra
         focusHub->RequestFocusImmediately();
         DoProcessAutoFill();
     }
+    auto type = GetAutoFillType();
+    bool formOtherAccount = (viewDataWrap->GetOtherAccount() && IsAutoFillPasswordType(type));
+    if (!(type == AceAutoFillType::ACE_NEW_PASSWORD && type == autoFillType) && !formOtherAccount) {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "Set last auto fill text value.");
+        lastAutoFillTextValue_ = nodeWrap->GetValue();
+    }
+
     if (!contentController_ || contentController_->GetTextValue() == nodeWrap->GetValue()) {
         return;
     }
@@ -6595,14 +6605,6 @@ void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWra
     selectController_->UpdateCaretIndex(textLength);
     NotifyOnEditChanged(true);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto type = GetAutoFillType();
-    bool formOtherAccount = (viewDataWrap->GetOtherAccount() && IsAutoFillPasswordType(type));
-    if (!(type == AceAutoFillType::ACE_NEW_PASSWORD && type == autoFillType) && !formOtherAccount) {
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "Set last auto fill text value.");
-        lastAutoFillPasswordTextValue_ = nodeWrap->GetValue();
-    }
 }
 
 bool TextFieldPattern::ParseFillContentJsonValue(const std::unique_ptr<JsonValue>& jsonObject,
@@ -6670,14 +6672,13 @@ bool TextFieldPattern::CheckAutoSave()
     }
     auto autoFillType = GetAutoFillType();
     if (autoFillType == AceAutoFillType::ACE_USER_NAME) {
-        if (!lastAutoFillPasswordTextValue_.empty() &&
-            contentController_->GetTextValue() != lastAutoFillPasswordTextValue_) {
+        if (!lastAutoFillTextValue_.empty() && contentController_->GetTextValue() != lastAutoFillTextValue_) {
             return true;
         }
     }
     if (AceAutoFillType::ACE_UNSPECIFIED < autoFillType && autoFillType <= AceAutoFillType::ACE_FORMAT_ADDRESS &&
         autoFillType != AceAutoFillType::ACE_USER_NAME) {
-        if (contentController_->GetTextValue() != lastAutoFillPasswordTextValue_) {
+        if (contentController_->GetTextValue() != lastAutoFillTextValue_) {
             return true;
         }
     }
