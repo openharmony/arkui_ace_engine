@@ -1374,22 +1374,28 @@ public:
  */
 HWTEST_F(PinchRecognizerTestNg, PinchRecognizerPtrHandleTouchMoveEventTest003, TestSize.Level1)
 {
-    MockPinchRecognizer recognizerTest(FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
     TouchEvent event;
     event.id = 1;
-    recognizerTest.activeFingers_.push_back(1);
-    recognizerTest.activeFingers_.push_back(2);
-    recognizerTest.refereeState_ = RefereeState::SUCCEED;
-    EXPECT_CALL(recognizerTest, BatchAdjudicate(_, _)).WillRepeatedly([]() {
-        std::cout << "shaokf HandleTouchUpEvent test " << std::endl;
-    });
-    recognizerTest.HandleTouchUpEvent(event);
+    pinchRecognizerPtr->fingersId_.insert(1);
+    pinchRecognizerPtr->activeFingers_.push_back(1);
+    pinchRecognizerPtr->activeFingers_.push_back(2);
+    pinchRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizerPtr->HandleTouchUpEvent(event);
+    SUCCEED();
+    event.id = 3;
+    pinchRecognizerPtr->fingersId_.insert(1);
+    pinchRecognizerPtr->activeFingers_.push_back(1);
+    pinchRecognizerPtr->activeFingers_.push_back(2);
+    pinchRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizerPtr->HandleTouchUpEvent(event);
     SUCCEED();
 }
 
 /**
  * @tc.name: PinchRecognizerPtrHandleTouchMoveEventTest004
- * @tc.desc: Test PinchRecognizer function: HandleTouchMoveEvent
+ * @tc.desc: Test HandleTouchCancelEvent
  * @tc.type: FUNC
  */
 HWTEST_F(PinchRecognizerTestNg, PinchRecognizerPtrHandleTouchMoveEventTest004, TestSize.Level1)
@@ -1406,7 +1412,7 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerPtrHandleTouchMoveEventTest004, T
 
 /**
  * @tc.name: PinchRecognizerPtrHandleTouchMoveEventTest005
- * @tc.desc: Test PinchRecognizer function: HandleTouchMoveEvent
+ * @tc.desc: Test SendCallbackMsg
  * @tc.type: FUNC
  */
 HWTEST_F(PinchRecognizerTestNg, PinchRecognizerPtrHandleTouchMoveEventTest005, TestSize.Level1)
@@ -1421,5 +1427,4 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerPtrHandleTouchMoveEventTest005, T
     recognizerTest.SendCallbackMsg(callback);
     SUCCEED();
 }
-
 } // namespace OHOS::Ace::NG
