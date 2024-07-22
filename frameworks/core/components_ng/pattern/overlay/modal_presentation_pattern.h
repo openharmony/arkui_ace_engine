@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.h"
@@ -31,8 +32,8 @@ enum class ContentCoverDismissReason {
     CLOSE_BUTTON,
 };
 
-class ACE_EXPORT ModalPresentationPattern : public PopupBasePattern, public FocusView {
-    DECLARE_ACE_TYPE(ModalPresentationPattern, PopupBasePattern, FocusView);
+class ACE_EXPORT ModalPresentationPattern : public PopupBasePattern, public FocusView, public AutoFillTriggerStateHolder {
+    DECLARE_ACE_TYPE(ModalPresentationPattern, PopupBasePattern, FocusView, AutoFillTriggerStateHolder);
 
 public:
     ModalPresentationPattern(int32_t targetId, ModalTransition type, std::function<void(const std::string&)>&& callback)

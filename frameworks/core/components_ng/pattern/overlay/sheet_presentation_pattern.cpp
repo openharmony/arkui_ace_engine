@@ -844,6 +844,7 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
             CHECK_NULL_VOID(host);
             overlayManager->DestroySheet(host, pattern->GetSheetKey());
             pattern->FireCallback("false");
+            overlayManager->FireAutoSave(host, true);
         }
     });
     StartSheetTransitionAnimation(option, isTransitionIn, offset);

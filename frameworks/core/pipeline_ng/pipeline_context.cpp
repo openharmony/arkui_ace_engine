@@ -2246,13 +2246,18 @@ bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<Vie
             pageNode = stageManager_->GetLastPage();
             dumpNode = pageNode;
         }
-    } else {
+    } else { 
         pageNode = node->GetPageNode();
         dumpNode = node;
     }
-    CHECK_NULL_RETURN(pageNode, false);
     CHECK_NULL_RETURN(dumpNode, false);
     dumpNode->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer);
+    auto nodeTag = node->GetTag();
+    if (nodeTag == V2::SHEET_PAGE_TAG || nodeTag == V2::MODAL_PAGE_TAG) {
+        viewDataWrap->SetPageUrl(nodeTag);
+        return true;
+    }
+    CHECK_NULL_RETURN(pageNode, false);
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
     auto pageInfo = pagePattern->GetPageInfo();

@@ -793,6 +793,10 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
             CHECK_NULL_VOID(overlayManager);
             overlayManager->PostDialogFinishEvent(nodeWk);
             dialogPattern->CallDialogDidDisappearCallback();
+
+            auto node = nodeWK.Upgrade();
+            CHECK_NULL_VOID(node);
+            overlayManager->FireAutoSave(node, false);
         });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
@@ -871,6 +875,7 @@ void OverlayManager::CloseDialogMatchTransition(const RefPtr<FrameNode>& node)
                 overlayManager->PostDialogFinishEvent(nodeWk);
                 auto node = nodeWk.Upgrade();
                 CHECK_NULL_VOID(node);
+                overlayManager->FireAutoSave(node, false);
                 auto dialogPattern = node->GetPattern<DialogPattern>();
                 dialogPattern->CallDialogDidDisappearCallback();
         });
@@ -1343,6 +1348,31 @@ void OverlayManager::ClearToast()
     for (auto [id, toastNodeWeak] : toastMap_) {
         PopToast(id);
     }
+}
+
+void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode, bool isBindSheet = false)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "fire auto save enter");
+    CHECK_NULL_VOID(ContainerNode);
+    if (!ContainerNode->NeedRequestAutoSave()) {
+        return;
+    }
+    auto container = Container::Current();
+    auto currentId = Container::CurrentId();
+    CHECK_NULL_VOID(container);
+
+    if (isBindSheet) {
+        auto layoutProperty = ContainerNode->GetLayoutProperty<SheetPresentationProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto currentStyle = layoutProperty->GetSheetStyleValue();
+        auto currentInstanceId = currentStyle.instanceId;
+        if (currentInstaceId.has_value()) {
+            currentId = CONTAINER_ID_DIVIDE_SIZE;
+        }
+    } else if (container->IsSubContainer()) {
+        currentId - SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+    }
+    container->RequestAutoSave(ContainerNode, nullptr, nullptr, nullptr, currentId);
 }
 
 void OverlayManager::ShowPopupAnimation(const RefPtr<FrameNode>& popupNode)
@@ -3082,6 +3112,7 @@ void OverlayManager::PlayTransitionEffectOut(const RefPtr<FrameNode>& topModalNo
         }
         auto rootNode = FindWindowScene(topModalNode);
         RemoveChildWithService(rootNode, topModalNode);
+        FireAutoSave(topModalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         // Fire shown event of navdestination under the disappeared modal
         FireNavigationStateChange(true);
@@ -3100,6 +3131,7 @@ void OverlayManager::PlayTransitionEffectOut(const RefPtr<FrameNode>& topModalNo
                     overlayManager->FireNavigationStateChange(false, modal);
                 }
                 overlayManager->RemoveChildWithService(root, modal);
+                overlayManager->FireAutoSave(modal);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                 // Fire shown event of navdestination under the disappeared modal
                 overlayManager->FireNavigationStateChange(true);
@@ -3137,6 +3169,7 @@ bool OverlayManager::ModalPageExitProcess(const RefPtr<FrameNode>& topModalNode)
         // Fire hidden event of navdestination on the disappeared modal
         FireNavigationStateChange(false, topModalNode);
         RemoveChildWithService(rootNode, topModalNode);
+        FireAutoSave(topModalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     topModalNode->GetPattern<ModalPresentationPattern>()->FireCallback("false");
@@ -3489,6 +3522,7 @@ void OverlayManager::HandleModalPop(
             FireNavigationStateChange(false, topModalNode);
         }
         RemoveChildWithService(rootNode, topModalNode);
+        FireAutoSave(topModalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     modalStack_.pop();
@@ -3586,6 +3620,7 @@ void OverlayManager::PlayDefaultModalOut(
                 overlayManager->FireNavigationStateChange(false, modal);
             }
             overlayManager->RemoveChildWithService(root, modal);
+            overlayManager->FireAutoSave(modal);
             root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             // Fire shown event of navdestination under the disappeared modal
             overlayManager->FireNavigationStateChange(true);
@@ -3647,6 +3682,7 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
                     overlayManager->FireNavigationStateChange(false, modal);
                 }
                 overlayManager->RemoveChildWithService(root, modal);
+                overlayManager->FireAutoSave(modal);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                 // Fire shown event of navdestination under the disappeared modal
                 overlayManager->FireNavigationStateChange(true);
@@ -4013,6 +4049,7 @@ void OverlayManager::PlaySheetTransition(
                 CHECK_NULL_VOID(root);
                 auto sheetParent = DynamicCast<FrameNode>(sheet->GetParent());
                 CHECK_NULL_VOID(sheetParent);
+                overlayManager->FireAutoSave(sheet, true);
                 overlayManager->RemoveChildWithService(root, sheetParent);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             });

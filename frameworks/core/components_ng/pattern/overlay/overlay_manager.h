@@ -163,6 +163,8 @@ public:
     void ShowToast(const NG::ToastInfo& toastInfo, const std::function<void(int32_t)>& callback);
     void CloseToast(int32_t toastId, const std::function<void(int32_t)>& callback);
 
+    void FireAutoSave(const RefPtr<FrameNode>& ContainerNode, bool isBindSheet);
+
     std::unordered_map<int32_t, RefPtr<FrameNode>> GetDialogMap()
     {
         return dialogMap_;
