@@ -915,7 +915,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPattern0010, TestSize.Level1)
     CreateWithItem([](SwiperModelNG model) {});
     bool isCustomSize = true;
     pattern_->SetIsIndicatorCustomSize(isCustomSize);
-    EXPECT_TRUE(pattern_->IsCustomSize_);
+    EXPECT_TRUE(pattern_->isCustomSize_);
 }
 
 /**
