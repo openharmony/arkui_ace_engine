@@ -3136,7 +3136,7 @@ bool OverlayManager::ModalPageExitProcess(const RefPtr<FrameNode>& topModalNode)
         topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     topModalNode->OnAccessibilityEvent(
-        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     if (topModalNode->GetPattern<ModalPresentationPattern>()->HasTransitionEffect()) {
         PlayTransitionEffectOut(topModalNode);
     } else if (modalTransition == ModalTransition::DEFAULT) {
@@ -3457,7 +3457,7 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
         FireNavigationStateChange(false);
     }
     modalNode->OnAccessibilityEvent(
-        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        AccessibilityEventType::PAGE_OPEN, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     if (modalTransition == ModalTransition::DEFAULT) {
         PlayDefaultModalTransition(modalNode, true);
     } else if (modalTransition == ModalTransition::ALPHA) {
@@ -3493,7 +3493,7 @@ void OverlayManager::HandleModalPop(
         onWillDisappear();
     }
     topModalNode->OnAccessibilityEvent(
-        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     if (modalPresentationPattern->HasTransitionEffect()) {
         PlayTransitionEffectOut(topModalNode);
     } else if (modalTransition == ModalTransition::DEFAULT) {
@@ -3958,7 +3958,8 @@ void OverlayManager::PlaySheetTransition(
 {
     CHECK_NULL_VOID(sheetNode);
     sheetNode->OnAccessibilityEvent(
-        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        isTransitionIn ? AccessibilityEventType::PAGE_OPEN : AccessibilityEventType::PAGE_CLOSE,
+        WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 
     // current sheet animation
     AnimationOption option;
