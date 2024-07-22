@@ -68,7 +68,7 @@ const RefPtr<InterpolatingSpring> MENU_ANIMATION_CURVE =
 const RefPtr<InterpolatingSpring> STACK_MENU_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, STACK_MENU_DAMPING);
 const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 380.0f, 34.0f);
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 34.0f);
 const RefPtr<InterpolatingSpring> MAIN_MENU_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 528.0f, 35.0f);
 const float MINIMUM_AMPLITUDE_RATION = 0.08f;
