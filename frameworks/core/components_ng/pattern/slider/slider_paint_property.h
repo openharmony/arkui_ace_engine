@@ -77,9 +77,13 @@ public:
 
     std::string ToJsonSelectColor() const
     {
-        if (HasSelectGradientColor() && !GetSelectIsResourceColorValue(false)) {
+        if (HasSelectGradientColor()) {
             Gradient colors = GetSelectGradientColor().value();
-            return GradientToJson(colors);
+            if (GetSelectIsResourceColorValue(false)) {
+                return colors.GetColors()[0].GetLinearColor().ToColor().ColorToString();
+            } else {
+                return GradientToJson(colors);
+            }
         }
         auto pipeline = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_RETURN(pipeline, "");
