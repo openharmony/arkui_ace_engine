@@ -756,4 +756,9 @@ bool SecurityComponentHandler::LoadSecurityComponentService()
 {
     return SecCompKit::LoadService();
 }
+
+bool SecurityComponentHandler::IsSystemAppCalling()
+{
+    return SecCompKit::IsSystemAppCalling();
+}
 } // namespace OHOS::Ace::NG
