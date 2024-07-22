@@ -2320,7 +2320,7 @@ const ArkUI_AttributeItem* GetAccessibilityRole(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
     std::string nodeTypeString = fullImpl->getNodeModifiers()->getCommonModifier()->getAccessibilityRole(
         node->uiNodeHandle);
-    g_numberValues[0].u32 = static_cast<int32_t>(UnConvertAccessibilityRole(nodeTypeString));
+    g_numberValues[0].u32 = static_cast<uint32_t>(UnConvertAccessibilityRole(nodeTypeString));
     g_attributeItem.size = REQUIRED_ONE_PARAM;
     return &g_attributeItem;
 }
