@@ -106,10 +106,12 @@ void RefreshPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    refreshOffset_ = layoutProperty->GetRefreshOffset().value_or(GetTriggerRefreshDisTance()).Value() > 0 ?
-        layoutProperty->GetRefreshOffset().value_or(GetTriggerRefreshDisTance()) : GetTriggerRefreshDisTance();
-    pullToRefresh_ = layoutProperty->GetPullToRefresh().value_or(true);
     hasLoadingText_ = layoutProperty->HasLoadingText();
+    refreshOffset_ = layoutProperty->GetRefreshOffset().value_or(GetTriggerRefreshDisTance());
+    if (LessOrEqual(refreshOffset_.Value(), 0)) {
+        refreshOffset_ = GetTriggerRefreshDisTance();
+    }
+    pullToRefresh_ = layoutProperty->GetPullToRefresh().value_or(true);
     InitPanEvent(gestureHub);
     InitOnKeyEvent();
     InitChildNode();
