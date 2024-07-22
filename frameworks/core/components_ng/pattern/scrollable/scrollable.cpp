@@ -926,8 +926,6 @@ void Scrollable::ProcessScrollMotionStop(bool stopFriction)
 
 void Scrollable::ProcessSpringMotion(double position)
 {
-    // Do not round when the current position is less than 0.5 px from the final position.
-    position = NearEqual(position, finalPosition_, 0.5) ? position : Round(position);
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}f, position is %{public}f",
         currentPos_, position);
     auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
@@ -981,8 +979,6 @@ void Scrollable::ProcessSpringMotion(double position)
 
 void Scrollable::ProcessScrollMotion(double position)
 {
-    double nearPosition = isSnapAnimation_ ? endPos_ : finalPosition_;
-    position = NearEqual(position, nearPosition, 0.5) ? position : Round(position);
     currentVelocity_ = frictionVelocity_;
     if (needScrollSnapToSideCallback_) {
         needScrollSnapChange_ = needScrollSnapToSideCallback_(position - currentPos_);
