@@ -74,6 +74,11 @@ struct ActionTable {
     ActionType action;
 };
 
+struct FillEventInfoParam {
+    int64_t elementId;
+    int64_t stackNodeId;
+};
+
 struct AccessibilityActionParam {
     RefPtr<NG::AccessibilityProperty> accessibilityProperty;
     std::string setTextArgument = "";
@@ -199,6 +204,8 @@ Accessibility::EventType ConvertAceEventType(AccessibilityEventType type)
         { AccessibilityEventType::HOVER_EXIT_EVENT, Accessibility::EventType::TYPE_VIEW_HOVER_EXIT_EVENT },
         { AccessibilityEventType::CHANGE, Accessibility::EventType::TYPE_PAGE_CONTENT_UPDATE },
         { AccessibilityEventType::COMPONENT_CHANGE, Accessibility::EventType::TYPE_VIEW_TEXT_UPDATE_EVENT },
+        { AccessibilityEventType::PAGE_OPEN, Accessibility::EventType::TYPE_PAGE_OPEN },
+        { AccessibilityEventType::PAGE_CLOSE, Accessibility::EventType::TYPE_PAGE_CLOSE },
         { AccessibilityEventType::SCROLL_END, Accessibility::EventType::TYPE_VIEW_SCROLLED_EVENT },
         { AccessibilityEventType::TEXT_SELECTION_UPDATE,
             Accessibility::EventType::TYPE_VIEW_TEXT_SELECTION_UPDATE_EVENT },
@@ -1050,8 +1057,8 @@ void FillElementInfo(int64_t elementId, AccessibilityElementInfo& elementInfo,
 void FillEventInfo(const RefPtr<NG::FrameNode>& node,
                    AccessibilityEventInfo& eventInfo,
                    const RefPtr<PipelineBase>& context,
-                   int64_t elementId,
-                   const RefPtr<JsAccessibilityManager>& jsAccessibilityManager)
+                   const RefPtr<JsAccessibilityManager>& jsAccessibilityManager,
+                   const FillEventInfoParam& param)
 {
     CHECK_NULL_VOID(node);
     if (node->GetTag() == V2::WEB_CORE_TAG) {
@@ -1061,7 +1068,7 @@ void FillEventInfo(const RefPtr<NG::FrameNode>& node,
         eventInfo.SetPageId(webAccessibilityNode->GetPageId());
         eventInfo.AddContent(webAccessibilityNode->GetContent());
         AccessibilityElementInfo elementInfo;
-        FillElementInfo(elementId, elementInfo, context, jsAccessibilityManager);
+        FillElementInfo(param.elementId, elementInfo, context, jsAccessibilityManager);
         eventInfo.SetElementInfo(elementInfo);
         return;
     }
@@ -1074,7 +1081,8 @@ void FillEventInfo(const RefPtr<NG::FrameNode>& node,
     eventInfo.SetBeginIndex(accessibilityProperty->GetBeginIndex());
     eventInfo.SetEndIndex(accessibilityProperty->GetEndIndex());
     AccessibilityElementInfo elementInfo;
-    FillElementInfo(elementId, elementInfo, context, jsAccessibilityManager);
+    FillElementInfo(param.elementId, elementInfo, context, jsAccessibilityManager);
+    elementInfo.SetNavDestinationId(param.stackNodeId);
     eventInfo.SetElementInfo(elementInfo);
 }
 
@@ -2319,7 +2327,7 @@ void JsAccessibilityManager::FillEventInfoWithNode(
 {
     CHECK_NULL_VOID(node);
     if (node->GetTag() == V2::WEB_CORE_TAG) {
-        FillEventInfo(node, eventInfo, context, elementId, Claim(this));
+        FillEventInfo(node, eventInfo, context, Claim(this), FillEventInfoParam { elementId, -1 });
         return;
     }
     eventInfo.SetComponentType(node->GetTag());
@@ -2404,7 +2412,8 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
         ngPipeline = FindPipelineByElementId(accessibilityEvent.nodeId, node);
         CHECK_NULL_VOID(ngPipeline);
         CHECK_NULL_VOID(node);
-        FillEventInfo(node, eventInfo, ngPipeline, accessibilityEvent.nodeId, Claim(this));
+        FillEventInfo(node, eventInfo, ngPipeline, Claim(this),
+            FillEventInfoParam { accessibilityEvent.nodeId, accessibilityEvent.stackNodeId });
         eventInfo.SetWindowId(ngPipeline->GetFocusWindowId());
     } else {
         ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
