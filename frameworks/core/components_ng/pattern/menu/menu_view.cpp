@@ -58,7 +58,7 @@ constexpr float PAN_MAX_VELOCITY = 2000.0f;
 constexpr float HALF_DIVIDE = 2.0f;
 constexpr float PREVIEW_ORIGIN_SCALE = 1.0f;
 const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 380.0f, 34.0f);
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 34.0f);
 const std::string HOVER_IMAGE_CLIP_PROPERTY_NAME = "hoverImageClip";
 
 void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode)

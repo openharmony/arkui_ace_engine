@@ -46,7 +46,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DURATION = 800;
-constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 100;
+constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 250;
 } // namespace
 
 void ViewAbstractModelNG::BindMenuGesture(

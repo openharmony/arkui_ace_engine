@@ -28,7 +28,7 @@ constexpr float PAN_MAX_VELOCITY = 2000.0f;
 
 // custom preview animation params when hover image
 const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 380.0f, 34.0f);
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 34.0f);
 
 RefPtr<MenuPattern> GetMenuPattern(const RefPtr<FrameNode>& menuWrapper)
 {
