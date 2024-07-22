@@ -206,6 +206,7 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
     if (isTraversing_) {
         LOGF("Try to remove the child([%{public}s][%{public}d]) of node [%{public}s][%{public}d] when its children "
             "is traversing", (*iter)->GetTag().c_str(), (*iter)->GetId(), GetTag().c_str(), GetId());
+        abort();
     }
     auto result = children_.erase(iter);
     return result;
