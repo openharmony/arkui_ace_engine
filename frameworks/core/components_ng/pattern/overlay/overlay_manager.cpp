@@ -5982,9 +5982,9 @@ void OverlayManager::UpdatePixelMapPosition(bool isSubwindowOverlay)
     CHECK_NULL_VOID(imageNode);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
-    auto rect = imageContext->GetPaintRectWithTranslate();
-    imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(moveVector.GetX() + rect.first.GetX()),
-        Dimension(moveVector.GetY() + rect.first.GetY())));
+    auto rect = imageNode->GetOffsetRelativeToWindow();
+    imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(moveVector.GetX() + rect.GetX()),
+        Dimension(moveVector.GetY() + rect.GetY())));
     imageContext->OnModifyDone();
 }
 
