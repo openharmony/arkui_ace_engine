@@ -540,10 +540,12 @@ public:
         std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, int32_t nodeId);
     void ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson,
         std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, OHOS::NWeb::NWebAutofillEvent& eventType);
+    AceAutoFillType GetFocusedType();
     void HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool RequestAutoFill(AceAutoFillType autoFillType);
     bool RequestAutoSave();
     bool UpdateAutoFillPopup();
+    bool CloseAutoFillPopup();
     void UpdateSelectHandleInfo();
     bool IsSelectHandleReverse();
     void OnCompleteSwapWithNewSize();

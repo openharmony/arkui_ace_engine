@@ -1295,11 +1295,23 @@ public:
         if (placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
             placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
             placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
-            offset.deltaY = rect_.top + rect_.height +
-                ((size.height + rectf.GetY() - rectf.Height()) / POPUP_CALCULATE_RATIO);
+            offset.deltaY = rect_.top + rect_.height -
+                ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO);
         } else {
-            offset.deltaY = rect_.top + ((rectf.GetY() - size.height - rectf.Height()) / POPUP_CALCULATE_RATIO);
+            offset.deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO);
         }
+
+        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_LEFT ||
+            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT) {
+            offset.deltaX = rect_.left - ((rectf.Width() - size.width) / POPUP_CALCULATE_RATIO);
+        }
+
+        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_RIGHT ||
+            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
+            offset.deltaX = rect_.left + rect_.width - ((rectf.Width() + size.width) / POPUP_CALCULATE_RATIO);
+        }
+
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "popup offset.deltaX:%{public}f", offset.deltaX);
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "popup offset.deltaY:%{public}f", offset.deltaY);
         config.targetOffset = offset;
     }
@@ -1334,6 +1346,12 @@ bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
         OverwritePageNodeInfo(node, viewData);
     }
     AbilityRuntime::AutoFillManager::GetInstance().UpdateCustomPopupUIExtension(autoFillSessionId, viewData);
+    return true;
+}
+
+bool AceContainer::ClosePopupUIExtension(uint32_t autoFillSessionId)
+{
+    AbilityRuntime::AutoFillManager::GetInstance().CloseUIExtension(autoFillSessionId);
     return true;
 }
 

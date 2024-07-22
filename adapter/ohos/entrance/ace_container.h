@@ -101,6 +101,8 @@ public:
     bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
         uint32_t autoFillSessionId, bool isNative = true) override;
 
+    bool ClosePopupUIExtension(uint32_t autoFillSessionId) override;
+
     void Initialize() override;
 
     void Destroy() override;
