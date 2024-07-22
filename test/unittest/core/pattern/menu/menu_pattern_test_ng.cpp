@@ -19,6 +19,7 @@
 #define private public
 #define protected public
 
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
@@ -104,9 +105,15 @@ public:
     RefPtr<MenuItemAccessibilityProperty> menuItemAccessibilityProperty_;
 };
 
-void MenuPatternTestNg::SetUpTestCase() {}
+void MenuPatternTestNg::SetUpTestCase()
+{
+    MockContainer::SetUp();
+}
 
-void MenuPatternTestNg::TearDownTestCase() {}
+void MenuPatternTestNg::TearDownTestCase()
+{
+    MockContainer::TearDown();
+}
 
 void MenuPatternTestNg::SetUp()
 {
@@ -1215,6 +1222,215 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg075, TestSize.Level1)
     auto val = menuNode->isRestoreInfoUsed_;
 
     EXPECT_NE(val, false);
+}
+
+/**
+ * @tc.name: MenuPatternTest076
+ * @tc.desc: Test OnItemPressed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg076, TestSize.Level1)
+{
+    auto parent = FrameNode::CreateFrameNode(
+        V2::JS_FOR_EACH_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(parent, nullptr);
+    auto firstNode = FrameNode::CreateFrameNode(
+        V2::JS_FOR_EACH_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(firstNode, nullptr);
+    auto nextNode = FrameNode::CreateFrameNode(V2::JS_FOR_EACH_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(nextNode, nullptr);
+    auto menuItemGroup1 = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_GROUP_ETS_TAG, -1, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    ASSERT_NE(menuItemGroup1, nullptr);
+    auto menuItemGroup2 = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, -1, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemGroup2, nullptr);
+    auto menuItemGroup3 = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_GROUP_ETS_TAG, -1, AceType::MakeRefPtr<MenuItemGroupPattern>());
+    ASSERT_NE(menuItemGroup3, nullptr);
+    firstNode->MountToParent(parent);
+    nextNode->MountToParent(parent);
+    menuItemGroup1->MountToParent(parent);
+    menuItemGroup2->MountToParent(parent);
+    menuItemGroup3->MountToParent(parent);
+    auto menuPattern = parent->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+    menuPattern->OnItemPressed(parent, 5, false);
+    EXPECT_EQ(parent->GetTag(), V2::JS_FOR_EACH_ETS_TAG);
+    menuPattern->OnItemPressed(parent, 0, false);
+    EXPECT_EQ(parent->GetChildAtIndex(1)->GetTag(), V2::JS_FOR_EACH_ETS_TAG);
+    menuPattern->OnItemPressed(parent, 3, false);
+    EXPECT_EQ(parent->GetChildAtIndex(4)->GetTag(), V2::MENU_ITEM_GROUP_ETS_TAG);
+    menuPattern->OnItemPressed(parent, 2, false, true);
+    EXPECT_EQ(parent->GetChildAtIndex(3)->GetTag(), V2::MENU_ITEM_ETS_TAG);
+    menuPattern->OnItemPressed(parent, 2, false);
+    EXPECT_EQ(parent->GetChildAtIndex(3)->GetTag(), V2::MENU_ITEM_ETS_TAG);
+}
+
+/**
+ * @tc.name: MenuPatternTest077
+ * @tc.desc: Test GetSelectMenuWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg077, TestSize.Level1)
+{
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProperty, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetIsWidthModifiedBySelect(true);
+    menuLayoutProperty->propSelectMenuModifiedWidth_ = 0.1f;
+    menuPattern->GetSelectMenuWidth();
+    menuLayoutProperty->propSelectMenuModifiedWidth_ = 100.0f;
+    auto with = menuPattern->GetSelectMenuWidth();
+    EXPECT_EQ(with, 100.0f);
+}
+
+/**
+ * @tc.name: MenuPatternTest078
+ * @tc.desc: Test OnColorConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg078, TestSize.Level1)
+{
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    std::vector<SelectParam> selectParam = { { "content1", "icon1" }, { "content2", "" },
+    { "", "icon3" }, { "", "" } };
+    auto wrapperNode = MenuView::Create(selectParam, TARGET_ID, EMPTY_TEXT);
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 4);
+    menuPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(menuNode->needCallChildrenUpdate_, false);
+}
+
+/**
+ * @tc.name: MenuPatternTest079
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg079, TestSize.Level1)
+{
+    const DirtySwapConfig configDirtySwap = { false, false, false, false, false, false };
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
+    int32_t setApiVersion = 11;
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
+    ASSERT_NE(menuAlgorithmWrapper, nullptr);
+    auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(30, 30));
+    auto layoutWrapperNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(menuNode, geometryNode, menuNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapperNode, nullptr);
+    layoutWrapperNode->layoutProperty_ = property;
+    layoutWrapperNode->SetLayoutAlgorithm(menuAlgorithmWrapper);
+    layoutWrapperNode->skipMeasureContent_.emplace(false);
+    EXPECT_EQ(layoutWrapperNode->SkipMeasureContent(), false);
+
+    EXPECT_TRUE(menuPattern->OnDirtyLayoutWrapperSwap(layoutWrapperNode, configDirtySwap));
+
+    BorderRadiusProperty radius;
+    radius.SetRadius(Dimension(20));
+    property->propBorderRadius_ = radius;
+    EXPECT_TRUE(menuPattern->OnDirtyLayoutWrapperSwap(layoutWrapperNode, configDirtySwap));
+
+    radius.SetRadius(Dimension(10));
+    property->propBorderRadius_ = radius;
+    EXPECT_TRUE(menuPattern->OnDirtyLayoutWrapperSwap(layoutWrapperNode, configDirtySwap));
+
+    setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    EXPECT_TRUE(menuPattern->OnDirtyLayoutWrapperSwap(layoutWrapperNode, configDirtySwap));
+
+    radius.SetRadius(Dimension(20));
+    property->propBorderRadius_ = radius;
+    EXPECT_TRUE(menuPattern->OnDirtyLayoutWrapperSwap(layoutWrapperNode, configDirtySwap));
+
+    layoutWrapperNode->GetGeometryNode()->SetFrameSize(SizeF(50, 30));
+    EXPECT_TRUE(menuPattern->OnDirtyLayoutWrapperSwap(layoutWrapperNode, configDirtySwap));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: MenuPatternTest080
+ * @tc.desc: Test ShowMenuDisappearAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg080, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    MenuModelNG MneuModelInstance;
+    MneuModelInstance.Create();
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    menuPattern->ShowMenuDisappearAnimation();
+    auto renderContext = menuNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetOpacity(), 0);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: MenuPatternTest081
+ * @tc.desc: Test UpdateMenuItemChildren with OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg081, TestSize.Level1)
+{
+    MenuModelNG MneuModelInstance;
+    MneuModelInstance.Create();
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    auto firstNode = FrameNode::CreateFrameNode(
+        V2::JS_FOR_EACH_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(firstNode, nullptr);
+    auto secondNode = FrameNode::CreateFrameNode(
+        V2::JS_SYNTAX_ITEM_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(secondNode, nullptr);
+    auto menuItem1 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 3, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItem1, nullptr);
+    auto menuItemPattern = menuItem1->GetPattern<MenuItemPattern>();
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::STACK;
+    auto menuItem2 = FrameNode::CreateFrameNode("", 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItem2, nullptr);
+
+    firstNode->MountToParent(menuNode);
+    secondNode->MountToParent(menuNode);
+    menuItem1->MountToParent(menuNode);
+    menuItem2->MountToParent(menuNode);
+    menuPattern->OnModifyDone();
+    EXPECT_EQ(menuNode->GetChildren().size(), 4);
 }
 
 /**
