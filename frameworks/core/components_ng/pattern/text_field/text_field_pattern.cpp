@@ -2495,7 +2495,9 @@ void TextFieldPattern::HandleTripleClickEvent(GestureEvent& info)
         SetIsSingleHandle(true);
         CloseSelectOverlay();
     }
-    selectController_->UpdateSelectPragraphByOffset(info.GetLocalLocation());
+    if (CanChangeSelectState()) {
+        selectController_->UpdateSelectPragraphByOffset(info.GetLocalLocation());
+    }
     if (IsSelected()) {
         StopTwinkling();
         SetIsSingleHandle(false);
@@ -3120,7 +3122,7 @@ bool TextFieldPattern::CanChangeSelectState()
     CHECK_NULL_RETURN(theme, false);
     Dimension fontSize = layoutProperty->GetFontSizeValue(theme->GetFontSize());
     // fontSize == 0 can not change
-    return fontSize.Value() != 0.0f;
+    return !NearZero(fontSize.Value());
 }
 
 bool TextFieldPattern::IsOnUnitByPosition(const Offset& globalOffset)
