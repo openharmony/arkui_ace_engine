@@ -58,6 +58,9 @@ class BuilderNode {
   public recycle(): void {
     this._JSBuilderNode.recycle();
   }
+  public updateConfiguration(): void {
+    this._JSBuilderNode.updateConfiguration();
+  }
 }
 
 class JSBuilderNode extends BaseNode {
@@ -170,13 +173,19 @@ class JSBuilderNode extends BaseNode {
     this.updateEnd();
     __JSScopeUtil__.restoreInstanceId();
   }
-  private updateConfiguration() {
+  public updateConfiguration(): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this.updateStart();
     this.purgeDeletedElmtIds();
     Array.from(this.updateFuncByElmtId.keys()).sort((a: number, b: number): number => {
       return (a < b) ? -1 : (a > b) ? 1 : 0;
     }).forEach(elmtId => this.UpdateElement(elmtId));
+    for (const child of this.childrenWeakrefMap_.values()) {
+      const childView = child.deref();
+      if (childView) {
+        childView.forceCompleteRerender(true);
+      }
+    }
     this.updateEnd();
     __JSScopeUtil__.restoreInstanceId();
   }
