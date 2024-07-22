@@ -548,6 +548,7 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
         GetReverseValue(sliderLayoutProperty) ? borderBlank_ + sliderLength_ - length : length - borderBlank_;
     float min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
     float max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
+    float step = sliderPaintProperty->GetStep().value_or(1.0f);
     touchLength = std::clamp(touchLength, 0.0f, sliderLength_);
     CHECK_NULL_VOID(sliderLength_ != 0);
     valueRatio_ = touchLength / sliderLength_;
@@ -555,7 +556,8 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     valueRatio_ = NearEqual(valueRatio_, 1) ? 1 : std::round(valueRatio_ / stepRatio_) * stepRatio_;
 
     float oldValue = value_;
-    value_ = std::clamp(valueRatio_ * (max - min) + min, min, max);
+    value_ = NearEqual(valueRatio_, 1) ? max : (std::round(valueRatio_ / stepRatio_) * step + min);
+    value_ = std::clamp(value_, min, max);
     sliderPaintProperty->UpdateValue(value_);
     valueChangeFlag_ = !NearEqual(oldValue, value_);
     UpdateCircleCenterOffset();
