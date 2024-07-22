@@ -62,11 +62,13 @@ class PipelineContext;
 class Pattern;
 class StateModifyTask;
 class UITask;
-class FramePorxy;
 
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
     DECLARE_ACE_TYPE(FrameNode, UINode, LayoutWrapper);
+
+private:
+    class FrameProxy;
 
 public:
     // create a new child element with new element tree.
@@ -565,7 +567,7 @@ public:
 
     RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree = true) override;
     RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index) override;
-    const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true) override;
+    ChildrenListWithGuard GetAllChildrenWithBuild(bool addToRenderTree = true) override;
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
@@ -794,7 +796,7 @@ private:
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithm_;
     RefPtr<GeometryNode> oldGeometryNode_;
     std::optional<bool> skipMeasureContent_;
-    std::unique_ptr<FramePorxy> frameProxy_;
+    std::unique_ptr<FrameProxy> frameProxy_;
     WeakPtr<TargetComponent> targetComponent_;
 
     bool needSyncRenderTree_ = false;

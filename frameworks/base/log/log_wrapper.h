@@ -220,6 +220,8 @@ private:
     static LogLevel level_;
 };
 
+bool LogBacktrace(size_t maxFrameNums = 256);
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_LOG_WRAPPER_H

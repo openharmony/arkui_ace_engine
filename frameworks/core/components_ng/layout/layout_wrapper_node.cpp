@@ -85,11 +85,8 @@ void LayoutWrapperNode::SetCacheCount(int32_t cacheCount, const std::optional<La
     layoutWrapperBuilder_->SetCacheCount(cacheCount, itemConstraint);
 }
 
-const std::list<RefPtr<LayoutWrapper>>& LayoutWrapperNode::GetAllChildrenWithBuild(bool addToRenderTree)
+void LayoutWrapperNode::Build(bool addToRenderTree)
 {
-    if (!cachedList_.empty()) {
-        return cachedList_;
-    }
     for (const auto& child : children_) {
         cachedList_.push_back(child);
     }
@@ -114,7 +111,15 @@ const std::list<RefPtr<LayoutWrapper>>& LayoutWrapperNode::GetAllChildrenWithBui
             }
         }
     }
-    return cachedList_;
+}
+
+ChildrenListWithGuard LayoutWrapperNode::GetAllChildrenWithBuild(bool addToRenderTree)
+{
+    if (cachedList_.empty()) {
+        Build(addToRenderTree);
+    }
+    static RecursiveLock dummyLock;
+    return ChildrenListWithGuard(cachedList_, dummyLock);
 }
 
 void LayoutWrapperNode::RemoveChildInRenderTree(uint32_t index)

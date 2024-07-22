@@ -1444,7 +1444,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeUpdateAnimatableArithmeticProperty0038, TestS
 
 /**
  * @tc.name: FrameNodeTestNg0039
- * @tc.desc: Test of FramePorxy
+ * @tc.desc: Test of FrameProxy
  * @tc.type: FUNC
  */
 HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0039, TestSize.Level1)

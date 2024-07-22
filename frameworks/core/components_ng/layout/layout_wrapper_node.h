@@ -103,7 +103,7 @@ public:
     // render area, and nodes in the render area will be mounted on the render tree after the layout is complete. You
     // can call the RemoveChildInRenderTree method to explicitly remove the node from the area to be rendered.
     RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree = true) override;
-    const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true) override;
+    ChildrenListWithGuard GetAllChildrenWithBuild(bool addToRenderTree = true) override;
     RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index) override
     {
         return nullptr;
@@ -223,6 +223,7 @@ public:
     void SetLongPredictTask() override;
 
 private:
+    void Build(bool addToRenderTree);
     void LayoutOverlay();
     // Used to save a persist wrapper created by child, ifElse, ForEach, the map stores [index, Wrapper].
     std::list<RefPtr<LayoutWrapperNode>> children_;
