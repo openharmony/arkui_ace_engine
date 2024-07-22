@@ -1310,6 +1310,17 @@ public:
         start = selectController_->GetStartIndex();
         end = selectController_->GetEndIndex();
     }
+
+    void SetIsPasswordSymbol(bool isPasswordSymbol)
+    {
+        isPasswordSymbol_ = isPasswordSymbol;
+    }
+
+    bool GetIsPasswordSymbol() const
+    {
+        return isPasswordSymbol_;
+    }
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override
@@ -1719,6 +1730,7 @@ private:
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;
+    bool isPasswordSymbol_ = true;
 };
 } // namespace OHOS::Ace::NG
 

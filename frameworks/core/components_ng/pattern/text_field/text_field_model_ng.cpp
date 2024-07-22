@@ -545,6 +545,8 @@ void TextFieldModelNG::SetPasswordIcon(const PasswordIcon& passwordIcon)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    // when not call SetPasswordIcon() and api >= 13, use symbol format image, else use image format.
+    pattern->SetIsPasswordSymbol(false);
     if (passwordIcon.showResult != "") {
         ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordSourceInfo,
             ImageSourceInfo(passwordIcon.showResult, passwordIcon.showBundleName, passwordIcon.showModuleName));
@@ -912,6 +914,8 @@ void TextFieldModelNG::SetPasswordIcon(FrameNode* frameNode, const PasswordIcon&
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    // when not call SetPasswordIcon() and api >= 13, use symbol format image, else use image format.
+    pattern->SetIsPasswordSymbol(false);
     if (passwordIcon.showResult != "") {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordSourceInfo,
             ImageSourceInfo(passwordIcon.showResult,
