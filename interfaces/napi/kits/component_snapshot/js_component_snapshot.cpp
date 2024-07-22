@@ -289,6 +289,7 @@ static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
 
     if (!helper.CheckArgs(napi_valuetype::napi_string)) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing the first argument failed, not of string type.");
         napi_close_escapable_handle_scope(env, scope);
         return result;
     }
@@ -325,20 +326,22 @@ static napi_value JSSnapshotFromBuilder(napi_env env, napi_callback_info info)
 
     JsComponentSnapshot helper(env, info);
     if (!helper.CheckArgs(napi_valuetype::napi_function)) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing the first argument failed, not of function type.");
         napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
 
+    napi_value result = nullptr;
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        NapiThrow(env, "ace engine delegate is null", ERROR_CODE_INTERNAL_ERROR);
-        napi_close_escapable_handle_scope(env, scope);
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Can'nt get delegate of ace_engine. ");
+        auto callback = helper.CreateCallback(&result);
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         return nullptr;
     }
 
     // create builder closure
     auto builder = [build = helper.GetArgv(0), env] { napi_call_function(env, nullptr, build, 0, nullptr, nullptr); };
-    napi_value result = nullptr;
 
     NG::SnapshotParam param;
     helper.ParseParamForBuilder(param);
