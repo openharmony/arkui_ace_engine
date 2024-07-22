@@ -120,6 +120,8 @@ public:
             theme->normalLayout_ = pattern->GetAttr<int>("menu_normal_layout", 1);
             theme->normalPlacement_ = pattern->GetAttr<int>("menu_normal_placement", 1);
             theme->hasBackBlur_ = pattern->GetAttr<int>("menu_back_blur", 1);
+            theme->hasBackBlurColor_ = static_cast<bool>(pattern->GetAttr<double>("menu_back_blur_with_color", 0.0f));
+            theme->backBlurColor_ = pattern->GetAttr<Color>("menu_back_blur_color", Color::TRANSPARENT);
         }
     };
 
@@ -345,6 +347,16 @@ public:
         return hasBackBlur_;
     }
 
+    bool HasBackBlurColor() const
+    {
+        return hasBackBlurColor_;
+    }
+
+    Color GetBackBlurColor() const
+    {
+        return backBlurColor_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -383,6 +395,7 @@ private:
     Dimension innerBorderRadius_;
     Color innerBorderColor_ = Color::TRANSPARENT;
     Color borderColor_ = Color::TRANSPARENT;
+    Color backBlurColor_ = Color::TRANSPARENT;
     Dimension borderWidth_;
     uint32_t symbolId_;
     bool hasFilter_ = true;
@@ -393,6 +406,7 @@ private:
     bool normalLayout_ = true;
     bool normalPlacement_ = true;
     bool hasBackBlur_ = true;
+    bool hasBackBlurColor_ = false;
 };
 
 } // namespace OHOS::Ace::NG
