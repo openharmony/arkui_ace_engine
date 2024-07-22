@@ -1017,7 +1017,7 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
  * shadows[4] : ShadowType, shadows[5] : Color, shadows[6] : IsFilled
  * @param length shadows length
  */
-void SetBackShadow(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length, ArkUI_Int32 unit)
+void SetBackShadow(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1034,11 +1034,8 @@ void SetBackShadow(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, Ark
     }
     auto blurRadius = shadows[NUM_0].f32;                          // BlurRadius
     auto hasColorValue = static_cast<int32_t>(shadows[NUM_1].i32); // 1: has ColorStrategy; 2: has Color
-    
-    // OffsetX
-    auto offsetX = Dimension(shadows[NUM_2].f32, static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
-    // OffsetY
-    auto offsetY = Dimension(shadows[NUM_3].f32, static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
+    auto offsetX = shadows[NUM_2].f32;                             // OffsetX
+    auto offsetY = shadows[NUM_3].f32;                             // OffsetY
     auto shadowType = shadows[NUM_4].i32;                          // ShadowType
     auto color = static_cast<uint32_t>(shadows[NUM_5].u32);        // Color
     auto isFilled = static_cast<uint32_t>(shadows[NUM_6].i32);     // IsFilled
@@ -5962,15 +5959,15 @@ RefPtr<NG::ChainedTransitionEffect> ParseTransition(ArkUITransitionEffectOption*
         animationOption.SetDelay(animation.delay);
         animationOption.SetIteration(animation.iterations);
         animationOption.SetTempo(animation.tempo);
-        animationOption.SetAnimationDirection(
-            DIRECTION_LIST[animation.playMode > DIRECTION_LIST.size() ? 0 : animation.playMode]);
+        animationOption.SetAnimationDirection(DIRECTION_LIST[
+            static_cast<ArkUI_Uint32>(animation.playMode) > DIRECTION_LIST.size() ? 0 : animation.playMode]);
 
         // curve
         if (animation.iCurve) {
             auto curve = reinterpret_cast<Curve*>(animation.iCurve);
             animationOption.SetCurve(AceType::Claim(curve));
         } else {
-            if (animation.curve < 0 || animation.curve >= CURVES.size()) {
+            if (animation.curve < 0 || static_cast<ArkUI_Uint32>(animation.curve) >= CURVES.size()) {
                 animationOption.SetCurve(OHOS::Ace::Curves::EASE_IN_OUT);
             } else {
                 animationOption.SetCurve(CURVES[animation.curve]);

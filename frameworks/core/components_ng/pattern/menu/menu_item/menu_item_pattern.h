@@ -19,8 +19,8 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/slider/render_slider.h"
-#include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_algorithm.h"
@@ -194,6 +194,11 @@ public:
         return clickMenuItemId_;
     }
 
+    void SetOnClickAIMenuItem(std::function<void()> onClickAIMenuItem)
+    {
+        onClickAIMenuItem_ = onClickAIMenuItem;
+    }
+
     void OnVisibleChange(bool isVisible) override;
     void InitLongPressEvent();
     void UpdateNeedDivider(bool need);
@@ -213,7 +218,8 @@ public:
     {
         isStackSubmenuHeader_ = true;
     }
-    bool IsStackSubmenuHeader() {
+    bool IsStackSubmenuHeader()
+    {
         return isStackSubmenuHeader_;
     }
     RefPtr<FrameNode> FindTouchedEmbeddedMenuItem(const OffsetF& position);
@@ -281,6 +287,7 @@ private:
     bool isHovered_ = false;
     bool isExpanded_ = false;
     int32_t clickMenuItemId_ = -1;
+    std::function<void()> onClickAIMenuItem_ = nullptr;
     int32_t index_ = 0;
 
     std::function<void()> subBuilderFunc_ = nullptr;
@@ -324,6 +331,7 @@ public:
 
 private:
     void OnTouch(const TouchEventInfo& info) override;
+    void HandleOnChange();
     bool OnKeyEvent(const KeyEvent& event) override;
     std::unique_ptr<Offset> lastTouchOffset_;
 };

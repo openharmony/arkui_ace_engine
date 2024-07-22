@@ -74,7 +74,7 @@ std::pair<float, float> OverlengthDotIndicatorModifier::GetTouchBottomCenterX(Co
     float rightCenterX = contentProperty.longPointRightCenterX;
 
     if (isCustomSize_ || contentProperty.vectorBlackPointCenterX.empty() ||
-        contentProperty.vectorBlackPointCenterX.size() < maxDisplayCount_) {
+        static_cast<int32_t>(contentProperty.vectorBlackPointCenterX.size()) < maxDisplayCount_) {
         return { leftCenterX, rightCenterX };
     }
 

@@ -585,7 +585,7 @@ public:
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::string content);
-    void InitValueText(const std::string& content);
+    bool InitValueText(const std::string& content);
 
     void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);
@@ -601,6 +601,8 @@ public:
         FocusHub::LostFocusToViewRoot();
         isKeyboardClosedByUser_ = false;
     }
+
+    void OnDirectionConfigurationUpdate() override;
 
     void NotifyKeyboardClosed() override
     {
@@ -1206,7 +1208,8 @@ public:
 
     void CleanNodeResponseKeyEvent();
 
-    void ScrollPage(bool reverse, bool smooth = false) override;
+    void ScrollPage(bool reverse, bool smooth = false,
+        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
     void InitScrollBarClickEvent() override {}
     bool IsUnderlineMode();
     bool IsInlineMode();
@@ -1363,6 +1366,11 @@ public:
         start = selectController_->GetStartIndex();
         end = selectController_->GetEndIndex();
     }
+
+    void SetTextChangedAtCreation(bool changed)
+    {
+        isTextChangedAtCreation_ = changed;
+    }
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override
@@ -1424,6 +1432,7 @@ private:
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
+    bool CanChangeSelectState();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void CursorMoveOnClick(const Offset& offset);
 
@@ -1483,7 +1492,7 @@ private:
     void RequestKeyboardOnFocus();
     bool IsModalCovered();
     void SetNeedToRequestKeyboardOnFocus();
-    void SetAccessibilityAction();
+    void SetAccessibilityAction() override;
     void SetAccessibilityActionGetAndSetCaretPosition();
     void SetAccessibilityMoveTextAction();
     void SetAccessibilityScrollAction();
@@ -1587,6 +1596,7 @@ private:
     bool FinishTextPreviewByPreview(const std::string& insertValue);
 
     bool GetTouchInnerPreviewText(const Offset& offset) const;
+    bool IsShowMenu(const std::optional<SelectionOptions>& options);
 
     RectF frameRect_;
     RectF textRect_;
@@ -1778,6 +1788,7 @@ private:
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;
+    bool isTextChangedAtCreation_ = false;
 };
 } // namespace OHOS::Ace::NG
 

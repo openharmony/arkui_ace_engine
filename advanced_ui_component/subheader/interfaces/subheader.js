@@ -13,11 +13,18 @@
  * limitations under the License.
  */
 
+let TextModifier;
+if (globalThis.__hasUIFramework__) {
+    TextModifier = requireNapi('arkui.modifier').TextModifier;
+} else {
+    globalThis.requireNapi('arkui.mock');
+    TextModifier = requireNapi('arkui.mock').TextModifier;
+}
+
 var _a;
 if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
-const TextModifier = requireNapi('arkui.modifier').TextModifier;
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const resourceManager = requireNapi('resourceManager');
 const BusinessError = requireNapi('base');

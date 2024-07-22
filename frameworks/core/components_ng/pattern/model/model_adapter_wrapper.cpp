@@ -61,26 +61,24 @@ ModelAdapterWrapper::ModelAdapterWrapper(uint32_t key, const ModelViewContext& c
 #endif
 }
 
-void ModelAdapterWrapper::Deinit()
+std::shared_future<void> ModelAdapterWrapper::Deinit()
 {
     ACE_SCOPED_TRACE("ModelAdapterWrapper::Deinit");
 #if defined(KIT_3D_ENABLE)
     if (sceneAdapter_) {
         sceneAdapter_->Deinit();
-        return;
+        return std::shared_future<void>();
     }
 #endif
-    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this)] {
+    std::shared_ptr<Render3D::WidgetAdapter> widgetAdapter(widgetAdapter_);
+    std::shared_ptr<Render3D::TextureLayer> textureLayer(textureLayer_);
+    auto key = key_;
+    return Render3D::GraphicsTask::GetInstance().PushAsyncMessage([widgetAdapter, textureLayer, key] {
         ACE_SCOPED_TRACE("ModelAdapterWrapper::Deinit render");
-        auto adapter = weak.Upgrade();
-        CHECK_NULL_VOID(adapter);
-
-        CHECK_NULL_VOID(adapter->widgetAdapter_);
-        adapter->widgetAdapter_->DeInitEngine();
-
-        Render3D::GraphicsManager::GetInstance().UnRegister(adapter->GetKey());
-
-        auto& textureLayer = adapter->textureLayer_;
+        
+        CHECK_NULL_VOID(widgetAdapter);
+        widgetAdapter->DeInitEngine();
+        Render3D::GraphicsManager::GetInstance().UnRegister(key);
         CHECK_NULL_VOID(textureLayer);
         textureLayer->DestroyRenderTarget();
     });

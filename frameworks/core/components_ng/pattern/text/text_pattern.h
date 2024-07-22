@@ -226,7 +226,7 @@ public:
     {
         dataDetectorAdapter_->onResult_ = std::move(onResult);
     }
-    std::optional<TextDataDetectResult> GetTextDetectResult()
+    TextDataDetectResult GetTextDetectResult()
     {
         return dataDetectorAdapter_->textDetectResult_;
     }
@@ -323,6 +323,8 @@ public:
     void CloseOperate();
     void OnDragMove(const RefPtr<Ace::DragEvent>& event);
     virtual void AddUdmfData(const RefPtr<Ace::DragEvent>& event);
+    void ProcessNormalUdmfData(const RefPtr<UnifiedData>& unifiedData);
+    void AddPixelMapToUdmfData(const RefPtr<PixelMap>& pixelMap, const RefPtr<UnifiedData>& unifiedData);
 
     std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;
     TextStyleResult GetTextStyleObject(const RefPtr<SpanNode>& node);
@@ -644,7 +646,7 @@ protected:
     void HandleSpanSingleClickEvent(GestureEvent& info, RectF textContentRect, bool& isClickOnSpan);
     void HandleDoubleClickEvent(GestureEvent& info);
     void CheckOnClickEvent(GestureEvent& info);
-    bool ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
+    bool ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
         const ShowSelectOverlayFunc& showSelectOverlayFunc = nullptr);
     void SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
         const ShowSelectOverlayFunc& showSelectOverlayFunc);

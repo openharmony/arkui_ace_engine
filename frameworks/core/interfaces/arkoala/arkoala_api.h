@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 118
+#define ARKUI_FULL_API_VERSION 119
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
 #define ARKUI_NODE_API_VERSION 119
@@ -1318,8 +1318,7 @@ struct ArkUICommonModifier {
     void (*resetPositionEdges)(ArkUINodeHandle node);
     void (*setBorderStyle)(ArkUINodeHandle node, const ArkUI_Int32* styles, ArkUI_Int32 length);
     void (*resetBorderStyle)(ArkUINodeHandle node);
-    void (*setBackShadow)(
-        ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length, ArkUI_Int32 unit);
+    void (*setBackShadow)(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length);
     void (*resetBackShadow)(ArkUINodeHandle node);
     void (*setHitTestBehavior)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetHitTestBehavior)(ArkUINodeHandle node);
@@ -1919,6 +1918,9 @@ struct ArkUITextModifier {
     void (*resetTextMinFontScale)(ArkUINodeHandle node);
     void (*setTextMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 number);
     void (*resetTextMaxFontScale)(ArkUINodeHandle node);
+    void (*setTextSelectionMenuOptions)(
+        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
+    void (*resetTextSelectionMenuOptions)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -2903,6 +2905,9 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaEnablePreviewText)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextAreaEnablePreviewText)(ArkUINodeHandle node);
     void (*getTextAreaPadding)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit);
+    void (*setTextAreaSelectionMenuOptions)(
+        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
+    void (*resetTextAreaSelectionMenuOptions)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -3096,6 +3101,9 @@ struct ArkUITextInputModifier {
     void (*getTextInputMargin)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit);
     void (*setTextInputEnablePreviewText)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextInputEnablePreviewText)(ArkUINodeHandle node);
+    void (*setTextInputSelectionMenuOptions)(
+        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
+    void (*resetTextInputSelectionMenuOptions)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -3675,6 +3683,9 @@ struct ArkUISearchModifier {
     void (*resetSearchOnDidDelete)(ArkUINodeHandle node);
     void (*setSearchEnablePreviewText)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetSearchEnablePreviewText)(ArkUINodeHandle node);
+    void (*setSearchSelectionMenuOptions)(
+        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
+    void (*resetSearchSelectionMenuOptions)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {

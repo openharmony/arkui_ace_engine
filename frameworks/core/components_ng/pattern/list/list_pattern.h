@@ -165,7 +165,8 @@ public:
     void ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth = false,
         ScrollAlign align = ScrollAlign::START);
     bool CheckTargetValid(int32_t index, int32_t indexInGroup);
-    void ScrollPage(bool reverse, bool smooth = false) override;
+    void ScrollPage(bool reverse, bool smooth = false,
+        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
     void ScrollBy(float offset);
     bool AnimateToTarget(int32_t index, std::optional<int32_t> indexInGroup, ScrollAlign align);
     Offset GetCurrentOffset() const;
@@ -222,8 +223,15 @@ public:
     }
     bool CanReplaceSwiperItem()
     {
-        if (!swiperItem_.Upgrade()) {
+        auto listItemPattern = swiperItem_.Upgrade();
+        if (!listItemPattern) {
             canReplaceSwiperItem_ = true;
+            return canReplaceSwiperItem_;
+        }
+        auto host = listItemPattern->GetHost();
+        if (!host || !host->IsOnMainTree()) {
+            canReplaceSwiperItem_ = true;
+            return canReplaceSwiperItem_;
         }
         return canReplaceSwiperItem_;
     }
@@ -345,7 +353,6 @@ private:
         const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, float itemGroupTop);
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
-    void SetAccessibilityAction();
     ListItemGroupPara GetListItemGroupParameter(const RefPtr<FrameNode>& node);
     bool IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node);
     void GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const;

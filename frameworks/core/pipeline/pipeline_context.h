@@ -237,7 +237,7 @@ public:
 
     void OnVirtualKeyboardHeightChange(float keyboardHeight,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
-        const bool supportAvoidance = false) override;
+        const bool supportAvoidance = false, bool forceChange = false) override;
 
     // Set card position for barrierFree
     void SetCardViewPosition(int id, float offsetX, float offsetY);
@@ -1004,8 +1004,8 @@ private:
 
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
     Size selectedItemSize_ { 0.0, 0.0 };
-    size_t selectedIndex_ = -1;
-    size_t insertIndex_ = -1;
+    int32_t selectedIndex_ = -1;
+    int32_t insertIndex_ = -1;
     RefPtr<RenderNode> initRenderNode_;
     std::string customDragInfo_;
     std::string selectedText_;

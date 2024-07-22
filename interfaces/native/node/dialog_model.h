@@ -18,7 +18,6 @@
 
 #include "native_dialog.h"
 #include "native_type.h"
-#include "third_party/externals/dng_sdk/source/dng_types.h"
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
 
 #ifdef __cplusplus

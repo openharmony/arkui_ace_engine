@@ -15,5 +15,8 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("recycle_node_test_ng") {
   type = "new"
-  sources = [ "recycle_node_test_ng.cpp" ]
+  sources = [
+    "recycle_manager_test.cpp",
+    "recycle_node_test_ng.cpp",
+  ]
 }

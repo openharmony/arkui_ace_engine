@@ -44,9 +44,12 @@ private:
     void CheckNeedExpandContent(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint);
     void UpdateSelfSize(LayoutWrapper* layoutWrapper, float width, float itemHeight, float expandableHeight);
     float GetDividerStroke(LayoutWrapper* layoutWrapper);
+    float GetBordersHeight(LayoutWrapper* layoutWrapper);
 
     float horInterval_ = 0.0f;
+    float verInterval_ = 0.0f;
     float idealWidth_ = 0.0f;
+    float idealHeight_ = 0.0f;
     float emptyWidth_ = 0.0f;
     float maxRowWidth_ = 0.0f;
     float middleSpace_ = 0.0f;

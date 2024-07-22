@@ -103,8 +103,7 @@ bool TextSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     auto textStyle = textPattern->GetTextStyle();
-    auto handleRadius = TextLayoutadapter::TextConvertToPx(theme->GetHandleDiameter(),
-        { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+    auto handleRadius = pipeline->NormalizeToPx(theme->GetHandleDiameter());
     // If the handle is incomplete at the top, not show.
     if (LessNotEqual(paintRect.Top() - handleRadius, 0.0f)) {
         return false;

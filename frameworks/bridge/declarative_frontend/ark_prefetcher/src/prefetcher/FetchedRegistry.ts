@@ -17,11 +17,11 @@ class FetchedRegistry {
   private readonly fetchedIndicies: Set<number> = new Set(); // {I where I is in cache} ∩ `prefetchRange`
   private rangeToPrefetch: IndexRange = new IndexRange(0, 0);
 
-  addFetched(index: number) {
+  addFetched(index: number): void {
     this.fetchedIndicies.add(index);
   }
 
-  getFetchedInRange(range: IndexRange) {
+  getFetchedInRange(range: IndexRange): void {
     let fetched = 0;
     range.forEachIndex((index) => {
       fetched += this.fetchedIndicies.has(index) ? 1 : 0;
@@ -29,7 +29,7 @@ class FetchedRegistry {
     return fetched;
   }
 
-  updateRangeToPrefetch(prefetchRange: IndexRange) {
+  updateRangeToPrefetch(prefetchRange: IndexRange): void {
     this.rangeToPrefetch.subtract(prefetchRange).forEachIndex((index) => {
       this.fetchedIndicies.delete(index);
     });

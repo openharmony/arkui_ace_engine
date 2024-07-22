@@ -153,19 +153,18 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     dialogProperties.backgroundColor = Color(controllerHandler->backgroundColor);
     dialogProperties.customStyle = controllerHandler->enableCustomStyle;
     dialogProperties.gridCount = controllerHandler->gridCount;
-    ParseDialogMask(dialogProperties,controllerHandler);
+    ParseDialogMask(dialogProperties, controllerHandler);
     ParseDialogCornerRadiusRect(dialogProperties, controllerHandler);
     if (controllerHandler->onWillDismissCall) {
         dialogProperties.onWillDismissCallByNDK = [controllerHandler](int32_t reason) {
-            ArkUI_DialogDismissEvent event = { controllerHandler->userData, reason, false };
             return controllerHandler->onWillDismissCall(reason);
         };
     }
 
-    if (controllerHandler->onWillDismissCallByNDK ) {
-        dialogProperties.onWillDismissCallByNDK  = [controllerHandler](int32_t reason) {
+    if (controllerHandler->onWillDismissCallByNDK) {
+        dialogProperties.onWillDismissCallByNDK = [controllerHandler](int32_t reason) {
             ArkUI_DialogDismissEvent event = { controllerHandler->userData, reason, false };
-            controllerHandler->onWillDismissCallByNDK (&event);
+            controllerHandler->onWillDismissCallByNDK(&event);
             return event.BlockDismiss;
         };
     } else {

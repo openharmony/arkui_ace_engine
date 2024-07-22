@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -596,7 +597,8 @@ HWTEST_F(NavBarTestNg, NavBarPattern005, TestSize.Level1)
     auto buttonNode = AceType::MakeRefPtr<FrameNode>(FRAME_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(buttonNode, nullptr);
     buttonNode->MountToParent(menuNode);
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(FRAME_ITEM_ETS_TAG, nodeId);
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
     ASSERT_NE(barItemNode, nullptr);
     barItemNode->MountToParent(buttonNode);
     barItemNode->SetIsMoreItemNode(true);
@@ -634,7 +636,8 @@ HWTEST_F(NavBarTestNg, NavBarPattern006, TestSize.Level1)
     auto buttonNode = AceType::MakeRefPtr<FrameNode>(FRAME_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(buttonNode, nullptr);
     buttonNode->MountToParent(menuNode);
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(BAR_ITEM_ETS_TAG, nodeId);
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
     ASSERT_NE(barItemNode, nullptr);
     barItemNode->MountToParent(buttonNode);
     barItemNode->SetIsMoreItemNode(true);
@@ -834,7 +837,7 @@ HWTEST_F(NavBarTestNg, NavBarNode001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
     titleBarNode->SetTitle(frameNode);
     navBarNode->SetTitleBarNode(titleBarNode);
-    EXPECT_EQ(navBarNode->GetTitleString(), "");
+    EXPECT_EQ(NavigationTitleUtil::GetTitleString(titleBarNode, false), "");
 }
 
 /**
@@ -857,7 +860,7 @@ HWTEST_F(NavBarTestNg, NavBarNode002, TestSize.Level1)
     frameNode->tag_ = V2::TEXT_ETS_TAG;
     titleBarNode->SetTitle(frameNode);
     navBarNode->SetTitleBarNode(titleBarNode);
-    EXPECT_EQ(navBarNode->GetTitleString(), "");
+    EXPECT_EQ(NavigationTitleUtil::GetTitleString(titleBarNode, false), "");
 }
 
 /**
@@ -879,7 +882,7 @@ HWTEST_F(NavBarTestNg, NavBarNode003, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
     titleBarNode->SetSubtitle(frameNode);
     navBarNode->SetTitleBarNode(titleBarNode);
-    EXPECT_EQ(navBarNode->GetSubtitleString(), "");
+    EXPECT_EQ(NavigationTitleUtil::GetSubtitleString(titleBarNode), "");
 }
 
 /**
@@ -902,7 +905,7 @@ HWTEST_F(NavBarTestNg, NavBarNode004, TestSize.Level1)
     frameNode->tag_ = V2::TEXT_ETS_TAG;
     titleBarNode->SetSubtitle(frameNode);
     navBarNode->SetTitleBarNode(titleBarNode);
-    EXPECT_EQ(navBarNode->GetSubtitleString(), "");
+    EXPECT_EQ(NavigationTitleUtil::GetSubtitleString(titleBarNode), "");
 }
 
 /**
@@ -1211,7 +1214,8 @@ HWTEST_F(NavBarTestNg, NavBarPattern023, TestSize.Level1)
         FRAME_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(buttonNode, nullptr);
     buttonNode->MountToParent(menuNode);
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(FRAME_ITEM_ETS_TAG, nodeId);
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
     ASSERT_NE(barItemNode, nullptr);
     barItemNode->MountToParent(buttonNode);
     barItemNode->SetIsMoreItemNode(true);

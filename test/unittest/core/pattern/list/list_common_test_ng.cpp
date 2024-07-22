@@ -15,6 +15,7 @@
 
 #include "list_test_ng.h"
 #include "test/mock/base/mock_drag_window.h"
+#include "test/mock/core/common/mock_container.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
@@ -989,10 +990,12 @@ HWTEST_F(ListCommonTestNg, EventHub001, TestSize.Level1)
     /**
      * @tc.steps: step1. EXPECT_CALL DrawFrameNode, HandleOnItemDragStart will trigger it
      */
-    auto mockDragWindow = MockDragWindow::CreateDragWindow("", 0, 0, 0, 0, 0);
+    auto mockDragWindow = MockDragWindow::CreateDragWindow({ "", 0, 0, 0, 0, 0 });
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), DrawFrameNode(_)).Times(2);
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), MoveTo).Times(AnyNumber());
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), Destroy).Times(AnyNumber());
+    auto container = Container::GetContainer(CONTAINER_ID_DIVIDE_SIZE);
+    EXPECT_CALL(*(AceType::DynamicCast<MockContainer>(container)), GetWindowId()).Times(AnyNumber());
 
     /**
      * @tc.steps: step2. Run List GetDragExtraParams func.
@@ -1737,6 +1740,33 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag002, TestSize.Level1)
     dragManager->HandleOnItemDragEnd(info);
     EXPECT_EQ(actualFrom, -1);
     EXPECT_EQ(actualTo, -1);
+}
+
+/**
+ * @tc.name: InitDragDropEvent001
+ * @tc.desc: Test InitDragDropEvent, if already init, will not create dragEvent again
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, InitDragDropEvent001, TestSize.Level1)
+{
+    auto onMoveEvent = [](int32_t from, int32_t to) {};
+    CreateForEachList(3, 1, onMoveEvent);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. InitDragDropEvent, if already init, will not create dragEvent again
+     */
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
+    auto syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachNode->GetChildAtIndex(0));
+    auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
+    auto listItemPattern = listItem->GetPattern<ListItemPattern>();
+    auto dragManager = listItemPattern->dragManager_;
+    auto listItemEventHub = listItem->GetEventHub<ListItemEventHub>();
+    auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
+    // InitDragDropEvent
+    auto dragEvent = gestureHub->dragEventActuator_->userCallback_;
+    dragManager->InitDragDropEvent();
+    EXPECT_EQ(dragEvent, gestureHub->dragEventActuator_->userCallback_);
 }
 
 /**

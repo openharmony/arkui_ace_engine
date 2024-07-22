@@ -1205,8 +1205,23 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
                 reinterpret_cast<NativeReference*>(ref), context);
         }
     }
-
+    UpdateFontScale(context->GetConfiguration());
     return UIContentErrorCode::NO_ERRORS;
+}
+
+void UIContentImpl::UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
+{
+    CHECK_NULL_VOID(config);
+    auto maxAppFontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::APP_FONT_MAX_SCALE);
+    auto followSystem = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
+    auto context = NG::PipelineContext::GetContextByContainerId(instanceId_);
+    CHECK_NULL_VOID(context);
+    if (!followSystem.empty()) {
+        context->SetFollowSystem(followSystem == "followSystem");
+    }
+    if (!maxAppFontScale.empty()) {
+        context->SetMaxAppFontScale(std::stof(maxAppFontScale));
+    }
 }
 
 void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
@@ -1788,6 +1803,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                                                      .append(moduleName)
                                                      .append(",abilityName:")
                                                      .append(abilityName));
+    UpdateFontScale(context->GetConfiguration());
     return errorCode;
 }
 
@@ -1830,7 +1846,9 @@ void UIContentImpl::Foreground()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: window foreground", bundleName_.c_str(), moduleName_.c_str(),
         instanceId_);
-    PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
+    if (window_ != nullptr && window_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
+    }
     ContainerScope::UpdateRecentForeground(instanceId_);
     Platform::AceContainer::OnShow(instanceId_);
     // set the flag isForegroundCalled to be true
@@ -3068,6 +3086,7 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(
                 return;
             }
             auto popupParam = CreateCustomPopupParam(true, config);
+            popupParam->SetBlockEvent(false);
             auto uiExtNode = ModalUIExtension::Create(want, callbacks, false, false);
             auto focusHub = uiExtNode->GetFocusHub();
             if (focusHub) {
@@ -3357,6 +3376,7 @@ void UIContentImpl::SetContentNodeGrayScale(float grayscale)
     auto renderContext = rootElement->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateFrontGrayScale(Dimension(grayscale));
+    pipelineContext->SetDragNodeGrayscale(grayscale);
 }
 
 void UIContentImpl::PreLayout()

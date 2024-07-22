@@ -22,13 +22,7 @@
 namespace OHOS::Ace::NG {
 OffscreenCanvasPattern::OffscreenCanvasPattern(int32_t width, int32_t height)
 {
-    if (width < 0) {
-        width = 0;
-    }
-    if (height < 0) {
-        height = 0;
-    }
-    offscreenPaintMethod_ = MakeRefPtr<OffscreenCanvasPaintMethod>(width, height);
+    offscreenPaintMethod_ = MakeRefPtr<OffscreenCanvasPaintMethod>(std::max(width, 0), std::max(height, 0));
 }
 
 void OffscreenCanvasPattern::UpdateSize(int32_t width, int32_t height)

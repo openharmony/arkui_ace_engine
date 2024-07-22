@@ -47,6 +47,20 @@ void NodeContainerModelNG::SetOnResize(std::function<void(const SizeF& size)>&& 
     pattern->SetOnResize(std::move(resizeFunc));
 }
 
+void NodeContainerModelNG::SetOnAppear(std::function<void()>&& onAppearCallback)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<NodeContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetControllerAboutToAppear(std::move(onAppearCallback));
+}
+
+void NodeContainerModelNG::SetOnDisAppear(std::function<void()>&& onDisAppearCallback)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<NodeContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetControllerAboutToDisappear(std::move(onDisAppearCallback));
+}
+
 void NodeContainerModelNG::SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();

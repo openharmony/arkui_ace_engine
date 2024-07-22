@@ -411,16 +411,6 @@ void WebPattern::SetRotation(uint32_t rotation)
     renderSurface_->SetTransformHint(rotation);
 }
 
-void WebPattern::OnAttachToMainTree()
-{
-    isAttachedToMainTree_ = true;
-}
-
-void WebPattern::OnDetachFromMainTree()
-{
-    isAttachedToMainTree_ = false;
-}
-
 void WebPattern::InitEvent()
 {
     auto host = GetHost();
@@ -1000,10 +990,16 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
         // get drag pixel map successfully, disable next drag util received web kernel drag callback
         frameNode->SetDraggable(false);
         RefPtr<UnifiedData> aceUnifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
+        std::string fileName = delegate_->dragData_->GetImageFileName();
         std::string plainContent = delegate_->dragData_->GetFragmentText();
         std::string htmlContent = delegate_->dragData_->GetFragmentHtml();
         std::string linkUrl = delegate_->dragData_->GetLinkURL();
         std::string linkTitle = delegate_->dragData_->GetLinkTitle();
+        if (!fileName.empty()) {
+            OnDragFileNameStart(aceUnifiedData, fileName);
+        } else {
+            TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop event start, dragdata has no image file uri, just pass");
+        }
         if (!plainContent.empty()) {
             isDragEndMenuShow_ = true;
             UdmfClient::GetInstance()->AddPlainTextRecord(aceUnifiedData, plainContent);
@@ -1016,12 +1012,6 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
             isDragEndMenuShow_ = false;
             UdmfClient::GetInstance()->AddLinkRecord(aceUnifiedData, linkUrl, linkTitle);
             TAG_LOGI(AceLogTag::ACE_WEB, "web DragDrop event Start, linkUrl size:%{public}zu", linkUrl.size());
-        }
-        std::string fileName = delegate_->dragData_->GetImageFileName();
-        if (!fileName.empty()) {
-            OnDragFileNameStart(aceUnifiedData, fileName);
-        } else {
-            TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop event start, dragdata has no image file uri, just pass");
         }
         info->SetData(aceUnifiedData);
         HandleOnDragEnter(info);
@@ -1741,12 +1731,12 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     } else {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnDirtyLayoutWrapperSwap safeArea is set, no need setbounds");
     }
-    if (isOfflineMode_) {
-        TAG_LOGE(AceLogTag::ACE_WEB,
+    if (offlineWebInited_ && !offlineWebRendered_) {
+        TAG_LOGI(AceLogTag::ACE_WEB,
             "OnDirtyLayoutWrapperSwap; WebPattern is Offline Mode, WebId:%{public}d", GetWebId());
-        isOfflineMode_ = false;
-        isVisible_ = true;
-        OnWindowShow();
+        offlineWebRendered_ = true;
+        delegate_->OnRenderToForeground();
+        delegate_->ShowWebView();
     }
 
     // first update size to load url.
@@ -2342,10 +2332,8 @@ void WebPattern::OnModifyDone()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetHandleChildBounds(true);
-    bool isFirstCreate = false;
     if (!delegate_) {
         // first create case,
-        isFirstCreate = true;
         delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "",
             Container::CurrentId());
         CHECK_NULL_VOID(delegate_);
@@ -2521,16 +2509,20 @@ void WebPattern::OnModifyDone()
     CHECK_NULL_VOID(pipelineContext);
 
     // offline mode
-    if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE && isFirstCreate) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type");
-        isOfflineMode_ = true;
-        OfflineMode();
-        isVisible_ = false;
+    if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
+        InitInOfflineMode();
     }
 }
 
-void WebPattern::OfflineMode()
+void WebPattern::InitInOfflineMode()
 {
+    if (offlineWebInited_) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type, webId:%{public}d", GetWebId());
+    offlineWebInited_ = true;
+    isActive_ = false;
+    isVisible_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int width = 0;
@@ -2553,13 +2545,17 @@ void WebPattern::OfflineMode()
     Size drawSize = Size(width, height);
     Offset offset = Offset(0, 0);
     delegate_->SetBoundsOrResize(drawSize, offset);
-    if (webSrc_) {
-        delegate_->LoadUrl();
-    } else if (webData_) {
-        delegate_->LoadDataWithRichText();
+    
+    if (!isUrlLoaded_) {
+        isUrlLoaded_ = true;
+        if (webSrc_) {
+            delegate_->LoadUrl();
+        } else if (webData_) {
+            delegate_->LoadDataWithRichText();
+        }
     }
-    isUrlLoaded_ = true;
-    OnWindowHide();
+    delegate_->HideWebView();
+    CloseContextSelectionMenu();
 }
 
 bool WebPattern::IsNeedResizeVisibleViewport()
@@ -2644,7 +2640,6 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
-    context->SetRootRect(width, height, 0);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     taskExecutor->PostDelayedTask(
@@ -2707,9 +2702,6 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
         rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
         frameNode->GetRenderContext()->SyncGeometryProperties(rect);
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        context->SetRootRect(width, height, 0);
     }
 }
 
@@ -3081,8 +3073,8 @@ void WebPattern::SelectCancel() const
     if (isReceivedArkDrag_) {
         return;
     }
-    CHECK_NULL_VOID(menuCallback_);
-    menuCallback_->Cancel();
+    CHECK_NULL_VOID(quickMenuCallback_);
+    quickMenuCallback_->Cancel();
 }
 
 std::string WebPattern::GetSelectInfo() const
@@ -3155,6 +3147,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     CHECK_NULL_RETURN(theme, false);
     selectHotZone_ = theme->GetHandleHotZoneRadius().ConvertToPx();
     SelectOverlayInfo selectInfo;
+    RegisterSelectOverLayOnClose(selectInfo);
     selectInfo.isSingleHandle = (overlayType == INSERT_OVERLAY);
     UpdateRunQuickMenuSelectInfo(selectInfo, params, insertTouchHandle, beginTouchHandle, endTouchHandle);
     if (isQuickMenuMouseTrigger_) {
@@ -3170,12 +3163,25 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
         selectOverlayProxy_->SetHandleReverse(false);
     }
     dropParams_ = params;
-    menuCallback_ = callback;
     selectMenuInfo_ = selectInfo.menuInfo;
     insertHandle_ = insertTouchHandle;
     startSelectionHandle_ = beginTouchHandle;
     endSelectionHandle_ = endTouchHandle;
     return selectOverlayProxy_ ? true : false;
+}
+
+void WebPattern::RegisterSelectOverLayOnClose(SelectOverlayInfo& selectInfo)
+{
+    selectInfo.onClose = [weak = AceType::WeakClaim(this)] (bool isGlobalTouchEvent) {
+        if (!isGlobalTouchEvent) {
+            return;
+        }
+        TAG_LOGI(AceLogTag::ACE_WEB, "globalTouchEvent, close web select overLayer.");
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->CloseSelectOverlay();
+        webPattern->SelectCancel();
+    };
 }
 
 void WebPattern::DragDropSelectionMenu()
@@ -3189,8 +3195,12 @@ void WebPattern::DragDropSelectionMenu()
     if (!isDragEndMenuShow_ || IsImageDrag()) {
         return;
     }
+    if (!isVisible_) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop selection menu web is invisible");
+        return;
+    }
     CHECK_NULL_VOID(dropParams_);
-    CHECK_NULL_VOID(menuCallback_);
+    CHECK_NULL_VOID(quickMenuCallback_);
     SelectOverlayInfo selectInfo;
     selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
     selectInfo.firstHandle.isShow = IsTouchHandleShow(startSelectionHandle_);
@@ -3199,7 +3209,7 @@ void WebPattern::DragDropSelectionMenu()
     selectInfo.secondHandle.paintRect = ComputeTouchHandleRect(endSelectionHandle_);
     QuickMenuIsNeedNewAvoid(selectInfo, dropParams_, startSelectionHandle_, endSelectionHandle_);
     selectInfo.menuInfo.menuIsShow = true;
-    RegisterSelectOverlayCallback(selectInfo, dropParams_, menuCallback_);
+    RegisterSelectOverlayCallback(selectInfo, dropParams_, quickMenuCallback_);
     RegisterSelectOverlayEvent(selectInfo);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -3462,6 +3472,9 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto container = Container::Current();
+    if (container == nullptr) {
+        container = Container::GetActive();
+    }
     CHECK_NULL_RETURN(container, false);
     bool isPopup = false;
     return container->RequestAutoFill(host, autoFillType, false, isPopup, autoFillSessionId_, false);
@@ -3473,6 +3486,9 @@ bool WebPattern::RequestAutoSave()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto container = Container::Current();
+    if (container == nullptr) {
+        container = Container::GetActive();
+    }
     CHECK_NULL_RETURN(container, false);
     return container->RequestAutoSave(host, nullptr, nullptr, false);
 }
@@ -3483,6 +3499,9 @@ bool WebPattern::UpdateAutoFillPopup()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto container = Container::Current();
+    if (container == nullptr) {
+        container = Container::GetActive();
+    }
     CHECK_NULL_RETURN(container, false);
     return container->UpdatePopupUIExtension(host, autoFillSessionId_, false);
 }
@@ -4226,30 +4245,28 @@ void WebPattern::UpdateLocale()
 
 void WebPattern::OnWindowShow()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowShow");
+    CHECK_NULL_VOID(delegate_);
     delegate_->OnRenderToForeground();
-    if (!isOfflineMode_) {
-        delegate_->OnOnlineRenderToForeground();
-    }
+    delegate_->OnOnlineRenderToForeground();
 
     if (isWindowShow_ || !isVisible_) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowShow");
 
-    CHECK_NULL_VOID(delegate_);
     delegate_->ShowWebView();
     isWindowShow_ = true;
 }
 
 void WebPattern::OnWindowHide()
 {
-    if (!isOfflineMode_) {
-        delegate_->OnRenderToBackground();
-    }
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowHide");
+    CHECK_NULL_VOID(delegate_);
+    delegate_->OnRenderToBackground();
+
     if (!isWindowShow_ || !isVisible_) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowHide");
 
     CHECK_NULL_VOID(delegate_);
     delegate_->HideWebView();
@@ -4374,10 +4391,11 @@ void WebPattern::SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterE
 
 void WebPattern::OnInActive()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "WebPattern::OnInActive webId:%{public}d, isActive:%{public}d", GetWebId(), isActive_);
     if (!isActive_) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnInActive");
 
     CHECK_NULL_VOID(delegate_);
     delegate_->OnInactive();
@@ -4386,10 +4404,11 @@ void WebPattern::OnInActive()
 
 void WebPattern::OnActive()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "WebPattern::OnActive webId:%{public}d, isActive:%{public}d", GetWebId(), isActive_);
     if (isActive_) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnActive");
 
     CHECK_NULL_VOID(delegate_);
     delegate_->OnActive();
@@ -4408,6 +4427,7 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
     isVisible_ = isVisible;
     if (!isVisible_) {
         CloseSelectOverlay();
+        SelectCancel();
         if (isVisibleActiveEnable_) {
             OnInActive();
         }
@@ -4530,11 +4550,9 @@ void WebPattern::OnScrollStartRecursive(std::vector<float> positions)
 
 void WebPattern::OnAttachToBuilderNode(NodeStatus nodeStatus)
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnAttachToBuilderNode");
     if (nodeStatus != NodeStatus::NORMAL_NODE) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type");
-        isOfflineMode_ = true;
-        OfflineMode();
-        isVisible_ = false;
+        InitInOfflineMode();
     }
 }
 

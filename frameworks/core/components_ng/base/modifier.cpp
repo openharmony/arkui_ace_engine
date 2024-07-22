@@ -57,7 +57,7 @@ void OverlayModifier::Draw(DrawingContext& context)
 void OverlayModifier::SetExtensionHandler(ExtensionHandler* extensionHandler)
 {
     extensionHandler_ = extensionHandler;
-    extensionHandler_->SetInvalidateRenderImpl([weak = WeakClaim(this)]() {
+    extensionHandler_->SetOverlayRenderImpl([weak = WeakClaim(this)]() {
         auto modifier = weak.Upgrade();
         if (modifier) {
             modifier->SetOverlayChange();
@@ -78,7 +78,7 @@ void ForegroundModifier::Draw(DrawingContext& context)
 void ForegroundModifier::SetExtensionHandler(ExtensionHandler* extensionHandler)
 {
     extensionHandler_ = extensionHandler;
-    extensionHandler_->SetInvalidateRenderImpl([weak = WeakClaim(this)]() {
+    extensionHandler_->SetForeGroundRenderImpl([weak = WeakClaim(this)]() {
         auto modifier = weak.Upgrade();
         if (modifier) {
             modifier->SetForegroundChange();

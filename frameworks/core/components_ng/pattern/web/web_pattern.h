@@ -672,8 +672,6 @@ private:
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
-    void OnAttachToMainTree() override;
-    void OnDetachFromMainTree() override;
 
     void OnWindowShow() override;
     void OnWindowHide() override;
@@ -796,7 +794,6 @@ private:
     int onDragMoveCnt = 0;
     bool isDragEndMenuShow_ = false;
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> dropParams_ = nullptr;
-    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> menuCallback_ = nullptr;
     std::chrono::time_point<std::chrono::system_clock> firstMoveInTime;
     std::chrono::time_point<std::chrono::system_clock> preMoveInTime;
     std::chrono::time_point<std::chrono::system_clock> curMoveInTime;
@@ -817,6 +814,7 @@ private:
     bool IsTouchHandleShow(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
 
     void SuggestionSelected(int32_t index);
+    void RegisterSelectOverLayOnClose(SelectOverlayInfo& selectInfo);
 #ifdef OHOS_STANDARD_SYSTEM
     WebOverlayType GetTouchHandleOverlayType(
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
@@ -864,7 +862,7 @@ private:
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void PostTaskToUI(const std::function<void()>&& task, const std::string& name) const;
-    void OfflineMode();
+    void InitInOfflineMode();
     void OnOverScrollFlingVelocityHandler(float velocity, bool isFling);
     bool FilterScrollEventHandleOffset(const float offset);
     bool FilterScrollEventHandlevVlocity(const float velocity);
@@ -1014,8 +1012,8 @@ private:
     RefPtr<WebDelegateObserver> observer_;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
-    bool isOfflineMode_ = false;
-    bool isAttachedToMainTree_ = false;
+    bool offlineWebInited_ = false;
+    bool offlineWebRendered_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
     bool accessibilityState_ = false;
     RefPtr<WebAccessibilityNode> webAccessibilityNode_;

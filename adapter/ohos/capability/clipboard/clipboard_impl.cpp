@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/capability/clipboard/clipboard_impl.h"
+#include <vector>
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "adapter/ohos/capability/html/html_to_span.h"
@@ -63,14 +64,20 @@ void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
 #endif
 }
 
-void ClipboardImpl::HasDataType(const std::function<void(bool hasData)>& callback, const std::string& mimeType)
+void ClipboardImpl::HasDataType(
+    const std::function<void(bool hasData)>& callback, const std::vector<std::string>& mimeTypes)
 {
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
     bool hasData = false;
     CHECK_NULL_VOID(taskExecutor_);
     taskExecutor_->PostSyncTask(
-        [&hasData, mimeType]() {
-            hasData = OHOS::MiscServices::PasteboardClient::GetInstance()->HasDataType(mimeType);
+        [&hasData, mimeTypes]() {
+            for (auto mimeType = mimeTypes.begin(); mimeType != mimeTypes.end(); ++mimeType) {
+                hasData = OHOS::MiscServices::PasteboardClient::GetInstance()->HasDataType(*mimeType);
+                if (hasData) {
+                    break;
+                }
+            }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardHasDataType");
     callback(hasData);

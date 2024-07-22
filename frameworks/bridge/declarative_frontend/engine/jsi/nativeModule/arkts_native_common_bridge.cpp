@@ -1990,7 +1990,7 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
     if (ArkTSUtils::ParseJsInteger(vm, styleArg, shadowStyle)) {
         ArkUIInt32orFloat32 shadows[] = { {.i32 = shadowStyle} };
         GetArkUINodeModifiers()->getCommonModifier()->setBackShadow(nativeNode, shadows,
-            (sizeof(shadows) / sizeof(shadows[NUM_0])), NUM_0);
+            (sizeof(shadows) / sizeof(shadows[NUM_0])));
         return panda::JSValueRef::Undefined(vm);
     }
     ArkUIInt32orFloat32 shadows[] = { { 0.0 }, { .i32 = 0  }, { 0.0 }, { 0.0 },
@@ -2021,7 +2021,7 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
     }
     shadows[NUM_6].i32 = fillArg->IsBoolean() ? fillArg->BooleaValue(vm) : false;
     GetArkUINodeModifiers()->getCommonModifier()->setBackShadow(nativeNode, shadows,
-        (sizeof(shadows) / sizeof(shadows[NUM_0])), NUM_0);
+        (sizeof(shadows) / sizeof(shadows[NUM_0])));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -5774,6 +5774,8 @@ Local<panda::ObjectRef> CommonBridge::CreateGestureEventInfo(
     }
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
         panda::NumberRef::New(vm, static_cast<int32_t>(info->GetSourceTool())));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "deviceId"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info->GetDeviceId())));
 
     auto fingerArr = panda::ArrayRef::New(vm);
     const std::list<FingerInfo>& fingerList = info->GetFingerList();
@@ -6139,7 +6141,7 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
     double density = PipelineBase::GetCurrentDensity();
     const char* keys[] = { "repeat", "offsetX", "offsetY", "scale", "angle", "speed", "timestamp", "pinchCenterX",
         "pinchCenterY", "source", "pressure", "sourceTool", "velocityX", "velocityY", "velocity",
-        "getModifierKeyState" };
+        "getModifierKeyState", "deviceId" };
     Local<JSValueRef> values[] = { panda::BooleanRef::New(vm, info.GetRepeat()),
         panda::NumberRef::New(vm, info.GetOffsetX() / density), panda::NumberRef::New(vm, info.GetOffsetY() / density),
         panda::NumberRef::New(vm, info.GetScale()), panda::NumberRef::New(vm, info.GetAngle()),
@@ -6153,7 +6155,8 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
         panda::NumberRef::New(vm, info.GetVelocity().GetVelocityX() / density),
         panda::NumberRef::New(vm, info.GetVelocity().GetVelocityY() / density),
         panda::NumberRef::New(vm, info.GetVelocity().GetVelocityValue() / density),
-        panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState) };
+        panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
+        panda::NumberRef::New(vm, info.GetDeviceId()) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))));
@@ -6623,12 +6626,14 @@ ArkUINativeModuleValue CommonBridge::SetOnHover(ArkUIRuntimeCallInfo* runtimeCal
             "timestamp",
             "source",
             "target",
+            "deviceId",
         };
         Local<JSValueRef> values[] = { panda::FunctionRef::New(vm, Framework::JsStopPropagation),
             panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
             panda::NumberRef::New(vm, static_cast<double>(hoverInfo.GetTimeStamp().time_since_epoch().count())),
             panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetSourceDevice())),
-            FrameNodeBridge::CreateEventTargetObject(vm, hoverInfo) };
+            FrameNodeBridge::CreateEventTargetObject(vm, hoverInfo),
+            panda::NumberRef::New(vm, hoverInfo.GetDeviceId()) };
         auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         obj->SetNativePointerFieldCount(vm, 1);
         obj->SetNativePointerField(vm, 0, static_cast<void*>(&hoverInfo));

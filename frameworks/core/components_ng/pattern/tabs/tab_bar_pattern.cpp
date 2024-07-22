@@ -1097,12 +1097,12 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
     CHECK_NULL_VOID(tabsNode);
     auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabsPattern);
+    UpdateAnimationDuration();
+    auto duration = GetAnimationDuration().value_or(0);
     if (tabsPattern->GetIsCustomAnimation()) {
         OnCustomContentTransition(indicator_, index);
     } else {
-        UpdateAnimationDuration();
-        if (GetAnimationDuration().has_value() && Positive(GetAnimationDuration().value())
-            && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
+        if (duration > 0 && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
             tabContentWillChangeFlag_ = true;
             swiperController_->SwipeTo(index);
@@ -1111,12 +1111,20 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
             swiperController_->SwipeToWithoutAnimation(index);
         }
     }
+
+    changeByClick_ = true;
+    if (duration > 0 && CanScroll()) {
+        targetIndex_ = index;
+    } else {
+        jumpIndex_ = index;
+    }
 }
 
 void TabBarPattern::HandleBottomTabBarChange(int32_t index)
 {
     AnimationUtils::CloseImplicitAnimation();
     auto preIndex = GetImageColorOnIndex().value_or(indicator_);
+    SetImageColorOnIndex(index);
     UpdateImageColor(index);
     UpdateSymbolStats(index, preIndex);
     if (preIndex < 0 || preIndex >= static_cast<int32_t>(tabBarStyles_.size()) ||
@@ -1222,6 +1230,7 @@ void TabBarPattern::GetBottomTabBarImageSizeAndOffset(const std::vector<int32_t>
     }
     auto selectedMaskNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(maskPosition + maskIndex));
     CHECK_NULL_VOID(selectedMaskNode);
+    selectedMaskNode->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::LTR);
     if (maskIndex == 0) {
         originalSelectedMaskOffset = imageOffset;
     } else {
@@ -1457,13 +1466,13 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
         return;
     }
     changeByClick_ = true;
+    UpdateAnimationDuration();
+    auto duration = GetAnimationDuration().value_or(0);
 
     if (tabsPattern->GetIsCustomAnimation()) {
         OnCustomContentTransition(indicator, index);
     } else {
-        UpdateAnimationDuration();
-        if (GetAnimationDuration().has_value() && Positive(GetAnimationDuration().value())
-            && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
+        if (duration> 0 && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
             tabContentWillChangeFlag_ = true;
             swiperController_->SwipeTo(index);
@@ -1471,8 +1480,10 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
             swiperController_->SwipeToWithoutAnimation(index);
         }
     }
-    if (CanScroll()) {
+    if (duration > 0 && CanScroll()) {
         targetIndex_ = index;
+    } else if (duration <= 0) {
+        jumpIndex_ = index;
     } else {
         TriggerTranslateAnimation(indicator, index);
     }
@@ -1663,15 +1674,14 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
         tabBarPattern->UpdateIndicator(index);
         tabBarPattern->UpdateTextColorAndFontWeight(index);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
-            if (tabBarPattern->GetTabBarStyle() == TabBarStyle::SUBTABBATSTYLE &&
-                tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
-                if (!tabBarPattern->GetChangeByClick() && tabBarPattern->CanScroll()) {
-                    tabBarPattern->StopTranslateAnimation();
-                    tabBarPattern->targetIndex_ = index;
-                    tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-                } else {
-                    tabBarPattern->SetChangeByClick(false);
-                }
+            tabBarPattern->UpdateAnimationDuration();
+            auto duration = tabBarPattern->GetAnimationDuration().value_or(0);
+            if (tabBarPattern->GetChangeByClick()) {
+                tabBarPattern->SetChangeByClick(false);
+            } else if (duration > 0 && tabBarPattern->CanScroll()) {
+                tabBarPattern->StopTranslateAnimation();
+                tabBarPattern->targetIndex_ = index;
+                tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
             } else {
                 tabBarPattern->StopTranslateAnimation();
                 tabBarPattern->jumpIndex_ = index;
@@ -2099,7 +2109,10 @@ void TabBarPattern::TriggerTranslateAnimation(int32_t currentIndex, int32_t targ
         PlayTabBarTranslateAnimation(option, targetOffset);
     }
 
-    if (!changeByClick_) {
+    if (!changeByClick_ ||
+        std::count(tabBarStyles_.begin(), tabBarStyles_.end(), TabBarStyle::SUBTABBATSTYLE) !=
+            static_cast<int32_t>(tabBarStyles_.size()) ||
+        layoutProperty->GetAxisValue(Axis::HORIZONTAL) != Axis::HORIZONTAL) {
         return;
     }
     PlayIndicatorTranslateAnimation(option, originalPaintRect, targetPaintRect, targetOffset);

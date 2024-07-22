@@ -79,6 +79,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     TouchEventInfo event("touchEvent");
     event.SetTimeStamp(lastPoint.time);
     event.SetPointerEvent(lastPoint.pointerEvent);
+    event.SetDeviceId(lastPoint.deviceId);
     TouchLocationInfo changedInfo("onTouch", lastPoint.originalId);
     PointF lastLocalPoint(lastPoint.x, lastPoint.y);
     NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,

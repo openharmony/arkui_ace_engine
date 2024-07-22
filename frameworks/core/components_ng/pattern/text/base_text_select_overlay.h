@@ -152,9 +152,9 @@ public:
     virtual RectF GetVisibleContentRect();
     virtual bool CheckHandleVisible(const RectF& paintRect) = 0;
 
-    virtual std::string GetPasteMimeType()
+    virtual std::vector<std::string> GetPasteMimeTypes()
     {
-        return "";
+        return std::vector<std::string>();
     }
 
     virtual void OnResetTextSelection() {}
@@ -188,7 +188,7 @@ public:
         const OffsetF& rightTop, const OffsetF& leftTop);
 
     void OnSelectionMenuOptionsUpdate(
-        const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
+        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
 
     float GetHandleDiameter();
     VectorF GetHostScale();
@@ -210,7 +210,7 @@ public:
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info) override;
     bool IsTouchAtHandle(const TouchEventInfo& info);
     bool IsClickAtHandle(const GestureEvent& info);
-    bool HasThreeDimensionTransform();
+    bool HasUnsupportedTransform();
     bool CheckSwitchToMode(HandleLevelMode mode) override;
 
     void OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo)

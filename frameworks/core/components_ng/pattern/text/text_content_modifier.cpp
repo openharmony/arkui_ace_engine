@@ -111,8 +111,8 @@ void TextContentModifier::SetDefaultAnimatablePropertyValue(const TextStyle& tex
 
 void TextContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 {
-    float fontSizeValue = TextLayoutadapter::TextConvertToPx(textStyle.GetFontSize(),
-        { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+    float fontSizeValue = textStyle.GetFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     fontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
     AttachProperty(fontSizeFloat_);
 }
@@ -122,8 +122,8 @@ void TextContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
     float fontSizeValue = textStyle.GetFontSize().Value();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
-        fontSizeValue = TextLayoutadapter::TextConvertToPx(textStyle.GetAdaptMinFontSize(),
-            { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+        fontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     }
 
     adaptMinFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
@@ -135,8 +135,8 @@ void TextContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
     float fontSizeValue = textStyle.GetFontSize().Value();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
-        fontSizeValue = TextLayoutadapter::TextConvertToPx(textStyle.GetAdaptMaxFontSize(),
-            { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+        fontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     }
 
     adaptMaxFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
@@ -205,8 +205,8 @@ void TextContentModifier::SetDefaultBaselineOffset(const TextStyle& textStyle)
     float baselineOffset = textStyle.GetBaselineOffset().Value();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
-        baselineOffset = TextLayoutadapter::TextConvertToPx(textStyle.GetBaselineOffset(),
-            { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+        baselineOffset = textStyle.GetBaselineOffset().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     }
 
     baselineOffsetFloat_ = MakeRefPtr<AnimatablePropertyFloat>(baselineOffset);
@@ -755,8 +755,7 @@ void TextContentModifier::SetFontFamilies(const std::vector<std::string>& value)
 
 void TextContentModifier::SetFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    auto fontSizeValue = TextLayoutadapter::TextConvertToPx(
-        value, { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+    auto fontSizeValue = value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     fontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(fontSizeFloat_);
     fontSizeFloat_->Set(fontSizeValue);
@@ -764,8 +763,7 @@ void TextContentModifier::SetFontSize(const Dimension& value, TextStyle& textSty
 
 void TextContentModifier::SetAdaptMinFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    auto fontSizeValue = TextLayoutadapter::TextConvertToPx(
-        value, { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+    auto fontSizeValue = value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     adaptMinFontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(adaptMinFontSizeFloat_);
     adaptMinFontSizeFloat_->Set(fontSizeValue);
@@ -773,8 +771,7 @@ void TextContentModifier::SetAdaptMinFontSize(const Dimension& value, TextStyle&
 
 void TextContentModifier::SetAdaptMaxFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    auto fontSizeValue = TextLayoutadapter::TextConvertToPx(
-        value, { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+    auto fontSizeValue = value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     adaptMaxFontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(adaptMaxFontSizeFloat_);
     adaptMaxFontSizeFloat_->Set(fontSizeValue);
@@ -927,9 +924,7 @@ bool TextContentModifier::SetTextRace(const MarqueeOption& option)
         auto fadeoutWidth = theme->GetFadeoutWidth();
         auto textStyle = textPattern->GetTextStyle();
         marqueeGradientPercent_ =
-            TextLayoutadapter::TextConvertToPx(
-                fadeoutWidth, { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() }) /
-            contentWidth;
+            fadeoutWidth.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale()) / contentWidth;
     }
 
     return true;

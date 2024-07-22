@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/adapter/txt_paragraph.h"
 
+#include "base/log/ace_performance_monitor.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "base/geometry/dimension.h"
@@ -175,6 +176,7 @@ int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
 
 void TxtParagraph::Build()
 {
+    OTHER_DURATION();
     ACE_TEXT_SCOPED_TRACE("TxtParagraph::Build");
     CHECK_NULL_VOID(!hasExternalParagraph_ && builder_);
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -205,6 +207,7 @@ void TxtParagraph::Reset()
 
 void TxtParagraph::Layout(float width)
 {
+    OTHER_DURATION();
     ACE_TEXT_SCOPED_TRACE("TxtParagraph::Layout");
     CHECK_NULL_VOID(!hasExternalParagraph_ && paragraph_);
     paragraph_->Layout(width);
@@ -512,7 +515,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
     // when text_ ends with a \n, return the top position of the next line.
     auto preIsPlaceholder = CalCulateAndCheckPreIsPlaceholder(extent - 1, extent);
     prevChar = text_[std::max(0, extent - 1)];
-    if (prevChar == NEWLINE_CODE && !text_[extent] && !preIsPlaceholder) {
+    if (prevChar == NEWLINE_CODE && !text_[static_cast<size_t>(extent)] && !preIsPlaceholder) {
         // Return the start of next line.
         result.offset.SetX(MakeEmptyOffsetX());
 #ifndef USE_GRAPHIC_TEXT_GINE

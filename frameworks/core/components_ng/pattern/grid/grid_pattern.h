@@ -169,7 +169,8 @@ public:
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const;
 
-    void ScrollPage(bool reverse, bool smooth = false) override;
+    void ScrollPage(bool reverse, bool smooth = false,
+        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
 
     bool UpdateStartIndex(int32_t index);
 
@@ -279,7 +280,6 @@ private:
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
-    void SetAccessibilityAction();
 
     void ProcessEvent(bool indexChanged, float finalOffset);
     void MarkDirtyNodeSelf();

@@ -850,8 +850,8 @@ HWTEST_F(ScrollTestNg, OnModifyDone001, TestSize.Level1)
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     ASSERT_NE(pattern_->GetScrollableEvent(), nullptr);
-    ASSERT_NE(accessibilityProperty_->actionScrollForwardImpl_, nullptr);
-    ASSERT_NE(accessibilityProperty_->actionScrollBackwardImpl_, nullptr);
+    ASSERT_NE(accessibilityProperty_->actionScrollForwardWithParamImpl_, nullptr);
+    ASSERT_NE(accessibilityProperty_->actionScrollBackwardWithParamImpl_, nullptr);
     EXPECT_EQ(pattern_->GetAxis(), Axis::VERTICAL);
 
     /**
@@ -884,10 +884,10 @@ HWTEST_F(ScrollTestNg, Pattern002, TestSize.Level1)
     CreateScroll();
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    accessibilityProperty_->actionScrollForwardImpl_();
+    accessibilityProperty_->actionScrollForwardWithParamImpl_(AccessibilityScrollType::SCROLL_FULL);
     ASSERT_NE(pattern_->springAnimation_, nullptr);
     pattern_->springAnimation_ = nullptr;
-    accessibilityProperty_->actionScrollBackwardImpl_();
+    accessibilityProperty_->actionScrollBackwardWithParamImpl_(AccessibilityScrollType::SCROLL_FULL);
     ASSERT_NE(pattern_->springAnimation_, nullptr);
 
     /**
@@ -896,9 +896,9 @@ HWTEST_F(ScrollTestNg, Pattern002, TestSize.Level1)
      */
     CreateScroll();
     CreateDone(frameNode_);
-    accessibilityProperty_->actionScrollForwardImpl_();
+    accessibilityProperty_->actionScrollForwardWithParamImpl_(AccessibilityScrollType::SCROLL_FULL);
     EXPECT_EQ(pattern_->animator_, nullptr);
-    accessibilityProperty_->actionScrollBackwardImpl_();
+    accessibilityProperty_->actionScrollBackwardWithParamImpl_(AccessibilityScrollType::SCROLL_FULL);
     EXPECT_EQ(pattern_->animator_, nullptr);
 
     /**
@@ -910,9 +910,9 @@ HWTEST_F(ScrollTestNg, Pattern002, TestSize.Level1)
     model.SetAxis(Axis::NONE);
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    accessibilityProperty_->actionScrollForwardImpl_();
+    accessibilityProperty_->actionScrollForwardWithParamImpl_(AccessibilityScrollType::SCROLL_FULL);
     EXPECT_EQ(pattern_->animator_, nullptr);
-    accessibilityProperty_->actionScrollBackwardImpl_();
+    accessibilityProperty_->actionScrollBackwardWithParamImpl_(AccessibilityScrollType::SCROLL_FULL);
     EXPECT_EQ(pattern_->animator_, nullptr);
 }
 

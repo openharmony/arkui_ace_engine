@@ -1357,12 +1357,12 @@ bool UINode::SetParentLayoutConstraint(const SizeF& size) const
 
 void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
 {
+    if (nodeStatus_ == nodeStatus) {
+        return;
+    }
     nodeStatus_ = nodeStatus;
+    OnAttachToBuilderNode(nodeStatus_);
     for (const auto& child : children_) {
-        if (child->GetNodeStatus() == nodeStatus_) {
-            continue;
-        }
-        child->OnAttachToBuilderNode(nodeStatus_);
         child->UpdateNodeStatus(nodeStatus_);
     }
 }
@@ -1383,7 +1383,7 @@ void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
     std::list<int32_t>& removedElmtId, bool isEntry)
 {
     for (auto const& child : children) {
-        if (!child->IsDisappearing()) {
+        if (!child->IsDisappearing() && child->GetTag() != V2::RECYCLE_VIEW_ETS_TAG) {
             CollectRemovedChild(child, removedElmtId);
         }
     }

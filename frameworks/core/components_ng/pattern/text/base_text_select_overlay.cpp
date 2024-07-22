@@ -42,9 +42,9 @@ void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_VOID(textBase);
     auto clipboard = textBase->GetClipboard();
     if (clipboard) {
-        auto mimeType = GetPasteMimeType();
-        if (!mimeType.empty()) {
-            clipboard->HasDataType(checkClipboard, mimeType);
+        auto mimeTypes = GetPasteMimeTypes();
+        if (!mimeTypes.empty()) {
+            clipboard->HasDataType(checkClipboard, mimeTypes);
             return;
         }
         clipboard->HasData(checkClipboard);
@@ -652,6 +652,9 @@ float BaseTextSelectOverlay::GetHandleDiameter()
 
 void BaseTextSelectOverlay::SwitchToOverlayMode()
 {
+    if (HasUnsupportedTransform()) {
+        return;
+    }
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     handleLevelMode_ = HandleLevelMode::OVERLAY;
@@ -679,8 +682,15 @@ VectorF BaseTextSelectOverlay::GetHostScale()
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, unitScale);
         auto scale = renderContext->GetTransformScaleValue(unitScale);
-        scaleX *= scale.x;
-        scaleY *= scale.y;
+        scaleX *= std::abs(scale.x);
+        scaleY *= std::abs(scale.y);
+        auto transformMatrix = renderContext->GetTransformMatrix();
+        if (transformMatrix.has_value()) {
+            DecomposedTransform transform;
+            TransformUtil::DecomposeTransform(transform, transformMatrix.value());
+            scaleX *= std::abs(transform.scale[0]);
+            scaleY *= std::abs(transform.scale[1]);
+        }
         host = host->GetAncestorNodeOfFrame(true);
     }
     return VectorF(1.0f / scaleX, 1.0f / scaleY);
@@ -778,7 +788,7 @@ bool BaseTextSelectOverlay::CheckHandleCanPaintInHost(const RectF& firstRect, co
 
 void BaseTextSelectOverlay::CalcHandleLevelMode(const RectF& firstLocalPaintRect, const RectF& secondLocalPaintRect)
 {
-    if (CheckHandleCanPaintInHost(firstLocalPaintRect, secondLocalPaintRect) || HasThreeDimensionTransform()) {
+    if (CheckHandleCanPaintInHost(firstLocalPaintRect, secondLocalPaintRect) || HasUnsupportedTransform()) {
         SetHandleLevelMode(HandleLevelMode::EMBED);
     } else {
         SetHandleLevelMode(HandleLevelMode::OVERLAY);
@@ -796,7 +806,7 @@ void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
     if (IsAncestorNodeGeometryChange(flag)) {
         isSwitchToEmbed = isSwitchToEmbed || CheckAndUpdateHostGlobalPaintRect();
     }
-    isSwitchToEmbed = isSwitchToEmbed && (!IsAncestorNodeEndScroll(flag) || HasThreeDimensionTransform());
+    isSwitchToEmbed = isSwitchToEmbed && (!IsAncestorNodeEndScroll(flag) || HasUnsupportedTransform());
     if (isStartScroll || isStartAnimation || isTransformChanged || isStartTransition) {
         HideMenu(true);
     }
@@ -873,27 +883,36 @@ bool BaseTextSelectOverlay::IsClickAtHandle(const GestureEvent& info)
         PointF(localOffset.GetX(), localOffset.GetY()), PointF(globalOffset.GetX(), globalOffset.GetY()));
 }
 
-bool BaseTextSelectOverlay::HasThreeDimensionTransform()
+bool BaseTextSelectOverlay::HasUnsupportedTransform()
 {
     auto pattern = GetPattern<Pattern>();
     CHECK_NULL_RETURN(pattern, false);
     auto parent = pattern->GetHost();
     CHECK_NULL_RETURN(parent, false);
+    const int32_t zTranslateIndex = 2;
     while (parent) {
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         if (parent->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
             return false;
         }
-        auto hasTransformMatrix = renderContext->HasTransformMatrix();
         auto rotateVector = renderContext->GetTransformRotate();
-        auto hasRotate = false;
-        if (rotateVector.has_value()) {
-            hasRotate = !NearEqual(rotateVector->x, 0) || !NearEqual(rotateVector->y, 0) ||
-                        !NearEqual(rotateVector->v, 0);
+        if (rotateVector.has_value() && !NearZero(rotateVector->w) &&
+            !(NearZero(rotateVector->x) && NearZero(rotateVector->y))) {
+            return true;
         }
-        if (hasTransformMatrix || hasRotate) {
-            return false;
+        auto transformMatrix = renderContext->GetTransformMatrix();
+        if (transformMatrix) {
+            DecomposedTransform transform;
+            TransformUtil::DecomposeTransform(transform, transformMatrix.value());
+            Quaternion identity(0.0f, 0.0f, 0.0f, 1.0f);
+            if (transform.quaternion != identity || !NearZero(transform.translate[zTranslateIndex])) {
+                return true;
+            }
+        }
+        auto translate = renderContext->GetTransformTranslate();
+        if (translate && !NearZero(translate->z.Value())) {
+            return true;
         }
         parent = parent->GetAncestorNodeOfFrame(true);
     }
@@ -902,7 +921,7 @@ bool BaseTextSelectOverlay::HasThreeDimensionTransform()
 
 bool BaseTextSelectOverlay::CheckSwitchToMode(HandleLevelMode mode)
 {
-    if (mode == HandleLevelMode::OVERLAY && HasThreeDimensionTransform()) {
+    if (mode == HandleLevelMode::OVERLAY && HasUnsupportedTransform()) {
         return false;
     }
     return true;

@@ -615,6 +615,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSSymbol::JSBind(globalObj);
     JSSymbolSpan::JSBind(globalObj);
     JSContainerSpan::JSBind(globalObj);
+    JsDragFunction::JSBind(globalObj);
 #ifdef USE_COMPONENTS_LIB
     JSBindLibs("arkui.qrcode", "QRCode");
     JSBindLibs("arkui.relativeContainer", "RelativeContainer");
@@ -628,7 +629,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 #endif
     // add missing binds to ng build
 #ifndef CROSS_PLATFORM
-    JsDragFunction::JSBind(globalObj);
     JSCalendarPicker::JSBind(globalObj);
     JSContextMenu::JSBind(globalObj);
 #ifdef EFFECT_COMPONENT_SUPPORTED

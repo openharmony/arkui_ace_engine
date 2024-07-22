@@ -130,38 +130,45 @@ void MenuWrapperPattern::HandleInteraction(const TouchEventInfo& info)
     RefPtr<UINode> innerMenuNode = nullptr;
     auto menuZone = GetMenuZone(innerMenuNode);
     CHECK_NULL_VOID(innerMenuNode);
+
+    ClearLastMenuItem();
     // get menuNode's touch region
     if (menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
         currentTouchItem_ = FindTouchedMenuItem(innerMenuNode, position);
-        auto lastTouchItem = GetLastTouchItem();
-        if (currentTouchItem_ && currentTouchItem_ != lastTouchItem_) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto theme = pipeline->GetTheme<SelectTheme>();
-            CHECK_NULL_VOID(theme);
-            auto curMenuItemPattern = currentTouchItem_->GetPattern<MenuItemPattern>();
-            CHECK_NULL_VOID(curMenuItemPattern);
-            if (!curMenuItemPattern->IsDisabled() && !curMenuItemPattern->IsStackSubmenuHeader()) {
-                curMenuItemPattern->SetBgBlendColor(
-                    curMenuItemPattern->GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
-                curMenuItemPattern->PlayBgColorAnimation(false);
-            }
-            if (lastTouchItem_) {
-                auto lastMenuItemPattern = lastTouchItem_->GetPattern<MenuItemPattern>();
-                CHECK_NULL_VOID(lastMenuItemPattern);
-                lastMenuItemPattern->SetBgBlendColor(Color::TRANSPARENT);
-                lastMenuItemPattern->PlayBgColorAnimation(false);
-            }
-            lastTouchItem_ = currentTouchItem_;
-        }
-    } else if (lastTouchItem_) {
+        ChangeCurMenuItemBgColor();
+        lastTouchItem_ = currentTouchItem_;
+    }
+    innerMenuNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void MenuWrapperPattern::ChangeCurMenuItemBgColor()
+{
+    if (!currentTouchItem_) {
+        return;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto curMenuItemPattern = currentTouchItem_->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(curMenuItemPattern);
+    if (curMenuItemPattern->IsDisabled() || curMenuItemPattern->IsStackSubmenuHeader()) {
+        return;
+    }
+    curMenuItemPattern->SetBgBlendColor(
+        curMenuItemPattern->GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
+    curMenuItemPattern->PlayBgColorAnimation(false);
+}
+
+void MenuWrapperPattern::ClearLastMenuItem()
+{
+    if (lastTouchItem_) {
         auto lastMenuItemPattern = lastTouchItem_->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(lastMenuItemPattern);
         lastMenuItemPattern->SetBgBlendColor(Color::TRANSPARENT);
         lastMenuItemPattern->PlayBgColorAnimation(false);
         lastTouchItem_ = nullptr;
     }
-    innerMenuNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void MenuWrapperPattern::OnAttachToFrameNode()

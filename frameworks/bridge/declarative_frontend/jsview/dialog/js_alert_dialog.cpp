@@ -466,7 +466,6 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         }
 
         auto backgroundBlurStyle = obj->GetProperty("backgroundBlurStyle");
-        BlurStyleOption styleOption;
         if (backgroundBlurStyle->IsNumber()) {
             auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
             if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&

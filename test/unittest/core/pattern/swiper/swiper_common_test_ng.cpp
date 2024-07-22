@@ -819,6 +819,60 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnKeyEvent005
+ * @tc.desc: OnKeyEvent return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, OnKeyEvent005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set axis default
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+
+    /**
+     * @tc.steps: step2. Call OnKeyEvent KEY_DPAD_LEFT
+     * @tc.expected: false
+     */
+    EXPECT_FALSE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::LONG_PRESS)));
+
+    /**
+     * @tc.steps: step3. Call OnKeyEvent KEY_DPAD_RIGHT
+     * @tc.expected: false
+     */
+    EXPECT_FALSE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::LONG_PRESS)));
+
+     /**
+     * @tc.steps: step4. Call OnKeyEvent KEY_DPAD_UP
+     * @tc.expected: false
+     */
+    EXPECT_FALSE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_UP, KeyAction::DOWN)));
+
+    /**
+     * @tc.steps: step5. Call OnKeyEvent KEY_DPAD_DOWN
+     * @tc.expected: false
+     */
+    EXPECT_FALSE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN)));
+
+    /**
+     * @tc.steps: step6. set axis vertical
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetDirection(Axis::VERTICAL); });
+
+    /**
+     * @tc.steps: step7. Call OnKeyEvent KEY_DPAD_LEFT
+     * @tc.expected: false
+     */
+    EXPECT_FALSE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN)));
+
+    /**
+     * @tc.steps: step8. Call OnKeyEvent KEY_DPAD_RIGHT
+     * @tc.expected: false
+     */
+    EXPECT_FALSE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN)));
+}
+
+/**
  * @tc.name: MarginIgnoreBlankTest001
  * @tc.desc: Test Swiper PrevMargin IgnoreBlank
  * @tc.type: FUNC

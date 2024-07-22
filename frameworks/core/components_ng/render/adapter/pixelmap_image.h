@@ -52,6 +52,8 @@ public:
 
     bool DrawImageNine(
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
+    bool DrawImageLattice(
+        RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
 
     static RefPtr<CanvasImage> QueryFromCache(const std::string& key);
 

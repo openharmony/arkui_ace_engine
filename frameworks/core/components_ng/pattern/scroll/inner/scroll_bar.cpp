@@ -407,8 +407,7 @@ void ScrollBar::SetMouseEvent()
             } else {
                 scrollBar->isMousePressed_ = false;
             }
-        } else if (!scrollBar->IsPressed()) {
-            scrollBar->ScheduleDisappearDelayTask();
+            scrollBar->isShowScrollBar_ = true;
         }
         if (inHoverRegion && !scrollBar->IsHover()) {
             if (!scrollBar->IsPressed()) {
@@ -421,6 +420,10 @@ void ScrollBar::SetMouseEvent()
             if (!scrollBar->IsPressed()) {
                 scrollBar->PlayScrollBarShrinkAnimation();
             }
+        }
+        if (!inBarRegion && !inHoverRegion && !scrollBar->IsPressed() && scrollBar->isShowScrollBar_) {
+            scrollBar->ScheduleDisappearDelayTask();
+            scrollBar->isShowScrollBar_ = false;
         }
         scrollBar->locationInfo_ = info.GetLocalLocation();
     });
@@ -880,5 +883,117 @@ void ScrollBar::DumpAdvanceInfo()
         DumpLog::GetInstance().AddDesc(info.ToString());
     }
     DumpLog::GetInstance().AddDesc("==========================innerScrollBarLayoutInfos==========================");
+}
+
+Color ScrollBar::GetForegroundColor() const
+{
+    return IsPressed() ? foregroundColor_.BlendColor(PRESSED_BLEND_COLOR) : foregroundColor_;
+}
+
+void ScrollBar::SetHoverWidth(const RefPtr<ScrollBarTheme>& theme)
+{
+    hoverWidth_ = theme->GetActiveWidth() + theme->GetScrollBarMargin() * 2;
+}
+
+void ScrollBar::SetNormalWidth(const Dimension& normalWidth)
+{
+    if (normalWidth_ != normalWidth) {
+        normalWidthUpdate_ = true;
+        normalWidth_ = normalWidth;
+        CalcReservedHeight();
+        MarkNeedRender();
+    }
+}
+
+void ScrollBar::SetScrollable(bool isScrollable)
+{
+    CHECK_NULL_VOID(isScrollable_ != isScrollable);
+    isScrollable_ = isScrollable;
+}
+
+void ScrollBar::SetPositionMode(PositionMode positionMode)
+{
+    if (positionMode_ != positionMode) {
+        positionModeUpdate_ = true;
+        positionMode_ = positionMode;
+        if (panRecognizer_) {
+            PanDirection panDirection;
+            panDirection.type =
+                positionMode_ == PositionMode::BOTTOM ? PanDirection::HORIZONTAL : PanDirection::VERTICAL;
+            panRecognizer_->SetDirection(panDirection);
+        }
+    }
+}
+
+void ScrollBar::SetDisplayMode(DisplayMode displayMode)
+{
+    CHECK_NULL_VOID(displayMode_ != displayMode);
+    displayMode_ = displayMode;
+}
+
+void ScrollBar::PlayScrollBarDisappearAnimation()
+{
+    if (displayMode_ == DisplayMode::AUTO && isScrollable_ && !isHover_ && !isPressed_) {
+        opacityAnimationType_ = OpacityAnimationType::DISAPPEAR;
+        MarkNeedRender();
+    }
+}
+
+void ScrollBar::PlayScrollBarAppearAnimation()
+{
+    if (displayMode_ == DisplayMode::AUTO && isScrollable_) {
+        disappearDelayTask_.Cancel();
+        opacityAnimationType_ = OpacityAnimationType::APPEAR;
+        MarkNeedRender();
+    }
+}
+
+void ScrollBar::PlayScrollBarGrowAnimation()
+{
+    PlayScrollBarAppearAnimation();
+    normalWidth_ = activeWidth_;
+    FlushBarWidth();
+    hoverAnimationType_ = HoverAnimationType::GROW;
+    MarkNeedRender();
+}
+
+void ScrollBar::PlayScrollBarShrinkAnimation()
+{
+    normalWidth_ = inactiveWidth_;
+    FlushBarWidth();
+    hoverAnimationType_ = HoverAnimationType::SHRINK;
+    MarkNeedRender();
+}
+
+void ScrollBar::PlayScrollBarAdaptAnimation()
+{
+    needAdaptAnimation_ = true;
+    MarkNeedRender();
+}
+
+void ScrollBar::MarkNeedRender()
+{
+    if (markNeedRenderFunc_) {
+        markNeedRenderFunc_();
+    }
+}
+
+float ScrollBar::GetMainOffset(const Offset& offset) const
+{
+    return positionMode_ == PositionMode::BOTTOM ? offset.GetX() : offset.GetY();
+}
+
+void ScrollBar::SetReverse(bool reverse)
+{
+    if (isReverse_ != reverse) {
+        isReverse_ = reverse;
+        isReverseUpdate_ = true;
+    }
+}
+
+Axis ScrollBar::GetPanDirection() const
+{
+    CHECK_NULL_RETURN(panRecognizer_, Axis::NONE);
+    return panRecognizer_->GetAxisDirection();
 }
 } // namespace OHOS::Ace::NG

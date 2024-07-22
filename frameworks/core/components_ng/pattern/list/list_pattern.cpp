@@ -847,7 +847,7 @@ float ListPattern::GetStartOverScrollOffset(float offset) const
 {
     float startOffset = 0.0f;
     float ChainDelta = chainAnimation_ ? chainAnimation_->GetValuePredict(0, -offset) : 0.f;
-    auto startPos = startMainPos_ + ChainDelta;
+    auto startPos = startMainPos_ + ChainDelta - currentDelta_;
     auto newStartPos = startPos + offset;
     if (startPos > contentStartOffset_ && newStartPos > contentStartOffset_) {
         startOffset = offset;
@@ -865,7 +865,7 @@ float ListPattern::GetEndOverScrollOffset(float offset) const
 {
     float endOffset = 0.0f;
     float ChainDelta = chainAnimation_ ? chainAnimation_->GetValuePredict(endIndex_, -offset) : 0.f;
-    auto endPos = endMainPos_ + ChainDelta;
+    auto endPos = endMainPos_ + ChainDelta - currentDelta_;
     auto contentEndPos = contentMainSize_ - contentEndOffset_;
     if (GreatNotEqual(contentEndPos, endMainPos_ - startMainPos_)) {
         endPos = startMainPos_ + contentEndPos;
@@ -1671,9 +1671,12 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
     return true;
 }
 
-void ListPattern::ScrollPage(bool reverse, bool smooth)
+void ListPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
     float distance = reverse ? contentMainSize_ : -contentMainSize_;
+    if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
+        distance = distance / 2.f;
+    }
     if (smooth) {
         float position = -GetTotalOffset() + distance;
         AnimateTo(-position, -1, nullptr, true, false, false);
@@ -2194,31 +2197,6 @@ void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->UpdateClipEdge(true);
     ScrollablePattern::FromJson(json);
-}
-
-void ListPattern::SetAccessibilityAction()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
-        const auto& pattern = weakPtr.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (!pattern->IsScrollable()) {
-            return;
-        }
-        pattern->ScrollPage(false);
-    });
-
-    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
-        const auto& pattern = weakPtr.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (!pattern->IsScrollable()) {
-            return;
-        }
-        pattern->ScrollPage(true);
-    });
 }
 
 ListItemGroupPara ListPattern::GetListItemGroupParameter(const RefPtr<FrameNode>& node)

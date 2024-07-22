@@ -321,7 +321,8 @@ bool PipelineContext::CheckNeedDisableUpdateBackgroundImage()
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight,
+    const bool supportAvoidance, bool forceChange)
 {}
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
@@ -360,7 +361,7 @@ bool PipelineContext::CheckOverlayFocus()
 
 void PipelineContext::OnDrawCompleted(const std::string& componentId) {}
 
-void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node) {}
+void PipelineContext::SetNeedRenderNode(const WeakPtr<FrameNode>& node) {}
 
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
@@ -698,11 +699,16 @@ void PipelineContext::CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, Axis
 
 void PipelineContext::PreLayout(uint64_t nanoTimestamp, uint32_t frameCount) {}
 
-void PipelineContext::AddFrameNodeChangeListener(const RefPtr<FrameNode>& node) {}
+void PipelineContext::AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node) {}
 
-void PipelineContext::RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node) {}
+void PipelineContext::RemoveFrameNodeChangeListener(int32_t nodeId) {}
 
-void PipelineContext::AddChangedFrameNode(const RefPtr<FrameNode>& node) {}
+bool PipelineContext::AddChangedFrameNode(const WeakPtr<FrameNode>& node)
+{
+    return true;
+}
+
+void PipelineContext::RemoveChangedFrameNode(int32_t nodeId) {}
 
 void PipelineContext::FlushNodeChangeFlag() {}
 
@@ -749,7 +755,8 @@ RefPtr<ImageCache> PipelineBase::GetImageCache() const
 }
 
 void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight,
+    const bool supportAvoidance, bool forceChange)
 {}
 void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)

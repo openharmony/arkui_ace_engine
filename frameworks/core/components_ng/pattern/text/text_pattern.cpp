@@ -64,8 +64,8 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr double DIMENSION_VALUE = 16.0;
-constexpr const char COPY_ACTION[] = "copy";
-constexpr const char SELECT_ACTION[] = "select";
+constexpr const char COPY_ACTION[] = "复制";
+constexpr const char SELECT_ACTION[] = "选择文本";
 constexpr const char SYMBOL_COLOR[] = "BLACK";
 constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
 constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
@@ -853,7 +853,7 @@ bool TextPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSpan)
                 dataDetectorAdapter_->ResponseBestMatchItem(aiSpan);
                 return true;
             }
-            return ShowUIExtensionMenu(aiSpan);
+            return ShowAIEntityMenu(aiSpan);
         }
     }
     return false;
@@ -871,15 +871,14 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
             return;
         }
         pattern->CloseSelectOverlay();
+        pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
         if (action == std::string(COPY_ACTION)) {
-            pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
             pattern->HandleOnCopy();
+            pattern->ResetSelection();
         } else if (action == std::string(SELECT_ACTION)) {
             if (calculateHandleFunc == nullptr) {
-                pattern->SetTextSelection(aiSpan.start, aiSpan.end);
                 pattern->CalculateHandleOffsetAndShowOverlay();
             } else {
-                pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
                 calculateHandleFunc();
             }
             if (showSelectOverlayFunc == nullptr) {
@@ -894,7 +893,7 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
     };
 }
 
-bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
+bool TextPattern::ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
     const ShowSelectOverlayFunc& showSelectOverlayFunc)
 {
     auto host = GetHost();
@@ -922,7 +921,7 @@ bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
         aiRect = textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
     }
 
-    return dataDetectorAdapter_->ShowUIExtensionMenu(aiSpan, aiRect, host, IsSelectableAndCopy());
+    return dataDetectorAdapter_->ShowAIEntityMenu(aiSpan, aiRect, host, IsSelectableAndCopy());
 }
 
 void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
@@ -1068,10 +1067,6 @@ void TextPattern::InitHoverEvent()
 
 void TextPattern::HandleMouseEvent(const MouseInfo& info)
 {
-    if (!IsSelectableAndCopy()) {
-        return;
-    }
-
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
@@ -1162,6 +1157,11 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
 
 void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset)
 {
+    if (!IsSelectableAndCopy()) {
+        isMousePressed_ = false;
+        leftMousePressed_ = false;
+        return;
+    }
     if (blockPress_) {
         dragBoxes_ = GetTextBoxes();
         return;
@@ -1185,6 +1185,9 @@ void TextPattern::HandleMouseRightButton(const MouseInfo& info, const Offset& te
                 isMousePressed_ = false;
                 return;
             }
+        }
+        if (!IsSelectableAndCopy()) {
+            return;
         }
 
         CalculateHandleOffsetAndShowOverlay(true);
@@ -1475,6 +1478,19 @@ void TextPattern::AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& r
 void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
 {
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
+    if (isSpanStringMode_) {
+        std::vector<uint8_t> arr;
+        auto dragSpanString = styledString_->GetSubSpanString(recoverStart_, recoverEnd_ - recoverStart_);
+        dragSpanString->EncodeTlv(arr);
+        UdmfClient::GetInstance()->AddSpanStringRecord(unifiedData, arr);
+    } else {
+        ProcessNormalUdmfData(unifiedData);
+    }
+    event->SetData(unifiedData);
+}
+
+void TextPattern::ProcessNormalUdmfData(const RefPtr<UnifiedData>& unifiedData)
+{
     std::list<ResultObject> finalResult;
     auto type = SelectSpanType::TYPESPAN;
     for (const auto& resultObj : dragResultObjects_) {
@@ -1497,29 +1513,32 @@ void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
         }
         if (result.type == SelectSpanType::TYPEIMAGE) {
             if (result.valuePixelMap) {
-                const uint8_t* pixels = result.valuePixelMap->GetPixels();
-                CHECK_NULL_VOID(pixels);
-                int32_t length = result.valuePixelMap->GetByteCount();
-                std::vector<uint8_t> data(pixels, pixels + length);
-                PixelMapRecordDetails details = { result.valuePixelMap->GetWidth(), result.valuePixelMap->GetHeight(),
-                    result.valuePixelMap->GetPixelFormat(), result.valuePixelMap->GetAlphaType() };
-                UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data, details);
+                pattern->AddPixelMapToUdmfData(result.valuePixelMap, unifiedData);
             } else if (result.valueString.size() > 1) {
                 UdmfClient::GetInstance()->AddImageRecord(unifiedData, result.valueString);
+            } else {
+                // builder span, fill pixelmap data
+                auto builderNode = DynamicCast<FrameNode>(pattern->GetChildByIndex(result.spanPosition.spanIndex));
+                CHECK_NULL_VOID(builderNode);
+                pattern->AddPixelMapToUdmfData(builderNode->GetPixelMap(), unifiedData);
             }
         }
     };
-    if (isSpanStringMode_) {
-        std::vector<uint8_t> arr;
-        auto dragSpanString = styledString_->GetSubSpanString(recoverStart_, recoverEnd_ - recoverStart_);
-        dragSpanString->EncodeTlv(arr);
-        UdmfClient::GetInstance()->AddSpanStringRecord(unifiedData, arr);
-    } else {
-        for (const auto& resultObj : finalResult) {
-            resultProcessor(resultObj);
-        }
+    for (const auto& resultObj : finalResult) {
+        resultProcessor(resultObj);
     }
-    event->SetData(unifiedData);
+}
+
+void TextPattern::AddPixelMapToUdmfData(const RefPtr<PixelMap>& pixelMap, const RefPtr<UnifiedData>& unifiedData)
+{
+    CHECK_NULL_VOID(pixelMap && unifiedData);
+    const uint8_t* pixels = pixelMap->GetPixels();
+    CHECK_NULL_VOID(pixels);
+    int32_t length = pixelMap->GetByteCount();
+    std::vector<uint8_t> data(pixels, pixels + length);
+    PixelMapRecordDetails details = { pixelMap->GetWidth(), pixelMap->GetHeight(),
+        pixelMap->GetPixelFormat(), pixelMap->GetAlphaType() };
+    UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data, details);
 }
 
 void TextPattern::CloseOperate()
@@ -1945,7 +1964,7 @@ SymbolSpanStyle TextPattern::GetSymbolSpanStyleObject(const RefPtr<SpanNode>& no
     }
     symbolSpanStyle.fontWeight = static_cast<int32_t>(node->GetFontWeightValue(FontWeight::NORMAL));
     symbolSpanStyle.renderingStrategy = static_cast<int32_t>(node->GetSymbolRenderingStrategyValue(0));
-    symbolSpanStyle.effectStrategy = node->GetSymbolEffectStrategyValue(0);
+    symbolSpanStyle.effectStrategy = static_cast<int32_t>(node->GetSymbolEffectStrategyValue(0));
     return symbolSpanStyle;
 }
 
@@ -2097,6 +2116,7 @@ void TextPattern::OnModifyDone()
 
         if (textDetectEnable_) {
             auto entityJson = JsonUtil::ParseJsonString(textForDisplay_);
+            TAG_LOGI(AceLogTag::ACE_TEXT, "text content is the json format: %{public}d", entityJson->IsNull());
             if (!entityJson->IsNull() && !entityJson->GetValue("bundleName")->IsNull() &&
                 dataDetectorAdapter_->ParseOriText(entityJson, textForDisplay_)) {
                 textLayoutProperty->UpdateContent(textForDisplay_);
@@ -2167,6 +2187,9 @@ void TextPattern::InitCopyOption()
     }
     if (onClick_ || IsSelectableAndCopy() || CanStartAITask()) {
         InitClickEvent(gestureEventHub);
+        if (CanStartAITask()) {
+            InitMouseEvent();
+        }
     }
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -2714,6 +2737,12 @@ void TextPattern::DumpAdvanceInfo()
 
     DumpLog::GetInstance().AddDesc(
         std::string("BindSelectionMenu: ").append(std::to_string(selectionMenuMap_.empty())));
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto fontScale = pipeline->GetFontScale();
+    auto fontWeightScale = pipeline->GetFontWeightScale();
+    DumpLog::GetInstance().AddDesc(std::string("fontScale: ").append(std::to_string(fontScale)));
+    DumpLog::GetInstance().AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
 }
 
 void TextPattern::DumpInfo()
@@ -2730,21 +2759,23 @@ void TextPattern::DumpInfo()
         std::string("FontSize: ")
             .append((textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(DIMENSION_VALUE, DimensionUnit::FP))
                         .ToString()));
-    dumpLog.AddDesc(std::string("FontWeight: ").append(StringUtils::ToString(textStyle_->GetFontWeight())));
-    dumpLog.AddDesc(std::string("FontStyle: ").append(StringUtils::ToString(textStyle_->GetFontStyle())));
-    dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle_->GetLineHeight().ToString()));
-    dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle_->GetLineSpacing().ToString()));
-    dumpLog.AddDesc(std::string("BaselineOffset: ").append(textStyle_->GetBaselineOffset().ToString()));
-    dumpLog.AddDesc(std::string("TextIndent: ").append(textStyle_->GetTextIndent().ToString()));
-    dumpLog.AddDesc(std::string("LetterSpacing: ").append(textStyle_->GetLetterSpacing().ToString()));
-    dumpLog.AddDesc(std::string("TextOverflow: ").append(StringUtils::ToString(textStyle_->GetTextOverflow())));
-    dumpLog.AddDesc(std::string("TextAlign: ").append(StringUtils::ToString(textStyle_->GetTextAlign())));
-    dumpLog.AddDesc(std::string("WordBreak: ").append(StringUtils::ToString(textStyle_->GetWordBreak())));
-    dumpLog.AddDesc(std::string("TextCase: ").append(StringUtils::ToString(textStyle_->GetTextCase())));
-    dumpLog.AddDesc(std::string("EllipsisMode: ").append(StringUtils::ToString(textStyle_->GetEllipsisMode())));
+    if (textStyle_.has_value()) {
+        dumpLog.AddDesc(std::string("FontWeight: ").append(StringUtils::ToString(textStyle_->GetFontWeight())));
+        dumpLog.AddDesc(std::string("FontStyle: ").append(StringUtils::ToString(textStyle_->GetFontStyle())));
+        dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle_->GetLineHeight().ToString()));
+        dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle_->GetLineSpacing().ToString()));
+        dumpLog.AddDesc(std::string("BaselineOffset: ").append(textStyle_->GetBaselineOffset().ToString()));
+        dumpLog.AddDesc(std::string("TextIndent: ").append(textStyle_->GetTextIndent().ToString()));
+        dumpLog.AddDesc(std::string("LetterSpacing: ").append(textStyle_->GetLetterSpacing().ToString()));
+        dumpLog.AddDesc(std::string("TextOverflow: ").append(StringUtils::ToString(textStyle_->GetTextOverflow())));
+        dumpLog.AddDesc(std::string("TextAlign: ").append(StringUtils::ToString(textStyle_->GetTextAlign())));
+        dumpLog.AddDesc(std::string("WordBreak: ").append(StringUtils::ToString(textStyle_->GetWordBreak())));
+        dumpLog.AddDesc(std::string("TextCase: ").append(StringUtils::ToString(textStyle_->GetTextCase())));
+        dumpLog.AddDesc(std::string("EllipsisMode: ").append(StringUtils::ToString(textStyle_->GetEllipsisMode())));
+        dumpLog.AddDesc(
+            std::string("LineBreakStrategy: ").append(GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy())));
+    }
     dumpLog.AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
-    dumpLog.AddDesc(
-        std::string("LineBreakStrategy: ").append(GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy())));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();

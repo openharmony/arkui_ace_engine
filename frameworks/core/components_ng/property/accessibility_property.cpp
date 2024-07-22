@@ -305,6 +305,10 @@ std::pair<bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<Fram
         }
         HitTestMode hitTestMode = node->GetHitTestMode();
         UpdateSearchStrategyByHitTestMode(hitTestMode, shouldSearchSelf, shouldSearchChildren);
+        if (accessibilityProperty != nullptr && accessibilityProperty->HasAccessibilityVirtualNode() &&
+            accessibilityProperty->GetAccessibilityLevel() != AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
+            shouldSearchChildren = true;
+        }
     } while (0);
     return std::make_pair(shouldSearchSelf, shouldSearchChildren);
 }

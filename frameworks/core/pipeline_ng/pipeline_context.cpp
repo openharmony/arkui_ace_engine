@@ -54,8 +54,8 @@
 #include "core/common/font_manager.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/layout_inspector.h"
-#include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/stylus/stylus_detector_default.h"
+#include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
@@ -108,6 +108,16 @@ constexpr int32_t RESAMPLE_COORD_TIME_THRESHOLD = 20 * 1000 * 1000;
 constexpr int32_t VSYNC_PERIOD_COUNT = 2;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
+
+#define CHECK_THREAD_SAFE(isFormRender, taskExecutor) CheckThreadSafe(isFormRender, taskExecutor, __func__, __LINE__)
+void CheckThreadSafe(
+    bool isFormRender, OHOS::Ace::RefPtr<OHOS::Ace::TaskExecutor>& taskExecutor, const char* func, int line)
+{
+    if (!isFormRender && !taskExecutor->WillRunOnCurrentThread(OHOS::Ace::TaskExecutor::TaskType::UI)) {
+        LOGW("[%{public}s:%{public}d] doesn't run on UI thread!", func, line);
+        OHOS::Ace::LogBacktrace();
+    }
+}
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -203,6 +213,7 @@ float PipelineContext::GetCurrentRootHeight()
 
 void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirtyNode)
 {
+    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
     dirtyPropertyNodes_.emplace(dirtyNode);
     hasIdleTasks_ = true;
     RequestFrame();
@@ -315,6 +326,7 @@ void PipelineContext::FlushDirtyNodeUpdate()
     }
 
     // node api property diff before ets update.
+    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
     decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
     dirtyPropertyNodes_.clear();
     for (const auto& node : dirtyPropertyNodes) {
@@ -623,7 +635,8 @@ void PipelineContext::InspectDrew()
     CHECK_RUN_ON(UI);
     if (!needRenderNode_.empty()) {
         auto needRenderNode = std::move(needRenderNode_);
-        for (auto&& node : needRenderNode) {
+        for (auto&& nodeWeak : needRenderNode) {
+            auto node = nodeWeak.Upgrade();
             if (node) {
                 OnDrawCompleted(node->GetInspectorId()->c_str());
             }
@@ -674,6 +687,7 @@ void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
 
     int32_t displaySyncRate = GetOrCreateUIDisplaySyncManager()->GetDisplaySyncRate();
     frameRateManager_->SetDisplaySyncRate(displaySyncRate);
+    ArkUIPerfMonitor::GetInstance().RecordDisplaySyncRate(displaySyncRate);
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
@@ -703,6 +717,7 @@ void PipelineContext::FlushMessages()
 void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
 {
     window_->Lock();
+    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
     decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
     dirtyPropertyNodes_.clear();
     for (const auto& dirtyNode : dirtyPropertyNodes) {
@@ -719,7 +734,7 @@ void PipelineContext::FlushAfterLayoutCallbackInImplicitAnimationTask()
     window_->Unlock();
 }
 
-void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node)
+void PipelineContext::SetNeedRenderNode(const WeakPtr<FrameNode>& node)
 {
     CHECK_RUN_ON(UI);
     needRenderNode_.insert(node);
@@ -1528,8 +1543,9 @@ void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
         privacyManager->RemoveNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
     }
 
+    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
     dirtyPropertyNodes_.erase(frameNode);
-    needRenderNode_.erase(frameNode);
+    needRenderNode_.erase(WeakPtr<FrameNode>(frameNode));
 
     if (dirtyFocusNode_ == frameNode) {
         dirtyFocusNode_.Reset();
@@ -1553,11 +1569,12 @@ void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance,
+    bool forceChange)
 {
     CHECK_RUN_ON(UI);
     // prevent repeated trigger with same keyboardHeight
-    if (NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length())) {
+    if (!forceChange && NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length())) {
         return;
     }
 
@@ -1622,6 +1639,11 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         if (scrollResult) {
             FlushUITasks();
         }
+
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+            "AvoidanceLogic keyboardHeight: %{public}f, positionY: %{public}f, safeHeight: %{public}f, "
+            "rootHeight_ %{public}f final calculate keyboard offset is %{public}f",
+            keyboardHeight, positionY, safeHeight, rootHeight_, safeAreaManager_->GetKeyboardOffset());
     };
     FlushUITasks();
     DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
@@ -1775,7 +1797,7 @@ bool PipelineContext::OnBackPressed()
 
     // If the tag of the last child of the rootnode is video, exit full screen.
     if (fullScreenManager_->OnBackPressed()) {
-        LOGI("fullscreen component：video or web consumed backpressed event");
+        LOGI("fullscreen component: video or web consumed backpressed event");
         return true;
     }
 
@@ -1913,6 +1935,7 @@ bool PipelineContext::SetIsFocusActive(bool isFocusActive)
     if (isFocusActive_ == isFocusActive) {
         return false;
     }
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "Pipeline focus turns to %{public}s", isFocusActive ? "active" : "inactive");
     isFocusActive_ = isFocusActive;
     for (auto& pair : isFocusActiveUpdateEvents_) {
         if (pair.second) {
@@ -1969,7 +1992,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     auto oriPoint = point;
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     eventManager_->CheckDownEvent(scalePoint);
-    ResSchedReport::GetInstance().OnTouchEvent(scalePoint.type);
+    ResSchedReport::GetInstance().OnTouchEvent(scalePoint);
 
     if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE &&
         scalePoint.type != TouchType::HOVER_MOVE) {
@@ -2194,7 +2217,9 @@ void PipelineContext::ResetDraggingStatus(const TouchEvent& touchPoint, const Re
         manager->SetDraggingPressedState(false);
     }
     if (manager->IsDragging() && manager->IsSameDraggingPointer(touchPoint.id)) {
-        manager->OnDragEnd(PointerEvent(touchPoint.x, touchPoint.y), "");
+        manager->OnDragEnd(
+            PointerEvent(touchPoint.touchEventId, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY),
+            "");
     }
 }
 
@@ -2532,6 +2557,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     lastMouseEvent_->action = event.action;
     lastMouseEvent_->sourceType = event.sourceType;
     lastMouseEvent_->time = event.time;
+    lastMouseEvent_->touchEventId = event.touchEventId;
 
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
         // Mouse right button press event set focus inactive here.
@@ -2593,9 +2619,10 @@ void PipelineContext::FlushMouseEvent()
         auto result = container->GetCurPointerEventSourceType(sourceType);
         if (result) {
             TAG_LOGI(AceLogTag::ACE_MOUSE,
-                "FlushMouseEvent: last pointer event sourceType:%{public}d last mouse event time:%{public}" PRId64
-                " current time %{public}" PRId64 "",
-                sourceType, static_cast<int64_t>(lastMouseEvent_->time.time_since_epoch().count()), GetSysTimestamp());
+                "FlushMouseEvent: last pointer event id %{public}d sourceType:%{public}d last mouse event "
+                "time:%{public}" PRId64 " current time %{public}" PRId64 "",
+                lastMouseEvent_->touchEventId, sourceType,
+                static_cast<int64_t>(lastMouseEvent_->time.time_since_epoch().count()), GetSysTimestamp());
         }
     }
     MouseEvent event;
@@ -3112,6 +3139,7 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
     const int32_t duration = 400;
     option.SetDuration(duration);
     option.SetCurve(Curves::FRICTION);
+    RecycleManager::Notify(configurationChange);
     AnimationUtils::Animate(option, [weak = WeakClaim(this), configurationChange,
         weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), fullUpdate]() {
         auto pipeline = weak.Upgrade();
@@ -3204,12 +3232,12 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
 
 void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId)
 {
-    onWindowFocusChangedCallbacks_.emplace_back(nodeId);
+    onWindowFocusChangedCallbacks_.emplace(nodeId);
 }
 
 void PipelineContext::RemoveWindowFocusChangedCallback(int32_t nodeId)
 {
-    onWindowFocusChangedCallbacks_.remove(nodeId);
+    onWindowFocusChangedCallbacks_.erase(nodeId);
 }
 
 void PipelineContext::FlushWindowFocusChangedCallback(bool isFocus)
@@ -3358,11 +3386,17 @@ void PipelineContext::AddPredictTask(PredictTask&& task)
 void PipelineContext::OnIdle(int64_t deadline)
 {
     int64_t currentTime = GetSysTimestamp();
-    if (deadline == 0 && lastVsyncEndTimestamp_ > 0 && currentTime > static_cast<int64_t>(lastVsyncEndTimestamp_) &&
-        currentTime - static_cast<int64_t>(lastVsyncEndTimestamp_) > VSYNC_PERIOD_COUNT * window_->GetVSyncPeriod()) {
-        auto frontend = weakFrontend_.Upgrade();
-        if (frontend) {
-            frontend->NotifyUIIdle();
+    if (deadline == 0) {
+        int64_t lastTaskEndTimestamp = window_->GetLastVsyncEndTimestamp();
+        if (eventManager_) {
+            lastTaskEndTimestamp = std::max(lastTaskEndTimestamp, eventManager_->GetLastTouchEventEndTimestamp());
+        }
+        if (lastTaskEndTimestamp > 0 && currentTime > lastTaskEndTimestamp
+            && currentTime - lastTaskEndTimestamp > VSYNC_PERIOD_COUNT * window_->GetVSyncPeriod()) {
+            auto frontend = weakFrontend_.Upgrade();
+            if (frontend) {
+                frontend->NotifyUIIdle();
+            }
         }
     }
     if (deadline == 0 || isWindowAnimation_) {
@@ -4003,23 +4037,44 @@ void PipelineContext::GetInspectorTree()
     rootNode_->GetInspectorValue();
 }
 
-void PipelineContext::AddFrameNodeChangeListener(const RefPtr<FrameNode>& node)
+void PipelineContext::AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node)
 {
+    CHECK_NULL_VOID(node.Upgrade());
     if (std::find(changeInfoListeners_.begin(), changeInfoListeners_.end(), node) == changeInfoListeners_.end()) {
         changeInfoListeners_.push_back(node);
     }
 }
 
-void PipelineContext::RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node)
+void PipelineContext::RemoveFrameNodeChangeListener(int32_t nodeId)
 {
-    changeInfoListeners_.remove(node);
+    if (changeInfoListeners_.empty()) {
+        return;
+    }
+    changeInfoListeners_.remove_if([nodeId](const WeakPtr<FrameNode>& node) {
+        return !node.Upgrade() || nodeId == node.Upgrade()->GetId();
+    });
 }
 
-void PipelineContext::AddChangedFrameNode(const RefPtr<FrameNode>& node)
+bool PipelineContext::AddChangedFrameNode(const WeakPtr<FrameNode>& node)
 {
+    CHECK_NULL_RETURN(node.Upgrade(), false);
+    if (changeInfoListeners_.empty() || !node.Upgrade()->IsOnMainTree()) {
+        return false;
+    }
     if (std::find(changedNodes_.begin(), changedNodes_.end(), node) == changedNodes_.end()) {
         changedNodes_.push_back(node);
     }
+    return true;
+}
+
+void PipelineContext::RemoveChangedFrameNode(int32_t nodeId)
+{
+    if (changedNodes_.empty()) {
+        return;
+    }
+    changedNodes_.remove_if([nodeId](const WeakPtr<FrameNode>& node) {
+        return !node.Upgrade() || nodeId == node.Upgrade()->GetId();
+    });
 }
 
 void PipelineContext::FlushNodeChangeFlag()
@@ -4027,8 +4082,9 @@ void PipelineContext::FlushNodeChangeFlag()
     ACE_FUNCTION_TRACE();
     if (!changeInfoListeners_.empty()) {
         for (const auto& it : changeInfoListeners_) {
-            if (it) {
-                it->ProcessFrameNodeChangeFlag();
+            auto listener = it.Upgrade();
+            if (listener) {
+                listener->ProcessFrameNodeChangeFlag();
             }
         }
     }
@@ -4040,9 +4096,9 @@ void PipelineContext::CleanNodeChangeFlag()
     auto cleanNodes = std::move(changedNodes_);
     changedNodes_.clear();
     for (const auto& it : cleanNodes) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(it);
-        if (frameNode) {
-            frameNode->ClearChangeInfoFlag();
+        auto changeNode = it.Upgrade();
+        if (changeNode) {
+            changeNode->ClearChangeInfoFlag();
         }
     }
 }

@@ -20,7 +20,41 @@ namespace {} // namespace
 
 class ListGroupAlgTestNg : public ListTestNg {
 public:
+    void CreateGroupWithHeader(int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle,
+        int32_t itemNumber = GROUP_ITEM_NUMBER);
+    void CreateGroupWithFooter(int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle,
+        int32_t itemNumber = GROUP_ITEM_NUMBER);
 };
+
+void ListGroupAlgTestNg::CreateGroupWithHeader(
+    int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber)
+{
+    for (int32_t index = 0; index < groupNumber; index++) {
+        auto header = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+        ListItemGroupModelNG groupModel = CreateListItemGroup(listItemGroupStyle);
+        groupModel.SetSpace(Dimension(SPACE));
+        groupModel.SetDivider(ITEM_DIVIDER);
+        groupModel.SetHeader(std::move(header));
+        CreateListItems(itemNumber, static_cast<V2::ListItemStyle>(listItemGroupStyle));
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
+
+void ListGroupAlgTestNg::CreateGroupWithFooter(
+    int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber)
+{
+    for (int32_t index = 0; index < groupNumber; index++) {
+        auto footer = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+        ListItemGroupModelNG groupModel = CreateListItemGroup(listItemGroupStyle);
+        groupModel.SetSpace(Dimension(SPACE));
+        groupModel.SetDivider(ITEM_DIVIDER);
+        groupModel.SetFooter(std::move(footer));
+        CreateListItems(itemNumber, static_cast<V2::ListItemStyle>(listItemGroupStyle));
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
 
 /**
  * @tc.name: ListItemGroupLayoutAlgorithm001
@@ -399,6 +433,27 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayout004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListItemGroupLayout005
+ * @tc.desc: Test model SetStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayout005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. No Item in group
+     * @tc.expected: The group height depend on header+footer
+     */
+    ListModelNG model = CreateList();
+    CreateGroupWithSetting(1, V2::ListItemGroupStyle::NONE, 0);
+    CreateGroupWithHeader(1, V2::ListItemGroupStyle::NONE, 0);
+    CreateGroupWithFooter(1, V2::ListItemGroupStyle::NONE, 0);
+    CreateDone(frameNode_);
+    EXPECT_EQ(GetChildHeight(frameNode_, 0), GROUP_HEADER_LEN * 2);
+    EXPECT_EQ(GetChildHeight(frameNode_, 1), GROUP_HEADER_LEN);
+    EXPECT_EQ(GetChildHeight(frameNode_, 2), GROUP_HEADER_LEN);
+}
+
+/**
  * @tc.name: Sticky001
  * @tc.desc: List set sticky header and footer
  * @tc.type: FUNC
@@ -449,10 +504,79 @@ HWTEST_F(ListGroupAlgTestNg, Sticky001, TestSize.Level1)
 
 /**
  * @tc.name: Sticky002
- * @tc.desc: List set sticky header and footer in HORIZONTAL and RTL Layout
+ * @tc.desc: List set sticky header in RTL Layout, but RTL has no effect
  * @tc.type: FUNC
  */
 HWTEST_F(ListGroupAlgTestNg, Sticky002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. V2::StickyStyle::HEADER
+     * @tc.expected: head is Sticky
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true; // no effect because vertical layout
+    ListModelNG model = CreateList();
+    model.SetSticky(V2::StickyStyle::HEADER);
+    CreateGroupWithHeader(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
+    CreateDone(frameNode_);
+    RefPtr<FrameNode> firstGroupNode = GetChildFrameNode(frameNode_, 0);
+    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0.f);
+    ScrollTo(ITEM_HEIGHT);
+    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), ITEM_HEIGHT);
+
+    /**
+     * @tc.steps: step2. V2::StickyStyle::BOTH
+     * @tc.expected: head is Sticky
+     */
+    ScrollTo(0.f); // reset position
+    layoutProperty_->UpdateStickyStyle(V2::StickyStyle::BOTH);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0.f);
+    ScrollTo(ITEM_HEIGHT);
+    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), ITEM_HEIGHT);
+}
+
+/**
+ * @tc.name: Sticky003
+ * @tc.desc: List set sticky footer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, Sticky003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. V2::StickyStyle::FOOTER
+     * @tc.expected: foot is Sticky
+     */
+    const int32_t footerIndex = 0;
+    ListModelNG model = CreateList();
+    model.SetSticky(V2::StickyStyle::FOOTER);
+    CreateGroupWithFooter(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
+    CreateDone(frameNode_);
+    RefPtr<FrameNode> secondGroupNode = GetChildFrameNode(frameNode_, 1);
+    float expectOffset = LIST_HEIGHT - GetChildHeight(frameNode_, 0) - GROUP_HEADER_LEN;
+    EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), expectOffset);
+    ScrollTo(ITEM_HEIGHT);
+    EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), expectOffset + ITEM_HEIGHT);
+
+    /**
+     * @tc.steps: step3. V2::StickyStyle::BOTH
+     * @tc.expected: head/foot is Sticky
+     */
+    ScrollTo(0.f); // reset position
+    layoutProperty_->UpdateStickyStyle(V2::StickyStyle::BOTH);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), expectOffset);
+    ScrollTo(ITEM_HEIGHT);
+    EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), expectOffset + ITEM_HEIGHT);
+}
+
+/**
+ * @tc.name: Sticky004
+ * @tc.desc: List set sticky header and footer in HORIZONTAL and RTL Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, Sticky004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. V2::StickyStyle::HEADER
@@ -498,6 +622,77 @@ HWTEST_F(ListGroupAlgTestNg, Sticky002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Sticky005
+ * @tc.desc: List set sticky header in HORIZONTAL and RTL Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, Sticky005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. V2::StickyStyle::HEADER
+     * @tc.expected: head is Sticky
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    ListModelNG model = CreateList();
+    model.SetListDirection(Axis::HORIZONTAL);
+    model.SetSticky(V2::StickyStyle::HEADER);
+    CreateGroupWithHeader(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
+    CreateDone(frameNode_);
+    RefPtr<FrameNode> firstGroupNode = GetChildFrameNode(frameNode_, 0);
+    EXPECT_EQ(GetChildX(firstGroupNode, HEADER_INDEX), 130.f);
+    ScrollTo(ITEM_WIDTH);
+    EXPECT_EQ(GetChildX(firstGroupNode, HEADER_INDEX), 70.f);
+
+    /**
+     * @tc.steps: step2. V2::StickyStyle::BOTH
+     * @tc.expected: head is Sticky
+     */
+    ScrollTo(0.f); // reset position
+    layoutProperty_->UpdateStickyStyle(V2::StickyStyle::BOTH);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0.f);
+    ScrollTo(ITEM_WIDTH);
+    EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0.f);
+}
+
+/**
+ * @tc.name: Sticky006
+ * @tc.desc: List set sticky footer in HORIZONTAL and RTL Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, Sticky006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. V2::StickyStyle::FOOTER
+     * @tc.expected: foot is Sticky
+     */
+    const int32_t footerIndex = 0;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    ListModelNG model = CreateList();
+    model.SetListDirection(Axis::HORIZONTAL);
+    model.SetSticky(V2::StickyStyle::FOOTER);
+    CreateGroupWithFooter(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
+    CreateDone(frameNode_);
+    RefPtr<FrameNode> secondGroupNode = GetChildFrameNode(frameNode_, 1);
+    EXPECT_EQ(GetChildX(secondGroupNode, footerIndex), 60.f);
+    ScrollTo(ITEM_WIDTH);
+    EXPECT_EQ(GetChildX(secondGroupNode, footerIndex), 60.f);
+
+    /**
+     * @tc.steps: step2. V2::StickyStyle::BOTH
+     * @tc.expected: head/foot is Sticky
+     */
+    ScrollTo(0.f); // reset position
+    layoutProperty_->UpdateStickyStyle(V2::StickyStyle::BOTH);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), 0.f);
+    ScrollTo(ITEM_WIDTH);
+    EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), 0.f);
+}
+
+/**
  * @tc.name: LanesLayout001
  * @tc.desc: test lanes
  * @tc.type: FUNC
@@ -538,7 +733,7 @@ HWTEST_F(ListGroupAlgTestNg, LanesLayout001, TestSize.Level1)
     ClearOldNodes();
     model = CreateList();
     model.SetLaneMinLength(Dimension(300.f));
-    model.SetLaneMaxLength(Dimension(400.f));
+    model.SetLaneMaxLength(Dimension(350.f));
     CreateListItemGroups(1);
     CreateDone(frameNode_);
     groupNode = GetChildFrameNode(frameNode_, 0);
@@ -960,5 +1155,42 @@ HWTEST_F(ListGroupAlgTestNg, InfinityCrossSize001, TestSize.Level1)
     ViewAbstract::SetWidth(CalcLength(150.f));
     CreateDone(frameNode_);
     EXPECT_EQ(GetChildWidth(frameNode_, 0), 150.f);
+}
+
+/**
+ * @tc.name: SetHeaderFooter001
+ * @tc.desc: test SetHeader/SetFooter to null, will not has header/footer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, SetHeaderFooter001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set header footer to null
+     * @tc.expected: Will not has header/footer node
+     */
+    CreateList();
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    groupModel.SetHeader(nullptr);
+    groupModel.SetFooter(nullptr);
+    auto groupNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_EQ(groupNode->GetTotalChildCount(), 0);
+
+    /**
+     * @tc.steps: step2. Set header
+     * @tc.expected: Has header node
+     */
+    auto header = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+    groupModel.SetHeader(std::move(header));
+    EXPECT_EQ(groupNode->GetTotalChildCount(), 1);
+
+    /**
+     * @tc.steps: step3. Set footer
+     * @tc.expected: Has header and footer nodes
+     */
+    auto footer = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+    groupModel.SetFooter(std::move(footer));
+    EXPECT_EQ(groupNode->GetTotalChildCount(), 2);
+    // pop frameNode
+    CreateDone(frameNode_);
 }
 } // namespace OHOS::Ace::NG

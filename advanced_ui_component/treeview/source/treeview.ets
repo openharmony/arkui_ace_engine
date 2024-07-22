@@ -991,7 +991,7 @@ export struct TreeView {
   }
 
   clearLastIndexColor() {
-    if (this.viewLastIndex === -1 || this.viewLastIndex >= this.nodeList.length) {
+    if (this.viewLastIndex === -1) {
       return;
     }
     this.setImageSources(this.viewLastIndex, InteractionStatus.Normal);
@@ -1622,6 +1622,7 @@ export class TreeController {
       removeNodeIdList
     );
     this.nodeIdList.splice(this.nodeIdList.indexOf(clickNodeId), 1);
+    this.listNodeDataSource.lastIndex = -1;
   }
 
   /**
@@ -1978,7 +1979,7 @@ class ListNodeDataSource extends BasicDataSource {
   }
 
   public clearLastIndexStatus() {
-    if (this.lastIndex === -1 || this.lastIndex >= this.listNode.length) {
+    if (this.lastIndex === -1) {
       return;
     }
     this.setImageSource(this.lastIndex, InteractionStatus.Normal);
