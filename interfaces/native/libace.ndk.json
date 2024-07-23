@@ -1970,5 +1970,17 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_StartDrag"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DialogDismissEvent_SetShouldBlockDismiss"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DialogDismissEvent_GetUserData"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DialogDismissEvent_GetDismissReason"
     }
 ]
