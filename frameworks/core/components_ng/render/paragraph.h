@@ -228,6 +228,7 @@ public:
     virtual float GetMaxIntrinsicWidth() = 0;
     virtual bool DidExceedMaxLines() = 0;
     virtual float GetLongestLine() = 0;
+    virtual float GetLongestLineWithIndent() = 0;
     virtual float GetMaxWidth() = 0;
     virtual float GetAlphabeticBaseline() = 0;
     virtual float GetCharacterWidth(int32_t index) = 0;

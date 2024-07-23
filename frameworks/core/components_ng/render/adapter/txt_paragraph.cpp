@@ -263,6 +263,13 @@ float TxtParagraph::GetLongestLine()
 #endif
 }
 
+float TxtParagraph::GetLongestLineWithIndent()
+{
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, 0.0f);
+    return static_cast<float>(paragrah->GetLongestLineWithIndent());
+}
+
 float TxtParagraph::GetMaxWidth()
 {
     auto paragrah = GetParagraph();
