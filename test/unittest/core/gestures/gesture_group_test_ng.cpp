@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "gtest/gtest.h"
 #include "test/unittest/core/gestures/gestures_common_test_ng.h"
 
 using namespace testing;
@@ -654,7 +655,6 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupForceRejectTest001, TestSize.Level1)
     exclusiveRecognizer.ForceReject();
     EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
 
-
     /**
      * @tc.steps: step2. call function and compare result.
      * @tc.steps: case1: recognizers is empty
@@ -910,5 +910,166 @@ HWTEST_F(GestureGroupTestNg, GestureGroupCreateRecognizerTest001, TestSize.Level
     EXPECT_NE(groupRecognizer, nullptr);
     EXPECT_EQ(groupRecognizer->GetPriority(), GesturePriority::Low);
     EXPECT_EQ(groupRecognizer->GetPriorityMask(), GestureMask::Normal);
+}
+
+/**
+ * @tc.name: GestureGroupTestNg001
+ * @tc.desc: Test GestureGroup Deserialize function
+ */
+HWTEST_F(GestureGroupTestNg, GestureGroupTestNg001, TestSize.Level1)
+{
+    GestureGroupModelNG gestureGroupModelNG;
+    gestureGroupModelNG.Create(0);
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto gestureGroupNG = AceType::DynamicCast<NG::GestureGroup>(gestureProcessor->TopGestureNG());
+    GestureGroup gestureGroup = GestureGroup(GestureMode::Sequence);
+    const char* buff = "-123bytes";
+    gestureGroup.Deserialize(buff);
+    const char* buff2 = nullptr;
+    auto result = gestureGroup.Deserialize(buff2);
+    char buff3[8] = { 0, 0, 0, 0, 3 & 0xFF, 0, 0, 0 };
+    gestureGroup.Deserialize(buff3);
+    char buff4[8] = { 0, 0, 0, 0, 7 & 0xFF, 0, 0, 0 };
+    gestureGroup.Deserialize(buff4);
+    char buff5[8] = { 0, 0, 0, 0, 11 & 0xFF, 0, 0, 0 };
+    gestureGroup.Deserialize(buff5);
+    char buff6[8] = { 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF };
+    gestureGroup.Deserialize(buff6);
+    char buff7[20] = { 0, 0, 0, 0, 13 & 0xFF, 0, 0, 0, 8 & 0xFF, 0, 0, 0, 8 & 0xFF, 0, 0, 0, 8 & 0xFF, 0, 0, 0 };
+    gestureGroup.Deserialize(buff7);
+    char buff8[8] = { 0, 0, 0, 0, 12 & 0xFF, 0, 0, 0 };
+    gestureGroup.Deserialize(buff8);
+    char buff9[16] = { 0, 0, 0, 0, 172 & 0xFF, 0, 0, 0, 8 & 0xFF, 0, 0, 0, 8 & 0xFF, 0, 0, 0 };
+    gestureGroup.Deserialize(buff9);
+    EXPECT_EQ(result, -1);
+}
+
+/**
+ * @tc.name: GestureGroupTestNg002
+ * @tc.desc: Test GestureGroup SizeofMe function
+ */
+HWTEST_F(GestureGroupTestNg, GestureGroupTestNg002, TestSize.Level1)
+{
+    GestureGroupModelNG gestureGroupModelNG;
+    gestureGroupModelNG.Create(0);
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto gestureGroupNG = AceType::DynamicCast<NG::GestureGroup>(gestureProcessor->TopGestureNG());
+    GestureGroup gestureGroup = GestureGroup(GestureMode::Sequence);
+    gestureGroup.MakeGesture(GestureType::GROUP);
+    auto result = gestureGroup.MakeGesture(GestureType::LONG_PRESS);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GestureGroupTestNg003
+ * @tc.desc: Test GestureGroup Serialize function
+ */
+HWTEST_F(GestureGroupTestNg, GestureGroupTestNg003, TestSize.Level1)
+{
+    GestureGroupModelNG gestureGroupModelNG;
+    gestureGroupModelNG.Create(0);
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto gestureGroupNG = AceType::DynamicCast<NG::GestureGroup>(gestureProcessor->TopGestureNG());
+    GestureGroup gestureGroup = GestureGroup(GestureMode::Sequence);
+    char* buff = nullptr;
+    auto result = gestureGroup.Serialize(buff);
+    char buff2[16] = { 0, 0, 0, 0, 172 & 0xFF, 0, 0, 0, 8 & 0xFF, 0, 0, 0, 8 & 0xFF, 0, 0, 0 };
+    gestureGroup.Serialize(buff2);
+    EXPECT_EQ(result, -1);
+}
+
+/**
+ * @tc.name: GestureGroupTestNg004
+ * @tc.desc: Test GestureGroup RemoveGesture function
+ */
+HWTEST_F(GestureGroupTestNg, GestureGroupTestNg004, TestSize.Level1)
+{
+    bool result = true;
+    GestureGroupModelNG gestureGroupModelNG;
+    gestureGroupModelNG.Create(0);
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto gestureGroupNG = AceType::DynamicCast<NG::GestureGroup>(gestureProcessor->TopGestureNG());
+    GestureGroup gestureGroup = GestureGroup(GestureMode::Sequence);
+    auto gesture = AceType::MakeRefPtr<TapGesture>();
+    auto gesture2 = AceType::MakeRefPtr<TapGesture>();
+    auto gesture3 = AceType::MakeRefPtr<TapGesture>();
+    gestureGroup.AddGesture(gesture);
+    gestureGroup.AddGesture(gesture2);
+    gestureGroup.AddGesture(gesture3);
+
+    std::vector<RefPtr<Gesture>> gestures;
+    auto longPressGestureOne = AceType::MakeRefPtr<LongPressGesture>(5, false, 1);
+    longPressGestureOne->SetTag("HELLO");
+    gestures.emplace_back(longPressGestureOne);
+    auto longPressGestureTwo = AceType::MakeRefPtr<LongPressGesture>(5, false, 1);
+    gestures.emplace_back(longPressGestureTwo);
+    auto group = AceType::MakeRefPtr<GestureGroup>(GestureMode::Exclusive, gestures);
+    gestureGroup.AddGesture(group);
+
+    gestureGroup.RemoveGesture(gesture2);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: GestureGroupTestNg005
+ * @tc.desc: Test GestureGroup RemoveChildrenByTag function
+ */
+HWTEST_F(GestureGroupTestNg, GestureGroupTestNg005, TestSize.Level1)
+{
+    bool result = true;
+    GestureGroupModelNG gestureGroupModelNG;
+    gestureGroupModelNG.Create(0);
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto gestureGroupNG = AceType::DynamicCast<NG::GestureGroup>(gestureProcessor->TopGestureNG());
+    GestureGroup gestureGroup = GestureGroup(GestureMode::Sequence);
+
+    std::vector<RefPtr<Gesture>> gestures;
+    auto longPressGestureOne = AceType::MakeRefPtr<LongPressGesture>(5, false, 1);
+    longPressGestureOne->SetTag("HELLO");
+    gestures.emplace_back(longPressGestureOne);
+    auto longPressGestureTwo = AceType::MakeRefPtr<LongPressGesture>(5, false, 1);
+    gestures.emplace_back(longPressGestureTwo);
+    auto group = AceType::MakeRefPtr<GestureGroup>(GestureMode::Exclusive, gestures);
+    gestureGroup.AddGesture(group);
+
+    gestureGroup.RemoveChildrenByTag("HELLO", result);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: GestureGroupTestNg006
+ * @tc.desc: Test Pan_Gesture Deserialize function
+ */
+HWTEST_F(GestureGroupTestNg, GestureGroupTestNg006, TestSize.Level1)
+{
+    PanDirection panDirection;
+    panDirection.type = PanDirection::RIGHT;
+    auto panGesture = AceType::MakeRefPtr<PanGesture>(SINGLE_FINGER_NUMBER, panDirection, PAN_DISTANCE);
+    const char* buff = nullptr;
+    auto result = panGesture->Deserialize(buff);
+    char buff2[320] = { 0, 0, 0, 0, 13 & 0xFF, 0, 0, 0, 8 & 0xFF, 0, 0, 0, 8 & 0xFF, 0, 0, 0, 8 & 0xFF, 0, 0, 0 };
+    panGesture->Deserialize(buff2);
+    EXPECT_EQ(result, -1);
+}
+
+/**
+ * @tc.name: GestureGroupTestNg007
+ * @tc.desc: Test Pan_Gesture Serialize function
+ */
+HWTEST_F(GestureGroupTestNg, GestureGroupTestNg007, TestSize.Level1)
+{
+    PanDirection panDirection;
+    panDirection.type = PanDirection::RIGHT;
+    auto panGesture = AceType::MakeRefPtr<PanGesture>(SINGLE_FINGER_NUMBER, panDirection, PAN_DISTANCE);
+    char* buff = nullptr;
+    auto result = panGesture->Serialize(buff);
+    char buff2[320] = { 0, 0, 0, 0, 172 & 0xFF, 0, 0, 0, 8 & 0xFF, 0, 0, 0, 8 & 0xFF, 0, 0, 0 };
+    panGesture->Serialize(buff2);
+    EXPECT_EQ(result, -1);
 }
 } // namespace OHOS::Ace::NG

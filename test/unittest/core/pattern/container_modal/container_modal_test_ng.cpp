@@ -29,14 +29,15 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
-#include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
+#include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 using namespace testing;
@@ -638,5 +639,373 @@ HWTEST_F(ContainerModelTestNg, ButtonsRectTest011, TestSize.Level1)
     pattern_->SubscribeContainerModalButtonsRectChange(std::move(callback));
     pattern_->CallButtonsRectChange();
     EXPECT_TRUE(callbackTriggered);
+}
+
+/**
+ * @tc.name: AccessibilityProperty002
+ * @tc.desc: Test GetText of containerModal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, AccessibilityProperty002, TestSize.Level1)
+{
+    ContainerModalView view;
+    RefPtr<FrameNode> content = CreateContent();
+    auto frameNode = view.Create(content);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+    pattern_->appLabel_ = "abc";
+    EXPECT_EQ(accessibilityProperty_->GetText(), "abc");
+}
+
+/**
+ * @tc.name: UpdateGestureRowVisible
+ * @tc.desc: Test GUpdateGestureRowVisible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, UpdateGestureRowVisible, TestSize.Level1)
+{
+    bool result = true;
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPattern>());
+    auto textNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<TextPickerColumnPattern>());
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(textNode);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(buttonNode);
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPattern>();
+    auto gestureRow = containerPattern->GetGestureRow();
+    CHECK_NULL_VOID(gestureRow);
+    auto customTitleRow = containerPattern->GetCustomTitleRow();
+    CHECK_NULL_VOID(customTitleRow);
+    auto buttonsRow = containerPattern->GetControlButtonRow();
+    CHECK_NULL_VOID(buttonsRow);
+    auto gestureRowProp = gestureRow->GetLayoutProperty();
+    auto customTitleRowProp = customTitleRow->GetLayoutProperty();
+    auto buttonsRowProp = buttonsRow->GetLayoutProperty();
+    customTitleRowProp->UpdateVisibility(VisibleType::GONE);
+    buttonsRowProp->UpdateVisibility(VisibleType::GONE);
+    containerPattern->UpdateGestureRowVisible();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: UpdateGestureRowVisible2
+ * @tc.desc: Test GUpdateGestureRowVisible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, UpdateGestureRowVisible2, TestSize.Level1)
+{
+    bool result = true;
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPattern>());
+    auto textNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<TextPickerColumnPattern>());
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(textNode);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(buttonNode);
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPattern>();
+    auto gestureRow = containerPattern->GetGestureRow();
+    CHECK_NULL_VOID(gestureRow);
+    auto customTitleRow = containerPattern->GetCustomTitleRow();
+    CHECK_NULL_VOID(customTitleRow);
+    auto buttonsRow = containerPattern->GetControlButtonRow();
+    CHECK_NULL_VOID(buttonsRow);
+    auto gestureRowProp = gestureRow->GetLayoutProperty();
+    auto customTitleRowProp = customTitleRow->GetLayoutProperty();
+    auto buttonsRowProp = buttonsRow->GetLayoutProperty();
+    customTitleRowProp->UpdateVisibility(VisibleType::GONE);
+    buttonsRowProp->UpdateVisibility(VisibleType::VISIBLE);
+    containerPattern->UpdateGestureRowVisible();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: UpdateGestureRowVisible3
+ * @tc.desc: Test GUpdateGestureRowVisible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, UpdateGestureRowVisible3, TestSize.Level1)
+{
+    bool result = true;
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPattern>());
+    auto textNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<TextPickerColumnPattern>());
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(textNode);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(buttonNode);
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPattern>();
+    auto gestureRow = containerPattern->GetGestureRow();
+    CHECK_NULL_VOID(gestureRow);
+    auto customTitleRow = containerPattern->GetCustomTitleRow();
+    CHECK_NULL_VOID(customTitleRow);
+    auto buttonsRow = containerPattern->GetControlButtonRow();
+    CHECK_NULL_VOID(buttonsRow);
+    auto gestureRowProp = gestureRow->GetLayoutProperty();
+    auto customTitleRowProp = customTitleRow->GetLayoutProperty();
+    auto buttonsRowProp = buttonsRow->GetLayoutProperty();
+    customTitleRowProp->UpdateVisibility(VisibleType::VISIBLE);
+    buttonsRowProp->UpdateVisibility(VisibleType::VISIBLE);
+    containerPattern->UpdateGestureRowVisible();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: UpdateGestureRowVisible4
+ * @tc.desc: Test GUpdateGestureRowVisible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, UpdateGestureRowVisible4, TestSize.Level1)
+{
+    bool result = true;
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPattern>());
+    auto textNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<TextPickerColumnPattern>());
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(textNode);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(buttonNode);
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPattern>();
+    auto gestureRow = containerPattern->GetGestureRow();
+    CHECK_NULL_VOID(gestureRow);
+    auto customTitleRow = containerPattern->GetCustomTitleRow();
+    CHECK_NULL_VOID(customTitleRow);
+    auto buttonsRow = containerPattern->GetControlButtonRow();
+    CHECK_NULL_VOID(buttonsRow);
+    auto gestureRowProp = gestureRow->GetLayoutProperty();
+    auto customTitleRowProp = customTitleRow->GetLayoutProperty();
+    auto buttonsRowProp = buttonsRow->GetLayoutProperty();
+    customTitleRowProp->UpdateVisibility(VisibleType::VISIBLE);
+    buttonsRowProp->UpdateVisibility(VisibleType::GONE);
+    containerPattern->UpdateGestureRowVisible();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: GetContainerModalButtonsRect
+ * @tc.desc: Test GetContainerModalButtonsRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, GetContainerModalButtonsRect, TestSize.Level1)
+{
+    bool result = true;
+    CreateContainerModal();
+    RectF containerModalRect;
+    RectF buttonsRect;
+    auto column = pattern_->GetColumnNode();
+    auto geomeNode = column->GetGeometryNode();
+    geomeNode->frame_.rect_ = { 0, 0, 0, 0 };
+    pattern_->GetContainerModalButtonsRect(containerModalRect, buttonsRect);
+    EXPECT_TRUE(result);
+}
+
+HWTEST_F(ContainerModelTestNg, GetContainerModalButtonsRect2, TestSize.Level1)
+{
+    bool result = true;
+    CreateContainerModal();
+    auto controlButtonsRow = pattern_->GetControlButtonRow();
+    auto children = controlButtonsRow->GetChildren();
+    for (auto& child : children) {
+        auto node = AceType::DynamicCast<FrameNode>(child);
+        node->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+    }
+    RectF containerModalRect;
+    RectF buttonsRect;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    pattern_->GetContainerModalButtonsRect(containerModalRect, buttonsRect);
+    EXPECT_TRUE(result);
+}
+
+HWTEST_F(ContainerModelTestNg, GetContainerModalButtonsRect3, TestSize.Level1)
+{
+    bool result = true;
+    CreateContainerModal();
+    RectF containerModalRect;
+    RectF buttonsRect;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    pattern_->GetContainerModalButtonsRect(containerModalRect, buttonsRect);
+    pattern_->InitButtonsLayoutProperty();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: GetCustomTitleHeight
+ * @tc.desc: Test GetCustomTitleHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, GetCustomTitleHeight, TestSize.Level1)
+{
+    bool result = true;
+    CreateContainerModal();
+    pattern_->GetCustomTitleHeight();
+    auto customTitleRow = pattern_->GetCustomTitleRow();
+    auto property = customTitleRow->GetLayoutProperty();
+    property->UpdateVisibility(VisibleType::GONE);
+    pattern_->GetCustomTitleHeight();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: InitColumnTouchTestFunc
+ * @tc.desc: Test InitColumnTouchTestFunc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, InitColumnTouchTestFunc, TestSize.Level1)
+{
+    bool result = true;
+    CreateContainerModal();
+    pattern_->InitColumnTouchTestFunc();
+    auto column = pattern_->GetColumnNode();
+    auto eventHub = column->GetOrCreateGestureEventHub();
+    const auto& Callback = eventHub->GetOnTouchTestFunc();
+    std::vector<TouchTestInfo> touchInfos;
+    TouchTestInfo info;
+    info.id = CONTAINER_MODAL_STACK_ID;
+    touchInfos.emplace_back(info);
+    Callback(touchInfos);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: InitColumnTouchTestFunc2
+ * @tc.desc: Test InitColumnTouchTestFunc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, InitColumnTouchTestFunc2, TestSize.Level1)
+{
+    bool result = true;
+    CreateContainerModal();
+    pattern_->InitColumnTouchTestFunc();
+    auto column = pattern_->GetColumnNode();
+    auto eventHub = column->GetOrCreateGestureEventHub();
+    const auto& Callback = eventHub->GetOnTouchTestFunc();
+    std::vector<TouchTestInfo> touchInfos;
+    TouchTestInfo info;
+    touchInfos.emplace_back(info);
+    Callback(touchInfos);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: AddButtonHoverEvent
+ * @tc.desc: Test AddButtonHoverEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, AddButtonHoverEvent, TestSize.Level1)
+{
+    bool result = true;
+    CreateContainerModal();
+    pattern_->InitColumnTouchTestFunc();
+    RefPtr<FrameNode> content = CreateContent();
+    ContainerModalView view;
+    auto frameNode = view.Create(content);
+    auto frameNode2 = view.Create(content);
+    auto inputEventHub = frameNode_->GetOrCreateInputEventHub();
+    auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
+    frameNode2->layoutProperty_ = imageLayoutProperty;
+    imageLayoutProperty->UpdateImageSourceInfo(
+        ImageSourceInfo("file://data/data/com.example.test/res/example.svg", Dimension(300.0), Dimension(200.0)));
+    imageLayoutProperty->UpdateAlt(
+        ImageSourceInfo("file://data/data/com.example.test/res/exampleAlt.jpg", Dimension(100.0), Dimension(200.0)));
+    view.AddButtonHoverEvent(inputEventHub, frameNode, frameNode2, false);
+
+    auto hoverEventActuator = inputEventHub->hoverEventActuator_;
+    auto Events = hoverEventActuator->inputEvents_;
+    for (const auto& callback : Events) {
+        (*callback)(false);
+    }
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: AddButtonHoverEvent2
+ * @tc.desc: Test AddButtonHoverEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, AddButtonHoverEvent2, TestSize.Level1)
+{
+    bool result = true;
+    CreateContainerModal();
+    pattern_->InitColumnTouchTestFunc();
+    RefPtr<FrameNode> content = CreateContent();
+    ContainerModalView view;
+    auto frameNode = view.Create(content);
+    auto frameNode2 = view.Create(content);
+    auto inputEventHub = frameNode_->GetOrCreateInputEventHub();
+    auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
+    frameNode2->layoutProperty_ = imageLayoutProperty;
+    imageLayoutProperty->UpdateImageSourceInfo(
+        ImageSourceInfo("file://data/data/com.example.test/res/example.svg", Dimension(300.0), Dimension(200.0)));
+    imageLayoutProperty->UpdateAlt(
+        ImageSourceInfo("file://data/data/com.example.test/res/exampleAlt.jpg", Dimension(100.0), Dimension(200.0)));
+    view.AddButtonHoverEvent(inputEventHub, frameNode, frameNode2, true);
+
+    auto hoverEventActuator = inputEventHub->hoverEventActuator_;
+    auto Events = hoverEventActuator->inputEvents_;
+    for (const auto& callback : Events) {
+        (*callback)(true);
+    }
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: AddButtonOnEvent
+ * @tc.desc: Test AddButtonOnEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, AddButtonOnEvent, TestSize.Level1)
+{
+    bool result = true;
+    CreateContainerModal();
+    pattern_->InitColumnTouchTestFunc();
+    RefPtr<FrameNode> content = CreateContent();
+    ContainerModalView view;
+    auto frameNode = view.Create(content);
+    auto frameNode2 = view.Create(content);
+    auto inputEventHub = frameNode_->GetOrCreateInputEventHub();
+    auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
+    frameNode2->layoutProperty_ = imageLayoutProperty;
+    imageLayoutProperty->UpdateImageSourceInfo(
+        ImageSourceInfo("file://data/data/com.example.test/res/example.svg", Dimension(300.0), Dimension(200.0)));
+    imageLayoutProperty->UpdateAlt(
+        ImageSourceInfo("file://data/data/com.example.test/res/exampleAlt.jpg", Dimension(100.0), Dimension(200.0)));
+    view.AddButtonOnEvent(inputEventHub, frameNode, frameNode2, true);
+
+    auto mouseEventActuator_ = inputEventHub->mouseEventActuator_;
+    auto Events = mouseEventActuator_->inputEvents_;
+    MouseInfo mouseInfo;
+    for (const auto& callback : Events) {
+        (*callback)(mouseInfo);
+    }
+    mouseInfo.action_ = MouseAction::PRESS;
+    for (const auto& callback : Events) {
+        (*callback)(mouseInfo);
+    }
+    mouseInfo.action_ = MouseAction::RELEASE;
+    for (const auto& callback : Events) {
+        (*callback)(mouseInfo);
+    }
+    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace::NG
