@@ -582,8 +582,6 @@ public:
     }
     void SetParentFocusable(bool parentFocusable);
 
-    void RefreshFocus();
-
     void SetFocusable(bool focusable, bool isExplicit = true);
     void SetShow(bool show);
     void SetEnabled(bool enabled);
@@ -1065,7 +1063,6 @@ protected:
     bool AcceptFocusOfLastFocus();
     bool AcceptFocusByRectOfLastFocus(const RectF& rect);
     bool AcceptFocusByRectOfLastFocusNode(const RectF& rect);
-    bool AcceptFocusByRectOfLastFocusScope(const RectF& rect);
     bool AcceptFocusByRectOfLastFocusFlex(const RectF& rect);
 
     bool CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) const;
