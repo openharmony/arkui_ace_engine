@@ -3340,7 +3340,7 @@ void WebPattern::OnQuickMenuDismissed()
     CloseSelectOverlay();
 }
 
-void WebPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap)
+void WebPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "called");
     CHECK_NULL_VOID(viewDataWrap);
