@@ -2363,30 +2363,22 @@ void SwiperPattern::HandleTouchBottomLoop()
 {
     auto currentFirstIndex = GetLoopIndex(currentFirstIndex_);
     auto currentIndex = GetLoopIndex(currentIndex_);
+
+    if (IsHorizontalAndRightToLeft()) {
+        currentFirstIndex = TotalCount() - 1 - currentFirstIndex;
+        currentIndex = TotalCount() - 1 - currentIndex;
+    }
+
     bool commTouchBottom = (currentFirstIndex == TotalCount() - 1);
     bool followTouchBottom = (commTouchBottom && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
                                                      gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT));
     if (followTouchBottom) {
         if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
-            if (IsHorizontalAndRightToLeft()) {
-                touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
-            } else {
-                touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
-            }
+            touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
         } else if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
-            if (IsHorizontalAndRightToLeft()) {
-                touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
-            } else {
-                touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
-            }
+            touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
         }
         return;
-    }
-
-    if (IsHorizontalAndRightToLeft()) {
-        currentFirstIndex = TotalCount() - 1 - currentFirstIndex;
-        currentIndex = TotalCount() - 1 - currentIndex;
-        commTouchBottom = (currentFirstIndex == TotalCount() - 1);
     }
 
     bool leftReleaseTouchBottom =
@@ -2407,23 +2399,25 @@ void SwiperPattern::HandleTouchBottomLoop()
 
 void SwiperPattern::CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex)
 {
+    auto currentIndex = GetLoopIndex(currentIndex_);
+    auto currentFirstIndex = GetLoopIndex(currentFirstIndex_);
+    if (IsHorizontalAndRightToLeft()) {
+        preFirstIndex = TotalCount() - 1 - preFirstIndex;
+        currentFirstIndex = TotalCount() - 1 - currentFirstIndex;
+        currentIndex = TotalCount() - 1 - currentIndex;
+    }
+
     // Keep follow hand
-    if (preFirstIndex == 0 && currentFirstIndex_ == TotalCount() - 1) {
+    if (preFirstIndex == 0 && currentFirstIndex == TotalCount() - 1) {
         needTurn_ = true;
         if (isTouchDown_ && LessOrEqual(mainDeltaSum_, 0.0f)) {
             needTurn_ = false;
         }
-    } else if (preFirstIndex == TotalCount() - 1 && currentFirstIndex_ == 0) {
+    } else if (preFirstIndex == TotalCount() - 1 && currentFirstIndex == 0) {
         needTurn_ = true;
         if (isTouchDown_ && GreatOrEqual(mainDeltaSum_, 0.0f)) {
             needTurn_ = false;
         }
-    }
-
-    auto currentFirstIndex = GetLoopIndex(currentFirstIndex_);
-    auto needTurn = needTurn_;
-    if (IsHorizontalAndRightToLeft() && currentFirstIndex == TotalCount() - 1 && GetLoopIndex(currentIndex_) == 0) {
-        needTurn = true;
     }
 
     if (GreatNotEqual(additionalOffset, 0.0f)) {
@@ -2432,12 +2426,66 @@ void SwiperPattern::CalculateGestureState(float additionalOffset, float currentT
     } else if (LessNotEqual(additionalOffset, 0.0f)) {
         gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
         needTurn_ = false;
-    } else if (currentFirstIndex >= GetLoopIndex(currentIndex_)) {
-        gestureState_ = needTurn ? GestureState::GESTURE_STATE_FOLLOW_LEFT : GestureState::GESTURE_STATE_FOLLOW_RIGHT;
-    } else if (currentFirstIndex < GetLoopIndex(currentIndex_)) {
-        gestureState_ = needTurn ? GestureState::GESTURE_STATE_FOLLOW_RIGHT : GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    } else if (currentFirstIndex >= currentIndex) {
+        gestureState_ = needTurn_ ? GestureState::GESTURE_STATE_FOLLOW_LEFT : GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    } else if (currentFirstIndex < currentIndex) {
+        gestureState_ = needTurn_ ? GestureState::GESTURE_STATE_FOLLOW_RIGHT : GestureState::GESTURE_STATE_FOLLOW_LEFT;
     }
     return;
+}
+
+std::pair<float, float> SwiperPattern::CalcCurrentPageStatusOnRTL(float additionalOffset) const
+{
+    float currentTurnPageRate = FLT_MAX;
+    auto firstIndex = currentFirstIndex_;
+    for (auto iter = itemPosition_.rbegin(); iter != itemPosition_.rend(); iter++) {
+        auto startPos = contentMainSize_ - iter->second.endPos;
+        auto endPos = contentMainSize_ - iter->second.startPos;
+        if (LessNotEqual((startPos + additionalOffset), 0) && LessNotEqual((endPos + additionalOffset), 0)) {
+            continue;
+        }
+        if (GreatOrEqual((startPos + additionalOffset), 0) && GreatNotEqual((endPos + additionalOffset), 0)) {
+            firstIndex = iter->first;
+            currentTurnPageRate = 0.0f;
+            break;
+        }
+        if (GreatNotEqual((endPos + additionalOffset), 0)) {
+            firstIndex = iter->first;
+            currentTurnPageRate =
+                (NearEqual(endPos, startPos) ? 0 : ((startPos + additionalOffset) / (endPos - startPos)));
+            break;
+        }
+    }
+
+    return std::make_pair(currentTurnPageRate, firstIndex);
+}
+
+std::pair<float, float> SwiperPattern::CalcCurrentPageStatus(float additionalOffset) const
+{
+    float currentTurnPageRate = FLT_MAX;
+    auto firstIndex = currentFirstIndex_;
+    for (const auto& iter : itemPosition_) {
+        if (LessNotEqual((iter.second.startPos + additionalOffset), 0) &&
+            LessNotEqual((iter.second.endPos + additionalOffset), 0)) {
+            continue;
+        }
+        if (GreatOrEqual((iter.second.startPos + additionalOffset), 0) &&
+            GreatNotEqual((iter.second.endPos + additionalOffset), 0)) {
+            firstIndex = iter.first;
+            currentTurnPageRate = 0.0f;
+            break;
+        }
+        if (GreatNotEqual((iter.second.endPos + additionalOffset), 0)) {
+            firstIndex = iter.first;
+            currentTurnPageRate =
+                (NearEqual(iter.second.endPos, iter.second.startPos)
+                        ? 0
+                        : ((iter.second.startPos + additionalOffset) / (iter.second.endPos - iter.second.startPos)));
+            break;
+        }
+    }
+
+    return std::make_pair(currentTurnPageRate, firstIndex);
 }
 
 void SwiperPattern::UpdateNextValidIndex()
@@ -2466,27 +2514,10 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset,
     }
 
     int32_t preFirstIndex = currentFirstIndex_;
-    float currentTurnPageRate = FLT_MAX;
-    for (const auto& iter : itemPosition_) {
-        if (LessNotEqual((iter.second.startPos + additionalOffset), 0) &&
-            LessNotEqual((iter.second.endPos + additionalOffset), 0)) {
-            continue;
-        }
-        if (GreatOrEqual((iter.second.startPos + additionalOffset), 0) &&
-            GreatNotEqual((iter.second.endPos + additionalOffset), 0)) {
-            currentFirstIndex_ = iter.first;
-            currentTurnPageRate = 0.0f;
-            break;
-        }
-        if (GreatNotEqual((iter.second.endPos + additionalOffset), 0)) {
-            currentFirstIndex_ = iter.first;
-            currentTurnPageRate =
-                (NearEqual(iter.second.endPos, iter.second.startPos)
-                        ? 0
-                        : ((iter.second.startPos + additionalOffset) / (iter.second.endPos - iter.second.startPos)));
-            break;
-        }
-    }
+    auto currentPageStatus = IsHorizontalAndRightToLeft() ? CalcCurrentPageStatusOnRTL(additionalOffset)
+                                                          : CalcCurrentPageStatus(additionalOffset);
+    float currentTurnPageRate = currentPageStatus.first;
+    currentFirstIndex_ = currentPageStatus.second;
 
     currentFirstIndex_ = nextIndex.value_or(currentFirstIndex_);
     UpdateNextValidIndex();
