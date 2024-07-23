@@ -271,6 +271,11 @@ public:
         }
     }
 
+    const std::vector<PointF>& GetStepPointVec() const
+    {
+        return stepPointVec_;
+    }
+
 private:
     void InitializeShapeProperty();
     RSRect GetTrackRect();
@@ -353,6 +358,7 @@ private:
     Color blockOuterEdgeColor_;
     Color blockShadowColor_;
     RefPtr<BasicShape> shape_;
+    std::vector<PointF> stepPointVec_;
     ACE_DISALLOW_COPY_AND_MOVE(SliderContentModifier);
 };
 
