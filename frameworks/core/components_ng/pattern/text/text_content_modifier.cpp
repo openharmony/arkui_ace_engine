@@ -352,8 +352,9 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     auto pManager = textPattern->GetParagraphManager();
     CHECK_NULL_VOID(pManager);
     CHECK_NULL_VOID(!pManager->GetParagraphs().empty());
-    ACE_SCOPED_TRACE(
-        "Text[id:%d] paint[offset:%f,%f]", textPattern->GetHost()->GetId(), paintOffset_.GetX(), paintOffset_.GetY());
+    auto host = textPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f]", host->GetId(), paintOffset_.GetX(), paintOffset_.GetY());
 
     auto info = GetFadeoutInfo(drawingContext);
     bool isDrawNormal = !ifPaintObscuration || ifHaveSpanItemChildren_;
@@ -935,7 +936,7 @@ void TextContentModifier::StartTextRace(const MarqueeOption& option)
     if (!SetTextRace(option)) {
         return;
     }
-
+    TAG_LOGD(AceLogTag::ACE_TEXT, "StartTextRace:%{public}d", textRacing_);
     marqueeSet_ = true;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         UpdateImageNodeVisible(VisibleType::INVISIBLE);
@@ -1046,6 +1047,7 @@ void TextContentModifier::SetTextRaceAnimation(const AnimationOption& option)
 
 void TextContentModifier::PauseTextRace()
 {
+    TAG_LOGD(AceLogTag::ACE_TEXT, "PauseTextRace:%{public}d", textRacing_);
     if (!textRacing_) {
         return;
     }

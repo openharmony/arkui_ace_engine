@@ -94,6 +94,9 @@ void TextPattern::OnWindowHide()
 {
     CHECK_NULL_VOID(contentMod_);
     contentMod_->PauseAnimation();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    TAG_LOGD(AceLogTag::ACE_TEXT, "OnWindowHide [%{public}d]", host->GetId());
 }
 
 void TextPattern::OnWindowShow()
@@ -107,6 +110,8 @@ void TextPattern::OnWindowShow()
     if (visibleRect.IsEmpty()) {
         return;
     }
+    TAG_LOGD(AceLogTag::ACE_TEXT, "OnWindowShow [%{public}d], [Rect:%{public}s]", host->GetId(),
+        visibleRect.ToString().c_str());
     contentMod_->ResumeAnimation();
 }
 
@@ -2087,6 +2092,7 @@ void TextPattern::OnModifyDone()
 
     if (CheckNeedMeasure(textLayoutProperty->GetPropertyChangeFlag()) && pManager_) {
         // measure flag changed, reset paragraph.
+        ACE_TEXT_SCOPED_TRACE("OnModifyDone[Text][id:%d]", host->GetId());
         pManager_->Reset();
     }
 
