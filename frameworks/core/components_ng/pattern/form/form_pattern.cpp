@@ -588,6 +588,7 @@ void FormPattern::OnModifyDone()
     layoutProperty->UpdateRequestFormInfo(info);
     UpdateBackgroundColorWhenUnTrustForm();
     info.obscuredMode = isFormObscured_;
+    info.obscuredMode |= CheckFormBundleForbidden(info.bundleName);
     HandleFormComponent(info);
 }
 
@@ -615,6 +616,7 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     UpdateBackgroundColorWhenUnTrustForm();
     info.obscuredMode = isFormObscured_;
+    info.obscuredMode |= CheckFormBundleForbidden(info.bundleName);
     HandleFormComponent(info);
     return false;
 }
@@ -680,7 +682,7 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
 #else
     formManagerBridge_->AddForm(host->GetContextRefPtr(), info);
 #endif
-    if (formManagerBridge_->CheckFormBundleForbidden(info.bundleName)) {
+    if (CheckFormBundleForbidden(info.bundleName)) {
         LoadDisableFormStyle(info);
     }
 }
@@ -1892,5 +1894,11 @@ void FormPattern::UnregisterAccessibility()
     auto formNode = DynamicCast<FormNode>(host);
     CHECK_NULL_VOID(formNode);
     formNode->ClearAccessibilityChildTreeRegisterFlag();
+}
+
+bool FormPattern::CheckFormBundleForbidden(const std::string &bundleName)
+{
+    CHECK_NULL_RETURN(formManagerBridge_, false);
+    return formManagerBridge_->CheckFormBundleForbidden(bundleName);
 }
 } // namespace OHOS::Ace::NG
