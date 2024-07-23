@@ -138,7 +138,7 @@ RefPtr<FrameNode> PasswordResponseArea::CreateNode()
     AddEvent(stackNode);
     stackNode->MarkModifyDone();
 
-    if (isShowSymbol()) {
+    if (IsShowSymbol()) {
         auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
         CHECK_NULL_RETURN(symbolNode, nullptr);
@@ -212,8 +212,7 @@ void PasswordResponseArea::Refresh()
         return;
     }
 
-    if (isShowSymbol()) {
-        UpdateSymbolSource();
+    if (IsShowSymbol()) {
         return;
     }
 
@@ -237,7 +236,7 @@ void PasswordResponseArea::ChangeObscuredState()
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    if (isShowSymbol()) {
+    if (IsShowSymbol()) {
         UpdateSymbolSource();
     } else {
         UpdateImageSource();
@@ -398,7 +397,7 @@ void PasswordResponseArea::UpdateSymbolSource()
     CHECK_NULL_VOID(symbolNode);
     auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(symbolProperty);
-    auto currentSymbolId = isObscured_ ? textFieldTheme->GetShowSymbolId() : textFieldTheme->GetHideSymbolId();
+    auto currentSymbolId = isObscured_ ? textFieldTheme->GetHideSymbolId() : textFieldTheme->GetShowSymbolId();
     symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(currentSymbolId));
     symbolProperty->UpdateFontSize(textFieldTheme->GetSymbolSize());
     symbolProperty->UpdateSymbolColorList({ textFieldTheme->GetSymbolColor() });
@@ -421,12 +420,11 @@ void PasswordResponseArea::InitSymbolEffectOptions()
     symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
 }
 
-bool PasswordResponseArea::isShowSymbol()
+bool PasswordResponseArea::IsShowSymbol()
 {
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
     CHECK_NULL_RETURN(textFieldPattern, false);
-    return textFieldPattern->GetIsPasswordSymbol() &&
-        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN);
+    return textFieldPattern->IsShowPasswordSymbol();
 }
 
 bool PasswordResponseArea::IsShowPasswordIcon()
