@@ -80,6 +80,12 @@ RichEditorModel* RichEditorModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+enum class RenderingStrategy {
+    SINGLE = 0,
+    MULTIPLE_COLOR,
+    MULTIPLE_OPACITY
+};
+
 CalcDimension JSRichEditor::ParseLengthMetrics(const JSRef<JSObject>& obj)
 {
     CalcDimension size;
@@ -1339,6 +1345,10 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     JSRef<JSVal> renderingStrategy = styleObject->GetProperty("renderingStrategy");
     uint32_t symbolRenderStrategy;
     if (!renderingStrategy->IsNull() && JSContainerBase::ParseJsInteger(renderingStrategy, symbolRenderStrategy)) {
+        if (symbolRenderStrategy < 0 ||
+            symbolRenderStrategy > static_cast<uint32_t>(RenderingStrategy::MULTIPLE_OPACITY)) {
+            symbolRenderStrategy = static_cast<uint32_t>(RenderingStrategy::SINGLE);
+        }
         updateSpanStyle.updateSymbolRenderingStrategy = symbolRenderStrategy;
         style.SetRenderStrategy(symbolRenderStrategy);
     }
