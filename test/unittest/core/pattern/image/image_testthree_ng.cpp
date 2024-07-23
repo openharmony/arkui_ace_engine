@@ -1150,6 +1150,10 @@ HWTEST_F(ImageTestThreeNg, ImagePatternSetOnFinishCallback, TestSize.Level1)
     imagePattern->SetOnFinishCallback(canvasImage);
     imagePattern->SetRedrawCallback(canvasImage);
     EXPECT_EQ(imagePattern->image_, nullptr);
+    EXPECT_NE(canvasImage->redrawCallback_, nullptr);
+    canvasImage->redrawCallback_();
+    EXPECT_NE(canvasImage->onFinishCallback_, nullptr);
+    canvasImage->onFinishCallback_();
 }
 
 /**
@@ -1184,6 +1188,9 @@ HWTEST_F(ImageTestThreeNg, ImagePatternCalAndUpdateSelectOverlay, TestSize.Level
     imagePattern->OpenSelectOverlay();
     imagePattern->CalAndUpdateSelectOverlay();
     EXPECT_NE(imagePattern->selectOverlay_.GetRawPtr(), nullptr);
+    auto info = imagePattern->selectOverlay_->GetSelectOverlayMangerInfo();
+    info.onHandleMoveDone(RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_WIDTH), true);
+    info.menuCallback.onCopy();
 }
 
 /**
@@ -1698,5 +1705,71 @@ HWTEST_F(ImageTestThreeNg, ImagePatternSetImageFit, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->SetImageFit(frameNode);
     EXPECT_FALSE(frameNode->GetPaintProperty<ImageRenderProperty>()->HasImageFit());
+}
+
+void ImagePatternMethods01()
+{
+    auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
+
+    imagePattern->TriggerFirstVisibleAreaChange();
+    EXPECT_EQ(imagePattern->gifAnimation_, false);
+    imagePattern->imageAnalyzerManager_ = nullptr;
+    EXPECT_EQ(imagePattern->IsSupportImageAnalyzerFeature(), false);
+    auto frameNodePtr = AceType::Claim(frameNode);
+    imagePattern->AddImageLoadSuccessEvent(frameNodePtr);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    EXPECT_NE(eventHub->completeEvent_, nullptr);
+    LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT);
+    eventHub->FireCompleteEvent(loadImageSuccessEvent);
+    loadImageSuccessEvent.loadingStatus_ = -1;
+    eventHub->FireCompleteEvent(loadImageSuccessEvent);
+
+    RefPtr<PixelMap> pixelMap = nullptr;
+    EXPECT_NE(ImagePattern::IsShowingSrc(frameNodePtr, pixelMap), false);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    pipeline->SetIsFormRender(true);
+
+    imagePattern->UpdateFormDurationByRemainder();
+    EXPECT_EQ(imagePattern->isFormAnimationEnd_, true);
+
+    imagePattern->ResetFormAnimationFlag();
+    EXPECT_EQ(imagePattern->formAnimationRemainder_, DURATION_DEFAULT);
+
+    imagePattern->SetIteration(DURATION_DEFAULT);
+    EXPECT_EQ(imagePattern->animator_->iteration_, ITERATION_DEFAULT);
+
+    imagePattern->SetDuration(1);
+    int testData = 0;
+    std::function onProgress = [&testData](const uint32_t&, const uint32_t&) {
+        testData = 1;
+    };
+    imagePattern->SetOnProgressCallback(std::move(onProgress));
+    imagePattern->onProgressCallback_(uint32_t(0), uint32_t(1));
+    EXPECT_EQ(testData, 1);
+
+    imagePattern->EnableDrag();
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    eventHub->defaultOnDragStart_(dragEvent, string(""));
+    EXPECT_EQ(dragEvent->GetData(), nullptr);
+
+    std::vector<float> matrix = {1.1f};
+    ImageModelNG::SetColorFilterMatrix(frameNode, matrix);
+    imagePattern->SetColorFilter(frameNodePtr);
+    EXPECT_EQ(imageRenderProperty->GetColorFilter().value(), matrix);
+
+    ImageModelNG::SetImageFit(frameNode, ImageFit::COVER);
+    imagePattern->SetImageFit(frameNodePtr);
+    EXPECT_EQ(imageRenderProperty->GetImageFitValue(), ImageFit::COVER);
+}
+
+/**
+ * @tc.name:  ImagePatternMethods
+ * @tc.desc: call void methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternMethods, TestSize.Level1)
+{
+    ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ImagePatternMethods01();
 }
 } // namespace OHOS::Ace::NG

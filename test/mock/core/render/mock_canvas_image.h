@@ -30,6 +30,19 @@ public:
     MOCK_METHOD3(DrawRect, void(RSCanvas&, const RSRect&, const RSRect&));
     MOCK_CONST_METHOD0(GetWidth, int32_t());
     MOCK_CONST_METHOD0(GetHeight, int32_t());
+
+    void SetRedrawCallback(std::function<void()>&& callback)  override
+    {
+        redrawCallback_ = callback;
+    }
+
+    void SetOnFinishCallback(std::function<void ()> &&callback) override
+    {
+        onFinishCallback_ = callback;
+    }
+
+    std::function<void()> redrawCallback_ = nullptr;
+    std::function<void()> onFinishCallback_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_MOCK_CANVAS_IMAGE__H
