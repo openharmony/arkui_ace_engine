@@ -417,8 +417,8 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
     double minFontSize = 0.0;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    maxFontSize =
-        textStyle.GetAdaptMaxFontSize().ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+    auto maxFontSizeDimension = textStyle.GetAdaptMaxFontSize();
+    maxFontSize = maxFontSizeDimension.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     minFontSize =
         textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
@@ -428,8 +428,8 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
         }
         return true;
     }
-    constexpr Dimension ADAPT_UNIT = 1.0_fp;
-    Dimension step = ADAPT_UNIT;
+    auto adaptUnit = maxFontSizeDimension.GetAdaptDimensionUnit(textStyle.GetAdaptMinFontSize());
+    Dimension step(1.0f, adaptUnit);
     if (GreatNotEqual(textStyle.GetAdaptFontSizeStep().Value(), 0.0)) {
         step = textStyle.GetAdaptFontSizeStep();
     }
