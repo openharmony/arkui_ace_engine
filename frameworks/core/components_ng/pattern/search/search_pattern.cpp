@@ -99,26 +99,12 @@ void SearchPattern::UpdateChangeEvent(const std::string& textValue, int16_t styl
     imageHost->MarkModifyDone();
     buttonHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    UpdateFocusTextColor(imageHost);
+    PaintSearchFocusState();
+    JudgmentImageHost(imageHost);
 }
 
-void SearchPattern::UpdateFocusTextColor(const RefPtr<FrameNode>& imageHost)
+void SearchPattern::JudgmentImageHost(const RefPtr<FrameNode>& imageHost)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(searchTheme);
-    auto focusTextColor_ = searchTheme->GetFocusTextColor();
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
-    CHECK_NULL_VOID(textFieldFrameNode);
-    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textFieldLayoutProperty);
-    textFieldLayoutProperty->UpdateTextColor(focusTextColor_);
     if (imageHost->GetTag() == V2::SYMBOL_ETS_TAG) {
         auto textLayoutProperty = imageHost->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
@@ -1751,7 +1737,7 @@ void SearchPattern::InitIconColorSize()
     } else {
         GetSearchNode()->SetCancelIconColor(searchTheme->GetSearchIconColor());
         GetSearchNode()->SetSearchIconColor(searchTheme->GetSearchIconColor());
-        normalIconColor_ = searchTheme->GetSymbolIconColor();
+        normalIconColor_ = searchTheme->GetSearchIconColor();
     }
 }
 
