@@ -159,9 +159,16 @@ void ModelAdapterWrapper::OnDirtyLayoutWrapperSwap(const Render3D::WindowChangeI
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);
         CHECK_NULL_VOID(adapter->textureLayer_);
-        CHECK_NULL_VOID(adapter->widgetAdapter_);
 
         adapter->textureLayer_->OnWindowChange(windowChangeInfo);
+    });
+
+    Render3D::GraphicsTask::GetInstance().PushAsyncMessage([weak = WeakClaim(this)] {
+        auto adapter = weak.Upgrade();
+        CHECK_NULL_VOID(adapter);
+        CHECK_NULL_VOID(adapter->textureLayer_);
+        CHECK_NULL_VOID(adapter->widgetAdapter_);
+
         adapter->widgetAdapter_->OnWindowChange(adapter->textureLayer_->GetTextureInfo());
     });
 }
