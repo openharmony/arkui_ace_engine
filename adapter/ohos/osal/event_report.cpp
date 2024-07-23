@@ -522,7 +522,7 @@ void EventReport::ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stat
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         CURRENTPKG, packageName,
         MAXMENUITEM, maxMenuItem,
-        CHANGEDEFAULTSETTING, stateChange);
+        STATECHANGE, stateChange);
 }
 
 void EventReport::ReportPageNodeOverflow(const std::string& pageUrl, int32_t nodeCount, int32_t threshold)
