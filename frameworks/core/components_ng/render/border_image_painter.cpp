@@ -155,8 +155,7 @@ void BorderImagePainter::InitBorderImageOutset()
         widthProp_.leftDimen->NormalizeToPx(dipScale_, 0.0, lpxScale_, paintSize_.Width(), leftOutset_);
     }
     if (GreatNotEqual(imageRight.GetBorderImageOutset().Value(), 0.0)) {
-        imageRight.GetBorderImageOutset().NormalizeToPx(
-            0.0, 0.0, lpxScale_, paintSize_.Width(), rightOutset_);
+        imageRight.GetBorderImageOutset().NormalizeToPx(dipScale_, 0.0, lpxScale_, paintSize_.Width(), rightOutset_);
     } else if (hasWidthProp_) {
         widthProp_.rightDimen->NormalizeToPx(dipScale_, 0.0, lpxScale_, paintSize_.Width(), rightOutset_);
     }

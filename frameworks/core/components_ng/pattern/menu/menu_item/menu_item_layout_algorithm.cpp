@@ -23,10 +23,6 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-    constexpr Dimension MENU_ITEM_CHILD_MIN_HEIGHT = 32.0_vp;
-    constexpr Dimension MENU_ITEM_VERTICAL_PADDING = 8.0_vp;
-}
 void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -43,7 +39,7 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutConstraint = props->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        verInterval_ = static_cast<float>(MENU_ITEM_VERTICAL_PADDING.ConvertToPx()) - GetBordersHeight(layoutWrapper);
+        verInterval_ = GetMenuItemVerticalPadding() - GetBordersHeight(layoutWrapper);
     }
     const auto& padding = props->CreatePaddingAndBorderWithDefault(horInterval_, verInterval_, 0.0f, 0.0f);
     maxRowWidth_ = layoutConstraint->maxSize.Width() - padding.Width();
@@ -61,6 +57,10 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             ConvertToPx(calcConstraint->selfIdealSize.value().Width()->GetDimension(), scaleProperty,
                 layoutConstraint->percentReference.Width()));
     }
+    if (calcConstraint && calcConstraint->selfIdealSize.has_value() &&
+        calcConstraint->selfIdealSize.value().Height().has_value()) {
+        idealHeight_ = calcConstraint->selfIdealSize.value().Height()->GetDimension().ConvertToPx();
+    }
     if (layoutConstraint->selfIdealSize.Width().has_value()) {
         maxRowWidth_ =
             std::max(layoutConstraint->minSize.Width(),
@@ -74,7 +74,7 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     minItemHeight_ = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
     // set item min height
     childConstraint.minSize.SetHeight(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) ?
-        MENU_ITEM_CHILD_MIN_HEIGHT.ConvertToPx() : minItemHeight_);
+        theme->GetMenuChildMinHeight().ConvertToPx() : minItemHeight_);
 
     iconSize_ = theme->GetIconSideLength().ConvertToPx();
     MeasureItemViews(childConstraint, layoutConstraint, padding, layoutWrapper);
@@ -102,12 +102,10 @@ void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
     auto rightRowSize = rightRow ? rightRow->GetGeometryNode()->GetFrameSize() : SizeT(0.0f, 0.0f);
 
-    auto itemHeight = std::max(leftRowSize.Height(), rightRowSize.Height()) + padding.Height();
+    auto itemHeight = idealHeight_ > 0.0f ? idealHeight_ :
+        std::max(leftRowSize.Height(), rightRowSize.Height()) + padding.Height();
     CHECK_NULL_VOID(leftRow);
     float topSpace = (itemHeight - leftRowSize.Height() + GetBordersHeight(layoutWrapper)) / 2.0f;
-    if (padding.top.has_value() && Positive(padding.top.value()) && padding.top.value() > topSpace) {
-        topSpace = padding.top.value();
-    }
     leftRow->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     leftRow->GetGeometryNode()->SetMarginFrameOffset(OffsetF(padding.left.value_or(horInterval_), topSpace));
     if (layoutDirection == TextDirection::RTL) {
@@ -120,9 +118,6 @@ void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     CHECK_NULL_VOID(rightRow);
     topSpace = (itemHeight - rightRowSize.Height() + GetBordersHeight(layoutWrapper)) / 2.0f;
-    if (padding.top.has_value() && Positive(padding.top.value()) && padding.top.value() > topSpace) {
-        topSpace = padding.top.value();
-    }
     rightRow->GetGeometryNode()->SetMarginFrameOffset(
         OffsetF(layoutWrapper->GetGeometryNode()->GetFrameSize().Width() - padding.right.value_or(horInterval_) -
             rightRow->GetGeometryNode()->GetFrameSize().Width(), topSpace));
@@ -234,7 +229,7 @@ void MenuItemLayoutAlgorithm::MeasureRow(const RefPtr<LayoutWrapper>& row, const
     float spaceWidth = constraint.maxSize.Width();
     float rowWidth = 0.0f;
     float rowHeight = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) ?
-	MENU_ITEM_CHILD_MIN_HEIGHT.ConvertToPx() : minItemHeight_;
+	theme->GetMenuChildMinHeight().ConvertToPx() : minItemHeight_;
     for (const auto& child : children) {
         if (child != children.back()) {
             // not content node
@@ -312,5 +307,15 @@ float MenuItemLayoutAlgorithm::GetBordersHeight(LayoutWrapper* layoutWrapper)
     CHECK_NULL_RETURN(border, 0.0f);
     return border->topDimen.value_or(Dimension(0.0)).ConvertToPx() +
         border->bottomDimen.value_or(Dimension(0.0)).ConvertToPx();
+}
+
+float MenuItemLayoutAlgorithm::GetMenuItemVerticalPadding()
+{
+    float ret = 0.0f;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, ret);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, ret);
+    return theme->GetMenuItemVerticalPadding().ConvertToPx();
 }
 } // namespace OHOS::Ace::NG

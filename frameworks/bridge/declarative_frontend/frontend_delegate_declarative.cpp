@@ -1697,6 +1697,7 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = title,
         .content = message,
         .autoCancel = autoCancel,
@@ -1711,6 +1712,7 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter with status changed");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = title,
         .content = message,
         .autoCancel = autoCancel,
@@ -1725,6 +1727,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter with attr");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
@@ -1765,6 +1768,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter with attr for status changed");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
@@ -1887,7 +1891,6 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const WeakPtr<NG::UINode>& n
         CHECK_NULL_VOID(overlayManager);
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
         overlayManager->CloseCustomDialog(node, std::move(callback));
-        SubwindowManager::GetInstance()->CloseCustomDialogNG(node, std::move(callback));
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog");
     return;
@@ -1907,12 +1910,11 @@ void FrontendDelegateDeclarative::UpdateCustomDialog(
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
     }
-    auto task = [dialogAttr, dialogProperties, node, callback]
+    auto task = [dialogProperties, node, callback]
         (const RefPtr<NG::OverlayManager>& overlayManager) mutable {
         CHECK_NULL_VOID(overlayManager);
         LOGI("begin to update custom dialog.");
         overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
-        SubwindowManager::GetInstance()->UpdateCustomDialogNG(node, dialogAttr, std::move(callback));
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayUpdateCustomDialog");
     return;

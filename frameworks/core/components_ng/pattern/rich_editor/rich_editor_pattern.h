@@ -351,7 +351,9 @@ public:
     void NotifyKeyboardClosed() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
-        FocusHub::LostFocusToViewRoot();
+        if (!isCustomKeyboardAttached_ && HasFocus()) {
+            FocusHub::LostFocusToViewRoot();
+        }
     }
     void ClearOperationRecords();
     void ClearRedoOperationRecords();
@@ -379,6 +381,8 @@ public:
     int32_t CalcLineBeginPosition();
     float GetTextThemeFontSize();
     int32_t CalcLineEndPosition();
+    int32_t CalcSingleLineBeginPosition(int32_t fixedPos);
+    int32_t CalcSingleLineEndPosition(int32_t fixedPos);
     bool CursorMoveLineBegin();
     bool CursorMoveLineEnd();
     void HandleSelectFontStyle(KeyCode code) override;
@@ -386,7 +390,7 @@ public:
     void HandleOnShowMenu() override;
     int32_t HandleSelectPosition(bool isForward);
     int32_t HandleSelectParagraghPos(bool direction);
-    int32_t HandleSelectWrapper(CaretMoveIntent direction);
+    int32_t HandleSelectWrapper(CaretMoveIntent direction, int32_t fixedPos);
     void AIDeleteComb(int32_t start, int32_t end, int32_t& aiPosition, bool direction);
     bool HandleOnDeleteComb(bool backward) override;
     int32_t GetLeftWordPosition(int32_t caretPosition);
@@ -395,7 +399,7 @@ public:
     int32_t GetParagraphEndPosition(int32_t caretPosition);
     int32_t CaretPositionSelectEmoji(CaretMoveIntent direction);
     void HandleSelect(CaretMoveIntent direction) override;
-    bool SetCaretPosition(int32_t pos);
+    bool SetCaretPosition(int32_t pos, bool needNotifyImf = true);
     int32_t GetCaretPosition();
     int32_t GetTextContentLength() override;
     bool GetCaretVisible() const;
@@ -596,7 +600,7 @@ public:
     }
     void DumpInfo() override;
     void MouseDoubleClickParagraphEnd(int32_t& index);
-    void DoubleClickExcludeSymbol(int32_t& start, int32_t& end);
+    void AdjustSelectionExcludeSymbol(int32_t& start, int32_t& end);
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
     void OnColorConfigurationUpdate() override;
@@ -808,6 +812,11 @@ public:
         selectOverlay_->OnAncestorNodeChanged(flag);
     }
 
+    bool IsTouchCaret() const
+    {
+        return isTouchCaret_;
+    }
+
 protected:
     bool CanStartAITask() override;
 
@@ -825,8 +834,8 @@ private:
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
-    bool RepeatClickCaret(const Offset& offset, int32_t lastCaretPosition, const RectF& lastCaretRect);
-    void CreateAndShowSingleHandle(GestureEvent& info);
+    bool RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect);
+    void CreateAndShowSingleHandle(bool isShowMenu = true);
     void MoveCaretAndStartFocus(const Offset& offset);
     void HandleDoubleClickEvent(GestureEvent& info);
     bool HandleUserClickEvent(GestureEvent& info);
@@ -1030,6 +1039,7 @@ private:
     void OnTextInputActionUpdate(TextInputAction value);
     void CloseSystemMenu();
     void SetAccessibilityAction() override;
+    void SetAccessibilityEditAction();
     void HandleTripleClickEvent(OHOS::Ace::GestureEvent& info);
     void UpdateSelectionByTouchMove(const Offset& offset);
     void MoveCaretAnywhere(const Offset& touchOffset);
@@ -1063,6 +1073,20 @@ private:
     void TripleClickSection(GestureEvent& info, int32_t start, int32_t end, int32_t pos);
     SelectType CheckResult(const Offset& pos, int32_t currentPosition);
     void RequestKeyboardToEdit();
+    void HandleTasksOnLayoutSwap()
+    {
+        while (!tasks_.empty()) {
+            const auto& task = tasks_.front();
+            if (task) {
+                task();
+            }
+            tasks_.pop();
+        }
+    }
+    void PostTaskToLayutSwap(std::function<void()>&& task)
+    {
+        tasks_.emplace(std::forward<std::function<void()>>(task));
+    }
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1165,6 +1189,8 @@ private:
     std::vector<TimeStamp> clickInfo_;
     bool previewLongPress_ = false;
     bool editingLongPress_ = false;
+    bool needMoveCaretToContentRect_ = false;
+    std::queue<std::function<void()>> tasks_;
 };
 } // namespace OHOS::Ace::NG
 

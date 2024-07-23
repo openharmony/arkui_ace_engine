@@ -308,6 +308,10 @@ void RosenRenderContext::DetachModifiers()
     if (scaleXYUserModifier_) {
         rsNode_->RemoveModifier(scaleXYUserModifier_);
     }
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    if (pipeline) {
+        pipeline->RequestFrame();
+    }
 }
 
 void RosenRenderContext::StartRecording()
@@ -829,10 +833,9 @@ void RosenRenderContext::PaintBackground()
         return;
     }
     auto srcSize = bgLoadingCtx_->GetImageSize();
-    SizeF renderSize = ImagePainter::CalculateBgImageSize(
-        GetHost()->GetGeometryNode()->GetFrameSize(), srcSize, GetBackgroundImageSize());
-    OffsetF positionOffset = ImagePainter::CalculateBgImagePosition(
-        GetHost()->GetGeometryNode()->GetFrameSize(), renderSize, GetBackgroundImagePosition());
+    SizeF renderSize = ImagePainter::CalculateBgImageSize(paintRect_.GetSize(), srcSize, GetBackgroundImageSize());
+    OffsetF positionOffset =
+        ImagePainter::CalculateBgImagePosition(paintRect_.GetSize(), renderSize, GetBackgroundImagePosition());
     auto slice = GetBackgroundImageResizableSliceValue(ImageResizableSlice());
     Rosen::Vector4f rect(slice.left.ConvertToPxWithSize(srcSize.Width()),
         slice.top.ConvertToPxWithSize(srcSize.Height()),
@@ -983,7 +986,7 @@ bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<BlurStyle
     if (!bgBlurStyle.has_value()) {
         return false;
     }
-    bool blurEnable = bgBlurStyle->policy == BlurStyleActivePolicy::ALAWYS_ACTIVE ||
+    bool blurEnable = bgBlurStyle->policy == BlurStyleActivePolicy::ALWAYS_ACTIVE ||
         (bgBlurStyle->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE && bgBlurStyle->isWindowFocused);
     if (bgBlurStyle->isValidColor) {
         if (blurEnable) {
@@ -997,7 +1000,7 @@ bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<BlurStyle
 
 bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<EffectOption>& efffectOption)
 {
-    bool blurEnable = efffectOption->policy == BlurStyleActivePolicy::ALAWYS_ACTIVE ||
+    bool blurEnable = efffectOption->policy == BlurStyleActivePolicy::ALWAYS_ACTIVE ||
         (efffectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE && efffectOption->isWindowFocused);
     if (efffectOption->isValidColor) {
         if (blurEnable) {
@@ -1647,16 +1650,16 @@ public:
     void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
     {
         if (pixelMap) {
-            std::unique_lock<std::mutex> lock(g_mutex);
 #ifdef PIXEL_MAP_SUPPORTED
             g_pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
 #endif // PIXEL_MAP_SUPPORTED
         } else {
             g_pixelMap = nullptr;
-            TAG_LOGW(AceLogTag::ACE_DRAG, "get drag thumbnail pixelMap failed!");
+            TAG_LOGE(AceLogTag::ACE_DRAG, "get thumbnail pixelMap failed!");
         }
 
         if (callback_ == nullptr) {
+            std::unique_lock<std::mutex> lock(g_mutex);
             thumbnailGet.notify_all();
             return;
         }
@@ -1681,10 +1684,12 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale)
     auto ret =
         RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY, true);
     if (!ret) {
+        LOGE("TakeSurfaceCaptureForUI failed!");
         return nullptr;
     }
     std::unique_lock<std::mutex> lock(g_mutex);
     if (thumbnailGet.wait_for(lock, PIXELMAP_TIMEOUT_DURATION) == std::cv_status::timeout) {
+        LOGE("get thumbnail pixelMap timeout!");
         return nullptr;
     }
     return g_pixelMap;
@@ -2625,7 +2630,9 @@ void RosenRenderContext::PaintAccessibilityFocus()
     Dimension paintWidth(lineWidth, DimensionUnit::PX);
     const auto& bounds = rsNode_->GetStagingProperties().GetBounds();
     RoundRect frameRect;
-    frameRect.SetRect(RectF(lineWidth, lineWidth, bounds.z_ - (2 * lineWidth), bounds.w_ - (2 * lineWidth)));
+    double noGreenBorderWidth = (bounds.w_ - (2 * lineWidth)) > 0 ? (bounds.w_ - (2 * lineWidth)) : 0;
+    double noGreenBorderHeight = (bounds.z_ - (2 * lineWidth)) > 0 ? (bounds.z_ - (2 * lineWidth)) : 0;
+    frameRect.SetRect(RectF(lineWidth, lineWidth, noGreenBorderHeight, noGreenBorderWidth));
     RectT<int32_t> localRect = GetAccessibilityFocusRect().value_or(RectT<int32_t>());
     if (localRect != RectT<int32_t>()) {
         RectF globalRect = frameRect.GetRect();

@@ -37,7 +37,7 @@ private:
     float MeasureAndGetDefaultHeight(RefPtr<LayoutProperty> layoutProps, RefPtr<SelectTheme> theme);
     void NeedAgingUpdateParams(LayoutWrapper* layoutWrapper);
     void UpdateOptionsMaxLines(const std::vector<RefPtr<FrameNode>>& options, int32_t maxLines);
-
+    void UpdateMargin(LayoutWrapper* layoutWrapper, RefPtr<SelectTheme> theme);
     float fontScale_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectLayoutAlgorithm);

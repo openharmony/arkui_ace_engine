@@ -135,6 +135,7 @@ public:
     void OnColorConfigurationUpdate() override;
     void UpdateBubbleText();
     void UpdateText(const RefPtr<UINode>& node, const RefPtr<PopupTheme>& popupTheme);
+    void AddPipelineCallBack();
 
     void SetMessageColor(bool isSetMessageColor)
     {

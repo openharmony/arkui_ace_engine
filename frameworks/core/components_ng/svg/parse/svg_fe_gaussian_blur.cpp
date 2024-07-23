@@ -34,7 +34,7 @@ void SvgFeGaussianBlur::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFil
 {
     imageFilter = MakeImageFilter(feAttr_.in, imageFilter, resultHash);
     RSRect filterRect(effectFilterArea_.Left(), effectFilterArea_.Top(),
-        effectFilterArea_.Width(), effectFilterArea_.Height());
+        effectFilterArea_.Right(), effectFilterArea_.Bottom());
     imageFilter = RSRecordingImageFilter::CreateBlurImageFilter(
         gaussianBlurAttr_.stdDeviationX, gaussianBlurAttr_.stdDeviationY,
         RSTileMode::DECAL, imageFilter, RSImageBlurType::GAUSS, filterRect);

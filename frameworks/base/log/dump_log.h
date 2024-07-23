@@ -29,7 +29,7 @@
 
 namespace OHOS::Ace {
 
-class DumpLog : public Singleton<DumpLog> {
+class ACE_FORCE_EXPORT DumpLog : public Singleton<DumpLog> {
     DECLARE_SINGLETON(DumpLog);
 
 public:

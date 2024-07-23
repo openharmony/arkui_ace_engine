@@ -577,13 +577,13 @@ bool WaterFlowLayoutInfoSW::AdjustLanes(const std::vector<WaterFlowSections::Sec
         return false;
     }
     const size_t n = sections.size();
-    const size_t curSegIdx = GetSegment(newStartIndex_);
+    const size_t curSegIdx = static_cast<size_t>(GetSegment(newStartIndex_));
     auto curSection = sections[curSegIdx];
     if (curSection.OnlyCountDiff(prevSection)) {
         // move old lanes_[prevSegIdx,...] to Lanes_[curSegIdx,...]
         if (n <= lanes_.size()) {
             // means curSegIdx <= prevSegIdx
-            for (size_t i = start; i < curSegIdx; ++i) {
+            for (size_t i = static_cast<size_t>(start); i < curSegIdx; ++i) {
                 lanes_[i] = std::vector<Lane>(sections[i].crossCount.value_or(1));
             }
             for (size_t i = curSegIdx; i < n; ++i) {
@@ -597,7 +597,7 @@ bool WaterFlowLayoutInfoSW::AdjustLanes(const std::vector<WaterFlowSections::Sec
             for (size_t i = n - 1; i >= curSegIdx; i--) {
                 lanes_[i] = lanes_[oriSize--];
             }
-            for (size_t i = start; i < curSegIdx; ++i) {
+            for (size_t i = static_cast<size_t>(start); i < curSegIdx; ++i) {
                 lanes_[i] = std::vector<Lane>(sections[i].crossCount.value_or(1));
             }
         }
@@ -609,13 +609,15 @@ bool WaterFlowLayoutInfoSW::AdjustLanes(const std::vector<WaterFlowSections::Sec
 
 bool WaterFlowLayoutInfoSW::PrepareNewStartIndex()
 {
-    if (newStartIndex_ == INVALID_NEW_START_INDEX) {
-        return false;
-    }
     if (newStartIndex_ == EMPTY_NEW_START_INDEX) {
         newStartIndex_ = StartIndex();
     }
-    
+    if (newStartIndex_ == Infinity<int32_t>()) {
+        newStartIndex_ = INVALID_NEW_START_INDEX;
+    }
+    if (newStartIndex_ == INVALID_NEW_START_INDEX) {
+        return false;
+    }
     return true;
 }
 

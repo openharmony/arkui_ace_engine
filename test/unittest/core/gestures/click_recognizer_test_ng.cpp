@@ -1323,9 +1323,10 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerHandleTouchUpEvent001, TestSize.L
     RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
     DimensionRect area;
     DimensionOffset origin;
-    EventTarget target = {"", "", area, origin};
+    EventTarget target = { "", "", area, origin };
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
-        return GestureJudgeResult::REJECT;};
+        return GestureJudgeResult::REJECT;
+    };
     targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
     TouchEvent touchEvent;
     touchEvent.tiltX.emplace(1.0f);
@@ -1346,5 +1347,39 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerHandleTouchUpEvent001, TestSize.L
     clickRecognizerPtr->gestureInfo_->SetTag("test");
     clickRecognizerPtr->HandleTouchUpEvent(touchEvent);
     EXPECT_EQ(clickRecognizerPtr->disposal_, GestureDisposal::REJECT);
+}
+
+/**
+ * @tc.name: ClickRecognizerHandleTouchUpEvent002
+ * @tc.desc: Test ClickRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerHandleTouchUpEvent002, TestSize.Level1)
+{
+    ClickRecognizer clickRecognizer = ClickRecognizer(FINGER_NUMBER, COUNT);
+    clickRecognizer.refereeState_ = RefereeState::SUCCEED;
+    clickRecognizer.currentFingers_ = 0;
+    clickRecognizer.CleanRecognizerState();
+
+    clickRecognizer.refereeState_ = RefereeState::FAIL;
+    clickRecognizer.currentFingers_ = 0;
+    clickRecognizer.CleanRecognizerState();
+
+    clickRecognizer.refereeState_ = RefereeState::DETECTING;
+    clickRecognizer.currentFingers_ = 0;
+    clickRecognizer.CleanRecognizerState();
+
+    clickRecognizer.refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    clickRecognizer.currentFingers_ = 0;
+    clickRecognizer.CleanRecognizerState();
+
+    clickRecognizer.refereeState_ = RefereeState::DETECTING;
+    clickRecognizer.currentFingers_ = 1;
+    clickRecognizer.CleanRecognizerState();
+
+    clickRecognizer.refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    clickRecognizer.currentFingers_ = 1;
+    clickRecognizer.CleanRecognizerState();
+    SUCCEED();
 }
 } // namespace OHOS::Ace::NG

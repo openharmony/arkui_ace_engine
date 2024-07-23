@@ -127,7 +127,7 @@ private:
     void SetTouchPoint(
         const std::list<TouchLocationInfo>& touchInfoList, const int64_t timeStamp, const TouchType& touchType);
     OH_NativeXComponent_TouchEventType ConvertNativeXComponentTouchEvent(const TouchType& touchType);
-    OH_NativeXComponent_TouchEvent touchEventPoint_;
+    OH_NativeXComponent_TouchEvent touchEventPoint_ { .screenX = 0, .screenY = 0 };
     std::vector<XComponentTouchPoint> nativeXComponentTouchPoints_;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;

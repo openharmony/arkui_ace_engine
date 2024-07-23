@@ -38,7 +38,7 @@ void TextDragOverlayModifier::onDraw(DrawingContext& context)
     auto pattern = DynamicCast<TextDragPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
     auto& canvas = context.canvas;
-    Color color(TEXT_DRAG_COLOR_BG);
+    Color color = pattern->GetDragBackgroundColor();
     RSBrush brush;
     brush.SetColor(ToRSColor(color));
     brush.SetAntiAlias(true);

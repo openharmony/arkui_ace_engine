@@ -25,6 +25,7 @@ public:
     RefPtr<ListPaintMethod> UpdateOverlayModifier();
     void UpdateDividerMap();
     void onDraw(RefPtr<PaintWrapper> paintWrapper, int32_t lineNumber, bool isClip = false);
+    void GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t lineNumber);
 };
 
 void ListLayoutTestNg::UpdateContentModifier()
@@ -69,6 +70,18 @@ void ListLayoutTestNg::onDraw(RefPtr<PaintWrapper> paintWrapper, int32_t lineNum
     DrawingContext drawingContext = { canvas, LIST_WIDTH, LIST_HEIGHT };
     paintMethod->UpdateContentModifier(AceType::RawPtr(paintWrapper));
     listContentModifier->onDraw(drawingContext);
+}
+
+void ListLayoutTestNg::GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t lineNumber)
+{
+    auto paintMethod = AceType::DynamicCast<ListItemGroupPaintMethod>(paintWrapper->nodePaintImpl_);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawLine(_, _)).Times(lineNumber); // DrawLine
+    paintMethod->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
 }
 
 /**
@@ -844,38 +857,52 @@ HWTEST_F(ListLayoutTestNg, PaintMethod004, TestSize.Level1)
  */
 HWTEST_F(ListLayoutTestNg, PaintMethod005, TestSize.Level1)
 {
-    Testing::MockCanvas canvas;
-    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawLine(_, _)).Times(2);
-
     CreateList();
     CreateGroupWithSetting(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
     auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
-    RefPtr<NodePaintMethod> paint = groupPattern->CreateNodePaintMethod();
-    RefPtr<ListItemGroupPaintMethod> groupPaint = AceType::DynamicCast<ListItemGroupPaintMethod>(paint);
-    auto paintWrapper = groupFrameNode->CreatePaintWrapper();
-    groupPaint->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
+    auto paintWrapper = FlushLayoutTask(groupFrameNode);
+    auto groupPaint = AceType::DynamicCast<ListItemGroupPaintMethod>(paintWrapper->nodePaintImpl_);
 
-    groupPaint->divider_.strokeWidth = Dimension(-1);
-    groupPaint->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
+    /**
+     * @tc.steps: step1. strokeWidth > 0
+     * @tc.expected: DrawLine
+     */
+    groupPaint->divider_.strokeWidth = Dimension(STROKE_WIDTH);
+    GroupPaintDivider(paintWrapper, 1);
 
+    /**
+     * @tc.steps: step2. strokeWidth > 0, but PERCENT
+     * @tc.expected: Not DrawLine
+     */
     groupPaint->divider_.strokeWidth = Dimension(STROKE_WIDTH, DimensionUnit::PERCENT);
-    groupPaint->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
+    GroupPaintDivider(paintWrapper, 0);
 
+    /**
+     * @tc.steps: step3. strokeWidth < 0
+     * @tc.expected: Not DrawLine
+     */
+    groupPaint->divider_.strokeWidth = Dimension(-1);
+    GroupPaintDivider(paintWrapper, 0);
+
+    /**
+     * @tc.steps: step4. startMargin + endMargin == LIST_WIDTH
+     * @tc.expected: Not DrawLine
+     */
     groupPaint->divider_ = ITEM_DIVIDER;
     groupPaint->divider_.startMargin = Dimension(LIST_WIDTH / 2);
     groupPaint->divider_.endMargin = Dimension(LIST_WIDTH / 2);
-    groupPaint->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
+    GroupPaintDivider(paintWrapper, 0);
 
+    /**
+     * @tc.steps: step5. startMargin + endMargin > LIST_WIDTH
+     * @tc.expected: Rest margin and DrawLine
+     */
     groupPaint->divider_ = ITEM_DIVIDER;
     groupPaint->divider_.startMargin = Dimension(LIST_WIDTH / 2);
     groupPaint->divider_.endMargin = Dimension(LIST_WIDTH / 2 + 1);
-    groupPaint->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
+    GroupPaintDivider(paintWrapper, 1);
 }
 
 /**

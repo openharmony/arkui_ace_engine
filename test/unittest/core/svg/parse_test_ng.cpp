@@ -1978,5 +1978,8 @@ HWTEST_F(ParseTestNg, ParseNodeTest009, TestSize.Level1)
 
     svgNode->SetAttr("mask", "testMask");
     EXPECT_EQ(svgNode->GetBaseAttributes().maskId, "testMask");
+
+    svgNode->SetAttr("patterntransform", "testPatterntransform");
+    EXPECT_EQ(svgNode->GetBaseAttributes().transform, "testPatterntransform");
 }
 } // namespace OHOS::Ace::NG

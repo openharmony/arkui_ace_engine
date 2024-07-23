@@ -664,11 +664,11 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest004, TestSize.Level
     /**
     corresponding ets code:
        RelativeContainer() {
-            }.width(200).height(200).backgroundColor(Color.Orange)
+            }.width('300px').height('300px').backgroundColor(Color.Orange)
     */
     relativeContainerLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     relativeContainerLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF());
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
 }
 

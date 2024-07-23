@@ -105,7 +105,7 @@ bool TextSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
     auto textStyle = textPattern->GetTextStyle();
     auto handleRadius = pipeline->NormalizeToPx(theme->GetHandleDiameter());
     // If the handle is incomplete at the top, not show.
-    if (LessNotEqual(paintRect.Top() - handleRadius, 0.0f)) {
+    if (LessNotEqual(paintRect.Top() - handleRadius, 0.0f) && handleLevelMode_ != HandleLevelMode::EMBED) {
         return false;
     }
     auto clip = false;

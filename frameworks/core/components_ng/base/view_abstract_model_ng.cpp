@@ -46,7 +46,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DURATION = 800;
-constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 100;
+constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 250;
 } // namespace
 
 void ViewAbstractModelNG::BindMenuGesture(
@@ -304,10 +304,12 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
             // create or show menu on long press
             auto event =
                 [builderF = buildFunc, weakTarget, menuParam, previewBuildFunc](const GestureEvent& info) mutable {
+                TAG_LOGI(AceLogTag::ACE_MENU, "Trigger longPress event for menu");
                 auto taskExecutor = Container::CurrentTaskExecutor();
                 CHECK_NULL_VOID(taskExecutor);
                 taskExecutor->PostTask(
                     [builder = builderF, weakTarget, menuParam, previewBuildFunc, info]() mutable {
+                        TAG_LOGI(AceLogTag::ACE_MENU, "Execute longPress task for menu");
                         auto targetNode = weakTarget.Upgrade();
                         CHECK_NULL_VOID(targetNode);
                         auto pipelineContext = NG::PipelineContext::GetCurrentContext();
@@ -315,6 +317,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
                         auto dragDropManager = pipelineContext->GetDragDropManager();
                         CHECK_NULL_VOID(dragDropManager);
                         if (dragDropManager->IsAboutToPreview() || dragDropManager->IsDragging()) {
+                            TAG_LOGI(AceLogTag::ACE_DRAG, "Drag is in progress, return");
                             return;
                         }
                         if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {

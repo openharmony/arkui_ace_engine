@@ -602,6 +602,8 @@ public:
         isKeyboardClosedByUser_ = false;
     }
 
+    void OnDirectionConfigurationUpdate() override;
+
     void NotifyKeyboardClosed() override
     {
         if (HasFocus()) {
@@ -1092,7 +1094,7 @@ public:
 
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
-    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
+    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) override;
@@ -1197,7 +1199,7 @@ public:
 
     OffsetF GetTextPaintOffset() const override;
 
-    OffsetF GetPaintRectGlobalOffset(bool duringLayout = false) const;
+    OffsetF GetPaintRectGlobalOffset() const;
 
     void NeedRequestKeyboard()
     {
@@ -1380,6 +1382,11 @@ protected:
     {
         isDetachFromMainTree_ = true;
     }
+    
+    bool IsReverse() const override
+    {
+        return false;
+    };
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
@@ -1430,11 +1437,12 @@ private:
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
+    bool CanChangeSelectState();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void CursorMoveOnClick(const Offset& offset);
 
     void DelayProcessOverlay(const OverlayRequest& request = OverlayRequest());
-    void ProcessOverlayAfterLayout(bool isGlobalAreaChanged);
+    void ProcessOverlayAfterLayout(const OffsetF& prevOffset);
     void ProcessOverlay(const OverlayRequest& request = OverlayRequest());
 
     bool SelectOverlayIsOn()
@@ -1740,7 +1748,7 @@ private:
     RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
     RefPtr<TextInputResponseArea> cleanNodeResponseArea_;
-    std::string lastAutoFillPasswordTextValue_;
+    std::string lastAutoFillTextValue_;
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
     std::function<void(bool)> isFocusActiveUpdateEvent_;

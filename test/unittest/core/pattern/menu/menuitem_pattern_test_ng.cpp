@@ -628,7 +628,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText003, TestSize.Lev
     ASSERT_TRUE(content.has_value());
     EXPECT_EQ(content.value(), "item content");
     auto textRenderContext = contentNode->GetRenderContext();
-    EXPECT_EQ(textRenderContext->GetForegroundColor(), selectTheme->GetMenuFontColor());
+    EXPECT_EQ(textRenderContext->GetOpacity(), selectTheme->GetDisabledFontColorAlpha());
 }
 
 /**

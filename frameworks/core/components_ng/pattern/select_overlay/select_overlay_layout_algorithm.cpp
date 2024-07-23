@@ -67,7 +67,7 @@ void SelectOverlayLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
-    auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
+    auto keyboardHeight = safeAreaManager->IsNeedAvoidWindow() ? 0.0f : safeAreaManager->GetKeyboardInset().Length();
     auto maxSize =
         SizeF(layoutConstraint.maxSize.Width(), layoutConstraint.maxSize.Height() - keyboardHeight -
                                                     (info_->isUsingMouse ? info_->rightClickOffset.GetY() : 0.0f));
@@ -546,7 +546,7 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
     float positionX = (selectArea.Left() + selectArea.Right() - menuWidth) / 2.0f;
-    auto hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
+    auto hasKeyboard = !safeAreaManager->IsNeedAvoidWindow() && GreatNotEqual(keyboardInsert.Length(), 0.0f);
     auto downHandle = info_->handleReverse ? info_->firstHandle : info_->secondHandle;
     auto downHandleIsReallyShow = hasKeyboard ? ((LessOrEqual((double)downHandle.paintRect.Bottom(),
         (double)keyboardInsert.start)) ? true : false) : downHandle.isShow;

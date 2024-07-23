@@ -390,6 +390,7 @@ void ProgressPattern::FireBuilder()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!makeFunc_.has_value()) {
+        CHECK_NULL_VOID(contentModifierNode_);
         host->RemoveChildAndReturnIndex(contentModifierNode_);
         contentModifierNode_ = nullptr;
         host->GetRenderContext()->SetClipToFrame(true);

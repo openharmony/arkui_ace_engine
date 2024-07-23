@@ -399,6 +399,10 @@ void JSSearch::SetSearchDefaultIcon()
 
 void JSSearch::SetSearchSymbolIcon(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsObject()) {
+        return;
+    }
+
     std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
     SetSymbolOptionApply(info, iconSymbol, info[0]);
     SearchModel::GetInstance()->SetSearchSymbolIcon(iconSymbol);

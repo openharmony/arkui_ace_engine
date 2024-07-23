@@ -68,15 +68,16 @@ void WaterFlowSections::NotifySectionChange(
     int32_t start, int32_t deleteCount, const std::vector<WaterFlowSections::Section>& newSections)
 {
     int32_t addItemCount = 0;
-    for (int i = 0; i < static_cast<int32_t>(newSections.size()) - 1; i++) {
+    int32_t n = static_cast<int32_t>(sections_.size());
+    for (int32_t i = 0; i < static_cast<int32_t>(newSections.size()) - 1; i++) {
         addItemCount += newSections[i].itemsCount;
     }
     int32_t deleteItemCount = 0;
-    for (int i = start; i < start + deleteCount - 1; i++) {
+    for (int32_t i = start; i < std::min(start + deleteCount - 1, n); i++) {
         deleteItemCount += sections_[i].itemsCount;
     }
     int32_t itemCount = 0;
-    for (int i = 0; i < start; i++) {
+    for (int32_t i = 0; i < std::min(start, n); i++) {
         itemCount += sections_[i].itemsCount;
     }
     if (notifyDataChange_) {

@@ -113,6 +113,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
     ShowNext();
     EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
     pattern_->springAnimationIsRunning_ = true;
+    pattern_->isTouchDownSpringAnimation_ = false;
     pattern_->childScrolling_ = true;
 
     /**
@@ -121,7 +122,8 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
      */
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::DOWN, Offset()));
     EXPECT_TRUE(pattern_->isTouchDown_);
-    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    EXPECT_TRUE(pattern_->isTouchDownSpringAnimation_);
     EXPECT_FALSE(pattern_->childScrolling_);
 
     /**
@@ -131,6 +133,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::UP, Offset()));
     EXPECT_FALSE(pattern_->isTouchDown_);
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    EXPECT_FALSE(pattern_->isTouchDownSpringAnimation_);
     EXPECT_TRUE(pattern_->moveDirection_);
 }
 
@@ -816,6 +819,60 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent004, TestSize.Level1)
     OnKeyEvent(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
     EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
     EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
+}
+
+/**
+ * @tc.name: OnKeyEvent005
+ * @tc.desc: OnKeyEvent return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, OnKeyEvent005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set axis default
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+
+    /**
+     * @tc.steps: step2. Call OnKeyEvent KEY_DPAD_LEFT
+     * @tc.expected: false
+     */
+    EXPECT_FALSE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::LONG_PRESS)));
+
+    /**
+     * @tc.steps: step3. Call OnKeyEvent KEY_DPAD_RIGHT
+     * @tc.expected: false
+     */
+    EXPECT_FALSE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::LONG_PRESS)));
+
+     /**
+     * @tc.steps: step4. Call OnKeyEvent KEY_DPAD_UP
+     * @tc.expected: false
+     */
+    EXPECT_FALSE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_UP, KeyAction::DOWN)));
+
+    /**
+     * @tc.steps: step5. Call OnKeyEvent KEY_DPAD_DOWN
+     * @tc.expected: false
+     */
+    EXPECT_FALSE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN)));
+
+    /**
+     * @tc.steps: step6. set axis vertical
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetDirection(Axis::VERTICAL); });
+
+    /**
+     * @tc.steps: step7. Call OnKeyEvent KEY_DPAD_LEFT
+     * @tc.expected: false
+     */
+    EXPECT_FALSE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN)));
+
+    /**
+     * @tc.steps: step8. Call OnKeyEvent KEY_DPAD_RIGHT
+     * @tc.expected: false
+     */
+    EXPECT_FALSE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN)));
 }
 
 /**

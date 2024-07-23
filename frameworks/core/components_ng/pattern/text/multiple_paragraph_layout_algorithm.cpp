@@ -344,8 +344,8 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
         .ellipsisMode = textStyle.GetEllipsisMode(),
-        .textOverflow = textStyle.GetTextOverflow(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
+        .textOverflow = textStyle.GetTextOverflow(),
         .indent = textStyle.GetTextIndent()
     };
 }
@@ -432,10 +432,11 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
     auto maxLines = static_cast<int32_t>(paraStyle.maxLines);
     for (auto && group : spans_) {
         ParagraphStyle spanParagraphStyle = paraStyle;
-        if (group.front()) {
-            GetSpanParagraphStyle(group.front()->textLineStyle, spanParagraphStyle);
-            if (group.front()->fontStyle->HasFontSize()) {
-                auto fontSize = group.front()->fontStyle->GetFontSizeValue();
+        RefPtr<SpanItem> paraStyleSpanItem = GetParagraphStyleSpanItem(group);
+        if (paraStyleSpanItem) {
+            GetSpanParagraphStyle(paraStyleSpanItem->textLineStyle, spanParagraphStyle);
+            if (paraStyleSpanItem->fontStyle->HasFontSize()) {
+                auto fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue();
                 spanParagraphStyle.fontSize =
                     fontSize.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
             }
@@ -492,6 +493,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
         preParagraphsPlaceholderCount_ += currentParagraphPlaceholderCount_;
         currentParagraphPlaceholderCount_ = 0;
         shadowOffset_ += GetShadowOffset(group);
+        HandleEmptyParagraph(paragraph, group);
         paragraph->Build();
         ApplyIndent(spanParagraphStyle, paragraph, maxWidth, textStyle);
         UpdateSymbolSpanEffect(frameNode, paragraph, group);

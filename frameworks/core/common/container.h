@@ -89,6 +89,11 @@ public:
         return false;
     }
 
+    virtual bool ClosePopupUIExtension(uint32_t autoFillSessionId)
+    {
+        return false;
+    }
+
     virtual AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder)
     {
         return AceAutoFillType::ACE_UNSPECIFIED;
@@ -182,6 +187,18 @@ public:
     virtual RefPtr<DisplayInfo> GetDisplayInfo()
     {
         return MakeRefPtr<DisplayInfo>();
+    }
+
+    virtual void InitIsFoldable() {}
+
+    virtual bool IsFoldable() const
+    {
+        return false;
+    }
+
+    virtual FoldStatus GetCurrentFoldStatus()
+    {
+        return FoldStatus::UNKNOWN;
     }
 
     virtual NG::SafeAreaInsets GetKeyboardSafeArea()

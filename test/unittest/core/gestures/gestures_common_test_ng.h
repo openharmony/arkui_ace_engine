@@ -52,9 +52,11 @@
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/components/scroll/scroll_bar_controller.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t DURATION = 100;
 constexpr int32_t FINGER_NUMBER = 5;
 constexpr int32_t FINGER_NUMBER_OVER_MAX = 11;
 constexpr int32_t SINGLE_FINGER_NUMBER = 1;

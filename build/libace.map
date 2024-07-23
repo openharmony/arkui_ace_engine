@@ -246,6 +246,11 @@
       "OHOS::Ace::NG::CustomNode::FlushReload()";
       "OHOS::Ace::CanvasModel::GetInstance()";
 
+      OHOS::Ace::NG::InspectorFilter::*;
+      OHOS::Ace::NG::ServiceCollaborationMenuAceHelper::*;
+      OHOS::Ace::NG::ServiceCollaborationAceCallback::*;
+      OHOS::Ace::DumpLog::*;
+
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
       virtual?thunk?to?OHOS::Ace::Frontend::~Frontend*;

@@ -59,6 +59,11 @@ protected:
         return true;
     }
 
+    bool AvoidCutout() const override
+    {
+        return false;
+    }
+
 private:
     // record node in which container.
     int32_t containerId_ = -1;

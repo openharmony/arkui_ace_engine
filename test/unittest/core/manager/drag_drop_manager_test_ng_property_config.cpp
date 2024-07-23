@@ -1466,7 +1466,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest049, TestSize.Level1)
      * @tc.expected: dragDropManager->summaryMap_.empty() return a true value.
      */
     dragDropManager->summaryMap_.clear();
-    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::COPY);
+    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::COPY, -1);
     EXPECT_TRUE(dragDropManager->summaryMap_.empty());
 
     /**
@@ -1474,7 +1474,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest049, TestSize.Level1)
      * @tc.expected: dragDropManager->summaryMap_.empty() return a false value.
      */
     dragDropManager->summaryMap_.insert(make_pair(NODE_TAG, frameNodeNullId));
-    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::COPY);
+    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::COPY, -1);
     EXPECT_FALSE(dragDropManager->summaryMap_.empty());
 
     /**
@@ -1483,7 +1483,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest049, TestSize.Level1)
      */
     dragDropManager->summaryMap_.clear();
     dragDropManager->summaryMap_.insert(make_pair(ROOT_ETS_TAG, frameNodeNullId));
-    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::COPY);
+    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::COPY, -1);
     EXPECT_TRUE(allowDrop.find(ROOT_ETS_TAG) == allowDrop.end());
 }
 
@@ -2034,13 +2034,13 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest067, TestSize.Level1)
     frameNode->SetAllowDrop(allowDrop);
     const auto& dragFrameNodeAllowDrop = frameNode->GetAllowDrop();
     EXPECT_NE(dragDropManager->draggedFrameNode_, frameNode);
-    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::UNKNOWN);
-    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::MOVE);
+    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::UNKNOWN, -1);
+    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::MOVE, -1);
     EXPECT_FALSE(dragFrameNodeAllowDrop.empty());
     EXPECT_FALSE(dragDropManager->summaryMap_.empty());
 
     dragDropManager->draggedFrameNode_ = frameNode;
-    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::UNKNOWN);
+    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::UNKNOWN, -1);
     EXPECT_EQ(dragDropManager->draggedFrameNode_, frameNode);
 }
 

@@ -50,8 +50,10 @@ constexpr int32_t MAX_RETRY_TIMES = 3;
 constexpr int32_t MAX_RETRY_DURATION = 800;
 constexpr float MOVE_DISTANCE_LIMIT = 20.0f;
 constexpr uint64_t MOVE_TIME_LIMIT = 6L;
-constexpr int64_t DRAG_MOVE_TIME_THRESHOLD = 16 * 1000 * 1000;
 constexpr float MAX_DISTANCE_TO_PRE_POINTER = 3.0f;
+constexpr float DEFAULT_SPRING_RESPONSE = 0.347f;
+constexpr float MIN_SPRING_RESPONSE = 0.002f;
+constexpr float DEL_SPRING_RESPONSE = 0.005f;
 } // namespace
 
 RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
@@ -312,10 +314,11 @@ bool DragDropManager::CheckDragDropProxy(int64_t id) const
     return currentId_ == id;
 }
 
-void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior)
+void DragDropManager::UpdateDragAllowDrop(
+    const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior, const int32_t eventId)
 {
     if (!IsDropAllowed(dragFrameNode)) {
-        UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
+        UpdateDragStyle(DragCursorStyleCore::FORBIDDEN, eventId);
         return;
     }
     
@@ -324,7 +327,7 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
     // special handling for no drag data present situation, always show as move
     if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
-        UpdateDragStyle(DragCursorStyleCore::MOVE);
+        UpdateDragStyle(DragCursorStyleCore::MOVE, eventId);
         return;
     }
 
@@ -335,33 +338,34 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
             // draggedFrameNode or frameNode is disabled, otherwise use copy
             auto eventHub = dragFrameNode->GetEventHub<EventHub>();
             if (draggedFrameNode_ == dragFrameNode || !(eventHub && eventHub->IsEnabled())) {
-                UpdateDragStyle(DragCursorStyleCore::MOVE);
+                UpdateDragStyle(DragCursorStyleCore::MOVE, eventId);
             } else {
-                UpdateDragStyle(DragCursorStyleCore::COPY);
+                UpdateDragStyle(DragCursorStyleCore::COPY, eventId);
             }
             break;
         }
         case DragBehavior::MOVE: {
-            UpdateDragStyle(DragCursorStyleCore::MOVE);
+            UpdateDragStyle(DragCursorStyleCore::MOVE, eventId);
             break;
         }
         case DragBehavior::COPY: {
-            UpdateDragStyle(DragCursorStyleCore::COPY);
+            UpdateDragStyle(DragCursorStyleCore::COPY, eventId);
             break;
         }
         default: {
-            UpdateDragStyle(DragCursorStyleCore::COPY);
+            UpdateDragStyle(DragCursorStyleCore::COPY, eventId);
             break;
         }
     }
 }
 
-void DragDropManager::UpdateDragStyle(const DragCursorStyleCore& dragStyle)
+void DragDropManager::UpdateDragStyle(const DragCursorStyleCore& dragStyle, int32_t eventId)
 {
     if (dragStyle != dragCursorStyleCore_) {
         dragCursorStyleCore_ = dragStyle;
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Update DragStyle to %{public}d.", dragCursorStyleCore_);
-        InteractionInterface::GetInstance()->UpdateDragStyle(dragCursorStyleCore_);
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Update DragStyle to %{public}d, pointerEventId: %{public}d.",
+            dragCursorStyleCore_, eventId);
+        InteractionInterface::GetInstance()->UpdateDragStyle(dragCursorStyleCore_, eventId);
     }
 }
 
@@ -673,7 +677,7 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
         }
 
         if (!isMouseDragged_ || isDragWindowShow_) {
-            UpdateDragStyle(DragCursorStyleCore::MOVE);
+            UpdateDragStyle(DragCursorStyleCore::MOVE, pointerEvent.pointerEventId);
         }
         return;
     }
@@ -834,11 +838,13 @@ void DragDropManager::DoDropAction(const RefPtr<FrameNode>& dragFrameNode, const
 RefPtr<UnifiedData> DragDropManager::RequestUDMFDataWithUDKey(const std::string& udKey)
 {
     if (udKey.empty()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "udKey is empty");
         return nullptr;
     }
     RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->CreateUnifiedData();
     auto ret = UdmfClient::GetInstance()->GetData(udData, udKey);
     if (ret != 0) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Get udmfData failed");
         return nullptr;
     }
     return udData;
@@ -891,8 +897,7 @@ bool DragDropManager::CheckRemoteData(
     std::string remoteUdKey = udKey;
     auto isRemoteData = UdmfClient::GetInstance()->GetRemoteStatus(remoteUdKey);
     if (isRemoteData) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Stop drag with motion drag action, target device id : %{private}d.",
-            pointerEvent.deviceId);
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Stop drag with motion drag action.");
         TryGetDataBackGround(dragFrameNode, pointerEvent, udKey);
     }
     return isRemoteData;
@@ -947,7 +952,7 @@ void DragDropManager::RequireSummary()
             std::string str = udkey + "-" + std::to_string(recordSize) + ";";
             summarys += str;
         }
-        TAG_LOGD(AceLogTag::ACE_DRAG, "require summary: %{public}s", summarys.c_str());
+        TAG_LOGI(AceLogTag::ACE_DRAG, "require summary: %{public}s", summarys.c_str());
     }
     std::string extraInfo;
     ret = InteractionInterface::GetInstance()->GetDragExtraInfo(extraInfo);
@@ -1087,14 +1092,14 @@ void DragDropManager::FireOnDragEvent(
     }
     if (event->GetResult() == DragRet::ENABLE_DROP) {
         if (event->GetDragBehavior() == DragBehavior::MOVE) {
-            UpdateDragStyle(DragCursorStyleCore::MOVE);
+            UpdateDragStyle(DragCursorStyleCore::MOVE, pointerEvent.pointerEventId);
         } else {
-            UpdateDragStyle(DragCursorStyleCore::COPY);
+            UpdateDragStyle(DragCursorStyleCore::COPY, pointerEvent.pointerEventId);
         }
     } else if (event->GetResult() == DragRet::DISABLE_DROP) {
-        UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
+        UpdateDragStyle(DragCursorStyleCore::FORBIDDEN, pointerEvent.pointerEventId);
     } else {
-        UpdateDragAllowDrop(frameNode, event->GetDragBehavior());
+        UpdateDragAllowDrop(frameNode, event->GetDragBehavior(), pointerEvent.pointerEventId);
     }
 }
 
@@ -1517,18 +1522,16 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
 
 bool DragDropManager::IsNeedDoDragMoveAnimate(const PointerEvent& pointerEvent)
 {
-    if (!IsNeedDisplayInSubwindow() || isDragFwkShow_) {
+    if (!(IsNeedDisplayInSubwindow() || isDragWithContextMenu_) || isDragFwkShow_) {
         return false;
     }
     auto x = pointerEvent.GetPoint().GetX();
     auto y = pointerEvent.GetPoint().GetY();
+    curPointerOffset_ = { x, y };
     auto distanceToPrePointer = sqrt(pow(prePointerOffset_.GetX() - x, 2) + pow(prePointerOffset_.GetY() - y, 2));
-    int64_t nanoCurrentTimeStamp = pointerEvent.downTime.time_since_epoch().count();
-    if ((nanoCurrentTimeStamp < nanoPreDragMoveAnimationTime_ + DRAG_MOVE_TIME_THRESHOLD) &&
-        (distanceToPrePointer < MAX_DISTANCE_TO_PRE_POINTER)) {
+    if (distanceToPrePointer < MAX_DISTANCE_TO_PRE_POINTER) {
         return false;
     }
-    nanoPreDragMoveAnimationTime_ = nanoCurrentTimeStamp;
     prePointerOffset_ = { x, y };
     return true;
 }
@@ -1597,9 +1600,24 @@ bool DragDropManager::UpdateDragMovePositionFinished(
     }
     return false;
 }
+
+float DragDropManager::GetCurrentDistance(float x, float y)
+{
+    auto distance = sqrt(pow(curPointerOffset_.GetX() - x, 2) + pow(curPointerOffset_.GetY() - y, 2));
+    CHECK_NULL_RETURN(info_.imageNode, distance);
+    auto containerId = Container::CurrentId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+    CHECK_NULL_RETURN(subwindow, distance);
+    auto overlayManager = subwindow->GetOverlayManager();
+    auto gatherNodeCenter = info_.imageNode->GetPaintRectCenter();
+    auto gatherDistance = CalcGatherNodeMaxDistanceWithPoint(overlayManager,
+        gatherNodeCenter.GetX(), gatherNodeCenter.GetY());
+    return std::max(distance, gatherDistance);
+}
+
 void DragDropManager::DoDragMoveAnimate(const PointerEvent& pointerEvent)
 {
-    bool needDoDragMoveAnimate = IsNeedDoDragMoveAnimate(pointerEvent) || isDragWithContextMenu_;
+    bool needDoDragMoveAnimate = IsNeedDoDragMoveAnimate(pointerEvent);
     if (!needDoDragMoveAnimate) {
         return;
     }
@@ -1618,24 +1636,22 @@ void DragDropManager::DoDragMoveAnimate(const PointerEvent& pointerEvent)
         !needDoDragMoveAnimate) {
         return;
     }
-    auto distance = CalcDragPreviewDistanceWithPoint(PRESERVE_HEIGHT, x, y, info_);
-    auto gatherNodeCenter = info_.imageNode->GetPaintRectCenter();
-    auto maxDistance = CalcGatherNodeMaxDistanceWithPoint(overlayManager,
-        gatherNodeCenter.GetX(), gatherNodeCenter.GetY());
-    distance = std::max(distance, maxDistance);
     AnimationOption option;
-    const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.347f, 0.99f, 0.0f);
+    auto springResponse = std::max(DEFAULT_SPRING_RESPONSE - DEL_SPRING_RESPONSE * allAnimationCnt_,
+        MIN_SPRING_RESPONSE);
+    const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(springResponse, 0.99f, 0.0f);
     constexpr int32_t animateDuration = 30;
     option.SetCurve(curve);
     option.SetDuration(animateDuration);
     bool dragWithContextMenu = isDragWithContextMenu_;
-    option.SetOnFinishEvent([distance, weakManager = WeakClaim(this), containerId, dragWithContextMenu, isMenuShow]() {
-        constexpr decltype(distance) MAX_DISTANCE = 5.0;
-        if (distance < MAX_DISTANCE && (!dragWithContextMenu || !isMenuShow)) {
-            auto dragDropManager = weakManager.Upgrade();
-            if (dragDropManager) {
-                dragDropManager->TransDragWindowToDragFwk(containerId);
-            }
+    AddNewDragAnimation();
+    option.SetOnFinishEvent([weakManager = WeakClaim(this), containerId, dragWithContextMenu, isMenuShow, x, y]() {
+        auto dragDropManager = weakManager.Upgrade();
+        CHECK_NULL_VOID(dragDropManager);
+        if ((dragDropManager->IsAllAnimationFinished() ||
+            dragDropManager->GetCurrentDistance(x, y) < MAX_DISTANCE_TO_PRE_POINTER) &&
+            (!dragWithContextMenu || !isMenuShow)) {
+            dragDropManager->TransDragWindowToDragFwk(containerId);
         }
     });
     auto renderContext = info_.imageNode->GetRenderContext();
@@ -1664,6 +1680,13 @@ void DragDropManager::UpdateDragPreviewScale()
 void DragDropManager::DoDragStartAnimation(
     const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event, bool isSubwindowOverlay)
 {
+    auto containerId = Container::CurrentId();
+    auto deviceId = event.GetDeviceId();
+    if (deviceId == 0xFFFFFFFF) {
+        isDragFwkShow_ = false;
+        TransDragWindowToDragFwk(containerId);
+        return;
+    }
     CHECK_NULL_VOID(overlayManager);
     if (!(GetDragPreviewInfo(overlayManager, info_))
         || (!IsNeedDisplayInSubwindow() && !isSubwindowOverlay && !isDragWithContextMenu_)) {
@@ -1674,7 +1697,6 @@ void DragDropManager::DoDragStartAnimation(
         return;
     }
     CHECK_NULL_VOID(info_.imageNode);
-    auto containerId = Container::CurrentId();
     isDragFwkShow_ = false;
     ResetPullMoveReceivedForCurrentDrag();
     auto distance = CalcDragPreviewDistanceWithPoint(PRESERVE_HEIGHT, event.GetGlobalLocation().GetX(),
@@ -1690,8 +1712,17 @@ void DragDropManager::DoDragStartAnimation(
     }
     Offset newOffset = CalcDragMoveOffset(PRESERVE_HEIGHT, static_cast<int32_t>(event.GetGlobalLocation().GetX()),
         static_cast<int32_t>(event.GetGlobalLocation().GetY()), info_);
-    nanoPreDragMoveAnimationTime_ = GetSysTimestamp();
     prePointerOffset_ = { newOffset.GetX(), newOffset.GetY() };
+    curPointerOffset_ = { newOffset.GetX(), newOffset.GetY() };
+    currentAnimationCnt_ = 0;
+    allAnimationCnt_ = 0;
+    DragStartAnimation(newOffset, overlayManager, gatherNodeCenter);
+}
+
+void DragDropManager::DragStartAnimation(
+    const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager, const OffsetF& gatherNodeCenter)
+{
+    auto containerId = Container::CurrentId();
     AnimationOption option;
     const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.347f, 0.99f, 0.0f);
     constexpr int32_t animateDuration = 300;

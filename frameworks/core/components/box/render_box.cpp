@@ -1108,7 +1108,7 @@ bool RenderBox::HandleMouseEvent(const MouseEvent& event)
 #else
     LOGI("RenderBox::HandleMouseEvent: Do mouse callback with mouse event{ Global(%{public}f,%{public}f), "
          "Local(%{public}f,%{public}f)}, Button(%{public}d), Action(%{public}d), Time(%{public}lld), "
-         "DeviceId(%{public}" PRId64 ", SourceType(%{public}d) }. Return: %{public}d",
+         "DeviceId(%{private}" PRId64 ", SourceType(%{public}d) }. Return: %{public}d",
         info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetLocalLocation().GetX(),
         info.GetLocalLocation().GetY(), info.GetButton(), info.GetAction(),
         info.GetTimeStamp().time_since_epoch().count(), info.GetDeviceId(), info.GetSourceDevice(),

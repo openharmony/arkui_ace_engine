@@ -1053,6 +1053,7 @@ public:
     static void ToJsonValue(
         const RefPtr<FocusHub>& hub, std::unique_ptr<JsonValue>& json, const InspectorFilter& filter);
 
+    bool FocusToHeadOrTailChild(bool isHead);
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
@@ -1069,7 +1070,6 @@ protected:
 
     bool CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) const;
     bool RequestNextFocus(FocusStep moveStep, const RectF& rect);
-    bool FocusToHeadOrTailChild(bool isHead);
 
     void OnFocus();
     void OnFocusNode();

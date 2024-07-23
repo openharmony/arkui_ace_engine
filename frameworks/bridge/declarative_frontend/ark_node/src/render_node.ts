@@ -931,7 +931,7 @@ class RenderNode {
   }
   get shapeClip(): ShapeClip {
     this.shapeClipValue = this.shapeClipValue ? this.shapeClipValue : new ShapeClip();
-    return this.shapeMask;
+    return this.shapeClipValue;
   }
 }
 

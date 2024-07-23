@@ -681,6 +681,10 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
     ACE_SCOPED_TRACE("OnVsyncEvent now:%" PRIu64 "", nanoTimestamp);
     frameCount_ = frameCount;
 
+    recvTime_ = GetSysTimestamp();
+    compensationValue_ =
+        nanoTimestamp > static_cast<uint64_t>(recvTime_) ? (nanoTimestamp - static_cast<uint64_t>(recvTime_)) : 0;
+
     for (auto& callback : subWindowVsyncCallbacks_) {
         callback.second(nanoTimestamp, frameCount);
     }
@@ -726,7 +730,8 @@ void PipelineBase::RemoveTouchPipeline(const WeakPtr<PipelineBase>& context)
 }
 
 void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, bool supportAvoidance)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, bool supportAvoidance,
+    bool forceChange)
 {
     auto currentContainer = Container::Current();
     if (currentContainer && !currentContainer->IsSubContainer()) {
@@ -742,7 +747,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
         return;
     }
-    OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction, safeHeight, supportAvoidance);
+    OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction, safeHeight, supportAvoidance, forceChange);
 }
 
 void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
@@ -924,6 +929,8 @@ void PipelineBase::Destroy()
     virtualKeyBoardCallback_.clear();
     etsCardTouchEventCallback_.clear();
     formLinkInfoMap_.clear();
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "pipeline destroyed, has %{public}zu finish callbacks not executed",
+        finishFunctions_.size());
     finishFunctions_.clear();
     {
         // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker

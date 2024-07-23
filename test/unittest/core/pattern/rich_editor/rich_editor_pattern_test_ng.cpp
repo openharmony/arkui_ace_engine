@@ -1896,4 +1896,71 @@ HWTEST_F(RichEditorPatternTestNg, IsLineSeparatorInLast001, TestSize.Level1)
     spanItem->content = "nihao\n";
     EXPECT_TRUE(richEditorPattern->IsLineSeparatorInLast(spanNode));
 }
+
+/**
+ * @tc.name: GetRichEditorController001
+ * @tc.desc: test GetRichEditorController
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, GetRichEditorController001, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto controller = richEditorModel.GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
+}
+
+/**
+ * @tc.name: BindSelectionMenu001
+ * @tc.desc: test BindSelectionMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, BindSelectionMenu001, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    std::function<void()> buildFunc = []() {
+        callBack1 = 1;
+        return;
+    };
+    TextSpanType textSpanType = TextSpanType::TEXT;
+    TextResponseType textResponseType = TextResponseType::LONG_PRESS;
+    SelectMenuParam menuParam { .onAppear = [](int32_t, int32_t) {}, .onDisappear = []() {} };
+    richEditorModel.BindSelectionMenu(textSpanType, textResponseType, buildFunc, menuParam);
+}
+
+/**
+ * @tc.name: OnHandleMove001
+ * @tc.desc: test OnHandleMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, OnHandleMove001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
+    RectF rect(testNumber0, testNumber0, testNumber5, testNumber5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, testNumber5);
+    richEditorPattern->selectOverlay_->OnHandleMove(rect, true);
+}
+
+/**
+ * @tc.name: UpdateSelectorOnHandleMove001
+ * @tc.desc: test UpdateSelectorOnHandleMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, UpdateSelectorOnHandleMove001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
+    auto offsetF = OffsetF(5.0f, 30.0f);
+    RectF rect(testNumber0, testNumber0, testNumber5, testNumber5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, testNumber5);
+    richEditorPattern->selectOverlay_->UpdateSelectorOnHandleMove(offsetF, true);
+}
 } // namespace

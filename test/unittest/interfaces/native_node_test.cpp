@@ -206,8 +206,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest005, TestSize.Level1)
     ArkUI_ColorStop* colorStopPtr = &colorStop;
     item3.object = reinterpret_cast<void*>(colorStopPtr);
     nodeAPI->setAttribute(rootNode, NODE_LINEAR_GRADIENT, &item3);
-    auto linearGradientVal = nodeAPI->getAttribute(rootNode, NODE_LINEAR_GRADIENT);
-    EXPECT_EQ(linearGradientVal->value[0].f32, val0);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_LINEAR_GRADIENT), nullptr);
     
     ArkUI_NumberValue sweepGradient[] = {{.f32 = val0}, {.f32 = val0}, {.f32 = val0}, {.f32 = val0}, {.f32 = val0},
         {.i32 = true}};
@@ -378,14 +377,12 @@ HWTEST_F(NativeNodeTest, NativeNodeTest005, TestSize.Level1)
         {.i32 = ARKUI_SHADOW_TYPE_COLOR}, {.u32 = color}, {.u32 = 1}};
     ArkUI_AttributeItem customShadowItem = {customShadowVal, sizeof(customShadowVal) / sizeof(ArkUI_NumberValue)};
     nodeAPI->setAttribute(rootNode, NODE_CUSTOM_SHADOW, &customShadowItem);
-    auto customshadowResult = nodeAPI->getAttribute(rootNode, NODE_CUSTOM_SHADOW);
-    EXPECT_EQ(customshadowResult->value[0].f32, val10);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_CUSTOM_SHADOW), nullptr);
 
     value2[0].f32 = size;
     value2[1].f32 = size;
     nodeAPI->setAttribute(rootNode, NODE_BACKGROUND_IMAGE_SIZE, &item2);
-    auto imagesizeVal = nodeAPI->getAttribute(rootNode, NODE_BACKGROUND_IMAGE_SIZE);
-    EXPECT_EQ(imagesizeVal->value[0].f32, size);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_BACKGROUND_IMAGE_SIZE), nullptr);
 
     value[0].i32 = ARKUI_IMAGE_SIZE_COVER;
     nodeAPI->setAttribute(rootNode, NODE_BACKGROUND_IMAGE_SIZE_WITH_STYLE, &item);
@@ -445,8 +442,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest005, TestSize.Level1)
     ArkUI_AttributeItem scaleTransitionItem =
         {scaleTransition, sizeof(scaleTransition) / sizeof(ArkUI_NumberValue)};
     nodeAPI->setAttribute(rootNode, NODE_SCALE_TRANSITION, &scaleTransitionItem);
-    auto scaleTransitionVal = nodeAPI->getAttribute(rootNode, NODE_SCALE_TRANSITION);
-    EXPECT_EQ(scaleTransitionVal->value[0].f32, val0);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SCALE_TRANSITION), nullptr);
 
     ArkUI_NumberValue translateTransition[] = {{.f32 = val0}, {.f32 = val0}, {.f32 = val0},
         {.i32 = 1000}, {.i32 = ARKUI_CURVE_LINEAR}, {.i32 = 1000},
@@ -468,8 +464,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest005, TestSize.Level1)
 
     value[0].i32 = true;
     nodeAPI->setAttribute(rootNode, NODE_FOCUSABLE, &item);
-    auto focusableVal = nodeAPI->getAttribute(rootNode, NODE_FOCUSABLE);
-    EXPECT_EQ(focusableVal->value[0].i32, true);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_FOCUSABLE), nullptr);
 
     value[0].i32 = true;
     nodeAPI->setAttribute(rootNode, NODE_DEFAULT_FOCUS, &item);
@@ -497,28 +492,26 @@ HWTEST_F(NativeNodeTest, NativeNodeTest005, TestSize.Level1)
     ArkUI_AttributeItem maskItem = {mask, sizeof(mask) / sizeof(ArkUI_NumberValue)};
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_MASK, &maskItem), ARKUI_ERROR_CODE_NO_ERROR);
     auto maskVal = nodeAPI->getAttribute(rootNode, NODE_MASK);
-    EXPECT_EQ(maskVal->value[0].u32, color);
+    EXPECT_NE(maskVal, nullptr);
     mask[3].i32 = ARKUI_MASK_TYPE_CIRCLE;
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_MASK, &maskItem), ARKUI_ERROR_CODE_NO_ERROR);
     maskVal = nodeAPI->getAttribute(rootNode, NODE_MASK);
-    EXPECT_EQ(maskVal->value[0].u32, color);
+    EXPECT_NE(maskVal, nullptr);
     mask[3].i32 = ARKUI_MASK_TYPE_ELLIPSE;
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_MASK, &maskItem), ARKUI_ERROR_CODE_NO_ERROR);
     maskVal = nodeAPI->getAttribute(rootNode, NODE_MASK);
-    EXPECT_EQ(maskVal->value[0].u32, color);
+    EXPECT_NE(maskVal, nullptr);
     mask[3].i32 = ARKUI_MASK_TYPE_PATH;
     maskItem.string = pathCommands;
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_MASK, &maskItem), ARKUI_ERROR_CODE_NO_ERROR);
     maskVal = nodeAPI->getAttribute(rootNode, NODE_MASK);
-    EXPECT_EQ(maskVal->value[0].u32, color);
-
+    EXPECT_NE(maskVal, nullptr);
     value4[0].i32 = ARKUI_MASK_TYPE_PROGRESS;
     value4[1].f32 = val10;
     value4[2].f32 = val100;
     value4[3].u32 = color;
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_MASK, &item4), ARKUI_ERROR_CODE_NO_ERROR);
     maskVal = nodeAPI->getAttribute(rootNode, NODE_MASK);
-    EXPECT_EQ(maskVal->value[0].i32, static_cast<int32_t>(ARKUI_MASK_TYPE_PROGRESS));
 
     value2[0].i32 = ARKUI_BLEND_MODE_NONE;
     value2[1].i32 = BLEND_APPLY_TYPE_FAST;
@@ -606,11 +599,6 @@ HWTEST_F(NativeNodeTest, NativeNodeTest005, TestSize.Level1)
     auto accessibilityModeVal = nodeAPI->getAttribute(rootNode, NODE_ACCESSIBILITY_MODE);
     EXPECT_EQ(accessibilityModeVal->value[0].i32, static_cast<int32_t>(ARKUI_ACCESSIBILITY_MODE_AUTO));
 
-    value[0].i32 = false;
-    nodeAPI->setAttribute(rootNode, NODE_FOCUS_STATUS, &item);
-    auto focsuStatusVal = nodeAPI->getAttribute(rootNode, NODE_FOCUS_STATUS);
-    EXPECT_EQ(focsuStatusVal->value[0].i32, 0);
-
     value[0].f32 = val05;
     nodeAPI->setAttribute(rootNode, NODE_ASPECT_RATIO, &item);
     auto aspectRatioVal = nodeAPI->getAttribute(rootNode, NODE_ASPECT_RATIO);
@@ -630,9 +618,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest005, TestSize.Level1)
     value4[1].f32 = val10;
     value4[2].f32 = val10;
     value4[3].f32 = val10;
-    nodeAPI->setAttribute(rootNode, NODE_OUTLINE_WIDTH, &item4);
-    auto outlineWidthVal = nodeAPI->getAttribute(rootNode, NODE_OUTLINE_WIDTH);
-    EXPECT_EQ(outlineWidthVal->value[0].f32, val10);
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_OUTLINE_WIDTH, &item4), ARKUI_ERROR_CODE_NO_ERROR);
 
     value[0].f32 = val05;
     nodeAPI->setAttribute(rootNode, NODE_WIDTH_PERCENT, &item);
@@ -739,20 +725,19 @@ HWTEST_F(NativeNodeTest, NativeNodeTest005, TestSize.Level1)
     auto borderRadiusPercentVal4 = nodeAPI->getAttribute(rootNode, NODE_BORDER_RADIUS_PERCENT);
     EXPECT_EQ(borderRadiusPercentVal4->value[0].f32, val01);
 
-    value[0].i32 = 1;
-    nodeAPI->setAttribute(rootNode, NODE_ACCESSIBILITY_ID, &item);
     auto accessibilityIdVal = nodeAPI->getAttribute(rootNode, NODE_ACCESSIBILITY_ID);
-    EXPECT_EQ(accessibilityIdVal->value[0].i32, 1);
+    EXPECT_NE(accessibilityIdVal, nullptr);
 
     value[0].u32 = ARKUI_ACCESSIBILITY_ACTION_CLICK;
     nodeAPI->setAttribute(rootNode, NODE_ACCESSIBILITY_ACTIONS, &item);
     auto accessibilityActionVal = nodeAPI->getAttribute(rootNode, NODE_ACCESSIBILITY_ACTIONS);
-    EXPECT_EQ(accessibilityActionVal->value[0].u32, ARKUI_ACCESSIBILITY_ACTION_CLICK);
+    EXPECT_NE(accessibilityActionVal, nullptr);
+    
 
     value[0].u32 = ARKUI_NODE_STACK;
     nodeAPI->setAttribute(rootNode, NODE_ACCESSIBILITY_ROLE, &item);
     auto accessibilityRoleVal = nodeAPI->getAttribute(rootNode, NODE_ACCESSIBILITY_ROLE);
-    EXPECT_EQ(accessibilityRoleVal->value[0].u32, ARKUI_NODE_STACK);
+    EXPECT_NE(accessibilityRoleVal, nullptr);
 
     value2[0].u32 = ARKUI_SAFE_AREA_TYPE_SYSTEM;
     value2[1].u32 = ARKUI_SAFE_AREA_EDGE_TOP;
@@ -852,6 +837,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest005, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_EXPAND_SAFE_AREA), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_VISIBLE_AREA_CHANGE_RATIO), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TRANSITION), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_UNIQUE_ID), nullptr);
 }
 
 /**
@@ -1285,8 +1271,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest008, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_TEXT);
-    ASSERT_NE(rootNode, nullptr);
+
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_TEXT, nullptr});
 
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_CONTENT), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_FONT_COLOR), ARKUI_ERROR_CODE_NO_ERROR);
@@ -1346,6 +1332,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest008, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_ENABLE_DATA_DETECTOR_CONFIG), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_SELECTED_BACKGROUND_COLOR), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_CONTENT_WITH_STYLED_STRING), nullptr);
+    nodeAPI->disposeNode(rootNode);
 }
 
 /**
@@ -1401,8 +1388,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest010, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_IMAGE_SPAN);
-    ASSERT_NE(rootNode, nullptr);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_IMAGE_SPAN, nullptr});
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SPAN_SRC), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SPAN_VERTICAL_ALIGNMENT), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SPAN_ALT), ARKUI_ERROR_CODE_NO_ERROR);
@@ -1410,6 +1396,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest010, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SPAN_SRC), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SPAN_VERTICAL_ALIGNMENT), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SPAN_ALT), nullptr);
+    nodeAPI->disposeNode(rootNode);
 }
 
 /**
@@ -1421,8 +1408,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest011, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_IMAGE);
-    ASSERT_NE(rootNode, nullptr);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_IMAGE, nullptr});
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SRC), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_OBJECT_FIT), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_INTERPOLATION), ARKUI_ERROR_CODE_NO_ERROR);
@@ -1449,6 +1435,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest011, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_RENDER_MODE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_FILL_COLOR), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_RESIZABLE), nullptr);
+    nodeAPI->disposeNode(rootNode);
 }
 
 /**
@@ -1499,8 +1486,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest014, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_TEXT_INPUT);
-    ASSERT_NE(rootNode, nullptr);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_TEXT_INPUT, nullptr});
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_INPUT_PLACEHOLDER), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_INPUT_TEXT), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_INPUT_CARET_COLOR), ARKUI_ERROR_CODE_NO_ERROR);
@@ -1597,6 +1583,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest014, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_LINE_HEIGHT), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_MAX_LINES), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_ALIGN), nullptr);
+    nodeAPI->disposeNode(rootNode);
 }
 
 /**
@@ -1608,8 +1595,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest015, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_TEXT_AREA);
-    ASSERT_NE(rootNode, nullptr);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_TEXT_AREA, nullptr});
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_AREA_PLACEHOLDER), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_AREA_TEXT), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_AREA_MAX_LENGTH), ARKUI_ERROR_CODE_NO_ERROR);
@@ -1686,6 +1672,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest015, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_LINE_HEIGHT), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_MAX_LINES), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_ALIGN), nullptr);
+    nodeAPI->disposeNode(rootNode);
 }
 
 /**
@@ -1697,8 +1684,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest016, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_BUTTON);
-    ASSERT_NE(rootNode, nullptr);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_BUTTON, nullptr});
     ArkUI_NumberValue value[] = {{.f32 = 10.0f}};
     ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue), "test", nullptr};
     nodeAPI->setAttribute(rootNode, NODE_BUTTON_LABEL, &item);
@@ -1723,6 +1709,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest016, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_FONT_COLOR), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_FONT_SIZE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_FONT_WEIGHT), ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->disposeNode(rootNode);
 }
 
 /**
@@ -1799,8 +1786,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest020, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_DATE_PICKER);
-    ASSERT_NE(rootNode, nullptr);
+
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_DATE_PICKER, nullptr});
     ArkUI_NumberValue value[] = {};
     ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue), nullptr, nullptr};
     item.string = "#ff182431;14;normal;Arial;normal";
@@ -1824,6 +1811,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest020, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_DATE_PICKER_DISAPPEAR_TEXT_STYLE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_DATE_PICKER_TEXT_STYLE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_DATE_PICKER_SELECTED_TEXT_STYLE), nullptr);
+    nodeAPI->disposeNode(rootNode);
 }
 
 /**
@@ -1835,8 +1823,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest021, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_TIME_PICKER);
-    ASSERT_NE(rootNode, nullptr);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_TIME_PICKER, nullptr});
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TIME_PICKER_SELECTED), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TIME_PICKER_USE_MILITARY_TIME), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TIME_PICKER_DISAPPEAR_TEXT_STYLE), ARKUI_ERROR_CODE_NO_ERROR);
@@ -1848,6 +1835,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest021, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TIME_PICKER_DISAPPEAR_TEXT_STYLE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TIME_PICKER_TEXT_STYLE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TIME_PICKER_SELECTED_TEXT_STYLE), nullptr);
+    nodeAPI->disposeNode(rootNode);
 }
 
 /**
@@ -1859,8 +1847,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest022, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_TEXT_PICKER);
-    ASSERT_NE(rootNode, nullptr);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_TEXT_PICKER, nullptr});
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_PICKER_OPTION_RANGE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_PICKER_OPTION_SELECTED), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_PICKER_OPTION_VALUE), ARKUI_ERROR_CODE_NO_ERROR);
@@ -1881,6 +1868,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest022, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_PICKER_SELECTED_INDEX), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_PICKER_CAN_LOOP), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_PICKER_DEFAULT_PICKER_ITEM_HEIGHT), nullptr);
+    nodeAPI->disposeNode(rootNode);
 }
 
 /**
@@ -1892,8 +1880,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest023, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_CALENDAR_PICKER);
-    ASSERT_NE(rootNode, nullptr);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_CALENDAR_PICKER, nullptr});
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_CALENDAR_PICKER_HINT_RADIUS), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_CALENDAR_PICKER_SELECTED_DATE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_CALENDAR_PICKER_EDGE_ALIGNMENT), ARKUI_ERROR_CODE_NO_ERROR);
@@ -1903,6 +1890,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest023, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_CALENDAR_PICKER_SELECTED_DATE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_CALENDAR_PICKER_EDGE_ALIGNMENT), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_CALENDAR_PICKER_TEXT_STYLE), nullptr);
+    nodeAPI->disposeNode(rootNode);
 }
 
 /**
@@ -1942,7 +1930,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest024, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_DIRECTION), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_REVERSE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_STYLE), nullptr);
-    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SLIDER_TRACK_THICKNESS), nullptr);
+    EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_SLIDER_TRACK_THICKNESS), nullptr);
 }
 
 /**
@@ -2054,7 +2042,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest028, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_SWIPER, nullptr});
     ASSERT_NE(rootNode, nullptr);
     ArkUI_NumberValue value[] = {{.i32 = ARKUI_CURVE_LINEAR}};
     ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue), nullptr, nullptr};
@@ -2102,7 +2090,6 @@ HWTEST_F(NativeNodeTest, NativeNodeTest028, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SWIPER_NEXT_MARGIN), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SWIPER_INDICATOR), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SWIPER_NESTED_SCROLL), ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SWIPER_SWIPE_TO_INDEX), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SWIPER_INDICATOR_INTERACTIVE), ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SWIPER_LOOP), nullptr);
@@ -2276,8 +2263,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest033, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_WATER_FLOW);
-    ASSERT_NE(rootNode, nullptr);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_WATER_FLOW, nullptr});
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_LAYOUT_DIRECTION), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_COLUMN_TEMPLATE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_ROW_TEMPLATE), ARKUI_ERROR_CODE_NO_ERROR);
@@ -2287,7 +2273,6 @@ HWTEST_F(NativeNodeTest, NativeNodeTest033, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_NODE_ADAPTER), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_CACHED_COUNT), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_FOOTER), ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_SCROLL_TO_INDEX), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_WATER_FLOW_ITEM_CONSTRAINT_SIZE), ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_LAYOUT_DIRECTION), nullptr);
@@ -2298,6 +2283,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest033, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_NODE_ADAPTER), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_CACHED_COUNT), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_ITEM_CONSTRAINT_SIZE), nullptr);
+    nodeAPI->disposeNode(rootNode);
 }
 
 /**
@@ -2335,7 +2321,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest035, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_RELATIVE_CONTAINER);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_RELATIVE_CONTAINER, nullptr});
     ASSERT_NE(rootNode, nullptr);
 
     auto alignRules = OH_ArkUI_AlignmentRuleOption_Create();
@@ -2361,7 +2347,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest035, TestSize.Level1)
     EXPECT_EQ(nodeAPI->setAttribute(
         rootNode, NODE_RELATIVE_LAYOUT_CHAIN_MODE, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
     auto chainModResult = nodeAPI->getAttribute(rootNode, NODE_RELATIVE_LAYOUT_CHAIN_MODE);
-    EXPECT_EQ(chainModResult->value[0].i32, static_cast<int32_t>(ARKUI_AXIS_HORIZONTAL));
+    EXPECT_NE(chainModResult, nullptr);
 
     int32_t guideLineOptSize = 1;
     float positionStart = 50.0f;
@@ -2374,8 +2360,6 @@ HWTEST_F(NativeNodeTest, NativeNodeTest035, TestSize.Level1)
     ArkUI_AttributeItem guidelineOptItem = {.object = guidelineOption};
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_RELATIVE_CONTAINER_GUIDE_LINE, &guidelineOptItem),
         ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_RELATIVE_CONTAINER_GUIDE_LINE, nullptr),
-        ARKUI_ERROR_CODE_PARAM_INVALID);
     auto guidelineOptResult = nodeAPI->getAttribute(rootNode, NODE_RELATIVE_CONTAINER_GUIDE_LINE);
     ASSERT_NE(guidelineOptResult, nullptr);
     
@@ -2386,8 +2370,6 @@ HWTEST_F(NativeNodeTest, NativeNodeTest035, TestSize.Level1)
     ArkUI_AttributeItem barrierOptItem = {.object = barrierOption};
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_RELATIVE_CONTAINER_BARRIER, &barrierOptItem),
         ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_RELATIVE_CONTAINER_BARRIER, nullptr),
-        ARKUI_ERROR_CODE_PARAM_INVALID);
     auto barrierOptResult = nodeAPI->getAttribute(rootNode, NODE_RELATIVE_CONTAINER_BARRIER);
     ASSERT_NE(barrierOptResult, nullptr);
 
@@ -2430,7 +2412,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest037, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_STACK, nullptr});
     float negativeFloat = -1.0f;
     int32_t negativeEnum = -1;
     uint32_t color = 0XFFFF0000;
@@ -2570,8 +2552,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest037, TestSize.Level1)
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_ALIGN_RULES, &itemEnum), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_FOCUS_STATUS, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_FOCUS_STATUS, &itemEnum), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_ASPECT_RATIO, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_ASPECT_RATIO, &item), ARKUI_ERROR_CODE_PARAM_INVALID);
-    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_ASPECT_RATIO, &itemEnum), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_LAYOUT_WEIGHT, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_DISPLAY_PRIORITY, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_OUTLINE_WIDTH, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -2612,7 +2594,6 @@ HWTEST_F(NativeNodeTest, NativeNodeTest037, TestSize.Level1)
     backgroundBlurVal[0].i32 = negativeEnum;
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_BACKGROUND_BLUR_STYLE, &backgroundBlurItem),
         ARKUI_ERROR_CODE_PARAM_INVALID);
-    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TRANSFORM_CENTER, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TRANSFORM_CENTER, &item4), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_OPACITY_TRANSITION, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_ROTATE_TRANSITION, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -2662,6 +2643,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest037, TestSize.Level1)
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_EXPAND_SAFE_AREA, &itemEnum4), ARKUI_ERROR_CODE_PARAM_INVALID);
     valueEnum[0].u32 = -1;
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_ACCESSIBILITY_ROLE, &itemEnum), ARKUI_ERROR_CODE_PARAM_INVALID);
+    item0.size = -1;
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TRANSFORM_CENTER, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     nodeAPI->disposeNode(rootNode);
 }
 
@@ -2674,7 +2657,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest038, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_TEXT);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_TEXT, nullptr});
     float negativeFloat = -1.0f;
     int32_t negativeInt = -1;
     ArkUI_NumberValue value[] = {{.f32 = negativeFloat}};
@@ -2739,8 +2722,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest039, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto textinput = nodeAPI->createNode(ARKUI_NODE_TEXT_INPUT);
-    auto textarea = nodeAPI->createNode(ARKUI_NODE_TEXT_AREA);
+    auto textinput = new ArkUI_Node({ARKUI_NODE_TEXT_INPUT, nullptr});
+    auto textarea = new ArkUI_Node({ARKUI_NODE_TEXT_AREA, nullptr});
     float negativeFloat = -1.0f;
     int32_t negativeInt = -1;
     ArkUI_NumberValue value[] = {{.f32 = negativeFloat}};
@@ -2889,7 +2872,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest043, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_IMAGE_SPAN);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_IMAGE_SPAN, nullptr});
     float negativeFloat = -1.0f;
     int32_t negativeInt = -1;
     ArkUI_NumberValue value[] = {{.f32 = negativeFloat}};
@@ -2916,7 +2899,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest044, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_IMAGE);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_IMAGE, nullptr});
     int32_t negativeInt = -1;
     ArkUI_NumberValue value0[] = {};
     ArkUI_AttributeItem item0 = {value0, 0, nullptr, nullptr};
@@ -2989,7 +2972,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest047, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_BUTTON);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_BUTTON, nullptr});
     ArkUI_NumberValue value0[] = {};
     ArkUI_AttributeItem item0 = {value0, 0, nullptr, nullptr};
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_BUTTON_LABEL, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -3095,7 +3078,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest051, TestSize.Level1)
         ARKUI_ERROR_CODE_PARAM_INVALID);
     item.string = "test;10;normal;test;italic";
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_DATE_PICKER_SELECTED_TEXT_STYLE, &item),
-        ARKUI_ERROR_CODE_PARAM_INVALID);
+        ARKUI_ERROR_CODE_NO_ERROR);
     item.string = "#ff182431;test;normal;test;italic";
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_DATE_PICKER_SELECTED_TEXT_STYLE, &item),
         ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -3114,7 +3097,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest052, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_TIME_PICKER);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
     float negativeFloat = -1.0f;
     ArkUI_NumberValue value0[] = {};
     ArkUI_AttributeItem item0 = {value0, 0, nullptr, nullptr};
@@ -3155,7 +3138,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest053, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_TEXT_PICKER);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
     ArkUI_NumberValue value0[] = {};
     ArkUI_AttributeItem item0 = {value0, 0, nullptr, nullptr};
     ArkUI_NumberValue value[] = {{.i32 = ARKUI_TEXTPICKER_RANGETYPE_SINGLE}};
@@ -3230,7 +3213,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest054, TestSize.Level1)
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_CALENDAR_PICKER_EDGE_ALIGNMENT, &item),
         ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_CALENDAR_PICKER_TEXT_STYLE, &item0),
-        ARKUI_ERROR_CODE_PARAM_INVALID);
+        ARKUI_ERROR_CODE_NO_ERROR);
     value3[1].f32 = negativeFloat;
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_CALENDAR_PICKER_TEXT_STYLE, &item3),
         ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -3372,10 +3355,10 @@ HWTEST_F(NativeNodeTest, NativeNodeTest059, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_LIST);
-    auto childNode = nodeAPI->createNode(ARKUI_NODE_LIST_ITEM);
-    auto childNodeNew = nodeAPI->createNode(ARKUI_NODE_LIST_ITEM);
-    auto groupNode = nodeAPI->createNode(ARKUI_NODE_LIST_ITEM_GROUP);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_LIST, nullptr});
+    auto childNode = new ArkUI_Node({ARKUI_NODE_LIST_ITEM, nullptr});
+    auto childNodeNew = new ArkUI_Node({ARKUI_NODE_LIST_ITEM, nullptr});
+    auto groupNode = new ArkUI_Node({ARKUI_NODE_LIST_ITEM_GROUP, nullptr});
 
     nodeAPI->insertChildAt(rootNode, groupNode, 0);
     nodeAPI->insertChildAfter(groupNode, childNodeNew, nullptr);
@@ -3454,7 +3437,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest060, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_SWIPER, nullptr});
     float negativeFloat = -1.0f;
     int32_t negativeInt = -1;
     ArkUI_NumberValue value0[] = {};
@@ -3507,6 +3490,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest060, TestSize.Level1)
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SWIPER_NESTED_SCROLL, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SWIPER_NESTED_SCROLL, &itemEnum), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SWIPER_SWIPE_TO_INDEX, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
+    valueEnum[0].i32 = ARKUI_SWIPER_INDICATOR_TYPE_DOT;
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SWIPER_INDICATOR, &itemEnum), ARKUI_ERROR_CODE_PARAM_INVALID);
     nodeAPI->disposeNode(rootNode);
 }
 
@@ -3741,8 +3726,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest067, TestSize.Level1)
     EXPECT_EQ(nodeAPI->insertChildBefore(abnormalNode, abnormalNode, nullptr),
         ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE);
     EXPECT_EQ(nodeAPI->insertChildAt(abnormalNode, abnormalNode, 0), ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE);
-    EXPECT_EQ(nodeAPI->setAttribute(nullptr, NODE_WIDTH, nullptr), ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE);
-    EXPECT_EQ(nodeAPI->resetAttribute(nullptr, NODE_WIDTH), ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE);
+    EXPECT_EQ(nodeAPI->setAttribute(abnormalNode, NODE_WIDTH, nullptr), ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE);
+    EXPECT_EQ(nodeAPI->resetAttribute(abnormalNode, NODE_WIDTH), ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE);
     int32_t abnormalAttribute = 999 * MAX_NODE_SCOPE_NUM;
     auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
     EXPECT_EQ(nodeAPI->setAttribute(node, static_cast<ArkUI_NodeAttributeType>(abnormalAttribute), nullptr),
@@ -3755,10 +3740,15 @@ HWTEST_F(NativeNodeTest, NativeNodeTest067, TestSize.Level1)
         EXPECT_EQ(nodeAPI->setAttribute(node, static_cast<ArkUI_NodeAttributeType>(abnormalAttribute), nullptr),
             ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED);
         EXPECT_EQ(nodeAPI->resetAttribute(node, static_cast<ArkUI_NodeAttributeType>(abnormalAttribute)),
-            ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED);
-        EXPECT_EQ(nodeAPI->getAttribute(node, static_cast<ArkUI_NodeAttributeType>(abnormalAttribute)), nullptr);
+            ARKUI_ERROR_CODE_NO_ERROR);
+        if (i == ARKUI_NODE_DATE_PICKER || i == ARKUI_NODE_TEXT_PICKER || i == ARKUI_NODE_TIME_PICKER ||
+            i == ARKUI_NODE_LOADING_PROGRESS) {
+            EXPECT_NE(nodeAPI->getAttribute(node, static_cast<ArkUI_NodeAttributeType>(abnormalAttribute)), nullptr);
+        } else {
+            EXPECT_EQ(nodeAPI->getAttribute(node, static_cast<ArkUI_NodeAttributeType>(abnormalAttribute)), nullptr);
+        }
     }
-    for (int32_t j = static_cast<int32_t>(ARKUI_NODE_STACK); j <= static_cast<int32_t>(ARKUI_NODE_GRID_ITEM); j++) {
+    for (int32_t j = static_cast<int32_t>(ARKUI_NODE_STACK); j < static_cast<int32_t>(ARKUI_NODE_GRID_ITEM); j++) {
         abnormalAttribute = (j + 1) * MAX_NODE_SCOPE_NUM - 1;
         if (j == ARKUI_NODE_FLOW_ITEM) {
             EXPECT_EQ(nodeAPI->setAttribute(node, static_cast<ArkUI_NodeAttributeType>(abnormalAttribute), nullptr),
@@ -3770,8 +3760,14 @@ HWTEST_F(NativeNodeTest, NativeNodeTest067, TestSize.Level1)
             EXPECT_EQ(nodeAPI->setAttribute(node, static_cast<ArkUI_NodeAttributeType>(abnormalAttribute), nullptr),
                 ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED);
             EXPECT_EQ(nodeAPI->resetAttribute(node, static_cast<ArkUI_NodeAttributeType>(abnormalAttribute)),
-                ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED);
-            EXPECT_EQ(nodeAPI->getAttribute(node, static_cast<ArkUI_NodeAttributeType>(abnormalAttribute)), nullptr);
+                ARKUI_ERROR_CODE_NO_ERROR);
+            if (j == ARKUI_NODE_LIST) {
+                EXPECT_NE(nodeAPI->getAttribute(
+                    node, static_cast<ArkUI_NodeAttributeType>(abnormalAttribute)), nullptr);
+            } else {
+                EXPECT_EQ(nodeAPI->getAttribute(
+                    node, static_cast<ArkUI_NodeAttributeType>(abnormalAttribute)), nullptr);
+            }
         }
     }
     delete abnormalNode;

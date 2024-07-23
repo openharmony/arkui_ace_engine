@@ -2852,7 +2852,7 @@ void JSViewAbstract::ParseBlurStyleOption(const JSRef<JSObject>& jsOption, BlurS
     auto policy = static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE);
     ParseJsInt32(jsOption->GetProperty("policy"), policy);
     if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
-        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALAWYS_INACTIVE)) {
+        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
         styleOption.policy = static_cast<BlurStyleActivePolicy>(policy);
     }
 
@@ -2990,7 +2990,7 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
     auto policy = static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE);
     ParseJsInt32(jsOption->GetProperty("policy"), policy);
     if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
-        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALAWYS_INACTIVE)) {
+        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
         effectOption.policy = static_cast<BlurStyleActivePolicy>(policy);
     }
 
@@ -5522,7 +5522,7 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
 
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
 {
-    if (jsValue->IsNumber() && jsValue->ToNumber<int64_t>() >= 0) {
+    if (jsValue->IsNumber()) {
         result = Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>()));
         return true;
     }
@@ -5538,8 +5538,7 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result, const Color& defaultColor)
 {
     if (jsValue->IsNumber()) {
-        result = jsValue->ToNumber<int64_t>() >= 0 ? Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>())) :
-            defaultColor;
+        result = Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>()));
         return true;
     }
     if (jsValue->IsString()) {
@@ -10489,11 +10488,11 @@ void JSViewAbstract::JsFocusScopeId(const JSCallbackInfo& info)
     if (info.Length() == 0) {
         return;
     }
-    if (!info[0]->IsString() || info[0]->IsNull() || info[0]->IsUndefined()) {
-        return;
-    }
 
-    std::string focusScopeId = info[0]->ToString();
+    std::string focusScopeId;
+    if (info[0]->IsString()) {
+        focusScopeId = info[0]->ToString();
+    }
 
     bool isGroup = false;
     if (info.Length() == PARAMETER_LENGTH_SECOND && !info[0]->IsNull() && !info[0]->IsUndefined() &&
