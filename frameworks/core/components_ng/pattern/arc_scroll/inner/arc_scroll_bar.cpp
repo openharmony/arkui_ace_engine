@@ -18,7 +18,6 @@ namespace OHOS::Ace::NG {
 namespace {
 inline constexpr int TWOFOLD = 2;
 inline constexpr double HALF = 0.5;
-inline constexpr double NORMAL_WIDEN_WIDTH = 12.0;
 constexpr int32_t BAR_SHRINK_DELAY_DURATION = 2000; // 2000ms
 } // namespace
 
@@ -54,7 +53,7 @@ void ArcScrollBar::SetBarRegion(const Offset& offset, const Size& size)
     double sweepAngle = GetNormaMaxOffsetAngle();
     double width = NormalizeToPx(GetNormalBackgroundWidth());
     centerDeviation_ = width * FACTOR_HALF;
-    if (normalWidth == NORMAL_WIDEN_WIDTH) {
+    if (GetDisplayMode() == DisplayMode::AUTO || normalWidth == NormalizeToPx(GetActiveWidth())) {
         startAngle = GetActiveStartAngle();
         sweepAngle = GetActiveMaxOffsetAngle();
         width = NormalizeToPx(GetActiveBackgroundWidth());
@@ -71,7 +70,7 @@ void ArcScrollBar::SetRoundTrickRegion(double estimatedHeight, double barRegionS
         width_ = NormalizeToPx(GetNormalScrollBarWidth());
         centerDeviation_ = NormalizeToPx(GetNormalBackgroundWidth()) * FACTOR_HALF;
         double maxAngle = GetNormaMaxOffsetAngle();
-        if (normalWidth == NORMAL_WIDEN_WIDTH) {
+        if (GetDisplayMode() == DisplayMode::AUTO || normalWidth == NormalizeToPx(GetActiveWidth())) {
             width_ = NormalizeToPx(GetActiveScrollBarWidth());
             centerDeviation_ = NormalizeToPx(GetActiveBackgroundWidth()) * FACTOR_HALF;
             maxAngle = GetActiveMaxOffsetAngle();

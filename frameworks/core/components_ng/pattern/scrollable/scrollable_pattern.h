@@ -703,6 +703,12 @@ protected:
     {
         return true;
     }
+#ifdef ARKUI_CIRCLE_FEATURE
+    void SetRoundScroll()
+    {
+        isRoundScroll_ = true;
+    }
+#endif
 
 private:
     virtual void OnScrollEndCallback() {};
@@ -864,6 +870,10 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
     bool lastCanOverScroll_ = false;
+
+#ifdef ARKUI_CIRCLE_FEATURE
+    bool isRoundScroll_ = false;
+#endif
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;
