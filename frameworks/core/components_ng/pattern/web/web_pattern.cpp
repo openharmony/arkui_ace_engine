@@ -2652,6 +2652,7 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
         drawSizeCache_.SetSize(drawSize_);
     }
     if (drawSizeCache_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow not obstruct");
         isVirtualKeyBoardShow_ = VkState::VK_SHOW;
         return !safeAreaEnabled;
     }
@@ -2661,6 +2662,7 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
         return true;
     }
     if (!delegate_->NeedSoftKeyboard()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow not NeedSoftKeyboard");
         return false;
     }
     isVirtualKeyBoardShow_ = VkState::VK_SHOW;
@@ -3049,7 +3051,7 @@ void WebPattern::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
     selectInfo.onHandleMoveDone = [weak = AceType::WeakClaim(this)](const RectF& rectF, bool isFirst) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
-        webPattern->UpdateTouchHandleForOverlay();
+        webPattern->UpdateTouchHandleForOverlay(true);
         webPattern->SetSelectOverlayDragging(false);
     };
     selectInfo.onTouchDown = [weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
@@ -4242,7 +4244,7 @@ OffsetF WebPattern::GetSelectPopupPostion(std::shared_ptr<OHOS::NWeb::NWebSelect
     return offset;
 }
 
-void WebPattern::UpdateTouchHandleForOverlay()
+void WebPattern::UpdateTouchHandleForOverlay(bool fromOverlay)
 {
     WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle_, startSelectionHandle_, endSelectionHandle_);
     CHECK_NULL_VOID(selectOverlayProxy_);
@@ -4252,14 +4254,14 @@ void WebPattern::UpdateTouchHandleForOverlay()
     }
     SelectHandleInfo firstHandleInfo;
     SelectHandleInfo secondHandleInfo;
-    SelectMenuInfo menuInfo;
     if (overlayType == INSERT_OVERLAY) {
+        if (!fromOverlay) {
+            selectOverlayProxy_->ShowOrHiddenMenu(true, true);
+        }
         firstHandleInfo.isShow = IsTouchHandleShow(insertHandle_);
         firstHandleInfo.paintRect = ComputeTouchHandleRect(insertHandle_);
-        menuInfo.menuDisable = true;
-        menuInfo.menuIsShow = false;
+        firstHandleInfo.needLayout = true;
         selectOverlayProxy_->UpdateFirstSelectHandleInfo(firstHandleInfo);
-        selectOverlayProxy_->UpdateSelectMenuInfo(menuInfo);
     } else {
         firstHandleInfo.isShow = IsTouchHandleShow(startSelectionHandle_);
         firstHandleInfo.paintRect = ComputeTouchHandleRect(startSelectionHandle_);

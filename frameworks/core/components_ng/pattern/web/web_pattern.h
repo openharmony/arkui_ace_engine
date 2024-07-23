@@ -515,7 +515,7 @@ public:
     void OnDateTimeChooserClose();
     void OnShowAutofillPopup(const float offsetX, const float offsetY, const std::vector<std::string>& menu_items);
     void OnHideAutofillPopup();
-    void UpdateTouchHandleForOverlay();
+    void UpdateTouchHandleForOverlay(bool fromOverlay = false);
     bool IsSelectOverlayDragging()
     {
         return selectOverlayDragging_;
