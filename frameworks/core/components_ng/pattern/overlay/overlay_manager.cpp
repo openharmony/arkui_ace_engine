@@ -1367,7 +1367,7 @@ void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode, bool i
     } else if (container->IsSubContainer()) {
         currentId - SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
     }
-    container->RequestAutoSave(ContainerNode, nullptr, nullptr, nullptr, currentId);
+    container->RequestAutoSave(ContainerNode, nullptr, nullptr, true, currentId);
 }
 
 void OverlayManager::ShowPopupAnimation(const RefPtr<FrameNode>& popupNode)
