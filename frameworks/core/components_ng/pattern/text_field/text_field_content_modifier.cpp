@@ -45,6 +45,7 @@ const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
 };
 constexpr float ROUND_VALUE = 0.5f;
 constexpr Dimension DEFAULT_FADEOUT_VP = 16.0_vp;
+constexpr double MAX_TEXTFADEOUT_PERCENT = 0.5;
 
 inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 {
@@ -670,16 +671,24 @@ void TextFieldContentModifier::DrawTextFadeout(DrawingContext& context)
     auto textWidth = paragraph->GetTextWidth();
     auto leftFadeOn = false;
     auto rigthFadeOn = false;
-    auto gradientPercent = DEFAULT_FADEOUT_VP.ConvertToPx() / context.width;
+    auto textFadeoutWidth = DEFAULT_FADEOUT_VP.ConvertToPx();
+    auto gradientPercent = std::min(MAX_TEXTFADEOUT_PERCENT,
+        textFadeoutWidth / std::max(static_cast<double>(contentRect.Width()), textFadeoutWidth));
     auto textFadeRect = RectF(contentRect.GetX(), contentOffset.GetY(), contentRect.Width(),
         std::max(textRect.Height(), contentRect.Height()));
     AdjustTextFadeRect(textFadeRect);
 
+    RSRect clipRect;
+    std::vector<RSPoint> clipRadius;
+    GetFrameRectClip(clipRect, clipRadius);
+    canvas.ClipRoundRect(clipRect, clipRadius, true);
+
+    canvas.Save();
     RSRect clipTextInnerRect = RSRect(textFadeRect.GetX(), textFadeRect.GetY(),
         textFadeRect.Width() + textFadeRect.GetX(), textFadeRect.GetY() + textFadeRect.Height());
     canvas.ClipRect(clipTextInnerRect, RSClipOp::INTERSECT);
-
     paragraph->Paint(canvas, textRectX, contentOffset.GetY());
+    canvas.Restore();
 
     auto textIndent = std::max(textFieldPattern->GetTextIndent(), 0.0f);
     if (GreatNotEqual(textWidth + textIndent, contentRect.Width())) {
