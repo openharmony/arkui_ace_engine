@@ -813,10 +813,18 @@ RefPtr<FrameNode> DialogPattern::CreateDivider(
     CHECK_NULL_RETURN(dividerPaintProps, nullptr);
     dividerPaintProps->UpdateDividerColor(color);
     // add divider margin
-    MarginProperty margin = {
-        .left = CalcLength((space - dividerWidth) / 2),
-        .right = CalcLength((space - dividerWidth) / 2),
-    };
+    MarginProperty margin;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        margin = {
+            .left = CalcLength((space + space - Dimension(dividerWidth.ConvertToVp(), DimensionUnit::VP)) / 2),
+            .right = CalcLength((space + space - Dimension(dividerWidth.ConvertToVp(), DimensionUnit::VP)) / 2),
+        };
+    } else {
+        margin = {
+            .left = CalcLength((space - dividerWidth) / 2),
+            .right = CalcLength((space - dividerWidth) / 2),
+        };
+    }
     dividerProps->UpdateMargin(margin);
     return dividerNode;
 }
