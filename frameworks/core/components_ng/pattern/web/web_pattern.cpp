@@ -266,13 +266,17 @@ WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& w
     bool incognitoMode, const std::string& sharedRenderProcessToken)
     : webSrc_(std::move(webSrc)), webController_(webController), renderMode_(renderMode), incognitoMode_(incognitoMode),
       sharedRenderProcessToken_(sharedRenderProcessToken)
-{}
+{
+    InitAiEngine();
+}
 
 WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback, RenderMode renderMode,
     bool incognitoMode, const std::string& sharedRenderProcessToken)
     : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), renderMode_(renderMode),
       incognitoMode_(incognitoMode), sharedRenderProcessToken_(sharedRenderProcessToken)
-{}
+{
+    InitAiEngine();
+}
 
 WebPattern::~WebPattern()
 {
@@ -5263,7 +5267,6 @@ std::vector<int8_t> WebPattern::GetWordSelection(const std::string& text, int8_t
     return DataDetectorMgr::GetInstance().GetWordSelection(text, offset);
 }
 
-
 bool WebPattern::Backward()
 {
     if (!delegate_) {
@@ -5630,5 +5633,24 @@ void WebPattern::UnRegisterTextBlurCallback()
     textBlurCallback_ = nullptr;
     textBlurAccessibilityEnable_ = false;
     SetAccessibilityState(false);
+}
+
+void WebPattern::InitAiEngine()
+{
+    static bool isInit = false;
+    if (isInit) {
+        return;
+    }
+    auto context = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+    uiTaskExecutor.PostTask(
+        [&, instanceId = context->GetInstanceId()] {
+            ContainerScope scope(instanceId);
+            TAG_LOGI(AceLogTag::ACE_WEB, "ArkWeb init data detector.");
+            DataDetectorMgr::GetInstance();
+        },
+        "ArkWebTextInitDataDetect");
+    isInit = true;
 }
 } // namespace OHOS::Ace::NG

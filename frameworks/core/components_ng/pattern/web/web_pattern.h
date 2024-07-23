@@ -913,6 +913,7 @@ private:
     void GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId);
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
+    void InitAiEngine();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
