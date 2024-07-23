@@ -1495,6 +1495,8 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
         ShowPopupAnimationNG(popupNode);
     }
     SetPopupHotAreas(popupNode);
+    popupNode->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 void OverlayManager::SetPopupHotAreas(RefPtr<FrameNode> popupNode)
@@ -1605,6 +1607,8 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     HidePopupAnimation(popupNode, onFinish);
     popupNode->OnAccessibilityEvent(
         AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    popupNode->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 RefPtr<FrameNode> OverlayManager::HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo)
@@ -1755,6 +1759,8 @@ void OverlayManager::ErasePopup(int32_t targetId)
         auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
         CHECK_NULL_VOID(layoutProp);
         auto isShowInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+        popupNode->OnAccessibilityEvent(
+            AccessibilityEventType::PAGE_CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
         if (isShowInSubWindow) {
             auto subwindowMgr = SubwindowManager::GetInstance();
             subwindowMgr->DeleteHotAreas(Container::CurrentId(), popupNode->GetId());
