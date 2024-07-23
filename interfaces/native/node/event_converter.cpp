@@ -26,6 +26,7 @@
 #include "base/error/error_code.h"
 #include "core/event/touch_event.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "interfaces/native/drag_and_drop.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {
@@ -203,6 +204,20 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_TOUCH;
         case NODE_ON_CLICK:
             return ON_CLICK;
+        case NODE_ON_DRAG_START:
+            return ON_DRAG_START;
+        case NODE_ON_DRAG_ENTER:
+            return ON_DRAG_ENTER;
+        case NODE_ON_DROP:
+            return ON_DRAG_DROP;
+        case NODE_ON_DRAG_MOVE:
+            return ON_DRAG_MOVE;
+        case NODE_ON_DRAG_LEAVE:
+            return ON_DRAG_LEAVE;
+        case NODE_ON_DRAG_END:
+            return ON_DRAG_END;
+        case NODE_ON_PRE_DRAG:
+            return ON_PRE_DRAG;
         case NODE_CHECKBOX_EVENT_ON_CHANGE:
             return ON_CHECKBOX_CHANGE;
         case NODE_SLIDER_EVENT_ON_CHANGE:
@@ -381,6 +396,20 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TOUCH_EVENT;
         case ON_CLICK:
             return NODE_ON_CLICK;
+        case ON_DRAG_START:
+            return NODE_ON_DRAG_START;
+        case ON_DRAG_ENTER:
+            return NODE_ON_DRAG_ENTER;
+        case ON_DRAG_DROP:
+            return NODE_ON_DROP;
+        case ON_DRAG_MOVE:
+            return NODE_ON_DRAG_MOVE;
+        case ON_DRAG_LEAVE:
+            return NODE_ON_DRAG_LEAVE;
+        case ON_DRAG_END:
+            return NODE_ON_DRAG_END;
+        case ON_PRE_DRAG:
+            return NODE_ON_PRE_DRAG;
         case ON_CHECKBOX_CHANGE:
             return NODE_CHECKBOX_EVENT_ON_CHANGE;
         case ON_SLIDER_CHANGE:
@@ -568,6 +597,12 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
         case MIXED_EVENT: {
             event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_MIXED_EVENT);
             ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->mixedEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        case DRAG_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->dragEvent.subKind);
             event->kind = ConvertToNodeEventType(subKind);
             return true;
         }
@@ -853,6 +888,18 @@ int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_Nu
         mixedData->numberReturnData[i].i32 = value[i].i32;
     }
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_DragEvent* OH_ArkUI_NodeEvent_GetDragEvent(ArkUI_NodeEvent* nodeEvent)
+{
+    if (!nodeEvent || nodeEvent->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT)) {
+        return nullptr;
+    }
+    const auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(nodeEvent->origin);
+    if (!originNodeEvent) {
+        return nullptr;
+    }
+    return const_cast<ArkUI_DragEvent*>(reinterpret_cast<const ArkUI_DragEvent*>(&(originNodeEvent->dragEvent)));
 }
 
 #ifdef __cplusplus

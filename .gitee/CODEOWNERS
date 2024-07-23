@@ -2701,6 +2701,8 @@ frameworks/core/interfaces/native/node/node_content_modifier.cpp @arkuiframework
 frameworks/core/interfaces/native/node/node_content_modifier.h @arkuiframework
 frameworks/core/interfaces/native/node/node_date_picker_modifier.cpp @arkuipopupwindow
 frameworks/core/interfaces/native/node/node_date_picker_modifier.h @arkuipopupwindow
+frameworks/core/interfaces/native/node/node_drag_modifier.cpp @arkuievent
+frameworks/core/interfaces/native/node/node_drag_modifier.h @arkuievent
 frameworks/core/interfaces/native/node/node_folder_stack_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/node_folder_stack_modifier.h @arkuilayout
 frameworks/core/interfaces/native/node/node_gesture_modifier.cpp @arkuievent
@@ -2815,7 +2817,9 @@ frameworks/core/interfaces/native/node/view_model.h @arkuiframework
 frameworks/core/interfaces/native/node/water_flow_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/node/water_flow_modifier.h @arkuiscroll
 interfaces/native/BUILD.gn @arkui_architecture
+interfaces/native/drag_and_drop.h @arkuievent
 interfaces/native/drawable_descriptor.h @arkui_image
+interfaces/native/event/drag_and_drop_impl.cpp @arkuievent
 interfaces/native/event/ui_input_event.cpp @arkuievent
 interfaces/native/event/ui_input_event_impl.h @arkuievent
 interfaces/native/libace.ndk.json @arkui_architecture
