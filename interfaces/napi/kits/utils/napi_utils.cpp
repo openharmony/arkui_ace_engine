@@ -66,9 +66,9 @@ void NapiThrow(napi_env env, const std::string& message, int32_t errCode)
     napi_throw(env, error);
 }
 
-void ReplaceHolder(std::string& originStr, const std::vector<std::string>& params, int32_t containCount)
+void ReplaceHolder(std::string& originStr, const std::vector<std::string>& params, uint32_t containCount)
 {
-    auto size = static_cast<int32_t>(params.size());
+    auto size = static_cast<uint32_t>(params.size());
     if (containCount == size) {
         return;
     }
@@ -94,12 +94,15 @@ void ReplaceHolder(std::string& originStr, const std::vector<std::string>& param
         std::string replaceContentStr;
         std::string::size_type index;
         if (shortHolderType) {
-            index = static_cast<uint32_t>(searchTime + containCount);
+            index = static_cast<std::string::size_type>(searchTime + containCount);
         } else {
-            index = static_cast<uint32_t>(StringUtils::StringToInt(pos) - 1 + containCount);
+            index = static_cast<std::string::size_type>(StringUtils::StringToInt(pos) - 1 + containCount);
         }
-        replaceContentStr = params[index];
-
+        if (static_cast<uint32_t>(index) < size) {
+            replaceContentStr = params[index];
+        } else {
+            LOGE("str size is error index = %{public}d size = %{public}d", static_cast<uint32_t>(index), size);
+        }
         originStr.replace(matches[0].first - originStr.begin(), matches[0].length(), replaceContentStr);
         start = originStr.begin() + matches.prefix().length() + replaceContentStr.length();
         end = originStr.end();

@@ -395,24 +395,9 @@ void UIExtensionPattern::OnDisconnect(bool isAbnormal)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void UIExtensionPattern::OnAreaChangedInner()
+void UIExtensionPattern::OnSyncGeometryNode(const DirtySwapConfig& config)
 {
-    DispatchDisplayArea();
-}
-
-bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
-{
-    CHECK_NULL_RETURN(sessionWrapper_, false);
-    CHECK_NULL_RETURN(dirty, false);
-    auto host = dirty->GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate();
-    auto geometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto displaySize = geometryNode->GetFrameSize();
-    displayArea_ = RectF(displayOffset, displaySize);
-    sessionWrapper_->NotifyDisplayArea(displayArea_);
-    return false;
+    DispatchDisplayArea(true);
 }
 
 void UIExtensionPattern::OnWindowShow()
@@ -474,7 +459,18 @@ void UIExtensionPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    OnAreaChangedFunc onAreaChangedFunc = [weak = WeakClaim(this)](
+        const RectF& oldRect,
+        const OffsetF& oldOrigin,
+        const RectF& rect,
+        const OffsetF& origin) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->DispatchDisplayArea();
+    };
+    eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
     pipeline->AddOnAreaChangeNode(host->GetId());
     callbackId_ = pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t, int32_t) {
         auto pattern = weak.Upgrade();
@@ -482,6 +478,7 @@ void UIExtensionPattern::OnAttachToFrameNode()
             pattern->DispatchDisplayArea(true);
         }
     });
+    UIEXT_LOGI("OnAttachToFrameNode");
 }
 
 void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -665,7 +662,9 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     AceExtraInputData::InsertInterpolatePoints(info);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->RequestFocusImmediately();
+    if (pipeline->IsWindowFocused()) {
+        focusHub->RequestFocusImmediately();
+    }
     DispatchPointerEvent(pointerEvent);
 }
 

@@ -197,11 +197,11 @@ HWTEST_F(ViewAbstractModelTestNg, GetOverlayFromPageTest, TestSize.Level1)
     auto navPatern = navDestinaion->GetPattern<NavDestinationPattern>();
     ASSERT_NE(navPatern, nullptr);
     auto overlay = navPatern->GetOverlayManager();
-    EXPECT_NE(overlay, nullptr);
-    EXPECT_TRUE(!targetNode->RootNodeIsPage());
+    EXPECT_EQ(overlay, nullptr);
+    EXPECT_FALSE(!targetNode->RootNodeIsPage());
     EXPECT_EQ(targetNode->GetRootNodeId(), 1);
-    EXPECT_TRUE(!pageNode->RootNodeIsPage());
-    EXPECT_EQ(pageNode->GetRootNodeId(), targetNode->GetRootNodeId());
+    EXPECT_FALSE(!pageNode->RootNodeIsPage());
+    EXPECT_NE(pageNode->GetRootNodeId(), targetNode->GetRootNodeId());
 }
 
 /**

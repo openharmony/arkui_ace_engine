@@ -42,7 +42,7 @@ static void SetBarInUIThread(TaskExecutor::Task&& task, const std::string& name)
 {
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, name);
+    taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, name, PriorityType::VIP);
 }
 
 static napi_value JSSetVisible(napi_env env, napi_callback_info info)

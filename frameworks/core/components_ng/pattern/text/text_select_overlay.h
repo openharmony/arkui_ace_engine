@@ -71,6 +71,10 @@ public:
 
 protected:
     virtual void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle);
+    void UpdateTransformFlag() override
+    {
+        hasTransform_ = CheckHasTransformAttr();
+    }
     bool selectTextUseTopHandle = false;
 
 private:

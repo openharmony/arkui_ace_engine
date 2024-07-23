@@ -42,6 +42,7 @@ public:
     void SetRenderSurface(const RefPtr<RenderSurface>& renderSurface) override;
     void RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent, StateChangedEvent&& stateChangedEvent,
         CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent, CommonEvent&& startRenderFrameEvent) override;
+    void RegisterMediaPlayerSeekDoneEvent(SeekDoneEvent&& seekDoneEvent) override;
     int32_t GetDuration(int32_t& duration) override;
     int32_t GetVideoWidth() override;
     int32_t GetVideoHeight() override;

@@ -222,6 +222,7 @@ bool SubwindowOhos::InitContainer()
     subPipelineContext->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
     subPipelineContext->SetupSubRootElement();
     subPipelineContext->SetKeyboardAnimationConfig(parentPipeline->GetKeyboardAnimationConfig());
+    subPipelineContext->SetDragNodeGrayscale(parentPipeline->GetDragNodeGrayscale());
     return true;
 }
 
@@ -1127,8 +1128,8 @@ void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::fun
     CHECK_NULL_VOID(parentContainer);
     if (parentContainer->IsScenceBoardWindow() || toastInfo.showMode == NG::ToastShowMode::TOP_MOST ||
         toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
-        ShowWindow(false);
         ResizeWindow();
+        ShowWindow(false);
         CHECK_NULL_VOID(window_);
         window_->SetTouchable(false);
     }

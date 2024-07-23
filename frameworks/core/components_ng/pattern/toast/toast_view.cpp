@@ -29,6 +29,7 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+constexpr float MAX_TOAST_SCALE = 2.0f;
 RefPtr<FrameNode> ToastView::CreateToastNode(const ToastInfo& toastInfo)
 {
     auto context = PipelineBase::GetCurrentContext();
@@ -93,6 +94,7 @@ void ToastView::UpdateTextLayoutProperty(
     auto padding = toastTheme->GetPadding();
     auto fontWeight = toastTheme->GetTextStyle().GetFontWeight();
     auto textColor = toastTheme->GetTextStyle().GetTextColor();
+    textLayoutProperty->UpdateMaxFontScale(MAX_TOAST_SCALE);
     PaddingProperty paddings;
     paddings.top = NG::CalcLength(padding.Top());
     paddings.bottom = NG::CalcLength(padding.Bottom());
@@ -148,7 +150,7 @@ void ToastView::UpdateTextContext(const RefPtr<FrameNode>& textNode)
         textContext->UpdateBackgroundColor(Color::TRANSPARENT);
         BlurStyleOption styleOption;
         styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
-        styleOption.policy = BlurStyleActivePolicy::ALAWYS_ACTIVE;
+        styleOption.policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
         textContext->UpdateBackBlurStyle(styleOption);
     } else {
         auto toastBackgroundColor = toastTheme->GetBackgroundColor();

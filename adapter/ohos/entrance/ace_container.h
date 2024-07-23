@@ -101,6 +101,8 @@ public:
     bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
         uint32_t autoFillSessionId, bool isNative = true) override;
 
+    bool ClosePopupUIExtension(uint32_t autoFillSessionId) override;
+
     void Initialize() override;
 
     void Destroy() override;
@@ -283,6 +285,12 @@ public:
     }
 
     RefPtr<DisplayInfo> GetDisplayInfo() override;
+
+    void InitIsFoldable() override;
+
+    bool IsFoldable() const override;
+
+    FoldStatus GetCurrentFoldStatus() override;
 
     void SetHapPath(const std::string& hapPath);
 

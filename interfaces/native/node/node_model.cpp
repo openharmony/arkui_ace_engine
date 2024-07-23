@@ -352,8 +352,9 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
     }
     if (eventType == NODE_EVENT_ON_VISIBLE_AREA_CHANGE) {
         ArkUI_AttributeItem* radio = nodePtr->areaChangeRadio;
-        if (radio == nullptr) {
-            radio = static_cast<ArkUI_AttributeItem*>(userData);
+        radio = radio ? radio : static_cast<ArkUI_AttributeItem*>(userData);
+        if (!radio) {
+            return ERROR_CODE_PARAM_INVALID;
         }
         ArkUI_Int32 radioLength = radio->size;
         if (radioLength <= 0) {
@@ -507,6 +508,9 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
             break;
         case MIXED_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->mixedEvent.subKind);
+            break;
+        case DRAG_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->dragEvent.subKind);
             break;
         default:
             break; /* Empty */

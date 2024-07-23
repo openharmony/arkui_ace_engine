@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -113,7 +114,9 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
     textPickerNode->MountToParent(contentColumn);
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
-
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(dialogPattern, nullptr);
+    dialogPattern->SetIsPickerDiaglog(true);
     auto closeDiaglogEvent = CloseDiaglogEvent(textPickerPattern, dialogNode);
     auto closeCallback = [func = std::move(closeDiaglogEvent)](const GestureEvent& /* info */) {
         func();
@@ -140,12 +143,16 @@ std::function<void()> TextPickerDialogView::CloseDiaglogEvent(const RefPtr<TextP
         weakPattern = WeakPtr<TextPickerPattern>(textPickerPattern)]() {
         auto dialogNode = weak.Upgrade();
         CHECK_NULL_VOID(dialogNode);
+        auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+        CHECK_NULL_VOID(dialogPattern);
+        dialogPattern->SetIsPickerDiaglog(false);
         auto textPickerPattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(textPickerPattern);
         if (textPickerPattern->GetIsShowInDialog()) {
             auto pipeline = PipelineContext::GetCurrentContext();
             auto overlayManager = pipeline->GetOverlayManager();
             overlayManager->CloseDialog(dialogNode);
+            textPickerPattern->SetIsShowInDialog(false);
         }
     };
     textPickerPattern->updateFontConfigurationEvent(event);
@@ -260,6 +267,9 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     textPickerNode->MountToParent(contentColumn);
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(dialogPattern, nullptr);
+    dialogPattern->SetIsPickerDiaglog(true);
 
     auto closeDiaglogEvent = CloseDiaglogEvent(textPickerPattern, dialogNode);
     auto closeCallBack = [func = std::move(closeDiaglogEvent)](const GestureEvent& /* info */) {
@@ -269,8 +279,7 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     float scale = pipeline->GetFontScale();
-    if (GreatOrEqualCustomPrecision(scale, pickerTheme->GetMaxOneFontScale())
-        && GetIsOverRange(scale)) {
+    if (NeedAdaptForAging()) {
         dialogNode = SeparatedOptionsShow(contentColumn, textPickerNode, buttonInfos, settingData,
             dialogEvent, dialogCancelEvent, scale, closeCallBack, dialogNode);
         return dialogNode;
@@ -564,6 +573,9 @@ void TextPickerDialogView::UpdateConfirmButtonTextLayoutProperty(
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
     textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    if (!NeedAdaptForAging()) {
+        textLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
+    }
     textLayoutProperty->UpdateFontSize(
         ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
@@ -576,6 +588,9 @@ void TextPickerDialogView::UpdateCancelButtonTextLayoutProperty(
     CHECK_NULL_VOID(textCancelLayoutProperty);
     textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
     textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    if (!NeedAdaptForAging()) {
+        textCancelLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
+    }
     textCancelLayoutProperty->UpdateFontSize(
         ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
     textCancelLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
@@ -611,16 +626,28 @@ void TextPickerDialogView::UpdateConfirmButtonMargin(
     const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme)
 {
     MarginProperty margin;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
         margin.top = CalcLength(dialogTheme->GetDividerHeight());
         margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-        margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
+        if (isRtl) {
+            margin.right = CalcLength(0.0_vp);
+            margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
+        } else {
+            margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
+            margin.left = CalcLength(0.0_vp);
+        }
+
     } else {
-        margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
         margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
         margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
-        margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
+        if (isRtl) {
+            margin.right = CalcLength(0.0_vp);
+            margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
+        } else {
+            margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
+            margin.left = CalcLength(0.0_vp);
+        }
     }
     buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
 }
@@ -629,16 +656,27 @@ void TextPickerDialogView::UpdateCancelButtonMargin(
     const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme)
 {
     MarginProperty margin;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
         margin.top = CalcLength(dialogTheme->GetDividerHeight());
         margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-        margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
+        if (isRtl) {
+            margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
+            margin.left = CalcLength(0.0_vp);
+        } else {
+            margin.right = CalcLength(0.0_vp);
+            margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
+        }
     } else {
-        margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
         margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
         margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
-        margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
+        if (isRtl) {
+            margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
+            margin.left = CalcLength(0.0_vp);
+        } else {
+            margin.right = CalcLength(0.0_vp);
+            margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
+        }
     }
     buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
 }
@@ -694,7 +732,7 @@ void TextPickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& but
     }
     UpdateButtonStyleAndRole(buttonInfos, index, buttonLayoutProperty, buttonRenderContext, buttonTheme);
     if (buttonInfos[index].fontSize.has_value()) {
-        buttonLayoutProperty->UpdateFontSize(buttonInfos[index].fontSize.value());
+        buttonLayoutProperty->UpdateFontSize(ConvertFontScaleValue(buttonInfos[index].fontSize.value()));
     }
     if (buttonInfos[index].fontColor.has_value()) {
         buttonLayoutProperty->UpdateFontColor(buttonInfos[index].fontColor.value());
@@ -1026,11 +1064,6 @@ void TextPickerDialogView::UpdateButtonDefaultFocus(const std::vector<ButtonInfo
             focusHub->SetIsDefaultFocus(true);
         }
     }
-}
-
-bool TextPickerDialogView::GetIsOverRange(const float& scale)
-{
-    return true;
 }
 
 RefPtr<FrameNode> TextPickerDialogView::CreateForwardNode(NG::DialogGestureEvent& moveForwardEvent,
@@ -1429,7 +1462,8 @@ bool TextPickerDialogView::NeedAdaptForAging()
     CHECK_NULL_RETURN(pipeline, false);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, false);
-    if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale())) {
+    if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale()) &&
+        Dimension(pipeline->GetRootHeight()).ConvertToVp() > pickerTheme->GetDeviceHeightLimit()) {
         return true;
     }
     return false;
@@ -1450,15 +1484,14 @@ const Dimension TextPickerDialogView::AdjustFontSizeScale(const Dimension& fontS
 const Dimension TextPickerDialogView::ConvertFontScaleValue(
     const Dimension& fontSizeValue, const Dimension& fontSizeLimit, bool isUserSetFont)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, fontSizeValue);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, fontSizeValue);
     float fontSizeScale = pipeline->GetFontScale();
     Dimension fontSizeValueResult = fontSizeValue;
 
-    if (NeedAdaptForAging() &&
-        Dimension(pipeline->GetRootHeight()).ConvertToVp() > pickerTheme->GetDeviceHeightLimit()) {
+    if (NeedAdaptForAging()) {
         if (fontSizeValue.Unit() == DimensionUnit::VP) {
             if (isUserSetFont) {
                 fontSizeValueResult = ConvertFontSizeLimit(fontSizeValue, fontSizeLimit, isUserSetFont);
@@ -1470,12 +1503,20 @@ const Dimension TextPickerDialogView::ConvertFontScaleValue(
                 fontSizeValueResult = fontSizeValue * fontSizeScale;
             }
             if (isUserSetFont) {
-                fontSizeValueResult =
-                    ConvertFontSizeLimit(fontSizeValueResult, fontSizeLimit, isUserSetFont);
+                fontSizeValueResult = ConvertFontSizeLimit(fontSizeValueResult, fontSizeLimit, isUserSetFont);
             }
         }
     } else {
-        fontSizeValueResult = AdjustFontSizeScale(fontSizeValueResult, pickerTheme->GetNormalFontScale());
+        if (isUserSetFont) {
+            fontSizeValueResult = ConvertFontSizeLimit(fontSizeValue, fontSizeLimit, isUserSetFont);
+        }
+
+        if (GreatOrEqualCustomPrecision(fontSizeScale, pickerTheme->GetMaxOneFontScale()) &&
+            fontSizeValueResult.Unit() != DimensionUnit::VP) {
+            if (!NearZero(fontSizeScale)) {
+                fontSizeValueResult = fontSizeValueResult / fontSizeScale;
+            }
+        }
     }
     return fontSizeValueResult;
 }

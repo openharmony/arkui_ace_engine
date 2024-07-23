@@ -1205,8 +1205,25 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
                 reinterpret_cast<NativeReference*>(ref), context);
         }
     }
-
+    if (context) {
+        UpdateFontScale(context->GetConfiguration());
+    }
     return UIContentErrorCode::NO_ERRORS;
+}
+
+void UIContentImpl::UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
+{
+    CHECK_NULL_VOID(config);
+    auto maxAppFontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::APP_FONT_MAX_SCALE);
+    auto followSystem = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
+    auto context = NG::PipelineContext::GetContextByContainerId(instanceId_);
+    CHECK_NULL_VOID(context);
+    if (!followSystem.empty()) {
+        context->SetFollowSystem(followSystem == "followSystem");
+    }
+    if (!maxAppFontScale.empty()) {
+        context->SetMaxAppFontScale(std::stof(maxAppFontScale));
+    }
 }
 
 void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
@@ -1788,6 +1805,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                                                      .append(moduleName)
                                                      .append(",abilityName:")
                                                      .append(abilityName));
+    UpdateFontScale(context->GetConfiguration());
     return errorCode;
 }
 
@@ -1977,6 +1995,7 @@ void UIContentImpl::SetBackgroundColor(uint32_t color)
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetAppBgColor(Color(bgColor));
+            pipelineContext->ChangeDarkModeBrightness();
         },
         TaskExecutor::TaskType::UI, "ArkUISetAppBackgroundColor");
 }
@@ -2191,13 +2210,16 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
         if (pipelineContext) {
             pipelineContext->CheckAndUpdateKeyboardInset();
-            pipelineContext->ChangeDarkModeBrightness();
         }
         SubwindowManager::GetInstance()->OnWindowSizeChanged(container->GetInstanceId(),
             Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())),
             static_cast<WindowSizeChangeReason>(reason));
     };
 
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext) {
+        pipelineContext->ChangeDarkModeBrightness();
+    }
     AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
     if (container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
         reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) {
@@ -2852,7 +2874,7 @@ bool UIContentImpl::DumpViewData(AbilityBase::ViewData& viewData, AbilityBase::A
 }
 
 bool UIContentImpl::DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
-    bool skipSubAutoFillContainer)
+    bool skipSubAutoFillContainer, bool needsRecordData)
 {
     CHECK_NULL_RETURN(viewDataWrap, false);
     auto context = context_.lock();
@@ -2880,7 +2902,7 @@ bool UIContentImpl::DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewD
     CHECK_NULL_RETURN(container, false);
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_RETURN(pipelineContext, false);
-    return pipelineContext->DumpPageViewData(node, viewDataWrap, skipSubAutoFillContainer);
+    return pipelineContext->DumpPageViewData(node, viewDataWrap, skipSubAutoFillContainer, needsRecordData);
 }
 
 void UIContentImpl::SearchElementInfoByAccessibilityId(
@@ -3360,6 +3382,7 @@ void UIContentImpl::SetContentNodeGrayScale(float grayscale)
     auto renderContext = rootElement->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateFrontGrayScale(Dimension(grayscale));
+    pipelineContext->SetDragNodeGrayscale(grayscale);
 }
 
 void UIContentImpl::PreLayout()

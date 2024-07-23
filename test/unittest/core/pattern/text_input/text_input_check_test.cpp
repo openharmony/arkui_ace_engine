@@ -118,7 +118,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave004, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -127,7 +127,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave004, TestSize.Level1)
      * @tc.steps: step4. set PasswordTextValue ne textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -151,7 +151,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave005, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -160,7 +160,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave005, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -184,7 +184,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave006, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -193,7 +193,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave006, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -217,7 +217,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave007, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -226,7 +226,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave007, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -250,7 +250,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave008, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -259,7 +259,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave008, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -283,7 +283,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave009, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -292,7 +292,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave009, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -316,7 +316,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0010, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -325,7 +325,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0010, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -349,7 +349,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0011, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -358,7 +358,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0011, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -382,7 +382,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0012, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -391,7 +391,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0012, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -415,7 +415,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0013, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -424,7 +424,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0013, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -448,7 +448,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0014, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -457,7 +457,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0014, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -481,7 +481,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0015, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -490,7 +490,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0015, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -514,7 +514,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0016, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -523,7 +523,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0016, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -547,7 +547,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0017, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -556,7 +556,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0017, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -580,7 +580,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0018, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -589,7 +589,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0018, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -613,7 +613,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0019, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -622,7 +622,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0019, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -646,7 +646,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0020, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -655,7 +655,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0020, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -679,7 +679,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0021, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -688,7 +688,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0021, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -712,7 +712,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0022, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -721,7 +721,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0022, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -745,7 +745,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0023, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -754,7 +754,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0023, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -778,7 +778,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0024, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -787,7 +787,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0024, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -811,7 +811,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0025, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -820,7 +820,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0025, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -844,7 +844,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0026, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -853,7 +853,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0026, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -877,7 +877,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0027, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -886,7 +886,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0027, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -910,7 +910,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0028, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -919,7 +919,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0028, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -943,7 +943,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0029, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -952,7 +952,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0029, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -976,7 +976,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0030, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -985,7 +985,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0030, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1009,7 +1009,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0031, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -1018,7 +1018,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0031, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1042,7 +1042,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0032, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "a";
+    pattern_->lastAutoFillTextValue_ = "a";
     EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -1051,7 +1051,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0032, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 

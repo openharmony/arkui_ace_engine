@@ -564,8 +564,6 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 void SearchLayoutAlgorithm::LayoutSearchIcon(const LayoutSearchParams& params)
 {
     auto searchIconLeftSpace = params.searchTheme->GetSearchIconLeftSpace().ConvertToPx();
-    auto searchIconRightSpace = params.searchTheme->GetSearchIconRightSpace().ConvertToPx();
-
     auto imageWrapper = params.layoutWrapper->GetOrCreateChildByIndex(IMAGE_INDEX);
     CHECK_NULL_VOID(imageWrapper);
     auto imageGeometryNode = imageWrapper->GetGeometryNode();
@@ -584,7 +582,7 @@ void SearchLayoutAlgorithm::LayoutSearchIcon(const LayoutSearchParams& params)
         leftOffset = 0.0f;
     }
     float iconHorizontalOffset = params.isRTL ?
-        params.searchFrameWidth - searchIconRightSpace - iconRenderWidth - rightOffset :
+        params.searchFrameWidth - searchIconLeftSpace - iconRenderWidth - rightOffset :
         leftOffset + searchIconLeftSpace + (iconRenderWidth - iconFrameWidth) / 2.0f;
 
     auto searchIconConstraint = imageWrapper->GetLayoutProperty()->GetLayoutConstraint();

@@ -407,8 +407,7 @@ void ScrollBar::SetMouseEvent()
             } else {
                 scrollBar->isMousePressed_ = false;
             }
-        } else if (!scrollBar->IsPressed()) {
-            scrollBar->ScheduleDisappearDelayTask();
+            scrollBar->isShowScrollBar_ = true;
         }
         if (inHoverRegion && !scrollBar->IsHover()) {
             if (!scrollBar->IsPressed()) {
@@ -421,6 +420,10 @@ void ScrollBar::SetMouseEvent()
             if (!scrollBar->IsPressed()) {
                 scrollBar->PlayScrollBarShrinkAnimation();
             }
+        }
+        if (!inBarRegion && !inHoverRegion && !scrollBar->IsPressed() && scrollBar->isShowScrollBar_) {
+            scrollBar->ScheduleDisappearDelayTask();
+            scrollBar->isShowScrollBar_ = false;
         }
         scrollBar->locationInfo_ = info.GetLocalLocation();
     });
@@ -539,6 +542,7 @@ void ScrollBar::HandleDragStart(const GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR,"inner scrollBar drag start, localLocation: %{public}s, "
         "globalLocation: %{public}s",
         info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
+    ACE_SCOPED_TRACE("inner scrollBar HandleDragStart");
     if (scrollPositionCallback_) {
         scrollPositionCallback_(0, SCROLL_FROM_START);
         if (dragFRCSceneCallback_) {
@@ -551,6 +555,16 @@ void ScrollBar::HandleDragStart(const GestureEvent& info)
 
 void ScrollBar::HandleDragUpdate(const GestureEvent& info)
 {
+    // if historical touch point slope is zero but delta is not zero, no need to update.
+    auto mainDelta = info.GetMainDelta();
+    if (info.IsInterpolated()) {
+        if (GetPanDirection() == Axis::VERTICAL && NearZero(info.GetInputYDeltaSlope()) && !NearZero(mainDelta)) {
+            return;
+        } else if (GetPanDirection() == Axis::HORIZONTAL && NearZero(info.GetInputXDeltaSlope()) &&
+                   !NearZero(mainDelta)) {
+            return;
+        }
+    }
     if (scrollPositionCallback_) {
         // The offset of the mouse wheel and gesture is opposite.
         auto offset = info.GetInputEventType() == InputEventType::AXIS ?
@@ -558,6 +572,7 @@ void ScrollBar::HandleDragUpdate(const GestureEvent& info)
         if (IsReverse()) {
             offset = -offset;
         }
+        ACE_SCOPED_TRACE("inner scrollBar HandleDragUpdate offset:%f", offset);
         scrollPositionCallback_(offset, SCROLL_FROM_BAR);
         if (dragFRCSceneCallback_) {
             dragFRCSceneCallback_(NearZero(info.GetMainDelta()) ? info.GetMainVelocity()
@@ -576,6 +591,7 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar drag end, position is %{public}f and %{public}f, "
         "velocity is %{public}f",
         info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), velocity);
+    ACE_SCOPED_TRACE("inner scrollBar HandleDragEnd velocity:%f", velocity);
     if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
         if (scrollEndCallback_) {
             scrollEndCallback_();

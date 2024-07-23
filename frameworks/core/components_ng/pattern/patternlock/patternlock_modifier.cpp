@@ -58,6 +58,7 @@ constexpr float CONNECTED_LINE_SPRING_RESPONSE = 0.22f;
 constexpr float CONNECTED_LINE_SPRING_DAMPING = 0.88f;
 constexpr float CANCELED_LINE_SPRING_RESPONSE = 0.22f;
 constexpr float CANCELED_LINE_SPRING_DAMPING = 0.88f;
+constexpr float CANCELED_LINE_MIN_POINT = 0.1f;
 constexpr int32_t ANIMATABLE_POINT_COUNT = 2;
 constexpr float DIAMETER_TO_RADIUS = 0.5f;
 constexpr float GRADUAL_CHANGE_POINT = 0.5;
@@ -351,8 +352,9 @@ void PatternLockModifier::AddCanceledLineToPath(RSPath& path, const OffsetF& off
     OffsetF pointBegin =
         GetCircleCenterByXY(offset, choosePoint_[count - 1].GetColumn(), choosePoint_[count - 1].GetRow());
     OffsetF pointEnd = GetCanceledLineTailPoint();
-    if (!NearEqual(pointBegin.GetX(), pointEnd.GetX(), EPSILON)
-        || !NearEqual(pointBegin.GetY(), pointEnd.GetY(), EPSILON)) {
+    if ((!NearEqual(pointBegin.GetX(), pointEnd.GetX(), EPSILON)
+        || !NearEqual(pointBegin.GetY(), pointEnd.GetY(), EPSILON))
+        && GreatOrEqual(pointEnd.GetY(), CANCELED_LINE_MIN_POINT)) {
         path.MoveTo(pointBegin.GetX(), pointBegin.GetY());
         path.LineTo(pointEnd.GetX(), pointEnd.GetY());
     }

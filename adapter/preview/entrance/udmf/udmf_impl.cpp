@@ -29,6 +29,16 @@ UdmfClient* UdmfClient::GetInstance()
     return &instance;
 }
 
+RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedDataForNative(void* rawData)
+{
+    return nullptr;
+}
+
+void* UdmfClientImpl::TransformUnifiedDataPtr(RefPtr<UnifiedData>& unifiedData)
+{
+    return nullptr;
+}
+
 RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedData(napi_value napiValue)
 {
     return nullptr;

@@ -165,6 +165,7 @@ public:
             TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On change %{private}s", value.c_str());
             TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On change previewText %{private}s", previewText.value.c_str());
             TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On change previewText index %{private}d", previewText.offset);
+            // Not all in one, in order to fix the cppcrash bug
             auto onChange = onChange_;
             onChange(value, previewText);
         }

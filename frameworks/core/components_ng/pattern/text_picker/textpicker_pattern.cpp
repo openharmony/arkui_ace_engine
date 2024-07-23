@@ -83,6 +83,65 @@ bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     return true;
 }
 
+void TextPickerPattern::UpdateConfirmButtonMargin(
+    const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme)
+{
+    MarginProperty margin;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        margin.top = CalcLength(dialogTheme->GetDividerHeight());
+        margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+        if (isRtl) {
+            margin.right = CalcLength(0.0_vp);
+            margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
+        } else {
+            margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
+            margin.left = CalcLength(0.0_vp);
+        }
+
+    } else {
+        margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
+        margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
+        if (isRtl) {
+            margin.right = CalcLength(0.0_vp);
+            margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
+        } else {
+            margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
+            margin.left = CalcLength(0.0_vp);
+        }
+    }
+    buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
+}
+
+void TextPickerPattern::UpdateCancelButtonMargin(
+    const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme)
+{
+    MarginProperty margin;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        margin.top = CalcLength(dialogTheme->GetDividerHeight());
+        margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+        if (isRtl) {
+            margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
+            margin.left = CalcLength(0.0_vp);
+        } else {
+            margin.right = CalcLength(0.0_vp);
+            margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
+        }
+    } else {
+        margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
+        margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
+        if (isRtl) {
+            margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
+            margin.left = CalcLength(0.0_vp);
+        } else {
+            margin.right = CalcLength(0.0_vp);
+            margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
+        }
+    }
+    buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
+}
+
 void TextPickerPattern::OnLanguageConfigurationUpdate()
 {
     auto buttonConfirmNode = weakButtonConfirm_.Upgrade();
@@ -92,6 +151,11 @@ void TextPickerPattern::OnLanguageConfigurationUpdate()
     auto confirmNodeLayout = confirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(confirmNodeLayout);
     confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    auto pipeline = confirmNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
     confirmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     auto buttonCancelNode = weakButtonCancel_.Upgrade();
@@ -101,6 +165,7 @@ void TextPickerPattern::OnLanguageConfigurationUpdate()
     auto cancelNodeLayout = cancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(cancelNodeLayout);
     cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
     cancelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -184,6 +249,7 @@ void TextPickerPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     InitDisabled();
+    isNeedUpdateSelectedIndex_ = true;
 }
 
 void TextPickerPattern::SetEventCallback(EventCallback&& value)
@@ -287,7 +353,8 @@ void TextPickerPattern::OnColumnsBuildingCascade()
         if (cascadeOptions_.size() > index) {
             selectedIndex_ = selecteds_.size() <= index || cascadeOptions_[index].rangeResult.empty()
                                  ? 0 : selecteds_[index] % cascadeOptions_[index].rangeResult.size();
-            textPickerColumnPattern->SetCurrentIndex(selectedIndex_);
+            textPickerColumnPattern->SetCurrentIndex(
+                isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
             std::vector<NG::RangeContent> rangeContents;
             for (uint32_t i = 0; i < cascadeOptions_[index].rangeResult.size(); i++) {
                 NG::RangeContent rangeContent;
@@ -312,7 +379,8 @@ void TextPickerPattern::OnColumnsBuildingUnCascade()
         if (cascadeOptions_.size() > it.first) {
             selectedIndex_ = selecteds_.size() <= it.first || cascadeOptions_[it.first].rangeResult.empty()
                                  ? 0 : selecteds_[it.first] % cascadeOptions_[it.first].rangeResult.size();
-            textPickerColumnPattern->SetCurrentIndex(selectedIndex_);
+            textPickerColumnPattern->SetCurrentIndex(
+                isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
             std::vector<NG::RangeContent> rangeContents;
             for (uint32_t i = 0; i < cascadeOptions_[it.first].rangeResult.size(); i++) {
                 NG::RangeContent rangeContent;
@@ -329,7 +397,8 @@ void TextPickerPattern::OnColumnsBuildingUnCascade()
                 AppendOption(item);
             }
             selectedIndex_ = range_.empty() ? 0 : GetSelected() % range_.size();
-            textPickerColumnPattern->SetCurrentIndex(selectedIndex_);
+            textPickerColumnPattern->SetCurrentIndex(
+                isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
             textPickerColumnPattern->SetOptions(options_);
             textPickerColumnPattern->SetColumnKind(columnsKind_);
             it.second->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -964,6 +1033,11 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(frameNode);
     FrameNode::ProcessOffscreenNode(frameNode);
     host->MarkModifyDone();
+}
+
+void TextPickerPattern::OnDirectionConfigurationUpdate()
+{
+    isNeedUpdateSelectedIndex_ = false;
 }
 
 void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size)

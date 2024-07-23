@@ -455,6 +455,16 @@ public:
         axis == Axis::HORIZONTAL ? height_ = crossSize : width_ = crossSize;
     }
 
+    void SetMainSize(const std::optional<T>& mainSize, Axis axis)
+    {
+        axis == Axis::HORIZONTAL ? width_ = mainSize : height_ = mainSize;
+    }
+
+    void SetCrossSize(const std::optional<T>& crossSize, Axis axis)
+    {
+        axis == Axis::HORIZONTAL ? height_ = crossSize : width_ = crossSize;
+    }
+
     void SetWidth(const std::optional<T>& width)
     {
         width_ = width;

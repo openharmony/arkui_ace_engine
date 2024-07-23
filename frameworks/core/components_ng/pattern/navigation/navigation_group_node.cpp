@@ -488,7 +488,9 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             auto backIcon = weakPreBackIcon.Upgrade();
             if (navigation) {
                 navigation->isOnAnimation_ = false;
-                navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+                auto id = navigation->GetTopDestination() ? navigation->GetTopDestination()->GetAccessibilityId() : -1;
+                navigation->OnAccessibilityEvent(
+                    AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
                 navigation->CleanPopAnimations();
             }
             auto preNavDesNode = weakPreNode.Upgrade();
@@ -691,7 +693,9 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                 break;
             }
             navigation->RemoveDialogDestination();
-            navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+            auto id = navigation->GetTopDestination() ? navigation->GetTopDestination()->GetAccessibilityId() : -1;
+            navigation->OnAccessibilityEvent(
+                AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
             auto curNode = weakCurNode.Upgrade();
             if (curNode) {
                 auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
@@ -880,7 +884,9 @@ void NavigationGroupNode::TransitionWithReplace(
         auto navigationNode = weakNavigation.Upgrade();
         CHECK_NULL_VOID(navigationNode);
         navigationNode->isOnAnimation_ = false;
-        navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+        auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
+        navigationNode->OnAccessibilityEvent(
+            AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
         navigationNode->DealNavigationExit(preNode, isNavBar);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);

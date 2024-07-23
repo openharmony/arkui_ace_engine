@@ -745,7 +745,7 @@ ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSOb
     JSRef<JSVal> objectFit = obj->GetProperty("objectFit");
     if (!objectFit->IsNull() && objectFit->IsNumber()) {
         auto fit = static_cast<ImageFit>(objectFit->ToNumber<int32_t>());
-        if (fit < ImageFit::FILL || fit > ImageFit::SCALE_DOWN) {
+        if (fit < ImageFit::FILL || fit > ImageFit::BOTTOM_END) {
             fit = ImageFit::COVER;
         }
         imageStyle.objectFit = fit;

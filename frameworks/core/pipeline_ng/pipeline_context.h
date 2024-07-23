@@ -50,6 +50,7 @@
 #endif
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/recycle_view/recycle_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/web/itouch_event_callback.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -564,7 +565,7 @@ public:
     {
         storeNode_.erase(restoreId);
     }
-    void SetNeedRenderNode(const RefPtr<FrameNode>& node);
+    void SetNeedRenderNode(const WeakPtr<FrameNode>& node);
 
     void SetIgnoreViewSafeArea(bool value) override;
     void SetIsLayoutFullScreen(bool value) override;
@@ -576,9 +577,8 @@ public:
     void DumpJsInfo(const std::vector<std::string>& params) const;
 
     bool DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
-        bool skipSubAutoFillContainer = false);
+        bool skipSubAutoFillContainer = false, bool needsRecordData = false);
     bool CheckNeedAutoSave();
-    bool CheckPageFocus();
     bool CheckOverlayFocus();
     void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap);
     void NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode,
@@ -707,6 +707,11 @@ public:
     const RefPtr<NavigationManager>& GetNavigationManager() const
     {
         return navigationMgr_;
+    }
+
+    const std::unique_ptr<RecycleManager>& GetRecycleManager() const
+    {
+        return recycleManager_;
     }
 
     RefPtr<PrivacySensitiveManager> GetPrivacySensitiveManager() const
@@ -846,7 +851,7 @@ protected:
 
     void OnVirtualKeyboardHeightChange(float keyboardHeight,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
-        const bool supportAvoidance = false) override;
+        const bool supportAvoidance = false, bool forceChange = false) override;
     void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false) override;
 
@@ -928,10 +933,10 @@ private:
         }
     };
 
-    std::pair<float, float> LinearInterpolation(const std::tuple<float, float, uint64_t>& history,
+    std::tuple<float, float, float, float> LinearInterpolation(const std::tuple<float, float, uint64_t>& history,
         const std::tuple<float, float, uint64_t>& current, const uint64_t nanoTimeStamp);
 
-    std::pair<float, float> GetResampleCoord(const std::vector<TouchEvent>& history,
+    std::tuple<float, float, float, float> GetResampleCoord(const std::vector<TouchEvent>& history,
         const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp, const bool isScreen);
 
     std::tuple<float, float, uint64_t> GetAvgPoint(const std::vector<TouchEvent>& events, const bool isScreen);
@@ -969,7 +974,7 @@ private:
 
     int32_t curFocusNodeId_ = -1;
 
-    std::set<RefPtr<FrameNode>> needRenderNode_;
+    std::set<WeakPtr<FrameNode>> needRenderNode_;
 
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
@@ -1062,6 +1067,7 @@ private:
     int32_t preNodeId_ = -1;
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
+    std::unique_ptr<RecycleManager> recycleManager_ = std::make_unique<RecycleManager>();
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
     bool customTitleSettedShow_ = true;

@@ -60,6 +60,7 @@ public:
     virtual void SetLoadingText(const std::string& loadingText) = 0;
     virtual void SetRefreshOffset(const Dimension& offset) = 0;
     virtual void SetPullToRefresh(bool isPullToRefresh) = 0;
+    virtual void SetIsCustomBuilderExist(bool isCustomBuilderExist) {}
 
 private:
     static std::unique_ptr<RefreshModel> instance_;

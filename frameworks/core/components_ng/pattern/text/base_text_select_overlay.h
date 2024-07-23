@@ -256,6 +256,8 @@ protected:
     }
     void RegisterScrollingListener(const RefPtr<FrameNode> scrollableNode);
     void OnHandleScrolling(const WeakPtr<FrameNode>& scrollingNode);
+    virtual void UpdateTransformFlag();
+    bool CheckHasTransformAttr();
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;
@@ -263,13 +265,13 @@ protected:
     OnMenuItemClickCallback onMenuItemClick_;
 
 private:
-    void UpdateTransformFlag();
     void FindScrollableParentAndSetCallback(const RefPtr<FrameNode>& host);
     void RegisterParentScrollCallback(const RefPtr<FrameNode>& host, int32_t parentId);
     void ShowSelectOverlay(const OverlayRequest& request, bool hasClipboardData);
     void GetHandlePoints(const RectF& handleRect, std::vector<PointF>& points, bool handleOnTop);
     bool IsPointsInRegion(const std::vector<PointF>& points, const RectF& regionRect);
     bool CheckAndUpdateHostGlobalPaintRect();
+    bool CheckHasTransformMatrix(const RefPtr<RenderContext>& context);
     bool isSingleHandle_ = false;
     bool isShowPaste_ = false;
     bool isShowMenu_ = true;

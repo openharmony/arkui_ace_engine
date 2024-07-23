@@ -12,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "test/unittest/core/gestures/gestures_common_test_ng.h"
+#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -27,11 +29,13 @@ public:
 void GestureRefereeTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
 }
 
 void GestureRefereeTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 /**
@@ -1598,5 +1602,327 @@ HWTEST_F(GestureRefereeTestNg, GestureRefereeTest018, TestSize.Level1)
     EXPECT_EQ(result, true);
     result = gestureReferee.CheckSourceTypeChange(SourceType::TOUCH, true);
     EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: GestureRefereeOnAcceptGestureTest019
+ * @tc.desc: Test GestureReferee OnAcceptGesture function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. call CheckSourceTypeChange function
+     * @tc.steps: expected equal
+     */
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    gestureScope->recognizers_.insert(gestureScope->recognizers_.end(), clickRecognizerPtr);
+    gestureScope->recognizers_.push_back(nullptr);
+    EXPECT_EQ(gestureScope->CheckRecognizerState(), false);
+}
+
+/**
+ * @tc.name: GestureRefereeOnAcceptGestureTest020
+ * @tc.desc: Test GestureReferee OnAcceptGesture function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. call CheckSourceTypeChange function
+     * @tc.steps: expected equal
+     */
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr->refereeState_ = RefereeState::FAIL;
+    auto gestureRecognizer = AceType::DynamicCast<NGGestureRecognizer>(clickRecognizerPtr);
+    gestureScope->recognizers_.emplace_back(gestureRecognizer);
+    gestureScope->recognizers_.push_back(nullptr);
+    EXPECT_EQ(gestureScope->IsReady(), false);
+}
+
+/**
+ * @tc.name: GestureRefereeOnAcceptGestureTest021
+ * @tc.desc: Test GestureReferee OnAcceptGesture function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. call CheckSourceTypeChange function
+     * @tc.steps: expected equal
+     */
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    gestureScope->recognizers_.emplace_back(clickRecognizerPtr);
+    EXPECT_EQ(gestureScope->HasFailRecognizer(), false);
+}
+
+/**
+ * @tc.name: GestureRefereeOnAcceptGestureTest022
+ * @tc.desc: Test GestureReferee OnAcceptGesture function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. call CheckSourceTypeChange function
+     * @tc.steps: expected equal
+     */
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr->refereeState_ = RefereeState::FAIL;
+    gestureScope->recognizers_.insert(gestureScope->recognizers_.end(), clickRecognizerPtr);
+    gestureScope->recognizers_.push_back(nullptr);
+    EXPECT_EQ(gestureScope->HasFailRecognizer(), true);
+}
+
+/**
+ * @tc.name: GestureRefereeOnAcceptGestureTest023
+ * @tc.desc: Test GestureReferee OnAcceptGesture function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. call CheckSourceTypeChange function
+     * @tc.steps: expected equal
+     */
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto gestureRecognizer = AceType::DynamicCast<NGGestureRecognizer>(clickRecognizerPtr);
+    gestureRecognizer->refereeState_ = RefereeState::DETECTING;
+    gestureScope->recognizers_.emplace_back(gestureRecognizer);
+    gestureScope->recognizers_.push_back(nullptr);
+    EXPECT_EQ(gestureScope->IsReady(), false);
+}
+
+/**
+ * @tc.name: GestureRefereeOnAcceptGestureTest024
+ * @tc.desc: Test GestureReferee OnAcceptGesture function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. call CheckSourceTypeChange function
+     * @tc.steps: expected equal
+     */
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto gestureRecognizer = AceType::DynamicCast<NGGestureRecognizer>(clickRecognizerPtr);
+    gestureScope->recognizers_.emplace_back(gestureRecognizer);
+    RefPtr<ClickRecognizer> clickRecognizerPtrOther = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtrOther = nullptr;
+    gestureScope->recognizers_.push_back(clickRecognizerPtrOther);
+    gestureScope->ForceCleanGestureScope();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: GestureRefereeOnAcceptGestureTest025
+ * @tc.desc: Test GestureReferee OnAcceptGesture function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. call CheckSourceTypeChange function
+     * @tc.steps: expected equal
+     */
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto gestureRecognizer = AceType::DynamicCast<NGGestureRecognizer>(clickRecognizerPtr);
+    gestureScope->recognizers_.emplace_back(gestureRecognizer);
+    RefPtr<ClickRecognizer> clickRecognizerPtrOther = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtrOther = nullptr;
+    gestureScope->recognizers_.push_back(clickRecognizerPtrOther);
+    gestureScope->ForceCleanGestureScopeState();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: GestureRefereeOnAcceptGestureTest026
+ * @tc.desc: Test GestureReferee OnAcceptGesture function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. call CheckSourceTypeChange function
+     * @tc.steps: expected equal
+     */
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto gestureRecognizer = AceType::DynamicCast<NGGestureRecognizer>(clickRecognizerPtr);
+    gestureScope->recognizers_.emplace_back(gestureRecognizer);
+    RefPtr<ClickRecognizer> clickRecognizerPtrOther = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtrOther = nullptr;
+    gestureScope->recognizers_.push_back(clickRecognizerPtrOther);
+    gestureScope->CleanGestureScopeState();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: GestureRefereeOnAcceptGestureTest027
+ * @tc.desc: Test GestureReferee OnAcceptGesture function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest027, TestSize.Level1)
+{
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto gestureRecognizer = AceType::DynamicCast<NGGestureRecognizer>(clickRecognizerPtr);
+    gestureScope->recognizers_.emplace_back(gestureRecognizer);
+    auto gesture = AceType::MakeRefPtr<NG::GestureReferee>();
+    size_t id = 3;
+    gesture->gestureScopes_.try_emplace(id, gestureScope);
+    gesture->QueryAllDone();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: GestureRefereeOnAcceptGestureTest028
+ * @tc.desc: Test GestureReferee OnAcceptGesture function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest028, TestSize.Level1)
+{
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto gestureRecognizer = AceType::DynamicCast<NGGestureRecognizer>(clickRecognizerPtr);
+    gestureScope->recognizers_.emplace_back(gestureRecognizer);
+    auto gesture = AceType::MakeRefPtr<NG::GestureReferee>();
+    gesture->lastIsAxis_ = true;
+    SourceType type = SourceType::TOUCH;
+    bool isAxis = true;
+    gesture->CheckEventTypeChange(type, isAxis);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: GestureRefereeOnAcceptGestureTest029
+ * @tc.desc: Test GestureReferee OnAcceptGesture function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest029, TestSize.Level1)
+{
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto gestureRecognizer = AceType::DynamicCast<NGGestureRecognizer>(clickRecognizerPtr);
+    gestureScope->recognizers_.emplace_back(gestureRecognizer);
+    auto gesture = AceType::MakeRefPtr<NG::GestureReferee>();
+    gesture->lastIsAxis_ = true;
+    gesture->CleanRedundanceScope();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: GestureRefereeOnAcceptGestureTest030
+ * @tc.desc: Test GestureReferee OnAcceptGesture function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest030, TestSize.Level1)
+{
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto gestureRecognizer = AceType::DynamicCast<NGGestureRecognizer>(clickRecognizerPtr);
+    gestureScope->recognizers_.emplace_back(gestureRecognizer);
+    auto gesture = AceType::MakeRefPtr<NG::GestureReferee>();
+    gesture->lastIsAxis_ = true;
+    gesture->IsReady();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: GestureRefereeOnAcceptGestureTest031
+ * @tc.desc: Test GestureReferee OnAcceptGesture function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest031, TestSize.Level1)
+{
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto gestureRecognizer = AceType::DynamicCast<NGGestureRecognizer>(clickRecognizerPtr);
+    gestureScope->recognizers_.emplace_back(gestureRecognizer);
+    auto gesture = AceType::MakeRefPtr<NG::GestureReferee>();
+    size_t id = 3;
+    gesture->gestureScopes_.try_emplace(id, gestureScope);
+    gesture->CleanGestureRefereeState(id);
+    SUCCEED();
+    id = 5;
+    gesture->CleanGestureRefereeState(id);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: GestureRefereeOnAcceptGestureTest032
+ * @tc.desc: Test GestureReferee OnAcceptGesture function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest032, TestSize.Level1)
+{
+    auto container = Container::Current();
+    auto pipelineContext = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    PanDirection panDirection;
+    panDirection.type = PanDirection::VERTICAL;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 0);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers { panRecognizer };
+    auto test = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    auto gesture = AceType::MakeRefPtr<NG::GestureReferee>();
+    auto Ngg = AceType::DynamicCast<NG::NGGestureRecognizer>(test);
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureScope->recognizers_.emplace_back(Ngg);
+    gestureScope->recognizers_.emplace_back(nullptr);
+    gestureScope->CheckRecognizerState();
+}
+
+/**
+ * @tc.name: GestureRefereeOnAcceptGestureTest033
+ * @tc.desc: Test GestureReferee OnAcceptGesture function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. call CheckSourceTypeChange function
+     * @tc.steps: expected equal
+     */
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    gestureScope->recognizers_.insert(gestureScope->recognizers_.end(), clickRecognizerPtr);
+    gestureScope->ForceCleanGestureScope();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: GestureRefereeOnAcceptGestureTest034
+ * @tc.desc: Test GestureReferee OnAcceptGesture function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest034, TestSize.Level1)
+{
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto gestureRecognizer = AceType::DynamicCast<NGGestureRecognizer>(clickRecognizerPtr);
+    gestureScope->recognizers_.emplace_back(gestureRecognizer);
+    auto gesture = AceType::MakeRefPtr<NG::GestureReferee>();
+    size_t id = 3;
+    gesture->gestureScopes_.try_emplace(id, gestureScope);
+    gesture->QueryAllDone(1);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: GestureRefereeOnAcceptGestureTest035
+ * @tc.desc: Test GestureReferee OnAcceptGesture function
+ */
+HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest035, TestSize.Level1)
+{
+    auto container = Container::Current();
+    auto pipelineContext = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    PanDirection panDirection;
+    panDirection.type = PanDirection::VERTICAL;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 0);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers { panRecognizer };
+    auto test = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    auto Ngg = AceType::DynamicCast<NG::NGGestureRecognizer>(test);
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureScope->recognizers_.emplace_back(Ngg);
+    gestureScope->recognizers_.emplace_back(nullptr);
+    auto gesture = AceType::MakeRefPtr<NG::GestureReferee>();
+    gesture->lastIsAxis_ = true;
+    size_t id = 1;
+    gesture->gestureScopes_.try_emplace(id, gestureScope);
+    gesture->CleanRedundanceScope();
+    SUCCEED();
 }
 } // namespace OHOS::Ace::NG

@@ -1526,4 +1526,18 @@ HWTEST_F(FormTestNg, SnapshotSurfaceNode, TestSize.Level1)
     pattern->SnapshotSurfaceNode();
     ASSERT_NE(host, nullptr);
 }
+
+/**
+ * @tc.name: CheckFormBundleForbidden
+ * @tc.desc: Test CheckFormBundleForbidden in Form Pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, CheckFormBundleForbidden, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    bool isForbidden = pattern->CheckFormBundleForbidden("MyBundleName");
+    ASSERT_EQ(isForbidden, false);
+}
 } // namespace OHOS::Ace::NG

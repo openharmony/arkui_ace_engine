@@ -328,7 +328,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   */
   public forceCompleteRerender(deep: boolean = false): void {
     stateMgmtProfiler.begin('ViewPU/V2.forceCompleteRerender');
-    stateMgmtConsole.warn(`${this.debugInfo__()}: forceCompleteRerender - start.`);
+    stateMgmtConsole.debug(`${this.debugInfo__()}: forceCompleteRerender - start.`);
 
     // see which elmtIds are managed by this View
     // and clean up all book keeping for them

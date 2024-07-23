@@ -140,6 +140,7 @@ public:
         gridLayoutInfo_.endMainLineIndex_ = 0;
         gridLayoutInfo_.ResetPositionFlags();
         gridLayoutInfo_.irregularItemsPosition_.clear();
+        gridLayoutInfo_.clearStretch_ = true;
     }
 
     void SetIrregular(bool value)

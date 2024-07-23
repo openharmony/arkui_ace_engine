@@ -56,8 +56,8 @@ static constexpr OHOS::HiviewDFX::HiLogLabel LOG_LABEL = {LOG_CORE, FR_LOG_DOMAI
 
 #define FR_FILENAME (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
 #define PRINT_HILOG(level, fmt, ...) \
-    HILOG_IMPL(LOG_CORE, LOG_##level, FR_LOG_DOMAIN, FR_LOG_TAG, "[%{public}s(%{public}s:%{public}d)]" fmt, \
-        FR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+    HILOG_IMPL(LOG_CORE, LOG_##level, FR_LOG_DOMAIN, FR_LOG_TAG, "[%{public}s:%{public}d]" fmt, \
+        FR_FILENAME, __LINE__, ##__VA_ARGS__)
 
 #define HILOG_FATAL(fmt, ...) PRINT_HILOG(FATAL, fmt, ##__VA_ARGS__)
 #define HILOG_ERROR(fmt, ...) PRINT_HILOG(ERROR, fmt, ##__VA_ARGS__)

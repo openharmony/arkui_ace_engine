@@ -101,9 +101,7 @@ public:
         navigationMode_ = navigationMode;
     }
 
-    bool IsFoldStateChange();
-
-    void UpdateFoldState();
+    bool JudgeFoldStateChangeAndUpdateState();
 
     void SetNavigationStack(const RefPtr<NavigationStack>& navigationStack);
 
@@ -409,6 +407,7 @@ private:
     bool ApplyTopNavPathSystemBarStyleOrRestore(const RefPtr<WindowManager>& windowManager,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& topNavPath);
     void InitPageNode(const RefPtr<FrameNode>& host);
+    void InitFoldState();
 
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);

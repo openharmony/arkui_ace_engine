@@ -447,7 +447,7 @@ private:
     bool isPress_ = false;
     bool isHover_ = false;
     RefPtr<InputEvent> mouseEvent_;
-    double defaultPickerItemHeight_;
+    double defaultPickerItemHeight_ = 0.0;
     uint32_t selectedIndex_ = 0;
     std::string selectedValue_;
     std::vector<std::string> range_ { "" };
@@ -459,7 +459,7 @@ private:
     double totalDragDelta_ = 0.0;
     double yLast_ = 0.0;
     double yOffset_ = 0.0;
-    double jumpInterval_;
+    double jumpInterval_ = 0.0;
     Size optionSize_;
     Dimension fixHeight_;
     bool isIndexChanged_ = false;

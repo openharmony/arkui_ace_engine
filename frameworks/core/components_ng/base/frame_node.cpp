@@ -95,8 +95,6 @@ constexpr uint8_t SUGGEST_OPINC_CHCKED_ONCE = 1 << 3;
 constexpr uint8_t SUGGEST_OPINC_CHECKED_THROUGH = 1 << 4;
 // Node has rendergroup marked.
 constexpr uint8_t APP_RENDER_GROUP_MARKED_MASK = 1 << 7;
-// OPINC must more then 2 leaf;
-constexpr int32_t THRESH_CHILD_NO = 2;
 // OPINC max ratio for scroll scope(height);
 constexpr float HIGHT_RATIO_LIMIT = 0.8;
 // Min area for OPINC
@@ -215,12 +213,6 @@ public:
                 AddFrameNode(child.node, allFrameNodeChildren_, partFrameNodeChildren_, count);
             }
         }
-        return ChildrenListWithGuard(allFrameNodeChildren_, *this);
-    }
-
-    ChildrenListWithGuard GetCurrentFrameChildren()
-    {
-        auto guard = GetGuard();
         return ChildrenListWithGuard(allFrameNodeChildren_, *this);
     }
 
@@ -891,10 +883,10 @@ void FrameNode::DumpAdvanceInfo()
     }
 }
 
-void FrameNode::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap)
+void FrameNode::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData)
 {
     if (pattern_) {
-        pattern_->DumpViewDataPageNode(viewDataWrap);
+        pattern_->DumpViewDataPageNode(viewDataWrap, needsRecordData);
     }
 }
 
@@ -1729,7 +1721,7 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
         if (self->GetInspectorId()) {
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
-            pipeline->SetNeedRenderNode(self);
+            pipeline->SetNeedRenderNode(weak);
         }
     };
     if (forceUseMainThread || wrapper->CheckShouldRunOnMain()) {
@@ -3022,6 +3014,21 @@ void FrameNode::OnAccessibilityEvent(
     }
 }
 
+void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType)
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.windowContentChangeTypes = windowsContentChangeType;
+        event.nodeId = GetAccessibilityId();
+        event.stackNodeId = stackNodeId;
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibility(event);
+    }
+}
+
 void FrameNode::OnRecycle()
 {
     for (const auto& destroyCallback : destroyCallbacks_) {
@@ -3533,7 +3540,9 @@ void FrameNode::Layout()
 
     auto pipeline = GetContext();
     CHECK_NULL_VOID_LAYOUT_TRACE_END(pipeline);
-    bool isFocusOnPage = pipeline->CheckPageFocus();
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    bool isFocusOnPage = stageManager->CheckPageFocus();
     bool needSyncRsNode = false;
     DirtySwapConfig config;
     bool willSyncGeoProperties = OnLayoutFinish(needSyncRsNode, config);
@@ -3725,6 +3734,8 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
                 ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth()));
         }
     }
+
+    pattern_->OnSyncGeometryNode(config);
     if (needSyncRsNode) {
         pattern_->BeforeSyncGeometryProperties(config);
         renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true, layoutProperty_->GetPixelRound());
@@ -3853,6 +3864,13 @@ OffsetF FrameNode::GetOffsetInScreen()
     CHECK_NULL_RETURN(window, OffsetF(0.0f, 0.0f));
     auto windowOffset = window->GetCurrentWindowRect().GetOffset();
     frameOffset += OffsetT<float> { windowOffset.GetX(), windowOffset.GetY() };
+    return frameOffset;
+}
+
+OffsetF FrameNode::GetOffsetInSubwindow(const OffsetF& subwindowOffset)
+{
+    auto frameOffset = GetOffsetInScreen();
+    frameOffset -= subwindowOffset;
     return frameOffset;
 }
 
@@ -4710,12 +4728,6 @@ OPINC_TYPE_E FrameNode::IsOpIncValidNode(const SizeF& boundary, int32_t childNum
     return ret;
 }
 
-ChildrenListWithGuard FrameNode::GetAllChildren()
-{
-    // frameProxy_ never be null in frame node;
-    return frameProxy_->GetCurrentFrameChildren();
-}
-
 OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth)
 {
     if (GetSuggestOpIncActivatedOnce()) {
@@ -4740,13 +4752,11 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
     } else if (status == OPINC_SUGGESTED_OR_EXCLUDED) {
         return OPINC_SUGGESTED_OR_EXCLUDED;
     } else if (status == OPINC_PARENT_POSSIBLE) {
-        for (auto child : GetAllChildren()) {
-            if (!child) {
-                continue;
-            }
-            auto frameNode = AceType::DynamicCast<FrameNode>(child);
-            if (frameNode) {
-                frameNode->FindSuggestOpIncNode(path, boundary, depth + 1);
+        std::list<RefPtr<FrameNode>> childrens;
+        GenerateOneDepthVisibleFrame(childrens);
+        for (auto child : childrens) {
+            if (child) {
+                child->FindSuggestOpIncNode(path, boundary, depth + 1);
             }
         }
         return OPINC_PARENT_POSSIBLE;
@@ -4766,8 +4776,6 @@ void FrameNode::MarkAndCheckNewOpIncNode()
             parent->SetOpIncCheckedOnce();
             auto status = IsOpIncValidNode(parent->GetGeometryNode()->GetFrameSize());
             if (status == OPINC_NODE) {
-                parent->SetOpIncGroupCheckedThrough(true);
-            } else if (FrameNode::GetValidLeafChildNumber(Claim(this), THRESH_CHILD_NO) >= THRESH_CHILD_NO) {
                 parent->SetOpIncGroupCheckedThrough(true);
             } else {
                 parent->SetOpIncGroupCheckedThrough(false);

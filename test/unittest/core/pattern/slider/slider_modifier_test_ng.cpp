@@ -19,6 +19,8 @@
 #define protected public
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_default.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -98,9 +100,11 @@ const Dimension SHAPE_HEIGHT = 20.0_vp;
 const OffsetF SLIDER_GLOBAL_OFFSET = { 200.0f, 200.0f };
 const SizeF BLOCK_SIZE_F(10.0f, 10.0f);
 const SizeF BLOCK_SIZE_F_ZREO(0.0f, 0.0f);
+constexpr float SLIDER_NEGATIVE = -5.0f;
 } // namespace
 class SliderModifierTestNg : public testing::Test {
 public:
+    void SetUp() override;
     void TearDown() override;
 
     static void SetUpTestSuite();
@@ -121,6 +125,13 @@ void SliderModifierTestNg::SetUpTestSuite()
 void SliderModifierTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
+}
+
+void SliderModifierTestNg::SetUp()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
 }
 
 void SliderModifierTestNg::TearDown()
@@ -1451,5 +1462,62 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest028, TestSize.Level1)
     auto scale = std::max(blockSize.Width() / sliderContentModifier.shapeWidth_->Get(),
         blockSize.Height() / sliderContentModifier.shapeHeight_->Get());
     EXPECT_FALSE(NearZero(scale));
+}
+
+/**
+ * @tc.name: SliderModelNgTest001
+ * @tc.desc: TEST SliderModelNG::SetShowTips
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTestNg, SliderModelNgTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slider and set the properties ,and then get frameNode.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    sliderModelNG.SetShowTips(false, std::nullopt);
+    sliderModelNG.SetBlockSize(BLOCK_SIZE_WIDTH, Dimension(0.0));
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(NG::ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. get the properties of all settings.
+     * @tc.expected: step2. check whether the properties is correct.
+     */
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    sliderModelNG.SetMinResponsiveDistance(AceType::RawPtr(frameNode), SLIDER_NEGATIVE);
+    Dimension testResult = sliderModelNG.GetThickness(AceType::RawPtr(frameNode));
+    EXPECT_EQ(testResult, Dimension(0.0));
+}
+
+/**
+ * @tc.name: SliderModelNgTest002
+ * @tc.desc: TEST SliderModelNG::setModel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTestNg, SliderModelNgTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slider and set the properties ,and then get frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::NONE);
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    sliderModelNG.SetThickness(AceType::RawPtr(frameNode), RADIUS);
+    sliderModelNG.SetMinResponsiveDistance(AceType::RawPtr(frameNode), 50.0);
+    /**
+     * @tc.steps: step2. get the properties of all settings.
+     * @tc.expected: step2. check whether the properties is correct.
+     */
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    Dimension testResult = sliderModelNG.GetThickness(AceType::RawPtr(frameNode));
+    EXPECT_EQ(testResult, RADIUS);
 }
 } // namespace OHOS::Ace::NG

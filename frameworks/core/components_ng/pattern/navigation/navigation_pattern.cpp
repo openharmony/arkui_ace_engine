@@ -288,6 +288,17 @@ void NavigationPattern::OnAttachToMainTree()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     InitPageNode(host);
+    InitFoldState();
+}
+
+void NavigationPattern::InitFoldState()
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    container->InitIsFoldable();
+    if (container->IsFoldable()) {
+        currentfoldStatus_ = container->GetCurrentFoldStatus();
+    }
 }
 
 void NavigationPattern::OnDetachFromMainTree()
@@ -319,23 +330,16 @@ bool NavigationPattern::IsTopNavDestination(const RefPtr<UINode>& node) const
     return navDestination == node;
 }
 
-bool NavigationPattern::IsFoldStateChange()
+bool NavigationPattern::JudgeFoldStateChangeAndUpdateState()
 {
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
-    auto displayInfo = container->GetDisplayInfo();
-    CHECK_NULL_RETURN(displayInfo, false);
-    auto foldStatus = displayInfo->GetFoldStatus();
-    return foldStatus != currentfoldStatus_;
-}
-
-void NavigationPattern::UpdateFoldState()
-{
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto displayInfo = container->GetDisplayInfo();
-    CHECK_NULL_VOID(displayInfo);
-    currentfoldStatus_ = displayInfo->GetFoldStatus();
+    auto foldStatus = container->GetCurrentFoldStatus();
+    if (foldStatus != currentfoldStatus_) {
+        currentfoldStatus_ = foldStatus;
+        return true;
+    }
+    return false;
 }
 
 void NavigationPattern::UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host)
@@ -992,7 +996,9 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             navigationNode->DealNavigationExit(navBarNode, true, false);
         }
         navigationNode->RemoveDialogDestination();
-        navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+        auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
+        navigationNode->OnAccessibilityEvent(
+            AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
         navigationStack_->UpdateReplaceValue(0);
         return;
     }
@@ -1016,7 +1022,9 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             DealTransitionVisibility(preTopNavDestination, needVisible, false);
         }
         navigationNode->RemoveDialogDestination();
-        navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+        auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
+        navigationNode->OnAccessibilityEvent(
+            AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
         return;
     }
 
@@ -1044,7 +1052,9 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     navigationNode->RemoveDialogDestination();
-    navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+    auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
+    navigationNode->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
 }
 
 void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -1443,7 +1453,8 @@ void NavigationPattern::HandleDragUpdate(float xOffset)
 
     auto navigationPosition = navigationLayoutProperty->GetNavBarPosition().value_or(NavBarPosition::START);
     bool isNavBarStart = navigationPosition == NavBarPosition::START;
-    auto navBarLine = preNavBarWidth_ + (isNavBarStart ? xOffset : -xOffset);
+    auto navBarLine = isRightToLeft_ ? preNavBarWidth_ + (isNavBarStart ? -xOffset : xOffset)
+                                     : preNavBarWidth_ + (isNavBarStart ? xOffset : -xOffset);
     float currentNavBarWidth = realNavBarWidth_;
 
     if (maxNavBarWidthPx + dividerWidth + minContentWidthPx > frameWidth) {
@@ -1707,7 +1718,7 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
             navigationTransition.transition(proxy);
         };
         proxy->SetInteractiveAnimation(AnimationUtils::CreateInteractiveAnimation(
-            addAnimationCallback, finishCallback));
+            addAnimationCallback, finishCallback), finishCallback);
         isFinishInteractiveAnimation_ = false;
         proxy->StartAnimation();
     } else {
@@ -1748,7 +1759,9 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
     if (newTopNavDestination) {
         newTopNavDestination->SetIsOnAnimation(false);
     }
-    hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+    auto id = hostNode->GetTopDestination() ? hostNode->GetTopDestination()->GetAccessibilityId() : -1;
+    hostNode->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
     do {
         if (replaceValue != 0) {
             hostNode->DealNavigationExit(preTopNavDestination, preTopNavDestination == nullptr);
@@ -2367,7 +2380,9 @@ void NavigationPattern::RecoveryToLastStack(
     navigationStack_->RecoveryNavigationStack();
     PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
     hostNode->SetIsOnAnimation(false);
-    hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+    auto id = hostNode->GetTopDestination() ? hostNode->GetTopDestination()->GetAccessibilityId() : -1;
+    hostNode->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
 }
 
 bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,

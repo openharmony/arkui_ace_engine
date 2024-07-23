@@ -78,6 +78,11 @@ struct PixelMapInfo {
     NG::OffsetF overlayOffset = { 0.0f, 0.0f };
 };
 
+struct AIButtonConfig {
+    std::vector<float> buttonOffset = {0.0f, 0.0f, 0.0f, 0.0f};
+    bool isShow = true;
+};
+
 struct ImageAnalyzerConfig {
     NG::MarginProperty aiButtonMargin;
     std::set<ImageAnalyzerType> types;

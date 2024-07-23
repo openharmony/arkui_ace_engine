@@ -84,15 +84,9 @@ bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight)
 SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& opts) const
 {
     SafeAreaInsets res;
-#ifdef PREVIEW
-    if (ignoreSafeArea_) {
-        return res;
+    if (!IsSafeAreaValid()) {
+        return {};
     }
-#else
-    if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
-        return res;
-    }
-#endif
     if (opts.type & SAFE_AREA_TYPE_CUTOUT) {
         res = res.Combine(cutoutSafeArea_);
     }
@@ -171,7 +165,7 @@ SafeAreaInsets SafeAreaManager::GetSystemSafeArea() const
 
 SafeAreaInsets SafeAreaManager::GetCutoutSafeArea() const
 {
-    if (ignoreSafeArea_ || !isFullScreen_) {
+    if (!IsSafeAreaValid()) {
         return {};
     }
     return cutoutSafeArea_;
@@ -179,16 +173,18 @@ SafeAreaInsets SafeAreaManager::GetCutoutSafeArea() const
 
 SafeAreaInsets SafeAreaManager::GetSafeArea() const
 {
-#ifdef PREVIEW
-    if (ignoreSafeArea_) {
+    if (!IsSafeAreaValid()) {
         return {};
     }
-#else
-    if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
-        return {};
-    }
-#endif
     return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
+}
+
+SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutCutout() const
+{
+    if (!IsSafeAreaValid()) {
+        return {};
+    }
+    return systemSafeArea_.Combine(navSafeArea_);
 }
 
 SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutProcess() const

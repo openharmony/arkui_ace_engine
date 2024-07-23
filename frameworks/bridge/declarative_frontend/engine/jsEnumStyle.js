@@ -1441,8 +1441,8 @@ var BlurStyle;
 var BlurStyleActivePolicy;
 (function (BlurStyleActivePolicy) {
   BlurStyleActivePolicy[BlurStyleActivePolicy["FOLLOWS_WINDOW_ACTIVE_STATE"] = 0] = "FOLLOWS_WINDOW_ACTIVE_STATE";
-  BlurStyleActivePolicy[BlurStyleActivePolicy["ALAWYS_ACTIVE"] = 1] = "ALAWYS_ACTIVE";
-  BlurStyleActivePolicy[BlurStyleActivePolicy["ALAWYS_INACTIVE"] = 2] = "ALAWYS_INACTIVE";
+  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_ACTIVE"] = 1] = "ALWAYS_ACTIVE";
+  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_INACTIVE"] = 2] = "ALWAYS_INACTIVE";
 })(BlurStyleActivePolicy || (BlurStyleActivePolicy = {}));
 
 var BlurType;
@@ -3296,6 +3296,12 @@ var GestureRecognizerState;
   GestureRecognizerState[GestureRecognizerState["SUCCESSFUL"] = 4] = "SUCCESSFUL";
   GestureRecognizerState[GestureRecognizerState["FAILED"] = 5] = "FAILED";
 })(GestureRecognizerState || (GestureRecognizerState = {}));
+
+let GridItemAlignment;
+(function (GridItemAlignment) {
+  GridItemAlignment[GridItemAlignment['DEFAULT'] = 0] = 'DEFAULT';
+  GridItemAlignment[GridItemAlignment['STRETCH'] = 1] = 'STRETCH';
+})(GridItemAlignment || (GridItemAlignment = {}));
 
 class ImageAnalyzerController {
   constructor() {

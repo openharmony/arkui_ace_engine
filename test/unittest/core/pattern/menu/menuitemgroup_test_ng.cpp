@@ -591,8 +591,13 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPattern003, TestSize.Level1)
 
     bool press = true;
     int32_t index = 0;
-    menuItemGroupPattern2->OnIntItemPressed(0, press);
+    menuItemGroupPattern2->OnIntItemPressed(index, press);
+    auto needFooterDivider = menuItemGroup1->GetPaintProperty<MenuItemGroupPaintProperty>()->propNeedFooterDivider_;
+    EXPECT_EQ(needFooterDivider, false);
+
     index = -1;
-    menuItemGroupPattern2->OnIntItemPressed(-1, press);
+    menuItemGroupPattern2->OnIntItemPressed(index, press);
+    auto needHeaderDivider = menuItemGroup3->GetPaintProperty<MenuItemGroupPaintProperty>()->propNeedHeaderDivider_;
+    EXPECT_EQ(needHeaderDivider, false);
 }
 } // namespace OHOS::Ace::NG

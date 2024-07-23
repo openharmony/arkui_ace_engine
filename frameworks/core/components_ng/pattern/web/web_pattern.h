@@ -190,7 +190,7 @@ public:
 
     void OnModifyDone() override;
 
-    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
+    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
 
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
@@ -515,7 +515,7 @@ public:
     void OnDateTimeChooserClose();
     void OnShowAutofillPopup(const float offsetX, const float offsetY, const std::vector<std::string>& menu_items);
     void OnHideAutofillPopup();
-    void UpdateTouchHandleForOverlay();
+    void UpdateTouchHandleForOverlay(bool fromOverlay = false);
     bool IsSelectOverlayDragging()
     {
         return selectOverlayDragging_;
@@ -540,10 +540,12 @@ public:
         std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, int32_t nodeId);
     void ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson,
         std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, OHOS::NWeb::NWebAutofillEvent& eventType);
+    AceAutoFillType GetFocusedType();
     void HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool RequestAutoFill(AceAutoFillType autoFillType);
     bool RequestAutoSave();
     bool UpdateAutoFillPopup();
+    bool CloseAutoFillPopup();
     void UpdateSelectHandleInfo();
     bool IsSelectHandleReverse();
     void OnCompleteSwapWithNewSize();
@@ -668,12 +670,11 @@ private:
     void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate = true);
     void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
-    void OnAttachToMainTree() override;
-    void OnDetachFromMainTree() override;
 
     void OnWindowShow() override;
     void OnWindowHide() override;
@@ -864,7 +865,7 @@ private:
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void PostTaskToUI(const std::function<void()>&& task, const std::string& name) const;
-    void OfflineMode();
+    void InitInOfflineMode();
     void OnOverScrollFlingVelocityHandler(float velocity, bool isFling);
     bool FilterScrollEventHandleOffset(const float offset);
     bool FilterScrollEventHandlevVlocity(const float velocity);
@@ -914,6 +915,7 @@ private:
     void GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId);
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
+    void InitAiEngine();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -1014,8 +1016,8 @@ private:
     RefPtr<WebDelegateObserver> observer_;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
-    bool isOfflineMode_ = false;
-    bool isAttachedToMainTree_ = false;
+    bool offlineWebInited_ = false;
+    bool offlineWebRendered_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
     bool accessibilityState_ = false;
     RefPtr<WebAccessibilityNode> webAccessibilityNode_;

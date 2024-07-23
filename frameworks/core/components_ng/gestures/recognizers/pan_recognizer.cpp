@@ -143,6 +143,7 @@ void PanRecognizer::OnRejected()
     if (refereeState_ != RefereeState::SUCCEED) {
         refereeState_ = RefereeState::FAIL;
     }
+    SendRejectMsg();
     firstInputTime_.reset();
 }
 
@@ -636,6 +637,9 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetRawGlobalLocation(GetRawGlobalLocation(touchPoint.postEventNodeId));
     info.SetPointerId(touchPoint.id);
     info.SetTargetDisplayId(touchPoint.targetDisplayId);
+    info.SetIsInterpolated(touchPoint.isInterpolated);
+    info.SetInputXDeltaSlope(touchPoint.inputXDeltaSlope);
+    info.SetInputYDeltaSlope(touchPoint.inputYDeltaSlope);
     info.SetMainDelta(mainDelta_ / static_cast<double>(touchPoints_.size()));
     if (inputEventType_ == InputEventType::AXIS) {
         info.SetScreenLocation(lastAxisEvent_.GetScreenOffset());
@@ -922,6 +926,11 @@ void PanRecognizer::UpdateTouchEventInfo(const TouchEvent& event, bool updateVel
         windowTouchPoint, GetAttachedNode(), false, isPostEventResult_, event.postEventNodeId);
     delta_ =
         (Offset(windowPoint.GetX(), windowPoint.GetY()) - Offset(windowTouchPoint.GetX(), windowTouchPoint.GetY()));
+    if ((direction_.type & PanDirection::VERTICAL) == 0) {
+        delta_.SetY(0.0);
+    } else if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
+        delta_.SetX(0.0);
+    }
 
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_GESTURE, "Delta is x %{public}f, y %{public}f ", delta_.GetX(), delta_.GetY());

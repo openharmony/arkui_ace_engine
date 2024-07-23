@@ -183,6 +183,7 @@ void ClickRecognizer::OnAccepted()
 
 void ClickRecognizer::OnRejected()
 {
+    SendRejectMsg();
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
 }
@@ -447,6 +448,9 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
 
 void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& onAction)
 {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return;
+    }
     if (onAction && *onAction) {
         GestureEvent info = GetGestureEventInfo();
         // onAction may be overwritten in its invoke so we copy it first

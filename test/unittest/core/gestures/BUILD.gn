@@ -27,6 +27,7 @@ ace_unittest("gestures_test_ng") {
     "pan_recognizer_test_ng.cpp",
     "parallel_recognizer_test_ng.cpp",
     "pinch_recognizer_test_ng.cpp",
+    "recognizer_group_test_ng.cpp",
     "rotation_recognizer_test_ng.cpp",
     "sequenced_recognizer_test_ng.cpp",
     "swipe_recognizer_test_ng.cpp",

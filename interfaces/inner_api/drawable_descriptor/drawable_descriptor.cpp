@@ -53,6 +53,7 @@ constexpr float BADGED_SIDE_X = 21.0f;
 constexpr float BADGED_SIDE_Y = 7.0f;
 constexpr float SIDE = 192.0f;
 constexpr float NOT_ADAPTIVE_SIZE = 288.0f;
+constexpr float HALF = 0.5f;
 
 inline bool NearEqual(const double left, const double right, const double epsilon)
 {
@@ -64,6 +65,7 @@ inline bool NearEqual(const double left, const double right)
     constexpr double epsilon = 0.001f;
     return NearEqual(left, right, epsilon);
 }
+
 #endif
 const int DEFAULT_DURATION = 1000;
 const std::string DEFAULT_MASK = "ohos_icon_mask";
@@ -503,25 +505,39 @@ void LayeredDrawableDescriptor::CompositeIconAdaptive(std::shared_ptr<Rosen::Dra
         bitmapCanvas.DetachBrush();
     }
     if (foreground) {
-        srcRect = Rosen::Drawing::Rect(
-            0.0, 0.0, static_cast<float>(foreground->GetWidth()), static_cast<float>(foreground->GetHeight()));
-        auto x = static_cast<float>((background->GetWidth() - foreground->GetWidth()) / 2);
-        auto y = static_cast<float>((background->GetHeight() - foreground->GetHeight()) / 2);
-        dstRect = Rosen::Drawing::Rect(
-            x, y, static_cast<float>(foreground->GetWidth()), static_cast<float>(foreground->GetHeight())
-        );
-
-        brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC_ATOP);
-        bitmapCanvas.AttachBrush(brush);
-        image.BuildFromBitmap(*foreground);
-        bitmapCanvas.DrawImageRect(image, srcRect, dstRect, Rosen::Drawing::SamplingOptions(),
-            Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
-        bitmapCanvas.DetachBrush();
+        BlendForeground(bitmapCanvas, brush, image, background, foreground);
     }
-
     // convert bitmap back to pixelMap
     bitmapCanvas.ReadPixels(imageInfo, tempCache.GetPixels(), tempCache.GetRowBytes(), 0, 0);
     TransformToPixelMap(tempCache, imageInfo);
+}
+
+void LayeredDrawableDescriptor::BlendForeground(Rosen::Drawing::Canvas& bitmapCanvas, Rosen::Drawing::Brush& brush,
+    Rosen::Drawing::Image& image, const std::shared_ptr<Rosen::Drawing::Bitmap>& background,
+    const std::shared_ptr<Rosen::Drawing::Bitmap>& foreground)
+{
+    if (!foreground || !background || NearEqual(foreground->GetWidth(), 0.0) ||
+        NearEqual(foreground->GetHeight(), 0.0)) {
+        return;
+    }
+    auto scale = std::min(background->GetWidth() * 1.0f / foreground->GetWidth(),
+        background->GetHeight() * 1.0f / foreground->GetHeight());
+    if (NearEqual(scale, 0.0)) {
+        return;
+    }
+    auto destWidth = foreground->GetWidth() * scale;
+    auto destHeight = foreground->GetHeight() * scale;
+    auto dstOffsetX = static_cast<float>((background->GetWidth() - destWidth) * HALF);
+    auto dstOffsetY = static_cast<float>((background->GetHeight() - destHeight) * HALF);
+    Rosen::Drawing::Rect rsSrcRect(0.0, 0.0, foreground->GetWidth(), foreground->GetHeight());
+    Rosen::Drawing::Rect rsDstRect(dstOffsetX, dstOffsetY,
+        destWidth + dstOffsetX, destHeight + dstOffsetY);
+    brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC_ATOP);
+    bitmapCanvas.AttachBrush(brush);
+    image.BuildFromBitmap(*foreground);
+    bitmapCanvas.DrawImageRect(image, rsSrcRect, rsDstRect, Rosen::Drawing::SamplingOptions(),
+        Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
+    bitmapCanvas.DetachBrush();
 }
 
 void LayeredDrawableDescriptor::CompositeIconNotAdaptive(std::shared_ptr<Rosen::Drawing::Bitmap>& foreground,

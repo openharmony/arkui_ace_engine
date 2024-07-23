@@ -67,6 +67,11 @@ const uint8_t* PixelMapPreview::GetPixels() const
     return nullptr;
 }
 
+bool PixelMapPreview::GetPixelsVec(std::vector<uint8_t>& data) const
+{
+    return false;
+}
+
 PixelFormat PixelMapPreview::GetPixelFormat() const
 {
     return PixelFormat::UNKNOWN;

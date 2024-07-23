@@ -1762,5 +1762,213 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_GetRouterPageId"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeEvent_GetDragEvent"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeEvent_GetPreviewDragStatus"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_DisableDefaultDropAnimation"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_SetSuggestedDropOperation"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_SetDragResult"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_SetData"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_GetUdmfData"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_GetDataTypeCount"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_GetDataTypes"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_GetDragResult"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_GetPreviewTouchPointX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_GetPreviewTouchPointY"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_GetPreviewRectWidth"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_GetPreviewRectHeight"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_GetTouchPointXToWindow"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_GetTouchPointYToWindow"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_GetTouchPointXToDisplay"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_GetTouchPointYToDisplay"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_GetVelocityX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_GetVelocityY"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_GetVelocity"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_GetModifierKeyStates"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_SetDragEventStrictReportWithNode"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_SetDragEventStrictReportWithContext"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_SetNodeAllowedDropDataTypes"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DisallowNodeAnyDropDataTypes"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AllowNodeAllDropDataTypes"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_SetNodeDraggable"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_SetNodeDragPreview"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateDragPreviewOption"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragPreviewOption_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragPreviewOption_SetScaleMode"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragPreviewOption_SetDefaultShadowEnabled"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragPreviewOption_SetDefaultRadiusEnabled"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragPreviewOption_SetNumberBadgeEnabled"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragPreviewOption_SetBadgeNumber"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragPreviewOption_SetDefaultAnimationBeforeLiftingEnabled"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_SetNodeDragPreviewOption"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateDragActionWithNode"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateDragActionWithContext"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragAction_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragAction_SetPointerId"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragAction_SetPixelMaps"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragAction_SetTouchPointX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragAction_SetTouchPointY"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragAction_SetData"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragAction_SetDragPreviewOption"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragAction_RegisterStatusListener"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragAction_UnregisterStatusListener"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragAndDropInfo_GetDragStatus"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragAndDropInfo_GetDragEvent"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_StartDrag"
     }
 ]

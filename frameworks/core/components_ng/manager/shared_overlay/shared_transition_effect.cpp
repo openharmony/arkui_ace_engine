@@ -176,8 +176,8 @@ bool SharedTransitionExchange::CreateTranslateAnimation(const RefPtr<FrameNode>&
 
 bool SharedTransitionExchange::CreateSizeAnimation(const RefPtr<FrameNode>& src, const RefPtr<FrameNode>& dest)
 {
-    auto destSize = dest->GetGeometryNode()->GetFrameSize();
-    auto srcSize = src->GetGeometryNode()->GetFrameSize();
+    auto destSize = dest->GetRenderContext()->GetPaintRectWithoutTransform().GetSize();
+    auto srcSize = src->GetRenderContext()->GetPaintRectWithoutTransform().GetSize();
     if (!destSize.IsPositive()) {
         TAG_LOGW(AceLogTag::ACE_ANIMATION,
             "DestSize is %{public}s, means we don't get the size correctly, so create sharedTransition failed"

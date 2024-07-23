@@ -440,6 +440,9 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(frameNode);
     auto bubblePattern = frameNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(bubblePattern);
+    if (bubblePattern->IsExiting()) {
+        return;
+    }
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;

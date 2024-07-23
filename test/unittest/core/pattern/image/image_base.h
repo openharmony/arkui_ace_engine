@@ -144,6 +144,9 @@ auto GetCompoment()
     EXPECT_NE(renderProperty, nullptr);
     return std::make_tuple(frameNode, layoutProperty, pattern, renderProperty);
 }
+
+std::vector<RefPtr<UINode>> PopUINodes();
+void PushUINodes(std::vector<RefPtr<UINode>> &vec);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_TEXTFIELD_TEXTINPUT_TEST_NG_H

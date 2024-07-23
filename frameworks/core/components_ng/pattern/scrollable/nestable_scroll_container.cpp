@@ -89,4 +89,12 @@ void NestableScrollContainer::SetParentScrollable()
         }
     }
 }
+
+void NestableScrollContainer::OnScrollDragEndRecursive()
+{
+    auto parent = parent_.Upgrade();
+    if (parent && nestedScroll_.NeedParent()) {
+        parent->OnScrollDragEndRecursive();
+    }
+}
 } // namespace OHOS::Ace::NG

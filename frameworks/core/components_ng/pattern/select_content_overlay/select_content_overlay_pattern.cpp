@@ -146,7 +146,8 @@ bool SelectContentOverlayPattern::UpdateHandleHotZoneWithPoint()
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, false);
     auto hotZone = theme->GetHandleHotZoneRadius().ConvertToPx();
-    auto radius = theme->GetHandleDiameter().ConvertToPx() / 2.0f;
+    auto radius =
+        (theme->GetHandleDiameter().ConvertToPx() + theme->GetHandleDiameterStrokeWidth().ConvertToPx()) / 2.0f;
     firstHandleRegion_.SetSize({ hotZone * 2, hotZone * 2 });
     secondHandleRegion_.SetSize({ hotZone * 2, hotZone * 2 });
     if (info_->isSingleHandle) {

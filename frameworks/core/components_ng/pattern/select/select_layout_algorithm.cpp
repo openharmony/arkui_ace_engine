@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/select/select_layout_algorithm.h"
 
 #include "base/geometry/dimension.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
@@ -37,13 +38,17 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutProps = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProps);
     auto childConstraint = layoutProps->CreateChildConstraint();
-
     // Measure child row to get row height and width.
     auto rowWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(rowWrapper);
-    auto spinnerSize = MeasureAndGetSize(rowWrapper->GetOrCreateChildByIndex(1), childConstraint);
     auto rowProps = DynamicCast<FlexLayoutProperty>(rowWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(rowProps);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    UpdateMargin(layoutWrapper, theme);
+    auto spinnerSize = MeasureAndGetSize(rowWrapper->GetOrCreateChildByIndex(1), childConstraint);
     auto space = static_cast<float>(rowProps->GetSpaceValue(Dimension()).ConvertToPx());
     childConstraint.maxSize.MinusWidth(spinnerSize.Width() + space);
     auto textWrapper = rowWrapper->GetOrCreateChildByIndex(0);
@@ -81,10 +86,6 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     rowGeometry->SetFrameSize(SizeF(rowWidth, rowHeight));
     rowWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
     float defaultHeight = MeasureAndGetDefaultHeight(layoutProps, theme);
     layoutWrapper->GetGeometryNode()->SetContentSize(
         SizeF(rowWidth, rowHeight > defaultHeight ? rowHeight : defaultHeight));
@@ -162,5 +163,38 @@ void SelectLayoutAlgorithm::UpdateOptionsMaxLines(const std::vector<RefPtr<Frame
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateMaxLines(maxLines);
     }
+}
+
+void SelectLayoutAlgorithm::UpdateMargin(LayoutWrapper* layoutWrapper, RefPtr<SelectTheme> theme)
+{
+    auto rowWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(rowWrapper);
+    auto spinner = rowWrapper->GetOrCreateChildByIndex(1);
+    auto spinnerLayoutProperty = spinner->GetLayoutProperty();
+    auto layoutProps = layoutWrapper->GetLayoutProperty();
+    auto rowProps = DynamicCast<FlexLayoutProperty>(rowWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(rowProps);
+    auto arrowStart = rowProps->GetFlexDirection() == FlexDirection::ROW_REVERSE;
+    CHECK_NULL_VOID(layoutProps);
+    auto isRtl = layoutProps->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    MarginProperty spinnerMargin;
+    MarginProperty TextMargin;
+    if (arrowStart ^ isRtl) {
+        spinnerMargin.left = CalcLength(theme->GetContentMargin());
+        spinnerMargin.right = CalcLength();
+        TextMargin.left = CalcLength();
+        TextMargin.right = CalcLength(theme->GetContentMargin());
+    } else {
+        spinnerMargin.left = CalcLength();
+        spinnerMargin.right = CalcLength(theme->GetContentMargin());
+        TextMargin.left = CalcLength(theme->GetContentMargin());
+        TextMargin.right = CalcLength();
+    }
+    spinnerLayoutProperty->UpdateMargin(spinnerMargin);
+        auto textWrapper = rowWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(textWrapper);
+        auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateMargin(TextMargin);
 }
 } // namespace OHOS::Ace::NG

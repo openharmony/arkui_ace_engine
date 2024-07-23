@@ -64,8 +64,8 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr double DIMENSION_VALUE = 16.0;
-constexpr const char COPY_ACTION[] = "copy";
-constexpr const char SELECT_ACTION[] = "select";
+constexpr const char COPY_ACTION[] = "复制";
+constexpr const char SELECT_ACTION[] = "选择文本";
 constexpr const char SYMBOL_COLOR[] = "BLACK";
 constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
 constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
@@ -94,11 +94,24 @@ void TextPattern::OnWindowHide()
 {
     CHECK_NULL_VOID(contentMod_);
     contentMod_->PauseAnimation();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    TAG_LOGD(AceLogTag::ACE_TEXT, "OnWindowHide [%{public}d]", host->GetId());
 }
 
 void TextPattern::OnWindowShow()
 {
     CHECK_NULL_VOID(contentMod_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RectF frameRect;
+    RectF visibleRect;
+    host->GetVisibleRect(visibleRect, frameRect);
+    if (visibleRect.IsEmpty()) {
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_TEXT, "OnWindowShow [%{public}d], [Rect:%{public}s]", host->GetId(),
+        visibleRect.ToString().c_str());
     contentMod_->ResumeAnimation();
 }
 
@@ -853,7 +866,7 @@ bool TextPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSpan)
                 dataDetectorAdapter_->ResponseBestMatchItem(aiSpan);
                 return true;
             }
-            return ShowUIExtensionMenu(aiSpan);
+            return ShowAIEntityMenu(aiSpan);
         }
     }
     return false;
@@ -871,15 +884,14 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
             return;
         }
         pattern->CloseSelectOverlay();
+        pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
         if (action == std::string(COPY_ACTION)) {
-            pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
             pattern->HandleOnCopy();
+            pattern->ResetSelection();
         } else if (action == std::string(SELECT_ACTION)) {
             if (calculateHandleFunc == nullptr) {
-                pattern->SetTextSelection(aiSpan.start, aiSpan.end);
                 pattern->CalculateHandleOffsetAndShowOverlay();
             } else {
-                pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
                 calculateHandleFunc();
             }
             if (showSelectOverlayFunc == nullptr) {
@@ -894,7 +906,7 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
     };
 }
 
-bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
+bool TextPattern::ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
     const ShowSelectOverlayFunc& showSelectOverlayFunc)
 {
     auto host = GetHost();
@@ -922,7 +934,7 @@ bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
         aiRect = textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
     }
 
-    return dataDetectorAdapter_->ShowUIExtensionMenu(aiSpan, aiRect, host, IsSelectableAndCopy());
+    return dataDetectorAdapter_->ShowAIEntityMenu(aiSpan, aiRect, host, IsSelectableAndCopy());
 }
 
 void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
@@ -1068,10 +1080,6 @@ void TextPattern::InitHoverEvent()
 
 void TextPattern::HandleMouseEvent(const MouseInfo& info)
 {
-    if (!IsSelectableAndCopy()) {
-        return;
-    }
-
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
@@ -1162,6 +1170,11 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
 
 void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset)
 {
+    if (!IsSelectableAndCopy()) {
+        isMousePressed_ = false;
+        leftMousePressed_ = false;
+        return;
+    }
     if (blockPress_) {
         dragBoxes_ = GetTextBoxes();
         return;
@@ -1185,6 +1198,9 @@ void TextPattern::HandleMouseRightButton(const MouseInfo& info, const Offset& te
                 isMousePressed_ = false;
                 return;
             }
+        }
+        if (!IsSelectableAndCopy()) {
+            return;
         }
 
         CalculateHandleOffsetAndShowOverlay(true);
@@ -1475,6 +1491,19 @@ void TextPattern::AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& r
 void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
 {
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
+    if (isSpanStringMode_) {
+        std::vector<uint8_t> arr;
+        auto dragSpanString = styledString_->GetSubSpanString(recoverStart_, recoverEnd_ - recoverStart_);
+        dragSpanString->EncodeTlv(arr);
+        UdmfClient::GetInstance()->AddSpanStringRecord(unifiedData, arr);
+    } else {
+        ProcessNormalUdmfData(unifiedData);
+    }
+    event->SetData(unifiedData);
+}
+
+void TextPattern::ProcessNormalUdmfData(const RefPtr<UnifiedData>& unifiedData)
+{
     std::list<ResultObject> finalResult;
     auto type = SelectSpanType::TYPESPAN;
     for (const auto& resultObj : dragResultObjects_) {
@@ -1497,29 +1526,32 @@ void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
         }
         if (result.type == SelectSpanType::TYPEIMAGE) {
             if (result.valuePixelMap) {
-                const uint8_t* pixels = result.valuePixelMap->GetPixels();
-                CHECK_NULL_VOID(pixels);
-                int32_t length = result.valuePixelMap->GetByteCount();
-                std::vector<uint8_t> data(pixels, pixels + length);
-                PixelMapRecordDetails details = { result.valuePixelMap->GetWidth(), result.valuePixelMap->GetHeight(),
-                    result.valuePixelMap->GetPixelFormat(), result.valuePixelMap->GetAlphaType() };
-                UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data, details);
+                pattern->AddPixelMapToUdmfData(result.valuePixelMap, unifiedData);
             } else if (result.valueString.size() > 1) {
                 UdmfClient::GetInstance()->AddImageRecord(unifiedData, result.valueString);
+            } else {
+                // builder span, fill pixelmap data
+                auto builderNode = DynamicCast<FrameNode>(pattern->GetChildByIndex(result.spanPosition.spanIndex));
+                CHECK_NULL_VOID(builderNode);
+                pattern->AddPixelMapToUdmfData(builderNode->GetPixelMap(), unifiedData);
             }
         }
     };
-    if (isSpanStringMode_) {
-        std::vector<uint8_t> arr;
-        auto dragSpanString = styledString_->GetSubSpanString(recoverStart_, recoverEnd_ - recoverStart_);
-        dragSpanString->EncodeTlv(arr);
-        UdmfClient::GetInstance()->AddSpanStringRecord(unifiedData, arr);
-    } else {
-        for (const auto& resultObj : finalResult) {
-            resultProcessor(resultObj);
-        }
+    for (const auto& resultObj : finalResult) {
+        resultProcessor(resultObj);
     }
-    event->SetData(unifiedData);
+}
+
+void TextPattern::AddPixelMapToUdmfData(const RefPtr<PixelMap>& pixelMap, const RefPtr<UnifiedData>& unifiedData)
+{
+    CHECK_NULL_VOID(pixelMap && unifiedData);
+    const uint8_t* pixels = pixelMap->GetPixels();
+    CHECK_NULL_VOID(pixels);
+    int32_t length = pixelMap->GetByteCount();
+    std::vector<uint8_t> data(pixels, pixels + length);
+    PixelMapRecordDetails details = { pixelMap->GetWidth(), pixelMap->GetHeight(),
+        pixelMap->GetPixelFormat(), pixelMap->GetAlphaType() };
+    UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data, details);
 }
 
 void TextPattern::CloseOperate()
@@ -2060,6 +2092,7 @@ void TextPattern::OnModifyDone()
 
     if (CheckNeedMeasure(textLayoutProperty->GetPropertyChangeFlag()) && pManager_) {
         // measure flag changed, reset paragraph.
+        ACE_TEXT_SCOPED_TRACE("OnModifyDone[Text][id:%d]", host->GetId());
         pManager_->Reset();
     }
 
@@ -2097,6 +2130,7 @@ void TextPattern::OnModifyDone()
 
         if (textDetectEnable_) {
             auto entityJson = JsonUtil::ParseJsonString(textForDisplay_);
+            TAG_LOGI(AceLogTag::ACE_TEXT, "text content is the json format: %{public}d", entityJson->IsNull());
             if (!entityJson->IsNull() && !entityJson->GetValue("bundleName")->IsNull() &&
                 dataDetectorAdapter_->ParseOriText(entityJson, textForDisplay_)) {
                 textLayoutProperty->UpdateContent(textForDisplay_);
@@ -2167,6 +2201,9 @@ void TextPattern::InitCopyOption()
     }
     if (onClick_ || IsSelectableAndCopy() || CanStartAITask()) {
         InitClickEvent(gestureEventHub);
+        if (CanStartAITask()) {
+            InitMouseEvent();
+        }
     }
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -2433,7 +2470,24 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
         InitClickEvent(gestureEventHub);
     }
     if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
-        dataDetectorAdapter_->StartAITask();
+        ParseOriText(textLayoutProperty->GetContent().value_or(""));
+        if (!dataDetectorAdapter_->aiDetectInitialized_) {
+            dataDetectorAdapter_->StartAITask();
+        }
+    }
+}
+
+void TextPattern::ParseOriText(const std::string& currentText)
+{
+    auto entityJson = JsonUtil::ParseJsonString(currentText);
+    TAG_LOGI(AceLogTag::ACE_TEXT, "text content is the json format: %{public}d", entityJson->IsNull());
+    if (!entityJson->IsNull() && !entityJson->GetValue("bundleName")->IsNull() &&
+        dataDetectorAdapter_->ParseOriText(entityJson, textForDisplay_)) {
+        if (childNodes_.empty()) {
+            auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(textLayoutProperty);
+            textLayoutProperty->UpdateContent(textForDisplay_);
+        }
     }
 }
 

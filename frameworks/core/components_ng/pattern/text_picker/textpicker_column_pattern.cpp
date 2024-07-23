@@ -1372,7 +1372,7 @@ double TextPickerColumnPattern::GetDownCandidateDistance(int32_t index, int32_t 
 
 double TextPickerColumnPattern::GetShiftDistanceForLandscape(int32_t index, ScrollDirection dir)
 {
-    int32_t optionCounts = GetShowOptionCount();
+    int32_t optionCounts = static_cast<int32_t>(GetShowOptionCount());
     if (optionCounts == 0) {
         return 0.0;
     }
@@ -1401,7 +1401,7 @@ double TextPickerColumnPattern::GetShiftDistanceForLandscape(int32_t index, Scro
 
 void TextPickerColumnPattern::SetOptionShiftDistance()
 {
-    auto itemCounts = GetShowOptionCount();
+    int32_t itemCounts = static_cast<int32_t>(GetShowOptionCount());
     bool isLanscape = itemCounts == OPTION_COUNT_PHONE_LANDSCAPE + BUFFER_NODE_NUMBER;
     for (int32_t i = 0; i < itemCounts; i++) {
         TextPickerOptionProperty& prop = optionProperties_[i];
@@ -1669,7 +1669,7 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
     if (clickBreak_) {
         return;
     }
-    int32_t middleIndex = GetShowOptionCount() / HALF_NUMBER;
+    int32_t middleIndex = static_cast<int32_t>(GetShowOptionCount()) / HALF_NUMBER;
     int32_t step = param->itemIndex - middleIndex;
     auto overFirst = static_cast<int32_t>(currentIndex_) + step < 0 && step < 0;
     auto overLast =

@@ -890,9 +890,6 @@ void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps, c
     textProps->UpdateTextDecoration(theme->GetTextDecoration());
     textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textProps->UpdateMaxLines(SELECT_ITSELF_TEXT_LINES);
-    MarginProperty margin;
-    margin.left = CalcLength(theme->GetContentMargin());
-    textProps->UpdateMargin(margin);
 }
 
 void SelectPattern::InitSpinner(
@@ -910,10 +907,6 @@ void SelectPattern::InitSpinner(
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     spinnerLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
-    MarginProperty margin;
-    margin.right = CalcLength(selectTheme->GetContentMargin());
-    spinnerLayoutProperty->UpdateMargin(margin);
-
     auto spinnerRenderProperty = spinner->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(spinnerRenderProperty);
     spinnerRenderProperty->UpdateSvgFillColor(selectTheme->GetSpinnerColor());
@@ -928,9 +921,6 @@ void SelectPattern::InitSpinner(
     spinnerLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo{symbolId});
     spinnerLayoutProperty->UpdateSymbolColorList({selectTheme->GetSpinnerSymbolColor()});
     spinnerLayoutProperty->UpdateFontSize(selectTheme->GetFontSize());
-    MarginProperty margin;
-    margin.right = CalcLength(selectTheme->GetContentMargin());
-    spinnerLayoutProperty->UpdateMargin(margin);
 }
 
 // XTS inspector code

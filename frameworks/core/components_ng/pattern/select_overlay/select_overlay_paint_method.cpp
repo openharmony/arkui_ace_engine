@@ -25,6 +25,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr float AGING_MIN_SCALE = 1.75f;
+constexpr float HALF = 2.0f;
 void SelectOverlayPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
@@ -39,15 +40,15 @@ void SelectOverlayPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto top = padding.Top().ConvertToPx();
     auto sideWidth = textOverlayTheme->GetMenuToolbarHeight().ConvertToPx() - padding.Top().ConvertToPx() -
                      padding.Bottom().ConvertToPx();
-    auto buttonRadius = sideWidth / 2.0;
-    auto offset = isReversePaint_ ? defaultMenuStartOffset_ + OffsetF(buttonRadius + left, buttonRadius + top) :
-                                    defaultMenuEndOffset_ + OffsetF(-buttonRadius - right, buttonRadius + top);
+    auto buttonRadius = sideWidth / HALF;
+    auto tempY = static_cast<float>(buttonRadius + top);
     if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
-        offset = defaultMenuEndOffset_ + OffsetF(-buttonRadius - right, selectMenuHeight_ / 2.0f);
+        tempY = static_cast<float>(selectMenuHeight_ / HALF);
     }
+    auto offset = isReversePaint_ ? defaultMenuStartOffset_ + OffsetF(static_cast<float>(buttonRadius + left), tempY)
+                                  : defaultMenuEndOffset_ + OffsetF(static_cast<float>(-buttonRadius - right), tempY);
 
     CheckCirclesAndBackArrowIsShown();
-    CheckHasExtensionMenu();
     selectOverlayModifier_->SetIsReverse(isReversePaint_);
     selectOverlayModifier_->SetMenuOptionOffset(offset);
     selectOverlayModifier_->SetFirstHandleIsShow(info_.firstHandle.isShow);
@@ -125,8 +126,8 @@ void SelectOverlayPaintMethod::CheckCirclesAndBackArrowIsShown()
             }
         }
         circlesAndBackArrowIsShown_ = true;
-        selectOverlayModifier_->SetHasExtensionMenu(hasExtensionMenu_);
     }
+    selectOverlayModifier_->SetHasExtensionMenu(hasExtensionMenu_);
 }
 
 void SelectOverlayPaintMethod::CheckHasExtensionMenu()

@@ -164,7 +164,8 @@ public:
      * @param name Name of the task.
      * @return Returns 'true' whether task has been executed.
      */
-    bool PostSyncTask(Task&& task, TaskType type, const std::string& name) const
+    bool PostSyncTask(
+        Task&& task, TaskType type, const std::string& name, PriorityType priorityType = PriorityType::IMMEDIATE) const
     {
         if (!task || type == TaskType::BACKGROUND) {
             return false;
@@ -172,7 +173,7 @@ public:
             task();
             return true;
         }
-        return PostTaskAndWait(CancelableTask(std::move(task)), type, name, 0ms);
+        return PostTaskAndWait(CancelableTask(std::move(task)), type, name, 0ms, priorityType);
     }
 
     /**
@@ -300,19 +301,18 @@ protected:
 #endif
 
 private:
-    bool PostTaskAndWait(
-        CancelableTask&& task, TaskType type, const std::string& name, std::chrono::milliseconds timeoutMs = 0ms) const
+    bool PostTaskAndWait(CancelableTask&& task, TaskType type, const std::string& name,
+        std::chrono::milliseconds timeoutMs = 0ms, PriorityType priorityType = PriorityType::IMMEDIATE) const
     {
 #ifdef ACE_DEBUG
         bool result = false;
         if (OnPreSyncTask(type)) {
-            result =
-                OnPostTask(Task(task), type, 0, name, PriorityType::IMMEDIATE) && task.WaitUntilComplete(timeoutMs);
+            result = OnPostTask(Task(task), type, 0, name, priorityType) && task.WaitUntilComplete(timeoutMs);
             OnPostSyncTask();
         }
         return result;
 #else
-        return OnPostTask(Task(task), type, 0, name, PriorityType::IMMEDIATE) && task.WaitUntilComplete(timeoutMs);
+        return OnPostTask(Task(task), type, 0, name, priorityType) && task.WaitUntilComplete(timeoutMs);
 #endif
     }
 };
