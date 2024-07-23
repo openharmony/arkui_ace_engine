@@ -83,7 +83,8 @@ bool ButtonPattern::NeedAgingUpdateText(RefPtr<ButtonLayoutProperty>& layoutProp
         return false;
     }
     const auto& calcConstraint = layoutProperty->GetCalcLayoutConstraint();
-    if (calcConstraint && calcConstraint->selfIdealSize.has_value()) {
+    if (calcConstraint && calcConstraint->selfIdealSize->Height().has_value() &&
+        calcConstraint->selfIdealSize->Width().has_value()) {
         return false;
     }
     if (!(NearEqual(fontScale, buttonTheme->GetBigFontSizeScale()) ||
