@@ -179,10 +179,9 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);
-    auto isNewAvoid = info_->isNewAvoid && !info_->isSingleHandle;
     auto shouldInActiveByHandle =
         !info_->firstHandle.isShow && !info_->secondHandle.isShow && !info_->isSelectRegionVisible;
-    if ((!CheckInShowArea(*info_) || (!isNewAvoid && shouldInActiveByHandle)) && !info_->isUsingMouse) {
+    if ((!CheckInShowArea(*info_) || (!info_->isNewAvoid && shouldInActiveByHandle)) && !info_->isUsingMouse) {
         menu->SetActive(false);
         return;
     }
@@ -464,8 +463,13 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
         auto shouldAvoidBottom = GreatNotEqual(menuRect.Bottom(), rootRect.Height());
         auto menuSpace = NearEqual(upPaint.Top(), downPaint.Top()) ? spaceBetweenHandle : spaceBetweenText;
         auto offsetY = downPaint.GetY() - menuSpace - menuRect.Height();
-        if ((shouldAvoidKeyboard || shouldAvoidBottom) && offsetY > 0) {
-            menuOffset.SetY(offsetY);
+        auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
+        if (shouldAvoidKeyboard || shouldAvoidBottom) {
+            if (topArea > offsetY) {
+                menuOffset.SetY(downPaint.Bottom() - spaceBetweenText - menuRect.Height());
+            } else {
+                menuOffset.SetY(offsetY);
+            }
         }
     }
     return menuOffset;
