@@ -60,6 +60,11 @@ public:
         userData_ = userData;
     }
 
+    WeakPtr<UINode> GetContentSlot()
+    {
+        return nodeSlot_;
+    }
+
 private:
     WeakPtr<UINode> nodeSlot_;
     std::list<RefPtr<UINode>> children_;
