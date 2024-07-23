@@ -125,7 +125,7 @@ private:
     JSRef<JSObject> GetJsPathInfo(int32_t index);
     std::string GetNameByIndex(int32_t index);
     JSRef<JSVal> GetOnPopByIndex(int32_t index) const;
-    bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode);
+    bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     int32_t GetSize() const;
     void SetJSParentStack(JSRef<JSVal> parent);
     static std::string ConvertParamToString(const JSRef<JSVal>& param);
