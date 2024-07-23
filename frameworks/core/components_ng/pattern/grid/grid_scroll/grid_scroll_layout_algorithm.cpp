@@ -1752,24 +1752,8 @@ int32_t GridScrollLayoutAlgorithm::MeasureChildPlaced(const SizeF& frameSize, in
 bool GridScrollLayoutAlgorithm::CheckNeedMeasure(
     const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstraint) const
 {
-    if (expandSafeArea_ || layoutWrapper->CheckNeedForceMeasureAndLayout()) {
-        return true;
-    }
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, true);
-    auto constraint = geometryNode->GetParentLayoutConstraint();
-    CHECK_NULL_RETURN(constraint, true);
-    return constraint.value() != layoutConstraint;
-}
-
-bool GridScrollLayoutAlgorithm::CheckNeedMeasureWhenStretch(
-    const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstraint) const
-{
     auto childLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    if (!childLayoutProperty->GetNeedStretch()) {
-        return true;
-    }
-    if (clearStretch_) {
+    if (childLayoutProperty && childLayoutProperty->GetNeedStretch() && gridLayoutInfo_.clearStretch_) {
         childLayoutProperty->SetNeedStretch(false);
         if (axis_ == Axis::VERTICAL) {
             childLayoutProperty->ClearUserDefinedIdealSize(false, true);
@@ -1778,12 +1762,18 @@ bool GridScrollLayoutAlgorithm::CheckNeedMeasureWhenStretch(
         }
         return true;
     }
+
+    if (expandSafeArea_ || layoutWrapper->CheckNeedForceMeasureAndLayout()) {
+        return true;
+    }
+
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, true);
     auto constraint = geometryNode->GetParentLayoutConstraint();
     CHECK_NULL_RETURN(constraint, true);
-    return layoutConstraint.selfIdealSize.MainSize(axis_).has_value() ||
-           layoutWrapper->CheckNeedForceMeasureAndLayout();
+    return constraint->maxSize != layoutConstraint.maxSize ||
+           constraint->percentReference != layoutConstraint.percentReference ||
+           constraint->selfIdealSize.CrossSize(axis_) != layoutConstraint.selfIdealSize.CrossSize(axis_);
 }
 
 void GridScrollLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper, const SizeF& frameSize,
@@ -1796,16 +1786,12 @@ void GridScrollLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper, const
     if (!CheckNeedMeasure(childLayoutWrapper, childConstraint)) {
         return;
     }
-    auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(childLayoutWrapper->GetLayoutProperty());
+    auto childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
     if (!childLayoutProperty) {
         childLayoutWrapper->Measure(childConstraint);
         return;
     }
-    if (childLayoutProperty->GetNeedStretch()) {
-        if (!CheckNeedMeasureWhenStretch(childLayoutWrapper, childConstraint)) {
-            return;
-        }
-    }
+
     auto oldConstraint = childLayoutProperty->GetLayoutConstraint();
     if (oldConstraint.has_value() && !NearEqual(GetCrossAxisSize(oldConstraint.value().maxSize, axis_),
                                          GetCrossAxisSize(childConstraint.maxSize, axis_))) {
@@ -2254,7 +2240,7 @@ void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, Layo
         gridLayoutInfo_.endMainLineIndex_ = 0;
         gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
         gridLayoutInfo_.ResetPositionFlags();
-        clearStretch_ = true;
+        gridLayoutInfo_.clearStretch_ = true;
         isChildrenUpdated_ = true;
         if (gridLayoutInfo_.childrenCount_ > 0) {
             ReloadToStartIndex(mainSize, crossSize, layoutWrapper);
@@ -2268,7 +2254,7 @@ void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, Layo
         isChildrenUpdated_ = true;
         gridLayoutInfo_.irregularItemsPosition_.clear();
         gridLayoutInfo_.ResetPositionFlags();
-        clearStretch_ = true;
+        gridLayoutInfo_.clearStretch_ = true;
         gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
         auto it = gridLayoutInfo_.FindInMatrix(updateIdx);
         it = gridLayoutInfo_.FindStartLineInMatrix(it, updateIdx);
