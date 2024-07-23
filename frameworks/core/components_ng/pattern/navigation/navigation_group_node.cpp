@@ -455,6 +455,92 @@ bool NavigationGroupNode::HandleBack(const RefPtr<FrameNode>& node, bool isLastC
     return true;
 }
 
+void NavigationGroupNode::CreateAnimationWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+    const AnimationFinishCallback finishCallback, bool isNavBar)
+{
+    CHECK_NULL_VOID(preNode);
+    auto preNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
+    CHECK_NULL_VOID(preNavDestination);
+    auto preTitleNode = AceType::DynamicCast<TitleBarNode>(preNavDestination->GetTitleBarNode());
+    CHECK_NULL_VOID(preTitleNode);
+    auto preBackIcon = AceType::DynamicCast<FrameNode>(preTitleNode->GetBackButton());
+    CHECK_NULL_VOID(preBackIcon);
+    RefPtr<TitleBarNode> curTitleBarNode;
+    if (!GetCurTitleBarNode(curTitleBarNode, curNode, isNavBar)) {
+        return;
+    }
+    auto preFrameSize = preNode->GetGeometryNode()->GetFrameSize();
+    /* set initial status of animation */
+    preNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
+    preNode->GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, preFrameSize.Width(), REMOVE_CLIP_SIZE),
+        RadiusF(EdgeF(0.0f, 0.0f)));
+    preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    preTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+
+    if (curNode) {
+        auto curFrameSize = curNode->GetGeometryNode()->GetFrameSize();
+        curNode->GetRenderContext()->ClipWithRRect(
+            RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+        float flag = CheckLanguageDirection();
+        curNode->GetRenderContext()->UpdateTranslateInXY({ -curFrameSize.Width() * PARENT_PAGE_OFFSET * flag, 0.0f });
+        curTitleBarNode->GetRenderContext()->UpdateTranslateInXY(
+            { curFrameSize.Width() * PARENT_TITLE_OFFSET * flag, 0.0f });
+    }
+
+    /* start transition animation */
+    AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
+        finishCallback);
+    auto newPopAnimation = AnimationUtils::StartAnimation(option, [
+        this, preNode, preTitleNode, preFrameSize, curNode, curTitleBarNode]() {
+            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation pop animation start");
+            /* preNode */
+            float flag = CheckLanguageDirection();
+            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+                preNode->GetRenderContext()->ClipWithRRect(
+                    RectF(0.0f, 0.0f, preFrameSize.Width() * HALF, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+            } else {
+                preNode->GetRenderContext()->ClipWithRRect(
+                    RectF(preFrameSize.Width() * HALF, 0.0f, preFrameSize.Width(), REMOVE_CLIP_SIZE),
+                    RadiusF(EdgeF(0.0f, 0.0f)));
+            }
+            preNode->GetRenderContext()->UpdateTranslateInXY({ preFrameSize.Width() * HALF * flag, 0.0f });
+            preTitleNode->GetRenderContext()->UpdateTranslateInXY({ preFrameSize.Width() * HALF * flag, 0.0f });
+
+            /* curNode */
+            if (curNode) {
+                curNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+                curTitleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+            }
+    }, option.GetOnFinishEvent());
+    if (newPopAnimation) {
+        popAnimations_.emplace_back(newPopAnimation);
+    }
+
+    /* opacity for title and backIcon */
+    auto titleOpacityAnimation = TitleOpacityAnimation(preTitleNode, true);
+    if (titleOpacityAnimation) {
+        popAnimations_.emplace_back(titleOpacityAnimation);
+    }
+    auto backButtonAnimation = BackButtonAnimation(preBackIcon, false);
+    if (backButtonAnimation) {
+        popAnimations_.emplace_back(backButtonAnimation);
+    }
+
+    /* mask animation */
+    std::shared_ptr<AnimationUtils::Animation> maskAnimation;
+    if (curNode) {
+        AnimationOption maskOption = CreateAnimationOption(Curves::FRICTION, FillMode::FORWARDS, MASK_DURATION,
+            nullptr);
+        curNode->GetRenderContext()->SetActualForegroundColor(MASK_COLOR);
+        maskAnimation = AnimationUtils::StartAnimation(
+            maskOption, [curNode]() { curNode->GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT); });
+    }
+    if (maskAnimation) {
+        popAnimations_.emplace_back(maskAnimation);
+    }
+}
+
 void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
     bool isNavBar)
 {
@@ -470,7 +556,6 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
     auto preBackIcon = AceType::DynamicCast<FrameNode>(preTitleNode->GetBackButton());
     CHECK_NULL_VOID(preBackIcon);
 
-    auto preFrameSize = preNode->GetGeometryNode()->GetFrameSize();
     RefPtr<TitleBarNode> curTitleBarNode;
     if (!GetCurTitleBarNode(curTitleBarNode, curNode, isNavBar)) {
         return;
@@ -532,76 +617,8 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             context->MarkNeedFlushMouseEvent();
         };
 
-    /* set initial status of animation */
-    preNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
-    preNode->GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, preFrameSize.Width(), REMOVE_CLIP_SIZE),
-        RadiusF(EdgeF(0.0f, 0.0f)));
-    preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-    preTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     preNavDestination->SetIsOnAnimation(true);
-
-    if (curNode) {
-        auto curFrameSize = curNode->GetGeometryNode()->GetFrameSize();
-        curNode->GetRenderContext()->ClipWithRRect(
-            RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
-        float flag = CheckLanguageDirection();
-        curNode->GetRenderContext()->UpdateTranslateInXY({ -curFrameSize.Width() * PARENT_PAGE_OFFSET * flag, 0.0f });
-        curTitleBarNode->GetRenderContext()->UpdateTranslateInXY(
-            { curFrameSize.Width() * PARENT_TITLE_OFFSET * flag, 0.0f });
-    }
-
-    /* start transition animation */
-    AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
-        callback);
-    auto newPopAnimation = AnimationUtils::StartAnimation(option, [
-        this, preNode, preTitleNode, preFrameSize, curNode, curTitleBarNode]() {
-            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation pop animation start");
-            /* preNode */
-            float flag = CheckLanguageDirection();
-            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-                preNode->GetRenderContext()->ClipWithRRect(
-                    RectF(0.0f, 0.0f, preFrameSize.Width() * HALF, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
-            } else {
-                preNode->GetRenderContext()->ClipWithRRect(
-                    RectF(preFrameSize.Width() * HALF, 0.0f, preFrameSize.Width(), REMOVE_CLIP_SIZE),
-                    RadiusF(EdgeF(0.0f, 0.0f)));
-            }
-            preNode->GetRenderContext()->UpdateTranslateInXY({ preFrameSize.Width() * HALF * flag, 0.0f });
-            preTitleNode->GetRenderContext()->UpdateTranslateInXY({ preFrameSize.Width() * HALF * flag, 0.0f });
-
-            /* curNode */
-            if (curNode) {
-                curNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-                curTitleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-            }
-    }, option.GetOnFinishEvent());
-    if (newPopAnimation) {
-        popAnimations_.emplace_back(newPopAnimation);
-    }
-
-    /* opacity for title and backIcon */
-    auto titleOpacityAnimation = TitleOpacityAnimation(preTitleNode, true);
-    if (titleOpacityAnimation) {
-        popAnimations_.emplace_back(titleOpacityAnimation);
-    }
-    auto backButtonAnimation = BackButtonAnimation(preBackIcon, false);
-    if (backButtonAnimation) {
-        popAnimations_.emplace_back(backButtonAnimation);
-    }
-
-    /* mask animation */
-    std::shared_ptr<AnimationUtils::Animation> maskAnimation;
-    if (curNode) {
-        AnimationOption maskOption = CreateAnimationOption(Curves::FRICTION, FillMode::FORWARDS, MASK_DURATION,
-            nullptr);
-        curNode->GetRenderContext()->SetActualForegroundColor(MASK_COLOR);
-        maskAnimation = AnimationUtils::StartAnimation(
-            maskOption, [curNode]() { curNode->GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT); });
-    }
-    if (maskAnimation) {
-        popAnimations_.emplace_back(maskAnimation);
-    }
+    CreateAnimationWithPop(preNode, curNode, callback, isNavBar);
 
     // clear this flag for navBar layout only
     if (isNavBar) {
@@ -613,13 +630,90 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
 #endif
 }
 
+void NavigationGroupNode::CreateAnimationWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+    const AnimationFinishCallback finishCallback, bool isNavBar)
+{
+    CHECK_NULL_VOID(preNode);
+    CHECK_NULL_VOID(curNode);
+    RefPtr<TitleBarNode> preTitleNode;
+    if (isNavBar) {
+        auto navBarNode = AceType::DynamicCast<NavBarNode>(preNode);
+        preTitleNode = navBarNode ? AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode()) : nullptr;
+    } else {
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
+        preTitleNode = navDestination ? AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode()) : nullptr;
+    }
+    CHECK_NULL_VOID(preTitleNode);
+    auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+    CHECK_NULL_VOID(curNavDestination);
+    auto curTitleNode = AceType::DynamicCast<TitleBarNode>(curNavDestination->GetTitleBarNode());
+    CHECK_NULL_VOID(curTitleNode);
+    auto preFrameSize = preNode->GetGeometryNode()->GetFrameSize();
+    auto curFrameSize = curNode->GetGeometryNode()->GetFrameSize();
+    auto mode = GetNavigationMode();
+    /* set initial status of animation */
+    /* preNode */
+    preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    preTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    /* curNode */
+    float flag = CheckLanguageDirection();
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        curNode->GetRenderContext()->ClipWithRRect(
+            RectF(0.0f, 0.0f, curFrameSize.Width() * HALF, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+    } else {
+        curNode->GetRenderContext()->ClipWithRRect(
+            RectF(curFrameSize.Width() * HALF, 0.0f, curFrameSize.Width(), REMOVE_CLIP_SIZE),
+            RadiusF(EdgeF(0.0f, 0.0f)));
+    }
+    curNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF * flag, 0.0f });
+    curTitleNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF * flag, 0.0f });
+
+    /* start transition animation */
+    AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
+        finishCallback);
+    auto newPushAnimation = AnimationUtils::StartAnimation(option, [
+        this, preNode, preTitleNode, curNode, curTitleNode, preFrameSize, curFrameSize, mode]() {
+            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation push animation start");
+            float flag = CheckLanguageDirection();
+            // preNode
+            preNode->GetRenderContext()->UpdateTranslateInXY(
+                { -preFrameSize.Width() * PARENT_PAGE_OFFSET * flag, 0.0f });
+            preTitleNode->GetRenderContext()->UpdateTranslateInXY(
+                { preFrameSize.Width() * PARENT_TITLE_OFFSET * flag, 0.0f });
+            // curNode
+            curNode->GetRenderContext()->ClipWithRRect(
+                RectF(0.0f, 0.0f, curFrameSize.Width(), REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+            curNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+            curTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    }, option.GetOnFinishEvent());
+    if (newPushAnimation) {
+        pushAnimations_.emplace_back(newPushAnimation);
+    }
+    auto maskAnimation = MaskAnimation(preNode->GetRenderContext());
+    if (maskAnimation) {
+        pushAnimations_.emplace_back(maskAnimation);
+    }
+
+    // title opacity
+    auto titleOpacityAnimation = TitleOpacityAnimation(curTitleNode, false);
+    if (titleOpacityAnimation) {
+        pushAnimations_.emplace_back(titleOpacityAnimation);
+    }
+    // backIcon opacity
+    auto backIcon = AceType::DynamicCast<FrameNode>(curTitleNode->GetBackButton());
+    auto backButtonAnimation = BackButtonAnimation(backIcon, true);
+    if (backButtonAnimation) {
+        pushAnimations_.emplace_back(backButtonAnimation);
+    }
+}
 void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
     bool isNavBar)
 {
     CHECK_NULL_VOID(preNode);
     CHECK_NULL_VOID(curNode);
 
-    RefPtr<FrameNode> preTitleNode;
+    RefPtr<TitleBarNode> preTitleNode;
     if (isNavBar) {
         auto navBarNode = AceType::DynamicCast<NavBarNode>(preNode);
         navBarNode->SetTransitionType(PageTransitionType::EXIT_PUSH);
@@ -631,15 +725,11 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     }
     CHECK_NULL_VOID(preTitleNode);
 
-    auto mode = GetNavigationMode();
     auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
     CHECK_NULL_VOID(curNavDestination);
     curNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
     auto curTitleNode = AceType::DynamicCast<TitleBarNode>(curNavDestination->GetTitleBarNode());
     CHECK_NULL_VOID(curTitleNode);
-
-    auto preFrameSize = preNode->GetGeometryNode()->GetFrameSize();
-    auto curFrameSize = curNode->GetGeometryNode()->GetFrameSize();
 
     /* Create animation callback */
     CleanPushAnimations();
@@ -712,10 +802,6 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             navigation->CleanPushAnimations();
         };
 
-    /* set initial status of animation */
-    /* preNode */
-    preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-    preTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     if (!isNavBar) {
         auto preDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
         preDestination->SetIsOnAnimation(true);
@@ -723,58 +809,9 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             preNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
         }
     }
-    /* curNode */
-    float flag = CheckLanguageDirection();
-    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-        curNode->GetRenderContext()->ClipWithRRect(
-            RectF(0.0f, 0.0f, curFrameSize.Width() * HALF, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
-    } else {
-        curNode->GetRenderContext()->ClipWithRRect(
-            RectF(curFrameSize.Width() * HALF, 0.0f, curFrameSize.Width(), REMOVE_CLIP_SIZE),
-            RadiusF(EdgeF(0.0f, 0.0f)));
-    }
-    curNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF * flag, 0.0f });
-    curTitleNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF * flag, 0.0f });
     curNavDestination->SetIsOnAnimation(true);
+    CreateAnimationWithPush(preNode, curNode, callback, isNavBar);
 
-    /* start transition animation */
-    AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
-        callback);
-    auto newPushAnimation = AnimationUtils::StartAnimation(option, [
-        this, preNode, preTitleNode, curNode, curTitleNode, preFrameSize, curFrameSize, mode]() {
-            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation push animation start");
-            float flag = CheckLanguageDirection();
-            // preNode
-            preNode->GetRenderContext()->UpdateTranslateInXY(
-                { -preFrameSize.Width() * PARENT_PAGE_OFFSET * flag, 0.0f });
-            preTitleNode->GetRenderContext()->UpdateTranslateInXY(
-                { preFrameSize.Width() * PARENT_TITLE_OFFSET * flag, 0.0f });
-            // curNode
-            curNode->GetRenderContext()->ClipWithRRect(
-                RectF(0.0f, 0.0f, curFrameSize.Width(), REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
-            curNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-            curTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-    }, option.GetOnFinishEvent());
-    if (newPushAnimation) {
-        pushAnimations_.emplace_back(newPushAnimation);
-    }
-    auto maskAnimation = MaskAnimation(preNode->GetRenderContext());
-    if (maskAnimation) {
-        pushAnimations_.emplace_back(maskAnimation);
-    }
-
-    // title opacity
-    auto titleOpacityAnimation = TitleOpacityAnimation(curTitleNode, false);
-    if (titleOpacityAnimation) {
-        pushAnimations_.emplace_back(titleOpacityAnimation);
-    }
-    // backIcon opacity
-    auto backIcon = AceType::DynamicCast<FrameNode>(curTitleNode->GetBackButton());
-    auto backButtonAnimation = BackButtonAnimation(backIcon, true);
-    if (backButtonAnimation) {
-        pushAnimations_.emplace_back(backButtonAnimation);
-    }
     isOnAnimation_ = true;
     if (AceChecker::IsPerformanceCheckEnabled()) {
         int64_t startTime = GetSysTimestamp();
