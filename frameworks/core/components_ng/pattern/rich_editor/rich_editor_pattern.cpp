@@ -6270,7 +6270,7 @@ void RichEditorPattern::HandleOnCopyStyledString()
     subSpanString->EncodeTlv(tlvData);
     clipboard_->AddSpanStringRecord(pasteData, tlvData);
     clipboard_->AddTextRecord(pasteData, subSpanString->GetString());
-    clipboard_->SetData(pasteData, copyOption_);
+    clipboard_->SetData(pasteData, HandleOnCopyOptions());
 }
 
 void RichEditorPattern::OnCopyOperation(bool isUsingExternalKeyboard)
@@ -6310,7 +6310,7 @@ void RichEditorPattern::OnCopyOperation(bool isUsingExternalKeyboard)
     for (auto resultObj = copyResultObjects.rbegin(); resultObj != copyResultObjects.rend(); ++resultObj) {
         resultProcessor(*resultObj);
     }
-    clipboard_->SetData(pasteData, copyOption_);
+    clipboard_->SetData(pasteData, HandleOnCopyOptions());
 }
 
 void RichEditorPattern::HandleOnCopy(bool isUsingExternalKeyboard)
@@ -6318,7 +6318,7 @@ void RichEditorPattern::HandleOnCopy(bool isUsingExternalKeyboard)
     CHECK_NULL_VOID(clipboard_);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "isUsingExternalKeyboard=%{public}d, copyOption=%{public}d",
         isUsingExternalKeyboard, copyOption_);
-    if (copyOption_ == CopyOptions::None) {
+    if (HandleOnCopyOptions() == CopyOptions::None) {
         return;
     }
     auto host = GetHost();
