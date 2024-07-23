@@ -2783,15 +2783,18 @@ void ViewAbstract::ClearWidthOrHeight(FrameNode *frameNode, bool isWidth)
     layoutProperty->ClearUserDefinedIdealSize(isWidth, !isWidth);
 }
 
-void ViewAbstract::SetPosition(FrameNode *frameNode, const OffsetT<Dimension>& value)
+void ViewAbstract::SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value)
 {
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, PositionEdges, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Position, value, frameNode);
 }
 
 void ViewAbstract::SetPositionEdges(FrameNode* frameNode, const EdgesParam& value)
 {
-    ACE_RESET_RENDER_CONTEXT(RenderContext, Position);
-    ACE_UPDATE_RENDER_CONTEXT(PositionEdges, value);
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Position, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(PositionEdges, value, frameNode);
 }
 
 void ViewAbstract::ResetPosition(FrameNode* frameNode)
@@ -3121,13 +3124,15 @@ void ViewAbstract::SetDisplayIndex(FrameNode* frameNode, int32_t value)
 void ViewAbstract::SetOffset(FrameNode* frameNode, const OffsetT<Dimension>& value)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, OffsetEdges, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Offset, value, frameNode);
 }
 
 void ViewAbstract::SetOffsetEdges(FrameNode* frameNode, const EdgesParam& value)
 {
-    ACE_RESET_RENDER_CONTEXT(RenderContext, Offset);
-    ACE_UPDATE_RENDER_CONTEXT(OffsetEdges, value);
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Offset, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OffsetEdges, value, frameNode);
 }
 
 void ViewAbstract::MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& value)
