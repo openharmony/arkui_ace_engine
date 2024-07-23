@@ -113,7 +113,7 @@ public:
         return lastTime_;
     }
 
-    bool GetFoldStatusDelayTask() const
+    bool HasFoldStatusDelayTask() const
     {
         return foldStatusDelayTask_;
     }

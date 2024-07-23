@@ -291,7 +291,7 @@ bool FolderStackLayoutAlgorithm::IsIntoFolderStack(
 {
     auto pattern = layoutWrapper->GetHostNode()->GetPattern<FolderStackPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    CHECK_NULL_RETURN(!pattern->GetFoldStatusDelayTask(), false);
+    CHECK_NULL_RETURN(!pattern->HasFoldStatusDelayTask(), false);
     auto displayInfo = pattern->GetDisplayInfo();
     if (!displayInfo) {
         auto container = Container::Current();
