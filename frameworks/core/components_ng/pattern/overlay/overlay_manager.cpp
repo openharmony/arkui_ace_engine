@@ -4361,7 +4361,7 @@ void OverlayManager::SaveSheePageNode(
     int32_t targetId = targetNode->GetId();
     auto root = AceType::DynamicCast<FrameNode>(rootNodeWeak_.Upgrade());
     CHECK_NULL_VOID(root);
-    bool isValidTarget = (root->GetId() != targetId);
+    bool isValidTarget = CheckTargetIdIsValid(targetId);
     SheetKey sheetKey;
     if (isStartByUIContext) {
         sheetKey = SheetKey(isValidTarget, sheetContentNode->GetId(), targetId);
@@ -4376,6 +4376,17 @@ void OverlayManager::SaveSheePageNode(
     modalList_.emplace_back(WeakClaim(RawPtr(sheetPageNode)));
     SaveLastModalNode();
     sheetNodePattern->SetOverlay(AceType::WeakClaim(this));
+}
+
+bool OverlayManager::CheckTargetIdIsValid(int32_t targetId)
+{
+    if (targetId < 0) {
+        return false;
+    }
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto rootId = rootNode->GetId();
+    return rootId != targetId;
 }
 
 RefPtr<FrameNode> OverlayManager::CreateSheetMask(const RefPtr<FrameNode>& sheetPageNode,
@@ -4411,7 +4422,7 @@ bool OverlayManager::CreateSheetKey(const RefPtr<NG::FrameNode>& sheetContentNod
     SheetKey& sheetKey)
 {
     CHECK_NULL_RETURN(sheetContentNode, false);
-    bool isTargetIdValid = (targetId >= 0);
+    bool isTargetIdValid = CheckTargetIdIsValid(targetId);
     if (!isTargetIdValid) {
         auto rootNode = rootNodeWeak_.Upgrade();
         CHECK_NULL_RETURN(rootNode, false);
