@@ -192,7 +192,7 @@ private:
     RefPtr<ImageStateManager> stateManager_;
     RefPtr<ImageObject> imageObj_;
     RefPtr<CanvasImage> canvasImage_;
-    std::string imageDataCopy_;
+    std::string downloadedUrlData_;
 
     // [LoadNotifier] contains 3 tasks to notify whom uses [ImageLoadingContext] of loading results
     LoadNotifier notifiers_;
