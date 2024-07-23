@@ -2579,7 +2579,7 @@ void WebPattern::InitInOfflineMode()
     Offset offset = Offset(0, 0);
     TAG_LOGD(AceLogTag::ACE_WEB, "InitInOfflineMode drawsize_ : %{public}s", drawSize_.ToString().c_str());
     delegate_->SetBoundsOrResize(drawSize, offset);
-    
+
     if (!isUrlLoaded_) {
         isUrlLoaded_ = true;
         if (webSrc_) {
@@ -2653,6 +2653,7 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
     }
     if (height - GetCoordinatePoint()->GetY() < keyboard) {
         TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow Complete occlusion");
+        isVirtualKeyBoardShow_ = VkState::VK_SHOW;
         return true;
     }
     if (!delegate_->NeedSoftKeyboard()) {
@@ -2710,10 +2711,8 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
     UpdateOnFocusTextField(!NearZero(keyboard));
     if (NearZero(keyboard)) {
         return ProcessVirtualKeyBoardHide(width, height, keyboardSafeAreaEnabled);
-    } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW || lastKeyboardHeight_ != keyboard) {
-        return ProcessVirtualKeyBoardShow(width, height, keyboard, keyboardSafeAreaEnabled);
     }
-    return !keyboardSafeAreaEnabled;
+    return ProcessVirtualKeyBoardShow(width, height, keyboard, keyboardSafeAreaEnabled);
 }
 
 void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate)
