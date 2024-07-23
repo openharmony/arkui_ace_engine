@@ -154,7 +154,7 @@ struct ContentItemStruct {
   @State primaryTextColors: ResourceColor = $r('sys.color.composeListItem_normal_left_text_color');
   @Prop itemHeight: number | null = null;
   @State iconMagnitude: Length | null = null;
-  @State iconHue: ResourceColor | null = null;
+  @State iconColor: ResourceColor | null = null;
   @State secondaryTextColors: ResourceColor = $r('sys.color.font_secondary');
   @State secondaryThirdTextSize: string | number | Resource = $r('sys.float.ohos_id_text_size_body2');
   @State descriptionColors: ResourceColor = $r('sys.color.font_tertiary');
@@ -176,23 +176,23 @@ struct ContentItemStruct {
     this.descriptionColors = this.isFocus ? $r('sys.color.composeListItem_focused_left_description_text_color') : $r('sys.color.composeListItem_normal_left_description_text_color');
   }
 
-  getIconColor() {
+  initIconColor() {
     switch (this.iconStyle) {
       case IconType.BADGE:
-        this.iconHue = $r('sys.color.composeListItem_badge_color');
+        this.iconColor = $r('sys.color.composeListItem_badge_color');
         break;
       case IconType.SYSTEM_ICON:
-        this.iconHue = $r('sys.color.composeListItem_normal_icon_color');
+        this.iconColor = $r('sys.color.composeListItem_normal_icon_color');
         break;
       default:
-        this.iconHue = null;
+        this.iconColor = null;
         break;
     }
   }
 
   aboutToAppear() {
     this.onPropChange();
-    this.getIconColor();
+    this.initIconColor();
   }
 
   @Builder
@@ -206,7 +206,7 @@ struct ContentItemStruct {
           .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
           .focusable(FOCUSABLE)
           .draggable(false)
-          .fillColor(this.iconHue || $r('sys.color.icon_primary'))
+          .fillColor(this.iconColor || $r('sys.color.icon_primary'))
           .attributeModifier(this.iconImageModifier)
           .flexShrink(0);
       } else {
@@ -911,10 +911,10 @@ export struct ComposeListItem {
 
   setContainerPadding(top: Resource, bottom: Resource) {
     this.containerPadding = {
-      top: top,
-      right: $r('sys.float.composeListItem_padding_right') || null,
-      bottom: bottom,
-      left: $r('sys.float.composeListItem_padding_left') || null,
+      top: LengthMetrics.vp(LengthMetrics.resource(top).value),
+      end: LengthMetrics.vp(LengthMetrics.resource($r('sys.float.composeListItem_padding_right') || null).value),
+      bottom: LengthMetrics.vp(LengthMetrics.resource(bottom).value),
+      start: LengthMetrics.vp(LengthMetrics.resource($r('sys.float.composeListItem_padding_left') || null).value),
     };
   }
 
@@ -1133,8 +1133,8 @@ export struct ComposeListItem {
       }).padding(this.containerPadding)
     }
     .padding({
-      left: STACK_PADDING,
-      right: STACK_PADDING
+      start: this.getComposeItemLeftPadding(),
+      end: this.getComposeItemRightPadding()
     });
   }
 }
