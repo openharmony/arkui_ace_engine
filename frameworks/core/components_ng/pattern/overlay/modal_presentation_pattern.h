@@ -32,7 +32,8 @@ enum class ContentCoverDismissReason {
     CLOSE_BUTTON,
 };
 
-class ACE_EXPORT ModalPresentationPattern : public PopupBasePattern, public FocusView, public AutoFillTriggerStateHolder {
+class ACE_EXPORT ModalPresentationPattern : public PopupBasePattern,
+    public FocusView, public AutoFillTriggerStateHolder {
     DECLARE_ACE_TYPE(ModalPresentationPattern, PopupBasePattern, FocusView, AutoFillTriggerStateHolder);
 
 public:

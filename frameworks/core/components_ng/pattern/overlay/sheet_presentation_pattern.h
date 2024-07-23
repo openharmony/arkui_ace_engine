@@ -43,7 +43,8 @@ enum class BindSheetDismissReason {
     SLIDE_DOWN,
 };
 class ACE_EXPORT SheetPresentationPattern :
-    public LinearLayoutPattern, public PopupBasePattern, public FocusView, public NestableScrollContainer, public AutoFillTriggerStateHolder{
+    public LinearLayoutPattern, public PopupBasePattern, public FocusView,
+        public NestableScrollContainer, public AutoFillTriggerStateHolder{
     DECLARE_ACE_TYPE(SheetPresentationPattern,
         LinearLayoutPattern, PopupBasePattern, FocusView, NestableScrollContainer, AutoFillTriggerStateHolder);
 

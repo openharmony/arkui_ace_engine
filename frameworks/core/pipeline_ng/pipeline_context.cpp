@@ -2246,7 +2246,7 @@ bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<Vie
             pageNode = stageManager_->GetLastPage();
             dumpNode = pageNode;
         }
-    } else { 
+    } else {
         pageNode = node->GetPageNode();
         dumpNode = node;
     }
