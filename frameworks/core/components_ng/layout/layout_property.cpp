@@ -956,6 +956,9 @@ void LayoutProperty::UpdatePadding(const PaddingProperty& value)
     if (padding_->UpdateWithCheck(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
     }
+    if (padding_->UpdateStartAndEnd(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+    }
 }
 
 void LayoutProperty::UpdateSafeAreaPadding(const PaddingProperty& value)
