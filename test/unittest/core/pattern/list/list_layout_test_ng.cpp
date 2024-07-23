@@ -22,10 +22,10 @@ namespace {} // namespace
 class ListLayoutTestNg : public ListTestNg {
 public:
     void UpdateContentModifier();
-    RefPtr<ListPaintMethod> UpdateOverlayModifier();
+    RefPtr<ListPaintMethod> UpdateOverlayModifier(RefPtr<PaintWrapper> paintWrapper);
     void UpdateDividerMap();
-    void onDraw(RefPtr<PaintWrapper> paintWrapper, int32_t lineNumber, bool isClip = false);
-    void GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t lineNumber);
+    void PaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t expectLineNumber, bool isClip = false);
+    void GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t expectLineNumber);
 };
 
 void ListLayoutTestNg::UpdateContentModifier()
@@ -36,13 +36,11 @@ void ListLayoutTestNg::UpdateContentModifier()
     listPaint->UpdateContentModifier(AceType::RawPtr(paintWrapper));
 }
 
-RefPtr<ListPaintMethod> ListLayoutTestNg::UpdateOverlayModifier()
+RefPtr<ListPaintMethod> ListLayoutTestNg::UpdateOverlayModifier(RefPtr<PaintWrapper> paintWrapper)
 {
-    RefPtr<NodePaintMethod> paint = pattern_->CreateNodePaintMethod();
-    RefPtr<ListPaintMethod> listPaint = AceType::DynamicCast<ListPaintMethod>(paint);
-    auto paintWrapper = frameNode_->CreatePaintWrapper();
-    listPaint->UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
-    return listPaint;
+    auto paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
+    paintMethod->UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    return paintMethod;
 }
 
 void ListLayoutTestNg::UpdateDividerMap()
@@ -55,7 +53,7 @@ void ListLayoutTestNg::UpdateDividerMap()
     UpdateContentModifier();
 }
 
-void ListLayoutTestNg::onDraw(RefPtr<PaintWrapper> paintWrapper, int32_t lineNumber, bool isClip)
+void ListLayoutTestNg::PaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t expectLineNumber, bool isClip)
 {
     auto paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
     auto modifier = paintMethod->GetContentModifier(nullptr);
@@ -66,13 +64,13 @@ void ListLayoutTestNg::onDraw(RefPtr<PaintWrapper> paintWrapper, int32_t lineNum
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawLine(_, _)).Times(lineNumber); // DrawLine
+    EXPECT_CALL(canvas, DrawLine(_, _)).Times(expectLineNumber); // DrawLine
     DrawingContext drawingContext = { canvas, LIST_WIDTH, LIST_HEIGHT };
     paintMethod->UpdateContentModifier(AceType::RawPtr(paintWrapper));
     listContentModifier->onDraw(drawingContext);
 }
 
-void ListLayoutTestNg::GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t lineNumber)
+void ListLayoutTestNg::GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t expectLineNumber)
 {
     auto paintMethod = AceType::DynamicCast<ListItemGroupPaintMethod>(paintWrapper->nodePaintImpl_);
     Testing::MockCanvas canvas;
@@ -80,7 +78,7 @@ void ListLayoutTestNg::GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int3
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawLine(_, _)).Times(lineNumber); // DrawLine
+    EXPECT_CALL(canvas, DrawLine(_, _)).Times(expectLineNumber); // DrawLine
     paintMethod->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
 }
 
@@ -467,7 +465,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
  * @tc.desc: Test top content offset and bottom end offset
  * @tc.type: FUNC
  */
-HWTEST_F(ListLayoutTestNg, DISABLED_ContentOffset006, TestSize.Level1)
+HWTEST_F(ListLayoutTestNg, ContentOffset006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create List with ScrollSnapAlign START
@@ -496,241 +494,88 @@ HWTEST_F(ListLayoutTestNg, DISABLED_ContentOffset006, TestSize.Level1)
      * @tc.steps: step3. change scroll snap to END
      * @tc.expected: item bottom snap to contentEndOffset.
      */
-    float firstEndSnap = -contentEndOffset; // LIST_HEIGHT % ITEM_HEIGHT - contentEndOffset;
-    ScrollToEdge(ScrollEdgeType::SCROLL_TOP);
-    layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::END);
+    ClearOldNodes();
+    model = CreateList();
+    model.SetContentStartOffset(contentStartOffset);
+    model.SetContentEndOffset(contentEndOffset);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
+    CreateListItems(itemNumber);
+    CreateDone(frameNode_);
     ScrollSnap(-40, 0);
-    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), firstEndSnap);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), -100);
     ScrollSnap(-110, 0);
-    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT + firstEndSnap);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), -100);
 }
 
 /**
  * @tc.name: PaintMethod001
- * @tc.desc: Test List paint method about UpdateContentModifier
+ * @tc.desc: Test paint method when has no ListItem in List and in ListItemGroup
  * @tc.type: FUNC
  */
 HWTEST_F(ListLayoutTestNg, PaintMethod001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Not set divider
-     * @tc.expected: modifier dividerInfo_ has no value.
+     * @tc.steps: step1. Has no ListItem
+     * @tc.expected: UnScrollable, not need paint scrollBar, not DrawLine
      */
-    CreateList();
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    UpdateContentModifier();
-    auto dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
-    auto lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
-    auto dividerMap = lda->GetDividerMap();
-    EXPECT_TRUE(dividerMap.empty());
-
-    /**
-     * @tc.steps: step2. Set chainAnimation and divider
-     * @tc.expected: modifier dividerInfo_ has no value.
-     */
-    V2::ItemDivider itemDivider = ITEM_DIVIDER;
-    ClearOldNodes();
     ListModelNG model = CreateList();
-    model.SetDivider(itemDivider);
-    model.SetChainAnimation(true);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    UpdateContentModifier();
-    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
-    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
-    dividerMap = lda->GetDividerMap();
-    EXPECT_TRUE(dividerMap.empty());
+    model.SetScrollBar(DisplayMode::ON);
+    CreateListItemGroup(V2::ListItemGroupStyle::NONE); // no ListItem in ListItemGroup
+    auto paintWrapper = CreateDone(frameNode_);
 
     /**
-     * @tc.steps: step3. Set divider strokeWidth less than zero
-     * @tc.expected: modifier dividerInfo_ has no value.
+     * @tc.steps: step2. UnScrollable List
+     * @tc.expected: Not need paint scrollBar
      */
-    itemDivider = ITEM_DIVIDER;
-    itemDivider.strokeWidth = Dimension(-1);
-    ClearOldNodes();
-    model = CreateList();
-    model.SetDivider(itemDivider);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    UpdateContentModifier();
-    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
-    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
-    dividerMap = lda->GetDividerMap();
-    EXPECT_TRUE(dividerMap.empty());
+    auto paintMethod = UpdateOverlayModifier(paintWrapper);
+    auto scrollBarOverlayModifier = paintMethod->scrollBarOverlayModifier_.Upgrade();
+    auto scrollBar = paintMethod->scrollBar_.Upgrade();
+    EXPECT_NE(scrollBar, nullptr);
+    EXPECT_FALSE(scrollBar->NeedPaint());
+    PaintDivider(paintWrapper, 0);
 
     /**
-     * @tc.steps: step4. Set divider strokeWidth Unit as PERCENT
-     * @tc.expected: modifier dividerInfo_ has no value.
+     * @tc.steps: step3. No ListItem in ListItemGroup
+     * @tc.expected: Not DrawLine
      */
-    itemDivider = ITEM_DIVIDER;
-    itemDivider.strokeWidth = Dimension(STROKE_WIDTH, DimensionUnit::PERCENT);
-    ClearOldNodes();
-    model = CreateList();
-    model.SetDivider(itemDivider);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    UpdateContentModifier();
-    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
-    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
-    dividerMap = lda->GetDividerMap();
-    EXPECT_TRUE(dividerMap.empty());
-
-    /**
-     * @tc.steps: step5. Not create item
-     * @tc.expected: modifier dividerInfo_ has no value.
-     */
-    itemDivider = ITEM_DIVIDER;
-    ClearOldNodes();
-    model = CreateList();
-    model.SetDivider(itemDivider);
-    CreateDone(frameNode_);
-    UpdateContentModifier();
-    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
-    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
-    dividerMap = lda->GetDividerMap();
-    EXPECT_TRUE(dividerMap.empty());
-
-    /**
-     * @tc.steps: step6. Set divider strokeWidth greater than contentSize(LIST_HEIGHT)
-     * @tc.expected: modifier dividerInfo_ has no value.
-     */
-    itemDivider = ITEM_DIVIDER;
-    itemDivider.strokeWidth = Dimension(LIST_HEIGHT + 1);
-    ClearOldNodes();
-    model = CreateList();
-    model.SetDivider(itemDivider);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    UpdateContentModifier();
-    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
-    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
-    dividerMap = lda->GetDividerMap();
-    EXPECT_TRUE(dividerMap.empty());
-
-    /**
-     * @tc.steps: step7. Set divider startMargin + endMargin equal to crossSize(LIST_WIDTH)
-     * @tc.expected: modifier dividerInfo_ has no value.
-     */
-    itemDivider = ITEM_DIVIDER;
-    itemDivider.startMargin = Dimension(LIST_WIDTH / 2);
-    itemDivider.endMargin = Dimension(LIST_WIDTH / 2);
-    ClearOldNodes();
-    model = CreateList();
-    model.SetDivider(itemDivider);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    UpdateContentModifier();
-    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
-    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
-    dividerMap = lda->GetDividerMap();
-    EXPECT_TRUE(dividerMap.empty());
-
-    /**
-     * @tc.steps: step8. Set divider startMargin + endMargin greater than crossSize(LIST_WIDTH)
-     * @tc.expected: modifier dividerInfo_ has value and reset margin to zero.
-     */
-    itemDivider = ITEM_DIVIDER;
-    itemDivider.startMargin = Dimension(LIST_WIDTH / 2);
-    itemDivider.endMargin = Dimension(LIST_WIDTH / 2 + 1);
-    ClearOldNodes();
-    model = CreateList();
-    model.SetDivider(itemDivider);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    auto renderContext = frameNode_->GetRenderContext();
-    renderContext->UpdatePaintRect(frameNode_->GetGeometryNode()->GetFrameRect());
-    UpdateContentModifier();
-    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
-    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
-    dividerMap = lda->GetDividerMap();
-    EXPECT_FALSE(dividerMap.empty());
-    for (auto child : dividerMap) {
-        EXPECT_EQ(child.second.offset.GetX(), 0.f);
-    }
-
-    /**
-     * @tc.steps: step9. Set divider startMargin + endMargin less than crossSize(LIST_WIDTH)
-     * @tc.expected: modifier dividerInfo_ has value and margin not change
-     */
-    itemDivider = ITEM_DIVIDER;
-    ClearOldNodes();
-    model = CreateList();
-    model.SetDivider(itemDivider);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    renderContext = frameNode_->GetRenderContext();
-    renderContext->UpdatePaintRect(frameNode_->GetGeometryNode()->GetFrameRect());
-    UpdateContentModifier();
-    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
-    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
-    dividerMap = lda->GetDividerMap();
-    EXPECT_FALSE(dividerMap.empty());
-    for (auto child : dividerMap) {
-        EXPECT_EQ(child.second.offset.GetX(), ITEM_DIVIDER.startMargin.ConvertToPx());
-    }
+    auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
+    auto groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    GroupPaintDivider(groupPaintWrapper, 0);
 }
 
 /**
  * @tc.name: PaintMethod002
- * @tc.desc: Test List paint method about GetForegroundDrawFunction/PaintEdgeEffect
+ * @tc.desc: Test List paint method about UpdateOverlayModifier(scroll bar)
  * @tc.type: FUNC
  */
 HWTEST_F(ListLayoutTestNg, PaintMethod002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Set EdgeEffect::FADE
-     */
-    ListModelNG model = CreateList();
-    model.SetEdgeEffect(EdgeEffect::FADE, false);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    RefPtr<NodePaintMethod> paint = pattern_->CreateNodePaintMethod();
-    RefPtr<ListPaintMethod> listPaint = AceType::DynamicCast<ListPaintMethod>(paint);
-    auto paintWrapper = frameNode_->CreatePaintWrapper();
-    Testing::MockCanvas canvas;
-    EXPECT_CALL(canvas, Save).Times(AnyNumber());
-    EXPECT_CALL(canvas, Translate).Times(AnyNumber());
-    EXPECT_CALL(canvas, Restore).Times(AnyNumber());
-    listPaint->GetForegroundDrawFunction(AceType::RawPtr(paintWrapper));
-    listPaint->PaintEdgeEffect(AceType::RawPtr(paintWrapper), canvas);
-    SUCCEED();
-}
-
-/**
- * @tc.name: PaintMethod003
- * @tc.desc: Test List paint method about UpdateOverlayModifier
- * @tc.type: FUNC
- */
-HWTEST_F(ListLayoutTestNg, PaintMethod003, TestSize.Level1)
-{
-    /**
      * @tc.steps: step1. Set DisplayMode ON
-     * @tc.expected: The displayMode is ON, has scrollbar and on the right
+     * @tc.expected: Has scrollbar and on the right
      */
     ListModelNG model = CreateList();
     model.SetScrollBar(DisplayMode::ON);
     CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    RefPtr<ListPaintMethod> paint = UpdateOverlayModifier();
-    auto scrollBarOverlayModifier = paint->scrollBarOverlayModifier_.Upgrade();
-    auto scrollBar = paint->scrollBar_.Upgrade();
-    ASSERT_NE(scrollBar, nullptr);
-    EXPECT_EQ(scrollBar->displayMode_, DisplayMode::ON);
-    EXPECT_TRUE(scrollBar->NeedPaint());
+    auto paintWrapper = CreateDone(frameNode_);
+    RefPtr<ListPaintMethod> paintMethod = UpdateOverlayModifier(paintWrapper);
+    auto scrollBarOverlayModifier = paintMethod->scrollBarOverlayModifier_.Upgrade();
+    auto scrollBar = paintMethod->scrollBar_.Upgrade();
     EXPECT_EQ(scrollBarOverlayModifier->positionMode_, PositionMode::RIGHT);
+    EXPECT_TRUE(scrollBar->NeedPaint());
 
     /**
-     * @tc.steps: step2. Update axis
+     * @tc.steps: step2. Change axis to HORIZONTAL
      * @tc.expected: The scrollbar and on the bottom
      */
-    layoutProperty_->UpdateListDirection(Axis::HORIZONTAL);
-    pattern_->OnModifyDone();
-    FlushLayoutTask(frameNode_);
-    paint = UpdateOverlayModifier();
-    scrollBarOverlayModifier = paint->scrollBarOverlayModifier_.Upgrade();
-    scrollBar = paint->scrollBar_.Upgrade();
-    EXPECT_NE(scrollBar, nullptr);
+    model = CreateList();
+    model.SetScrollBar(DisplayMode::ON);
+    model.SetListDirection(Axis::HORIZONTAL);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    paintWrapper = CreateDone(frameNode_);
+    paintMethod = UpdateOverlayModifier(paintWrapper);
+    scrollBarOverlayModifier = paintMethod->scrollBarOverlayModifier_.Upgrade();
+    scrollBar = paintMethod->scrollBar_.Upgrade();
     EXPECT_TRUE(scrollBar->NeedPaint());
     EXPECT_EQ(scrollBarOverlayModifier->positionMode_, PositionMode::BOTTOM);
 
@@ -741,84 +586,47 @@ HWTEST_F(ListLayoutTestNg, PaintMethod003, TestSize.Level1)
     model = CreateList();
     model.SetScrollBar(DisplayMode::OFF);
     CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    paint = UpdateOverlayModifier();
-    scrollBarOverlayModifier = paint->scrollBarOverlayModifier_.Upgrade();
-    scrollBar = paint->scrollBar_.Upgrade();
+    paintWrapper = CreateDone(frameNode_);
+    paintMethod = UpdateOverlayModifier(paintWrapper);
+    scrollBar = paintMethod->scrollBar_.Upgrade();
     EXPECT_EQ(scrollBar, nullptr);
-
-    /**
-     * @tc.steps: step4. Set DisplayMode::ON
-     * @tc.expected: Has scrollbar and on the right
-     */
-    ClearOldNodes();
-    model = CreateList();
-    model.SetScrollBar(DisplayMode::ON);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    paint = UpdateOverlayModifier();
-    scrollBarOverlayModifier = paint->scrollBarOverlayModifier_.Upgrade();
-    scrollBar = paint->scrollBar_.Upgrade();
-    EXPECT_NE(scrollBar, nullptr);
-    EXPECT_TRUE(scrollBar->NeedPaint());
-    EXPECT_EQ(scrollBarOverlayModifier->positionMode_, PositionMode::RIGHT);
-
-    /**
-     * @tc.steps: step5. Has no item
-     * @tc.expected: UnScrollable, has no scrollbar
-     */
-    ClearOldNodes();
-    model = CreateList();
-    model.SetScrollBar(DisplayMode::ON);
-    CreateDone(frameNode_);
-    paint = UpdateOverlayModifier();
-    scrollBarOverlayModifier = paint->scrollBarOverlayModifier_.Upgrade();
-    scrollBar = paint->scrollBar_.Upgrade();
-    EXPECT_NE(scrollBar, nullptr);
-    EXPECT_FALSE(scrollBar->NeedPaint());
-
-    /**
-     * @tc.steps: step6. Set HORIZONTAL direction
-     * @tc.expected: Has scrollbar and on the bottom
-     */
-    ClearOldNodes();
-    model = CreateList();
-    model.SetListDirection(Axis::HORIZONTAL);
-    model.SetScrollBar(DisplayMode::ON);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    paint = UpdateOverlayModifier();
-    scrollBarOverlayModifier = paint->scrollBarOverlayModifier_.Upgrade();
-    scrollBar = paint->scrollBar_.Upgrade();
-    EXPECT_NE(scrollBar, nullptr);
-    EXPECT_TRUE(scrollBar->NeedPaint());
-    EXPECT_EQ(scrollBarOverlayModifier->positionMode_, PositionMode::BOTTOM);
 }
 
 /**
- * @tc.name: PaintMethod004
- * @tc.desc: Test List paint method about PaintDivider
+ * @tc.name: PaintMethod003
+ * @tc.desc: Test List paint method about PaintDivider in diff Layout
  * @tc.type: FUNC
  */
-HWTEST_F(ListLayoutTestNg, PaintMethod004, TestSize.Level1)
+HWTEST_F(ListLayoutTestNg, PaintMethod003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Not set divider
      * @tc.expected: Not DrawLine
      */
     ListModelNG model = CreateList();
-    CreateGroupWithSetting(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
-    CreateListItems(TOTAL_ITEM_NUMBER);
+    // Group
+    ListItemGroupModelNG groupModel = CreateListItemGroup(V2::ListItemGroupStyle::NONE);
+    CreateListItems(2);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    // ListItems
+    CreateListItems(2);
     auto paintWrapper = CreateDone(frameNode_);
-    onDraw(paintWrapper, 0);
+    auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
+    auto groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    PaintDivider(paintWrapper, 0);
+    GroupPaintDivider(groupPaintWrapper, 0);
 
     /**
      * @tc.steps: step2. Set divider
      * @tc.expected: DrawLine, call times depends on the divider number in view
      */
     model.SetDivider(AceType::RawPtr(frameNode_), ITEM_DIVIDER);
+    groupModel.SetDivider(AceType::RawPtr(groupFrameNode), ITEM_DIVIDER);
     paintWrapper = FlushLayoutTask(frameNode_);
-    onDraw(paintWrapper, 2);
+    groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    PaintDivider(paintWrapper, 2);
+    GroupPaintDivider(groupPaintWrapper, 1);
 
     /**
      * @tc.steps: step3. Set lanes>1
@@ -826,7 +634,9 @@ HWTEST_F(ListLayoutTestNg, PaintMethod004, TestSize.Level1)
      */
     model.SetLanes(AceType::RawPtr(frameNode_), 2);
     paintWrapper = FlushLayoutTask(frameNode_);
-    onDraw(paintWrapper, 2);
+    groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    PaintDivider(paintWrapper, 2);
+    GroupPaintDivider(groupPaintWrapper, 0);
 
     /**
      * @tc.steps: step4. Set padding
@@ -834,83 +644,100 @@ HWTEST_F(ListLayoutTestNg, PaintMethod004, TestSize.Level1)
      */
     ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(10.f));
     paintWrapper = FlushLayoutTask(frameNode_);
-    onDraw(paintWrapper, 2, true);
-
-    /**
-     * @tc.steps: step5. Set lanes>1 and lastIsItemGroup
-     * @tc.expected: DrawLine, call times depends on the divider number in view
-     */
-    ClearOldNodes();
-    model = CreateList();
-    model.SetLanes(2);
-    model.SetDivider(ITEM_DIVIDER);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateGroupWithSetting(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
-    paintWrapper = CreateDone(frameNode_);
-    onDraw(paintWrapper, 6);
+    groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    PaintDivider(paintWrapper, 2, true);
+    GroupPaintDivider(groupPaintWrapper, 0);
 }
 
 /**
- * @tc.name: PaintMethod005
- * @tc.desc: Test ListItemGroup paint method about PaintDivider
+ * @tc.name: PaintMethod004
+ * @tc.desc: Test ListItemGroup paint method about PaintDivider with diff args
  * @tc.type: FUNC
  */
-HWTEST_F(ListLayoutTestNg, PaintMethod005, TestSize.Level1)
+HWTEST_F(ListLayoutTestNg, PaintMethod004, TestSize.Level1)
 {
-    CreateList();
-    CreateGroupWithSetting(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
-    CreateDone(frameNode_);
+    auto itemDivider = ITEM_DIVIDER;
+    ListModelNG model = CreateList();
+    model.SetDivider(itemDivider);
+    // Group
+    ListItemGroupModelNG groupModel = CreateListItemGroup(V2::ListItemGroupStyle::NONE);
+    groupModel.SetDivider(itemDivider);
+    CreateListItems(2);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    // ListItems
+    CreateListItems(2);
+    auto paintWrapper = CreateDone(frameNode_);
     auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
-    auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
-    auto paintWrapper = FlushLayoutTask(groupFrameNode);
-    auto groupPaint = AceType::DynamicCast<ListItemGroupPaintMethod>(paintWrapper->nodePaintImpl_);
+    auto groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    auto groupPaint = AceType::DynamicCast<ListItemGroupPaintMethod>(groupPaintWrapper->nodePaintImpl_);
 
     /**
      * @tc.steps: step1. strokeWidth > 0
-     * @tc.expected: DrawLine
+     * @tc.expected: DrawLine, call times depends on the divider number in view
      */
-    groupPaint->divider_.strokeWidth = Dimension(STROKE_WIDTH);
-    GroupPaintDivider(paintWrapper, 1);
+    PaintDivider(paintWrapper, 2);
+    GroupPaintDivider(groupPaintWrapper, 1);
 
     /**
      * @tc.steps: step2. strokeWidth > 0, but PERCENT
      * @tc.expected: Not DrawLine
      */
-    groupPaint->divider_.strokeWidth = Dimension(STROKE_WIDTH, DimensionUnit::PERCENT);
-    GroupPaintDivider(paintWrapper, 0);
+    itemDivider.strokeWidth = Dimension(STROKE_WIDTH, DimensionUnit::PERCENT);
+    model.SetDivider(AceType::RawPtr(frameNode_), itemDivider);
+    groupModel.SetDivider(AceType::RawPtr(groupFrameNode), itemDivider);
+    paintWrapper = FlushLayoutTask(frameNode_);
+    groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    PaintDivider(paintWrapper, 0);
+    GroupPaintDivider(groupPaintWrapper, 0);
 
     /**
      * @tc.steps: step3. strokeWidth < 0
      * @tc.expected: Not DrawLine
      */
-    groupPaint->divider_.strokeWidth = Dimension(-1);
-    GroupPaintDivider(paintWrapper, 0);
+    itemDivider.strokeWidth = Dimension(-1);
+    model.SetDivider(AceType::RawPtr(frameNode_), itemDivider);
+    groupModel.SetDivider(AceType::RawPtr(groupFrameNode), itemDivider);
+    paintWrapper = FlushLayoutTask(frameNode_);
+    groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    PaintDivider(paintWrapper, 0);
+    GroupPaintDivider(groupPaintWrapper, 0);
 
     /**
      * @tc.steps: step4. startMargin + endMargin == LIST_WIDTH
      * @tc.expected: Not DrawLine
      */
-    groupPaint->divider_ = ITEM_DIVIDER;
-    groupPaint->divider_.startMargin = Dimension(LIST_WIDTH / 2);
-    groupPaint->divider_.endMargin = Dimension(LIST_WIDTH / 2);
-    GroupPaintDivider(paintWrapper, 0);
+    itemDivider = ITEM_DIVIDER;
+    itemDivider.startMargin = Dimension(LIST_WIDTH / 2);
+    itemDivider.endMargin = Dimension(LIST_WIDTH / 2);
+    model.SetDivider(AceType::RawPtr(frameNode_), itemDivider);
+    groupModel.SetDivider(AceType::RawPtr(groupFrameNode), itemDivider);
+    paintWrapper = FlushLayoutTask(frameNode_);
+    groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    PaintDivider(paintWrapper, 0);
+    GroupPaintDivider(groupPaintWrapper, 0);
 
     /**
      * @tc.steps: step5. startMargin + endMargin > LIST_WIDTH
      * @tc.expected: Rest margin and DrawLine
      */
-    groupPaint->divider_ = ITEM_DIVIDER;
-    groupPaint->divider_.startMargin = Dimension(LIST_WIDTH / 2);
-    groupPaint->divider_.endMargin = Dimension(LIST_WIDTH / 2 + 1);
-    GroupPaintDivider(paintWrapper, 1);
+    itemDivider = ITEM_DIVIDER;
+    itemDivider.startMargin = Dimension(LIST_WIDTH / 2);
+    itemDivider.endMargin = Dimension(LIST_WIDTH / 2 + 1);
+    model.SetDivider(AceType::RawPtr(frameNode_), itemDivider);
+    groupModel.SetDivider(AceType::RawPtr(groupFrameNode), itemDivider);
+    paintWrapper = FlushLayoutTask(frameNode_);
+    groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    PaintDivider(paintWrapper, 2);
+    GroupPaintDivider(groupPaintWrapper, 1);
 }
 
 /**
- * @tc.name: PaintMethod006
+ * @tc.name: PaintMethod005
  * @tc.desc: Test List paint method about UpdateContentModifier
  * @tc.type: FUNC
  */
-HWTEST_F(ListLayoutTestNg, PaintMethod006, TestSize.Level1)
+HWTEST_F(ListLayoutTestNg, PaintMethod005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Set divider startMargin and endMargin normal value

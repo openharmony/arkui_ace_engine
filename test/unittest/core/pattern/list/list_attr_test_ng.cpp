@@ -1164,6 +1164,95 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AttrScrollSnapAlign008
+ * @tc.desc: Test FixPredictSnapOffsetAlignStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign008, TestSize.Level1)
+{
+    CreateSnapList(V2::ScrollSnapAlign::START);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+
+    // EdgeEffect::FADE
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::FADE, false);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+}
+
+/**
+ * @tc.name: AttrScrollSnapAlign009
+ * @tc.desc: Test FixPredictSnapOffsetAlignEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign009, TestSize.Level1)
+{
+    CreateSnapList(V2::ScrollSnapAlign::END);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+
+    // EdgeEffect::FADE
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::FADE, false);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+}
+
+/**
+ * @tc.name: AttrScrollSnapAlign010
+ * @tc.desc: Test FixPredictSnapOffsetAlignCenter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign010, TestSize.Level1)
+{
+    float defaultOffset = -(LIST_HEIGHT - DEVIATION_HEIGHT - ITEM_HEIGHT) / 2; // -140.f
+    CreateSnapList(V2::ScrollSnapAlign::CENTER);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+
+    // EdgeEffect::FADE
+    defaultOffset = -(LIST_HEIGHT - ITEM_HEIGHT) / 2;
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::FADE, false);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+}
+
+/**
  * @tc.name: AttrSLECM001
  * @tc.desc: Test property about edgeEffect/chainAnimation/multiSelectable
  * @tc.type: FUNC

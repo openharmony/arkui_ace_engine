@@ -382,7 +382,6 @@ void ListTestNg::ScrollSnap(double offset, double endVelocity)
     info.SetMainVelocity(velocity);
     info.SetMainDelta(offset);
     scrollable->HandleDragUpdate(info);
-    scrollable->isDragging_ = false;
     FlushLayoutTask(frameNode_);
 
     // Lift finger and end List sliding.
@@ -390,6 +389,7 @@ void ListTestNg::ScrollSnap(double offset, double endVelocity)
     info.SetMainDelta(0.0);
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
+    scrollable->isDragging_ = false;
     FlushLayoutTask(frameNode_);
 
     if (scrollable->IsSpringMotionRunning()) {
