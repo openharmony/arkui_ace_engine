@@ -29,6 +29,7 @@ public:
     static void Destructor(JSListScroller* scroller);
 
     void GetItemRectInGroup(const JSCallbackInfo& args);
+    void GetVisibleListContentInfo(const JSCallbackInfo& args);
     void CloseAllSwipeActions(const JSCallbackInfo& args);
     void ScrollToItemInGroup(const JSCallbackInfo& args);
 };
