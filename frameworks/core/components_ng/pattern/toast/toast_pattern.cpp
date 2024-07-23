@@ -183,7 +183,6 @@ void ToastPattern::BeforeCreateLayoutWrapper()
         TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast get pipelineContext failed");
         return;
     }
-    UpdateToastSize(toastNode);
     UpdateToastFontSize();
 
     auto textNode = DynamicCast<FrameNode>(toastNode->GetFirstChild());
