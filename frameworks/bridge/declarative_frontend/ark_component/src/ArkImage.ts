@@ -343,11 +343,19 @@ class ImageBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses>
       if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
         getUINativeModule().image.setBorderRadius(node, this.value, this.value, this.value, this.value);
       } else {
-        getUINativeModule().image.setBorderRadius(node,
-          (this.value as BorderRadiuses).topLeft,
-          (this.value as BorderRadiuses).topRight,
-          (this.value as BorderRadiuses).bottomLeft,
-          (this.value as BorderRadiuses).bottomRight);
+        let keys = Object.keys(this.value);
+        if (keys.indexOf('topStart') >= 0 || keys.indexOf('topEnd') >= 0 ||
+          keys.indexOf('bottomStart') >= 0 || keys.indexOf('bottomEnd') >= 0) {
+            let localizedBorderRadius = this.value as LocalizedBorderRadiuses;
+            getUINativeModule().image.setBorderRadius(node, localizedBorderRadius.topStart,
+              localizedBorderRadius.topEnd, localizedBorderRadius.bottomStart,
+              localizedBorderRadius.bottomEnd);
+        } else {
+          let borderRadius = this.value as BorderRadiuses;
+          getUINativeModule().image.setBorderRadius(node,
+            borderRadius.topLeft, borderRadius.topRight,
+            borderRadius.bottomLeft, borderRadius.bottomRight);
+        }
       }
     }
   }
