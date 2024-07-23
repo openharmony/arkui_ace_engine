@@ -113,7 +113,7 @@ public:
         return lastTime_;
     }
 
-    CancelableCallback<void()> GetFoldStatusDelayTask() const
+    bool GetFoldStatusDelayTask() const
     {
         return foldStatusDelayTask_;
     }
