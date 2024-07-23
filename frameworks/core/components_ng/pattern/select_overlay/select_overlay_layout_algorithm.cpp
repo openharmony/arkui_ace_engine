@@ -463,13 +463,8 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
         auto shouldAvoidBottom = GreatNotEqual(menuRect.Bottom(), rootRect.Height());
         auto menuSpace = NearEqual(upPaint.Top(), downPaint.Top()) ? spaceBetweenHandle : spaceBetweenText;
         auto offsetY = downPaint.GetY() - menuSpace - menuRect.Height();
-        auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
-        if (shouldAvoidKeyboard || shouldAvoidBottom) {
-            if (topArea > offsetY) {
-                menuOffset.SetY(downPaint.Bottom() - spaceBetweenText - menuRect.Height());
-            } else {
-                menuOffset.SetY(offsetY);
-            }
+        if ((shouldAvoidKeyboard || shouldAvoidBottom) && offsetY > 0) {
+            menuOffset.SetY(offsetY);
         }
     }
     return menuOffset;
