@@ -793,10 +793,6 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
             CHECK_NULL_VOID(overlayManager);
             overlayManager->PostDialogFinishEvent(nodeWk);
             dialogPattern->CallDialogDidDisappearCallback();
-
-            auto node = nodeWK.Upgrade();
-            CHECK_NULL_VOID(node);
-            overlayManager->FireAutoSave(node, false);
         });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
@@ -875,7 +871,6 @@ void OverlayManager::CloseDialogMatchTransition(const RefPtr<FrameNode>& node)
                 overlayManager->PostDialogFinishEvent(nodeWk);
                 auto node = nodeWk.Upgrade();
                 CHECK_NULL_VOID(node);
-                overlayManager->FireAutoSave(node, false);
                 auto dialogPattern = node->GetPattern<DialogPattern>();
                 dialogPattern->CallDialogDidDisappearCallback();
         });
@@ -1366,7 +1361,7 @@ void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode, bool i
         CHECK_NULL_VOID(layoutProperty);
         auto currentStyle = layoutProperty->GetSheetStyleValue();
         auto currentInstanceId = currentStyle.instanceId;
-        if (currentInstaceId.has_value()) {
+        if (currentInstanceId.has_value()) {
             currentId = CONTAINER_ID_DIVIDE_SIZE;
         }
     } else if (container->IsSubContainer()) {
