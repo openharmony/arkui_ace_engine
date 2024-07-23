@@ -106,8 +106,9 @@ constexpr float GREATER_WINDOW_PREVIEW_HEIGHT = 1165.0f;
 constexpr float GREATER_WINDOW_PREVIEW_HEIGHT_SECOND = 1376.0f;
 constexpr float GREATER_HALF_PREVIEW_MENUITEM_HEIGHT = 700.0f;
 constexpr float SCALE_PREVIEW_WIDTH_FORTH = 576.0f;
+constexpr float SCALE_PREVIEW_WIDTH_FORTH_SECOND = 720.0f;
 constexpr float SCALE_PREVIEW_HEIGHT = 270.0f;
-constexpr float SCALE_PREVIEW_HEIGHT_FORTH = 80.0f;
+constexpr float SCALE_PREVIEW_HEIGHT_FORTH = 100.0f;
 constexpr float SCALE_MENU_HEIGHT = 952.0f;
 constexpr float MENU_SIZE_WIDTH_SECOND = 199.0f;
 constexpr double DIP_SCALE = 1.5;
@@ -116,6 +117,7 @@ constexpr double CONST_DOUBLE_ZREO = 0.0;
 constexpr float SCALE_ANIMATION_FISRT = 0.8f;
 constexpr float SCALE_ANIMATION_SECOND = 1.0f;
 constexpr float MENU_WRAPPER_HEIGHT = 1200.0f;
+constexpr float PLACEMENT_MENU_SPACE = 12.0f;
 const std::vector<SelectParam> CREATE_VALUE = { { "content1", "icon1" }, { "content2", "" },
     { "", "icon3" }, { "", "" } };
 const std::vector<SelectParam> CREATE_VALUE_NEW = { { "content1_new", "" }, { "", "icon4_new" },
@@ -1227,7 +1229,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5700, TestSize.Level1)
     auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
     auto menuGeometryNode = menuNode->GetGeometryNode();
     ASSERT_NE(menuGeometryNode, nullptr);
-    menuGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, GREATER_WINDOW_MENU_HEIGHT));
+    menuGeometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
     auto previewNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(1));
     auto previewGeometryNode = previewNode->GetGeometryNode();
     ASSERT_NE(previewGeometryNode, nullptr);
@@ -1255,13 +1257,13 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5700, TestSize.Level1)
 
     previewGeometryNode->SetFrameSize(SizeF(GREATER_WINDOW_PREVIEW_WIDTH_SECOND, PREVIEW_HEIGHT));
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
-    auto expectPreviewOffset = OffsetF(
-        OFFSET_FORTH + (TARGET_SIZE_WIDTH - SCALE_PREVIEW_WIDTH_FORTH) / 2, PORTRAIT_TOP_SECURITY.ConvertToPx());
-    EXPECT_EQ(previewGeometryNode->GetFrameOffset(), OffsetF(39.0038, 0.0f));
-    EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(621.992, 86.3878));
-    auto expectMenuOffset = OffsetF(OFFSET_FORTH + (TARGET_SIZE_WIDTH - SCALE_PREVIEW_WIDTH_FORTH) / 2,
-        SCALE_PREVIEW_HEIGHT_FORTH + TARGET_SECURITY.ConvertToPx() + PORTRAIT_TOP_SECURITY.ConvertToPx());
-    EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(39.0038, 98.3878));
+    std::cout << previewGeometryNode->GetFrameOffset().ToString().c_str() << std::endl;
+    std::cout << previewGeometryNode->GetFrameSize().ToString().c_str() << std::endl;
+    std::cout << menuGeometryNode->GetFrameOffset().ToString().c_str() << std::endl;
+    std::cout << menuGeometryNode->GetFrameSize().ToString().c_str() << std::endl;
+    EXPECT_EQ(previewGeometryNode->GetFrameOffset(), OffsetF(0.0, 0.0));
+    EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(SCALE_PREVIEW_WIDTH_FORTH_SECOND, SCALE_PREVIEW_HEIGHT_FORTH));
+    EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(0.0, SCALE_PREVIEW_HEIGHT_FORTH + PLACEMENT_MENU_SPACE));
 }
 
 /**

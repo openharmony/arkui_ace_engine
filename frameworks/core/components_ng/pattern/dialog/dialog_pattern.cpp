@@ -159,6 +159,8 @@ void DialogPattern::OnFontConfigurationUpdate()
         auto buttonContainerNew = BuildButtons(dialogProperties_.buttons, DialogButtonDirection::VERTICAL);
         CHECK_NULL_VOID(buttonContainerNew);
         buttonContainerNew->MountToParent(contentColumn_);
+        buttonContainer_ = buttonContainerNew;
+        CheckScrollHeightIsNegative(contentColumn_, dialogProperties_);
         UpdateTextFontScale();
     }
 }
@@ -465,6 +467,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
         auto buttonContainerNew = BuildButtons(props.buttons, DialogButtonDirection::VERTICAL);
         buttonContainerNew->MountToParent(contentColumn);
         buttonContainer_ = buttonContainerNew;
+        CheckScrollHeightIsNegative(contentColumn, props);
     }
     contentColumn_ = contentColumn;
     UpdateTextFontScale();
@@ -1342,7 +1345,9 @@ bool DialogPattern::NeedsButtonDirectionChange(const std::vector<ButtonInfo>& bu
     auto props = host->GetLayoutProperty<DialogLayoutProperty>();
     CHECK_NULL_RETURN(props, false);
     auto buttonLayoutConstraint = props->GetLayoutConstraint();
+    isSuitOldMeasure_ = true;
     host->Measure(buttonLayoutConstraint);
+    isSuitOldMeasure_ = false;
     const auto& children = buttonContainer_->GetChildren();
     for (const auto& child : children) {
         if (child->GetTag() == V2::BUTTON_ETS_TAG) {
@@ -1378,6 +1383,31 @@ bool DialogPattern::NeedsButtonDirectionChange(const std::vector<ButtonInfo>& bu
         }
     }
     return false;
+}
+
+void DialogPattern::CheckScrollHeightIsNegative(
+    const RefPtr<UINode>& contentColumn, const DialogProperties& Dialogprops)
+{
+    CHECK_NULL_VOID(buttonContainer_);
+    if (Dialogprops.buttons.size() == ONE_BUTTON_MODE || buttonContainer_->GetTag() == V2::ROW_ETS_TAG) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto props = host->GetLayoutProperty<DialogLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    auto buttonLayoutConstraint = props->GetLayoutConstraint();
+    isSuitOldMeasure_ = true;
+    host->Measure(buttonLayoutConstraint);
+    isSuitOldMeasure_ = false;
+    if (isScrollHeightNegative_) {
+        isSuitableForElderly_ = false;
+        notAdapationAging_ = true;
+        contentColumn->RemoveChild(buttonContainer_);
+        auto buttonContainerNew = BuildButtons(Dialogprops.buttons, Dialogprops.buttonDirection);
+        buttonContainerNew->MountToParent(contentColumn);
+        buttonContainer_ = buttonContainerNew;
+    }
 }
 
 void DialogPattern::UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation)

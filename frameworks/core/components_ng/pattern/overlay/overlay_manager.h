@@ -88,6 +88,12 @@ struct DismissTarget {
     bool targetIsSheet = false;
 };
 
+struct CustomKeyboardOffsetInfo {
+    float finalOffset = 0.0f;
+    float inAniStartOffset = 0.0f;
+    float outAniEndOffset = 0.0f;
+};
+
 // StageManager is the base class for root render node to perform page switch.
 class ACE_FORCE_EXPORT OverlayManager : public virtual AceType {
     DECLARE_ACE_TYPE(OverlayManager, AceType);
@@ -585,6 +591,8 @@ public:
     void ResetRootNode(int32_t sessionId);
     void OnUIExtensionWindowSizeChange();
 
+    RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
+
 private:
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
         const RefPtr<FrameNode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
@@ -735,7 +743,6 @@ private:
     int32_t WebBackward(RefPtr<NG::FrameNode>& overlay);
     void FindWebNode(const RefPtr<NG::UINode>& node, RefPtr<NG::FrameNode>& webNode);
 
-    RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
     void RegisterDialogLifeCycleCallback(const RefPtr<FrameNode>& dialog, const DialogProperties& dialogProps);
     void CustomDialogRecordEvent(const DialogProperties& dialogProps);
     RefPtr<UINode> RebuildCustomBuilder(RefPtr<UINode>& contentNode);
@@ -755,6 +762,7 @@ private:
     RefPtr<FrameNode> GetOverlayFrameNode();
     void MountToParentWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     void RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
+    CustomKeyboardOffsetInfo CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index

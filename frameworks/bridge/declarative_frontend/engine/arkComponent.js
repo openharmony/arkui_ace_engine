@@ -2858,6 +2858,21 @@ class PixelRoundModifier extends ModifierWithKey {
   }
 }
 PixelRoundModifier.identity = Symbol('pixelRound');
+class FocusBoxModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetFocusBox(node);
+    }
+    else {
+      getUINativeModule().common.setFocusBox(node, this.value?.margin,
+        this.value?.strokeWidth, this.value?.strokeColor);
+    }
+  }
+}
+FocusBoxModifier.identity = Symbol('focusBox');
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 const isString = (val) => typeof val === 'string';
 const isNumber = (val) => typeof val === 'number';
@@ -3007,9 +3022,7 @@ class ArkComponent {
     } else {
       this._modifiersWithKeys = new Map();
     }
-    if (classType === ModifierType.STATE) {
-      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
-    }
+    this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     this._nativePtrChanged = false;
   }
   setNodePtr(nodePtr) {
@@ -3038,7 +3051,7 @@ class ArkComponent {
       ArkLogConsole.info("modifier pointer changed");
       this.nativePtr = instance.nativePtr;
       this._nativePtrChanged = true;
-      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(instance.nativePtr);
+      this._weakPtr = instance._weakPtr;
     }
   }
   applyModifierPatch() {
@@ -4168,6 +4181,10 @@ class ArkComponent {
   }
   pixelRound(value) {
     modifierWithKey(this._modifiersWithKeys, PixelRoundModifier.identity, PixelRoundModifier, value);
+    return this;
+  }
+  focusBox(value) {
+    modifierWithKey(this._modifiersWithKeys, FocusBoxModifier.identity, FocusBoxModifier, value);
     return this;
   }
 }
@@ -9234,9 +9251,7 @@ class ArkSpanComponent {
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
-    if (classType === ModifierType.STATE) {
-      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
-    }
+    this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     this._nativePtrChanged = false;
   }
   initialize(value) {
@@ -9266,7 +9281,7 @@ class ArkSpanComponent {
     if (this.nativePtr !== instance.nativePtr) {
       this.nativePtr = instance.nativePtr;
       this._nativePtrChanged = true;
-      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(instance.nativePtr);
+      this._weakPtr = instance._weakPtr;
     }
   }
   onGestureJudgeBegin(callback) {
@@ -15558,6 +15573,15 @@ ButtonLabelStyleModifier.identity = Symbol('buttonLabelStyle');
 class ButtonTypeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
+  }
+  applyStage(node, component) {
+    if (this.stageValue === undefined || this.stageValue === null) {
+      this.value = this.stageValue;
+      this.applyPeer(node, true, component);
+      return true;
+    }
+    this.applyPeer(node, false, component);
+    return false;
   }
   applyPeer(node, reset) {
     if (reset) {

@@ -733,4 +733,85 @@ HWTEST_F(ParseTestTwoNg, ParseGradientTest002, TestSize.Level1)
     svgCircle->UpdateFillGradient(viewPort);
     svgCircle->UpdateStrokeGradient(viewPort);
 }
+
+/**
+ * @tc.name: ParseNodeTest001
+ * @tc.desc: SvgNode SetAttr Parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseNodeTest001, TestSize.Level1)
+{
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    svgNode->SetAttr("stroke-dasharray", "");
+
+    svgNode->SetAttr("stroke-linecap", "round");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineCap(), LineCapStyle::ROUND);
+
+    svgNode->SetAttr("strokeLinecap", "square");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineCap(), LineCapStyle::SQUARE);
+
+    svgNode->SetAttr("stroke-linejoin", "bevel");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineJoin(), LineJoinStyle::BEVEL);
+
+    svgNode->SetAttr("strokeLinejoin", "round");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineJoin(), LineJoinStyle::ROUND);
+
+    svgNode->SetAttr("stroke-miterlimit", "0.1");
+    EXPECT_NE(svgNode->GetBaseAttributes().strokeState.GetMiterLimit(), 0.1);
+
+    svgNode->SetAttr("stroke-miterlimit", "1.1");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetMiterLimit(), 1.1);
+
+    svgNode->SetAttr("strokeMiterlimit", "0.2");
+    EXPECT_NE(svgNode->GetBaseAttributes().strokeState.GetMiterLimit(), 0.2);
+
+    svgNode->SetAttr("strokeMiterlimit", "1.2");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetMiterLimit(), 1.2);
+
+    svgNode->SetAttr("strokeOpacity", "0.321");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetOpacity().GetValue(), 0.321);
+
+    svgNode->SetAttr("strokeWidth", "1.2");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineWidth().Value(), 1.2);
+    
+    svgNode->SetAttr("strokeWidth", "-1.2");
+    EXPECT_NE(svgNode->GetBaseAttributes().strokeState.GetLineWidth().Value(), -1.2);
+
+    svgNode->SetAttr("strokeDasharray", "");
+    svgNode->SetAttr("strokeDasharray", "1.1 1.2");
+    auto tesData = std::vector{1.1, 1.2};
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineDash().lineDash, tesData);
+
+    svgNode->SetAttr("strokeDashoffset", "2.0");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineDash().dashOffset, 2.0);
+
+    svgNode->SetAttr("transform-origin", "test_transform-origin");
+    EXPECT_EQ(svgNode->GetBaseAttributes().transformOrigin, "test_transform-origin");
+}
+
+/**
+ * @tc.name: ParseSvgDomTest001
+ * @tc.desc: SvgDom test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseNodeTest002, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(USE_SVG_LABEL.c_str(), USE_SVG_LABEL.length());
+    ImageSourceInfo src;
+    src.SetFillColor(Color::GREEN);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+
+    auto containerSize = svgDom->GetContainerSize();
+    EXPECT_EQ(containerSize, SizeF(24.0f, 24.0f));
+
+    svgDom->SetFillColor(Color::RED);
+    EXPECT_EQ(svgDom->fillColor_.value(), Color::RED);
+
+    svgDom->SetSmoothEdge(1.1f);
+    EXPECT_EQ(svgDom->smoothEdge_, 1.1f);
+
+    svgDom->ControlAnimation(true);
+    EXPECT_EQ(svgDom->IsStatic(), true);
+}
 } // namespace OHOS::Ace::NG

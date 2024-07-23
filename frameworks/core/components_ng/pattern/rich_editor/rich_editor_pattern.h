@@ -351,7 +351,9 @@ public:
     void NotifyKeyboardClosed() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
-        FocusHub::LostFocusToViewRoot();
+        if (!isCustomKeyboardAttached_) {
+            FocusHub::LostFocusToViewRoot();
+        }
     }
     void ClearOperationRecords();
     void ClearRedoOperationRecords();
@@ -598,7 +600,7 @@ public:
     }
     void DumpInfo() override;
     void MouseDoubleClickParagraphEnd(int32_t& index);
-    void DoubleClickExcludeSymbol(int32_t& start, int32_t& end);
+    void AdjustSelectionExcludeSymbol(int32_t& start, int32_t& end);
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
     void OnColorConfigurationUpdate() override;
@@ -810,6 +812,11 @@ public:
         selectOverlay_->OnAncestorNodeChanged(flag);
     }
 
+    bool IsTouchCaret() const
+    {
+        return isTouchCaret_;
+    }
+
 protected:
     bool CanStartAITask() override;
 
@@ -827,8 +834,8 @@ private:
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
-    bool RepeatClickCaret(const Offset& offset, int32_t lastCaretPosition, const RectF& lastCaretRect);
-    void CreateAndShowSingleHandle(GestureEvent& info);
+    bool RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect);
+    void CreateAndShowSingleHandle(bool isShowMenu = true);
     void MoveCaretAndStartFocus(const Offset& offset);
     void HandleDoubleClickEvent(GestureEvent& info);
     bool HandleUserClickEvent(GestureEvent& info);
@@ -1032,6 +1039,7 @@ private:
     void OnTextInputActionUpdate(TextInputAction value);
     void CloseSystemMenu();
     void SetAccessibilityAction() override;
+    void SetAccessibilityEditAction();
     void HandleTripleClickEvent(OHOS::Ace::GestureEvent& info);
     void UpdateSelectionByTouchMove(const Offset& offset);
     void MoveCaretAnywhere(const Offset& touchOffset);

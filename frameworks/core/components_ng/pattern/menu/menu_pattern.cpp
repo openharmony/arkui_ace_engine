@@ -68,7 +68,7 @@ const RefPtr<InterpolatingSpring> MENU_ANIMATION_CURVE =
 const RefPtr<InterpolatingSpring> STACK_MENU_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, STACK_MENU_DAMPING);
 const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 380.0f, 34.0f);
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 34.0f);
 const RefPtr<InterpolatingSpring> MAIN_MENU_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 528.0f, 35.0f);
 const float MINIMUM_AMPLITUDE_RATION = 0.08f;
@@ -76,7 +76,6 @@ const float MINIMUM_AMPLITUDE_RATION = 0.08f;
 constexpr double MOUNT_MENU_FINAL_SCALE = 0.95f;
 constexpr double SEMI_CIRCLE_ANGEL = 90.0f;
 constexpr Dimension PADDING = 4.0_vp;
-constexpr Dimension MENU_DEFAULT_RADIUS = 20.0_vp;
 
 
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
@@ -912,7 +911,7 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     // make menu round rect
     BorderRadiusProperty borderRadius;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        borderRadius.SetRadius(MENU_DEFAULT_RADIUS);
+        borderRadius.SetRadius(theme->GetMenuDefaultRadius());
     } else {
         borderRadius.SetRadius(theme->GetMenuBorderRadius());
     }
@@ -1347,24 +1346,8 @@ void MenuPattern::ShowMenuDisappearAnimation()
     });
 }
 
-void MenuPattern::CallMenuAboutToAppearCallback()
-{
-    auto menuWrapper = GetMenuWrapper();
-    CHECK_NULL_VOID(menuWrapper);
-    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    menuWrapperPattern->CallMenuAboutToAppearCallback();
-    menuWrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
-    auto pipeline = menuWrapper->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    overlayManager->SetIsMenuShow(true);
-}
-
 bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    CallMenuAboutToAppearCallback();
     ShowPreviewMenuAnimation();
     ShowMenuAppearAnimation();
     ShowStackExpandMenu();

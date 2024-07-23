@@ -1382,6 +1382,11 @@ protected:
     {
         isDetachFromMainTree_ = true;
     }
+    
+    bool IsReverse() const override
+    {
+        return false;
+    };
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
@@ -1437,7 +1442,7 @@ private:
     void CursorMoveOnClick(const Offset& offset);
 
     void DelayProcessOverlay(const OverlayRequest& request = OverlayRequest());
-    void ProcessOverlayAfterLayout(bool isGlobalAreaChanged);
+    void ProcessOverlayAfterLayout(const OffsetF& prevOffset);
     void ProcessOverlay(const OverlayRequest& request = OverlayRequest());
 
     bool SelectOverlayIsOn()

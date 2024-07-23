@@ -388,8 +388,9 @@ void TextLayoutAlgorithm::CreateParagraphDrag(
 bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout)
 {
-    ACE_TEXT_SCOPED_TRACE("CreateParagraphAndLayout[Length:%d]", static_cast<int32_t>(content.length()));
     auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
+    ACE_TEXT_SCOPED_TRACE("CreateParagraphAndLayout[maxSize:%s][Len:%d]", maxSize.ToString().c_str(),
+        static_cast<int32_t>(content.length()));
     if (!CreateParagraph(textStyle, content, layoutWrapper, maxSize.Width())) {
         return false;
     }

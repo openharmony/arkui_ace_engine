@@ -95,6 +95,7 @@ void LongPressRecognizer::OnRejected()
     if (refereeState_ == RefereeState::SUCCEED) {
         return;
     }
+    SendRejectMsg();
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
 }

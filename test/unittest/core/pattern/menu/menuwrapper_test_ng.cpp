@@ -725,8 +725,11 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg013, TestSize.Level1)
     wrapperPattern->SetLastTouchItem(menuItemNode2);
     wrapperPattern->currentTouchItem_ = menuItemNode1;
     wrapperPattern->HandleInteraction(info);
+    EXPECT_EQ(wrapperPattern->lastTouchItem_, wrapperPattern->currentTouchItem_);
+
     wrapperPattern->currentTouchItem_ = menuItemNode2;
     wrapperPattern->HandleInteraction(info);
+    EXPECT_EQ(wrapperPattern->lastTouchItem_, wrapperPattern->currentTouchItem_);
 }
 
 /**
@@ -909,7 +912,9 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg017, TestSize.Level1)
     }
     auto layoutWrapper = layoutWrapperNode->GetOrCreateChildByIndex(0, true);
     ASSERT_NE(layoutWrapper, nullptr);
-    wrapperPattern->SetHotAreas(layoutWrapper);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->instanceId_ = MIN_SUBCONTAINER_ID;
+    EXPECT_FALSE(wrapperPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, configDirtySwap));
 }
 
 /**

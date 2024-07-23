@@ -77,7 +77,6 @@ protected:
     }
 
     GridLayoutInfo gridLayoutInfo_;
-    bool clearStretch_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutBaseAlgorithm);
 };

@@ -94,11 +94,24 @@ void TextPattern::OnWindowHide()
 {
     CHECK_NULL_VOID(contentMod_);
     contentMod_->PauseAnimation();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    TAG_LOGD(AceLogTag::ACE_TEXT, "OnWindowHide [%{public}d]", host->GetId());
 }
 
 void TextPattern::OnWindowShow()
 {
     CHECK_NULL_VOID(contentMod_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RectF frameRect;
+    RectF visibleRect;
+    host->GetVisibleRect(visibleRect, frameRect);
+    if (visibleRect.IsEmpty()) {
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_TEXT, "OnWindowShow [%{public}d], [Rect:%{public}s]", host->GetId(),
+        visibleRect.ToString().c_str());
     contentMod_->ResumeAnimation();
 }
 
@@ -2079,6 +2092,7 @@ void TextPattern::OnModifyDone()
 
     if (CheckNeedMeasure(textLayoutProperty->GetPropertyChangeFlag()) && pManager_) {
         // measure flag changed, reset paragraph.
+        ACE_TEXT_SCOPED_TRACE("OnModifyDone[Text][id:%d]", host->GetId());
         pManager_->Reset();
     }
 
@@ -2456,7 +2470,24 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
         InitClickEvent(gestureEventHub);
     }
     if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
-        dataDetectorAdapter_->StartAITask();
+        ParseOriText(textLayoutProperty->GetContent().value_or(""));
+        if (!dataDetectorAdapter_->aiDetectInitialized_) {
+            dataDetectorAdapter_->StartAITask();
+        }
+    }
+}
+
+void TextPattern::ParseOriText(const std::string& currentText)
+{
+    auto entityJson = JsonUtil::ParseJsonString(currentText);
+    TAG_LOGI(AceLogTag::ACE_TEXT, "text content is the json format: %{public}d", entityJson->IsNull());
+    if (!entityJson->IsNull() && !entityJson->GetValue("bundleName")->IsNull() &&
+        dataDetectorAdapter_->ParseOriText(entityJson, textForDisplay_)) {
+        if (childNodes_.empty()) {
+            auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(textLayoutProperty);
+            textLayoutProperty->UpdateContent(textForDisplay_);
+        }
     }
 }
 

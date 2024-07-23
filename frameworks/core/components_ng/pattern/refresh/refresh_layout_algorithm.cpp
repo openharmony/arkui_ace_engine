@@ -46,8 +46,15 @@ void RefreshLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         if (HasCustomBuilderIndex() && index == customBuilderIndex_.value_or(0)) {
             auto builderLayoutConstraint = layoutConstraint;
-            builderLayoutConstraint.UpdateIllegalSelfIdealSizeWithCheck(
-                CalculateBuilderSize(child, builderLayoutConstraint, builderBaseHeight_));
+            bool isCustomBuilderExist = layoutProperty->GetIsCustomBuilderExistValue(false);
+            if (isCustomBuilderExist) {
+                builderLayoutConstraint.UpdateIllegalSelfIdealSizeWithCheck(
+                    CalculateBuilderSize(child, builderLayoutConstraint, builderBaseHeight_));
+            } else {
+                builderLayoutConstraint.minSize.SetHeight(builderBaseHeight_);
+                builderLayoutConstraint.maxSize.SetHeight(builderBaseHeight_);
+                builderLayoutConstraint.percentReference.SetHeight(builderBaseHeight_);
+            }
             child->Measure(builderLayoutConstraint);
             ++index;
             continue;
@@ -110,10 +117,7 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
-    auto align = Alignment::TOP_LEFT;
-    if (layoutProperty->GetPositionProperty()) {
-        align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
-    }
+    auto align = Alignment::TOP_CENTER;
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<RefreshPattern>();

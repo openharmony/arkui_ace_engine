@@ -94,7 +94,7 @@ void BubblePattern::OnModifyDone()
     RegisterButtonOnTouch();
 }
 
-void BubblePattern::OnAttachToFrameNode()
+void BubblePattern::AddPipelineCallBack()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -102,6 +102,12 @@ void BubblePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     pipelineContext->AddWindowStateChangedCallback(host->GetId());
+}
+
+void BubblePattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
 
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);

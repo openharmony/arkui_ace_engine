@@ -42,6 +42,7 @@
 #include "base/image/file_uri_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/udmf/unified_data.h"
+#include "ndk_data_conversion.h"
 namespace OHOS::Ace {
 UdmfClient* UdmfClient::GetInstance()
 {
@@ -82,6 +83,31 @@ napi_value UdmfClientImpl::TransformUdmfUnifiedData(RefPtr<UnifiedData>& Unified
     UDMF::UnifiedDataNapi::NewInstance(env, unifiedData, dataVal);
     CHECK_NULL_RETURN(dataVal, nullptr);
     return dataVal;
+}
+
+void* UdmfClientImpl::TransformUnifiedDataPtr(RefPtr<UnifiedData>& unifiedDataImpl)
+{
+    CHECK_NULL_RETURN(unifiedDataImpl, nullptr);
+    std::shared_ptr<UDMF::UnifiedData> unifiedData =
+        AceType::DynamicCast<UnifiedDataImpl>(unifiedDataImpl)->GetUnifiedData();
+    CHECK_NULL_RETURN(unifiedData, nullptr);
+    return unifiedData.get();
+}
+
+RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedDataForNative(void* rawData)
+{
+    CHECK_NULL_RETURN(rawData, nullptr);
+    auto udData = AceType::MakeRefPtr<UnifiedDataImpl>();
+    auto udmfData = static_cast<OH_UdmfData*>(rawData);
+    CHECK_NULL_RETURN(udmfData, nullptr);
+    auto unifiedData = std::make_shared<UDMF::UnifiedData>();
+    auto status = OHOS::UDMF::NdkDataConversion::GetNativeUnifiedData(udmfData, unifiedData);
+    if (status) {
+        return nullptr;
+    }
+
+    udData->SetUnifiedData(unifiedData);
+    return udData;
 }
 
 napi_value UdmfClientImpl::TransformSummary(std::map<std::string, int64_t>& summary)

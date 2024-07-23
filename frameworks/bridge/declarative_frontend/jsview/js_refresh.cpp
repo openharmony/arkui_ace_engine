@@ -178,7 +178,8 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     }
     ParsFrictionData(friction);
     if (!ParseRefreshingContent(paramObject)) {
-        ParseCustomBuilder(info);
+        bool isCustomBuilderExist = ParseCustomBuilder(info);
+        RefreshModel::GetInstance()->SetIsCustomBuilderExist(isCustomBuilderExist);
     }
 
     std::string loadingStr = "";
@@ -209,6 +210,7 @@ bool JSRefresh::ParseRefreshingContent(const JSRef<JSObject>& paramObject)
     CHECK_NULL_RETURN(frameNode, false);
     RefPtr<NG::FrameNode> refPtrFrameNode = AceType::Claim(frameNode);
     RefreshModel::GetInstance()->SetCustomBuilder(refPtrFrameNode);
+    RefreshModel::GetInstance()->SetIsCustomBuilderExist(false);
     return true;
 }
 

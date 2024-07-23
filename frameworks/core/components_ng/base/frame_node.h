@@ -465,6 +465,9 @@ public:
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
 
+    void OnAccessibilityEvent(
+        AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType);
+
     void MarkNeedRenderOnly();
 
     void OnDetachFromMainTree(bool recursive) override;
@@ -813,6 +816,7 @@ public:
         return localMat_;
     }
     OffsetF GetOffsetInScreen();
+    OffsetF GetOffsetInSubwindow(const OffsetF& subwindowOffset);
     RefPtr<PixelMap> GetPixelMap();
     RefPtr<FrameNode> GetPageNode();
     RefPtr<FrameNode> GetFirstAutoFillContainerNode();

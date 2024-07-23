@@ -96,10 +96,13 @@
 
 namespace {
 constexpr uint64_t ONE_MS_IN_NS = 1 * 1000 * 1000;
+constexpr uint64_t ONE_S_IN_NS = 1 * 1000 * 1000 * 1000;
 constexpr uint64_t INTERPOLATION_THRESHOLD = 100 * 1000 * 1000; // 100ms
 constexpr int32_t INDEX_X = 0;
 constexpr int32_t INDEX_Y = 1;
 constexpr int32_t INDEX_TIME = 2;
+constexpr int32_t INDEX_X_SLOPE = 2;
+constexpr int32_t INDEX_Y_SLOPE = 3;
 constexpr int32_t TIME_THRESHOLD = 2 * 1000000; // 3 millisecond
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t USED_ID_FIND_FLAG = 3;                 // if args >3 , it means use id to find
@@ -372,35 +375,40 @@ void PipelineContext::RemoveScheduleTask(uint32_t id)
     scheduleTasks_.erase(id);
 }
 
-std::pair<float, float> PipelineContext::LinearInterpolation(const std::tuple<float, float, uint64_t>& history,
-    const std::tuple<float, float, uint64_t>& current, const uint64_t nanoTimeStamp)
+std::tuple<float, float, float, float> PipelineContext::LinearInterpolation(
+    const std::tuple<float, float, uint64_t>& history, const std::tuple<float, float, uint64_t>& current,
+    const uint64_t nanoTimeStamp)
 {
     if (nanoTimeStamp == std::get<INDEX_TIME>(history) || nanoTimeStamp == std::get<INDEX_TIME>(current)) {
-        return std::make_pair(0.0f, 0.0f);
+        return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
     }
     if (std::get<INDEX_TIME>(current) <= std::get<INDEX_TIME>(history)) {
-        return std::make_pair(0.0f, 0.0f);
+        return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
     }
     if (std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history) > INTERPOLATION_THRESHOLD) {
-        return std::make_pair(0.0f, 0.0f);
+        return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
     }
     if (nanoTimeStamp < std::get<INDEX_TIME>(history)) {
-        return std::make_pair(0.0f, 0.0f);
+        return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
     }
+    auto inputXDeltaSlope = (std::get<INDEX_X>(current) - std::get<INDEX_X>(history)) * ONE_S_IN_NS /
+                            (float)(std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history));
+    auto inputYDeltaSlope = (std::get<INDEX_Y>(current) - std::get<INDEX_Y>(history)) * ONE_S_IN_NS /
+                            (float)(std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history));
     if (nanoTimeStamp < std::get<INDEX_TIME>(current)) {
         float alpha = (float)(nanoTimeStamp - std::get<INDEX_TIME>(history)) /
                       (float)(std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history));
         float x = std::get<INDEX_X>(history) + alpha * (std::get<INDEX_X>(current) - std::get<INDEX_X>(history));
         float y = std::get<INDEX_Y>(history) + alpha * (std::get<INDEX_Y>(current) - std::get<INDEX_Y>(history));
-        return std::make_pair(x, y);
+        return std::make_tuple(x, y, inputXDeltaSlope, inputYDeltaSlope);
     } else if (nanoTimeStamp > std::get<INDEX_TIME>(current)) {
         float alpha = (float)(nanoTimeStamp - std::get<INDEX_TIME>(current)) /
                       (float)(std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history));
         float x = std::get<INDEX_X>(current) + alpha * (std::get<INDEX_X>(current) - std::get<INDEX_X>(history));
         float y = std::get<INDEX_Y>(current) + alpha * (std::get<INDEX_Y>(current) - std::get<INDEX_Y>(history));
-        return std::make_pair(x, y);
+        return std::make_tuple(x, y, inputXDeltaSlope, inputYDeltaSlope);
     }
-    return std::make_pair(0.0f, 0.0f);
+    return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 std::tuple<float, float, uint64_t> PipelineContext::GetAvgPoint(
@@ -433,11 +441,11 @@ std::tuple<float, float, uint64_t> PipelineContext::GetAvgPoint(
     return std::make_tuple(avgX, avgY, avgTime);
 }
 
-std::pair<float, float> PipelineContext::GetResampleCoord(const std::vector<TouchEvent>& history,
+std::tuple<float, float, float, float> PipelineContext::GetResampleCoord(const std::vector<TouchEvent>& history,
     const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp, const bool isScreen)
 {
     if (history.empty() || current.empty()) {
-        return std::make_pair(0.0f, 0.0f);
+        return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
     }
     uint64_t lastNanoTime = 0;
     float x = 0.0f;
@@ -451,7 +459,7 @@ std::pair<float, float> PipelineContext::GetResampleCoord(const std::vector<Touc
         }
     }
     if (nanoTimeStamp > RESAMPLE_COORD_TIME_THRESHOLD + lastNanoTime) {
-        return std::make_pair(x, y);
+        return std::make_tuple(x, y, 0.0f, 0.0f);
     }
     auto historyPoint = GetAvgPoint(history, isScreen);
     auto currentPoint = GetAvgPoint(current, isScreen);
@@ -480,15 +488,17 @@ TouchEvent PipelineContext::GetResampleTouchEvent(
     auto newXy = GetResampleCoord(history, current, nanoTimeStamp, false);
     auto newScreenXy = GetResampleCoord(history, current, nanoTimeStamp, true);
     TouchEvent newTouchEvent = GetLatestPoint(current, nanoTimeStamp);
-    if (newXy.first != 0 && newXy.second != 0) {
-        newTouchEvent.x = newXy.first;
-        newTouchEvent.y = newXy.second;
-        newTouchEvent.screenX = newScreenXy.first;
-        newTouchEvent.screenY = newScreenXy.second;
+    if (std::get<INDEX_X>(newXy) != 0 && std::get<INDEX_Y>(newXy) != 0) {
+        newTouchEvent.x = std::get<INDEX_X>(newXy);
+        newTouchEvent.y = std::get<INDEX_Y>(newXy);
+        newTouchEvent.screenX = std::get<INDEX_X>(newScreenXy);
+        newTouchEvent.screenY = std::get<INDEX_Y>(newScreenXy);
         std::chrono::nanoseconds nanoseconds(nanoTimeStamp);
         newTouchEvent.time = TimeStamp(nanoseconds);
         newTouchEvent.history = current;
         newTouchEvent.isInterpolated = true;
+        newTouchEvent.inputXDeltaSlope = std::get<INDEX_X_SLOPE>(newXy);
+        newTouchEvent.inputYDeltaSlope = std::get<INDEX_Y_SLOPE>(newXy);
     }
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT,
@@ -541,12 +551,12 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     ACE_SCOPED_TRACE_COMMERCIAL("UIVsyncTask[timestamp:%" PRIu64 "][vsyncID:%" PRIu64 "][instanceID:%d]", nanoTimestamp,
         static_cast<uint64_t>(frameCount), instanceId_);
     window_->Lock();
-    auto recvTime = GetSysTimestamp();
     static const std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
-    resampleTimeStamp_ = nanoTimestamp - static_cast<uint64_t>(window_->GetVSyncPeriod()) + ONE_MS_IN_NS;
+    resampleTimeStamp_ = nanoTimestamp - static_cast<uint64_t>(window_->GetVSyncPeriod()) + ONE_MS_IN_NS -\
+        compensationValue_;
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();
@@ -575,7 +585,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 #endif
     }
 
-    taskScheduler_->StartRecordFrameInfo(GetCurrentFrameInfo(recvTime, nanoTimestamp));
+    taskScheduler_->StartRecordFrameInfo(GetCurrentFrameInfo(recvTime_, nanoTimestamp));
     taskScheduler_->FlushTask();
     UIObserverHandler::GetInstance().HandleLayoutDoneCallBack();
     taskScheduler_->FinishRecordFrameInfo();
@@ -593,7 +603,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     } while (false);
 #endif
 
-    if (hasRunningAnimation || window_->HasUIAnimation()) {
+    if (hasRunningAnimation || window_->HasUIRunningAnimation()) {
         RequestFrame();
     }
     window_->FlushModifier();
@@ -1479,22 +1489,10 @@ float PipelineContext::GetPageAvoidOffset()
 
 void PipelineContext::SyncSafeArea(SafeAreaSyncType syncType)
 {
+    bool keyboardSafeArea =
+        syncType == SafeAreaSyncType::SYNC_TYPE_KEYBOARD && !safeAreaManager_->KeyboardSafeAreaEnabled();
     CHECK_NULL_VOID(stageManager_);
-    auto lastPage = stageManager_->GetLastPageWithTransition();
-    auto prevPage = stageManager_->GetPrevPageWithTransition();
-    if (lastPage) {
-        auto changeType =
-            syncType == SafeAreaSyncType::SYNC_TYPE_KEYBOARD && !safeAreaManager_->KeyboardSafeAreaEnabled()
-                ? PROPERTY_UPDATE_LAYOUT
-                : PROPERTY_UPDATE_MEASURE;
-        stageManager_->SyncPageSafeArea(lastPage, changeType);
-    }
-    if (prevPage) {
-        auto overlay = prevPage->GetPattern<PagePattern>();
-        if (overlay) {
-            overlay->MarkDirtyOverlay();
-        }
-    }
+    stageManager_->SyncPageSafeArea(keyboardSafeArea);
     SubwindowManager::GetInstance()->MarkDirtyDialogSafeArea();
     if (overlayManager_) {
         overlayManager_->MarkDirty(PROPERTY_UPDATE_MEASURE);
@@ -1748,20 +1746,30 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         float offsetFix = (rootSize.Height() - positionY - height) < keyboardHeight
                               ? keyboardHeight - (rootSize.Height() - positionY - height)
                               : keyboardHeight;
+        auto lastKeyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
+        float newKeyboardOffset = 0.0f;
         if (NearZero(keyboardHeight)) {
-            context->safeAreaManager_->UpdateKeyboardOffset(0.0f);
+            newKeyboardOffset = 0.0f;
         } else if (positionYWithOffset + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0f) {
-            context->safeAreaManager_->UpdateKeyboardOffset(-offsetFix);
+            newKeyboardOffset = -offsetFix;
         } else if (LessOrEqual(rootSize.Height() - positionYWithOffset - height, height) &&
                    LessOrEqual(rootSize.Height() - positionYWithOffset, keyboardHeight)) {
-            context->safeAreaManager_->UpdateKeyboardOffset(-keyboardHeight);
+            newKeyboardOffset = -keyboardHeight;
         } else if ((positionYWithOffset + height > rootSize.Height() - keyboardHeight &&
                        positionYWithOffset < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
                    NearZero(context->rootNode_->GetGeometryNode()->GetFrameOffset().GetY())) {
-            context->safeAreaManager_->UpdateKeyboardOffset(-height - offsetFix / 2.0f);
+            newKeyboardOffset = -height - offsetFix / 2.0f;
         } else {
-            context->safeAreaManager_->UpdateKeyboardOffset(0.0f);
+            newKeyboardOffset = 0.0f;
         }
+
+        if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset)) {
+            context->safeAreaManager_->UpdateKeyboardOffset(newKeyboardOffset);
+        } else {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Calculated keyboardOffset %{public}f is smaller than current"
+                "keyboardOffset, so keep current keyboardOffset", newKeyboardOffset);
+        }
+
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
             "keyboardHeight: %{public}f, positionY: %{public}f, textHeight: %{public}f, "
             "rootSize.Height() %{public}f final calculate keyboard offset is %{public}f",
@@ -1997,10 +2005,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE &&
         scalePoint.type != TouchType::HOVER_MOVE) {
         eventManager_->GetEventTreeRecord().AddTouchPoint(scalePoint);
-        if (SystemProperties::GetAceCommercialLogEnabled()) {
+        if (SystemProperties::GetAceCommercialLogEnabled() || scalePoint.isPrivacyMode) {
             TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
-                "InputTracking id:%{public}d, fingerId:%{public}d, type=%{public}d, inject=%{public}d",
-                scalePoint.touchEventId, scalePoint.id, (int)scalePoint.type, scalePoint.isInjected);
+                "InputTracking id:%{public}d, fingerId:%{public}d, type=%{public}d, inject=%{public}d, "
+                "isPrivacyMode=%{public}d",
+                scalePoint.touchEventId, scalePoint.id, (int)scalePoint.type, scalePoint.isInjected,
+                scalePoint.isPrivacyMode);
         } else {
             TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
                 "InputTracking id:%{public}d, fingerId:%{public}d, x=%{public}.3f, y=%{public}.3f type=%{public}d, "
@@ -2278,14 +2288,6 @@ bool PipelineContext::CheckNeedAutoSave()
     return pageNode->NeedRequestAutoSave();
 }
 
-bool PipelineContext::CheckPageFocus()
-{
-    CHECK_NULL_RETURN(stageManager_, true);
-    auto pageNode = stageManager_->GetLastPage();
-    CHECK_NULL_RETURN(pageNode, true);
-    return pageNode->GetFocusHub() && pageNode->GetFocusHub()->IsCurrentFocus();
-}
-
 bool PipelineContext::CheckOverlayFocus()
 {
     CHECK_NULL_RETURN(overlayManager_, false);
@@ -2498,7 +2500,7 @@ void PipelineContext::FlushTouchEvents()
         }
         std::list<TouchEvent> touchPoints;
         for (const auto& iter : idToTouchPoints) {
-            lastDispatchTime_[iter.first] = GetVsyncTime();
+            lastDispatchTime_[iter.first] = GetVsyncTime() - compensationValue_;
             auto it = newIdTouchPoints.find(iter.first);
             if (it != newIdTouchPoints.end()) {
                 touchPoints.emplace_back(it->second);

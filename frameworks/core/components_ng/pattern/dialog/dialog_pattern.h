@@ -269,9 +269,29 @@ public:
         return fontScaleForElderly_;
     }
 
+    void SetIsPickerDiaglog(bool value)
+    {
+        isPickerDiaglog_ = value;
+    }
+
+    bool GetIsPickerDiaglog()
+    {
+        return isPickerDiaglog_;
+    }
+
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
     void InitHostWindowRect();
     void UpdateFontScale();
+
+    bool GetIsSuitOldMeasure()
+    {
+        return isSuitOldMeasure_;
+    }
+
+    void SetIsScrollHeightNegative(bool isScrollHeightNegative)
+    {
+        isScrollHeightNegative_ = isScrollHeightNegative;
+    }
 
 private:
     bool AvoidKeyboard() const override
@@ -340,6 +360,7 @@ private:
     void OnFontConfigurationUpdate() override;
     void UpdateTextFontScale();
     void UpdateTitleTextFontScale();
+    void CheckScrollHeightIsNegative(const RefPtr<UINode>& contentColumn, const DialogProperties& props);
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
@@ -363,7 +384,10 @@ private:
     RefPtr<FrameNode> contentColumn_;
     RefPtr<RenderContext> contentRenderContext_;
     bool isSuitableForElderly_ = false;
+    bool isPickerDiaglog_ = false;
     bool notAdapationAging_ = false;
+    bool isSuitOldMeasure_ = false;
+    bool isScrollHeightNegative_ = false;
     float fontScaleForElderly_ = 1.0f;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
     RefPtr<FrameNode> titleContainer_;

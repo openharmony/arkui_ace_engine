@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 #include <algorithm>
+#include <atomic>
 #include <cstdint>
 #include <optional>
 #include <ratio>
@@ -135,7 +136,7 @@ constexpr uint32_t RECORD_MAX_LENGTH = 20;
 constexpr uint32_t OBSCURE_SHOW_TICKS = 1;
 constexpr Dimension ERROR_TEXT_TOP_MARGIN = 8.0_vp;
 constexpr Dimension ERROR_TEXT_BOTTOM_MARGIN = 8.0_vp;
-constexpr uint32_t FIND_TEXT_ZERO_INDEX = 1;
+constexpr int32_t FIND_TEXT_ZERO_INDEX = 1;
 constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
 const std::string NEWLINE = "\n";
@@ -524,7 +525,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (hostLayoutProperty) {
         hostLayoutProperty->ResetTextAlignChanged();
     }
-    ProcessOverlayAfterLayout(oldParentGlobalOffset != parentGlobalOffset_);
+    ProcessOverlayAfterLayout(oldParentGlobalOffset);
     if (inlineSelectAllFlag_) {
         HandleOnSelectAll(false, true);
         inlineSelectAllFlag_ = false;
@@ -637,23 +638,37 @@ void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
     }
 }
 
-void TextFieldPattern::ProcessOverlayAfterLayout(bool isGlobalAreaChanged)
+void TextFieldPattern::ProcessOverlayAfterLayout(const OffsetF& prevOffset)
 {
-    if (processOverlayDelayTask_) {
-        CHECK_NULL_VOID(HasFocus());
-        processOverlayDelayTask_();
-        processOverlayDelayTask_ = nullptr;
-        return;
-    }
-    if (isGlobalAreaChanged) {
-        HandleParentGlobalOffsetChange();
-        return;
-    }
-    if (needToRefreshSelectOverlay_ && SelectOverlayIsOn()) {
-        StopTwinkling();
-        ProcessOverlay();
-        needToRefreshSelectOverlay_ = false;
-    }
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterLayoutTask([weak = WeakClaim(this), prevOffset]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->parentGlobalOffset_ = pattern->GetPaintRectGlobalOffset();
+        if (pattern->SelectOverlayIsOn()) {
+            if (pattern->IsSelected()) {
+                pattern->selectOverlay_->UpdateAllHandlesOffset();
+            } else {
+                pattern->selectOverlay_->UpdateSecondHandleOffset();
+            }
+        }
+        if (pattern->processOverlayDelayTask_) {
+            CHECK_NULL_VOID(pattern->HasFocus());
+            pattern->processOverlayDelayTask_();
+            pattern->processOverlayDelayTask_ = nullptr;
+        } else if (prevOffset != pattern->parentGlobalOffset_) {
+            pattern->HandleParentGlobalOffsetChange();
+        } else if (pattern->needToRefreshSelectOverlay_ && pattern->SelectOverlayIsOn()) {
+            if (pattern->IsSelected()) {
+                pattern->StopTwinkling();
+            } else {
+                pattern->StartTwinkling();
+            }
+            pattern->ProcessOverlay({ .menuIsShow = pattern->selectOverlay_->IsCurrentMenuVisibile() });
+            pattern->needToRefreshSelectOverlay_ = false;
+        }
+    });
 }
 
 bool TextFieldPattern::HasFocus() const
@@ -710,9 +725,6 @@ void TextFieldPattern::UpdateCaretRect(bool isEditorValueChanged)
     if (IsSelected()) {
         selectController_->MoveFirstHandleToContentRect(selectController_->GetFirstHandleIndex());
         selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex());
-        if (SelectOverlayIsOn()) {
-            selectOverlay_->UpdateAllHandlesOffset();
-        }
         return;
     }
     if (focusHub && !focusHub->IsCurrentFocus() && !obscuredChange_) {
@@ -1449,8 +1461,8 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnSelectAll");
     auto textSize = static_cast<int32_t>(contentController_->GetWideText().length());
     if (inlineStyle) {
-        if (static_cast<int32_t>(contentController_->GetWideText().rfind(L".")) < textSize - FIND_TEXT_ZERO_INDEX) {
-            textSize = contentController_->GetWideText().rfind(L".");
+        if (static_cast<int32_t>(contentController_->GetWideText().rfind(L'.')) < textSize - FIND_TEXT_ZERO_INDEX) {
+            textSize = static_cast<int32_t>(contentController_->GetWideText().rfind(L'.'));
         }
         UpdateSelection(0, textSize);
     } else {
@@ -2483,7 +2495,9 @@ void TextFieldPattern::HandleTripleClickEvent(GestureEvent& info)
         SetIsSingleHandle(true);
         CloseSelectOverlay();
     }
-    selectController_->UpdateSelectPragraphByOffset(info.GetLocalLocation());
+    if (CanChangeSelectState()) {
+        selectController_->UpdateSelectPragraphByOffset(info.GetLocalLocation());
+    }
     if (IsSelected()) {
         StopTwinkling();
         SetIsSingleHandle(false);
@@ -2788,6 +2802,7 @@ void TextFieldPattern::OnModifyDone()
         needToRefreshSelectOverlay_ = textWidth > 0;
         UpdateSelection(std::clamp(selectController_->GetStartIndex(), 0, textWidth),
             std::clamp(selectController_->GetEndIndex(), 0, textWidth));
+        SetIsSingleHandle(!IsSelected());
         if (isTextChangedAtCreation_ && textWidth == 0) {
             CloseSelectOverlay();
             StartTwinkling();
@@ -3107,7 +3122,7 @@ bool TextFieldPattern::CanChangeSelectState()
     CHECK_NULL_RETURN(theme, false);
     Dimension fontSize = layoutProperty->GetFontSizeValue(theme->GetFontSize());
     // fontSize == 0 can not change
-    return fontSize.Value() != 0.0f;
+    return !NearZero(fontSize.Value());
 }
 
 bool TextFieldPattern::IsOnUnitByPosition(const Offset& globalOffset)
@@ -3645,6 +3660,11 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     if ((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Request Softkeyboard, Close CustomKeyboard.");
         CloseCustomKeyboard();
+    }
+    auto context = tmpHost->GetContextRefPtr();
+    if (context && context->GetTextFieldManager()) {
+        auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+        textFieldManager->SetImeAttached(true);
     }
     inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
     UpdateCaretInfoToController();

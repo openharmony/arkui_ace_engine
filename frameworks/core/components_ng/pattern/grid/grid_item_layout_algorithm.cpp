@@ -37,6 +37,9 @@ LayoutConstraintF GridItemLayoutAlgorithm::CreateChildConstraint(LayoutWrapper* 
     auto layoutConstraint = props->CreateChildConstraint();
 
     if (!props->GetNeedStretch()) {
+        if (props->GetStretchChild()) {
+            props->SetStretchChild(false);
+        }
         return layoutConstraint;
     }
 
@@ -52,11 +55,12 @@ LayoutConstraintF GridItemLayoutAlgorithm::CreateChildConstraint(LayoutWrapper* 
     }
 
     auto childConstraint = childLayoutProperty->GetLayoutConstraint();
-    if (!childConstraint->selfIdealSize.MainSize(props->GetAxis()).has_value() &&
-        layoutConstraint.parentIdealSize.MainSize(props->GetAxis()).has_value()) {
+    if (props->GetStretchChild() || (!childConstraint->selfIdealSize.MainSize(props->GetAxis()).has_value() &&
+        layoutConstraint.parentIdealSize.MainSize(props->GetAxis()).has_value())) {
         layoutConstraint.selfIdealSize.SetMainSize(
             layoutConstraint.parentIdealSize.MainSize(props->GetAxis()), props->GetAxis());
         child->GetHostNode()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        props->SetStretchChild(true);
     }
     return layoutConstraint;
 }

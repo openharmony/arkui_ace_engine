@@ -3014,6 +3014,21 @@ void FrameNode::OnAccessibilityEvent(
     }
 }
 
+void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType)
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.windowContentChangeTypes = windowsContentChangeType;
+        event.nodeId = GetAccessibilityId();
+        event.stackNodeId = stackNodeId;
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibility(event);
+    }
+}
+
 void FrameNode::OnRecycle()
 {
     for (const auto& destroyCallback : destroyCallbacks_) {
@@ -3525,7 +3540,9 @@ void FrameNode::Layout()
 
     auto pipeline = GetContext();
     CHECK_NULL_VOID_LAYOUT_TRACE_END(pipeline);
-    bool isFocusOnPage = pipeline->CheckPageFocus();
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    bool isFocusOnPage = stageManager->CheckPageFocus();
     bool needSyncRsNode = false;
     DirtySwapConfig config;
     bool willSyncGeoProperties = OnLayoutFinish(needSyncRsNode, config);
@@ -3847,6 +3864,13 @@ OffsetF FrameNode::GetOffsetInScreen()
     CHECK_NULL_RETURN(window, OffsetF(0.0f, 0.0f));
     auto windowOffset = window->GetCurrentWindowRect().GetOffset();
     frameOffset += OffsetT<float> { windowOffset.GetX(), windowOffset.GetY() };
+    return frameOffset;
+}
+
+OffsetF FrameNode::GetOffsetInSubwindow(const OffsetF& subwindowOffset)
+{
+    auto frameOffset = GetOffsetInScreen();
+    frameOffset -= subwindowOffset;
     return frameOffset;
 }
 

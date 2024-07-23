@@ -95,6 +95,9 @@ class BuilderNode {
     recycle() {
         this._JSBuilderNode.recycle();
     }
+    updateConfiguration() {
+        this._JSBuilderNode.updateConfiguration();
+    }
 }
 class JSBuilderNode extends BaseNode {
     constructor(uiContext, options) {
@@ -206,6 +209,12 @@ class JSBuilderNode extends BaseNode {
         Array.from(this.updateFuncByElmtId.keys()).sort((a, b) => {
             return (a < b) ? -1 : (a > b) ? 1 : 0;
         }).forEach(elmtId => this.UpdateElement(elmtId));
+        for (const child of this.childrenWeakrefMap_.values()) {
+            const childView = child.deref();
+            if (childView) {
+                childView.forceCompleteRerender(true);
+            }
+        }
         this.updateEnd();
         __JSScopeUtil__.restoreInstanceId();
     }
@@ -2275,6 +2284,9 @@ class ComponentContent extends Content {
             return result;
         }
         return node;
+    }
+    updateConfiguration() {
+        this.builderNode_.updateConfiguration();
     }
 }
 /*

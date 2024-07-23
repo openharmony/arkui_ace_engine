@@ -156,6 +156,11 @@ void ToastPattern::BeforeCreateLayoutWrapper()
 
     auto toastNode = GetHost();
     CHECK_NULL_VOID(toastNode);
+    auto pipelineContext = IsDefaultToast() ? toastNode->GetContextRefPtr() : GetMainPipelineContext();
+    if (!pipelineContext) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast get pipelineContext failed");
+        return;
+    }
     UpdateToastSize(toastNode);
 
     auto textNode = DynamicCast<FrameNode>(toastNode->GetFirstChild());

@@ -219,6 +219,33 @@ struct ArkUIMouseEvent {
     ArkUI_Int32 interceptResult;
 };
 
+struct ArkUIDragEvent {
+    void* unifiedData;
+    void* unifiedDataSummary;
+    ArkUI_Int32 dragResult;
+    ArkUI_Float64 touchPointX;
+    ArkUI_Float64 touchPointY;
+    ArkUI_Float64 previewRectWidth;
+    ArkUI_Float64 previewRectHeight;
+    ArkUI_Float64 velocityX;
+    ArkUI_Float64 velocityY;
+    ArkUI_Float64 velocity;
+    ArkUI_Float64 windowX;
+    ArkUI_Float64 windowY;
+    ArkUI_Float64 displayX;
+    ArkUI_Float64 displayY;
+    ArkUI_Float64 screenX;
+    ArkUI_Float64 screenY;
+    ArkUI_Int64 modifierKeyState;
+    ArkUI_Int32 dragBehavior;
+    bool useCustomDropAnimation;
+    ArkUI_Int32 subKind;
+    ArkUI_Int32 preDragStatus;
+    ArkUI_Int32 dataTypesCount;
+    ArkUI_CharPtr* dataTypes;
+    ArkUI_Int32 dataTypesMaxStrLength;
+};
+
 struct ArkUIStringAndFloat {
     ArkUI_Float32 value;
     ArkUI_CharPtr valueStr;
@@ -673,6 +700,7 @@ enum ArkUIEventCategory {
     TEXT_ARRAY = 8,
     MOUSE_INPUT_EVENT = 9,
     MIXED_EVENT = 10,
+    DRAG_EVENT = 11,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -695,6 +723,13 @@ enum ArkUIEventSubKind {
     ON_ATTACH,
     ON_DETACH,
     ON_ACCESSIBILITY_ACTIONS,
+    ON_DRAG_START,
+    ON_DRAG_ENTER,
+    ON_DRAG_DROP,
+    ON_DRAG_MOVE,
+    ON_DRAG_LEAVE,
+    ON_DRAG_END,
+    ON_PRE_DRAG,
     ON_DETECT_RESULT_UPDATE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT,
     ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
     ON_IMAGE_ERROR,
@@ -994,6 +1029,7 @@ struct ArkUINodeEvent {
         ArkUIAPIEventTextArray textArrayEvent;
         ArkUIMouseEvent mouseEvent;
         ArkUIMixedEvent mixedEvent;
+        ArkUIDragEvent dragEvent;
     };
 };
 
@@ -1728,6 +1764,10 @@ struct ArkUICommonModifier {
     void (*setTransition)(ArkUINodeHandle node, ArkUITransitionEffectOption* option);
     void (*setDragPreview)(ArkUINodeHandle node, ArkUIDragPreview dragPreview);
     void (*resetDragPreview)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getNodeUniqueId)(ArkUINodeHandle node);
+    void (*setFocusBoxStyle)(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Float32 valueStrokeWidth,
+        ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue);
+    void (*resetFocusBoxStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {

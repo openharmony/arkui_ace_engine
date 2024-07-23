@@ -60,7 +60,7 @@ std::optional<SizeF> CalendarLayoutAlgorithm::MeasureContent(
         auto frameNode = layoutWrapper->GetHostNode();
         CHECK_NULL_RETURN(frameNode, std::nullopt);
         auto pipeline = frameNode->GetContext();
-        CHECK_NULL_RETURN(frameNode, std::nullopt);
+        CHECK_NULL_RETURN(pipeline, std::nullopt);
         maxWidth_ = pipeline->GetRootWidth();
         maxHeight_ = pipeline->GetRootHeight();
         return SizeF(static_cast<float>(pipeline->GetRootWidth()), static_cast<float>(pipeline->GetRootHeight()));

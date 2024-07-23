@@ -185,6 +185,11 @@ void RefreshModelNG::SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder)
     pattern->AddCustomBuilderNode(customBuilder);
 }
 
+void RefreshModelNG::SetIsCustomBuilderExist(bool isCustomBuilderExist)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsCustomBuilderExist, isCustomBuilderExist);
+}
+
 void RefreshModelNG::SetCustomBuilder(FrameNode* frameNode, FrameNode* customBuilder)
 {
     CHECK_NULL_VOID(frameNode);

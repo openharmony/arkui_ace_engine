@@ -22,7 +22,7 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
-
+constexpr float DRAG_BACKGROUND_OPACITY = 0.95f;
 /**
  * TextTheme defines color and styles of ThemeComponent. TextTheme should be built
  * using TextTheme::Builder.
@@ -63,6 +63,11 @@ public:
             theme->selectedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, Color(0x33007dff));
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
+            auto dragBackgroundColor = pattern->GetAttr<Color>("drag_background_color", Color::WHITE);
+            if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+                dragBackgroundColor = dragBackgroundColor.ChangeOpacity(DRAG_BACKGROUND_OPACITY);
+            }
+            theme->dragBackgroundColor_ = dragBackgroundColor;
             constexpr double childMinSize = 20.0;
             theme->linearSplitChildMinSize_ = pattern->GetAttr<double>(LINEAR_SPLIT_CHILD_MIN_SIZE, childMinSize);
             theme->isTextFadeout_ = pattern->GetAttr<std::string>("text_fadeout_enable", "") == "true";
@@ -109,12 +114,18 @@ public:
         return isShowHandle_;
     }
 
+    const Color& GetDragBackgroundColor() const
+    {
+        return dragBackgroundColor_;
+    }
+
 protected:
     TextTheme() = default;
 
 private:
     TextStyle textStyle_;
     Color selectedColor_;
+    Color dragBackgroundColor_ = Color::WHITE;
     bool draggable_ = false;
     double linearSplitChildMinSize_ = 20.0;
     bool isTextFadeout_ = false;

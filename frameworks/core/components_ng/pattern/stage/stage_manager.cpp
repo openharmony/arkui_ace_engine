@@ -394,6 +394,7 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         FirePageShow(newPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
         inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
     }
+    PageChangeCloseKeyboard();
     AddPageTransitionTrace(outPageNode, inPageNode);
 
     FireAutoSave(outPageNode, inPageNode);
@@ -492,7 +493,7 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
     context->MarkNeedFlushMouseEvent();
 }
 
-void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType)
+void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType, bool needFocus)
 {
     auto pageNode = DynamicCast<FrameNode>(node);
     CHECK_NULL_VOID(pageNode);
@@ -500,7 +501,9 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
 
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    pagePattern->FocusViewShow();
+    if (needFocus) {
+        pagePattern->FocusViewShow();
+    }
     pagePattern->OnShow();
     // With or without a page transition, we need to make the coming page visible first
     pagePattern->ProcessShowState();
@@ -631,12 +634,27 @@ void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, cons
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page from %s to %s", srcFullPath.c_str(), destFullPath.c_str());
 }
 
-void StageManager::SyncPageSafeArea(const RefPtr<FrameNode>& lastPage, PropertyChangeFlag changeFlag)
+void StageManager::SyncPageSafeArea(bool keyboardSafeArea)
 {
+    auto changeType = keyboardSafeArea ? PROPERTY_UPDATE_LAYOUT : PROPERTY_UPDATE_MEASURE;
+    auto lastPage = GetLastPageWithTransition();
     CHECK_NULL_VOID(lastPage);
-    lastPage->MarkDirtyNode(changeFlag);
-    auto overlay = lastPage->GetPattern<PagePattern>();
-    CHECK_NULL_VOID(overlay);
-    overlay->MarkDirtyOverlay();
+    lastPage->MarkDirtyNode(changeType);
+    auto lastPageOverlay = lastPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(lastPageOverlay);
+    lastPageOverlay->MarkDirtyOverlay();
+
+    auto prevPage = GetPrevPageWithTransition();
+    CHECK_NULL_VOID(prevPage);
+    auto prevPageOverlay = prevPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(prevPageOverlay);
+    prevPageOverlay->MarkDirtyOverlay();
+}
+
+bool StageManager::CheckPageFocus()
+{
+    auto pageNode = GetLastPage();
+    CHECK_NULL_RETURN(pageNode, true);
+    return pageNode->GetFocusHub() && pageNode->GetFocusHub()->IsCurrentFocus();
 }
 } // namespace OHOS::Ace::NG

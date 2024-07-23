@@ -447,6 +447,19 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             customActionCancel();
         }
     };
+    auto panOnReject = [weak = WeakClaim(this)]() {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Tragger pan onReject");
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        actuator->SetGatherNode(nullptr);
+        actuator->ClearGatherNodeChildrenInfo();
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto manager = pipelineContext->GetOverlayManager();
+        CHECK_NULL_VOID(manager);
+        manager->RemoveGatherNode();
+    };
+    panRecognizer_->SetOnReject(panOnReject);
     panRecognizer_->SetIsForDrag(true);
     panRecognizer_->SetMouseDistance(DRAG_PAN_DISTANCE_MOUSE.ConvertToPx());
     actionCancel_ = actionCancel;
@@ -615,6 +628,24 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_DETECTING_STATUS, frameNode);
         }
     };
+    auto longpressOnReject = [weak = WeakClaim(this)]() {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto dragDropManager = pipelineContext->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        if (dragDropManager->IsDragging()) {
+            return;
+        }
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Tragger long press onReject");
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        actuator->SetGatherNode(nullptr);
+        actuator->ClearGatherNodeChildrenInfo();
+        auto manager = pipelineContext->GetOverlayManager();
+        CHECK_NULL_VOID(manager);
+        manager->RemoveGatherNode();
+    };
+    previewLongPressRecognizer_->SetOnReject(panOnReject);
     previewLongPressRecognizer_->SetOnAction(longPressUpdate);
     previewLongPressRecognizer_->SetOnActionCancel(longPressCancel);
     previewLongPressRecognizer_->SetThumbnailCallback(std::move(preDragCallback));
@@ -1256,7 +1287,7 @@ void DragEventActuator::ApplyNewestOptionExecutedFromModifierToNode(
 
 void DragEventActuator::SetEventColumn(const RefPtr<DragEventActuator>& actuator)
 {
-    TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent start set eventColumn.");
+    TAG_LOGI(AceLogTag::ACE_DRAG, "DragEvent start set eventColumn.");
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
@@ -1289,7 +1320,8 @@ void DragEventActuator::SetEventColumn(const RefPtr<DragEventActuator>& actuator
     } else {
         manager->MountEventToRootNode(columnNode);
     }
-    TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set eventColumn success.");
+    TAG_LOGI(AceLogTag::ACE_DRAG, "DragEvent set eventColumn success. depth %{public}d, id %{public}d.",
+        columnNode->GetDepth(), columnNode->GetId());
 }
 
 void DragEventActuator::HideFilter()
@@ -1368,6 +1400,7 @@ void DragEventActuator::HideEventColumn()
 void DragEventActuator::BindClickEvent(const RefPtr<FrameNode>& columnNode)
 {
     auto callback = [weak = WeakClaim(this)](GestureEvent& /* info */) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "start click event callback");
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         auto gestureHub = actuator->gestureEventHub_.Upgrade();

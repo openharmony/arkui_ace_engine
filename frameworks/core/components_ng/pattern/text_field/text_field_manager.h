@@ -75,12 +75,21 @@ public:
 
     bool GetImeShow() const override
     {
-        return imeShow_;
+        if (!imeShow_ && imeAttachCalled_) {
+            TAG_LOGI(ACE_KEYBOARD, "imeNotShown but attach called, still consider that as shown");
+        }
+        return imeShow_ || imeAttachCalled_;
     }
 
     void SetImeShow(bool imeShow)
     {
         imeShow_ = imeShow;
+        imeAttachCalled_ = false;
+    }
+
+    void SetImeAttached(bool imeAttached)
+    {
+        imeAttachCalled_ = imeAttached;
     }
 
     void SetUIExtensionImeShow(bool imeShow) override
@@ -131,6 +140,7 @@ private:
     WeakPtr<Pattern> onFocusTextField_;
     WeakPtr<FrameNode> weakNavNode_;
     int32_t onFocusTextFieldId = -1;
+    bool imeAttachCalled_ = false;
     bool needToRequestKeyboard_ = true;
 };
 

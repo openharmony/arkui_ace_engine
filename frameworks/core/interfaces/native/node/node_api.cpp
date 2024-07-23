@@ -40,6 +40,7 @@
 #include "core/interfaces/native/node/node_canvas_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_common_modifier.h"
+#include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
 #include "core/interfaces/native/node/node_list_modifier.h"
@@ -334,6 +335,13 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnAttach,
     NodeModifier::SetOnDetach,
     NodeModifier::SetOnAccessibilityActions,
+    NodeModifier::SetOnDragStart,
+    NodeModifier::SetOnDragEnter,
+    NodeModifier::SetOnDragDrop,
+    NodeModifier::SetOnDragMove,
+    NodeModifier::SetOnDragLeave,
+    NodeModifier::SetOnDragEnd,
+    NodeModifier::SetOnPreDrag,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {

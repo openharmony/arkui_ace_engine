@@ -2734,8 +2734,9 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
     }
     auto ret = OHOS::Rosen::RSInterfaces::GetInstance().RegisterSurfaceOcclusionChangeCallback(
         surfaceNodeId_,
-        [weak = WeakClaim(this), weakContext = context_](float visibleRatio) {
+        [weak = WeakClaim(this)](float visibleRatio) {
             auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
             auto context = delegate->context_.Upgrade();
             CHECK_NULL_VOID(context);
             context->GetTaskExecutor()->PostTask(
@@ -7082,8 +7083,6 @@ NG::WebInfoType WebDelegate::GetWebInfoType()
 
 void WebDelegate::OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "OnAdsBlocked %{public}s", url.c_str());
-
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     context->GetTaskExecutor()->PostTask(

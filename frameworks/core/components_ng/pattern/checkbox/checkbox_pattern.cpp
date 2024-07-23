@@ -297,14 +297,14 @@ void CheckBoxPattern::InitFocusEvent()
 
 void CheckBoxPattern::HandleFocusEvent()
 {
-    CHECK_NULL_VOID(checkboxModifier_);
+    CHECK_NULL_VOID(paintMethod_);
     AddIsFocusActiveUpdateEvent();
     OnIsFocusActiveUpdate(true);
 }
 
 void CheckBoxPattern::HandleBlurEvent()
 {
-    CHECK_NULL_VOID(checkboxModifier_);
+    CHECK_NULL_VOID(paintMethod_);
     RemoveIsFocusActiveUpdateEvent();
     OnIsFocusActiveUpdate(false);
 }
@@ -333,8 +333,10 @@ void CheckBoxPattern::RemoveIsFocusActiveUpdateEvent()
 
 void CheckBoxPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
 {
-    CHECK_NULL_VOID(checkboxModifier_);
-    checkboxModifier_->SetIsFocused(isFocusAcitve);
+    CHECK_NULL_VOID(paintMethod_);
+    auto modifier = paintMethod_->GetCheckBoxModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->SetIsFocused(isFocusAcitve);
 }
 
 void CheckBoxPattern::OnClick()
