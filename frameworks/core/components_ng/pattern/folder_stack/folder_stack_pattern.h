@@ -113,6 +113,11 @@ public:
         return lastTime_;
     }
 
+    CancelableCallback<void()> GetFoldStatusDelayTask() const
+    {
+        return foldStatusDelayTask_;
+    }
+
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     void RegisterFoldStatusListener();
