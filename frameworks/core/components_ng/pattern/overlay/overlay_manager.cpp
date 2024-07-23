@@ -1385,7 +1385,7 @@ void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode, bool i
             currentId = CONTAINER_ID_DIVIDE_SIZE;
         }
     } else if (container->IsSubContainer()) {
-        currentId - SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
     }
     container->RequestAutoSave(ContainerNode, nullptr, nullptr, true, currentId);
 }
