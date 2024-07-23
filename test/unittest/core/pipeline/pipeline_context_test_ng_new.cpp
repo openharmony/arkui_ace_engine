@@ -1007,7 +1007,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg064, TestSize.Level1)
     std::tuple<float, float, uint64_t> current_fs = std::make_tuple(2.0f, 2.0f, 2000);
     uint64_t nanoTimeStampFs = 1000;
     auto result_fs = context_->LinearInterpolation(history_fs, current_fs, nanoTimeStampFs);
-    EXPECT_EQ(result_fs, std::make_pair(0.0f, 0.0f));
+    EXPECT_EQ(result_fs, std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f));
 
     /**
      * @tc.steps2: history and current timestamps are equal to nanoTimeStamp
@@ -1017,7 +1017,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg064, TestSize.Level1)
     std::tuple<float, float, uint64_t> current_se = std::make_tuple(2.0f, 2.0f, 1000);
     uint64_t nanoTimeStampSe = 1500;
     auto result_se = context_->LinearInterpolation(history_se, current_se, nanoTimeStampSe);
-    EXPECT_EQ(result_se, std::make_pair(0.0f, 0.0f));
+    EXPECT_EQ(result_se, std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f));
 
     /**
      * @tc.steps3: history and current timestamps are equal to nanoTimeStamp
@@ -1027,7 +1027,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg064, TestSize.Level1)
     std::tuple<float, float, uint64_t> current_th = std::make_tuple(2.0f, 2.0f, 3000);
     uint64_t nanoTimeStampTh = 2500;
     auto result_th = context_->LinearInterpolation(history_th, current_th, nanoTimeStampTh);
-    EXPECT_EQ(result_th, std::make_pair(1.75f, 1.75f));
+    EXPECT_EQ(result_th, std::make_tuple(1.75f, 1.75f, 500000.0f, 500000.0f));
 
     /**
      * @tc.steps4: nanoTimeStamp is less than history timestamp
@@ -1037,7 +1037,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg064, TestSize.Level1)
     std::tuple<float, float, uint64_t> current_for = std::make_tuple(2.0f, 2.0f, 2000);
     uint64_t nanoTimeStampFor = 500;
     auto result_for = context_->LinearInterpolation(history_for, current_for, nanoTimeStampFor);
-    EXPECT_EQ(result_for, std::make_pair(0.0f, 0.0f));
+    EXPECT_EQ(result_for, std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f));
 
     /**
      * @tc.steps5: nanoTimeStamp is less than current timestamp
@@ -1047,7 +1047,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg064, TestSize.Level1)
     std::tuple<float, float, uint64_t> current_fie = std::make_tuple(2.0f, 2.0f, 2000);
     uint64_t nanoTimeStampFie = 1500;
     auto result_fie = context_->LinearInterpolation(history_fie, current_fie, nanoTimeStampFie);
-    EXPECT_NE(result_fie, std::make_pair(0.0f, 0.0f));
+    EXPECT_NE(result_fie, std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f));
 
     /**
      * @tc.steps6: nanoTimeStamp is greater than current timestamp
@@ -1057,7 +1057,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg064, TestSize.Level1)
     std::tuple<float, float, uint64_t> current_six = std::make_tuple(2.0f, 2.0f, 2000);
     uint64_t nanoTimeStampSix = 2500;
     auto result_six = context_->LinearInterpolation(history_six, current_six, nanoTimeStampSix);
-    EXPECT_NE(result_six, std::make_pair(0.0f, 0.0f));
+    EXPECT_NE(result_six, std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 /**
@@ -1075,20 +1075,21 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg065, TestSize.Level1)
     std::vector<TouchEvent> emptyCurrent;
     uint64_t nanoTimeStamp = 1234567890;
     bool isScreen = true;
-    std::pair<float, float> result = context_->GetResampleCoord(emptyHistory, emptyCurrent, nanoTimeStamp, isScreen);
-    EXPECT_FLOAT_EQ(0.0f, result.first);
-    EXPECT_FLOAT_EQ(0.0f, result.second);
+    std::tuple<float, float, float, float> result =
+        context_->GetResampleCoord(emptyHistory, emptyCurrent, nanoTimeStamp, isScreen);
+    EXPECT_FLOAT_EQ(0.0f, std::get<0>(result));
+    EXPECT_FLOAT_EQ(0.0f, std::get<1>(result));
     auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
     emptyHistory.push_back(TouchEvent {}.SetX(100.0f).SetY(200.0f).SetTime(timeStampAce));
     result = context_->GetResampleCoord(emptyHistory, emptyCurrent, nanoTimeStamp, isScreen);
-    EXPECT_FLOAT_EQ(0.0f, result.first);
-    EXPECT_FLOAT_EQ(0.0f, result.second);
+    EXPECT_FLOAT_EQ(0.0f, std::get<0>(result));
+    EXPECT_FLOAT_EQ(0.0f, std::get<1>(result));
     emptyHistory.clear();
     auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
     emptyCurrent.push_back(TouchEvent {}.SetX(200.0f).SetY(300.0f).SetTime(timeStampTwo));
     result = context_->GetResampleCoord(emptyHistory, emptyCurrent, nanoTimeStamp, isScreen);
-    EXPECT_FLOAT_EQ(0.0f, result.first);
-    EXPECT_FLOAT_EQ(0.0f, result.second);
+    EXPECT_FLOAT_EQ(0.0f, std::get<0>(result));
+    EXPECT_FLOAT_EQ(0.0f, std::get<1>(result));
 }
 
 /**

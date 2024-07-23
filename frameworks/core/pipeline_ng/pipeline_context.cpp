@@ -96,10 +96,13 @@
 
 namespace {
 constexpr uint64_t ONE_MS_IN_NS = 1 * 1000 * 1000;
+constexpr uint64_t ONE_S_IN_NS = 1 * 1000 * 1000 * 1000;
 constexpr uint64_t INTERPOLATION_THRESHOLD = 100 * 1000 * 1000; // 100ms
 constexpr int32_t INDEX_X = 0;
 constexpr int32_t INDEX_Y = 1;
 constexpr int32_t INDEX_TIME = 2;
+constexpr int32_t INDEX_X_SLOPE = 2;
+constexpr int32_t INDEX_Y_SLOPE = 3;
 constexpr int32_t TIME_THRESHOLD = 2 * 1000000; // 3 millisecond
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t USED_ID_FIND_FLAG = 3;                 // if args >3 , it means use id to find
@@ -372,35 +375,40 @@ void PipelineContext::RemoveScheduleTask(uint32_t id)
     scheduleTasks_.erase(id);
 }
 
-std::pair<float, float> PipelineContext::LinearInterpolation(const std::tuple<float, float, uint64_t>& history,
-    const std::tuple<float, float, uint64_t>& current, const uint64_t nanoTimeStamp)
+std::tuple<float, float, float, float> PipelineContext::LinearInterpolation(
+    const std::tuple<float, float, uint64_t>& history, const std::tuple<float, float, uint64_t>& current,
+    const uint64_t nanoTimeStamp)
 {
     if (nanoTimeStamp == std::get<INDEX_TIME>(history) || nanoTimeStamp == std::get<INDEX_TIME>(current)) {
-        return std::make_pair(0.0f, 0.0f);
+        return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
     }
     if (std::get<INDEX_TIME>(current) <= std::get<INDEX_TIME>(history)) {
-        return std::make_pair(0.0f, 0.0f);
+        return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
     }
     if (std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history) > INTERPOLATION_THRESHOLD) {
-        return std::make_pair(0.0f, 0.0f);
+        return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
     }
     if (nanoTimeStamp < std::get<INDEX_TIME>(history)) {
-        return std::make_pair(0.0f, 0.0f);
+        return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
     }
+    auto inputXDeltaSlope = (std::get<INDEX_X>(current) - std::get<INDEX_X>(history)) * ONE_S_IN_NS /
+                            (float)(std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history));
+    auto inputYDeltaSlope = (std::get<INDEX_Y>(current) - std::get<INDEX_Y>(history)) * ONE_S_IN_NS /
+                            (float)(std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history));
     if (nanoTimeStamp < std::get<INDEX_TIME>(current)) {
         float alpha = (float)(nanoTimeStamp - std::get<INDEX_TIME>(history)) /
                       (float)(std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history));
         float x = std::get<INDEX_X>(history) + alpha * (std::get<INDEX_X>(current) - std::get<INDEX_X>(history));
         float y = std::get<INDEX_Y>(history) + alpha * (std::get<INDEX_Y>(current) - std::get<INDEX_Y>(history));
-        return std::make_pair(x, y);
+        return std::make_tuple(x, y, inputXDeltaSlope, inputYDeltaSlope);
     } else if (nanoTimeStamp > std::get<INDEX_TIME>(current)) {
         float alpha = (float)(nanoTimeStamp - std::get<INDEX_TIME>(current)) /
                       (float)(std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history));
         float x = std::get<INDEX_X>(current) + alpha * (std::get<INDEX_X>(current) - std::get<INDEX_X>(history));
         float y = std::get<INDEX_Y>(current) + alpha * (std::get<INDEX_Y>(current) - std::get<INDEX_Y>(history));
-        return std::make_pair(x, y);
+        return std::make_tuple(x, y, inputXDeltaSlope, inputYDeltaSlope);
     }
-    return std::make_pair(0.0f, 0.0f);
+    return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 std::tuple<float, float, uint64_t> PipelineContext::GetAvgPoint(
@@ -433,11 +441,11 @@ std::tuple<float, float, uint64_t> PipelineContext::GetAvgPoint(
     return std::make_tuple(avgX, avgY, avgTime);
 }
 
-std::pair<float, float> PipelineContext::GetResampleCoord(const std::vector<TouchEvent>& history,
+std::tuple<float, float, float, float> PipelineContext::GetResampleCoord(const std::vector<TouchEvent>& history,
     const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp, const bool isScreen)
 {
     if (history.empty() || current.empty()) {
-        return std::make_pair(0.0f, 0.0f);
+        return std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f);
     }
     uint64_t lastNanoTime = 0;
     float x = 0.0f;
@@ -451,7 +459,7 @@ std::pair<float, float> PipelineContext::GetResampleCoord(const std::vector<Touc
         }
     }
     if (nanoTimeStamp > RESAMPLE_COORD_TIME_THRESHOLD + lastNanoTime) {
-        return std::make_pair(x, y);
+        return std::make_tuple(x, y, 0.0f, 0.0f);
     }
     auto historyPoint = GetAvgPoint(history, isScreen);
     auto currentPoint = GetAvgPoint(current, isScreen);
@@ -480,15 +488,17 @@ TouchEvent PipelineContext::GetResampleTouchEvent(
     auto newXy = GetResampleCoord(history, current, nanoTimeStamp, false);
     auto newScreenXy = GetResampleCoord(history, current, nanoTimeStamp, true);
     TouchEvent newTouchEvent = GetLatestPoint(current, nanoTimeStamp);
-    if (newXy.first != 0 && newXy.second != 0) {
-        newTouchEvent.x = newXy.first;
-        newTouchEvent.y = newXy.second;
-        newTouchEvent.screenX = newScreenXy.first;
-        newTouchEvent.screenY = newScreenXy.second;
+    if (std::get<INDEX_X>(newXy) != 0 && std::get<INDEX_Y>(newXy) != 0) {
+        newTouchEvent.x = std::get<INDEX_X>(newXy);
+        newTouchEvent.y = std::get<INDEX_Y>(newXy);
+        newTouchEvent.screenX = std::get<INDEX_X>(newScreenXy);
+        newTouchEvent.screenY = std::get<INDEX_Y>(newScreenXy);
         std::chrono::nanoseconds nanoseconds(nanoTimeStamp);
         newTouchEvent.time = TimeStamp(nanoseconds);
         newTouchEvent.history = current;
         newTouchEvent.isInterpolated = true;
+        newTouchEvent.inputXDeltaSlope = std::get<INDEX_X_SLOPE>(newXy);
+        newTouchEvent.inputYDeltaSlope = std::get<INDEX_Y_SLOPE>(newXy);
     }
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT,
