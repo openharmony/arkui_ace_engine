@@ -94,6 +94,13 @@ const std::string OH_DEFAULT_SELECT_ALL = "OH_DEFAULT_SELECT_ALL";
 const std::string OH_DEFAULT_CAMERA_INPUT = "OH_DEFAULT_CAMERA_INPUT";
 const std::string OH_DEFAULT_COLLABORATION_SERVICE = "OH_DEFAULT_COLLABORATION_SERVICE";
 
+const std::unordered_map<std::string, std::function<bool(const SelectMenuInfo&)>> isMenuItemEnabledFuncMap = {
+    { OH_DEFAULT_CUT, [](const SelectMenuInfo& info){ return info.showCut; } },
+    { OH_DEFAULT_COPY, [](const SelectMenuInfo& info){ return info.showCopy; } },
+    { OH_DEFAULT_SELECT_ALL, [](const SelectMenuInfo& info){ return info.showCopyAll; } },
+    { OH_DEFAULT_PASTE, [](const SelectMenuInfo& info){ return info.showPaste; } }
+};
+
 void SetResponseRegion(RefPtr<FrameNode>& node)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -539,6 +546,13 @@ std::unordered_map<std::string, std::function<void()>> GetSystemCallback(const s
     return systemCallback;
 }
 
+bool IsSystemMenuItemEnabled(const std::shared_ptr<SelectOverlayInfo>& info, const std::string& id)
+{
+    CHECK_NULL_RETURN(info, true);
+    auto isEnabledFunc = isMenuItemEnabledFuncMap.find(id);
+    return isEnabledFunc == isMenuItemEnabledFuncMap.end() ? true : (isEnabledFunc->second)(info->menuInfo);
+}
+
 std::string GetSystemIconPath(const std::string& id, const std::string& iconPath)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -622,7 +636,8 @@ std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOption
                 overlayManager->DestroySelectOverlay(true);
             }
         };
-        params.emplace_back(item.content.value_or("null"), "", callback);
+        params.emplace_back(GetItemContent(item.id, item.content.value_or("")), "", callback);
+        params.back().enabled = IsSystemMenuItemEnabled(info, item.id);
         itemNum++;
     }
     return params;
