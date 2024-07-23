@@ -709,6 +709,11 @@ void PipelineContext::FlushNodeChangeFlag() {}
 
 void PipelineContext::CleanNodeChangeFlag() {}
 
+bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
+{
+    return false;
+}
+
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
