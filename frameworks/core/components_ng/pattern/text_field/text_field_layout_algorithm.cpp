@@ -551,35 +551,10 @@ void TextFieldLayoutAlgorithm::HandleTextArea(LayoutWrapper* layoutWrapper, cons
     RefPtr<GeometryNode> counterGeometryNode = counterNode->GetGeometryNode();
     CHECK_NULL_VOID(counterGeometryNode);
     RectF frameRect = layoutWrapper->GetGeometryNode()->GetFrameRect();
-    countX = -content->GetRect().Width() + counterGeometryNode->GetFrameRect().Width();
-    if (isRTL) {
-        HandleRTLTextArea(content, counterGeometryNode, countX, counterGeometryNode->GetContentSize().Width());
-    } else {
-        HandleLTRTextArea(content, counterGeometryNode, countX);
-    }
+    countX = content->GetRect().GetX();
     counterGeometryNode->SetFrameOffset(OffsetF(countX,
         frameRect.Height() - pattern->GetPaddingBottom() - counterGeometryNode->GetFrameRect().Height()));
     counterNode->Layout();
-}
-
-void TextFieldLayoutAlgorithm::HandleRTLTextArea(const std::unique_ptr<GeometryProperty>& content,
-    const RefPtr<GeometryNode>& textGeometryNode, float& countX, float errTextWidth)
-{
-    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-        countX = content->GetRect().GetX();
-    } else {
-        countX = -content->GetRect().Width() + errTextWidth;
-    }
-}
-
-void TextFieldLayoutAlgorithm::HandleLTRTextArea(const std::unique_ptr<GeometryProperty>& content,
-    const RefPtr<GeometryNode>& textGeometryNode, float& countX)
-{
-    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-        countX = content->GetRect().Width();
-    } else {
-        countX = content->GetRect().GetX();
-    }
 }
 
 float TextFieldLayoutAlgorithm::CounterNodeMeasure(float contentWidth, LayoutWrapper* layoutWrapper)

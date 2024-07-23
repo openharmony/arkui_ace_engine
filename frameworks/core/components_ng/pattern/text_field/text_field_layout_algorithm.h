@@ -178,10 +178,6 @@ private:
         const RefPtr<TextFieldPattern>& pattern, bool isRTL, float& countX);
     void HandleTextArea(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& counterNode,
         const RefPtr<TextFieldPattern>& pattern, bool isRTL, float& countX);
-    void HandleRTLTextArea(const std::unique_ptr<GeometryProperty>& content,
-        const RefPtr<GeometryNode>& textGeometryNode, float& countX, float errTextWidth);
-    void HandleLTRTextArea(const std::unique_ptr<GeometryProperty>& content,
-        const RefPtr<GeometryNode>& textGeometryNode, float &countX);
     float CalculateContentWidth(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
         float imageWidth);
     float CalculateContentHeight(const LayoutConstraintF& contentConstraint);
