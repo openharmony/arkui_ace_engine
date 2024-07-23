@@ -21,11 +21,17 @@
 #include <variant>
 #include <vector>
 
-#include "base/utils/type_definition.h"
+#include "commonlibrary/c_utils/base/include/refbase.h"
+
+namespace OHOS {
+class IRemoteObject;
+}
 
 namespace OHOS::Ace {
 constexpr int32_t UNSUPPORTED_CODE = 801;
-using FuncVariant = std::variant<std::function<void(std::string)>, std::function<void(int32_t, std::string)>>;
+using FuncVariant =
+    std::variant<std::function<void(sptr<IRemoteObject>, std::string)>, std::function<void(int32_t, std::string)>,
+    std::function<void(int32_t, std::string, std::string, int32_t, std::string)>>;
 
 struct TextDataDetectInfo {
     std::string text;
