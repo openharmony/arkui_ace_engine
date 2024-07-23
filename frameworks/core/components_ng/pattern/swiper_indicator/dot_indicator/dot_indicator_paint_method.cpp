@@ -360,17 +360,11 @@ std::tuple<float, float, float> DotIndicatorPaintMethod::GetMoveRate()
         longPointLeftCenterMoveRate = 1;
         longPointRightCenterMoveRate = 1;
     } else if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT) {
-        auto rateAbs = std::abs(turnPageRate_);
-        if (!isHorizontalAndRightToLeft_) {
-            rateAbs = 1.0f - rateAbs;
-        }
+        auto rateAbs = 1.0f - std::abs(turnPageRate_);
         // x0:0.33, y0:0, x1:0.67, y1:1
         longPointLeftCenterMoveRate = longPointRightCenterMoveRate = CubicCurve(0.33, 0, 0.67, 1).MoveInternal(rateAbs);
     } else if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT) {
         auto rateAbs = std::abs(turnPageRate_);
-        if (isHorizontalAndRightToLeft_) {
-            rateAbs = 1.0f - rateAbs;
-        }
         // x0:0.33, y0:0, x1:0.67, y1:1
         longPointLeftCenterMoveRate = longPointRightCenterMoveRate = CubicCurve(0.33, 0, 0.67, 1).MoveInternal(rateAbs);
     } else if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
@@ -380,10 +374,6 @@ std::tuple<float, float, float> DotIndicatorPaintMethod::GetMoveRate()
     } else if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
         longPointRightCenterMoveRate = std::abs(turnPageRate_);
         longPointLeftCenterMoveRate = std::abs(turnPageRate_) * LONG_POINT_TAIL_RATIO;
-    }
-    if (isHorizontalAndRightToLeft_ && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
-        gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT)) {
-        return { blackPointCenterMoveRate, longPointRightCenterMoveRate, longPointLeftCenterMoveRate };
     }
     return { blackPointCenterMoveRate, longPointLeftCenterMoveRate, longPointRightCenterMoveRate };
 }
@@ -408,10 +398,10 @@ std::pair<float, float> DotIndicatorPaintMethod::CalculatePointCenterX(
         (starAndEndPointCenter.endLongPointRightCenterX - starAndEndPointCenter.startLongPointRightCenterX) *
             longPointRightCenterMoveRate;
     if (isHorizontalAndRightToLeft_) {
-        longPointCenterX.first = starAndEndPointCenter.startLongPointLeftCenterX -
+        longPointCenterX.first = starAndEndPointCenter.startLongPointLeftCenterX +
         (starAndEndPointCenter.endLongPointLeftCenterX - starAndEndPointCenter.startLongPointLeftCenterX) *
             longPointLeftCenterMoveRate;
-        longPointCenterX.second = starAndEndPointCenter.startLongPointRightCenterX -
+        longPointCenterX.second = starAndEndPointCenter.startLongPointRightCenterX +
             (starAndEndPointCenter.endLongPointRightCenterX - starAndEndPointCenter.startLongPointRightCenterX) *
                 longPointRightCenterMoveRate;
     }
