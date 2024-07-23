@@ -115,7 +115,10 @@ public:
 
     bool HasFoldStatusDelayTask() const
     {
-        return foldStatusDelayTask_;
+        if (foldStatusDelayTask_) {
+            return true;
+        }
+        return false;
     }
 
 private:
