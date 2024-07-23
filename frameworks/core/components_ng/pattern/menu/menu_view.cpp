@@ -61,7 +61,6 @@ constexpr float PREVIEW_ORIGIN_SCALE = 1.0f;
 const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 380.0f, 34.0f);
 const std::string HOVER_IMAGE_CLIP_PROPERTY_NAME = "hoverImageClip";
-const std::string BUTTON_PASTE = "textoverlay.paste";
 
 void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode)
 {
@@ -244,7 +243,7 @@ void OptionKeepMenu(RefPtr<FrameNode>& option, WeakPtr<FrameNode>& menuWeak)
 bool GetHasIcon(const std::vector<OptionParam>& params)
 {
     for (size_t i = 0; i < params.size(); ++i) {
-        if (!params[i].icon.empty() || params[i].value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
+        if (!params[i].icon.empty() || params[i].isPasteOption) {
             return true;
         }
     }
