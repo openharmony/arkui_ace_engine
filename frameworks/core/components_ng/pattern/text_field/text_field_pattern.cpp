@@ -109,6 +109,7 @@ const BorderRadiusProperty ZERO_BORDER_RADIUS_PROPERTY(0.0_vp);
 // need to be moved to TextFieldTheme
 constexpr Dimension BORDER_DEFAULT_WIDTH = 0.0_vp;
 constexpr Dimension TYPING_UNDERLINE_WIDTH = 2.0_px;
+constexpr Dimension ERROR_BORDER_WIDTH = 1.0_vp;
 constexpr Dimension OVER_COUNT_BORDER_WIDTH = 1.0_vp;
 constexpr Dimension INLINE_BORDER_WIDTH = 2.0_vp;
 constexpr Dimension ERROR_UNDERLINE_WIDTH = 2.0_px;
@@ -951,8 +952,6 @@ void TextFieldPattern::HandleFocusEvent()
         needSelectAll_ = true;
     }
     ProcessFocusStyle();
-    SetFocusStyle();
-    AddIsFocusActiveUpdateEvent();
     RequestKeyboardOnFocus();
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ?
         PROPERTY_UPDATE_MEASURE_SELF : PROPERTY_UPDATE_MEASURE);
@@ -981,102 +980,6 @@ void TextFieldPattern::ProcessFocusStyle()
         CHECK_NULL_VOID(textFieldTheme);
         underlineColor_ = userUnderlineColor_.typing.value_or(textFieldTheme->GetUnderlineTypingColor());
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
-    }
-}
-
-void TextFieldPattern::SetFocusStyle()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto textFieldTheme = GetTheme();
-    CHECK_NULL_VOID(textFieldTheme);
-
-    if (!paintProperty->HasBackgroundColor()) {
-        auto defaultBGColor = textFieldTheme->GetBgColor();
-        if (renderContext->GetBackgroundColorValue(defaultBGColor) == defaultBGColor) {
-            renderContext->UpdateBackgroundColor(textFieldTheme->GetFocusBgColor());
-            isFocusBGColorSet_ = true;
-        }
-    }
-    auto defaultTextColor = textFieldTheme->GetTextColor();
-    if (layoutProperty->GetTextColorValue(defaultTextColor) == defaultTextColor) {
-        layoutProperty->UpdateTextColor(textFieldTheme->GetFocusTextColor());
-        isFocusTextColorSet_ = true;
-    }
-    auto defaultPlaceholderColor = textFieldTheme->GetPlaceholderColor();
-    if (layoutProperty->GetPlaceholderTextColorValue(defaultPlaceholderColor) == defaultPlaceholderColor) {
-        layoutProperty->UpdatePlaceholderTextColor(textFieldTheme->GetFocusPlaceholderColor());
-        isFocusPlaceholderColorSet_ = true;
-    }
-
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void TextFieldPattern::ClearFocusStyle()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto textFieldTheme = GetTheme();
-    CHECK_NULL_VOID(textFieldTheme);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-
-    if (isOnHover_) {
-        RestoreDefaultMouseState();
-    }
-
-    if (isFocusBGColorSet_) {
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
-        isFocusBGColorSet_ = false;
-    }
-    if (isFocusTextColorSet_) {
-        layoutProperty->UpdateTextColor(textFieldTheme->GetTextColor());
-        isFocusTextColorSet_ = false;
-    }
-    if (isFocusPlaceholderColorSet_) {
-        layoutProperty->UpdatePlaceholderTextColor(textFieldTheme->GetPlaceholderColor());
-        isFocusPlaceholderColorSet_ = false;
-    }
-
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void TextFieldPattern::AddIsFocusActiveUpdateEvent()
-{
-    if (!isFocusActiveUpdateEvent_) {
-        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
-        };
-    }
-
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
-}
-
-void TextFieldPattern::RemoveIsFocusActiveUpdateEvent()
-{
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
-}
-
-void TextFieldPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
-{
-    if (isFocusAcitve) {
-        SetFocusStyle();
-    } else {
-        ClearFocusStyle();
     }
 }
 
@@ -1358,8 +1261,9 @@ void TextFieldPattern::HandleBlurEvent()
         context->RemoveOnAreaChangeNode(host->GetId());
     }
     needToRequestKeyboardInner_ = false;
-    ClearFocusStyle();
-    RemoveIsFocusActiveUpdateEvent();
+    if (isOnHover_) {
+        RestoreDefaultMouseState();
+    }
     isCursorAlwaysDisplayed_ = false;
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     if (UiSessionManager::GetInstance().GetSearchEventRegistered()) {
@@ -5833,7 +5737,7 @@ void TextFieldPattern::SetShowError()
         } else if (passWordMode) {
             BorderWidthProperty borderWidth;
             BorderColorProperty borderColor;
-            borderWidth.SetBorderWidth(textFieldTheme->GetErrorTextInputBorderWidth());
+            borderWidth.SetBorderWidth(ERROR_BORDER_WIDTH);
             layoutProperty->UpdateBorderWidth(borderWidth);
             borderColor.SetColor(textFieldTheme->GetPasswordErrorBorderColor());
             renderContext->UpdateBorderColor(borderColor);
@@ -6939,10 +6843,7 @@ bool TextFieldPattern::IsShowPasswordIcon() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-
-    auto textfieldTheme = GetTheme();
-    bool isShowPasswordIcon = textfieldTheme->IsShowPasswordIcon();
-    return layoutProperty->GetShowPasswordIconValue(isShowPasswordIcon) && IsInPasswordMode();
+    return layoutProperty->GetShowPasswordIconValue(true) && IsInPasswordMode();
 }
 
 std::optional<bool> TextFieldPattern::IsShowPasswordText() const
@@ -7461,7 +7362,7 @@ void TextFieldPattern::SetThemeBorderAttr()
     CHECK_NULL_VOID(theme);
     if (!paintProperty->HasBorderColorFlagByUser()) {
         BorderColorProperty borderColor;
-        borderColor.SetColor(theme->GetTextInputColor());
+        borderColor.SetColor(Color::BLACK);
         renderContext->UpdateBorderColor(borderColor);
     } else {
         renderContext->UpdateBorderColor(paintProperty->GetBorderColorFlagByUserValue());
@@ -7478,7 +7379,7 @@ void TextFieldPattern::SetThemeBorderAttr()
 
     if (!paintProperty->HasBorderWidthFlagByUser()) {
         BorderWidthProperty borderWidth;
-        borderWidth.SetBorderWidth(theme->GetTextInputWidth());
+        borderWidth.SetBorderWidth(BORDER_DEFAULT_WIDTH);
         renderContext->UpdateBorderWidth(borderWidth);
         layoutProperty->UpdateBorderWidth(borderWidth);
     } else {
@@ -7501,8 +7402,7 @@ void TextFieldPattern::SetThemeAttr()
     CHECK_NULL_VOID(theme);
     SetThemeBorderAttr();
     if (!paintProperty->HasBackgroundColor()) {
-        auto backgroundColor = isFocusBGColorSet_ ? theme->GetFocusBgColor() : theme->GetBgColor();
-        backgroundColor = IsUnderlineMode() ? Color::TRANSPARENT : backgroundColor;
+        auto backgroundColor = IsUnderlineMode() ? Color::TRANSPARENT : theme->GetBgColor();
         renderContext->UpdateBackgroundColor(backgroundColor);
     } else {
         renderContext->UpdateBackgroundColor(paintProperty->GetBackgroundColorValue());
@@ -7529,8 +7429,7 @@ void TextFieldPattern::SetThemeAttr()
     }
 
     if (!paintProperty->HasTextColorFlagByUser()) {
-        auto textColor = isFocusTextColorSet_ ? theme->GetFocusTextColor() : theme->GetTextColor();
-        layoutProperty->UpdateTextColor(textColor);
+        layoutProperty->UpdateTextColor(theme->GetTextColor());
     } else {
         layoutProperty->UpdateTextColor(paintProperty->GetTextColorFlagByUserValue());
     }

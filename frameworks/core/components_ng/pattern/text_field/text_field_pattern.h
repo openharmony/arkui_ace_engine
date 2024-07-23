@@ -853,11 +853,6 @@ public:
     void HandleBlurEvent();
     void HandleFocusEvent();
     void ProcessFocusStyle();
-    void SetFocusStyle();
-    void ClearFocusStyle();
-    void AddIsFocusActiveUpdateEvent();
-    void RemoveIsFocusActiveUpdateEvent();
-    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     bool OnBackPressed() override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
@@ -1751,7 +1746,6 @@ private:
     std::string lastAutoFillTextValue_;
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
-    std::function<void(bool)> isFocusActiveUpdateEvent_;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
     bool isTouchCaret_ = false;
     bool needSelectAll_ = false;
@@ -1778,9 +1772,6 @@ private:
 
     bool haveTextFadeoutCapacity_ = false;
 
-    bool isFocusBGColorSet_ = false;
-    bool isFocusTextColorSet_ = false;
-    bool isFocusPlaceholderColorSet_ = false;
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewText_ = false;
