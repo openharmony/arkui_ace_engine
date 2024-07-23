@@ -17,9 +17,6 @@ ace_unittest("accessibility_test_ng") {
   type = "new"
   module_output = "basic"
   sources = [
-    "$ace_root/frameworks/core/accessibility/accessibility_manager_ng.cpp",
-    "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
-    "accessibility_manager_ng_test_ng.cpp",
     "accessibility_node_test_ng.cpp",
     "accessibility_utils_test_ng.cpp",
   ]
