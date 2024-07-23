@@ -1269,6 +1269,56 @@ HWTEST_F(OverlayTestNg, RemoveOverlayTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RemoveOverlayTest003
+ * @tc.desc:  Test OverlayManager::RemoveOverlay from atomicService.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, RemoveOverlayTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create atomicservice node.
+     */
+    auto atom = FrameNode::CreateFrameNode(V2::ATOMIC_SERVICE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto menuBarRow = FrameNode::CreateFrameNode(V2::APP_BAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto stageNode = FrameNode::CreateFrameNode(
+    V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    ASSERT_NE(stageNode, nullptr);
+    atom->AddChild(stageNode);
+    atom->AddChild(menuBarRow);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->SetInstallationFree(1);
+    /**
+     * @tc.steps: step2. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    atom->MountToParent(rootNode);
+    /**
+     * @tc.steps: step3. showpopup node.
+     */
+    overlayManager->ShowPopup(targetId, popupInfo);
+    /**
+     * @tc.steps: step4. remove popupNode from atomicService.
+     */
+    auto res = overlayManager->RemoveOverlay(false);
+    EXPECT_FALSE(res);
+    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
+}
+
+/**
  * @tc.name: ToastShowModeTest001
  * @tc.desc: Test OverlayManager::ShowToast with showMode.
  * @tc.type: FUNC
