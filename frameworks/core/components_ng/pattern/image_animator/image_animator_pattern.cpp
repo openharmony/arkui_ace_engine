@@ -309,7 +309,7 @@ void ImageAnimatorPattern::OnModifyDone()
         renderContext->UpdateBorderRadius(BorderRadiusProperty(imageTheme->GetCardRadius()));
     }
     if (!renderContext->HasClipEdge()) {
-        renderContext->UpdateClipEdge(true);
+        renderContext->UpdateClipEdge(static_cast<bool>(imageTheme->GetAdaptRadius()));
     }
 
     auto size = static_cast<int32_t>(images_.size());
