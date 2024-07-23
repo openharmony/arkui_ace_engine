@@ -4632,14 +4632,14 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<Frame
 }
 
 // if device is phone, fold status, screen is in landscape mode, preferType is BOTTOM
-void OverlayManager::CheckDeviceInLandscape(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode,
-    uint32_t& statusBarHeight)
+void OverlayManager::CheckDeviceInLandscape(
+    NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode, float& sheetTopSafeArea)
 {
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
     if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM &&
         sheetPattern->IsPhoneInLandScape()) {
-        statusBarHeight = 0.0f;
+        sheetTopSafeArea = 0.0f;
     }
 }
 
@@ -4648,21 +4648,10 @@ void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, Re
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
     auto sheetMaxHeight = sheetPattern->GetPageHeightWithoutOffset();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
-    auto statusBarHeight = safeAreaInsets.top_.Length();
-    auto windowManager = pipelineContext->GetWindowManager();
-    auto sheetType = sheetPattern->GetSheetType();
-    if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        statusBarHeight = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
-    } else if (sheetType == SheetType::SHEET_BOTTOMLANDSPACE &&
-        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        statusBarHeight = 0.0f;
-    }
+    auto sheetTopSafeArea = sheetPattern->GetSheetTopSafeArea();
 
-    CheckDeviceInLandscape(sheetStyle, sheetNode, statusBarHeight);
-    auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - statusBarHeight;
+    CheckDeviceInLandscape(sheetStyle, sheetNode, sheetTopSafeArea);
+    auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - sheetTopSafeArea;
     if (sheetStyle.sheetMode.has_value()) {
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
             sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE;
@@ -4680,7 +4669,7 @@ void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, Re
     } else {
         float height = 0.0f;
         if (sheetStyle.height->Unit() == DimensionUnit::PERCENT) {
-            height = sheetStyle.height->ConvertToPxWithSize(sheetMaxHeight - statusBarHeight);
+            height = sheetStyle.height->ConvertToPxWithSize(sheetMaxHeight - sheetTopSafeArea);
         } else {
             height = sheetStyle.height->ConvertToPx();
         }
@@ -4699,20 +4688,9 @@ void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPt
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
     auto sheetMaxHeight = sheetPattern->GetPageHeightWithoutOffset();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
-    auto statusBarHeight = safeAreaInsets.top_.Length();
-    auto windowManager = pipelineContext->GetWindowManager();
-    auto sheetType = sheetPattern->GetSheetType();
-    if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        statusBarHeight = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
-    } else if (sheetType == SheetType::SHEET_BOTTOMLANDSPACE &&
-        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        statusBarHeight = 0.0f;
-    }
-    CheckDeviceInLandscape(sheetStyle, sheetNode, statusBarHeight);
-    auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - statusBarHeight;
+    auto sheetTopSafeArea = sheetPattern->GetSheetTopSafeArea();
+    CheckDeviceInLandscape(sheetStyle, sheetNode, sheetTopSafeArea);
+    auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - sheetTopSafeArea;
     auto selection = sheetStyle.detents[sheetPattern->GetDetentsIndex()];
     if (selection.sheetMode.has_value()) {
         if (selection.sheetMode == SheetMode::MEDIUM) {
@@ -4731,7 +4709,7 @@ void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPt
     } else {
         float height = 0.0f;
         if (selection.height->Unit() == DimensionUnit::PERCENT) {
-            height = selection.height->ConvertToPxWithSize(sheetMaxHeight - statusBarHeight);
+            height = selection.height->ConvertToPxWithSize(sheetMaxHeight - sheetTopSafeArea);
         } else {
             height = selection.height->ConvertToPx();
         }

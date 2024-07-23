@@ -116,20 +116,44 @@ bool SheetPresentationPattern::IsPhoneInLandScape()
     return false;
 }
 
+float SheetPresentationPattern::GetSheetTopSafeArea()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, 0.0f);
+    auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
+    auto sheetTopSafeArea = safeAreaInsets.top_.Length();
+    auto windowManager = pipelineContext->GetWindowManager();
+    auto sheetType = GetSheetType();
+    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    double deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
+
+    // full screen subwindow sheet is also WINDOW_MODE_FLOATING, can not enter
+    if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+        !NearEqual(windowGlobalRect.Height(), deviceHeight)) {
+        sheetTopSafeArea = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
+    } else if (sheetType == SheetType::SHEET_BOTTOMLANDSPACE &&
+               AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        sheetTopSafeArea = 0.0f;
+    }
+    return sheetTopSafeArea;
+}
+
 void SheetPresentationPattern::InitPageHeight()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
-    TAG_LOGD(AceLogTag::ACE_SHEET, "statusBarHeight_ of sheet by GetSafeAreaWithoutProcess : %{public}u",
+    TAG_LOGD(AceLogTag::ACE_SHEET, "statusBarHeight of sheet by GetSafeAreaWithoutProcess : %{public}u",
         safeAreaInsets.top_.Length());
-    statusBarHeight_ =
+    sheetTopSafeArea_ =
         GetSheetType() != SheetType::SHEET_BOTTOMLANDSPACE ? safeAreaInsets.top_.Length() : .0f;
     auto showInPage =
         GetLayoutProperty<SheetPresentationProperty>()->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false);
     auto overlay = GetOverlayManager();
     if (overlay && overlay->IsRootExpansive() && showInPage) {
-        statusBarHeight_ = .0f;
+        sheetTopSafeArea_ = .0f;
     }
 
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
@@ -137,12 +161,16 @@ void SheetPresentationPattern::InitPageHeight()
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM &&
         IsPhoneInLandScape()) {
-        statusBarHeight_ = 0.0f;
+        sheetTopSafeArea_ = 0.0f;
     }
     auto windowManager = pipelineContext->GetWindowManager();
-    if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        statusBarHeight_ = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
+    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    double deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
+    if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+        !NearEqual(windowGlobalRect.Height(), deviceHeight)) {
+        sheetTopSafeArea_ = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
     }
+    TAG_LOGD(AceLogTag::ACE_SHEET, "sheetTopSafeArea of sheet is : %{public}f", sheetTopSafeArea_);
     auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
     sheetThemeType_ = sheetTheme->GetSheetType();
@@ -177,7 +205,7 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
     InitPageHeight();
     if (sheetLayoutAlgorithm->GetSheetMaxHeight() > 0) {
         pageHeight_ = sheetLayoutAlgorithm->GetSheetMaxHeight();
-        sheetMaxHeight_ = sheetLayoutAlgorithm->GetSheetMaxHeight() - statusBarHeight_;
+        sheetMaxHeight_ = sheetLayoutAlgorithm->GetSheetMaxHeight() - sheetTopSafeArea_;
         sheetMaxWidth_ = sheetLayoutAlgorithm->GetSheetMaxWidth();
         centerHeight_ = sheetLayoutAlgorithm->GetCenterHeight();
         if (!NearEqual(sheetOffsetX_, sheetLayoutAlgorithm->GetSheetOffsetX()) ||
@@ -677,11 +705,11 @@ void SheetPresentationPattern::AvoidSafeArea()
             ScrollTo(.0f);
             renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
         } else {
-            sheetHeightUp_ = pageHeight_ - (SHEET_BLANK_MINI_HEIGHT.ConvertToPx() + statusBarHeight_) - height_;
+            sheetHeightUp_ = pageHeight_ - (SHEET_BLANK_MINI_HEIGHT.ConvertToPx() + sheetTopSafeArea_) - height_;
             // Otherwise, sheet is necessary to raise and trigger scroll scrolling
             // sheet is raised to the top first
             renderContext->UpdateTransformTranslate(
-                { 0.0f, SHEET_BLANK_MINI_HEIGHT.ConvertToPx() + statusBarHeight_, 0.0f });
+                { 0.0f, SHEET_BLANK_MINI_HEIGHT.ConvertToPx() + sheetTopSafeArea_, 0.0f });
             // Then adjust the remaining height(heightUp = h - maxH) difference by scrolling
             ScrollTo(heightUp);
         }
@@ -713,7 +741,7 @@ float SheetPresentationPattern::GetSheetHeightChange()
     // The minimum height of the input component from the bottom of the screen after popping up the soft keyboard
     auto inputMinH = keyboardH;
     // the LARGE sheet is 15vp from the status bar, and SHEET_CENTER's Node height not equal to screen height.
-    auto largeHeight = pipelineContext->GetRootHeight() - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - statusBarHeight_;
+    auto largeHeight = pipelineContext->GetRootHeight() - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - sheetTopSafeArea_;
     // maxH : height that the sheet can reach the stage = the LARGE sheet - Current sheet height
     auto maxH = largeHeight - height_;
     if (inputH >= inputMinH) {
@@ -1974,11 +2002,12 @@ void SheetPresentationPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc(std::string("SheetPage Node Height: ").append(std::to_string(centerHeight_)));
     DumpLog::GetInstance().AddDesc(
         std::string("Sheet Height [start from the bottom, KeyboardHeight = 0]: ").append(std::to_string(height_)));
-    DumpLog::GetInstance().AddDesc(std::string("SheetMaxHeight [start from the bottom, pageHeight - statusBarHeight]: ")
-                                       .append(std::to_string(sheetMaxHeight_)));
+    DumpLog::GetInstance().AddDesc(
+        std::string("SheetMaxHeight [start from the bottom, pageHeight - sheetTopSafeArea]: ")
+            .append(std::to_string(sheetMaxHeight_)));
     DumpLog::GetInstance().AddDesc(std::string("Page Height: ").append(std::to_string(pageHeight_)));
     DumpLog::GetInstance().AddDesc(
-        std::string("StatusBar Height [current sheetType needed]: ").append(std::to_string(statusBarHeight_)));
+        std::string("StatusBar Height [current sheetType needed]: ").append(std::to_string(sheetTopSafeArea_)));
     DumpLog::GetInstance().AddDesc(std::string("PopupSheet OffsetX: ").append(std::to_string(sheetOffsetX_)));
     DumpLog::GetInstance().AddDesc(std::string("PopupSheet OffsetY: ").append(std::to_string(sheetOffsetY_)));
     DumpLog::GetInstance().AddDesc(std::string("SheetMaxWidth: ").append(std::to_string(sheetMaxWidth_)));

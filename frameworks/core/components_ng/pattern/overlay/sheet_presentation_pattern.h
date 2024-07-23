@@ -289,6 +289,7 @@ public:
     void ScrollTo(float height);
     bool AdditionalScrollTo(const RefPtr<FrameNode>& scroll, float height);
     float InitialSingleGearHeight(NG::SheetStyle& sheetStyle);
+    float GetSheetTopSafeArea();
 
     // initial drag gesture event
     void InitPanEvent();
@@ -488,7 +489,7 @@ public:
 
     float GetSheetMaxHeight()
     {
-        // pageHeight - statusBarHeight
+        // pageHeight - sheetTopSafeArea
         return sheetMaxHeight_;
     }
 
@@ -644,13 +645,13 @@ private:
     float scrollHeight_ = 0.0f;
     float preWidth_ = 0.0f;
     int32_t preType_ = -1;
-    float statusBarHeight_ = .0f;
+    float sheetTopSafeArea_ = .0f;
     bool isExecuteOnDisappear_ = false;
     bool windowRotate_ = false;
     bool firstMeasure_ = true;
     bool isScrolling_ = false;
     float builderHeight_ = 0.0f;
-    float sheetMaxHeight_ = 0.0f; // start from the bottom, pageHeight - statusBarHeight
+    float sheetMaxHeight_ = 0.0f; // start from the bottom, pageHeight - sheetTopSafeArea
     float sheetMaxWidth_ = 0.0f;
     float centerHeight_ = 0.0f; // node height, not translate height
     float sheetFitContentHeight_ = 0.0f;
