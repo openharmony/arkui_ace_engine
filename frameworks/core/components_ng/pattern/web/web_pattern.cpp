@@ -73,6 +73,7 @@ namespace {
 const std::string IMAGE_POINTER_CONTEXT_MENU_PATH = "etc/webview/ohos_nweb/context-menu.svg";
 const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
+constexpr int32_t AUTOFILL_DELAY_TIME = 100;
 constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
 constexpr int32_t TOUCH_EVENT_MAX_SIZE = 5;
 constexpr int32_t KEYEVENT_MAX_NUM = 1000;
@@ -3485,24 +3486,51 @@ void WebPattern::ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMes
     }
 }
 
+AceAutoFillType WebPattern::GetFocusedType()
+{
+    AceAutoFillType type = AceAutoFillType::ACE_UNSPECIFIED;
+    for (const auto& nodeInfo : pageNodeInfo_) {
+        if (nodeInfo && nodeInfo->GetIsFocus()) {
+            type = static_cast<AceAutoFillType>(nodeInfo->GetAutoFillType());
+            break;
+        }
+    }
+    return type;
+}
+
 void WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "called");
     OHOS::NWeb::NWebAutofillEvent eventType = OHOS::NWeb::NWebAutofillEvent::UNKNOWN;
     ParseNWebViewDataJson(viewDataJson, pageNodeInfo_, eventType);
-    if (eventType == OHOS::NWeb::NWebAutofillEvent::SAVE) {
-        RequestAutoSave();
-    } else if (eventType == OHOS::NWeb::NWebAutofillEvent::FILL) {
-        for (const auto& nodeInfo : pageNodeInfo_) {
-            if (nodeInfo && nodeInfo->GetIsFocus()) {
-                RequestAutoFill(static_cast<AceAutoFillType>(nodeInfo->GetAutoFillType()));
-                break;
-            }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    auto task = [weak = WeakClaim(this), eventType]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (eventType == OHOS::NWeb::NWebAutofillEvent::SAVE) {
+            pattern->RequestAutoSave();
+        } else if (eventType == OHOS::NWeb::NWebAutofillEvent::FILL) {
+            pattern->RequestAutoFill(pattern->GetFocusedType());
+        } else if (eventType == OHOS::NWeb::NWebAutofillEvent::UPDATE) {
+            pattern->UpdateAutoFillPopup();
+        } else if (eventType == OHOS::NWeb::NWebAutofillEvent::CLOSE) {
+            pattern->CloseAutoFillPopup();
         }
-    } else if (eventType == OHOS::NWeb::NWebAutofillEvent::UPDATE) {
-        UpdateAutoFillPopup();
-    } else if (eventType == OHOS::NWeb::NWebAutofillEvent::CLOSE) {
-        // do nothing, popup is automically cancel when losing focus
+    };
+
+    if (eventType == OHOS::NWeb::NWebAutofillEvent::FILL) {
+        taskExecutor->PostDelayedTask(
+            task, TaskExecutor::TaskType::UI, AUTOFILL_DELAY_TIME, "ArkUIWebHandleAutoFillEvent");
+    } else {
+        taskExecutor->PostTask(
+            task, TaskExecutor::TaskType::UI, "ArkUIWebHandleAutoFillEvent");
     }
 }
 
@@ -3544,6 +3572,17 @@ bool WebPattern::UpdateAutoFillPopup()
     }
     CHECK_NULL_RETURN(container, false);
     return container->UpdatePopupUIExtension(host, autoFillSessionId_, false);
+}
+
+bool WebPattern::CloseAutoFillPopup()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "called");
+    auto container = Container::Current();
+    if (container == nullptr) {
+        container = Container::GetActive();
+    }
+    CHECK_NULL_RETURN(container, false);
+    return container->ClosePopupUIExtension(autoFillSessionId_);
 }
 
 void WebPattern::UpdateSelectHandleInfo()
