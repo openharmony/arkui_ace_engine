@@ -1205,7 +1205,9 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
                 reinterpret_cast<NativeReference*>(ref), context);
         }
     }
-    UpdateFontScale(context->GetConfiguration());
+    if (context) {
+        UpdateFontScale(context->GetConfiguration());
+    }
     return UIContentErrorCode::NO_ERRORS;
 }
 
