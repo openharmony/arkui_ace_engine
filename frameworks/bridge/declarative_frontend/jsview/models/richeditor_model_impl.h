@@ -19,33 +19,33 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 namespace OHOS::Ace::Framework {
 class ACE_EXPORT RichEditorModelImpl : public RichEditorModel {
-    void Create(bool isStyledStringMode = false) override;
+    void Create(bool isStyledStringMode = false) override {}
     RefPtr<RichEditorBaseControllerBase> GetRichEditorController() override;
-    void SetOnReady(std::function<void()>&& func) override;
-    void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func) override;
-    void SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func) override;
-    void SetAboutToIMEInput(std::function<bool(const NG::RichEditorInsertValue&)>&& func) override;
-    void SetOnIMEInputComplete(std::function<void(const NG::RichEditorAbstractSpanResult&)>&& func) override;
-    void SetAboutToDelete(std::function<bool(const NG::RichEditorDeleteValue&)>&& func) override;
-    void SetOnDeleteComplete(std::function<void()>&& func) override;
-    void SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance = false) override;
-    void SetCopyOption(CopyOptions& copyOptions) override;
+    void SetOnReady(std::function<void()>&& func) override {}
+    void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func) override {}
+    void SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func) override {}
+    void SetAboutToIMEInput(std::function<bool(const NG::RichEditorInsertValue&)>&& func) override {}
+    void SetOnIMEInputComplete(std::function<void(const NG::RichEditorAbstractSpanResult&)>&& func) override {}
+    void SetAboutToDelete(std::function<bool(const NG::RichEditorDeleteValue&)>&& func) override {}
+    void SetOnDeleteComplete(std::function<void()>&& func) override {}
+    void SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance = false) override {}
+    void SetCopyOption(CopyOptions& copyOptions) override {}
     void BindSelectionMenu(NG::TextSpanType& editorType, NG::TextResponseType& responseType,
-        std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam) override;
-    void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) override;
-    void SetPlaceholder(PlaceholderOptions& options) override;
-    void SetTextDetectEnable(bool value) override;
-    void SetSupportPreviewText(bool value) override;
-    void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) override;
-    void SetSelectedBackgroundColor(const Color& selectedColor) override;
-    void SetCaretColor(const Color& color) override;
-    void SetOnEditingChange(std::function<void(const bool&)>&& func) override;
-    void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;
-    void SetEnterKeyType(TextInputAction value) override;
-    void SetOnWillChange(std::function<bool(const NG::RichEditorChangeValue&)>&& func) override;
-    void SetOnDidChange(std::function<void(const NG::RichEditorChangeValue&)>&& func) override;
-    void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) override;
-    void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) override;
+        std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam) override {}
+    void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) override {}
+    void SetPlaceholder(PlaceholderOptions& options) override {}
+    void SetTextDetectEnable(bool value) override {}
+    void SetSupportPreviewText(bool value) override {}
+    void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) override {}
+    void SetSelectedBackgroundColor(const DynamicColor& selectedColor) override {}
+    void SetCaretColor(const DynamicColor& color) override {}
+    void SetOnEditingChange(std::function<void(const bool&)>&& func) override {}
+    void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override {}
+    void SetEnterKeyType(TextInputAction value) override {}
+    void SetOnWillChange(std::function<bool(const NG::RichEditorChangeValue&)>&& func) override {}
+    void SetOnDidChange(std::function<void(const NG::RichEditorChangeValue&)>&& func) override {}
+    void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) override {}
+    void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) override {}
 };
 } // namespace OHOS::Ace::Framework
 
