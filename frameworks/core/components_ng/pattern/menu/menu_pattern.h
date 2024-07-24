@@ -468,6 +468,8 @@ public:
         }
     }
 
+    static bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
+
     bool UseContentModifier()
     {
         return builderNode_.Upgrade() != nullptr;

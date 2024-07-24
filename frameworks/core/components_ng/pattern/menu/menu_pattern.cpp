@@ -48,6 +48,7 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/shadow_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -865,6 +866,20 @@ RefPtr<LayoutAlgorithm> MenuPattern::CreateLayoutAlgorithm()
     }
 }
 
+bool MenuPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
+{
+    auto colorMode = SystemProperties::GetColorMode();
+    if (shadowStyle == ShadowStyle::None) {
+        return true;
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, false);
+    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    return true;
+}
+
 void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktopMenu)
 {
     auto renderContext = host->GetRenderContext();
@@ -874,9 +889,15 @@ void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktop
 
     if (resetForDesktopMenu) {
         // DesktopMenu apply shadow on inner Menu node
-        renderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
+        Shadow shadow;
+        if (GetShadowFromTheme(ShadowStyle::None, shadow)) {
+            renderContext->UpdateBackShadow(shadow);
+        }
     } else {
-        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
+        Shadow shadow;
+        if (GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow)) {
+            renderContext->UpdateBackShadow(shadow);
+        }
     }
     // to enable inner menu shadow effect for desktopMenu, need to remove clipping from container
     bool clip = !resetForDesktopMenu;
@@ -911,7 +932,10 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
         auto bgColor = theme->GetBackgroundColor();
         renderContext->UpdateBackgroundColor(bgColor);
     }
-    renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
+    Shadow shadow;
+    if (GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow)) {
+        renderContext->UpdateBackShadow(shadow);
+    }
     // make menu round rect
     BorderRadiusProperty borderRadius;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -1497,14 +1521,20 @@ void InnerMenuPattern::ApplyDesktopMenuTheme()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->UpdateBackShadow(ShadowConfig::DefaultShadowS);
+    Shadow shadow;
+    if (GetShadowFromTheme(ShadowStyle::OuterDefaultSM, shadow)) {
+        host->GetRenderContext()->UpdateBackShadow(shadow);
+    }
 }
 
 void InnerMenuPattern::ApplyMultiMenuTheme()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->UpdateBackShadow(ShadowConfig::NoneShadow);
+    Shadow shadow;
+    if (GetShadowFromTheme(ShadowStyle::None, shadow)) {
+        host->GetRenderContext()->UpdateBackShadow(shadow);
+    }
 }
 
 void MenuPattern::OnColorConfigurationUpdate()
