@@ -669,12 +669,14 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 auto previewPixelMap = GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
                 gestureHub->SetPixelMap(previewPixelMap);
                 gestureHub->SetDragPreviewPixelMap(previewPixelMap);
+                actuator->PrepareFinalPixelMapForDragThroughTouch(previewPixelMap, false);
             } else if (dragPreviewInfo.pixelMap != nullptr) {
                 gestureHub->SetPixelMap(dragPreviewInfo.pixelMap);
                 gestureHub->SetDragPreviewPixelMap(dragPreviewInfo.pixelMap);
+                actuator->PrepareFinalPixelMapForDragThroughTouch(dragPreviewInfo.pixelMap, false);
             } else if (dragPreviewInfo.customNode != nullptr) {
 #if defined(PIXEL_MAP_SUPPORTED)
-                auto callback = [id = Container::CurrentId(), pipeline, gestureHub]
+                auto callback = [id = Container::CurrentId(), pipeline, gestureHub, weak]
                     (std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
                     ContainerScope scope(id);
                     if (pixelMap != nullptr) {
@@ -682,10 +684,13 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                         auto taskScheduler = pipeline->GetTaskExecutor();
                         CHECK_NULL_VOID(taskScheduler);
                         taskScheduler->PostTask(
-                            [gestureHub, customPixelMap]() {
+                            [gestureHub, customPixelMap, weak]() {
                                 CHECK_NULL_VOID(gestureHub);
                                 gestureHub->SetPixelMap(customPixelMap);
                                 gestureHub->SetDragPreviewPixelMap(customPixelMap);
+                                auto actuator = weak.Upgrade();
+                                CHECK_NULL_VOID(actuator);
+                                actuator->PrepareFinalPixelMapForDragThroughTouch(customPixelMap, true);
                             },
                             TaskExecutor::TaskType::UI, "ArkUIDragSetCustomPixelMap");
                     }
@@ -2389,5 +2394,56 @@ void DragEventActuator::ResetResponseRegion()
         gestureHub->SetResponseRegion(responseRegion_);
         isResponseRegionFull = false;
     }
+}
+
+void DragEventActuator::PrepareFinalPixelMapForDragThroughTouch(RefPtr<PixelMap> pixelMap, bool immediately)
+{
+    ResetPreScaledPixelMapForDragThroughTouch();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    auto windowScale = dragDropManager->GetWindowScale();
+    float scale = windowScale * PIXELMAP_DRAG_SCALE_MULTIPLE;
+
+    auto task = [weak = WeakClaim(this), pixelMap, scale] () {
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        actuator->DoPixelMapScaleForDragThroughTouch(pixelMap, scale);
+    };
+
+    if (immediately) {
+        task();
+        return;
+    }
+
+    auto taskScheduler = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskScheduler);
+    taskScheduler->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIPrepareScaledPixel", PriorityType::VIP);
+}
+
+void DragEventActuator::DoPixelMapScaleForDragThroughTouch(RefPtr<PixelMap> pixelMap, float targetScale)
+{
+#if defined(PIXEL_MAP_SUPPORTED)
+    preScaledPixelMap_ = PixelMap::CopyPixelMap(pixelMap);
+    if (!preScaledPixelMap_) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Copy preScaledPixelMap_ is failure!");
+        return;
+    }
+    preScaledPixelMap_->Scale(targetScale, targetScale, AceAntiAliasingOption::HIGH);
+    preScaleValue_ = targetScale;
+#endif
+}
+
+RefPtr<PixelMap> DragEventActuator::GetPreScaledPixelMapForDragThroughTouch(float& preScale)
+{
+    preScale = preScaleValue_;
+    return preScaledPixelMap_;
+}
+
+void DragEventActuator::ResetPreScaledPixelMapForDragThroughTouch()
+{
+    preScaledPixelMap_ = nullptr;
+    preScaleValue_ = 1.0f;
 }
 } // namespace OHOS::Ace::NG
