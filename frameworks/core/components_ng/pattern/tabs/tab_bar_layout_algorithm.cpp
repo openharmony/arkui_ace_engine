@@ -437,12 +437,16 @@ void TabBarLayoutAlgorithm::AdjustPosition(LayoutWrapper* layoutWrapper, LayoutC
 void TabBarLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint,
     int32_t& endIndex, float& endPos)
 {
-    while (endIndex < childCount_ && (LessNotEqual(endPos, endMainPos_) || isBarAdaptiveHeight_ ||
+    // 1.When first item is invisible and located to the right or below the tab bar, measure at least one item.
+    // 2.When set the height of tab bar to auto, measure all items to find max height of items.
+    // 3.If target index exists, measure items from the end index to target index.
+    while (endIndex < childCount_ && (endIndex == 0 || LessNotEqual(endPos, endMainPos_) || isBarAdaptiveHeight_ ||
         (targetIndex_ && endIndex <= targetIndex_.value()))) {
         MeasureItem(layoutWrapper, childLayoutConstraint, endIndex);
         visibleItemPosition_[endIndex] = { endPos, endPos + visibleItemLength_[endIndex] };
         endPos += visibleItemLength_[endIndex];
-        if (LessOrEqual(endPos, startMainPos_) && !isBarAdaptiveHeight_ && !targetIndex_.has_value()) {
+        if (endIndex < childCount_ - 1 && LessOrEqual(endPos, startMainPos_) && !isBarAdaptiveHeight_ &&
+            !targetIndex_.has_value()) {
             visibleChildrenMainSize_ -= visibleItemLength_[endIndex];
             visibleItemLength_.erase(endIndex);
             visibleItemPosition_.erase(endIndex);
@@ -454,12 +458,16 @@ void TabBarLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, LayoutCo
 void TabBarLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint,
     int32_t& startIndex, float& startPos)
 {
-    while (startIndex >= 0 && (GreatNotEqual(startPos, startMainPos_) || isBarAdaptiveHeight_ ||
-        (targetIndex_ && startIndex >= targetIndex_.value()))) {
+    // 1.When last item is invisible and located to the left or above the tab bar, measure at least one item.
+    // 2.When set the height of tab bar to auto, measure all items to find max height of items.
+    // 3.If target index exists, measure items from the start index to target index.
+    while (startIndex >= 0 && (startIndex == childCount_ - 1 || GreatNotEqual(startPos, startMainPos_) ||
+        isBarAdaptiveHeight_ || (targetIndex_ && startIndex >= targetIndex_.value()))) {
         MeasureItem(layoutWrapper, childLayoutConstraint, startIndex);
         visibleItemPosition_[startIndex] = { startPos - visibleItemLength_[startIndex], startPos };
         startPos -= visibleItemLength_[startIndex];
-        if (GreatOrEqual(startPos, endMainPos_) && !isBarAdaptiveHeight_ && !targetIndex_.has_value()) {
+        if (startIndex > 0 && GreatOrEqual(startPos, endMainPos_) && !isBarAdaptiveHeight_ &&
+            !targetIndex_.has_value()) {
             visibleChildrenMainSize_ -= visibleItemLength_[startIndex];
             visibleItemLength_.erase(startIndex);
             visibleItemPosition_.erase(startIndex);
