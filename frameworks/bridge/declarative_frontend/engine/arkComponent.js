@@ -15580,6 +15580,7 @@ class ButtonTypeModifier extends ModifierWithKey {
       this.applyPeer(node, true, component);
       return true;
     }
+    this.value = this.stageValue;
     this.applyPeer(node, false, component);
     return false;
   }
