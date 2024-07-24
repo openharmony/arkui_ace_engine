@@ -261,7 +261,7 @@ void WindowScene::BufferAvailableCallback()
         CHECK_NULL_VOID(self->startingWindow_);
         const auto& config =
             Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
-        if (config.enabled_) {
+        if (config.enabled_ && self->session_->NeedStartingWindowExitAnimation()) {
             auto context = self->startingWindow_->GetRenderContext();
             CHECK_NULL_VOID(context);
             context->SetMarkNodeGroup(true);
