@@ -1246,8 +1246,13 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
             nodeInfo.GetAccessibilityId(), accessibilityProperty->GetChildTreeId(),
             accessibilityProperty->GetChildWindowId());
     }
-    nodeInfo.SetBelongTreeId(treeId_);
-    nodeInfo.SetParentWindowId(parentWindowId_);
+    if (nodeInfo.GetWindowId() == static_cast<int32_t>(windowId_)) {
+        nodeInfo.SetBelongTreeId(treeId_);
+        nodeInfo.SetParentWindowId(parentWindowId_);
+    } else {
+        nodeInfo.SetBelongTreeId(0);
+        nodeInfo.SetParentWindowId(0);
+    }
 
     GridInfo gridInfo(accessibilityProperty->GetCollectionInfo().rows,
         accessibilityProperty->GetCollectionInfo().columns, accessibilityProperty->GetCollectionInfo().selectMode);
@@ -2270,10 +2275,10 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     if (!isEnabled) {
         return false;
     }
-    int64_t elementId = eventInfo.GetAccessibilityId();
-    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId_, elementId);
-    eventInfo.SetSource(elementId);
     AccessibilityElementInfo info = eventInfo.GetElementInfo();
+    int64_t elementId = eventInfo.GetAccessibilityId();
+    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(info.GetBelongTreeId(), elementId);
+    eventInfo.SetSource(elementId);
     UpdateElementInfoTreeId(info);
     eventInfo.SetElementInfo(info);
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d accessibilityId:%{public}" PRId64,
@@ -2385,6 +2390,9 @@ void JsAccessibilityManager::SendEventToAccessibilityWithNode(
         eventInfo.SetWindowId(accessibilityEvent.windowId);
     }
     FillEventInfoWithNode(frameNode, eventInfo, ngPipeline, accessibilityEvent.nodeId);
+    if (ngPipeline->IsFormRender()) {
+        eventInfo.SetWindowId(static_cast<int32_t>(GetWindowId()));
+    }
     GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo);
 
     auto container = Container::GetContainer(context->GetInstanceId());
@@ -2430,6 +2438,9 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
     }
     if (accessibilityEvent.type == AccessibilityEventType::PAGE_CHANGE && accessibilityEvent.windowId != 0) {
         eventInfo.SetWindowId(accessibilityEvent.windowId);
+    }
+    if (ngPipeline->IsFormRender()) {
+        eventInfo.SetWindowId(static_cast<int32_t>(GetWindowId()));
     }
 
     GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo);
@@ -2555,6 +2566,9 @@ RefPtr<NG::PipelineContext> JsAccessibilityManager::GetPipelineByWindowId(uint32
         if (subContextNG!= nullptr && subContextNG->GetWindowId() == windowId) {
             return subContextNG;
         }
+    }
+    if (GetWindowId() == windowId) {
+        return mainPipeline;
     }
     return nullptr;
 }
@@ -3128,6 +3142,9 @@ RefPtr<PipelineBase> JsAccessibilityManager::GetPipelineByWindowId(const int32_t
         if (context->GetWindowId() == static_cast<uint32_t>(windowId)) {
             return context;
         }
+        if (GetWindowId() == static_cast<uint32_t>(windowId)) {
+            return context;
+        }
         for (auto& subContext : GetSubPipelineContexts()) {
             context = subContext.Upgrade();
             CHECK_NULL_RETURN(context, nullptr);
@@ -3233,6 +3250,7 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityIdNG(int64_t elemen
 
     CommonProperty commonProperty;
     GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "commonProperty.windowId: %{public}d", commonProperty.windowId);
     auto node = GetFramenodeByAccessibilityId(rootNode, nodeId);
     CHECK_NULL_VOID(node);
     UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo, ngPipeline);
@@ -4128,7 +4146,14 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
     lastFrameNode_.Reset();
     lastElementId_ = -1;
     currentFocusNodeId_ = -1;
-    instance->DeregisterElementOperator(windowId);
+    if (parentWindowId_ == 0) {
+        instance->DeregisterElementOperator(windowId);
+    } else {
+        instance->DeregisterElementOperator(windowId, treeId_);
+        parentElementId_ = INVALID_PARENT_ID;
+        parentWindowId_ = 0;
+    }
+
     RefPtr<PipelineBase> context;
     for (auto subContext : GetSubPipelineContexts()) {
         context = subContext.Upgrade();
@@ -4229,10 +4254,19 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     if (IsRegister()) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "parentTreeId: %{public}d, %{public}" PRId64, parentTreeId, parentElementId);
 
     std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_VOID(instance);
+    auto pipelineContext = GetPipelineContext().Upgrade();
+    CHECK_NULL_VOID(pipelineContext);
+    auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
+    if (container != nullptr && container->IsUIExtensionWindow()) {
+        windowId_ = pipelineContext->GetFocusWindowId();
+    } else if (pipelineContext->IsFormRender()) {
+        windowId_ = parentWindowId;
+    }
+    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(parentTreeId, parentElementId);
+
     uint32_t windowId = GetWindowId();
     auto interactionOperation = std::make_shared<JsInteractionOperation>(windowId);
     interactionOperation->SetHandler(WeakClaim(this));
@@ -4242,6 +4276,9 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
         .parentTreeId = parentTreeId,
         .elementId = parentElementId,
     };
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "windowId: %{public}u, parentWindowId: %{public}u, "
+                                           "parentTreeId: %{public}d, %{public}" PRId64,
+                                           windowId, parentWindowId, parentTreeId, parentElementId);
     Accessibility::RetError retReg = instance->RegisterElementOperator(registration, interactionOperation);
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "RegisterElementOperator result: %{public}d", retReg);
     Register(retReg == RET_OK);
@@ -4267,7 +4304,7 @@ void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
     uint32_t windowId = GetWindowId();
     Register(false);
     currentFocusNodeId_ = -1;
-    instance->DeregisterElementOperator(windowId);
+    instance->DeregisterElementOperator(windowId, treeId_);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(false);
     parentElementId_ = INVALID_PARENT_ID;
     parentWindowId_ = 0;
@@ -4291,6 +4328,7 @@ void JsAccessibilityManager::JsInteractionOperation::SetBelongTreeId(const int32
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "SetBelongTreeId treeId: %{public}d", treeId);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
+    jsAccessibilityManager->treeId_ = treeId;
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
     CHECK_NULL_VOID(context);
     context->GetTaskExecutor()->PostTask(
@@ -4298,7 +4336,6 @@ void JsAccessibilityManager::JsInteractionOperation::SetBelongTreeId(const int32
             auto jsAccessibilityManager = weak.Upgrade();
             CHECK_NULL_VOID(jsAccessibilityManager);
             ACE_SCOPED_TRACE("SetBelongTreeId");
-            jsAccessibilityManager->treeId_ = treeId;
             jsAccessibilityManager->NotifyChildTreeOnRegister(treeId);
         },
         TaskExecutor::TaskType::UI, "ArkUIAccessibilityClearCurrentFocus");
@@ -4306,49 +4343,51 @@ void JsAccessibilityManager::JsInteractionOperation::SetBelongTreeId(const int32
 
 void JsAccessibilityManager::UpdateElementInfoTreeId(Accessibility::AccessibilityElementInfo& info)
 {
-    if (treeId_ == 0) {
+    int32_t treeId = info.GetBelongTreeId();
+    if (treeId <= 0) {
         return;
     }
 
     int64_t elementId = info.GetAccessibilityId();
-    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId_, elementId);
+    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, elementId);
     info.SetAccessibilityId(elementId);
 
     int64_t parentId = info.GetParentNodeId();
     if (parentId != INVALID_PARENT_ID) {
-        AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId_, parentId);
+        AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, parentId);
         info.SetParent(parentId);
     }
 
     std::vector<int64_t> childIds = info.GetChildIds();
     for (int64_t child : childIds) {
         info.RemoveChild(child);
-        AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId_, child);
+        AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, child);
         info.AddChild(child);
     }
 }
 
 void JsAccessibilityManager::UpdateElementInfosTreeId(std::list<Accessibility::AccessibilityElementInfo>& infos)
 {
-    if (treeId_ == 0) {
-        return;
-    }
-
     for (auto &item : infos) {
+        int32_t treeId = item.GetBelongTreeId();
+        if (treeId <= 0) {
+            continue;
+        }
+
         int64_t elementId = item.GetAccessibilityId();
-        AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId_, elementId);
+        AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, elementId);
         item.SetAccessibilityId(elementId);
 
         int64_t parentId = item.GetParentNodeId();
         if (parentId != INVALID_PARENT_ID) {
-            AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId_, parentId);
+            AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, parentId);
             item.SetParent(parentId);
         }
 
         std::vector<int64_t> childIds = item.GetChildIds();
         for (int64_t child : childIds) {
             item.RemoveChild(child);
-            AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId_, child);
+            AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, child);
             item.AddChild(child);
         }
     }
@@ -4948,7 +4987,7 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
     CHECK_NULL_VOID(ngPipeline);
     auto stageManager = ngPipeline->GetStageManager();
     CHECK_NULL_VOID(stageManager);
-    if (parentWindowId_ == 0) {
+    if (!ngPipeline->IsFormRender()) {
         output.windowId = static_cast<int32_t>(ngPipeline->GetFocusWindowId());
     } else {
         output.windowId = static_cast<int32_t>(GetWindowId());

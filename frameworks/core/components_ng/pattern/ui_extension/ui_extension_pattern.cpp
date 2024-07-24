@@ -1018,7 +1018,7 @@ void UIExtensionPattern::InitializeAccessibility()
         WeakClaim(this), accessibilityId);
     CHECK_NULL_VOID(accessibilityChildTreeCallback_);
     if (accessibilityManager->IsRegister()) {
-        accessibilityChildTreeCallback_->OnRegister(ngPipeline->GetWindowId(), accessibilityManager->GetTreeId());
+        accessibilityChildTreeCallback_->OnRegister(ngPipeline->GetFocusWindowId(), accessibilityManager->GetTreeId());
     }
     UIEXT_LOGD("UIExtension: %{public}" PRId64 " register child tree", accessibilityId);
     accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId, accessibilityChildTreeCallback_);
