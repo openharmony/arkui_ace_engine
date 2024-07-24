@@ -481,8 +481,8 @@ void WindowScene::OnForeground()
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         CHECK_NULL_VOID(self->session_);
-        if (self->session_->ISAnco()) {
-            return
+        if (self->session_->IsAnco()) {
+            return;
         }
         CHECK_NULL_VOID(self->snapshotWindow_);
         auto surfaceNode = self->session_->GetSurfaceNode();
