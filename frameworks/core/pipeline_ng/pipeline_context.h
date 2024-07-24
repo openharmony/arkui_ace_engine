@@ -299,6 +299,8 @@ public:
 
     float GetPageAvoidOffset() override;
 
+    bool CheckNeedAvoidInSubWindow() override;
+
     void CheckAndUpdateKeyboardInset() override;
 
     void UpdateSizeChangeReason(

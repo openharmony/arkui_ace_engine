@@ -751,8 +751,9 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
     auto currentContainer = Container::Current();
     if (currentContainer && !currentContainer->IsSubContainer()) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
-        if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && NearZero(GetPageAvoidOffset())) {
+        if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && !CheckNeedAvoidInSubWindow()) {
             // subwindow is shown, main window doesn't lift,  no need to handle the keyboard event
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "subwindow is shown and pageOffset is zero, main window doesn't lift");
             return;
         }
     }

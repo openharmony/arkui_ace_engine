@@ -579,6 +579,11 @@ float PipelineContext::GetPageAvoidOffset()
     return 0.0f;
 }
 
+bool PipelineContext::CheckNeedAvoidInSubWindow()
+{
+    return false;
+}
+
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node) {}
 
 void PipelineContext::RemoveFontNodeNG(const WeakPtr<UINode>& node) {}

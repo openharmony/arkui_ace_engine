@@ -1270,6 +1270,11 @@ public:
         return 0.0f;
     }
 
+    virtual bool CheckNeedAvoidInSubWindow()
+    {
+        return false;
+    }
+
     virtual bool IsDensityChanged() const = 0;
 
     void SetUiDvsyncSwitch(bool on);
