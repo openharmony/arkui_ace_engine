@@ -946,6 +946,9 @@ void LayoutProperty::UpdateMargin(const MarginProperty& value)
     if (margin_->UpdateWithCheck(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
     }
+    if (margin_->UpdateStartAndEnd(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+    }
 }
 
 void LayoutProperty::UpdatePadding(const PaddingProperty& value)
