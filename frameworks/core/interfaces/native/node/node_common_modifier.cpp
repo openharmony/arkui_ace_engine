@@ -6065,23 +6065,31 @@ ArkUI_Int32 GetNodeUniqueId(ArkUINodeHandle node)
     return frameNode->GetId();
 }
 
-void SetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Float32 valueStrokeWidth,
-    ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue)
+void SetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int32 marginUnit,
+    ArkUI_Float32 valueStrokeWidth, ArkUI_Int32 widthUnit, ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue)
 {
     CHECK_NULL_VOID(node);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto marginUnitEnum = static_cast<OHOS::Ace::DimensionUnit>(marginUnit);
+    auto widthUnitEnum = static_cast<OHOS::Ace::DimensionUnit>(widthUnit);
     NG::FocusBoxStyle style;
-    if ((hasValue >> 2) & 1) { // margin
-        CalcDimension margin;
-        margin.SetValue(valueMargin);
+    if ((hasValue >> 2) & 1) { // 2: margin
+        CalcDimension margin = CalcDimension(valueMargin, DimensionUnit::FP);
+        if (marginUnitEnum >= OHOS::Ace::DimensionUnit::PX && marginUnitEnum <= OHOS::Ace::DimensionUnit::CALC &&
+            marginUnitEnum != OHOS::Ace::DimensionUnit::PERCENT) {
+            margin.SetUnit(marginUnitEnum);
+        }
         style.margin = margin;
     }
-    if ((hasValue >> 1) & 1) { // strokeWidth
-        CalcDimension strokeWidth;
-        strokeWidth.SetValue(valueStrokeWidth);
+    if ((hasValue >> 1) & 1) { // 1: strokeWidth
+        CalcDimension strokeWidth = CalcDimension(valueStrokeWidth, DimensionUnit::FP);
+        if (widthUnitEnum >= OHOS::Ace::DimensionUnit::PX && widthUnitEnum <= OHOS::Ace::DimensionUnit::CALC &&
+            widthUnitEnum != OHOS::Ace::DimensionUnit::PERCENT) {
+            strokeWidth.SetUnit(widthUnitEnum);
+        }
         style.strokeWidth = strokeWidth;
     }
-    if ((hasValue >> 0) & 1) { // strokeColor
+    if ((hasValue >> 0) & 1) { // 0: strokeColor
         Color strokeColor(valueColor);
         style.strokeColor = strokeColor;
     }

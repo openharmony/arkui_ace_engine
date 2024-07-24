@@ -1647,7 +1647,21 @@ typedef enum {
      *
      */
     NODE_UNIQUE_ID = 95,
-    
+
+    /**
+     * @brief Set the current component system focus box style.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].f32: The distance between the focus box and the edge of the component. \n
+     * Positive numbers represent the outer side, negative numbers represent the inner side. \n
+     * Percentage is not supported. \n
+     * .value[1].f32: Focus box width. Negative numbers and percentages are not supported. \n
+     * .value[2].u32: Focus box color. \n
+     * \n
+     *
+     */
+    NODE_FOCUS_BOX = 96,
+
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
