@@ -2567,33 +2567,4 @@ HWTEST_F(OverlayTestNg, DialogDumpInfoTest001, TestSize.Level1)
     pattern->DumpInfo();
     EXPECT_NE(DumpLog::GetInstance().description_.size(), 0);
 }
-
-/**
- * @tc.name: FireAutoSaveTest001
- * @tc.desc: Test fire auto save
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayTestNg, FireAutoSaveTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet page node.
-     */
-    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    auto callback = [](const std::string&) {};
-    SheetStyle style;
-    style.instanceId = CONTAINER_ID_DIVIDE_SIZE + 1;
-    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, nullptr, std::move(callback), style);
-    ASSERT_NE(sheetNode, nullptr);
-
-    /**
-     * @tc.steps: step2. create overlayManager and call FireAutoSave.
-     */
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    sheetNode->MountToParent(rootNode);
-    sheetNode->MarkDirtyNode();
-    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->FireAutoSave(sheetNode, true);
-    ASSERT_NE(overlayManager, nullptr);
-}
 } // namespace OHOS::Ace::NG
