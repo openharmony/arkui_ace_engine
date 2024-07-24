@@ -375,7 +375,7 @@ public:
         onDidDeleteEvent_ = std::move(func);
     }
 
-    void FireOnDidInsertValueEvent(const DeleteValueInfo& info)
+    void FireOnDidDeleteValueEvent(const DeleteValueInfo& info)
     {
         if (onDidDeleteEvent_) {
             onDidDeleteEvent_(info);

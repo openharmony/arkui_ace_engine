@@ -43,7 +43,7 @@ void MutableSpanString::SplitSpansByNewLine()
     }
 }
 
-void MutableSpanString::RemoveSpans(int32_t start, int32_t length)
+void MutableSpanString::RemoveSpans(int32_t start, int32_t length, bool removeSpecialSpan)
 {
     if (!CheckRange(start, length)) {
         return;
@@ -61,7 +61,9 @@ void MutableSpanString::RemoveSpans(int32_t start, int32_t length)
             RemoveSpan(start, length, spanKey);
         }
     }
-    RemoveSpecialSpans(start, length);
+    if (removeSpecialSpan) {
+        RemoveSpecialSpans(start, length);
+    }
 }
 
 void MutableSpanString::RemoveSpecialSpans(int32_t start, int32_t length)
@@ -101,11 +103,17 @@ void MutableSpanString::ReplaceSpan(int32_t start, int32_t length, const RefPtr<
     }
     std::list<std::pair<int32_t, int32_t>> indexList;
     GetNormalTypesVector(indexList, start, length);
+    std::list<int32_t> specialList;
+    GetSpecialTypesVector(specialList, start, length);
     for (const auto& pair : indexList) {
         auto startIndex = pair.first;
         auto secondIndex = pair.second;
         RemoveSpans(startIndex, secondIndex);
         AddSpan(span->GetSubSpan(startIndex, startIndex + secondIndex));
+    }
+    for (const auto& index : specialList) {
+        RemoveSpans(index, 1, false);
+        AddSpan(span->GetSubSpan(index, index + 1));
     }
 }
 
