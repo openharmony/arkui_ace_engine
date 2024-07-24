@@ -589,6 +589,9 @@ std::string GetItemContent(const std::string& id, const std::string& content)
     if (id == OH_DEFAULT_SELECT_ALL) {
         return Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL);
     }
+    if (id == OH_DEFAULT_PASTE) {
+        return Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE);
+    }
     if (id == OH_DEFAULT_CAMERA_INPUT) {
         return textOverlayTheme->GetCameraInput();
     }
