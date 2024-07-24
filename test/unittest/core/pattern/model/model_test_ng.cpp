@@ -327,6 +327,7 @@ HWTEST_F(ModelTestNg, ModelViewNgTest004, TestSize.Level1)
     EXPECT_EQ(modelPattern->modelAdapter_->widgetAdapter_, nullptr);
     EXPECT_EQ(modelPattern->modelAdapter_->textureLayer_, nullptr);
     modelPattern->OnAttachToFrameNode();
+    modelPattern->modelAdapter_->OnPaint3D(modelPaintProperty);
     EXPECT_NE(modelPattern->modelAdapter_->widgetAdapter_, nullptr);
     EXPECT_NE(modelPattern->modelAdapter_->textureLayer_, nullptr);
 
