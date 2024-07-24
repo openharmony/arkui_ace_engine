@@ -2325,9 +2325,11 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
 
 void TextFieldPattern::DoProcessAutoFill()
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "DoProcessAutoFill");
     bool isPopup = false;
     auto isSuccess = ProcessAutoFill(isPopup);
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     auto isImeShow = textFieldManager && textFieldManager->GetImeShow();
