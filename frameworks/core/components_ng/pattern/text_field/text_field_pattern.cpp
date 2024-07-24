@@ -1616,7 +1616,10 @@ void TextFieldPattern::HandleOnPaste()
         textfield->ResetObscureTickCountDown();
         textfield->selectController_->UpdateCaretIndex(newCaretPosition);
         if (layoutProperty->HasMaxLength()) {
-            int32_t sum = originLength - (end - start) + static_cast<int32_t>(pasteData.length());
+            bool textChange = false;
+            auto result = data;
+            textfield->contentController_->FilterTextInputStyle(textChange, result);
+            int32_t sum = originLength - (end - start) + static_cast<int32_t>(StringUtils::ToWstring(result).length());
             textfield->showCountBorderStyle_ = sum >
                 static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
             textfield->HandleCountStyle();
