@@ -244,12 +244,14 @@ void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     RectF firstHandle;
     firstHandle.SetOffset(firstHandleOffset);
     firstHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), firstHandleMetrics.height });
+    firstHandle.SetOffset(OffsetF(firstHandle.GetX() - firstHandle.Width() / 2.0f, firstHandle.GetY()));
     textSelector_.firstHandle = firstHandle;
 
     RectF secondHandle;
     secondHandle.SetOffset(secondHandleOffset);
     secondHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), secondHandleMetrics.height });
     secondHandle.SetHeight(secondHandleMetrics.height);
+    secondHandle.SetOffset(OffsetF(secondHandle.GetX() - secondHandle.Width() / 2.0f, secondHandle.GetY()));
     textSelector_.secondHandle = secondHandle;
 }
 
