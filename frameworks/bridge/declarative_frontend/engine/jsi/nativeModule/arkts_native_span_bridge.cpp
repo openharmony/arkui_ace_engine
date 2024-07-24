@@ -192,7 +192,7 @@ ArkUINativeModuleValue SpanBridge::SetLineHeight(ArkUIRuntimeCallInfo *runtimeCa
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension lineHeight(0.0, DimensionUnit::PX);
-    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, lineHeight)) {
+    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, lineHeight) || lineHeight.IsNegative()) {
         lineHeight.Reset();
     }
     GetArkUINodeModifiers()->getSpanModifier()->setSpanLineHeight(

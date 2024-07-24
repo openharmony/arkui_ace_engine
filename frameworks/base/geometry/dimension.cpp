@@ -213,7 +213,8 @@ std::string Dimension::ToString() const
     static const int32_t percentIndex = 3;
     static const int32_t percentUnit = 100;
     static std::array<std::string, unitsNum> units = { "px", "vp", "fp", "%", "lpx", "auto" };
-    if (static_cast<int>(unit_) >= unitsNum) {
+    if (static_cast<int32_t>(unit_) >= unitsNum ||
+        static_cast<int32_t>(unit_) < static_cast<int32_t>(DimensionUnit::INVALID)) {
         return StringUtils::DoubleToString(value_).append("px");
     }
     if (unit_ == DimensionUnit::NONE) {

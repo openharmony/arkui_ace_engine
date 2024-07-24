@@ -5028,7 +5028,7 @@ void TextFieldPattern::AfterIMEDeleteValue(const std::string& deleteValue, TextD
     deleteValueInfo.deleteOffset = selectController_->GetCaretIndex();
     deleteValueInfo.deleteValue = deleteValue;
     deleteValueInfo.direction = direction;
-    return eventHub->FireOnDidInsertValueEvent(deleteValueInfo);
+    return eventHub->FireOnDidDeleteValueEvent(deleteValueInfo);
 }
 
 std::u16string TextFieldPattern::GetLeftTextOfCursor(int32_t number)
