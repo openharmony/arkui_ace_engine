@@ -2590,7 +2590,7 @@ HWTEST_F(OverlayTestNg, FireAutoSaveTest001, TestSize.Level1)
      * @tc.steps: step2. create overlayManager and call FireAutoSave.
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    sheetNode->MountToParent(rootNade);
+    sheetNode->MountToParent(rootNode);
     sheetNode->MarkDirtyNode();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->FireAutoSave(sheetNode, true);
