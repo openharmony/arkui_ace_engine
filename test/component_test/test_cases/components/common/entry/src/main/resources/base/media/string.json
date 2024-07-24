@@ -1,0 +1,89 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "BenchMark"
+    },
+    {
+      "name": "Length",
+      "value": "10"
+    },
+    {
+      "name": "border_radius",
+      "value": "50"
+    }
+  ,
+    {
+      "name": "offset",
+      "value": "20"
+    },
+    {
+      "name": "line_height",
+      "value": "100"
+    },
+    {
+      "name": "commonPosition_length",
+      "value": "20"
+    },
+    {
+      "name": "commonImage_width",
+      "value": "200"
+    },
+    {
+      "name": "commonImage_height",
+      "value": "200"
+    },
+    {
+      "name": "common_opacity",
+      "value": "0.5"
+    },
+    {
+      "name": "common_width",
+      "value": "20"
+    },
+    {
+      "name": "common_height",
+      "value": "20"
+    },
+    {
+      "name": "common_radius",
+      "value": "20"
+    },
+    {
+      "name": "common_length",
+      "value": "110"
+    },
+    {
+      "name": "common_breadth",
+      "value": "10"
+    },
+    {
+      "name": "slider_number",
+      "value": "20"
+    },
+    {
+      "name": "SColor",
+      "value": "rgba(6, 224, 0, 1)"
+    },
+    {
+      "name": "X",
+      "value": "10"
+    },
+    {
+      "name": "Y",
+      "value": "60"
+    },
+    {
+      "name": "Z",
+      "value": "200"
+    }
+  ]
+}
