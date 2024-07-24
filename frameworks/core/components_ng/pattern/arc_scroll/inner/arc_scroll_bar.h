@@ -44,7 +44,6 @@ public:
     virtual float CalcPatternOffset(float scrollBarOffset) const override;
 
     void ScheduleShrinkDelayTask();
-    virtual void PlayScrollBarAppearAnimation() override;
     void HandlingTouch(const TouchEventInfo& info);
 
 private:
