@@ -1,0 +1,32 @@
+{
+  "float": [
+    {
+      "name": "contentOpacity",
+      "value": "0.8"
+    },
+    {
+      "name": "offset_min",
+      "value": "0.1"
+    },
+    {
+      "name": "offset_max",
+      "value": "0.8"
+    },
+    {
+      "name": "ListDivider_float",
+      "value": "40.00vp"
+    },
+    {
+      "name": "ListLanes_float",
+      "value": "5.00vp"
+    },
+    {
+      "name": "ListFriction_float",
+      "value": "0.5"
+    },
+    {
+      "name": "float_friction",
+      "value": "0.9"
+    }
+  ]
+}
