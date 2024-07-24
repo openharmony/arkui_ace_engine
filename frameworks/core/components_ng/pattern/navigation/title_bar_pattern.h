@@ -292,6 +292,8 @@ public:
         moveIndex_ = index;
     }
 
+    void UpdateNavBarTitleProperty(const RefPtr<TitleBarNode>& hostNode);
+    void UpdateNavDesTitleProperty(const RefPtr<TitleBarNode>& hostNode);
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
 
