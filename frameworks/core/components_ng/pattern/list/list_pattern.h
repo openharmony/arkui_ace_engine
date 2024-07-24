@@ -360,8 +360,8 @@ private:
     void UpdateListDirectionInCardStyle();
     bool UpdateStartListItemIndex();
     bool UpdateEndListItemIndex();
-    float GetStartOverScrollOffset(float offset) const;
-    float GetEndOverScrollOffset(float offset) const;
+    float GetStartOverScrollOffset(float offset, float startMainPos) const;
+    float GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const;
     RefPtr<ListContentModifier> listContentModifier_;
 
     void ReadThemeToFadingEdge();
