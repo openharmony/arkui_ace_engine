@@ -834,7 +834,7 @@ private:
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
-    bool RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect);
+    bool RepeatClickCaret(const Offset& offset, int32_t lastCaretPosition, const RectF& lastCaretRect);
     void CreateAndShowSingleHandle(bool isShowMenu = true);
     void MoveCaretAndStartFocus(const Offset& offset);
     void HandleDoubleClickEvent(GestureEvent& info);
