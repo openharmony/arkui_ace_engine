@@ -59,7 +59,9 @@
         "common":{
             "ok":"OK",
             "cancel":"Cancel",
-            "more":"More"
+            "more":"More",
+            "prev":"Prev",
+            "next":"Next"
         },
         "refresh":{
             "last_updated":"Last updated: %s",
