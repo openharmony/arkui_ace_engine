@@ -93,21 +93,12 @@ RectF TextSelectOverlay::GetSecondHandleLocalPaintRect()
 
 bool TextSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto theme = pipeline->GetTheme<TextOverlayTheme>();
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, false);
     auto host = textPattern->GetHost();
     CHECK_NULL_RETURN(host, false);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    auto textStyle = textPattern->GetTextStyle();
-    auto handleRadius = pipeline->NormalizeToPx(theme->GetHandleDiameter());
-    // If the handle is incomplete at the top, not show.
-    if (LessNotEqual(paintRect.Top() - handleRadius, 0.0f) && handleLevelMode_ != HandleLevelMode::EMBED) {
-        return false;
-    }
     auto clip = false;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         clip = true;
