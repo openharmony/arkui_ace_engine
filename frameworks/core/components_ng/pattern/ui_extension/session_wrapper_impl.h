@@ -95,6 +95,7 @@ public:
 
 private:
     void InitAllCallback();
+    void UpdateSessionConfig();
     WeakPtr<UIExtensionPattern> hostPattern_;
     RefPtr<TaskExecutor> taskExecutor_;
     int32_t instanceId_;
