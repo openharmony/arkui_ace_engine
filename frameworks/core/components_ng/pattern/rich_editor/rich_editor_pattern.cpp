@@ -6765,8 +6765,7 @@ void RichEditorPattern::InitSelection(const Offset& pos)
         }
     }
 
-    int32_t nextPosition = currentPosition + GetGraphemeClusterLength(GetWideText(), currentPosition);
-    nextPosition = std::min(nextPosition, GetTextContentLength());
+    int32_t nextPosition = std::min(currentPosition + 1, GetTextContentLength());
     MouseDoubleClickParagraphEnd(currentPosition);
     DoubleClickExcludeSymbol(currentPosition, nextPosition);
     if (!IsCustomSpanInCaretPos(currentPosition, true)) {
