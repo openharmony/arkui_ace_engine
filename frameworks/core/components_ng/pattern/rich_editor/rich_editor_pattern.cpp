@@ -2435,6 +2435,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     caretUpdateType_ = CaretUpdateType::PRESSED;
     CHECK_NULL_VOID(overlayMod_);
     RectF lastCaretRect = GetCaretRect();
+    int32_t lastCaretPosition = caretPosition_;
     bool isCaretTwinkling = caretTwinkling_;
     auto position = paragraphs_.GetIndex(textOffset);
     AdjustCursorPosition(position);
@@ -2451,7 +2452,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     UseHostToUpdateTextFieldManager();
     CalcCaretInfoByClick(info.GetLocalLocation());
     CHECK_NULL_VOID(info.GetSourceDevice() != SourceType::MOUSE);
-    if (RepeatClickCaret(info.GetLocalLocation(), lastCaretRect) && isCaretTwinkling) {
+    if (RepeatClickCaret(info.GetLocalLocation(), lastCaretPosition, lastCaretRect) && isCaretTwinkling) {
         CreateAndShowSingleHandle();
     }
 }
@@ -2463,11 +2464,18 @@ Offset RichEditorPattern::ConvertTouchOffsetToTextOffset(const Offset& touchOffs
     return touchOffset - Offset(richTextRect_.GetX(), richTextRect_.GetY());
 }
 
-bool RichEditorPattern::RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect)
+bool RichEditorPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaretPosition, const RectF& lastCaretRect)
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "caretTwinkling=%{public}d offset=%{public}s lastCaretRect=%{public}s",
         caretTwinkling_, offset.ToString().c_str(), lastCaretRect.ToString().c_str());
     CHECK_NULL_RETURN(caretTwinkling_, false);
+    Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
+    auto position = paragraphs_.GetIndex(textOffset);
+    if (position != lastCaretPosition) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "clickCaretPosition=%{public}d but lastCaretPosition=%{public}d",
+            position, lastCaretPosition);
+        return false;
+    }
     auto lastCaretHeight = lastCaretRect.Height();
     auto caretRect =
         RectF(lastCaretRect.GetX() - lastCaretHeight / 2.0f, lastCaretRect.GetY(), lastCaretHeight, lastCaretHeight);
@@ -5869,7 +5877,7 @@ void RichEditorPattern::HandleTouchDown(const Offset& offset)
     isTouchCaret_ = false;
     CHECK_NULL_VOID(HasFocus());
     RectF lastCaretRect = GetCaretRect();
-    isTouchCaret_ = RepeatClickCaret(offset, lastCaretRect);
+    isTouchCaret_ = RepeatClickCaret(offset, caretPosition_, lastCaretRect);
     if (isTouchCaret_ && !selectOverlay_->IsSingleHandleShow()) {
         CreateAndShowSingleHandle(false);
     }
