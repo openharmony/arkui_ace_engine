@@ -161,10 +161,6 @@ private:
     static void UpdatePlaceholderTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& placeholderTextStyle, bool isDisabled);
-    static void UpdateTextFadeoutTextStyle(
-        const RefPtr<FrameNode>& frameNode, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle);
-    void UpdateParagraphTextFadeoutWidth(
-        const LayoutConstraintF& contentConstraint, const RefPtr<FrameNode>& frameNode);
     void UpdateTextStyleTextOverflowAndWordBreak(TextStyle& textStyle, bool isTextArea,
         bool isInlineStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty);
     float GetVisualTextWidth() const;

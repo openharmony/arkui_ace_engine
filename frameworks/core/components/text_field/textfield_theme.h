@@ -189,9 +189,6 @@ public:
             auto textfieldShowHandle = pattern->GetAttr<std::string>("textfield_show_handle", "0");
             theme->textfieldShowHandle_ = StringUtils::StringToInt(textfieldShowHandle);
 
-            std::string isTextFadeout = pattern->GetAttr<std::string>("text_fadeout_enable", "");
-            theme->textFadeoutEnabled_ = isTextFadeout == "true";
-
             theme->cancelButtonIconColor_ = pattern->GetAttr<Color>("cancel_button_icon_color", Color());
             theme->previewUnderlineColor_ = pattern->GetAttr<Color>(PREVIEW_UNDERLINE_COLOR, Color());
             theme->previewBoardColor_ = pattern->GetAttr<Color>(PREVIEW_BOARD_COLOR, Color());
@@ -538,11 +535,6 @@ public:
         return cancelButtonStyle_;
     }
 
-    bool TextFadeoutEnabled() const
-    {
-        return textFadeoutEnabled_;
-    }
-
     const Color& GetCancelButtonIconColor() const
     {
         return cancelButtonIconColor_;
@@ -665,8 +657,6 @@ private:
     bool showPasswordDirectly_ = false;
     bool textfieldShowHandle_ = false;
     Dimension passwordTypeHeight_ = 40.0_vp;
-
-    bool textFadeoutEnabled_ = false;
 
     // cancelButton
     Color cancelButtonIconColor_;

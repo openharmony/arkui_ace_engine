@@ -991,7 +991,6 @@ public:
     void SetTextInputFlag(bool isTextInput)
     {
         isTextInput_ = isTextInput;
-        SetTextFadeoutCapacity(isTextInput_);
     }
 
     void SetSingleLineHeight(float height)
@@ -1293,15 +1292,6 @@ public:
     bool GetCustomKeyboardOption()
     {
         return keyboardAvoidance_;
-    }
-
-    void SetTextFadeoutCapacity(bool enabled)
-    {
-        haveTextFadeoutCapacity_ = enabled;
-    }
-    bool GetTextFadeoutCapacity()
-    {
-        return haveTextFadeoutCapacity_;
     }
 
     void SetShowKeyBoardOnFocus(bool value);
@@ -1769,8 +1759,6 @@ private:
     bool textInputBlurOnSubmit_ = true;
     bool textAreaBlurOnSubmit_ = false;
     bool isDetachFromMainTree_ = false;
-
-    bool haveTextFadeoutCapacity_ = false;
 
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool hasSupportedPreviewText_ = true;
