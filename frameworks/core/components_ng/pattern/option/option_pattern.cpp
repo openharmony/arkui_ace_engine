@@ -145,6 +145,9 @@ void OptionPattern::SetFocusStyle()
     CHECK_NULL_VOID(renderContext);
     auto&& graphics = renderContext->GetOrCreateGraphics();
     CHECK_NULL_VOID(graphics);
+    if (!selectTheme_->GetoptionApplyFocusedStyle()) {
+        return;
+    }
 
     Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(NONE_SHADOW_VALUE));
     if (!graphics->HasBackShadow() || graphics->GetBackShadowValue() == shadow) {
@@ -169,6 +172,9 @@ void OptionPattern::ClearFocusStyle()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    if (!selectTheme_->GetoptionApplyFocusedStyle()) {
+        return;
+    }
     if (!isBGColorSetByUser_) {
         renderContext->UpdateBackgroundColor(
             selected_ == index_ ? selectTheme_->GetSelectedColor() : Color::TRANSPARENT);
