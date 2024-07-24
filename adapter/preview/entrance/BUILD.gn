@@ -85,6 +85,23 @@ ohos_source_set("preview_entrance_source") {
       }
     }
 
+    if (defined(config.enable_component_test) && config.enable_component_test &&
+        platform == "windows") {
+      sources += [
+        "$ace_root/frameworks/component_test/component_test_manager_impl.cpp",
+        "$ace_root/frameworks/component_test/component_test_proxy.cpp",
+        "$ace_root/frameworks/component_test/core/action.cpp",
+        "$ace_root/frameworks/component_test/core/combination_isscrollable.cpp",
+        "$ace_root/frameworks/component_test/core/component_test_component_impl.cpp",
+        "$ace_root/frameworks/component_test/core/component_test_matcher_impl.cpp",
+        "$ace_root/frameworks/component_test/core/component_test_tester_impl.cpp",
+        "$ace_root/frameworks/component_test/idle_watcher.cpp",
+        "$ace_root/frameworks/component_test/test_config.cpp",
+        "$ace_root/frameworks/component_test/test_result_recorder.cpp",
+        "$ace_root/frameworks/component_test/test_task_scheduler.cpp",
+      ]
+    }
+
     if (!is_arkui_x) {
       if (platform == "windows") {
         defines -= [ "UNICODE" ]
