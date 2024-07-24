@@ -1967,6 +1967,10 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     if (direction_ == GetDirection() && panEvent_) {
         return;
     }
+    // fade offset need to be reset when is still dragging
+    if (direction_ != GetDirection()) {
+        fadeOffset_ = 0.f;
+    }
     direction_ = GetDirection();
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
