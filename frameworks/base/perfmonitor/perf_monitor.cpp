@@ -534,7 +534,7 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
         PerfConstants::WINDOW_TITLE_BAR_MINIMIZED, PerfConstants::WINDOW_RECT_MOVE,
         PerfConstants::APP_EXIT_FROM_WINDOW_TITLE_BAR_CLOSED, PerfConstants::WINDOW_TITLE_BAR_RECOVER,
         PerfConstants::LAUNCHER_APP_LAUNCH_FROM_OTHER, PerfConstants::WINDOW_RECT_RESIZE,
-        PerfConstants::WINDOW_TITLE_BAR_MAXIMIZED
+        PerfConstants::WINDOW_TITLE_BAR_MAXIMIZED, PerfConstants::LAUNCHER_APP_LAUNCHE_FROM_TRANSITION
     };
     if (exceptSceneSet.find(sceneId) != exceptSceneSet.end()) {
         return true;
