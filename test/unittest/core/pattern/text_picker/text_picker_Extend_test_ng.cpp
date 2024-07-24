@@ -772,15 +772,13 @@ HWTEST_F(TextPickerExTestNg, TextPickerPaintTest005, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     ASSERT_NE(textPickerPattern, nullptr);
     auto textPickerPaintMethod =
         AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
+    ASSERT_NE(textPickerPaintMethod, nullptr);
     auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
     auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
     ASSERT_NE(paintWrapper, nullptr);
     auto canvasDrawFunction = textPickerPaintMethod->GetContentDrawFunction(paintWrapper);

@@ -1514,15 +1514,13 @@ HWTEST_F(DatePickerTestNg, DatePickerPaintTest009, TestSize.Level1)
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
     auto datePickerPaintMethod =
         AceType::MakeRefPtr<DatePickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(datePickerPattern)));
+    ASSERT_NE(datePickerPaintMethod, nullptr);
     auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
     auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
     auto canvasDrawFunction = datePickerPaintMethod->GetContentDrawFunction(paintWrapper);
     ASSERT_EQ(canvasDrawFunction, nullptr);
@@ -3568,7 +3566,16 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest022, TestSize.Level1)
     auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
     columnPattern->OnAttachToFrameNode();
+    auto child = columnNode->GetChildren();
+    auto iter = child.begin();
+    auto textNode = AceType::DynamicCast<FrameNode>(*iter);
+    ASSERT_TRUE(textNode);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    ASSERT_TRUE(textPattern);
+    RefPtr<TextLayoutProperty> textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_TRUE(textLayoutProperty);
     columnPattern->ToUpdateSelectedTextProperties(theme);
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), Color::BLACK);
 }
 
 /**

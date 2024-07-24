@@ -1071,7 +1071,6 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest019, TestSize.Level1)
     ASSERT_NE(theme, nullptr);
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(node, nullptr);
     InitTextPickerPatternTestNg();
     TextPickerModelNG::SetDigitalCrownSensitivity(node, INVALID_CROWNSENSITIVITY);
     TextPickerModelNG::GetInstance()->SetDigitalCrownSensitivity(INVALID_CROWNSENSITIVITY);

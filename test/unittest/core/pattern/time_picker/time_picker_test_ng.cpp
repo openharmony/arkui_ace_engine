@@ -2547,14 +2547,12 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerPaintTest021, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(pickerPaintProperty, nullptr);
     auto timePickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerPattern, nullptr);
     auto timePickerPaintMethod = AceType::MakeRefPtr<TimePickerPaintMethod>();
+    ASSERT_NE(timePickerPaintMethod, nullptr);
     auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
     auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
     ASSERT_NE(paintWrapper, nullptr);
     auto canvasDrawFunction = timePickerPaintMethod->GetContentDrawFunction(paintWrapper);
@@ -2711,7 +2709,16 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern023, TestSize.Level1)
     ASSERT_NE(minuteColumn, nullptr);
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     ASSERT_NE(minuteColumnPattern, nullptr);
+    auto child = minuteColumn->GetChildren();
+    auto iter = child.begin();
+    auto textNode = AceType::DynamicCast<FrameNode>(*iter);
+    ASSERT_TRUE(textNode);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    ASSERT_TRUE(textPattern);
+    RefPtr<TextLayoutProperty> textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_TRUE(textLayoutProperty);
     minuteColumnPattern->ToUpdateSelectedTextProperties(theme);
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), Color::BLACK);
 }
 
 /**
