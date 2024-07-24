@@ -2101,11 +2101,15 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
     pageRouterStack_.emplace_back(WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(popNode)));
     popNode->MovePosition(GetLastPageIndex());
     for (auto iter = lastIter; iter != pageRouterStack_.end(); ++iter, ++popIndex) {
-        auto pageNode = iter->Upgrade();
-        if (!pageNode) {
+        auto page = iter->Upgrade();
+        if (!page) {
             continue;
         }
-        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        if (page == popNode) {
+            // do not change index of page that will be replaced.
+            continue;
+        }
+        auto pagePattern = page->GetPattern<NG::PagePattern>();
         pagePattern->GetPageInfo()->SetPageIndex(popIndex + 1);
     }
 #if defined(ENABLE_SPLIT_MODE)
