@@ -158,7 +158,6 @@ void ArcScrollBar::HandlingTouch(const TouchEventInfo& info)
         SetPressed(inRegion);
         shrinkDelayTask_.Cancel();
         PlayScrollBarGrowAnimation();
-        MarkNeedRender();
     }
 
     if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
