@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
+#include <type_traits>
 #include "gtest/gtest.h"
 
 #define private public
 #define protected public
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/common/mock_container.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -44,6 +46,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/components_ng/pattern/root/root_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -100,6 +103,9 @@ constexpr Dimension TRACK_BORDER_RADIUS = 5.0_px;
 const OffsetF SLIDER_GLOBAL_OFFSET = { 200.0f, 200.0f };
 const SizeF BLOCK_SIZE_F(10.0f, 10.0f);
 const SizeF BLOCK_SIZE_F_ZREO(0.0f, 0.0f);
+const Offset SLIDER_OFFSET = { 200, 200 };
+constexpr float MIN_LABEL = 10.0f;
+constexpr float MAX_LABEL = 20.0f;
 } // namespace
 class SliderPatternTestNg : public testing::Test {
 public:
@@ -118,11 +124,13 @@ private:
 void SliderPatternTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
 }
 
 void SliderPatternTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 void SliderPatternTestNg::TearDown()
@@ -927,4 +935,257 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest014, TestSize.Level1)
     sliderPattern->SetBuilderFunc(node);
     sliderPattern->BuildContentModifierNode();
 }
+
+/**
+ * @tc.name: SliderPatternTest015
+ * @tc.desc: SliderPattern::OnWindowSizeChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Slider node.
+     */
+    auto sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto sliderNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    sliderPattern->AttachToFrameNode(sliderNode);
+    ASSERT_NE(sliderNode, nullptr);
+    auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    sliderPaintProperty->UpdateValue(VALUE);
+    sliderPaintProperty->UpdateMin(MIN);
+    sliderPaintProperty->UpdateMax(MAX);
+    sliderPaintProperty->UpdateStep(STEP);
+    sliderPattern->OnWindowSizeChanged(FRAME_WIDTH, FRAME_HEIGHT, WindowSizeChangeReason::RESIZE);
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    int32_t setApiVersion = 13;
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    sliderPattern->OnWindowSizeChanged(FRAME_WIDTH, FRAME_HEIGHT, WindowSizeChangeReason::ROTATION);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+    EXPECT_TRUE(sliderPattern->skipGestureEvents_);
+}
+
+/**
+ * @tc.name: SliderPatternTest016
+ * @tc.desc: SliderPattern::HandleTouchUp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Slider node.
+     */
+    auto sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto sliderNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    sliderPattern->AttachToFrameNode(sliderNode);
+    ASSERT_NE(sliderNode, nullptr);
+    auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    sliderPaintProperty->UpdateValue(VALUE);
+    sliderPaintProperty->UpdateMin(MIN);
+    sliderPaintProperty->UpdateMax(MAX);
+    sliderPaintProperty->UpdateStep(STEP);
+    sliderPattern->lastTouchLocation_ = SLIDER_OFFSET;
+    sliderPattern->bubbleFlag_ = false;
+    sliderPattern->isFocusActive_ = true;
+    sliderPattern->sliderInteractionMode_ = SliderModelNG::SliderInteraction::SLIDE_AND_CLICK_UP;
+    sliderPattern->HandleTouchUp(SLIDER_OFFSET, SourceType::TOUCH);
+    EXPECT_TRUE(sliderPattern->allowDragEvents_);
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    sliderPattern->bubbleFlag_ = true;
+    sliderPattern->isFocusActive_ = false;
+    sliderPattern->sliderInteractionMode_ = SliderModelNG::SliderInteraction::SLIDE_ONLY;
+    sliderPattern->HandleTouchUp(SLIDER_OFFSET, SourceType::NONE);
+    EXPECT_FALSE(sliderPattern->bubbleFlag_);
+}
+
+/**
+ * @tc.name: SliderPatternTest017
+ * @tc.desc: SliderPattern::HandleTouchUp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Slider node.
+     */
+    auto sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto sliderNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    sliderPattern->AttachToFrameNode(sliderNode);
+    ASSERT_NE(sliderNode, nullptr);
+    auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    GestureEvent SliderInfo;
+    SliderInfo.inputEventType_ = InputEventType::AXIS;
+    SliderInfo.localLocation_ = Offset(MIN_LABEL, MAX_LABEL);
+    SliderInfo.SetOffsetX(.0);
+    SliderInfo.SetOffsetY(1.0);
+    SliderInfo.SetSourceTool(SourceTool::MOUSE);
+    sliderPattern->HandlingGestureEvent(SliderInfo);
+    sliderPattern->direction_ = Axis::VERTICAL;
+    sliderPattern->HandlingGestureEvent(SliderInfo);
+    EXPECT_FALSE(sliderPattern->panMoveFlag_);
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    sliderPattern->bubbleFlag_ = true;
+    sliderPattern->isFocusActive_ = false;
+    sliderPattern->sliderInteractionMode_ = SliderModelNG::SliderInteraction::SLIDE_ONLY;
+    sliderPattern->direction_ = Axis::VERTICAL;
+    sliderPattern->fingerId_ = 2;
+    SliderInfo.inputEventType_ = InputEventType::TOUCH_SCREEN;
+    FingerInfo fingerInfoFst;
+    fingerInfoFst.fingerId_ = 1;
+    FingerInfo fingerInfoScd;
+    fingerInfoScd.fingerId_ = 2;
+    SliderInfo.fingerList_.push_back(fingerInfoFst);
+    SliderInfo.fingerList_.push_back(fingerInfoScd);
+    sliderPattern->HandlingGestureEvent(SliderInfo);
+    EXPECT_TRUE(sliderPattern->panMoveFlag_);
+}
+
+/**
+ * @tc.name: SliderPatternTest018
+ * @tc.desc: SliderPattern::StartAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Slider node.
+     */
+    auto sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto sliderNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    sliderPattern->AttachToFrameNode(sliderNode);
+    ASSERT_NE(sliderNode, nullptr);
+    auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    sliderPattern->sliderContentModifier_ =
+        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+    sliderPattern->sliderContentModifier_->isVisible_ = true;
+    sliderPattern->StartAnimation();
+    EXPECT_TRUE(sliderPattern->sliderContentModifier_->GetVisible());
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    sliderPattern->sliderContentModifier_->isVisible_ = false;
+    sliderPattern->isVisibleArea_ = true;
+    sliderPattern->isVisible_ = true;
+    sliderPattern->isShow_ = true;
+    sliderPattern->StartAnimation();
+    EXPECT_TRUE(sliderPattern->sliderContentModifier_->GetVisible());
+}
+
+/**
+ * @tc.name: SliderPatternTest019
+ * @tc.desc: SliderPattern::UpdateTipState.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Slider node.
+     */
+    auto sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto sliderNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    sliderPattern->AttachToFrameNode(sliderNode);
+    ASSERT_NE(sliderNode, nullptr);
+    auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    sliderPattern->sliderContentModifier_ =
+        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+    sliderPattern->focusFlag_ = true;
+    sliderPattern->UpdateTipState();
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    sliderPattern->showTips_ = true;
+    sliderPattern->isVisibleArea_ = true;
+    sliderPattern->isVisible_ = true;
+    sliderPattern->isShow_ = true;
+    sliderPattern->UpdateTipState();
+    EXPECT_FALSE(sliderPattern->isFocusActive_);
+}
+
+/**
+ * @tc.name: SliderPatternTest020
+ * @tc.desc: SliderPattern::OnIsFocusActiveUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Slider node.
+     */
+    auto sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto sliderNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    sliderPattern->AttachToFrameNode(sliderNode);
+    ASSERT_NE(sliderNode, nullptr);
+    auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    sliderPattern->sliderContentModifier_ =
+        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
+    sliderPattern->focusFlag_ = false;
+    sliderPattern->OnIsFocusActiveUpdate(true);
+    EXPECT_FALSE(sliderPattern->isFocusActive_);
+    /**
+     * @tc.steps: step2. Set focusFlag_ = true and bubbleFlag_ ≠ showBubble.
+     */
+    sliderPattern->focusFlag_ = true;
+    sliderPattern->showTips_ = false;
+    sliderPattern->bubbleFlag_ = false;
+    sliderPattern->OnIsFocusActiveUpdate(true);
+    EXPECT_TRUE(sliderPattern->isFocusActive_);
+}
+
+/**
+ * @tc.name: SliderPatternTest021
+ * @tc.desc: SliderPattern::UseContentModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Slider node.
+     */
+    auto sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto sliderNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    sliderPattern->AttachToFrameNode(sliderNode);
+    ASSERT_NE(sliderNode, nullptr);
+    auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    auto host = sliderPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto hub = host->GetEventHub<EventHub>();
+    ASSERT_NE(hub, nullptr);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    /**
+     * @tc.steps: step2. Set contentModifierNode_ and call UseContentModifier.
+     */
+    auto modifierNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    sliderPattern->contentModifierNode_ = modifierNode;
+    sliderPattern->InitTouchEvent(gestureHub);
+    sliderPattern->InitPanEvent(gestureHub);
+    RefPtr<EventHub> eventHub = AccessibilityManager::MakeRefPtr<EventHub>();
+    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
+    sliderPattern->InitOnKeyEvent(focusHub);
+    auto inputEventHub = eventHub->GetInputEventHub();
+    sliderPattern->InitMouseEvent(inputEventHub);
+    EXPECT_EQ(sliderPattern->hoverEvent_, nullptr);
+    EXPECT_EQ(sliderPattern->mouseEvent_, nullptr);
+}
+
 } // namespace OHOS::Ace::NG
