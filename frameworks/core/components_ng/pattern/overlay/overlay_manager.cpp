@@ -3373,12 +3373,12 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     SaveLastModalNode();
     MountToParentWithService(rootNode, modalNode);
     modalNode->AddChild(builder);
-    if (!isAllowedBeCovered_ && rootNode) {
+    if (!isAllowedBeCovered_ && modalNode->GetParent()) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY,
-            "RootNode %{public}d mark IsProhibitedAddChildNode when sessionId %{public}d.",
-            rootNode->GetId(), targetId);
+            "modalNode->GetParent() %{public}d mark IsProhibitedAddChildNode when sessionId %{public}d.",
+            modalNode->GetParent()->GetId(), targetId);
         if (AddCurSessionId(targetId)) {
-            rootNode->UpdateModalUiextensionCount(true);
+            modalNode->GetParent()->UpdateModalUiextensionCount(true);
         }
     }
 
@@ -5255,7 +5255,20 @@ void OverlayManager::ResetRootNode(int32_t sessionId)
     curSessionIds_.erase(sessionId);
     auto rootNode = FindWindowScene(nullptr);
     CHECK_NULL_VOID(rootNode);
-    rootNode->UpdateModalUiextensionCount(false);
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetInstallationFree()) {
+        // it is in atomicservice
+        for (auto child : rootNode->GetChildren()) {
+            CHECK_NULL_VOID(child);
+            if (child->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
+                child->UpdateModalUiextensionCount(false);
+                break;
+            }
+        }
+    } else {
+        rootNode->UpdateModalUiextensionCount(false);
+    }
 }
 
 void OverlayManager::SetIsAllowedBeCovered(bool isAllowedBeCovered)
@@ -5754,7 +5767,12 @@ void OverlayManager::MarkDirty(PropertyChangeFlag flag)
     CHECK_NULL_VOID(root);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    for (auto&& child : root->GetChildren()) {
+    auto markNode = root;
+    if (pipeline->GetInstallationFree()) {
+        markNode = root->GetFirstChild();
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "atomicService node need marked");
+    }
+    for (auto&& child : markNode->GetChildren()) {
         // first child is Stage node in main window, subwindow not has Stage node.
         if (child != root->GetFirstChild() || pipeline->IsSubPipeline()) {
             child->MarkDirtyNode(flag);
@@ -6310,7 +6328,7 @@ void OverlayManager::SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, con
             CHECK_NULL_VOID(childNode);
             if (childNode->GetTag() == V2::APP_BAR_ETS_TAG) {
                 TAG_LOGD(AceLogTag::ACE_OVERLAY, "setNodeBeforeAppbar AddChildBefore");
-                child->AddChildBefore(node, childNode);
+                child->AddChildBefore(node, childNode, node->GetTag() == V2::MODAL_PAGE_TAG);
                 return;
             }
         }
