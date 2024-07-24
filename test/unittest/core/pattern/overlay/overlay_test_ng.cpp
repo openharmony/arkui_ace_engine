@@ -2570,7 +2570,7 @@ HWTEST_F(OverlayTestNg, DialogDumpInfoTest001, TestSize.Level1)
 
 /**
  * @tc.name: FireAutoSaveTest001
- * @tc.desc: Test Dialog DumpInfo
+ * @tc.desc: Test fire auto save
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayTestNg, FireAutoSaveTest001, TestSize.Level1)
