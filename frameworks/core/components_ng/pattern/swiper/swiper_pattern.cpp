@@ -938,7 +938,10 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
 
     if (!targetIndex_) {
-        SetIndicatorJumpIndex(jumpIndex_);
+        if (isUserFinish_) {
+            SetIndicatorJumpIndex(jumpIndex_);
+        }
+
         CheckMarkDirtyNodeForRenderIndicator();
     }
 
