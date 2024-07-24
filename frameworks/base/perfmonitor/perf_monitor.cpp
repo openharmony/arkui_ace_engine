@@ -358,7 +358,7 @@ void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank,
 
 void PerfMonitor::ReportJankFrameApp(double jank)
 {
-    if (jank >= static_cast<double>(JANK_SKIPPED_THRESHOLD)) {
+    if (jank >= static_cast<double>(JANK_SKIPPED_THRESHOLD) && !isBackgroundApp) {
         JankInfo jankInfo;
         jankInfo.skippedFrameTime = static_cast<int64_t>(jank * SINGLE_FRAME_TIME);
         RecordBaseInfo(nullptr);
