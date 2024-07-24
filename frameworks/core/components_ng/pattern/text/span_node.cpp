@@ -262,7 +262,11 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     if (NearZero(textStyle.GetFontSize().Value())) {
         return -1;
     }
-    textStyle.SetHalfLeading(pipelineContext->GetHalfLeading());
+    if (textLineStyle && textLineStyle->HasHalfLeading()) {
+        textStyle.SetHalfLeading(textLineStyle->GetHalfLeadingValue());
+    } else {
+        textStyle.SetHalfLeading(pipelineContext->GetHalfLeading());
+    }
 
     auto spanContent = GetSpanContent(content, isMarquee);
     auto pattern = frameNode->GetPattern<TextPattern>();
@@ -1072,7 +1076,7 @@ std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
         PropertyInfo::TEXT_ALIGN, PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
         PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY, PropertyInfo::WORD_BREAK,
         PropertyInfo::LINE_BREAK_STRATEGY, PropertyInfo::FONTFEATURE, PropertyInfo::LINESPACING,
-        PropertyInfo::SYMBOL_EFFECT_OPTIONS };
+        PropertyInfo::SYMBOL_EFFECT_OPTIONS, PropertyInfo::HALFLEADING };
 
     set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
         propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));

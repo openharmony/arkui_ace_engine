@@ -350,5 +350,5 @@ void TextModelImpl::SetOnDrop(NG::OnDragDropFunc&& onDrop)
     component->SetOnDropId(onDrop);
 }
 
-
+void TextModelImpl::SetHalfLeading(bool halfLeading) {}
 } // namespace OHOS::Ace::Framework
