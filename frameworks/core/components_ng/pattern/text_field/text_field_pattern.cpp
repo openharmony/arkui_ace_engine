@@ -1351,6 +1351,8 @@ void TextFieldPattern::HandleBlurEvent()
     HandleCrossPlatformInBlurEvent();
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     NotifyOnEditChanged(false);
+    showCountBorderStyle_ = false;
+    HandleCounterBorder();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -2724,7 +2726,7 @@ void TextFieldPattern::ProcessUnderlineColorOnModifierDone()
     if (inputValue != DEFAULT_MODE && !showBorder) {
         return;
     }
-    if (showCountBorderStyle_ && IsUnderlineMode()) {
+    if (showCountBorderStyle_ && IsUnderlineMode() && HasFocus()) {
         auto theme = GetTheme();
         CHECK_NULL_VOID(theme);
         SetUnderlineColor(
@@ -2973,6 +2975,7 @@ void TextFieldPattern::FilterInitializeText()
     if (static_cast<int32_t>(GetWideText().length()) < GetCaretIndex()) {
         selectController_->UpdateCaretIndex(static_cast<int32_t>(GetWideText().length()));
     }
+    UpdateShowCountBorderStyle();
 }
 
 bool TextFieldPattern::IsDisabled()
