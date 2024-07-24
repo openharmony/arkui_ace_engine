@@ -84,7 +84,7 @@ private:
     uint64_t startupTimestamp_ = 0;
     OnFrameCallback callback_ = nullptr;
     WeakPtr<PipelineBase> context_;
-    RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>();
+    RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>(UIObjectType::DISPLAYSYNC_ANIMATOR);
 };
 
 class SchedulerBuilder {

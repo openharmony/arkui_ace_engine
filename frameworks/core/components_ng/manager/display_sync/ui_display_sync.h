@@ -34,6 +34,11 @@ namespace OHOS::Ace {
 enum class RefreshRateMode : int32_t {
     REFRESHRATE_MODE_AUTO = -1,
 };
+enum class UIObjectType : int32_t {
+    DISPLAYSYNC_OTHERS = -1,
+    DISPLAYSYNC_ANIMATOR = 0,
+    DISPLAYSYNC_XCOMPONENT = 1,
+};
 constexpr int32_t INVALID_ANIMATOR_EXPECTED_RATE = -1;
 
 class PipelineBase;
@@ -187,9 +192,11 @@ public:
     RefPtr<PipelineBase> GetCurrentContext();
 
     UIDisplaySync();
+    UIDisplaySync(UIObjectType uiObjectType);
     ~UIDisplaySync() noexcept override;
 
 private:
+    UIObjectType uiObjectType_ = UIObjectType::DISPLAYSYNC_OTHERS;
     RefPtr<DisplaySyncData> data_ = AceType::MakeRefPtr<DisplaySyncData>();
     int32_t sourceVsyncRate_ = 0;
     bool rateChanged_ = true;

@@ -184,7 +184,7 @@ public:
 
     virtual int32_t GetCurrentRefreshRateMode() const
     {
-        return 0;
+        return -1;
     }
 
     virtual int32_t GetAnimateExpectedRate() const
