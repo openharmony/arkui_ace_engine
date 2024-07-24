@@ -715,7 +715,7 @@ void SearchPattern::OnClickTextField()
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     auto textFiledFocusHub = textFieldPattern->GetFocusHub();
-    if (!textFiledFocusHub->IsCurrentFocus()) {
+    if (!textFiledFocusHub->IsCurrentFocus() && focusHub->IsFocusOnTouch().value_or(true)) {
         textFiledFocusHub->RequestFocusImmediately();
     }
     host->MarkModifyDone();
