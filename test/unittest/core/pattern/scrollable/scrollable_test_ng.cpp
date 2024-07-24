@@ -57,15 +57,17 @@ void ScrollableTestNg::TearDown()
 
 void ScrollableTestNg::InitNestedScrolls()
 {
-    scroll_ = FrameNode::CreateFrameNode("scroll", -1, AceType::MakeRefPtr<PartiallyMockedScrollable>());
+    ResetElmtId();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    scroll_ = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, nodeId, AceType::MakeRefPtr<PartiallyMockedScrollable>());
+    stack->Push(scroll_);
     mockScroll_ = FrameNode::CreateFrameNode("mockScroll", -1, AceType::MakeRefPtr<MockNestableScrollContainer>());
     scroll_->MountToParent(mockScroll_);
-
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    // to enable need parent
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARALLEL, .backward = NestedScrollMode::PARALLEL };
     scrollPn->SetParentScrollable();
-
     scrollPn->AddScrollEvent();
     scrollPn->SetEdgeEffect();
 }
