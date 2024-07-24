@@ -2862,18 +2862,10 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
     currentPointerEvent_ = currentEvent;
-    int32_t pointerAction = currentEvent->GetPointerAction();
     MMI::PointerEvent::PointerItem pointerItem;
     currentEvent->GetPointerItem(currentEvent->GetPointerId(), pointerItem);
     int32_t originId = pointerItem.GetOriginPointerId();
-    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_UP ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
-        currentEvents_.erase(originId);
-    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-        currentEvents_[originId] = currentEvent;
-    }
+    currentEvents_[originId] = currentEvent;
     auto callbacksIter = stopDragCallbackMap_.begin();
     while (callbacksIter != stopDragCallbackMap_.end()) {
         auto pointerId = callbacksIter->first;
