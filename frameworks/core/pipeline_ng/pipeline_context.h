@@ -193,6 +193,8 @@ public:
         return {};
     }
 
+    bool HasOnAreaChangeNode(int32_t nodeId);
+
     void AddOnAreaChangeNode(int32_t nodeId);
 
     void RemoveOnAreaChangeNode(int32_t nodeId);

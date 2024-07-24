@@ -2935,6 +2935,11 @@ void PipelineContext::RemoveOnAreaChangeNode(int32_t nodeId)
     isOnAreaChangeNodesCacheVaild_ = false;
 }
 
+bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
+{
+    return onAreaChangeNodeIds_.find(nodeId) != onAreaChangeNodeIds_.end();
+}
+
 void PipelineContext::HandleOnAreaChangeEvent(uint64_t nanoTimestamp)
 {
     ACE_FUNCTION_TRACE();

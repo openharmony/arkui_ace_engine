@@ -112,6 +112,9 @@ void BubblePattern::OnAttachToFrameNode()
 
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    hasOnAreaChange_ = pipelineContext->HasOnAreaChangeNode(targetNode->GetId());
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host)](const RectF& oldRect,
@@ -148,7 +151,9 @@ void BubblePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
-    pipeline->RemoveOnAreaChangeNode(targetNode->GetId());
+    if (!hasOnAreaChange_) {
+        pipeline->RemoveOnAreaChangeNode(targetNode->GetId());
+    }
 }
 
 void BubblePattern::InitTouchEvent()
