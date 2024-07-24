@@ -837,7 +837,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         };
         SnapshotParam param;
         param.delay = CREATE_PIXELMAP_TIME;
-        NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), false, param);
+        NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), true, param);
         PrintBuilderNode(dragPreviewInfo.customNode);
         return;
     }
