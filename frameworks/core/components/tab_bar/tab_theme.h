@@ -29,6 +29,7 @@ namespace OHOS::Ace {
  * using TabTheme::Builder.
  */
 namespace {
+constexpr double THIRDFONT_DEFAULT_VALUE = 1.45;
 constexpr double BIGFONT_DEFAULT_VALUE = 1.75;
 constexpr double LARGEFONT_DEFAULT_VALUE = 2.0;
 constexpr double MAXFONT_DEFAULT_VALUE = 3.2;
@@ -100,6 +101,8 @@ public:
                     pattern->GetAttr<Dimension>("sub_tab_bar_left_right_margin", 12.0_vp);
                 theme->subTabBarIndicatorstyleMarginTop_ =
                     pattern->GetAttr<Dimension>("sub_tab_bar_indicatorstyle_margin_top", 4.0_vp);
+                theme->subTabBarThirdLargeFontSizeScale_ =
+                    pattern->GetAttr<double>("sub_tab_bar_third_large_font_size_scale", THIRDFONT_DEFAULT_VALUE);
 
                 ParseAttribute(theme, pattern);
             } else {
@@ -420,6 +423,11 @@ public:
         return tabBarColumnMargin_;
     }
 
+    float GetsubTabBarThirdLargeFontSizeScale() const
+    {
+        return subTabBarThirdLargeFontSizeScale_;
+    }
+
     const Dimension& GetHorizontalBottomTabMinWidth() const
     {
         return horizontalBottomTabMinWidth_;
@@ -534,6 +542,7 @@ private:
     float subTabBarOriginFontSizeScale_ = 1.0f;
     Dimension subTabBarLeftRightMargin_;
     Dimension subTabBarIndicatorstyleMarginTop_;
+    float subTabBarThirdLargeFontSizeScale_ = 1.45f;
 };
 
 } // namespace OHOS::Ace
