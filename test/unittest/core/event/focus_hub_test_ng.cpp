@@ -645,6 +645,8 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0016, TestSize.Level1)
     KeyEvent keyEvent;
     keyEvent.action = KeyAction::DOWN;
     keyEvent.code = KeyCode::KEY_SPACE;
+    keyEvent.isRedispatch = true;
+    keyEvent.isPreIme = true;
 
     /**
      * @tc.steps2: call the function OnKeyEvent with FocusType::NODE.
@@ -1769,9 +1771,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0035, TestSize.Level1)
  */
 HWTEST_F(FocusHubTestNg, FocusHubTestNg0036, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Create frameNode.
-     */
     auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
         AceType::MakeRefPtr<Pattern>());
     auto child = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1,
@@ -1926,9 +1925,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0041, TestSize.Level1)
  */
 HWTEST_F(FocusHubTestNg, FocusHubTestNg0042, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Create frameNode.
-     */
     auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
         AceType::MakeRefPtr<Pattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
@@ -1938,5 +1934,70 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0042, TestSize.Level1)
     KeyEvent keyEvent;
     focusHub->SetOnClickCallback([](GestureEvent&) { return; });
     focusHub->OnClick(keyEvent);
+}
+
+/**
+ * @tc.name: HasBackwardFocusMovementInChildren001
+ * @tc.desc: Test the function HasBackwardFocusMovementInChildren.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, HasBackwardFocusMovementInChildren001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    KeyEvent keyEvent;
+    ASSERT_FALSE(focusHub->HasBackwardFocusMovementInChildren());
+}
+
+/**
+ * @tc.name: HasForwardFocusMovementInChildren001
+ * @tc.desc: Test the function HasForwardFocusMovementInChildren.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, HasForwardFocusMovementInChildren001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    KeyEvent keyEvent;
+    ASSERT_FALSE(focusHub->HasForwardFocusMovementInChildren());
+}
+
+/**
+ * @tc.name: ClearFocusMovementFlagsInChildren001
+ * @tc.desc: Test the function ClearFocusMovementFlagsInChildren.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, ClearFocusMovementFlagsInChildren001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    KeyEvent keyEvent;
+    ASSERT_FALSE(focusHub->HasBackwardFocusMovement());
+}
+
+/**
+ * @tc.name: SetLastWeakFocusToPreviousInFocusView001
+ * @tc.desc: Test the function SetLastWeakFocusToPreviousInFocusView.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, SetLastWeakFocusToPreviousInFocusView001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    KeyEvent keyEvent;
+    focusHub->SetLastWeakFocusToPreviousInFocusView();
+    ASSERT_FALSE(focusHub->lastWeakFocusNode_.Upgrade());
 }
 } // namespace OHOS::Ace::NG

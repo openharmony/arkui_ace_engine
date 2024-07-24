@@ -1070,6 +1070,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest017, TestSize.Level1)
     auto dragEvent = AceType::MakeRefPtr<DragEvent>(
         std::move(dragActionStart), std::move(dragActionUpdate), std::move(dragActionEnd), std::move(dragActionCancel));
     guestureEventHub->dragEventActuator_->userCallback_ = dragEvent;
+    guestureEventHub->userParallelClickEventActuator_ = AceType::MakeRefPtr<ClickEventActuator>(AceType::WeakClaim(AceType::RawPtr(guestureEventHub)));
     result = guestureEventHub->ProcessTouchTestHit(
         coordinateOffset, touchRestrict, innerTargets, finalResult, 2, localPoint, nullptr, responseLinkResult);
     EXPECT_FALSE(result);
@@ -1879,5 +1880,37 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart001, TestSize.Level1)
      */
     guestureEventHub->OnDragStart(info, pipline, frameNode, dragDropInfo, event);
     EXPECT_TRUE(EventHub->dragDropProxy_ == false);
+}
+
+/**
+ * @tc.name: SetMouseDragGatherPixelMaps001
+ * @tc.desc: Test SetMouseDragGatherPixelMaps
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, SetMouseDragGatherPixelMaps001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 101, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    auto eventHub = guestureEventHub->eventHub_.Upgrade();
+    guestureEventHub->SetMouseDragGatherPixelMaps();
+    guestureEventHub->SetNotMouseDragGatherPixelMaps();
+    ASSERT_NE(PipelineContext::GetCurrentContext(), nullptr);
+}
+
+/**
+ * @tc.name: GetDragCallback001
+ * @tc.desc: Test GetDragCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetDragCallback001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 101, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    RefPtr<PipelineBase> context;
+    ASSERT_NE(guestureEventHub, nullptr);
+    auto eventHub = guestureEventHub->eventHub_.Upgrade();
+    OnDragCallbackCore callback = guestureEventHub->GetDragCallback(context, eventHub);
+    ASSERT_NE(callback, nullptr);
 }
 } // namespace OHOS::Ace::NG

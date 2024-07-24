@@ -1960,4 +1960,17 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0108, TestSize.Level1)
     focusHub->focusType_ = FocusType::SCOPE;
     ASSERT_FALSE(focusHub->HasFocusedChild());
 }
+
+/**
+ * @tc.name: GetRootFocusHub001
+ * @tc.desc: Test the function GetRootFocusHub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, GetRootFocusHub001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    ASSERT_NE(focusHub->GetRootFocusHub(), nullptr);
+}
 } // namespace OHOS::Ace::NG
