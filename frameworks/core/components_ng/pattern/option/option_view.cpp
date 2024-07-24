@@ -52,7 +52,11 @@ RefPtr<FrameNode> Create(int32_t index)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
     BorderRadiusProperty border;
-    border.SetRadius(theme->GetInnerBorderRadius());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        border.SetRadius(theme->GetMenuDefaultInnerRadius());
+    } else {
+        border.SetRadius(theme->GetInnerBorderRadius());
+    }
     renderContext->UpdateBorderRadius(border);
 
     auto props = node->GetPaintProperty<OptionPaintProperty>();

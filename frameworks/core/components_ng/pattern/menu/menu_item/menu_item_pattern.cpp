@@ -1140,7 +1140,11 @@ void MenuItemPattern::AddClickableArea()
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
         BorderRadiusProperty border;
-        border.SetRadius(theme->GetInnerBorderRadius());
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            border.SetRadius(theme->GetMenuDefaultInnerRadius());
+        } else {
+            border.SetRadius(theme->GetInnerBorderRadius());
+        }
         auto clickableContext = clickableArea->GetRenderContext();
         CHECK_NULL_VOID(clickableContext);
         clickableContext->UpdateBorderRadius(border);

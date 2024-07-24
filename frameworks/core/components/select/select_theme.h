@@ -296,7 +296,8 @@ public:
             theme->menuItemVerticalPadding_ = pattern->GetAttr<Dimension>("menu_item_vertical_padding", 8.0_vp);
             theme->menuItemGroupTitleTextFontSize_ =
                 pattern->GetAttr<Dimension>("menu_item_group_title_text_font_size", 18.0_vp);
-            theme->menuDefaultRadius_ = pattern->GetAttr<Dimension>("menu_default_radius", 20.0_vp);
+            theme->menuDefaultRadius_ = pattern->GetAttr<Dimension>("menu_border_radius_new", 20.0_vp);
+            theme->menuDefaultInnerRadius_ = pattern->GetAttr<Dimension>("inner_border_radius_new", 16.0_vp);
             theme->menuTextColor_= pattern->GetAttr<Color>("menu_text_color", Color(0xe5000000));
         }
     };
@@ -420,6 +421,7 @@ public:
         theme->menuItemVerticalPadding_ = menuItemVerticalPadding_;
         theme->menuItemGroupTitleTextFontSize_ = menuItemGroupTitleTextFontSize_;
         theme->menuDefaultRadius_ = menuDefaultRadius_;
+        theme->menuDefaultInnerRadius_ = menuDefaultInnerRadius_;
         theme->menuTextColor_ = menuTextColor_;
     }
 
@@ -1095,6 +1097,11 @@ public:
         return menuDefaultRadius_;
     }
 
+    const Dimension& GetMenuDefaultInnerRadius() const
+    {
+        return menuDefaultInnerRadius_;
+    }
+
     const Color& GetMenuTextColor() const
     {
         return menuTextColor_;
@@ -1223,6 +1230,7 @@ private:
     Dimension menuItemVerticalPadding_;
     Dimension menuItemGroupTitleTextFontSize_;
     Dimension menuDefaultRadius_;
+    Dimension menuDefaultInnerRadius_;
     Color menuTextColor_;
     uint32_t menuItemContentAlign_ = CONTENT_ALIGN_LEFT;
 };
