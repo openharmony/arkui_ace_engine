@@ -4956,4 +4956,10 @@ void FrameNode::NotifyWebPattern(bool isRegister)
 #endif
     UINode::NotifyWebPattern(isRegister);
 }
+
+uint32_t FrameNode::GetWindowPatternType() const
+{
+    CHECK_NULL_RETURN(pattern_, 0);
+    return pattern_->GetWindowPatternType();
+}
 } // namespace OHOS::Ace::NG

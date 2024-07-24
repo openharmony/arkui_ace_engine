@@ -64,21 +64,27 @@ public:
     {
         overlayManager_.Reset();
     }
+    uint32_t GetWindowPatternType() const override;
 
-private:
+protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    std::function<void(const Rosen::Vector4f&)> boundsChangedCallback_;
+    sptr<Rosen::Session> session_;
+
+private:
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
+
     void OnBoundsChanged(const Rosen::Vector4f& bounds);
     void RegisterFocusCallback();
     void RegisterEventCallback();
     void RegisterResponseRegionCallback();
     void PostCheckContextTransparentTask();
     void PostFaultInjectTask();
+
     int32_t instanceId_ = Container::CurrentId();
-    sptr<Rosen::Session> session_;
-    std::function<void(const Rosen::Vector4f&)> boundsChangedCallback_;
+
     CancelableCallback<void()> checkContextTransparentTask_;
     RefPtr<OverlayManager> overlayManager_;
 
