@@ -776,8 +776,15 @@ bool ListPattern::IsAtTop() const
     bool groupAtStart = true;
     bool groupAtEnd = true;
     GetListItemGroupEdge(groupAtStart, groupAtEnd);
-    return (startIndex_ == 0 && groupAtStart) &&
-           NonNegative(startMainPos_ - currentDelta_ + GetChainDelta(0) - contentStartOffset_);
+    int32_t startIndex = startIndex_;
+    float startMainPos = startMainPos_;
+    if (posMap_) {
+        auto res = posMap_->GetStartIndexAndPos();
+        startIndex = res.first;
+        startMainPos = res.second - currentOffset_;
+    }
+    return (startIndex == 0 && groupAtStart) &&
+           NonNegative(startMainPos - currentDelta_ + GetChainDelta(0) - contentStartOffset_);
 }
 
 bool ListPattern::IsAtBottom() const
@@ -785,8 +792,15 @@ bool ListPattern::IsAtBottom() const
     bool groupAtStart = true;
     bool groupAtEnd = true;
     GetListItemGroupEdge(groupAtStart, groupAtEnd);
-    return (endIndex_ == maxListItemIndex_ && groupAtEnd) &&
-           LessOrEqual(endMainPos_ - currentDelta_ + GetChainDelta(endIndex_), contentMainSize_ - contentEndOffset_);
+    int32_t endIndex = endIndex_;
+    float endMainPos = endMainPos_;
+    if (posMap_) {
+        auto res = posMap_->GetEndIndexAndPos();
+        endIndex = res.first;
+        endMainPos = res.second - currentOffset_;
+    }
+    return (endIndex == maxListItemIndex_ && groupAtEnd) &&
+           LessOrEqual(endMainPos - currentDelta_ + GetChainDelta(endIndex), contentMainSize_ - contentEndOffset_);
 }
 
 bool ListPattern::OutBoundaryCallback()
@@ -834,20 +848,33 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
     bool groupAtStart = true;
     bool groupAtEnd = true;
     GetListItemGroupEdge(groupAtStart, groupAtEnd);
-    if (startIndex_ == 0 && groupAtStart) {
-        offset.start = GetStartOverScrollOffset(delta);
+
+    int32_t startIndex = startIndex_;
+    float startMainPos = startMainPos_;
+    int32_t endIndex = endIndex_;
+    float endMainPos = endMainPos_;
+    if (posMap_) {
+        auto res = posMap_->GetStartIndexAndPos();
+        startIndex = res.first;
+        startMainPos = res.second - currentOffset_;
+        res = posMap_->GetEndIndexAndPos();
+        endIndex = res.first;
+        endMainPos = res.second - currentOffset_;
     }
-    if (endIndex_ == maxListItemIndex_ && groupAtEnd) {
-        offset.end = GetEndOverScrollOffset(delta);
+    if (startIndex == 0 && groupAtStart) {
+        offset.start = GetStartOverScrollOffset(delta, startMainPos);
+    }
+    if (endIndex == maxListItemIndex_ && groupAtEnd) {
+        offset.end = GetEndOverScrollOffset(delta, endMainPos, startMainPos);
     }
     return offset;
 }
 
-float ListPattern::GetStartOverScrollOffset(float offset) const
+float ListPattern::GetStartOverScrollOffset(float offset, float startMainPos) const
 {
     float startOffset = 0.0f;
     float ChainDelta = chainAnimation_ ? chainAnimation_->GetValuePredict(0, -offset) : 0.f;
-    auto startPos = startMainPos_ + ChainDelta - currentDelta_;
+    auto startPos = startMainPos + ChainDelta - currentDelta_;
     auto newStartPos = startPos + offset;
     if (startPos > contentStartOffset_ && newStartPos > contentStartOffset_) {
         startOffset = offset;
@@ -861,14 +888,14 @@ float ListPattern::GetStartOverScrollOffset(float offset) const
     return startOffset;
 }
 
-float ListPattern::GetEndOverScrollOffset(float offset) const
+float ListPattern::GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const
 {
     float endOffset = 0.0f;
     float ChainDelta = chainAnimation_ ? chainAnimation_->GetValuePredict(endIndex_, -offset) : 0.f;
-    auto endPos = endMainPos_ + ChainDelta - currentDelta_;
+    auto endPos = endMainPos + ChainDelta - currentDelta_;
     auto contentEndPos = contentMainSize_ - contentEndOffset_;
-    if (GreatNotEqual(contentEndPos, endMainPos_ - startMainPos_)) {
-        endPos = startMainPos_ + contentEndPos;
+    if (GreatNotEqual(contentEndPos, endMainPos - startMainPos)) {
+        endPos = startMainPos + contentEndPos;
     }
     auto newEndPos = endPos + offset;
     if (endPos < contentEndPos && newEndPos < contentEndPos) {
@@ -1781,6 +1808,7 @@ Rect ListPattern::GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
 
 void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm::PositionMap& recycledItemPosition)
 {
+    posMap_->UpdateTotalCount(maxListItemIndex_ + 1);
     if (itemPosition_.empty()) {
         return;
     }

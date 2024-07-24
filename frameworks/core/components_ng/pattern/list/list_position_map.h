@@ -378,6 +378,13 @@ public:
         ClearDirty();
     }
 
+    void UpdateTotalCount(int32_t totalCount)
+    {
+        totalItemCount_ = totalCount;
+        auto iter = posMap_.lower_bound(totalCount);
+        posMap_.erase(iter, posMap_.end());
+    }
+
     float GetPos(int32_t index, float offset = 0.0f)
     {
         return posMap_[index].mainPos - offset;
@@ -386,6 +393,24 @@ public:
     float GetGroupLayoutOffset(int32_t startIndex, float startPos)
     {
         return posMap_[startIndex].mainPos - startPos;
+    }
+
+    std::pair<int32_t, float> GetStartIndexAndPos() const
+    {
+        if (posMap_.empty()) {
+            return { 0, 0.0f };
+        }
+        const auto& start = posMap_.begin();
+        return { start->first, start->second.mainPos };
+    }
+
+    std::pair<int32_t, float> GetEndIndexAndPos() const
+    {
+        if (posMap_.empty()) {
+            return { 0, 0.0f };
+        }
+        const auto& end = posMap_.rbegin();
+        return { end->first, end->second.mainPos + end->second.mainSize };
     }
 
     void OptimizeBeforeMeasure(int32_t& beginIndex, float& beginPos, const float offset, const float contentSize)
