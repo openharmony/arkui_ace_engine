@@ -93,7 +93,6 @@ constexpr char DOUBLE_CLICK_TITLE[] = "DOUBLE_CLICK_TITLE";
 constexpr char CURRENTPKG[] = "CURRENTPKG";
 constexpr char STATECHANGE[] = "STATECHANGE";
 constexpr char MAXMENUITEM[] = "MAXMENUITEM";
-constexpr char CHANGEDEFAULTSETTING[] = "CHANGEDEFAULTSETTING";
 constexpr char SCENE_BOARD_UE_DOMAIN[] = "SCENE_BOARD_UE";
 #ifdef VSYNC_TIMEOUT_CHECK
 constexpr char UI_VSYNC_TIMEOUT[] = "UI_VSYNC_TIMEOUT";
@@ -522,7 +521,7 @@ void EventReport::ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stat
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         CURRENTPKG, packageName,
         MAXMENUITEM, maxMenuItem,
-        CHANGEDEFAULTSETTING, stateChange);
+        STATECHANGE, stateChange);
 }
 
 void EventReport::ReportPageNodeOverflow(const std::string& pageUrl, int32_t nodeCount, int32_t threshold)
