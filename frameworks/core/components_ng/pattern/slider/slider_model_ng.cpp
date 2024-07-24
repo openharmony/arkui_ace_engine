@@ -83,11 +83,6 @@ void SliderModelNG::SetSelectColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectColor, value);
 }
-void SliderModelNG::SetSelectColor(const Gradient& value, bool isResourceColor)
-{
-    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectGradientColor, value);
-    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectIsResourceColor, isResourceColor);
-}
 void SliderModelNG::SetMinLabel(float value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Min, value);
@@ -402,10 +397,9 @@ void SliderModelNG::SetTrackBackgroundColor(FrameNode* frameNode, const Gradient
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, value, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundIsResourceColor, isResourceColor, frameNode);
 }
-void SliderModelNG::SetSelectColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor)
+void SliderModelNG::SetSelectColor(FrameNode* frameNode, const Color& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectGradientColor, value, frameNode);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectIsResourceColor, isResourceColor, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectColor, value, frameNode);
 }
 void SliderModelNG::SetShowSteps(FrameNode* frameNode, bool value)
 {
@@ -608,12 +602,11 @@ Gradient SliderModelNG::GetTrackBackgroundColor(FrameNode* frameNode)
     return value;
 }
 
-Gradient SliderModelNG::GetSelectColor(FrameNode* frameNode)
+Color SliderModelNG::GetSelectColor(FrameNode* frameNode)
 {
-    Gradient value;
+    Color value;
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
-        SliderPaintProperty, SelectGradientColor, value, frameNode,
-        SliderModelNG::CreateSolidGradient(Color(SELECTED_COLOR)));
+        SliderPaintProperty, SelectColor, value, frameNode, Color(SELECTED_COLOR));
     return value;
 }
 
