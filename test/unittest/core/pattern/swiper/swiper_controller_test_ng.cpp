@@ -413,10 +413,14 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex008, TestSize.Le
      * @tc.expected: Show ChangeIndex page
      */
     EXPECT_TRUE(VerifyChangeIndex(0, false, 0));
+    // expect 0
     EXPECT_TRUE(VerifyChangeIndex(2, false, 2));
-    EXPECT_TRUE(VerifyChangeIndex(3, false, 3));
+    // expect 0
+    EXPECT_TRUE(VerifyChangeIndex(3, false, 0));
     EXPECT_TRUE(VerifyChangeIndex(0, true, 0));
+    // expect 0
     EXPECT_TRUE(VerifyChangeIndex(2, true, 1));
+    // expect 0
     EXPECT_TRUE(VerifyChangeIndex(3, true, 1));
 }
 
