@@ -208,6 +208,7 @@ private:
     bool IsMaskEnableForm(const RequestFormInfo &info);
     void UpdateChildNodeOpacity(FormChildNodeType formChildNodeType, double opacity);
     void SnapshotSurfaceNode();
+    bool CheckFormBundleForbidden(const std::string &bundleName);
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;
 

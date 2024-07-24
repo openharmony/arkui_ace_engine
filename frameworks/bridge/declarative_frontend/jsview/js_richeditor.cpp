@@ -54,6 +54,7 @@
 #include "core/components_v2/inspector/utils.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<RichEditorModel> RichEditorModel::instance_ = nullptr;
@@ -80,6 +81,12 @@ RichEditorModel* RichEditorModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+enum class RenderingStrategy {
+    SINGLE = 0,
+    MULTIPLE_COLOR,
+    MULTIPLE_OPACITY
+};
+
 CalcDimension JSRichEditor::ParseLengthMetrics(const JSRef<JSObject>& obj)
 {
     CalcDimension size;
@@ -1041,7 +1048,7 @@ void JSRichEditor::SetPlaceholder(const JSCallbackInfo& info)
         JSRef<JSVal> colorVal = object->GetProperty("fontColor");
         Color fontColor;
         if (!colorVal->IsNull() && JSContainerBase::ParseJsColor(colorVal, fontColor)) {
-            options.fontColor = fontColor;
+            options.fontColor = DynamicColor(fontColor, ParseColorResourceId(colorVal));
         } else {
             auto richEditorTheme = pipelineContext->GetTheme<NG::RichEditorTheme>();
             options.fontColor = richEditorTheme ? richEditorTheme->GetPlaceholderColor() : fontColor;
@@ -1116,14 +1123,18 @@ void JSRichEditor::SetCaretColor(const JSCallbackInfo& info)
         return;
     }
     Color color;
-    if (!ParseJsColor(info[0], color)) {
+    DynamicColor dynamicColor;
+    JSRef<JSVal> colorVal = info[0];
+    if (!ParseJsColor(colorVal, color)) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
         CHECK_NULL_VOID(theme);
-        color = theme->GetCaretColor();
+        dynamicColor = theme->GetCaretColor();
+    } else {
+        dynamicColor = DynamicColor(color, ParseColorResourceId(colorVal));
     }
-    RichEditorModel::GetInstance()->SetCaretColor(color);
+    RichEditorModel::GetInstance()->SetCaretColor(dynamicColor);
 }
 
 void JSRichEditor::SetSelectedBackgroundColor(const JSCallbackInfo& info)
@@ -1133,14 +1144,18 @@ void JSRichEditor::SetSelectedBackgroundColor(const JSCallbackInfo& info)
         return;
     }
     Color selectedColor;
-    if (!ParseJsColor(info[0], selectedColor)) {
+    DynamicColor dynamicSelectedColor;
+    JSRef<JSVal> colorVal = info[0];
+    if (!ParseJsColor(colorVal, selectedColor)) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
         CHECK_NULL_VOID(theme);
-        selectedColor = theme->GetSelectedBackgroundColor();
+        dynamicSelectedColor = theme->GetSelectedBackgroundColor();
+    } else {
+        dynamicSelectedColor = DynamicColor(selectedColor, ParseColorResourceId(colorVal));
     }
-    RichEditorModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
+    RichEditorModel::GetInstance()->SetSelectedBackgroundColor(dynamicSelectedColor);
 }
 
 void JSRichEditor::SetEnterKeyType(const JSCallbackInfo& info)
@@ -1203,6 +1218,18 @@ void JSRichEditor::SetOnSubmit(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
     CreateJsRichEditorCommonEvent(info);
+}
+
+std::optional<uint32_t> JSRichEditor::ParseColorResourceId(JSRef<JSVal> colorVal)
+{
+    CHECK_NULL_RETURN(colorVal->IsObject(), std::nullopt);
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorVal);
+    JSViewAbstract::CompleteResourceObject(jsObj);
+    JSRef<JSVal> resId = jsObj->GetProperty("id");
+    CHECK_NULL_RETURN(resId->IsNumber(), std::nullopt);
+    auto type = jsObj->GetPropertyValue<int32_t>("type", -1);
+    CHECK_NULL_RETURN(type == static_cast<int32_t>(ResourceType::COLOR), std::nullopt);
+    return resId->ToNumber<uint32_t>();
 }
 
 void JSRichEditor::JSBind(BindingTarget globalObj)
@@ -1339,6 +1366,10 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     JSRef<JSVal> renderingStrategy = styleObject->GetProperty("renderingStrategy");
     uint32_t symbolRenderStrategy;
     if (!renderingStrategy->IsNull() && JSContainerBase::ParseJsInteger(renderingStrategy, symbolRenderStrategy)) {
+        if (symbolRenderStrategy < 0 ||
+            symbolRenderStrategy > static_cast<uint32_t>(RenderingStrategy::MULTIPLE_OPACITY)) {
+            symbolRenderStrategy = static_cast<uint32_t>(RenderingStrategy::SINGLE);
+        }
         updateSpanStyle.updateSymbolRenderingStrategy = symbolRenderStrategy;
         style.SetRenderStrategy(symbolRenderStrategy);
     }
@@ -2126,9 +2157,9 @@ void JSRichEditorBaseController::ParseJsTextStyle(
     JSRef<JSVal> fontColor = styleObject->GetProperty("fontColor");
     Color textColor;
     if (!fontColor->IsNull() && JSContainerBase::ParseJsColor(fontColor, textColor)) {
-        updateSpanStyle.updateTextColor = textColor;
-        style.SetTextColor(textColor);
-        updateSpanStyle.hasResourceFontColor = false;
+        DynamicColor dynamicColor = DynamicColor(textColor, JSRichEditor::ParseColorResourceId(fontColor));
+        style.SetTextColor(dynamicColor);
+        updateSpanStyle.updateTextColor = dynamicColor;
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
@@ -2245,9 +2276,9 @@ void JSRichEditorBaseController::ParseTextDecoration(
         JSRef<JSVal> color = decorationObject->GetProperty("color");
         Color decorationColor;
         if (!color->IsNull() && JSContainerBase::ParseJsColor(color, decorationColor)) {
-            updateSpanStyle.updateTextDecorationColor = decorationColor;
-            style.SetTextDecorationColor(decorationColor);
-            updateSpanStyle.hasResourceDecorationColor = false;
+            DynamicColor dynamicColor = DynamicColor(decorationColor, JSRichEditor::ParseColorResourceId(color));
+            updateSpanStyle.updateTextDecorationColor = dynamicColor;
+            style.SetTextDecorationColor(dynamicColor);
         }
         JSRef<JSVal> textDecorationStyle = decorationObject->GetProperty("style");
         if (!textDecorationStyle->IsNull() && !textDecorationStyle->IsUndefined()) {
@@ -2257,8 +2288,8 @@ void JSRichEditorBaseController::ParseTextDecoration(
         }
     }
     if (!updateSpanStyle.updateTextDecorationColor.has_value() && updateSpanStyle.updateTextColor.has_value()) {
-        updateSpanStyle.updateTextDecorationColor = style.GetTextColor();
-        style.SetTextDecorationColor(style.GetTextColor());
+        updateSpanStyle.updateTextDecorationColor = style.GetDynamicTextColor();
+        style.SetTextDecorationColor(style.GetDynamicTextColor());
     }
 }
 

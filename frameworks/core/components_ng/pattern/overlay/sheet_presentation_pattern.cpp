@@ -1619,6 +1619,10 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     if (sheetType_ != sheetType) {
+        if (sheetType == SheetType::SHEET_BOTTOM || SheetType::SHEET_CENTER) {
+            // exchange of folded and unfolded states
+            isFoldable_ = true;
+        }
         sheetType_ = sheetType;
         SetSheetBorderWidth();
     }

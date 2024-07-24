@@ -299,20 +299,13 @@ void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    NG::Gradient gradient;
-    bool isResourceColor = false;
-    if (!ConvertGradientColor(info[0], gradient)) {
-        Color colorVal;
-        if (!ParseJsColor(info[0], colorVal)) {
-            auto theme = GetTheme<SliderTheme>();
-            CHECK_NULL_VOID(theme);
-            colorVal = theme->GetTrackSelectedColor();
-        }
-        isResourceColor = true;
-        gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
-        SliderModel::GetInstance()->SetSelectColor(colorVal);
+    Color colorVal;
+    if (!ParseJsColor(info[0], colorVal)) {
+        auto theme = GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(theme);
+        colorVal = theme->GetTrackSelectedColor();
     }
-    SliderModel::GetInstance()->SetSelectColor(gradient, isResourceColor);
+    SliderModel::GetInstance()->SetSelectColor(colorVal);
 }
 
 void JSSlider::SetMinLabel(const JSCallbackInfo& info)

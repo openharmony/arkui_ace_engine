@@ -15,6 +15,8 @@
 
 #include "core/common/ai/data_detector_adapter.h"
 
+#include "iremote_object.h"
+
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/log_wrapper.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -99,14 +101,22 @@ void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
     }
     Container::UpdateCurrent(mainContainerId_);
 
+    auto runtimeContext = Platform::AceContainer::GetRuntimeContext(pipeline->GetInstanceId());
+    CHECK_NULL_VOID(runtimeContext);
+    auto token = runtimeContext->GetToken();
+    auto bundleName = runtimeContext->GetBundleName();
     if (onClickMenu_ && menuOption.first == std::string(COPY_ACTION)) {
         onClickMenu_(std::string(COPY_ACTION));
     } else if (onClickMenu_ && menuOption.first == std::string(SELECT_ACTION)) {
         onClickMenu_(std::string(SELECT_ACTION));
-    } else if (std::holds_alternative<std::function<void(std::string)>>(menuOption.second)) {
-        std::get<std::function<void(std::string)>>(menuOption.second)(aiSpan.content);
+    } else if (std::holds_alternative<std::function<void(sptr<IRemoteObject>, std::string)>>(menuOption.second)) {
+        std::get<std::function<void(sptr<IRemoteObject>, std::string)>>(menuOption.second)(token, aiSpan.content);
     } else if (std::holds_alternative<std::function<void(int32_t, std::string)>>(menuOption.second)) {
         std::get<std::function<void(int32_t, std::string)>>(menuOption.second)(mainContainerId_, aiSpan.content);
+    } else if (std::holds_alternative<std::function<void(int32_t, std::string, std::string, int32_t, std::string)>>(
+                   menuOption.second)) {
+        std::get<std::function<void(int32_t, std::string, std::string, int32_t, std::string)>>(menuOption.second)(
+            mainContainerId_, textForAI_, bundleName, aiSpan.start, aiSpan.content);
     } else {
         TAG_LOGW(AceLogTag::ACE_TEXT, "No matching menu option");
     }

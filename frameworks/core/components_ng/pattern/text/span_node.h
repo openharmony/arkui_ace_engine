@@ -403,14 +403,19 @@ public:
         spanItem_->description = desc;
     }
 
+    void UpdateColorByResourceId()
+    {
+        spanItem_->fontStyle->UpdateColorByResourceId();
+    }
+
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, Color);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, DynamicColor);
     DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, TextDecoration);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, DynamicColor);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFeature, FONT_FEATURES_LIST);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextShadow, std::vector<Shadow>);
@@ -585,6 +590,7 @@ public:
     }
     ~CustomSpanItem() override = default;
     RefPtr<SpanItem> GetSameStyleSpanItem() const override;
+    ResultObject GetSpanResultObject(int32_t start, int32_t end) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     ACE_DISALLOW_COPY_AND_MOVE(CustomSpanItem);
     std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure;

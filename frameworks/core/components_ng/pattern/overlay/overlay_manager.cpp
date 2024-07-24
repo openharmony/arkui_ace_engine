@@ -713,9 +713,9 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     auto root = node->GetParent();
     CHECK_NULL_VOID(root);
     node->OnAccessibilityEvent(
-        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     DeleteDialogHotAreas(node);
-    root->RemoveChild(node);
+    root->RemoveChild(node, node->GetIsUseTransitionAnimator());
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
     if (container->IsDialogContainer() || isShowInSubWindow) {
@@ -781,7 +781,8 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
                            ? dialogPattern->GetOpenAnimation().value().GetDuration()
                            : theme->GetAnimationDurationIn());
     ctx->ScaleAnimation(option, theme->GetScaleStart(), theme->GetScaleEnd());
-    node->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    node->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_OPEN, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
@@ -866,7 +867,8 @@ void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node)
     MountToParentWithService(root, node);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     BlurLowerNode(node);
-    node->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    node->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_OPEN, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 void OverlayManager::CloseDialogMatchTransition(const RefPtr<FrameNode>& node)
@@ -961,6 +963,10 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->OnShowMenuAnimationFinished(menuWK, weak, id);
+            menuWK.Upgrade()->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE,
+                WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
+                static_cast<int32_t>(AccessibilityEventType::PAGE_CHANGE));
         });
 
     if (wrapperPattern->GetPreviewMode() == MenuPreviewMode::CUSTOM) {
@@ -1105,6 +1111,12 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
         ContainerScope scope(id);
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
+        auto menuWrapper = menuWK.Upgrade();
+        menuWrapper->OnAccessibilityEvent(
+            AccessibilityEventType::PAGE_CHANGE,
+            WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
+            static_cast<int32_t>(AccessibilityEventType::PAGE_CHANGE));
         overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
     });
     ShowMenuClearAnimation(menu, option, showPreviewAnimation, startDrag);
@@ -2850,7 +2862,9 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
         }
         auto dialogPattern = DynamicCast<DialogPattern>(pattern);
         CHECK_NULL_RETURN(dialogPattern, OVERLAY_EXISTS);
-        if (dialogPattern->ShouldDismiss()) {
+        if (dialogPattern->CallDismissInNDK(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK))) {
+            return OVERLAY_REMOVE;
+        } else if (dialogPattern->ShouldDismiss()) {
             SetDismissDialogId(overlay->GetId());
             dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK));
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
@@ -4018,6 +4032,10 @@ void OverlayManager::PlaySheetTransition(
                 return;
             }
         }
+        if (sheetPattern->IsFoldable()) {
+            option.SetDuration(0);
+            option.SetCurve(Curves::LINEAR);
+        }
         sheetPattern->FireOnTypeDidChange();
         sheetPattern->FireOnWidthDidChange(sheetNode);
         option.SetOnFinishEvent(
@@ -4047,6 +4065,7 @@ void OverlayManager::PlaySheetTransition(
                 }
             },
             option.GetOnFinishEvent());
+        sheetPattern->SetIsFoldable(false);
     } else {
         option.SetOnFinishEvent(
             [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), weakOverlayManager = WeakClaim(this)] {
@@ -4361,7 +4380,7 @@ void OverlayManager::SaveSheePageNode(
     int32_t targetId = targetNode->GetId();
     auto root = AceType::DynamicCast<FrameNode>(rootNodeWeak_.Upgrade());
     CHECK_NULL_VOID(root);
-    bool isValidTarget = (root->GetId() != targetId);
+    bool isValidTarget = CheckTargetIdIsValid(targetId);
     SheetKey sheetKey;
     if (isStartByUIContext) {
         sheetKey = SheetKey(isValidTarget, sheetContentNode->GetId(), targetId);
@@ -4376,6 +4395,17 @@ void OverlayManager::SaveSheePageNode(
     modalList_.emplace_back(WeakClaim(RawPtr(sheetPageNode)));
     SaveLastModalNode();
     sheetNodePattern->SetOverlay(AceType::WeakClaim(this));
+}
+
+bool OverlayManager::CheckTargetIdIsValid(int32_t targetId)
+{
+    if (targetId < 0) {
+        return false;
+    }
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto rootId = rootNode->GetId();
+    return rootId != targetId;
 }
 
 RefPtr<FrameNode> OverlayManager::CreateSheetMask(const RefPtr<FrameNode>& sheetPageNode,
@@ -4411,7 +4441,7 @@ bool OverlayManager::CreateSheetKey(const RefPtr<NG::FrameNode>& sheetContentNod
     SheetKey& sheetKey)
 {
     CHECK_NULL_RETURN(sheetContentNode, false);
-    bool isTargetIdValid = (targetId >= 0);
+    bool isTargetIdValid = CheckTargetIdIsValid(targetId);
     if (!isTargetIdValid) {
         auto rootNode = rootNodeWeak_.Upgrade();
         CHECK_NULL_RETURN(rootNode, false);

@@ -19,6 +19,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/toast/toast_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
@@ -60,7 +61,7 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const ToastInfo& toastInfo)
     pattern->SetToastInfo(toastInfo);
     pattern->SetTextNode(textNode);
     UpdateTextLayoutProperty(textNode, toastInfo.message, toastInfo.isRightToLeft);
-    UpdateTextContext(textNode);
+    UpdateToastContext(toastNode);
     textNode->MountToParent(toastNode);
     auto align = Alignment::ParseAlignment(toastInfo.alignment);
     if (align.has_value()) {
@@ -108,16 +109,36 @@ void ToastView::UpdateTextLayoutProperty(
     textLayoutProperty->UpdatePadding(paddings);
     textLayoutProperty->UpdateTextColor(textColor);
     textLayoutProperty->UpdateFontWeight(fontWeight);
+    auto textContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textContext);
+    textContext->UpdateClipEdge(false);
 
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
         textLayoutProperty->UpdateEllipsisMode(EllipsisMode::TAIL);
     }
 }
-void ToastView::UpdateTextContext(const RefPtr<FrameNode>& textNode)
+
+bool ToastView::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 {
-    auto textContext = textNode->GetRenderContext();
-    CHECK_NULL_VOID(textContext);
+    auto colorMode = SystemProperties::GetColorMode();
+    if (shadowStyle == ShadowStyle::None) {
+        return true;
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    if (!shadowTheme) {
+        return false;
+    }
+    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    return true;
+}
+
+void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
+{
+    auto toastContext = toastNode->GetRenderContext();
+    CHECK_NULL_VOID(toastContext);
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
@@ -125,36 +146,37 @@ void ToastView::UpdateTextContext(const RefPtr<FrameNode>& textNode)
     auto radius = toastTheme->GetRadius();
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(radius.GetX().ConvertToPx()));
-    textContext->UpdateBorderRadius(borderRadius);
+    toastContext->UpdateBorderRadius(borderRadius);
     if (toastTheme->GetToastDoubleBorderEnable()) {
-        textContext->UpdateOuterBorderRadius(borderRadius);
+        toastContext->UpdateOuterBorderRadius(borderRadius);
 
         BorderWidthProperty innerWidthProp;
         innerWidthProp.SetBorderWidth(Dimension(toastTheme->GetToastInnerBorderWidth()));
-        textContext->UpdateBorderWidth(innerWidthProp);
+        toastContext->UpdateBorderWidth(innerWidthProp);
         BorderColorProperty innerColorProp;
         innerColorProp.SetColor(toastTheme->GetToastInnerBorderColor());
-        textContext->UpdateBorderColor(innerColorProp);
+        toastContext->UpdateBorderColor(innerColorProp);
 
         BorderWidthProperty outerWidthProp;
         outerWidthProp.SetBorderWidth(Dimension(toastTheme->GetToastOuterBorderWidth()));
-        textContext->UpdateOuterBorderWidth(outerWidthProp);
+        toastContext->UpdateOuterBorderWidth(outerWidthProp);
         BorderColorProperty outerColorProp;
         outerColorProp.SetColor(toastTheme->GetToastOuterBorderColor());
-        textContext->UpdateOuterBorderColor(outerColorProp);
+        toastContext->UpdateOuterBorderColor(outerColorProp);
     }
-    textContext->UpdateBackShadow(ShadowConfig::DefaultShadowL);
-    textContext->UpdateClipEdge(false);
-
+    Shadow shadow;
+    if (GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow)) {
+        toastContext->UpdateBackShadow(shadow);
+    }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        textContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        toastContext->UpdateBackgroundColor(Color::TRANSPARENT);
         BlurStyleOption styleOption;
         styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
         styleOption.policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
-        textContext->UpdateBackBlurStyle(styleOption);
+        toastContext->UpdateBackBlurStyle(styleOption);
     } else {
         auto toastBackgroundColor = toastTheme->GetBackgroundColor();
-        textContext->UpdateBackgroundColor(toastBackgroundColor);
+        toastContext->UpdateBackgroundColor(toastBackgroundColor);
     }
 }
 } // namespace OHOS::Ace::NG

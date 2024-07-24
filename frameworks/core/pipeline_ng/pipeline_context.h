@@ -193,6 +193,8 @@ public:
         return {};
     }
 
+    bool HasOnAreaChangeNode(int32_t nodeId);
+
     void AddOnAreaChangeNode(int32_t nodeId);
 
     void RemoveOnAreaChangeNode(int32_t nodeId);
@@ -577,7 +579,7 @@ public:
     void DumpJsInfo(const std::vector<std::string>& params) const;
 
     bool DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
-        bool skipSubAutoFillContainer = false);
+        bool skipSubAutoFillContainer = false, bool needsRecordData = false);
     bool CheckNeedAutoSave();
     bool CheckOverlayFocus();
     void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap);
@@ -821,6 +823,7 @@ public:
     void RemoveChangedFrameNode(int32_t nodeId);
     void SetForceSplitEnable(bool isForceSplit)
     {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "set force split %{public}s", isForceSplit ? "enable" : "disable");
         isForceSplit_ = isForceSplit;
     }
 

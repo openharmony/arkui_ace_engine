@@ -63,6 +63,13 @@ template("ace_core_source_set") {
       include_dirs += vendor_configs.ace_engine_advanced_split_mode_dirs
     }
 
+    if (ace_engine_feature_enable_nav_split_mode &&
+        defined(
+            vendor_configs.ace_engine_advanced_navigation_split_mode_dirs)) {
+      include_dirs +=
+          vendor_configs.ace_engine_advanced_navigation_split_mode_dirs
+    }
+
     # add common source file needed by all product platform here
     sources = [
       # accessibility
@@ -530,7 +537,10 @@ template("ace_core_source_set") {
           "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform",
           "$ace_root/frameworks/core/components_ng/pattern/form:ace_core_components_form_pattern_ng_$platform",
         ]
-        external_deps += [ "form_fwk:form_manager" ]
+        external_deps += [
+          "ability_base:want",
+          "form_fwk:form_manager",
+        ]
       }
     }
 

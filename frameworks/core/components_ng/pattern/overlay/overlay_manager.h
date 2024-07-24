@@ -615,6 +615,7 @@ private:
     void SaveSheePageNode(
         const RefPtr<FrameNode>& sheetPageNode, const RefPtr<FrameNode>& sheetContentNode,
         const RefPtr<FrameNode>& targetNode, bool isStartByUIContext);
+    bool CheckTargetIdIsValid(int32_t targetId);
     RefPtr<FrameNode> CreateSheetMask(const RefPtr<FrameNode>& sheetPageNode,
         const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle);
     void UpdateSheetRender(const RefPtr<FrameNode>& sheetPageNode, NG::SheetStyle& sheetStyle, bool isPartialUpdate);

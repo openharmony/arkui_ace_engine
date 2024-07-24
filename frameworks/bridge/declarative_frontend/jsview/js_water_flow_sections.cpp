@@ -126,8 +126,8 @@ bool JSWaterFlowSections::ParseSectionOptions(
     }
     auto itemsCount = obj->GetProperty("itemsCount");
     JSViewAbstract::ParseJsInteger(itemsCount, section.itemsCount);
-    if (section.itemsCount <= 0) {
-        LOGW("itemsCount can not be less or equal 0");
+    if (section.itemsCount < 0) {
+        LOGW("itemsCount can not be less than 0");
         return false;
     }
 

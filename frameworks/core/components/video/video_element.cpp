@@ -1356,7 +1356,7 @@ void VideoElement::OnCurrentTimeChange(uint32_t currentPos)
     if (duration_ == 0) {
         int32_t duration = 0;
         if (mediaPlayer_->GetDuration(duration) == 0) {
-            duration_ = static_cast<int32_t>(duration / MILLISECONDS_TO_SECONDS);
+            duration_ = static_cast<uint32_t>(duration / MILLISECONDS_TO_SECONDS);
             IntTimeToText(duration_, durationText_);
         }
     }

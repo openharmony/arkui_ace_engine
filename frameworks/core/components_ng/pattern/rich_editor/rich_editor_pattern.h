@@ -351,7 +351,7 @@ public:
     void NotifyKeyboardClosed() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
-        if (!isCustomKeyboardAttached_) {
+        if (!isCustomKeyboardAttached_ && HasFocus()) {
             FocusHub::LostFocusToViewRoot();
         }
     }
@@ -696,19 +696,19 @@ public:
 
     void OnVirtualKeyboardAreaChanged() override;
 
-    void SetCaretColor(const Color& caretColor)
+    void SetCaretColor(const DynamicColor& caretColor)
     {
         caretColor_ = caretColor;
     }
 
-    Color GetCaretColor();
+    DynamicColor GetCaretColor();
 
-    void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
+    void SetSelectedBackgroundColor(const DynamicColor& selectedBackgroundColor)
     {
         selectedBackgroundColor_ = selectedBackgroundColor;
     }
 
-    Color GetSelectedBackgroundColor();
+    DynamicColor GetSelectedBackgroundColor();
 
     void SetCustomKeyboardOption(bool supportAvoidance);
     void StopEditing();
@@ -834,7 +834,7 @@ private:
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
-    bool RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect);
+    bool RepeatClickCaret(const Offset& offset, int32_t lastCaretPosition, const RectF& lastCaretRect);
     void CreateAndShowSingleHandle(bool isShowMenu = true);
     void MoveCaretAndStartFocus(const Offset& offset);
     void HandleDoubleClickEvent(GestureEvent& info);
@@ -1140,8 +1140,8 @@ private:
     std::optional<struct UpdateSpanStyle> typingStyle_;
     std::optional<TextStyle> typingTextStyle_;
     std::list<ResultObject> dragResultObjects_;
-    std::optional<Color> caretColor_;
-    std::optional<Color> selectedBackgroundColor_;
+    std::optional<DynamicColor> caretColor_;
+    std::optional<DynamicColor> selectedBackgroundColor_;
     std::function<void()> customKeyboardBuilder_;
     std::function<void(int32_t)> caretChangeListener_;
     RefPtr<OverlayManager> keyboardOverlay_;

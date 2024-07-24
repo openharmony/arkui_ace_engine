@@ -23,23 +23,34 @@ extern "C" {
 #endif
 
 /**
-* @brief Enumerates the actions for triggering closure of the dialog box.
-*
-* @since 12
-*/
+ * @brief Enumerates the actions for triggering closure of the dialog box.
+ *
+ * @since 12
+ */
 typedef enum {
     /** Touching the system-defined Back button or pressing the Esc key. */
     DIALOG_DISMISS_BACK_PRESS = 0,
     /** Touching the mask. */
     DIALOG_DISMISS_TOUCH_OUTSIDE,
+    /** 点击关闭按钮。*/
+    DIALOG_DISMISS_CLOSE_BUTTON,
+    /** 下拉关闭。*/
+    DIALOG_DISMISS_SLIDE_DOWN,
 } ArkUI_DismissReason;
 
 /**
-* @brief Invoked when the dialog box is closed.
-*
-* @since 12
-*/
+ * @brief Invoked when the dialog box is closed.
+ *
+ * @since 12
+ */
 typedef bool (*ArkUI_OnWillDismissEvent)(int32_t reason);
+
+/**
+ * @brief Defines a struct for a dialog box dismiss event.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_DialogDismissEvent ArkUI_DialogDismissEvent;
 
 /**
  * @brief Provides the custom dialog box APIs for the native side.
@@ -208,7 +219,55 @@ typedef struct {
     * @return Returns <b>0</b> if the operation is successful; returns <b>401</b> if a parameter error occurs.
     */
     int32_t (*close)(ArkUI_NativeDialogHandle handle);
+
+    /**
+    * @brief Registers a listener for the dismiss event of the custom dialog box.
+    *
+    * @param handle Indicates the pointer to the custom dialog box controller.
+    * @param userData Indicates the pointer to the custom data.
+    * @param callback Indicates the callback for the dismiss event of the custom dialog box.
+    * @return Returns the result code.
+    *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+    *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+    */
+    int32_t (*registerOnWillDismissWithUserData)(
+        ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event));
 } ArkUI_NativeDialogAPI_1;
+
+/**
+ * @brief Sets whether to block the system behavior of dismissing a dialog box.
+ *
+ * @param event Indicates the pointer to a dialog box dismiss event object.
+ * @param shouldBlockDismiss Indicates whether to block the system behavior of dismissing the dialog box. The value
+ *                           <b>true</b> means to block the system behavior, and <b>false</b> means the opposite.
+ * @since 12
+ */
+void ArkUI_DialogDismissEvent_SetShouldBlockDismiss(ArkUI_DialogDismissEvent* event, bool shouldBlockDismiss);
+
+/**
+ * @brief Obtains the pointer to user data in a dialog box dismiss event object.
+ *
+ * @param event Indicates the pointer to a dialog box dismiss event object.
+ *
+ * @return Returns the pointer to user data.
+ * @since 12
+ */
+void* ArkUI_DialogDismissEvent_GetUserData(ArkUI_DialogDismissEvent* event);
+
+/**
+ * @brief Obtains the c from a dialog box dismiss event object.
+ *
+ * @param event Indicates the pointer to a dialog box dismiss event object.
+ *
+ * @return Returns the dismissal reason. Returns <b>-1</b> if an exception occurs.
+ *         {@link DIALOG_DISMISS_BACK_PRESS}: touching the Back button, swiping left or right on the screen, or
+ *                                            pressing the Esc key.
+ *         {@link DIALOG_DISMISS_TOUCH_OUTSIDE}: touching the mask.
+ *         {@link DIALOG_DISMISS_CLOSE_BUTTON}: touching the Close button.
+ *         {@link DIALOG_DISMISS_SLIDE_DOWN}: sliding down.
+ * @since 12
+ */
+int32_t ArkUI_DialogDismissEvent_GetDismissReason(ArkUI_DialogDismissEvent* event);
 
 #ifdef __cplusplus
 };

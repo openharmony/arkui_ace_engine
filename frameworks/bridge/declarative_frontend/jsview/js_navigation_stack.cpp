@@ -412,7 +412,7 @@ JSRef<JSVal> JSNavigationStack::GetOnPopByIndex(int32_t index) const
 }
 
 bool JSNavigationStack::GetNavDestinationNodeInUINode(
-    RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode)
+    RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode)
 {
     RefPtr<NG::CustomNode> customNode;
     while (node) {
@@ -427,8 +427,8 @@ bool JSNavigationStack::GetNavDestinationNodeInUINode(
             customNode->Render();
         } else if (node->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
             desNode = AceType::DynamicCast<NG::NavDestinationGroupNode>(node);
-            if (customNode) {
-                node = customNode;
+            if (desNode) {
+                desNode->SetNavDestinationCustomNode(AceType::WeakClaim(AceType::RawPtr(customNode)));
             }
             return true;
         }

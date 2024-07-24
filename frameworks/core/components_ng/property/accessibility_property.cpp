@@ -117,12 +117,37 @@ AccessibilityHoverTestPath AccessibilityProperty::HoverTest(
     AccessibilityHoverTestPath path;
     CHECK_NULL_RETURN(root, path);
     ACE_SCOPED_TRACE("AccessibilityHoverTest");
-    AccessibilityProperty::HoverTestRecursive(point, root, path, debugInfo);
+    bool ancestorGroupFlag = false;
+    auto accessibilityProperty = root->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    if (accessibilityProperty != nullptr) {
+        ancestorGroupFlag = accessibilityProperty->IsAccessibilityGroup();
+    }
+    AccessibilityProperty::HoverTestRecursive(point, root, path, debugInfo, ancestorGroupFlag);
     return path;
 }
 
+void GetHitTestModeStr(HitTestMode hitTestMode, std::string& testModeStr)
+{
+    switch (hitTestMode) {
+        case HitTestMode::HTMDEFAULT:
+            testModeStr = "Default";
+            break;
+        case HitTestMode::HTMBLOCK:
+            testModeStr = "Block";
+            break;
+        case HitTestMode::HTMTRANSPARENT:
+            testModeStr = "Transparent";
+            break;
+        case HitTestMode::HTMNONE:
+            testModeStr = "None";
+            break;
+        default:
+            testModeStr = "Unsupported";
+    }
+}
+
 std::unique_ptr<JsonValue> AccessibilityProperty::CreateNodeSearchInfo(const RefPtr<FrameNode>& node,
-    const PointF& parentPoint)
+    const PointF& parentPoint, bool& ancestorGroupFlag)
 {
     auto nodeInfo = JsonUtil::Create();
     nodeInfo->Put("id", node->GetAccessibilityId());
@@ -131,9 +156,11 @@ std::unique_ptr<JsonValue> AccessibilityProperty::CreateNodeSearchInfo(const Ref
         nodeInfo->Put("parent", node->GetParent()->GetAccessibilityId());
     }
     nodeInfo->Put("visible", node->IsVisible());
-    auto [shouldSearchSelf, shouldSearchChildren] = AccessibilityProperty::GetSearchStrategy(node);
+    auto [shouldSearchSelf, shouldSearchChildren, groupFlag]
+        = AccessibilityProperty::GetSearchStrategy(node, ancestorGroupFlag);
     nodeInfo->Put("shouldSearchSelf", shouldSearchSelf);
     nodeInfo->Put("shouldSearchChildren", shouldSearchChildren);
+    nodeInfo->Put("currentGroup", groupFlag);
 
     auto renderContext = node->GetRenderContext();
     auto rect = renderContext->GetPaintRectWithoutTransform();
@@ -158,28 +185,14 @@ std::unique_ptr<JsonValue> AccessibilityProperty::CreateNodeSearchInfo(const Ref
     }
 
     std::string testModeStr = "";
-    switch (node->GetHitTestMode()) {
-        case HitTestMode::HTMDEFAULT:
-            testModeStr = "Default";
-            break;
-        case HitTestMode::HTMBLOCK:
-            testModeStr = "Block";
-            break;
-        case HitTestMode::HTMTRANSPARENT:
-            testModeStr = "Transparent";
-            break;
-        case HitTestMode::HTMNONE:
-            testModeStr = "None";
-            break;
-        default:
-            testModeStr = "Unsupported";
-    }
+    GetHitTestModeStr(node->GetHitTestMode(), testModeStr);
     nodeInfo->Put("hitTestMode", testModeStr.c_str());
     return nodeInfo;
 }
 
 bool AccessibilityProperty::ProcessHoverTestRecursive(const PointF& noOffsetPoint, const RefPtr<FrameNode>& node,
-    AccessibilityHoverTestPath& path, std::unique_ptr<HoverTestDebugTraceInfo>& debugInfo, bool hitTarget)
+    AccessibilityHoverTestPath& path, std::unique_ptr<HoverTestDebugTraceInfo>& debugInfo,
+    RecursiveParam recursiveParam)
 {
     auto property = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     auto virtualNode = property->GetAccessibilityVirtualNode();
@@ -187,7 +200,8 @@ bool AccessibilityProperty::ProcessHoverTestRecursive(const PointF& noOffsetPoin
         auto frameNode = AceType::DynamicCast<FrameNode>(virtualNode);
         CHECK_NULL_RETURN(frameNode, false);
 
-        if (AccessibilityProperty::HoverTestRecursive(noOffsetPoint, frameNode, path, debugInfo)) {
+        if (AccessibilityProperty::HoverTestRecursive(noOffsetPoint, frameNode, path, debugInfo,
+            recursiveParam.ancestorGroupFlag)) {
             return true;
         }
     } else {
@@ -197,19 +211,21 @@ bool AccessibilityProperty::ProcessHoverTestRecursive(const PointF& noOffsetPoin
             if (child == nullptr) {
                 continue;
             }
-            if (AccessibilityProperty::HoverTestRecursive(noOffsetPoint, child, path, debugInfo)) {
+            if (AccessibilityProperty::HoverTestRecursive(noOffsetPoint, child, path, debugInfo,
+                recursiveParam.ancestorGroupFlag)) {
                 return true;
             }
         }
     }
-    return hitTarget;
+    return recursiveParam.hitTarget;
 }
 
 bool AccessibilityProperty::HoverTestRecursive(
     const PointF& parentPoint,
     const RefPtr<FrameNode>& node,
     AccessibilityHoverTestPath& path,
-    std::unique_ptr<HoverTestDebugTraceInfo>& debugInfo)
+    std::unique_ptr<HoverTestDebugTraceInfo>& debugInfo,
+    bool& ancestorGroupFlag)
 {
     if (!node->IsAccessibilityVirtualNode()) {
         if (!node->IsActive() || node->IsInternal()) {
@@ -217,7 +233,7 @@ bool AccessibilityProperty::HoverTestRecursive(
         }
     }
     if (debugInfo != nullptr) {
-        auto nodeInfo = CreateNodeSearchInfo(node, parentPoint);
+        auto nodeInfo = CreateNodeSearchInfo(node, parentPoint, ancestorGroupFlag);
         debugInfo->trace.push_back(std::move(nodeInfo));
     }
     bool hitTarget = false;
@@ -225,7 +241,8 @@ bool AccessibilityProperty::HoverTestRecursive(
         return false;
     }
 
-    auto [shouldSearchSelf, shouldSearchChildren] = AccessibilityProperty::GetSearchStrategy(node);
+    auto [shouldSearchSelf, shouldSearchChildren, currentGroupFlag]
+        = AccessibilityProperty::GetSearchStrategy(node, ancestorGroupFlag);
 
     auto renderContext = node->GetRenderContext();
     auto rect = renderContext->GetPaintRectWithoutTransform();
@@ -243,7 +260,10 @@ bool AccessibilityProperty::HoverTestRecursive(
 
     if (shouldSearchChildren) {
         PointF noOffsetPoint = selfPoint - rect.GetOffset();
-        return ProcessHoverTestRecursive(noOffsetPoint, node, path, debugInfo, hitTarget);
+        RecursiveParam recursiveParam;
+        recursiveParam.hitTarget = hitTarget;
+        recursiveParam.ancestorGroupFlag = currentGroupFlag;
+        return ProcessHoverTestRecursive(noOffsetPoint, node, path, debugInfo, recursiveParam);
     }
     return hitTarget;
 }
@@ -264,20 +284,20 @@ void UpdateSearchStrategyByHitTestMode(HitTestMode hitTestMode, bool& shouldSear
     }
 }
 
-std::pair<bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<FrameNode>& node)
+std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<FrameNode>& node,
+    bool& ancestorGroupFlag)
 {
     bool shouldSearchSelf = true;
     bool shouldSearchChildren = true;
+    bool currentGroupFlag = false;
+    auto level = AccessibilityProperty::Level::AUTO;
     do {
         auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
         if (accessibilityProperty != nullptr) {
-            auto level = accessibilityProperty->GetAccessibilityLevel();
-            bool hasGroupOrVirtualNode = accessibilityProperty->IsAccessibilityGroup();
+            level = accessibilityProperty->GetAccessibilityLevel();
+            currentGroupFlag = accessibilityProperty->IsAccessibilityGroup();
             bool hasAccessibilityText = accessibilityProperty->HasAccessibilityTextOrDescription();
             if (level == AccessibilityProperty::Level::YES) {
-                if (hasGroupOrVirtualNode) {
-                    shouldSearchChildren = false;
-                }
                 break;
             } else if (level == AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
                 shouldSearchSelf = false;
@@ -288,10 +308,6 @@ std::pair<bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<Fram
                     shouldSearchSelf = false;
                 } else {
                     // shouldSearchSelf is true here
-                    if (hasGroupOrVirtualNode) {
-                        shouldSearchChildren = false;
-                        break;
-                    }
                     if (hasAccessibilityText) {
                         break;
                     }
@@ -310,7 +326,15 @@ std::pair<bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<Fram
             shouldSearchChildren = true;
         }
     } while (0);
-    return std::make_pair(shouldSearchSelf, shouldSearchChildren);
+
+    if (ancestorGroupFlag == true) {
+        if (level != AccessibilityProperty::Level::YES) {
+            shouldSearchSelf = false;
+        }
+        currentGroupFlag = true;
+    }
+
+    return std::make_tuple(shouldSearchSelf, shouldSearchChildren, currentGroupFlag);
 }
 
 static const std::set<std::string> TAGS_FOCUSABLE = {

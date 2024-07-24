@@ -437,17 +437,18 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest009, TestSize.Lev
 HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest010, TestSize.Level1)
 {
     AccessibilityProperty accessibilityProperty;
+    bool ancestorGroupFlag = false;
     auto root = FrameNode::CreateFrameNode(
         V2::BUTTON_ETS_TAG, 12, AceType::MakeRefPtr<Pattern>(), true);
     NG::PointF hoverPoint(0, 0);
-    auto result = accessibilityProperty.CreateNodeSearchInfo(root, hoverPoint);
+    auto result = accessibilityProperty.CreateNodeSearchInfo(root, hoverPoint, ancestorGroupFlag);
     EXPECT_TRUE(root->IsRootNode());
     
     auto subNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     root->AddChild(subNode);
     EXPECT_FALSE(subNode->IsRootNode());
-    result = accessibilityProperty.CreateNodeSearchInfo(subNode, hoverPoint);
+    result = accessibilityProperty.CreateNodeSearchInfo(subNode, hoverPoint, ancestorGroupFlag);
     EXPECT_TRUE(result->Contains("parent"));
     EXPECT_TRUE(result->Contains("visible"));
 
@@ -456,7 +457,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest010, TestSize.Lev
     EXPECT_TRUE(result->Contains("accessibilityLevel"));
 
     root->SetHitTestMode(HitTestMode::HTMDEFAULT);
-    result = accessibilityProperty.CreateNodeSearchInfo(subNode, hoverPoint);
+    result = accessibilityProperty.CreateNodeSearchInfo(subNode, hoverPoint, ancestorGroupFlag);
     EXPECT_TRUE(result->Contains("hitTestMode"));
     std::string value = result->GetString("hitTestMode");
     EXPECT_EQ(value, "Default");
@@ -465,7 +466,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest010, TestSize.Lev
         V2::BUTTON_ETS_TAG, 2, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     root->AddChild(subNode1);
     subNode1->SetHitTestMode(HitTestMode::HTMBLOCK);
-    auto result1 = accessibilityProperty.CreateNodeSearchInfo(subNode1, hoverPoint);
+    auto result1 = accessibilityProperty.CreateNodeSearchInfo(subNode1, hoverPoint, ancestorGroupFlag);
     EXPECT_TRUE(result1->Contains("hitTestMode"));
     std::string value1 = result1->GetString("hitTestMode");
     EXPECT_EQ(value1, "Block");
@@ -474,7 +475,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest010, TestSize.Lev
         V2::BUTTON_ETS_TAG, 3, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     root->AddChild(subNode2);
     subNode2->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
-    auto result2 = accessibilityProperty.CreateNodeSearchInfo(subNode2, hoverPoint);
+    auto result2 = accessibilityProperty.CreateNodeSearchInfo(subNode2, hoverPoint, ancestorGroupFlag);
     EXPECT_TRUE(result2->Contains("hitTestMode"));
     std::string value2 = result2->GetString("hitTestMode");
     EXPECT_EQ(value2, "Transparent");
@@ -495,13 +496,15 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest011, TestSize.Lev
     NG::PointF hoverPoint(0, 0);
     auto debugInfo = std::make_unique<AccessibilityProperty::HoverTestDebugTraceInfo>();
 
+    bool ancestorGroupFlag = false;
+
     root->SetActive(false);
-    auto result = accessibilityProperty.HoverTestRecursive(hoverPoint, root, path, debugInfo);
+    auto result = accessibilityProperty.HoverTestRecursive(hoverPoint, root, path, debugInfo, ancestorGroupFlag);
     EXPECT_EQ(result, false);
     root->SetActive(true);
 
     root->SetInternal();
-    result = accessibilityProperty.HoverTestRecursive(hoverPoint, root, path, debugInfo);
+    result = accessibilityProperty.HoverTestRecursive(hoverPoint, root, path, debugInfo, ancestorGroupFlag);
     EXPECT_EQ(result, false);
 
     root->SetActive(true);
@@ -516,50 +519,51 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest011, TestSize.Lev
 HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest012, TestSize.Level1)
 {
     AccessibilityProperty accessibilityProperty;
+    bool ancestorGroupFlag = false;
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, 14, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto result = accessibilityProperty.GetSearchStrategy(frameNode);
-    EXPECT_EQ(result, std::make_pair(true, true));
+    auto result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
+    EXPECT_EQ(result, std::make_tuple(true, true, false));
 
     auto accessibilityPropertyNew = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     EXPECT_NE(accessibilityPropertyNew, nullptr);
     auto levelBak = accessibilityPropertyNew->GetAccessibilityLevel();
     accessibilityPropertyNew->SetAccessibilityLevel(AccessibilityProperty::Level::YES);
-    result = accessibilityProperty.GetSearchStrategy(frameNode);
-    EXPECT_EQ(result, std::make_pair(true, true));
+    result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
+    EXPECT_EQ(result, std::make_tuple(true, true, false));
 
     bool hasGroupOrVirtualNodeBak = accessibilityPropertyNew->IsAccessibilityGroup();
     accessibilityPropertyNew->SetAccessibilityGroup(true);
-    result = accessibilityProperty.GetSearchStrategy(frameNode);
-    EXPECT_EQ(result, std::make_pair(true, false));
+    result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
+    EXPECT_EQ(result, std::make_tuple(true, true, true));
     accessibilityPropertyNew->SetAccessibilityGroup(hasGroupOrVirtualNodeBak);
     accessibilityPropertyNew->SetAccessibilityLevel(levelBak);
 
     accessibilityPropertyNew->SetAccessibilityLevel(AccessibilityProperty::Level::NO_HIDE_DESCENDANTS);
-    result = accessibilityProperty.GetSearchStrategy(frameNode);
-    EXPECT_EQ(result, std::make_pair(false, false));
+    result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
+    EXPECT_EQ(result, std::make_tuple(false, false, false));
     accessibilityPropertyNew->SetAccessibilityLevel(levelBak);
 
     hasGroupOrVirtualNodeBak = accessibilityPropertyNew->IsAccessibilityGroup();
-    result = accessibilityProperty.GetSearchStrategy(frameNode);
-    EXPECT_EQ(result, std::make_pair(true, true));
+    result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
+    EXPECT_EQ(result, std::make_tuple(true, true, false));
 
     accessibilityPropertyNew->SetAccessibilityGroup(true);
-    result = accessibilityProperty.GetSearchStrategy(frameNode);
-    EXPECT_EQ(result, std::make_pair(true, false));
+    result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
+    EXPECT_EQ(result, std::make_tuple(true, true, true));
     accessibilityPropertyNew->SetAccessibilityGroup(hasGroupOrVirtualNodeBak);
 
     accessibilityPropertyNew->SetAccessibilityLevel(AccessibilityProperty::Level::NO);
-    result = accessibilityProperty.GetSearchStrategy(frameNode);
-    EXPECT_EQ(result, std::make_pair(false, true));
+    result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
+    EXPECT_EQ(result, std::make_tuple(false, true, false));
 
     accessibilityPropertyNew->SetAccessibilityLevel(AccessibilityProperty::Level::AUTO);
     accessibilityPropertyNew->SetAccessibilityGroup(true);
     bool hasGroupOrVirtualNode = accessibilityPropertyNew->IsAccessibilityGroup() ||
                 accessibilityPropertyNew->HasAccessibilityVirtualNode();
     EXPECT_TRUE(hasGroupOrVirtualNode);
-    result = accessibilityProperty.GetSearchStrategy(frameNode);
-    EXPECT_EQ(result, std::make_pair(true, false));
+    result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
+    EXPECT_EQ(result, std::make_tuple(true, true, true));
     accessibilityPropertyNew->SetAccessibilityGroup(hasGroupOrVirtualNodeBak);
 }
 
@@ -913,17 +917,18 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest028, TestSize.Lev
 HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest029, TestSize.Level1)
 {
     AccessibilityProperty accessibilityProperty;
+    bool ancestorGroupFlag = false;
     auto root = FrameNode::CreateFrameNode(
         V2::BUTTON_ETS_TAG, 12, AceType::MakeRefPtr<Pattern>(), true);
     NG::PointF hoverPoint(0, 0);
-    auto result = accessibilityProperty.CreateNodeSearchInfo(root, hoverPoint);
+    auto result = accessibilityProperty.CreateNodeSearchInfo(root, hoverPoint, ancestorGroupFlag);
     EXPECT_TRUE(root->IsRootNode());
     
     auto subNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     root->AddChild(subNode);
     EXPECT_FALSE(subNode->IsRootNode());
-    result = accessibilityProperty.CreateNodeSearchInfo(subNode, hoverPoint);
+    result = accessibilityProperty.CreateNodeSearchInfo(subNode, hoverPoint, ancestorGroupFlag);
     EXPECT_TRUE(result->Contains("parent"));
     EXPECT_TRUE(result->Contains("visible"));
 
@@ -935,7 +940,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest029, TestSize.Lev
         V2::BUTTON_ETS_TAG, 4, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     root->AddChild(subNode3);
     subNode3->SetHitTestMode(HitTestMode::HTMNONE);
-    auto result3 = accessibilityProperty.CreateNodeSearchInfo(subNode3, hoverPoint);
+    auto result3 = accessibilityProperty.CreateNodeSearchInfo(subNode3, hoverPoint, ancestorGroupFlag);
     EXPECT_TRUE(result3->Contains("hitTestMode"));
     std::string value3 = result3->GetString("hitTestMode");
     EXPECT_EQ(value3, "None");
@@ -944,7 +949,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest029, TestSize.Lev
         V2::BUTTON_ETS_TAG, 5, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     root->AddChild(subNode4);
     subNode4->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
-    auto result4 = accessibilityProperty.CreateNodeSearchInfo(subNode4, hoverPoint);
+    auto result4 = accessibilityProperty.CreateNodeSearchInfo(subNode4, hoverPoint, ancestorGroupFlag);
     EXPECT_TRUE(result4->Contains("hitTestMode"));
     std::string value4 = result4->GetString("hitTestMode");
     EXPECT_EQ(value4, "Unsupported");
@@ -958,6 +963,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest029, TestSize.Lev
 HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest030, TestSize.Level1)
 {
     AccessibilityProperty accessibilityProperty;
+    bool ancestorGroupFlag = false;
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, 14, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
   
@@ -965,23 +971,23 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest030, TestSize.Lev
     EXPECT_NE(accessibilityPropertyNew, nullptr);
     auto levelBak = accessibilityPropertyNew->GetAccessibilityLevel();
     accessibilityPropertyNew->SetAccessibilityLevel(AccessibilityProperty::Level::YES);
-    auto result = accessibilityProperty.GetSearchStrategy(frameNode);
-    EXPECT_EQ(result, std::make_pair(true, true));
+    auto result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
+    EXPECT_EQ(result, std::make_tuple(true, true, false));
 
     bool hasGroupOrVirtualNodeBak = accessibilityPropertyNew->IsAccessibilityGroup();
-    result = accessibilityProperty.GetSearchStrategy(frameNode);
-    EXPECT_EQ(result, std::make_pair(true, true));
+    result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
+    EXPECT_EQ(result, std::make_tuple(true, true, false));
 
     accessibilityPropertyNew->SetAccessibilityGroup(true);
-    result = accessibilityProperty.GetSearchStrategy(frameNode);
-    EXPECT_EQ(result, std::make_pair(true, false));
+    result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
+    EXPECT_EQ(result, std::make_tuple(true, true, true));
     accessibilityPropertyNew->SetAccessibilityGroup(hasGroupOrVirtualNodeBak);
 
     accessibilityPropertyNew->SetAccessibilityText("test");
     bool hasAccessibilityText = accessibilityPropertyNew->HasAccessibilityTextOrDescription();
     EXPECT_TRUE(hasAccessibilityText);
-    result = accessibilityPropertyNew->GetSearchStrategy(frameNode);
-    EXPECT_EQ(result, std::make_pair(true, true));
+    result = accessibilityPropertyNew->GetSearchStrategy(frameNode, ancestorGroupFlag);
+    EXPECT_EQ(result, std::make_tuple(true, true, false));
     accessibilityPropertyNew->SetAccessibilityLevel(levelBak);
 
     frameNode->accessibilityProperty_ = nullptr;
@@ -991,19 +997,19 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest030, TestSize.Lev
     auto eventHub = frameNode->GetEventHub<EventHub>();
     eventHub->SetEnabled(false);
     EXPECT_FALSE(eventHub->IsEnabled());
-    result = accessibilityProperty.GetSearchStrategy(frameNode);
-    EXPECT_EQ(result, std::make_pair(true, false));
+    result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
+    EXPECT_EQ(result, std::make_tuple(true, false, false));
 
     frameNode->SetHitTestMode(HitTestMode::HTMBLOCK);
-    result = accessibilityProperty.GetSearchStrategy(frameNode);
-    EXPECT_EQ(result, std::make_pair(true, false));
+    result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
+    EXPECT_EQ(result, std::make_tuple(true, false, false));
 
     frameNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
-    result = accessibilityProperty.GetSearchStrategy(frameNode);
-    EXPECT_EQ(result, std::make_pair(true, false));
+    result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
+    EXPECT_EQ(result, std::make_tuple(true, false, false));
 
     frameNode->SetHitTestMode(HitTestMode::HTMNONE);
-    result = accessibilityProperty.GetSearchStrategy(frameNode);
-    EXPECT_EQ(result, std::make_pair(false, false));
+    result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
+    EXPECT_EQ(result, std::make_tuple(false, false, false));
 }
 } // namespace OHOS::Ace::NG

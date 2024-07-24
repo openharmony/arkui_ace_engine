@@ -263,6 +263,7 @@ struct DialogProperties {
     std::function<void()> onDidDisappear;
     std::function<void()> onWillAppear;
     std::function<void()> onWillDisappear;
+    std::function<bool(int32_t)> onWillDismissCallByNDK;
 
     WordBreak wordBreak = WordBreak::BREAK_ALL;
 };

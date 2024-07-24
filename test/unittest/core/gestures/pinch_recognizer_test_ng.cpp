@@ -34,6 +34,8 @@ void PinchRecognizerTestNg::TearDownTestSuite()
     MockPipelineContext::TearDown();
 }
 
+void funtest(GestureEvent& info) {}
+
 /**
  * @tc.name: PinchRecognizerTest001
  * @tc.desc: Test PinchRecognizer function: OnAccepted OnRejected
@@ -602,8 +604,8 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTest008, TestSize.Level1)
     /**
      * @tc.steps: step1. create PinchRecognizer.
      */
-    RefPtr<PinchRecognizer> pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
-                                                                                   PINCH_GESTURE_DISTANCE);
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
     ASSERT_NE(pinchRecognizer, nullptr);
 
     /**
@@ -640,8 +642,8 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTest009, TestSize.Level1)
     /**
      * @tc.steps: step1. create PinchRecognizer.
      */
-    RefPtr<PinchRecognizer> pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
-                                                                                   PINCH_GESTURE_DISTANCE);
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
     ASSERT_NE(pinchRecognizer, nullptr);
 
     /**
@@ -697,8 +699,8 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTest010, TestSize.Level1)
     /**
      * @tc.steps: step1. create PinchRecognizer.
      */
-    RefPtr<PinchRecognizer> pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
-                                                                                   PINCH_GESTURE_DISTANCE);
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
     ASSERT_NE(pinchRecognizer, nullptr);
 
     /**
@@ -751,8 +753,8 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTest012, TestSize.Level1)
     /**
      * @tc.steps: step1. create PinchRecognizer.
      */
-    RefPtr<PinchRecognizer> pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
-                                                                                   PINCH_GESTURE_DISTANCE);
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
     ASSERT_NE(pinchRecognizer, nullptr);
     /**
      * @tc.steps: step2. test with HandleTouchDownEvent(AxisEvent).
@@ -783,8 +785,8 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTest013, TestSize.Level1)
     /**
      * @tc.steps: step1. create PinchRecognizer.
      */
-    RefPtr<PinchRecognizer> pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
-                                                                                   PINCH_GESTURE_DISTANCE);
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
     ASSERT_NE(pinchRecognizer, nullptr);
 
     /**
@@ -809,8 +811,8 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTest014, TestSize.Level1)
     /**
      * @tc.steps: step1. create PinchRecognizer.
      */
-    RefPtr<PinchRecognizer> pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
-                                                                                   PINCH_GESTURE_DISTANCE);
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
     ASSERT_NE(pinchRecognizer, nullptr);
     /**
      * @tc.steps: step2. test with HandleTouchMoveEvent(AxisEvent).
@@ -842,8 +844,8 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerHandleTouchUpEventTest001, TestSi
     /**
      * @tc.steps: step1. create PinchRecognizer.
      */
-    RefPtr<PinchRecognizer> pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
-                                                                                   PINCH_GESTURE_DISTANCE);
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
     ASSERT_NE(pinchRecognizer, nullptr);
 
     /**
@@ -901,8 +903,8 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerHandleTouchMoveEventTest001, Test
     /**
      * @tc.steps: step1. create PinchRecognizer.
      */
-    RefPtr<PinchRecognizer> pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
-                                                                                   PINCH_GESTURE_DISTANCE);
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
     ASSERT_NE(pinchRecognizer, nullptr);
 
     /**
@@ -989,8 +991,8 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerHandleTouchMoveEventTest002, Test
     /**
      * @tc.steps: step1. create PinchRecognizer.
      */
-    RefPtr<PinchRecognizer> pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
-                                                                                   PINCH_GESTURE_DISTANCE);
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
 
     /**
      * @tc.steps: step2. test HandleTouchMoveEvent(TouchEvent).
@@ -1241,8 +1243,8 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTest011, TestSize.Level1)
     /**
      * @tc.steps: step1. create PinchRecognizer.
      */
-    RefPtr<PinchRecognizer> pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
-                                                                                   PINCH_GESTURE_DISTANCE);
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
     ASSERT_NE(pinchRecognizer, nullptr);
 
     /**
@@ -1327,11 +1329,12 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerPtrHandleTouchMoveEventTest002, T
     /**
      * @tc.steps: step1. create and set Recognizer、TargetComponent.
      */
-    RefPtr<PinchRecognizer> pinchRecognizerPtr = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
-        PINCH_GESTURE_DISTANCE);
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
     RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
-        return GestureJudgeResult::REJECT;};
+        return GestureJudgeResult::REJECT;
+    };
     targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
     TouchEvent touchEvent;
     AxisEvent axisEvent;
@@ -1357,4 +1360,66 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerPtrHandleTouchMoveEventTest002, T
     pinchRecognizerPtr->HandleTouchMoveEvent(axisEvent);
     EXPECT_EQ(pinchRecognizerPtr->disposal_, GestureDisposal::REJECT);
 }
+
+class MockPinchRecognizer : public PinchRecognizer {
+public:
+    MockPinchRecognizer(int32_t fingers, double distance) : PinchRecognizer(fingers, distance) {}
+    MOCK_METHOD(void, BatchAdjudicate, (const RefPtr<NGGestureRecognizer>&, GestureDisposal), ());
+};
+
+/**
+ * @tc.name: PinchRecognizerPtrHandleTouchMoveEventTest003
+ * @tc.desc: Test PinchRecognizer function: HandleTouchMoveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PinchRecognizerTestNg, PinchRecognizerPtrHandleTouchMoveEventTest003, TestSize.Level1)
+{
+    MockPinchRecognizer recognizerTest(FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+    TouchEvent event;
+    event.id = 1;
+    recognizerTest.activeFingers_.push_back(1);
+    recognizerTest.activeFingers_.push_back(2);
+    recognizerTest.refereeState_ = RefereeState::SUCCEED;
+    EXPECT_CALL(recognizerTest, BatchAdjudicate(_, _)).WillRepeatedly([]() {
+        std::cout << "shaokf HandleTouchUpEvent test " << std::endl;
+    });
+    recognizerTest.HandleTouchUpEvent(event);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: PinchRecognizerPtrHandleTouchMoveEventTest004
+ * @tc.desc: Test PinchRecognizer function: HandleTouchMoveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PinchRecognizerTestNg, PinchRecognizerPtrHandleTouchMoveEventTest004, TestSize.Level1)
+{
+    MockPinchRecognizer recognizerTest(FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+    TouchEvent event;
+    event.id = 1;
+    recognizerTest.activeFingers_.push_back(1);
+    recognizerTest.activeFingers_.push_back(2);
+    recognizerTest.refereeState_ = RefereeState::SUCCEED;
+    recognizerTest.HandleTouchCancelEvent(event);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: PinchRecognizerPtrHandleTouchMoveEventTest005
+ * @tc.desc: Test PinchRecognizer function: HandleTouchMoveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PinchRecognizerTestNg, PinchRecognizerPtrHandleTouchMoveEventTest005, TestSize.Level1)
+{
+    MockPinchRecognizer recognizerTest(FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+    recognizerTest.activeFingers_.push_back(1);
+    recognizerTest.activeFingers_.push_back(2);
+    recognizerTest.refereeState_ = RefereeState::SUCCEED;
+    GestureEvent info;
+    auto callback = std::make_unique<GestureEventFunc>(funtest);
+    recognizerTest.inputEventType_ = InputEventType::AXIS;
+    recognizerTest.SendCallbackMsg(callback);
+    SUCCEED();
+}
+
 } // namespace OHOS::Ace::NG

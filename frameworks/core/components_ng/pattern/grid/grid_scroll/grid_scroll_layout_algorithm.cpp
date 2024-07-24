@@ -1941,23 +1941,28 @@ void GridScrollLayoutAlgorithm::SupplyAllData2ZeroIndex(float mainSize, float cr
     }
 
     // Complete the data from endIndex+1 to targetIndex_
+    auto lineHeight = 0.f;
     if (endIndex < targetIndex) {
         // The start line when completing the data
         currentMainLineIndex_ = endLineIndex;
-        float lineHeight = 0.0f;
         int32_t targetLineIndex = 0;
         do {
             lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
         } while (!(LessNotEqual(lineHeight, 0.0) || IsIndexInMatrix(targetIndex.value(), targetLineIndex)));
-        if (gridLayoutInfo_.extraOffset_.has_value() && Negative(gridLayoutInfo_.extraOffset_.value())) {
-            auto extraOffset = 0.f;
-            extraOffset = -gridLayoutInfo_.extraOffset_.value();
-            auto heightForExtralOffset = lineHeight;
-            while (GreatOrEqual(extraOffset, heightForExtralOffset) && !Negative(lineHeight)) {
-                lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
-                heightForExtralOffset += lineHeight;
-            }
+    }
+
+    if (gridLayoutInfo_.extraOffset_.has_value() && Negative(gridLayoutInfo_.extraOffset_.value())) {
+        auto extraOffset = -gridLayoutInfo_.extraOffset_.value();
+        gridLayoutInfo_.GetLineIndexByIndex(targetIndex.value(), currentMainLineIndex_);
+        lineHeight = gridLayoutInfo_.lineHeightMap_[currentMainLineIndex_];
+        auto heightForExtralOffset = lineHeight + mainGap_;
+        while (GreatOrEqual(extraOffset, heightForExtralOffset) && !Negative(lineHeight)) {
+            lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
+            heightForExtralOffset += (lineHeight + mainGap_);
         }
+        ACE_SCOPED_TRACE(
+            "SupplyAllData2ZeroIndex, extraOffset_:%f, heightForExtralOffset:%f, LineIndexForExtralOffset:%d",
+            extraOffset, heightForExtralOffset, currentMainLineIndex_);
     }
 
     // Once the data is completed, the global variables need to be returned

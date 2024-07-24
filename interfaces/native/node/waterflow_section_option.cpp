@@ -37,7 +37,7 @@ ArkUI_WaterFlowSectionOption* OH_ArkUI_WaterFlowSectionOption_Create()
 }
 
 // 释放函数
-void OH_ArkUI_WaterFlowSectionOption_Destroy(ArkUI_WaterFlowSectionOption* option)
+void OH_ArkUI_WaterFlowSectionOption_Dispose(ArkUI_WaterFlowSectionOption* option)
 {
     if (option != nullptr) {
         delete option;

@@ -168,6 +168,7 @@ void CustomDialogControllerModelNG::SetCloseDialogForNDK(FrameNode* dialogNode)
     CHECK_NULL_VOID(dialogNode);
     ContainerScope scope(Container::CurrentIdSafely());
     auto container = Container::Current();
+    dialogNode->SetIsUseTransitionAnimator(true);
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);

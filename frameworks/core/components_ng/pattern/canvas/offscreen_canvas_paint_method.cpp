@@ -35,7 +35,7 @@
 #include "core/components_ng/pattern/canvas/custom_paint_util.h"
 
 namespace OHOS::Ace::NG {
-
+constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
 OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(int32_t width, int32_t height)
 {
     antiAlias_ = false;
@@ -46,6 +46,8 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(int32_t width, int32_t he
     lastLayoutSize_.SetHeight(static_cast<float>(height));
     InitBitmap();
     InitImageCallbacks();
+    // The initial value of the font size in canvas is 14px.
+    SetFontSize(DEFAULT_FONT_SIZE);
 }
 
 void OffscreenCanvasPaintMethod::InitBitmap()

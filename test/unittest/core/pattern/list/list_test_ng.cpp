@@ -357,8 +357,9 @@ void ListTestNg::HandleDragEnd(int32_t index, float mainVelocity)
     FlushLayoutTask(frameNode_);
 }
 
-void ListTestNg::ScrollSnapForEqualHeightItem(float offset, float velocity)
+void ListTestNg::ScrollSnap(double offset, double endVelocity)
 {
+    double velocity = offset > 0.f ? 1200.f : -1200.f;
     // Define (150.0, 500.0) as finger press position.
     double touchPosX = 150.0;
     double touchPosY = 500.0;
@@ -370,56 +371,41 @@ void ListTestNg::ScrollSnapForEqualHeightItem(float offset, float velocity)
     info.SetSourceTool(SourceTool::FINGER);
     info.SetInputEventType(InputEventType::TOUCH_SCREEN);
     // Call HandleTouchDown and HandleDragStart.
-    pattern_->scrollableEvent_->GetScrollable()->HandleTouchDown();
-    pattern_->scrollableEvent_->GetScrollable()->isDragging_ = true;
-    pattern_->scrollableEvent_->GetScrollable()->HandleDragStart(info);
+    auto scrollable = pattern_->scrollableEvent_->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->isDragging_ = true;
+    scrollable->HandleDragStart(info);
 
     // Update finger position.
     info.SetGlobalLocation(Offset(touchPosX, touchPosY + offset));
     info.SetGlobalPoint(Point(touchPosX, touchPosY + offset));
     info.SetMainVelocity(velocity);
     info.SetMainDelta(offset);
-    pattern_->scrollableEvent_->GetScrollable()->HandleDragUpdate(info);
+    scrollable->HandleDragUpdate(info);
+    scrollable->isDragging_ = false;
     FlushLayoutTask(frameNode_);
 
     // Lift finger and end List sliding.
-    info.SetMainVelocity(0.0);
+    info.SetMainVelocity(endVelocity);
     info.SetMainDelta(0.0);
-    pattern_->scrollableEvent_->GetScrollable()->HandleTouchUp();
-    pattern_->scrollableEvent_->GetScrollable()->HandleDragEnd(info);
-    pattern_->scrollableEvent_->GetScrollable()->isDragging_ = false;
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
     FlushLayoutTask(frameNode_);
 
-    if (pattern_->scrollableEvent_->GetScrollable()->IsSpringMotionRunning()) {
+    if (scrollable->IsSpringMotionRunning()) {
         // If current position is out of boundary, trig spring motion.
-        float endValue = pattern_->scrollableEvent_->GetScrollable()->GetFinalPosition();
-        pattern_->scrollableEvent_->GetScrollable()->ProcessSpringMotion(endValue);
-        pattern_->scrollableEvent_->GetScrollable()->StopSpringAnimation();
+        float endValue = scrollable->GetFinalPosition();
+        scrollable->ProcessSpringMotion(endValue);
+        scrollable->StopSpringAnimation();
         FlushLayoutTask(frameNode_);
-    } else if (!(pattern_->scrollableEvent_->GetScrollable()->isSnapScrollAnimationStop_)) {
+    } else if (!(scrollable->isSnapScrollAnimationStop_)) {
         // StartScrollSnapMotion, for condition that equal item height.
-        float endValue = pattern_->scrollableEvent_->GetScrollable()->GetSnapFinalPosition();
-        pattern_->scrollableEvent_->GetScrollable()->ProcessScrollSnapMotion(endValue);
-        pattern_->scrollableEvent_->GetScrollable()->ProcessScrollSnapStop();
+        float endValue = scrollable->GetSnapFinalPosition();
+        scrollable->ProcessScrollSnapMotion(endValue);
+        scrollable->ProcessScrollSnapStop();
         FlushLayoutTask(frameNode_);
     }
-    pattern_->scrollableEvent_->GetScrollable()->StopScrollable();
-}
-
-void ListTestNg::ScrollSnap(float offset, float velocity)
-{
-    pattern_->OnScrollSnapCallback(offset, velocity);
-    pattern_->SetScrollSource(SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
-    // StartScrollSnapMotion, for condition that equal item height
-    float endValue = pattern_->scrollableEvent_->GetScrollable()->GetSnapFinalPosition();
-    pattern_->ScrollBy(-endValue);
-    pattern_->scrollable_->isSnapScrollAnimationStop_ = false; // for UpdateScrollSnapEndWithOffset
-    FlushLayoutTask(frameNode_);
-    // UpdateScrollSnapEndWithOffset, for condition that different item height
-    endValue -= pattern_->scrollableEvent_->GetScrollable()->GetSnapFinalPosition();
-    pattern_->ScrollBy(endValue);
-    FlushLayoutTask(frameNode_);
+    scrollable->StopScrollable();
 }
 
 AssertionResult ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset)

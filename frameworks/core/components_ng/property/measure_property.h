@@ -393,11 +393,23 @@ struct PaddingPropertyT {
             right = value.right;
             top = value.top;
             bottom = value.bottom;
-            start = value.start;
-            end = value.end;
             return true;
         }
         return false;
+    }
+
+    bool UpdateStartAndEnd(const PaddingPropertyT& value)
+    {
+        bool hasStartOrEnd = false;
+        if (value.start.has_value()) {
+            start = value.start;
+            hasStartOrEnd = true;
+        }
+        if (value.end.has_value()) {
+            end = value.end;
+            hasStartOrEnd = true;
+        }
+        return hasStartOrEnd;
     }
 
     std::string ToString() const

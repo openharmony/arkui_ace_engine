@@ -21,6 +21,7 @@
 #include "base/utils/linear_map.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "core/common/resource/resource_manager.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -591,6 +592,68 @@ bool Color::IsRGBValid(int value)
 bool Color::IsOpacityValid(double value)
 {
     return value >= MIN_RGBA_OPACITY && value <= MAX_RGBA_OPACITY;
+}
+
+DynamicColor::DynamicColor(const Color& color)
+{
+    SetValue(color.GetValue());
+}
+
+DynamicColor::DynamicColor(const Color& color, std::optional<uint32_t> resId) : resourceId(resId)
+{
+    SetValue(color.GetValue());
+}
+
+DynamicColor::DynamicColor(const Color& color, uint32_t resId) : resourceId(resId)
+{
+    SetValue(color.GetValue());
+}
+
+void DynamicColor::UpdateColorByResourceId()
+{
+#ifndef ACE_UNITTEST
+    CHECK_NULL_VOID(resourceId);
+    auto resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+    CHECK_NULL_VOID(resourceAdapter);
+    auto newColor = resourceAdapter->GetColor(resourceId.value());
+    SetValue(newColor.GetValue());
+#endif
+}
+
+Color DynamicColor::ToColor() const
+{
+    return Color(GetValue());
+}
+
+std::string DynamicColor::ToString() const
+{
+    std::string ret = "color=";
+    ret += Color::ToString();
+    ret += ", resourceId=";
+    ret += resourceId ? std::to_string(resourceId.value()) : "nullopt";
+    return ret;
+}
+
+DynamicColor& DynamicColor::operator=(const Color& rhs)
+{
+    SetValue(rhs.GetValue());
+    return *this;
+}
+
+bool DynamicColor::operator==(const DynamicColor& rhs) const
+{
+    if (this->GetValue() != rhs.GetValue()) {
+        return false;
+    }
+    if (!this->resourceId && !rhs.resourceId) {
+        return true;
+    }
+    return this->resourceId && rhs.resourceId && *(this->resourceId) == *(rhs.resourceId);
+}
+
+bool DynamicColor::operator!=(const DynamicColor& rhs) const
+{
+    return !operator==(rhs);
 }
 
 } // namespace OHOS::Ace

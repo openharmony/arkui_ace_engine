@@ -674,13 +674,14 @@ bool UINode::IsAutoFillContainerNode()
     return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG || tag_ == V2::DIALOG_ETS_TAG;
 }
 
-void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer)
+void UINode::DumpViewDataPageNodes(
+    RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer, bool needsRecordData)
 {
     auto frameNode = AceType::DynamicCast<FrameNode>(this);
     if (frameNode && !frameNode->IsVisible()) {
         return;
     }
-    DumpViewDataPageNode(viewDataWrap);
+    DumpViewDataPageNode(viewDataWrap, needsRecordData);
     for (const auto& item : GetChildren()) {
         if (!item) {
             continue;
@@ -688,7 +689,7 @@ void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipS
         if (skipSubAutoFillContainer && item->IsAutoFillContainerNode()) {
             continue;
         }
-        item->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer);
+        item->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer, needsRecordData);
     }
 }
 

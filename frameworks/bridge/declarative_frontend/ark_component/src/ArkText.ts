@@ -750,7 +750,7 @@ class TextEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> {
     super(value);
   }
   static identity: Symbol = Symbol('textEditMenuOptions');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().text.resetSelectionMenuOptions(node);
     } else {
@@ -775,9 +775,9 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextEnableDataDetectorModifier.identity, TextEnableDataDetectorModifier, value);
     return this;
   }
-  dataDetectorConfig(config: any): this {
+  dataDetectorConfig(config: TextDataDetectorConfig): this {
     let detectorConfig = new TextDataDetectorConfig();
-    detectorConfig.types = config.type;
+    detectorConfig.types = config.types;
     detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
     modifierWithKey(this._modifiersWithKeys, TextDataDetectorConfigModifier.identity, TextDataDetectorConfigModifier, detectorConfig);
     return this;
@@ -935,7 +935,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
       TextOnTextSelectionChangeModifier, callback);
     return this;
   }
-  editMenuOptions(value: EditMenuOptions) {
+  editMenuOptions(value: EditMenuOptions): this {
     modifierWithKey(this._modifiersWithKeys, TextEditMenuOptionsModifier.identity,
       TextEditMenuOptionsModifier, value);
     return this;

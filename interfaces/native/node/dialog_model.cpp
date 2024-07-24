@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "dialog_model.h"
+
+#include "native_dialog.h"
 #include "native_type.h"
 #include "node_model.h"
 
@@ -183,4 +185,39 @@ int32_t RegisterOnWillDismiss(ArkUI_NativeDialogHandle handle, ArkUI_OnWillDismi
     return impl->getDialogAPI()->registerOnWillDismiss(handle->controller, eventHandler);
 }
 
+int32_t RegisterOnWillDismissWithUserData(
+    ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event))
+{
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !handle || !callback) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    int result = impl->getDialogAPI()->registerOnWillDismissWithUserData(handle->controller, userData, callback);
+    return result;
+}
+
 } // namespace OHOS::Ace::NG::DialogModel
+
+void OH_ArkUI_DialogDismissEvent_SetShouldBlockDismiss(ArkUI_DialogDismissEvent* event, bool shouldBlockDismiss)
+{
+    if (!event) {
+        return;
+    }
+    event->BlockDismiss = shouldBlockDismiss;
+}
+
+void* OH_ArkUI_DialogDismissEvent_GetUserData(ArkUI_DialogDismissEvent* event)
+{
+    if (!event) {
+        return nullptr;
+    }
+    return event->userData;
+}
+
+int32_t OH_ArkUI_DialogDismissEvent_GetDismissReason(ArkUI_DialogDismissEvent* event)
+{
+    if (!event) {
+        return -1;
+    }
+    return event->reason;
+}

@@ -2255,7 +2255,7 @@ void PipelineContext::RegisterDumpInfoListener(const std::function<void(const st
 }
 
 bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
-    bool skipSubAutoFillContainer)
+    bool skipSubAutoFillContainer, bool needsRecordData)
 {
     CHECK_NULL_RETURN(viewDataWrap, false);
     RefPtr<FrameNode> pageNode = nullptr;
@@ -2270,7 +2270,7 @@ bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<Vie
         dumpNode = node;
     }
     CHECK_NULL_RETURN(dumpNode, false);
-    dumpNode->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer);
+    dumpNode->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer, needsRecordData);
     auto nodeTag = node->GetTag();
     if (nodeTag == V2::DIALOG_ETS_TAG) {
         viewDataWrap->SetPageUrl(nodeTag);
@@ -2938,6 +2938,11 @@ void PipelineContext::RemoveOnAreaChangeNode(int32_t nodeId)
 {
     onAreaChangeNodeIds_.erase(nodeId);
     isOnAreaChangeNodesCacheVaild_ = false;
+}
+
+bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
+{
+    return onAreaChangeNodeIds_.find(nodeId) != onAreaChangeNodeIds_.end();
 }
 
 void PipelineContext::HandleOnAreaChangeEvent(uint64_t nanoTimestamp)

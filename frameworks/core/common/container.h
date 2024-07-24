@@ -89,6 +89,11 @@ public:
         return false;
     }
 
+    virtual bool ClosePopupUIExtension(uint32_t autoFillSessionId)
+    {
+        return false;
+    }
+
     virtual AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder)
     {
         return AceAutoFillType::ACE_UNSPECIFIED;

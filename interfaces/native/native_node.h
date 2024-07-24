@@ -7303,18 +7303,18 @@ int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow(ArkUI_NodeHandle nod
 int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(ArkUI_NodeHandle node, ArkUI_IntOffset* translateOffset);
 
 /**
-* @brief The event called when the sliding operation offset changes.
-*
-* @param node Indicates the target node.
-* @param userData Indicates the custom data to be saved.
-* @param onFinish Callback Events.
-*        offset Slide offset.
-* @return Error code.
-*         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
-*         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
-*         {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} The component does not support this event.
-* @since 12
-*/
+ * @brief The event called when the sliding operation offset changes.
+ *
+ * @param node Indicates the target node.
+ * @param userData Indicates the custom data to be saved.
+ * @param onFinish Callback Events.
+ *        offset Slide offset.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} The component does not support this event.
+ * @since 12
+ */
 int32_t OH_ArkUI_List_CloseAllSwipeActions(ArkUI_NodeHandle node, void* userData, void (*onFinish)(void* userData));
 
 /**

@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/navigation/navigation_model.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/base/navigation_register.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT NavigationModelNG : public OHOS::Ace::NavigationModel {

@@ -526,6 +526,16 @@ public:
         return isDrag_;
     }
 
+    void SetIsFoldable(bool isFoldable)
+    {
+        isFoldable_ = isFoldable;
+    }
+
+    bool IsFoldable() const
+    {
+        return isFoldable_;
+    }
+
     // Get ScrollHeight before avoid keyboard
     float GetScrollHeight() const
     {
@@ -682,6 +692,7 @@ private:
 
     bool show_ = true;
     bool isDrag_ = false;
+    bool isFoldable_ = false;
     bool isNeedProcessHeight_ = false;
     bool isSheetNeedScroll_ = false; // true if Sheet is ready to receive scroll offset.
     bool isSheetPosChanged_ = false; // UpdateTransformTranslate end
