@@ -2089,6 +2089,54 @@ HWTEST_F(OverlayTestNg, DialogTest008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BuildAIEntityMenu
+ * @tc.desc: Test OverlayManager::BuildAIEntityMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, BuildAIEntityMenu, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and overlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step2. create menuOptions and call BuildAIEntityMenu.
+     * @tc.expected: build AI entity menu successful.
+     */
+    std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
+    menuOptions.push_back(std::make_pair(MENU_CONTENT, []() {}));
+    EXPECT_NE(overlayManager->BuildAIEntityMenu(menuOptions), nullptr);
+}
+
+/**
+ * @tc.name: CreateAIEntityMenu
+ * @tc.desc: Test OverlayManager::CreateAIEntityMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, CreateAIEntityMenu, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node, target node and overlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step2. create menuOptions and call CreateAIEntityMenu.
+     * @tc.expected: create AI entity menu successful.
+     */
+    std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
+    menuOptions.push_back(std::make_pair(MENU_CONTENT, []() {}));
+    EXPECT_NE(overlayManager->CreateAIEntityMenu(menuOptions, targetNode), nullptr);
+}
+
+/**
  * @tc.name: ShowAIEntityMenu
  * @tc.desc: Test OverlayManager::ShowAIEntityMenu.
  * @tc.type: FUNC
@@ -2096,28 +2144,22 @@ HWTEST_F(OverlayTestNg, DialogTest008, TestSize.Level1)
 HWTEST_F(OverlayTestNg, ShowAIEntityMenu, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create target node and toast node.
+     * @tc.steps: step1. create root node, target node and overlayManager.
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    auto baseFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-    auto uiExtId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto uiExtNode = FrameNode::CreateFrameNode(
-        V2::DIALOG_ETS_TAG, uiExtId, AceType::MakeRefPtr<DialogPattern>(AceType::MakeRefPtr<DialogTheme>(), nullptr));
-    ASSERT_NE(uiExtNode, nullptr);
-
-    std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
-    menuOptions.push_back(std::make_pair(MENU_CONTENT, []() {}));
-
-    /**
-     * @tc.steps: step2. create overlayManager and call ShowAIEntityMenu.
-     * @tc.expected: ShowAIEntityMenu return true.
-     */
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     ASSERT_NE(overlayManager, nullptr);
 
+    /**
+     * @tc.steps: step2. create menuOptions, handleRect and call CreateAIEntityMenu.
+     * @tc.expected: ShowAIEntityMenu return true.
+     */
+    std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
+    menuOptions.push_back(std::make_pair(MENU_CONTENT, []() {}));
     RectF handleRect(3.0, 3.0, 100.0f, 75.0f);
-    EXPECT_TRUE(overlayManager->ShowAIEntityMenu(menuOptions, handleRect, baseFrameNode));
+    EXPECT_TRUE(overlayManager->ShowAIEntityMenu(menuOptions, handleRect, targetNode));
 }
 
 /**
