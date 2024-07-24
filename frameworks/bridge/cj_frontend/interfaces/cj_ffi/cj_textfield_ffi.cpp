@@ -104,12 +104,26 @@ void FfiOHOSAceFrameworkTextFieldSetBackgroundColor(uint32_t value)
 
 void FfiOHOSAceFrameworkTextFieldSetPadding(double value, int32_t unit)
 {
-    FfiOHOSAceFrameworkViewAbstractSetPadding(value, unit);
+    struct CJEdge textEdge;
+    textEdge.top = value;
+    textEdge.topUnit = unit;
+    textEdge.right = value;
+    textEdge.rightUnit = unit;
+    textEdge.bottom = value;
+    textEdge.bottomUnit = unit;
+    textEdge.left = value;
+    textEdge.leftUnit = unit;
+    FfiOHOSAceFrameworkTextFieldSetPaddings(textEdge);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetPaddings(CJEdge params)
 {
-    FfiOHOSAceFrameworkViewAbstractSetPaddings(params);
+    NG::PaddingProperty paddings;
+    paddings.top = NG::CalcLength(Dimension(params.top, static_cast<DimensionUnit>(params.topUnit)));
+    paddings.bottom = NG::CalcLength(Dimension(params.right, static_cast<DimensionUnit>(params.rightUnit)));
+    paddings.left = NG::CalcLength(Dimension(params.bottom, static_cast<DimensionUnit>(params.bottomUnit)));
+    paddings.right = NG::CalcLength(Dimension(params.left, static_cast<DimensionUnit>(params.leftUnit)));
+    TextFieldModel::GetInstance()->SetPadding(paddings, Edge(), false);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetMargin(double value, int32_t unit)

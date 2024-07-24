@@ -1338,8 +1338,10 @@ static void NewCjRadialGradient(RadialGradientParam radialGradientParam, NG::Gra
         newGradient.GetRadialGradient()->radialCenterY = CalcDimension(columnValue, DimensionUnit::PERCENT);
     }
     // radius
-    newGradient.GetRadialGradient()->radialVerticalSize = CalcDimension(radialGradientParam.radius);
-    newGradient.GetRadialGradient()->radialHorizontalSize = CalcDimension(radialGradientParam.radius);
+    newGradient.GetRadialGradient()->radialVerticalSize =
+        Dimension(radialGradientParam.radius, static_cast<DimensionUnit>(radialGradientParam.radiusUnit));
+    newGradient.GetRadialGradient()->radialHorizontalSize =
+        Dimension(radialGradientParam.radius, static_cast<DimensionUnit>(radialGradientParam.radiusUnit));
     // repeating
     newGradient.SetRepeat(radialGradientParam.repeating);
     // color stops
