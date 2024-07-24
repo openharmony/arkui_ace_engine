@@ -601,6 +601,42 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel016, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RichEditorModel017
+ * @tc.desc: test GetRichEditorController、SetCustomKeyboard、BindSelectionMenu、SetPlaceholder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel017, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create(true);
+    auto richEditorNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorController = richEditorModel.GetRichEditorController();
+    EXPECT_NE(richEditorController, nullptr);
+
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto func = []() {};
+    richEditorNode->pattern_ = nullptr;
+    richEditorModel.SetCustomKeyboard(func, true);
+    EXPECT_EQ(richEditorNode->GetPattern<RichEditorPattern>(), nullptr);
+
+    std::function<void()> buildFunc = []() {};
+    auto textSpanType = TextSpanType::TEXT;
+    auto textResponseType = TextResponseType::LONG_PRESS;
+    SelectMenuParam menuParam { .onAppear = [](int32_t, int32_t) {}, .onDisappear = []() {} };
+    richEditorModel.BindSelectionMenu(textSpanType, textResponseType, buildFunc, menuParam);
+    EXPECT_EQ(richEditorNode->GetPattern<RichEditorPattern>(), nullptr);
+
+    richEditorNode->pattern_ = pattern;
+
+    PlaceholderOptions options;
+    options.value = std::nullopt;
+    richEditorModel.SetPlaceholder(options);
+    EXPECT_FALSE(options.value.has_value());
+}
+
+/**
  * @tc.name: RichEditorController001
  * @tc.desc: test add image span
  * @tc.type: FUNC

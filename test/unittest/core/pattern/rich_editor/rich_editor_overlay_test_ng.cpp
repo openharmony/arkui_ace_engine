@@ -1574,4 +1574,90 @@ HWTEST_F(RichEditorOverlayTestNg, IsSelectLineHeadAndUseLeadingMargin001, TestSi
     bool ret =richEditorPattern->paragraphs_.IsSelectLineHeadAndUseLeadingMargin(0);
     EXPECT_EQ(ret, false);
 }
+
+/**
+ * @tc.name: RichEditorOverlayTestNg001
+ * @tc.desc: Test onDraw.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto richEditorTheme = AceType::MakeRefPtr<RichEditorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(richEditorTheme));
+
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+    auto scrollBarModifier = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
+    auto richEditorOverlayModifier = AceType::MakeRefPtr<RichEditorOverlayModifier>(
+        richEditorPattern, AceType::WeakClaim(AceType::RawPtr(scrollBarModifier)), scrollEdgeEffect);
+    ASSERT_NE(richEditorOverlayModifier, nullptr);
+
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+
+    richEditorOverlayModifier->previewTextStyle_ = PreviewTextStyle::NORMAL;
+    richEditorPattern->contentRect_ = RectF(0, 0, 10.0f, 10.0f);
+    richEditorOverlayModifier->showPreviewTextDecoration_ = AceType::MakeRefPtr<PropertyBool>(1);
+    richEditorOverlayModifier->caretVisible_ = AceType::MakeRefPtr<PropertyBool>(1);
+    richEditorOverlayModifier->caretOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF(50, 30));
+    richEditorOverlayModifier->caretWidth_ = AceType::MakeRefPtr<PropertyFloat>(10.0f);
+    richEditorOverlayModifier->caretHeight_ = AceType::MakeRefPtr<PropertyFloat>(10.0f);
+    richEditorOverlayModifier->contentRect_ = RectF(0, 0, 10.0, 10.0);
+    richEditorOverlayModifier->onDraw(context);
+    EXPECT_EQ(richEditorPattern->contentRect_.Height(), 10.0f);
+
+    richEditorPattern->contentRect_ = RectF(0, 0, 10.0f, 50.0f);
+    richEditorOverlayModifier->contentRect_ = RectF(0, 0, 100.0, 10.0);
+    richEditorOverlayModifier->onDraw(context);
+    richEditorOverlayModifier->contentRect_ = RectF(0, 0, 100.0, 100.0);
+    richEditorOverlayModifier->onDraw(context);
+    EXPECT_EQ(richEditorPattern->contentRect_.Height(), 50.0f);
+}
+
+/**
+ * @tc.name: RichEditorOverlayTestNg002
+ * @tc.desc: Test UpdateScrollBar.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+    auto scrollBarModifier = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
+    auto richEditorOverlayModifier = AceType::MakeRefPtr<RichEditorOverlayModifier>(
+        richEditorPattern, AceType::WeakClaim(AceType::RawPtr(scrollBarModifier)), scrollEdgeEffect);
+    ASSERT_NE(richEditorOverlayModifier, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto  renderContext = RenderContext::Create();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintProperty = richEditorPattern->CreatePaintProperty();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+
+    richEditorPattern->InitScrollablePattern();
+    richEditorOverlayModifier->UpdateScrollBar(AceType::RawPtr(paintWrapper));
+
+    auto scrollBar = richEditorPattern->GetScrollBar();
+    ASSERT_NE(scrollBar, nullptr);
+    scrollBar->isScrollable_ = true;
+    richEditorOverlayModifier->UpdateScrollBar(AceType::RawPtr(paintWrapper));
+    scrollBar->positionModeUpdate_ = true;
+    richEditorOverlayModifier->UpdateScrollBar(AceType::RawPtr(paintWrapper));
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    EXPECT_EQ(scrollBar->GetOpacityAnimationType(), OpacityAnimationType::NONE);
+}
 } // namespace OHOS::Ace::NG
