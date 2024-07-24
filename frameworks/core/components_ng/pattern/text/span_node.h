@@ -585,6 +585,7 @@ public:
     }
     ~CustomSpanItem() override = default;
     RefPtr<SpanItem> GetSameStyleSpanItem() const override;
+    ResultObject GetSpanResultObject(int32_t start, int32_t end) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     ACE_DISALLOW_COPY_AND_MOVE(CustomSpanItem);
     std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure;

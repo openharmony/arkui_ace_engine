@@ -998,6 +998,25 @@ ResultObject ImageSpanItem::GetSpanResultObject(int32_t start, int32_t end)
     return resultObject;
 }
 
+ResultObject CustomSpanItem::GetSpanResultObject(int32_t start, int32_t end)
+{
+    int32_t itemLength = 1;
+    ResultObject resultObject;
+
+    int32_t endPosition = interval.second;
+    int32_t startPosition = interval.first;
+    resultObject.type = SelectSpanType::TYPEBUILDERSPAN;
+    if ((start <= startPosition) && (end >= endPosition)) {
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
+        resultObject.valueString = " ";
+        resultObject.isInit = true;
+    }
+    return resultObject;
+}
+
 void SpanItem::GetIndex(int32_t& start, int32_t& end) const
 {
     auto contentLen = StringUtils::ToWstring(content).length();
