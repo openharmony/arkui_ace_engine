@@ -2293,9 +2293,14 @@ bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<Vie
         pageNode = node->GetPageNode();
         dumpNode = node;
     }
-    CHECK_NULL_RETURN(pageNode, false);
     CHECK_NULL_RETURN(dumpNode, false);
     dumpNode->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer, needsRecordData);
+    auto nodeTag = node->GetTag();
+    if (nodeTag == V2::DIALOG_ETS_TAG) {
+        viewDataWrap->SetPageUrl(nodeTag);
+        return true;
+    }
+    CHECK_NULL_RETURN(pageNode, false);
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
     auto pageInfo = pagePattern->GetPageInfo();

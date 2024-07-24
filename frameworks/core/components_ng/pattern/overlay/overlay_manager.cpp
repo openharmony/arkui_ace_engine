@@ -664,12 +664,29 @@ void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
         TaskExecutor::TaskType::UI, "ArkUIOverlayDialogCloseEvent");
 }
 
+void OverlayManager::FireDialogAutoSave(const RefPtr<FrameNode>& ContainerNode)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "fire dialog auto save enter");
+    CHECK_NULL_VOID(ContainerNode);
+    if (!ContainerNode->NeedRequestAutoSave()) {
+        return;
+    }
+    auto container = Container::Current();
+    auto currentId = Container::CurrentId();
+    CHECK_NULL_VOID(container);
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+    }
+    container->RequestAutoSave(ContainerNode, nullptr, nullptr, true, currentId);
+}
+
 void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "on dialog close event enter");
     CHECK_NULL_VOID(node);
 
     BlurOverlayNode(node);
+    FireDialogAutoSave(node);
 
     auto dialogPattern = node->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
