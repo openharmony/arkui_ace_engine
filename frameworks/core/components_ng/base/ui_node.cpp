@@ -483,7 +483,7 @@ void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const
 
 void UINode::GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
 {
-    for (const auto& uiChild : GetChildren()) {
+    for (const auto& uiChild : GetChildren(true)) {
         if (uiChild && !uiChild->IsOnMainTree()) {
             continue;
         }
