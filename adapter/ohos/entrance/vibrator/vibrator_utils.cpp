@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/pattern/indexer/vibrator_impl.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include <vector>
 
 #include "vibrator_agent.h"
@@ -27,11 +27,24 @@ namespace {
         VIBRATOR_TYPE_CHARGING,
         VIBRATOR_TYPE_CLOCK_TIMER
     };
+
+    const char* VIBRATOR_TYPE_INVALID = "vibrator.type.invalid";
+    const char* GetVibratorType(const std::string& vibratorType)
+    {
+        if (vibratorType == "longPress.light") {
+            return VIBRATOR_TYPE_LONG_PRESS_LIGHT;
+        } else if (vibratorType == "slide") {
+            return VIBRATOR_TYPE_SLIDE;
+        } else if (vibratorType == "slide.light") {
+            return VIBRATOR_TYPE_SLIDE_LIGHT;
+        }
+        return VIBRATOR_TYPE_INVALID;
+    }
 };
 
-const char* VibratorImpl::supportedEffectId = nullptr;
+const char* VibratorUtils::supportedEffectId = nullptr;
 
-const char* VibratorImpl::GetFirstSupportedId()
+const char* VibratorUtils::GetFirstSupportedId()
 {
     bool state = false;
     for (auto item : effectIdNames) {
@@ -43,15 +56,28 @@ const char* VibratorImpl::GetFirstSupportedId()
     return nullptr;
 }
 
-void VibratorImpl::StartVibraFeedback()
+void VibratorUtils::StartVibraFeedback()
 {
 #ifdef INDEXER_SUPPORT_VIBRATOR
     if (supportedEffectId == nullptr) {
-        supportedEffectId = VibratorImpl::GetFirstSupportedId();
+        supportedEffectId = VibratorUtils::GetFirstSupportedId();
     }
     if (supportedEffectId != nullptr) {
         Sensors::StartVibrator(supportedEffectId);
     }
 #endif
+}
+
+void VibratorUtils::StartVibraFeedback(const std::string& vibratorType)
+{
+    const char* realVibratorType = GetVibratorType(vibratorType);
+    if (strcmp(realVibratorType, VIBRATOR_TYPE_INVALID) == 0) {
+        return;
+    }
+    bool state = false;
+    Sensors::IsSupportEffect(realVibratorType, &state);
+    if (state) {
+        Sensors::StartVibrator(realVibratorType);
+    }
 }
 } // namespace OHOS::Ace::NG

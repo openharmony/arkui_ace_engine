@@ -28,6 +28,7 @@
 #include "core/animation/animator.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/popup_param.h"
@@ -36,7 +37,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
-#include "core/components_ng/pattern/indexer/vibrator_impl.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
@@ -851,7 +851,7 @@ void IndexerPattern::ApplyIndexChanged(
     if (selectChanged) {
         ShowBubble();
         if (enableHapticFeedback_ && selectedChangedForHaptic_ && !fromTouchUp) {
-            VibratorImpl::StartVibraFeedback();
+            VibratorUtils::StartVibraFeedback();
         }
     }
 }
