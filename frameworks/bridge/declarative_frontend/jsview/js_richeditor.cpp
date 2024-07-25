@@ -1971,6 +1971,12 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
             CalcDimension height;
             JSContainerBase::ParseJsDimensionVp(widthVal, width);
             JSContainerBase::ParseJsDimensionVp(heightVal, height);
+            if (width.Unit() == DimensionUnit::PERCENT) {
+                width = Dimension(0.0);
+            }
+            if (height.Unit() == DimensionUnit::PERCENT) {
+                height = Dimension(0.0);
+            }
             style.leadingMargin->size = NG::LeadingMarginSize(width, height);
         } else if (sizeVal->IsUndefined()) {
             std::string resWidthStr;
