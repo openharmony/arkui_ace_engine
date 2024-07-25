@@ -238,7 +238,12 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
             CHECK_NULL_VOID(stage);
             auto pageNode = weakNode.Upgrade();
             int64_t endTime = GetSysTimestamp();
-            stage->PerformanceCheck(pageNode, endTime - startTime);
+            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+            CHECK_NULL_VOID(pagePattern);
+            auto pageInfo = pagePattern->GetPageInfo();
+            CHECK_NULL_VOID(pageInfo);
+            auto pagePath = pageInfo->GetFullPath();
+            stage->PerformanceCheck(pageNode, endTime - startTime, pagePath);
         });
     }
 #if !defined(ACE_UNITTEST)
@@ -304,12 +309,12 @@ bool StageManager::InsertPage(const RefPtr<FrameNode>& node, bool bellowTopOrBot
     return true;
 }
 
-void StageManager::PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout)
+void StageManager::PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout, std::string path)
 {
     CHECK_NULL_VOID(pageNode);
     PerformanceCheckNodeMap nodeMap;
     pageNode->GetPerformanceCheckData(nodeMap);
-    AceScopedPerformanceCheck::RecordPerformanceCheckData(nodeMap, vsyncTimeout);
+    AceScopedPerformanceCheck::RecordPerformanceCheckData(nodeMap, vsyncTimeout, path);
 }
 
 bool StageManager::PopPage(bool needShowNext, bool needTransition)
