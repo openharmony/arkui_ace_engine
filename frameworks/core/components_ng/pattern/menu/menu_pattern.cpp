@@ -872,7 +872,8 @@ bool MenuPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
     if (shadowStyle == ShadowStyle::None) {
         return true;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, false);
