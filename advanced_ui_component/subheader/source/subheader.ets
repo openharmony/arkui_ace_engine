@@ -199,8 +199,10 @@ export struct SubHeader {
   private commonContentPadding() {
     .padding({
       end: LengthMetrics.resource($r('sys.float.padding_level0')),
-      top: LengthMetrics.resource($r('sys.float.padding_level4')),
-      bottom: LengthMetrics.resource($r('sys.float.padding_level4')),
+      top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource($r('sys.float.padding_level0'))
+        : LengthMetrics.resource($r('sys.float.padding_level4')),
+      bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource($r('sys.float.padding_level0'))
+        : LengthMetrics.resource($r('sys.float.padding_level4')),
     })
   }
 
@@ -208,8 +210,10 @@ export struct SubHeader {
   private commonListPadding() {
     .padding({
       end: LengthMetrics.resource($r('sys.float.padding_level6')),
-      top: LengthMetrics.resource($r('sys.float.padding_level4')),
-      bottom: LengthMetrics.resource($r('sys.float.padding_level4')),
+      top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource($r('sys.float.padding_level0'))
+        : LengthMetrics.resource($r('sys.float.padding_level4')),
+      bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource($r('sys.float.padding_level0'))
+        : LengthMetrics.resource($r('sys.float.padding_level4')),
     })
   }
 
@@ -302,6 +306,9 @@ export struct SubHeader {
         Row() {
           this.leftArea();
         }
+        .margin({
+          top: this.fontSize >= MIN_FONT_SIZE ? $r('sys.float.padding_level8') : ''
+        })
         .width('100%')
         .flexShrink(1)
 
