@@ -142,7 +142,7 @@ void WebPattern::InitEvent()
         CHECK_NULL_VOID(WebPattern);
         WebPattern->UpdateLocale();
     };
-    context->SetConfigChangedCallback(std::move(langTask));
+    context->SetConfigChangedCallback(GetHost()->GetId(), std::move(langTask));
 }
 
 void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -380,6 +380,11 @@ void WebPattern::WebRequestFocus()
     CHECK_NULL_VOID(focusHub);
 
     focusHub->RequestFocusImmediately();
+}
+
+WebInfoType WebPattern::GetWebInfoType()
+{
+    return WebInfoType::TYPE_MOBILE;
 }
 
 void WebPattern::UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty)
@@ -1188,9 +1193,14 @@ void WebPattern::InitSlideUpdateListener()
     // cross platform is not support now;
 }
 
-void WebPattern::UpdateSlideOffset()
+void WebPattern::UpdateSlideOffset(bool isNeedReset)
 {
    // cross platform is not support now;
+}
+
+void WebPattern::Backward()
+{
+    // cross platform is not support now;
 }
 
 void WebPattern::CalculateHorizontalDrawRect()

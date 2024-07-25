@@ -21,6 +21,7 @@
 #include <variant>
 #include <vector>
 
+#include <unordered_map>
 #include "base/utils/type_definition.h"
 
 namespace OHOS::Ace {
