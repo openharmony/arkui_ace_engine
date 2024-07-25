@@ -358,13 +358,29 @@ namespace OHOS::Ace::NG {
                     expiringTempItem_.try_emplace(index + i, LazyForEachChild(info.extraKey[i], nullptr));
                 }
             } else if (info.node != nullptr) {
-                expiringTempItem_.try_emplace(index, LazyForEachChild(info.key, info.node));
-                if (info.moveIn) {
-                    expiringTempItem_.try_emplace(index - 1, child);
-                }
+                RepairMoveOrExchange(expiringTempItem_, info, child, index, changedIndex);
             } else {
                 expiringTempItem_.try_emplace(index + changedIndex, child);
             }
+        }
+    }
+
+    void LazyForEachBuilder::RepairMoveOrExchange(std::map<int32_t, LazyForEachChild>& expiringTempItem_,
+        OperationInfo& info, LazyForEachChild& child, int32_t index, int32_t changedIndex)
+    {
+        if (info.isExchange) {
+            expiringTempItem_.try_emplace(index + changedIndex, LazyForEachChild(info.key, info.node));
+            return;
+        }
+        if (info.moveIn) {
+            int32_t fromIndex = index + changedIndex - 1;
+            int32_t toIndex = index + changedIndex;
+            if (info.fromDiffTo > 0) {
+                fromIndex = index + changedIndex;
+                toIndex = index + changedIndex - 1;
+            }
+            expiringTempItem_.try_emplace(toIndex, LazyForEachChild(info.key, info.node));
+            expiringTempItem_.try_emplace(fromIndex, child);
         }
     }
 
@@ -528,6 +544,7 @@ namespace OHOS::Ace::NG {
             }
             toInfo.node = iter->second.second;
             toInfo.moveIn = true;
+            toInfo.fromDiffTo = operation.coupleIndex.first - operation.coupleIndex.second;
             if (!operation.key.empty()) {
                 toInfo.key = operation.key;
             } else {
@@ -554,10 +571,7 @@ namespace OHOS::Ace::NG {
         auto startIndexExist = operationList_.find(operation.coupleIndex.first);
         auto endIndexExist = operationList_.find(operation.coupleIndex.second);
         if (startIndexExist == operationList_.end()) {
-            auto iter = cachedTemp.find(operation.coupleIndex.first);
-            if (iter == cachedTemp.end()) {
-                iter = expiringTemp.find(operation.coupleIndex.first);
-            }
+            auto iter = FindItem(operation.coupleIndex.first, cachedTemp, expiringTemp);
             if (iter == expiringTemp.end()) {
                 return;
             }
@@ -567,16 +581,14 @@ namespace OHOS::Ace::NG {
             } else {
                 startInfo.key = iter->second.first;
             }
+            startInfo.isExchange = true;
             initialIndex = std::min(initialIndex, operation.coupleIndex.second);
             operationList_.try_emplace(operation.coupleIndex.second, startInfo);
         } else {
             ThrowRepeatOperationError(operation.coupleIndex.first);
         }
         if (endIndexExist == operationList_.end()) {
-            auto iter = cachedTemp.find(operation.coupleIndex.second);
-            if (iter == cachedTemp.end()) {
-                iter = expiringTemp.find(operation.coupleIndex.second);
-            }
+            auto iter = FindItem(operation.coupleIndex.second, cachedTemp, expiringTemp);
             if (iter == expiringTemp.end()) {
                 return;
             }
@@ -586,11 +598,22 @@ namespace OHOS::Ace::NG {
             } else {
                 endInfo.key = iter->second.first;
             }
+            endInfo.isExchange = true;
             initialIndex = std::min(initialIndex, operation.coupleIndex.first);
             operationList_.try_emplace(operation.coupleIndex.first, endInfo);
         } else {
             ThrowRepeatOperationError(operation.coupleIndex.second);
         }
+    }
+
+    std::map<int32_t, LazyForEachChild>::iterator LazyForEachBuilder::FindItem(int32_t index,
+        std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp)
+    {
+        auto iter = cachedTemp.find(index);
+        if (iter == cachedTemp.end()) {
+            iter = expiringTemp.find(index);
+        }
+        return iter;
     }
 
     void LazyForEachBuilder::OperateReload(V2::Operation& operation, int32_t& initialIndex)
