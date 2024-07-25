@@ -34,8 +34,6 @@ constexpr double PRIMARY_RGBA_OPACITY = 0.9f;
 constexpr double SECONDARY_RGBA_OPACITY = 0.6f;
 constexpr int DEFAULT_ANIMATION_DURATION_OUT = 220;
 constexpr int DEFAULT_ANIMATION_DURATION_IN = 250;
-constexpr float DEFAULT_ALIGN_DIALOG = 3.0;
-constexpr float SHADOW_NONE = 6.0;
 constexpr int DEFAULT_DIALOG_ALIGNMENT = 2;
 constexpr double DEFAULT_DIALOG_MAXSIZE_SCALE_LANDSCAPE = 0.9f;
 constexpr double DEFAULT_DIALOG_MAXSIZE_SCALE_PORTRAIT = 0.8f;
@@ -128,16 +126,6 @@ public:
     const Edge& GetDefaultPadding() const
     {
         return defaultPadding_;
-    }
-
-    const Color& GetBackgroudBorderColor() const
-    {
-        return backgroundBorderColor_;
-    }
-
-    const Dimension& GetBackgroudBorderWidth()
-    {
-        return backgroundBorderWidth_;
     }
 
     const Edge& GetAdjustPadding() const
@@ -280,11 +268,6 @@ public:
         return frameEnd_;
     }
 
-    double GetDialogRatioHeight() const
-    {
-        return dialogRatioHeight_;
-    }
-
     double GetScaleStart() const
     {
         return scaleStart_;
@@ -343,26 +326,6 @@ public:
     int32_t GetAnimationDurationOut() const
     {
         return animationDurationOut_;
-    }
-
-    int32_t GetTextAlignContent() const
-    {
-        return text_align_content_;
-    }
-
-    int32_t GetButtonType() const
-    {
-        return button_type_;
-    }
-
-    int32_t GetTextAlignTitle() const
-    {
-        return text_align_title_;
-    }
-
-    int32_t GetDeviceColumns() const
-    {
-        return device_columns_dialog_;
     }
 
     const Color& GetDividerColor()
@@ -448,31 +411,6 @@ public:
     uint32_t GetDefaultShadowOn() const
     {
         return defaultShadowOn_;
-    }
-
-    uint32_t GetShadowDialog() const
-    {
-        return shadowDialog_;
-    }
-
-    int32_t GetAlignDialog() const
-    {
-        return alignDialog_;
-    }
-
-    const Color& GetColorBgWithBlur() const
-    {
-        return colorBgWithBlur_;
-    }
-
-    const Dimension& GetPaddingTopTitle() const
-    {
-        return paddingTopTitle_;
-    }
-
-    const Dimension& GetPaddingSingleTitle() const
-    {
-        return paddingSingleTitle_;
     }
 
     uint32_t GetDefaultShadowOff() const
@@ -575,7 +513,6 @@ protected:
 private:
     Radius radius_;
     Color backgroundColor_;
-    Color backgroundBorderColor_;
     TextStyle titleTextStyle_;
     TextStyle subtitleTextStyle_;
     TextStyle contentTextStyle_;
@@ -596,7 +533,6 @@ private:
     Dimension buttonSpacingVertical_;
     Dimension dividerLength_;
     Dimension dividerBetweenButtonWidth_;
-    Dimension backgroundBorderWidth_;
     Dimension dialogLandscapeHeightBoundary_;
     Color buttonBackgroundColor_;
     Color buttonClickedColor_;
@@ -608,7 +544,6 @@ private:
     Dimension translateValue_;
     double frameStart_ = 0.0;
     double frameEnd_ = 1.0;
-    double dialogRatioHeight_ = 0.8;
     double scaleStart_ = 0.0;
     double scaleEnd_ = 1.0;
     double opacityStart_ = 0.0;
@@ -623,17 +558,12 @@ private:
     int32_t animationDurationIn_ = 250;
     int32_t opacityAnimationDurIn_ = 150;
     int32_t animationDurationOut_ = 250;
-    int32_t text_align_content_ = 0;
-    int32_t button_type_ = 0;
-    int32_t text_align_title_ = 0;
-    int32_t device_columns_dialog_ = 0;
     Color maskColorStart_;
     Color maskColorEnd_;
     Color dividerColor_;
     Color commonButtonBgColor_;
     Color commonButtonTextColor_;
     Color emphasizeButtonBgColor_;
-    Color colorBgWithBlur_;
     Dimension dividerWidth_;
     Dimension dividerHeight_;
     Edge dividerPadding_;
@@ -654,16 +584,12 @@ private:
     Dimension mutiButtonPaddingEnd_;
     Dimension mutiButtonPaddingHorizontal_;
     Dimension mutiButtonPaddingVertical_;
-    Dimension paddingSingleTitle_;
-    Dimension paddingTopTitle_;
     std::string multipleDialogDisplay_;
     bool expandDisplay_ = false;
     Dimension buttonWithContentPadding_;
     Dimension containerMaxWidth_;
     uint32_t defaultShadowOn_ = 6;
     uint32_t defaultShadowOff_ = 6;
-    uint32_t shadowDialog_ = 6;
-    int32_t alignDialog_ = 3;
     DialogAlignment alignment_;
     double maxSizeScaleLandscape_ = 0.9;
     double maxSizeScalePortrait_ = 0.8;
