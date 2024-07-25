@@ -203,9 +203,8 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     }
     std::string resultInfo = std::string("fingerId: ").append(std::to_string(touchPoint.id));
     for (const auto& item : touchTestResultInfo) {
-        resultInfo.append("{ id: ")
-            .append(std::to_string(item.first))
-            .append(", tag: ")
+        resultInfo.append("{ ")
+            .append("tag: ")
             .append(item.second.tag)
             .append(", inspectorId: ")
             .append(item.second.inspectorId)
@@ -297,9 +296,8 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result, 
     for (const auto& item : hittedRecognizerInfo) {
         hittedRecognizerTypeInfo.append("recognizer type ").append(item.first).append(" node info:");
         for (const auto& nodeInfo : item.second) {
-            hittedRecognizerTypeInfo.append(" { id: ")
-                .append(std::to_string(nodeInfo.nodeId))
-                .append(", tag: ")
+            hittedRecognizerTypeInfo.append(" { ")
+                .append("tag: ")
                 .append(nodeInfo.tag)
                 .append(", inspectorId: ")
                 .append(nodeInfo.inspectorId)
