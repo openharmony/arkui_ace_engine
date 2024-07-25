@@ -1485,15 +1485,15 @@ void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceD
     auto& visibleAreaInnerCallback = eventHub_->GetVisibleAreaCallback(false);
 
     if (forceDisappear || IsFrameDisappear(timestamp)) {
-        if (!NearEqual(lastVisibleRatio_, VISIBLE_RATIO_MIN)) {
-            ProcessAllVisibleCallback(
-                visibleAreaUserRatios, visibleAreaUserCallback, VISIBLE_RATIO_MIN, lastVisibleCallbackRatio_);
-            lastVisibleRatio_ = VISIBLE_RATIO_MIN;
-        }
         if (!NearEqual(lastInnerVisibleRatio_, VISIBLE_RATIO_MIN)) {
             ProcessAllVisibleCallback(visibleAreaInnerRatios, visibleAreaInnerCallback, VISIBLE_RATIO_MIN,
                 lastInnerVisibleCallbackRatio_, false, true);
             lastInnerVisibleRatio_ = VISIBLE_RATIO_MIN;
+        }
+        if (!NearEqual(lastVisibleRatio_, VISIBLE_RATIO_MIN)) {
+            ProcessAllVisibleCallback(
+                visibleAreaUserRatios, visibleAreaUserCallback, VISIBLE_RATIO_MIN, lastVisibleCallbackRatio_);
+            lastVisibleRatio_ = VISIBLE_RATIO_MIN;
         }
         return;
     }
