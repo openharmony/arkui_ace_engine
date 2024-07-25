@@ -2968,22 +2968,15 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     }
-    bool isTouchSelectArea = BetweenSelection(info.GetGlobalLocation());
-    HandleDraggableFlag(isTouchSelectArea);
-    bool isInterceptEvent = isTouchSelectArea;
-    // check current is mouse long press
-    isInterceptEvent |= (isMousePressed_ && caretUpdateType_== CaretUpdateType::LONG_PRESSED);
-
-    // SpanString do not support drag
-    if (isSpanStringMode_) {
-        auto gestureHub = GetGestureEventHub();
-        if (gestureHub) {
-            gestureHub->SetIsTextDraggable(false);
-        }
-        isInterceptEvent = false;
+    bool isLongPressSelectArea = BetweenSelection(info.GetGlobalLocation()) && !isDoubleClick;
+    HandleDraggableFlag(isLongPressSelectArea);
+    bool isLongPressByMouse = isMousePressed_ && caretUpdateType_== CaretUpdateType::LONG_PRESSED;
+    bool isInterceptEvent = isLongPressSelectArea || isLongPressByMouse;
+    if (isInterceptEvent) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "intercept when longPressSelectArea=%{public}d longPressByMouse=%{public}d",
+            isLongPressSelectArea, isLongPressByMouse);
+        return;
     }
-
-    CHECK_NULL_VOID(!isInterceptEvent);
     HandleDoubleClickOrLongPress(info, host);
 }
 
