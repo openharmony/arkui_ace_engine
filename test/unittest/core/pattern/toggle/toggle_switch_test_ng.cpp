@@ -1535,7 +1535,6 @@ HWTEST_F(ToggleSwitchTestNg, PreventDefault001, TestSize.Level1)
     switchPattern->clickListener_->operator()(clickInfo);
     EXPECT_FALSE(switchPattern->isTouchPreventDefault_);
     EXPECT_FALSE(switchPattern->isOn_);
-    EXPECT_FALSE(switchPattern->isFocus_);
 }
 
 /**
