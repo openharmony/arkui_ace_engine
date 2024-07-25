@@ -35,7 +35,6 @@ public:
     PageInfo(int32_t pageId, std::string url, std::string path)
         : pageId_(pageId), url_(std::move(url)), path_(std::move(path))
     {}
-
     int32_t GetPageId() const
     {
         return pageId_;
@@ -80,11 +79,22 @@ public:
     {
         return pageIndex_;
     }
+
+    void SetFullPath(const std::string& fullPath)
+    {
+        fullPath_ = fullPath;
+    }
+
+    const std::string& GetFullPath() const
+    {
+        return fullPath_;
+    }
 private:
     int32_t pageId_ = 0;
     int32_t pageIndex_ = -1;
     std::string url_;
     std::string path_;
+    std::string fullPath_;
 
     std::function<void(int32_t)> alertCallback_;
     DialogProperties dialogProperties_;

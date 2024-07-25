@@ -51,6 +51,8 @@ private:
     napi_value ProcessWillClickUnRegister(napi_env env, napi_callback_info info);
     napi_value ProcessDidClickRegister(napi_env env, napi_callback_info info);
     napi_value ProcessDidClickUnRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessTabContentStateRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessTabContentStateUnRegister(napi_env env, napi_callback_info info);
     napi_value AddToScrollEventType(napi_env env);
     napi_value AddToRouterPageState(napi_env env);
     napi_value CreateNavDestinationState(napi_env env);

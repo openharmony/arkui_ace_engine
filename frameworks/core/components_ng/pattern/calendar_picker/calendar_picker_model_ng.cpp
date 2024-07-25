@@ -189,10 +189,7 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateCalendarNodeChild(int32_t content
     padding.right = CalcLength(theme->GetEntryDateLeftRightMargin());
     padding.bottom = CalcLength(theme->GetEntryDateTopBottomMargin());
     linearLayoutProperty->UpdatePadding(padding);
-
-    if (textDirection == TextDirection::RTL) {
-        linearLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
-    }
+    linearLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
 
     CreateDateNode(contentId, settingData);
     contentNode->MarkModifyDone();
@@ -280,6 +277,13 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateNode(int32_t nodeId, const Calend
 
 void CalendarPickerModelNG::SetEdgeAlign(const CalendarEdgeAlign& alignType, const DimensionOffset& offset)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->SetCalendarEdgeAlign(alignType);
+    pickerPattern->SetCalendarDialogOffset(offset);
+
     ACE_UPDATE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogAlignType, alignType);
     ACE_UPDATE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogOffset, offset);
 }
@@ -396,6 +400,13 @@ DimensionOffset CalendarPickerModelNG::GetEdgeOffset(FrameNode* frameNode)
 void CalendarPickerModelNG::SetEdgeAlign(
     FrameNode* frameNode, const CalendarEdgeAlign& alignType, const DimensionOffset& offset)
 {
+    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->SetCalendarEdgeAlign(alignType);
+    pickerPattern->SetCalendarDialogOffset(offset);
+
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogAlignType, alignType, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogOffset, offset, frameNode);
 }
@@ -538,18 +549,18 @@ std::map<std::size_t, std::string> CalendarPickerModelNG::GetDateNodeOrder(const
         order[num++] = (date.GetMonth() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetMonth());
         order[num] = (date.GetDay() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetDay());
     } else {
-        int32_t index = 0;
+        size_t index = 0;
         for (size_t i = 0; i < outOrder.size(); ++i) {
             if (outOrder[i] == "year") {
-                yearNodeIndex_ = i + index;
+                yearNodeIndex_ = static_cast<int32_t>(i + index);
                 order[i] = std::to_string(date.GetYear());
             }
             if (outOrder[i] == "month") {
-                monthNodeIndex_ = i + index;
+                monthNodeIndex_ = static_cast<int32_t>(i + index);
                 order[i] = (date.GetMonth() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetMonth());
             }
             if (outOrder[i] == "day") {
-                dayNodeIndex_ = i + index;
+                dayNodeIndex_ = static_cast<int32_t>(i + index);
                 order[i] = (date.GetDay() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetDay());
             }
             index++;

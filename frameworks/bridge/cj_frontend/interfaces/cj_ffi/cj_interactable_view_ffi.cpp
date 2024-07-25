@@ -18,6 +18,7 @@
 #include <cinttypes>
 
 #include "cj_lambda.h"
+
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
@@ -26,27 +27,15 @@
 #include "core/event/ace_event_handler.h"
 #include "core/gestures/click_recognizer.h"
 #ifndef _NON_OHOS_
-#include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "foundation/multimedia/image_framework/frameworks/kits/cj/include/pixel_map_impl.h"
+
+#include "adapter/ohos/osal/pixel_map_ohos.h"
 #endif
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace {
-
-void FfiSetEventTarget(const EventTarget& eventTarget, CJArea& cjArea, CJPosition& position, CJPosition& globalPosition)
-{
-    cjArea.width = eventTarget.area.GetWidth().ConvertToVp();
-    cjArea.height = eventTarget.area.GetHeight().ConvertToVp();
-    const auto& localOffset = eventTarget.area.GetOffset();
-    const auto& origin = eventTarget.origin;
-    position.x = localOffset.GetX().ConvertToVp();
-    position.y = localOffset.GetY().ConvertToVp();
-    globalPosition.x = origin.GetX().ConvertToVp() + localOffset.GetX().ConvertToVp();
-    globalPosition.y = origin.GetX().ConvertToVp() + localOffset.GetY().ConvertToVp();
-}
-
 void FFiSetDragInfo(
     const RefPtr<DragEvent>& info, const std::string& extraParams, CJPosition& cjPosition, CJDragInfo& ffiDragInfo)
 {
@@ -92,7 +81,7 @@ RefPtr<PixelMap> ParseDragPixelMap(int64_t pixelMapId)
     }
     return pixMapOhos;
 #else
-   return nullptr;
+    return nullptr;
 #endif
 }
 
@@ -101,10 +90,12 @@ RefPtr<PixelMap> ParseDragPixelMap(int64_t pixelMapId)
 extern "C" {
 std::string CJClickInfo::ToString() const
 {
-    std::string result = "globalX: " + std::to_string(globalX);
-    result = result + ", globalY: " + std::to_string(globalY);
-    result = result + ", localX: " + std::to_string(localX);
-    result = result + ", localY: " + std::to_string(localY);
+    std::string result = "x: " + std::to_string(x);
+    result = result + ", y: " + std::to_string(y);
+    result = result + ", windowX: " + std::to_string(windowX);
+    result = result + ", windowY: " + std::to_string(windowY);
+    result = result + ", displayX: " + std::to_string(displayX);
+    result = result + ", displayY: " + std::to_string(displayY);
     result = result + ", timestamp: " + std::to_string(timestamp);
     result = result + ", target.area.width: " + std::to_string(target->area->width);
     result = result + ", target.area.height: " + std::to_string(target->area->width);
@@ -112,17 +103,6 @@ std::string CJClickInfo::ToString() const
     result = result + ", target.area.position.y: " + std::to_string(target->area->position->y);
     result = result + ", target.area.globalPosition.x: " + std::to_string(target->area->globalPosition->y);
     result = result + ", target.area.globalPosition.y: " + std::to_string(target->area->globalPosition->y);
-    return result;
-}
-
-
-std::string ClickInfoForSpan::ToString() const
-{
-    std::string result = "globalX: " + std::to_string(globalX);
-    result = result + ", globalY: " + std::to_string(globalY);
-    result = result + ", localX: " + std::to_string(localX);
-    result = result + ", localY: " + std::to_string(localY);
-    result = result + ", timestamp: " + std::to_string(timestamp);
     return result;
 }
 
@@ -134,51 +114,18 @@ std::string CJTouchEvent::ToString() const
     return result;
 }
 
-void FfiOHOSAceFrameworkInteractableViewOnClick(void (*callback)(CJClickInfo newInfo))
+void FfiOHOSAceFrameworkInteractableViewOnClick(void (*callback)(CJClickInfo clickInfo))
 {
-    auto onClick = [ffiOnClick = CJLambda::Create(callback)](const ClickInfo& newInfo) -> void {
-        CJClickInfo ffiClickInfo {};
-        CJArea cjArea {};
+    auto lambda = [ffiOnClick = CJLambda::Create(callback)](const GestureEvent& event) -> void {
+        CJClickInfo cjClickInfo {};
         CJEventTarget cjEventTarget {};
+        CJArea cjArea {};
         CJPosition cjPosition {};
         CJPosition cjGlobalPosition {};
-        FfiSetEventTarget(newInfo.GetTarget(), cjArea, cjPosition, cjGlobalPosition);
-        cjArea.position = &cjPosition;
-        cjArea.globalPosition = &cjGlobalPosition;
-        cjEventTarget.area = &cjArea;
-        ffiClickInfo.target = &cjEventTarget;
-        ffiClickInfo.timestamp = newInfo.GetTimeStamp().time_since_epoch().count();
-        auto& globalLoc = newInfo.GetGlobalLocation();
-        ffiClickInfo.globalX = PipelineBase::Px2VpWithCurrentDensity(globalLoc.GetX());
-        ffiClickInfo.globalY = PipelineBase::Px2VpWithCurrentDensity(globalLoc.GetY());
-        auto& localLoc = newInfo.GetLocalLocation();
-        ffiClickInfo.localX = PipelineBase::Px2VpWithCurrentDensity(localLoc.GetX());
-        ffiClickInfo.localY = PipelineBase::Px2VpWithCurrentDensity(localLoc.GetY());
-        ffiClickInfo.sourceType = static_cast<int32_t>(newInfo.GetSourceDevice());
-        ffiOnClick(ffiClickInfo);
+        AssambleCJClickInfo(event, cjClickInfo, cjEventTarget, cjArea, cjPosition, cjGlobalPosition);
+        ffiOnClick(cjClickInfo);
     };
-    auto onNewClick = [ffiOnClick = CJLambda::Create(callback)](const GestureEvent& info) -> void {
-        CJClickInfo ffiClickInfo {};
-        CJArea cjArea {};
-        CJEventTarget cjEventTarget {};
-        CJPosition cjPosition {};
-        CJPosition cjGlobalPosition {};
-        FfiSetEventTarget(info.GetTarget(), cjArea, cjPosition, cjGlobalPosition);
-        cjArea.position = &cjPosition;
-        cjArea.globalPosition = &cjGlobalPosition;
-        cjEventTarget.area = &cjArea;
-        ffiClickInfo.target = &cjEventTarget;
-        ffiClickInfo.timestamp = info.GetTimeStamp().time_since_epoch().count();
-        auto& globalLoc = info.GetGlobalLocation();
-        ffiClickInfo.globalX = PipelineBase::Px2VpWithCurrentDensity(globalLoc.GetX());
-        ffiClickInfo.globalY = PipelineBase::Px2VpWithCurrentDensity(globalLoc.GetY());
-        auto& localLoc = info.GetLocalLocation();
-        ffiClickInfo.localX = PipelineBase::Px2VpWithCurrentDensity(localLoc.GetX());
-        ffiClickInfo.localY = PipelineBase::Px2VpWithCurrentDensity(localLoc.GetY());
-        ffiClickInfo.sourceType = static_cast<int32_t>(info.GetSourceDevice());
-        ffiOnClick(ffiClickInfo);
-    };
-    ViewAbstractModel::GetInstance()->SetOnClick(std::move(onNewClick), nullptr);
+    ViewAbstractModel::GetInstance()->SetOnClick(std::move(lambda), nullptr);
 }
 
 void FfiOHOSAceFrameworkInteractableViewOnTouch(bool (*callback)(CJTouchEvent touchInfo))
@@ -207,7 +154,7 @@ void FfiOHOSAceFrameworkInteractableViewOnTouch(bool (*callback)(CJTouchEvent to
         CJEventTarget cjEventTarget {};
         CJPosition cjPosition {};
         CJPosition cjGlobalPosition {};
-        FfiSetEventTarget(touchEventInfo.GetTarget(), cjArea, cjPosition, cjGlobalPosition);
+        AssambleCJEventTarget(touchEventInfo.GetTarget(), cjArea, cjPosition, cjGlobalPosition);
         cjArea.position = &cjPosition;
         cjArea.globalPosition = &cjGlobalPosition;
         cjEventTarget.area = &cjArea;
@@ -236,54 +183,51 @@ void FfiOHOSAceFrameworkInteractableViewOnDisAppear(void (*callback)())
 void FfiOHOSAceFrameworkInteractableViewOnHover(void (*callback)(bool))
 {
     auto onHover = CJLambda::Create(callback);
-    ViewAbstractModel::GetInstance()->SetOnHover([onHover](bool param, HoverInfo& info) {
-        onHover(param);
-    });
+    ViewAbstractModel::GetInstance()->SetOnHover([onHover](bool param, HoverInfo& info) { onHover(param); });
 }
 
 void FfiOHOSAceFrameworkInteractableViewOnAreaChanged(void (*callback)(CJArea, CJArea))
 {
     auto onAreaChanged = CJLambda::Create(callback);
-    ViewAbstractModel::GetInstance()->SetOnAreaChanged([onAreaChanged](
-        const Rect& lastRect, const Offset& lastOrigin, const Rect& rect, const Offset& origin) {
-        CJArea lastCjArea {};
-        lastCjArea.width = lastRect.Width();
-        lastCjArea.height = lastRect.Height();
-        CJPosition lastCjPosition {};
-        CJPosition lastCjGlobalPosition {};
-        lastCjPosition.x = lastRect.GetOffset().GetX();
-        lastCjPosition.y = lastRect.GetOffset().GetY();
-        lastCjGlobalPosition.x = lastRect.GetOffset().GetX() + lastOrigin.GetX();
-        lastCjGlobalPosition.y = lastRect.GetOffset().GetY() + lastOrigin.GetY();
-        lastCjArea.position = &lastCjPosition;
-        lastCjArea.globalPosition = &lastCjGlobalPosition;
+    ViewAbstractModel::GetInstance()->SetOnAreaChanged(
+        [onAreaChanged](const Rect& lastRect, const Offset& lastOrigin, const Rect& rect, const Offset& origin) {
+            CJArea lastCjArea {};
+            lastCjArea.width = lastRect.Width();
+            lastCjArea.height = lastRect.Height();
+            CJPosition lastCjPosition {};
+            CJPosition lastCjGlobalPosition {};
+            lastCjPosition.x = lastRect.GetOffset().GetX();
+            lastCjPosition.y = lastRect.GetOffset().GetY();
+            lastCjGlobalPosition.x = lastRect.GetOffset().GetX() + lastOrigin.GetX();
+            lastCjGlobalPosition.y = lastRect.GetOffset().GetY() + lastOrigin.GetY();
+            lastCjArea.position = &lastCjPosition;
+            lastCjArea.globalPosition = &lastCjGlobalPosition;
 
-        CJArea cjArea {};
-        cjArea.width = rect.Width();
-        cjArea.height = rect.Height();
-        CJPosition cjPosition {};
-        CJPosition cjGlobalPosition {};
-        cjPosition.x = rect.GetOffset().GetX();
-        cjPosition.y = rect.GetOffset().GetY();
-        cjGlobalPosition.x = rect.GetOffset().GetX() + origin.GetX();
-        cjGlobalPosition.y = rect.GetOffset().GetY() + origin.GetY();
-        cjArea.position = &cjPosition;
-        cjArea.globalPosition = &cjGlobalPosition;
+            CJArea cjArea {};
+            cjArea.width = rect.Width();
+            cjArea.height = rect.Height();
+            CJPosition cjPosition {};
+            CJPosition cjGlobalPosition {};
+            cjPosition.x = rect.GetOffset().GetX();
+            cjPosition.y = rect.GetOffset().GetY();
+            cjGlobalPosition.x = rect.GetOffset().GetX() + origin.GetX();
+            cjGlobalPosition.y = rect.GetOffset().GetY() + origin.GetY();
+            cjArea.position = &cjPosition;
+            cjArea.globalPosition = &cjGlobalPosition;
 
-        onAreaChanged(lastCjArea, cjArea);
-    });
+            onAreaChanged(lastCjArea, cjArea);
+        });
 }
 
 void FfiOHOSAceFrameworkInteractableViewOnVisibleAreaChange(
     VectorFloat64Handle raitosValsHandle, void (*callback)(bool isVisible, double currentRatio))
 {
     auto onVisibleChange = CJLambda::Create(callback);
-    const auto &ratios = *reinterpret_cast<std::vector<double> *>(raitosValsHandle);
+    const auto& ratios = *reinterpret_cast<std::vector<double>*>(raitosValsHandle);
 
     ViewAbstractModel::GetInstance()->SetOnVisibleChange(
         [onVisibleChange](bool isVisible, double currentRatio) { onVisibleChange(isVisible, currentRatio); }, ratios);
 }
-
 
 void FfiOHOSAceFrameworkInteractableViewOnMouse(void (*callback)(CJMouseEvent))
 {

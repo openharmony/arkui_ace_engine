@@ -89,6 +89,11 @@ public:
         return padding_;
     }
 
+    const std::unique_ptr<PaddingProperty>& GetSafeAreaPaddingProperty() const
+    {
+        return safeAreaPadding_;
+    }
+
     const std::unique_ptr<MarginProperty>& GetMarginProperty() const
     {
         return margin_;
@@ -137,6 +142,8 @@ public:
     }
 
     void UpdatePadding(const PaddingProperty& value);
+    void UpdateSafeAreaPadding(const PaddingProperty& value);
+    void ResetSafeAreaPadding();
 
     void UpdateMargin(const MarginProperty& value);
 
@@ -159,7 +166,8 @@ public:
 
     void UpdateLayoutDirection(TextDirection value);
 
-    void UpdateGeometryTransition(const std::string& id, bool followWithoutTransition = false);
+    void UpdateGeometryTransition(const std::string& id,
+        bool followWithoutTransition = false, bool doRegisterSharedTransition = true);
 
     void ResetGeometryTransition();
 
@@ -169,8 +177,8 @@ public:
     bool HasAspectRatio() const;
     float GetAspectRatio() const;
 
-    bool HasFixedWidth() const;
-    bool HasFixedHeight() const;
+    bool HasFixedWidth(bool checkPercent = true) const;
+    bool HasFixedHeight(bool checkPercent = true) const;
 
     void UpdateMeasureType(MeasureType measureType)
     {
@@ -267,7 +275,7 @@ public:
     LayoutConstraintF CreateContentConstraint() const;
 
     PaddingPropertyF CreatePaddingWithoutBorder(bool useRootConstraint = true, bool roundPixel = true);
-    PaddingPropertyF CreatePaddingAndBorder();
+    PaddingPropertyF CreatePaddingAndBorder(bool includeSafeAreaPadding = true, bool forceReCreate = false);
     PaddingPropertyF CreatePaddingAndBorderWithDefault(float paddingHorizontalDefault, float paddingVerticalDefault,
         float borderHorizontalDefault, float borderVerticalDefault);
     BorderWidthPropertyF CreateBorder();
@@ -332,6 +340,51 @@ public:
     bool ConstraintEqual(const std::optional<LayoutConstraintF>& preLayoutConstraint,
         const std::optional<LayoutConstraintF>& preContentConstraint);
 
+    PaddingPropertyF GetOrCreateSafeAreaPadding(bool forceReCreate = false);
+
+    void UpdateNeedPositionLocalizedEdges(bool needPositionLocalizedEdges)
+    {
+        needPositionLocalizedEdges_ = needPositionLocalizedEdges;
+    }
+
+    bool IsPositionLocalizedEdges() const
+    {
+        return needPositionLocalizedEdges_;
+    }
+
+    void UpdatNeedMarkAnchorPosition(bool needMarkAnchorPosition)
+    {
+        needMarkAnchorPosition_ = needMarkAnchorPosition;
+    }
+
+    bool IsMarkAnchorPosition() const
+    {
+        return needMarkAnchorPosition_;
+    }
+
+    void UpdateNeedOffsetLocalizedEdges(bool needOffsetLocalizedEdges)
+    {
+        needOffsetLocalizedEdges_ = needOffsetLocalizedEdges;
+    }
+
+    bool IsOffsetLocalizedEdges() const
+    {
+        return needOffsetLocalizedEdges_;
+    }
+
+    void CheckPositionLocalizedEdges(TextDirection layoutDirection);
+    void CheckMarkAnchorPosition(TextDirection layoutDirection);
+    void CheckOffsetLocalizedEdges(TextDirection layoutDirection);
+    void CheckLocalizedBorderRadiuses(const TextDirection& direction);
+    void CheckLocalizedOuterBorderColor(const TextDirection& direction);
+    void CheckLocalizedPadding(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
+    void CheckLocalizedMargin(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
+    void CheckLocalizedEdgeWidths(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
+    void CheckLocalizedEdgeColors(const TextDirection& direction);
+    void CheckLocalizedBorderImageSlice(const TextDirection& direction);
+    void CheckLocalizedBorderImageWidth(const TextDirection& direction);
+    void CheckLocalizedBorderImageOutset(const TextDirection& direction);
+
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
 
@@ -343,8 +396,15 @@ private:
 
     void CheckAspectRatio();
     void CheckBorderAndPadding();
+    void ConstraintContentByPadding();
+    void ConstraintContentByBorder();
+    void ConstraintContentBySafeAreaPadding();
+    PaddingPropertyF CreateSafeAreaPadding();
 
     const std::string PixelRoundToJsonValue() const;
+
+    void PaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void MarginToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     // available in measure process.
     std::optional<LayoutConstraintF> layoutConstraint_;
@@ -354,6 +414,7 @@ private:
     std::optional<LayoutConstraintF> parentLayoutConstraint_;
 
     std::unique_ptr<MeasureProperty> calcLayoutConstraint_;
+    std::unique_ptr<PaddingProperty> safeAreaPadding_;
     std::unique_ptr<PaddingProperty> padding_;
     std::unique_ptr<MarginProperty> margin_;
     std::optional<MarginPropertyF> marginResult_;
@@ -385,6 +446,9 @@ private:
 
     bool heightPercentSensitive_ = false;
     bool widthPercentSensitive_ = false;
+    bool needPositionLocalizedEdges_ = false;
+    bool needMarkAnchorPosition_ = false;
+    bool needOffsetLocalizedEdges_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };

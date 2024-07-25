@@ -35,6 +35,9 @@ constexpr int32_t NUM_6 = 6;
 constexpr int32_t NUM_7 = 7;
 const std::string DEFAULT_STR = "-1";
 const char* TEXTCLOCK_NODEPTR_OF_UINODE = "nodePtr_";
+const std::string TEXTCLOCK_DATE_TIME_OPTIONS_HOUR = "hour";
+const std::string TEXTCLOCK_DATE_TIME_OPTIONS_TWO_DIGIT_VAL = "2-digit";
+const std::string TEXTCLOCK_DATE_TIME_OPTIONS_NUMERIC_VAL = "numeric";
 } // namespace
 
 ArkUINativeModuleValue TextClockBridge::SetFormat(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -161,8 +164,8 @@ ArkUINativeModuleValue TextClockBridge::SetFontWeight(ArkUIRuntimeCallInfo* runt
     if (!fontWeightArg->IsNull()) {
         if (fontWeightArg->IsNumber()) {
             fontWeight = std::to_string(fontWeightArg->Int32Value(vm));
-        } else if (fontWeightArg->IsString()) {
-            fontWeight = fontWeightArg->ToString(vm)->ToString();
+        } else if (fontWeightArg->IsString(vm)) {
+            fontWeight = fontWeightArg->ToString(vm)->ToString(vm);
         }
     }
     GetArkUINodeModifiers()->getTextClockModifier()->setFontWeight(nativeNode, fontWeight.c_str());
@@ -214,8 +217,8 @@ ArkUINativeModuleValue TextClockBridge::SetFontFeature(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString()) {
-        auto value = secondArg->ToString(vm)->ToString();
+    if (secondArg->IsString(vm)) {
+        auto value = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getTextClockModifier()->setFontFeature(nativeNode, value.c_str());
     } else {
         GetArkUINodeModifiers()->getTextClockModifier()->resetFontFeature(nativeNode);
@@ -298,7 +301,7 @@ ArkUINativeModuleValue TextClockBridge::SetContentModifierBuilder(ArkUIRuntimeCa
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
-    if (!secondArg->IsObject()) {
+    if (!secondArg->IsObject(vm)) {
         TextClockModelNG::SetBuilderFunc(frameNode, nullptr);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -322,11 +325,11 @@ ArkUINativeModuleValue TextClockBridge::SetContentModifierBuilder(ArkUIRuntimeCa
             panda::TryCatch trycatch(vm);
             auto jsObject = obj.ToLocal();
             auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
-            CHECK_EQUAL_RETURN(makeFunc->IsFunction(), false, nullptr);
+            CHECK_EQUAL_RETURN(makeFunc->IsFunction(vm), false, nullptr);
             panda::Local<panda::FunctionRef> func = makeFunc;
             auto result = func->Call(vm, jsObject, params, NUM_2);
             JSNApi::ExecutePendingJob(vm);
-            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(), true, nullptr);
+            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(vm), true, nullptr);
             auto resultObj = result->ToObject(vm);
             panda::Local<panda::JSValueRef> nodeptr =
                 resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, TEXTCLOCK_NODEPTR_OF_UINODE));
@@ -335,6 +338,37 @@ ArkUINativeModuleValue TextClockBridge::SetContentModifierBuilder(ArkUIRuntimeCa
             CHECK_NULL_RETURN(frameNode, nullptr);
             return AceType::Claim(frameNode);
         });
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue TextClockBridge::SetDateTimeOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> hourArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ZeroPrefixType hourType = ZeroPrefixType::AUTO;
+    std::string hour = TEXTCLOCK_DATE_TIME_OPTIONS_HOUR;
+    if (hourArg->IsString(vm)) {
+        std::string hour = hourArg->ToString(vm)->ToString(vm);
+        if (hour == TEXTCLOCK_DATE_TIME_OPTIONS_TWO_DIGIT_VAL) {
+            hourType = ZeroPrefixType::SHOW;
+        } else if (hour == TEXTCLOCK_DATE_TIME_OPTIONS_NUMERIC_VAL) {
+            hourType = ZeroPrefixType::HIDE;
+        }
+    }
+    GetArkUINodeModifiers()->getTextClockModifier()->setDateTimeOptions(
+        nativeNode, static_cast<ArkUI_Int32>(hourType));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextClockBridge::ResetDateTimeOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextClockModifier()->resetDateTimeOptions(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

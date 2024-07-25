@@ -147,7 +147,6 @@ shared_ptr<JsValue> JsiGroupJsBridge::ProcessJsRequest(const shared_ptr<JsRuntim
     }
     LOGI("send message, groupName: %{private}s, callbackId: %{private}d", groupName.c_str(), callbackId);
     std::string strFunctionName = argv[PLUGIN_REQUEST_ARG_FUNCTION_NAME_INDEX]->ToString(runtime);
-
     // In the preview scenario, only the fetch interface is available. If other APIs need to be supported in the future,
     // adaptation is required.
     if (strFunctionName != "fetch") {
@@ -745,14 +744,12 @@ void JsiGroupJsBridge::GetRequestData(const shared_ptr<JsValue>& valObject, Requ
                 fetchRequestDataMap2[iter].value(runtime_, item, requestData);
             }
         }
-
     }
 }
 
 ParseJsDataResult JsiGroupJsBridge::ParseRequestData(
     int32_t argc, const std::vector<shared_ptr<JsValue>>& argv, OHOS::Ace::RequestData& requestData, int32_t requestId)
 {
-
     if (argc < PLUGIN_REQUEST_ARG_APP_PARAMS_INDEX) {
         return ParseJsDataResult::PARSE_JS_SUCCESS;
     }

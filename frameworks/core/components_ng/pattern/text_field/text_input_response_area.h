@@ -50,7 +50,11 @@ public:
     }
 
     virtual const RefPtr<FrameNode> GetFrameNode() = 0;
+
+    SizeF GetFrameSize(bool withSafeArea = false);
+
 protected:
+    Alignment GetStackAlignment(const TextDirection& userDirection);
     void LayoutChild(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth);
     WeakPtr<Pattern> hostPattern_;
     RectF areaRect_;
@@ -62,7 +66,10 @@ class PasswordResponseArea : public TextInputResponseArea {
 public:
     PasswordResponseArea(const WeakPtr<Pattern>& hostPattern, bool isObscured)
         : TextInputResponseArea(hostPattern), isObscured_(isObscured) {}
-    ~PasswordResponseArea() = default;
+    ~PasswordResponseArea()
+    {
+        ClearArea();
+    }
 
     void InitResponseArea() override;
 
@@ -80,6 +87,11 @@ public:
         ChangeObscuredState();
     }
 
+    bool IsObscured() const
+    {
+        return isObscured_;
+    }
+
     void Refresh() override;
 
     void ClearArea() override
@@ -91,6 +103,7 @@ public:
         CHECK_NULL_VOID(stackNode_);
         host->RemoveChildAndReturnIndex(stackNode_);
         passwordNode_.Reset();
+        areaRect_.Reset();
     }
 
     const RefPtr<FrameNode> GetFrameNode() override;
@@ -146,6 +159,7 @@ public:
         CHECK_NULL_VOID(host);
         CHECK_NULL_VOID(unitNode_);
         host->RemoveChildAndReturnIndex(unitNode_);
+        areaRect_.Reset();
     }
 
 private:
@@ -182,6 +196,7 @@ public:
     void Refresh() override;
 
 private:
+    bool IsShowClean();
     void InitClickEvent(const RefPtr<FrameNode>& frameNode);
     void OnCleanNodeClicked();
     RefPtr<FrameNode> CreateNode();

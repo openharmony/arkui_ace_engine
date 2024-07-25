@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_ADAPTER_IMPL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_ADAPTER_IMPL_H
 
 #include <cstdint>
 #include <functional>
@@ -127,6 +128,12 @@ protected:
 
     void OnItemDeleted(UINode* node, const std::string& key) override;
 
+    // used in ArkTS side.
+    std::set<std::string> GetCacheKeys(std::set<int32_t>& idleIndexes) override
+    {
+        return {};
+    }
+
     // used in ArkTS side for tabs.
     LazyForEachChild OnGetChildByIndexNew(int32_t index, std::map<int32_t, LazyForEachChild>& cachedItems,
         std::unordered_map<std::string, LazyForEachCacheChild>& expiringItems) override
@@ -226,3 +233,4 @@ private:
 namespace OHOS::Ace::NodeAdapter {
 const ArkUINodeAdapterAPI* GetNodeAdapterAPI();
 } // namespace OHOS::Ace::NodeAdapter
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_ADAPTER_IMPL_H

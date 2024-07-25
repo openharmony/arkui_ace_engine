@@ -18,22 +18,24 @@
 #include <optional>
 #include <utility>
 
+#include "base/image/image_source.h"
+#include "base/image/pixel_map.h"
 #include "gtest/gtest.h"
 
 #define protected public
 #define private public
-#include "core/components_ng/pattern/custom_paint/canvas_event_hub.h"
-#include "core/components_ng/pattern/custom_paint/canvas_layout_algorithm.h"
-#include "core/components_ng/pattern/custom_paint/canvas_model.h"
-#include "core/components_ng/pattern/custom_paint/canvas_model_ng.h"
-#include "core/components_ng/pattern/custom_paint/canvas_modifier.h"
-#include "core/components_ng/pattern/custom_paint/canvas_paint_mem.h"
-#include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
-#include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
-#include "core/components_ng/pattern/custom_paint/canvas_pattern.h"
-#include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
-#include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
-#include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
+#include "core/components_ng/pattern/canvas/canvas_event_hub.h"
+#include "core/components_ng/pattern/canvas/canvas_layout_algorithm.h"
+#include "core/components_ng/pattern/canvas/canvas_model.h"
+#include "core/components_ng/pattern/canvas/canvas_model_ng.h"
+#include "core/components_ng/pattern/canvas/canvas_modifier.h"
+#include "core/components_ng/pattern/canvas/canvas_paint_method.h"
+#include "core/components_ng/pattern/canvas/canvas_paint_op.h"
+#include "core/components_ng/pattern/canvas/canvas_pattern.h"
+#include "core/components_ng/pattern/canvas/custom_paint_paint_method.h"
+#include "core/components_ng/pattern/canvas/custom_paint_util.h"
+#include "core/components_ng/pattern/canvas/offscreen_canvas_paint_method.h"
+#include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 #undef private
 #undef protected
 
@@ -84,4 +86,332 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest001, TestSize.Level1)
     EXPECT_FALSE(paintMethod->IsPercentStr(nonPercentStr));
     EXPECT_STREQ(nonPercentStr.c_str(), exceptedresult.c_str());
 }
+
+/**
+ * @tc.name: CanvasPatternTest002
+ * @tc.desc: CanvasPattern::OnSizeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
+    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    RefPtr<LayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<LayoutAlgorithm>();
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm, false);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    DirtySwapConfig config;
+    bool needReset;
+
+    /**
+     * @tc.steps: step1. needReset = false; dirtyPixelGridRoundSize_ = { 0, 0 }
+     */
+    needReset = false;
+    pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
+    pattern->dirtyPixelGridRoundSize_ = { -1, -1 };
+    pattern->OnSizeChanged(config, needReset);
+    ASSERT_NE(pattern->contentModifier_, nullptr);
+    auto contentModifier1 = pattern->contentModifier_;
+    EXPECT_FALSE(contentModifier1->needResetSurface_);
+
+    /**
+     * @tc.steps: step2. needReset = false; dirtyPixelGridRoundSize_ = { 1, 1 };
+     */
+    needReset = false;
+    config.frameSizeChange = false;
+    config.contentSizeChange = false;
+    pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
+    pattern->dirtyPixelGridRoundSize_ = { 1, 1 };
+    pattern->OnSizeChanged(config, needReset);
+    ASSERT_NE(pattern->contentModifier_, nullptr);
+    auto contentModifier2 = pattern->contentModifier_;
+    EXPECT_FALSE(contentModifier2->needResetSurface_);
+
+    /**
+     * @tc.steps: step3. needReset = true; dirtyPixelGridRoundSize_ = { 1, 1 };
+     */
+    needReset = false;
+    config.frameSizeChange = true;
+    config.contentSizeChange = true;
+    pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
+    pattern->dirtyPixelGridRoundSize_ = { 1, 1 };
+    pattern->OnSizeChanged(config, needReset);
+    ASSERT_NE(pattern->contentModifier_, nullptr);
+    auto contentModifier3 = pattern->contentModifier_;
+    EXPECT_FALSE(contentModifier3->needResetSurface_);
+
+    /**
+     * @tc.steps: step4. needReset = true; config.frameSizeChange = false; config.contentSizeChange = false;
+     */
+    needReset = true;
+    config.frameSizeChange = false;
+    config.contentSizeChange = false;
+    pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
+    pattern->dirtyPixelGridRoundSize_ = { -1, -1 };
+    pattern->OnSizeChanged(config, needReset);
+    ASSERT_NE(pattern->contentModifier_, nullptr);
+    auto contentModifier4 = pattern->contentModifier_;
+    EXPECT_FALSE(contentModifier4->needResetSurface_);
+
+    /**
+     * @tc.steps: step5. needReset = true; config.frameSizeChange = true; config.contentSizeChange = false;
+     */
+    needReset = true;
+    config.frameSizeChange = true;
+    config.contentSizeChange = false;
+    pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
+    pattern->dirtyPixelGridRoundSize_ = { -1, -1 };
+    pattern->OnSizeChanged(config, needReset);
+    ASSERT_NE(pattern->contentModifier_, nullptr);
+    auto contentModifier5 = pattern->contentModifier_;
+    EXPECT_TRUE(contentModifier5->needResetSurface_);
+
+    /**
+     * @tc.steps: step6. needReset = true; config.frameSizeChange = false; config.contentSizeChange = true;
+     */
+    needReset = true;
+    config.frameSizeChange = false;
+    config.contentSizeChange = true;
+    pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
+    pattern->dirtyPixelGridRoundSize_ = { -1, -1 };
+    pattern->OnSizeChanged(config, needReset);
+    ASSERT_NE(pattern->contentModifier_, nullptr);
+    auto contentModifier6 = pattern->contentModifier_;
+    EXPECT_TRUE(contentModifier6->needResetSurface_);
+}
+
+/**
+ * @tc.name: CanvasPatternTest003
+ * @tc.desc: CanvasPattern::EnableAnalyzer
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, CanvasPatternTest003, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
+    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+
+    /**
+     * @tc.steps: step1. enable = false;
+     */
+    pattern->EnableAnalyzer(false);
+    EXPECT_FALSE(pattern->imageAnalyzerManager_);
+
+    /**
+     * @tc.steps: step1. enable = true;
+     */
+    pattern->EnableAnalyzer(true);
+    EXPECT_TRUE(pattern->imageAnalyzerManager_);
+}
+
+/**
+ * @tc.name: CanvasPatternTest004
+ * @tc.desc: CanvasPattern::UpdateTextDefaultDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, CanvasPatternTest004, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
+    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+
+    /**
+     * @tc.steps: step1. TextDirection::AUTO;
+     */
+    pattern->currentSetTextDirection_ = TextDirection::AUTO;
+    pattern->UpdateTextDefaultDirection();
+    EXPECT_EQ(pattern->currentSetTextDirection_, TextDirection::AUTO);
+}
+
+/**
+ * @tc.name: CanvasPatternTest005
+ * @tc.desc: CanvasLayoutAlgorithm::MeasureContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, CanvasPatternTest005, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
+    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    
+    RefPtr<CanvasLayoutAlgorithm> canvasLayoutAlgorithm = AceType::MakeRefPtr<CanvasLayoutAlgorithm>();
+    LayoutConstraintF layoutConstraint;
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step1. IsValid() == false;
+     */
+    layoutConstraint.maxSize.SetWidth(1000.0f);
+    layoutConstraint.maxSize.SetHeight(1000.0f);
+    canvasLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
+    EXPECT_EQ(pattern->canvasSize_->width_, 1000.0f);
+    EXPECT_EQ(pattern->canvasSize_->height_, 1000.0f);
+
+    /**
+     * @tc.steps: step1. IsValid() == true;
+     */
+    layoutConstraint.selfIdealSize.SetWidth(960.0f);
+    layoutConstraint.selfIdealSize.SetHeight(960.0f);
+    canvasLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
+    EXPECT_EQ(pattern->canvasSize_->width_, 960.0f);
+    EXPECT_EQ(pattern->canvasSize_->height_, 960.0f);
+}
+
+/**
+ * @tc.name: CanvasPatternTest006
+ * @tc.desc: GetMimeType && GetQuality
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, CanvasPatternTest006, TestSize.Level1)
+{
+    double dRet = 0.0;
+    std::string strRet = "";
+    /**
+     * @tc.steps: step1. GetQuality：values.size() < MIME_TYPE_COLUMN_NUM
+     */
+    dRet = GetQuality("");
+    EXPECT_EQ(dRet, DEFAULT_QUALITY);
+    /**
+     * @tc.steps: step2. GetMimeType：values.empty()
+     */
+    strRet = GetMimeType("");
+    EXPECT_EQ(strRet, IMAGE_PNG);
+    /**
+     * @tc.steps: step3. GetQuality：mimeType != IMAGE_JPEG && mimeType != IMAGE_WEBP
+     */
+    std::string mimeArgs = "image/png,0.92";
+    dRet = GetQuality(mimeArgs);
+    EXPECT_EQ(dRet, DEFAULT_QUALITY);
+    /**
+     * @tc.steps: step4. GetQuality：mimeType == IMAGE_JPEG
+     */
+    mimeArgs = "image/jpeg,0.92";
+    dRet = GetQuality(mimeArgs);
+    EXPECT_EQ(dRet, DEFAULT_QUALITY);
+    /**
+     * @tc.steps: step5. GetQuality：mimeType == IMAGE_WEBP
+     */
+    mimeArgs = "image/webp,0.92";
+    dRet = GetQuality(mimeArgs);
+    EXPECT_EQ(dRet, DEFAULT_QUALITY);
+    /**
+     * @tc.steps: step6. GetQuality：quality > 1.0
+     */
+    mimeArgs = "image/webp,1.1";
+    dRet = GetQuality(mimeArgs);
+    EXPECT_EQ(dRet, DEFAULT_QUALITY);
+    /**
+     * @tc.steps: step7. GetQuality：quality < 0.0
+     */
+    mimeArgs = "image/webp,-1.1";
+    dRet = GetQuality(mimeArgs);
+    EXPECT_EQ(dRet, DEFAULT_QUALITY);
+    /**
+     * @tc.steps: step8. GetMimeType：values.size() > MIME_TYPE_COLUMN_NUM
+     */
+    mimeArgs = "image/webp,0.8,0.92";
+    strRet = GetMimeType(mimeArgs);
+    EXPECT_EQ(strRet, IMAGE_PNG);
+}
+
+/**
+ * @tc.name: CanvasPatternTest007
+ * @tc.desc: OffscreenCanvasPattern::SetTextDirection && UpdateTextDefaultDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, CanvasPatternTest007, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<OffscreenCanvasPattern>(100, 100); });
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
+    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
+    auto offPattern = frameNode->GetPattern<OffscreenCanvasPattern>();
+
+    /**
+     * @tc.steps: step1. SetTextDirection : TextDirection::AUTO;
+     */
+    offPattern->SetTextDirection(TextDirection::AUTO);
+    EXPECT_EQ(offPattern->offscreenPaintMethod_->state_.fillState.textDirection_, TextDirection::AUTO);
+    /**
+     * @tc.steps: step2. SetTextDirection : TextDirection::INHERIT;
+     */
+    offPattern->SetTextDirection(TextDirection::INHERIT);
+    EXPECT_EQ(offPattern->offscreenPaintMethod_->state_.fillState.textDirection_, TextDirection::LTR);
+    /**
+     * @tc.steps: step3. UpdateTextDefaultDirection : TextDirection::INHERIT;
+     */
+    offPattern->currentSetTextDirection_ = TextDirection::AUTO;
+    offPattern->UpdateTextDefaultDirection();
+    EXPECT_EQ(offPattern->offscreenPaintMethod_->state_.fillState.textDirection_, TextDirection::LTR);
+    /**
+     * @tc.steps: step4. UpdateTextDefaultDirection : TextDirection::INHERIT;
+     */
+    offPattern->currentSetTextDirection_ = TextDirection::INHERIT;
+    offPattern->UpdateTextDefaultDirection();
+    EXPECT_EQ(offPattern->offscreenPaintMethod_->state_.fillState.textDirection_, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: CanvasPatternTest008
+ * @tc.desc: OffscreenCanvasPaintMethod::FillText && StrokeText
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, CanvasPatternTest008, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<OffscreenCanvasPattern>(100, 100); });
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
+    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
+    auto offPattern = frameNode->GetPattern<OffscreenCanvasPattern>();
+
+    /**
+     * @tc.steps: step1. FillText : ret == false
+     */
+    PaintState state;
+    offPattern->offscreenPaintMethod_->FillText("test", 0.0, 0.0, 50, state);
+    EXPECT_FALSE(offPattern->offscreenPaintMethod_->UpdateParagraph("test", false, false));
+
+    /**
+     * @tc.steps: step2. StrokeText : HasShadow() == false
+     */
+    Shadow shadow1 = Shadow(5.0f, Offset(0.0, 0.0), Color(0x32000000), ShadowStyle::OuterDefaultXS);
+    Shadow shadow2 = Shadow(5.0f, Offset(10.0, 10.0), Color(0x32000000), ShadowStyle::OuterDefaultXS);
+    offPattern->offscreenPaintMethod_->state_.shadow = shadow1;
+    EXPECT_FALSE(offPattern->offscreenPaintMethod_->HasShadow());
+    offPattern->offscreenPaintMethod_->StrokeText("test", 0.0, 0.0, 50, state);
+    /**
+     * @tc.steps: step3. StrokeText : HasShadow() == true
+     */
+    offPattern->offscreenPaintMethod_->state_.shadow = shadow2;
+    EXPECT_TRUE(offPattern->offscreenPaintMethod_->HasShadow());
+    offPattern->offscreenPaintMethod_->FillText("test", 0.0, 0.0, 50, state);
+}
+
 } // namespace OHOS::Ace::NG

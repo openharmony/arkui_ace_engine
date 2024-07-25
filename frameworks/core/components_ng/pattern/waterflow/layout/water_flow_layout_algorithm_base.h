@@ -15,7 +15,10 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_BASE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_BASE_H
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
+#include "core/components_ng/property/layout_constraint.h"
 
 namespace OHOS::Ace::NG {
 class WaterFlowLayoutBase : public LayoutAlgorithm {
@@ -23,6 +26,20 @@ class WaterFlowLayoutBase : public LayoutAlgorithm {
 
 public:
     virtual void SetCanOverScroll(bool canOverScroll) = 0;
+    struct PredictLayoutParam {
+        std::list<int32_t> items;
+        LayoutConstraintF layoutConstraint;
+    };
+
+protected:
+    void PreBuildItems(LayoutWrapper* layoutWrapper, const RefPtr<WaterFlowLayoutInfoBase>& info,
+        const LayoutConstraintF& constraint, int32_t cachedCount);
+
+private:
+    std::list<int32_t> LayoutCachedItem(
+        LayoutWrapper* wrapper, const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t cachedCount);
+    static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
+    static void PostIdleTask(RefPtr<FrameNode> frameNode, const PredictLayoutParam& param);
 };
 
 enum class WaterFlowLayoutMode { TOP_DOWN = 0, SLIDING_WINDOW = 1 };

@@ -14,15 +14,20 @@
  */
 
 /// <reference path='./import.ts' />
-class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
+interface XComponentParam {
+  id: string;
+  type: string | XComponentType;
+  imageAIOptions: ImageAIOptions;
+  libraryname?: string;
+  controller?: XComponentController;
+}
+class ArkXComponentComponent extends ArkComponent implements XComponentAttribute {
   _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
   nativePtr: KNode;
 
-  constructor(nativePtr: KNode) {
-    this._modifiersWithKeys = new Map();
-    this.nativePtr = nativePtr;
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
-
   applyModifierPatch(): void {
     let expiringItemsWithKeys = [];
     this._modifiersWithKeys.forEach((value, key) => {
@@ -33,6 +38,13 @@ class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     expiringItemsWithKeys.forEach(key => {
       this._modifiersWithKeys.delete(key);
     });
+  }
+  initialize(value: Object[]): this {
+    if (value[0]) {
+      modifierWithKey(this._modifiersWithKeys, XComponentInitializeModifier.identity,
+        XComponentInitializeModifier, value[0] as XComponentParam);
+    }
+    return this;
   }
   outline(value: OutlineOptions): this {
     throw new Error('Method not implemented.');
@@ -503,6 +515,21 @@ globalThis.XComponent.attributeModifier = function (modifier) {
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
+class XComponentInitializeModifier extends ModifierWithKey<XComponentParam> {
+  constructor(value: XComponentParam) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentInitialize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetXComponentInitialize(node);
+    } else {
+      getUINativeModule().xComponent.setXComponentInitialize(node, this.value?.id,
+        this.value?.type, this.value?.imageAIOptions, this.value?.libraryname, this.value?.controller);
+    }
+  }
+}
 
 class XComponentOpacityModifier extends ModifierWithKey<number | Resource> {
   constructor(value: number | Resource) {

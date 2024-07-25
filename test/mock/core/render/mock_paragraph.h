@@ -52,19 +52,23 @@ public:
     MOCK_METHOD1(GetCharacterWidth, float(int32_t index));
     MOCK_METHOD1(SetParagraphSymbolAnimation, void(const RefPtr<FrameNode>& frameNode));
     MOCK_METHOD1(SetParagraphId, void(uint32_t id));
+    MOCK_METHOD1(GetLineMetrics, TextLineMetrics(size_t lineNumber));
+    MOCK_METHOD1(GetGlyphPositionAtCoordinate, PositionWithAffinity(const Offset& offset));
     MOCK_METHOD2(GetGlyphIndexByCoordinate, int32_t(const Offset& offset, bool isSelectionPos));
     MOCK_METHOD3(ComputeOffsetForCaretDownstream, bool(int32_t extent, CaretMetricsF& result,
         bool needLineHighest));
     MOCK_METHOD3(ComputeOffsetForCaretUpstream, bool(int32_t extent, CaretMetricsF& result,
         bool needLineHighest));
     MOCK_METHOD3(GetRectsForRange, void(int32_t start, int32_t end, std::vector<RectF>& selectedRects));
+    MOCK_METHOD3(GetTightRectsForRange, void(int32_t start, int32_t end, std::vector<RectF>& selectedRects));
     MOCK_METHOD3(Paint, void(RSCanvas& canvas, float x, float y));
 #ifndef USE_ROSEN_DRAWING
     MOCK_METHOD3(Paint, void(SkCanvas* skCanvas, float x, float y));
 #endif
     MOCK_METHOD3(GetWordBoundary, bool(int32_t offset, int32_t& start, int32_t& end));
 
-    bool CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) override
+    bool CalcCaretMetricsByPosition(
+        int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity, bool needLineHighest) override
     {
         return false;
     }
@@ -79,11 +83,6 @@ public:
     {
         LineMetrics lineMetrics;
         return lineMetrics;
-    }
-
-    TextLineMetrics GetLineMetrics(size_t lineNumber) override
-    {
-        return TextLineMetrics();
     }
     
     bool GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics) override

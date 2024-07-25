@@ -122,6 +122,12 @@ public:
         return false;
     }
 
+    bool IsEmptyStack() const override
+    {
+        // not check for old pipeline yet
+        return true;
+    }
+
 private:
     std::unique_ptr<ScopedViewStackProcessor> scopeStack_;
 };

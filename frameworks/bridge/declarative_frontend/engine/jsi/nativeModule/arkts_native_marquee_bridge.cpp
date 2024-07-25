@@ -57,8 +57,8 @@ ArkUINativeModuleValue MarqueeBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtim
     if (!weightArg->IsNull()) {
         if (weightArg->IsNumber()) {
             weight = std::to_string(weightArg->Int32Value(vm));
-        } else if (weightArg->IsString()) {
-            weight = weightArg->ToString(vm)->ToString();
+        } else if (weightArg->IsString(vm)) {
+            weight = weightArg->ToString(vm)->ToString(vm);
         }
     }
     GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeFontWeight(nativeNode, weight.c_str());
@@ -82,10 +82,10 @@ ArkUINativeModuleValue MarqueeBridge::SetFontFamily(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (!secondArg->IsString()) {
+    if (!secondArg->IsString(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    std::string families = secondArg->ToString(vm)->ToString();
+    std::string families = secondArg->ToString(vm)->ToString(vm);
     GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeFontFamily(nativeNode, families.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
@@ -161,7 +161,7 @@ ArkUINativeModuleValue MarqueeBridge::SetMarqueeUpdateStrategy(ArkUIRuntimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto value = secondArg->ToString(vm)->ToString();
+    auto value = secondArg->ToString(vm)->ToString(vm);
     static const LinearMapNode<MarqueeUpdateStrategy> marqueeUpdateStrategyTable[] = {
         { "default", MarqueeUpdateStrategy::DEFAULT },
         { "preserve_position", MarqueeUpdateStrategy::PRESERVE_POSITION },
@@ -193,7 +193,7 @@ ArkUINativeModuleValue MarqueeBridge::SetMarqueeOnStart(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
         GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeOnStart(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -227,7 +227,7 @@ ArkUINativeModuleValue MarqueeBridge::SetMarqueeOnBounce(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
         GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeOnBounce(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -261,7 +261,7 @@ ArkUINativeModuleValue MarqueeBridge::SetMarqueeOnFinish(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
         GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeOnFinish(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }

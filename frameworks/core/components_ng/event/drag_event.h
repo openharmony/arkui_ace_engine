@@ -151,6 +151,9 @@ public:
     void SetPixelMap(const RefPtr<DragEventActuator>& actuator);
     void SetEventColumn(const RefPtr<DragEventActuator>& actuator);
     void HideFilter();
+    void HideMenu(int32_t targetId);
+    void UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float menuScale, bool isRedragStart);
+    void UpdatePreviewPosition();
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
     void BindClickEvent(const RefPtr<FrameNode>& columnNode);
@@ -160,6 +163,8 @@ public:
     void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);
     bool GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator);
     bool IsAllowedDrag();
+    void SetDragDampStartPointInfo(const Point& point, int32_t pointerId);
+    void HandleDragDampingMove(const Point& point, int32_t pointerId, bool isRedragStart = false);
     void SetTextPixelMap(const RefPtr<GestureEventHub>& gestureHub);
     void RestartDragTask(const GestureEvent& info);
     static OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap);
@@ -217,13 +222,18 @@ public:
         return defaultOnDragStartExecuted_;
     }
 
+    const OptionsAfterApplied& GetOptionsAfterApplied()
+    {
+        return optionsAfterApplied_;
+    }
+
     void CopyDragEvent(const RefPtr<DragEventActuator>& dragEventActuator);
 
     void SetGatherNodeAboveFilter(const RefPtr<DragEventActuator>& actuator);
     bool IsBelongToMultiItemNode(const RefPtr<FrameNode>& frameNode);
     bool IsSelectedItemNode(const RefPtr<UINode>& uiNode);
-    void FindItemFatherNode(const RefPtr<FrameNode>& frameNode);
-    bool IsNeedGather();
+    void FindItemParentNode(const RefPtr<FrameNode>& frameNode);
+    bool IsNeedGather() const;
     static RefPtr<FrameNode> GetOrCreateGatherNode(const RefPtr<NG::OverlayManager>& overlayManager,
         const RefPtr<DragEventActuator>& actuator, std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
     static RefPtr<FrameNode> CreateGatherNode(const RefPtr<DragEventActuator>& actuator);
@@ -232,17 +242,18 @@ public:
     static void MarkDirtyGatherNode(const RefPtr<FrameNode>& gatherNode);
     static void ResetNode(const RefPtr<FrameNode>& frameNode);
     static void MountGatherNode(const RefPtr<OverlayManager>& overlayManager, const RefPtr<FrameNode>& frameNode,
-        const RefPtr<FrameNode>& gatherNode, std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
+        const RefPtr<FrameNode>& gatherNode, const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
     static void GetFrameNodePreviewPixelMap(const RefPtr<FrameNode>& frameNode);
     void SetGatherNode(const RefPtr<FrameNode>& gatherNode);
-    RefPtr<FrameNode> GetGatherNode();
-    std::vector<GatherNodeChildInfo> GetGatherNodeChildrenInfo();
+    RefPtr<FrameNode> GetGatherNode() const;
+    const std::vector<GatherNodeChildInfo>& GetGatherNodeChildrenInfo() const;
     void ClearGatherNodeChildrenInfo();
     void PushBackGatherNodeChild(GatherNodeChildInfo& gatherNodeChild);
+    void AddTouchListener(const TouchRestrict& touchRestrict) override;
     void HandleTouchUpEvent();
     void HandleTouchMoveEvent();
     void HandleTouchCancelEvent();
-    RefPtr<FrameNode> GetItemFatherNode();
+    const RefPtr<FrameNode> GetItemParentNode() const;
     RefPtr<FrameNode> GetFrameNode();
     static void PrepareShadowParametersForDragData(const RefPtr<FrameNode>& frameNode,
        std::unique_ptr<JsonValue>& arkExtraInfoJson, float scale);
@@ -260,6 +271,13 @@ public:
         const RefPtr<FrameNode>& frameNode, int32_t childSize, float previewScale, bool isUsePixelMapOffset = false);
 
     void GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>& gestureHub);
+    void SetResponseRegionFull();
+    void ResetResponseRegion();
+    static void ResetDragStatus();
+    void PrepareFinalPixelMapForDragThroughTouch(RefPtr<PixelMap> pixelMap, bool immediately);
+    void DoPixelMapScaleForDragThroughTouch(RefPtr<PixelMap> pixelMap, float targetScale);
+    RefPtr<PixelMap> GetPreScaledPixelMapForDragThroughTouch(float& preScale);
+    void ResetPreScaledPixelMapForDragThroughTouch();
 
 private:
     void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
@@ -278,7 +296,7 @@ private:
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
-    WeakPtr<FrameNode> itemFatherNode_;
+    WeakPtr<FrameNode> itemParentNode_;
     RefPtr<DragEvent> userCallback_;
     RefPtr<DragEvent> customCallback_;
     RefPtr<PanRecognizer> panRecognizer_;
@@ -286,8 +304,10 @@ private:
     RefPtr<LongPressRecognizer> previewLongPressRecognizer_;
     RefPtr<SequencedRecognizer> SequencedRecognizer_;
     RefPtr<FrameNode> gatherNode_;
+    RefPtr<TouchEventImpl> touchListener_;
 
     RefPtr<PixelMap> textPixelMap_;
+    RefPtr<PixelMap> preScaledPixelMap_;
     std::function<void(GestureEvent&)> actionStart_;
     std::function<void(GestureEvent&)> longPressUpdate_;
     std::function<void()> actionCancel_;
@@ -296,15 +316,20 @@ private:
     bool isReceivedLongPress_ = false;
     bool isNotInPreviewState_ = false;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
+    std::vector<DimensionRect> responseRegion_;
     bool isSelectedItemNode_ = false;
     bool isOnBeforeLiftingAnimation = false;
 
     bool isDragUserReject_ = false;
     bool defaultOnDragStartExecuted_ = false;
+    bool isResponseRegionFull = false;
+    OptionsAfterApplied optionsAfterApplied_;
 
     PanDirection direction_;
     int32_t fingers_ = 1;
     float distance_ = 0.0f;
+    float preScaleValue_ = 1.0f;
+    bool isRedragStart_ = false;
 };
 
 } // namespace OHOS::Ace::NG

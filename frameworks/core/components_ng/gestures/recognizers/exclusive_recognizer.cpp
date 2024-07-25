@@ -51,14 +51,7 @@ void ExclusiveRecognizer::OnAccepted()
             continue;
         }
         recognizer->OnRejected();
-        auto bridgeObjList = recognizer->GetBridgeObj();
-        for (const auto& item : bridgeObjList) {
-            auto bridgeObj = item.Upgrade();
-            if (bridgeObj) {
-                bridgeObj->OnRejected();
-                bridgeObj->OnRejectBridgeObj();
-            }
-        }
+        recognizer->OnRejectBridgeObj();
     }
 }
 
@@ -76,7 +69,11 @@ void ExclusiveRecognizer::OnRejected()
             auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
             group->ForceReject();
         } else {
+            if (recognizer->IsBridgeMode()) {
+                continue;
+            }
             recognizer->OnRejected();
+            recognizer->OnRejectBridgeObj();
         }
     }
 }
@@ -108,6 +105,10 @@ void ExclusiveRecognizer::OnBlocked()
 
 bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
 {
+    if (point.type == TouchType::DOWN || point.type == TouchType::UP) {
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, exclusive %{public}d type: %{public}d",
+            point.touchEventId, point.id, static_cast<int32_t>(point.type));
+    }
     switch (point.type) {
         case TouchType::MOVE:
         case TouchType::DOWN:
@@ -136,6 +137,7 @@ bool ExclusiveRecognizer::HandleEvent(const AxisEvent& event)
         case AxisAction::BEGIN:
         case AxisAction::UPDATE:
         case AxisAction::END:
+        case AxisAction::CANCEL:
         case AxisAction::NONE: {
             if (activeRecognizer_) {
                 activeRecognizer_->HandleEvent(event);

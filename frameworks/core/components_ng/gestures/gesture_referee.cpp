@@ -81,14 +81,7 @@ void GestureScope::OnAcceptGesture(const RefPtr<NGGestureRecognizer>& recognizer
             continue;
         }
         gesture->OnRejected();
-        auto bridgeObjList = gesture->GetBridgeObj();
-        for (const auto& item : bridgeObjList) {
-            auto bridgeObj = item.Upgrade();
-            if (bridgeObj) {
-                bridgeObj->OnRejected();
-                bridgeObj->OnRejectBridgeObj();
-            }
-        }
+        gesture->OnRejectBridgeObj();
     }
     if (queryStateFunc_) {
         queryStateFunc_(touchId_);
@@ -132,7 +125,8 @@ bool DectectAllDone(const RefPtr<NGGestureRecognizer> recognizer)
     RefereeState state = recognizer->GetRefereeState();
     if (!AceType::InstanceOf<RecognizerGroup>(recognizer)) {
         if (state != RefereeState::SUCCEED && state != RefereeState::SUCCEED_BLOCKED &&
-            state != RefereeState::FAIL && state != RefereeState::READY) {
+            state != RefereeState::FAIL && state != RefereeState::READY &&
+            state != RefereeState::DETECTING) {
             return false;
         }
     } else {
@@ -213,7 +207,7 @@ bool GestureScope::IsReady()
 {
     for (const auto& weak : recognizers_) {
         auto recognizer = weak.Upgrade();
-        if (recognizer && recognizer->GetRefereeState() != RefereeState::READY) {
+        if (recognizer && !recognizer->IsReady()) {
             return false;
         }
     }
@@ -232,6 +226,17 @@ bool GestureScope::HasFailRecognizer()
 }
 
 void GestureScope::ForceCleanGestureScope()
+{
+    for (const auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (recognizer) {
+            recognizer->ForceCleanRecognizer();
+        }
+    }
+    recognizers_.clear();
+}
+
+void GestureScope::ForceCleanGestureScopeState()
 {
     for (const auto& weak : recognizers_) {
         auto recognizer = weak.Upgrade();
@@ -304,6 +309,15 @@ bool GestureReferee::QueryAllDone()
     return true;
 }
 
+bool GestureReferee::CheckEventTypeChange(SourceType type, bool isAxis) const
+{
+    bool ret = false;
+    if (!isAxis && lastIsAxis_ && type == SourceType::TOUCH) {
+        ret = true;
+    }
+    return ret;
+}
+
 bool GestureReferee::CheckSourceTypeChange(SourceType type, bool isAxis_)
 {
     bool ret = false;
@@ -365,6 +379,13 @@ void GestureReferee::ForceCleanGestureReferee()
         iter->second->ForceCleanGestureScope();
     }
     gestureScopes_.clear();
+}
+
+void GestureReferee::ForceCleanGestureRefereeState()
+{
+    for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
+        iter->second->ForceCleanGestureScopeState();
+    }
 }
 
 void GestureReferee::CleanGestureRefereeState(int32_t touchId)

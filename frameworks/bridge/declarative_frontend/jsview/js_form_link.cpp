@@ -50,7 +50,7 @@ void JSFormLink::Create(const JSCallbackInfo& info)
     if (!Container::IsInFormContainer()) {
         APP_LOGW("[Engine Log] FormLink only support in form widget.");
     }
-    if (info.Length() == 0 || !info[0]->IsObject() || !info[0]->IsString()) {
+    if (info.Length() == 0 || !info[0]->IsObject()) {
         return;
     }
     auto action = info[0]->ToString();

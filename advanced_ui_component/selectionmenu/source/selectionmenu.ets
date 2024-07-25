@@ -398,17 +398,10 @@ struct SelectionMenuComponent {
                   }
                   this.controller.closeSelectionMenu()
                 })
-              if (this.showExpandedMenuOptions) {
-                MenuItem({ startIcon: this.theme.shareIcon, content: "分享", labelInfo: "" })
-                  .enabled(false)
-                MenuItem({ startIcon: this.theme.translateIcon, content: "翻译", labelInfo: "" })
-                  .enabled(false)
-                MenuItem({ startIcon: this.theme.searchIcon, content: "搜索", labelInfo: "" })
-                  .enabled(false)
-              }
             }
           }
-          if (this.controller && !this.showExpandedMenuOptions) {
+          if (this.controller && !this.showExpandedMenuOptions &&
+            this.expandedMenuOptions && this.expandedMenuOptions.length > 0) {
             MenuItem({ content: "更多", endIcon: this.theme.arrowDownIcon })
               .onClick(() => {
                 this.showExpandedMenuOptions = true

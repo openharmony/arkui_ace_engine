@@ -49,8 +49,4 @@ CJ_EXPORT void FfiOHOSAceFrameworkInteractableViewOnDragLeave(
 CJ_EXPORT void FfiOHOSAceFrameworkInteractableViewOnDrop(void (*callback)(CJDragInfo info), uint32_t componentName);
 }
 
-namespace OHOS::Ace {
-void SetEventTarget(const EventTarget& eventTarget, const CJEventTarget& cjEventTarget);
-} // namespace OHOS::Ace
-
 #endif // OHOS_ACE_FRAMEWORK_CJ_TEXT_FFI_H

@@ -54,6 +54,7 @@ bool StylusDetectorLoader::Init()
     destroyStylusDetectorInstance_ =
         (void (*)(StylusDetectorInterface*))dlsym(libraryHandle_, "DestroyStylusDetectorInstance");
     if (createStylusDetectorInstance_ == nullptr || destroyStylusDetectorInstance_ == nullptr) {
+        LOGI("Stylus detector loader instance loading failed.");
         Close();
         return false;
     }

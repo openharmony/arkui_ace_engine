@@ -52,6 +52,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkListSetLanesByLengthConstrain(
     double min, int32_t minUnit, double max, int32_t maxUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkListSetAlignListItem(int32_t align);
 CJ_EXPORT void FfiOHOSAceFrameworkListSetSticky(int32_t style);
+CJ_EXPORT void FfiOHOSAceFrameworkListSetNestedScroll(int32_t scrollForward, int32_t scrollBackward);
 CJ_EXPORT void FfiOHOSAceFrameworkListSetOnScrollFrameBegin(double (*callback)(double offset, int32_t state));
 CJ_EXPORT void FfiOHOSAceFrameworkListSetItemDeleteCallback(bool (*callback)(int32_t value));
 CJ_EXPORT void FfiOHOSAceFrameworkListSetScrollIndexCallback(void (*callback)(int32_t firstIndex, int32_t lastIndex));

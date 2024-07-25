@@ -21,10 +21,8 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {
 constexpr int32_t VIDEO_NODE_INDEX = 0;
 constexpr int32_t IMAGE_NODE_INDEX = 1;
-} // namespace
 
 class ACE_EXPORT MovingPhotoNode : public FrameNode {
     DECLARE_ACE_TYPE(MovingPhotoNode, FrameNode);

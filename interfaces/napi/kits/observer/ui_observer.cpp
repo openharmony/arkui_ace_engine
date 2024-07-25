@@ -55,6 +55,10 @@ std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedDidClickListeners_;
 std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::didClickInfos_;
 
+std::list<std::shared_ptr<UIObserverListener>> UIObserver::tabContentStateListeners_;
+std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::specifiedTabContentStateListeners_;
+
 // UIObserver.on(type: "navDestinationUpdate", callback)
 // register a global listener without options
 void UIObserver::RegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener)
@@ -1059,6 +1063,94 @@ void UIObserver::HandleDidClick(NG::AbilityContextInfo& info, const GestureEvent
         listener->OnDidClick(gestureEventInfo, clickInfo, frameNode);
     }
     napi_close_handle_scope(env, scope);
+}
+
+// UIObserver.on(type: "tabContentState", callback)
+// register a global listener without options
+void UIObserver::RegisterTabContentStateCallback(const std::shared_ptr<UIObserverListener>& listener)
+{
+    if (std::find(tabContentStateListeners_.begin(), tabContentStateListeners_.end(), listener) !=
+        tabContentStateListeners_.end()) {
+        return;
+    }
+    tabContentStateListeners_.emplace_back(listener);
+}
+
+// UIObserver.on(type: "tabContentState", options, callback)
+// register a listener on a specified tabContentState
+void UIObserver::RegisterTabContentStateCallback(
+    const std::string& id, const std::shared_ptr<UIObserverListener>& listener)
+{
+    auto iter = specifiedTabContentStateListeners_.find(id);
+    if (iter == specifiedTabContentStateListeners_.end()) {
+        specifiedTabContentStateListeners_.emplace(id, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
+        return;
+    }
+    auto& holder = iter->second;
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        return;
+    }
+    holder.emplace_back(listener);
+}
+
+// UIObserver.off(type: "tabContentState", callback)
+void UIObserver::UnRegisterTabContentStateCallback(napi_value cb)
+{
+    if (cb == nullptr) {
+        tabContentStateListeners_.clear();
+        return;
+    }
+
+    tabContentStateListeners_.erase(
+        std::remove_if(
+            tabContentStateListeners_.begin(),
+            tabContentStateListeners_.end(),
+            [cb](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(cb);
+            }),
+        tabContentStateListeners_.end()
+    );
+}
+
+// UIObserver.off(type: "tabContentState", options, callback)
+void UIObserver::UnRegisterTabContentStateCallback(const std::string& id, napi_value cb)
+{
+    auto iter = specifiedTabContentStateListeners_.find(id);
+    if (iter == specifiedTabContentStateListeners_.end()) {
+        return;
+    }
+    auto& holder = iter->second;
+    if (cb == nullptr) {
+        holder.clear();
+        return;
+    }
+    holder.erase(
+        std::remove_if(
+            holder.begin(),
+            holder.end(),
+            [cb](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(cb);
+            }),
+        holder.end()
+    );
+}
+
+void UIObserver::HandleTabContentStateChange(const NG::TabContentInfo& tabContentInfo)
+{
+    for (const auto& listener : tabContentStateListeners_) {
+        listener->OnTabContentStateChange(tabContentInfo);
+    }
+
+    auto iter = specifiedTabContentStateListeners_.find(tabContentInfo.id);
+    if (iter == specifiedTabContentStateListeners_.end()) {
+        return;
+    }
+
+    auto& holder = iter->second;
+
+    for (const auto& listener : holder) {
+        listener->OnTabContentStateChange(tabContentInfo);
+    }
 }
 
 void UIObserver::GetAbilityInfos(napi_env env, napi_value abilityContext, NG::AbilityContextInfo& info)

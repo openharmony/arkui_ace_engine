@@ -48,7 +48,7 @@ public:
 
     virtual void RequestFrame();
 
-    virtual void FlushFrameRate(int32_t rate, bool isAnimatorStopped) {}
+    virtual void FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateTyte) {}
 
     virtual void SetTaskExecutor(const RefPtr<TaskExecutor>& taskExecutor) {}
 
@@ -84,12 +84,12 @@ public:
 
     virtual void FlushModifier() {}
 
-    virtual bool HasUIAnimation()
+    virtual bool HasUIRunningAnimation()
     {
         return false;
     }
 
-    void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount);
+    virtual void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount);
 
     virtual void SetVsyncCallback(AceVsyncCallback&& callback);
 
@@ -139,6 +139,16 @@ public:
         return lastRequestVsyncTime_;
     }
 
+    int64_t GetLastVsyncEndTimestamp() const
+    {
+        return lastVsyncEndTimestamp_;
+    }
+
+    void SetLastVsyncEndTimestamp(int64_t lastVsyncEndTimestamp)
+    {
+        lastVsyncEndTimestamp_ = lastVsyncEndTimestamp;
+    }
+
     virtual void SetKeepScreenOn(bool keepScreenOn) {};
 
     virtual int64_t GetVSyncPeriod() const
@@ -186,6 +196,8 @@ public:
 
     virtual void Unlock() {}
 
+    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch);
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
@@ -200,10 +212,8 @@ protected:
     std::list<struct VsyncCallback> callbacks_;
 
     uint64_t lastRequestVsyncTime_ = 0;
+    int64_t lastVsyncEndTimestamp_ = 0;
     uint32_t windowId_ = 0;
-#ifdef VSYNC_TIMEOUT_CHECK
-    CancelableCallback<void()> onVsyncEventCheckTimer_;
-#endif
 
 private:
     std::function<Rect()> windowRectImpl_;

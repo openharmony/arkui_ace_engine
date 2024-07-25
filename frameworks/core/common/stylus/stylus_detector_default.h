@@ -28,9 +28,10 @@ public:
 
     bool IsEnable() override;
 
-    bool RegisterStylusInteractionListener(const std::shared_ptr<IStylusDetectorCallback>& callback) override;
+    bool RegisterStylusInteractionListener(
+        const std::string& bundleName, const std::shared_ptr<IStylusDetectorCallback>& callback) override;
 
-    void UnRegisterStylusInteractionListener() override;
+    void UnRegisterStylusInteractionListener(const std::string& bundleName) override;
 
     bool Notify(const NotifyInfo& notifyInfo) override;
 

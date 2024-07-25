@@ -98,7 +98,14 @@ void NativeRichEditorController::ParseRichEditorTextSpanResult(
     nativeTextResult.offsetInSpanStart = spanObject.offsetInSpan[0];
     nativeTextResult.offsetInSpanEnd = spanObject.offsetInSpan[1];
     nativeTextResult.spanPosition = spanPosition;
-    nativeTextResult.value = spanObject.valueString.c_str();
+    auto len = spanObject.valueString.size() + 1;
+    char* cString = static_cast<char*>(malloc(sizeof(char) * len));
+    if (cString == nullptr) {
+        LOGE("ParseRichEditorTextSpanResult error, malloc cString failed");
+        return;
+    }
+    std::char_traits<char>::copy(cString, spanObject.valueString.c_str(), len);
+    nativeTextResult.value = cString;
 }
 
 void NativeRichEditorController::ParseRichEditorImageSpanResult(
@@ -397,9 +404,17 @@ void NativeRichEditorController::UpdateSpanStyleImage(
     richEditorController->UpdateSpanStyle(start, end, textStyle, imageStyle);
 }
 
-static void NativeRichEditorSpanResultListFree(NativeRichEditorSpanResult* src)
+static void NativeRichEditorSpanResultListFree(int64_t size, NativeRichEditorSpanResult* src)
 {
-    delete src;
+    if (!src) {
+        return;
+    }
+    for (int64_t i = 0; i < size; i++) {
+        if (src[i].textResult.value) {
+            delete src[i].textResult.value;
+        }
+    }
+    delete[] src;
 }
 
 NativeRichEditorSpanResultList NativeRichEditorController::GetSpans(int32_t start, int32_t end)
@@ -413,7 +428,9 @@ NativeRichEditorSpanResultList NativeRichEditorController::GetSpans(int32_t star
 
         SelectionInfo selectionInfo = richEditorController->GetSpansInfo(start, end);
         const std::list<ResultObject>& spanObjectList = selectionInfo.GetSelection().resultObjects;
-
+        if (spanObjectList.size() == 0) {
+            return result;
+        }
         auto spans = new NativeRichEditorSpanResult[spanObjectList.size()];
         size_t idx = 0;
         for (const ResultObject& spanObject : spanObjectList) {
@@ -454,7 +471,9 @@ void NativeRichEditorController::UpdateParagraphStyle(
             {
                 style.leadingMargin = std::make_optional<NG::LeadingMargin>();
                 Dimension resWidth(params.margin, static_cast<DimensionUnit>(params.marginUnit));
-                style.leadingMargin->size = NG::LeadingMarginSize(resWidth, Dimension(0.0, DimensionUnit::PX));
+                auto widthCalc = CalcDimension(resWidth.ConvertToPx());
+                auto heightCalc = CalcDimension(0.0);
+                style.leadingMargin->size = NG::LeadingMarginSize(widthCalc, heightCalc);
                 break;
             }
         case MarginType::MARGIN_PLACEHOLDER:
@@ -468,7 +487,9 @@ void NativeRichEditorController::UpdateParagraphStyle(
 #endif
                 Dimension width(placeholder.width, static_cast<DimensionUnit>(placeholder.widthUnit));
                 Dimension height(placeholder.height, static_cast<DimensionUnit>(placeholder.heightUnit));
-                style.leadingMargin->size = NG::LeadingMarginSize(width, height);
+                auto widthCalc = CalcDimension(width.ConvertToPx());
+                auto heightCalc = CalcDimension(height.ConvertToPx());
+                style.leadingMargin->size = NG::LeadingMarginSize(widthCalc, heightCalc);
                 break;
             }
         default:

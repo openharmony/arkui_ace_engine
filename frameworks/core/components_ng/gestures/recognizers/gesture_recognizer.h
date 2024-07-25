@@ -204,10 +204,22 @@ public:
         onActionCancel_ = std::make_unique<GestureEventNoParameter>(onActionCancel);
     }
 
+    void SetOnReject(const GestureEventNoParameter& onReject)
+    {
+        onReject_ = std::make_unique<GestureEventNoParameter>(onReject);
+    }
+
     inline void SendCancelMsg()
     {
         if (onActionCancel_ && *onActionCancel_) {
             (*onActionCancel_)();
+        }
+    }
+
+    inline void SendRejectMsg()
+    {
+        if (onReject_ && *onReject_) {
+            (*onReject_)();
         }
     }
 
@@ -333,18 +345,11 @@ public:
     virtual void ForceCleanRecognizer() {};
     virtual void CleanRecognizerState() {};
 
-    virtual bool AboutToAddCurrentFingers(int32_t touchId)
-    {
-        currentFingers_++;
-        return true;
-    }
+    bool AboutToAddCurrentFingers(int32_t touchId);
 
-    virtual bool AboutToMinusCurrentFingers(int32_t touchId)
-    {
-        return true;
-    }
+    bool AboutToMinusCurrentFingers(int32_t touchId);
 
-    bool IsInAttachedNode(const TouchEvent& event);
+    bool IsInAttachedNode(const TouchEvent& event, bool isRealTime = true);
 
     
     void SetUserData(void* userData)
@@ -396,6 +401,11 @@ public:
 
     void SetResponseLinkRecognizers(const std::list<RefPtr<TouchEventTarget>>& responseLinkResult);
 
+    virtual bool IsReady()
+    {
+        return refereeState_ == RefereeState::READY;
+    }
+
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
@@ -439,6 +449,8 @@ protected:
     std::unique_ptr<GestureEventFunc> onActionUpdate_;
     std::unique_ptr<GestureEventFunc> onActionEnd_;
     std::unique_ptr<GestureEventNoParameter> onActionCancel_;
+    // triggered when the recongnizer is rejected
+    std::unique_ptr<GestureEventNoParameter> onReject_;
 
     int64_t deviceId_ = 0;
     SourceType deviceType_ = SourceType::NONE;
@@ -446,6 +458,7 @@ protected:
     int32_t transId_ = 0;
 
     int32_t currentFingers_ = 0;
+    std::set<int32_t> fingersId_;
     RefPtr<GestureInfo> gestureInfo_;
     GestureJudgeFunc sysJudge_ = nullptr;
     bool isTouchEventFinished_ = false;

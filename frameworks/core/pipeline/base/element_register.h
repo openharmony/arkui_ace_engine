@@ -105,7 +105,7 @@ public:
     }
 
     RefPtr<NG::GeometryTransition> GetOrCreateGeometryTransition(
-        const std::string& id, bool followWithoutTransition = false);
+        const std::string& id, bool followWithoutTransition = false, bool doRegisterSharedTransition = true);
     void DumpGeometryTransition();
 
     void ReSyncGeometryTransition(const WeakPtr<NG::FrameNode>& trigger = nullptr,
@@ -124,6 +124,16 @@ public:
         }
     }
 
+    uint32_t GetNodeNum() const
+    {
+        return itemMap_.size();
+    }
+
+    ElementIdType GetLastestElementId() const
+    {
+        return lastestElementId_;
+    }
+
 private:
     // private constructor
     ElementRegister() = default;
@@ -137,6 +147,8 @@ private:
     // ElementID assigned during initial render
     // first to Component, then synced to Element
     ElementIdType nextUniqueElementId_ = 0;
+
+    ElementIdType lastestElementId_ = 0;
 
     // Map for created elements
     std::unordered_map<ElementIdType, WeakPtr<AceType>> itemMap_;

@@ -64,11 +64,14 @@ public:
     void SetInsertOffset(int32_t insertOffset);
     int32_t GetInsertOffset() const;
     void SetInsertValue(const std::string& insertValue);
+    void SetPreviewText(const std::string& previewText);
     const std::string& GetInsertValue() const;
+    const std::string& GetPreviewText() const;
 
 private:
-    int32_t insertOffset_;
+    int32_t insertOffset_ = 0;
     std::string insertValue_;
+    std::string previewText_;
 };
 
 enum class SpanResultType { TEXT, IMAGE, SYMBOL };
@@ -91,6 +94,8 @@ public:
     int32_t GetEraseLength() const;
     void SetValue(const std::string& value);
     const std::string& GetValue() const;
+    void SetPreviewText(const std::string& previewText);
+    const std::string& GetPreviewText() const;
     void SetFontColor(const std::string& fontColor);
     const std::string& GetFontColor() const;
     void SetFontFeature(const FONT_FEATURES_LIST& fontFeature);
@@ -117,6 +122,8 @@ public:
     TextDecoration GetTextDecoration() const;
     void SetColor(const std::string& color);
     const std::string& GetColor() const;
+    void SetTextDecorationStyle(TextDecorationStyle textDecorationStyle);
+    TextDecorationStyle GetTextDecorationStyle() const;
     void SetValuePixelMap(const RefPtr<PixelMap>& valuePixelMap);
     const RefPtr<PixelMap>& GetValuePixelMap() const;
     void SetValueResourceStr(const std::string valueResourceStr);
@@ -167,6 +174,7 @@ private:
     int32_t offsetInSpan_ = 0;
     int32_t eraseLength_ = 0;
     std::string value_;
+    std::string previewText_;
     std::string fontColor_;
     FONT_FEATURES_LIST fontFeature_;
     double fontSize_ = 0.0;
@@ -175,6 +183,7 @@ private:
     std::string fontFamily_;
     TextDecoration textDecoration_;
     std::string color_;
+    TextDecorationStyle textDecorationStyle_;
     RefPtr<PixelMap> valuePixelMap_;
     std::string valueResourceStr_;
     int32_t width_ = 0;
@@ -206,12 +215,12 @@ public:
 
 private:
     int32_t offset_ = 0;
-    RichEditorDeleteDirection direction_;
+    RichEditorDeleteDirection direction_ = RichEditorDeleteDirection::BACKWARD;
     int32_t length_ = 0;
     std::list<RichEditorAbstractSpanResult> richEditorDeleteSpans_;
 };
 
-class RichEditorChangeValue : public BaseEventInfo {
+class ACE_FORCE_EXPORT RichEditorChangeValue : public BaseEventInfo {
     DECLARE_ACE_TYPE(RichEditorChangeValue, BaseEventInfo)
 public:
     RichEditorChangeValue() : BaseEventInfo("RichEditorChangeValue") {}

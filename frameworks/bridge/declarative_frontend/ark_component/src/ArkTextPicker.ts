@@ -129,7 +129,7 @@ class TextpickerDividerModifier extends ModifierWithKey<DividerOptions | null> {
   }
 }
 
-class TextpickerGradientHeightModifier extends ModifierWithKey<Dimension>{
+class TextpickerGradientHeightModifier extends ModifierWithKey<Dimension> {
   constructor(value: Dimension) {
     super(value);
   }

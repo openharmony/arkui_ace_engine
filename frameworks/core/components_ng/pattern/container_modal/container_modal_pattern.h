@@ -181,7 +181,7 @@ public:
     }
 
     Dimension GetCustomTitleHeight();
-
+    Dimension GetStackNodeRadius();
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
     {
@@ -205,6 +205,8 @@ protected:
     }
 
     bool CanShowFloatingTitle();
+    bool CanShowCustomTitle();
+    void TrimFloatingWindowLayout();
 
     WindowMode windowMode_;
     bool customTitleSettedShow_ = true;
@@ -212,7 +214,7 @@ protected:
     std::function<void(RectF&, RectF&)> controlButtonsRectChangeCallback_;
     RectF buttonsRect_;
     Dimension titleHeight_ = CONTAINER_TITLE_HEIGHT;
-
+    void InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow);
 private:
     void WindowFocus(bool isFocus);
     void SetTitleButtonHide(
@@ -221,7 +223,7 @@ private:
     void InitTitle();
     void InitContainerEvent();
     void InitLayoutProperty();
-    void InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow);
+
     void InitButtonsLayoutProperty();
 
     std::string appLabel_;

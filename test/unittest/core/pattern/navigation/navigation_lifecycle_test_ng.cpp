@@ -186,6 +186,9 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePushTest001, TestSize.Lev
      */
     auto frameNode = NavigationLifecycleTestNg::CreateDestination("A");
     EXPECT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<NavDestinationPattern>(frameNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    pattern->SetNavigationNode(navigationNode);
     auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
     EXPECT_NE(eventHub, nullptr);
     stack->SetLifecycleIndex(0);
@@ -211,6 +214,9 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePushTest001, TestSize.Lev
      * @tc.steps: step3. push destinationB and set lifecycle
      */
     auto frameNodeB = CreateDestination("B");
+    auto patternB = AceType::DynamicCast<NavDestinationPattern>(frameNodeB->GetPattern());
+    EXPECT_NE(patternB, nullptr);
+    patternB->SetNavigationNode(navigationNode);
     SetEvent(NavDestinationLifecycle::ON_APPEAR, 0, frameNodeB, stack);
     SetEvent(NavDestinationLifecycle::ON_SHOW, lifecycleIndex, frameNodeB, stack);
     SetEvent(NavDestinationLifecycle::ON_HIDE, 1, frameNode, stack);
@@ -312,8 +318,15 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePopTest003, TestSize.Leve
     /**
      * @tc.steps: step3. push destinationB and set lifecycle
      */
+
+    auto pattern = AceType::DynamicCast<NavDestinationPattern>(frameNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    pattern->SetNavigationNode(navigationNode);
     stack->Remove();
     auto frameNodeB = CreateDestination("B");
+    auto patternB = AceType::DynamicCast<NavDestinationPattern>(frameNodeB->GetPattern());
+    EXPECT_NE(patternB, nullptr);
+    patternB->SetNavigationNode(navigationNode);
     stack->Add("pageB", frameNodeB);
     stack->UpdateReplaceValue(1);
     stack->UpdateAnimatedValue(false);
@@ -356,6 +369,9 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePushTest004, TestSize.Lev
      */
     auto frameNode = NavigationLifecycleTestNg::CreateDestination("A");
     EXPECT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<NavDestinationPattern>(frameNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    pattern->SetNavigationNode(navigationNode);
     SetEvent(NavDestinationLifecycle::ON_WILL_APPEAR, 0, frameNode, stack);
     SetEvent(NavDestinationLifecycle::ON_APPEAR, 1, frameNode, stack);
     const int8_t willShowIndex = 2;
@@ -476,20 +492,20 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecycleReplaceTest006, TestSize.
      * @tc.steps: step3. create destination B and set lifecycle
      */
     auto destinationB = NavigationLifecycleTestNg::CreateDestination("B");
+    auto pattern = AceType::DynamicCast<NavDestinationPattern>(frameNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    pattern->SetNavigationNode(navigationNode);
+    auto patternB = AceType::DynamicCast<NavDestinationPattern>(destinationB->GetPattern());
+    EXPECT_NE(patternB, nullptr);
+    patternB->SetNavigationNode(navigationNode);
     SetEvent(NavDestinationLifecycle::ON_WILL_APPEAR, 0, destinationB, stack);
     SetEvent(NavDestinationLifecycle::ON_WILL_HIDE, 1, frameNode, stack);
-    const int8_t onAppearIndex = 2;
-    SetEvent(NavDestinationLifecycle::ON_APPEAR, onAppearIndex, destinationB, stack);
-    const int8_t willShowIndex = 3;
-    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, willShowIndex, destinationB, stack);
-    const int8_t hideIndex = 4;
-    SetEvent(NavDestinationLifecycle::ON_HIDE, hideIndex, frameNode, stack);
-    const int8_t willDisappearIndex = 5;
-    SetEvent(NavDestinationLifecycle::ON_WILL_DISAPPEAR, willDisappearIndex, frameNode, stack);
-    const int8_t showIndex = 6;
-    SetEvent(NavDestinationLifecycle::ON_SHOW, showIndex, destinationB, stack);
-    const int8_t disAppearIndex = 7;
-    SetEvent(NavDestinationLifecycle::ON_DISAPPEAR, disAppearIndex, frameNode, stack);
+    SetEvent(NavDestinationLifecycle::ON_APPEAR, 2, destinationB, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, 3, destinationB, stack);
+    SetEvent(NavDestinationLifecycle::ON_HIDE, 4, frameNode, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_DISAPPEAR, 5, frameNode, stack);
+    SetEvent(NavDestinationLifecycle::ON_SHOW, 6, destinationB, stack);
+    SetEvent(NavDestinationLifecycle::ON_DISAPPEAR, 7, frameNode, stack);
 
     /**
      * @tc.steps: step4. sync navigation stack
@@ -535,6 +551,9 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePushTest007, TestSize.Lev
      */
     auto frameNode = NavigationLifecycleTestNg::CreateDestination("A");
     EXPECT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<NavDestinationPattern>(frameNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    pattern->SetNavigationNode(navigationNode);
     SetEvent(NavDestinationLifecycle::ON_WILL_APPEAR, 0, frameNode, stack);
     SetEvent(NavDestinationLifecycle::ON_APPEAR, 1, frameNode, stack);
     const int8_t willShowIndex = 2;
@@ -654,20 +673,20 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecycleReplaceTest009, TestSize.
      * @tc.steps: step3. create destination B and set lifecycle
      */
     auto destinationB = NavigationLifecycleTestNg::CreateDestination("B");
+    auto pattern = AceType::DynamicCast<NavDestinationPattern>(frameNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    pattern->SetNavigationNode(navigationNode);
+    auto patternB = AceType::DynamicCast<NavDestinationPattern>(destinationB->GetPattern());
+    EXPECT_NE(patternB, nullptr);
+    patternB->SetNavigationNode(navigationNode);
     SetEvent(NavDestinationLifecycle::ON_WILL_APPEAR, 0, destinationB, stack);
     SetEvent(NavDestinationLifecycle::ON_WILL_HIDE, 1, frameNode, stack);
-    const int8_t onAppearIndex = 2;
-    SetEvent(NavDestinationLifecycle::ON_APPEAR, onAppearIndex, destinationB, stack);
-    const int8_t willShowIndex = 3;
-    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, willShowIndex, destinationB, stack);
-    const int8_t hideIndex = 4;
-    SetEvent(NavDestinationLifecycle::ON_HIDE, hideIndex, frameNode, stack);
-    const int8_t willDisappearIndex = 5;
-    SetEvent(NavDestinationLifecycle::ON_WILL_DISAPPEAR, willDisappearIndex, frameNode, stack);
-    const int8_t showIndex = 6;
-    SetEvent(NavDestinationLifecycle::ON_SHOW, showIndex, destinationB, stack);
-    const int8_t disAppearIndex = 7;
-    SetEvent(NavDestinationLifecycle::ON_DISAPPEAR, disAppearIndex, frameNode, stack);
+    SetEvent(NavDestinationLifecycle::ON_APPEAR, 2, destinationB, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, 3, destinationB, stack);
+    SetEvent(NavDestinationLifecycle::ON_HIDE, 4, frameNode, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_DISAPPEAR, 5, frameNode, stack);
+    SetEvent(NavDestinationLifecycle::ON_SHOW, 6, destinationB, stack);
+    SetEvent(NavDestinationLifecycle::ON_DISAPPEAR, 7, frameNode, stack);
 
     /**
      * @tc.steps: step4. sync navigation stack

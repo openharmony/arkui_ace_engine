@@ -150,6 +150,15 @@ void SetShadowOffset(ArkUINodeHandle node, ArkUI_Float32 offsetX, ArkUI_Float32 
     renderContext->RequestNextFrame();
 }
 
+void SetLabel(ArkUINodeHandle node, ArkUI_CharPtr label)
+{
+    auto* currentNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
+    CHECK_NULL_VOID(currentNode);
+    auto pattern = currentNode->GetPattern<NG::RenderNodePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetLabel(std::string(label));
+}
+
 void SetShadowAlpha(ArkUINodeHandle node, ArkUI_Float32 alpha)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
@@ -323,8 +332,8 @@ void SetBorderColor(ArkUINodeHandle node, uint32_t left, uint32_t top, uint32_t 
 
     BorderColorProperty borderColorProperty {
         .leftColor = Color(left),
-        .topColor = Color(top),
         .rightColor = Color(right),
+        .topColor = Color(top),
         .bottomColor = Color(bottom),
         .multiValued = true
     };
@@ -370,11 +379,11 @@ void SetCircleMask(ArkUINodeHandle node,
     CHECK_NULL_VOID(renderContext);
 
     Circle circle;
-    Dimension centerX(centerXValue, DimensionUnit::VP);
+    Dimension centerX(centerXValue, DimensionUnit::PX);
     circle.SetAxisX(centerX);
-    Dimension centerY(centerYValue, DimensionUnit::VP);
+    Dimension centerY(centerYValue, DimensionUnit::PX);
     circle.SetAxisY(centerY);
-    Dimension radius(radiusValue, DimensionUnit::VP);
+    Dimension radius(radiusValue, DimensionUnit::PX);
     circle.SetRadius(radius);
 
     ShapeMaskProperty property { fillColor, strokeColor, strokeWidth };
@@ -425,9 +434,8 @@ void SetOvalMask(ArkUINodeHandle node,
     renderContext->RequestNextFrame();
 }
 
-void SetCommandPathMask(
-    ArkUINodeHandle node, ArkUI_CharPtr commands,
-    ArkUI_Uint32 fillColor, ArkUI_Uint32 strokeColor, ArkUI_Float32 strokeWidth)
+void SetCommandPathMask(ArkUINodeHandle node, ArkUI_CharPtr commands, ArkUI_Uint32 fillColor, ArkUI_Uint32 strokeColor,
+    ArkUI_Float32 strokeWidth)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
@@ -439,14 +447,107 @@ void SetCommandPathMask(
     renderContext->RequestNextFrame();
 }
 
+void SetRectClip(
+    ArkUINodeHandle node, ArkUI_Float32 rectX, ArkUI_Float32 rectY, ArkUI_Float32 rectW, ArkUI_Float32 rectH)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+
+    RectF rect(rectX, rectY, rectW, rectH);
+    renderContext->ClipWithRect(rect);
+    renderContext->RequestNextFrame();
+}
+
+void SetCircleClip(
+    ArkUINodeHandle node, ArkUI_Float32 centerXValue, ArkUI_Float32 centerYValue, ArkUI_Float32 radiusValue)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+
+    Circle circle;
+    Dimension centerX(centerXValue, DimensionUnit::PX);
+    circle.SetAxisX(centerX);
+    Dimension centerY(centerYValue, DimensionUnit::PX);
+    circle.SetAxisY(centerY);
+    Dimension radius(radiusValue, DimensionUnit::PX);
+    circle.SetRadius(radius);
+
+    renderContext->ClipWithCircle(circle);
+    renderContext->RequestNextFrame();
+}
+
+void SetRoundRectClip(ArkUINodeHandle node, const ArkUI_Float32* roundRect, const ArkUI_Uint32 roundRectSize)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+
+    RoundRect roundRectInstance;
+    roundRectInstance.SetCornerRadius(
+        RoundRect::CornerPos::TOP_LEFT_POS, roundRect[TOP_LEFT_X_VALUE], roundRect[TOP_LEFT_Y_VALUE]);
+    roundRectInstance.SetCornerRadius(
+        RoundRect::CornerPos::TOP_RIGHT_POS, roundRect[TOP_RIGHT_X_VALUE], roundRect[TOP_RIGHT_Y_VALUE]);
+    roundRectInstance.SetCornerRadius(
+        RoundRect::CornerPos::BOTTOM_LEFT_POS, roundRect[BOTTOM_LEFT_X_VALUE], roundRect[BOTTOM_LEFT_Y_VALUE]);
+    roundRectInstance.SetCornerRadius(
+        RoundRect::CornerPos::BOTTOM_RIGHT_POS, roundRect[BOTTOM_RIGHT_X_VALUE], roundRect[BOTTOM_RIGHT_Y_VALUE]);
+
+    RectF rect(roundRect[LEFT_VALUE], roundRect[TOP_VALUE], roundRect[WIDTH_VALUE], roundRect[HEIGHT_VALUE]);
+    roundRectInstance.SetRect(rect);
+
+    renderContext->ClipWithRoundRect(roundRectInstance);
+    renderContext->RequestNextFrame();
+}
+
+void SetOvalClip(
+    ArkUINodeHandle node, ArkUI_Float32 rectX, ArkUI_Float32 rectY, ArkUI_Float32 rectW, ArkUI_Float32 rectH)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+
+    RectF rect(rectX, rectY, rectW, rectH);
+    renderContext->ClipWithOval(rect);
+    renderContext->RequestNextFrame();
+}
+
+void SetCommandPathClip(ArkUINodeHandle node, ArkUI_CharPtr commands)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+
+    renderContext->SetClipBoundsWithCommands(std::string(commands));
+    renderContext->RequestNextFrame();
+}
+
+void SetMarkNodeGroup(ArkUINodeHandle node, ArkUI_Bool isNodeGroup)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+
+    renderContext->SetMarkNodeGroup(isNodeGroup);
+    renderContext->RequestNextFrame();
+}
+
 namespace NodeModifier {
 const ArkUIRenderNodeModifier* GetRenderNodeModifier()
 {
     static const ArkUIRenderNodeModifier modifier = { AppendChild, InsertChildAfter, RemoveChild, ClearChildren,
-        SetClipToFrame, SetRotation, SetShadowColor, SetShadowOffset, SetShadowAlpha, SetShadowElevation,
+        SetClipToFrame, SetRotation, SetShadowColor, SetShadowOffset, SetLabel, SetShadowAlpha, SetShadowElevation,
         SetShadowRadius, Invalidate, SetScale, SetRenderNodeBackgroundColor, SetPivot, SetFrame, SetSize, SetOpacity,
         SetTranslate, SetBorderStyle, SetBorderWidth, SetBorderColor, SetBorderRadius, SetRectMask, SetCircleMask,
-        SetRoundRectMask, SetOvalMask, SetCommandPathMask, SetPosition };
+        SetRoundRectMask, SetOvalMask, SetCommandPathMask, SetRectClip, SetCircleClip, SetRoundRectClip, SetOvalClip,
+        SetCommandPathClip, SetPosition, SetMarkNodeGroup };
 
     return &modifier;
 }

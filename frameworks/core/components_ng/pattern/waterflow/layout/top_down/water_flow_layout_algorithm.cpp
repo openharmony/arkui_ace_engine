@@ -58,7 +58,7 @@ void WaterFlowLayoutAlgorithm::InitialItemsCrossSize(
 
     auto crossSize = frameSize.CrossSize(axis_);
     std::vector<double> crossLens;
-    std::pair<std::vector<double>, bool> cross;
+    std::pair<std::vector<double>, double> cross;
     if (axis_ == Axis::VERTICAL) {
         cross =
             ParseTemplateArgs(WaterFlowLayoutUtils::PreParseArgs(columnsTemplate), crossSize, crossGap_, childrenCount);
@@ -70,9 +70,7 @@ void WaterFlowLayoutAlgorithm::InitialItemsCrossSize(
     if (crossLens.empty()) {
         crossLens.push_back(crossSize);
     }
-    if (cross.second) {
-        crossGap_ = 0;
-    }
+    crossGap_ = cross.second;
 
     // cross count changed by auto-fill and cross size change
     if (!layoutInfo_->items_[0].empty() && crossLens.size() != layoutInfo_->items_[0].size()) {
@@ -253,6 +251,14 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
     layoutInfo_->firstIndex_ = firstIndex;
+    auto cachedCount = layoutProperty->GetCachedCountValue(1);
+    layoutWrapper->SetActiveChildRange(layoutInfo_->NodeIdx(layoutInfo_->FirstIdx()),
+        layoutInfo_->NodeIdx(layoutInfo_->endIndex_), cachedCount, cachedCount);
+    PreBuildItems(layoutWrapper, layoutInfo_,
+        WaterFlowLayoutUtils::CreateChildConstraint(
+            { itemsCrossPosition_.find(0)->second, mainSize_, axis_ }, layoutProperty, nullptr),
+        cachedCount);
+
     LayoutFooter(layoutWrapper, childFrameOffset, layoutProperty->IsReverse());
 }
 
@@ -339,6 +345,10 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
             layoutInfo_->align_ = ScrollAlign::START;
             layoutInfo_->jumpIndex_ = EMPTY_JUMP_INDEX;
             layoutInfo_->itemStart_ = false;
+            if (layoutInfo_->extraOffset_.has_value()) {
+                layoutInfo_->currentOffset_ += layoutInfo_->extraOffset_.value();
+                layoutInfo_->extraOffset_.reset();
+            }
         }
         position = GetItemPosition(++currentIndex);
         fill = true;

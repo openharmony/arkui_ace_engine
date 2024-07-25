@@ -23,10 +23,10 @@ std::vector<std::string> JsForEachFunction::ExecuteIdentityMapper()
 {
     std::vector<std::string> result;
 
-    JSRef<JSObject> jsKeys;
+    JSRef<JSVal> jsKeys;
     if (!jsIdentityMapperFunc_.IsEmpty()) {
         JSRef<JSVal> argv[] = { jsIdentityMapperFunc_.Lock() };
-        jsKeys = JSRef<JSObject>::Cast(JsFunction::ExecuteJS(1, argv));
+        jsKeys = JsFunction::ExecuteJS(1, argv);
         if (jsKeys.IsEmpty()) {
             return result;
         }
@@ -34,7 +34,9 @@ std::vector<std::string> JsForEachFunction::ExecuteIdentityMapper()
 
     JSRef<JSArray> jsKeysArr;
     if (!jsKeys.IsEmpty()) {
-        jsKeysArr = JSRef<JSArray>::Cast(jsKeys);
+        if (jsKeys->IsArray()) {
+            jsKeysArr = JSRef<JSArray>::Cast(jsKeys);
+        }
     } else {
         jsKeysArr = JSRef<JSArray>::Cast(jsThis_.Lock());
     }

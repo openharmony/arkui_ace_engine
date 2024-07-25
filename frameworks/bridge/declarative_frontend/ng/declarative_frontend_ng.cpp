@@ -19,6 +19,7 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/thread_checker.h"
 #include "frameworks/bridge/common/utils/utils.h"
+#include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
 
 namespace OHOS::Ace {
 
@@ -89,7 +90,7 @@ void DeclarativeFrontendNG::SetAssetManager(const RefPtr<AssetManager>& assetMan
 
 void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskExecutor)
 {
-    auto pageRouterManager = AceType::MakeRefPtr<NG::PageRouterManager>();
+    auto pageRouterManager = NG::PageRouterManagerFactory::CreateManager();
     auto loadPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url,
                                 const std::function<void(const std::string&, int32_t)>& errorCallback) {
         auto jsEngine = weakEngine.Upgrade();
@@ -403,10 +404,10 @@ UIContentErrorCode DeclarativeFrontendNG::RunPage(
     return UIContentErrorCode::NULL_POINTER;
 }
 
-UIContentErrorCode DeclarativeFrontendNG::RunPageByNamedRouter(const std::string& name)
+UIContentErrorCode DeclarativeFrontendNG::RunPageByNamedRouter(const std::string& name, const std::string& params)
 {
     if (delegate_) {
-        delegate_->RunPage(name, "", pageProfile_, true);
+        delegate_->RunPage(name, params, pageProfile_, true);
         return UIContentErrorCode::NO_ERRORS;
     }
     return UIContentErrorCode::NULL_POINTER;
@@ -563,18 +564,26 @@ void DeclarativeFrontendNG::DumpHeapSnapshot(bool isPrivate)
     }
 }
 
-std::pair<std::string, UIContentErrorCode> DeclarativeFrontendNG::RestoreRouterStack(const std::string& contentInfo)
+void DeclarativeFrontendNG::NotifyUIIdle()
 {
-    if (delegate_) {
-        return delegate_->RestoreRouterStack(contentInfo);
+    if (jsEngine_) {
+        jsEngine_->NotifyUIIdle();
     }
-    return std::make_pair("", UIContentErrorCode::NULL_POINTER);
 }
 
-std::string DeclarativeFrontendNG::GetContentInfo() const
+std::pair<RouterRecoverRecord, UIContentErrorCode> DeclarativeFrontendNG::RestoreRouterStack(
+    const std::string& contentInfo, ContentInfoType type)
 {
     if (delegate_) {
-        return delegate_->GetContentInfo();
+        return delegate_->RestoreRouterStack(contentInfo, type);
+    }
+    return std::make_pair(RouterRecoverRecord(), UIContentErrorCode::NULL_POINTER);
+}
+
+std::string DeclarativeFrontendNG::GetContentInfo(ContentInfoType type) const
+{
+    if (delegate_) {
+        return delegate_->GetContentInfo(type);
     }
     return "";
 }

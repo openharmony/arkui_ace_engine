@@ -31,7 +31,6 @@ public:
     bool CanUpdate(const RefPtr<Component>& newComponent) override
     {
         auto context = context_.Upgrade();
-
         if (context && context->GetIsDeclarative()) {
             return true;
         } else {

@@ -528,4 +528,29 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
 }
 
 void JSUIExtension::Mock(const JSCallbackInfo& info) {}
+
+void JSSecurityUIExtension::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSSecurityUIExtension>::Declare("SecurityUIExtensionComponent");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSSecurityUIExtension>::StaticMethod("create", &JSSecurityUIExtension::Mock, opt);
+    JSClass<JSSecurityUIExtension>::StaticMethod("onRemoteReady", &JSSecurityUIExtension::Mock);
+    JSClass<JSSecurityUIExtension>::StaticMethod("onReceive", &JSSecurityUIExtension::Mock);
+    JSClass<JSSecurityUIExtension>::StaticMethod("onError", &JSSecurityUIExtension::Mock);
+    JSClass<JSSecurityUIExtension>::StaticMethod("onTerminated", &JSSecurityUIExtension::Mock);
+    JSClass<JSSecurityUIExtension>::StaticMethod("width", &JSSecurityUIExtension::Mock);
+    JSClass<JSSecurityUIExtension>::StaticMethod("height", &JSSecurityUIExtension::Mock);
+    JSClass<JSSecurityUIExtension>::StaticMethod("backgroundColor", &JSSecurityUIExtension::Mock);
+    JSClass<JSSecurityUIExtension>::Bind(globalObj);
+}
+
+void JSSecurityUIExtension::Create(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    CreateMockComponent("SecurityUIExtensionComponent");
+}
+
+void JSSecurityUIExtension::Mock(const JSCallbackInfo& info) {}
 } // namespace OHOS::Ace::Framework

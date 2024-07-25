@@ -41,6 +41,7 @@ constexpr int32_t DEFAULT_INTERVAL = 3000;
 constexpr int32_t DEFAULT_DURATION = 400;
 constexpr int32_t DEFAULT_CACHED_COUNT = 1;
 constexpr int32_t DEFAULT_DISPLAY_COUNT = 1;
+constexpr bool DEFAULT_SWIPE_BY_GROUP = false;
 constexpr bool DEFAULT_AUTO_PLAY = false;
 constexpr bool DEFAULT_LOOP = true;
 constexpr bool DEAFULT_DISABLE_SWIPE = false;
@@ -167,7 +168,7 @@ bool GetArrowInfo(const std::vector<std::string>& arrowInfo, SwiperArrowParamete
     auto isShowBackgroundValue = arrowInfo[ARROW_IS_SHOW_BACKGROUND];
     auto isSidebarMiddleValue = arrowInfo[ARROW_IS_SIDE_BAR_MIDDLE];
 
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_RETURN(swiperIndicatorTheme, false);
@@ -213,7 +214,8 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
     auto maskValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_MASK);
     auto colorValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_COLOR);
     auto selectedColorValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_SELECTED_COLOR);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(frameNode, SwiperParameters());
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperParameters());
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperParameters());
@@ -280,7 +282,8 @@ void ParseIndicatorAttribute(std::optional<Dimension> dim, bool& hasValue, float
 
 SwiperParameters GetDotIndicatorProps(FrameNode* frameNode, ArkUISwiperIndicator* indicator)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(frameNode, SwiperParameters());
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperParameters());
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperParameters());
@@ -314,13 +317,15 @@ SwiperParameters GetDotIndicatorProps(FrameNode* frameNode, ArkUISwiperIndicator
         indicator->colorValue.isSet == 1 ? Color(indicator->colorValue.value) : swiperIndicatorTheme->GetColor();
     swiperParameters.selectedColorVal = indicator->selectedColorValue.isSet == 1 ?
         Color(indicator->selectedColorValue.value) : swiperIndicatorTheme->GetSelectedColor();
+    swiperParameters.maxDisplayCountVal = indicator->maxDisplayCount.isSet == 1 ?
+        indicator->maxDisplayCount.value : NUM_0;
     return swiperParameters;
 }
 
 void GetFontContent(
     const std::string& size, const std::string& weight, bool isSelected, SwiperDigitalParameters& digitalParameters)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);
@@ -373,7 +378,7 @@ SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& di
     auto selectedDigitFontWeight = digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_WEIGHT] == "-"
                                        ? ""
                                        : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_WEIGHT];
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipelineContext, SwiperDigitalParameters());
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperDigitalParameters());
@@ -402,7 +407,19 @@ void SetIndicatorInteractive(ArkUINodeHandle node, ArkUI_Bool value)
     SwiperModelNG::SetIndicatorInteractive(frameNode, static_cast<bool>(value));
 }
 
-void ResetIndicatorInteractive(ArkUINodeHandle node) {}
+void ResetIndicatorInteractive(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetIndicatorInteractive(frameNode, true);
+}
+
+ArkUI_Int32 GetIndicatorInteractive(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(SwiperModelNG::GetIndicatorInteractive(frameNode));
+}
 
 void SetSwiperNextMargin(
     ArkUINodeHandle node, ArkUI_Float32 nextMarginValue, ArkUI_Int32 nextMarginUnit, ArkUI_Bool ignoreBlank)
@@ -470,6 +487,20 @@ void ResetSwiperDisplayCount(ArkUINodeHandle node)
     SwiperModelNG::SetDisplayCount(frameNode, DEFAULT_DISPLAY_COUNT);
 }
 
+void SetSwiperSwipeByGroup(ArkUINodeHandle node, ArkUI_Bool swipeByGroup)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetSwipeByGroup(frameNode, swipeByGroup);
+}
+
+void ResetSwiperSwipeByGroup(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetSwipeByGroup(frameNode, DEFAULT_SWIPE_BY_GROUP);
+}
+
 void SetSwiperDisplayArrow(ArkUINodeHandle node, ArkUI_CharPtr displayArrowStr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -490,7 +521,7 @@ void SetSwiperDisplayArrow(ArkUINodeHandle node, ArkUI_CharPtr displayArrowStr)
         SwiperModelNG::SetArrowStyle(frameNode, swiperArrowParameters);
         SwiperModelNG::SetDisplayArrow(frameNode, true);
     } else if (displayArrowValue == DISPLAY_ARROW_TRUE) {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = frameNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
         CHECK_NULL_VOID(swiperIndicatorTheme);
@@ -993,6 +1024,7 @@ void GetSwiperIndicator(ArkUINodeHandle node, ArkUISwiperIndicator* props)
         props->maskValue = ArkUIOptionalInt { 1, params->maskValue.value_or(0) };
         props->colorValue = ArkUIOptionalUint { 1, params->colorVal.value().GetValue() };
         props->selectedColorValue = ArkUIOptionalUint { 1, params->selectedColorVal.value().GetValue() };
+        props->maxDisplayCount = ArkUIOptionalInt { 1, params->maxDisplayCountVal.value() };
     }
 }
 
@@ -1005,25 +1037,123 @@ ArkUINodeHandle GetSwiperController(ArkUINodeHandle node)
     auto nodecontroller = reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(controller));
     return nodecontroller;
 }
+
+void SetSwiperOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        SwiperModelNG::SetOnChange(frameNode, std::move(*onEvent));
+    } else {
+        SwiperModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void ResetSwiperOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetOnChange(frameNode, nullptr);
+}
+
+void SetSwiperOnAnimationStart(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(int32_t, int32_t, const AnimationCallbackInfo&)>*>(callback);
+        SwiperModelNG::SetOnAnimationStart(frameNode, std::move(*onEvent));
+    } else {
+        SwiperModelNG::SetOnAnimationStart(frameNode, nullptr);
+    }
+}
+
+void ResetSwiperOnAnimationStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetOnAnimationStart(frameNode, nullptr);
+}
+
+void SetSwiperOnAnimationEnd(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(int32_t, const AnimationCallbackInfo&)>*>(callback);
+        SwiperModelNG::SetOnAnimationEnd(frameNode, std::move(*onEvent));
+    } else {
+        SwiperModelNG::SetOnAnimationEnd(frameNode, nullptr);
+    }
+}
+
+void ResetSwiperOnAnimationEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetOnAnimationEnd(frameNode, nullptr);
+}
+
+void SetSwiperOnGestureSwipe(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(int32_t, const AnimationCallbackInfo&)>*>(callback);
+        SwiperModelNG::SetOnGestureSwipe(frameNode, std::move(*onEvent));
+    } else {
+        SwiperModelNG::SetOnGestureSwipe(frameNode, nullptr);
+    }
+}
+
+void ResetSwiperOnGestureSwipe(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetOnGestureSwipe(frameNode, nullptr);
+}
+
+void SetOnContentDidScroll(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(int32_t, int32_t, float, float)>*>(callback);
+        SwiperModelNG::SetOnContentDidScroll(frameNode, std::move(*onEvent));
+    } else {
+        SwiperModelNG::SetOnContentDidScroll(frameNode, nullptr);
+    }
+}
+
+void ResetOnContentDidScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetOnContentDidScroll(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
 const ArkUISwiperModifier* GetSwiperModifier()
 {
     static const ArkUISwiperModifier modifier = { SetSwiperNextMargin, ResetSwiperNextMargin, SetSwiperPrevMargin,
-        ResetSwiperPrevMargin, SetSwiperDisplayCount, ResetSwiperDisplayCount, SetSwiperDisplayArrow,
-        ResetSwiperDisplayArrow, SetSwiperCurve, ResetSwiperCurve, SetSwiperDisableSwipe, ResetSwiperDisableSwipe,
-        SetSwiperEffectMode, ResetSwiperEffectMode, SetSwiperCachedCount, ResetSwiperCachedCount, SetSwiperDisplayMode,
-        ResetSwiperDisplayMode, SetSwiperItemSpace, ResetSwiperItemSpace, SetSwiperVertical, ResetSwiperVertical,
-        SetSwiperLoop, ResetSwiperLoop, SetSwiperInterval, ResetSwiperInterval, SetSwiperAutoPlay, ResetSwiperAutoPlay,
-        SetSwiperIndex, ResetSwiperIndex, SetSwiperIndicator, ResetSwiperIndicator, SetSwiperDuration,
-        ResetSwiperDuration, SetSwiperEnabled, ResetSwiperEnabled, GetSwiperLoop, GetSwiperAutoPlay, GetSwiperIndex,
-        GetSwiperVertical, GetSwiperDuration, GetSwiperDisplayCount, GetSwiperInterval, GetSwiperCurve,
-        GetSwiperDisableSwipe, GetSwiperItemSpace, GetSwiperShowIndicator, GetSwiperShowDisplayArrow,
-        GetSwiperEffectMode, SetIndicatorInteractive, ResetIndicatorInteractive, SetNodeAdapter, ResetNodeAdapter,
-        GetNodeAdapter, GetCachedCount, SetSwiperNestedScroll, ResetSwiperNestedScroll, GetSwiperNestedScroll,
-        SetSwiperToIndex, GetSwiperPrevMargin, GetSwiperNextMargin, SetSwiperIndicatorStyle, GetSwiperIndicator,
-        GetSwiperController };
+        ResetSwiperPrevMargin, SetSwiperDisplayCount, ResetSwiperDisplayCount, SetSwiperSwipeByGroup,
+        ResetSwiperSwipeByGroup, SetSwiperDisplayArrow, ResetSwiperDisplayArrow, SetSwiperCurve, ResetSwiperCurve,
+        SetSwiperDisableSwipe, ResetSwiperDisableSwipe, SetSwiperEffectMode, ResetSwiperEffectMode,
+        SetSwiperCachedCount, ResetSwiperCachedCount, SetSwiperDisplayMode, ResetSwiperDisplayMode, SetSwiperItemSpace,
+        ResetSwiperItemSpace, SetSwiperVertical, ResetSwiperVertical, SetSwiperLoop, ResetSwiperLoop, SetSwiperInterval,
+        ResetSwiperInterval, SetSwiperAutoPlay, ResetSwiperAutoPlay, SetSwiperIndex, ResetSwiperIndex,
+        SetSwiperIndicator, ResetSwiperIndicator, SetSwiperDuration, ResetSwiperDuration, SetSwiperEnabled,
+        ResetSwiperEnabled, GetSwiperLoop, GetSwiperAutoPlay, GetSwiperIndex, GetSwiperVertical, GetSwiperDuration,
+        GetSwiperDisplayCount, GetSwiperInterval, GetSwiperCurve, GetSwiperDisableSwipe, GetSwiperItemSpace,
+        GetSwiperShowIndicator, GetSwiperShowDisplayArrow, GetSwiperEffectMode, SetIndicatorInteractive,
+        ResetIndicatorInteractive, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, GetCachedCount,
+        SetSwiperNestedScroll, ResetSwiperNestedScroll, GetSwiperNestedScroll, SetSwiperToIndex, GetSwiperPrevMargin,
+        GetSwiperNextMargin, SetSwiperIndicatorStyle, GetSwiperIndicator, GetSwiperController,
+        SetSwiperOnChange, ResetSwiperOnChange, SetSwiperOnAnimationStart, ResetSwiperOnAnimationStart,
+        SetSwiperOnAnimationEnd, ResetSwiperOnAnimationEnd, SetSwiperOnGestureSwipe, ResetSwiperOnGestureSwipe,
+        SetOnContentDidScroll, ResetOnContentDidScroll, GetIndicatorInteractive };
     return &modifier;
 }
 

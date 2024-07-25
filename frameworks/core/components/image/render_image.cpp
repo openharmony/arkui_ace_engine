@@ -663,7 +663,7 @@ void RenderImage::ApplyObjectPosition()
     if (imageObjectPosition_.GetSizeTypeX() == BackgroundImagePositionType::PX) {
         offset.SetX((layoutSize.Width() - dstRect_.Width()) / 2 - imageObjectPosition_.GetSizeValueX());
     } else {
-        offset.SetX((layoutSize.Width() - dstRect_.Width()) / 2 -
+        offset.SetX((layoutSize.Width() - dstRect_.Width()) / 2 - // 2: left & right border of width
                     imageObjectPosition_.GetSizeValueX() * (layoutSize.Width() - dstRect_.Width()) / PERCENT_TRANSLATE);
     }
 

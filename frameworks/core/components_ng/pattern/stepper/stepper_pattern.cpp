@@ -101,9 +101,11 @@ void StepperPattern::UpdateIndexWithoutMeasure(int32_t index)
 
 void StepperPattern::UpdateOrCreateLeftButtonNode(int32_t index)
 {
-    isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
     auto hostNode = DynamicCast<StepperNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+    auto stepperLayoutProperty = hostNode->GetLayoutProperty<StepperLayoutProperty>();
+    CHECK_NULL_VOID(stepperLayoutProperty);
+    isRightToLeft_ = stepperLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (index <= 0) {
         hostNode->RemoveLeftButtonNode();
     } else if (!hostNode->HasLeftButtonNode()) {
@@ -162,9 +164,13 @@ void StepperPattern::CreateLeftButtonNode()
         CalcSize(CalcLength(stepperTheme->GetArrowWidth()), CalcLength(stepperTheme->GetArrowHeight())));
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
     ImageSourceInfo imageSourceInfo;
+    auto stepperLayoutProperty = hostNode->GetLayoutProperty<StepperLayoutProperty>();
+    CHECK_NULL_VOID(stepperLayoutProperty);
     if (isRightToLeft_) {
+        rowNode->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::RTL);
         imageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_NEXT_ARROW);
     } else {
+        rowNode->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::LTR);
         imageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_BACK_ARROW);
     }
     leftImage_ = imageNode;
@@ -343,8 +349,10 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
     ImageSourceInfo imageSourceInfo;
     if (isRightToLeft_) {
+        rowNode->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::RTL);
         imageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_BACK_ARROW);
     } else {
+        rowNode->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::LTR);
         imageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_NEXT_ARROW);
     }
     rightImage_ = imageNode;
@@ -679,21 +687,31 @@ void StepperPattern::ButtonSkipColorConfigurationUpdate(const RefPtr<FrameNode>&
 
 void StepperPattern::OnLanguageConfigurationUpdate()
 {
-    if (AceApplicationInfo::GetInstance().IsRightToLeft() != isRightToLeft_) {
+    auto hostNode = DynamicCast<StepperNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto stepperLayoutProperty = hostNode->GetLayoutProperty<StepperLayoutProperty>();
+    CHECK_NULL_VOID(stepperLayoutProperty);
+    auto isRightToLeft = stepperLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if (isRightToLeft != isRightToLeft_) {
         auto hostNode = AceType::DynamicCast<StepperNode>(GetHost());
         CHECK_NULL_VOID(hostNode);
         hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
+        isRightToLeft_ = isRightToLeft;
 
         auto stepperTheme = GetTheme();
         CHECK_NULL_VOID(stepperTheme);
         if (leftImage_) {
             auto leftimageLayoutProperty = leftImage_->GetLayoutProperty<ImageLayoutProperty>();
             CHECK_NULL_VOID(leftimageLayoutProperty);
+            auto leftRow = DynamicCast<FrameNode>(leftImage_->GetParent());
+            CHECK_NULL_VOID(leftRow);
+            
             ImageSourceInfo leftimageSourceInfo;
             if (isRightToLeft_) {
+                leftRow->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::RTL);
                 leftimageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_NEXT_ARROW);
             } else {
+                leftRow->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::LTR);
                 leftimageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_BACK_ARROW);
             }
             leftimageSourceInfo.SetFillColor(stepperTheme->GetArrowColor());
@@ -702,10 +720,14 @@ void StepperPattern::OnLanguageConfigurationUpdate()
         if (rightImage_) {
             auto rightimageLayoutProperty = rightImage_->GetLayoutProperty<ImageLayoutProperty>();
             CHECK_NULL_VOID(rightimageLayoutProperty);
+            auto rightRow = DynamicCast<FrameNode>(rightImage_->GetParent());
+            CHECK_NULL_VOID(rightRow);
             ImageSourceInfo rightimageSourceInfo;
             if (isRightToLeft_) {
+                rightRow->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::RTL);
                 rightimageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_BACK_ARROW);
             } else {
+                rightRow->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::LTR);
                 rightimageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_NEXT_ARROW);
             }
             rightimageSourceInfo.SetFillColor(stepperTheme->GetArrowColor());

@@ -35,7 +35,7 @@ const NG::SizeF PAINTSIZE = { 5.0, 10.0 };
 const NG::SizeF TEST_SIZE = { 100.0, 200.0 };
 const NG::OffsetF OFFSET_F = { 1.0, 2.0 };
 
-const double DIPSCALE = 10.0;
+const NG::DisplayScaleInfo DIPSCALE = { .vpScale = 10.0 };
 const double FIVE = 5.0;
 const double TWO = 2.0;
 const double ONE = 1.0;

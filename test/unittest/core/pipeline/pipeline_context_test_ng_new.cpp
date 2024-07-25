@@ -139,7 +139,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg038, TestSize.Level1)
     ASSERT_NE(frameNode_, nullptr);
     context_->onWindowSizeChangeCallbacks_.emplace_back(frameNode_->GetId());
     context_->FlushWindowSizeChangeCallback(0, 0, WindowSizeChangeReason::UNDEFINED);
-    EXPECT_EQ(context_->onWindowSizeChangeCallbacks_.size(), 1);
+    EXPECT_EQ(context_->onWindowSizeChangeCallbacks_.size(), 2);
 }
 
 /**
@@ -521,8 +521,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg045, TestSize.Level1)
      */
     auto pattern = AceType::MakeRefPtr<Pattern>();
     auto frameNode = FrameNode::CreateFrameNode(TEST_TAG, 3, pattern);
-    context_->SetNeedRenderNode(frameNode);
-    EXPECT_EQ(context_->needRenderNode_.count(frameNode), 1);
+    context_->SetNeedRenderNode(WeakPtr<FrameNode>(frameNode));
+    EXPECT_EQ(context_->needRenderNode_.count(WeakPtr<FrameNode>(frameNode)), 1);
 
     /**
      * @tc.steps3: Call the function FlushPipelineImmediately.
@@ -702,7 +702,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg052, TestSize.Level1)
     auto frameNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId, nullptr);
     context_->safeAreaManager_->AddGeoRestoreNode(frameNode);
-    context_->SyncSafeArea(false);
+    context_->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_NONE);
     EXPECT_TRUE(frameNode->isLayoutDirtyMarked_);
 }
 
@@ -840,10 +840,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg057, TestSize.Level1)
 
     auto needRenderNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto needRenderNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, needRenderNodeId, nullptr);
-    context_->SetNeedRenderNode(needRenderNode);
-    EXPECT_EQ(context_->needRenderNode_.count(needRenderNode), 1);
+    context_->SetNeedRenderNode(WeakPtr<FrameNode>(needRenderNode));
+    EXPECT_EQ(context_->needRenderNode_.count(WeakPtr<FrameNode>(needRenderNode)), 1);
     context_->InspectDrew();
-    EXPECT_EQ(context_->needRenderNode_.count(needRenderNode), 0);
+    EXPECT_EQ(context_->needRenderNode_.count(WeakPtr<FrameNode>(needRenderNode)), 0);
 }
 
 /**
@@ -1007,7 +1007,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg064, TestSize.Level1)
     std::tuple<float, float, uint64_t> current_fs = std::make_tuple(2.0f, 2.0f, 2000);
     uint64_t nanoTimeStampFs = 1000;
     auto result_fs = context_->LinearInterpolation(history_fs, current_fs, nanoTimeStampFs);
-    EXPECT_EQ(result_fs, std::make_pair(0.0f, 0.0f));
+    EXPECT_EQ(result_fs, std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f));
 
     /**
      * @tc.steps2: history and current timestamps are equal to nanoTimeStamp
@@ -1017,7 +1017,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg064, TestSize.Level1)
     std::tuple<float, float, uint64_t> current_se = std::make_tuple(2.0f, 2.0f, 1000);
     uint64_t nanoTimeStampSe = 1500;
     auto result_se = context_->LinearInterpolation(history_se, current_se, nanoTimeStampSe);
-    EXPECT_EQ(result_se, std::make_pair(0.0f, 0.0f));
+    EXPECT_EQ(result_se, std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f));
 
     /**
      * @tc.steps3: history and current timestamps are equal to nanoTimeStamp
@@ -1027,7 +1027,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg064, TestSize.Level1)
     std::tuple<float, float, uint64_t> current_th = std::make_tuple(2.0f, 2.0f, 3000);
     uint64_t nanoTimeStampTh = 2500;
     auto result_th = context_->LinearInterpolation(history_th, current_th, nanoTimeStampTh);
-    EXPECT_EQ(result_th, std::make_pair(1.75f, 1.75f));
+    EXPECT_EQ(result_th, std::make_tuple(1.75f, 1.75f, 500000.0f, 500000.0f));
 
     /**
      * @tc.steps4: nanoTimeStamp is less than history timestamp
@@ -1037,7 +1037,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg064, TestSize.Level1)
     std::tuple<float, float, uint64_t> current_for = std::make_tuple(2.0f, 2.0f, 2000);
     uint64_t nanoTimeStampFor = 500;
     auto result_for = context_->LinearInterpolation(history_for, current_for, nanoTimeStampFor);
-    EXPECT_EQ(result_for, std::make_pair(0.0f, 0.0f));
+    EXPECT_EQ(result_for, std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f));
 
     /**
      * @tc.steps5: nanoTimeStamp is less than current timestamp
@@ -1047,7 +1047,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg064, TestSize.Level1)
     std::tuple<float, float, uint64_t> current_fie = std::make_tuple(2.0f, 2.0f, 2000);
     uint64_t nanoTimeStampFie = 1500;
     auto result_fie = context_->LinearInterpolation(history_fie, current_fie, nanoTimeStampFie);
-    EXPECT_NE(result_fie, std::make_pair(0.0f, 0.0f));
+    EXPECT_NE(result_fie, std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f));
 
     /**
      * @tc.steps6: nanoTimeStamp is greater than current timestamp
@@ -1057,7 +1057,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg064, TestSize.Level1)
     std::tuple<float, float, uint64_t> current_six = std::make_tuple(2.0f, 2.0f, 2000);
     uint64_t nanoTimeStampSix = 2500;
     auto result_six = context_->LinearInterpolation(history_six, current_six, nanoTimeStampSix);
-    EXPECT_NE(result_six, std::make_pair(0.0f, 0.0f));
+    EXPECT_NE(result_six, std::make_tuple(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 /**
@@ -1075,20 +1075,21 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg065, TestSize.Level1)
     std::vector<TouchEvent> emptyCurrent;
     uint64_t nanoTimeStamp = 1234567890;
     bool isScreen = true;
-    std::pair<float, float> result = context_->GetResampleCoord(emptyHistory, emptyCurrent, nanoTimeStamp, isScreen);
-    EXPECT_FLOAT_EQ(0.0f, result.first);
-    EXPECT_FLOAT_EQ(0.0f, result.second);
+    std::tuple<float, float, float, float> result =
+        context_->GetResampleCoord(emptyHistory, emptyCurrent, nanoTimeStamp, isScreen);
+    EXPECT_FLOAT_EQ(0.0f, std::get<0>(result));
+    EXPECT_FLOAT_EQ(0.0f, std::get<1>(result));
     auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
     emptyHistory.push_back(TouchEvent {}.SetX(100.0f).SetY(200.0f).SetTime(timeStampAce));
     result = context_->GetResampleCoord(emptyHistory, emptyCurrent, nanoTimeStamp, isScreen);
-    EXPECT_FLOAT_EQ(0.0f, result.first);
-    EXPECT_FLOAT_EQ(0.0f, result.second);
+    EXPECT_FLOAT_EQ(0.0f, std::get<0>(result));
+    EXPECT_FLOAT_EQ(0.0f, std::get<1>(result));
     emptyHistory.clear();
     auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
     emptyCurrent.push_back(TouchEvent {}.SetX(200.0f).SetY(300.0f).SetTime(timeStampTwo));
     result = context_->GetResampleCoord(emptyHistory, emptyCurrent, nanoTimeStamp, isScreen);
-    EXPECT_FLOAT_EQ(0.0f, result.first);
-    EXPECT_FLOAT_EQ(0.0f, result.second);
+    EXPECT_FLOAT_EQ(0.0f, std::get<0>(result));
+    EXPECT_FLOAT_EQ(0.0f, std::get<1>(result));
 }
 
 /**
@@ -1354,8 +1355,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg076, TestSize.Level1)
     pipeline->foldStatusChangedCallbackMap_.emplace(2, nullptr);
     pipeline->foldDisplayModeChangedCallbackMap_.emplace(1, [](FoldDisplayMode foldDisplayMode) {});
     pipeline->foldDisplayModeChangedCallbackMap_.emplace(2, nullptr);
+    pipeline->transformHintChangedCallbackMap_.emplace(1, nullptr);
+    pipeline->transformHintChangedCallbackMap_.emplace(2, [](uint32_t num) {});
     pipeline->OnFoldStatusChange(FoldStatus::EXPAND);
     pipeline->OnFoldDisplayModeChange(FoldDisplayMode::FULL);
+    pipeline->OnTransformHintChanged(0);
     EXPECT_NE(PipelineContext::GetContextByContainerId(0), nullptr);
     pipeline->AddDirtyPropertyNode(frameNode);
     EXPECT_TRUE(pipeline->hasIdleTasks_);
@@ -1446,18 +1450,19 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg078, TestSize.Level1)
      */
     auto formCallback = [](bool visible) {};
     pipeline->ContainerModalUnFocus();
-    pipeline->UpdateTitleInTargetPos(false, 0);
-    pipeline->SetCloseButtonStatus(false);
-    pipeline->SetContainerModalTitleVisible(false, true);
+    pipeline->windowModal_ = WindowModal::NORMAL;
     pipeline->SetContainerModalTitleHeight(0);
+    pipeline->UpdateTitleInTargetPos(false, 0);
+    pipeline->SetContainerModalTitleVisible(false, true);
+    pipeline->SetCloseButtonStatus(false);
     pipeline->GetContainerModalTitleHeight();
     pipeline->windowModal_ = WindowModal::CONTAINER_MODAL;
+    pipeline->GetContainerModalTitleHeight();
     pipeline->ContainerModalUnFocus();
     pipeline->UpdateTitleInTargetPos(false, 0);
     pipeline->SetCloseButtonStatus(true);
     pipeline->SetContainerModalTitleVisible(true, false);
     pipeline->SetContainerModalTitleHeight(0);
-    pipeline->GetContainerModalTitleHeight();
     pipeline->SetAppBgColor(Color::BLACK);
     auto frameNode1 = FrameNode::GetOrCreateFrameNode("test", 6, nullptr);
     pipeline->activeNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode1));
@@ -1625,7 +1630,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg087, TestSize.Level1)
      */
     ASSERT_NE(context_, nullptr);
     context_->dirtyPropertyNodes_.emplace(frameNode_);
-    context_->needRenderNode_.emplace(frameNode_);
+    context_->needRenderNode_.emplace(WeakPtr<FrameNode>(frameNode_));
     context_->dirtyFocusNode_ = frameNode_;
     context_->dirtyFocusScope_ = frameNode_;
     context_->dirtyRequestFocusNode_ = frameNode_;
@@ -1638,12 +1643,185 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg087, TestSize.Level1)
     context_->DetachNode(frameNode_);
 
     EXPECT_NE(context_->dirtyPropertyNodes_.count(frameNode_), 1);
-    EXPECT_NE(context_->needRenderNode_.count(frameNode_), 1);
+    EXPECT_NE(context_->needRenderNode_.count(WeakPtr<FrameNode>(frameNode_)), 1);
     EXPECT_NE(context_->dirtyFocusNode_, frameNode_);
     EXPECT_NE(context_->dirtyFocusScope_, frameNode_);
     EXPECT_NE(context_->dirtyRequestFocusNode_, frameNode_);
     EXPECT_NE(context_->activeNode_, frameNode_);
     EXPECT_NE(context_->focusNode_, frameNode_);
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg007
+ * @tc.desc: Test AddLayoutNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg007, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler add layoutNode.
+     */
+    UITaskScheduler taskScheduler;
+    auto layoutNode = AceType::MakeRefPtr<FrameNode>("test", -1, AceType::MakeRefPtr<Pattern>(), false);
+
+    /**
+     * @tc.steps2: Call AddLayoutNode.
+     * @tc.expected: taskScheduler.layoutNodes_.size() = 1
+     */
+    taskScheduler.AddLayoutNode(layoutNode);
+    EXPECT_EQ(taskScheduler.layoutNodes_.size(), 1);
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg008
+ * @tc.desc: Test SetLayoutNodeRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg008, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler add layoutNode.
+     */
+    UITaskScheduler taskScheduler;
+    auto layoutNode1 = AceType::MakeRefPtr<FrameNode>("test1", -1, AceType::MakeRefPtr<Pattern>(), false);
+    auto layoutNode2 = AceType::MakeRefPtr<FrameNode>("test2", -1, AceType::MakeRefPtr<Pattern>(), false);
+    auto layoutNode3 = AceType::MakeRefPtr<FrameNode>("test3", -1, AceType::MakeRefPtr<Pattern>(), false);
+    auto layoutNode4 = AceType::MakeRefPtr<FrameNode>("test4", -1, AceType::MakeRefPtr<Pattern>(), false);
+    layoutNode3->SetIsFind(true);
+    layoutNode2->SetOverlayNode(layoutNode4);
+    taskScheduler.AddLayoutNode(layoutNode1);
+    taskScheduler.AddLayoutNode(layoutNode2);
+    taskScheduler.AddLayoutNode(layoutNode3);
+
+    /**
+     * @tc.steps2: Call SetLayoutNodeRect.
+     */
+    taskScheduler.SetLayoutNodeRect();
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg009
+ * @tc.desc: Test FlushPersistAfterLayoutTask/FlushAfterRenderTask/FlushAfterLayoutCallbackInImplicitAnimationTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg009, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler add layoutNode.
+     */
+    UITaskScheduler taskScheduler;
+    taskScheduler.AddPersistAfterLayoutTask([]() {});
+    taskScheduler.AddPersistAfterLayoutTask(nullptr);
+    taskScheduler.AddAfterRenderTask(nullptr);
+    taskScheduler.AddAfterRenderTask([]() {});
+
+    /**
+     * @tc.steps2: Call FlushPersistAfterLayoutTask/FlushAfterRenderTask/FlushAfterLayoutCallbackInImplicitAnimationTask
+     */
+    taskScheduler.FlushPersistAfterLayoutTask();
+    taskScheduler.FlushAfterRenderTask();
+    taskScheduler.FlushAfterLayoutCallbackInImplicitAnimationTask();
+
+    /**
+     * @tc.steps3: Call FlushAfterLayoutCallbackInImplicitAnimationTask/FlushTask
+     */
+    taskScheduler.FlushTask(true);
+    taskScheduler.FlushTask(false);
+    taskScheduler.AddAfterLayoutTask([]() {}, true);
+    taskScheduler.AddAfterLayoutTask(nullptr, true);
+    taskScheduler.FlushAfterLayoutCallbackInImplicitAnimationTask();
+    taskScheduler.FlushTask(false);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg095
+ * @tc.desc: Test the function AddDirtyLayoutNode/AddDirtyRenderNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg095, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters,destroyed_ is false/true
+     */
+    auto frameNode1 = FrameNode::GetOrCreateFrameNode("test1", 1, nullptr);
+    auto frameNode2 = FrameNode::GetOrCreateFrameNode("test2", 2, nullptr);
+    context_->SetPredictNode(frameNode2);
+    context_->PipelineContext::AddDirtyLayoutNode(frameNode1);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg096
+ * @tc.desc: Test the function FlushFocusScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg096, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters,isNeedTriggerScroll_ is false
+     */
+    RefPtr<FocusManager> focusManager = context_->GetOrCreateFocusManager();
+    context_->PipelineContext::FlushFocusScroll();
+
+    /**
+     * @tc.steps2: initialize parameters,isNeedTriggerScroll_ is true
+     */
+    focusManager->SetNeedTriggerScroll(true);
+    context_->PipelineContext::FlushFocusScroll();
+}
+
+/**
+ * @tc.name: PipelineContextTestNg097
+ * @tc.desc: Test the function RegisterTouchEventListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg097, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters,construct changeInfoListeners_
+     */
+    std::shared_ptr<ITouchEventCallback> touchEventCallback = nullptr;
+    context_->RegisterTouchEventListener(touchEventCallback);
+    ASSERT_EQ(context_->listenerVector_.size(), 0);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg098
+ * @tc.desc: Test the function AddChangedFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg098, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: AddChangedFrameNode
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", -1, AceType::MakeRefPtr<Pattern>(), false);
+    context_->AddChangedFrameNode(frameNode);
+    EXPECT_EQ(context_->changedNodes_.size(), 1);
+    context_->AddChangedFrameNode(frameNode);
+    EXPECT_EQ(context_->changedNodes_.size(), 1);
+    context_->CleanNodeChangeFlag();
+    EXPECT_EQ(context_->changedNodes_.size(), 0);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg099
+ * @tc.desc: Test the function AddFrameNodeChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg099, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: AddFrameNodeChangeListener
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", -1, AceType::MakeRefPtr<Pattern>(), false);
+    context_->AddFrameNodeChangeListener(frameNode);
+    context_->FlushNodeChangeFlag();
+    EXPECT_EQ(context_->changeInfoListeners_.size(), 1);
+    context_->AddFrameNodeChangeListener(frameNode);
+    EXPECT_EQ(context_->changeInfoListeners_.size(), 1);
+    context_->RemoveFrameNodeChangeListener(frameNode);
+    context_->FlushNodeChangeFlag();
+    EXPECT_EQ(context_->changeInfoListeners_.size(), 0);
 }
 } // namespace NG
 } // namespace OHOS::Ace

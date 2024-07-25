@@ -64,7 +64,9 @@ void TextPaintMethod::DoStartTextRace()
         option.step = DEFAULT_MARQUEE_STEP_VP.ConvertToPx();
     }
     option.loop = layoutProperty->GetTextMarqueeLoop().value_or(-1);
-    option.direction = layoutProperty->GetTextMarqueeDirection().value_or(MarqueeDirection::LEFT);
+    auto defaultDirection = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::LTR ? MarqueeDirection::LEFT
+                                                                                              : MarqueeDirection::RIGHT;
+    option.direction = layoutProperty->GetTextMarqueeDirection().value_or(defaultDirection);
     option.delay = layoutProperty->GetTextMarqueeDelay().value_or(0);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -90,9 +92,9 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     SizeF contentSize = paintWrapper->GetContentSize();
     textContentModifier_->SetContentSize(contentSize);
-    auto offset = OffsetF(0.0, 0.0);
+    auto offset = paintWrapper->GetContentOffset();
     textContentModifier_->SetContentOffset(offset);
-    auto paintOffset = OffsetF(0.0, -std::min(baselineOffset_, 0.0f));
+    auto paintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     textContentModifier_->SetPrintOffset(paintOffset);
 
     auto frameNode = textPattern->GetHost();

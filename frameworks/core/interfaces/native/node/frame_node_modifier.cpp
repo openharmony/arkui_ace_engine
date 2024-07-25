@@ -101,9 +101,9 @@ ArkUI_Bool InsertChildAfterInFrameNode(ArkUINodeHandle node, ArkUINodeHandle chi
 
 void RemoveChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
 {
-    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
-    auto* childNode = reinterpret_cast<FrameNode*>(child);
+    auto* childNode = reinterpret_cast<UINode*>(child);
     currentNode->RemoveChild(Referenced::Claim<UINode>(childNode));
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
@@ -116,57 +116,77 @@ void ClearChildrenInFrameNode(ArkUINodeHandle node)
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
-ArkUI_Uint32 GetChildrenCount(ArkUINodeHandle node)
+ArkUI_Uint32 GetChildrenCount(ArkUINodeHandle node, ArkUI_Bool isExpanded)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, 0);
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, 0);
-    return frameNode->GetAllChildrenWithBuild(false).size();
+    if (isExpanded) {
+        frameNode->GetAllChildrenWithBuild(false);
+    }
+    return isExpanded ? frameNode->GetAllChildrenWithBuild(false).size()
+                      : frameNode->GetTotalChildCountWithoutExpanded();
 }
 
-ArkUINodeHandle GetChild(ArkUINodeHandle node, ArkUI_Int32 index)
+ArkUINodeHandle GetChild(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Bool isExpanded)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->GetAllChildrenWithBuild(false);
-    auto child = frameNode->GetFrameNodeChildByIndex(index);
+    CHECK_NULL_RETURN(index >= 0, nullptr);
+    if (isExpanded) {
+        frameNode->GetAllChildrenWithBuild(false);
+    }
+    auto child = frameNode->GetFrameNodeChildByIndex(index, false, isExpanded);
     return reinterpret_cast<ArkUINodeHandle>(child);
 }
 
-ArkUINodeHandle GetFirst(ArkUINodeHandle node)
+ArkUINodeHandle GetFirst(ArkUINodeHandle node, ArkUI_Bool isExpanded)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->GetAllChildrenWithBuild(false);
-    auto child = frameNode->GetFrameNodeChildByIndex(0);
+    if (isExpanded) {
+        frameNode->GetAllChildrenWithBuild(false);
+    }
+    auto child = frameNode->GetFrameNodeChildByIndex(0, false, isExpanded);
     return reinterpret_cast<ArkUINodeHandle>(child);
 }
 
-ArkUINodeHandle GetNextSibling(ArkUINodeHandle node)
+ArkUINodeHandle GetNextSibling(ArkUINodeHandle node, ArkUI_Bool isExpanded)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
     auto parent = GetParentNode(currentNode);
     CHECK_NULL_RETURN(parent, nullptr);
-    parent->GetAllChildrenWithBuild(false);
-    auto index = parent->GetChildTrueIndex(Referenced::Claim<FrameNode>(currentNode));
-    auto sibling = parent->GetFrameNodeChildByIndex(index + 1);
+    auto index = -1;
+    if (isExpanded) {
+        parent->GetAllChildrenWithBuild(false);
+        index = parent->GetChildTrueIndex(Referenced::Claim<FrameNode>(currentNode));
+    } else {
+        index = parent->GetFrameNodeIndex(Referenced::Claim<FrameNode>(currentNode), false);
+    }
+    CHECK_NULL_RETURN(index > -1, nullptr);
+    auto sibling = parent->GetFrameNodeChildByIndex(index + 1, false, isExpanded);
     return reinterpret_cast<ArkUINodeHandle>(sibling);
 }
 
-ArkUINodeHandle GetPreviousSibling(ArkUINodeHandle node)
+ArkUINodeHandle GetPreviousSibling(ArkUINodeHandle node, ArkUI_Bool isExpanded)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
     auto parent = GetParentNode(currentNode);
-    CHECK_NULL_RETURN(parent, nullptr);
-    parent->GetAllChildrenWithBuild(false);
-    auto index = parent->GetChildTrueIndex(Referenced::Claim<FrameNode>(currentNode));
-    auto sibling = parent->GetFrameNodeChildByIndex(index - 1);
+    auto index = -1;
+    if (isExpanded) {
+        parent->GetAllChildrenWithBuild(false);
+        index = parent->GetChildTrueIndex(Referenced::Claim<FrameNode>(currentNode));
+    } else {
+        index = parent->GetFrameNodeIndex(Referenced::Claim<FrameNode>(currentNode), false);
+    }
+    CHECK_NULL_RETURN(index > 0, nullptr);
+    auto sibling = parent->GetFrameNodeChildByIndex(index - 1, false, isExpanded);
     return reinterpret_cast<ArkUINodeHandle>(sibling);
 }
 
@@ -186,88 +206,88 @@ ArkUI_Int32 GetIdByNodePtr(ArkUINodeHandle node)
     return nodeId;
 }
 
-void GetPositionToParent(ArkUINodeHandle node, ArkUI_Float32* parentOffset, ArkUI_Bool useVp)
+void GetPositionToParent(ArkUINodeHandle node, ArkUI_Float32 (*parentOffset)[2], ArkUI_Bool useVp)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto currFrameRect = currentNode->GetRectWithRender();
     auto offset = currFrameRect.GetOffset();
     if (useVp) {
-        parentOffset[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
-        parentOffset[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+        (*parentOffset)[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+        (*parentOffset)[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
     } else {
-        parentOffset[0] = offset.GetX();
-        parentOffset[1] = offset.GetY();
+        (*parentOffset)[0] = offset.GetX();
+        (*parentOffset)[1] = offset.GetY();
     }
 }
 
-void GetPositionToScreen(ArkUINodeHandle node, ArkUI_Float32* screenPosition, ArkUI_Bool useVp)
+void GetPositionToScreen(ArkUINodeHandle node, ArkUI_Float32 (*screenPosition)[2], ArkUI_Bool useVp)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto offset = currentNode->GetPositionToScreen();
     if (useVp) {
-        screenPosition[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
-        screenPosition[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+        (*screenPosition)[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+        (*screenPosition)[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
     } else {
-        screenPosition[0] = offset.GetX();
-        screenPosition[1] = offset.GetY();
+        (*screenPosition)[0] = offset.GetX();
+        (*screenPosition)[1] = offset.GetY();
     }
 }
 
-void GetPositionToWindow(ArkUINodeHandle node, ArkUI_Float32* windowOffset, ArkUI_Bool useVp)
+void GetPositionToWindow(ArkUINodeHandle node, ArkUI_Float32 (*windowOffset)[2], ArkUI_Bool useVp)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto offset = currentNode->GetOffsetRelativeToWindow();
     if (useVp) {
-        windowOffset[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
-        windowOffset[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+        (*windowOffset)[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+        (*windowOffset)[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
     } else {
-        windowOffset[0] = offset.GetX();
-        windowOffset[1] = offset.GetY();
+        (*windowOffset)[0] = offset.GetX();
+        (*windowOffset)[1] = offset.GetY();
     }
 }
 
-void GetPositionToParentWithTransform(ArkUINodeHandle node, ArkUI_Float32* parentPosition, ArkUI_Bool useVp)
+void GetPositionToParentWithTransform(ArkUINodeHandle node, ArkUI_Float32 (*parentPosition)[2], ArkUI_Bool useVp)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto offset = currentNode->GetPositionToParentWithTransform();
     if (useVp) {
-        parentPosition[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
-        parentPosition[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+        (*parentPosition)[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+        (*parentPosition)[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
     } else {
-        parentPosition[0] = offset.GetX();
-        parentPosition[1] = offset.GetY();
+        (*parentPosition)[0] = offset.GetX();
+        (*parentPosition)[1] = offset.GetY();
     }
 }
 
-void GetPositionToScreenWithTransform(ArkUINodeHandle node, ArkUI_Float32* screenPosition, ArkUI_Bool useVp)
+void GetPositionToScreenWithTransform(ArkUINodeHandle node, ArkUI_Float32 (*screenPosition)[2], ArkUI_Bool useVp)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto offset = currentNode->GetPositionToScreenWithTransform();
     if (useVp) {
-        screenPosition[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
-        screenPosition[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+        (*screenPosition)[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+        (*screenPosition)[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
     } else {
-        screenPosition[0] = offset.GetX();
-        screenPosition[1] = offset.GetY();
+        (*screenPosition)[0] = offset.GetX();
+        (*screenPosition)[1] = offset.GetY();
     }
 }
 
-void GetPositionToWindowWithTransform(ArkUINodeHandle node, ArkUI_Float32* windowPosition, ArkUI_Bool useVp)
+void GetPositionToWindowWithTransform(ArkUINodeHandle node, ArkUI_Float32 (*windowPosition)[2], ArkUI_Bool useVp)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto offset = currentNode->GetPositionToWindowWithTransform();
     if (useVp) {
-        windowPosition[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
-        windowPosition[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+        (*windowPosition)[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+        (*windowPosition)[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
     } else {
-        windowPosition[0] = offset.GetX();
-        windowPosition[1] = offset.GetY();
+        (*windowPosition)[0] = offset.GetX();
+        (*windowPosition)[1] = offset.GetY();
     }
 }
 
@@ -364,7 +384,7 @@ ArkUINodeHandle GetFrameNodeByUniqueId(ArkUI_Int32 uniqueId)
         if (parent && parent->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
             node = parent;
         } else {
-            node = node->GetFirstChild();
+            node = node->GetFrameChildByIndexWithoutExpanded(0);
         }
     }
 
@@ -373,7 +393,7 @@ ArkUINodeHandle GetFrameNodeByUniqueId(ArkUI_Int32 uniqueId)
 
 ArkUINodeHandle GetFrameNodeByKey(ArkUI_CharPtr key)
 {
-    auto node = NG::Inspector::GetFrameNodeByKey(key);
+    auto node = NG::Inspector::GetFrameNodeByKey(key, true);
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 
@@ -385,14 +405,16 @@ void PropertyUpdate(ArkUINodeHandle node)
     }
 }
 
-ArkUINodeHandle GetLast(ArkUINodeHandle node)
+ArkUINodeHandle GetLast(ArkUINodeHandle node, ArkUI_Bool isExpanded)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    auto size = frameNode->GetAllChildrenWithBuild(false).size();
-    auto child = frameNode->GetFrameNodeChildByIndex(size - 1);
+    size_t size = isExpanded ? frameNode->GetAllChildrenWithBuild(false).size()
+                             : static_cast<size_t>(frameNode->GetTotalChildCountWithoutExpanded());
+    CHECK_NULL_RETURN(size > 0, nullptr);
+    auto child = frameNode->GetFrameNodeChildByIndex(size - 1, false, isExpanded);
     return reinterpret_cast<ArkUINodeHandle>(child);
 }
 
@@ -419,10 +441,10 @@ ArkUI_Float32* GetLayoutPositionWithoutMargin(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
-    auto offset = currentNode->GetGeometryNode()->GetFrameOffset();
+    auto rect = currentNode->GetPaintRectWithTransform();
     ArkUI_Float32* ret = new ArkUI_Float32[2];
-    ret[0] = offset.GetX();
-    ret[1] = offset.GetY();
+    ret[0] = rect.GetX();
+    ret[1] = rect.GetY();
     return ret;
 }
 

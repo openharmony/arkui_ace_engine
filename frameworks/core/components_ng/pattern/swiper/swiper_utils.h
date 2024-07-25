@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension SWIPER_MARGIN = 16.0_vp;
 constexpr Dimension SWIPER_GUTTER = 16.0_vp;
-}
+} // namespace
 
 class SwiperUtils {
 public:
@@ -41,11 +41,7 @@ public:
     {
         // If display count is setted, use stretch mode.
         CHECK_NULL_RETURN(property, true);
-        if (property->HasDisplayCount() && !property->HasMinSize()) {
-            return true;
-        }
-
-        return property->GetDisplayMode().value_or(SwiperDisplayMode::STRETCH) == SwiperDisplayMode::STRETCH;
+        return property->IsStretch();
     }
 
     static float GetItemSpace(const RefPtr<SwiperLayoutProperty>& property)
@@ -68,6 +64,7 @@ public:
         }
         auto axis = property->GetDirection().value_or(Axis::HORIZONTAL);
         // re-determine ignoreItemSpace_ based on child calc length
+        property->ResetIgnorePrevMarginAndNextMargin();
         property->ResetIgnoreItemSpace();
         auto itemSpace = GetItemSpace(property);
         auto parentMainSize = idealSize.MainSize(axis);
@@ -141,19 +138,21 @@ public:
         }
 
         return static_cast<int32_t>(std::floor(static_cast<float>(index) / static_cast<float>(displayCount))) *
-                displayCount + displayCount - 1;
+                   displayCount +
+               displayCount - 1;
     }
 
-    static void CheckAutoFillDisplayCount(RefPtr<SwiperLayoutProperty>& swiperLayoutProperty, float contentWidth,
-        int32_t totalCount)
+    static void CheckAutoFillDisplayCount(
+        RefPtr<SwiperLayoutProperty>& swiperLayoutProperty, float contentWidth, int32_t totalCount)
     {
         bool isAutoFill = swiperLayoutProperty->GetMinSize().has_value();
         if (!isAutoFill) {
             return;
         }
         auto minSize = swiperLayoutProperty->GetMinSize()->ConvertToPx();
-        auto displayCount = static_cast<int32_t>(floor((contentWidth - 2 * SWIPER_MARGIN.ConvertToPx() +
-            SWIPER_GUTTER.ConvertToPx()) / (minSize + SWIPER_GUTTER.ConvertToPx())));
+        auto displayCount =
+            static_cast<int32_t>(floor((contentWidth - 2 * SWIPER_MARGIN.ConvertToPx() + SWIPER_GUTTER.ConvertToPx()) /
+                                       (minSize + SWIPER_GUTTER.ConvertToPx())));
         if (LessOrEqual(minSize, 0)) {
             displayCount = 1;
         }
@@ -167,20 +166,38 @@ public:
     }
 
 private:
-    static bool CheckMarginPropertyExceed(
-        const RefPtr<SwiperLayoutProperty>& property, float childCalcIdealLength)
+    static bool CheckMarginPropertyExceed(const RefPtr<SwiperLayoutProperty>& property, float childCalcIdealLength)
     {
         CHECK_NULL_RETURN(property, false);
         auto prevMargin = property->GetPrevMarginValue(0.0_px).ConvertToPx();
         auto nextMargin = property->GetNextMarginValue(0.0_px).ConvertToPx();
-        if (GreatNotEqual(prevMargin, childCalcIdealLength) ||
-            GreatNotEqual(nextMargin, childCalcIdealLength)) {
-            property->UpdatePrevMarginWithoutMeasure(0.0_px);
-            property->UpdateNextMarginWithoutMeasure(0.0_px);
+        if (GreatNotEqual(prevMargin, childCalcIdealLength) || GreatNotEqual(nextMargin, childCalcIdealLength)) {
+            property->MarkIgnorePrevMarginAndNextMargin();
             return true;
         }
         return false;
     }
+};
+
+/**
+ * @brief Helper RAII object. set @c var to @c value when this object goes out of scope.
+ * REQUIRES: the life span of @c var surpasses this object.
+ */
+template<typename T>
+class DestructSetter {
+public:
+    DestructSetter() = delete;
+    DestructSetter(T& var, T value) : ref_(var), value_(value) {}
+    ~DestructSetter()
+    {
+        ref_ = value_;
+    }
+
+private:
+    T& ref_;
+    T value_ {};
+
+    ACE_DISALLOW_COPY_AND_MOVE(DestructSetter);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_UTILS_H

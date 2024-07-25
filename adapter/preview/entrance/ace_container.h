@@ -63,7 +63,8 @@ public:
 
     static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths);
     static void SetResourcesPathAndThemeStyle(int32_t instanceId, const std::string& systemResourcesPath,
-        const std::string& appResourcesPath, const int32_t& themeId, const ColorMode& colorMode);
+        const std::string& hmsResourcesPath, const std::string& appResourcesPath, const int32_t& themeId,
+        const ColorMode& colorMode);
 
 #ifndef ENABLE_ROSEN_BACKEND
     static void SetView(AceViewPreview* view, double density, int32_t width, int32_t height);
@@ -158,14 +159,14 @@ public:
         return true;
     }
 
-    AceViewPreview* GetAceView() const
+    RefPtr<AceView> GetAceView() const override
     {
         return aceView_;
     }
 
     void* GetView() const override
     {
-        return static_cast<void*>(aceView_);
+        return static_cast<void*>(AceType::RawPtr(aceView_));
     }
 
     void SetWindowModal(WindowModal windowModal)
@@ -263,7 +264,7 @@ public:
         return it->second;
     }
 
-    static std::string GetContentInfo(int32_t instanceId);
+    static std::string GetContentInfo(int32_t instanceId, ContentInfoType type);
     void SetSharedRuntime(void* runtime) override
     {
         sharedRuntime_ = runtime;
@@ -320,7 +321,7 @@ private:
         UIEnvCallback callback);
 #endif
 
-    AceViewPreview* aceView_ = nullptr;
+    RefPtr<AceViewPreview> aceView_ = nullptr;
     int32_t instanceId_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;

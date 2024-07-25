@@ -64,8 +64,10 @@ void RosenRenderQrcode::DrawQRCode(
         int32_t smallSquareWidth = size / sqrt(2);
 
         skBitmap = ProcessQrcodeData(smallSquareWidth, qrCode);
+        // draw without border around
         canvas->drawImage(skBitmap.asImage(),
-            topLeft.GetX() + (size - smallSquareWidth) / 2.0, topLeft.GetY() + (size - smallSquareWidth) / 2.0, SkSamplingOptions());
+            topLeft.GetX() + (size - smallSquareWidth) / 2.0,
+            topLeft.GetY() + (size - smallSquareWidth) / 2.0, SkSamplingOptions());
     }
 #else
     if (qrcode_->GetType() == QrcodeType::CIRCLE) {
@@ -77,6 +79,7 @@ void RosenRenderQrcode::DrawQRCode(
     canvas->DrawBitmap(ProcessQrcodeData(size, qrCode), topLeft.GetX(), topLeft.GetY());
     if (qrcode_->GetType() == QrcodeType::CIRCLE) {
         int32_t smallSquareWidth = size / sqrt(2);
+        // draw without border around
         canvas->DrawBitmap(ProcessQrcodeData(smallSquareWidth, qrCode),
             topLeft.GetX() + (size - smallSquareWidth) / 2.0, topLeft.GetY() + (size - smallSquareWidth) / 2.0);
     }

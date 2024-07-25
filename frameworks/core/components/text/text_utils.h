@@ -48,6 +48,31 @@ inline CharType GetCharType(const std::wstring& value, int32_t position)
     return result;
 }
 
+inline bool IsSameCharType(const std::wstring& wstring, int32_t position, CharType type)
+{
+    return GetCharType(wstring, position) == type;
+}
+  
+inline int32_t FindSameCharTypeStart(const std::wstring& wstring, int32_t position, CharType type)
+{
+    for (int32_t i = position - 1; i >= 0; --i) {
+        if (!IsSameCharType(wstring, i, type)) {
+            return i + 1;
+        }
+    }
+    return 0;
+}
+  
+inline int32_t FindSameCharTypeEnd(const std::wstring& wstring, int32_t position, int32_t length, CharType type)
+{
+    for (int32_t i = position; i < length; ++i) {
+        if (!IsSameCharType(wstring, i, type)) {
+            return i;
+        }
+    }
+    return length;
+}
+
 inline TextSelection GetRangeOfSameType(const std::string& str, int32_t position)
 {
     TextSelection selection = TextSelection(position, position);
@@ -59,27 +84,8 @@ inline TextSelection GetRangeOfSameType(const std::string& str, int32_t position
         return selection;
     }
 
-    // find start position.
-    for (int32_t i = position - 1; i >= 0; --i) {
-        if (GetCharType(wstring, i) != type) {
-            selection.baseOffset = i + 1;
-            break;
-        }
-        if (i == 0) {
-            selection.baseOffset = 0;
-        }
-    }
-
-    // find end position.
-    for (int32_t i = position; i < length; ++i) {
-        if (GetCharType(wstring, i) != type) {
-            selection.extentOffset = i;
-            break;
-        }
-        if (i == (length - 1)) {
-            selection.extentOffset = length;
-        }
-    }
+    selection.baseOffset = FindSameCharTypeStart(wstring, position, type);
+    selection.extentOffset = FindSameCharTypeEnd(wstring, position, length, type);
     return selection;
 }
 

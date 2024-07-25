@@ -41,6 +41,7 @@ constexpr bool DEFAULT_SYNC_LOAD_VALUE = false;
 constexpr ImageFit DEFAULT_OBJECT_FIT_VALUE = ImageFit::COVER;
 constexpr bool DEFAULT_FIT_ORIGINAL_SIZE = false;
 constexpr bool DEFAULT_DRAGGABLE = false;
+constexpr bool DEFAULT_IMAGE_SENSITIVE = false;
 constexpr ArkUI_Float32 DEFAULT_IMAGE_EDGE_ANTIALIASING = 0;
 constexpr ImageResizableSlice DEFAULT_IMAGE_SLICE;
 const std::vector<float> DEFAULT_COLOR_FILTER = { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 };
@@ -295,9 +296,6 @@ void SetObjectFit(ArkUINodeHandle node, ArkUI_Int32 objectFitNumber)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageFit objectFitValue = static_cast<ImageFit>(objectFitNumber);
-    if (objectFitValue < ImageFit::FILL || objectFitValue > ImageFit::SCALE_DOWN) {
-        objectFitValue = ImageFit::COVER;
-    }
     ImageModelNG::SetImageFit(frameNode, objectFitValue);
 }
 
@@ -371,7 +369,7 @@ void ResetFillColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ImageTheme>();
     CHECK_NULL_VOID(theme);
@@ -447,8 +445,9 @@ void GetColorFilter(ArkUINodeHandle node, ArkUIFilterColorType* colorFilter)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto filterFloatArray = ImageModelNG::GetColorFilter(frameNode);
-    colorFilter->filterSize = filterFloatArray.size() < MAX_COLOR_FILTER_SIZE ? filterFloatArray.size() :
-        MAX_COLOR_FILTER_SIZE;
+    colorFilter->filterSize = filterFloatArray.size() < MAX_COLOR_FILTER_SIZE
+                                  ? static_cast<int32_t>(filterFloatArray.size())
+                                  : static_cast<int32_t>(MAX_COLOR_FILTER_SIZE);
     for (size_t i = 0; i < static_cast<size_t>(colorFilter->filterSize) && i < MAX_COLOR_FILTER_SIZE; i++) {
         *(colorFilter->filterArray+i) = filterFloatArray[i];
     }
@@ -590,10 +589,11 @@ void SetImageOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
-        opacity = 0.0f;
+    auto opacityValue = static_cast<float>(opacity);
+    if ((LessNotEqual(opacityValue, 0.0)) || GreatNotEqual(opacityValue, 1.0)) {
+        opacityValue = 0.0f;
     }
-    ViewAbstract::SetOpacity(frameNode, opacity);
+    ViewAbstract::SetOpacity(frameNode, opacityValue);
 }
 
 void ResetImageOpacity(ArkUINodeHandle node)
@@ -679,6 +679,28 @@ void SetResourceSrc(ArkUINodeHandle node, void* resource)
     ImageModelNG::SetResource(frameNode, resource);
 }
 
+void SetAltSourceInfo(ArkUINodeHandle node, const ArkUIImageSourceInfo* sourceInfo)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(sourceInfo);
+    if (sourceInfo->url) {
+        if (ImageSourceInfo::ResolveURIType(sourceInfo->url) == SrcType::NETWORK) {
+            return;
+        }
+        ImageModelNG::SetAlt(frameNode, ImageSourceInfo { sourceInfo->url, "", "" });
+        return;
+    }
+    if (sourceInfo->resource) {
+        ImageModelNG::SetAltResource(frameNode, sourceInfo->resource);
+        return;
+    }
+    if (sourceInfo->pixelMap) {
+        ImageModelNG::SetAltPixelMap(frameNode, sourceInfo->pixelMap);
+        return;
+    }
+}
+
 void ResetDynamicRangeMode(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -747,6 +769,22 @@ void EnableAnalyzer(ArkUINodeHandle node, ArkUI_Bool enable)
     ImageModelNG::EnableAnalyzer(frameNode, enable);
 }
 
+void SetImagePrivacySensitve(ArkUINodeHandle node, ArkUI_Int32 sensitive)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetPrivacySensitive(static_cast<bool>(sensitive));
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void ResetImagePrivacySensitve(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetPrivacySensitive(DEFAULT_IMAGE_SENSITIVE);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void AnalyzerConfig(ArkUINodeHandle node, void* config)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -754,11 +792,78 @@ void AnalyzerConfig(ArkUINodeHandle node, void* config)
     ImageModelNG::SetImageAnalyzerConfig(frameNode, config);
 }
 
+void ResetImageContent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::ResetImage(frameNode);
+}
+
 void ResetImageSrc(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::ResetImageSrc(frameNode);
+}
+
+void SetInitialPixelMap(ArkUINodeHandle node, ArkUI_Int64 pixelMap)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    void* rawPtr = reinterpret_cast<void*>(pixelMap);
+    CHECK_NULL_VOID(rawPtr);
+    RefPtr<PixelMap> pixelMapRef = PixelMap::CreatePixelMap(rawPtr);
+    ImageModelNG::SetInitialPixelMap(frameNode, pixelMapRef);
+}
+
+void SetOnComplete(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onComplete = reinterpret_cast<std::function<void(const LoadImageSuccessEvent&)>*>(callback);
+        ImageModelNG::SetOnComplete(frameNode, std::move(*onComplete));
+    } else {
+        ImageModelNG::SetOnComplete(frameNode, nullptr);
+    }
+}
+
+void SetOnError(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onError = reinterpret_cast<std::function<void(const LoadImageFailEvent&)>*>(callback);
+        ImageModelNG::SetOnError(frameNode, std::move(*onError));
+    } else {
+        ImageModelNG::SetOnError(frameNode, nullptr);
+    }
+}
+
+void ResetOnError(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetOnError(frameNode, nullptr);
+}
+
+void SetImageOnFinish(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onFinish = reinterpret_cast<std::function<void()>*>(callback);
+        ImageModelNG::SetOnSvgPlayFinish(frameNode, std::move(*onFinish));
+    } else {
+        ImageModelNG::SetOnSvgPlayFinish(frameNode, nullptr);
+    }
+}
+
+void ResetImageOnFinish(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetOnSvgPlayFinish(frameNode, nullptr);
 }
 } // namespace
 
@@ -769,16 +874,18 @@ const ArkUIImageModifier* GetImageModifier()
         ResetCopyOption, SetAutoResize, ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode,
         ResetRenderMode, SetSyncLoad, ResetSyncLoad, SetObjectFit, ResetObjectFit, SetFitOriginalSize,
         ResetFitOriginalSize, SetSourceSize, ResetSourceSize, SetMatchTextDirection, ResetMatchTextDirection,
-        SetFillColor, ResetFillColor, SetAlt, ResetAlt, SetImageInterpolation, ResetImageInterpolation,
-        SetColorFilter, ResetColorFilter, SetImageSyncLoad, ResetImageSyncLoad, SetImageObjectFit,
-        ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize, SetImageDraggable,
-        ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder, ResetImageBorder,
-        SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable,
-        ResetResizable, SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality,
-        ResetEnhancedImageQuality, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit,
-        GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
-        GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
-        EnableAnalyzer, AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter, ResetImageSrc };
+        SetFillColor, ResetFillColor, SetAlt, ResetAlt, SetImageInterpolation, ResetImageInterpolation, SetColorFilter,
+        ResetColorFilter, SetImageSyncLoad, ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit,
+        SetImageFitOriginalSize, ResetImageFitOriginalSize, SetImageDraggable, ResetImageDraggable,
+        SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder, ResetImageBorder, SetImageOpacity,
+        ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable, ResetResizable,
+        SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality, ResetEnhancedImageQuality, GetImageSrc,
+        GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable,
+        GetRenderMode, SetImageResizable, GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap,
+        SetPixelMapArray, SetResourceSrc, EnableAnalyzer, SetImagePrivacySensitve, ResetImagePrivacySensitve,
+        AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter, ResetImageContent, ResetImageSrc,
+        SetInitialPixelMap, SetAltSourceInfo, SetOnComplete, SetOnError, ResetOnError, SetImageOnFinish,
+        ResetImageOnFinish };
     return &modifier;
 }
 
@@ -848,6 +955,31 @@ void SetImageOnDownloadProgress(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     ImageModelNG::SetOnDownloadProgress(frameNode, std::move(onDownloadProgress));
+}
+
+void ResetImageOnComplete(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetOnComplete(frameNode, nullptr);
+}
+void ResetImageOnError(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetOnError(frameNode, nullptr);
+}
+void ResetImageOnSvgPlayFinish(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetOnSvgPlayFinish(frameNode, nullptr);
+}
+void ResetImageOnDownloadProgress(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetOnDownloadProgress(frameNode, nullptr);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

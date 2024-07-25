@@ -41,13 +41,14 @@ public:
     virtual void SetFontFamilies(const std::vector<std::string>& families) = 0;
     virtual void SetFontSize(const Dimension& size) = 0;
     virtual std::vector<double> GetLineDash() = 0;
-    virtual void SetFillGradient(const Ace::Gradient& gradient) = 0;
+    virtual void SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient) = 0;
     virtual void SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern) = 0;
     virtual void SetFillColor(const Color& color, bool colorFlag) = 0;
-    virtual void SetStrokeGradient(const Ace::Gradient& gradient) = 0;
+    virtual void SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient) = 0;
     virtual void SetStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern) = 0;
     virtual void SetStrokeColor(const Color& color, bool colorFlag) = 0;
     virtual void DrawImage(const ImageInfo& imageInfo) = 0;
+    virtual void DrawSvgImage(const ImageInfo& imageInfo) {}
     virtual void PutImageData(const ImageData& imageData) = 0;
     virtual void CloseImageBitmap(const std::string& src) {}
     virtual std::unique_ptr<ImageData> GetImageData(const ImageSize& imageSize) = 0;
@@ -96,8 +97,8 @@ public:
     virtual void SetLineDash(const std::vector<double>& lineDash) = 0;
     virtual void SetTextAlign(const TextAlign& align) = 0;
     virtual void SetTextBaseline(const TextBaseline& baseline) = 0;
-    virtual double GetMeasureTextWidth(const PaintState& state, const std::string& text) = 0;
-    virtual double GetMeasureTextHeight(const PaintState& state, const std::string& text) = 0;
+    virtual double GetMeasureTextWidth(const PaintState& state, const std::string& text) { return 0.0; };
+    virtual double GetMeasureTextHeight(const PaintState& state, const std::string& text) { return 0.0; };
     virtual void FillRect(const Rect& rect) = 0;
     virtual void StrokeRect(const Rect& rect) = 0;
     virtual void ClearRect(const Rect& rect) = 0;
@@ -134,9 +135,9 @@ public:
     virtual void TransferFromImageBitmap(RefPtr<AceType>& canvasPattern, const RefPtr<AceType>& pixelMap) {};
 #else
     virtual void TransferFromImageBitmap(
-        RefPtr<AceType>& canvasPattern, const std::unique_ptr<Ace::ImageData>& imageData) {};
+        RefPtr<AceType>& canvasPattern, const std::shared_ptr<Ace::ImageData>& imageData) {};
 #endif
-    virtual void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, onAnalyzedCallback& onAnalyzed) {};
+    virtual void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, OnAnalyzedCallback& onAnalyzed) {};
     virtual void StopImageAnalyzer(RefPtr<AceType>& canvasPattern) {};
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasRenderingContext2DModel);

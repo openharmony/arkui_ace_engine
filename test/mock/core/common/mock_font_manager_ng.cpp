@@ -18,6 +18,8 @@
 #include "core/common/font_manager.h"
 
 namespace OHOS::Ace {
+
+std::string FontManager::appCustomFont_ = "";
 const std::vector<std::string>& FontManager::GetFontNames() const
 {
     return {};
@@ -51,4 +53,14 @@ void FontManager::AddVariationNodeNG(const WeakPtr<NG::UINode>& node) {}
 void FontManager::RemoveVariationNodeNG(const WeakPtr<NG::UINode>& node) {}
 
 void FontManager::RebuildFontNodeNG() {}
+
+bool FontManager::IsUseAppCustomFont() const
+{
+    return false;
+}
+
+const std::string& FontManager::GetAppCustomFont() const
+{
+    return appCustomFont_;
+}
 } // namespace OHOS::Ace

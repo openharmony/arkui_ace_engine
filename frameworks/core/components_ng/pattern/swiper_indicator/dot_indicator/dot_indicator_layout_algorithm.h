@@ -45,12 +45,18 @@ public:
         hoverPoint_ = hoverPoint;
     }
 
+    void SetIndicatorDisplayCount(int32_t indicatorDisplayCount)
+    {
+        indicatorDisplayCount_ = indicatorDisplayCount;
+    }
+
 private:
     static double GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge);
     float indicatorWidth_ = 0.0f;
     float indicatorHeight_ = 0.0f;
     bool isHoverOrPress_ = false;
     PointF hoverPoint_;
+    int32_t indicatorDisplayCount_ = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_INDICATOR_DOT_INDICATOR_LAYOUT_ALGORITHM_H

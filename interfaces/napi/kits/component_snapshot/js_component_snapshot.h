@@ -22,6 +22,7 @@
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 
+#include "core/components_ng/render/snapshot_param.h"
 namespace OHOS::Media {
 class PixelMap;
 } // namespace OHOS::Media
@@ -37,7 +38,15 @@ public:
 
     napi_value GetArgv(int32_t idx);
 
-    static constexpr int32_t ARGC_MAX = 2;
+    void ParseParamForBuilder(NG::SnapshotParam& param);
+
+    void ParseParamForGet(NG::SnapshotOptions& options);
+
+    void ParseParam(int32_t idx, NG::SnapshotParam& param);
+
+    void ParseOptions(int32_t idx, NG::SnapshotOptions& options);
+
+    static constexpr int32_t ARGC_MAX = 5;
 
 private:
     napi_env env_ = nullptr;

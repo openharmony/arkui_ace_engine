@@ -24,7 +24,7 @@
 namespace __detail__ {
 
 template<typename... Types>
-std::tuple<Types...> ToTuple(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+std::tuple<Types...> ToTuple(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     int index = 0;
     return {
@@ -47,23 +47,27 @@ public:
     static void Declare(const char* name);
 
     template<typename Base, typename R, typename... Args>
-    static void Method(const char* name, R (Base::*func)(Args...), int id);
+    static void Method(const char* name, FunctionBinding<Base, R, Args...>*);
 
     template<typename T>
-    static void CustomMethod(const char* name, MemberFunctionCallback<T> callback, int id);
+    static void CustomMethod(
+        const char* name, FunctionBinding<T, panda::Local<panda::JSValueRef>, panda::JsiRuntimeCallInfo*>* binding);
 
     static void CustomMethod(const char* name, FunctionCallback callback);
 
     template<typename T>
-    static void CustomMethod(const char* name, JSMemberFunctionCallback<T> callback, int id);
+    static void CustomMethod(const char* name, FunctionBinding<T, void, const JSCallbackInfo&>* binding);
 
     template<typename T>
-    static void CustomProperty(const char* name, MemberFunctionGetCallback<T> callback, int getterId, int setterId);
+    static void CustomProperty(const char* name,
+        FunctionBinding<T, panda::Local<panda::JSValueRef>, panda::JsiRuntimeCallInfo*>* getter,
+        FunctionBinding<T, panda::Local<panda::JSValueRef>, panda::JsiRuntimeCallInfo*>* setter);
 
     static void CustomProperty(const char* name, FunctionGetCallback getter, FunctionSetCallback setter);
 
     template<typename T>
-    static void CustomProperty(const char* name, JSMemberFunctionCallback<T> callback, int getterId, int setterId);
+    static void CustomProperty(const char* name, FunctionBinding<T, void, const JSCallbackInfo&>* getter,
+        FunctionBinding<T, void, const JSCallbackInfo&>* setter);
 
     template<typename R, typename... Args>
     static void StaticMethod(const char* name, StaticFunctionBinding<R, Args...>* staticFunctionBinding);
@@ -85,8 +89,7 @@ public:
     static void Bind(BindingTarget t, JSDestructorCallback<C> dtor = nullptr, JSGCMarkCallback<C> gcMark = nullptr);
 
     template<typename Base>
-    static void InheritAndBind(
-        BindingTarget t, JSFunctionCallback ctor = nullptr,
+    static void InheritAndBind(BindingTarget t, JSFunctionCallback ctor = nullptr,
         JSDestructorCallback<C> dtor = nullptr, JSGCMarkCallback<C> gcMark = nullptr);
 
     template<typename Base>
@@ -100,32 +103,29 @@ public:
 
 private:
     template<typename T, typename... Args>
-    static panda::Local<panda::JSValueRef> InternalMemberFunctionCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo);
+    static panda::Local<panda::JSValueRef> InternalMemberFunctionCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 
     template<typename T>
-    static panda::Local<panda::JSValueRef> InternalJSMemberFunctionCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo);
+    static panda::Local<panda::JSValueRef> InternalJSMemberFunctionCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 
     template<typename Class, typename R, typename... Args>
-    static panda::Local<panda::JSValueRef> MethodCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo);
-
-    template<typename Class, typename R, typename... Args>
-    static panda::Local<panda::JSValueRef> JSMethodCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo);
+    static panda::Local<panda::JSValueRef> MethodCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 
     template<typename R, typename... Args>
-    static panda::Local<panda::JSValueRef> StaticMethodCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo);
+    static panda::Local<panda::JSValueRef> StaticMethodCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 
-    static panda::Local<panda::JSValueRef> JSStaticMethodCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo);
+    static panda::Local<panda::JSValueRef> JSStaticMethodCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 
     template<typename... Args>
-    static panda::Local<panda::JSValueRef> InternalConstructor(panda::JsiRuntimeCallInfo *runtimeCallInfo);
+    static panda::Local<panda::JSValueRef> InternalConstructor(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 
-    static panda::Local<panda::JSValueRef> ConstructorInterceptor(panda::JsiRuntimeCallInfo *runtimeCallInfo);
+    static panda::Local<panda::JSValueRef> ConstructorInterceptor(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 
-    static void DestructorInterceptor(void *env, void* nativePtr, void* data);
+    static void DestructorInterceptor(void* env, void* nativePtr, void* data);
 
-    static panda::Local<panda::JSValueRef> JSConstructorInterceptor(panda::JsiRuntimeCallInfo *runtimeCallInfo);
+    static panda::Local<panda::JSValueRef> JSConstructorInterceptor(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 
-    static bool CheckIfConstructCall(panda::JsiRuntimeCallInfo *runtimeCallInfo);
+    static bool CheckIfConstructCall(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 
     static thread_local std::unordered_map<std::string, panda::Global<panda::FunctionRef>> staticFunctions_;
     static thread_local std::unordered_map<std::string, panda::Global<panda::FunctionRef>> customFunctions_;
@@ -137,7 +137,6 @@ private:
     static thread_local JSGCMarkCallback<C> jsGcMark_;
     static thread_local std::string className_;
     static thread_local panda::Global<panda::FunctionRef> classFunction_;
-    static thread_local std::vector<shared_ptr<int32_t>> functionIds_;
 };
 
 template<typename T>

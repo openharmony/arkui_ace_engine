@@ -19,6 +19,7 @@
 #include "core/components/slider/slider_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 const bool DEFAULT_SHOW_STEPS = false;
@@ -91,7 +92,7 @@ void ResetSliderStepSize(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<SliderTheme>();
 
@@ -210,7 +211,7 @@ void ResetTrackBackgroundColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
@@ -223,19 +224,18 @@ void SetSelectColor(ArkUINodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SliderModelNG::SetSelectColor(frameNode, SliderModelNG::CreateSolidGradient(Color(color)), true);
+    SliderModelNG::SetSelectColor(frameNode, Color(color));
 }
 
 void ResetSelectColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
-    SliderModelNG::SetSelectColor(
-        frameNode, SliderModelNG::CreateSolidGradient(theme->GetTrackSelectedColor()), true);
+    SliderModelNG::SetSelectColor(frameNode, theme->GetTrackSelectedColor());
 }
 
 void SetShowSteps(ArkUINodeHandle node, int showSteps)
@@ -536,8 +536,7 @@ ArkUI_Uint32 GetSelectColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
-    NG::Gradient gradient = SliderModelNG::GetSelectColor(frameNode);
-    return gradient.GetColors().at(0).GetColor().GetValue();
+    return SliderModelNG::GetSelectColor(frameNode).GetValue();
 }
 
 ArkUI_Bool GetShowSteps(ArkUINodeHandle node)

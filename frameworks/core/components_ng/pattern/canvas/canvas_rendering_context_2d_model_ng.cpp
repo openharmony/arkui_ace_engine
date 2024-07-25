@@ -20,7 +20,7 @@
 #include "securec.h"
 
 #include "core/components/common/properties/paint_state.h"
-#include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
+#include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
@@ -80,10 +80,10 @@ std::vector<double> CanvasRenderingContext2DModelNG::GetLineDash()
     return pattern_ ? pattern_->GetLineDash().lineDash : std::vector<double> {};
 }
 
-void CanvasRenderingContext2DModelNG::SetFillGradient(const Ace::Gradient& gradient)
+void CanvasRenderingContext2DModelNG::SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateFillGradient(gradient);
+    pattern_->SetFillGradient(gradient);
 }
 
 void CanvasRenderingContext2DModelNG::SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern)
@@ -98,10 +98,10 @@ void CanvasRenderingContext2DModelNG::SetFillColor(const Color& color, bool colo
     pattern_->UpdateFillColor(color);
 }
 
-void CanvasRenderingContext2DModelNG::SetStrokeGradient(const Ace::Gradient& gradient)
+void CanvasRenderingContext2DModelNG::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateStrokeGradient(gradient);
+    pattern_->SetStrokeGradient(gradient);
 }
 
 void CanvasRenderingContext2DModelNG::SetStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern)
@@ -119,15 +119,13 @@ void CanvasRenderingContext2DModelNG::SetStrokeColor(const Color& color, bool co
 void CanvasRenderingContext2DModelNG::DrawImage(const ImageInfo& imageInfo)
 {
     CHECK_NULL_VOID(pattern_);
-    if (imageInfo.isImage) {
-        pattern_->DrawImage(imageInfo.image, imageInfo.imgWidth, imageInfo.imgHeight);
-        return;
-    }
-    if (imageInfo.isSvg) {
-        pattern_->DrawSvgImage(imageInfo.svgDom, imageInfo.image, imageInfo.imageFit);
-        return;
-    }
-    pattern_->DrawPixelMap(imageInfo.pixelMap, imageInfo.image);
+    pattern_->DrawImage(imageInfo.image, imageInfo.imgWidth, imageInfo.imgHeight);
+}
+
+void CanvasRenderingContext2DModelNG::DrawSvgImage(const ImageInfo& imageInfo)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->DrawSvgImage(imageInfo.svgDom, imageInfo.image, imageInfo.imageFit);
 }
 
 void CanvasRenderingContext2DModelNG::PutImageData(const Ace::ImageData& imageData)
@@ -426,16 +424,6 @@ void CanvasRenderingContext2DModelNG::SetTextBaseline(const TextBaseline& baseli
     pattern_->UpdateTextBaseline(baseline);
 }
 
-double CanvasRenderingContext2DModelNG::GetMeasureTextWidth(const PaintState& state, const std::string& text)
-{
-    return pattern_ ? pattern_->MeasureText(text, state) : 0.0;
-}
-
-double CanvasRenderingContext2DModelNG::GetMeasureTextHeight(const PaintState& state, const std::string& text)
-{
-    return pattern_ ? pattern_->MeasureTextHeight(text, state) : 0.0;
-}
-
 void CanvasRenderingContext2DModelNG::FillRect(const Rect& rect)
 {
     CHECK_NULL_VOID(pattern_);
@@ -462,31 +450,23 @@ TransformParam CanvasRenderingContext2DModelNG::GetTransform()
 RefPtr<Ace::PixelMap> CanvasRenderingContext2DModelNG::GetPixelMap(const ImageSize& imageSize)
 {
 #ifdef PIXEL_MAP_SUPPORTED
-    // 1 Get data from canvas
-    auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
-    auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
-    if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
-        return nullptr;
-    }
-
-    // 2 Create pixelmap
+    // Create pixelmap
     OHOS::Media::InitializationOptions options;
     options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
     options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
     options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
-    options.size.width = static_cast<int32_t>(finalWidth);
-    options.size.height = static_cast<int32_t>(finalHeight);
+    options.size.width = static_cast<int32_t>(std::abs(imageSize.width));
+    options.size.height = static_cast<int32_t>(std::abs(imageSize.height));
     options.editable = true;
     auto pixelMap = Ace::PixelMap::Create(OHOS::Media::PixelMap::Create(options));
-    if (pixelMap) {
-        std::shared_ptr<Ace::ImageData> imageData = std::make_shared<Ace::ImageData>();
-        imageData->pixelMap = pixelMap;
-        imageData->dirtyX = static_cast<int32_t>(imageSize.left);
-        imageData->dirtyY = static_cast<int32_t>(imageSize.top);
-        imageData->dirtyWidth = static_cast<int32_t>(imageSize.width);
-        imageData->dirtyHeight = static_cast<int32_t>(imageSize.height);
-        GetImageData(imageData);
-    }
+    CHECK_NULL_RETURN(pixelMap, nullptr);
+    std::shared_ptr<Ace::ImageData> imageData = std::make_shared<Ace::ImageData>();
+    imageData->pixelMap = pixelMap;
+    imageData->dirtyX = static_cast<int32_t>(imageSize.left);
+    imageData->dirtyY = static_cast<int32_t>(imageSize.top);
+    imageData->dirtyWidth = static_cast<int32_t>(imageSize.width);
+    imageData->dirtyHeight = static_cast<int32_t>(imageSize.height);
+    GetImageData(imageData);
     return pixelMap;
 #else
     return nullptr;
@@ -496,42 +476,34 @@ RefPtr<Ace::PixelMap> CanvasRenderingContext2DModelNG::GetPixelMap(const ImageSi
 void CanvasRenderingContext2DModelNG::GetImageDataModel(const ImageSize& imageSize, uint8_t* buffer)
 {
 #ifdef PIXEL_MAP_SUPPORTED
-    auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
-    auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
-    if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
-        return;
-    }
     OHOS::Media::InitializationOptions options;
     options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
     options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
     options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
-    options.size.width = static_cast<int32_t>(finalWidth);
-    options.size.height = static_cast<int32_t>(finalHeight);
+    options.size.width = static_cast<int32_t>(std::abs(imageSize.width));
+    options.size.height = static_cast<int32_t>(std::abs(imageSize.height));
     options.editable = true;
     auto pixelMap = Ace::PixelMap::Create(OHOS::Media::PixelMap::Create(options));
-    if (pixelMap) {
-        std::shared_ptr<Ace::ImageData> imageData = std::make_shared<Ace::ImageData>();
-        imageData->pixelMap = pixelMap;
-        imageData->dirtyX = static_cast<int32_t>(imageSize.left);
-        imageData->dirtyY = static_cast<int32_t>(imageSize.top);
-        imageData->dirtyWidth = static_cast<int32_t>(imageSize.width);
-        imageData->dirtyHeight = static_cast<int32_t>(imageSize.height);
-        GetImageData(imageData);
-        auto pixelsSize = pixelMap->GetRowBytes() * pixelMap->GetHeight();
-        memcpy_s(buffer, pixelsSize, pixelMap->GetWritablePixels(), pixelsSize);
-    }
+    CHECK_NULL_VOID(pixelMap);
+    std::shared_ptr<Ace::ImageData> imageData = std::make_shared<Ace::ImageData>();
+    imageData->pixelMap = pixelMap;
+    imageData->dirtyX = static_cast<int32_t>(imageSize.left);
+    imageData->dirtyY = static_cast<int32_t>(imageSize.top);
+    imageData->dirtyWidth = static_cast<int32_t>(imageSize.width);
+    imageData->dirtyHeight = static_cast<int32_t>(imageSize.height);
+    GetImageData(imageData);
+    auto pixelsSize = pixelMap->GetRowBytes() * pixelMap->GetHeight();
+    memcpy_s(buffer, pixelsSize, pixelMap->GetWritablePixels(), pixelsSize);
 #else
     auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
     auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
     std::unique_ptr<Ace::ImageData> data = GetImageData(imageSize);
-
-    if (data != nullptr) {
-        for (uint32_t idx = 0; idx < finalHeight * finalWidth; ++idx) {
-            buffer[4 * idx] = data->data[idx].GetRed();
-            buffer[4 * idx + 1] = data->data[idx].GetGreen();
-            buffer[4 * idx + 2] = data->data[idx].GetBlue();
-            buffer[4 * idx + 3] = data->data[idx].GetAlpha();
-        }
+    CHECK_NULL_VOID(data);
+    for (uint32_t idx = 0; idx < finalHeight * finalWidth; ++idx) {
+        buffer[4 * idx] = data->data[idx].GetRed();
+        buffer[4 * idx + 1] = data->data[idx].GetGreen();
+        buffer[4 * idx + 2] = data->data[idx].GetBlue();
+        buffer[4 * idx + 3] = data->data[idx].GetAlpha();
     }
 #endif
 }
@@ -590,7 +562,7 @@ void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(
 }
 #else
 void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(
-    RefPtr<AceType>& canvasPattern, const std::unique_ptr<Ace::ImageData>& imageData)
+    RefPtr<AceType>& canvasPattern, const std::shared_ptr<Ace::ImageData>& imageData)
 {
     auto customPaintPattern = AceType::DynamicCast<CanvasPattern>(canvasPattern);
     CHECK_NULL_VOID(customPaintPattern);
@@ -600,7 +572,7 @@ void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(
 #endif
 
 void CanvasRenderingContext2DModelNG::StartImageAnalyzer(
-    RefPtr<AceType>& canvasPattern, void* config, onAnalyzedCallback& onAnalyzed)
+    RefPtr<AceType>& canvasPattern, void* config, OnAnalyzedCallback& onAnalyzed)
 {
     auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern);
     CHECK_NULL_VOID(customPaintPattern);

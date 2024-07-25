@@ -35,7 +35,17 @@ int32_t Container::CurrentId()
     return g_id;
 }
 
+int32_t Container::SafelyId()
+{
+    return g_id;
+}
+
 int32_t Container::CurrentIdSafely()
+{
+    return g_id;
+}
+
+int32_t Container::CurrentIdSafelyWithCheck()
 {
     return g_id;
 }
@@ -51,6 +61,16 @@ RefPtr<TaskExecutor> Container::CurrentTaskExecutor()
     return MockContainer::Current()->GetTaskExecutor();
 }
 
+RefPtr<TaskExecutor> Container::CurrentTaskExecutorSafely()
+{
+    return MockContainer::Current()->GetTaskExecutor();
+}
+
+RefPtr<TaskExecutor> Container::CurrentTaskExecutorSafelyWithCheck()
+{
+    return MockContainer::Current()->GetTaskExecutor();
+}
+
 void Container::UpdateCurrent(int32_t id)
 {
     g_id = id;
@@ -62,6 +82,11 @@ RefPtr<Container> Container::Current()
 }
 
 RefPtr<Container> Container::CurrentSafely()
+{
+    return MockContainer::Current();
+}
+
+RefPtr<Container> Container::CurrentSafelyWithCheck()
 {
     return MockContainer::Current();
 }

@@ -192,19 +192,11 @@ protected:
     Color popupUnclickedBgAreaColor_;
 
 private:
-    static void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<IndexerTheme>& theme)
+    static void ParseColorAttributes(const RefPtr<ThemeStyle>& indexerPattern, const RefPtr<IndexerTheme>& theme)
     {
-        RefPtr<ThemeStyle> indexerPattern = themeConstants->GetPatternByName(THEME_PATTERN_INDEXER);
-        if (!indexerPattern) {
-            LOGE("Pattern of indexer is null, please check!");
-            return;
-        }
-        theme->defaultTextColor_ =
-            indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR));
+        theme->defaultTextColor_ = indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR));
         theme->selectedTextColor_ = indexerPattern->GetAttr<Color>("selected_text_color", Color(SELECT_TEXT_COLOR));
         theme->popupTextColor_ = indexerPattern->GetAttr<Color>("popup_text_color", Color(POPUP_TEXT_COLOR));
-        theme->popupTextSize_ =
-            indexerPattern->GetAttr<Dimension>("popup_text_size", Dimension(POPUP_TEXT_SIZE, DimensionUnit::FP));
         theme->selectedBackgroundColor_ =
             indexerPattern->GetAttr<Color>("selected_background_color", Color(SELECT_BACKGROUD_COLOR)).ChangeOpacity(
                 indexerPattern->GetAttr<double>("selected_background_color_opacity", SELECT_BACKGROUND_OPACITY));
@@ -214,27 +206,49 @@ private:
             indexerPattern->GetAttr<Color>("popup_selected_text_color", Color(POPUP_SELECTED_TEXT_COLOR));
         theme->popupUnselectedTextColor_ =
             indexerPattern->GetAttr<Color>("popup_unselected_text_color", Color(POPUP_UNSELECTED_TEXT_COLOR));
+        theme->hoverBgAreaColor_ = indexerPattern->GetAttr<Color>("hover_bg_area_color", Color(HOVER_BG_AREA_COLOR));
+        theme->slipHoverBackgroundColor_ =
+            indexerPattern->GetAttr<Color>("slip_hover_background_color", Color(SLIP_HOVER_BACKGROUD_COLOR));
+        theme->focusBgOutlineColor_ =
+            indexerPattern->GetAttr<Color>("focus_bg_outline_color", Color(FOCUS_BG_OUTLINE_COLOR));
+        theme->pressedBgAreaColor_ =
+            indexerPattern->GetAttr<Color>("pressed_bg_area_color", Color(PRESSED_BG_AREA_COLOR));
+        theme->slipPressedBackgroundColor_ =
+            indexerPattern->GetAttr<Color>("slip_pressed_background_color", Color(SLIP_PRESSED_BACKGROUD_COLOR));
+        theme->popupClickedBgAreaColor_ =
+            indexerPattern->GetAttr<Color>("popup_clicked_bg_area_color", Color(POPUP_CLICKED_BG_AREA_COLOR));
+        theme->popupTitleBackground_ =
+            indexerPattern->GetAttr<Color>("popup_title_color", Color(POPUP_TITLE_BG_AREA_COLOR));
+        theme->popupUnclickedBgAreaColor_ =
+            indexerPattern->GetAttr<Color>("popup_unclicked_bg_area_color", Color(POPUP_UNCLICKED_BG_AREA_COLOR));
+    }
+
+    static void ParseDimensionAttributes(const RefPtr<ThemeStyle>& indexerPattern,
+        const RefPtr<IndexerTheme>& theme)
+    {
+        theme->popupTextSize_ =
+            indexerPattern->GetAttr<Dimension>("popup_text_size", Dimension(POPUP_TEXT_SIZE, DimensionUnit::FP));
         theme->popupAreaSize_ =
             indexerPattern->GetAttr<Dimension>("popup_area_size", Dimension(POPUP_AREA_SIZE, DimensionUnit::VP));
         theme->hoverRadiusSize_ =
             indexerPattern->GetAttr<Dimension>("hover_radius_size", Dimension(HOVER_RADIUS_SIZE, DimensionUnit::VP));
         theme->hoverBgAreaSize_ =
             indexerPattern->GetAttr<Dimension>("hover_bg_area_size", Dimension(HOVER_BG_AREA_SIZE, DimensionUnit::VP));
-        theme->hoverBgAreaColor_ = indexerPattern->GetAttr<Color>("hover_bg_area_color", Color(HOVER_BG_AREA_COLOR));
         theme->hoverTextAlpha_ =
             indexerPattern->GetAttr<Dimension>("hover_text_alpha", Dimension(HOVER_TEXT_ALPHA, DimensionUnit::PX));
-        theme->slipHoverBackgroundColor_ =
-            indexerPattern->GetAttr<Color>("slip_hover_background_color", Color(SLIP_HOVER_BACKGROUD_COLOR));
-        theme->focusBgOutlineColor_ =
-            indexerPattern->GetAttr<Color>("focus_bg_outline_color", Color(FOCUS_BG_OUTLINE_COLOR));
         theme->focusBgOutlineSize_ = indexerPattern->GetAttr<Dimension>(
             "focus_bg_outline_size", Dimension(FOCUS_BG_OUTLINE_SIZE, DimensionUnit::VP));
-        theme->seletctTextStyle_.SetTextColor(
-            indexerPattern->GetAttr<Color>("selected_text_color", Color(SELECT_TEXT_COLOR)));
-        theme->seletctTextStyle_.SetFontStyle(FontStyle::NORMAL);
+    }
+
+    static void ParseTextStyleAttributes(const RefPtr<ThemeStyle>& indexerPattern,
+        const RefPtr<IndexerTheme>& theme)
+    {
         std::vector<std::string> fontFamilies;
         std::string defaultFamily = "HarmonyOS Sans";
         fontFamilies.emplace_back(defaultFamily);
+        theme->seletctTextStyle_.SetTextColor(
+            indexerPattern->GetAttr<Color>("selected_text_color", Color(SELECT_TEXT_COLOR)));
+        theme->seletctTextStyle_.SetFontStyle(FontStyle::NORMAL);
         theme->seletctTextStyle_.SetFontFamilies(fontFamilies);
         theme->defaultTextStyle_.SetTextColor(
             indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR)));
@@ -247,16 +261,18 @@ private:
         theme->popupTextStyle_.SetFontWeight(FontWeight::MEDIUM);
         theme->popupTextStyle_.SetFontStyle(FontStyle::NORMAL);
         theme->popupTextStyle_.SetFontFamilies(fontFamilies);
-        theme->pressedBgAreaColor_ =
-            indexerPattern->GetAttr<Color>("pressed_bg_area_color", Color(PRESSED_BG_AREA_COLOR));
-        theme->slipPressedBackgroundColor_ =
-            indexerPattern->GetAttr<Color>("slip_pressed_background_color", Color(SLIP_PRESSED_BACKGROUD_COLOR));
-        theme->popupClickedBgAreaColor_ =
-            indexerPattern->GetAttr<Color>("popup_clicked_bg_area_color", Color(POPUP_CLICKED_BG_AREA_COLOR));
-        theme->popupTitleBackground_ =
-            indexerPattern->GetAttr<Color>("popup_title_color", Color(POPUP_TITLE_BG_AREA_COLOR));
-        theme->popupUnclickedBgAreaColor_ =
-            indexerPattern->GetAttr<Color>("popup_unclicked_bg_area_color", Color(POPUP_UNCLICKED_BG_AREA_COLOR));
+    }
+
+    static void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<IndexerTheme>& theme)
+    {
+        RefPtr<ThemeStyle> indexerPattern = themeConstants->GetPatternByName(THEME_PATTERN_INDEXER);
+        if (!indexerPattern) {
+            LOGE("Pattern of indexer is null, please check!");
+            return;
+        }
+        ParseColorAttributes(indexerPattern, theme);
+        ParseDimensionAttributes(indexerPattern, theme);
+        ParseTextStyleAttributes(indexerPattern, theme);
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             theme->popupBackgroundColor_ = indexerPattern->GetAttr<Color>(
                 "popup_background_color_api_twelve", Color(POPUP_BACKGROUND_COLOR_API_TWELVE));

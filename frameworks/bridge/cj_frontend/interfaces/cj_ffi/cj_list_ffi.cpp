@@ -196,6 +196,13 @@ void FfiOHOSAceFrameworkListSetSticky(int32_t style)
     ListModel::GetInstance()->SetSticky(STICKY_STYLE[style]);
 }
 
+void FfiOHOSAceFrameworkListSetNestedScroll(int32_t scrollForward, int32_t scrollBackward)
+{
+    NestedScrollOptions localNestedScrollOptions = {.forward = NestedScrollMode(scrollForward),
+        .backward = NestedScrollMode(scrollBackward)};
+    ListModel::GetInstance()->SetNestedScroll(localNestedScrollOptions);
+}
+
 void FfiOHOSAceFrameworkListSetCachedCount(int32_t cachedCount)
 {
     int32_t value = cachedCount < 0 ? 1 : cachedCount;

@@ -48,7 +48,8 @@ std::string ScrollEventInfo::ToJSONString() const
     }
 }
 
-void ScrollPositionController::ScrollToIndex(int32_t index, bool /* smooth */, ScrollAlign /* align */)
+void ScrollPositionController::ScrollToIndex(
+    int32_t index, bool /* smooth */, ScrollAlign /* align */, std::optional<float> /* extraOffset */)
 {
     RefPtr<RenderNode> node = scroll_.Upgrade();
     if (node) {

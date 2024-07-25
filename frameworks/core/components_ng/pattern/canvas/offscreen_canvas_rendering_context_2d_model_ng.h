@@ -17,8 +17,8 @@
 #define FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CANVAS_OFFSCREEN_CANVAS_RENDERING_CONTEXT_2D_MODEL_NG_H
 
 #include "base/utils/macros.h"
+#include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 #include "core/components_ng/pattern/canvas/rendering_context_2d_model.h"
-#include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -38,13 +38,14 @@ public:
     void SetFontFamilies(const std::vector<std::string>& families) override;
     void SetFontSize(const Dimension& size) override;
     std::vector<double> GetLineDash() override;
-    void SetFillGradient(const Ace::Gradient& gradient) override;
+    void SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient) override;
     void SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern) override;
     void SetFillColor(const Color& color, bool colorFlag) override;
-    void SetStrokeGradient(const Ace::Gradient& gradient) override;
+    void SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient) override;
     void SetStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern) override;
     void SetStrokeColor(const Color& color, bool colorFlag) override;
     void DrawImage(const ImageInfo& imageInfo) override;
+    void DrawSvgImage(const ImageInfo& imageInfo) override;
     void PutImageData(const Ace::ImageData& imageData) override;
     void CloseImageBitmap(const std::string& src) override;
     std::unique_ptr<Ace::ImageData> GetImageData(const ImageSize& imageSize) override;
@@ -93,8 +94,6 @@ public:
     void SetLineDash(const std::vector<double>& lineDash) override;
     void SetTextAlign(const TextAlign& align) override;
     void SetTextBaseline(const TextBaseline& baseline) override;
-    double GetMeasureTextWidth(const PaintState& state, const std::string& text) override;
-    double GetMeasureTextHeight(const PaintState& state, const std::string& text) override;
     void FillRect(const Rect& rect) override;
     void StrokeRect(const Rect& rect) override;
     void ClearRect(const Rect& rect) override;

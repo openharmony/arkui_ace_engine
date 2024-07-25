@@ -29,6 +29,7 @@ public:
     static void SetDivider(const JSCallbackInfo& args);
     static void SetAspectRatio(const JSCallbackInfo& args);
     static void SetChildrenMainSize(const JSCallbackInfo& args);
+    static void SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj);
 };
 
 } // namespace OHOS::Ace::Framework

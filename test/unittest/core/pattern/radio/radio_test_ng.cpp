@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
+#include "test/unittest/core/pattern/test_ng.h"
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
@@ -31,6 +32,7 @@
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -64,9 +66,11 @@ constexpr Color NORMAL_COLOR = Color(0xff0000ff);
 constexpr Color ERROR_COLOR = Color();
 const std::optional<int32_t> INDICATOR_TYPE_TICK = 0;
 const OHOS::Ace::NG::TouchHoverAnimationType INVALID_TOUCH_HOVER_ANIMARION_TYPE = TouchHoverAnimationType(100);
+constexpr double NUM_TWO = 2.0;
+const SizeF CHILD_FRAME_SIZE = SizeF(50.0, 50.0);
 } // namespace
 
-class RadioTestNg : public testing::Test {
+class RadioTestNg : public TestNG {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -86,12 +90,14 @@ void RadioTestNg::SetUpTestSuite()
         return radioTheme;
     });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    MockContainer::SetUp();
 }
 
 void RadioTestNg::TearDownTestSuite()
 {
     MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 /**
@@ -208,8 +214,8 @@ HWTEST_F(RadioTestNg, RadioPaintPropertyTest004, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPaintPropertyTest005, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetRadioIndicator(INDICATOR_TYPE_TICK.value());
@@ -218,7 +224,7 @@ HWTEST_F(RadioTestNg, RadioPaintPropertyTest005, TestSize.Level1)
     auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
     ASSERT_NE(radioPaintProperty, nullptr);
     EXPECT_EQ(radioPaintProperty->GetRadioIndicator(), INDICATOR_TYPE_TICK);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -347,6 +353,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest005, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
+    pattern->preCheck_ = false;
     pattern->UpdateUncheckStatus(frameNode);
     EXPECT_EQ(isChecked, false);
 }
@@ -409,8 +416,10 @@ HWTEST_F(RadioTestNg, RadioPatternTest007, TestSize.Level1)
     EXPECT_EQ(radioPaintProperty->GetRadioCheckValue(), CHECKED);
     auto pageNode = stageManager->GetPageById(frameNode0->GetPageId());
     ASSERT_EQ(pageNode, nullptr);
-    pattern0->UpdateGroupCheckStatus(frameNode0, pageNode, false);
-    EXPECT_TRUE(radioPaintProperty->GetRadioCheckValue());
+    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
+    auto groupManager = pageEventHub->GetGroupManager();
+    pattern0->UpdateGroupCheckStatus(frameNode0, groupManager, false);
+    EXPECT_FALSE(radioPaintProperty->GetRadioCheckValue());
 }
 
 /**
@@ -462,7 +471,9 @@ HWTEST_F(RadioTestNg, RadioPatternTest008, TestSize.Level1)
     ASSERT_NE(radioPaintProperty0, nullptr);
     EXPECT_NE(radioPaintProperty0->GetRadioCheckValue(), CHECKED);
     auto pageNode = stageManager->GetPageById(frameNode0->GetPageId());
-    pattern0->UpdateGroupCheckStatus(frameNode0, pageNode, false);
+    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
+    auto groupManager = pageEventHub->GetGroupManager();
+    pattern0->UpdateGroupCheckStatus(frameNode0, groupManager, true);
     auto radioPaintProperty1 = frameNode1->GetPaintProperty<RadioPaintProperty>();
     ASSERT_NE(radioPaintProperty1, nullptr);
     EXPECT_EQ(radioPaintProperty1->GetRadioCheckValue(), CHECKED);
@@ -938,8 +949,8 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest007, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPaintMethodTest008, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetContentSize(CONTENT_SIZE);
@@ -959,7 +970,7 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest008, TestSize.Level1)
     radioPaintMethod.radioModifier_->uiStatus_ =
         AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(UIStatus::SELECTED));
     radioPaintMethod.radioModifier_->PaintIndicator(canvas, false, CONTENT_SIZE, CONTENT_OFFSET);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -970,8 +981,8 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest008, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPaintMethodTest009, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetContentSize(CONTENT_SIZE);
@@ -986,12 +997,12 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest009, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(4);
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(5);
     radioPaintMethod.radioModifier_->enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
     radioPaintMethod.radioModifier_->uiStatus_ =
         AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(UIStatus::UNSELECTED));
     radioPaintMethod.radioModifier_->PaintIndicator(canvas, false, CONTENT_SIZE, CONTENT_OFFSET);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1002,8 +1013,8 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest009, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPaintMethodTest010, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     auto radioModifier = AceType::MakeRefPtr<RadioModifier>();
     radioModifier->isOnAnimationFlag_->Set(true);
     radioModifier->UpdateIndicatorAnimation(true);
@@ -1013,7 +1024,7 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest010, TestSize.Level1)
     radioModifier->UpdateIndicatorAnimation(false);
     EXPECT_EQ(radioModifier->opacityScale_->Get(), 0);
     EXPECT_EQ(radioModifier->borderOpacityScale_->Get(), 1);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1066,6 +1077,14 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest003, TestSize.Level1)
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH);
     auto size = radioLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    layoutProperty->calcLayoutConstraint_->selfIdealSize->Reset();
+    layoutProperty->calcLayoutConstraint_->selfIdealSize->width_ = CalcLength(COMPONENT_WIDTH);
+    pattern->GetChildContentSize();
     ASSERT_NE(size, std::nullopt);
     EXPECT_EQ(size.value(), SizeF(COMPONENT_WIDTH, COMPONENT_WIDTH));
 }
@@ -1365,6 +1384,9 @@ HWTEST_F(RadioTestNg, RadioPatternTest025, TestSize.Level1)
     /**
      * fire touch event
      */
+    auto touchCallback = [](TouchEventInfo& info) {};
+    auto touchEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(touchEvent);
     auto touchEventActuator = gesture->touchEventActuator_;
     ASSERT_NE(touchEventActuator, nullptr);
     auto events = touchEventActuator->touchEvents_;
@@ -1552,8 +1574,8 @@ RadioBuilderFunc RadioTestNg::RadioBuilder()
 HWTEST_F(RadioTestNg, RadioPatternTest030, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     auto radioFunc = RadioBuilder();
@@ -1564,7 +1586,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest030, TestSize.Level1)
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
     ASSERT_NE(pattern->builder_, nullptr);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1574,8 +1596,8 @@ HWTEST_F(RadioTestNg, RadioPatternTest030, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest031, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetChecked(false);
@@ -1585,9 +1607,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest031, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto host = pattern->GetHost();
     pattern->OnModifyDone();
-    auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
-    ASSERT_NE(childNode, nullptr);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1791,5 +1811,192 @@ HWTEST_F(RadioTestNg, RadioPatternTest037, TestSize.Level1)
      */
     pattern->SetBuilderFunc(node);
     pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: RadioReverseLayout001
+ * @tc.desc: Test for layout method of RadioLayoutAlgorithm to get the offset in the RTL scene,
+             when Width and height are not set in the front end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioReverseLayout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node and add Image child.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto radioLayoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(radioLayoutProperty, nullptr);
+    radioLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    frameNode->MarkModifyDone();
+
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto childNode = pattern->builderChildNode_;
+    ASSERT_NE(childNode, nullptr);
+    auto hostGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(frameNode, hostGeometryNode, radioLayoutProperty);
+    auto childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> childWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childNode, childGeometryNode, childNode->GetLayoutProperty());
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.maxSize = SizeF(1000.0, 1000.0);
+    layoutConstraintSize.minSize = SizeF(0, 0);
+    ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
+    layoutWrapper.AppendChild(childWrapper);
+
+    /**
+     * @tc.steps: step2. Measure Radio node Content size and child size.
+     */
+    layoutWrapper.GetGeometryNode()->SetFrameSize(CONTENT_SIZE);
+    childWrapper->GetGeometryNode()->SetFrameSize(CHILD_FRAME_SIZE);
+
+    /**
+     * @tc.steps: step3. layout child node.
+     */
+    NG::OffsetF child_offset;
+    auto align = Alignment::CENTER;
+    child_offset.SetX((1.0 + align.GetHorizontal()) * (CONTENT_SIZE.Width() - CHILD_FRAME_SIZE.Width()) / NUM_TWO);
+    child_offset.SetY((1.0 + align.GetVertical()) * (CONTENT_SIZE.Height() - CHILD_FRAME_SIZE.Height()) / NUM_TWO);
+    radioLayoutAlgorithm.Layout(&layoutWrapper);
+    EXPECT_TRUE(IsEqual(childWrapper->GetGeometryNode()->GetMarginFrameOffset(), child_offset));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: RadioReverseLayout002
+ * @tc.desc: Test for layout method of RadioLayoutAlgorithm to get the offset in the RTL scene,
+             when Width and height are set in the front end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioReverseLayout002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node and add Image child.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto radioLayoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(radioLayoutProperty, nullptr);
+    radioLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    frameNode->MarkModifyDone();
+
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto childNode = pattern->builderChildNode_;
+    ASSERT_NE(childNode, nullptr);
+    auto hostGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(frameNode, hostGeometryNode, radioLayoutProperty);
+    auto childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> childWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childNode, childGeometryNode, childNode->GetLayoutProperty());
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.maxSize = SizeF(1000.0, 1000.0);
+    layoutConstraintSize.minSize = SizeF(0, 0);
+    layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH);
+    layoutConstraintSize.selfIdealSize.SetHeight(COMPONENT_HEIGHT);
+    ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
+    layoutWrapper.AppendChild(childWrapper);
+
+    /**
+     * @tc.steps: step2. Measure Radio node Content size and child size.
+     */
+    layoutWrapper.GetGeometryNode()->SetFrameSize(CONTENT_SIZE);
+    childWrapper->GetGeometryNode()->SetFrameSize(CHILD_FRAME_SIZE);
+
+    /**
+     * @tc.steps: step3. layout child node.
+     */
+    NG::OffsetF child_offset;
+    auto align = Alignment::CENTER;
+    child_offset.SetX((1.0 + align.GetHorizontal()) * (CONTENT_SIZE.Width() - CHILD_FRAME_SIZE.Width()) / NUM_TWO);
+    child_offset.SetY((1.0 + align.GetVertical()) * (CONTENT_SIZE.Height() - CHILD_FRAME_SIZE.Height()) / NUM_TWO);
+    radioLayoutAlgorithm.Layout(&layoutWrapper);
+    EXPECT_TRUE(IsEqual(childWrapper->GetGeometryNode()->GetMarginFrameOffset(), child_offset));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: RadioReverseLayout003
+ * @tc.desc: Test for layout method of RadioLayoutAlgorithm to get the offset in the RTL scene,
+             when Width and height are set in the front end and child node is customBuilder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioReverseLayout003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node and add customNode child.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
+    auto radioFunc = RadioBuilder();
+    radioModelNG.SetBuilder(std::move(radioFunc));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto radioLayoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(radioLayoutProperty, nullptr);
+    radioLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+    int32_t CustomIndicatorType = 2;
+    radioPaintProperty->UpdateRadioIndicator(CustomIndicatorType);
+
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    frameNode->MarkModifyDone();
+
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto childNode = pattern->builderChildNode_;
+    ASSERT_NE(childNode, nullptr);
+    auto hostGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(frameNode, hostGeometryNode, radioLayoutProperty);
+    auto childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> childWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childNode, childGeometryNode, childNode->GetLayoutProperty());
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.maxSize = SizeF(1000.0, 1000.0);
+    layoutConstraintSize.minSize = SizeF(0, 0);
+    layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH);
+    layoutConstraintSize.selfIdealSize.SetHeight(COMPONENT_HEIGHT);
+    ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
+    layoutWrapper.AppendChild(childWrapper);
+
+    /**
+     * @tc.steps: step2. Measure Radio node Content size and child size.
+     */
+    layoutWrapper.GetGeometryNode()->SetFrameSize(CONTENT_SIZE);
+    childWrapper->GetGeometryNode()->SetFrameSize(CHILD_FRAME_SIZE);
+
+    /**
+     * @tc.steps: step3. layout child node.
+     */
+    NG::OffsetF child_offset;
+    auto align = Alignment::CENTER;
+    child_offset.SetX((1.0 + align.GetHorizontal()) * (CONTENT_SIZE.Width() - CHILD_FRAME_SIZE.Width()) / NUM_TWO);
+    child_offset.SetY((1.0 + align.GetVertical()) * (CONTENT_SIZE.Height() - CHILD_FRAME_SIZE.Height()) / NUM_TWO);
+    radioLayoutAlgorithm.Layout(&layoutWrapper);
+    EXPECT_TRUE(IsEqual(childWrapper->GetGeometryNode()->GetMarginFrameOffset(), child_offset));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

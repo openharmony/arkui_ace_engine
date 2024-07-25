@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_group_bridge.h"
+#include "core/components_ng/pattern/list/list_item_group_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_list_item_group.h"
+using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 constexpr int32_t NODE_INDEX = 0;
@@ -91,6 +94,72 @@ ArkUINativeModuleValue ListItemGroupBridge::ResetDivider(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_INDEX);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetDivider(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListItemGroupBridge::SetChildrenMainSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    // 2: argument count.
+    if (info.Length() != 2 || !(info[1]->IsObject())) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    JSListItemGroup::SetChildrenMainSize(Framework::JSRef<Framework::JSObject>::Cast(info[1]));
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListItemGroupBridge::ResetChildrenMainSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NODE_INDEX);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getListItemGroupModifier()->resetListItemGroupChildrenMainSize(nativeNode);
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListItemGroupBridge::SetListItemGroupInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> spaceArg = runtimeCallInfo->GetCallArgRef(1); //1 is index of space
+    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(2); //2 is index of style
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    double space = 0.0;
+    if (spaceArg->IsObject(vm) || !ArkTSUtils::ParseJsDouble(vm, spaceArg, space) || LessNotEqual(space, 0.0)) {
+        space = 0.0;
+    }
+    GetArkUINodeModifiers()->getListItemGroupModifier()->setListItemGroupSpace(nativeNode, space);
+
+    if (styleArg->IsUndefined() || styleArg->IsNull() || !styleArg->IsNumber()) {
+        GetArkUINodeModifiers()->getListItemGroupModifier()->resetListItemGroupStyle(nativeNode);
+    } else {
+        uint32_t style = styleArg->Uint32Value(vm);
+        if (style < static_cast<uint32_t>(V2::ListItemGroupStyle::NONE) ||
+            style > static_cast<uint32_t>(V2::ListItemGroupStyle::CARD)) {
+            style = static_cast<uint32_t>(V2::ListItemGroupStyle::NONE);
+        }
+        GetArkUINodeModifiers()->getListItemGroupModifier()->setListItemGroupStyle(nativeNode, style);
+    }
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListItemGroupBridge::ResetListItemGroupInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getListItemGroupModifier()->resetListItemGroupSpace(nativeNode);
+    GetArkUINodeModifiers()->getListItemGroupModifier()->resetListItemGroupStyle(nativeNode);
+
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

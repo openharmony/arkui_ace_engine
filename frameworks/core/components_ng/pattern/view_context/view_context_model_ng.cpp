@@ -15,8 +15,11 @@
 
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 
+#include "base/error/error_code.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -43,5 +46,33 @@ void ViewContextModelNG::openAnimation(const AnimationOption& option)
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->OpenFrontendAnimation(option, option.GetCurve(), option.GetOnFinishEvent());
+}
+
+int32_t ViewContextModelNG::OpenBindSheet(
+    const RefPtr<NG::FrameNode>& sheetContentNode, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
+    std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+    std::function<void(const int32_t info)>&& onWillDismiss, std::function<void()>&& onWillAppear,
+    std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+    std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+    std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
+    int32_t currentInstanceId, int32_t targetId)
+{
+    return SheetManager::GetInstance().OpenBindSheetByUIContext(sheetContentNode, std::move(titleBuildFunc),
+        sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
+        std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
+        std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
+        std::move(sheetSpringBack), currentInstanceId, targetId);
+}
+
+int32_t ViewContextModelNG::UpdateBindSheet(const RefPtr<NG::FrameNode>& sheetContentNode,
+    NG::SheetStyle& sheetStyle, bool isPartialUpdate, int32_t currentInstanceId)
+{
+    return SheetManager::GetInstance().UpdateBindSheetByUIContext(
+        sheetContentNode, sheetStyle, isPartialUpdate, currentInstanceId);
+}
+
+int32_t ViewContextModelNG::CloseBindSheet(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t currentInstanceId)
+{
+    return SheetManager::GetInstance().CloseBindSheetByUIContext(sheetContentNode, currentInstanceId);
 }
 } // namespace OHOS::Ace::NG

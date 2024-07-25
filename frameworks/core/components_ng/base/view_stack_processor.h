@@ -40,7 +40,7 @@
 #define ACE_UPDATE_NODE_LAYOUT_PROPERTY(target, name, value, frameNode)         \
     do {                                                                        \
         CHECK_NULL_VOID(frameNode);                                             \
-        auto cast##target = frameNode->GetLayoutPropertyPtr<target>();          \
+        auto cast##target = (frameNode)->GetLayoutPropertyPtr<target>();        \
         if (cast##target) {                                                     \
             cast##target->Update##name(value);                                  \
         }                                                                       \
@@ -70,7 +70,7 @@
 #define ACE_UPDATE_NODE_PAINT_PROPERTY(target, name, value, frameNode)          \
     do {                                                                        \
         CHECK_NULL_VOID(frameNode);                                             \
-        auto cast##target = frameNode->GetPaintPropertyPtr<target>();           \
+        auto cast##target = (frameNode)->GetPaintPropertyPtr<target>();         \
         if (cast##target) {                                                     \
             cast##target->Update##name(value);                                  \
         }                                                                       \
@@ -100,7 +100,7 @@
 #define ACE_UPDATE_NODE_RENDER_CONTEXT(name, value, frameNode)                  \
     do {                                                                        \
         CHECK_NULL_VOID(frameNode);                                             \
-        const auto& target = frameNode->GetRenderContext();                     \
+        const auto& target = (frameNode)->GetRenderContext();                   \
         if (target) {                                                           \
             target->Update##name(value);                                        \
         }                                                                       \
@@ -170,7 +170,7 @@
 #define ACE_RESET_NODE_RENDER_CONTEXT(target, name, frameNode)                  \
     do {                                                                        \
         CHECK_NULL_VOID(frameNode);                                             \
-        const auto& cast##target = frameNode->GetRenderContext();               \
+        const auto& cast##target = (frameNode)->GetRenderContext();             \
         CHECK_NULL_VOID(cast##target);                                          \
         cast##target->Reset##name();                                            \
     } while (false)
@@ -355,6 +355,18 @@ public:
         return result;
     }
 
+    void SetRecycleNodeId(int32_t recycleNodeId)
+    {
+        recycleNodeId_ = recycleNodeId;
+    }
+
+    int32_t GetRecycleNodeId()
+    {
+        const auto result = recycleNodeId_;
+        recycleNodeId_ = ElementRegister::UndefinedElementId;
+        return result;
+    }
+
     /**
      * get the elmtId to which all get access should be accounted
      * ElementRegister::UndefinedElementId; means no get access recording enabled
@@ -452,6 +464,11 @@ public:
     {
         containerId_ = containerId;
     }
+
+    bool IsEmpty() const
+    {
+        return elementsStack_.empty();
+    }
 private:
     ViewStackProcessor();
 
@@ -480,6 +497,7 @@ private:
     int32_t containerId_ = OHOS::Ace::INSTANCE_ID_UNDEFINED;
     int32_t restoreInstanceId_ = OHOS::Ace::INSTANCE_ID_UNDEFINED;
 
+    ElementIdType recycleNodeId_ = ElementRegister::UndefinedElementId;
     // elmtId reserved for next component creation
     ElementIdType reservedNodeId_ = ElementRegister::UndefinedElementId;
 

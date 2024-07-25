@@ -66,7 +66,8 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         firstInputTimeWithId_.erase(point.id);
     }
 
-    if (touchEvents_.empty() && !userCallback_ && !onTouchEventCallback_ && !commonTouchEventCallback_) {
+    if (touchEvents_.empty() && !touchAfterEvents_ && !userCallback_ && !onTouchEventCallback_ &&
+        !commonTouchEventCallback_) {
         return true;
     }
     TouchEvent lastPoint;
@@ -78,6 +79,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     TouchEventInfo event("touchEvent");
     event.SetTimeStamp(lastPoint.time);
     event.SetPointerEvent(lastPoint.pointerEvent);
+    event.SetDeviceId(lastPoint.deviceId);
     TouchLocationInfo changedInfo("onTouch", lastPoint.originalId);
     PointF lastLocalPoint(lastPoint.x, lastPoint.y);
     NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,

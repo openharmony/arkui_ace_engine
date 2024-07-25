@@ -13,10 +13,19 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
+ace_unittest("drag_animation_helper_test_ng") {
+  type = "new"
+  module_output = "manager"
+  sources = [ "drag_animation_helper_test_ng.cpp" ]
+}
+
 ace_unittest("drag_drop_func_wrapper_test_ng") {
   type = "new"
   module_output = "manager"
-  sources = [ "drag_drop_func_wrapper_test_ng.cpp" ]
+  sources = [
+    "drag_drop_func_wrapper_test_ng.cpp",
+    "drag_drop_func_wrapper_test_ng_coverage.cpp",
+  ]
 }
 
 ace_unittest("drag_drop_manager_test_ng") {
@@ -24,7 +33,8 @@ ace_unittest("drag_drop_manager_test_ng") {
   module_output = "manager"
   sources = [
     "drag_drop_manager_test_ng.cpp",
-    "drag_drop_manager_test_ng_new.cpp",
+    "drag_drop_manager_test_ng_coverage.cpp",
+    "drag_drop_manager_test_ng_property_config.cpp",
   ]
 }
 
@@ -94,10 +104,17 @@ ace_unittest("focus_view_test_ng") {
   sources = [ "focus_view_test_ng.cpp" ]
 }
 
+ace_unittest("safe_area_manager_test_ng") {
+  type = "new"
+  module_output = "manager"
+  sources = [ "safe_area_manager_test_ng.cpp" ]
+}
+
 group("core_manager_unittest") {
   testonly = true
   deps = [
     ":display_sync_manager_test_ng",
+    ":drag_animation_helper_test_ng",
     ":drag_drop_func_wrapper_test_ng",
     ":drag_drop_manager_test_ng",
     ":drag_drop_proxy_test_ng",
@@ -107,6 +124,7 @@ group("core_manager_unittest") {
     ":frame_rate_manager_test_ng",
     ":full_screen_manager_test_ng",
     ":post_event_manager_test_ng",
+    ":safe_area_manager_test_ng",
     ":select_overlay_manager_test_ng",
     ":select_overlay_proxy_test_ng",
     ":shared_overlay_manager_test_ng",

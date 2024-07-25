@@ -123,7 +123,8 @@ void JankFrameReport::JankFrameRecord(int64_t timeStampNanos, const std::string&
         return;
     }
     int64_t now = GetSteadyTimestamp<std::chrono::nanoseconds>();
-    int64_t duration = now - std::max(timeStampNanos, prevEndTimeStamp_);
+    int64_t durationTmp = now - std::max(timeStampNanos, prevEndTimeStamp_);
+    int64_t duration = (now <= timeStampNanos) ? 0 : durationTmp;
     double jank = double(duration) / refreshPeriod_;
     // perf monitor jank frame
     PerfMonitor::GetPerfMonitor()->SetFrameTime(timeStampNanos, duration, jank, windowName);

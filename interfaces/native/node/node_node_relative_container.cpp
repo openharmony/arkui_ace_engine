@@ -106,7 +106,10 @@ float OH_ArkUI_GuidelineOption_GetPositionEnd(ArkUI_GuidelineOption* guideline, 
 ArkUI_BarrierOption* OH_ArkUI_BarrierOption_Create(int32_t size)
 {
     ArkUI_BarrierOption* barrierStylePtr = new ArkUI_BarrierOption;
-    barrierStylePtr->styles.resize(size);
+    if (size < 0) {
+        return barrierStylePtr;
+    }
+    barrierStylePtr->styles.resize(static_cast<uint32_t>(size));
     return barrierStylePtr;
 }
 

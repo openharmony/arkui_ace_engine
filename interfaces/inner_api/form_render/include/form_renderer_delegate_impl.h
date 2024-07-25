@@ -71,7 +71,6 @@ public:
     void SetSurfaceDetachEventHandler(std::function<void()>&& listener);
     void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& listener);
     void SetGetRectRelativeToWindowHandler(std::function<void(int32_t&, int32_t&)>&& listener);
-
 private:
     std::function<void(
         const std::shared_ptr<Rosen::RSSurfaceNode>&, const OHOS::AppExecFwk::FormJsInfo&, const AAFwk::Want&)>

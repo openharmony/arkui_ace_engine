@@ -43,6 +43,15 @@ void BarItemPattern::OnModifyDone()
     gesture->AddClickEvent(clickListener_);
 }
 
+void UpdateSymbolDefaultEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive)
+{
+    CHECK_NULL_VOID(symbolProperty);
+    auto symbolEffectOptions = SymbolEffectOptions(SymbolEffectType::BOUNCE);
+    symbolEffectOptions.SetIsTxtActive(isActive);
+    symbolEffectOptions.SetIsTxtActiveSource(0);
+    symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+}
+
 void UpdateSymbolBarButton(const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& iconNode,
     const Color& iconColor, std::function<void(WeakPtr<NG::FrameNode>)>& symbol, ImageSourceInfo& info)
 {
@@ -56,6 +65,8 @@ void UpdateSymbolBarButton(const RefPtr<BarItemNode>& barItemNode, const RefPtr<
         symbolProperty->UpdateSymbolColorList({iconColor});
         // User-defined color overrides the default color of the theme
         symbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)));
+        UpdateSymbolDefaultEffect(symbolProperty, false);
+        symbolProperty->UpdateFontSize(iconSize);
         iconNode->MarkModifyDone();
         iconNode->MarkDirtyNode();
     } else {
@@ -93,9 +104,10 @@ void UpdateImageBarButton(const RefPtr<BarItemNode>& barItemNode, const RefPtr<F
         symbolEffectOptions.SetIsTxtActive(true);
         symbolEffectOptions.SetIsTxtActiveSource(0);
         symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
-        symbolProperty->UpdateFontSize(iconSize);
         symbolProperty->UpdateSymbolColorList({ iconColor });
         symbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNodeNew)));
+        symbolProperty->UpdateFontSize(iconSize);
+        UpdateSymbolDefaultEffect(symbolProperty, false);
         iconNodeNew->MarkModifyDone();
         iconNodeNew->MarkDirtyNode();
         barItemNode->SetIconNode(iconNodeNew);
@@ -177,5 +189,23 @@ void BarItemPattern::UpdateBarItemActiveStatusResource()
         textNode->MarkDirtyNode();
         SetCurrentIconStatus(barIconStatus);
     }
+}
+
+void BarItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    Pattern::ToJsonValue(json, filter);
+    
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+
+    auto barItemNode = AceType::DynamicCast<BarItemNode>(GetHost());
+    CHECK_NULL_VOID(barItemNode);
+    auto textNode = AceType::DynamicCast<FrameNode>(barItemNode->GetTextNode());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    json->PutExtAttr("label", textLayoutProperty->GetContentValue("").c_str(), filter);
 }
 } // namespace OHOS::Ace::NG

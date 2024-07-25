@@ -91,6 +91,11 @@ public:
         }
     }
 
+    bool IsUserClickable() const
+    {
+        return userCallback_ != nullptr;
+    }
+
     void AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
     {
         if (clickEvents_.empty()) {

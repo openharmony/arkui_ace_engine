@@ -41,7 +41,6 @@ public:
     void SetLetterSpacing(const Dimension& value) override;
     void SetBaselineOffset(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
-    // TODO: add extra event for span.
     void SetOnClick(std::function<void(BaseEventInfo* info)>&& click) override;
     void ClearOnClick() override;
     
@@ -82,6 +81,7 @@ public:
     static void SetTextShadow(UINode* uiNode, const std::vector<Shadow>& value);
     static std::vector<Shadow> GetTextShadow(UINode* uiNode);
     static void SetOnClick(UINode* uiNode, GestureEventFunc&& click);
+    static void ClearOnClick(UINode* uiNode);
 #ifdef USE_GRAPHIC_TEXT_GINE
     // impl in render/adapter/span_model_adapter.cpp
     static RefPtr<SpanItem> CreateSpanItem(ArkUI_SpanItem* item);

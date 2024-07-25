@@ -76,8 +76,11 @@ bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper,
     return false;
 }
 
-void PagePattern::BeforeSyncGeometryProperties(const DirtySwapConfig& /* config */)
+void PagePattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
 {
+    if (config.skipLayout || config.skipMeasure) {
+        return;
+    }
     CHECK_NULL_VOID(dynamicPageSizeCallback_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -127,16 +130,17 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
     return renderContext->TriggerPageTransition(type, wrappedOnFinish);
 }
 
-void PagePattern::ProcessAutoSave()
+bool PagePattern::ProcessAutoSave(const std::function<void()>& onFinish,
+    const std::function<void()>& onUIExtNodeBindingCompleted)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, false);
     if (!host->NeedRequestAutoSave()) {
-        return;
+        return false;
     }
     auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    container->RequestAutoSave(host);
+    CHECK_NULL_RETURN(container, false);
+    return container->RequestAutoSave(host, onFinish, onUIExtNodeBindingCompleted);
 }
 
 void PagePattern::ProcessHideState()
@@ -183,18 +187,28 @@ void PagePattern::ProcessShowState()
 
 void PagePattern::OnAttachToMainTree()
 {
+#if defined(ENABLE_SPLIT_MODE)
+    if (!needFireObserver_) {
+        return;
+    }
+#endif
     int32_t index = INVALID_PAGE_INDEX;
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate) {
-        index = delegate->GetStackSize();
+        index = delegate->GetCurrentPageIndex();
+        GetPageInfo()->SetPageIndex(index);
     }
-    GetPageInfo()->SetPageIndex(index);
     state_ = RouterPageState::ABOUT_TO_APPEAR;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
 }
 
 void PagePattern::OnDetachFromMainTree()
 {
+#if defined(ENABLE_SPLIT_MODE)
+    if (!needFireObserver_) {
+        return;
+    }
+#endif
     state_ = RouterPageState::ABOUT_TO_DISAPPEAR;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
 }
@@ -206,26 +220,36 @@ void PagePattern::OnShow()
     CHECK_NULL_VOID(!isOnShow_);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    if (pageInfo_) {
-        context->FirePageChanged(pageInfo_->GetPageId(), true);
-    }
     auto container = Container::Current();
     if (!container || !container->WindowIsShow()) {
         LOGW("no need to trigger onPageShow callback when not in the foreground");
         return;
     }
+    std::string bundleName = container->GetBundleName();
+    NotifyPerfMonitorPageMsg(pageInfo_->GetPageUrl(), bundleName);
+    if (pageInfo_) {
+        context->FirePageChanged(pageInfo_->GetPageId(), true);
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(true);
     isOnShow_ = true;
+#if defined(ENABLE_SPLIT_MODE)
+    if (needFireObserver_) {
+        state_ = RouterPageState::ON_PAGE_SHOW;
+        UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+    }
+#else
     state_ = RouterPageState::ON_PAGE_SHOW;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+#endif
     JankFrameReport::GetInstance().StartRecord(pageInfo_->GetPageUrl());
-    std::string bundleName = container->GetBundleName();
-    NotifyPerfMonitorPageMsg(pageInfo_->GetPageUrl(), bundleName);
     auto pageUrlChecker = container->GetPageUrlChecker();
     if (pageUrlChecker != nullptr) {
         pageUrlChecker->NotifyPageShow(pageInfo_->GetPageUrl());
+    }
+    if (visibilityChangeCallback_) {
+        visibilityChangeCallback_(true);
     }
     if (onPageShow_) {
         onPageShow_();
@@ -257,8 +281,15 @@ void PagePattern::OnHide()
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(false);
     isOnShow_ = false;
+#if defined(ENABLE_SPLIT_MODE)
+    if (needFireObserver_) {
+        state_ = RouterPageState::ON_PAGE_HIDE;
+        UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+    }
+#else
     state_ = RouterPageState::ON_PAGE_HIDE;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+#endif
     auto container = Container::Current();
     if (container) {
         auto pageUrlChecker = container->GetPageUrlChecker();
@@ -266,6 +297,9 @@ void PagePattern::OnHide()
         if (pageUrlChecker != nullptr) {
             pageUrlChecker->NotifyPageHide(pageInfo_->GetPageUrl());
         }
+    }
+    if (visibilityChangeCallback_) {
+        visibilityChangeCallback_(false);
     }
     if (onPageHide_) {
         onPageHide_();
@@ -290,11 +324,19 @@ bool PagePattern::OnBackPressed()
         return true;
     }
     if (isPageInTransition_) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "page is in transition");
         return true;
     }
     // if in page transition, do not set to ON_BACK_PRESS
+#if defined(ENABLE_SPLIT_MODE)
+    if (needFireObserver_) {
+        state_ = RouterPageState::ON_BACK_PRESS;
+        UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+    }
+#else
     state_ = RouterPageState::ON_BACK_PRESS;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+#endif
     if (onBackPressed_) {
         return onBackPressed_();
     }
@@ -436,7 +478,7 @@ void PagePattern::NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std
         PerfMonitor::GetPerfMonitor()->SetPageUrl(pageUrl);
         // The page contains only page url but not the page name
         PerfMonitor::GetPerfMonitor()->SetPageName("");
-        PerfMonitor::GetPerfMonitor()->ReportPageShowMsg(pageUrl, bundleName);
+        PerfMonitor::GetPerfMonitor()->ReportPageShowMsg(pageUrl, bundleName, "");
     }
 }
 

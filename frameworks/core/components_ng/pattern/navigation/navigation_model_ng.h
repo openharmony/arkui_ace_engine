@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/navigation/navigation_model.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/base/navigation_register.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT NavigationModelNG : public OHOS::Ace::NavigationModel {
@@ -29,6 +30,7 @@ public:
     void SetNavigationStackWithCreatorAndUpdater(std::function<RefPtr<NG::NavigationStack>()> creator,
         std::function<void(RefPtr<NG::NavigationStack>)> updater) override;
     void SetNavigationStackProvided(bool provided) override;
+    void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath) override;
     bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
         const std::string& title, bool ignoreMainTitle = false) override;
     void SetTitle(const std::string& title, bool hasSubTitle = false) override;
@@ -67,6 +69,8 @@ public:
     void SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& onModeChange) override;
     void SetCustomTransition(NavigationTransitionEvent&& animationTransition) override;
     void SetIsCustomAnimation(bool isCustom) override;
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetNavigationStack(FrameNode* frameNode);
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar);
     static void SetMinContentWidth(FrameNode* frameNode, const Dimension& value);
     static void SetMinNavBarWidth(FrameNode* frameNode, const Dimension& value);
@@ -84,6 +88,7 @@ public:
     
     void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) override;
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::SafeAreaExpandOpts& opts);
+    void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) override;
 
 private:
     bool CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);

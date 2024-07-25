@@ -44,7 +44,7 @@ constexpr double INPUT_COUNT = 60000.0;
 constexpr double INPUT_COUNT_2 = 20000.0;
 constexpr bool IS_COUNT_DOWN = false;
 constexpr bool IS_COUNT_DOWN_2 = true;
-const std::string TEXT_TIMER_FORMAT = "HH:mm:ss.SS";
+const std::string TEXT_TIMER_FORMAT = "HH:mm:ss.SSS";
 const std::string FORMAT_DATA = "08:00:00";
 const int64_t UTC_1 = 1000000000000;
 const int64_t UTC_2 = 2000000000000;
@@ -484,7 +484,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest006, TestSize.Level1)
     EXPECT_EQ(pattern->GetFormatDuration(duration), hourOfMinute);
     EXPECT_EQ(pattern->GetMillisecondsDuration(1), secondsOfMillisecond * minuteOfSeconds);
 
-    format = "hh";
+    format = "HH";
     textTimerProperty->UpdateFormat(format);
     EXPECT_EQ(pattern->GetFormatDuration(duration), 1);
     EXPECT_EQ(pattern->GetMillisecondsDuration(1), duration);
@@ -879,7 +879,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest014, TestSize.Level1)
     /**
      * @tc.steps: step2. Tick timer and check value.
      */
-    pattern->Tick(100);
+    pattern->Tick(1000);
     pattern->SetBuilderFunc(node);
     pattern->BuildContentModifierNode();
 }

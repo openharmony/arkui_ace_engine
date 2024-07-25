@@ -219,7 +219,8 @@ void RosenRenderChart::PaintText(RSCanvas* canvas, const Rect& paintRegion, cons
             paragraph->Paint(canvas, pointPosition.GetX() - textSize.Width() / 2,
                 pointPosition.GetY() - textSize.Height() - TEXT_PADDING);
         } else if (text.GetPlacement() == Placement::BOTTOM) {
-            paragraph->Paint(canvas, pointPosition.GetX() - textSize.Width() / 2, pointPosition.GetY() + TEXT_PADDING);
+            paragraph->Paint(canvas, pointPosition.GetX() - textSize.Width() / 2,
+                pointPosition.GetY() + TEXT_PADDING);
         }
     }
 }
@@ -257,11 +258,11 @@ void RosenRenderChart::PaintPoint(SkCanvas* canvas, const Offset& offset, SkPain
         }
         case PointShape::SQUARE: {
             canvas->drawRect(SkRect::MakeLTRB(offset.GetX() - innerRadius, offset.GetY() - innerRadius,
-                                 offset.GetX() + innerRadius, offset.GetY() + innerRadius),
+                                              offset.GetX() + innerRadius, offset.GetY() + innerRadius),
                 paint);
             SetEdgeStyle(point, paint);
             canvas->drawRect(SkRect::MakeLTRB(offset.GetX() - pointSize / 2, offset.GetY() - pointSize / 2,
-                                 offset.GetX() + pointSize / 2, offset.GetY() + pointSize / 2),
+                                              offset.GetX() + pointSize / 2, offset.GetY() + pointSize / 2),
                 paint);
             break;
         }
@@ -571,8 +572,8 @@ void RosenRenderChart::PaintLineEdge(
         subPath.addRRect(
             SkRRect::MakeRectXY(SkRect::MakeXYWH(0.0, -0.5 * thickness, segmentInfo.GetSolidWidth(), thickness),
                 0.5 * thickness, 0.5 * thickness));
-        paint.setPathEffect(SkPath1DPathEffect::Make(subPath, segmentInfo.GetSpaceWidth() + segmentInfo.GetSolidWidth(),
-            5.0f, SkPath1DPathEffect::kMorph_Style));
+        paint.setPathEffect(SkPath1DPathEffect::Make(subPath, segmentInfo.GetSpaceWidth() +
+            segmentInfo.GetSolidWidth(), 5.0f, SkPath1DPathEffect::kMorph_Style));
     } else {
         paint.setStrokeWidth(thickness);
     }
@@ -583,7 +584,6 @@ void RosenRenderChart::PaintLineEdge(
         }
         SkPoint points[2] = { SkPoint::Make(startOffset_.GetX(), 0.0f), SkPoint::Make(end, 0.0f) };
         SkColor colors[2] = { segmentInfo.GetSegmentColor().GetValue(), targetColor_.GetValue() };
-
         paint.setShader(SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkTileMode::kClamp, 0, nullptr));
     }
     if (gradientOfLine_ && drawGradient) {
@@ -591,7 +591,6 @@ void RosenRenderChart::PaintLineEdge(
             SkPoint::Make(endGradientPoint_.GetX(), 0.0f) };
         SkColor colors[2] = { segmentInfo.GetSegmentColor().ChangeAlpha(0).GetValue(),
             segmentInfo.GetSegmentColor().GetValue() };
-
         paint.setShader(SkGradientShader::MakeLinear(points, colors, nullptr, 2, SkTileMode::kClamp, 0, nullptr));
     }
     paint.setStyle(SkPaint::Style::kStroke_Style);
@@ -944,7 +943,8 @@ void RosenRenderChart::PaintBar(RSCanvas* canvas, RSPen& pen, RSBrush brush, con
         auto barAreaPaintRect = GetBarAreaPaintRect(barsAreaPaintRect, barGroupIndex, barGroupNum, barInterval);
         Offset position = ConvertDataToPosition(paintRect, point);
         // barAreaPaintRect left add bar interval is originX
-        auto originX = barAreaPaintRect.GetOffset().GetX() + (BAR_INTERVAL_PROPORTION / 2) * barAreaPaintRect.Width();
+        auto originX = barAreaPaintRect.GetOffset().GetX() +
+            (BAR_INTERVAL_PROPORTION / 2) * barAreaPaintRect.Width();
         auto originY = position.GetY();
 
 #ifndef USE_ROSEN_DRAWING

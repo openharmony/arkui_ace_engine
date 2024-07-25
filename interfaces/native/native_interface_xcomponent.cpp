@@ -91,6 +91,38 @@ int32_t OH_NativeXComponent_GetTouchPointTiltY(OH_NativeXComponent* component, u
     return component->GetTiltY(pointIndex, tiltY);
 }
 
+int32_t OH_NativeXComponent_GetTouchPointWindowX(OH_NativeXComponent* component, uint32_t pointIndex, float* windowX)
+{
+    if ((component == nullptr) || (windowX == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    return component->GetWindowX(pointIndex, windowX);
+}
+
+int32_t OH_NativeXComponent_GetTouchPointWindowY(OH_NativeXComponent* component, uint32_t pointIndex, float* windowY)
+{
+    if ((component == nullptr) || (windowY == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    return component->GetWindowY(pointIndex, windowY);
+}
+
+int32_t OH_NativeXComponent_GetTouchPointDisplayX(OH_NativeXComponent* component, uint32_t pointIndex, float* displayX)
+{
+    if ((component == nullptr) || (displayX == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    return component->GetDisplayX(pointIndex, displayX);
+}
+
+int32_t OH_NativeXComponent_GetTouchPointDisplayY(OH_NativeXComponent* component, uint32_t pointIndex, float* displayY)
+{
+    if ((component == nullptr) || (displayY == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    return component->GetDisplayY(pointIndex, displayY);
+}
+
 int32_t OH_NativeXComponent_GetHistoricalPoints(OH_NativeXComponent* component, const void* window,
     int32_t* size, OH_NativeXComponent_HistoricalPoint** historicalPoints)
 {

@@ -22,11 +22,6 @@
 #include "test/mock/base/mock_system_properties.h"
 #endif
 #include "test/mock/core/rosen/mock_canvas.h"
-
-#include "core/components/scroll/scroll_controller_base.h"
-#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
-#include "core/components_ng/property/property.h"
-
 #define protected public
 #define private public
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -35,9 +30,12 @@
 
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
@@ -47,6 +45,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #undef private
 #undef protected
@@ -56,11 +55,11 @@ namespace OHOS::Ace::NG {
 void WaterFlowTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
-    // set buttonTheme to themeManager before using themeManager to get buttonTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*MockPipelineContext::GetCurrent(), FlushUITasks).Times(AnyNumber());
 
 #ifndef TEST_SEGMENTED_WATER_FLOW
     g_segmentedWaterflow = false;
@@ -138,6 +137,31 @@ void WaterFlowTestNg::CreateItem(int32_t number)
         } else {
             ViewAbstract::SetHeight(CalcLength(Dimension(BIG_ITEM_HEIGHT)));
         }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+}
+
+void WaterFlowTestNg::CreateFocusableItem(int32_t number)
+{
+    for (int32_t i = 0; i < number; i++) {
+        WaterFlowItemModelNG waterFlowItemModel;
+        waterFlowItemModel.Create();
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+        // set irregular height
+        int32_t two = 2;
+        if (i % two == 0) {
+            ViewAbstract::SetHeight(CalcLength(Dimension(ITEM_HEIGHT)));
+        } else {
+            ViewAbstract::SetHeight(CalcLength(Dimension(BIG_ITEM_HEIGHT)));
+        }
+        {
+            ButtonModelNG buttonModelNG;
+            std::list<RefPtr<Component>> buttonChildren;
+            buttonModelNG.CreateWithLabel({ .label = "label" }, buttonChildren);
+            ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+        ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
         ViewStackProcessor::GetInstance()->Pop();
     }
 }

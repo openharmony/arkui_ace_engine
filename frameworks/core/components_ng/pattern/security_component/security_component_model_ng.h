@@ -94,6 +94,7 @@ private:
     static bool IsBackgroundVisible();
     static bool IsArkuiComponent();
     static bool IsBelowThreshold(const Color& value);
+    static bool IsInReleaseList(uint32_t value);
     static void SetDefaultBackgroundButton(const RefPtr<FrameNode>& buttonNode,
         int32_t type);
     static void SetDefaultTextStyle(const RefPtr<FrameNode>& textNode, const std::string& text, bool isButtonVisible);

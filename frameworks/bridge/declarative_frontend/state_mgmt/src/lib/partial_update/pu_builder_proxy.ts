@@ -45,20 +45,20 @@ function makeBuilderParameterProxy(builderName: string, source: Object): Object 
             throw Error(`@Builder '${builderName}': Invalid attempt to set(write to) parameter '${prop.toString()}' error!`);
         },
         get(target, prop) {
-            const prop1 = prop.toString().trim().startsWith("__")
+            const prop1 = prop.toString().trim().startsWith('__')
                 ? prop.toString().trim().substring(2)
                 : prop.toString().trim();
             stateMgmtConsole.debug(`get - prop ${prop.toString()} prop1 ${prop1}`);
-            if (!(typeof target === "object") && (prop1 in target)) {
+            if (!(typeof target === 'object') && (prop1 in target)) {
                 throw Error(`@Builder '${builderName}': '${prop1}' used but not a function parameter error!`);
             }
             const value = target[prop1];
-            if (typeof value !== "function") {
+            if (typeof value !== 'function') {
                 stateMgmtConsole.debug(`      - no fun`);
                 return value;
             }
             const funcRet = value();
-            if ((typeof funcRet === "object") && ('get' in funcRet)) {
+            if ((typeof funcRet === 'object') && ('get' in funcRet)) {
                 if (prop1 !== prop) {
                     stateMgmtConsole.debug(`      - func - is ObservedPropertybstract - ret ObservedPropertyObject`);
                     return funcRet;

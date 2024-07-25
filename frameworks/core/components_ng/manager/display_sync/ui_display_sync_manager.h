@@ -18,6 +18,7 @@
 
 #include <unordered_map>
 #include <mutex>
+#include <queue>
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -57,6 +58,9 @@ public:
     int32_t FindMatchedRefreshRate(int32_t target);
     void FindAllRefreshRateFactors();
 
+    int32_t GetAnimatorRate();
+    bool IsAnimatorStopped();
+
     UIDisplaySyncManager();
     ~UIDisplaySyncManager() noexcept override;
 
@@ -75,6 +79,7 @@ private:
     bool supportSkipEnabled_ = true;
     std::vector<int32_t> refreshRateFactors_;
     std::once_flag computeFactorsFlag_;
+    std::priority_queue<int32_t> maxAnimatorRateHap_;
 };
 } // namespace OHOS::Ace
 

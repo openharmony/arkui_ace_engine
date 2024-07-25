@@ -26,6 +26,7 @@ struct NotifyInfo {
     int componentId;
     int x;
     int y;
+    std::string bundleName;
 };
 
 struct ResultData {
@@ -56,8 +57,9 @@ public:
 class StylusDetectorInterface {
 public:
     virtual bool IsEnable() = 0;
-    virtual bool RegisterStylusInteractionListener(const std::shared_ptr<IStylusDetectorCallback>& callback) = 0;
-    virtual void UnRegisterStylusInteractionListener() = 0;
+    virtual bool RegisterStylusInteractionListener(const std::string& bundleName,
+        const std::shared_ptr<IStylusDetectorCallback>& callback) = 0;
+    virtual void UnRegisterStylusInteractionListener(const std::string& bundleName) = 0;
     virtual bool Notify(const NotifyInfo& notifyInfo) = 0;
 
 protected:

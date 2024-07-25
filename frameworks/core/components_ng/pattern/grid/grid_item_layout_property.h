@@ -90,11 +90,44 @@ public:
     bool CheckWhetherCurrentItemAtExpectedPosition(Axis axis) const;
     int32_t GetRealMainSpan(Axis axis) const;
     int32_t GetRealCrossSpan(Axis axis) const;
+    void SetNeedStretch(bool needStretch)
+    {
+        needStretch_ = needStretch;
+    }
+
+    bool GetStretchChild() const
+    {
+        return stretchChild_;
+    }
+
+    void SetStretchChild(bool stretchChild)
+    {
+        stretchChild_ = stretchChild;
+    }
+
+    bool GetNeedStretch() const
+    {
+        return needStretch_;
+    }
+
+    void SetAxis(Axis axis)
+    {
+        axis_ = axis;
+    }
+
+    Axis GetAxis() const
+    {
+        return axis_;
+    }
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(GridItemLayoutProperty);
 
     void ResetGridLayoutInfoAndMeasure() const;
+
+    bool needStretch_ = false;
+    bool stretchChild_ = false;
+    Axis axis_ = Axis::NONE;
 };
 
 } // namespace OHOS::Ace::NG

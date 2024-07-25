@@ -1157,6 +1157,24 @@ typedef enum {
     ARKUI_OBJECT_FIT_SCALE_DOWN,
     /** The original size is retained. */
     ARKUI_OBJECT_FIT_NONE,
+    /** Not resized, the image is aligned with the start edge of the top of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_TOP_START,
+    /** Not resized, the image is horizontally centered at the top of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_TOP,
+    /** Not resized, the image is aligned with the end edge at the top of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_TOP_END,
+    /** Not resized, the image is vertically centered on the start edge of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_START,
+    /** Not resized, the image is horizontally and vertically centered in the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_CENTER,
+    /** Not resized, the image is vertically centered on the end edge of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_END,
+    /** Not resized, the image is aligned with the start edge at the bottom of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM_START,
+    /** Not resized, the image is horizontally centered at the bottom of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM,
+    /** Not resized, the image is aligned with the end edge at the bottom of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM_END,
 } ArkUI_ObjectFit;
 
 /**
@@ -1633,20 +1651,19 @@ typedef enum {
     ARKUI_FINISH_CALLBACK_LOGICALLY,
 } ArkUI_FinishCallbackType;
 
-
 /**
- * @brief 定义屏障线的方向。
+ * @brief defines the direction of the barrier line.
  *
  * @since 12
  */
 typedef enum {
-    /** 屏障在其所有referencedId的最左侧。*/
-    ARKUI_BARRIER_DIRECTION_LEFT = 0,
-    /** 屏障在其所有referencedId的最右侧。*/
-    ARKUI_BARRIER_DIRECTION_RIGHT,
-    /** 屏障在其所有referencedId的最上方。*/
+    /** The barrier is the leftmost of all its referencedIds. */
+    ARKUI_BARRIER_DIRECTION_START = 0,
+    /** The barrier is on the rightmost side of all its referencedIds. */
+    ARKUI_BARRIER_DIRECTION_END,
+    /** The barrier is at the top of all its referencedIds. */
     ARKUI_BARRIER_DIRECTION_TOP,
-    /** 屏障在其所有referencedId的最下方。*/
+    /** The barrier is at the bottom of all its referencedIds. */
     ARKUI_BARRIER_DIRECTION_BOTTOM
 } ArkUI_BarrierDirection;
 
@@ -1792,6 +1809,50 @@ typedef enum {
 } ArkUI_TextInputStyle;
 
 /**
+ * @brief Defines the state of the NavDestination component.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** The NavDestination show. */
+    ARKUI_NAV_DESTINATION_STATE_ON_SHOW = 0,
+    /** The NavDestination hide. */
+    ARKUI_NAV_DESTINATION_STATE_ON_HIDE = 1,
+    /** The NavDestination is mounted to the component tree. */
+    ARKUI_NAV_DESTINATION_STATE_ON_APPEAR = 2,
+    /** The NavDestination removed from the component tree. */
+    ARKUI_NAV_DESTINATION_STATE_ON_DISAPPEAR = 3,
+    /** Before the NavDestination show. */
+    ARKUI_NAV_DESTINATION_STATE_ON_WILL_SHOW = 4,
+    /** Before the NavDestination hide. */
+    ARKUI_NAV_DESTINATION_STATE_ON_WILL_HIDE = 5,
+    /** Before the NavDestination mount to the component tree. */
+    ARKUI_NAV_DESTINATION_STATE_ON_WILL_APPEAR = 6,
+    /** Before the NavDestination removed from the component tree. */
+    ARKUI_NAV_DESTINATION_STATE_ON_WILL_DISAPPEAR = 7,
+    /** The NavDestination returns from the component.*/
+    ARKUI_NAV_DESTINATION_STATE_ON_BACK_PRESS = 100,
+} ArkUI_NavDestinationState;
+
+/**
+ * @brief Define the state of Router Page.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** The Router Page is about to be created. */
+    ARKUI_ROUTER_PAGE_STATE_ABOUT_TO_APPEAR = 0,
+    /** The Router Page is about to be destroyed. */
+    ARKUI_ROUTER_PAGE_STATE_ABOUT_TO_DISAPPEAR = 1,
+    /** The Router Page show. */
+    ARKUI_ROUTER_PAGE_STATE_ON_SHOW = 2,
+    /** The Router Page hide. */
+    ARKUI_ROUTER_PAGE_STATE_ON_HIDE = 3,
+    /** The Router Page returns. */
+    ARKUI_ROUTER_PAGE_STATE_ON_BACK_PRESS = 4,
+} ArkUI_RouterPageState;
+
+/**
  * @brief 定义文本识别的实体类型。
  *
  * @since 12
@@ -1833,6 +1894,14 @@ typedef enum {
     ARKUI_SWIPER_INDICATOR_TYPE_DIGIT,
 } ArkUI_SwiperIndicatorType;
 
+
+typedef enum {
+    ARKUI_ANIMATION_DIRECTION_NORMAL = 0,
+    ARKUI_ANIMATION_DIRECTION_REVERSE,
+    ARKUI_ANIMATION_DIRECTION_ALTERNATE,
+    ARKUI_ANIMATION_DIRECTION_ALTERNATE_REVERSE,
+} ArkUI_AnimationDirection;
+
 typedef enum {
     /** In the folded state, when the ListItem slides in the opposite direction to the main axis,
      * the operation item is hidden.*/
@@ -1868,42 +1937,107 @@ typedef enum {
 } ArkUI_AnimationStatus;
 
 /**
- * @brief 定义帧动画组件在动画开始前和结束后的状态。
+ * @brief Enumerates the states before and after execution of the frame-by-frame animation.
  *
  * @since 12
 */
 typedef enum {
-    /** 动画未执行时不会将任何样式应用于目标，动画播放完成之后恢复初始默认状态。*/
+    /** Before execution, the animation does not apply any styles to the target component. After execution, the
+     *  animation restores the target component to its default state. */
     ARKUI_ANIMATION_FILL_MODE_NONE,
-    /** 目标将保留动画执行期间最后一个关键帧的状态。*/
+    /** The target component retains the state set by the last keyframe encountered during execution of the
+     *  animation. */
     ARKUI_ANIMATION_FILL_MODE_FORWARDS,
-    /** 动画将在应用于目标时立即应用第一个关键帧中定义的值，并在delay期间保留此值。*/
+    /** The animation applies the values defined in the first relevant keyframe once it is applied to the target
+     *  component, and retains the values during the period set by <b>delay</b>. */
     ARKUI_ANIMATION_FILL_MODE_BACKWARDS,
-    /** 动画将遵循Forwards和Backwards的规则，从而在两个方向上扩展动画属性。*/
+    /** The animation follows the rules for both <b><b>Forwards</b></b> and <b><b>Backwards</b></b>, extending the
+     *  animation attributes in both directions. */
     ARKUI_ANIMATION_FILL_MODE_BOTH,
 } ArkUI_AnimationFillMode;
 
 /**
- * @brief 定义错误码枚举值。
+ * @brief Enumerates the error codes.
  *
  * @since 12
 */
 typedef enum {
-    /** 无错误。*/
+    /** No error. */
     ARKUI_ERROR_CODE_NO_ERROR = 0,
-    /** 参数错误。*/
+    /** Invalid parameters. */
     ARKUI_ERROR_CODE_PARAM_INVALID = 401,
-    /** 组件不支持特点的属性或者事件。*/
+    /** The component does not support specific attributes or events. */
     ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED = 106102,
-    /** 对应的操作不支持ArkTS创建的节点。*/
+    /** The specific operation is not allowed on the node created by ArkTS. */
     ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE = 106103,
-    /** 懒加载适配器未绑定到组件上。*/
+    /** The adapter for lazy loading is not bound to the component. */
     ARKUI_ERROR_CODE_NODE_ADAPTER_NONE_HOST = 106104,
-    /** 适配器已存在。*/
+    /** The adapter already exists. */
     ARKUI_ERROR_CODE_NODE_ADAPTER_EXIST_IN_HOST = 106105,
-    /** 对应节点已存在子节点，无法添加适配器。*/
+    /** Failed to add the adapter because the corresponding node already has a subnode. */
     ARKUI_ERROR_CODE_NODE_ADAPTER_CHILD_NODE_EXIST = 106106,
+    /** The index value is invalid. */
+    ARKUI_ERROR_CODE_NODE_INDEX_INVALID = 106200,
+    /**  Failed to query route navigation information. */
+    ARKUI_ERROR_CODE_GET_INFO_FAILED = 106201,
+    /** The buffer size is not large enough. */
+    ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR = 106202,
 } ArkUI_ErrorCode;
+
+/**
+ * @brief defines the enumerated value of the extended security zone.
+ *
+ * @since 12
+*/
+typedef enum {
+    /** The default security zone includes the status bar and navigation bar. */
+    ARKUI_SAFE_AREA_TYPE_SYSTEM = 1,
+    /** Non-secure areas of the device, such as bangs or hole holes. */
+    ARKUI_SAFE_AREA_TYPE_CUTOUT = 1 << 1,
+    /** Soft keyboard area. */
+    ARKUI_SAFE_AREA_TYPE_KEYBOARD = 1 << 2,
+} ArkUI_SafeAreaType;
+
+/**
+ * @brief defines the enumerated value of the direction of the extended security zone.
+ *
+ * @since 12
+*/
+typedef enum {
+    /** Upper area. */
+    ARKUI_SAFE_AREA_EDGE_TOP = 1,
+    /** Lower area. */
+    ARKUI_SAFE_AREA_EDGE_BOTTOM = 1 << 1,
+    /** Front area. */
+    ARKUI_SAFE_AREA_EDGE_START = 1 << 2,
+    /** Tail area. */
+    ARKUI_SAFE_AREA_EDGE_END = 1 << 3,
+} ArkUI_SafeAreaEdge;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+} ArkUI_TranslationOptions;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+    float centerX;
+    float centerY;
+} ArkUI_ScaleOptions;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+    float angle;
+    float centerX;
+    float centerY;
+    float centerZ;
+    float perspective;
+} ArkUI_RotationOptions;
 
 /**
 * @brief Creates a size constraint.
@@ -2851,6 +2985,27 @@ void OH_ArkUI_SwiperIndicator_SetSelectedColor(ArkUI_SwiperIndicator* indicator,
  * @since 12
 */
 uint32_t OH_ArkUI_SwiperIndicator_GetSelectedColor(ArkUI_SwiperIndicator* indicator);
+
+/**
+ * @brief Sets the number of maxDisplayCount for the dot navigation indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @param maxDisplayCount the maxDisplayCount of the navigation dot, span is 6-9.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+*/
+int32_t OH_ArkUI_SwiperIndicator_SetMaxDisplayCount(ArkUI_SwiperIndicator* indicator, int32_t maxDisplayCount);
+
+/**
+ * @brief Obtains the number of maxDisplayCount for the dot navigation indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @return Returns the number of the maxDisplayCount, span is 6-9.
+ * @since 12
+*/
+int32_t OH_ArkUI_SwiperIndicator_GetMaxDisplayCount(ArkUI_SwiperIndicator* indicator);
 
 /**
  * @brief Create a configuration item for the ListitemSwipeActionItem interface settings.

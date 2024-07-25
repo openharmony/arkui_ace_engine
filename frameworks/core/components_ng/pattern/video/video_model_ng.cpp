@@ -276,4 +276,13 @@ void VideoModelNG::SetImageAnalyzerConfig(void* config)
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
     videoPattern->SetImageAnalyzerConfig(config);
 }
+
+void VideoModelNG::SetImageAIOptions(void *options)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
+    videoPattern->SetImageAIOptions(options);
+}
 } // namespace OHOS::Ace::NG

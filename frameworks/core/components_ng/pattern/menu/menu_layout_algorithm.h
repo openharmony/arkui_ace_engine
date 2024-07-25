@@ -103,6 +103,8 @@ private:
         float windowsOffsetY = 0.0f;
         float top = 0.0f;
         float bottom = 0.0f;
+        float left = 0.0f;
+        float right = 0.0f;
         float topSecurity = 0.0f;
         float bottomSecurity = 0.0f;
         float previewMenuGap = 0.0f;
@@ -112,7 +114,7 @@ private:
     void Initialize(LayoutWrapper* layoutWrapper);
     void InitializePadding(LayoutWrapper* layoutWrapper);
     void InitializePaddingAPI12(LayoutWrapper* layoutWrapper);
-    void InitializeParam();
+    void InitializeParam(const RefPtr<MenuPattern>& menuPattern);
     void InitWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, OffsetF& position);
@@ -141,8 +143,7 @@ private:
     std::list<RefPtr<LayoutWrapper>> GetOptionsLayoutWrappper(LayoutWrapper* layoutWrapper);
 
     OffsetF GetPositionWithPlacement(const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition);
-    void InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu,
-        const RefPtr<MenuPattern>& menuPattern);
+    void InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, const RefPtr<MenuPattern>& menuPattern);
     OffsetF GetChildPosition(const SizeF& childSize, bool didNeedArrow = false);
     OffsetF FitToScreen(const OffsetF& position, const SizeF& childSize, bool didNeedArrow = false);
     bool CheckPosition(const OffsetF& position, const SizeF& childSize);
@@ -169,15 +170,16 @@ private:
     RefPtr<PipelineContext> GetCurrentPipelineContext();
 
     void LayoutPreviewMenu(LayoutWrapper* layoutWrapper);
+    void UpdatePreviewPositionAndOffset(
+        RefPtr<LayoutWrapper>& previewLayoutWrapper, RefPtr<LayoutWrapper>& menuLayoutWrapper);
     void ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrapper);
-    void ModifyNormalPreviewMenuPlacement(LayoutWrapper* layoutWrapper);
-    void ModifyNormalPreviewMenuPortraitPlacement(LayoutWrapper* layoutWrapper);
     void GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& child, const Rect& windowGlobalRect,
         RefPtr<LayoutWrapper>& previewLayoutWrapper, SizeF& size, bool isShowHoverImage);
+    void GetPreviewNodeTargetHoverImageChild(const RefPtr<LayoutWrapper>& child,
+        RefPtr<FrameNode>& hostNode, RefPtr<GeometryNode>& geometryNode, bool isShowHoverImage);
     SizeF GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<FrameNode>& frameNode,
         RefPtr<LayoutWrapper>& previewLayoutWrapper, RefPtr<LayoutWrapper>& menuLayoutWrapper);
 
-    void LayoutNormalPreviewMenu(LayoutWrapper* layoutWrapper);
     void LayoutNormalTopPreviewBottomMenu(const RefPtr<GeometryNode>& previewGeometryNode,
         const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize, float menuItemTotalHeight);
     void LayoutNormalTopPreviewBottomMenuLessThan(const RefPtr<GeometryNode>& previewGeometryNode,
@@ -191,7 +193,6 @@ private:
     void LayoutNormalBottomPreviewTopMenuGreateThan(const RefPtr<GeometryNode>& previewGeometryNode,
         const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize);
 
-    void LayoutOtherDevicePreviewMenu(LayoutWrapper* layoutWrapper);
     void LayoutOtherDeviceLeftPreviewRightMenu(const RefPtr<GeometryNode>& previewGeometryNode,
         const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize, float menuItemTotalHeight);
     void LayoutOtherDeviceLeftPreviewRightMenuLessThan(const RefPtr<GeometryNode>& previewGeometryNode,

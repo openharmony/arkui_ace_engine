@@ -15,6 +15,7 @@
 
 #include "render_service_client/core/animation/rs_animation.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/animation/rs_interactive_implict_animator.h"
 
 #include "core/animation/native_curve_helper.h"
 #include "core/common/container.h"
@@ -50,6 +51,7 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
     if (rateRange) {
         timingProtocol.SetFrameRateRange({ rateRange->min_, rateRange->max_, rateRange->preferred_ });
     }
+    timingProtocol.SetInstanceId(Container::CurrentIdSafelyWithCheck());
     return timingProtocol;
 }
 std::function<void()> GetWrappedCallback(const std::function<void()>& callback)
@@ -57,7 +59,7 @@ std::function<void()> GetWrappedCallback(const std::function<void()>& callback)
     if (!callback) {
         return nullptr;
     }
-    auto wrappedOnFinish = [onFinish = callback, instanceId = Container::CurrentId()]() {
+    auto wrappedOnFinish = [onFinish = callback, instanceId = Container::CurrentIdSafelyWithCheck()]() {
         ContainerScope scope(instanceId);
         auto taskExecutor = Container::CurrentTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -79,6 +81,12 @@ private:
     friend AnimationUtils;
 };
 
+class AnimationUtils::InteractiveAnimation {
+private:
+    std::shared_ptr<Rosen::RSInteractiveImplictAnimator> interactiveAnimation_;
+    friend AnimationUtils;
+};
+
 void AnimationUtils::OpenImplicitAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
 {
@@ -90,6 +98,10 @@ void AnimationUtils::OpenImplicitAnimation(
 bool AnimationUtils::CloseImplicitAnimation()
 {
     auto animations = Rosen::RSNode::CloseImplicitAnimation();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (pipeline && !pipeline->GetOnShow()) {
+        pipeline->FlushMessages();
+    }
     return !animations.empty();
 }
 
@@ -106,6 +118,10 @@ void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallba
     auto wrappedOnRepeat = GetWrappedCallback(repeatCallback);
     Rosen::RSNode::Animate(timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback,
         wrappedOnFinish, wrappedOnRepeat);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (pipeline && !pipeline->GetOnShow()) {
+        pipeline->FlushMessages();
+    }
 }
 
 void AnimationUtils::AnimateWithCurrentOptions(
@@ -147,6 +163,10 @@ std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const 
     auto wrappedOnRepeat = GetWrappedCallback(repeatCallback);
     animation->animations_ = Rosen::RSNode::Animate(timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()),
         callback, wrappedOnFinish, wrappedOnRepeat);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (pipeline && !pipeline->GetOnShow()) {
+        pipeline->FlushMessages();
+    }
     if (!animation->animations_.empty()) {
         return animation;
     }
@@ -179,11 +199,22 @@ void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animat
     for (auto& ani : animation->animations_) {
         ani->Pause();
     }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (pipeline && !pipeline->GetOnShow()) {
+        pipeline->FlushMessages();
+    }
 }
 
 void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
 {
     CHECK_NULL_VOID(animation);
+    if (animation->animations_.empty()) {
+        return;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (pipeline) {
+        pipeline->RequestFrame();
+    }
     for (auto& ani : animation->animations_) {
         ani->Resume();
     }
@@ -192,5 +223,56 @@ void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Anima
 void AnimationUtils::ExecuteWithoutAnimation(const PropertyCallback& callback)
 {
     Rosen::RSNode::ExecuteWithoutAnimation(callback);
+}
+
+std::shared_ptr<AnimationUtils::InteractiveAnimation> AnimationUtils::CreateInteractiveAnimation(
+    const InteractiveAnimationCallback& addCallback, const FinishCallback& callback)
+{
+    std::shared_ptr<AnimationUtils::InteractiveAnimation> interactiveAnimation =
+        std::make_shared<AnimationUtils::InteractiveAnimation>();
+    CHECK_NULL_RETURN(interactiveAnimation, nullptr);
+    auto wrappedOnFinish = GetWrappedCallback(callback);
+    auto wrappedStart = GetWrappedCallback(addCallback);
+    Rosen::RSAnimationTimingProtocol timingProtocol;
+    Rosen::RSAnimationTimingCurve curve;
+    interactiveAnimation->interactiveAnimation_ =
+        Rosen::RSInteractiveImplictAnimator::Create(timingProtocol, curve);
+    CHECK_NULL_RETURN(interactiveAnimation->interactiveAnimation_, nullptr);
+    interactiveAnimation->interactiveAnimation_->AddAnimation(wrappedStart);
+    interactiveAnimation->interactiveAnimation_->SetFinishCallBack(wrappedOnFinish);
+    return interactiveAnimation;
+}
+
+int32_t AnimationUtils::StartInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation)
+{
+    CHECK_NULL_RETURN(interactiveAnimation, -1);
+    CHECK_NULL_RETURN(interactiveAnimation->interactiveAnimation_, -1);
+    return interactiveAnimation->interactiveAnimation_->StartAnimation();
+}
+
+void AnimationUtils::ContinueInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation)
+{
+    CHECK_NULL_VOID(interactiveAnimation);
+    CHECK_NULL_VOID(interactiveAnimation->interactiveAnimation_);
+    interactiveAnimation->interactiveAnimation_->ContinueAnimation();
+}
+
+void AnimationUtils::ReverseInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation)
+{
+    CHECK_NULL_VOID(interactiveAnimation);
+    CHECK_NULL_VOID(interactiveAnimation->interactiveAnimation_);
+    interactiveAnimation->interactiveAnimation_->ReverseAnimation();
+}
+
+void AnimationUtils::UpdateInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation, float progress)
+{
+    CHECK_NULL_VOID(interactiveAnimation);
+    CHECK_NULL_VOID(interactiveAnimation->interactiveAnimation_);
+    interactiveAnimation->interactiveAnimation_->PauseAnimation();
+    interactiveAnimation->interactiveAnimation_->SetFraction(progress);
 }
 } // namespace OHOS::Ace

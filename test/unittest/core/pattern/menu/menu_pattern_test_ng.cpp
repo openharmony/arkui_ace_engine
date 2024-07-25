@@ -204,6 +204,10 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg038, TestSize.Level1)
 {
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
     SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
     auto menuWrapperNode = GetPreviewMenuWrapper();
     ASSERT_NE(menuWrapperNode, nullptr);
@@ -235,6 +239,10 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg039, TestSize.Level1)
 {
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
     SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
     auto menuWrapperNode = GetPreviewMenuWrapper();
     ASSERT_NE(menuWrapperNode, nullptr);
@@ -266,6 +274,10 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg040, TestSize.Level1)
 {
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
     SystemProperties::orientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
     auto menuWrapperNode = GetPreviewMenuWrapper();
     ASSERT_NE(menuWrapperNode, nullptr);
@@ -693,6 +705,10 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg057, TestSize.Level1)
 {
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
     SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
     auto menuWrapperNode = GetPreviewMenuWrapper();
     ASSERT_NE(menuWrapperNode, nullptr);
@@ -724,6 +740,10 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg058, TestSize.Level1)
 {
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
     SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
     auto menuWrapperNode = GetPreviewMenuWrapper();
     ASSERT_NE(menuWrapperNode, nullptr);
@@ -755,6 +775,10 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg059, TestSize.Level1)
 {
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
     SystemProperties::orientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
     auto menuWrapperNode = GetPreviewMenuWrapper();
     ASSERT_NE(menuWrapperNode, nullptr);
@@ -1203,6 +1227,10 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg0410, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
     ScreenSystemManager::GetInstance().screenWidth_ = FULL_SCREEN_WIDTH;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
     SystemProperties::orientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
     auto menuWrapperNode = GetPreviewMenuWrapper();
     ASSERT_NE(menuWrapperNode, nullptr);

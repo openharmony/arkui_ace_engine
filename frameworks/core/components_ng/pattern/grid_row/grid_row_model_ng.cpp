@@ -101,4 +101,12 @@ void GridRowModelNG::SetDirection(FrameNode* frameNode, V2::GridRowDirection dir
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Direction, direction, frameNode);
 }
+
+void GridRowModelNG::SetOnBreakPointChange(FrameNode* frameNode,
+    std::function<void(const std::string)>&& onBreakPointChange)
+{
+    auto eventHub = frameNode->GetEventHub<GridRowEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnBreakpointChange(std::move(onBreakPointChange));
+}
 } // namespace OHOS::Ace::NG

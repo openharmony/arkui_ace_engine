@@ -39,6 +39,11 @@ public:
         return true;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
     OPINC_TYPE_E OpIncType() override
     {
         return OPINC_NODE;

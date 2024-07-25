@@ -78,7 +78,6 @@ void APngImageAnimation::OnNormalizedTimestampChanged(float normalized, bool rev
 
     auto picture = pictures_[index];
     float duration = picture->GetDuration();
-
     if (totalTime_ - lastFrameTime_ < duration) {
         return;
     }

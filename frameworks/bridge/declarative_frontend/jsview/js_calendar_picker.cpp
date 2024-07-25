@@ -230,11 +230,9 @@ void JSCalendarPicker::SetEdgeAlign(const JSCallbackInfo& info)
 {
     NG::CalendarEdgeAlign alignType = NG::CalendarEdgeAlign::EDGE_ALIGN_END;
     DimensionOffset offset;
-    if (!info[0]->IsNumber()) {
-        CalendarPickerModel::GetInstance()->SetEdgeAlign(alignType, offset);
-        return;
+    if (info[0]->IsNumber()) {
+        alignType = static_cast<NG::CalendarEdgeAlign>(info[0]->ToNumber<int32_t>());
     }
-    alignType = static_cast<NG::CalendarEdgeAlign>(info[0]->ToNumber<int32_t>());
 
     if (!info[1]->IsObject()) {
         CalendarPickerModel::GetInstance()->SetEdgeAlign(alignType, offset);
@@ -717,7 +715,6 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     }
 
     auto backgroundBlurStyle = paramObj->GetProperty("backgroundBlurStyle");
-    BlurStyleOption styleOption;
     if (backgroundBlurStyle->IsNumber()) {
         auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&

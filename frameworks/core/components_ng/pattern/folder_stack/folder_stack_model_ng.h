@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FOLDER_STACK_MODEL_NG_H
 
 #include "base/utils/macros.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_model.h"
 
 namespace OHOS::Ace::NG {
@@ -25,7 +26,9 @@ public:
     void Create(const std::vector<std::string>& itemId) override;
     void SetAlignment(Alignment alignment) override;
     void SetOnFolderStateChange(std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange) override;
+    static void SetEnableAnimation(FrameNode* frameNode, bool isEnableAnimation);
     void SetEnableAnimation(bool IsEnableAnimation) override;
+    static void SetAutoHalfFold(FrameNode* frameNode, bool isAutoHalfFold);
     void SetAutoHalfFold(bool IsAutoHalfFold) override;
     void SetOnHoverStatusChange(std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange) override;
 

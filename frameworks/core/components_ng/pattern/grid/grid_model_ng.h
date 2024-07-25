@@ -55,6 +55,7 @@ public:
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void SetScrollEnabled(bool scrollEnabled) override;
     void SetFriction(double friction) override;
+    void SetAlignItems(GridItemAlignment itemAlign) override;
     void SetOnScrollToIndex(ScrollToIndexFunc&& value) override;
     void SetOnScrollBarUpdate(ScrollBarUpdateFunc&& value) override;
     void SetOnItemDragStart(std::function<void(const ItemDragInfo&, int32_t)>&& value) override;
@@ -75,6 +76,7 @@ public:
     DisplayMode GetDisplayMode() const override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex);
     static void SetColumnsTemplate(FrameNode* frameNode, const std::string& columnsTemplate);
     static void SetRowsTemplate(FrameNode* frameNode, const std::string& rowsTemplate);
@@ -96,6 +98,7 @@ public:
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
     static void SetFriction(FrameNode* frameNode, double friction);
+    static void SetAlignItems(FrameNode* frameNode, GridItemAlignment itemAlign);
     static std::string GetColumnsTemplate(FrameNode* frameNode);
     static std::string GetRowsTemplate(FrameNode* frameNode);
     static float GetColumnsGap(FrameNode* frameNode);

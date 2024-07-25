@@ -447,4 +447,12 @@ void SelectModelImpl::SetHasOptionWidth(bool haveOptionWidth) {}
 void SelectModelImpl::SetMenuBackgroundColor(const Color& color) {}
 
 void SelectModelImpl::SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) {}
+
+void SelectModelImpl::SetLayoutDirection(TextDirection value)
+{
+    auto stack = ViewStackProcessor::GetInstance();
+    auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(selectComponent);
+    selectComponent->SetTextDirection(value);
+}
 } // namespace OHOS::Ace::Framework

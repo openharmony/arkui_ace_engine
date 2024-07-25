@@ -28,6 +28,7 @@ public:
     LinearVector() = default;
     explicit LinearVector(const size_t n) : std::vector<T>(n) {};
     LinearVector(const size_t n, T value) : std::vector<T>(n, value) {};
+    LinearVector(std::initializer_list<T> li) : std::vector<T>(li) {};
     ~LinearVector() = default;
 
     LinearVector operator+(const LinearVector& linearVector) const

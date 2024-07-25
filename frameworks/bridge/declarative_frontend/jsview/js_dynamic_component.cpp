@@ -38,6 +38,7 @@
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
@@ -55,6 +56,8 @@ void JSDynamicComponent::JSBind(BindingTarget globalObj)
     JSClass<JSDynamicComponent>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSDynamicComponent>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSDynamicComponent>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSDynamicComponent>::StaticMethod("width", &JSDynamicComponent::Width, opt);
+    JSClass<JSDynamicComponent>::StaticMethod("height", &JSDynamicComponent::Height, opt);
     JSClass<JSDynamicComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -110,21 +113,33 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
 
 void JSDynamicComponent::SetOnSizeChanged(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsFunction()) {
-        TAG_LOGW(AceLogTag::ACE_ISOLATED_COMPONENT, "OnSizeChanged argument is invalid");
+}
+
+void JSDynamicComponent::Width(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsWidth(info);
+
+    CalcDimension value;
+    bool parseResult = ParseJsDimensionVpNG(info[0], value);
+    if (NearEqual(value.Value(), 0)) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+        UIExtensionModel::GetInstance()->SetAdaptiveWidth(true);
         return;
     }
-    auto execCtx = info.GetExecutionContext();
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onCardSizeChanged = [execCtx, func = std::move(jsFunc)](int32_t width, int32_t height) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("DynamicComponent.onSizeChanged");
-        JSRef<JSObject> obj = JSRef<JSObject>::New();
-        obj->SetProperty<int32_t>("width", width);
-        obj->SetProperty<int32_t>("height", height);
-        auto returnValue = JSRef<JSVal>::Cast(obj);
-        func->ExecuteJS(1, &returnValue);
-    };
-    UIExtensionModel::GetInstance()->SetOnSizeChanged(std::move(onCardSizeChanged));
+    UIExtensionModel::GetInstance()->SetAdaptiveWidth(!parseResult || value.Unit() == DimensionUnit::AUTO);
+}
+
+void JSDynamicComponent::Height(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsHeight(info);
+
+    CalcDimension value;
+    bool parseResult = ParseJsDimensionVpNG(info[0], value);
+    if (NearEqual(value.Value(), 0)) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+        UIExtensionModel::GetInstance()->SetAdaptiveHeight(true);
+        return;
+    }
+    UIExtensionModel::GetInstance()->SetAdaptiveHeight(!parseResult || value.Unit() == DimensionUnit::AUTO);
 }
 } // namespace OHOS::Ace::Framework

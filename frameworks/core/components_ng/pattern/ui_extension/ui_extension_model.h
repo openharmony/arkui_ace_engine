@@ -32,7 +32,16 @@ class WantParams;
 
 namespace OHOS::Ace {
 namespace NG {
+class SecurityUIExtensionProxy;
 class UIExtensionProxy;
+
+struct UIExtensionConfig {
+    RefPtr<OHOS::Ace::WantWrap> wantWrap = nullptr;
+    RefPtr<NG::FrameNode> placeholderNode = nullptr;
+    bool transferringCaller = false;
+    bool densityDpi = false;
+    NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY;
+};
 }
 
 class ACE_EXPORT UIExtensionModel {
@@ -47,19 +56,26 @@ public:
     virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, NG::SessionType sessionType);
     // for DynamicComponent
     virtual void Create();
+    virtual void Create(const NG::UIExtensionConfig& config) {}
     virtual void InitializeDynamicComponent(const RefPtr<NG::FrameNode>& frameNode, const std::string& hapPath,
         const std::string& abcPath, const std::string& entryPoint, void* runtime);
     virtual void InitializeIsolatedComponent(const RefPtr<NG::FrameNode>& frameNode,
         const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime);
-    virtual void SetOnSizeChanged(std::function<void(int32_t, int32_t)>&& onSizeChanged);
+    virtual void SetAdaptiveWidth(bool state);
+    virtual void SetAdaptiveHeight(bool state);
 
     virtual void SetOnRemoteReady(std::function<void(const RefPtr<NG::UIExtensionProxy>&)>&& onRemoteReady);
     virtual void SetOnRelease(std::function<void(int32_t)>&& onRelease);
     virtual void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult);
-    virtual void SetOnTerminated(std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated);
-    virtual void SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive);
+    virtual void SetOnTerminated(std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated,
+        NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY) {}
+    virtual void SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive,
+        NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY) {}
+    virtual void SetSecurityOnRemoteReady(
+        std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>&& onRemoteReady) {}
     virtual void SetOnError(
-        std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError);
+        std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError,
+        NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY);
     virtual void SetPlatformOnError(
         std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError);
 

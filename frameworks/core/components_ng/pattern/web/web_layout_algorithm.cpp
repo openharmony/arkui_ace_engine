@@ -47,9 +47,6 @@ void WebLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
         MinusPaddingToSize(padding, drawSize);
         layoutWrapper->GetGeometryNode()->SetFrameSize(drawSize);
-    } else if (pattern->IsVirtualKeyBoardShow()) {
-        Size drawSize = pattern->GetDrawSize();
-        layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(drawSize.Width(), drawSize.Height()));
     } else {
         BoxLayoutAlgorithm::Measure(layoutWrapper);
     }

@@ -32,8 +32,8 @@ Framework::XComponentParams XComponentNodeBridge::SetXComponentNodeParams(
     }
     // xcomponent id
     arg = runtimeCallInfo->GetCallArgRef(1);
-    if (arg->IsString()) {
-        params.xcomponentId = arg->ToString(vm)->ToString();
+    if (arg->IsString(vm)) {
+        params.xcomponentId = arg->ToString(vm)->ToString(vm);
     }
     // xcomponentType
     arg = runtimeCallInfo->GetCallArgRef(2);
@@ -47,8 +47,8 @@ Framework::XComponentParams XComponentNodeBridge::SetXComponentNodeParams(
     }
     // surfaceId
     arg = runtimeCallInfo->GetCallArgRef(4);
-    if (arg->IsString()) {
-        params.surfaceId = arg->ToString(vm)->ToString();
+    if (arg->IsString(vm)) {
+        params.surfaceId = arg->ToString(vm)->ToString(vm);
     }
     // selfIdealWidth
     arg = runtimeCallInfo->GetCallArgRef(5);
@@ -62,14 +62,15 @@ Framework::XComponentParams XComponentNodeBridge::SetXComponentNodeParams(
     }
     // libraryname
     arg = runtimeCallInfo->GetCallArgRef(7);
-    if (arg->IsString()) {
-        params.libraryName = arg->ToString(vm)->ToString();
+    if (arg->IsString(vm)) {
+        params.libraryName = arg->ToString(vm)->ToString(vm);
     }
     // xComponentController
     arg = runtimeCallInfo->GetCallArgRef(8);
     if (!arg->IsUndefined()) {
         params.controller =
-            static_cast<Framework::JSXComponentController*>(Local<panda::ObjectRef>(arg)->GetNativePointerField(0));
+            static_cast<Framework::JSXComponentController*>(Local<panda::ObjectRef>(arg)->GetNativePointerField(
+                vm, 0));
     }
 
     return params;
@@ -117,7 +118,7 @@ ArkUINativeModuleValue XComponentNodeBridge::RegisterOnCreateCallback(ArkUIRunti
     Framework::JSXComponent* jsXComponent =
         reinterpret_cast<Framework::JSXComponent*>(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    if (jsXComponent && secondArg->IsFunction()) {
+    if (jsXComponent && secondArg->IsFunction(vm)) {
         Framework::JsiExecutionContext execCtx = { vm };
         jsXComponent->RegisterOnCreate(execCtx, secondArg);
     }
@@ -132,7 +133,7 @@ ArkUINativeModuleValue XComponentNodeBridge::RegisterOnDestroyCallback(ArkUIRunt
     Framework::JSXComponent* jsXComponent =
         reinterpret_cast<Framework::JSXComponent*>(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    if (jsXComponent && secondArg->IsFunction()) {
+    if (jsXComponent && secondArg->IsFunction(vm)) {
         Framework::JsiExecutionContext execCtx = { vm };
         jsXComponent->RegisterOnDestroy(execCtx, secondArg);
     }

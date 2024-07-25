@@ -197,6 +197,7 @@ public:
 
     void AddHittedRecognizerType(std::map<std::string, std::list<TouchTestResultInfo>>& hittedRecognizerInfo);
 
+    bool IsReady() override;
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override;
     void OnFinishGestureReferee(int32_t touchId, bool isBlocked = false) override;

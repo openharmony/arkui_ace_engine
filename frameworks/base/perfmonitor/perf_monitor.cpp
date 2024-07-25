@@ -182,8 +182,9 @@ bool SceneRecord::IsTimeOut(int64_t nowTime)
 
 void SceneRecord::RecordFrame(int64_t vsyncTime, int64_t duration, int32_t skippedFrames)
 {
+    int64_t currentTimeNs = GetCurrentRealTimeNs();
     if (totalFrames == 0) {
-        beginVsyncTime = GetCurrentRealTimeNs();
+        beginVsyncTime = currentTimeNs;
         isFirstFrame = true;
     } else {
         isFirstFrame = false;
@@ -206,6 +207,7 @@ void SceneRecord::RecordFrame(int64_t vsyncTime, int64_t duration, int32_t skipp
     }
     if (!isFirstFrame && duration > maxFrameTime) {
         maxFrameTime = duration;
+        maxFrameTimeSinceStart = (currentTimeNs - beginVsyncTime) / NS_TO_MS;
     }
     totalFrames++;
 }
@@ -230,7 +232,8 @@ bool SceneRecord::IsDisplayAnimator(const std::string& sceneId)
     if (sceneId == PerfConstants::APP_LIST_FLING || sceneId == PerfConstants::APP_SWIPER_SCROLL
         || sceneId == PerfConstants::SNAP_RECENT_ANI
         || sceneId == PerfConstants::WINDOW_RECT_RESIZE
-        || sceneId == PerfConstants::WINDOW_RECT_MOVE) {
+        || sceneId == PerfConstants::WINDOW_RECT_MOVE
+        || sceneId == PerfConstants::LAUNCHER_SPRINGBACK_SCROLL) {
         return true;
     }
     return false;
@@ -241,6 +244,9 @@ void SceneRecord::Reset()
     beginVsyncTime = 0;
     endVsyncTime = 0;
     maxFrameTime = 0;
+    maxFrameTimeSinceStart = 0;
+    maxHitchTime = 0;
+    maxHitchTimeSinceStart = 0;
     maxSuccessiveFrames = 0;
     seqMissFrames = 0;
     totalMissed = 0;
@@ -381,9 +387,10 @@ std::string PerfMonitor::GetPageName()
     return baseInfo.pageName;
 }
 
-void PerfMonitor::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName)
+void PerfMonitor::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
+                                    const std::string& pageName)
 {
-    EventReport::ReportPageShowMsg(pageUrl, bundleName);
+    EventReport::ReportPageShowMsg(pageUrl, bundleName, pageName);
 }
 
 void PerfMonitor::RecordBaseInfo(SceneRecord* record)
@@ -479,6 +486,9 @@ void PerfMonitor::FlushDataBase(SceneRecord* record, DataBase& data)
         data.endVsyncTime = data.beginVsyncTime;
     }
     data.maxFrameTime = record->maxFrameTime;
+    data.maxFrameTimeSinceStart = record->maxFrameTimeSinceStart;
+    data.maxHitchTime = record->maxHitchTime;
+    data.maxHitchTimeSinceStart = record->maxHitchTimeSinceStart;
     data.maxSuccessiveFrames = record->maxSuccessiveFrames;
     data.totalMissed = record->totalMissed;
     data.totalFrames = record->totalFrames;
@@ -510,24 +520,27 @@ void PerfMonitor::ReportPerfEvent(PerfEventType type, DataBase& data)
 
 bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
 {
-    if ((sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH
-        && GetCurrentRealTimeNs() - time > RESPONSE_TIMEOUT)
-        || sceneId == PerfConstants::VOLUME_BAR_SHOW
-        || sceneId == PerfConstants::APP_TRANSITION_TO_OTHER_APP
-        || sceneId == PerfConstants::APP_TRANSITION_FROM_OTHER_APP) {
+    int64_t currentRealTimeNs = GetCurrentRealTimeNs();
+    static set<std::string> exceptSceneSet = {
+        PerfConstants::APP_LIST_FLING, PerfConstants::SCREEN_ROTATION_ANI,
+        PerfConstants::SHOW_INPUT_METHOD_ANIMATION, PerfConstants::HIDE_INPUT_METHOD_ANIMATION,
+        PerfConstants::APP_TRANSITION_FROM_OTHER_APP, PerfConstants::APP_TRANSITION_TO_OTHER_APP,
+        PerfConstants::VOLUME_BAR_SHOW, PerfConstants::PC_APP_CENTER_GESTURE_OPERATION,
+        PerfConstants::PC_GESTURE_TO_RECENT, PerfConstants::PC_SHORTCUT_SHOW_DESKTOP,
+        PerfConstants::PC_ALT_TAB_TO_RECENT, PerfConstants::PC_SHOW_DESKTOP_GESTURE_OPERATION,
+        PerfConstants::PC_SHORTCUT_RESTORE_DESKTOP, PerfConstants::PC_SHORTCUT_TO_RECENT,
+        PerfConstants::PC_EXIT_RECENT, PerfConstants::PC_SHORTCUT_TO_APP_CENTER_ON_RECENT,
+        PerfConstants::PC_SHORTCUT_TO_APP_CENTER, PerfConstants::PC_SHORTCUT_EXIT_APP_CENTER,
+        PerfConstants::WINDOW_TITLE_BAR_MINIMIZED, PerfConstants::WINDOW_RECT_MOVE,
+        PerfConstants::APP_EXIT_FROM_WINDOW_TITLE_BAR_CLOSED, PerfConstants::WINDOW_TITLE_BAR_RECOVER,
+        PerfConstants::LAUNCHER_APP_LAUNCH_FROM_OTHER, PerfConstants::WINDOW_RECT_RESIZE,
+        PerfConstants::WINDOW_TITLE_BAR_MAXIMIZED, PerfConstants::LAUNCHER_APP_LAUNCHE_FROM_TRANSITION
+    };
+    if (exceptSceneSet.find(sceneId) != exceptSceneSet.end()) {
         return true;
     }
-    if (sceneId == PerfConstants::PC_APP_CENTER_GESTURE_OPERATION ||
-        sceneId == PerfConstants::PC_GESTURE_TO_RECENT ||
-        sceneId == PerfConstants::PC_SHORTCUT_SHOW_DESKTOP ||
-        sceneId == PerfConstants::PC_SHORTCUT_RESTORE_DESKTOP ||
-        sceneId == PerfConstants::PC_SHOW_DESKTOP_GESTURE_OPERATION ||
-        sceneId == PerfConstants::PC_ALT_TAB_TO_RECENT ||
-        sceneId == PerfConstants::PC_SHORTCUT_TO_RECENT ||
-        sceneId == PerfConstants::PC_EXIT_RECENT ||
-        sceneId == PerfConstants::PC_SHORTCUT_TO_APP_CENTER ||
-        sceneId == PerfConstants::PC_SHORTCUT_TO_APP_CENTER_ON_RECENT ||
-        sceneId == PerfConstants::PC_SHORTCUT_EXIT_APP_CENTER) {
+    if ((sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH && currentRealTimeNs - time > RESPONSE_TIMEOUT)
+        || (sceneId == PerfConstants::CLOSE_FOLDER_ANI && currentRealTimeNs - time > RESPONSE_TIMEOUT)) {
         return true;
     }
     return false;
@@ -536,11 +549,14 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
 // for jank frame app
 bool PerfMonitor::IsExclusionFrame()
 {
+    ACE_SCOPED_TRACE("IsExclusionFrame: isResponse(%d) isStartApp(%d) isBg(%d) isExcluWindow(%d) isExcAni(%d)",
+        isResponseExclusion, isStartAppFrame, isBackgroundApp, isExclusionWindow, isExceptAnimator);
     return isResponseExclusion || isStartAppFrame || isBackgroundApp || isExclusionWindow || isExceptAnimator;
 }
 
 void PerfMonitor::SetAppStartStatus()
 {
+    ACE_FUNCTION_TRACE();
     isStartAppFrame = true;
     startAppTime = GetCurrentRealTimeNs();
 }
@@ -607,6 +623,7 @@ bool PerfMonitor::IsSceneIdInSceneWhiteList(const std::string& sceneId)
         sceneId == PerfConstants::LAUNCHER_APP_SWIPE_TO_HOME ||
         sceneId == PerfConstants::LAUNCHER_APP_BACK_TO_HOME ||
         sceneId == PerfConstants::EXIT_RECENT_2_HOME_ANI ||
+        sceneId == PerfConstants::APP_SWIPER_FLING ||
         sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
             return true;
         }

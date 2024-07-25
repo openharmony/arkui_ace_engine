@@ -15,6 +15,7 @@ group("innerkits_target") {
   deps = [
     "form_render:ace_form_render",
     "ui_service_manager:ui_service_mgr",
+    "ui_session:ui_session",
     "xcomponent_controller:ace_xcomponent_controller",
   ]
 }

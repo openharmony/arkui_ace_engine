@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/pattern/window_scene/screen/screen_node.h"
-#include "core/components_ng/pattern/window_scene/screen/screen_pattren.h"
+#include "core/components_ng/pattern/window_scene/screen/screen_pattern.h"
 
 namespace OHOS::Ace::NG {
 HitTestResult ScreenNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,

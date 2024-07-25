@@ -65,8 +65,8 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     modifierWithKey(this._modifiersWithKeys, AnimationDurationModifier.identity, AnimationDurationModifier, value);
     return this;
   }
-  animateMode(value: AnimateMode): TabsAttribute {
-    modifierWithKey(this._modifiersWithKeys, AnimateModeModifier.identity, AnimateModeModifier, value);
+  animationMode(value: AnimationMode): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, AnimationModeModifier.identity, AnimationModeModifier, value);
     return this;
   }
   onChange(event: (index: number) => void): TabsAttribute {
@@ -259,11 +259,11 @@ class AnimationDurationModifier extends ModifierWithKey<number> {
 }
 
 
-class AnimateModeModifier extends ModifierWithKey<AnimateMode> {
-  constructor(value: AnimateMode) {
+class AnimationModeModifier extends ModifierWithKey<AnimationMode> {
+  constructor(value: AnimationMode) {
     super(value);
   }
-  static identity: Symbol = Symbol('animateMode');
+  static identity: Symbol = Symbol('animationMode');
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -420,6 +420,20 @@ class TabClipModifier extends ModifierWithKey<boolean | object> {
 
   checkObjectDiff(): boolean {
     return true;
+  }
+}
+
+class TabEdgeEffectModifier extends ModifierWithKey<EdgeEffect> {
+  static identity: Symbol = Symbol('tabedgeEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetTabEdgeEffect(node);
+    } else {
+      getUINativeModule().tabs.setTabEdgeEffect(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 

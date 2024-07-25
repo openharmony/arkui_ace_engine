@@ -264,6 +264,19 @@ void* PixelMapOhos::GetWritablePixels() const
     return pixmap_->GetWritablePixels();
 }
 
+bool PixelMapOhos::GetPixelsVec(std::vector<uint8_t>& data) const
+{
+    CHECK_NULL_RETURN(pixmap_, false);
+    data.resize(pixmap_->GetByteCount());
+    uint8_t* dst = data.data();
+    uint32_t errCode = pixmap_->ReadPixels(pixmap_->GetByteCount(), dst);
+    if (errCode) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "GetPixelsVec error, errCode=%{public}d", errCode);
+        return false;
+    }
+    return true;
+}
+
 RefPtr<PixelMap> PixelMap::ConvertSkImageToPixmap(
     const uint32_t* colors, uint32_t colorLength, int32_t width, int32_t height)
 {
@@ -290,8 +303,6 @@ void PixelMapOhos::SavePixelMapToFile(const std::string& dst) const
                            "_rowStride" + std::to_string(rowStride) + "_byteCount" + std::to_string(totalSize) + dst +
                            ".dat";
     auto path = ImageFileCache::GetInstance().ConstructCacheFilePath(filename);
-    char realPath[PATH_MAX] = { 0x00 };
-    CHECK_NULL_VOID(realpath(path.c_str(), realPath));
     std::ofstream outFile(path, std::fstream::out);
     if (!outFile.is_open()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "write error, path=%{public}s", path.c_str());

@@ -57,8 +57,8 @@ public:
 
     void SetNavPathList(const NavPathList& navPathList)
     {
-        navPathList_ = navPathList;
         preNavPathList_ = navPathList;
+        navPathList_ = navPathList;
     }
 
     bool Empty() const
@@ -118,6 +118,7 @@ public:
     void Add(const std::string& name, const RefPtr<UINode>& navDestinationNode, NavRouteMode mode,
         const RefPtr<RouteInfo>& routeInfo = nullptr);
     RefPtr<UINode> Get();
+    std::string GetNavDesNameByIndex(int32_t index);
     bool Get(const std::string& name, RefPtr<UINode>& navDestinationNode, int32_t& index);
     bool GetFromPreBackup(const std::string& name, RefPtr<UINode>& navDestinationNode, int32_t& index);
     RefPtr<UINode> Get(int32_t index);
@@ -178,7 +179,33 @@ public:
         navigationNode_ = navigationNode;
     }
 
+#if defined(ENABLE_NAV_SPLIT_MODE)
+    void SetLastNavPathList(const NavPathList& navPathList)
+    {
+        lastNavPathList_ = navPathList;
+    }
+    bool isLastListContains(const std::string& name, const RefPtr<UINode>& navDestinationNode);
+#endif
+
     virtual void UpdatePathInfoIfNeeded(RefPtr<UINode>& uiNode, int32_t index) {}
+    virtual void RecoveryNavigationStack() {}
+    virtual bool NeedBuildNewInstance(int32_t index) { return false; }
+    virtual void SetNeedBuildNewInstance(int32_t index, bool need) {}
+
+    void UpdateRecoveryList()
+    {
+        recoveryList_ = navPathList_;
+    }
+
+    void ClearRecoveryList()
+    {
+        recoveryList_.clear();
+    }
+
+    NavPathList GetRecoveryList()
+    {
+        return recoveryList_;
+    }
 
 protected:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);
@@ -190,6 +217,12 @@ protected:
     NavPathList navPathList_;
     // prev backup NavPathList
     NavPathList preNavPathList_;
+#if defined(ENABLE_NAV_SPLIT_MODE)
+    // backup NavPathList before push or pop
+    NavPathList lastNavPathList_;
+#endif
+    // recovery NavPathList
+    NavPathList recoveryList_;
     NavPathList cacheNodes_;
     bool animated_ = true;
     WeakPtr<UINode> navigationNode_;

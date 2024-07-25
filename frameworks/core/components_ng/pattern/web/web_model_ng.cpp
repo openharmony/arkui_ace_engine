@@ -32,15 +32,15 @@
 
 namespace OHOS::Ace::NG {
 void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& webController, RenderMode renderMode,
-                        bool incognitoMode)
+    bool incognitoMode, const std::string& sharedRenderProcessToken)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::WEB_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId,
-        [src, webController, renderMode, incognitoMode]() {
-            return AceType::MakeRefPtr<WebPattern>(src, webController, renderMode,
-                incognitoMode);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::WEB_ETS_TAG, nodeId, [src, webController, renderMode, incognitoMode, sharedRenderProcessToken]() {
+            return AceType::MakeRefPtr<WebPattern>(
+                src, webController, renderMode, incognitoMode, sharedRenderProcessToken);
         });
     frameNode->AddFlag(NodeFlag::WEB_TAG);
     stack->Push(frameNode);
@@ -55,23 +55,19 @@ void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& web
     webPattern->SetWebController(webController);
     webPattern->SetRenderMode(renderMode);
     webPattern->SetIncognitoMode(incognitoMode);
-
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddWindowStateChangedCallback(nodeId);
-    pipeline->AddWindowSizeChangeCallback(nodeId);
-    AddDragFrameNodeToManager();
+    webPattern->SetSharedRenderProcessToken(sharedRenderProcessToken);
 }
 
 void WebModelNG::Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
     std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup,
-    RenderMode renderMode, bool incognitoMode)
+    RenderMode renderMode, bool incognitoMode, const std::string& sharedRenderProcessToken)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId,
-        [src, setWebIdCallback, renderMode, incognitoMode]() {
-            return AceType::MakeRefPtr<WebPattern>(src, std::move(setWebIdCallback), renderMode, incognitoMode);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::WEB_ETS_TAG, nodeId, [src, setWebIdCallback, renderMode, incognitoMode, sharedRenderProcessToken]() {
+            return AceType::MakeRefPtr<WebPattern>(
+                src, std::move(setWebIdCallback), renderMode, incognitoMode, sharedRenderProcessToken);
         });
     frameNode->AddFlag(NodeFlag::WEB_TAG);
     stack->Push(frameNode);
@@ -88,11 +84,7 @@ void WebModelNG::Create(const std::string& src, std::function<void(int32_t)>&& s
     webPattern->SetParentNWebId(parentWebId);
     webPattern->SetRenderMode(renderMode);
     webPattern->SetIncognitoMode(incognitoMode);
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddWindowStateChangedCallback(nodeId);
-    pipeline->AddWindowSizeChangeCallback(nodeId);
-    AddDragFrameNodeToManager();
+    webPattern->SetSharedRenderProcessToken(sharedRenderProcessToken);
 }
 
 void WebModelNG::SetCustomScheme(const std::string& cmdLine)
@@ -203,9 +195,16 @@ void WebModelNG::SetOnGeolocationShow(std::function<void(const BaseEventInfo* in
 void WebModelNG::SetOnRequestFocus(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
-    auto instanceId = Container::CurrentId();
+    WeakPtr<NG::FrameNode> weak = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
 
-    auto uiCallback = [func, instanceId](const std::shared_ptr<BaseEventInfo>& info) {
+    auto uiCallback = [func, weak](const std::shared_ptr<BaseEventInfo>& info) {
+        auto frameNode = weak.Upgrade();
+        int32_t instanceId = INSTANCE_ID_UNDEFINED;
+        if (frameNode) {
+            instanceId = frameNode->GetInstanceId();
+        } else {
+            instanceId = Container::CurrentIdSafely();
+        }
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
@@ -271,8 +270,15 @@ void WebModelNG::SetMediaPlayGestureAccess(bool isNeedGestureAccess)
 void WebModelNG::SetOnKeyEvent(std::function<void(KeyEventInfo& keyEventInfo)>&& jsCallback)
 {
     auto func = jsCallback;
-    auto instanceId = Container::CurrentId();
-    auto uiCallback = [func, instanceId](KeyEventInfo& keyEventInfo) {
+    WeakPtr<NG::FrameNode> weak = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto uiCallback = [func, weak](KeyEventInfo& keyEventInfo) {
+        auto frameNode = weak.Upgrade();
+        int32_t instanceId = INSTANCE_ID_UNDEFINED;
+        if (frameNode) {
+            instanceId = frameNode->GetInstanceId();
+        } else {
+            instanceId = Container::CurrentIdSafely();
+        }
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
@@ -513,8 +519,15 @@ void WebModelNG::SetWebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled)
 void WebModelNG::SetOnMouseEvent(std::function<void(MouseInfo& info)>&& jsCallback)
 {
     auto func = jsCallback;
-    auto instanceId = Container::CurrentId();
-    auto uiCallback = [func, instanceId](MouseInfo& info) {
+    WeakPtr<NG::FrameNode> weak = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto uiCallback = [func, weak](MouseInfo& info) {
+        auto frameNode = weak.Upgrade();
+        int32_t instanceId = INSTANCE_ID_UNDEFINED;
+        if (frameNode) {
+            instanceId = frameNode->GetInstanceId();
+        } else {
+            instanceId = Container::CurrentIdSafely();
+        }
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
@@ -763,8 +776,15 @@ void WebModelNG::SetPageVisibleId(OnWebAsyncFunc&& pageVisibleId)
 void WebModelNG::SetOnInterceptKeyEventCallback(std::function<bool(KeyEventInfo& keyEventInfo)>&& keyEventInfo)
 {
     auto func = keyEventInfo;
-    auto instanceId = Container::CurrentId();
-    auto onConsole = [func, instanceId](KeyEventInfo& keyEventInfo) -> bool {
+    WeakPtr<NG::FrameNode> weak = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onConsole = [func, weak](KeyEventInfo& keyEventInfo) -> bool {
+        auto frameNode = weak.Upgrade();
+        int32_t instanceId = INSTANCE_ID_UNDEFINED;
+        if (frameNode) {
+            instanceId = frameNode->GetInstanceId();
+        } else {
+            instanceId = Container::CurrentIdSafely();
+        }
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         bool result = false;
@@ -1112,5 +1132,27 @@ void WebModelNG::SetAdsBlockedEventId(std::function<void(const BaseEventInfo* in
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnAdsBlockedEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetUpdateInstanceIdCallback(std::function<void(int32_t)>&& callback)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+
+    webPattern->SetUpdateInstanceIdCallback(std::move(callback));
+}
+
+void WebModelNG::SetOverlayScrollbarEnabled(bool isEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateOverlayScrollbarEnabled(isEnabled);
+}
+
+void WebModelNG::SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateKeyboardAvoidMode(mode);
 }
 } // namespace OHOS::Ace::NG

@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT AceScoringLog final {
+class ACE_FORCE_EXPORT AceScoringLog final {
 public:
     explicit AceScoringLog(const std::string& eventName);
     AceScoringLog(const std::string& pageName, const std::string& componentType, const std::string& procType);

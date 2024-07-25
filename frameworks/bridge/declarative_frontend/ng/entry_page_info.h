@@ -30,8 +30,10 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT EntryPageInfo : public PageInfo {
     DECLARE_ACE_TYPE(EntryPageInfo, PageInfo)
 public:
-    EntryPageInfo(int32_t pageId, const std::string& url, const std::string& path, std::string params)
-        : PageInfo(pageId, url, path), params_(std::move(params))
+    EntryPageInfo(int32_t pageId, const std::string& url, const std::string& path, std::string params,
+        bool recoverable = true, bool isCreateByNamedRouter = false)
+        : PageInfo(pageId, url, path), params_(std::move(params)), recoverable_(recoverable),
+        isCreateByNamedRouter_(isCreateByNamedRouter)
     {}
     ~EntryPageInfo() override = default;
 
@@ -45,6 +47,23 @@ public:
         std::string old(std::move(params_));
         params_ = param;
         return old;
+    }
+
+    bool IsRecoverable() const
+    {
+        return recoverable_;
+    }
+
+    bool ReplaceRecoverable(bool recoverable)
+    {
+        bool old = recoverable_;
+        recoverable_ = recoverable;
+        return old;
+    }
+
+    bool IsCreateByNamedRouter() const
+    {
+        return isCreateByNamedRouter_;
     }
 
     void SetPageMap(const RefPtr<Framework::RevSourceMap>& pageMap)
@@ -69,6 +88,8 @@ public:
 
 private:
     std::string params_;
+    bool recoverable_ = true;
+    bool isCreateByNamedRouter_ = false;
     int64_t showTime_ = 0;
     RefPtr<Framework::RevSourceMap> pageMap_;
 

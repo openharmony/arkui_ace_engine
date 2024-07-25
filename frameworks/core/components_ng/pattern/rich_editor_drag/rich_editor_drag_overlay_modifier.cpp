@@ -62,7 +62,7 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
     canvas.Save();
     canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
     OffsetF offset = { pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY() };
-    for (auto && info : hostPattern->GetParagraphs()) {
+    for (auto &&info : hostPattern->GetParagraphs()) {
         info.paragraph->Paint(canvas, offset.GetX(), offset.GetY());
         offset.AddY(info.paragraph->GetHeight());
     }
@@ -98,25 +98,22 @@ void RichEditorDragOverlayModifier::PaintImage(DrawingContext& context)
         auto rect = rectsForPlaceholders.at(index);
         auto offset = OffsetF(rect.Left(), rect.Top()) + pattern->GetTextRect().GetOffset();
         auto pattern = child->GetPattern();
-        auto imagePattern = DynamicCast<ImagePattern>(pattern);
-        if (imagePattern) {
-            PaintImageNode(context, child, imagePattern, offset);
-        } else {
-            PaintFrameNode(context, child, pattern, offset);
-        }
+        PaintFrameNode(context, child, pattern, offset);
         ++index;
     }
 }
 
-void RichEditorDragOverlayModifier::PaintImageNode(DrawingContext& context, RefPtr<FrameNode> imageNode,
-    RefPtr<ImagePattern> pattern, OffsetF offset)
+void RichEditorDragOverlayModifier::PaintImageNode(DrawingContext& context, const RefPtr<FrameNode>& imageNode,
+    const RefPtr<ImagePattern>& pattern, const OffsetF& offset)
 {
     auto& canvas = context.canvas;
     auto geometryNode = imageNode->GetGeometryNode();
     auto canvasImage = pattern->GetCanvasImage();
     auto layoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(geometryNode && canvasImage && layoutProperty);
-    auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
+    auto pixelMap = canvasImage->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    auto pixelMapImage = DynamicCast<PixelMapImage>(CanvasImage::Create(pixelMap));
     CHECK_NULL_VOID(pixelMapImage);
     float marginTop = 0.0f;
     float marginLeft = 0.0f;
@@ -148,11 +145,11 @@ void RichEditorDragOverlayModifier::PaintImageNode(DrawingContext& context, RefP
     canvas.Restore();
 }
 
-void RichEditorDragOverlayModifier::PaintFrameNode(DrawingContext& context, RefPtr<FrameNode> imageNode,
-    RefPtr<Pattern> pattern, OffsetF offset)
+void RichEditorDragOverlayModifier::PaintFrameNode(DrawingContext& context, const RefPtr<FrameNode>& frameNode,
+    const RefPtr<Pattern>& pattern, const OffsetF& offset)
 {
     auto& canvas = context.canvas;
-    auto pixelMap = imageNode->GetRenderContext()->GetThumbnailPixelMap();
+    auto pixelMap = frameNode->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
     auto canvasImage = CanvasImage::Create(pixelMap);
     auto layoutProperty = pattern->GetLayoutProperty<LayoutProperty>();

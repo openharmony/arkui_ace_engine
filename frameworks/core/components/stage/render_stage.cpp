@@ -281,7 +281,6 @@ void RenderStage::GetControllers()
     auto nextTopElement = *(childIter++);
     auto transitionIn = PageTransitionElement::GetTransitionElement(topElement);
     auto transitionOut = PageTransitionElement::GetTransitionElement(nextTopElement);
-
     if (!transitionIn || !transitionOut) {
         LOGE("transitionIn or transitionOut is null.");
         return;

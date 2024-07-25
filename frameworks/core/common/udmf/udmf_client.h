@@ -25,6 +25,8 @@
 #include "core/components/form/resource/form_request_data.h"
 
 namespace OHOS::Ace {
+const std::string DROP_TYPE_PLAIN_TEXT = "general.plain-text";
+const std::string DROP_TYPE_HYPERLINK = "general.hyperlink";
 struct PixelMapRecordDetails {
     int32_t width = 0;
     int32_t height = 0;
@@ -38,6 +40,8 @@ class ACE_FORCE_EXPORT UdmfClient : public AceType {
 public:
     static UdmfClient* GetInstance();
     virtual RefPtr<UnifiedData> TransformUnifiedData(napi_value napiValue) = 0;
+    virtual RefPtr<UnifiedData> TransformUnifiedDataForNative(void* rawData) = 0;
+    virtual void* TransformUnifiedDataPtr(RefPtr<UnifiedData>& unifiedData) = 0;
     virtual napi_value TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData) = 0;
     virtual napi_value TransformSummary(std::map<std::string, int64_t>& summary) = 0;
     virtual RefPtr<UnifiedData> CreateUnifiedData() = 0;

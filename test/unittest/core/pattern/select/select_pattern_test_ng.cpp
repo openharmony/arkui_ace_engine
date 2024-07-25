@@ -1666,4 +1666,29 @@ HWTEST_F(SelectPatternTestNg, SetItemSelected032, TestSize.Level1)
 
     EXPECT_EQ(val, -1);
 }
+
+/**
+ * @tc.name: SetControlSize001
+ * @tc.desc: Test SelectPattern SetControlSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetControlSize001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Get frameNode and pattern.
+     */
+    auto *selectFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(selectFrameNode, nullptr);
+    auto selectPattern = selectFrameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call SetControlSize.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetControlSize(ControlSize::SMALL);
+    auto controlSize = selectPattern->GetControlSize();
+    EXPECT_EQ(ControlSize::SMALL, controlSize);
+}
 } // namespace OHOS::Ace::NG

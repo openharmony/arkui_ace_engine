@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("toggle_test_ng") {
   type = "new"
   sources = [
+    "toggle_content_modifier_add_test_ng.cpp",
     "toggle_content_modifier_test_ng.cpp",
     "toggle_switch_test_ng.cpp",
     "toggle_test_ng.cpp",

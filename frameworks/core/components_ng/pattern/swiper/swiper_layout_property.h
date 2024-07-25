@@ -183,18 +183,42 @@ public:
         }
     }
 
-    void UpdatePrevMarginWithoutMeasure(const Dimension& value)
+    void ResetIgnorePrevMarginAndNextMargin()
     {
-        if (propPrevMargin_ != value) {
-            propPrevMargin_ = value;
-        }
+        ignorePrevMarginAndNextMargin_ = false;
     }
 
-    void UpdateNextMarginWithoutMeasure(const Dimension& value)
+    void MarkIgnorePrevMarginAndNextMargin()
     {
-        if (propNextMargin_ != value) {
-            propNextMargin_ = value;
+        ignorePrevMarginAndNextMargin_ = true;
+        propPrevMargin_ = Dimension(0.0_px);
+        propNextMargin_ = Dimension(0.0_px);
+    }
+
+    float GetCalculatedPrevMargin() const
+    {
+        if (!IsStretch() || ignorePrevMarginAndNextMargin_) {
+            return 0.0f;
         }
+        return GetPrevMarginValue(0.0_vp).ConvertToPx();
+    }
+
+    float GetCalculatedNextMargin() const
+    {
+        if (!IsStretch() || ignorePrevMarginAndNextMargin_) {
+            return 0.0f;
+        }
+        return GetNextMarginValue(0.0_vp).ConvertToPx();
+    }
+
+    bool IsStretch() const
+    {
+        // If display count is setted, use stretch mode.
+        if (HasDisplayCount() && !HasMinSize()) {
+            return true;
+        }
+
+        return GetDisplayMode().value_or(SwiperDisplayMode::STRETCH) == SwiperDisplayMode::STRETCH;
     }
 
     void ResetIgnoreItemSpace()
@@ -213,7 +237,7 @@ public:
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Direction, Axis, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Index, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Index, int32_t, PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemSpace, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedCount, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayMode, SwiperDisplayMode, PROPERTY_UPDATE_MEASURE);
@@ -226,9 +250,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Right, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Bottom, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PrevMargin, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PrevMarginIgnoreBlank, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PrevMarginIgnoreBlank, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NextMargin, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NextMarginIgnoreBlank, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NextMarginIgnoreBlank, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayArrow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HoverShow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowBackground, bool, PROPERTY_UPDATE_MEASURE);
@@ -240,12 +264,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Loop, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorInteractive, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCustomAnimation, bool, PROPERTY_UPDATE_MEASURE_SELF);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisableSwipe, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisableSwipe, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SwipeByGroup, bool, PROPERTY_UPDATE_MEASURE_SELF);
 
 private:
     bool ignoreItemSpace_ = false; // displayCount and prevMargin/nextMargin have higher priorities, so itemSpace might
                                    // be ignored in some situations.
+    bool ignorePrevMarginAndNextMargin_ = false;
 };
 } // namespace OHOS::Ace::NG
 

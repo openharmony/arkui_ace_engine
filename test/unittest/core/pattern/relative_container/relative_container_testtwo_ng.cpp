@@ -1944,4 +1944,74 @@ HWTEST_F(RelativeContainerTestTwoNg, ChainTest0016, TestSize.Level1)
     EXPECT_EQ(frameNode_->GetChildByIndex(1)->GetGeometryNode()->GetFrameOffset().GetX(), 110.0f);
     EXPECT_EQ(frameNode_->GetChildByIndex(2)->GetGeometryNode()->GetFrameOffset().GetX(), 220.0f);
 }
+
+static void AddAlignRule(const std::string& id, const AlignDirection& direction,
+    const HorizontalAlign& horizontalRule, std::map<AlignDirection, AlignRule>& alignRules)
+{
+    RelativeContainerTestUtilsNG::AddAlignRule(id, direction, horizontalRule, alignRules);
+}
+
+static void AddAlignRule(const std::string& id, const AlignDirection& direction,
+    const VerticalAlign& verticalRule, std::map<AlignDirection, AlignRule>& alignRules)
+{
+    RelativeContainerTestUtilsNG::AddAlignRule(id, direction, verticalRule, alignRules);
+}
+
+/**
+ * @tc.name: ChainTestRtl001
+ * @tc.desc: content of packed chain with bias is outside the constraints of the anchor, direction::RTL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerTestTwoNg, ChainTestRtl001, TestSize.Level1)
+{
+    CreateInstance([=](RelativeContainerModelNG model) {
+        SetContainerParam(CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);
+        TextModelNG textModelFirst;
+        SetComponentParam(textModelFirst, FIRST_ITEM_ID, 100.0f, 50.0f);
+        std::map<AlignDirection, AlignRule> firstTextAlignRules;
+        AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::TOP, firstTextAlignRules);
+        AddAlignRule(CONTAINER_ID, AlignDirection::START, HorizontalAlign::START, firstTextAlignRules);
+        AddAlignRule(SECOND_ITEM_ID, AlignDirection::END, HorizontalAlign::START, firstTextAlignRules);
+        ViewAbstract::SetAlignRules(firstTextAlignRules);
+        ViewAbstract::SetBias(std::make_pair(0.0f, 0.0f));
+        ChainInfo chainInfo;
+        chainInfo.direction = LineDirection::HORIZONTAL;
+        chainInfo.style = ChainStyle::PACKED;
+        ViewAbstract::SetChainStyle(chainInfo);
+        ViewStackProcessor::GetInstance()->Pop();
+
+        TextModelNG textModelSecond;
+        SetComponentParam(textModelSecond, SECOND_ITEM_ID, 100.0f, 50.0f);
+        std::map<AlignDirection, AlignRule> secondTextAlignRules;
+        AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::TOP, secondTextAlignRules);
+        AddAlignRule(FIRST_ITEM_ID, AlignDirection::START, HorizontalAlign::END, secondTextAlignRules);
+        AddAlignRule(THIRD_ITEM_ID, AlignDirection::END, HorizontalAlign::START, secondTextAlignRules);
+        ViewAbstract::SetAlignRules(secondTextAlignRules);
+        ViewStackProcessor::GetInstance()->Pop();
+
+        TextModelNG textModelThird;
+        SetComponentParam(textModelThird, THIRD_ITEM_ID, 100.0f, 50.0f);
+        std::map<AlignDirection, AlignRule> thirdTextAlignRules;
+        AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::TOP, thirdTextAlignRules);
+        AddAlignRule(SECOND_ITEM_ID, AlignDirection::START, HorizontalAlign::END, thirdTextAlignRules);
+        AddAlignRule(CONTAINER_ID, AlignDirection::END, HorizontalAlign::END, thirdTextAlignRules);
+        ViewAbstract::SetAlignRules(thirdTextAlignRules);
+        ViewStackProcessor::GetInstance()->Pop();
+    });
+    auto relativeContainerLayoutProperty = frameNode_->GetLayoutProperty();
+    EXPECT_FALSE(relativeContainerLayoutProperty == nullptr);
+    relativeContainerLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    frameNode_->SetActive();
+    frameNode_->SetLayoutDirtyMarked(true);
+    frameNode_->CreateLayoutTask();
+    frameNode_->SetActive(false);
+
+    EXPECT_EQ(frameNode_->GetChildByIndex(0)->GetGeometryNode()->GetFrameOffset().GetX(),
+        CONTAINER_WIDTH - 100.0f - 0.0f);
+    EXPECT_EQ(frameNode_->GetChildByIndex(1)->GetGeometryNode()->GetFrameOffset().GetX(),
+        CONTAINER_WIDTH - 100.0f - 100.0f);
+    EXPECT_EQ(frameNode_->GetChildByIndex(2)->GetGeometryNode()->GetFrameOffset().GetX(),
+        CONTAINER_WIDTH - 100.0f - 200.0f);
+}
+
 } // namespace OHOS::Ace::NG

@@ -35,5 +35,7 @@ ohos_unittest("image_file_cache_test_ng") {
     "//third_party/googletest:gmock_main",
   ]
 
+  external_deps = [ "skia:skia_canvaskit" ]
+
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

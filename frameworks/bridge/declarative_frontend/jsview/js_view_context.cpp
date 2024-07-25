@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <sstream>
 
 #include "base/log/ace_trace.h"
@@ -27,6 +28,8 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/view_context_model_impl.h"
 #include "core/common/ace_engine.h"
 #include "core/components/common/properties/animation_option.h"
@@ -69,6 +72,13 @@ namespace {
 
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
+constexpr int32_t INVALID_ID = -1;
+constexpr int32_t INDEX_ONE = 1;
+constexpr int32_t INDEX_TWO = 2;
+constexpr int32_t LENGTH_ONE = 1;
+constexpr int32_t LENGTH_TWO = 2;
+constexpr int32_t LENGTH_THREE = 3;
+int32_t g_animationCount = 0;
 enum class AnimationInterface : int32_t {
     ANIMATION = 0,
     ANIMATE_TO,
@@ -82,7 +92,20 @@ const char* g_animationInterfaceNames[] = {
     "keyframeAnimateTo",
 };
 
-void PrintInfiniteAnimation(const AnimationOption& option, AnimationInterface interface)
+std::unordered_map<int32_t, std::string> BIND_SHEET_ERROR_MAP = {
+    { ERROR_CODE_BIND_SHEET_CONTENT_ERROR, "The bindSheetContent is incorrect." },
+    { ERROR_CODE_BIND_SHEET_CONTENT_ALREADY_EXIST, "The bindSheetContent already exists." },
+    { ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND, "The bindSheetContent cannot be found." },
+    { ERROR_CODE_TARGET_ID_NOT_EXIST, "The targetId does not exist." },
+    { ERROR_CODE_TARGET_NOT_ON_MAIN_TREE, "The node of targetId is not in the component tree." },
+    { ERROR_CODE_TARGET_NOT_PAGE_CHILD,
+        "The node of targetId is not a child of the page node or NavDestination node." },
+    { ERROR_CODE_INTERNAL_ERROR, "Internal error." },
+    { ERROR_CODE_PARAM_INVALID, "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;"
+        "2. Incorrect parameter types; 3. Parameter verification failed." }
+};
+
+void PrintAnimationInfo(const AnimationOption& option, AnimationInterface interface, const std::optional<int32_t>& cnt)
 {
     if (option.GetIteration() == ANIMATION_REPEAT_INFINITE) {
         if (interface == AnimationInterface::KEYFRAME_ANIMATE_TO) {
@@ -95,27 +118,71 @@ void PrintInfiniteAnimation(const AnimationOption& option, AnimationInterface in
                 g_animationInterfaceNames[static_cast<int>(interface)], option.GetDuration(),
                 option.GetCurve()->ToString().c_str());
         }
+        return;
+    }
+    if (cnt) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "%{public}s starts, [%{public}s], finish cnt:%{public}d",
+            g_animationInterfaceNames[static_cast<int>(interface)], option.ToString().c_str(), cnt.value());
     }
 }
 
-void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
-    JSRef<JSFunc> jsAnimateToFunc, std::function<void()>& onFinishEvent, bool immediately)
+// check whether this container needs to perform animateTo
+bool CheckContainer(const RefPtr<Container>& container)
 {
-    ACE_SCOPED_TRACE("duration:%d, curve:%s, iteration:%d", option.GetDuration(), option.GetCurve()->ToString().c_str(),
-        option.GetIteration());
-    auto triggerId = Container::CurrentIdSafely();
-    AceEngine::Get().NotifyContainers([triggerId, option](const RefPtr<Container>& container) {
+    auto context = container->GetPipelineContext();
+    if (!context) {
+        return false;
+    }
+    if (!container->GetSettings().usingSharedRuntime) {
+        return false;
+    }
+    if (!container->IsFRSCardContainer() && !container->WindowIsShow()) {
+        return false;
+    }
+    auto executor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(executor, false);
+    return executor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
+}
+
+bool GetAnyContextIsLayouting(const RefPtr<PipelineBase>& currentPipeline)
+{
+    if (currentPipeline->IsLayouting()) {
+        return true;
+    }
+    bool isLayouting = false;
+    AceEngine::Get().NotifyContainers([&isLayouting](const RefPtr<Container>& container) {
+        if (isLayouting) {
+            // One container is already in layouting
+            return;
+        }
+        if (!CheckContainer(container)) {
+            return;
+        }
         auto context = container->GetPipelineContext();
-        if (!context) {
-            // pa container do not have pipeline context.
+        isLayouting |= context->IsLayouting();
+    });
+    return isLayouting;
+}
+
+void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
+    JSRef<JSFunc> jsAnimateToFunc, const std::optional<int32_t>& count, bool immediately)
+{
+    auto triggerId = pipelineContext->GetInstanceId();
+    ACE_SCOPED_TRACE("%s, instanceId:%d, finish cnt:%d", option.ToString().c_str(), triggerId, count.value_or(-1));
+    PrintAnimationInfo(
+        option, immediately ? AnimationInterface::ANIMATE_TO_IMMEDIATELY : AnimationInterface::ANIMATE_TO, count);
+    if (!ViewStackModel::GetInstance()->IsEmptyStack()) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION,
+            "when call animateTo, node stack is not empty, not suitable for animateTo. param is [duration:%{public}d, "
+            "curve:%{public}s, iteration:%{public}d]",
+            option.GetDuration(), option.GetCurve()->ToString().c_str(), option.GetIteration());
+    }
+    NG::ScopedViewStackProcessor scopedProcessor;
+    AceEngine::Get().NotifyContainers([triggerId](const RefPtr<Container>& container) {
+        if (!CheckContainer(container)) {
             return;
         }
-        if (!container->GetSettings().usingSharedRuntime) {
-            return;
-        }
-        if (!container->IsFRSCardContainer() && !container->WindowIsShow()) {
-            return;
-        }
+        auto context = container->GetPipelineContext();
         ContainerScope scope(container->GetInstanceId());
         context->FlushBuild();
         if (context->GetInstanceId() == triggerId) {
@@ -123,23 +190,16 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         }
         context->PrepareOpenImplicitAnimation();
     });
-    pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
+    pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), option.GetOnFinishEvent());
     pipelineContext->SetSyncAnimationOption(option);
     // Execute the function.
     jsAnimateToFunc->Call(jsAnimateToFunc);
     pipelineContext->FlushOnceVsyncTask();
     AceEngine::Get().NotifyContainers([triggerId](const RefPtr<Container>& container) {
+        if (!CheckContainer(container)) {
+            return;
+        }
         auto context = container->GetPipelineContext();
-        if (!context) {
-            // pa container do not have pipeline context.
-            return;
-        }
-        if (!container->GetSettings().usingSharedRuntime) {
-            return;
-        }
-        if (!container->IsFRSCardContainer() && !container->WindowIsShow()) {
-            return;
-        }
         ContainerScope scope(container->GetInstanceId());
         context->FlushBuild();
         if (context->GetInstanceId() == triggerId) {
@@ -159,18 +219,23 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
 }
 
 void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
-    const JSCallbackInfo& info, std::function<void()>& onFinishEvent, bool immediately)
+    JSRef<JSFunc> jsAnimateToFunc, const std::optional<int32_t>& count, bool immediately)
 {
-    ACE_SCOPED_TRACE("duration:%d, curve:%s, iteration:%d", option.GetDuration(), option.GetCurve()->ToString().c_str(),
-        option.GetIteration());
-    pipelineContext->FlushBuild();
-    pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
-    pipelineContext->SetSyncAnimationOption(option);
-    if (!info[1]->IsFunction()) {
-        return;
+    ACE_SCOPED_TRACE("%s, instanceId:%d, finish cnt:%d", option.ToString().c_str(), pipelineContext->GetInstanceId(),
+        count.value_or(-1));
+    PrintAnimationInfo(
+        option, immediately ? AnimationInterface::ANIMATE_TO_IMMEDIATELY : AnimationInterface::ANIMATE_TO, count);
+    if (!ViewStackModel::GetInstance()->IsEmptyStack()) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION,
+            "when call animateTo, node stack is not empty, not suitable for animateTo. param is [duration:%{public}d, "
+            "curve:%{public}s, iteration:%{public}d]",
+            option.GetDuration(), option.GetCurve()->ToString().c_str(), option.GetIteration());
     }
-    JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
-    jsAnimateToFunc->Call(info[1]);
+    NG::ScopedViewStackProcessor scopedProcessor;
+    pipelineContext->FlushBuild();
+    pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), option.GetOnFinishEvent());
+    pipelineContext->SetSyncAnimationOption(option);
+    jsAnimateToFunc->Call(jsAnimateToFunc);
     pipelineContext->FlushBuild();
     pipelineContext->CloseImplicitAnimation();
     pipelineContext->SetSyncAnimationOption(AnimationOption());
@@ -276,6 +341,57 @@ std::vector<KeyframeParam> ParseKeyframes(const JSExecutionContext& executionCon
         params.emplace_back(param);
     }
     return params;
+}
+
+napi_value CreateErrorValue(napi_env env, int32_t errCode, const std::string& errMsg = "")
+{
+    napi_value code = nullptr;
+    std::string codeStr = std::to_string(errCode);
+    napi_create_string_utf8(env, codeStr.c_str(), codeStr.length(), &code);
+    napi_value msg = nullptr;
+    napi_create_string_utf8(env, errMsg.c_str(), errMsg.length(), &msg);
+    napi_value error = nullptr;
+    napi_create_error(env, code, msg, &error);
+    return error;
+}
+
+RefPtr<NG::FrameNode> ParseSheeetContentNode(const JSCallbackInfo& info)
+{
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_RETURN(vm, nullptr);
+    auto jsTargetNode = info[0];
+    auto* targetNodePtr = jsTargetNode->GetLocalHandle()->ToNativePointer(vm)->Value();
+    CHECK_NULL_RETURN(targetNodePtr, nullptr);
+    NG::FrameNode* sheetContentNode = reinterpret_cast<NG::FrameNode*>(targetNodePtr);
+    CHECK_NULL_RETURN(sheetContentNode, nullptr);
+    return AceType::Claim(sheetContentNode);
+}
+
+void ReturnPromise(const JSCallbackInfo& info, int32_t errCode)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_deferred deferred = nullptr;
+    napi_value promise = nullptr;
+    napi_create_promise(env, &deferred, &promise);
+
+    if (errCode != ERROR_CODE_NO_ERROR) {
+        napi_value result = CreateErrorValue(env, errCode, BIND_SHEET_ERROR_MAP[errCode]);
+        napi_reject_deferred(env, deferred, result);
+    } else {
+        napi_value result = nullptr;
+        napi_get_undefined(env, &result);
+        napi_resolve_deferred(env, deferred, result);
+    }
+    CHECK_NULL_VOID(promise);
+    auto jsPromise = JsConverter::ConvertNapiValueToJsVal(promise);
+    if (!jsPromise->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "Return promise failed.");
+        return;
+    }
+    info.SetReturnValue(JSRef<JSObject>::Cast(jsPromise));
 }
 } // namespace
 
@@ -425,7 +541,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     if (SystemProperties::GetRosenBackendEnabled()) {
         option.SetAllowRunningAsynchronously(true);
     }
-    PrintInfiniteAnimation(option, AnimationInterface::ANIMATION);
+    PrintAnimationInfo(option, AnimationInterface::ANIMATION, std::nullopt);
     AceScopedTrace paramTrace("duration:%d, curve:%s, iteration:%d", option.GetDuration(),
         option.GetCurve()->ToString().c_str(), option.GetIteration());
     ViewContextModel::GetInstance()->openAnimation(option);
@@ -484,18 +600,22 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;
+    std::optional<int32_t> count;
     auto traceStreamPtr = std::make_shared<std::stringstream>();
     if (onFinish->IsFunction()) {
+        count = g_animationCount++;
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                            id = Container::CurrentIdSafely(), traceStreamPtr, node = frameNode]() mutable {
+                            id = Container::CurrentIdSafely(), traceStreamPtr, node = frameNode, count]() mutable {
             CHECK_NULL_VOID(func);
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCOPED_TRACE("onFinish[cnt:%d]", count.value());
             auto pipelineContext = PipelineContext::GetCurrentContextSafely();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->UpdateCurrentActiveNode(node);
+            TAG_LOGI(AceLogTag::ACE_ANIMATION, "animateTo finish, cnt:%{public}d", count.value());
             func->Execute();
             func = nullptr;
             AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
@@ -507,6 +627,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     }
 
     AnimationOption option = CreateAnimation(obj, pipelineContext->IsFormRender());
+    option.SetOnFinishEvent(onFinishEvent);
     *traceStreamPtr << "AnimateTo, Options"
                     << " duration:" << option.GetDuration()
                     << ",iteration:" << option.GetIteration()
@@ -514,8 +635,6 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
                     << ",tempo:" << option.GetTempo()
                     << ",direction:" << (uint32_t) option.GetAnimationDirection()
                     << ",curve:" << (option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
-    PrintInfiniteAnimation(
-        option, immediately ? AnimationInterface::ANIMATE_TO_IMMEDIATELY : AnimationInterface::ANIMATE_TO);
     AceAsyncTraceBegin(0, traceStreamPtr->str().c_str(), true);
     if (CheckIfSetFormAnimationDuration(pipelineContext, option)) {
         option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext));
@@ -525,26 +644,26 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     if (SystemProperties::GetRosenBackendEnabled()) {
         bool usingSharedRuntime = container->GetSettings().usingSharedRuntime;
         if (usingSharedRuntime) {
-            if (pipelineContext->IsLayouting()) {
+            if (GetAnyContextIsLayouting(pipelineContext)) {
                 TAG_LOGW(AceLogTag::ACE_ANIMATION,
                     "pipeline is layouting, post animateTo, duration:%{public}d, curve:%{public}s",
                     option.GetDuration(), option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
                 pipelineContext->GetTaskExecutor()->PostTask(
-                    [id = Container::CurrentIdSafely(), option, func = JSRef<JSFunc>::Cast(info[1]),
-                        onFinishEvent, immediately]() mutable {
+                    [id = Container::CurrentIdSafely(), option, func = JSRef<JSFunc>::Cast(info[1]), count,
+                        immediately]() mutable {
                         ContainerScope scope(id);
                         auto container = Container::CurrentSafely();
                         CHECK_NULL_VOID(container);
                         auto pipelineContext = container->GetPipelineContext();
                         CHECK_NULL_VOID(pipelineContext);
-                        AnimateToForStageMode(pipelineContext, option, func, onFinishEvent, immediately);
+                        AnimateToForStageMode(pipelineContext, option, func, count, immediately);
                     },
-                    TaskExecutor::TaskType::UI, "ArkUIAnimateToForStageMode");
+                    TaskExecutor::TaskType::UI, "ArkUIAnimateToForStageMode", PriorityType::IMMEDIATE);
                 return;
             }
-            AnimateToForStageMode(pipelineContext, option, JSRef<JSFunc>::Cast(info[1]), onFinishEvent, immediately);
+            AnimateToForStageMode(pipelineContext, option, JSRef<JSFunc>::Cast(info[1]), count, immediately);
         } else {
-            AnimateToForFaMode(pipelineContext, option, info, onFinishEvent, immediately);
+            AnimateToForFaMode(pipelineContext, option, JSRef<JSFunc>::Cast(info[1]), count, immediately);
         }
     } else {
         pipelineContext->FlushBuild();
@@ -594,7 +713,8 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
     overallAnimationOption.SetDuration(duration);
     // actual curve is in keyframe, this curve will not be effective
     overallAnimationOption.SetCurve(Curves::EASE_IN_OUT);
-    PrintInfiniteAnimation(overallAnimationOption, AnimationInterface::KEYFRAME_ANIMATE_TO);
+    PrintAnimationInfo(overallAnimationOption, AnimationInterface::KEYFRAME_ANIMATE_TO, std::nullopt);
+    NG::ScopedViewStackProcessor scopedProcessor;
     pipelineContext->FlushBuild();
     pipelineContext->OpenImplicitAnimation(
         overallAnimationOption, overallAnimationOption.GetCurve(), overallAnimationOption.GetOnFinishEvent());
@@ -634,6 +754,133 @@ void JSViewContext::SetDynamicDimming(const JSCallbackInfo& info)
     renderContext->UpdateDynamicDimDegree(std::clamp(dimming, 0.0f, 1.0f));
 }
 
+void JSViewContext::JSOpenBindSheet(const JSCallbackInfo& info)
+{
+    auto paramCnt = info.Length();
+    if (paramCnt < LENGTH_ONE) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+
+    auto sheetContentNode = ParseSheeetContentNode(info);
+    if (sheetContentNode == nullptr) {
+        ReturnPromise(info, ERROR_CODE_BIND_SHEET_CONTENT_ERROR);
+        return;
+    }
+
+    // parse SheetStyle and callbacks
+    NG::SheetStyle sheetStyle;
+    sheetStyle.sheetMode = NG::SheetMode::LARGE;
+    sheetStyle.showDragBar = true;
+    sheetStyle.showInPage = false;
+    std::function<void()> onAppearCallback;
+    std::function<void()> onDisappearCallback;
+    std::function<void()> onWillAppearCallback;
+    std::function<void()> onWillDisappearCallback;
+    std::function<void()> shouldDismissFunc;
+    std::function<void(const int32_t)> onWillDismissCallback;
+    std::function<void(const float)> onHeightDidChangeCallback;
+    std::function<void(const float)> onDetentsDidChangeCallback;
+    std::function<void(const float)> onWidthDidChangeCallback;
+    std::function<void(const float)> onTypeDidChangeCallback;
+    std::function<void()> titleBuilderFunction;
+    std::function<void()> sheetSpringBackFunc;
+    if (paramCnt >= LENGTH_TWO && info[INDEX_ONE]->IsObject()) {
+        JSViewAbstract::ParseSheetCallback(info[INDEX_ONE], onAppearCallback, onDisappearCallback, shouldDismissFunc,
+            onWillDismissCallback, onWillAppearCallback, onWillDisappearCallback, onHeightDidChangeCallback,
+            onDetentsDidChangeCallback, onWidthDidChangeCallback, onTypeDidChangeCallback, sheetSpringBackFunc);
+        JSViewAbstract::ParseSheetStyle(info[INDEX_ONE], sheetStyle);
+        JSViewAbstract::ParseSheetTitle(info[INDEX_ONE], sheetStyle, titleBuilderFunction);
+    }
+
+    int32_t targetId = INVALID_ID;
+    if (paramCnt >= LENGTH_THREE) {
+        if (!info[INDEX_TWO]->IsNumber()) {
+            ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+            return;
+        }
+        targetId = info[INDEX_TWO]->ToNumber<int32_t>();
+        if (targetId < 0) {
+            ReturnPromise(info, ERROR_CODE_TARGET_ID_NOT_EXIST);
+            return;
+        }
+    }
+    sheetStyle.instanceId = Container::CurrentId();
+    TAG_LOGI(AceLogTag::ACE_SHEET, "paramCnt: %{public}d, contentId: %{public}d, targetId: %{public}d",
+        paramCnt, sheetContentNode->GetId(), targetId);
+    auto ret = ViewContextModel::GetInstance()->OpenBindSheet(sheetContentNode,
+        std::move(titleBuilderFunction), sheetStyle, std::move(onAppearCallback), std::move(onDisappearCallback),
+        std::move(shouldDismissFunc), std::move(onWillDismissCallback),  std::move(onWillAppearCallback),
+        std::move(onWillDisappearCallback), std::move(onHeightDidChangeCallback),
+        std::move(onDetentsDidChangeCallback), std::move(onWidthDidChangeCallback),
+        std::move(onTypeDidChangeCallback), std::move(sheetSpringBackFunc), Container::CurrentId(), targetId);
+
+    ReturnPromise(info, ret);
+    return;
+}
+
+void JSViewContext::JSUpdateBindSheet(const JSCallbackInfo& info)
+{
+    auto paramCnt = info.Length();
+    if (paramCnt < LENGTH_TWO) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto sheetContentNode = ParseSheeetContentNode(info);
+    if (sheetContentNode == nullptr) {
+        ReturnPromise(info, ERROR_CODE_BIND_SHEET_CONTENT_ERROR);
+        return;
+    }
+
+    bool isPartialUpdate = false;
+    if (paramCnt == LENGTH_THREE) {
+        if (!info[INDEX_TWO]->IsBoolean()) {
+            ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+            return;
+        }
+        isPartialUpdate = info[INDEX_TWO]->ToBoolean();
+    }
+
+    NG::SheetStyle sheetStyle;
+    std::function<void()> titleBuilderFunction;
+    if (paramCnt >= LENGTH_TWO && info[INDEX_ONE]->IsObject()) {
+        JSViewAbstract::ParseSheetStyle(info[INDEX_ONE], sheetStyle, isPartialUpdate);
+        JSViewAbstract::ParseSheetTitle(info[INDEX_ONE], sheetStyle, titleBuilderFunction);
+    } else {
+        sheetStyle.sheetMode = NG::SheetMode::LARGE;
+        sheetStyle.showDragBar = true;
+        sheetStyle.showInPage = false;
+        isPartialUpdate = false;
+    }
+    TAG_LOGI(AceLogTag::ACE_SHEET, "paramCnt: %{public}d, contentId: %{public}d, isPartialUpdate: %{public}d",
+        paramCnt, sheetContentNode->GetId(), isPartialUpdate);
+    auto ret = ViewContextModel::GetInstance()->UpdateBindSheet(
+        sheetContentNode, sheetStyle, isPartialUpdate, Container::CurrentId());
+    ReturnPromise(info, ret);
+    return;
+}
+
+void JSViewContext::JSCloseBindSheet(const JSCallbackInfo& info)
+{
+    auto paramCnt = info.Length();
+    if (paramCnt < LENGTH_ONE) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+
+    auto sheetContentNode = ParseSheeetContentNode(info);
+    if (sheetContentNode == nullptr) {
+        ReturnPromise(info, ERROR_CODE_BIND_SHEET_CONTENT_ERROR);
+        return;
+    }
+
+    TAG_LOGI(AceLogTag::ACE_SHEET, "paramCnt: %{public}d, contentId: %{public}d", paramCnt, sheetContentNode->GetId());
+    auto ret =
+        ViewContextModel::GetInstance()->CloseBindSheet(sheetContentNode, Container::CurrentId());
+    ReturnPromise(info, ret);
+    return;
+}
+
 void JSViewContext::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewContext>::Declare("Context");
@@ -642,6 +889,9 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod("animateToImmediately", JSAnimateToImmediately);
     JSClass<JSViewContext>::StaticMethod("keyframeAnimateTo", JSKeyframeAnimateTo);
     JSClass<JSViewContext>::StaticMethod("setDynamicDimming", SetDynamicDimming);
+    JSClass<JSViewContext>::StaticMethod("openBindSheet", JSOpenBindSheet);
+    JSClass<JSViewContext>::StaticMethod("updateBindSheet", JSUpdateBindSheet);
+    JSClass<JSViewContext>::StaticMethod("closeBindSheet", JSCloseBindSheet);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }
 

@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/node_container/node_container_model_ng.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/node_container/node_container_node.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -22,8 +23,7 @@ void NodeContainerModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        "NodeContainer", nodeId, []() { return AceType::MakeRefPtr<NodeContainerPattern>(); });
+    auto frameNode = NodeContainerNode::GetOrCreateNodeContainerNode(nodeId);
     stack->Push(frameNode);
 
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
@@ -47,7 +47,21 @@ void NodeContainerModelNG::SetOnResize(std::function<void(const SizeF& size)>&& 
     pattern->SetOnResize(std::move(resizeFunc));
 }
 
-void NodeContainerModelNG::SetOnTouchEvent(TouchEventFunc &&touchEventFunc)
+void NodeContainerModelNG::SetOnAppear(std::function<void()>&& onAppearCallback)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<NodeContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetControllerAboutToAppear(std::move(onAppearCallback));
+}
+
+void NodeContainerModelNG::SetOnDisAppear(std::function<void()>&& onDisAppearCallback)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<NodeContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetControllerAboutToDisappear(std::move(onDisAppearCallback));
+}
+
+void NodeContainerModelNG::SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);

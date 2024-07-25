@@ -52,6 +52,11 @@ FlowItemPosition WaterFlowLayoutUtils::GetItemPosition(
     }
     int32_t segment = info->GetSegment(index);
     auto itemIndex = info->GetCrossIndexForNextItem(segment);
+    if (static_cast<int32_t>(info->segmentStartPos_.size()) <= segment) {
+        TAG_LOGI(AceLogTag::ACE_WATERFLOW, "The size of segmentStartPos %{public}zu is less than expected %{public}d.",
+            info->segmentStartPos_.size(), segment);
+        return { itemIndex.crossIndex, 0.0f };
+    }
     if (itemIndex.lastItemIndex < 0) {
         return { itemIndex.crossIndex, info->segmentStartPos_[segment] };
     }
@@ -143,5 +148,33 @@ float WaterFlowLayoutUtils::MeasureFooter(LayoutWrapper* wrapper, Axis axis)
     footer->Measure(footerConstraint);
     auto itemSize = footer->GetGeometryNode()->GetMarginFrameSize();
     return GetMainAxisSize(itemSize, axis);
+}
+
+float WaterFlowLayoutUtils::GetUserDefHeight(const RefPtr<WaterFlowSections>& sections, int32_t seg, int32_t idx)
+{
+    CHECK_NULL_RETURN(sections, -1.0f);
+    const auto& section = sections->GetSectionInfo()[seg];
+    if (section.onGetItemMainSizeByIndex) {
+        Dimension len(section.onGetItemMainSizeByIndex(idx), DimensionUnit::VP);
+        if (len.IsNegative()) {
+            return 0.0f;
+        }
+        return len.ConvertToPx();
+    }
+    return -1.0f;
+}
+
+void WaterFlowLayoutUtils::UpdateItemIdealSize(const RefPtr<LayoutWrapper>& item, Axis axis, float userHeight)
+{
+    auto props = item->GetLayoutProperty();
+    // get previously user defined ideal width
+    std::optional<CalcLength> crossSize;
+    const auto& layoutConstraint = props->GetCalcLayoutConstraint();
+    if (layoutConstraint && layoutConstraint->selfIdealSize) {
+        crossSize = axis == Axis::VERTICAL ? layoutConstraint->selfIdealSize->Width()
+                                           : layoutConstraint->selfIdealSize->Height();
+    }
+    props->UpdateUserDefinedIdealSize(axis == Axis::VERTICAL ? CalcSize(crossSize, CalcLength(userHeight))
+                                                             : CalcSize(CalcLength(userHeight), crossSize));
 }
 } // namespace OHOS::Ace::NG

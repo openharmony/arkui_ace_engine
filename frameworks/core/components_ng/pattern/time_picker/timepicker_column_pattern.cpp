@@ -20,8 +20,11 @@
 #include <iterator>
 #include <list>
 
+#include "core/components_ng/pattern/time_picker/timepicker_haptic_factory.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
+#include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_base_component.h"
@@ -34,7 +37,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-// TODO timepicker style modification
+// timepicker style modification
 constexpr Dimension PADDING_WEIGHT = 10.0_vp;
 const Dimension FONT_SIZE = Dimension(2.0);
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
@@ -74,6 +77,16 @@ void TimePickerColumnPattern::OnAttachToFrameNode()
     CreateAnimation();
     InitPanEvent(gestureHub);
     host->GetRenderContext()->SetClipToFrame(true);
+    InitHapticController(host);
+    RegisterWindowStateChangedCallback();
+}
+
+void TimePickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
+    UnregisterWindowStateChangedCallback();
 }
 
 void TimePickerColumnPattern::OnModifyDone()
@@ -81,7 +94,7 @@ void TimePickerColumnPattern::OnModifyDone()
     auto host = GetHost();
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>();
     pressColor_ = theme->GetPressColor();
@@ -123,6 +136,62 @@ void TimePickerColumnPattern::OnModifyDone()
         }
         SetOptionShiftDistance();
     }
+    InitHapticController(host);
+}
+
+void TimePickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto timePickerRowPattern = parentNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    if (timePickerRowPattern->GetIsEnableHaptic()) {
+        isEnableHaptic_ = true;
+        if (!hapticController_) {
+            hapticController_ = TimepickerAudioHapticFactory::GetInstance();
+        }
+    } else {
+        isEnableHaptic_ = false;
+        if (hapticController_) {
+            hapticController_->Stop();
+        }
+    }
+}
+
+void TimePickerColumnPattern::RegisterWindowStateChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
+}
+
+void TimePickerColumnPattern::UnregisterWindowStateChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(host->GetId());
+}
+
+void TimePickerColumnPattern::OnWindowHide()
+{
+    isShow_ = false;
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
+}
+
+void TimePickerColumnPattern::OnWindowShow()
+{
+    isShow_ = true;
 }
 
 void TimePickerColumnPattern::ParseTouchListener()
@@ -329,6 +398,42 @@ bool TimePickerColumnPattern::OnDirtyLayoutWrapperSwap(
     return true;
 }
 
+void TimePickerColumnPattern::InitTextFontFamily()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto timePickerRowPattern = parentNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    auto timePickerLayoutProperty = parentNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_VOID(timePickerLayoutProperty);
+    hasUserDefinedDisappearFontFamily_ = timePickerRowPattern->GetHasUserDefinedDisappearFontFamily();
+    hasUserDefinedNormalFontFamily_ = timePickerRowPattern->GetHasUserDefinedNormalFontFamily();
+    hasUserDefinedSelectedFontFamily_ = timePickerRowPattern->GetHasUserDefinedSelectedFontFamily();
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    if (!(fontManager->GetAppCustomFont().empty())) {
+        hasAppCustomFont_ = true;
+    }
+    auto appCustomFontFamily = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
+    if (hasAppCustomFont_ && !hasUserDefinedDisappearFontFamily_) {
+        timePickerLayoutProperty->UpdateDisappearFontFamily(appCustomFontFamily);
+    }
+    if (hasAppCustomFont_ && !hasUserDefinedNormalFontFamily_) {
+        timePickerLayoutProperty->UpdateFontFamily(appCustomFontFamily);
+    }
+    if (hasAppCustomFont_ && !hasUserDefinedSelectedFontFamily_) {
+        timePickerLayoutProperty->UpdateSelectedFontFamily(appCustomFontFamily);
+    }
+}
+
 void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextContentOnly)
 {
     auto host = GetHost();
@@ -351,10 +456,12 @@ void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
     auto timePickerLayoutProperty = parentNode->GetLayoutProperty<TimePickerLayoutProperty>();
     CHECK_NULL_VOID(timePickerLayoutProperty);
     uint32_t currentIndex = host->GetPattern<TimePickerColumnPattern>()->GetCurrentIndex();
+    CHECK_EQUAL_VOID(totalOptionCount, 0);
     currentIndex = currentIndex % totalOptionCount;
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
     auto child = host->GetChildren();
     auto iter = child.begin();
+    InitTextFontFamily();
 
     if (!isUpateTextContentOnly) {
         animationProperties_.clear();
@@ -463,7 +570,7 @@ void TimePickerColumnPattern::ChangeAmPmTextStyle(uint32_t index, uint32_t showO
     if (showOptionCount != CHILDREN_SIZE) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
@@ -490,7 +597,7 @@ void TimePickerColumnPattern::ChangeTextStyle(uint32_t index, uint32_t showOptio
     if (showOptionCount == CHILDREN_SIZE) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
@@ -756,6 +863,9 @@ void TimePickerColumnPattern::HandleDragMove(const GestureEvent& event)
 
 void TimePickerColumnPattern::HandleDragEnd()
 {
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
     pressed_ = false;
     CHECK_NULL_VOID(GetHost());
     CHECK_NULL_VOID(GetToss());
@@ -776,7 +886,7 @@ void TimePickerColumnPattern::HandleDragEnd()
 
     TimePickerScrollDirection dir =
         scrollDelta_ > 0.0 ? TimePickerScrollDirection::DOWN : TimePickerScrollDirection::UP;
-    int32_t middleIndex = GetShowCount() / MIDDLE_CHILD_INDEX;
+    int32_t middleIndex = static_cast<int32_t>(GetShowCount()) / MIDDLE_CHILD_INDEX;
     auto shiftDistance = (dir == TimePickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                                 : optionProperties_[middleIndex].nextDistance;
     auto shiftThreshold = shiftDistance / MIDDLE_CHILD_INDEX;
@@ -878,7 +988,7 @@ void TimePickerColumnPattern::CalcAlgorithmOffset(TimePickerScrollDirection dir,
 
 float TimePickerColumnPattern::GetShiftDistance(uint32_t index, TimePickerScrollDirection dir)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, 0.0f);
@@ -946,7 +1056,7 @@ float TimePickerColumnPattern::GetShiftDistance(uint32_t index, TimePickerScroll
 
 float TimePickerColumnPattern::GetShiftDistanceForLandscape(uint32_t index, TimePickerScrollDirection dir)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, 0.0f);
@@ -1044,7 +1154,7 @@ void TimePickerColumnPattern::SetDividerHeight(uint32_t showOptionCount)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     auto childSize = host->GetChildren().size();
     if (childSize != CHILDREN_SIZE) {
@@ -1085,6 +1195,9 @@ bool TimePickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropert
         currentIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
+    if (hapticController_ && isEnableHaptic_) {
+        hapticController_->PlayOnce();
+    }
     FlushCurrentOptions(isDown, isUpatePropertiesOnly);
     HandleChangeCallback(isDown, true);
     HandleEventCallback(true);
@@ -1096,6 +1209,11 @@ bool TimePickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropert
 void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
     int32_t dragDelta = offsetY - yLast_;
+    if (hapticController_ && isShow_) {
+        if (isEnableHaptic_) {
+            hapticController_->HandleDelta(dragDelta);
+        }
+    }
     yLast_ = offsetY;
     if (!CanMove(LessNotEqual(dragDelta, 0))) {
         return;
@@ -1115,6 +1233,9 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
             auto toss = GetToss();
             CHECK_NULL_VOID(toss);
             toss->StopTossAnimation();
+            if (hapticController_) {
+                hapticController_->Stop();
+            }
         }
         ScrollOption(dragDelta, true);
         offsetCurSet_ = dragDelta;
@@ -1238,7 +1359,7 @@ void TimePickerColumnPattern::OnAroundButtonClick(RefPtr<TimePickerEventParam> p
     if (clickBreak_) {
         return;
     }
-    int32_t middleIndex = GetShowCount() / 2;
+    int32_t middleIndex = static_cast<int32_t>(GetShowCount()) / 2;
     int32_t step = param->itemIndex_ - middleIndex;
     if (step != 0) {
         if (animation_) {
@@ -1265,6 +1386,9 @@ void TimePickerColumnPattern::OnAroundButtonClick(RefPtr<TimePickerEventParam> p
 }
 void TimePickerColumnPattern::TossAnimationStoped()
 {
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
     yLast_ = 0.0;
 }
 
@@ -1272,7 +1396,7 @@ void TimePickerColumnPattern::PlayRestAnimation()
 {
     TimePickerScrollDirection dir =
         scrollDelta_ > 0.0 ? TimePickerScrollDirection::DOWN : TimePickerScrollDirection::UP;
-    int32_t middleIndex = GetShowCount() / 2;
+    int32_t middleIndex = static_cast<int32_t>(GetShowCount()) / 2;
     double shiftDistance = (dir == TimePickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                                   : optionProperties_[middleIndex].nextDistance;
     double shiftThreshold = shiftDistance / 2;

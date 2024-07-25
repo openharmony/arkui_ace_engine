@@ -94,7 +94,9 @@ HWTEST_F(FrameRateRangeTest, GetDisplaySyncRate, TestSize.Level1)
     int32_t displaySyncRate = 90;
     int32_t animateRate = 60;
     FrameRateManager frameRageManager;
-    EXPECT_EQ(0, frameRageManager.GetExpectedRate());
+    auto [expectedRate1, expectedRateType1] = frameRageManager.GetExpectedRate();
+    EXPECT_EQ(0, expectedRate1);
+    EXPECT_EQ(0, expectedRateType1);
     EXPECT_EQ(0, frameRageManager.GetDisplaySyncRate());
     frameRageManager.SetDisplaySyncRate(displaySyncRate);
     EXPECT_EQ(displaySyncRate, frameRageManager.GetDisplaySyncRate());
@@ -112,6 +114,8 @@ HWTEST_F(FrameRateRangeTest, GetDisplaySyncRate, TestSize.Level1)
     EXPECT_EQ(false, frameRageManager.IsRateChanged());
 
     frameRageManager.AddNodeRate(nodeId, rate);
-    EXPECT_EQ(rate, frameRageManager.GetExpectedRate());
+    auto [expectedRate2, expectedRateType2] = frameRageManager.GetExpectedRate();
+    EXPECT_EQ(rate, expectedRate2);
+    EXPECT_EQ(ACE_COMPONENT_FRAME_RATE_TYPE, expectedRateType2);
 }
 } // namespace OHOS::Ace::NG

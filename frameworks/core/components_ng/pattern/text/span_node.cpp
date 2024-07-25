@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text/span_node.h"
 
+#include <cstdint>
 #include <optional>
 #include <string>
 
@@ -244,13 +245,17 @@ void SpanNode::DumpInfo()
 }
 
 int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-    bool isSpanStringMode, PlaceholderStyle /*placeholderStyle*/)
+    bool isSpanStringMode, PlaceholderStyle /*placeholderStyle*/, bool isMarquee)
 {
     CHECK_NULL_RETURN(builder, -1);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, -1);
     auto textStyle = InheritParentProperties(frameNode, isSpanStringMode);
     UseSelfStyle(fontStyle, textLineStyle, textStyle);
+    auto fontManager = pipelineContext->GetFontManager();
+    if (fontManager && !(fontManager->GetAppCustomFont().empty()) && (textStyle.GetFontFamilies().empty())) {
+        textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
+    }
     if (frameNode) {
         FontRegisterCallback(frameNode, textStyle);
     }
@@ -259,7 +264,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     }
     textStyle.SetHalfLeading(pipelineContext->GetHalfLeading());
 
-    auto spanContent = GetSpanContent(content);
+    auto spanContent = GetSpanContent(content, isMarquee);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, -1);
     textStyle.SetTextBackgroundStyle(backgroundStyle);
@@ -490,13 +495,16 @@ void SpanItem::UpdateContentTextStyle(
     builder->PopStyle();
 }
 
-std::string SpanItem::GetSpanContent(const std::string& rawContent)
+std::string SpanItem::GetSpanContent(const std::string& rawContent, bool isMarquee)
 {
     std::string data;
     if (needRemoveNewLine) {
         data = rawContent.substr(0, rawContent.length() - 1);
     } else {
         data = rawContent;
+    }
+    if (isMarquee) {
+        std::replace(data.begin(), data.end(), '\n', ' ');
     }
     return data;
 }
@@ -514,7 +522,7 @@ uint32_t SpanItem::GetSymbolUnicode()
 void SpanItem::StartDrag(int32_t start, int32_t end)
 {
     selectedStart = std::max(0, start);
-    int32_t contentLen = content.size();
+    auto contentLen = static_cast<int32_t>(content.size());
     selectedEnd = std::min(contentLen, end);
 }
 
@@ -898,7 +906,7 @@ RefPtr<ImageSpanItem> ImageSpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32
 }
 
 int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */, const RefPtr<Paragraph>& builder,
-    bool /* isSpanStringMode */, PlaceholderStyle placeholderStyle)
+    bool /* isSpanStringMode */, PlaceholderStyle placeholderStyle, bool /* isMarquee*/)
 {
     CHECK_NULL_RETURN(builder, -1);
     PlaceholderRun run;
@@ -906,7 +914,7 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     run.width = placeholderStyle.width;
     run.height = placeholderStyle.height;
     if (!NearZero(placeholderStyle.baselineOffset)) {
-        run.baseline_offset = placeholderStyle.height + placeholderStyle.baselineOffset;
+        run.baseline_offset = placeholderStyle.baselineOffset;
         run.alignment = PlaceholderAlignment::BASELINE;
     } else {
         switch (placeholderStyle.verticalAlign) {
@@ -990,6 +998,25 @@ ResultObject ImageSpanItem::GetSpanResultObject(int32_t start, int32_t end)
     return resultObject;
 }
 
+ResultObject CustomSpanItem::GetSpanResultObject(int32_t start, int32_t end)
+{
+    int32_t itemLength = 1;
+    ResultObject resultObject;
+
+    int32_t endPosition = interval.second;
+    int32_t startPosition = interval.first;
+    resultObject.type = SelectSpanType::TYPEBUILDERSPAN;
+    if ((start <= startPosition) && (end >= endPosition)) {
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
+        resultObject.valueString = " ";
+        resultObject.isInit = true;
+    }
+    return resultObject;
+}
+
 void SpanItem::GetIndex(int32_t& start, int32_t& end) const
 {
     auto contentLen = StringUtils::ToWstring(content).length();
@@ -998,7 +1025,7 @@ void SpanItem::GetIndex(int32_t& start, int32_t& end) const
 }
 
 int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */, const RefPtr<Paragraph>& builder,
-    bool /* isSpanStringMode */, PlaceholderStyle placeholderStyle)
+    bool /* isSpanStringMode */, PlaceholderStyle placeholderStyle, bool /* isMarquee*/)
 {
     CHECK_NULL_RETURN(builder, -1);
     textStyle = TextStyle();

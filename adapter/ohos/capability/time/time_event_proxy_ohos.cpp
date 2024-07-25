@@ -52,6 +52,10 @@ TimeEventProxyOhos::TimeEventProxyOhos()
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SCREEN_ON);
+    auto container = Container::Current();
+    if (container && container->IsFRSCardContainer()) {
+        matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_TIME_TICK);
+    }
 
     CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscribeInfo.SetThreadMode(CommonEventSubscribeInfo::ThreadMode::HANDLER);

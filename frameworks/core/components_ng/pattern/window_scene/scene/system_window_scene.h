@@ -47,21 +47,46 @@ public:
 
     void LostViewFocus() override;
 
-private:
+    void CreateOverlayManager(bool isShow, const RefPtr<FrameNode>& target)
+    {
+        if (!overlayManager_ && isShow) {
+            overlayManager_ = MakeRefPtr<OverlayManager>(target);
+            overlayManager_->SetIsAttachToCustomNode(true);
+        }
+    }
+
+    const RefPtr<OverlayManager>& GetOverlayManager()
+    {
+        return overlayManager_;
+    }
+
+    void DeleteOverlayManager()
+    {
+        overlayManager_.Reset();
+    }
+    uint32_t GetWindowPatternType() const override;
+
+protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    std::function<void(const Rosen::Vector4f&)> boundsChangedCallback_;
+    sptr<Rosen::Session> session_;
+
+private:
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
+
     void OnBoundsChanged(const Rosen::Vector4f& bounds);
     void RegisterFocusCallback();
     void RegisterEventCallback();
     void RegisterResponseRegionCallback();
     void PostCheckContextTransparentTask();
     void PostFaultInjectTask();
+
     int32_t instanceId_ = Container::CurrentId();
-    sptr<Rosen::Session> session_;
-    std::function<void(const Rosen::Vector4f&)> boundsChangedCallback_;
+
     CancelableCallback<void()> checkContextTransparentTask_;
+    RefPtr<OverlayManager> overlayManager_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SystemWindowScene);
 };

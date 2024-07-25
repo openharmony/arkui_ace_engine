@@ -464,5 +464,12 @@ void SetOnGridScrollIndex(ArkUINodeHandle node, void* extraParam)
     };
     GridModelNG::SetOnScrollIndex(frameNode, std::move(onEvent));
 }
+
+void ResetOnGridScrollIndex(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetOnScrollIndex(frameNode, nullptr);
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

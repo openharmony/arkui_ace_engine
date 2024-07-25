@@ -40,6 +40,9 @@ public:
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
     void SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
     void SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
+    void HasUserDefinedDisappearFontFamily(bool isUserDefined) override;
+    void HasUserDefinedNormalFontFamily(bool isUserDefined) override;
+    void HasUserDefinedSelectedFontFamily(bool isUserDefined) override;
     void SetBackgroundColor(const Color& color) override;
     void SetChangeEvent(DateChangeEvent&& onChange) override;
     static void SetSelectedTextStyle(
@@ -64,7 +67,7 @@ public:
     static LunarDate getSelectedDate(FrameNode* frameNode);
     static uint32_t getBackgroundColor(FrameNode* frameNode);
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
-
+    static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();

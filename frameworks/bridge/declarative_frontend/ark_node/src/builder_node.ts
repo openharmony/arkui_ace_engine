@@ -15,6 +15,7 @@
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
 
+type RecycleUpdateFunc = (elmtId: number, isFirstRender: boolean, recycleNode: ViewPU) => void;
 
 class BuilderNode {
   private _JSBuilderNode: JSBuilderNode;
@@ -30,7 +31,7 @@ class BuilderNode {
   public update(params: Object) {
     this._JSBuilderNode.update(params);
   }
-  public build(builder: WrappedBuilder<Object[]>, params: Object) {
+  public build(builder: WrappedBuilder<Object[]>, params: Object): void {
     this._JSBuilderNode.build(builder, params);
     this.nodePtr_ = this._JSBuilderNode.getNodePtr();
   }
@@ -58,6 +59,9 @@ class BuilderNode {
   public recycle(): void {
     this._JSBuilderNode.recycle();
   }
+  public updateConfiguration(): void {
+    this._JSBuilderNode.updateConfiguration();
+  }
 }
 
 class JSBuilderNode extends BaseNode {
@@ -74,6 +78,7 @@ class JSBuilderNode extends BaseNode {
     this.updateFuncByElmtId = new Map();
   }
   public reuse(param: Object): void {
+    this.updateStart();
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
       if (child) {
@@ -86,6 +91,7 @@ class JSBuilderNode extends BaseNode {
         }
       } // if child
     });
+    this.updateEnd();
   }
   public recycle(): void {
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
@@ -168,13 +174,19 @@ class JSBuilderNode extends BaseNode {
     this.updateEnd();
     __JSScopeUtil__.restoreInstanceId();
   }
-  private updateConfiguration() {
+  public updateConfiguration(): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this.updateStart();
     this.purgeDeletedElmtIds();
     Array.from(this.updateFuncByElmtId.keys()).sort((a: number, b: number): number => {
       return (a < b) ? -1 : (a > b) ? 1 : 0;
     }).forEach(elmtId => this.UpdateElement(elmtId));
+    for (const child of this.childrenWeakrefMap_.values()) {
+      const childView = child.deref();
+      if (childView) {
+        childView.forceCompleteRerender(true);
+      }
+    }
     this.updateEnd();
     __JSScopeUtil__.restoreInstanceId();
   }
@@ -230,7 +242,7 @@ class JSBuilderNode extends BaseNode {
   public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: { prototype: Object; pop?: () => void }): void {
     const _componentName: string = classObject && 'name' in classObject ? (Reflect.get(classObject, 'name') as string) : 'unspecified UINode';
     const _popFunc: () => void =
-      classObject && "pop" in classObject ? classObject.pop! : () => { };
+      classObject && 'pop' in classObject ? classObject.pop! : () => { };
     const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
       __JSScopeUtil__.syncInstanceId(this.instanceId_);
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
@@ -316,7 +328,7 @@ class JSBuilderNode extends BaseNode {
       // Create array of new ids.
       arr.forEach((item, index) => {
         newIdArray.push(
-          `${itemGenFuncUsesIndex ? index + "_" : ""}` + idGenFunc(item)
+          `${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item)
         );
       });
     }
@@ -366,7 +378,7 @@ class JSBuilderNode extends BaseNode {
     this._nativeRef = null;
     this.frameNode_?.resetNodePtr();
   }
-  updateInstance(uiContext: UIContext) {
+  updateInstance(uiContext: UIContext): void {
       this.uiContext_ = uiContext;
       this.instanceId_ = uiContext.instanceId_;
       if (this.frameNode_ !== undefined && this.frameNode_ !== null) {
@@ -393,5 +405,9 @@ class JSBuilderNode extends BaseNode {
   {
     this.updateNodePtr(nodePtr);
     this.updateInstanceId(instanceId);
+  }
+
+  public observeRecycleComponentCreation(name: string, recycleUpdateFunc: RecycleUpdateFunc): void {
+    throw new Error('custom component in @Builder used by BuilderNode does not support @Reusable');
   }
 }

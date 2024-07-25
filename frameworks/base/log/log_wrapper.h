@@ -26,10 +26,10 @@
 #include "base/utils/system_properties.h"
 
 #ifdef ACE_INSTANCE_LOG
-#define ACE_FMT_PREFIX "[%{public}s(%{public}s)-(%{public}s)] "
+#define ACE_FMT_PREFIX "[%{public}s(%{public}d)-(%{public}s)] "
 #define ACE_LOG_ID_WITH_REASON , OHOS::Ace::LogWrapper::GetIdWithReason().c_str()
 #else
-#define ACE_FMT_PREFIX "[%{private}s(%{private}s)] "
+#define ACE_FMT_PREFIX "[%{private}s(%{private}d)] "
 #define ACE_LOG_ID_WITH_REASON
 #endif
 
@@ -40,7 +40,7 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
 #define PRINT_LOG(level, tag, fmt, ...) \
     HILOG_IMPL(LOG_CORE, LOG_##level, (tag + ACE_DOMAIN), (OHOS::Ace::g_DOMAIN_CONTENTS_MAP.at(tag)),         \
             ACE_FMT_PREFIX fmt, OHOS::Ace::LogWrapper::GetBriefFileName(__FILE__),                            \
-            __FUNCTION__ ACE_LOG_ID_WITH_REASON, ##__VA_ARGS__)
+            __LINE__ ACE_LOG_ID_WITH_REASON, ##__VA_ARGS__)
 
 #define PRINT_APP_LOG(level, fmt, ...) HILOG_IMPL(LOG_APP, LOG_##level, APP_DOMAIN, "JSAPP", fmt, ##__VA_ARGS__)
 #else
@@ -49,7 +49,7 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
         if (OHOS::Ace::LogWrapper::JudgeLevel(OHOS::Ace::LogLevel::level)) {                                  \
             OHOS::Ace::LogWrapper::PrintLog(OHOS::Ace::LogDomain::FRAMEWORK, OHOS::Ace::LogLevel::level, tag, \
                 ACE_FMT_PREFIX fmt, OHOS::Ace::LogWrapper::GetBriefFileName(__FILE__),                        \
-                __FUNCTION__ ACE_LOG_ID_WITH_REASON, ##__VA_ARGS__);                                          \
+                __LINE__ ACE_LOG_ID_WITH_REASON, ##__VA_ARGS__);                                          \
         }                                                                                                     \
     } while (0)
 
@@ -80,22 +80,22 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
 #define APP_LOGE(fmt, ...) PRINT_APP_LOG(ERROR, fmt, ##__VA_ARGS__)
 #define APP_LOGF(fmt, ...) PRINT_APP_LOG(FATAL, fmt, ##__VA_ARGS__)
 
-#define JSON_STRING_PUT_INT(jsonValue, var) jsonValue->Put(#var, static_cast<int64_t>(var))
-#define JSON_STRING_PUT_BOOL(jsonValue, var) jsonValue->Put(#var, var)
-#define JSON_STRING_PUT_STRING(jsonValue, var) jsonValue->Put(#var, var.c_str())
-#define JSON_STRING_PUT_STRINGABLE(jsonValue, var) jsonValue->Put(#var, var.ToString().c_str())
+#define JSON_STRING_PUT_INT(jsonValue, var) (jsonValue)->Put(#var, static_cast<int64_t>(var))
+#define JSON_STRING_PUT_BOOL(jsonValue, var) (jsonValue)->Put(#var, (var))
+#define JSON_STRING_PUT_STRING(jsonValue, var) (jsonValue)->Put(#var, (var).c_str())
+#define JSON_STRING_PUT_STRINGABLE(jsonValue, var) (jsonValue)->Put(#var, (var).ToString().c_str())
 
 #define JSON_STRING_PUT_OPTIONAL_INT(jsonValue, var)          \
     do {                                                      \
         if (var) {                                            \
-            jsonValue->Put(#var, static_cast<int64_t>(*var)); \
+            (jsonValue)->Put(#var, static_cast<int64_t>(*(var))); \
         }                                                     \
     } while (0)                                               \
 
 #define JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, var) \
     do {                                                \
         if (var) {                                      \
-            jsonValue->Put(#var, var->c_str());         \
+            (jsonValue)->Put(#var, (var)->c_str());         \
         }                                               \
     } while (0)                                         \
 
@@ -103,14 +103,14 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
 #define JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, var) \
     do {                                                    \
         if (var) {                                          \
-            jsonValue->Put(#var, var->ToString().c_str());  \
+            (jsonValue)->Put(#var, (var)->ToString().c_str());  \
         }                                                   \
     } while (0)                                             \
 
 
 namespace OHOS::Ace {
 enum AceLogTag : uint8_t {
-    ACE_DEFAULT_DOMAIN = 0,          // C03900
+    ACE_DEFAULT_DOMAIN = 0,   // C03900
     ACE_ALPHABET_INDEXER,     // C03901
     ACE_COUNTER,              // C03902
     ACE_SUB_WINDOW,           // C03903
@@ -189,9 +189,11 @@ enum AceLogTag : uint8_t {
     ACE_MOVING_PHOTO,         // C0394C
     ACE_ARK_COMPONENT,        // C0394D
     ACE_WINDOW,               // C0394E
+    ACE_SECURITYUIEXTENSION,  // C0394F
+    ACE_INPUTKEYFLOW,         // C03950
+    ACE_WINDOW_PIPELINE,      // C03951
 
-    FORM_RENDER = 255, // C039FF FormRenderer
-    END = 256,         // Last one, do not use
+    FORM_RENDER = 255, // C039FF FormRenderer, last domain, do not add
 };
 
 ACE_FORCE_EXPORT extern const std::unordered_map<AceLogTag, const char*> g_DOMAIN_CONTENTS_MAP;

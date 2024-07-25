@@ -399,6 +399,8 @@ float OH_ArkUI_PinchGesture_GetCenterX(const ArkUI_GestureEvent* event);
 */
 float OH_ArkUI_PinchGesture_GetCenterY(const ArkUI_GestureEvent* event);
 
+
+ArkUI_NodeHandle OH_ArkUI_GestureEvent_GetNode(const ArkUI_GestureEvent* event);
 /**
  * @brief Defines the gesture APIs.
  *

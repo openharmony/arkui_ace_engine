@@ -84,20 +84,6 @@ class ArkBorderColor {
   }
 }
 
-class ArkPosition {
-  x: Length;
-  y: Length;
-
-  constructor() {
-    this.x = undefined;
-    this.y = undefined;
-  }
-
-  isEqual(another: ArkPosition): boolean {
-    return this.x === another.x && this.y === another.y;
-  }
-}
-
 class ArkBorderWidth {
   left: EdgeWidths | Length;
   right: EdgeWidths | Length;
@@ -351,6 +337,18 @@ class ArkSharedTransition {
   }
 }
 
+class ArkChainMode {
+  direction: Axis | undefined;
+  style: ChainStyle  | undefined;
+  constructor() {
+    this.direction = undefined;
+    this.style = undefined;
+  }
+  isEqual(another: ArkChainMode): boolean {
+    return (this.direction === another.direction) && (this.style === another.style);
+  }
+}
+
 class ArkListEdgeEffect {
   value: EdgeEffect;
   options?: EdgeEffectOptions | undefined;
@@ -477,24 +475,76 @@ class ArkBackgroundBlurStyle {
   }
 }
 
+class ArkBorderDashGap {
+  left: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+  right: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+  top: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+  bottom: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+
+  constructor() {
+    this.left = undefined;
+    this.right = undefined;
+    this.top = undefined;
+    this.bottom = undefined;
+  }
+
+  isEqual(another: ArkBorderDashGap): boolean {
+    return (
+      this.left === another.left &&
+      this.right === another.right &&
+      this.top === another.top &&
+      this.bottom === another.bottom
+    );
+  }
+}
+
+class ArkBorderDashWidth {
+  left: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+  right: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+  top: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+  bottom: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+
+  constructor() {
+    this.left = undefined;
+    this.right = undefined;
+    this.top = undefined;
+    this.bottom = undefined;
+  }
+
+  isEqual(another: ArkBorderDashWidth): boolean {
+    return (
+      this.left === another.left &&
+      this.right === another.right &&
+      this.top === another.top &&
+      this.bottom === another.bottom
+    );
+  }
+}
+
 class ArkBorder {
   arkWidth: ArkBorderWidth;
   arkColor: ArkBorderColor;
   arkRadius: ArkBorderRadius;
   arkStyle: ArkBorderStyle;
+  arkDashGap: ArkBorderDashGap;
+  arkDashWidth: ArkBorderDashWidth;
 
   constructor() {
     this.arkWidth = new ArkBorderWidth();
     this.arkColor = new ArkBorderColor();
     this.arkRadius = new ArkBorderRadius();
     this.arkStyle = new ArkBorderStyle();
+    this.arkDashGap = new ArkBorderDashGap();
+    this.arkDashWidth = new ArkBorderDashWidth();
   }
   isEqual(another: ArkBorder): boolean {
     return (
       this.arkWidth.isEqual(another.arkWidth) &&
       this.arkColor.isEqual(another.arkColor) &&
       this.arkRadius.isEqual(another.arkRadius) &&
-      this.arkStyle.isEqual(another.arkStyle)
+      this.arkStyle.isEqual(another.arkStyle) &&
+      this.arkDashGap.isEqual(another.arkDashGap) &&
+      this.arkDashWidth.isEqual(another.arkDashWidth)
     );
   }
 
@@ -518,7 +568,7 @@ class ArkBackgroundImageSize {
 }
 
 class ArkBackgroundImage {
-  src: string | undefined | Resource;
+  src: string | undefined | Resource | PixelMap;
   repeat: number | undefined;
   constructor() {
     this.src = undefined;
@@ -975,6 +1025,7 @@ class ArkDotIndicator extends DotIndicator {
   maskValue: boolean | undefined;
   colorValue: ResourceColor | undefined;
   selectedColorValue: ResourceColor | undefined;
+  maxDisplayCountValue: ResourceColor | undefined;
 
   constructor() {
     super();
@@ -990,6 +1041,7 @@ class ArkDotIndicator extends DotIndicator {
     this.maskValue = undefined;
     this.colorValue = undefined;
     this.selectedColorValue = undefined;
+    this.maxDisplayCountValue = undefined;
   }
 
   isEqual(another: ArkDotIndicator): boolean {
@@ -1005,7 +1057,8 @@ class ArkDotIndicator extends DotIndicator {
       this.selectedItemHeightValue === another.selectedItemHeightValue &&
       this.maskValue === another.maskValue &&
       this.colorValue === another.colorValue &&
-      this.selectedColorValue === another.selectedColorValue
+      this.selectedColorValue === another.selectedColorValue &&
+      this.maxDisplayCountValue === another.maxDisplayCountValue
     );
   }
 }
@@ -1091,6 +1144,20 @@ class ArkDisplayArrow {
 
   isEqual(another: ArkDisplayArrow): boolean {
     return this.value === another.value && this.isHoverShow === another.isHoverShow;
+  }
+}
+
+class ArkDisplayCount {
+  value: string | number | SwiperAutoFill;
+  swipeByGroup: boolean | undefined;
+
+  constructor() {
+    this.value = undefined;
+    this.swipeByGroup = undefined;
+  }
+
+  isEqual(another: ArkDisplayCount): boolean {
+    return this.value === another.value && this.swipeByGroup === another.swipeByGroup;
   }
 }
 
@@ -1257,47 +1324,6 @@ class ArkWaterFlowEdgeEffect {
   }
 }
 
-class ArkPositionType {
-  useEdges: boolean;
-  x: Length | undefined;
-  y: Length | undefined;
-  top: Dimension | undefined;
-  left: Dimension | undefined;
-  bottom: Dimension | undefined;
-  right: Dimension | undefined;
-
-  constructor() {
-    this.useEdges = false;
-    this.x = undefined;
-    this.y = undefined;
-    this.top = undefined;
-    this.left = undefined;
-    this.right = undefined;
-    this.bottom = undefined;
-  }
-
-  parsePositionType(value: Position | Edges) {
-    if (isUndefined(value)) {
-      return false;
-    }
-    if (('x' in value) || ('y' in value)) {
-      this.useEdges = false;
-      this.x = value.x;
-      this.y = value.y;
-      return true;
-    } else if (('top' in value) || ('left' in value) || ('bottom' in value) || ('right' in value)) {
-      this.useEdges = true;
-      this.top = value.top;
-      this.left = value.left;
-      this.bottom = value.bottom;
-      this.right = value.right;
-      return true;
-    } else {
-      return false;
-    }
-  }
-}
-
 class ArkSelection {
   selectionStart: number;
   selectionEnd: number;
@@ -1345,6 +1371,58 @@ class ArkDragPreviewOptions {
       this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting
     );
   }
+}
+
+class ArkDragPreview {
+  inspetorId : string;
+  constructor() {
+    this.inspetorId = undefined;
+  }
+
+  isEqual(another: ArkDragPreview) : boolean {
+    return this.inspetorId === another.inspetorId;
+  }
+}
+
+class ArkRelativeContainerGuideLine {
+  ids: Array<string> | undefined;
+  directions: Array<Axis> | undefined;
+  positions: Array<GuideLinePosition> | undefined;
+
+  constructor() {
+    this.ids = undefined;
+    this.directions = undefined;
+    this.positions = undefined;
+  }
+
+  isEqual(another: ArkRelativeContainerGuideLine): boolean {
+    return (
+      this.ids === another.ids &&
+      this.directions === another.directions &&
+      this.positions === another.positions
+    );
+  }
+}
+
+class ArkRelativeContainerBarrier {
+  ids: Array<string> | undefined;
+  directions: Array<BarrierDirection> | undefined;
+  referencedIds: Array<Array<string>> | undefined;
+
+  constructor() {
+    this.ids = undefined;
+    this.directions = undefined;
+    this.referencedIds = undefined;
+  }
+
+  isEqual(another: ArkRelativeContainerGuideLine): boolean {
+    return (
+      this.ids === another.ids &&
+      this.directions === another.directions &&
+      this.referencedIds === another.positions
+    );
+  }
+}
 
 class ArkFocusScopeId {
   id: string | undefined;

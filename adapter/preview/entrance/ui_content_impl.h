@@ -49,8 +49,8 @@ public:
         napi_value storage) override {
         return UIContentErrorCode::NO_ERRORS;
     }
-    void InitializeDynamic(
-        const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint) override {}
+    void InitializeDynamic(const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint,
+        const std::vector<std::string>& registerComponents) override {}
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override {}
     void Foreground() override {}
@@ -145,7 +145,11 @@ public:
 
     void SetContentNodeGrayScale(float grayscale) override {};
 
+    void PreLayout() override {};
+    
     void SetStatusBarItemColor(uint32_t color) override;
+
+    void SetForceSplitEnable(bool isForceSplit) override {};
 
 private:
     UIContentErrorCode CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo,

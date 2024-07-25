@@ -19,6 +19,7 @@
 #include <functional>
 #include <string>
 
+#include "base/i18n/time_format.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/text_clock/text_clock_controller.h"
@@ -104,10 +105,18 @@ public:
         return nodeId_;
     }
 
+    ZeroPrefixType GetPrefixHour()
+    {
+        auto textClockLayoutProperty = GetLayoutProperty<TextClockLayoutProperty>();
+        CHECK_NULL_RETURN(textClockLayoutProperty, prefixHour_);
+        return textClockLayoutProperty->GetPrefixHourValue(ZeroPrefixType::AUTO);
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnLanguageConfigurationUpdate() override;
     void DumpInfo() override;
     void InitTextClockController();
 
@@ -121,8 +130,8 @@ private:
     void OnVisibleAreaChange(bool visible);
     static void UpdateTextLayoutProperty(
         RefPtr<TextClockLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
-    void ParseInputFormat(bool& is24H);
-    static std::vector<std::string> ParseDateTimeValue(const std::string& strDateTimeValue);
+    void ParseInputFormat();
+    std::vector<std::string> ParseDateTimeValue(const std::string& strDateTimeValue);
     void GetDateTimeIndex(const char& element, TextClockFormatElement& tempFormatElement);
     static std::string GetAmPm(const std::string& dateTimeValue);
     static std::string Abstract(const std::string& strSource, const bool& abstractItem);
@@ -132,7 +141,8 @@ private:
     std::string SpliceDateTime(const std::vector<std::string>& curDateTime);
     static std::string CheckDateTimeElement(const std::vector<std::string>& curDateTime, const char& element,
         const int32_t& elementIndex, const bool& oneElement);
-
+    std::string AddZeroPrefix(const std::string& strTimeValue);
+    std::string RemoveZeroPrefix(const std::string& strTimeValue);
     std::string GetFormat() const;
     float GetHoursWest() const;
     RefPtr<FrameNode> GetTextNode();
@@ -153,6 +163,7 @@ private:
     std::string prevTime_;
     std::map<int32_t, TextClockFormatElement> formatElementMap_;
     CancelableCallback<void()> delayTask_;
+    ZeroPrefixType prefixHour_ = ZeroPrefixType::AUTO;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextClockPattern);
 };

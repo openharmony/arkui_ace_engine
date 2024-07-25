@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H
 
+#include <atomic>
 #include <cstdint>
 #include <list>
 
@@ -154,6 +155,10 @@ public:
 
     void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
     void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
+    virtual void CreateAnimationWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+        const AnimationFinishCallback finishCallback, bool isNavBar = false);
+    virtual void CreateAnimationWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+        const AnimationFinishCallback finishCallback, bool isNavBar = false);
 
     std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(
         const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
@@ -176,24 +181,62 @@ public:
     {
         isOnAnimation_ = isOnAnimation;
     }
-
+    RefPtr<FrameNode> GetTopDestination();
     void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
 
     void FireHideNodeChange(NavDestinationLifecycle lifecycle);
 
+    void ReduceModeSwitchAnimationCnt()
+    {
+        --modeSwitchAnimationCnt_;
+    }
+
+    void IncreaseModeSwitchAnimationCnt()
+    {
+        ++modeSwitchAnimationCnt_;
+    }
+
+    int32_t GetModeSwitchAnimationCnt()
+    {
+        return modeSwitchAnimationCnt_;
+    }
+
     float CheckLanguageDirection();
 
     void RemoveDialogDestination();
 
+    void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath)
+    {
+        navigationPathInfo_ = pagePath;
+        navigationModuleName_ = moduleName;
+    }
+
+    const std::string& GetNavigationPathInfo() const
+    {
+        return navigationPathInfo_;
+    }
+
+    void CleanHideNodes()
+    {
+        hideNodes_.clear();
+    }
+
+protected:
+    std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
+    std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
+
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
-        const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize);
+        const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize,
+        const RefPtr<UINode>& preLastStandardNode);
     bool ReorderNavDestination(
         const std::vector<std::pair<std::string, RefPtr<UINode>>>& navDestinationNodes,
         RefPtr<FrameNode>& navigationContentNode, int32_t& slot, bool& hasChanged);
     void RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
-        const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged);
+        const RefPtr<UINode>& remainChild, int32_t slot, bool& hasChanged, int32_t beforeLastStandardIndex);
+    void ReorderAnimatingDestination(RefPtr<FrameNode>& navigationContentNode, RefPtr<UINode>& maxAnimatingDestination,
+        RefPtr<UINode>& remainDestination, RefPtr<UINode>& curTopDestination);
     bool FindNavigationParent(const std::string& parentName);
     bool GetCurTitleBarNode(RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode,
         bool isNavBar);
@@ -207,13 +250,14 @@ private:
     std::vector<std::pair<RefPtr<NavDestinationGroupNode>, bool>> hideNodes_;
     std::vector<RefPtr<NavDestinationGroupNode>> showNodes_;
     int32_t lastStandardIndex_ = -1;
+    std::atomic_int32_t modeSwitchAnimationCnt_ = 0;
     bool isOnAnimation_ { false };
     bool isModeChange_ { false };
     bool needSetInvisible_ { false };
     bool isOnModeSwitchAnimation_ { false };
     std::string curId_;
-    std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
-    std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
+    std::string navigationPathInfo_;
+    std::string navigationModuleName_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

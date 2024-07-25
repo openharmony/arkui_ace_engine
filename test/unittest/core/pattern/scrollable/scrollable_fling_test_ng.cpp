@@ -565,74 +565,56 @@ HWTEST_F(ScrollableFlingTestNg, Fling006, TestSize.Level1)
 HWTEST_F(ScrollableFlingTestNg, Fling007, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Initialize ScrollablePattern type pointer and call ShouldSelectScrollBeStopped
-     * @tc.expected: Pointer is not nullptr and result is true
+     * @tc.steps: step1. Initialize ScrollablePattern type pointer
+     * @tc.expected: Pointer is not nullptr.
      */
+    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
+    mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
     EXPECT_TRUE(scrollPn);
-    auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
     scrollPn->parent_ = mockPn;
-    auto result = scrollPn->ShouldSelectScrollBeStopped();
+
+    /**
+     * @tc.steps: step2. Set the parameter scrollable to be nullptr
+     * @tc.expected: Scrollable is nullptr
+     */
+    RefPtr<Scrollable> scrollable = nullptr;
+    scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    scrollPn->scrollableEvent_->SetScrollable(scrollable);
+    scrollPn->SetCanOverScroll(false);
+    EXPECT_EQ(scrollPn->scrollableEvent_->GetScrollable(), nullptr);
+
+    /**
+     * @tc.steps: step3. Set the parameter scrollable is true and IsAtBottom is false
+     * @tc.expected: Scrollable is not nullptr
+     */
+    EXPECT_CALL(*scrollPn, IsAtBottom).WillRepeatedly(Return(false));
+    scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    scrollable =
+        AceType::MakeRefPtr<Scrollable>([](double, int32_t source) -> bool { return true; }, Axis::VERTICAL);
+    scrollPn->scrollableEvent_->SetScrollable(scrollable);
+    EXPECT_NE(scrollPn->scrollableEvent_->GetScrollable(), nullptr);
+
+    /**
+     * @tc.steps: step5. Call the GetCanOverScroll method, Set the parameter scrollable is false
+     * @tc.expected: The result is true
+     */
+    scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    auto result = scrollPn->GetCanOverScroll();
     EXPECT_TRUE(result);
 
     /**
-     * @tc.steps: step2. Call the ShouldSelectScrollBeStopped method
-     * @tc.expected: The result is false
+     * @tc.steps: step6. Call the GetCanOverScroll method, Set the parameter scrollable is true
+     * @tc.expected: The result is true
      */
-    scrollPn->mousePressed_ = true;
-    scrollPn->SetAxis(Axis::VERTICAL);
-    Offset localLocation;
-    localLocation.SetY(1.0f);
-    scrollPn->lastMouseMove_.SetLocalLocation(localLocation);
-    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), 1.0f);
-    result = scrollPn->ShouldSelectScrollBeStopped();
-    EXPECT_FALSE(result);
+    scrollable =
+        AceType::MakeRefPtr<Scrollable>([](double, int32_t source) -> bool { return true; }, Axis::VERTICAL);
+    scrollPn->scrollableEvent_->SetScrollable(scrollable);
+    result = scrollPn->GetCanOverScroll();
+    EXPECT_TRUE(result);
 
     /**
-     * @tc.steps: step3. Call the UpdateMouseStart method
-     * @tc.expected: The GetY is 0.1
-     */
-    scrollPn->SetAxis(Axis::VERTICAL);
-    float offset = 0.1f;
-    scrollPn->UpdateMouseStart(offset);
-    EXPECT_EQ(scrollPn->mouseStartOffset_.GetY(), 0.1f);
-
-    /**
-     * @tc.steps: step4. Call the UpdateMouseStart method
-     * @tc.expected: The GetX is 0.1
-     */
-    scrollPn->SetAxis(Axis::HORIZONTAL);
-    offset = 0.2f;
-    scrollPn->UpdateMouseStart(offset);
-    EXPECT_EQ(scrollPn->mouseStartOffset_.GetX(), 0.2f);
-
-    /**
-     * @tc.steps: step5. Call the GetOffsetWithLimit method
-     * @tc.expected: The result is 0.2
-     */
-    offset = 0.2f;
-    result = scrollPn->GetOffsetWithLimit(offset);
-    EXPECT_NE(result, offset);
-
-    /**
-     * @tc.steps: step6. Call the GetOffsetWithLimit method
-     * @tc.expected: The result is 0.0
-     */
-    offset = -0.1f;
-    result = scrollPn->GetOffsetWithLimit(offset);
-    EXPECT_EQ(result, -0.0f);
-
-    /**
-     * @tc.steps: step7. Call the GetOffsetWithLimit method
-     * @tc.expected: The result is 0.0
-     */
-    offset = 0.0f;
-    result = scrollPn->GetOffsetWithLimit(offset);
-    EXPECT_EQ(result, offset);
-
-    /**
-     * @tc.steps: step8. Set the correctVelocity is 3000
+     * @tc.steps: step7. Set the correctVelocity is 5000
      * Set the friction is 0.6
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
@@ -641,12 +623,12 @@ HWTEST_F(ScrollableFlingTestNg, Fling007, TestSize.Level1)
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
      */
-    float correctVelocity = 3000.0f;
+    float correctVelocity = 5000.0f;
     float friction = 0.6f;
     float frictionScale = -4.2f;
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
-    auto scrollable = scrollableEvent->GetScrollable();
+    scrollable = scrollableEvent->GetScrollable();
     scrollable->SetFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
@@ -1498,75 +1480,57 @@ HWTEST_F(ScrollableFlingTestNg, Fling017, TestSize.Level1)
 HWTEST_F(ScrollableFlingTestNg, Fling018, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Initialize ScrollablePattern type pointer and call ShouldSelectScrollBeStopped
-     * @tc.expected: Pointer is not nullptr and result is true
+     * @tc.steps: step1. Initialize ScrollablePattern type pointer
+     * @tc.expected: Pointer is not nullptr.
      */
+    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
+    mockScroll_->pattern_ = mockPn;
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
     EXPECT_TRUE(scrollPn);
-    auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
-    EXPECT_TRUE(mockPn);
     scrollPn->parent_ = mockPn;
-    auto result = scrollPn->ShouldSelectScrollBeStopped();
+
+    /**
+     * @tc.steps: step2. Set the parameter scrollable to be nullptr
+     * @tc.expected: Scrollable is nullptr
+     */
+    RefPtr<Scrollable> scrollable = nullptr;
+    scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    scrollPn->scrollableEvent_->SetScrollable(scrollable);
+    scrollPn->SetCanOverScroll(false);
+    EXPECT_EQ(scrollPn->scrollableEvent_->GetScrollable(), nullptr);
+
+    /**
+     * @tc.steps: step3. Set the parameter scrollable is true and IsAtBottom is false
+     * @tc.expected: Scrollable is not nullptr
+     */
+    EXPECT_CALL(*scrollPn, IsAtBottom).WillRepeatedly(Return(false));
+    scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    scrollable =
+        AceType::MakeRefPtr<Scrollable>([](double, int32_t source) -> bool { return true; }, Axis::VERTICAL);
+    scrollPn->scrollableEvent_->SetScrollable(scrollable);
+    EXPECT_NE(scrollPn->scrollableEvent_->GetScrollable(), nullptr);
+
+    /**
+     * @tc.steps: step5. Call the GetCanOverScroll method, Set the parameter scrollable is false
+     * @tc.expected: The result is true
+     */
+    scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    auto result = scrollPn->GetCanOverScroll();
     EXPECT_TRUE(result);
 
     /**
-     * @tc.steps: step2. Call the ShouldSelectScrollBeStopped method
-     * @tc.expected: The result is false
+     * @tc.steps: step6. Call the GetCanOverScroll method, Set the parameter scrollable is true
+     * @tc.expected: The result is true
      */
-    scrollPn->mousePressed_ = true;
-    scrollPn->SetAxis(Axis::VERTICAL);
-    Offset localLocation;
-    localLocation.SetY(1.0f);
-    scrollPn->lastMouseMove_.SetLocalLocation(localLocation);
-    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), 1.0f);
-    result = scrollPn->ShouldSelectScrollBeStopped();
-    EXPECT_FALSE(result);
+    scrollable =
+        AceType::MakeRefPtr<Scrollable>([](double, int32_t source) -> bool { return true; }, Axis::VERTICAL);
+    scrollPn->scrollableEvent_->SetScrollable(scrollable);
+    result = scrollPn->GetCanOverScroll();
+    EXPECT_TRUE(result);
 
     /**
-     * @tc.steps: step3. Call the UpdateMouseStart method
-     * @tc.expected: The GetY is 0.1
-     */
-    scrollPn->SetAxis(Axis::VERTICAL);
-    float offset = 0.1f;
-    scrollPn->UpdateMouseStart(offset);
-    EXPECT_EQ(scrollPn->mouseStartOffset_.GetY(), 0.1f);
-
-    /**
-     * @tc.steps: step4. Call the UpdateMouseStart method
-     * @tc.expected: The GetX is 0.1
-     */
-    scrollPn->SetAxis(Axis::HORIZONTAL);
-    offset = 0.2f;
-    scrollPn->UpdateMouseStart(offset);
-    EXPECT_EQ(scrollPn->mouseStartOffset_.GetX(), 0.2f);
-
-    /**
-     * @tc.steps: step5. Call the GetOffsetWithLimit method
-     * @tc.expected: The result is 0.2
-     */
-    offset = 0.2f;
-    result = scrollPn->GetOffsetWithLimit(offset);
-    EXPECT_NE(result, offset);
-
-    /**
-     * @tc.steps: step6. Call the GetOffsetWithLimit method
-     * @tc.expected: The result is 0.0
-     */
-    offset = -0.1f;
-    result = scrollPn->GetOffsetWithLimit(offset);
-    EXPECT_EQ(result, -0.0f);
-
-    /**
-     * @tc.steps: step7. Call the GetOffsetWithLimit method
-     * @tc.expected: The result is 0.0
-     */
-    offset = 0.0f;
-    result = scrollPn->GetOffsetWithLimit(offset);
-    EXPECT_EQ(result, offset);
-
-    /**
-     * @tc.steps: step8. Set the correctVelocity is -3000
-     * Set the friction is 0.9
+     * @tc.steps: step7. Set the correctVelocity is -5000
+     * Set the friction is 0.6
      * Set the frictionScale is -4.2
      * Calculate the position finalPosition that should be scrolled to through a formula
      * Get object scrollable and Call the SetFriction method
@@ -1574,12 +1538,12 @@ HWTEST_F(ScrollableFlingTestNg, Fling018, TestSize.Level1)
      * Obtain the actual scrolling position finalPosition_
      * @tc.expected: The values of finalPosition_ and finalPosition are the same
      */
-    float correctVelocity = -3000.0f;
-    float friction = 0.9f;
+    float correctVelocity = -5000.0f;
+    float friction = 0.6f;
     float frictionScale = -4.2f;
     float finalPosition = correctVelocity / (friction * -frictionScale);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
-    auto scrollable = scrollableEvent->GetScrollable();
+    scrollable = scrollableEvent->GetScrollable();
     scrollable->SetFriction(friction);
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;

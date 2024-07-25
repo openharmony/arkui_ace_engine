@@ -84,6 +84,8 @@ void FormManagerDelegate::AddGetRectRelativeToWindowCallback(OnGetRectRelativeTo
 
 void FormManagerDelegate::AddSnapshotCallback(SnapshotCallback&& callback) {}
 
+void FormManagerDelegate::AddEnableFormCallback(EnableFormCallback&& callback) {}
+
 void FormManagerDelegate::ResetForm() {}
 
 void FormManagerDelegate::ReleaseForm() {}
@@ -101,6 +103,10 @@ void FormManagerDelegate::OnAccessibilityChildTreeRegister(
 void FormManagerDelegate::OnAccessibilityChildTreeDeregister() {}
 void FormManagerDelegate::OnAccessibilityDumpChildInfo(
     const std::vector<std::string>& params, std::vector<std::string>& info) {}
+void FormManagerDelegate::OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs) {}
+
+void FormManagerDelegate::HandleCachedClickEvents() {}
 
 #if OHOS_STANDARD_SYSTEM
 bool FormManagerDelegate::GetFormInfo(const std::string& bundleName, const std::string& moduleName,
@@ -109,4 +115,9 @@ bool FormManagerDelegate::GetFormInfo(const std::string& bundleName, const std::
     return true;
 }
 #endif
+
+bool FormManagerDelegate::CheckFormBundleForbidden(const std::string& bundleName)
+{
+    return false;
+}
 } // namespace OHOS::Ace

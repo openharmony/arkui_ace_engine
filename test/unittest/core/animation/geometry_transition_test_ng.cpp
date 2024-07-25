@@ -52,7 +52,8 @@ public:
     void SetUp() override;
     void TearDown() override;
 
-    void Create(const WeakPtr<FrameNode>& frameNode, bool followWithoutTransition = false);
+    void Create(const WeakPtr<FrameNode>& frameNode,
+        bool followWithoutTransition = false, bool doRegisterSharedTransition = true);
 
     RefPtr<FrameNode> CreateHolderNode(const RefPtr<FrameNode>& node);
     RefPtr<GeometryTransition> gt_;
@@ -76,9 +77,10 @@ void GeometryTransitionTestNg::TearDown()
     gt_ = nullptr;
 }
 
-void GeometryTransitionTestNg::Create(const WeakPtr<FrameNode>& node, bool followWithoutTransition)
+void GeometryTransitionTestNg::Create(const WeakPtr<FrameNode>& node,
+    bool followWithoutTransition, bool doRegisterSharedTransition)
 {
-    gt_ = AceType::MakeRefPtr<GeometryTransition>("test", followWithoutTransition);
+    gt_ = AceType::MakeRefPtr<GeometryTransition>("test", followWithoutTransition, doRegisterSharedTransition);
     // The constructor has been modified and requires additional assignments
     gt_->inNode_ = node;
 }
@@ -112,7 +114,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition001, TestSize.Level1)
     EXPECT_FALSE(gt_->hasInAnim_);
     EXPECT_FALSE(gt_->hasOutAnim_);
 
-    Create(weakNode1, true);
+    Create(weakNode1, true, true);
     gt_->Build(weakNode1, false);
     gt_->WillLayout(node1);
     gt_->DidLayout(node1);
@@ -122,21 +124,21 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition001, TestSize.Level1)
     EXPECT_TRUE(gt_->hasInAnim_);
     EXPECT_TRUE(gt_->hasOutAnim_);
 
-    Create(weakNode1, true);
+    Create(weakNode1, true, true);
     gt_->Build(weakNode1, true);
     gt_->WillLayout(node1);
     gt_->DidLayout(node1);
     EXPECT_FALSE(gt_->hasInAnim_);
     EXPECT_FALSE(gt_->hasOutAnim_);
 
-    Create(weakNode1, true);
+    Create(weakNode1, true, true);
     gt_->Build(weakNode2, true);
     gt_->WillLayout(node2);
     gt_->DidLayout(node2);
     EXPECT_TRUE(gt_->hasInAnim_);
     EXPECT_FALSE(gt_->hasOutAnim_);
 
-    Create(weakNode1, true);
+    Create(weakNode1, true, true);
     weakNode2.Upgrade()->isRemoving_ = true;
     gt_->Build(weakNode2, true);
     gt_->WillLayout(node2);
@@ -152,7 +154,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition001, TestSize.Level1)
     weakNode2.Upgrade()->isRemoving_ = false;
     weakNodeTemp->isRemoving_ = false;
     weakNodeTemp->onMainTree_ = true;
-    Create(weakNode3, true);
+    Create(weakNode3, true, true);
     gt_->outNode_ = weakNode1;
     gt_->Build(weakNode2, true);
     gt_->WillLayout(node2);
@@ -169,7 +171,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition001, TestSize.Level1)
  */
 HWTEST_F(GeometryTransitionTestNg, GeometryTransition002, TestSize.Level1)
 {
-    Create(weakNode1, true);
+    Create(weakNode1, true, true);
     gt_->inNode_ = weakNode1;
     gt_->outNode_ = weakNode2;
     gt_->WillLayout(node2);
@@ -216,7 +218,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition003, TestSize.Level1)
     /**
      * @tc.steps: step1. create GeometryTransition with weakNode1.
      */
-    Create(weakNode1, true);
+    Create(weakNode1, true, true);
     weakNode1.Upgrade()->isRemoving_ = false;
     /**
      * @tc.steps: step2. try build with some condition.
@@ -307,7 +309,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition004, TestSize.Level1)
     /**
      * @tc.steps: step1. create GeometryTransition with weakNode1.
      */
-    Create(weakNode1, true);
+    Create(weakNode1, true, true);
     node2->AddChild(node1);
     gt_->inNode_ = weakNode1;
     gt_->outNode_ = weakNode2;
@@ -393,7 +395,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest005, TestSize.Level1)
     /**
      * @tc.steps: step1. create GeometryTransition with weakNode1.
      */
-    Create(weakNode1, true);
+    Create(weakNode1, true, true);
     node2->AddChild(node1);
     gt_->inNode_ = weakNode1;
     gt_->outNode_ = weakNode2;
@@ -429,7 +431,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest006, TestSize.Level1)
     /**
      * @tc.steps: step1. create GeometryTransition with node.
      */
-    Create(weakNode1, true);
+    Create(weakNode1, true, true);
     node2->AddChild(node1);
     gt_->inNode_ = weakNode1;
     gt_->outNode_ = weakNode2;
@@ -509,7 +511,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition007, TestSize.Level1)
     /**
      * @tc.steps: step1. create GeometryTransition with weakNode1.
      */
-    Create(weakNode1, true);
+    Create(weakNode1, true, true);
 
     gt_->hasInAnim_ = false;
     gt_->outNode_ = weakNode2;
@@ -545,7 +547,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition008, TestSize.Level1)
     /**
      * @tc.steps: step1. create GeometryTransition with weakNode1.
      */
-    Create(weakNode1, true);
+    Create(weakNode1, true, true);
     gt_->state_ = GeometryTransition::State::IDENTITY;
 
     /**
@@ -572,7 +574,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest009, TestSize.Level1)
     /**
      * @tc.steps: step1. create GeometryTransition with node.
      */
-    Create(weakNode1, true);
+    Create(weakNode1, true, true);
     node2->AddChild(node1);
     gt_->inNode_ = weakNode1;
     gt_->outNode_ = weakNode2;
@@ -649,7 +651,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest010, TestSize.Level1)
     /**
      * @tc.steps: step1. create GeometryTransition with node.
      */
-    Create(weakNode1, true);
+    Create(weakNode1, true, true);
     node2->AddChild(node1);
     gt_->inNode_ = weakNode1;
     gt_->outNode_ = weakNode2;
@@ -675,5 +677,44 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest010, TestSize.Level1)
     gt_->RecordAnimationOption(trigger, option);
     result = stack->GetImplicitAnimationOption().IsValid();
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: GeometryTransitionTest011
+ * @tc.desc: Test GetFollowWithoutTransition()
+ * @tc.type: FUNC
+ */
+HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GeometryTransition with node.
+     */
+    Create(weakNode1, false, true);
+    /**
+     * @tc.steps: step2. test GetFollowWithoutTransition() result when state of followWithoutTransition_ changes.
+     */
+    EXPECT_FALSE(gt_->GetFollowWithoutTransition());
+    gt_->followWithoutTransition_ = true;
+    EXPECT_TRUE(gt_->GetFollowWithoutTransition());
+
+}
+
+/**
+ * @tc.name: GeometryTransitionTest012
+ * @tc.desc: Test GetDoRegisterSharedTransition()
+ * @tc.type: FUNC
+ */
+HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GeometryTransition with node.
+     */
+    Create(weakNode1, false, true);
+    /**
+     * @tc.steps: step2. test GetDoRegisterSharedTransition() result when state of doRegisterSharedTransition_ changes.
+     */
+    EXPECT_TRUE(gt_->GetDoRegisterSharedTransition());
+    gt_->doRegisterSharedTransition_ = false;
+    EXPECT_FALSE(gt_->GetDoRegisterSharedTransition());
 }
 } // namespace OHOS::Ace::NG

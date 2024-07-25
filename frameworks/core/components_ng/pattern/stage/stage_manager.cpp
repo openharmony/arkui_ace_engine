@@ -17,12 +17,15 @@
 
 #include <unordered_map>
 
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_checker.h"
 #include "base/log/ace_performance_check.h"
-#include "base/perfmonitor/perf_monitor.h"
-#include "base/perfmonitor/perf_constants.h"
 #include "base/memory/referenced.h"
+#include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
@@ -30,6 +33,11 @@
 #include "core/common/ime/input_method_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+
+#if !defined(ACE_UNITTEST)
+#include "core/components_ng/base/transparent_node_detector.h"
+#endif
+
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
@@ -82,6 +90,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 CHECK_NULL_VOID(stageManager);
                 stageManager->SetStageInTrasition(false);
                 page->GetRenderContext()->RemoveClipWithRRect();
+                page->GetRenderContext()->ResetPageTransitionEffect();
             });
         return;
     }
@@ -169,7 +178,7 @@ void StageManager::PageChangeCloseKeyboard()
 #endif
 }
 
-bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition)
+bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition, bool  /*isPush*/)
 {
     CHECK_NULL_RETURN(stageNode_, false);
     CHECK_NULL_RETURN(node, false);
@@ -181,6 +190,17 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     const auto& children = stageNode_->GetChildren();
     RefPtr<FrameNode> outPageNode;
     needTransition &= !children.empty();
+    if (children.empty()) {
+        auto pagePattern = node->GetPattern<NG::PagePattern>();
+        CHECK_NULL_RETURN(pagePattern, false);
+        auto pageInfo = pagePattern->GetPageInfo();
+        CHECK_NULL_RETURN(pageInfo, false);
+        auto pagePath = pageInfo->GetFullPath();
+        ACE_SCOPED_TRACE_COMMERCIAL("Router Main Page: %s", pagePath.c_str());
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+        UiSessionManager::GetInstance().OnRouterChange(pagePath, "routerPushPage");
+#endif
+    }
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
     }
@@ -210,7 +230,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
 
     auto pagePattern = node->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
-    stagePattern_->currentPageIndex_ = pagePattern->GetPageInfo()->GetPageId();
+    stagePattern_->SetCurrentPageIndex(pagePattern->GetPageInfo()->GetPageId());
     if (AceChecker::IsPerformanceCheckEnabled()) {
         // After completing layout tasks at all nodes on the page, perform performance testing and management
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakNode = WeakPtr<FrameNode>(node), startTime]() {
@@ -221,11 +241,14 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
             stage->PerformanceCheck(pageNode, endTime - startTime);
         });
     }
+#if !defined(ACE_UNITTEST)
+    TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(node);
+#endif
 
     // close keyboard
     PageChangeCloseKeyboard();
-
-    FireAutoSave(outPageNode);
+    AddPageTransitionTrace(outPageNode, node);
+    FireAutoSave(outPageNode, node);
     if (needTransition) {
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakIn = WeakPtr<FrameNode>(node),
                                          weakOut = WeakPtr<FrameNode>(outPageNode)]() {
@@ -249,6 +272,38 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     return true;
 }
 
+bool StageManager::InsertPage(const RefPtr<FrameNode>& node, bool bellowTopOrBottom)
+{
+    CHECK_NULL_RETURN(stageNode_, false);
+    CHECK_NULL_RETURN(node, false);
+    StopPageTransition();
+
+    const auto& children = stageNode_->GetChildren();
+    if (children.empty()) {
+        return false;
+    }
+
+    RefPtr<FrameNode> targetNode = nullptr;
+    if (bellowTopOrBottom) {
+        targetNode = AceType::DynamicCast<FrameNode>(children.back());
+    } else {
+        targetNode = AceType::DynamicCast<FrameNode>(children.front());
+    }
+    auto rect = stageNode_->GetGeometryNode()->GetFrameRect();
+    rect.SetOffset({});
+    node->GetRenderContext()->SyncGeometryProperties(rect);
+    // mount to parent and mark build render tree.
+    stageNode_->AddChildBefore(node, targetNode);
+    // then build the total child. Build will trigger page create and onAboutToAppear
+    node->Build(nullptr);
+
+    stageNode_->RebuildRenderContextTree();
+
+    stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    return true;
+}
+
 void StageManager::PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout)
 {
     CHECK_NULL_VOID(pageNode);
@@ -265,6 +320,7 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
     StopPageTransition();
     const auto& children = stageNode_->GetChildren();
     if (children.empty()) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "router pop page start, children is empty");
         return false;
     }
     auto pageNode = children.back();
@@ -286,7 +342,8 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
     PageChangeCloseKeyboard();
 
     auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
-    FireAutoSave(outPageNode);
+    AddPageTransitionTrace(outPageNode, inPageNode);
+    FireAutoSave(outPageNode, inPageNode);
     if (needTransition) {
         StartTransition(outPageNode, inPageNode, RouteType::POP);
         inPageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
@@ -337,8 +394,10 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         FirePageShow(newPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
         inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
     }
+    PageChangeCloseKeyboard();
+    AddPageTransitionTrace(outPageNode, inPageNode);
 
-    FireAutoSave(outPageNode);
+    FireAutoSave(outPageNode, inPageNode);
     if (needTransition) {
         // from the penultimate node, (popSize - 1) nodes are deleted.
         // the last node will be deleted after pageTransition
@@ -406,7 +465,8 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
 
     stageNode_->RebuildRenderContextTree();
     auto outPageNode = AceType::DynamicCast<FrameNode>(lastPage);
-    FireAutoSave(outPageNode);
+    AddPageTransitionTrace(outPageNode, node);
+    FireAutoSave(outPageNode, node);
     if (needTransition) {
         StartTransition(outPageNode, node, RouteType::PUSH);
     }
@@ -433,7 +493,7 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
     context->MarkNeedFlushMouseEvent();
 }
 
-void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType)
+void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType, bool needFocus)
 {
     auto pageNode = DynamicCast<FrameNode>(node);
     CHECK_NULL_VOID(pageNode);
@@ -441,7 +501,9 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
 
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    pagePattern->FocusViewShow();
+    if (needFocus) {
+        pagePattern->FocusViewShow();
+    }
     pagePattern->OnShow();
     // With or without a page transition, we need to make the coming page visible first
     pagePattern->ProcessShowState();
@@ -460,15 +522,32 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
 #endif
 }
 
-void StageManager::FireAutoSave(const RefPtr<FrameNode>& pageNode)
+void StageManager::FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefPtr<FrameNode>& inPageNode)
 {
-    CHECK_NULL_VOID(pageNode);
-    auto pagePattern = pageNode->GetPattern<PagePattern>();
-    CHECK_NULL_VOID(pagePattern);
-    pagePattern->ProcessAutoSave();
+    CHECK_NULL_VOID(outPageNode);
+    CHECK_NULL_VOID(inPageNode);
+    auto outPagePattern = outPageNode->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(outPagePattern);
+    auto onUIExtNodeDestroy = [weak = WeakPtr<FrameNode>(inPageNode)]() {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called.");
+        auto page = weak.Upgrade();
+        CHECK_NULL_VOID(page);
+        auto pattern = page->GetPattern<PagePattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetIsModalCovered(false);
+    };
+    auto onUIExtNodeBindingCompleted = [weak = WeakPtr<FrameNode>(inPageNode)]() {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called.");
+        auto page = weak.Upgrade();
+        CHECK_NULL_VOID(page);
+        auto pattern = page->GetPattern<PagePattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetIsModalCovered(true);
+    };
+    outPagePattern->ProcessAutoSave(onUIExtNodeDestroy, onUIExtNodeBindingCompleted);
 }
 
-RefPtr<FrameNode> StageManager::GetLastPage()
+RefPtr<FrameNode> StageManager::GetLastPage() const
 {
     CHECK_NULL_RETURN(stageNode_, nullptr);
     const auto& children = stageNode_->GetChildren();
@@ -514,11 +593,12 @@ RefPtr<FrameNode> StageManager::GetLastPageWithTransition() const
     if (children.empty()) {
         return nullptr;
     }
-    if (stageInTrasition_) {
+    auto lastChildFrame = DynamicCast<FrameNode>(children.back());
+    auto pagePattern = lastChildFrame->GetPattern<PagePattern>();
+    if (pagePattern && pagePattern->GetPageInTransition()) {
         return DynamicCast<FrameNode>(destPageNode_.Upgrade());
-    } else {
-        return DynamicCast<FrameNode>(children.back());
     }
+    return lastChildFrame;
 }
 
 RefPtr<FrameNode> StageManager::GetPrevPageWithTransition() const
@@ -532,5 +612,49 @@ RefPtr<FrameNode> StageManager::GetPrevPageWithTransition() const
         return DynamicCast<FrameNode>(srcPageNode_.Upgrade());
     }
     return DynamicCast<FrameNode>(children.front());
+}
+
+void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage)
+{
+    CHECK_NULL_VOID(srcPage);
+    CHECK_NULL_VOID(destPage);
+
+    auto srcPattern = srcPage->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(srcPattern);
+    auto srcPageInfo = srcPattern->GetPageInfo();
+    CHECK_NULL_VOID(srcPageInfo);
+    auto srcFullPath = srcPageInfo->GetFullPath();
+
+    auto destPattern = destPage->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(destPattern);
+    auto destPageInfo = destPattern->GetPageInfo();
+    CHECK_NULL_VOID(destPageInfo);
+    auto destFullPath = destPageInfo->GetFullPath();
+
+    ACE_SCOPED_TRACE_COMMERCIAL("Router Page from %s to %s", srcFullPath.c_str(), destFullPath.c_str());
+}
+
+void StageManager::SyncPageSafeArea(bool keyboardSafeArea)
+{
+    auto changeType = keyboardSafeArea ? PROPERTY_UPDATE_LAYOUT : PROPERTY_UPDATE_MEASURE;
+    auto lastPage = GetLastPageWithTransition();
+    CHECK_NULL_VOID(lastPage);
+    lastPage->MarkDirtyNode(changeType);
+    auto lastPageOverlay = lastPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(lastPageOverlay);
+    lastPageOverlay->MarkDirtyOverlay();
+
+    auto prevPage = GetPrevPageWithTransition();
+    CHECK_NULL_VOID(prevPage);
+    auto prevPageOverlay = prevPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(prevPageOverlay);
+    prevPageOverlay->MarkDirtyOverlay();
+}
+
+bool StageManager::CheckPageFocus()
+{
+    auto pageNode = GetLastPage();
+    CHECK_NULL_RETURN(pageNode, true);
+    return pageNode->GetFocusHub() && pageNode->GetFocusHub()->IsCurrentFocus();
 }
 } // namespace OHOS::Ace::NG

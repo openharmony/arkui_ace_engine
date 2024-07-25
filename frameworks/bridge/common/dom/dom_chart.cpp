@@ -427,7 +427,6 @@ void DOMChart::CallSpecializedMethod(const std::string& method, const std::strin
         LOGW("series number is greater or equal to the size of chart");
         return;
     }
-
     if (!isSetFirst_) {
         isSetFirst_ = true;
         for (int32_t i = 0; i < static_cast<int32_t>(chartDatas.size()); i++) {

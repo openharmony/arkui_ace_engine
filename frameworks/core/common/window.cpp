@@ -57,9 +57,6 @@ void Window::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         }
         callback.callback_(nanoTimestamp, frameCount);
     }
-#ifdef VSYNC_TIMEOUT_CHECK
-    onVsyncEventCheckTimer_.Cancel();
-#endif
 }
 
 void Window::SetVsyncCallback(AceVsyncCallback&& callback)
@@ -68,5 +65,15 @@ void Window::SetVsyncCallback(AceVsyncCallback&& callback)
         .callback_ = std::move(callback),
         .containerId_ = Container::CurrentId(),
     });
+}
+
+void Window::SetUiDvsyncSwitch(bool dvsyncSwitch)
+{
+    if (!onShow_) {
+        return;
+    }
+    if (platformWindow_ != nullptr) {
+        platformWindow_->SetUiDvsyncSwitch(dvsyncSwitch);
+    }
 }
 } // namespace OHOS::Ace

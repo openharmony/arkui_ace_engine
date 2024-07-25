@@ -56,7 +56,6 @@ const std::vector<ImageRenderMode> IMAGE_RENDER_MODES = {
 extern "C" {
 void FfiOHOSAceFrameworkImageCreateWithUrl(const char* url)
 {
-    LOGI("FfiOHOSAceFrameworkImageCreateWithUrl url: %{public}s", url);
     ImageInfoConfig imageInfoConfig;
     imageInfoConfig.src = std::make_shared<std::string>(std::string(url));
     imageInfoConfig.bundleName = "";
@@ -94,6 +93,11 @@ void FfiOHOSAceFrameworkImageSetAlt(const char* url)
     std::string bundleName;
     std::string moduleName;
     ImageModel::GetInstance()->SetAlt(ImageSourceInfo { url, bundleName, moduleName });
+}
+
+CJ_EXPORT void FfiOHOSAceFrameworkImageSetBorderRadius()
+{
+    ImageModel::GetInstance()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkImageSetObjectFit(int32_t objectFit)

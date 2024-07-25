@@ -29,7 +29,9 @@ SvgStop::SvgStop() : SvgNode() {}
 
 RefPtr<SvgNode> SvgStop::Create()
 {
-    return AceType::MakeRefPtr<SvgStop>();
+    auto svgNode = AceType::MakeRefPtr<SvgStop>();
+    svgNode->stopAttr_.gradientColor.SetDimension(0.0);
+    return svgNode;
 }
 
 const GradientColor& SvgStop::GetGradientColor() const

@@ -125,11 +125,12 @@ public:
     PositionWithAffinity GetGlyphPositionAtCoordinate(const Offset& offset) override;
     void AdjustIndexForward(const Offset& offset, bool compareOffset, int32_t& index);
     void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) override;
+    void GetTightRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) override;
     void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) override;
     bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) override;
     bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) override;
-    bool CalcCaretMetricsByPosition(
-        int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) override;
+    bool CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity,
+        bool needLineHighest = true) override;
     bool CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffset,
         TextAffinity& textAffinity) override;
     void SetIndents(const std::vector<float>& indents) override;
@@ -163,7 +164,8 @@ private:
     bool HandleCaretWhenEmpty(CaretMetricsF& result);
     void HandleTextAlign(CaretMetricsF& result, TextAlign align);
     void HandleLeadingMargin(CaretMetricsF& result, LeadingMargin leadingMargin);
-    void GetRectsForRangeInner(int32_t start, int32_t end, std::vector<RectF>& selectedRects);
+    void GetRectsForRangeInner(int32_t start, int32_t end, std::vector<RectF>& selectedRects,
+        RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE);
     int32_t AdjustIndexForEmoji(int32_t index);
     bool IsIndexInEmoji(int32_t index, int32_t& emojiStart, int32_t& emojiEnd);
 
@@ -183,7 +185,7 @@ private:
 #endif
     std::u16string text_;
     int32_t placeholderCnt_ = 0;
-    TextAlign textAlign_;
+    TextAlign textAlign_ = TextAlign::START;
     static uint32_t destructCount;
     std::list<size_t> placeholderPosition_;
     bool hasExternalParagraph_ = false;

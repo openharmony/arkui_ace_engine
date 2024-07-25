@@ -77,6 +77,8 @@ struct TextEditingValue {
     std::string text;
     std::string hint;
     TextSelection selection;
+    bool isDelete;
+    std::string appendText;
 
 #if defined(IOS_PLATFORM)
     TextCompose compose;

@@ -217,7 +217,7 @@ enum class TextDataDetectType {
     URL,
     EMAIL,
     ADDRESS,
-    DATETIME,
+    DATE_TIME,
 };
 
 enum class LineBreakStrategy {
@@ -241,6 +241,12 @@ enum class TextOverflow {
     ELLIPSIS,
     MARQUEE,
     DEFAULT,
+};
+
+enum class TextSelectableMode {
+    SELECTABLE_UNFOCUSABLE = 0,
+    SELECTABLE_FOCUSABLE,
+    UNSELECTABLE,
 };
 
 namespace StringUtils {
@@ -330,6 +336,14 @@ enum class ImageFit {
     NONE,
     SCALE_DOWN,
     TOP_LEFT,
+    TOP,
+    TOP_END,
+    START,
+    CENTER,
+    END,
+    BOTTOM_START,
+    BOTTOM,
+    BOTTOM_END,
     COVER_TOP_LEFT,
 };
 
@@ -340,7 +354,8 @@ enum class DynamicRangeMode {
 };
 
 enum class AIImageQuality {
-    NONE = 1,
+    NONE = 0,
+    LOW,
     NORMAL,
     HIGH,
 };
@@ -382,6 +397,8 @@ enum class BorderImageDirection {
     RIGHT,
     TOP,
     BOTTOM,
+    START,
+    END,
 };
 
 enum class TimePickerFormat {
@@ -589,6 +606,11 @@ enum class VerticalAlign {
     BOTTOM,
     BASELINE,
     NONE,
+};
+
+enum class SwiperDynamicSyncSceneType {
+    GESTURE = 0,
+    ANIMATE,
 };
 
 namespace StringUtils {
@@ -855,6 +877,18 @@ enum class MarqueeUpdateStrategy : uint32_t {
     PRESERVE_POSITION,
 };
 
+enum class EdgeType {
+    MARGIN,
+    PADDING,
+    SAFE_AREA_PADDING,
+};
+
+enum class SafeAreaSyncType : uint32_t {
+    SYNC_TYPE_NONE = 0,
+    SYNC_TYPE_KEYBOARD,
+    SYNC_TYPE_AVOID_AREA,
+    SYNC_TYPE_WINDOW_IGNORE
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H

@@ -61,7 +61,9 @@ class ImageSpanTextBackgroundStyleModifier extends ModifierWithKey<TextBackgroun
         getUINativeModule().imageSpan.resetTextBackgroundStyle(node);
       }
       else {
-        getUINativeModule().imageSpan.setTextBackgroundStyle(node, textBackgroundStyle.color, textBackgroundStyle.radius.topLeft, textBackgroundStyle.radius.topRight, textBackgroundStyle.radius.bottomLeft, textBackgroundStyle.radius.bottomRight);
+        getUINativeModule().imageSpan.setTextBackgroundStyle(
+          node, textBackgroundStyle.color, textBackgroundStyle.radius.topLeft,
+          textBackgroundStyle.radius.topRight, textBackgroundStyle.radius.bottomLeft, textBackgroundStyle.radius.bottomRight);
       }
     }
   }
@@ -128,6 +130,22 @@ class ImageSpanOnErrorModifier extends ModifierWithKey<(result: {componentWidth:
     }
   }
 }
+class ImageSpanColorFilterModifier extends ModifierWithKey<ColorFilter | DrawingColorFilter> {
+  constructor(value: ColorFilter) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageSpanColorFilter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().imageSpan.resetColorFilter(node);
+    } else {
+      getUINativeModule().imageSpan.setColorFilter(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
 class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -150,6 +168,11 @@ class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
   }
   alt(value: PixelMap): ImageSpanAttribute {
     modifierWithKey(this._modifiersWithKeys, ImageSpanAltModifier.identity, ImageSpanAltModifier, value);
+    return this;
+  }
+  colorFilter(value: ColorFilter | DrawingColorFilter): ImageSpanAttribute {
+    modifierWithKey(this._modifiersWithKeys, ImageSpanColorFilterModifier.identity,
+      ImageSpanColorFilterModifier, value);
     return this;
   }
   onComplete(

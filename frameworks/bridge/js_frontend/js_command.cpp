@@ -61,8 +61,8 @@ inline void TrySaveTargetAndIdNode(const std::string& id, const std::string& tar
     }
 }
 
-std::vector<std::string> g_declarationNodes =
-{   DOM_NODE_TAG_BADGE,
+std::vector<std::string> g_declarationNodes = {
+    DOM_NODE_TAG_BADGE,
     DOM_NODE_TAG_BUTTON,
     DOM_NODE_TAG_LABEL,
     DOM_NODE_TAG_PIECE,

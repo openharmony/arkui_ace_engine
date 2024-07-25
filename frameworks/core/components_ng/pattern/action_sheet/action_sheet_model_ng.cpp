@@ -12,6 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
 
@@ -47,6 +50,9 @@ void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
         dialog = overlayManager->ShowDialog(arg, nullptr, false);
         CHECK_NULL_VOID(dialog);
     }
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "show");
+#endif
 }
 
 void ActionSheetModelNG::SetAction(GestureEventFunc&& eventFunc, ActionSheetInfo& sheetInfo)

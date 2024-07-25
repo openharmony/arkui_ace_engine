@@ -68,7 +68,7 @@ void JSPersistent::Set(const JSCallbackInfo& args)
     }
     std::string key = args[0]->ToString();
     auto serializedValue = JSON::Stringify(args.GetVm(), args[1].Get().GetLocalHandle());
-    std::string value = serializedValue->ToString(args.GetVm())->ToString();
+    std::string value = serializedValue->ToString(args.GetVm())->ToString(args.GetVm());
     if (!StorageProxy::GetInstance()->GetStorage()) {
         LOGW("no storage available");
         return;
@@ -86,12 +86,13 @@ void JSPersistent::Get(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsString()) {
         return;
     }
-    std::string key = args[0]->ToString();
-    if (!StorageProxy::GetInstance()->GetStorage()) {
+    auto storage = StorageProxy::GetInstance()->GetStorage();
+    if (!storage) {
         LOGW("no storage available");
         return;
     }
-    std::string value = StorageProxy::GetInstance()->GetStorage()->GetString(key);
+    std::string key = args[0]->ToString();
+    std::string value = storage->GetString(key);
     if (value.empty() || value == "undefined") {
         args.SetReturnValue(JSVal::Undefined());
         return;

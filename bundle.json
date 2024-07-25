@@ -16,7 +16,15 @@
             "SystemCapability.ArkUI.ArkUI.Full",
             "SystemCapability.ArkUI.ArkUI.Lite"
         ],
-        "features": [],
+        "features": [
+            "ace_engine_feature_enable_accessibility",
+            "ace_engine_feature_enable_web",
+            "ace_engine_feature_enable_pgo",
+            "ace_engine_feature_pgo_path",
+            "ace_engine_feature_enable_atomic",
+            "ace_engine_feature_enable_coverage",
+            "ace_engine_feature_enable_point_light"
+        ],
         "adapted_system_type": [
             "standard"
         ],
@@ -65,6 +73,7 @@
                 "init",
                 "image_framework",
                 "player_framework",
+                "audio_framework",
                 "access_token",
                 "input",
                 "webview",
@@ -77,6 +86,7 @@
                 "app_file_service",
                 "ets_utils",
                 "bounds_checking_function",
+                "libxml2",
                 "ffrt",
                 "icu",
                 "miscdevice",
@@ -86,12 +96,14 @@
                 "jsframework",
                 "opencl-headers",
                 "opengles",
-                "zlib"
-            ],
-            "third_party": [
+                "zlib",
                 "skia",
-                "libuv"
-            ]
+                "libuv",
+                "background_task_mgr",
+                "atomicservice_basic_engine",
+                "egl"
+            ],
+            "third_party": []
         },
         "build": {
             "group_type": {
@@ -144,7 +156,7 @@
                 },
                 {
                     "header": {
-                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/drawable_descriptor/",
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/drawable_descriptor",
                         "header_files": [
                             "drawable_descriptor.h"
                         ]
@@ -172,14 +184,14 @@
                 },
                 {
                     "header": {
-                        "header_base": "//foundation/arkui/ace_engine/",
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/native",
                         "header_files": [
-                            "interfaces/native/node/native_drawable_descriptor.h",
-                            "interfaces/native/native_interface_xcomponent.h",
-                            "interfaces/native/native_node.h",
-                            "interfaces/native/native_interface.h",
-                            "interfaces/native/native_type.h",
-                            "interfaces/native/native_node_napi.h"
+                            "node/native_drawable_descriptor.h",
+                            "native_interface_xcomponent.h",
+                            "native_node.h",
+                            "native_interface.h",
+                            "native_type.h",
+                            "native_node_napi.h"
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/native:ace_ndk"
@@ -193,6 +205,25 @@
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/build:libace_compatible"
+                },
+                {
+                    "header": {
+                        "header_base": "//foundation/arkui/ace_engine/frameworks/core/common/",
+                        "header_files": [
+                            "container_scope.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/frameworks/core:ace_container_scope"
+                },
+                {
+                    "header": {
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/ui_session/",
+                        "header_files": [
+                            "ui_content_service_interface.h",
+                            "ui_content_proxy.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/interfaces/inner_api/ui_session:ui_session"
                 }
             ],
             "test": [

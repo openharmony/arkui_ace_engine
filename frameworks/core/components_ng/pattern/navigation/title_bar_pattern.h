@@ -282,6 +282,18 @@ public:
         largeFontPopUpDialogNode_ = dialogNode;
     }
 
+    std::optional<int32_t> GetMoveIndex() const
+    {
+        return moveIndex_;
+    }
+
+    void SetMoveIndex(int32_t index)
+    {
+        moveIndex_ = index;
+    }
+
+    void UpdateNavBarTitleProperty(const RefPtr<TitleBarNode>& hostNode);
+    void UpdateNavDesTitleProperty(const RefPtr<TitleBarNode>& hostNode);
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
 
@@ -387,6 +399,7 @@ private:
     int32_t maxMenuNums_ = -1;
 
     WeakPtr<FrameNode> largeFontPopUpDialogNode_;
+    std::optional<int32_t> moveIndex_;
 };
 
 } // namespace OHOS::Ace::NG

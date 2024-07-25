@@ -191,6 +191,46 @@ void AceScopedPerformanceCheck::RecordPerformanceCheckData(const PerformanceChec
     RecordVsyncTimeout(nodeMap, vsyncTimeout / CONVERT_NANOSECONDS, codeInfo);
 }
 
+void AceScopedPerformanceCheck::RecordPerformanceCheckDataForNavigation(
+    const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout, const std::string& navPath)
+{
+    auto codeInfo = GetCodeInfo(1, 1);
+    codeInfo.sources = navPath;
+    if (navPath.find("pagePath") != navPath.npos) {
+        std::string pagePath = navPath.substr(navPath.find("pagePath") + 9, navPath.length());
+        codeInfo.sources = pagePath;
+    }
+    std::vector<PerformanceCheckNode> pageNodeList;
+    std::vector<PerformanceCheckNode> flexNodeList;
+    std::unordered_map<int32_t, PerformanceCheckNode> foreachNodeMap;
+    int32_t itemCount = 0;
+    int32_t maxDepth = 0;
+    for (const auto& node : nodeMap) {
+        if (node.second.childrenSize >= AceChecker::GetNodeChildren()) {
+            pageNodeList.emplace_back(node.second);
+        }
+        if (node.second.pageDepth > maxDepth) {
+            maxDepth = node.second.pageDepth;
+        }
+        if (node.second.flexLayouts != 0 && node.second.flexLayouts >= AceChecker::GetFlexLayouts()) {
+            flexNodeList.emplace_back(node.second);
+        }
+        if (node.second.isForEachItem) {
+            itemCount++;
+            auto iter = foreachNodeMap.find(node.second.codeRow);
+            if (iter != foreachNodeMap.end()) {
+                iter->second.foreachItems++;
+            } else {
+                foreachNodeMap.insert(std::make_pair(node.second.codeRow, node.second));
+            }
+        }
+    }
+    RecordPageNodeCountAndDepth(nodeMap.size(), maxDepth, pageNodeList, codeInfo);
+    RecordForEachItemsCount(itemCount, foreachNodeMap, codeInfo);
+    RecordFlexLayoutsCount(flexNodeList, codeInfo);
+    RecordVsyncTimeout(nodeMap, vsyncTimeout / CONVERT_NANOSECONDS, codeInfo);
+}
+
 void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(
     int32_t pageNodeCount, int32_t pageDepth, std::vector<PerformanceCheckNode>& pageNodeList, const CodeInfo& codeInfo)
 {

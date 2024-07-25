@@ -33,6 +33,9 @@ namespace {
 constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;
 constexpr int32_t TOTAL_SECONDS_OF_HOUR = 60 * 60;
 constexpr int32_t SECONDS_OF_MILLISECOND = 1000;
+constexpr int32_t SECONDS_OF_HUNDRED = 100;
+constexpr int32_t SECONDS_OF_TEN = 10;
+constexpr int32_t DEFAULT_SCALE = 1;
 constexpr double DEFAULT_COUNT = 60000.0;
 const std::string DEFAULT_FORMAT = "HH:mm:ss.SS";
 } // namespace
@@ -317,26 +320,7 @@ RefPtr<FrameNode> TextTimerPattern::GetTextNode()
 
 uint64_t TextTimerPattern::GetFormatDuration(uint64_t duration) const
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, duration);
-    auto layoutProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, duration);
-    auto format = layoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
-    char lastWord = format.back();
-    switch (lastWord) {
-        case 's':
-            duration = duration / SECONDS_OF_MILLISECOND;
-            break;
-        case 'm':
-            duration = duration / (SECONDS_OF_MILLISECOND * TOTAL_MINUTE_OF_HOUR);
-            break;
-        case 'h':
-            duration = duration / (SECONDS_OF_MILLISECOND * TOTAL_SECONDS_OF_HOUR);
-            break;
-        default:
-            break;
-    }
-    return duration;
+    return duration / GetMillisecondsDuration(DEFAULT_SCALE);
 }
 
 uint64_t TextTimerPattern::GetMillisecondsDuration(uint64_t duration) const
@@ -346,19 +330,18 @@ uint64_t TextTimerPattern::GetMillisecondsDuration(uint64_t duration) const
     auto layoutProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, duration);
     auto format = layoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
-    char lastWord = format.back();
-    switch (lastWord) {
-        case 's':
-            duration = duration * SECONDS_OF_MILLISECOND;
-            break;
-        case 'm':
-            duration = duration * (SECONDS_OF_MILLISECOND * TOTAL_MINUTE_OF_HOUR);
-            break;
-        case 'h':
-            duration = duration * (SECONDS_OF_MILLISECOND * TOTAL_SECONDS_OF_HOUR);
-            break;
-        default:
-            break;
+    if (format.find("SSS") != std::string::npos) {
+        return duration;
+    } else if (format.find("SS") != std::string::npos) {
+        return duration * SECONDS_OF_TEN;
+    } else if (format.find('S') != std::string::npos) {
+        return duration * SECONDS_OF_HUNDRED;
+    } else if (format.find('s') != std::string::npos) {
+        duration = duration * SECONDS_OF_MILLISECOND;
+    } else if (format.find('m') != std::string::npos) {
+        duration = duration * (SECONDS_OF_MILLISECOND * TOTAL_MINUTE_OF_HOUR);
+    } else if (format.find('H') != std::string::npos) {
+        duration = duration * (SECONDS_OF_MILLISECOND * TOTAL_SECONDS_OF_HOUR);
     }
     return duration;
 }

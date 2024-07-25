@@ -659,19 +659,20 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest001, TestSi
         ElementRegister::GetInstance()->MakeUniqueId(), menuItems, ui.titleBarNode, true);
     ASSERT_NE(navDestinationMenuItems, nullptr);
     ui.titleBarNode->AddChild(navDestinationMenuItems);
-    auto menuNode = AceType::DynamicCast<FrameNode>(navDestinationMenuItems->GetFirstChild());
-    ASSERT_NE(menuNode, nullptr);
     /**
      * @tc.steps: step2. call HandleLongPress.
      * @tc.expected: dialog_ != nullptr
      */
-    NavigationTitleUtil::HandleLongPress(menuNode, menuItem, false);
-    EXPECT_NE(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 0.0f;
+    info.globalLocation_.deltaY_ = 0.0f;
+    NavigationTitleUtil::HandleLongPress(info, navDestinationMenuItems, menuItems);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
     /**
      * @tc.steps: step3. call HandleLongPressActionEnd.
      * @tc.expected: dialog_ == nullptr
      */
-    NavigationTitleUtil::HandleLongPressActionEnd(menuNode);
+    NavigationTitleUtil::HandleLongPressActionEnd(navDestinationMenuItems);
     EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
 }
 /**
@@ -700,19 +701,20 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest002, TestSi
         ElementRegister::GetInstance()->MakeUniqueId(), menuItems, ui.titleBarNode, true);
     ASSERT_NE(navDestinationMenuItems, nullptr);
     ui.titleBarNode->AddChild(navDestinationMenuItems);
-    auto menuNode = AceType::DynamicCast<FrameNode>(navDestinationMenuItems->GetFirstChild());
-    ASSERT_NE(menuNode, nullptr);
     /**
      * @tc.steps: step2. call HandleLongPress.
      * @tc.expected: dialog_ != nullptr
      */
-    NavigationTitleUtil::HandleLongPress(menuNode, menuItem, false);
-    EXPECT_NE(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 0.0f;
+    info.globalLocation_.deltaY_ = 0.0f;
+    NavigationTitleUtil::HandleLongPress(info, navDestinationMenuItems, menuItems);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
     /**
      * @tc.steps: step3. call HandleLongPressActionEnd.
      * @tc.expected: dialog_ == nullptr
      */
-    NavigationTitleUtil::HandleLongPressActionEnd(menuNode);
+    NavigationTitleUtil::HandleLongPressActionEnd(navDestinationMenuItems);
     EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
 }
 
@@ -742,19 +744,82 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest003, TestSi
         ElementRegister::GetInstance()->MakeUniqueId(), menuItems, ui.titleBarNode, true);
     ASSERT_NE(navDestinationMenuItems, nullptr);
     ui.titleBarNode->AddChild(navDestinationMenuItems);
-    auto menuNode = AceType::DynamicCast<FrameNode>(navDestinationMenuItems->GetFirstChild());
-    ASSERT_NE(menuNode, nullptr);
     /**
      * @tc.steps: step2. call HandleLongPress.
      * @tc.expected: dialog_ != nullptr
      */
-    NavigationTitleUtil::HandleLongPress(menuNode, menuItem, false);
-    EXPECT_NE(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 0.0f;
+    info.globalLocation_.deltaY_ = 0.0f;
+    NavigationTitleUtil::HandleLongPress(info, navDestinationMenuItems, menuItems);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
     /**
      * @tc.steps: step3. call HandleLongPressActionEnd.
      * @tc.expected: dialog_ == nullptr
      */
-    NavigationTitleUtil::HandleLongPressActionEnd(menuNode);
+    NavigationTitleUtil::HandleLongPressActionEnd(navDestinationMenuItems);
     EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+}
+
+/**
+ * @tc.name: TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTest001
+ * @tc.desc: test GetFullModeTitleOffsetY function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTest001, TestSize.Level1)
+{
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    float titleHeight = 1.0f;
+    float subtitleHeight = 0.0f;
+    ui.titleBarLayoutAlgorithm->menuHeight_ = 2.0f;
+    auto titleBarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(titleBarGeometryNode, nullptr);
+    titleBarGeometryNode->SetFrameSize(SizeF(100, 100));
+    float offsetY = 48.5f;
+    EXPECT_EQ(ui.titleBarLayoutAlgorithm->GetFullModeTitleOffsetY(
+        titleHeight, subtitleHeight, titleBarGeometryNode), offsetY);
+}
+
+/**
+ * @tc.name: TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTest002
+ * @tc.desc: test GetFullModeTitleOffsetY function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTest002, TestSize.Level1)
+{
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    float titleHeight = 100.0f;
+    float subtitleHeight = 1.0f;
+    ui.titleBarLayoutAlgorithm->menuHeight_ = 2.0f;
+    auto titleBarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(titleBarGeometryNode, nullptr);
+    titleBarGeometryNode->SetFrameSize(SizeF(100, 100));
+    ui.titleBarLayoutAlgorithm->navTitleSpaceVertical_ = 1.0f;
+    float offsetY = -4.0f;
+    EXPECT_EQ(ui.titleBarLayoutAlgorithm->GetFullModeTitleOffsetY(
+        titleHeight, subtitleHeight, titleBarGeometryNode), offsetY);
+}
+
+/**
+ * @tc.name: TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTest003
+ * @tc.desc: test GetFullModeTitleOffsetY function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTest003, TestSize.Level1)
+{
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    float titleHeight = 99.0f;
+    float subtitleHeight = 1.0f;
+    ui.titleBarLayoutAlgorithm->menuHeight_ = 0.0f;
+    auto titleBarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(titleBarGeometryNode, nullptr);
+    titleBarGeometryNode->SetFrameSize(SizeF(100, 100));
+    ui.titleBarLayoutAlgorithm->navTitleSpaceVertical_ = 0.0f;
+    float offsetY = 0.0f;
+    EXPECT_EQ(ui.titleBarLayoutAlgorithm->GetFullModeTitleOffsetY(
+        titleHeight, subtitleHeight, titleBarGeometryNode), offsetY);
 }
 } // namespace OHOS::Ace::NG

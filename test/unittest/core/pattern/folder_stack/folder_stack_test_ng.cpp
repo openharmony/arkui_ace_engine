@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 
 #define private public
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/ng/offset_t.h"
@@ -49,16 +50,23 @@ const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 constexpr float SMALL_ITEM_WIDTH = 100.0f;
 constexpr float SMALL_ITEM_HEIGHT = 40.0f;
 const SizeF SMALL_ITEM_SIZE(SMALL_ITEM_WIDTH, SMALL_ITEM_HEIGHT);
+
+constexpr int32_t AT_LEAST_TIME = 1;
 } // namespace
 class FolderStackTestNg : public testing::Test {
 public:
     static void SetUpTestSuite()
     {
+        MockContainer::SetUp();
         MockPipelineContext::SetUp();
+        EXPECT_CALL(*MockContainer::Current(), GetDisplayInfo())
+            .Times(testing::AtLeast(AT_LEAST_TIME))
+            .WillRepeatedly(Return(AceType::MakeRefPtr<DisplayInfo>()));
     }
 
     static void TearDownTestSuite()
     {
+        MockContainer::TearDown();
         MockPipelineContext::TearDown();
     }
 
@@ -218,5 +226,412 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest002, TestSize.Level1)
     layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     ASSERT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(FULL_SCREEN_WIDTH, STACK_HEIGHT));
     ASSERT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF(ZERO, ZERO));
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest003
+ * @tc.desc: Test folderStack pattern with AlignmentContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create folderStack and get frameNode.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. get host
+     * @tc.expected: related function is called.
+     */
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern->OnAttachToFrameNode();
+    std::optional<int32_t> optionalValue = 1;
+    pattern->UpdateFoldStatusChangedCallbackId(optionalValue);
+    pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
+
+    pattern->InitFolderStackPatternAppearCallback();
+    pattern->OnModifyDone();
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest004
+ * @tc.desc: Test folderStack pattern transitionStatus_ has changed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create folderStack and get frameNode.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. get host
+     * @tc.expected: related function is called.
+     */
+    pattern->OnFolderStateChangeSend(FoldStatus::UNKNOWN);
+    pattern->OnFolderStateChangeSend(FoldStatus::FOLDED);
+
+    /**
+     * @tc.steps: step3. call OnDirtyLayoutWrapperSwap.
+     * @tc.expected: pattern->transitionStatus_ has changed.
+     */
+    RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    ASSERT_EQ(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true), false);
+    ASSERT_EQ(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false), false);
+    ASSERT_EQ(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false), false);
+    ASSERT_EQ(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, true), false);
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest005
+ * @tc.desc: Test folderStack pattern visible has changed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create folderStack and get frameNode.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2.
+     * @tc.expected: pattern->visible has changed.
+     */
+    pattern->OnVisibleChange(true);
+    pattern->OnVisibleChange(false);
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest006
+ * @tc.desc: Test folderStack pattern visible has changed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create folderStack and get frameNode.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. get host
+     * @tc.expected: related function is called.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateEnableAnimation(false);
+    pattern->StartOffsetEnteringAnimation();
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest007
+ * @tc.desc: Test folderStack pattern RefreshStack changed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create folderStack and get frameNode.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. get host
+     * @tc.expected: related function is called.
+     */
+    pattern->RefreshStack(FoldStatus::FOLDED);
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest008
+ * @tc.desc: Test folderStack pattern visible has changed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create folderStack and get frameNode.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. get host
+     * @tc.expected: related function is called.
+     */
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto hostNode = AceType::DynamicCast<FolderStackGroupNode>(host);
+    hostNode->SetControlPartsStackNode(nullptr);
+    hostNode->SetHoverNode(nullptr);
+    pattern->UpdateChildAlignment();
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest009
+ * @tc.desc: Test folderStack pattern SetAutoRotate has changed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create folderStack and get frameNode.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. get host
+     * @tc.expected: related function is called.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
+    layoutProperty->UpdateAutoHalfFold(true);
+    auto displayInfo = container->GetDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    displayInfo->SetFoldStatus(FoldStatus::HALF_FOLD);
+    container->SetOrientation(Orientation::HORIZONTAL);
+    pattern->SetAutoRotate();
+    pattern->RestoreScreenState();
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest010
+ * @tc.desc: Test folderStack pattern SetAutoRotate has changed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create folderStack and get frameNode.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. get host
+     * @tc.expected: related function is called.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
+    layoutProperty->UpdateAutoHalfFold(false);
+    auto displayInfo = container->GetDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    displayInfo->SetFoldStatus(FoldStatus::HALF_FOLD);
+    container->SetOrientation(Orientation::HORIZONTAL);
+    pattern->SetAutoRotate();
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest011
+ * @tc.desc: Test folderStack pattern SetAutoRotate has changed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create folderStack and get frameNode.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. get host
+     * @tc.expected: related function is called.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
+    layoutProperty->UpdateAutoHalfFold(true);
+    auto displayInfo = container->GetDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    displayInfo->SetFoldStatus(FoldStatus::EXPAND);
+    container->SetOrientation(Orientation::HORIZONTAL);
+    pattern->SetAutoRotate();
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest012
+ * @tc.desc: Test folderStack pattern SetAutoRotate has changed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create folderStack and get frameNode.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. get host
+     * @tc.expected: related function is called.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
+    layoutProperty->UpdateAutoHalfFold(false);
+    auto displayInfo = container->GetDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    displayInfo->SetFoldStatus(FoldStatus::EXPAND);
+    container->SetOrientation(Orientation::HORIZONTAL);
+    pattern->SetAutoRotate();
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest013
+ * @tc.desc: Test folderStack pattern SetAutoRotate has changed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create folderStack and get frameNode.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. get host
+     * @tc.expected: related function is called.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
+    layoutProperty->UpdateAutoHalfFold(true);
+    auto displayInfo = container->GetDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    displayInfo->SetFoldStatus(FoldStatus::HALF_FOLD);
+    container->SetOrientation(Orientation::SENSOR);
+    pattern->SetAutoRotate();
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest014
+ * @tc.desc: Test folderStack pattern SetAutoRotate has changed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create folderStack and get frameNode.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. get host
+     * @tc.expected: related function is called.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
+    layoutProperty->UpdateAutoHalfFold(true);
+    auto displayInfo = container->GetDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    displayInfo->SetFoldStatus(FoldStatus::EXPAND);
+    container->SetOrientation(Orientation::SENSOR);
+    pattern->SetAutoRotate();
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest015
+ * @tc.desc: Test folderStack pattern SetAutoRotate has changed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create folderStack and get frameNode.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. get host
+     * @tc.expected: related function is called.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
+    layoutProperty->UpdateAutoHalfFold(false);
+    auto displayInfo = container->GetDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    displayInfo->SetFoldStatus(FoldStatus::EXPAND);
+    container->SetOrientation(Orientation::SENSOR);
+    pattern->SetAutoRotate();
 }
 } // namespace OHOS::Ace::NG

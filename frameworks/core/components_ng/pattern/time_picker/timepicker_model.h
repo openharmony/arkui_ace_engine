@@ -41,12 +41,16 @@ public:
     virtual void SetSelectedTime(const PickerTime& value) = 0;
     virtual void SetOnChange(ChangeEvent&& onChange) = 0;
     virtual void SetHour24(bool isUseMilitaryTime) = 0;
+    virtual void SetIsEnableHapticFeedback(bool isEnableHapticFeedback) {};
     virtual void SetDateTimeOptions(ZeroPrefixType& hourType,
         ZeroPrefixType& minuteType, ZeroPrefixType& secondType) {};
     virtual void SetWheelModeEnabled(bool wheelModeEnabled) = 0;
     virtual void SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) = 0;
     virtual void SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) = 0;
     virtual void SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) = 0;
+    virtual void HasUserDefinedDisappearFontFamily(bool isUserDefined) = 0;
+    virtual void HasUserDefinedNormalFontFamily(bool isUserDefined) = 0;
+    virtual void HasUserDefinedSelectedFontFamily(bool isUserDefined) = 0;
     virtual void SetBackgroundColor(const Color& color) = 0;
     virtual void SetChangeEvent(ChangeEvent&& onChange) = 0;
 

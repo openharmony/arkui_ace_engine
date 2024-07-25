@@ -159,7 +159,6 @@ void AceContainer::Destroy()
 void AceContainer::DestroyView()
 {
     if (aceView_ != nullptr) {
-        delete aceView_;
         aceView_ = nullptr;
     }
 }
@@ -724,7 +723,8 @@ void AceContainer::AddAssetPath(
 #endif
 
 void AceContainer::SetResourcesPathAndThemeStyle(int32_t instanceId, const std::string& systemResourcesPath,
-    const std::string& appResourcesPath, const int32_t& themeId, const ColorMode& colorMode)
+    const std::string& hmsResourcesPath, const std::string& appResourcesPath, const int32_t& themeId,
+    const ColorMode& colorMode)
 {
     auto container = GetContainerInstance(instanceId);
     if (!container) {
@@ -736,6 +736,9 @@ void AceContainer::SetResourcesPathAndThemeStyle(int32_t instanceId, const std::
     container->resourceInfo_.SetResourceConfiguration(resConfig);
     container->resourceInfo_.SetPackagePath(appResourcesPath);
     container->resourceInfo_.SetSystemPackagePath(systemResourcesPath);
+    if (!hmsResourcesPath.empty()) {
+        container->resourceInfo_.SetHmsPackagePath(hmsResourcesPath);
+    }
     container->resourceInfo_.SetThemeId(themeId);
 }
 
@@ -1061,14 +1064,14 @@ RefPtr<AceContainer> AceContainer::GetContainerInstance(int32_t instanceId)
     return container;
 }
 
-std::string AceContainer::GetContentInfo(int32_t instanceId)
+std::string AceContainer::GetContentInfo(int32_t instanceId, ContentInfoType type)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, "");
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, "");
-    return front->GetContentInfo();
+    return front->GetContentInfo(type);
 }
 
 void AceContainer::LoadDocument(const std::string& url, const std::string& componentName)

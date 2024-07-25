@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_MODEL_H
 
 #include <cstdint>
 #include <vector>
@@ -43,6 +44,11 @@ struct ArkUI_Node {
     void* swiperIndicator = nullptr;
     void* imageFrameInfos = nullptr;
     void* drawableDescriptor = nullptr;
+    int32_t linearGradientDirection = -1;
+    void* customEventListeners = nullptr;
+    void* altDrawableDescriptor = nullptr;
+    ArkUI_AttributeItem* areaChangeRadio = nullptr;
+    void* transitionOption = nullptr;
 };
 
 struct ArkUI_Context {
@@ -114,6 +120,7 @@ bool InitialFullImpl();
 ArkUIFullNodeAPI* GetFullImpl();
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type);
 void DisposeNode(ArkUI_NodeHandle nativePtr);
+bool IsValidArkUINode(ArkUI_NodeHandle nodePtr);
 
 int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode);
 int32_t RemoveChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode);
@@ -148,3 +155,4 @@ int32_t AddNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_
 int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 void* GetParseJsMedia();
 }; // namespace OHOS::Ace::NodeModel
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_MODEL_H

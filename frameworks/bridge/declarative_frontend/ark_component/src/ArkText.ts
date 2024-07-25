@@ -161,6 +161,23 @@ class TextDraggableModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextPrivacySensitiveModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textPrivacySensitive');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetPrivacySensitive(node);
+    } else {
+      getUINativeModule().text.setPrivacySensitive(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextWordBreakModifier extends ModifierWithKey<WordBreak> {
   constructor(value: WordBreak) {
     super(value);
@@ -243,6 +260,46 @@ class TextMaxFontSizeModifier extends ModifierWithKey<number | string | Resource
       getUINativeModule().text.resetMaxFontSize(node);
     } else {
       getUINativeModule().text.setMaxFontSize(node, this.value!);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextMinFontScaleModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textMinFontScale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetMinFontScale(node);
+    } else if (!isNumber(this.value) && !isResource(this.value)) {
+      getUINativeModule().text.resetMinFontScale(node);
+    } else {
+      getUINativeModule().text.setMinFontScale(node, this.value!);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextMaxFontScaleModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textMaxFontScale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetMaxFontScale(node);
+    } else if (!isNumber(this.value) && !isResource(this.value)) {
+      getUINativeModule().text.resetMaxFontScale(node);
+    } else {
+      getUINativeModule().text.setMaxFontScale(node, this.value!);
     }
   }
 
@@ -609,6 +666,23 @@ class TextSelectionModifier extends ModifierWithKey<ArkSelection> {
   }
 }
 
+class TextSelectableModifier extends ModifierWithKey<TextSelectableMode> {
+  constructor(value: TextSelectableMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textTextSelectable');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetTextSelectableMode(node);
+    } else {
+      getUINativeModule().text.setTextSelectableMode(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextDataDetectorConfigModifier extends ModifierWithKey<TextDataDetectorConfig> {
   constructor(value: TextDataDetectorConfig) {
     super(value);
@@ -671,6 +745,20 @@ class TextControllerModifier extends ModifierWithKey<TextOptions> {
   }
 }
 
+class TextEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> {
+  constructor(value: EditMenuOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textEditMenuOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetSelectionMenuOptions(node);
+    } else {
+      getUINativeModule().text.setSelectionMenuOptions(node, this.value);
+    }
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -687,9 +775,9 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextEnableDataDetectorModifier.identity, TextEnableDataDetectorModifier, value);
     return this;
   }
-  dataDetectorConfig(config: any): this {
+  dataDetectorConfig(config: TextDataDetectorConfig): this {
     let detectorConfig = new TextDataDetectorConfig();
-    detectorConfig.types = config.type;
+    detectorConfig.types = config.types;
     detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
     modifierWithKey(this._modifiersWithKeys, TextDataDetectorConfigModifier.identity, TextDataDetectorConfigModifier, detectorConfig);
     return this;
@@ -712,6 +800,14 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   maxFontSize(value: number | string | Resource): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextMaxFontSizeModifier.identity, TextMaxFontSizeModifier, value);
+    return this;
+  }
+  minFontScale(value: number | Resource): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextMinFontScaleModifier.identity, TextMinFontScaleModifier, value);
+    return this;
+  }
+  maxFontScale(value: number | Resource): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextMaxFontScaleModifier.identity, TextMaxFontScaleModifier, value);
     return this;
   }
   fontStyle(value: FontStyle): TextAttribute {
@@ -776,6 +872,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextDraggableModifier.identity, TextDraggableModifier, value);
     return this;
   }
+  privacySensitive(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextPrivacySensitiveModifier.identity, TextPrivacySensitiveModifier, value);
+    return this;
+  }
   textShadow(value: ShadowOptions | Array<ShadowOptions>): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextTextShadowModifier.identity, TextTextShadowModifier, value);
     return this;
@@ -809,6 +909,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextSelectionModifier.identity, TextSelectionModifier, arkSelection);
     return this;
   }
+  textSelectable(value: TextSelectableMode): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextSelectableModifier.identity, TextSelectableModifier, value);
+    return this;
+  }
   ellipsisMode(value: EllipsisMode): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextEllipsisModeModifier.identity, TextEllipsisModeModifier, value);
     return this;
@@ -829,6 +933,11 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void) {
     modifierWithKey(this._modifiersWithKeys, TextOnTextSelectionChangeModifier.identity,
       TextOnTextSelectionChangeModifier, callback);
+    return this;
+  }
+  editMenuOptions(value: EditMenuOptions): this {
+    modifierWithKey(this._modifiersWithKeys, TextEditMenuOptionsModifier.identity,
+      TextEditMenuOptionsModifier, value);
     return this;
   }
 }

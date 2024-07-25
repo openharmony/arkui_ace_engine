@@ -104,6 +104,8 @@ public:
 
     static RefPtr<PipelineBase> GetCurrentContextSafely();
 
+    static RefPtr<PipelineBase> GetCurrentContextSafelyWithCheck();
+
     static RefPtr<PipelineBase> GetMainPipelineContext();
 
     static RefPtr<ThemeManager> CurrentThemeManager();
@@ -166,6 +168,8 @@ public:
     // Called by ohos AceContainer when touch event received.
     virtual void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) {}
 
+    virtual void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
+
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
     virtual bool OnKeyEvent(const KeyEvent& event) = 0;
@@ -190,7 +194,8 @@ public:
     virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount);
 
     // Called by viewr
-    virtual void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) = 0;
+    virtual void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+        const RefPtr<NG::FrameNode>& node = nullptr) = 0;
 
     // Called by view when idle event.
     virtual void OnIdle(int64_t deadline) = 0;
@@ -229,7 +234,44 @@ public:
 
     virtual void OnSurfacePositionChanged(int32_t posX, int32_t posY) = 0;
 
-    virtual void OnSurfaceDensityChanged(double density) = 0;
+    virtual void OnSurfaceDensityChanged(double density)
+    {
+        // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
+        // thread.
+        std::lock_guard lock(densityChangeMutex_);
+        for (auto&& [id, callback] : densityChangedCallbacks_) {
+            if (callback) {
+                callback(density);
+            }
+        }
+    }
+
+    void SendUpdateVirtualNodeFocusEvent()
+    {
+        auto accessibilityManager = GetAccessibilityManager();
+        CHECK_NULL_VOID(accessibilityManager);
+        accessibilityManager->UpdateVirtualNodeFocus();
+    }
+
+    int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback)
+    {
+        if (callback) {
+            // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
+            // thread.
+            std::lock_guard lock(densityChangeMutex_);
+            densityChangedCallbacks_.emplace(++densityChangeCallbackId_, std::move(callback));
+            return densityChangeCallbackId_;
+        }
+        return 0;
+    }
+
+    void UnregisterDensityChangedCallback(int32_t callbackId)
+    {
+        // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
+        // thread.
+        std::lock_guard lock(densityChangeMutex_);
+        densityChangedCallbacks_.erase(callbackId);
+    }
 
     virtual void OnTransformHintChanged(uint32_t transform) = 0;
 
@@ -326,6 +368,26 @@ public:
     void SetRootSize(double density, float width, float height);
 
     void UpdateFontWeightScale();
+
+    void SetFollowSystem(bool followSystem)
+    {
+        followSystem_ = followSystem;
+    }
+
+    void SetMaxAppFontScale(float maxAppFontScale)
+    {
+        maxAppFontScale_ = maxAppFontScale;
+    }
+
+    float GetMaxAppFontScale()
+    {
+        return maxAppFontScale_;
+    }
+
+    bool IsFollowSystem()
+    {
+        return followSystem_;
+    }
 
     double NormalizeToPx(const Dimension& dimension) const;
 
@@ -779,7 +841,7 @@ public:
     void PostSyncEvent(const TaskExecutor::Task& task, const std::string& name,
         TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
-    virtual void FlushReload(const ConfigurationChange& configurationChange) {}
+    virtual void FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate = true) {}
     virtual void FlushBuild() {}
 
     virtual void FlushReloadTransition() {}
@@ -804,7 +866,7 @@ public:
 
     void OnVirtualKeyboardAreaChange(Rect keyboardArea,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
-        bool supportAvoidance = false);
+        bool supportAvoidance = false, bool forceChange = false);
     void OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false);
 
@@ -821,12 +883,22 @@ public:
     using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
     void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
     {
-        virtualKeyBoardCallback_.push_back(std::move(listener));
+        static std::atomic<int32_t> pseudoId(-1); // -1 will not be conflict with real node ids.
+        auto nodeId = pseudoId.fetch_sub(1, std::memory_order_relaxed);
+        virtualKeyBoardCallback_.emplace(std::make_pair(nodeId, std::move(listener)));
+    }
+    void SetVirtualKeyBoardCallback(int32_t nodeId, virtualKeyBoardCallback&& listener)
+    {
+        virtualKeyBoardCallback_.emplace(std::make_pair(nodeId, std::move(listener)));
+    }
+    void RemoveVirtualKeyBoardCallback(int32_t nodeId)
+    {
+        virtualKeyBoardCallback_.erase(nodeId);
     }
     bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard) const
     {
         bool isConsume = false;
-        for (const auto& iterVirtualKeyBoardCallback : virtualKeyBoardCallback_) {
+        for (const auto& [nodeId, iterVirtualKeyBoardCallback] : virtualKeyBoardCallback_) {
             if (iterVirtualKeyBoardCallback && iterVirtualKeyBoardCallback(width, height, keyboard)) {
                 isConsume = true;
             }
@@ -835,14 +907,18 @@ public:
     }
 
     using configChangedCallback = std::function<void()>;
-    void SetConfigChangedCallback(configChangedCallback&& listener)
+    void SetConfigChangedCallback(int32_t nodeId, configChangedCallback&& listener)
     {
-        configChangedCallback_.push_back(std::move(listener));
+        configChangedCallback_.emplace(make_pair(nodeId, std::move(listener)));
+    }
+    void RemoveConfigChangedCallback(int32_t nodeId)
+    {
+        configChangedCallback_.erase(nodeId);
     }
 
     void NotifyConfigurationChange()
     {
-        for (const auto& callback : configChangedCallback_) {
+        for (const auto& [nodeId, callback] : configChangedCallback_) {
             if (callback) {
                 callback();
             }
@@ -976,6 +1052,8 @@ public:
         parentPipeline_ = pipeline;
     }
 
+    virtual void SetupSubRootElement() = 0;
+
     void AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback);
 
     void HandleEtsCardTouchEvent(const TouchEvent& point, SerializedGesture &serializedGesture);
@@ -1068,6 +1146,16 @@ public:
     bool GetHalfLeading() const
     {
         return halfLeading_;
+    }
+
+    void SetHasPreviewTextOption(bool hasOption)
+    {
+        hasPreviewTextOption_ = hasOption;
+    }
+
+    bool GetHasPreviewTextOption() const
+    {
+        return hasPreviewTextOption_;
     }
 
     void SetSupportPreviewText(bool changeSupported)
@@ -1180,24 +1268,6 @@ public:
         return false;
     }
 
-    void SetStateProfilerStatus(bool stateProfilerStatus)
-    {
-        stateProfilerStatus_ = stateProfilerStatus;
-        if (jsStateProfilerStatusCallback_) {
-            jsStateProfilerStatusCallback_(stateProfilerStatus);
-        }
-    }
-
-    void SetStateProfilerStatusCallback(std::function<void(bool)>&& callback)
-    {
-        jsStateProfilerStatusCallback_ = callback;
-    }
-
-    bool GetStateProfilerStatus() const
-    {
-        return stateProfilerStatus_;
-    }
-
     uint32_t GetFrameCount() const
     {
         return frameCount_;
@@ -1220,6 +1290,33 @@ public:
         return 0.0f;
     }
 
+    virtual bool IsDensityChanged() const = 0;
+
+    void SetUiDvsyncSwitch(bool on);
+    virtual bool GetOnShow() const = 0;
+    bool IsDestroyed();
+
+    void SetDestroyed();
+
+#if defined(SUPPORT_TOUCH_TARGET_TEST)
+    // Called by hittest to find touch node is equal target.
+    virtual bool OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe = false,
+        const std::string& target = "") = 0;
+#endif
+    virtual bool IsWindowFocused() const
+    {
+        return GetOnFoucs();
+    }
+
+    void SetDragNodeGrayscale(float dragNodeGrayscale)
+    {
+        dragNodeGrayscale_ = dragNodeGrayscale;
+    }
+
+    float GetDragNodeGrayscale() const
+    {
+        return dragNodeGrayscale_;
+    }
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1241,7 +1338,7 @@ protected:
 
     virtual void OnVirtualKeyboardHeightChange(float keyboardHeight,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
-        const bool supportAvoidance = false)
+        const bool supportAvoidance = false, bool forceChange = false)
     {}
     virtual void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false)
@@ -1256,8 +1353,8 @@ protected:
 
     std::function<void()> GetWrappedAnimationCallback(const std::function<void()>& finishCallback);
 
-    std::list<configChangedCallback> configChangedCallback_;
-    std::list<virtualKeyBoardCallback> virtualKeyBoardCallback_;
+    std::map<int32_t, configChangedCallback> configChangedCallback_;
+    std::map<int32_t, virtualKeyBoardCallback> virtualKeyBoardCallback_;
     std::list<foldStatusChangedCallback> foldStatusChangedCallback_;
 
     bool isRebuildFinished_ = false;
@@ -1340,7 +1437,7 @@ protected:
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
     SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
-    std::atomic<bool> onFocus_ = true;
+    std::atomic<bool> onFocus_ = false;
     uint64_t lastTouchTime_ = 0;
     std::map<int32_t, std::string> formLinkInfoMap_;
     struct FunctionHash {
@@ -1352,6 +1449,8 @@ protected:
     std::function<std::string()> onFormRecycle_;
     std::function<void(std::string)> onFormRecover_;
 
+    uint64_t compensationValue_ = 0;
+    int64_t recvTime_ = 0;
     std::once_flag displaySyncFlag_;
     RefPtr<UIDisplaySyncManager> uiDisplaySyncManager_;
 
@@ -1379,17 +1478,25 @@ private:
     bool isFormAnimation_ = false;
     bool halfLeading_ = false;
     bool hasSupportedPreviewText_ = true;
+    bool hasPreviewTextOption_ = false;
     bool useCutout_ = false;
     uint64_t vsyncTime_ = 0;
 
     bool delaySurfaceChange_ = false;
+    bool destroyed_ = false;
     int32_t width_ = -1;
     int32_t height_ = -1;
     WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     uint32_t frameCount_ = 0;
-    bool stateProfilerStatus_ = false;
-    std::function<void(bool)> jsStateProfilerStatusCallback_;
+    bool followSystem_ = true;
+    float maxAppFontScale_ = static_cast<float>(INT32_MAX);
+    float dragNodeGrayscale_ = 0.0f;
+    
+    // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
+    std::mutex densityChangeMutex_;
+    int32_t densityChangeCallbackId_ = 0;
+    std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

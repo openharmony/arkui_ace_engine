@@ -137,6 +137,11 @@ bool ThemeConstants::GetBooleanByName(const std::string& resName) const
     return false;
 }
 
+uint32_t ThemeConstants::GetSymbolByName(const char* name) const
+{
+    return -1;
+}
+
 std::vector<uint32_t> ThemeConstants::GetIntArray(uint32_t key) const
 {
     return {};

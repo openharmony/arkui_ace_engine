@@ -14,8 +14,9 @@
  */
 
 #include "core/common/container.h"
-#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -110,26 +111,40 @@ void NavDestinationGroupNode::ProcessShallowBuilder()
     }
 }
 
+/**
+ * @brief Find and return the nearest custom node, which is of type 'JsView'
+ */
 RefPtr<CustomNodeBase> NavDestinationGroupNode::GetNavDestinationCustomNode()
 {
-    auto pattern = GetPattern<NavDestinationPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    auto navDestinationNode = pattern->GetCustomNode();
-    CHECK_NULL_RETURN(navDestinationNode, nullptr);
-
-    auto child = navDestinationNode->GetFirstChild();
-    while (child) {
-        if (AceType::InstanceOf<NavDestinationGroupNode>(child)) {
-            break;
-        }
-
-        if (AceType::InstanceOf<CustomNodeBase>(child)) {
-            auto customNode = DynamicCast<CustomNodeBase>(child);
-            return customNode;
-        }
-        child = child->GetFirstChild();
-    }
-    return nullptr;
+    return customNode_.Upgrade();
 }
 
+void NavDestinationGroupNode::SetNavDestinationMode(NavDestinationMode mode)
+{
+    mode_ = mode;
+    auto pattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto context = pattern->GetNavDestinationContext();
+    CHECK_NULL_VOID(context);
+    context->SetMode(mode);
+}
+
+void NavDestinationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    FrameNode::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    auto titleBarNode = DynamicCast<TitleBarNode>(titleBarNode_);
+    if (titleBarNode) {
+        std::string title = NavigationTitleUtil::GetTitleString(titleBarNode, GetPrevTitleIsCustomValue(false));
+        std::string subtitle = NavigationTitleUtil::GetSubtitleString(titleBarNode);
+        json->PutExtAttr("title", title.c_str(), filter);
+        json->PutExtAttr("subtitle", subtitle.c_str(), filter);
+    }
+    json->PutExtAttr("mode", mode_ == NavDestinationMode::DIALOG
+        ? "NavDestinationMode::DIALOG"
+        : "NavDestinationMode::STANDARD", filter);
+}
 } // namespace OHOS::Ace::NG

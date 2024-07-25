@@ -23,6 +23,10 @@
 #include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t UI_ANIMATION_FRAME_RATE_TYPE = 2;
+constexpr int32_t DISPLAY_SYNC_FRAME_RATE_TYPE = 3;
+constexpr int32_t ACE_COMPONENT_FRAME_RATE_TYPE = 4;
+
 class FrameRateManager : public virtual AceType {
     DECLARE_ACE_TYPE(FrameRateManager, AceType);
 
@@ -46,7 +50,7 @@ public:
 
     int32_t GetDisplaySyncRate() const;
 
-    int32_t GetExpectedRate();
+    std::pair<int32_t, int32_t> GetExpectedRate();
 
 private:
     std::unordered_map<int32_t, int32_t> nodeRateMap_;

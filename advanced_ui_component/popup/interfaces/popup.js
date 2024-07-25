@@ -699,7 +699,7 @@ export class PopupComponent extends ViewPU {
     }
 
     getButtonTextMargin() {
-        return { top: LengthMetrics.vp(this.theme.button.textMargin.bottom.value / 2) };
+        return { top: LengthMetrics.vp(this.theme.button.textMargin.bottom.value ) };
     }
 
     getButtonTextPadding() {
@@ -873,6 +873,7 @@ export class PopupComponent extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((q27, r27) => {
                         Column.create();
+                        Column.direction(this.popupDirection);
                         Column.layoutWeight(this.getLayoutWeight());
                     }, Column);
                     this.observeComponentCreation2((l27, m27) => {
@@ -1079,7 +1080,6 @@ export class PopupComponent extends ViewPU {
                         Row.create();
                         Row.direction(this.popupDirection);
                         Row.alignItems(VerticalAlign.Top);
-                        Row.margin(this.getTitleMargin());
                     }, Row);
                     this.observeComponentCreation2((u24, v24) => {
                         Scroll.create();
@@ -1152,6 +1152,7 @@ export class PopupComponent extends ViewPU {
                     Row.pop();
                     this.observeComponentCreation2((x23, y23) => {
                         Flex.create({ wrap: FlexWrap.Wrap });
+                        Flex.direction(this.popupDirection);
                         Flex.margin(this.getButtonTextMargin());
                         Flex.flexGrow(1);
                         Flex.onAreaChange((a24, b24) => {

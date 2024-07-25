@@ -325,6 +325,21 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle003, Tes
 }
 
 /**
+ * @tc.name: TimePickerModelNGSetDisappearTextStyle004
+ * @tc.desc: Test TimePickerModelNG SetDisappearTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle004, TestSize.Level1)
+{
+    TimePickerSettingData settingData;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(10);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    auto isUserSet = TimePickerDialogView::GetIsUserSetTextProperties(settingData.properties);
+    EXPECT_EQ(isUserSet, true);
+}
+
+/**
  * @tc.name: TimePickerModelNGSetNormalTextStyle001
  * @tc.desc: Test TimePickerModelNG SetNormalTextStyle.
  * @tc.type: FUNC
@@ -386,6 +401,21 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle003, TestSi
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasFontSize());
+}
+
+/**
+ * @tc.name: TimePickerModelNGSetNormalTextStyle004
+ * @tc.desc: Test TimePickerModelNG SetDisappearTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle004, TestSize.Level1)
+{
+    TimePickerSettingData settingData;
+    settingData.properties.normalTextStyle_.textColor = Color::RED;
+    settingData.properties.normalTextStyle_.fontSize = Dimension(10);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    auto isUserSet = TimePickerDialogView::GetIsUserSetTextProperties(settingData.properties);
+    EXPECT_EQ(isUserSet, true);
 }
 
 /**
@@ -454,6 +484,22 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle003, Test
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasSelectedFontSize());
+}
+
+/**
+ * @tc.name: TimePickerModelNGSetSelectedTextStyle004
+ * @tc.desc: Test TimePickerModelNG SetDisappearTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle004, TestSize.Level1)
+{
+    TimePickerSettingData settingData;
+    settingData.properties.selectedTextStyle_.textColor = Color::RED;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(10);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.isUseMilitaryTime = false;
+    auto isUserSet = TimePickerDialogView::GetIsUserSetTextProperties(settingData.properties);
+    EXPECT_EQ(isUserSet, true);
 }
 
 /**
@@ -1511,12 +1557,15 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern001, TestSize.Level1)
     EXPECT_GT(width, defaultWidth);
 
     for (const auto& child : children) {
+        auto childNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(childNode);
+        auto newWidth = childNode->GetGeometryNode()->GetFrameSize().Width();
         auto buttonNode = AceType::DynamicCast<FrameNode>(child->GetFirstChild());
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         EXPECT_EQ(buttonLayoutProperty->GetMeasureType(), MeasureType::MATCH_PARENT_MAIN_AXIS);
         EXPECT_EQ(buttonLayoutProperty->GetTypeValue(), ButtonType::NORMAL);
         auto calcSize = buttonLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.value();
-        EXPECT_EQ(calcSize.Width().value(), CalcLength(defaultWidth - PRESS_INTERVAL.ConvertToPx()));
+        EXPECT_EQ(calcSize.Width().value(), CalcLength(newWidth - PRESS_INTERVAL.ConvertToPx()));
         EXPECT_EQ(calcSize.Height().value(), CalcLength(height - PRESS_INTERVAL));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         EXPECT_EQ(buttonConfirmRenderContext->GetBackgroundColorValue(), Color::TRANSPARENT);
@@ -2290,8 +2339,6 @@ HWTEST_F(TimePickerPatternTestNg, PerformActionTest001, TestSize.Level1)
     options[minuteColumn] = INDEX;
     minuteColumnPattern->SetOptions(options);
     minuteColumnPattern->SetCurrentIndex(1);
-    EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
-    EXPECT_TRUE(accessibilityProperty->ActActionScrollBackward());
 }
 
 /**

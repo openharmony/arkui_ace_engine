@@ -78,6 +78,8 @@ public:
     static RefPtr<CustomSpan> ParseJsCustomSpan(const JSCallbackInfo& args);
     static RefPtr<SpanBase> ParseJsCustomSpan(int32_t start, int32_t length, const JSCallbackInfo& args);
 
+    static RefPtr<SpanBase> ParseJsExtSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
+
     static bool CheckSpanType(int32_t spanType);
     bool CheckParameters(int32_t start, int32_t length);
     static JSRef<JSObject> CreateJsParagraphStyleSpan(const RefPtr<SpanBase>& spanObject);

@@ -49,6 +49,11 @@ bool TaskRunnerAdapterImpl::RunsTasksOnCurrentThread()
     return eventRunner_->IsCurrentRunnerThread();
 }
 
+void TaskRunnerAdapterImpl::RemoveTask(const std::string &name)
+{
+    eventHandler_->RemoveTask(name);
+}
+
 AppExecFwk::EventQueue::Priority TaskRunnerAdapterImpl::ConvertPriority(PriorityType priorityType)
 {
     switch (priorityType) {

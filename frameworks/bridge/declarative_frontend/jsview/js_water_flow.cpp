@@ -17,6 +17,9 @@
 
 #include <cstdint>
 #include <vector>
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
@@ -121,15 +124,16 @@ void ParseScroller(const JSRef<JSObject>& obj)
     }
 }
 } // namespace
+} // namespace
 
-void UpdateWaterFlowSections(const JSCallbackInfo& args, const JSRef<JSVal>& sections)
+void UpdateSections(
+    const JSCallbackInfo& args, const JSRef<JSVal>& sections, RefPtr<NG::WaterFlowSections>& waterFlowSections)
 {
+    CHECK_NULL_VOID(waterFlowSections);
     auto sectionsObject = JSRef<JSObject>::Cast(sections);
     auto changes = sectionsObject->GetProperty("changeArray");
     CHECK_NULL_VOID(changes->IsArray());
     auto changeArray = JSRef<JSArray>::Cast(changes);
-    auto waterFlowSections = WaterFlowModel::GetInstance()->GetOrCreateWaterFlowSections();
-    CHECK_NULL_VOID(waterFlowSections);
     ParseChanges(args, changeArray, waterFlowSections);
 
     auto lengthFunc = sectionsObject->GetProperty("length");
@@ -146,7 +150,21 @@ void UpdateWaterFlowSections(const JSCallbackInfo& args, const JSRef<JSVal>& sec
     auto func = JSRef<JSFunc>::Cast(clearFunc);
     func->Call(sectionsObject);
 }
-} // namespace
+
+void UpdateWaterFlowSections(const JSCallbackInfo& args, const JSRef<JSVal>& sections)
+{
+    auto waterFlowSections = WaterFlowModel::GetInstance()->GetOrCreateWaterFlowSections();
+    CHECK_NULL_VOID(waterFlowSections);
+    UpdateSections(args, sections, waterFlowSections);
+}
+
+void JSWaterFlow::UpdateWaterFlowSectionsByFrameNode(
+    NG::FrameNode* frameNode, const JSCallbackInfo& args, const JSRef<JSVal>& sections)
+{
+    auto waterFlowSections = NG::WaterFlowModelNG::GetOrCreateWaterFlowSections(frameNode);
+    CHECK_NULL_VOID(waterFlowSections);
+    UpdateSections(args, sections, waterFlowSections);
+}
 
 void JSWaterFlow::Create(const JSCallbackInfo& args)
 {
@@ -377,6 +395,9 @@ void JSWaterFlow::ReachStartCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onReachStart");
+#endif
             return;
         };
         WaterFlowModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
@@ -389,6 +410,9 @@ void JSWaterFlow::ReachEndCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onReachEnd");
+#endif
             return;
         };
         WaterFlowModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
@@ -501,6 +525,9 @@ void JSWaterFlow::JsOnScrollIndex(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(first, last);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onScrollIndex");
+#endif
             return;
         };
         WaterFlowModel::GetInstance()->SetOnScrollIndex(std::move(onScrollIndex));
@@ -514,9 +541,9 @@ void JSWaterFlow::SetScrollBar(const JSCallbackInfo& info)
     WaterFlowModel::GetInstance()->SetScrollBarMode(displayMode);
 }
 
-void JSWaterFlow::SetScrollBarColor(const std::string& color)
+void JSWaterFlow::SetScrollBarColor(const JSCallbackInfo& info)
 {
-    auto scrollBarColor = JSScrollable::ParseBarColor(color);
+    auto scrollBarColor = JSScrollable::ParseBarColor(info);
     if (!scrollBarColor.empty()) {
         WaterFlowModel::GetInstance()->SetScrollBarColor(scrollBarColor);
     }

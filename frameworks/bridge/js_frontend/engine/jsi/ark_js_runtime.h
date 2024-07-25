@@ -73,6 +73,8 @@ public:
         const uint8_t* buffer, int32_t size, const std::string& filePath = "", bool needUpdate = false) override;
     bool ExecuteJsBin(const std::string& fileName,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
+    bool ExecuteJsBinForAOT(const std::string& fileName,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
     shared_ptr<JsValue> GetGlobal() override;
     void RunGC() override;
     void RunFullGC() override;
@@ -97,6 +99,7 @@ public:
     bool HasPendingException() override;
     void ExecutePendingJob() override;
     void DumpHeapSnapshot(bool isPrivate) override;
+    void NotifyUIIdle() override;
     void DestroyHeapProfiler() override;
     bool IsExecuteModuleInAbcFile(
         const std::string &bundleName, const std::string &moduleName, const std::string &ohmurl);

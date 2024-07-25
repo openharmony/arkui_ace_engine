@@ -64,11 +64,11 @@ struct BlurBackGroundInfo {
 };
 
 struct OptionsAfterApplied {
-    double opacity;
+    double opacity { 0.0 };
     std::optional<Shadow> shadow;
     std::string shadowPath;
     std::optional<BorderRadiusProperty> borderRadius;
-    BlurBackGroundInfo  blurbgEffect;
+    BlurBackGroundInfo blurbgEffect;
 };
 
 struct DragPreviewOption {
@@ -203,6 +203,13 @@ public:
     }
 
     virtual RefPtr<NGGestureRecognizer> CreateRecognizer() = 0;
+
+    void SetDisposeTag(bool tag)
+    {
+        if (gestureInfo_) {
+            gestureInfo_->SetDisposeTag(tag);
+        }
+    }
 
 protected:
     int32_t fingers_ = 1;

@@ -81,25 +81,25 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (isDefaultFontSize) {
             fontSizeInit = badgeTheme->GetBadgeAgeFontSize().ConvertToVp();
         } else {
-            fontSizeInit = badgeFontSize.value().Value();
+            fontSizeInit = badgeFontSize->ConvertToVp();
         }
 
         if (isDefaultBadgeSize) {
             badgeSizeInit = badgeTheme->GetBadgeAgeCircleSize().ConvertToVp();
         } else {
-            badgeSizeInit = badgeCircleSize.value().Value();
+            badgeSizeInit = badgeCircleSize->ConvertToVp();
         }
     } else {
         if (isDefaultFontSize) {
             fontSizeInit = badgeTheme->GetBadgeFontSize().ConvertToVp();
         } else {
-            fontSizeInit = badgeFontSize.value().Value();
+            fontSizeInit = badgeFontSize->ConvertToVp();
         }
 
         if (isDefaultBadgeSize) {
             badgeSizeInit = badgeTheme->GetBadgeCircleSize().ConvertToVp();
         } else {
-            badgeSizeInit = badgeCircleSize.value().Value();
+            badgeSizeInit = badgeCircleSize->ConvertToVp();
         }
     }
     
@@ -125,14 +125,14 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto textSize = textGeometryNode->GetContentSize();
     if (!textData.empty() || messageCount > 0) {
         if ((textData.size() <= 1 && !textData.empty()) ||
-            ((messageCount < 10 && messageCount <= countLimit) && textData.empty())) {
+            ((messageCount < 10 && messageCount <= static_cast<size_t>(countLimit)) && textData.empty())) {
             if (hasFontSize_) {
                 badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
                 badgeHeight = std::max(badgeCircleDiameter, badgeHeight);
             }
             badgeCircleRadius = badgeCircleDiameter / 2;
             badgeWidth = badgeCircleDiameter;
-        } else if (textData.size() > 1 || messageCount > countLimit) {
+        } else if (textData.size() > 1 || messageCount > static_cast<size_t>(countLimit)) {
             if (hasFontSize_) {
                 badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
                 badgeHeight =
@@ -242,13 +242,13 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         if (isDefaultBadgeSize) {
             badgeSizeInit = badgeTheme->GetBadgeAgeCircleSize().ConvertToVp();
         } else {
-            badgeSizeInit = badgeCircleSize.value().Value();
+            badgeSizeInit = badgeCircleSize->ConvertToVp();
         }
     } else {
         if (isDefaultBadgeSize) {
             badgeSizeInit = badgeTheme->GetBadgeCircleSize().ConvertToVp();
         } else {
-            badgeSizeInit = badgeCircleSize.value().Value();
+            badgeSizeInit = badgeCircleSize->ConvertToVp();
         }
     }
 
@@ -277,13 +277,13 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     if (!textData.empty() || messageCount > 0) {
         if ((textData.size() <= 1 && !textData.empty()) ||
-            ((messageCount < 10 && messageCount <= countLimit) && textData.empty())) {
+            ((messageCount < 10 && messageCount <= static_cast<size_t>(countLimit)) && textData.empty())) {
             if (hasFontSize_) {
                 badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
             }
             badgeCircleRadius = badgeCircleDiameter / 2;
             badgeWidth = badgeCircleDiameter;
-        } else if (textData.size() > 1 || messageCount > countLimit) {
+        } else if (textData.size() > 1 || messageCount > static_cast<size_t>(countLimit)) {
             if (hasFontSize_) {
                 badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
             }
@@ -333,10 +333,8 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (layoutDirection == TextDirection::RTL) {
         auto parentSize = geometryNode->GetFrameSize();
         auto width = parentSize.Width();
-        auto childSize = childGeometryNode->GetFrameSize();
-        auto childOffset = childGeometryNode->GetFrameOffset();
-        childGeometryNode->SetMarginFrameOffset(OffsetF(
-            childOffset.GetX() + width - childSize.Width(), childOffset.GetY()));
+        auto childSize = childGeometryNode->GetMarginFrameSize();
+        childGeometryNode->SetMarginFrameOffset(OffsetF(width - childSize.Width(), 0.0f));
     } else {
         childGeometryNode->SetMarginFrameOffset(OffsetF());
     }

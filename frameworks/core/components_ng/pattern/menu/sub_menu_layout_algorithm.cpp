@@ -45,9 +45,9 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CheckMenuPadding(layoutWrapper);
     const auto& geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto parentItemProps = parentMenuItem->GetLayoutProperty<MenuItemLayoutProperty>();
-    CHECK_NULL_VOID(parentItemProps);
-    auto expandingMode = parentItemProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+    auto parentItemPattern = parentMenuItem->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(parentItemPattern);
+    auto expandingMode = parentItemPattern->GetExpandingMode();
     OffsetF position = GetSubMenuLayoutOffset(layoutWrapper, parentMenuItem, size,
         expandingMode == SubMenuExpandingMode::STACK);
     geometryNode->SetMarginFrameOffset(position);
@@ -266,13 +266,12 @@ void SubMenuLayoutAlgorithm::InitializePadding(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(theme);
     if (!menuPattern->IsSelectOverlayExtensionMenu()) {
         margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
-        optionPadding_ = margin_;
         paddingStart_ = static_cast<float>(theme->GetDefaultPaddingStart().ConvertToPx());
         paddingEnd_ = static_cast<float>(theme->GetDefaultPaddingEnd().ConvertToPx());
-        paddingTop_ = static_cast<float>(theme->GetDefaultPaddingTop().ConvertToPx());
-        paddingBottom_ = static_cast<float>(theme->GetDefaultPaddingBottomFixed().ConvertToPx());
-    } else {
-        optionPadding_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+        if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            paddingTop_ = static_cast<float>(theme->GetDefaultPaddingTop().ConvertToPx());
+            paddingBottom_ = static_cast<float>(theme->GetDefaultPaddingBottomFixed().ConvertToPx());
+        }
     }
 }
 
@@ -288,7 +287,6 @@ void SubMenuLayoutAlgorithm::InitializePaddingAPI12(LayoutWrapper* layoutWrapper
     CHECK_NULL_VOID(theme);
     if (!menuPattern->IsSelectOverlayExtensionMenu()) {
         margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
-        optionPadding_ = margin_;
         if (!hierarchicalParameters_) {
             paddingStart_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
             paddingEnd_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
@@ -296,8 +294,6 @@ void SubMenuLayoutAlgorithm::InitializePaddingAPI12(LayoutWrapper* layoutWrapper
             paddingStart_ = static_cast<float>(theme->GetMenuMediumMargin().ConvertToPx());
             paddingEnd_ = static_cast<float>(theme->GetMenuMediumMargin().ConvertToPx());
         }
-    } else {
-        optionPadding_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
     }
 }
 

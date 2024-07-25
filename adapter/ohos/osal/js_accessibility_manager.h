@@ -56,6 +56,7 @@ public:
     // JsAccessibilityManager overrides functions.
     void InitializeCallback() override;
     void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) override;
+    void UpdateVirtualNodeFocus() override;
     void SetCardViewParams(const std::string& key, bool focus) override;
     void HandleComponentPostBinding() override;
     void RegisterSubWindowInteractionOperation(int windowId) override;
@@ -97,8 +98,6 @@ public:
     void DeregisterInteractionOperation();
     bool SendAccessibilitySyncEvent(
         const AccessibilityEvent& accessibilityEvent, Accessibility::AccessibilityEventInfo eventInfo);
-    bool SendExtensionAccessibilitySyncEvent(
-        const AccessibilityEvent& accessibilityEvent, const Accessibility::AccessibilityEventInfo& eventInfo);
     bool TransferAccessibilityAsyncEvent(
         const Accessibility::AccessibilityEventInfo& eventInfo,
         int64_t uiExtensionOffset) override;
@@ -136,7 +135,7 @@ public:
         int32_t action, const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset) override;
 #ifdef WEB_SUPPORTED
     bool ExecuteWebActionNG(int64_t elementId, Accessibility::ActionType action, const RefPtr<NG::FrameNode>& frameNode,
-        const RefPtr<NG::PipelineContext>& ngPipeline);
+        const RefPtr<NG::PipelineContext>& ngPipeline, const std::map<std::string, std::string>& actionArguments);
     void SetWebAccessibilityState(bool state);
     void UpdateAccessibilityFocusId(const RefPtr<PipelineBase>& context, int64_t accessibilityId,
         bool isFocus) override;
@@ -156,6 +155,8 @@ public:
         int64_t parentElementId) override;
     void SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback) override;
     void DeregisterInteractionOperationAsChildTree() override;
+    void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
+        const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) override;
 
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId) override;
@@ -298,6 +299,8 @@ private:
     void DumpTreeNG(bool useWindowId, uint32_t windowId, int64_t rootId);
     void DumpTreeNG(const RefPtr<NG::FrameNode>& parent, int32_t depth,
         int64_t nodeID, const CommonProperty& commonProperty);
+    void DumpTreeAccessibilityNodeNG(const RefPtr<NG::UINode>& uiNodeParent,
+        int32_t depth, int64_t nodeID, const CommonProperty& commonProperty);
 
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
         const RefPtr<PipelineBase>& mainContext);
@@ -349,6 +352,12 @@ private:
 
     void UpdateElementInfosTreeId(std::list<Accessibility::AccessibilityElementInfo>& infos);
 
+    void FillEventInfoWithNode(
+        const RefPtr<NG::FrameNode>& node,
+        Accessibility::AccessibilityEventInfo& eventInfo,
+        const RefPtr<NG::PipelineContext>& context,
+        int64_t elementId);
+
     std::string callbackKey_;
     uint32_t windowId_ = 0;
     std::shared_ptr<JsAccessibilityStateObserver> stateObserver_ = nullptr;
@@ -361,8 +370,8 @@ private:
     WeakPtr<NG::FrameNode> lastFrameNode_;
     mutable std::mutex childTreeCallbackMapMutex_;
     std::unordered_map<int64_t, std::shared_ptr<AccessibilityChildTreeCallback>> childTreeCallbackMap_;
-    int32_t treeId_ = 0;
     int64_t parentElementId_ = INVALID_PARENT_ID;
+    uint32_t parentWindowId_ = 0;
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;
 };
 

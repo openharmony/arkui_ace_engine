@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_pattern.h"
 
+#include "base/i18n/localization.h"
 #include "base/utils/date_util.h"
 #include "core/components/calendar/calendar_data_adapter.h"
 #include "core/components/dialog/dialog_theme.h"
@@ -24,6 +25,7 @@
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -52,6 +54,8 @@ constexpr size_t OPTION_ACCEPT_BUTTON_INDEX = 1;
 void CalendarDialogPattern::OnModifyDone()
 {
     LinearLayoutPattern::OnModifyDone();
+    UpdateCalendarLayout();
+
     InitClickEvent();
     InitOnKeyEvent();
     InitOnTouchEvent();
@@ -59,12 +63,36 @@ void CalendarDialogPattern::OnModifyDone()
     InitTitleArrowsEvent();
     InitEntryChangeEvent();
 
+    UpdateTitleArrowsImage();
+    UpdateOptionsButton();
     UpdateDialogBackgroundColor();
     UpdateTitleArrowsColor();
     UpdateOptionsButtonColor();
-    UpdateTitleArrowsImage();
 }
 
+void CalendarDialogPattern::UpdateCalendarLayout()
+{
+    auto entryNode = entryNode_.Upgrade();
+    CHECK_NULL_VOID(entryNode);
+    auto textDirection = entryNode->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    auto calendarNode = GetCalendarFrameNode();
+    CHECK_NULL_VOID(calendarNode);
+    const auto& calendarLayoutProperty = calendarNode->GetLayoutProperty();
+    CHECK_NULL_VOID(calendarLayoutProperty);
+    calendarLayoutProperty->UpdateLayoutDirection(textDirection);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
+    CHECK_NULL_VOID(hostNode);
+    auto title = host->GetChildAtIndex(TITLE_NODE_INDEX);
+    CHECK_NULL_VOID(title);
+    auto titleNode = AceType::DynamicCast<FrameNode>(title);
+    CHECK_NULL_VOID(titleNode);
+    auto titleLayoutProperty = titleNode->GetLayoutProperty();
+    CHECK_NULL_VOID(titleLayoutProperty);
+    titleLayoutProperty->UpdateLayoutDirection(textDirection);
+}
 void CalendarDialogPattern::UpdateDialogBackgroundColor()
 {
     auto host = GetHost();
@@ -119,7 +147,11 @@ void CalendarDialogPattern::UpdateTitleArrowsImage()
     CHECK_NULL_VOID(host);
     auto title = host->GetChildAtIndex(TITLE_NODE_INDEX);
     CHECK_NULL_VOID(title);
-    auto textDirection = host->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    auto titleNode = AceType::DynamicCast<FrameNode>(title);
+    CHECK_NULL_VOID(titleNode);
+    auto titleLayoutProperty = titleNode->GetLayoutProperty();
+    CHECK_NULL_VOID(titleLayoutProperty);
+    auto textDirection = titleLayoutProperty->GetNonAutoLayoutDirection();
 
     auto lastYearNode = AceType::DynamicCast<FrameNode>(title->GetChildAtIndex(TITLE_LAST_YEAR_BUTTON_NODE_INDEX));
     CHECK_NULL_VOID(lastYearNode);
@@ -135,6 +167,11 @@ void CalendarDialogPattern::UpdateTitleArrowsImage()
         UpdateImage(lastMonthNode, InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG);
         UpdateImage(nextMonthNode, InternalResource::ResourceId::IC_PUBLIC_ARROW_LEFT_SVG);
         UpdateImage(nextYearNode, InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_LEFT_SVG);
+    } else {
+        UpdateImage(lastYearNode, InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_LEFT_SVG);
+        UpdateImage(lastMonthNode, InternalResource::ResourceId::IC_PUBLIC_ARROW_LEFT_SVG);
+        UpdateImage(nextMonthNode, InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG);
+        UpdateImage(nextYearNode, InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_RIGHT_SVG);
     }
 }
 
@@ -146,10 +183,37 @@ void CalendarDialogPattern::UpdateImage(
     auto imageNode = AceType::DynamicCast<FrameNode>(image);
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    auto imageInfo = imageLayoutProperty->GetImageSourceInfo();
-    imageInfo->SetResourceId(resourceId);
-    imageLayoutProperty->UpdateImageSourceInfo(imageInfo.value());
+
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetResourceId(resourceId);
+    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     imageNode->MarkModifyDone();
+}
+
+void CalendarDialogPattern::UpdateOptionsButton()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto options = host->GetChildAtIndex(OPTIONS_NODE_INDEX);
+    CHECK_NULL_VOID(options);
+
+    size_t buttonIndex = OPTION_CANCEL_BUTTON_INDEX;
+    for (const auto& child : options->GetChildren()) {
+        CHECK_NULL_VOID(child);
+        if (child->GetTag() == V2::BUTTON_ETS_TAG) {
+            auto button = AceType::DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(button);
+            auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+            CHECK_NULL_VOID(buttonLayoutProperty);
+            if (buttonIndex == OPTION_ACCEPT_BUTTON_INDEX) {
+                buttonLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
+            } else {
+                buttonLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+            }
+            button->MarkDirtyNode();
+            buttonIndex++;
+        }
+    }
 }
 
 void CalendarDialogPattern::UpdateOptionsButtonColor()
@@ -410,30 +474,60 @@ bool CalendarDialogPattern::HandleKeyEvent(const KeyEvent& event)
         return false;
     }
 
+    auto calendarNode = GetCalendarFrameNode();
+    CHECK_NULL_RETURN(calendarNode, false);
+    auto textDirection = calendarNode->GetLayoutProperty()->GetNonAutoLayoutDirection();
     switch (event.code) {
         case KeyCode::KEY_DPAD_LEFT: {
-            if ((focusAreaID_ == TITLE_NODE_INDEX && focusAreaChildID_ == TITLE_TEXT_NODE_INDEX + 1) ||
-                (focusAreaID_ == OPTIONS_NODE_INDEX && focusAreaChildID_ == OPTIONS_DIVIDER_NODE_INDEX + 1)) {
+            if (textDirection == TextDirection::RTL) {
+                if ((focusAreaID_ == TITLE_NODE_INDEX && focusAreaChildID_ == TITLE_TEXT_NODE_INDEX - 1) ||
+                    (focusAreaID_ == OPTIONS_NODE_INDEX && focusAreaChildID_ == OPTIONS_DIVIDER_NODE_INDEX - 1)) {
+                    focusAreaChildID_++;
+                }
+                focusAreaChildID_++;
+                auto childSize = static_cast<int32_t>(host->GetChildAtIndex(focusAreaID_)->GetChildren().size());
+                if (focusAreaChildID_ > childSize - 1) {
+                    focusAreaChildID_ = childSize - 1;
+                }
+            } else {
+                if ((focusAreaID_ == TITLE_NODE_INDEX && focusAreaChildID_ == TITLE_TEXT_NODE_INDEX + 1) ||
+                    (focusAreaID_ == OPTIONS_NODE_INDEX && focusAreaChildID_ == OPTIONS_DIVIDER_NODE_INDEX + 1)) {
+                    focusAreaChildID_--;
+                }
                 focusAreaChildID_--;
+                if (focusAreaChildID_ < 0) {
+                    focusAreaChildID_ = 0;
+                }
             }
-            focusAreaChildID_--;
-            if (focusAreaChildID_ < 0) {
-                focusAreaChildID_ = 0;
-            }
+
             PaintFocusState();
             ChangeEntryState();
             return true;
         }
         case KeyCode::KEY_DPAD_RIGHT: {
-            if ((focusAreaID_ == TITLE_NODE_INDEX && focusAreaChildID_ == TITLE_TEXT_NODE_INDEX - 1) ||
-                (focusAreaID_ == OPTIONS_NODE_INDEX && focusAreaChildID_ == OPTIONS_DIVIDER_NODE_INDEX - 1)) {
+            if (textDirection == TextDirection::RTL) {
+                if ((focusAreaID_ == TITLE_NODE_INDEX && focusAreaChildID_ == TITLE_TEXT_NODE_INDEX + 1) ||
+                    (focusAreaID_ == OPTIONS_NODE_INDEX && focusAreaChildID_ == OPTIONS_DIVIDER_NODE_INDEX + 1)) {
+                    focusAreaChildID_--;
+                }
+
+                focusAreaChildID_--;
+                if (focusAreaChildID_ < 0) {
+                    focusAreaChildID_ = 0;
+                }
+            } else {
+                if ((focusAreaID_ == TITLE_NODE_INDEX && focusAreaChildID_ == TITLE_TEXT_NODE_INDEX - 1) ||
+                    (focusAreaID_ == OPTIONS_NODE_INDEX && focusAreaChildID_ == OPTIONS_DIVIDER_NODE_INDEX - 1)) {
+                    focusAreaChildID_++;
+                }
+
                 focusAreaChildID_++;
+                auto childSize = static_cast<int32_t>(host->GetChildAtIndex(focusAreaID_)->GetChildren().size());
+                if (focusAreaChildID_ > childSize - 1) {
+                    focusAreaChildID_ = childSize - 1;
+                }
             }
-            focusAreaChildID_++;
-            auto childSize = static_cast<int32_t>(host->GetChildAtIndex(focusAreaID_)->GetChildren().size());
-            if (focusAreaChildID_ > childSize - 1) {
-                focusAreaChildID_ = childSize - 1;
-            }
+
             PaintFocusState();
             ChangeEntryState();
             return true;
@@ -471,27 +565,30 @@ bool CalendarDialogPattern::HandleCalendarNodeKeyEvent(const KeyEvent& event)
     auto calendarPattern = GetCalendarPattern();
     CHECK_NULL_RETURN(calendarPattern, false);
     ObtainedMonth currentMonthData = calendarPattern->GetCurrentMonthData();
-
+    auto calendarNode = GetCalendarFrameNode();
+    CHECK_NULL_RETURN(calendarNode, false);
+    auto textDirection = calendarNode->GetLayoutProperty()->GetNonAutoLayoutDirection();
     int32_t focusedDayIndex = GetIndexByFocusedDay();
+
     switch (event.code) {
         case KeyCode::KEY_DPAD_LEFT: {
-            focusedDayIndex--;
-            if (IsIndexInCurrentMonth(focusedDayIndex, currentMonthData)) {
-                focusedDay_ = currentMonthData.days[focusedDayIndex];
-                PaintCurrentMonthFocusState();
+            if (textDirection == TextDirection::RTL) {
+                focusedDayIndex++;
             } else {
-                PaintNonCurrentMonthFocusState(focusedDayIndex);
+                focusedDayIndex--;
             }
+
+            PaintMonthFocusState(focusedDayIndex);
             return true;
         }
         case KeyCode::KEY_DPAD_RIGHT: {
-            focusedDayIndex++;
-            if (IsIndexInCurrentMonth(focusedDayIndex, currentMonthData)) {
-                focusedDay_ = currentMonthData.days[focusedDayIndex];
-                PaintCurrentMonthFocusState();
+            if (textDirection == TextDirection::RTL) {
+                focusedDayIndex--;
             } else {
-                PaintNonCurrentMonthFocusState(focusedDayIndex);
+                focusedDayIndex++;
             }
+
+            PaintMonthFocusState(focusedDayIndex);
             return true;
         }
         case KeyCode::KEY_DPAD_UP: {
@@ -553,6 +650,19 @@ bool CalendarDialogPattern::HandleCalendarNodeKeyEvent(const KeyEvent& event)
     return false;
 }
 
+void CalendarDialogPattern::PaintMonthFocusState(int32_t focusedDayIndex)
+{
+    auto calendarPattern = GetCalendarPattern();
+    CHECK_NULL_VOID(calendarPattern);
+    ObtainedMonth currentMonthData = calendarPattern->GetCurrentMonthData();
+    if (IsIndexInCurrentMonth(focusedDayIndex, currentMonthData)) {
+        focusedDay_ = currentMonthData.days[focusedDayIndex];
+        PaintCurrentMonthFocusState();
+    } else {
+        PaintNonCurrentMonthFocusState(focusedDayIndex);
+    }
+}
+
 bool CalendarDialogPattern::IsIndexInCurrentMonth(int32_t focusedDayIndex, const ObtainedMonth& currentMonthData)
 {
     return focusedDayIndex >= 0 && focusedDayIndex < static_cast<int32_t>(currentMonthData.days.size()) &&
@@ -611,6 +721,7 @@ void CalendarDialogPattern::FocusedLastFocusedDay()
     if (it != monthData.days.end()) {
         focusedDay_ = *it;
         it->isKeyFocused = true;
+        calendarPattern->SetDialogClickEventState(true);
         UpdateSwiperNode(monthData, isPrev);
     }
 }
@@ -721,7 +832,7 @@ void CalendarDialogPattern::PaintNonCurrentMonthFocusState(int32_t focusedDayInd
         day.isKeyFocused = false;
     }
     calendarPattern->SetCurrentMonthData(currentMonthData);
-
+    calendarPattern->SetDialogClickEventState(true);
     if (focusedDayIndex == -1) {
         focusedDay_ = preMonthData.days[preMonthData.days.size() ? preMonthData.days.size() - 1 : 0];
         preMonthData.days[preMonthData.days.size() ? preMonthData.days.size() - 1 : 0].isKeyFocused = true;
@@ -735,6 +846,17 @@ void CalendarDialogPattern::PaintNonCurrentMonthFocusState(int32_t focusedDayInd
         swiperPattern->ShowNext();
         return;
     }
+    UpdateNonCurrentMonthFocusedDay(focusedDayIndex);
+}
+
+void CalendarDialogPattern::UpdateNonCurrentMonthFocusedDay(int32_t focusedDayIndex)
+{
+    auto calendarPattern = GetCalendarPattern();
+    CHECK_NULL_VOID(calendarPattern);
+
+    ObtainedMonth currentMonthData = calendarPattern->GetCurrentMonthData();
+    ObtainedMonth preMonthData = calendarPattern->GetPreMonthData();
+    ObtainedMonth nextMonthData = calendarPattern->GetNextMonthData();
 
     if (focusedDayIndex < 0 || focusedDayIndex >= static_cast<int32_t>(currentMonthData.days.size())) {
         return;
@@ -862,10 +984,15 @@ void CalendarDialogPattern::InitTitleArrowsEvent()
                 pattern->HandleTitleArrowsClickEvent(childIndex);
             }
         };
-        auto gestureHub = buttonNode->GetOrCreateGestureEventHub();
-        auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(event));
-        CHECK_NULL_VOID(gestureHub);
-        gestureHub->AddClickEvent(clickEvent);
+
+        auto buttonNodeId = buttonNode->GetId();
+        if (clickEvents_.find(buttonNodeId) == clickEvents_.end()) {
+            auto gestureHub = buttonNode->GetOrCreateGestureEventHub();
+            CHECK_NULL_VOID(gestureHub);
+            auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(event));
+            clickEvents_[buttonNodeId] = clickEvent;
+            gestureHub->AddClickEvent(clickEvent);
+        }
     }
 }
 
@@ -880,6 +1007,7 @@ void CalendarDialogPattern::HandleTitleArrowsClickEvent(int32_t nodeIndex)
     ObtainedMonth currentObtainedMonth = calendarPattern->GetCurrentMonthData();
     CalendarMonth currentMonth { .year = currentObtainedMonth.year, .month = currentObtainedMonth.month };
 
+    calendarPattern->SetDialogClickEventState(true);
     switch (nodeIndex) {
         case TITLE_LAST_YEAR_BUTTON_NODE_INDEX: {
             currentMonth.year = currentMonth.year == MIN_YEAR ? MAX_YEAR : currentMonth.year - 1;
@@ -916,8 +1044,9 @@ void CalendarDialogPattern::GetCalendarMonthData(int32_t year, int32_t month, Ob
 
     CalendarMonth currentMonth { .year = year, .month = month };
 
-    int32_t currentMonthMaxDay = PickerDate::GetMaxDay(year, month);
-    int32_t preMonthMaxDay = PickerDate::GetMaxDay(GetLastMonth(currentMonth).year, GetLastMonth(currentMonth).month);
+    int32_t currentMonthMaxDay = static_cast<int32_t>(PickerDate::GetMaxDay(year, month));
+    int32_t preMonthMaxDay =
+        static_cast<int32_t>(PickerDate::GetMaxDay(GetLastMonth(currentMonth).year, GetLastMonth(currentMonth).month));
     int32_t preMonthDaysCount = (Date::CalculateWeekDay(year, month, 1) + 1) % WEEK_DAYS;
     int32_t nextMonthDaysCount = 6 - ((Date::CalculateWeekDay(year, month, currentMonthMaxDay) + 1) % WEEK_DAYS);
 

@@ -78,6 +78,7 @@ public:
     void DumpHeapSnapshot(bool isPrivate) override;
     void DestroyHeapProfiler() override;
     void ForceFullGC() override;
+    void NotifyUIIdle() override;
 
     void SendCallbackMessage(const std::string& callbackId, const std::string& data) const override;
     // platform channel.

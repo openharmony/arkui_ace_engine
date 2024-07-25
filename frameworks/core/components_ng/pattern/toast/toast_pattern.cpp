@@ -31,25 +31,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t API_VERSION_9 = 9;
 constexpr Dimension ADAPT_TOAST_MIN_FONT_SIZE = 12.0_fp;
-
-size_t GetLineCount(const RefPtr<FrameNode>& textNode)
-{
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, 0.0f);
-    auto layoutConstraint = textLayoutProperty->GetLayoutConstraint();
-
-    auto textLayoutWrapper = textNode->CreateLayoutWrapper();
-    CHECK_NULL_RETURN(textLayoutWrapper, 0.0f);
-    textLayoutWrapper->Measure(layoutConstraint);
-    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(textLayoutWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutAlgorithmWrapper, 0);
-    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(textLayoutAlgorithm, 0);
-    auto paragraph = textLayoutAlgorithm->GetSingleParagraph();
-    CHECK_NULL_RETURN(paragraph, 0);
-    auto paragLineCount = paragraph->GetLineCount();
-    return paragLineCount;
-}
+constexpr float MIN_FONT_SCALE = 0.85f;
+constexpr float MAX_FONT_SCALE = 2.0f;
 
 // get main window's pipeline
 RefPtr<PipelineContext> GetMainPipelineContext()
@@ -122,8 +105,8 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     CHECK_NULL_RETURN(toastProp, Dimension(0.0));
     auto textHeight = text->GetGeometryNode()->GetMarginFrameSize().Height();
     Dimension offsetY;
-    const auto& safeArea = toastProp->GetSafeAreaInsets();
-    auto safeAreaOffset = safeArea ? safeArea->bottom_.Length() : 0.0f;
+    auto safeAreaManager = context->GetSafeAreaManager();
+    auto safeAreaOffset = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length() : 0;
     if (!toastProp->HasToastAlignment()) {
         auto toastBottom = GetBottomValue(layoutWrapper);
         toastBottom_ = toastBottom;
@@ -169,21 +152,42 @@ double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)
                                                         : toastTheme->GetBottom().ConvertToPx();
 }
 
+void ToastPattern::UpdateToastFontSize()
+{
+    auto context = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
+    CHECK_NULL_VOID(context);
+    auto toastTheme = context->GetTheme<ToastTheme>();
+    CHECK_NULL_VOID(toastTheme);
+    CHECK_NULL_VOID(textNode_);
+    auto textLayoutProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
+    auto minScale = textLayoutProperty->GetMinFontScaleValue(MIN_FONT_SCALE);
+    auto maxScale = textLayoutProperty->GetMaxFontScaleValue(MAX_FONT_SCALE);
+    auto fontScale = context->GetFontScale();
+    if (fontScale > minScale) {
+        fontScale = fontScale > maxScale ? maxScale : fontScale;
+    } else {
+        fontScale = minScale;
+    }
+    auto fontSize = toastTheme->GetTextStyle().GetFontSize() * fontScale;
+    textLayoutProperty->UpdateFontSize(fontSize);
+}
+
 void ToastPattern::BeforeCreateLayoutWrapper()
 {
     PopupBasePattern::BeforeCreateLayoutWrapper();
 
     auto toastNode = GetHost();
     CHECK_NULL_VOID(toastNode);
-    UpdateToastSize(toastNode);
+    auto pipelineContext = IsDefaultToast() ? toastNode->GetContextRefPtr() : GetMainPipelineContext();
+    if (!pipelineContext) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast get pipelineContext failed");
+        return;
+    }
+    UpdateToastFontSize();
 
     auto textNode = DynamicCast<FrameNode>(toastNode->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     UpdateTextSizeConstraint(textNode);
-    // TextAlign should be START when lines of text are greater than 1
-    if (GetLineCount(textNode) > 1) {
-        textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextAlign(TextAlign::START);
-    }
 }
 
 void ToastPattern::UpdateToastSize(const RefPtr<FrameNode>& toast)
@@ -302,11 +306,9 @@ double ToastPattern::GetTextMaxHeight()
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         deviceHeight = windowGlobalRect.Height();
     }
-
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-    CHECK_NULL_RETURN(safeAreaManager, 0.0);
-    auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
-    auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
+    auto bottom = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length() : 0;
+    auto top = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().top_.Length() : 0;
     auto maxHeight = deviceHeight - bottom - top - toastBottom_;
     auto limitHeight = (deviceHeight - bottom - top) * 0.65;
     if (GreatNotEqual(maxHeight, limitHeight)) {

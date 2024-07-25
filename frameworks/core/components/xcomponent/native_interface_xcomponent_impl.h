@@ -33,6 +33,10 @@ using NativeXComponent_Surface_Callback = void (*)(OH_NativeXComponent*, void*);
 struct XComponentTouchPoint {
     float tiltX = 0.0f;
     float tiltY = 0.0f;
+    float windowX = 0.0f;
+    float windowY = 0.0f;
+    float displayX = 0.0f;
+    float displayY = 0.0f;
     OH_NativeXComponent_TouchPointToolType sourceToolType =
         OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_UNKNOWN;
 };
@@ -244,6 +248,38 @@ public:
         return touchPoints_[pointIndex].tiltY;
     }
 
+    float GetWindowX(size_t pointIndex) const
+    {
+        if (pointIndex >= OH_MAX_TOUCH_POINTS_NUMBER || pointIndex >= touchPoints_.size()) {
+            return 0.0f;
+        }
+        return touchPoints_[pointIndex].windowX;
+    }
+
+    float GetWindowY(size_t pointIndex) const
+    {
+        if (pointIndex >= OH_MAX_TOUCH_POINTS_NUMBER || pointIndex >= touchPoints_.size()) {
+            return 0.0f;
+        }
+        return touchPoints_[pointIndex].windowY;
+    }
+
+    float GetDisplayX(size_t pointIndex) const
+    {
+        if (pointIndex >= OH_MAX_TOUCH_POINTS_NUMBER || pointIndex >= touchPoints_.size()) {
+            return 0.0f;
+        }
+        return touchPoints_[pointIndex].displayX;
+    }
+
+    float GetDisplayY(size_t pointIndex) const
+    {
+        if (pointIndex >= OH_MAX_TOUCH_POINTS_NUMBER || pointIndex >= touchPoints_.size()) {
+            return 0.0f;
+        }
+        return touchPoints_[pointIndex].displayY;
+    }
+
     OH_NativeXComponent_KeyEvent* GetKeyEvent()
     {
         return &keyEvent_;
@@ -395,7 +431,7 @@ private:
     double x_ = 0.0;
     double y_ = 0.0;
     OH_NativeXComponent_TouchEvent touchEvent_;
-    OH_NativeXComponent_MouseEvent mouseEvent_;
+    OH_NativeXComponent_MouseEvent mouseEvent_ { .x = 0, .y = 0 };
     OH_NativeXComponent_KeyEvent keyEvent_;
     OH_NativeXComponent_Callback* callback_ = nullptr;
     OH_NativeXComponent_MouseEvent_Callback* mouseEventCallback_ = nullptr;
@@ -412,7 +448,7 @@ private:
     NativeNode_Callback attachNativeNodeCallback_ = nullptr;
     NativeNode_Callback detachNativeNodeCallback_ = nullptr;
     OnTouchIntercept_Callback onTouchInterceptCallback_ = nullptr;
-    void* container_;
+    void* container_ = nullptr;
     bool needSoftKeyboard_ = false;
     std::pair<int32_t, OH_NativeXComponent_EventSourceType> curSourceType_ { -1,
         OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_UNKNOWN };
@@ -436,6 +472,10 @@ struct OH_NativeXComponent {
     int32_t GetToolType(size_t pointIndex, OH_NativeXComponent_TouchPointToolType* toolType);
     int32_t GetTiltX(size_t pointIndex, float* tiltX);
     int32_t GetTiltY(size_t pointIndex, float* tiltY);
+    int32_t GetWindowX(size_t pointIndex, float* windowX);
+    int32_t GetWindowY(size_t pointIndex, float* windowY);
+    int32_t GetDisplayX(size_t pointIndex, float* displayX);
+    int32_t GetDisplayY(size_t pointIndex, float* displayY);
     int32_t RegisterFocusEventCallback(void (*callback)(OH_NativeXComponent* component, void* window));
     int32_t RegisterKeyEventCallback(void (*callback)(OH_NativeXComponent* component, void* window));
     int32_t RegisterBlurEventCallback(void (*callback)(OH_NativeXComponent* component, void* window));

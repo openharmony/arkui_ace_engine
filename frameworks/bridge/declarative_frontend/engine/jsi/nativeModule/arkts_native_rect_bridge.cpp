@@ -100,7 +100,7 @@ ArkUINativeModuleValue RectBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallIn
             nativeNode, radiusValues.data(), radiusUnits.data(), radiusValidPairs.data(), radiusValidPairs.size());
         return panda::JSValueRef::Undefined(vm);
     }
-    if (jsValue->IsNumber() || jsValue->IsString() || jsValue->IsObject()) {
+    if (jsValue->IsNumber() || jsValue->IsString(vm) || jsValue->IsObject(vm)) {
         CalcDimension parsedValue;
         bool isSupportPercent = true;
         if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, parsedValue, isSupportPercent)) {

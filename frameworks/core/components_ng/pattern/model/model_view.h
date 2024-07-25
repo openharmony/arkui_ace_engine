@@ -56,19 +56,7 @@ public:
     virtual void SetBackground(const std::string& src) = 0;
     virtual void SetModelSource(const std::string& src) = 0;
     virtual void SetHandleCameraMove(bool value) = 0;
-    virtual void SetTransparent(bool value) = 0;
-    virtual void SetCameraPosition(AnimatableFloat x, AnimatableFloat y, AnimatableFloat z,
-        AnimatableFloat distance, bool isAngular) = 0;
-    virtual void SetCameraRotation(Quaternion quat) = 0;
-    virtual void SetCameraFrustum(float zNear, float zFar, float fovDegrees) = 0;
-    virtual void SetCameraLookAt(Vec3 lookAtVec) = 0;
-    virtual void SetCameraUp(Vec3 upVec) = 0;
-    virtual void AddLight(const RefPtr<NG::ModelLight>& light) = 0;
-    virtual void AddGeometry(const std::shared_ptr<Render3D::Geometry>& shape) = 0;
-    virtual void AddGLTFAnimation(const std::shared_ptr<Render3D::GLTFAnimation>& animation) = 0;
     virtual void AddCustomRender(const std::shared_ptr<Render3D::CustomRenderDescriptor>& customRender) = 0;
-    virtual void SetWidth(Dimension& width) = 0;
-    virtual void SetHeight(Dimension& height) = 0;
     virtual void SetRenderWidth(Dimension& width) = 0;
     virtual void SetRenderHeight(Dimension& height) = 0;
     virtual void SetRenderFrameRate(float rate) = 0;

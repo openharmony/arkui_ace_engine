@@ -211,8 +211,8 @@ const double DEFAULT_GRID_WIDTH = -1.0;
 const double DEFAULT_GRID_HEIGHT = -1.0;
 
 // scrollBar
-extern const char SCROLL_BAR_DISPLAY_MODE[] = "scrollbar";
-extern const char SCROLL_BAR_SHAPE_MODE[] = "shapemode";
+const char SCROLL_BAR_DISPLAY_MODE[] = "scrollbar";
+const char SCROLL_BAR_SHAPE_MODE[] = "shapemode";
 
 // edge constants
 const char PADDING_NAME[] = "Padding";

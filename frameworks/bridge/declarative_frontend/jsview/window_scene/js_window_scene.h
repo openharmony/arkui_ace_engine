@@ -24,6 +24,7 @@ class JSWindowScene : public JSViewAbstract, public JSInteractableView {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
+    static void JsAttractionEffect(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 

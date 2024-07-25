@@ -113,6 +113,8 @@ public:
     static void SetWaterflowFooter(FrameNode* frameNode, FrameNode* footerNode);
     static bool hasFooter(FrameNode* frameNode);
     static void SetFlingSpeedLimit(FrameNode* frameNode, double maxSpeed);
+    static void SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy);
+    static void SetLayoutMode(FrameNode* frameNode, WaterFlowLayoutMode mode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H

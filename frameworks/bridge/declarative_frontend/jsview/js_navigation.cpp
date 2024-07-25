@@ -19,8 +19,10 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/referenced.h"
+#include "base/system_bar/system_bar_style.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_navigation_function.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
@@ -261,8 +263,34 @@ bool JSNavigation::ParseCommonTitle(const JSRef<JSObject>& jsObj)
 void JSNavigation::Create(const JSCallbackInfo& info)
 {
     JSRef<JSObject> newObj;
-    if (info.Length() > 0) {
+    std::string moduleName;
+    std::string pagePath;
+    if (info.Length() == 1) {
+        // input format: navPathStack/pathInfo
         if (!info[0]->IsObject()) {
+            return;
+        }
+        // instance of NavPathStack
+        JSValueWrapper valueWrapper = info[0].Get().GetLocalHandle();
+        if (!JSNavPathStack::CheckIsValid(valueWrapper)) {
+            // first parameter = pathInfo{'moduleName': stringA, 'pagePath': stringB, 'isUserCreateStack': bool}
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current stack is not navPathStack");
+            auto infoObj = JSRef<JSObject>::Cast(info[0]);
+            if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
+                !infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->IsString()) {
+                TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current pageInfo is invalid");
+                return;
+            }
+            moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
+            pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
+        } else {
+            // first parameter = navPathStack
+            newObj = JSRef<JSObject>::Cast(info[0]);
+        }
+    } else if (info.Length() == 2) {
+        // parameter = navPathStack(maybe empty) + pathInfo
+        if (!info[0]->IsObject() || !info[1]->IsObject()) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "stack or pageInfo is invalid");
             return;
         }
         // instance of NavPathStack
@@ -271,7 +299,23 @@ void JSNavigation::Create(const JSCallbackInfo& info)
             TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current stack is not navPathStack");
             return;
         }
-        newObj = JSRef<JSObject>::Cast(info[0]);
+        // pathInfo{'moduleName': stringA, 'pagePath': stringB, 'isUserCreateStack': bool}
+        auto infoObj = JSRef<JSObject>::Cast(info[1]);
+        auto isUserCreateStack = infoObj->GetProperty(NG::IS_USER_CREATE_STACK);
+        bool isUserDefined = true;
+        if (isUserCreateStack->IsBoolean()) {
+            isUserDefined = isUserCreateStack->ToBoolean();
+        }
+        if (isUserDefined) {
+            newObj = JSRef<JSObject>::Cast(info[0]);
+        }
+        if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
+            !infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->IsString()) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current pageInfo is invalid");
+            return;
+        }
+        moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
+        pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
     }
 
     NavigationModel::GetInstance()->Create();
@@ -302,6 +346,7 @@ void JSNavigation::Create(const JSCallbackInfo& info)
         jsStack->SetJSExecutionContext(info.GetExecutionContext());
     };
     NavigationModel::GetInstance()->SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
+    NavigationModel::GetInstance()->SetNavigationPathInfo(moduleName, pagePath);
 }
 
 void JSNavigation::JSBind(BindingTarget globalObj)
@@ -338,6 +383,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSNavigation>::StaticMethod("customNavContentTransition", &JSNavigation::SetCustomNavContentTransition);
     JSClass<JSNavigation>::StaticMethod("ignoreLayoutSafeArea", &JSNavigation::SetIgnoreLayoutSafeArea);
+    JSClass<JSNavigation>::StaticMethod("systemBarStyle", &JSNavigation::SetSystemBarStyle);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -411,6 +457,7 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
     }
     if (info.Length() > 1) {
         ParseBackgroundOptions(info[1], options.bgOptions);
+        ParseBarOptions(info[1], options.brOptions);
     }
     NavigationModel::GetInstance()->SetTitlebarOptions(std::move(options));
 }
@@ -805,7 +852,7 @@ void JSNavigation::SetCustomNavContentTransition(const JSCallbackInfo& info)
     RefPtr<JsNavigationFunction> jsNavigationFunction =
         AceType::MakeRefPtr<JsNavigationFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onNavigationAnimation = [execCtx = info.GetExecutionContext(), func = std::move(jsNavigationFunction)](
-                                     NG::NavContentInfo from, NG::NavContentInfo to,
+                                     RefPtr<NG::NavDestinationContext> from, RefPtr<NG::NavDestinationContext> to,
                                      NG::NavigationOperation operation) -> NG::NavigationTransition {
         NG::NavigationTransition transition;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, transition);
@@ -817,13 +864,21 @@ void JSNavigation::SetCustomNavContentTransition(const JSCallbackInfo& info)
         }
 
         auto transitionObj = JSRef<JSObject>::Cast(ret);
+        JSRef<JSVal> interactive = transitionObj->GetProperty("isInteractive");
+        if (interactive->IsBoolean()) {
+            transition.interactive = interactive->ToBoolean();
+        } else {
+            transition.interactive = false;
+        }
+        int32_t timeout = -1;
         JSRef<JSVal> time = transitionObj->GetProperty("timeout");
         if (time->IsNumber()) {
-            auto timeout = time->ToNumber<int32_t>();
-            transition.timeout = (timeout >= 0) ? timeout : NAVIGATION_ANIMATION_TIMEOUT;
-        } else {
-            transition.timeout = NAVIGATION_ANIMATION_TIMEOUT;
+            timeout = time->ToNumber<int32_t>();
         }
+        if (!transition.interactive) {
+            timeout = timeout < 0 ? NAVIGATION_ANIMATION_TIMEOUT : timeout;
+        }
+        transition.timeout = timeout;
         JSRef<JSVal> transitionContext = transitionObj->GetProperty("transition");
         if (!transitionContext->IsFunction()) {
             return transition;
@@ -891,5 +946,18 @@ void JSNavigation::SetIgnoreLayoutSafeArea(const JSCallbackInfo& info)
         opts.edges = safeAreaEdge;
     }
     NavigationModel::GetInstance()->SetIgnoreLayoutSafeArea(opts);
+}
+
+void JSNavigation::SetSystemBarStyle(const JSCallbackInfo& info)
+{
+    RefPtr<SystemBarStyle> style = nullptr;
+    if (info.Length() == 1 && info[0]->IsObject()) {
+        auto styleObj = JsConverter::ConvertJsValToNapiValue(info[0]);
+        auto env = GetCurrentEnv();
+        if (env) {
+            style = SystemBarStyle::CreateStyleFromJsObj(env, styleObj);
+        }
+    }
+    NavigationModel::GetInstance()->SetSystemBarStyle(style);
 }
 } // namespace OHOS::Ace::Framework

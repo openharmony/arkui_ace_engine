@@ -14,6 +14,9 @@
  */
 
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
@@ -21,8 +24,10 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
 #include "core/animation/animator.h"
 #include "core/common/container.h"
+#include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/popup_param.h"
@@ -31,6 +36,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
+#include "core/components_ng/pattern/indexer/vibrator_impl.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
@@ -56,6 +62,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t TOTAL_NUMBER = 1000;
 constexpr double PERCENT_100 = 100.0;
+constexpr int32_t MODE_SEVEN = 6; // items is divided into 6 groups in (7 + #) mode
+constexpr int32_t MODE_FIVE = 4; // items is divided into 4 groups in (5 + #) mode
 }
 void IndexerPattern::OnModifyDone()
 {
@@ -66,13 +74,49 @@ void IndexerPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
 
     enableHapticFeedback_ = layoutProperty->GetEnableHapticFeedback().value_or(true);
-    auto itemCountChanged = false;
     bool autoCollapseModeChanged = true;
-    if (!isNewHeightCalculated_) {
-        auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(false);
-        autoCollapseModeChanged = autoCollapse != autoCollapse_;
-        autoCollapse_ = autoCollapse;
+    bool itemCountChanged = false;
+    InitArrayValue(autoCollapseModeChanged, itemCountChanged);
+    BuildArrayValueItems();
+    bool removeBubble = false;
+    auto usePopup = layoutProperty->GetUsingPopup().value_or(false);
+    if (isPopup_ != usePopup) {
+        isPopup_ = usePopup;
+        removeBubble = !isPopup_;
+    }
+    // Remove bubble if auto-collapse mode switched on/off or if items count changed
+    removeBubble = removeBubble || autoCollapseModeChanged || itemCountChanged;
+    if (removeBubble) {
+        RemoveBubble();
+    }
 
+    isNewHeightCalculated_ = false;
+    auto itemSize =
+        layoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP)).ConvertToPx();
+    auto indexerSizeChanged = (itemCountChanged || !NearEqual(itemSize, lastItemSize_));
+    lastItemSize_ = itemSize;
+    auto needMarkDirty = (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_NORMAL);
+    ApplyIndexChanged(needMarkDirty, initialized_ && selectChanged_, false, indexerSizeChanged);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    if (gesture) {
+        InitPanEvent(gesture);
+        InitTouchEvent(gesture);
+    }
+    InitInputEvent();
+    InitOnKeyEvent();
+    SetAccessibilityAction();
+}
+
+void IndexerPattern::InitArrayValue(bool& autoCollapseModeChanged, bool& itemCountChanged)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(true);
+    if (!isNewHeightCalculated_) {
+        autoCollapseModeChanged = autoCollapse != lastAutoCollapse_;
+        lastAutoCollapse_ = autoCollapse;
         auto newArray = layoutProperty->GetArrayValue().value_or(std::vector<std::string>());
         bool arrayValueChanged = newArray.size() != fullArrayValue_.size() || newArray != fullArrayValue_;
         if (arrayValueChanged || autoCollapseModeChanged) {
@@ -80,11 +124,16 @@ void IndexerPattern::OnModifyDone()
         }
         fullArrayValue_ = newArray;
     }
-
+    auto propSelect = layoutProperty->GetSelected().value();
     if (fullArrayValue_.size() > 0) {
-        if (autoCollapse_) {
+        if (autoCollapse) {
             sharpItemCount_ = fullArrayValue_.at(0) == StringUtils::Str16ToStr8(INDEXER_STR_SHARP) ? 1 : 0;
             CollapseArrayValue();
+            if ((lastCollapsingMode_ == IndexerCollapsingMode::SEVEN ||
+                    lastCollapsingMode_ == IndexerCollapsingMode::FIVE) &&
+                (propSelect > sharpItemCount_)) {
+                propSelect = GetAutoCollapseIndex(propSelect);
+            }
         } else {
             sharpItemCount_ = 0;
             BuildFullArrayValue();
@@ -97,26 +146,6 @@ void IndexerPattern::OnModifyDone()
         itemCount_ = 0;
         arrayValue_.clear();
     }
-    BuildArrayValueItems();
-
-    bool removeBubble = false;
-    auto usePopup = layoutProperty->GetUsingPopup().value_or(false);
-    if (isPopup_ != usePopup) {
-        isPopup_ = usePopup;
-        removeBubble = !isPopup_;
-    }
-
-    // Remove bubble if auto-collapse mode switched on/off or if items count changed
-    removeBubble |= autoCollapseModeChanged || itemCountChanged;
-    if (removeBubble) {
-        RemoveBubble();
-    }
-
-    auto propSelect = layoutProperty->GetSelected().value();
-    if (propSelect < 0 || propSelect >= itemCount_) {
-        propSelect = 0;
-        layoutProperty->UpdateSelected(propSelect);
-    }
     if (propSelect != selected_) {
         selected_ = propSelect;
         selectChanged_ = true;
@@ -124,20 +153,12 @@ void IndexerPattern::OnModifyDone()
     } else if (!isNewHeightCalculated_) {
         selectChanged_ = false;
     }
-    isNewHeightCalculated_ = false;
-    auto itemSize =
-        layoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP)).ConvertToPx();
-    auto indexerSizeChanged = (itemCountChanged || !NearEqual(itemSize, lastItemSize_));
-    lastItemSize_ = itemSize;
-    auto needMarkDirty = (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_NORMAL);
-    ApplyIndexChanged(needMarkDirty, initialized_ && selectChanged_, false, indexerSizeChanged);
-    auto gesture = host->GetOrCreateGestureEventHub();
-    if (gesture) {
-        InitPanEvent(gesture);
-    }
-    InitInputEvent();
+}
+
+void IndexerPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
     if (!touchListener_) {
-        CHECK_NULL_VOID(gesture);
+        CHECK_NULL_VOID(gestureHub);
         auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
             auto indexerPattern = weak.Upgrade();
             CHECK_NULL_VOID(indexerPattern);
@@ -150,10 +171,8 @@ void IndexerPattern::OnModifyDone()
             }
         };
         touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-        gesture->AddTouchEvent(touchListener_);
+        gestureHub->AddTouchEvent(touchListener_);
     }
-    InitOnKeyEvent();
-    SetAccessibilityAction();
 }
 
 bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -167,7 +186,7 @@ bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     CHECK_NULL_RETURN(indexerLayoutAlgorithm, false);
     itemSizeRender_ = indexerLayoutAlgorithm->GetItemSizeRender();
     auto height = indexerLayoutAlgorithm->GetActualHeight();
-    if (actualIndexerHeight_ != height && autoCollapse_) {
+    if (actualIndexerHeight_ != height && lastAutoCollapse_) {
         actualIndexerHeight_ = height;
         isNewHeightCalculated_ = true;
         auto hostNode = dirty->GetHostNode();
@@ -203,13 +222,13 @@ void IndexerPattern::BuildArrayValueItems()
     for (auto indexerItem : arrayValue_) {
         arrayValueStrs.push_back(indexerItem.first);
     }
-    layoutProperty->UpdateArrayValue(arrayValueStrs);
+    layoutProperty->UpdateActualArrayValue(arrayValueStrs);
 }
 
 void IndexerPattern::BuildFullArrayValue()
 {
     arrayValue_.clear();
-    
+    autoCollapse_ = false;
     for (auto indexerLetter : fullArrayValue_) {
         arrayValue_.push_back(std::pair(indexerLetter, false));
     }
@@ -290,6 +309,7 @@ void IndexerPattern::ApplySevenPlusOneMode(int32_t fullArraySize)
         arrayValue_.push_back(std::pair(fullArrayValue_.at(lastIndex), false));
         lastPushedIndex = lastIndex;
     }
+    autoCollapse_ = true;
 }
 
 void IndexerPattern::ApplyFivePlusOneMode(int32_t fullArraySize)
@@ -325,6 +345,32 @@ void IndexerPattern::ApplyFivePlusOneMode(int32_t fullArraySize)
         arrayValue_.push_back(std::pair(fullArrayValue_.at(lastIndex), false));
         lastPushedIndex = lastIndex;
     }
+    autoCollapse_ = true;
+}
+
+int32_t IndexerPattern::GetAutoCollapseIndex(int32_t propSelect)
+{
+    int32_t fullArraySize = static_cast<int32_t>(fullArrayValue_.size());
+    int32_t index = sharpItemCount_;
+    int32_t mode = MODE_FIVE;
+    propSelect -= sharpItemCount_;
+    if (lastCollapsingMode_ == IndexerCollapsingMode::SEVEN) {
+        mode = MODE_SEVEN;
+    }
+    // minimum items in one group including
+    // visible character in the group and excluding the first always visible item and # item if exists
+    auto cmin = static_cast<int32_t>((fullArraySize - 1 - sharpItemCount_) / mode);
+    auto gmax = (fullArraySize - 1 - sharpItemCount_) - cmin * mode; // number of groups with maximum items count
+    auto cmax = cmin + 1; // maximum items in one group including visible character in the group
+    auto gmin = mode - gmax; // number of groups with minimum items count
+    if (propSelect > gmin * cmin) {
+        index += gmin * 2; // one group includes two index
+        propSelect -= gmin * cmin;
+        index += propSelect / cmax * 2 + (propSelect % cmax == 0 ? 0 : 1);
+    } else {
+        index += propSelect / cmin * 2 + (propSelect % cmin == 0 ? 0 : 1);
+    }
+    return  index;
 }
 
 void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -481,7 +527,7 @@ void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
     }
     ResetStatus();
     ApplyIndexChanged(true, true, true);
-    OnSelect(true);
+    OnSelect();
 }
 
 void IndexerPattern::MoveIndexByOffset(const Offset& offset)
@@ -498,6 +544,7 @@ void IndexerPattern::MoveIndexByOffset(const Offset& offset)
     }
     childPressIndex_ = nextSelectIndex;
     selected_ = nextSelectIndex;
+    selectedChangedForHaptic_ = lastSelected_ != selected_;
     lastSelected_ = nextSelectIndex;
     FireOnSelect(selected_, true);
     if (isHover_ && childPressIndex_ >= 0) {
@@ -543,11 +590,13 @@ bool IndexerPattern::KeyIndexByStep(int32_t step)
     auto refreshBubble = nextSected >= 0 && nextSected < itemCount_;
     if (refreshBubble) {
         selected_ = nextSected;
+        selectedChangedForHaptic_ = lastSelected_ != selected_;
         lastSelected_ = nextSected;
     }
     childPressIndex_ = -1;
     childHoverIndex_ = -1;
     ApplyIndexChanged(true, refreshBubble);
+    OnSelect();
     return nextSected >= 0;
 }
 
@@ -569,6 +618,7 @@ bool IndexerPattern::MoveIndexByStep(int32_t step)
     selected_ = nextSected;
     ResetStatus();
     ApplyIndexChanged(true, true);
+    OnSelect();
     return nextSected >= 0;
 }
 
@@ -583,6 +633,7 @@ bool IndexerPattern::MoveIndexBySearch(const std::string& searchStr)
     childHoverIndex_ = -1;
     childPressIndex_ = -1;
     ApplyIndexChanged(true, true);
+    OnSelect();
     return nextSelectIndex >= 0;
 }
 
@@ -626,7 +677,7 @@ void IndexerPattern::ResetStatus()
     popupClickedIndex_ = -1;
 }
 
-void IndexerPattern::OnSelect(bool changed)
+void IndexerPattern::OnSelect()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -642,6 +693,7 @@ void IndexerPattern::OnSelect(bool changed)
         CHECK_NULL_VOID(lastFrameNode);
         ItemSelectedOutAnimation(lastFrameNode);
     }
+    selectedChangedForHaptic_ = lastSelected_ != selected_;
     lastSelected_ = selected_;
 }
 
@@ -662,6 +714,13 @@ void IndexerPattern::ApplyIndexChanged(
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
+#ifndef ACE_UNITTEST
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    const std::vector<std::string> customFonts = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
+#else
+    const std::vector<std::string> customFonts;
+#endif
     int32_t index = 0;
     auto total = host->GetTotalChildCount();
     auto childrenNode = host->GetChildren();
@@ -733,6 +792,11 @@ void IndexerPattern::ApplyIndexChanged(
                 childRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
             }
             auto selectedFont = layoutProperty->GetSelectedFont().value_or(indexerTheme->GetSelectTextStyle());
+            if ((!layoutProperty->GetSelectedFont().has_value() ||
+                    layoutProperty->GetSelectedFont().value().GetFontFamilies().empty()) &&
+                !customFonts.empty()) {
+                selectedFont.SetFontFamilies(customFonts);
+            }
             nodeLayoutProperty->UpdateFontSize(selectedFont.GetFontSize());
             auto fontWeight = selectedFont.GetFontWeight();
             nodeLayoutProperty->UpdateFontWeight(fontWeight);
@@ -769,9 +833,13 @@ void IndexerPattern::ApplyIndexChanged(
         nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
         childRenderContext->ResetBlendBorderColor();
         auto defaultFont = layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle());
+        if ((!layoutProperty->GetFont().has_value() || layoutProperty->GetFont().value().GetFontFamilies().empty()) &&
+            !customFonts.empty()) {
+            defaultFont.SetFontFamilies(customFonts);
+        }
         nodeLayoutProperty->UpdateFontSize(defaultFont.GetFontSize());
-        nodeLayoutProperty->UpdateFontWeight(defaultFont.GetFontWeight());
         nodeLayoutProperty->UpdateFontFamily(defaultFont.GetFontFamilies());
+        nodeLayoutProperty->UpdateFontWeight(defaultFont.GetFontWeight());
         nodeLayoutProperty->UpdateItalicFontStyle(defaultFont.GetFontStyle());
         nodeLayoutProperty->UpdateTextColor(layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor()));
         index++;
@@ -782,11 +850,9 @@ void IndexerPattern::ApplyIndexChanged(
     }
     if (selectChanged) {
         ShowBubble();
-#ifdef INDEXER_SUPPORT_VIBRATOR
-        if (enableHapticFeedback_) {
-            VibraFeedback();
+        if (enableHapticFeedback_ && selectedChangedForHaptic_ && !fromTouchUp) {
+            VibratorImpl::StartVibraFeedback();
         }
-#endif
     }
 }
 
@@ -1031,6 +1097,8 @@ void IndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto letterNode = GetLetterNode();
@@ -1039,6 +1107,11 @@ void IndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     CHECK_NULL_VOID(letterLayoutProperty);
     letterLayoutProperty->UpdateContent(arrayValue_[childPressIndex_ >= 0 ? childPressIndex_ : selected_].first);
     auto popupTextFont = layoutProperty->GetPopupFont().value_or(indexerTheme->GetPopupTextStyle());
+    if ((!layoutProperty->GetPopupFont().has_value() ||
+            layoutProperty->GetPopupFont().value().GetFontFamilies().empty()) &&
+        fontManager->IsUseAppCustomFont()) {
+        popupTextFont.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
+    }
     letterLayoutProperty->UpdateMaxLines(1);
     letterLayoutProperty->UpdateFontSize(popupTextFont.GetFontSize());
     letterLayoutProperty->UpdateFontWeight(popupTextFont.GetFontWeight());
@@ -1359,8 +1432,8 @@ void IndexerPattern::UpdateBubbleListItem(
         textLayoutProperty->UpdateFontSize(popupItemTextFontSize);
         textLayoutProperty->UpdateFontWeight(popupItemTextFontWeight);
         textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateTextColor(i == popupClickedIndex_ ?
-            popupSelectedTextColor : popupUnselectedTextColor);
+        textLayoutProperty->UpdateTextColor(
+            static_cast<int32_t>(i) == popupClickedIndex_ ? popupSelectedTextColor : popupUnselectedTextColor);
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
         UpdateBubbleListItemContext(listNode, indexerTheme, i);
@@ -1388,13 +1461,14 @@ void IndexerPattern::UpdateBubbleListItemContext(
         listItemContext->UpdateBorderRadius({ popupItemRadius, popupItemRadius, popupItemRadius, popupItemRadius });
         auto popupItemBackground =
             paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupUnclickedBgAreaColor());
-        listItemContext->UpdateBackgroundColor(
-            pos == popupClickedIndex_ ? (indexerTheme->GetPopupClickedBgAreaColor()) : popupItemBackground);
+        listItemContext->UpdateBackgroundColor(static_cast<int32_t>(pos) == popupClickedIndex_
+                                                   ? (indexerTheme->GetPopupClickedBgAreaColor())
+                                                   : popupItemBackground);
     } else {
         auto popupItemBackground =
             paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupBackgroundColor());
         listItemContext->UpdateBackgroundColor(
-            pos == popupClickedIndex_ ? Color(POPUP_LISTITEM_CLICKED_BG) : popupItemBackground);
+            static_cast<int32_t>(pos) == popupClickedIndex_ ? Color(POPUP_LISTITEM_CLICKED_BG) : popupItemBackground);
     }
 }
 
@@ -1505,6 +1579,9 @@ void IndexerPattern::OnListItemClick(int32_t index)
     auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
     if (onPopupSelected) {
         onPopupSelected(index);
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPopupSelected");
+#endif
     }
     ChangeListItemsSelectedStyle(index);
 }
@@ -1826,17 +1903,18 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
     if (fromPress || lastIndexFromPress_ == fromPress || lastFireSelectIndex_ != selectIndex) {
         auto onChangeEvent = indexerEventHub->GetChangeEvent();
         if (onChangeEvent && (selected_ >= 0) && (selected_ < itemCount_)) {
-            onChangeEvent(selected_);
+            onChangeEvent(actualIndex);
         }
         auto onCreatChangeEvent = indexerEventHub->GetCreatChangeEvent();
         if (onCreatChangeEvent && (selected_ >= 0) && (selected_ < itemCount_)) {
-            onCreatChangeEvent(selected_);
+            onCreatChangeEvent(actualIndex);
         }
         auto onSelected = indexerEventHub->GetOnSelected();
         if (onSelected && (selectIndex >= 0) && (selectIndex < itemCount_)) {
             onSelected(actualIndex); // fire onSelected with an item's index from original array
         }
     }
+    selectedChangedForHaptic_ = lastFireSelectIndex_ != selected_;
     lastFireSelectIndex_ = selectIndex;
     lastIndexFromPress_ = fromPress;
 }
@@ -1868,7 +1946,7 @@ void IndexerPattern::SetAccessibilityAction()
                 indexerPattern->selected_ = index;
                 indexerPattern->ResetStatus();
                 indexerPattern->ApplyIndexChanged(true, true, true);
-                indexerPattern->OnSelect(true);
+                indexerPattern->OnSelect();
             });
 
         accessibilityProperty->SetActionClearSelection(
@@ -1891,7 +1969,7 @@ void IndexerPattern::SetAccessibilityAction()
                 indexerPattern->selected_ = 0;
                 indexerPattern->ResetStatus();
                 indexerPattern->ApplyIndexChanged(true, false);
-                indexerPattern->OnSelect(false);
+                indexerPattern->OnSelect();
             });
     }
 }

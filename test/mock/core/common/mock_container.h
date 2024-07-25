@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 
+#include "core/common/ace_view.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace {
@@ -42,6 +43,36 @@ public:
     static RefPtr<MockContainer> Current();
     static RefPtr<MockContainer> GetContainer(int32_t containerId);
 
+    void SetIsFormRender(bool isFormRender) override
+    {
+        isFormRender_ = isFormRender;
+    }
+
+    bool IsFormRender() const override
+    {
+        return isFormRender_;
+    }
+
+    bool IsUIExtensionWindow() override
+    {
+        return isUIExtensionWindow_;
+    }
+
+    void SetIsUIExtensionWindow(bool isUIExtensionWindow)
+    {
+        isUIExtensionWindow_ = isUIExtensionWindow;
+    }
+
+    bool IsScenceBoardWindow() override
+    {
+        return isScenceBoardWindow_;
+    }
+
+    void SetIsScenceBoardWindow(bool isScenceBoardWindow)
+    {
+        isScenceBoardWindow_ = isScenceBoardWindow;
+    }
+
     MOCK_METHOD(void, Initialize, (), (override));
     MOCK_METHOD(void, Destroy, (), (override));
     MOCK_METHOD(int32_t, GetInstanceId, (), (const, override));
@@ -56,6 +87,7 @@ public:
     MOCK_METHOD(int32_t, GetViewPosY, (), (const, override));
     MOCK_METHOD(uint32_t, GetWindowId, (), (const, override));
     MOCK_METHOD(void*, GetView, (), (const, override));
+    MOCK_METHOD(RefPtr<AceView>, GetAceView, (), (const, override));
 
     MOCK_METHOD(void, DumpHeapSnapshot, (bool isPrivate), (override));
     MOCK_METHOD(void, TriggerGarbageCollection, (), (override));
@@ -66,6 +98,9 @@ public:
 private:
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<PipelineBase> pipelineContext_;
+    bool isFormRender_ = false;
+    bool isUIExtensionWindow_ = false;
+    bool isScenceBoardWindow_ = false;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_CORE_COMMON_MOCK_CONTAINER_H

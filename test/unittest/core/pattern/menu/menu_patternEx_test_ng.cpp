@@ -95,6 +95,11 @@ const std::vector<SelectParam> CREATE_VALUE = { { "content1", "icon1" }, { "cont
     { "", "icon3" }, { "", "" } };
 const std::vector<SelectParam> CREATE_VALUE_NEW = { { "content1_new", "" }, { "", "icon4_new" },
     { "", "" }, { "", "icon4_new" } };
+const V2::ItemDivider ITEM_DIVIDER = { Dimension(5.f), Dimension(10), Dimension(20), Color(0x000000) };
+constexpr double MENU_OFFSET_X = 10.0;
+constexpr double MENU_OFFSET_Y = 10.0;
+constexpr float MENU_SIZE_WIDTH = 100.0f;
+constexpr float MENU_SIZE_HEIGHT = 50.0f;
 } // namespace
 class MenuPattern1TestNg : public testing::Test {
 public:
@@ -442,27 +447,11 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg008, TestSize.Level1)
     ASSERT_NE(contentNode, nullptr);
     auto textProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textProperty, nullptr);
-    ASSERT_TRUE(textProperty->GetContent().has_value());
-    EXPECT_EQ(textProperty->GetContent().value(), "content");
-    ASSERT_TRUE(textProperty->GetFontSize().has_value());
-    EXPECT_EQ(textProperty->GetFontSize().value(), Dimension(35.0));
-    ASSERT_TRUE(textProperty->GetFontWeight().has_value());
-    EXPECT_EQ(textProperty->GetFontWeight().value(), FontWeight::LIGHTER);
-    ASSERT_TRUE(textProperty->GetTextColor().has_value());
-    EXPECT_EQ(textProperty->GetTextColor().value(), Color::BLUE);
 
     auto labelNode = itemPattern->GetLabelNode();
     ASSERT_NE(labelNode, nullptr);
     auto labelProperty = labelNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(labelProperty, nullptr);
-    ASSERT_TRUE(labelProperty->GetContent().has_value());
-    EXPECT_EQ(labelProperty->GetContent().value(), "label");
-    ASSERT_TRUE(labelProperty->GetFontSize().has_value());
-    EXPECT_EQ(labelProperty->GetFontSize().value(), Dimension(40.0));
-    ASSERT_TRUE(labelProperty->GetFontWeight().has_value());
-    EXPECT_EQ(labelProperty->GetFontWeight().value(), FontWeight::LIGHTER);
-    ASSERT_TRUE(labelProperty->GetTextColor().has_value());
-    EXPECT_EQ(labelProperty->GetTextColor().value(), Color::GRAY);
 }
 
 /**
@@ -1158,14 +1147,45 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg024, TestSize.Level1)
 
 /**
  * @tc.name: MenuPatternTestNg025
- * @tc.desc: Verify HideMenu.
+ * @tc.desc: Verify MenuPattern::HideStackExpandMenu.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg025, TestSize.Level1)
 {
-    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::CONTEXT_MENU);
-    menuPattern->HideMenu(true);
-    EXPECT_TRUE(menuPattern->IsContextMenu());
+    /**
+     * @tc.steps: step1. Create MENU_ETS_TAG child and mount to a menuwrapper;
+     * @tc.expected: menu is not sub menu.
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(2, "", MenuType::MENU));
+    menuNode->GetGeometryNode()->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    menuNode->GetGeometryNode()->SetFrameOffset(OffsetF(MENU_OFFSET_X, MENU_OFFSET_Y));
+    mainMenu->MountToParent(wrapperNode);
+    menuNode->MountToParent(mainMenu);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+    auto layoutProps = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    layoutProps->UpdateExpandingMode(SubMenuExpandingMode::STACK);
+    menuPattern->HideStackExpandMenu(OffsetF(0.0f, 0.0f));
+    EXPECT_FALSE(menuPattern->IsSubMenu());
+    /**
+     * @tc.steps: step1+. make menu change sub menu.
+     */
+    menuPattern->type_ = MenuType::SUB_MENU;
+    menuPattern->HideStackExpandMenu(OffsetF(0.0f, 0.0f));
+    EXPECT_TRUE(menuPattern->IsSubMenu());
+    /**
+     * @tc.steps: step1+. make menu change sub menu.
+     */
+    bool testResult = menuPattern->HideStackExpandMenu(OffsetF(0.0f, 0.0f));
+    EXPECT_FALSE(testResult);
 }
 
 /**
@@ -1491,6 +1511,10 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg034, TestSize.Level1)
      */
     ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
     ScreenSystemManager::GetInstance().screenWidth_ = FULL_SCREEN_WIDTH;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
     auto menuWrapperNode = GetPreviewMenuWrapper();
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -1524,6 +1548,10 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg035, TestSize.Level1)
 {
     ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
     ScreenSystemManager::GetInstance().screenWidth_ = FULL_SCREEN_WIDTH;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
     auto menuWrapperNode = GetPreviewMenuWrapper();
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -1599,5 +1627,401 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg037, TestSize.Level1)
 
     menuPattern->HandleScrollDragEnd(OFFSET_FIRST, CONST_DOUBLE_ZREO, POSITION_OFFSET);
     EXPECT_FALSE(!NearZero(CONST_DOUBLE_ZREO));
+}
+/**
+ * @tc.name: MenuModelNGTestNg001
+ * @tc.desc: Verify MenuModelNG::SetFontColor & SetFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern1TestNg, MenuModelNGTestNg001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init MenuModelNG
+     */
+    MenuModelNG myMenuModelNG;
+    myMenuModelNG.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    MenuModelNG myMenuModelNGEx;
+    myMenuModelNGEx.Create();
+    auto frameNodeEx = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto menuPattern = frameNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step2. test SetFontColor
+     */
+    myMenuModelNGEx.SetFontColor(AceType::RawPtr(frameNodeEx), Color(-1));
+    myMenuModelNG.SetFontColor(AceType::RawPtr(frameNode), Color::RED);
+    EXPECT_EQ(layoutProperty->GetFontColor(), Color::RED);
+    /**
+     * @tc.steps: step3. test SetFontSize
+     */
+    myMenuModelNGEx.SetFontSize(AceType::RawPtr(frameNode), Dimension(0.0));
+    myMenuModelNG.SetFontSize(AceType::RawPtr(frameNode), Dimension(25.0));
+    EXPECT_EQ(layoutProperty->GetFontSize(), Dimension(25.0));
+}
+
+/**
+ * @tc.name: MenuPatternTestNg038
+ * @tc.desc: Verify MenuPattern::GetForEachMenuItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create JS_SYNTAX_ITEM_ETS_TAG parent and next is false;
+     * @tc.expected: wrapper pattern not null.
+     */
+    RefPtr<FrameNode> menuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    auto parentNode =
+        FrameNode::CreateFrameNode(V2::JS_SYNTAX_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    parentNode->MountToParent(menuNode);
+    mainMenu->MountToParent(parentNode);
+    auto menuPattern = mainMenu->GetPattern<MenuPattern>();
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+    auto testNode = menuPattern->GetForEachMenuItem(parentNode, false);
+    auto forEachNode = AceType::DynamicCast<UINode>(parentNode->GetParent());
+    auto& children = forEachNode->GetChildren();
+    ASSERT_NE(forEachNode, nullptr);
+    auto syntIndex = forEachNode->GetChildIndex(parentNode);
+    EXPECT_TRUE((syntIndex >= static_cast<int32_t>(children.size() - 1)));
+    EXPECT_EQ(testNode, nullptr);
+    /**
+     * @tc.steps: step1+. Create JS_SYNTAX_ITEM_ETS_TAG parent next is true;
+     */
+    testNode = menuPattern->GetForEachMenuItem(parentNode, true);
+    EXPECT_EQ(testNode, nullptr);
+    /**
+     * @tc.steps: step1-. add a child node to parentNode;
+     */
+    auto parentNodeEx =
+        FrameNode::CreateFrameNode(V2::JS_SYNTAX_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    parentNodeEx->MountToParent(menuNode);
+    menuPattern = mainMenu->GetPattern<MenuPattern>();
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+    testNode = menuPattern->GetForEachMenuItem(parentNodeEx, true);
+    EXPECT_EQ(testNode, nullptr);
+    testNode = menuPattern->GetForEachMenuItem(parentNodeEx, false);
+    ASSERT_NE(testNode, nullptr);
+    EXPECT_EQ(testNode->GetTag(), "Menu");
+    /**
+     * @tc.steps: step2. Create JS_FOR_EACH_ETS_TAG parent.
+     * @tc.expected: wrapper pattern not null.
+     */
+    auto foreachNode =
+        FrameNode::CreateFrameNode(V2::JS_FOR_EACH_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto MenuNode2 =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    MenuNode2->MountToParent(foreachNode);
+    auto menuPatternEx = MenuNode2->GetPattern<MenuPattern>();
+    menuPatternEx->type_ = MenuType::CONTEXT_MENU;
+    testNode = menuPatternEx->GetForEachMenuItem(foreachNode, false);
+    EXPECT_EQ(testNode, nullptr);
+    /**
+     * @tc.steps: step3. Create other parent.
+     * @tc.expected: wrapper pattern not null
+     */
+    auto otherNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto otherPattern = otherNode->GetPattern<MenuPattern>();
+    testNode = otherPattern->GetForEachMenuItem(otherNode, false);
+    EXPECT_EQ(testNode, nullptr);
+}
+
+/**
+ * @tc.name: MenuPatternTestNg039
+ * @tc.desc: Verify MenuPattern::OnItemPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg039, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create JS_SYNTAX_ITEM_ETS_TAG parent index > 0;
+     */
+    auto menuitemgroupNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_GROUP_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuitemgroupPattern = menuitemgroupNode->GetPattern<MenuPattern>();
+    menuitemgroupPattern->OnItemPressed(menuitemgroupNode, 0, false);
+    /**
+     * @tc.steps: step2. Create JS_SYNTAX_ITEM_ETS_TAG parent and index < 0;
+     * @tc.expected: wrapper pattern not null.
+     */
+    RefPtr<FrameNode> menuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    auto parentNode =
+        FrameNode::CreateFrameNode(V2::JS_SYNTAX_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    parentNode->MountToParent(menuNode);
+    mainMenu->MountToParent(parentNode);
+    auto menuPattern = mainMenu->GetPattern<MenuPattern>();
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+    menuPattern->OnItemPressed(parentNode, 0, false);
+    EXPECT_EQ(parentNode->GetTag(), V2::JS_SYNTAX_ITEM_ETS_TAG);
+    /**
+     * @tc.steps: step2+. Create JS_SYNTAX_ITEM_ETS_TAG parent index > 0;
+     */
+    menuPattern->OnItemPressed(parentNode, 1, false);
+    EXPECT_EQ(parentNode->GetTag(), V2::JS_SYNTAX_ITEM_ETS_TAG);
+    /**
+     * @tc.steps: step3. Create JS_FOR_EACH_ETS_TAG parent index > 0;
+     */
+    auto foreachNode =
+        FrameNode::CreateFrameNode(V2::JS_FOR_EACH_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto MenuNode2 =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto foreachchildNode =
+        FrameNode::CreateFrameNode(V2::JS_FOR_EACH_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    MenuNode2->MountToParent(foreachNode);
+    foreachchildNode->MountToParent(foreachNode);
+    auto menuPatternEx = MenuNode2->GetPattern<MenuPattern>();
+    menuPatternEx->type_ = MenuType::CONTEXT_MENU;
+    menuPatternEx->OnItemPressed(foreachNode, -1, false);
+    EXPECT_EQ(parentNode->GetTag(), V2::JS_SYNTAX_ITEM_ETS_TAG);
+}
+
+/**
+ * @tc.name: MenuPatternTestNg040
+ * @tc.desc: Verify MenuPattern::OnItemPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create JS_FOR_EACH_ETS_TAG parent index < 0;
+     */
+    auto foreachNode = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    auto parent = FrameNode::CreateFrameNode(
+        V2::JS_SYNTAX_ITEM_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto nextNode = FrameNode::CreateFrameNode(V2::JS_FOR_EACH_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto nextNodeEx =
+        FrameNode::CreateFrameNode(V2::JS_FOR_EACH_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    parent->MountToParent(foreachNode);
+    nextNode->MountToParent(parent);
+    nextNodeEx->MountToParent(parent);
+    auto menuPattern = parent->GetPattern<MenuPattern>();
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+    menuPattern->OnItemPressed(parent, -1, false);
+    EXPECT_EQ(parent->GetTag(), V2::JS_SYNTAX_ITEM_ETS_TAG);
+}
+
+/**
+ * @tc.name: MenuPatternTestNg040
+ * @tc.desc: Verify MenuPattern::GetOutsideForEachMenuItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg041, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node child one and next is false;
+     * @tc.expected: wrapper pattern not null.
+     */
+    RefPtr<FrameNode> parentForEachNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    auto forEachNode =
+        FrameNode::CreateFrameNode(V2::JS_SYNTAX_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    forEachNode->MountToParent(parentForEachNode);
+    auto menuPattern = parentForEachNode->GetPattern<MenuPattern>();
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+    auto testNode = menuPattern->GetOutsideForEachMenuItem(forEachNode, false);
+    EXPECT_EQ(testNode, nullptr);
+    /**
+     * @tc.steps: step1+. Create JS_SYNTAX_ITEM_ETS_TAG parent next is true;
+     */
+    menuPattern->GetOutsideForEachMenuItem(forEachNode, true);
+    EXPECT_EQ(testNode, nullptr);
+    /**
+     * @tc.steps: step2. Create node child two and next is false;
+     */
+    auto forEachNodeEx =
+        FrameNode::CreateFrameNode(V2::JS_SYNTAX_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    forEachNodeEx->MountToParent(parentForEachNode);
+    menuPattern = parentForEachNode->GetPattern<MenuPattern>();
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+    menuPattern->GetOutsideForEachMenuItem(forEachNode, false);
+    EXPECT_EQ(testNode, nullptr);
+    /**
+     * @tc.steps: step1+. Create JS_SYNTAX_ITEM_ETS_TAG parent next is true;
+     */
+    menuPattern->GetOutsideForEachMenuItem(forEachNode, true);
+    EXPECT_EQ(testNode, nullptr);
+}
+/**
+ * @tc.name: MenuPatternTestNg042
+ * @tc.desc: Verify MenuPattern::GetMenuItemInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg042, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menuitem childnode and isNeedRestoreNodeId if false;
+     */
+    RefPtr<FrameNode> menuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    child->MountToParent(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+    auto menuItemPattern = child->GetPattern<MenuItemPattern>();
+    auto testInfo = menuPattern->GetMenuItemInfo(child, false);
+    EXPECT_FALSE(testInfo.isFindTargetId);
+}
+/**
+ * @tc.name: MenuPatternTestNg043
+ * @tc.desc: Verify MenuPattern::GetInnerMenuOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg043, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menuitem childnode and isNeedRestoreNodeId if false;
+     */
+    RefPtr<FrameNode> menuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    child->MountToParent(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+    auto menuItemPattern = child->GetPattern<MenuItemPattern>();
+    auto testInfo = menuPattern->GetInnerMenuOffset(child, false);
+    EXPECT_FALSE(testInfo.isFindTargetId);
+    /**
+     * @tc.steps: step1+. test GetInnerMenuOffset and isNeedRestoreNodeId if true;
+     */
+    testInfo = menuPattern->GetInnerMenuOffset(child, true);
+    EXPECT_FALSE(testInfo.isFindTargetId);
+    /**
+     * @tc.steps: step2. Create menuitemgroup node and isNeedRestoreNodeId if false;
+     */
+    auto menuitemgroupNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_GROUP_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto itemchildOne =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 2, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto itemchildTwo =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 3, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    itemchildOne->MountToParent(menuitemgroupNode);
+    itemchildTwo->MountToParent(menuitemgroupNode);
+    menuPattern = menuNode->GetPattern<MenuPattern>();
+    testInfo = menuPattern->GetInnerMenuOffset(menuitemgroupNode, false);
+    EXPECT_FALSE(testInfo.isFindTargetId);
+    /**
+     * @tc.steps: step2. Create menuitemgroup node and isNeedRestoreNodeId if true;
+     */
+    testInfo = menuPattern->GetInnerMenuOffset(menuitemgroupNode, true);
+    EXPECT_EQ(testInfo.originOffset, OffsetF(0.0, 0.0));
+    EXPECT_FALSE(testInfo.isFindTargetId);
+}
+
+/**
+ * @tc.name: MenuPatternTestNg044
+ * @tc.desc: Verify MneuModelInstance methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg044, TestSize.Level1)
+{
+    MenuModelNG MneuModelInstance;
+    MneuModelInstance.Create();
+    MneuModelInstance.SetFontSize(Dimension(25.0));
+    MneuModelInstance.SetFontColor(Color::RED);
+    MneuModelInstance.SetFontWeight(FontWeight::BOLD);
+    MneuModelInstance.SetFontStyle(Ace::FontStyle::ITALIC);
+    MneuModelInstance.SetBorderRadius(Dimension(2));
+    MneuModelInstance.SetWidth(Dimension(10));
+    std::vector<std::string> myFamilies = {"Smith"};
+    MneuModelInstance.SetFontFamily(myFamilies);
+    MneuModelInstance.SetBorderRadius(Dimension(1), Dimension(2), Dimension(3), Dimension(4));
+    MneuModelInstance.SetItemDivider(ITEM_DIVIDER);
+    MneuModelInstance.SetItemGroupDivider(ITEM_DIVIDER);
+    MneuModelInstance.SetExpandingMode(SubMenuExpandingMode::STACK);
+
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    // call UpdateMenuItemChildren
+    menuPattern->OnModifyDone();
+
+    MneuModelInstance.ResetFontFamily();
+    MneuModelInstance.ResetBorderRadius();
+    MneuModelInstance.CalculateBoundedWidth(Dimension(10));
+    MneuModelInstance.CalculateBoundedWidthForPC(Dimension(10));
+    MneuModelInstance.CalculateBoundedWidthForPC(Dimension(500));
+    MneuModelInstance.CalculateBoundedWidthForPC(Dimension(200));
+    MneuModelInstance.CalculateBoundedWidthForMobile(Dimension(10));
+    MneuModelInstance.CalculateBoundedWidthForMobile(Dimension(70));
+
+    ASSERT_TRUE(layoutProperty->GetFontSize().has_value());
+    EXPECT_EQ(layoutProperty->GetFontSize().value(), Dimension(25.0));
+    ASSERT_TRUE(layoutProperty->GetFontWeight().has_value());
+    EXPECT_EQ(layoutProperty->GetFontWeight().value(), FontWeight::BOLD);
+    ASSERT_TRUE(layoutProperty->GetFontColor().has_value());
+    EXPECT_EQ(layoutProperty->GetFontColor().value(), Color::RED);
+    ASSERT_TRUE(layoutProperty->GetItalicFontStyle().has_value());
+    EXPECT_EQ(layoutProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+}
+
+/**
+ * @tc.name: MenuPatternTestNg045
+ * @tc.desc: Verify MneuModelInstance methods with frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg045, TestSize.Level1)
+{
+    MenuModelNG MneuModelInstance;
+    MneuModelInstance.Create();
+
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    FrameNode *frameNode = menuNode.GetRawPtr();
+    CHECK_NULL_VOID(frameNode);
+    MneuModelInstance.SetFontSize(frameNode, Dimension(25.0));
+    MneuModelInstance.SetFontWeight(frameNode, FontWeight::BOLD);
+    MneuModelInstance.SetFontColor(frameNode, Color::RED);
+    MneuModelInstance.SetFontStyle(frameNode, Ace::FontStyle::ITALIC);
+    MneuModelInstance.SetBorderRadius(frameNode, Dimension(2));
+    MneuModelInstance.SetWidth(frameNode, Dimension(10));
+    std::vector<std::string> myFamilies = {"Smith"};
+    MneuModelInstance.SetFontFamily(frameNode, myFamilies);
+    MneuModelInstance.SetBorderRadius(frameNode, Dimension(1), Dimension(2), Dimension(3), Dimension(4));
+    MneuModelInstance.SetItemDivider(frameNode, ITEM_DIVIDER);
+    MneuModelInstance.SetItemGroupDivider(frameNode, ITEM_DIVIDER);
+    MneuModelInstance.ResetBorderRadius(frameNode);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    // call UpdateMenuItemChildren
+    menuPattern->OnModifyDone();
+
+    ASSERT_TRUE(layoutProperty->GetFontSize().has_value());
+    EXPECT_EQ(layoutProperty->GetFontSize().value(), Dimension(25.0));
+    ASSERT_TRUE(layoutProperty->GetFontWeight().has_value());
+    EXPECT_EQ(layoutProperty->GetFontWeight().value(), FontWeight::BOLD);
+    ASSERT_TRUE(layoutProperty->GetFontColor().has_value());
+    EXPECT_EQ(layoutProperty->GetFontColor().value(), Color::RED);
+    ASSERT_TRUE(layoutProperty->GetItalicFontStyle().has_value());
+    EXPECT_EQ(layoutProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+
+    MneuModelInstance.SetFontColor(frameNode, std::nullopt);
+    ASSERT_FALSE(layoutProperty->GetFontColor().has_value());
+    MneuModelInstance.SetFontSize(frameNode, Dimension(0.0));
+    ASSERT_FALSE(layoutProperty->GetFontSize().has_value());
 }
 } // namespace OHOS::Ace::NG

@@ -36,8 +36,9 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
         TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "the text is null");
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "InsertText length:%{public}d", static_cast<int32_t>(text.length()));
     auto task = [textFieldPattern = pattern_, text] {
-        ACE_SCOPED_TRACE("InsertText");
+        ACE_SCOPED_TRACE("InsertText [length:%d]", static_cast<int32_t>(text.length()));
         auto client = textFieldPattern.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
@@ -299,14 +300,17 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
     MiscServices::PanelType panelType = info.panelInfo.panelType;
     bool panelVisible = info.visible;
     MiscServices::Trigger triggerFrom = info.trigger;
-    if (!isHardKeyboardConnected && panelType == MiscServices::PanelType::SOFT_KEYBOARD && !panelVisible &&
-        triggerFrom == MiscServices::Trigger::IME_APP) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo soft keyboard is closed by user.");
-        auto task = [textField = pattern_] {
+    if (!isHardKeyboardConnected && panelType == MiscServices::PanelType::SOFT_KEYBOARD && !panelVisible) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo soft keyboard is closed by user, trigger=%{public}d",
+            triggerFrom);
+        auto task = [textField = pattern_, triggerFrom] {
             auto client = textField.Upgrade();
             CHECK_NULL_VOID(client);
             ContainerScope scope(client->GetInstanceId());
-            client->NotifyKeyboardClosedByUser();
+            if (triggerFrom == MiscServices::Trigger::IME_APP) {
+                client->NotifyKeyboardClosedByUser();
+            }
+            client->NotifyKeyboardClosed();
         };
         PostTaskToUI(task, "ArkUITextFieldKeyboardClosedByUser");
     }
@@ -317,13 +321,20 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
         keyboardInfo.keyBoardType = KeyBoardType::STATUS_BAR;
     }
     keyboardInfo.visible = info.visible;
-    auto pipeline = PipelineBase::GetCurrentContext();
-    auto task = [weak = WeakPtr(pipeline), keyboardInfo, id = Container::CurrentId()] {
+    auto textClient = pattern_.Upgrade();
+    CHECK_NULL_VOID(textClient);
+    auto pattern = AceType::DynamicCast<Pattern>(textClient);
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContextRefPtr();
+    auto task = [weak = WeakPtr(pipelineContext), keyboardInfo, id = Container::CurrentId()] {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
         ContainerScope scope(id);
         auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
         CHECK_NULL_VOID(textFieldManager);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo SetImeShow:%d", keyboardInfo.visible);
         textFieldManager->SetImeShow(keyboardInfo.visible);
     };
     PostTaskToUI(task, "ArkUITextFieldSetImeShow");
@@ -357,16 +368,19 @@ void OnTextChangedListenerImpl::AutoFillReceivePrivateCommand(
 
 int32_t OnTextChangedListenerImpl::SetPreviewText(const std::u16string &text, const MiscServices::Range &range)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetPreviewText value %{public}s in range (%{public}d, %{public}d)",
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetPreviewText value %{private}s in range (%{public}d, %{public}d)",
         StringUtils::Str16ToStr8(text).c_str(), range.start, range.end);
-    int32_t ret = MiscServices::ErrorCode::NO_ERROR;
-    auto task = [textFieldPattern = pattern_, text, range, &ret] {
+    int32_t ret = CheckPreviewTextParams(text, {range.start, range.end});
+    if (ret != MiscServices::ErrorCode::NO_ERROR) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetPreviewText result is %{public}d}", ret);
+        return ret;
+    }
+    auto task = [textFieldPattern = pattern_, text, range] {
         ACE_SCOPED_TRACE("SetPreviewText");
         auto client = textFieldPattern.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
-        ret = client->SetPreviewText(StringUtils::Str16ToStr8(text), {range.start, range.end});
-        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "SetPreviewText result is %{public}d}", ret);
+        client->SetPreviewText(StringUtils::Str16ToStr8(text), {range.start, range.end});
     };
     PostTaskToUI(task, "ArkUITextFieldSetPreviewText");
     return ret;
@@ -415,6 +429,20 @@ int32_t OnTextChangedListenerImpl::ReceivePrivateCommand(
             ret = MiscServices::ErrorCode::NO_ERROR;
         }
     }
+    return ret;
+}
+
+int32_t OnTextChangedListenerImpl::CheckPreviewTextParams(const std::u16string &text, const MiscServices::Range &range)
+{
+    int32_t ret = MiscServices::ErrorCode::NO_ERROR;
+    auto task = [textFieldPattern = pattern_, text, range, &ret] {
+        ACE_SCOPED_TRACE("SetPreviewText");
+        auto client = textFieldPattern.Upgrade();
+        CHECK_NULL_VOID(client);
+        ContainerScope scope(client->GetInstanceId());
+        ret = client->CheckPreviewTextValidate(StringUtils::Str16ToStr8(text), {range.start, range.end});
+    };
+    PostSyncTaskToUI(task, "ArkUICheckPreviewTextParams");
     return ret;
 }
 } // namespace OHOS::Ace::NG

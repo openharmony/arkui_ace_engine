@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::V2 {
 namespace {
-const std::unordered_map<std::string, 
+const std::unordered_map<std::string,
     std::function<std::string(const TimePickerDialogComposedElement&)>> CREATE_JSON_MAP {
     { "show", [](const TimePickerDialogComposedElement& inspector) { return inspector.GetShow(); } }
 };

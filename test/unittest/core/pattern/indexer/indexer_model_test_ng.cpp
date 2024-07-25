@@ -633,7 +633,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0019, TestSize.Level1)
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
 
-    EXPECT_EQ(pattern_->autoCollapse_, true);
+    EXPECT_EQ(pattern_->autoCollapse_, false);
     EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY_1.size());
     EXPECT_EQ(pattern_->arrayValue_.size(), CREATE_ARRAY_1.size());
     for (auto value : pattern_->arrayValue_) {
@@ -670,7 +670,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0020, TestSize.Level1)
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
 
-    EXPECT_EQ(pattern_->autoCollapse_, true);
+    EXPECT_EQ(pattern_->autoCollapse_, false);
     EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY_1.size());
     EXPECT_EQ(pattern_->arrayValue_.size(), CREATE_ARRAY_1.size());
     for (auto value : pattern_->arrayValue_) {
@@ -707,7 +707,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0021, TestSize.Level1)
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
 
-    EXPECT_EQ(pattern_->autoCollapse_, true);
+    EXPECT_EQ(pattern_->autoCollapse_, false);
     EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY_1.size());
     EXPECT_EQ(pattern_->arrayValue_.size(), CREATE_ARRAY_1.size());
     for (auto value : pattern_->arrayValue_) {
@@ -744,7 +744,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0022, TestSize.Level1)
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
 
-    EXPECT_EQ(pattern_->autoCollapse_, true);
+    EXPECT_EQ(pattern_->autoCollapse_, false);
     EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY_1.size());
     EXPECT_EQ(pattern_->arrayValue_.size(), CREATE_ARRAY_1.size());
     for (auto value : pattern_->arrayValue_) {
@@ -781,7 +781,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0023, TestSize.Level1)
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
 
-    EXPECT_EQ(pattern_->autoCollapse_, true);
+    EXPECT_EQ(pattern_->autoCollapse_, false);
     EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY_1.size());
     EXPECT_EQ(pattern_->arrayValue_.size(), CREATE_ARRAY_1.size());
     for (auto value : pattern_->arrayValue_) {
@@ -818,7 +818,7 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0024, TestSize.Level1)
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
 
-    EXPECT_EQ(pattern_->autoCollapse_, true);
+    EXPECT_EQ(pattern_->autoCollapse_, false);
     EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY_1.size());
     EXPECT_EQ(pattern_->arrayValue_.size(), CREATE_ARRAY_1.size());
     for (auto value : pattern_->arrayValue_) {

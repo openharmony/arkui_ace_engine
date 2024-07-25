@@ -20,7 +20,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
-#include "core/components_ng/pattern/image/image_modifier.h"
+#include "core/components_ng/pattern/image/image_overlay_modifier.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
@@ -29,20 +29,24 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ImagePaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ImagePaintMethod, NodePaintMethod)
 public:
-    ImagePaintMethod(const RefPtr<CanvasImage>& canvasImage, bool selected, bool sensitive = false,
+    ImagePaintMethod(const RefPtr<CanvasImage>& canvasImage, bool selected = false,
+        RefPtr<ImageOverlayModifier> imageOverlayModifier = nullptr, bool sensitive = false,
         ImageInterpolation interpolation = ImageInterpolation::NONE)
-        : canvasImage_(canvasImage), selected_(selected), sensitive_(sensitive), interpolationDefault_(interpolation)
+        : canvasImage_(canvasImage), selected_(selected), imageOverlayModifier_(std::move(imageOverlayModifier)),
+          sensitive_(sensitive), interpolationDefault_(interpolation)
     {}
     ~ImagePaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
-    CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
+    RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override;
+    void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
     void UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps, PaintWrapper* paintWrapper);
     void UpdateBorderRadius(PaintWrapper* paintWrapper);
     RefPtr<CanvasImage> canvasImage_;
     bool selected_ = false;
+    RefPtr<ImageOverlayModifier> imageOverlayModifier_;
     bool sensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
 

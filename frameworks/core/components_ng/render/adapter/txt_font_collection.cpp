@@ -20,7 +20,6 @@
 #include "core/common/container.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/components_ng/render/drawing.h"
-#include "rosen_text/properties/font_collection_txt.h"
 
 namespace OHOS::Ace::NG {
 

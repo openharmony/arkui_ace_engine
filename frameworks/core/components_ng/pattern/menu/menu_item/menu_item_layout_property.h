@@ -67,8 +67,6 @@ public:
         value->propLabel_ = CloneLabel();
         value->propSelectIconStyle_ = CloneSelectIconStyle();
         value->propMenuWidth_ = CloneMenuWidth();
-        value->propExpandingMode_ = CloneExpandingMode();
-        value->propHasFurtherExpand_ = CloneHasFurtherExpand();
         return value;
     }
 
@@ -83,8 +81,6 @@ public:
         ResetLabel();
         ResetSelectIconStyle();
         ResetMenuWidth();
-        ResetExpandingMode();
-        ResetHasFurtherExpand();
     }
 
     std::function<void(WeakPtr<NG::FrameNode>)>& GetStartSymbol()
@@ -122,8 +118,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EndIcon, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Label, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuWidth, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ExpandingMode, SubMenuExpandingMode, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HasFurtherExpand, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(SelectIconStyle, MenuItemSelectIconStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SelectIconStyle, SelectIcon, bool, PROPERTY_UPDATE_MEASURE);
@@ -191,6 +185,7 @@ public:
         auto defaultLabelFontColor = theme ? theme->GetSecondaryFontColor() : Color::GRAY;
         json->PutExtAttr("labelFontColor",
             GetLabelFontColor().value_or(defaultLabelFontColor).ColorToString().c_str(), filter);
+        json->PutFixedAttr("label", GetContent().value_or("").c_str(), filter, FIXED_ATTR_CONTENT);
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemLayoutProperty);

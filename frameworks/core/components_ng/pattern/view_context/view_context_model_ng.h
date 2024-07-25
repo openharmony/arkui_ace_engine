@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_MODEL_NG_H
 
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/view_context/view_context_model.h"
 
 namespace OHOS::Ace::NG {
@@ -23,6 +24,18 @@ class ACE_EXPORT ViewContextModelNG : public OHOS::Ace::ViewContextModel {
 public:
     void closeAnimation(const AnimationOption& option, bool needFlush) override;
     void openAnimation(const AnimationOption& option) override;
+    int32_t OpenBindSheet(const RefPtr<NG::FrameNode>& sheetContentNode,
+         std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
+        std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+        std::function<void(const int32_t info)>&& onWillDismiss, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
+        int32_t currentInstanceId, int32_t targetId) override;
+    int32_t UpdateBindSheet(
+        const RefPtr<NG::FrameNode>& sheetContentNode, NG::SheetStyle& sheetStyle, bool isPartialUpdate,
+        int32_t currentInstanceId) override;
+    int32_t CloseBindSheet(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t currentInstanceId) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_MODEL_NG_H

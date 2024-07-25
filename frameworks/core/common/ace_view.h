@@ -18,6 +18,7 @@
 
 #include <chrono>
 
+#include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/container.h"
@@ -31,7 +32,9 @@ class RSTransaction;
 
 namespace OHOS::Ace {
 
-class AceView {
+class AceView : public AceType {
+    DECLARE_ACE_TYPE(AceView, AceType);
+
 public:
     enum class ViewType : int32_t {
         SURFACE_VIEW = 0,

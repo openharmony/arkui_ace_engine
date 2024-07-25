@@ -48,9 +48,9 @@
 namespace OHOS::Ace::Framework {
 namespace {
 const std::unordered_set<std::string> EXPORT_TEXTURE_SUPPORT_TYPES = { V2::JS_VIEW_ETS_TAG, V2::COMMON_VIEW_ETS_TAG };
-constexpr uint32_t INFO_LENGTH_LIMIT = 2;
-constexpr uint32_t BUILD_PARAM_INDEX_TWO = 2;
-constexpr uint32_t BUILD_PARAM_INDEX_THREE = 3;
+constexpr int32_t INFO_LENGTH_LIMIT = 2;
+constexpr int32_t BUILD_PARAM_INDEX_TWO = 2;
+constexpr int32_t BUILD_PARAM_INDEX_THREE = 3;
 } // namespace
 
 void JSBaseNode::BuildNode(const JSCallbackInfo& info)

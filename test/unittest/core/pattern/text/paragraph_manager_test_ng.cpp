@@ -28,7 +28,9 @@
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
-namespace {} // namespace
+namespace {
+constexpr int32_t POSITION_WITH_AFFINITY = 2;
+} // namespace
 class ParagraphManagerTestNg : public testing::Test {
 public:
     void SetUp() override;
@@ -52,7 +54,6 @@ void ParagraphManagerTestNg::TearDown()
 
 void ParagraphManagerTestNg::ConstructParagraphs(RefPtr<ParagraphManager>& pManager)
 {
-    std::cout << "lijuan test ConstructParagraphs" << std::endl;
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(100.f));
     EXPECT_CALL(*paragraph, GetLongestLine()).WillRepeatedly(Return(100.f));
@@ -60,6 +61,11 @@ void ParagraphManagerTestNg::ConstructParagraphs(RefPtr<ParagraphManager>& pMana
     EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(1));
     EXPECT_CALL(*paragraph, GetTextWidth()).WillRepeatedly(Return(100.f));
     EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(4));
+    PositionWithAffinity positionWithAffinity(POSITION_WITH_AFFINITY, TextAffinity::UPSTREAM);
+    EXPECT_CALL(*paragraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(positionWithAffinity));
+    TextLineMetrics textLineMetrics;
+    textLineMetrics.lineNumber = 0;
+    EXPECT_CALL(*paragraph, GetLineMetrics(_)).WillRepeatedly(Return(textLineMetrics));
     EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _))
         .WillRepeatedly(DoAll(SetArgReferee<1>(0), SetArgReferee<2>(1), Return(true)));
     pManager->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 20 });
@@ -187,4 +193,69 @@ HWTEST_F(ParagraphManagerTestNg, GetLongestLine001, TestSize.Level1)
     EXPECT_EQ(result, 3);
 }
 
+/**
+ * @tc.name: GetGlyphPositionAtCoordinate001
+ * @tc.desc: Test GetGlyphPositionAtCoordinate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetGlyphPositionAtCoordinate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pManager and construct paragraphs.
+     */
+
+    /**
+     * @tc.steps: step2. call GetGlyphPositionAtCoordinate.
+     * @tc.expected: the position of the paragraphs is 2.
+     */
+    auto result = pManager->GetGlyphPositionAtCoordinate(Offset(10.0, 50.0)).position_;
+    EXPECT_EQ(result, 2);
+
+    /**
+     * @tc.steps: step3. call GetGlyphPositionAtCoordinate.
+     * @tc.expected: the position of the paragraphs is 22.
+     */
+    result = pManager->GetGlyphPositionAtCoordinate(Offset(10.0, 150.0)).position_;
+    EXPECT_EQ(result, 22);
+
+    /**
+     * @tc.steps: step4. call GetGlyphPositionAtCoordinate.
+     * @tc.expected: the position of the paragraphs is 37.
+     */
+    result = pManager->GetGlyphPositionAtCoordinate(Offset(10.0, 250.0)).position_;
+    EXPECT_EQ(result, 37);
+}
+
+/**
+ * @tc.name: GetLineMetrics001
+ * @tc.desc: Test GetLineMetrics.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetLineMetrics001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pManager and construct paragraphs.
+     */
+
+    /**
+     * @tc.steps: step2. call GetLineMetrics.
+     * @tc.expected: the lineNumber of the paragraphs is 0.
+     */
+    auto result = pManager->GetLineMetrics(0).lineNumber;
+    EXPECT_EQ(result, 0);
+
+    /**
+     * @tc.steps: step3. call GetLineMetrics.
+     * @tc.expected: the lineNumber of the paragraphs is 1.
+     */
+    result = pManager->GetLineMetrics(1).lineNumber;
+    EXPECT_EQ(result, 1);
+
+    /**
+     * @tc.steps: step4. call GetLineMetrics.
+     * @tc.expected: the lineNumber of the paragraphs is 2.
+     */
+    result = pManager->GetLineMetrics(2).lineNumber;
+    EXPECT_EQ(result, 2);
+}
 } // namespace OHOS::Ace::NG

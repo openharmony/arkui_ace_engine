@@ -28,6 +28,10 @@ void AceAsyncTraceBegin(int32_t taskId, const char* name, bool isAnimationTrace)
 
 void AceAsyncTraceEnd(int32_t taskId, const char* name, bool isAnimationTrace) {}
 
+void AceAsyncTraceBeginCommercial(int32_t taskId, const char* name, bool isAnimationTrace) {}
+
+void AceAsyncTraceEndCommercial(int32_t taskId, const char* name, bool isAnimationTrace) {}
+
 void AceCountTrace(const char* key, int32_t count) {}
 
 bool AceTraceBeginWithArgv(const char* /* format */, va_list /* args */)

@@ -58,8 +58,8 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInWindow(ArkUI_NodeHandle node, ArkU
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    ArkUI_Float32* tempOffset = new ArkUI_Float32[2];
-    impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToWindow(node->uiNodeHandle, tempOffset, false);
+    ArkUI_Float32 tempOffset[2];
+    impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToWindow(node->uiNodeHandle, &tempOffset, false);
     globalOffset->x = tempOffset[0];
     globalOffset->y = tempOffset[1];
 
@@ -72,9 +72,8 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInScreen(ArkUI_NodeHandle node, ArkU
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    ArkUI_Float32* tempOffset = new ArkUI_Float32[2];
-    ;
-    impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToScreen(node->uiNodeHandle, tempOffset, false);
+    ArkUI_Float32 tempOffset[2];
+    impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToScreen(node->uiNodeHandle, &tempOffset, false);
     screenOffset->x = tempOffset[0];
     screenOffset->y = tempOffset[1];
 
@@ -87,10 +86,9 @@ int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow(ArkUI_NodeHandle nod
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    ArkUI_Float32* tempOffset = new ArkUI_Float32[2];
-
+    ArkUI_Float32 tempOffset[2];
     impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToWindowWithTransform(
-        node->uiNodeHandle, tempOffset, false);
+        node->uiNodeHandle, &tempOffset, false);
     translateOffset->x = tempOffset[0];
     translateOffset->y = tempOffset[1];
 
@@ -103,10 +101,9 @@ int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(ArkUI_NodeHandle nod
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    ArkUI_Float32* tempOffset = new ArkUI_Float32[2];
-    ;
+    ArkUI_Float32 tempOffset[2];
     impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToScreenWithTransform(
-        node->uiNodeHandle, tempOffset, false);
+        node->uiNodeHandle, &tempOffset, false);
     translateOffset->x = tempOffset[0];
     translateOffset->y = tempOffset[1];
 

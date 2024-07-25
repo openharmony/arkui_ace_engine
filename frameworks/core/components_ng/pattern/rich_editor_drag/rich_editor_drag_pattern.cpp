@@ -49,7 +49,7 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>&
     CHECK_NULL_RETURN(dragPattern, nullptr);
     auto data = CalculateTextDragData(hostPattern, dragNode);
     dragPattern->Initialize(data);
-    dragPattern->SetLastLineHeight(data.lineHeight_);
+    dragPattern->SetLastLineHeight(data.lastLineHeight_);
     float frameWidth = dragPattern->GetFrameWidth();
     float frameHeight = dragPattern->GetFrameHeight();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "CreateDragNode width=%{public}f, height=%{public}f", frameWidth, frameHeight);
@@ -86,21 +86,22 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
     auto boxes = hostPattern->GetTextBoxes();
     for (const auto& child : imageChildren) {
         auto imageIndex = placeholderIndex[index];
-        if (imageIndex >= rectsForPlaceholders.size()) {
+        if (imageIndex >= static_cast<int32_t>(rectsForPlaceholders.size())) {
             break;
         }
         auto rect = rectsForPlaceholders.at(imageIndex);
 
         for (const auto& box : boxes) {
             if (box.IsInRegion({rect.GetX() + rect.Width() / 2, rect.GetY() + rect.Height() / 2})) {
+                auto gestureHub = child->GetOrCreateGestureEventHub();
+                if (gestureHub) {
+                    gestureHub->SetPixelMap(nullptr);
+                }
                 realImageChildren.emplace_back(child);
                 realRectsForPlaceholders.emplace_back(rect);
             }
         }
         ++index;
-    }
-    if (!boxes.empty()) {
-        dragPattern->SetLastLineHeight(boxes.back().Height());
     }
     dragPattern->InitSpanImageLayout(realImageChildren, realRectsForPlaceholders);
     return dragNode;

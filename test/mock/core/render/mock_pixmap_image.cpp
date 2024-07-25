@@ -42,4 +42,6 @@ void PixelMapImage::DrawToRSCanvas(
 {}
 
 void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect) {}
+
+void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) {}
 } // namespace OHOS::Ace::NG

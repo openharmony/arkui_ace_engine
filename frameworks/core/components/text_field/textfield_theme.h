@@ -63,13 +63,13 @@ public:
                 LOGW("find pattern of textfield fail");
                 return;
             }
-            const double defaultErrorAlpha = 0.6;
-            const double defaultUnderlineAlpha = 0.6;
-            const double defaultDisableUnderlineAlpha = 0.4;
-            const Color defaultUnderlineColor = Color(0x33182431);
-            const Color defaultUnderlineTextColor = Color(0x99182431);
-            const Color defaultCounterColor = Color(0x66182431);
-            const Color overCounterColor = Color(0x99FA2A2D);
+            ParsePatternSubFirstPart(pattern, theme);
+            ParsePatternSubSecondPart(pattern, theme);
+            ParsePatternSubThirdPart(pattern, theme);
+        }
+
+        void ParsePatternSubFirstPart(const RefPtr<ThemeStyle>& pattern, const RefPtr<TextFieldTheme>& theme) const
+        {
             theme->padding_ = Edge(pattern->GetAttr<Dimension>("textfield_padding_horizontal", 0.0_vp),
                 pattern->GetAttr<Dimension>("textfield_padding_vertical", 0.0_vp),
                 pattern->GetAttr<Dimension>("textfield_padding_horizontal", 0.0_vp),
@@ -109,6 +109,17 @@ public:
             theme->focusPlaceholderColor_ = pattern->GetAttr<Color>("tips_text_color_focused", Color());
             theme->bgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
             theme->focusBgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, Color());
+        }
+
+        void ParsePatternSubSecondPart(const RefPtr<ThemeStyle>& pattern, const RefPtr<TextFieldTheme>& theme) const
+        {
+            const double defaultErrorAlpha = 0.6;
+            const double defaultUnderlineAlpha = 0.6;
+            const double defaultDisableUnderlineAlpha = 0.4;
+            const Color defaultUnderlineColor = Color(0x33182431);
+            const Color defaultUnderlineTextColor = Color(0x99182431);
+            const Color defaultCounterColor = Color(0x66182431);
+            const Color overCounterColor = Color(0x99FA2A2D);
             // color of error border blend 60% opacity
             theme->errorBorderColor_ =
                 pattern->GetAttr<Color>("error_text_border_color", Color())
@@ -144,6 +155,11 @@ public:
             theme->underlineTypingColor_ =
                 pattern->GetAttr<Color>(PATTERN_UNDERLINE_TYPING_COLOR, Color())
                     .BlendOpacity(pattern->GetAttr<double>(UNDERLINE_COLOR_ALPHA, defaultUnderlineAlpha));
+        }
+
+        void ParsePatternSubThirdPart(const RefPtr<ThemeStyle>& pattern, const RefPtr<TextFieldTheme>& theme) const
+        {
+            const double defaultErrorAlpha = 0.6;
             theme->textColorDisable_ = pattern->GetAttr<Color>(PATTERN_DISABLED_TEXT_COLOR, Color());
             theme->cursorColor_ = pattern->GetAttr<Color>("cursor_color", Color());
             theme->cursorWidth_ = pattern->GetAttr<Dimension>("cursor_width", 2.0_vp);
@@ -172,7 +188,6 @@ public:
             theme->showPasswordDirectly_ = StringUtils::StringToInt(showPasswordDirectly);
             auto textfieldShowHandle = pattern->GetAttr<std::string>("textfield_show_handle", "0");
             theme->textfieldShowHandle_ = StringUtils::StringToInt(textfieldShowHandle);
-
             theme->textInputBorderColor_ = pattern->GetAttr<Color>("text_input_border_color", Color());
             theme->textInputBorderWidth_ = pattern->GetAttr<Dimension>("text_input_border_width", 0.0_vp);
             theme->errorTextInputBorderWidth_ = pattern->GetAttr<Dimension>("error_text_input_border_width", 1.0_vp);
@@ -180,9 +195,20 @@ public:
                 pattern->GetAttr<Dimension>("text_input_and_error_tips_spacing", 8.0_vp);
             theme->showPasswordIcon_ = static_cast<bool>(pattern->GetAttr<double>("show_icon_text_input", 1.0));
 
+            std::string isTextFadeout = pattern->GetAttr<std::string>("text_fadeout_enable", "");
+            theme->textFadeoutEnabled_ = isTextFadeout == "true";
+
             theme->cancelButtonIconColor_ = pattern->GetAttr<Color>("cancel_button_icon_color", Color());
             theme->previewUnderlineColor_ = pattern->GetAttr<Color>(PREVIEW_UNDERLINE_COLOR, Color());
             theme->previewBoardColor_ = pattern->GetAttr<Color>(PREVIEW_BOARD_COLOR, Color());
+
+            theme->placeholderLineSpacing_ = pattern->GetAttr<Dimension>("text_field_placeholder_linespacing", 0.0_vp);
+
+            theme->cancelButton_ = pattern->GetAttr<std::string>("textfield_accessibility_property_clear", "");
+            theme->showPasswordPromptInformation_ =
+                pattern->GetAttr<std::string>("textfield_accessibility_show_password", "");
+            theme->hiddenPasswordPromptInformation_ =
+                pattern->GetAttr<std::string>("textfield_accessibility_hide_password", "");
         }
     };
 
@@ -543,6 +569,11 @@ public:
         return cancelButtonStyle_;
     }
 
+    bool TextFadeoutEnabled() const
+    {
+        return textFadeoutEnabled_;
+    }
+
     const Color& GetCancelButtonIconColor() const
     {
         return cancelButtonIconColor_;
@@ -556,6 +587,31 @@ public:
     const Color& GetPreviewBoardColor() const
     {
         return previewBoardColor_;
+    }
+
+    const std::string& GetCancelButton() const
+    {
+        return cancelButton_;
+    }
+
+    const Dimension& getInlinePaddingRight() const
+    {
+        return inlinePaddingRight_;
+    }
+
+    const Dimension& GetPlaceholderLineSpacing() const
+    {
+        return placeholderLineSpacing_;
+    }
+
+    const std::string& GetShowPasswordPromptInformation() const
+    {
+        return showPasswordPromptInformation_;
+    }
+
+    const std::string& GetHiddenPasswordPromptInformation() const
+    {
+        return hiddenPasswordPromptInformation_;
     }
 
 protected:
@@ -639,19 +695,29 @@ private:
     bool draggable_ = false;
     bool showPasswordDirectly_ = false;
     bool textfieldShowHandle_ = false;
-    Dimension passwordTypeHeight_ = 40.0_vp;;
+    Dimension passwordTypeHeight_ = 40.0_vp;
 
     Dimension textInputBorderWidth_ = 0.0_vp;
     Dimension textInputAndErrTipsSpacing_ = 4.0_vp;
     Dimension errorTextInputBorderWidth_ = 1.0_vp;
     Color textInputBorderColor_;
     bool showPasswordIcon_ = true;
-    
+
+    bool textFadeoutEnabled_ = false;
+
     // cancelButton
     Color cancelButtonIconColor_;
     CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
     Color previewUnderlineColor_;
     Color previewBoardColor_;
+
+    std::string cancelButton_;
+
+    Dimension inlinePaddingRight_ = 12.0_vp;
+    Dimension placeholderLineSpacing_ = 0.0_vp;
+
+    std::string showPasswordPromptInformation_;
+    std::string hiddenPasswordPromptInformation_;
 };
 
 } // namespace OHOS::Ace

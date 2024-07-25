@@ -30,6 +30,7 @@
 
 namespace OHOS::Ace::NG {
 enum class NavDestinationState {
+    NONE = -1,
     ON_SHOWN = 0,
     ON_HIDDEN = 1,
     ON_APPEAR = 2,
@@ -50,6 +51,10 @@ struct NavDestinationInfo {
     std::string navDestinationId;
 
     NavDestinationInfo() = default;
+
+    NavDestinationInfo(std::string id, std::string name, NavDestinationState state)
+        : navigationId(std::move(id)), name(std::move(name)), state(state)
+    {}
 
     NavDestinationInfo(std::string id, std::string name, NavDestinationState state,
         int32_t index, napi_value param, std::string navDesId)
@@ -114,6 +119,26 @@ struct AbilityContextInfo {
     }
 };
 
+enum class TabContentState {
+    ON_SHOW = 0,
+    ON_HIDE = 1,
+};
+
+struct TabContentInfo {
+    std::string tabContentId;
+    int32_t tabContentUniqueId = 0;
+    TabContentState state;
+    int32_t index = 0;
+    std::string id;
+    int32_t uniqueId = 0;
+
+    TabContentInfo(std::string tabContentId, int32_t tabContentUniqueId, TabContentState state, int32_t index,
+        std::string id, int32_t uniqueId)
+        : tabContentId(std::move(tabContentId)), tabContentUniqueId(tabContentUniqueId), state(state), index(index),
+        id(std::move(id)), uniqueId(uniqueId)
+    {}
+};
+
 class ACE_FORCE_EXPORT UIObserverHandler {
 public:
     UIObserverHandler() = default;
@@ -127,6 +152,7 @@ public:
         const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode);
     void NotifyDidClick(const GestureEvent& gestureEventInfo,
         const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode);
+    void NotifyTabContentStateUpdate(const TabContentInfo& info);
     std::shared_ptr<NavDestinationInfo> GetNavigationState(const RefPtr<AceType>& node);
     std::shared_ptr<ScrollEventInfo> GetScrollEventState(const RefPtr<AceType>& node);
     std::shared_ptr<RouterPageInfoNG> GetRouterPageState(const RefPtr<AceType>& node);
@@ -142,6 +168,7 @@ public:
         AbilityContextInfo&, const GestureEvent&, const ClickInfo&, const RefPtr<FrameNode>&);
     using DidClickHandleFunc = void (*)(
         AbilityContextInfo&, const GestureEvent&, const ClickInfo&, const RefPtr<FrameNode>&);
+    using TabContentStateHandleFunc = void (*)(const TabContentInfo&);
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
@@ -154,6 +181,7 @@ public:
     void SetHandleNavDestinationSwitchFunc(NavDestinationSwitchHandleFunc func);
     void SetWillClickFunc(WillClickHandleFunc func);
     void SetDidClickFunc(DidClickHandleFunc func);
+    void SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func);
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
     ScrollEventHandleFunc scrollEventHandleFunc_ = nullptr;
@@ -164,6 +192,7 @@ private:
     NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_;
     WillClickHandleFunc willClickHandleFunc_ = nullptr;
     DidClickHandleFunc didClickHandleFunc_ = nullptr;
+    TabContentStateHandleFunc tabContentStateHandleFunc_ = nullptr;
 
     napi_value GetUIContextValue();
 };

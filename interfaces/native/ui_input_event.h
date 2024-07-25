@@ -179,6 +179,22 @@ enum {
 };
 
 /**
+ * @brief Defines an enum for modifier keys.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Ctrl. */
+    ARKUI_MODIFIER_KEY_CTRL = 1 << 0,
+    /** Shift. */
+    ARKUI_MODIFIER_KEY_SHIFT = 1 << 1,
+    /** Alt. */
+    ARKUI_MODIFIER_KEY_ALT = 1 << 2,
+    /** Fn. */
+    ARKUI_MODIFIER_KEY_FN = 1 << 3,
+} ArkUI_ModifierKeyName;
+
+/**
  * @brief Obtains the type of this UI input event.
  *
  * @param event Indicates the pointer to the current UI input event.
@@ -683,6 +699,18 @@ int32_t OH_ArkUI_MouseEvent_GetMouseButton(const ArkUI_UIInputEvent* event);
  * @since 12
  */
 int32_t OH_ArkUI_MouseEvent_GetMouseAction(const ArkUI_UIInputEvent* event);
+
+/**
+ * @brief Sets whether to prevent event bubbling.
+ *
+ * @param event Indicates the pointer to the current UI input event.
+ * @param stopPropagation Indicates whether the event is prevented from bubbling.
+ * @return Returns the status code of the execution. If 0 is returned, the setting is successful.
+ *         If 401 is returned, the execution fails.
+ *         The possible cause of the failure is that the event parameter is abnormal, such as a null pointer.
+ * @since 12
+ */
+int32_t OH_ArkUI_PointerEvent_SetStopPropagation(const ArkUI_UIInputEvent* event, bool stopPropagation);
 
 #ifdef __cplusplus
 };

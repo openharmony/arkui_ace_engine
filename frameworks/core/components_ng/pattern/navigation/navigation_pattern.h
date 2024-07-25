@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "base/system_bar/system_bar_style.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/navigation/inner_navigation_controller.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -34,8 +35,8 @@
 namespace OHOS::Ace::NG {
 
 using namespace Framework;
-using OnNavigationAnimation = std::function<NavigationTransition(NavContentInfo, NavContentInfo,
-        NavigationOperation)>;
+using OnNavigationAnimation = std::function<NavigationTransition(RefPtr<NavDestinationContext>,
+        RefPtr<NavDestinationContext>, NavigationOperation)>;
 class NavigationPattern : public Pattern {
     DECLARE_ACE_TYPE(NavigationPattern, Pattern);
 
@@ -71,6 +72,7 @@ public:
     void OnModifyDone() override;
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& /* config */) override;
 
     void OnLanguageConfigurationUpdate() override;
 
@@ -98,6 +100,8 @@ public:
     {
         navigationMode_ = navigationMode;
     }
+
+    bool JudgeFoldStateChangeAndUpdateState();
 
     void SetNavigationStack(const RefPtr<NavigationStack>& navigationStack);
 
@@ -315,6 +319,8 @@ public:
 
     static void FireNavigationLifecycleChange(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle);
 
+    static void NotifyPerfMonitorPageMsg(const std::string& pageName);
+
     // type: will_show + on_show, will_hide + on_hide, hide, show, willShow, willHide
     void NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isNavigationChanged, bool isFromStandard);
     void NotifyPageHide(const std::string& pageName);
@@ -327,6 +333,10 @@ public:
 
     void SetNavigationTransition(const OnNavigationAnimation navigationAnimation)
     {
+        if (currentProxy_ && !currentProxy_->GetIsFinished()) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "not support to update callback during animation");
+            return;
+        }
         onTransition_ = std::move(navigationAnimation);
     }
 
@@ -357,17 +367,48 @@ public:
         parentNode_ = parentNode;
     }
 
-    bool IsInitializationDone()
-    {
-        return isInitialDone_;
-    }
-
     WeakPtr<UINode> GetParentCustomNode() const
     {
         return parentNode_;
     }
 
+    void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style);
+
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+
+    bool IsFullPageNavigation() const
+    {
+        return isFullPageNavigation_;
+    }
+
+    bool IsTopNavDestination(const RefPtr<UINode>& node) const;
+    void TryRestoreSystemBarStyle(const RefPtr<WindowManager>& windowManager);
+
+    bool IsFinishInteractiveAnimation() const
+    {
+        return isFinishInteractiveAnimation_;
+    }
+
+    bool IsCurTopNewInstance() const
+    {
+        return isCurTopNewInstance_;
+    }
+
 private:
+    void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
+    void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);
+    void UpdateSystemBarStyleOnTopNavPathChange(
+        const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
+    void UpdateSystemBarStyleWithTopNavPath(const RefPtr<WindowManager>& windowManager,
+        const std::optional<std::pair<std::string, RefPtr<UINode>>>& topNavPath);
+    void UpdateSystemBarStyleOnPageVisibilityChange(bool show);
+    void RegisterPageVisibilityChangeCallback();
+    bool ApplyTopNavPathSystemBarStyleOrRestore(const RefPtr<WindowManager>& windowManager,
+        const std::optional<std::pair<std::string, RefPtr<UINode>>>& topNavPath);
+    void InitPageNode(const RefPtr<FrameNode>& host);
+    void InitFoldState();
+
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
     void TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -383,15 +424,24 @@ private:
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode usrNavigationMode);
+    void RecoveryToLastStack(const RefPtr<NavDestinationGroupNode>& preTopDestination,
+        const RefPtr<NavDestinationGroupNode>& newTopDestination);
     RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
+    void DoNavbarHideAnimation(const RefPtr<NavigationGroupNode>& hostNode);
     RefPtr<FrameNode> GetDividerNode() const;
     void FireInterceptionEvent(bool isBefore,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
-    void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart();
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
     void OnHover(bool isHover);
+    float GetPaintRectHeight(const RefPtr<FrameNode>& node)
+    {
+        auto renderContext = node->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, 0.0f);
+        return renderContext->GetPaintRectWithoutTransform().Height();
+    }
     void AddDividerHotZoneRect();
     void RangeCalculation(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
@@ -418,14 +468,25 @@ private:
         const RefPtr<NavDestinationGroupNode>& topDestination, bool isPopPage, bool isAnimated);
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void RefreshFocusToDestination();
+    void StartDefaultAnimation(const RefPtr<NavDestinationGroupNode>& preTopDestination,
+        const RefPtr<NavDestinationGroupNode>& topDestination,
+        bool isPopPage, bool isNeedInVisible = false);
+    bool ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode>& preTopDestination,
+        const RefPtr<NavDestinationGroupNode>& topDestination,
+        bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy,
+        NavigationTransition navigationTransition);
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;
     RefPtr<InputEvent> hoverEvent_;
-    RefPtr<DragEvent> dragEvent_;
+    RefPtr<PanEvent> panEvent_;
     RefPtr<NavigationTransitionProxy> currentProxy_;
     RectF dragRect_;
+    WeakPtr<FrameNode> pageNode_;
+    bool isFullPageNavigation_ = false;
+    std::optional<RefPtr<SystemBarStyle>> backupStyle_;
+    std::optional<RefPtr<SystemBarStyle>> currStyle_;
     bool addByNavRouter_ = false;
     bool ifNeedInit_ = true;
     float preNavBarWidth_ = 0.0f;
@@ -447,8 +508,12 @@ private:
     bool isInDividerDrag_ = false;
     bool isDividerDraggable_ = true;
     bool isAnimated_ = false;
+#if defined(ENABLE_NAV_SPLIT_MODE)
+    bool isBackPage_ = false;
+#endif
+    FoldStatus currentfoldStatus_ = FoldStatus::UNKNOWN;  // only used for mode-switch animation
     bool isReplace_ = false;
-    bool isInitialDone_ = false;
+    bool isFinishInteractiveAnimation_ = true;
     int32_t lastPreIndex_ = false;
     std::shared_ptr<NavigationController> navigationController_;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
@@ -459,6 +524,7 @@ private:
     WeakPtr<UINode> parentNode_;
     int32_t preStackSize_ = 0;
     bool isRightToLeft_ = false;
+    bool isCurTopNewInstance_ = false;
 };
 
 } // namespace OHOS::Ace::NG

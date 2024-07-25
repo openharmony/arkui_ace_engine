@@ -1271,6 +1271,37 @@ class TextInputOnDidDeleteModifier extends ModifierWithKey<Callback<DeleteValue>
   }
 }
 
+class TextInputEnablePreviewTextModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputEnablePreviewText');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetEnablePreviewText(node);
+    } else {
+      getUINativeModule().textInput.setEnablePreviewText(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> {
+  constructor(value: EditMenuOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textEditMenuOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetSelectionMenuOptions(node);
+    } else {
+      getUINativeModule().textInput.setSelectionMenuOptions(node, this.value);
+    }
+  }
+}
+
 interface TextInputParam {
   placeholder?: ResourceStr;
   text?: ResourceStr;
@@ -1721,6 +1752,15 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   onDidDelete(callback: Callback<DeleteValue>): this {
     modifierWithKey(this._modifiersWithKeys, TextInputOnDidDeleteModifier.identity, TextInputOnDidDeleteModifier, callback);
+    return this;
+  }
+  enablePreviewText(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputEnablePreviewTextModifier.identity, TextInputEnablePreviewTextModifier, value);
+    return this;
+  }
+  editMenuOptions(value: EditMenuOptions): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputEditMenuOptionsModifier.identity,
+      TextInputEditMenuOptionsModifier, value);
     return this;
   }
 }

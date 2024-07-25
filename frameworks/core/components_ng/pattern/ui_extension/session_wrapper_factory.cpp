@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
 
 #include "base/memory/referenced.h"
+#include "core/components_ng/pattern/ui_extension/security_session_wrapper_impl.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
@@ -25,6 +26,17 @@ RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(SessionType s
 {
     if (sessionType == SessionType::UI_EXTENSION_ABILITY || sessionType == SessionType::EMBEDDED_UI_EXTENSION) {
         return AceType::MakeRefPtr<SessionWrapperImpl>(hostPattern, instanceId, isTransferringCaller, sessionType);
+    }
+    return nullptr;
+}
+
+RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(
+    SessionType sessionType, const SessionCreateParam& sessionCreateParam)
+{
+    if (sessionType == SessionType::SECURITY_UI_EXTENSION_ABILITY) {
+        return AceType::MakeRefPtr<SecuritySessionWrapperImpl>(
+            sessionCreateParam.hostPattern, sessionCreateParam.instanceId,
+            sessionCreateParam.isTransferringCaller, sessionType);
     }
     return nullptr;
 }

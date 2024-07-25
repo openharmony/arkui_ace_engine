@@ -189,7 +189,6 @@ protected:
         const auto firstOffset = colorStops_.front().offset;
         const auto lastOffset = colorStops_.back().offset;
         const float span = std::min(std::max(lastOffset - firstOffset, 0.0f), std::numeric_limits<float>::max());
-
         if (NearZero(span)) {
             return;
         }
@@ -2336,9 +2335,9 @@ void RosenDecorationPainter::SetBorderStyle(
         if (borderEdge.GetBorderStyle() == BorderStyle::DOTTED) {
             SkPath dotPath;
             if (NearZero(spaceBetweenDot)) {
-                spaceBetweenDot = width * 2.0;
+                spaceBetweenDot = width * 2.0; // 2.0: Double factor.
             }
-            dotPath.addCircle(0.0f, 0.0f, SkDoubleToScalar(width / 2.0));
+            dotPath.addCircle(0.0f, 0.0f, SkDoubleToScalar(width / 2.0)); // 2.0: Average factor.
             paint.setPathEffect(
                 SkPath1DPathEffect::Make(dotPath, spaceBetweenDot, 0.0, SkPath1DPathEffect::kRotate_Style));
         } else if (borderEdge.GetBorderStyle() == BorderStyle::DASHED) {
@@ -2377,9 +2376,9 @@ void RosenDecorationPainter::SetBorderStyle(
         if (borderEdge.GetBorderStyle() == BorderStyle::DOTTED) {
             RSPath dotPath;
             if (NearZero(spaceBetweenDot)) {
-                spaceBetweenDot = width * 2.0;
+                spaceBetweenDot = width * 2.0; // 2.0: Double factor.
             }
-            dotPath.AddCircle(0.0f, 0.0f, static_cast<RSScalar>(width / 2.0));
+            dotPath.AddCircle(0.0f, 0.0f, static_cast<RSScalar>(width / 2.0)); // 2.0: Average factor.
             pen.SetPathEffect(
                 RSPathEffect::CreatePathDashEffect(dotPath, spaceBetweenDot, 0.0, RSPathDashStyle::ROTATE));
         } else if (borderEdge.GetBorderStyle() == BorderStyle::DASHED) {
@@ -3033,7 +3032,7 @@ void RosenDecorationPainter::PaintShadow(const RSPath& path, const Shadow& shado
             shadowPen.SetMiterLimit(pen->GetMiterLimit());
             shadowPen.SetCapStyle(pen->GetCapStyle());
             shadowPen.SetJoinStyle(pen->GetJoinStyle());
-            shadowPen.SetAlphaF(pen->GetAlphaF());
+            shadowPen.SetAlphaF(pen->GetAlphaF() * shadowPen.GetAlphaF());
             shadowPen.SetFilter(filter);
             canvas->AttachPen(shadowPen);
         }
@@ -3041,7 +3040,7 @@ void RosenDecorationPainter::PaintShadow(const RSPath& path, const Shadow& shado
             RSBrush shadowBrush;
             shadowBrush.SetColor(spotColor);
             shadowBrush.SetAntiAlias(true);
-            shadowBrush.SetAlphaF(brush->GetAlphaF());
+            shadowBrush.SetAlphaF(brush->GetAlphaF() * shadowBrush.GetAlphaF());
             shadowBrush.SetFilter(filter);
             canvas->AttachBrush(shadowBrush);
         }

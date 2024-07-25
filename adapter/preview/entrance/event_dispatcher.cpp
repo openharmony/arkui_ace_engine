@@ -162,7 +162,7 @@ void EventDispatcher::DispatchIdleEvent(int64_t deadline)
         return;
     }
 
-    auto aceView = container->GetAceView();
+    auto aceView = AceType::DynamicCast<AceViewPreview>(container->GetAceView());
     if (!aceView) {
         return;
     }
@@ -331,7 +331,7 @@ bool EventDispatcher::DispatchTouchEvent(const std::shared_ptr<MMI::PointerEvent
     ACE_SCOPED_TRACE("DispatchTouchEvent");
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_RETURN(container, false);
-    auto aceView = container->GetAceView();
+    auto aceView = AceType::DynamicCast<AceViewPreview>(container->GetAceView());
     CHECK_NULL_RETURN(aceView, false);
     if (pointerEvent->sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         if (pointerEvent->pointerAction_ >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
@@ -392,7 +392,7 @@ bool EventDispatcher::DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
     }
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_RETURN(container, false);
-    auto aceView = container->GetAceView();
+    auto aceView = AceType::DynamicCast<AceViewPreview>(container->GetAceView());
     CHECK_NULL_RETURN(aceView, false);
 
     KeyEvent event;

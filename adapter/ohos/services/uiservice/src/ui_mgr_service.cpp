@@ -22,12 +22,14 @@
 #include "string_ex.h"
 #include "system_ability_definition.h"
 #include "ui_service_mgr_errors.h"
+#include "xcollie/watchdog.h"
 
 #include "ui_service_hilog.h"
 namespace OHOS {
 namespace Ace {
 namespace {
 constexpr int32_t UI_MGR_SERVICE_SA_ID = 7001;
+constexpr uint32_t WATCHDOG_TIMEVAL = 5000;
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(DelayedSingleton<UIMgrService>::GetInstance().get());
 } // namespace
 
@@ -88,6 +90,12 @@ bool UIMgrService::Init()
     if (handler_ == nullptr) {
         return false;
     }
+
+    int32_t ret = HiviewDFX::Watchdog::GetInstance().AddThread("UIMgrService", handler_, WATCHDOG_TIMEVAL);
+    if (ret != 0) {
+        LOGW("Add watchdog thread failed");
+    }
+
     LOGI("Ace UIservice init success");
     return true;
 }

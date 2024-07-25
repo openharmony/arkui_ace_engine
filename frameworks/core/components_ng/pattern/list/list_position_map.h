@@ -29,6 +29,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
@@ -100,13 +101,10 @@ public:
         return flag;
     }
 
-    void UpdatePosMapStart(float delta, float& listCurrentPos, float space, int32_t startIndex, float startPos)
+    void UpdatePosMapStart(float delta, float& listCurrentPos, float space,
+        int32_t startIndex, float startPos, bool groupAtStart)
     {
         listCurrentPos += delta;
-        if (startIndex == 0) {
-            listCurrentPos = -startPos;
-            return;
-        }
         auto it = posMap_.find(startIndex);
         if (it == posMap_.begin() || it == posMap_.end()) {
             return;
@@ -115,7 +113,7 @@ public:
         it--;
         float prevPos = it->second.mainPos + it->second.mainSize + space;
         int32_t prevIndex = it->first;
-        if (prevIndex + 1 >= startIndex) {
+        if (prevIndex + 1 >= startIndex && groupAtStart) {
             if (NearEqual(prevPos, startPos)) {
                 return;
             }
@@ -127,7 +125,7 @@ public:
         listCurrentPos += prevPos - startPos;
     }
 
-    void UpdatePosMapEnd(int32_t prevEndIndex, float space)
+    void UpdatePosMapEnd(int32_t prevEndIndex, float space, bool groupAtEnd)
     {
         auto it = posMap_.find(prevEndIndex);
         if (it == posMap_.end()) {
@@ -138,7 +136,7 @@ public:
         if (it == posMap_.end()) {
             return;
         }
-        if (prevEndIndex + 1 >= it->first) {
+        if (prevEndIndex + 1 >= it->first && groupAtEnd) {
             if (NearEqual(prevPos, it->second.mainPos)) {
                 return;
             }
@@ -162,28 +160,17 @@ public:
             if (AceType::InstanceOf<FrameNode>(child)) {
                 auto frameNode = AceType::DynamicCast<FrameNode>(child);
                 CalculateFrameNode(frameNode);
-            } else if (AceType::InstanceOf<LazyForEachNode>(child)) {
-                auto lazyForEach = AceType::DynamicCast<LazyForEachNode>(child);
+            } else if (AceType::InstanceOf<LazyForEachNode>(child) ||
+                AceType::InstanceOf<RepeatVirtualScrollNode>(child)) {
                 // Rules: only one type node(ListItem or ListItemGroup) can exist in LazyForEach.
-                CalculateLazyForEachNode(lazyForEach);
+                CalculateLazyForEachNode(child);
             } else {
                 CalculateUINode(child);
             }
         }
     }
 
-    RefPtr<FrameNode> GetListFrameNode(RefPtr<LazyForEachNode> node) const
-    {
-        auto parent = node->GetParent();
-        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
-        while (parent && (!frameNode)) {
-            parent = parent->GetParent();
-            frameNode = AceType::DynamicCast<FrameNode>(parent);
-        }
-        return frameNode;
-    }
-
-    std::optional<bool> GetLazyForEachChildIsGroup(RefPtr<LazyForEachNode> node)
+    std::optional<bool> GetLazyForEachChildIsGroup(RefPtr<UINode> node)
     {
         std::optional<bool> isGroup;
         auto children = node->GetChildren();
@@ -198,7 +185,7 @@ public:
             }
         }
         if (!(isGroup.has_value())) {
-            auto listNode = GetListFrameNode(node);
+            auto listNode = node->GetParentFrameNode();
             CHECK_NULL_RETURN(listNode, isGroup);
             auto wrapper = listNode->GetOrCreateChildByIndex(curIndex_);
             CHECK_NULL_RETURN(wrapper, isGroup);
@@ -207,7 +194,7 @@ public:
         return isGroup;
     }
 
-    void CalculateLazyForEachNode(RefPtr<LazyForEachNode> node)
+    void CalculateLazyForEachNode(RefPtr<UINode> node)
     {
         int32_t count = node->FrameCount();
         if (count <= 0) {
@@ -391,6 +378,13 @@ public:
         ClearDirty();
     }
 
+    void UpdateTotalCount(int32_t totalCount)
+    {
+        totalItemCount_ = totalCount;
+        auto iter = posMap_.lower_bound(totalCount);
+        posMap_.erase(iter, posMap_.end());
+    }
+
     float GetPos(int32_t index, float offset = 0.0f)
     {
         return posMap_[index].mainPos - offset;
@@ -399,6 +393,24 @@ public:
     float GetGroupLayoutOffset(int32_t startIndex, float startPos)
     {
         return posMap_[startIndex].mainPos - startPos;
+    }
+
+    std::pair<int32_t, float> GetStartIndexAndPos() const
+    {
+        if (posMap_.empty()) {
+            return { 0, 0.0f };
+        }
+        const auto& start = posMap_.begin();
+        return { start->first, start->second.mainPos };
+    }
+
+    std::pair<int32_t, float> GetEndIndexAndPos() const
+    {
+        if (posMap_.empty()) {
+            return { 0, 0.0f };
+        }
+        const auto& end = posMap_.rbegin();
+        return { end->first, end->second.mainPos + end->second.mainSize };
     }
 
     void OptimizeBeforeMeasure(int32_t& beginIndex, float& beginPos, const float offset, const float contentSize)

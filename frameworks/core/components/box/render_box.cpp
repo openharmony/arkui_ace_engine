@@ -413,7 +413,7 @@ void RenderBox::PanOnActionEnd(const GestureEvent& info)
         return;
     }
 #if !defined(PREVIEW)
-    if (isDragDropNode_ ) {
+    if (isDragDropNode_) {
         isDragDropNode_  = false;
         RestoreCilpboardData(pipelineContext);
 
@@ -1108,11 +1108,10 @@ bool RenderBox::HandleMouseEvent(const MouseEvent& event)
 #else
     LOGI("RenderBox::HandleMouseEvent: Do mouse callback with mouse event{ Global(%{public}f,%{public}f), "
          "Local(%{public}f,%{public}f)}, Button(%{public}d), Action(%{public}d), Time(%{public}lld), "
-         "DeviceId(%{public}" PRId64 ", SourceType(%{public}d) }. Return: %{public}d",
+         ", SourceType(%{public}d) }. Return: %{public}d",
         info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetLocalLocation().GetX(),
         info.GetLocalLocation().GetY(), info.GetButton(), info.GetAction(),
-        info.GetTimeStamp().time_since_epoch().count(), info.GetDeviceId(), info.GetSourceDevice(),
-        info.IsStopPropagation());
+        info.GetTimeStamp().time_since_epoch().count(), info.GetSourceDevice(), info.IsStopPropagation());
 #endif
     onMouse_(info);
     return info.IsStopPropagation();
@@ -1224,9 +1223,7 @@ void RenderBox::SetGrayScale(double scale)
     if (frontDecoration_ == nullptr) {
         frontDecoration_ = AceType::MakeRefPtr<Decoration>();
     }
-
     double _scale = frontDecoration_->GetGrayScale().Value();
-
     if (!NearEqual(_scale, scale)) {
         frontDecoration_->SetGrayScale(Dimension(_scale));
         MarkNeedRender();
@@ -1238,7 +1235,6 @@ double RenderBox::GetGrayScale(void) const
     if (frontDecoration_ != nullptr) {
         return frontDecoration_->GetGrayScale().Value();
     }
-
     return 0.0;
 }
 
@@ -1247,9 +1243,7 @@ void RenderBox::SetBrightness(double ness)
     if (frontDecoration_ == nullptr) {
         frontDecoration_ = AceType::MakeRefPtr<Decoration>();
     }
-
     double brightness = frontDecoration_->GetBrightness().Value();
-
     if (!NearEqual(brightness, ness)) {
         frontDecoration_->SetBrightness(Dimension(brightness));
         MarkNeedRender();
@@ -1654,48 +1648,56 @@ void RenderBox::OnStatusStyleChanged(const VisualState state)
                 auto colorState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableColor>>(attribute);
                 GetBackDecoration()->SetBackgroundColor(colorState->value_);
-            } break;
+                break;
+            }
 
             case BoxStateAttribute::BORDER_COLOR: {
                 auto colorState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableColor>>(attribute);
                 BoxComponentHelper::SetBorderColor(GetBackDecoration(), colorState->value_);
-            } break;
+                break;
+            }
 
             case BoxStateAttribute::BORDER_RADIUS: {
                 auto radiusState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
                 BoxComponentHelper::SetBorderRadius(GetBackDecoration(), radiusState->value_);
-            } break;
+                break;
+            }
 
             case BoxStateAttribute::BORDER_STYLE: {
                 auto attributeStateValue =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, BorderStyle>>(attribute);
                 BoxComponentHelper::SetBorderStyle(GetBackDecoration(), attributeStateValue->value_);
-            } break;
+                break;
+            }
 
             case BoxStateAttribute::BORDER_WIDTH: {
                 auto widthState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
                 BoxComponentHelper::SetBorderWidth(GetBackDecoration(), widthState->value_);
-            } break;
+                break;
+            }
 
             case BoxStateAttribute::HEIGHT: {
                 auto valueState = AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, Dimension>>(attribute);
                 height_ = valueState->value_;
-            } break;
+                break;
+            }
 
             case BoxStateAttribute::WIDTH: {
                 auto valueState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
                 width_ = valueState->value_;
-            } break;
+                break;
+            }
 
             case BoxStateAttribute::ASPECT_RATIO: {
                 auto valueState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
                 SetAspectRatio(valueState->value_);
-            } break;
+                break;
+            }
 
             case BoxStateAttribute::BORDER: {
                 // We replace support for border object with updates to border components:
@@ -1703,12 +1705,14 @@ void RenderBox::OnStatusStyleChanged(const VisualState state)
                 // The reason - developer does not have to provide all border properties
                 // when border is set.
                 // See JSViewAbstract::JsBorder for details
-            } break;
+                break;
+            }
 
             case BoxStateAttribute::GRADIENT: {
                 auto gradientState = AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, Gradient>>(attribute);
                 GetBackDecoration()->SetGradient(gradientState->value_);
-            } break;
+                break;
+            }
             default:
                 break;
         }

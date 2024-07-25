@@ -24,6 +24,8 @@
 #include "base/memory/referenced.h"
 
 #define private public
+#define protected public
+
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -65,6 +67,8 @@ const std::string EMPTY_STRING;
 const std::string EMPTY_TAG;
 constexpr Dimension SPACE_NEGATIVE(-1);
 constexpr Dimension SPACE_ONE(1);
+constexpr int32_t MIRROR_FRAME_OFFSET_X = 620;
+constexpr int32_t MIRROR_FRAME_OFFSET_Y_ZERO = 0;
 } // namespace
 class LinearLayoutTestNg : public testing::Test {
 public:
@@ -952,6 +956,52 @@ HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest006, TestSize.Level1)
     EXPECT_EQ(secondChildLayoutWrapper->GetGeometryNode()->GetFrameSize(), LARGE_ITEM_SIZE);
     EXPECT_EQ(secondChildLayoutWrapper->GetGeometryNode()->GetFrameOffset(),
         OffsetF(ZERO, COLUMN_HEIGHT - spaceBetween - LARGE_ITEM_HEIGHT));
+}
+
+/**
+ * @tc.name: LinearColumnLayoutTest007
+ * @tc.desc: Layout items in column linear algorithm with RightToLeft
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearLayoutTestNg, LinearColumnLayoutTest007, TestSize.Level1)
+{
+    auto column = CreateColumn();
+    auto columnFrameNode = column.first;
+    auto columnLayoutWrapper = column.second;
+
+    auto childLayoutConstraint = columnLayoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
+    /* corresponding ets code:
+       Column() {
+         Blank()
+           .width(100)
+           .height(40)
+       }.height(80)
+       .width('100%')
+   */
+    // create first child node and wrapper
+    auto firstChild = CreateSmallChild(childLayoutConstraint);
+    auto firstChildFrameNode = firstChild.first;
+    auto firstChildLayoutWrapper = firstChild.second;
+    columnFrameNode->AddChild(firstChildFrameNode);
+    columnLayoutWrapper->AppendChild(firstChildLayoutWrapper);
+    // isRightToLeft is false
+    LinearLayoutUtils::Measure(AccessibilityManager::RawPtr(columnLayoutWrapper), true);
+    LinearLayoutUtils::Layout(
+        AccessibilityManager::RawPtr(columnLayoutWrapper), true, FlexAlign::FLEX_START, FlexAlign::SPACE_BETWEEN);
+    EXPECT_EQ(firstChildLayoutWrapper->GetGeometryNode()->GetFrameSize(), SMALL_ITEM_SIZE);
+    EXPECT_EQ(firstChildLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF(ZERO, ZERO));
+
+    // isRightToLeft is true
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    LinearLayoutUtils::Measure(AccessibilityManager::RawPtr(columnLayoutWrapper), true);
+    LinearLayoutUtils::Layout(
+        AccessibilityManager::RawPtr(columnLayoutWrapper), true, FlexAlign::FLEX_START, FlexAlign::SPACE_BETWEEN);
+    EXPECT_EQ(firstChildLayoutWrapper->GetGeometryNode()->GetFrameSize(), SMALL_ITEM_SIZE);
+    auto offsetVal = firstChildLayoutWrapper->GetGeometryNode()->GetFrameOffset();
+    EXPECT_EQ(offsetVal.GetX(), MIRROR_FRAME_OFFSET_X);
+    EXPECT_EQ(offsetVal.GetY(), MIRROR_FRAME_OFFSET_Y_ZERO);
 }
 
 /**

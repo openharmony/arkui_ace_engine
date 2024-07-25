@@ -67,6 +67,16 @@ inline std::string ToString(const FontStyle& fontStyle)
     auto iter = BinarySearchFindIndex(table, ArraySize(table), fontStyle);
     return iter != -1 ? table[iter].value : "";
 }
+
+inline std::string ToStringNDK(const FontStyle& fontStyle)
+{
+    static const LinearEnumMapNode<FontStyle, std::string> table[] = {
+        { FontStyle::NORMAL, "normal" },
+        { FontStyle::ITALIC, "italic" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), fontStyle);
+    return iter != -1 ? table[iter].value : "";
+}
 } // namespace StringUtils
 
 enum class TextBaseline {
@@ -308,6 +318,26 @@ public:
         fontSize_ = fontSize;
     }
 
+    void SetMaxFontScale(float maxFontScale)
+    {
+        maxFontScale_ = maxFontScale;
+    }
+
+    void SetMinFontScale(float minFontScale)
+    {
+        minFontScale_ = minFontScale;
+    }
+
+    std::optional<float> GetMaxFontScale() const
+    {
+        return maxFontScale_;
+    }
+
+    std::optional<float> GetMinFontScale() const
+    {
+        return minFontScale_;
+    }
+
     FontWeight GetFontWeight() const
     {
         return fontWeight_;
@@ -318,12 +348,22 @@ public:
         fontWeight_ = fontWeight;
     }
 
-    const Color& GetTextColor() const
+    const Color GetTextColor() const
+    {
+        return textColor_.ToColor();
+    }
+
+    const DynamicColor GetDynamicTextColor() const
     {
         return textColor_;
     }
 
     void SetTextColor(const Color& textColor)
+    {
+        textColor_ = textColor;
+    }
+
+    void SetTextColor(const DynamicColor& textColor)
     {
         textColor_ = textColor;
     }
@@ -348,12 +388,17 @@ public:
         wordSpacing_ = wordSpacing;
     }
 
-    const Color& GetTextDecorationColor() const
+    const Color GetTextDecorationColor() const
+    {
+        return textDecorationColor_.ToColor();
+    }
+
+    const Color GetDynamicTextDecorationColor() const
     {
         return textDecorationColor_;
     }
 
-    void SetTextDecorationColor(const Color& textDecorationColor)
+    void SetTextDecorationColor(const DynamicColor& textDecorationColor)
     {
         textDecorationColor_ = textDecorationColor;
     }
@@ -714,49 +759,16 @@ public:
         return symbolEffectOptions_;
     }
 
-    std::string ToString() const
-    {
-        auto jsonValue = JsonUtil::Create(true);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, fontSize_);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, lineHeight_);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, baselineOffset_);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, wordSpacing_);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, textIndent_);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, letterSpacing_);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, lineSpacing_);
-
-        JSON_STRING_PUT_INT(jsonValue, fontWeight_);
-        JSON_STRING_PUT_INT(jsonValue, fontStyle_);
-        JSON_STRING_PUT_INT(jsonValue, textBaseline_);
-        JSON_STRING_PUT_INT(jsonValue, textOverflow_);
-        JSON_STRING_PUT_INT(jsonValue, verticalAlign_);
-        JSON_STRING_PUT_INT(jsonValue, textAlign_);
-        JSON_STRING_PUT_INT(jsonValue, textDecorationStyle_);
-        JSON_STRING_PUT_INT(jsonValue, textDecoration_);
-        JSON_STRING_PUT_INT(jsonValue, whiteSpace_);
-        JSON_STRING_PUT_INT(jsonValue, wordBreak_);
-        JSON_STRING_PUT_INT(jsonValue, textCase_);
-        JSON_STRING_PUT_INT(jsonValue, ellipsisMode_);
-        JSON_STRING_PUT_INT(jsonValue, lineBreakStrategy_);
-
-        std::stringstream ss;
-        std::for_each(renderColors_.begin(), renderColors_.end(), [&ss](const Color& c) { ss << c.ToString() << ","; });
-        jsonValue->Put("renderColors", ss.str().c_str());
-        JSON_STRING_PUT_INT(jsonValue, renderStrategy_);
-        JSON_STRING_PUT_INT(jsonValue, effectStrategy_);
-        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, symbolEffectOptions_);
-
-        return jsonValue->ToString();
-    }
+    std::string ToString() const;
 
 private:
     std::vector<std::string> fontFamilies_;
-    std::list<std::pair<std::string, int32_t>> fontFeatures_ { { "\"pnum\"", 1 } };
+    std::list<std::pair<std::string, int32_t>> fontFeatures_;
     std::vector<Dimension> preferFontSizes_;
     std::vector<TextSizeGroup> preferTextSizeGroups_;
     std::vector<Shadow> textShadows_;
-    // use 14px for normal font size.
-    Dimension fontSize_ { 14, DimensionUnit::PX };
+    // use 16vp for normal font size.
+    Dimension fontSize_ { 16, DimensionUnit::VP };
     Dimension adaptMinFontSize_;
     Dimension adaptMaxFontSize_;
     Dimension adaptFontSizeStep_;
@@ -779,14 +791,16 @@ private:
     TextCase textCase_ { TextCase::NORMAL };
     EllipsisMode ellipsisMode_ = EllipsisMode::TAIL;
     LineBreakStrategy lineBreakStrategy_ { LineBreakStrategy::GREEDY };
-    Color textColor_ { Color::BLACK };
-    Color textDecorationColor_ { Color::BLACK };
+    DynamicColor textColor_ { Color::BLACK };
+    DynamicColor textDecorationColor_ { Color::BLACK };
     uint32_t maxLines_ = UINT32_MAX;
     bool hasHeightOverride_ = false;
     bool adaptTextSize_ = false;
     bool adaptHeight_ = false; // whether adjust text size with height.
     bool allowScale_ = true;
     bool halfLeading_ = false;
+    std::optional<float> minFontScale_;
+    std::optional<float> maxFontScale_;
 
     // for Symbol
     std::vector<Color> renderColors_;
@@ -846,15 +860,15 @@ inline WordBreak StringToWordBreak(const std::string& wordBreak)
 
 inline std::string FontWeightToString(const FontWeight& fontWeight)
 {
-    static const LinearEnumMapNode<FontWeight, std::string> fontWeightTable[] = {
+    static const std::unordered_map<FontWeight, std::string> fontWeightTable = {
         { FontWeight::W100, "100" }, { FontWeight::W200, "200" }, { FontWeight::W300, "300" },
         { FontWeight::W400, "400" }, { FontWeight::W500, "500" }, { FontWeight::W600, "600" },
         { FontWeight::W700, "700" }, { FontWeight::W800, "800" }, { FontWeight::W900, "900" },
         { FontWeight::BOLD, "bold" }, { FontWeight::BOLDER, "bolder" }, { FontWeight::LIGHTER, "lighter" },
         { FontWeight::MEDIUM, "medium" }, { FontWeight::NORMAL, "normal" }, { FontWeight::REGULAR, "regular" },
     };
-    auto weightIter = BinarySearchFindIndex(fontWeightTable, ArraySize(fontWeightTable), fontWeight);
-    return weightIter != -1 ? fontWeightTable[weightIter].value : "";
+    auto weightIter = fontWeightTable.find(fontWeight);
+    return weightIter != fontWeightTable.end() ? weightIter->second : "";
 }
 
 inline std::string ToString(const FontWeight& fontWeight)

@@ -31,6 +31,8 @@ public:
     static ArkUINativeModuleValue ResetColumns(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetGutter(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetGutter(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnBreakpointChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnBreakpointChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 

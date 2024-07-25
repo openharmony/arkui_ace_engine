@@ -171,9 +171,4 @@ void ImageLoadingContext::PerformDownload() {}
 void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData) {}
 
 void ImageLoadingContext::DownloadImageFailed(const std::string& errorMessage) {}
-
-bool ImageLoadingContext::RemoveDownloadTask(const std::string& src)
-{
-    return false;
-}
 } // namespace OHOS::Ace::NG

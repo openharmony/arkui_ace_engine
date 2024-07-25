@@ -21,6 +21,7 @@
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIGridModifier* GetGridModifier();
 void SetOnGridScrollIndex(ArkUINodeHandle node, void* extraParam);
+void ResetOnGridScrollIndex(ArkUINodeHandle node);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_GRID_MODIFIER_H

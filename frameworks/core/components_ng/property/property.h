@@ -50,6 +50,15 @@ inline constexpr PropertyChangeFlag PROPERTY_UPDATE_EVENT = 1 << 8;
 
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD = 1 << 9;
 
+using FrameNodeChangeInfoFlag = uint32_t;
+inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_INFO_NONE = 0;
+inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_START_SCROLL = 1 << 1;
+inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_END_SCROLL = 1 << 2;
+inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_START_ANIMATION = 1 << 3;
+inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_GEOMETRY_CHANGE = 1 << 4;
+inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_TRANSFORM_CHANGE = 1 << 5;
+inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_TRANSITION_START = 1 << 6;
+
 inline bool CheckNeedMakePropertyDiff(PropertyChangeFlag flag)
 {
     return (flag & PROPERTY_UPDATE_DIFF) == PROPERTY_UPDATE_DIFF;
@@ -300,6 +309,20 @@ public:                                                             \
         }                                                           \
         prop##name##_ = value;                                      \
         On##name##Update(value);                                    \
+    }
+
+#define ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP_FOR_VIRTUAL_NODE(name, type)                 \
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(name, type)                                       \
+public:                                                                                          \
+    void Update##name(const type& value, const int64_t accessibilityIdForVirtualNode = -2100000) \
+    {                                                                                            \
+        if (prop##name##_.has_value()) {                                                         \
+            if (NearEqual(prop##name##_.value(), value)) {                                       \
+                return;                                                                          \
+            }                                                                                    \
+        }                                                                                        \
+        prop##name##_ = value;                                                                   \
+        On##name##Update(value, accessibilityIdForVirtualNode);                                  \
     }
 
 // For Property Group Struct

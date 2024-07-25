@@ -75,6 +75,7 @@ public:
 
     // Called on Main Thread.
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
+    void AddLayoutNode(const RefPtr<FrameNode>& layoutNode);
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
     void AddPredictTask(PredictTask&& task);
     void AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask = false);
@@ -134,6 +135,10 @@ public:
         syncGeometryNodeTasks_.emplace_back(task);
     }
 
+    void AddSafeAreaPaddingProcessTask(FrameNode* node);
+    void RemoveSafeAreaPaddingProcessTask(FrameNode* node);
+    void FlushSafeAreaPaddingProcess();
+
     void SetIsLayouting(bool layouting)
     {
         isLayouting_ = layouting;
@@ -143,6 +148,8 @@ public:
 
 private:
     bool NeedAdditionalLayout();
+
+    void SetLayoutNodeRect();
 
     template<typename T>
     struct NodeCompare {
@@ -165,9 +172,11 @@ private:
     };
 
     using PageDirtySet = std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>>;
+    using LayoutNodesSet = std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>>;
     using RootDirtyMap = std::map<uint32_t, PageDirtySet>;
 
     std::list<RefPtr<FrameNode>> dirtyLayoutNodes_;
+    std::list<RefPtr<FrameNode>> layoutNodes_;
     RootDirtyMap dirtyRenderNodes_;
     std::list<PredictTask> predictTask_;
     std::list<std::function<void()>> afterLayoutTasks_;
@@ -175,6 +184,7 @@ private:
     std::list<std::function<void()>> afterRenderTasks_;
     std::list<std::function<void()>> persistAfterLayoutTasks_;
     std::list<std::function<void()>> syncGeometryNodeTasks_;
+    std::set<FrameNode*, NodeCompare<FrameNode*>> safeAreaPaddingProcessTasks_;
 
     uint32_t currentPageId_ = 0;
     bool is64BitSystem_ = false;

@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 module_output_path = "ui_service/ui_service"
 

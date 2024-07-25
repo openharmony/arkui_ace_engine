@@ -122,7 +122,9 @@ const OHOS::sptr<OHOS::Rosen::Window> GetWindow(int32_t containerId)
 }
 } // namespace
 
+bool LayoutInspector::stateProfilerStatus_ = false;
 bool LayoutInspector::layoutInspectorStatus_ = false;
+std::function<void(bool)> LayoutInspector::jsStateProfilerStatusCallback_ = nullptr;
 const char PNG_TAG[] = "png";
 
 void LayoutInspector::SupportInspector()
@@ -156,11 +158,35 @@ void LayoutInspector::SetStatus(bool layoutInspectorStatus)
     layoutInspectorStatus_ = layoutInspectorStatus;
 }
 
-void LayoutInspector::SetArkUIStateProfilerStatus(bool status)
+void LayoutInspector::TriggerJsStateProfilerStatusCallback(bool status)
 {
-    auto context = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(context);
-    context->SetStateProfilerStatus(status);
+    if (jsStateProfilerStatusCallback_) {
+        stateProfilerStatus_ = status;
+        jsStateProfilerStatusCallback_(status);
+    }
+}
+
+void LayoutInspector::SetJsStateProfilerStatusCallback(ProfilerStatusCallback callback)
+{
+    jsStateProfilerStatusCallback_ = callback;
+}
+
+bool LayoutInspector::GetStateProfilerStatus()
+{
+    return stateProfilerStatus_;
+}
+
+void LayoutInspector::SendStateProfilerMessage(const std::string& message)
+{
+    OHOS::AbilityRuntime::ConnectServerManager::Get().SendArkUIStateProfilerMessage(message);
+}
+
+void LayoutInspector::SetStateProfilerStatus(bool status)
+{
+    auto taskExecutor = Container::CurrentTaskExecutorSafely();
+    CHECK_NULL_VOID(taskExecutor);
+    auto task = [status]() { LayoutInspector::TriggerJsStateProfilerStatusCallback(status); };
+    taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUISetStateProfilerStatus");
 }
 
 void LayoutInspector::SetCallback(int32_t instanceId)
@@ -178,7 +204,7 @@ void LayoutInspector::SetCallback(int32_t instanceId)
     }
 
     OHOS::AbilityRuntime::ConnectServerManager::Get().SetStateProfilerCallback(
-        [](bool status) { return SetArkUIStateProfilerStatus(status); });
+        [](bool status) { return SetStateProfilerStatus(status); });
 }
 
 void LayoutInspector::CreateLayoutInfo(int32_t containerId)
@@ -216,8 +242,6 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
 {
     auto container = AceEngine::Get().GetContainer(containerId);
     CHECK_NULL_VOID(container);
-    auto pipeline = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipeline);
 #ifdef NG_BUILD
     treeJsonStr = NG::Inspector::GetInspector(true);
 #else
@@ -233,11 +257,6 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
         treeJsonStr = V2::Inspector::GetInspectorTree(pipelineContext, true);
     }
 #endif
-    auto jsonTree = JsonUtil::ParseJsonString(treeJsonStr);
-    jsonTree->Put("VsyncID", (int32_t)pipeline->GetFrameCount());
-    jsonTree->Put("ProcessID", getpid());
-    jsonTree->Put("WindowID", (int32_t)pipeline->GetWindowId());
-    treeJsonStr = jsonTree->ToString();
 }
 
 void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message)
@@ -272,7 +291,7 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
     message->Put("deviceWidth", deviceWidth);
     message->Put("deviceHeight", deviceHeight);
     message->Put("deviceDpi", deviceDpi);
-    int32_t encodeLength = SkBase64::Encode(data->data(), data->size(), nullptr);
+    int32_t encodeLength = static_cast<int32_t>(SkBase64::Encode(data->data(), data->size(), nullptr));
     message->Put("size", data->size());
     SkString info(encodeLength);
     SkBase64::Encode(data->data(), data->size(), info.writable_str());

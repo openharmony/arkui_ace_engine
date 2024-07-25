@@ -25,6 +25,7 @@ ace_unittest("list_test_ng") {
     "list_layout_test_ng.cpp",
     "list_scroller_event_test_ng.cpp",
     "list_scroller_test_ng.cpp",
+    "list_scroller_visible_content_change_test_ng.cpp",
     "list_scroller_visible_content_test_ng.cpp",
     "list_swipe_test_ng.cpp",
     "list_test_ng.cpp",

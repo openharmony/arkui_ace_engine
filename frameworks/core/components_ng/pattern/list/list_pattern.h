@@ -160,11 +160,13 @@ public:
 
     // scroller
     void ScrollTo(float position) override;
-    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) override;
+    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START,
+        std::optional<float> extraOffset = std::nullopt) override;
     void ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth = false,
         ScrollAlign align = ScrollAlign::START);
     bool CheckTargetValid(int32_t index, int32_t indexInGroup);
-    void ScrollPage(bool reverse, bool smooth = false) override;
+    void ScrollPage(bool reverse, bool smooth = false,
+        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
     void ScrollBy(float offset);
     bool AnimateToTarget(int32_t index, std::optional<int32_t> indexInGroup, ScrollAlign align);
     Offset GetCurrentOffset() const;
@@ -182,7 +184,7 @@ public:
 
     void UpdatePosMapStart(float delta);
     void UpdatePosMapEnd();
-    void CalculateCurrentOffset(float delta);
+    void CalculateCurrentOffset(float delta, const ListLayoutAlgorithm::PositionMap& recycledItemPosition);
     void UpdateScrollBarOffset() override;
     // chain animation
     void SetChainAnimation();
@@ -221,8 +223,15 @@ public:
     }
     bool CanReplaceSwiperItem()
     {
-        if (!swiperItem_.Upgrade()) {
+        auto listItemPattern = swiperItem_.Upgrade();
+        if (!listItemPattern) {
             canReplaceSwiperItem_ = true;
+            return canReplaceSwiperItem_;
+        }
+        auto host = listItemPattern->GetHost();
+        if (!host || !host->IsOnMainTree()) {
+            canReplaceSwiperItem_ = true;
+            return canReplaceSwiperItem_;
         }
         return canReplaceSwiperItem_;
     }
@@ -242,6 +251,16 @@ public:
     std::optional<ListPredictLayoutParam> GetPredictLayoutParam() const
     {
         return predictLayoutParam_;
+    }
+
+    void SetPredictLayoutParamV2(std::optional<ListPredictLayoutParamV2> param)
+    {
+        predictLayoutParamV2_ = param;
+    }
+
+    std::optional<ListPredictLayoutParamV2> GetPredictLayoutParamV2() const
+    {
+        return predictLayoutParamV2_;
     }
 
     void CloseAllSwipeActions(OnFinishFunc&&);
@@ -334,7 +353,6 @@ private:
         const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, float itemGroupTop);
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
-    void SetAccessibilityAction();
     ListItemGroupPara GetListItemGroupParameter(const RefPtr<FrameNode>& node);
     bool IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node);
     void GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const;
@@ -342,8 +360,8 @@ private:
     void UpdateListDirectionInCardStyle();
     bool UpdateStartListItemIndex();
     bool UpdateEndListItemIndex();
-    float GetStartOverScrollOffset(float offset) const;
-    float GetEndOverScrollOffset(float offset) const;
+    float GetStartOverScrollOffset(float offset, float startMainPos) const;
+    float GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const;
     RefPtr<ListContentModifier> listContentModifier_;
 
     void ReadThemeToFadingEdge();
@@ -412,6 +430,7 @@ private:
     bool isScrollEnd_ = false;
     bool needReEstimateOffset_ = false;
     std::optional<ListPredictLayoutParam> predictLayoutParam_;
+    std::optional<ListPredictLayoutParamV2> predictLayoutParamV2_;
 
     bool isNeedToUpdateListDirection_ = false;
 

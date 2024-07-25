@@ -63,17 +63,8 @@ public:
         CHECK_NULL_RETURN(host, nullptr);
         auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
         paintProperty->SetHost(host);
-        auto isSelect = paintProperty->GetCheckBoxSelectValue(false);
-        if (!checkboxModifier_) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
-            auto boardColor = isSelect ? paintProperty->GetCheckBoxSelectedColorValue(checkBoxTheme->GetActiveColor())
-                                       : checkBoxTheme->GetInactivePointColor();
-            auto checkColor = isSelect ? checkBoxTheme->GetPointColor() : Color::TRANSPARENT;
-            auto borderColor = isSelect ? Color::TRANSPARENT : checkBoxTheme->GetInactiveColor();
-            auto shadowColor = isSelect ? checkBoxTheme->GetShadowColor() : Color::TRANSPARENT;
-            checkboxModifier_ =
-                AceType::MakeRefPtr<CheckBoxModifier>(isSelect, boardColor, checkColor, borderColor, shadowColor);
+        if (!paintMethod_) {
+            paintMethod_ = MakeRefPtr<CheckBoxPaintMethod>();
         }
         CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -84,17 +75,16 @@ public:
         if (paintProperty->HasCheckBoxSelectedStyle()) {
             checkboxStyle = paintProperty->GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
         }
-        checkboxModifier_->SetCheckboxStyle(checkboxStyle);
-        checkboxModifier_->SetUseContentModifier(UseContentModifier());
-        checkboxModifier_->SetHasBuilder(builder_.has_value());
+        paintMethod_->SetCheckboxStyle(checkboxStyle);
+        paintMethod_->SetUseContentModifier(UseContentModifier());
+        paintMethod_->SetHasBuilder(builder_.has_value());
         host->SetCheckboxFlag(true);
-        auto paintMethod = MakeRefPtr<CheckBoxPaintMethod>(checkboxModifier_);
         auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();
-        paintMethod->SetEnabled(enabled);
-        paintMethod->SetTouchHoverAnimationType(touchHoverType_);
-        return paintMethod;
+        paintMethod_->SetEnabled(enabled);
+        paintMethod_->SetTouchHoverAnimationType(touchHoverType_);
+        return paintMethod_;
     }
 
     bool OnDirtyLayoutWrapperSwap(
@@ -245,16 +235,10 @@ private:
     void InitClickEvent();
     void InitTouchEvent();
     void InitMouseEvent();
-    void InitFocusEvent();
     void OnClick();
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
-    void HandleFocusEvent();
-    void HandleBlurEvent();
-    void AddIsFocusActiveUpdateEvent();
-    void RemoveIsFocusActiveUpdateEvent();
-    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     void CheckPageNode();
     void LoadBuilder();
     void UpdateIndicator();
@@ -298,7 +282,6 @@ private:
     bool isHover_ = false;
     bool isFirstCreated_ = true;
     bool isUserSetResponseRegion_ = false;
-    bool focusEventInitialized_ = false;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
@@ -310,11 +293,10 @@ private:
     OriginalCheckBoxStyle originalStyle_ = OriginalCheckBoxStyle::CIRCULAR_STYLE;
     RefPtr<FrameNode> builderNode_;
     std::optional<std::function<void()>> builder_;
-    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
-    RefPtr<CheckBoxModifier> checkboxModifier_;
+    RefPtr<CheckBoxPaintMethod> paintMethod_;
     WeakPtr<GroupManager> groupManager_;
-
+    bool isTouchPreventDefault_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxPattern);
 };
 } // namespace OHOS::Ace::NG

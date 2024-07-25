@@ -29,6 +29,16 @@ void SetOnListWillScroll(ArkUINodeHandle node, void* extraParam);
 void SetOnListDidScroll(ArkUINodeHandle node, void* extraParam);
 void SetOnListReachStart(ArkUINodeHandle node, void* extraParam);
 void SetOnListReachEnd(ArkUINodeHandle node, void* extraParam);
+
+void ResetOnListScroll(ArkUINodeHandle node);
+void ResetOnListScrollIndex(ArkUINodeHandle node);
+void ResetOnListScrollStart(ArkUINodeHandle node);
+void ResetOnListScrollStop(ArkUINodeHandle node);
+void ResetOnListScrollFrameBegin(ArkUINodeHandle node);
+void ResetOnListWillScroll(ArkUINodeHandle node);
+void ResetOnListDidScroll(ArkUINodeHandle node);
+void ResetOnListReachStart(ArkUINodeHandle node);
+void ResetOnListReachEnd(ArkUINodeHandle node);
 } // namespace OHOS::Ace::NG::NodeModifier
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_LIST_MODIFIER_H

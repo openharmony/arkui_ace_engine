@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_SCROLL_GRID_SCROLL_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_SCROLL_GRID_SCROLL_LAYOUT_ALGORITHM_H
 
-#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
@@ -35,9 +34,6 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    static void PrintGridMatrix(
-        const std::map<int32_t, std::map<int32_t, int32_t>>& gridMatrix, const std::map<int32_t, float>& positions);
-    static void PrintLineHeightMap(const std::map<int32_t, float>& lineHeightMap);
     void SetCanOverScroll(bool canOverScroll)
     {
         canOverScroll_ = canOverScroll;
@@ -109,6 +105,8 @@ private:
     int32_t MeasureChildPlaced(const SizeF& frameSize, int32_t itemIndex, int32_t crossStart,
         LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& childLayoutWrapper);
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstraint) const;
+    bool CheckNeedMeasureWhenStretch(
+        const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstraint) const;
     void MeasureChild(LayoutWrapper* layoutWrapper, const SizeF& frameSize,
         const RefPtr<LayoutWrapper>& childLayoutWrapper, int32_t crossStart, int32_t crossSpan);
 
@@ -164,8 +162,7 @@ private:
     void LayoutForwardCachedLine(LayoutWrapper* layoutWrapper, int32_t cacheCount);
     void CreateCachedChildConstraint(LayoutWrapper* layoutWrapper, float mainSize, float crossSize);
 
-    static void PostIdleTask(RefPtr<FrameNode> frameNode, const GridPredictLayoutParam& param);
-    static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
+    static bool PredictBuildItem(const RefPtr<FrameNode>& host, int32_t itemIdx, const GridPredictLayoutParam& param);
     static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
     void CompleteItemCrossPosition(LayoutWrapper* layoutWrapper, std::map<int32_t, int32_t> items);
     /**
@@ -179,6 +176,12 @@ private:
     std::pair<bool, bool> GetResetMode(LayoutWrapper* layoutWrapper, int32_t updateIdx);
 
     void CheckReset(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
+
+    bool CheckLastLineItemFullyShowed(LayoutWrapper* layoutWrapper);
+
+    bool IsIrregularLine(int32_t lineIndex) const override;
+    
+    void ResetOffsetWhenHeightChanged();
 
 protected:
     uint32_t crossCount_ = 0;

@@ -258,9 +258,8 @@ void OptionPattern::OnPress(const TouchEventInfo& info)
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         // disable next option node's divider
         UpdateNextNodeDivider(false);
-    }
-    // leave press status
-    else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+    } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+        // leave press status
         if (IsHover()) {
             SetBgBlendColor(theme->GetHoverColor());
         } else {

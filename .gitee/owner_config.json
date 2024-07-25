@@ -1,0 +1,293 @@
+{
+    "groups": {
+        "https://gitee.com/arkui_superman": [
+            "https://gitee.com/raulnaruto_admin",
+            "https://gitee.com/jiangdayuan",
+            "https://gitee.com/tsj_2020",
+            "https://gitee.com/cheng-feiwang",
+        ],
+        "https://gitee.com/arkuiabilitygroup": [
+            "https://gitee.com/lmleon",
+            "https://gitee.com/bad-eleven",
+            "https://gitee.com/Caoruihong",
+            "https://gitee.com/dutie123",
+            "https://gitee.com/zhanghangkai1024"
+        ],
+        "https://gitee.com/arkuiframework": [
+            "https://gitee.com/harmony_zhangjian",
+            "https://gitee.com/yesiyuanjim",
+            "https://gitee.com/lushi1202",
+            "https://gitee.com/xiang-shouxing",
+        ],
+        "https://gitee.com/arkuievent": [
+            "https://gitee.com/jiangtao92",
+            "https://gitee.com/piggyguy",
+            "https://gitee.com/zhaojian2021",
+            "https://gitee.com/benb365",
+        ],
+        "https://gitee.com/arkui_architecture": [
+            "https://gitee.com/sunfei2021",
+            "https://gitee.com/yan-shuifeng",
+            "https://gitee.com/lightningHo",
+            "https://gitee.com/liyi0309",
+        ],
+        "https://gitee.com/arkui_image": [
+            "https://gitee.com/ileft2019",
+            "https://gitee.com/jinweiliu",
+            "https://gitee.com/lexiaoyao2",
+            "https://gitee.com/liyujie43",
+        ],
+        "https://gitee.com/arkuistatemgmt": [
+            "https://gitee.com/seaside_wu",
+            "https://gitee.com/lixingchi1",
+            "https://gitee.com/s10021109",
+            "https://gitee.com/lihong67",
+            "https://gitee.com/guido_grassel"
+        ],
+        "https://gitee.com/arkuiscroll": [
+            "https://gitee.com/cc520bf",
+            "https://gitee.com/yangcan18",
+            "https://gitee.com/yeyinglong_admin",
+            "https://gitee.com/zcdqs",
+            "https://gitee.com/zhoutianer",
+            "https://gitee.com/xuzhidan",
+            "https://gitee.com/Hu_ZeQi",
+        ],
+        "https://gitee.com/arkuipopupwindow": [
+            "https://gitee.com/zhangfanfan2",
+            "https://gitee.com/niulihua",
+            "https://gitee.com/zhanghaibo0",
+            "https://gitee.com/youzhi92",
+            "https://gitee.com/Armstrong15",
+            "https://gitee.com/fredtt",
+            "https://gitee.com/futurescape",
+            "https://gitee.com/luoying_ace_admin",
+        ],
+        "https://gitee.com/huawei_g_five": [
+            "https://gitee.com/kangshihui",
+            "https://gitee.com/luckclover",
+            "https://gitee.com/lijuan124",
+            "https://gitee.com/tzcurtain",
+        ],
+        "https://gitee.com/arkuilayout": [
+            "https://gitee.com/ZhangYu-Home",
+            "https://gitee.com/xiexiyun",
+            "https://gitee.com/keerecles",
+            "https://gitee.com/sunbees",
+        ]
+    },
+    "userInfos": {
+        "https://gitee.com/raulnaruto_admin": {
+            "info": "[导航/模态公共 laoyitong]",
+            "group": "https://gitee.com/arkui_superman"
+        },
+        "https://gitee.com/jiangdayuan": {
+            "info": "[导航/模态 jiangdayuan]",
+            "group": "https://gitee.com/arkui_superman"
+        },
+        "https://gitee.com/tsj_2020": {
+            "info": "[导航类组件 tongshijia]",
+            "group": "https://gitee.com/arkui_superman"
+        },
+        "https://gitee.com/cheng-feiwang": {
+            "info": "[模态类组件 chenfeiwang]",
+            "group": "https://gitee.com/arkui_superman"
+        },
+        "https://gitee.com/lmleon": {
+            "info": "[公共能力 liangming]",
+            "group": "https://gitee.com/arkuiabilitygroup"
+        },
+        "https://gitee.com/bad-eleven": {
+            "info": "[公共能力 yeliangfeng]",
+            "group": "https://gitee.com/arkuiabilitygroup"
+        },
+        "https://gitee.com/Caoruihong": {
+            "info": "[稳定性/DFX caoruihong]",
+            "group": "https://gitee.com/arkuiabilitygroup"
+        },
+        "https://gitee.com/dutie123": {
+            "info": "[UIExtension相关 dujincheng]",
+            "group": "https://gitee.com/arkuiabilitygroup"
+        },
+        "https://gitee.com/zhanghangkai1024": {
+            "info": "[无障碍相关 zhanghangkai]",
+            "group": "https://gitee.com/arkuiabilitygroup"
+        },
+        "https://gitee.com/harmony_zhangjian": {
+            "info": "[基础框架公共 zhangjian]",
+            "group": "https://gitee.com/arkuiframework"
+        },
+        "https://gitee.com/yesiyuanjim": {
+            "info": "[基础框架 yesiyuan]",
+            "group": "https://gitee.com/arkuiframework"
+        },
+        "https://gitee.com/lushi1202": {
+            "info": "[启动/窗口/资源管理/DFX lushi]",
+            "group": "https://gitee.com/arkuiframework"
+        },
+        "https://gitee.com/xiang-shouxing": {
+            "info": "[视效/命令节点框架 xiangshouxing]",
+            "group": "https://gitee.com/arkuiframework"
+        },
+        "https://gitee.com/jiangtao92": {
+            "info": "[事件公共 jiangtao]",
+            "group": "https://gitee.com/arkuievent"
+        },
+        "https://gitee.com/piggyguy": {
+            "info": "[拖拽/事件手势/组件截图 jiadexiang]",
+            "group": "https://gitee.com/arkuievent"
+        },
+        "https://gitee.com/zhaojian2021": {
+            "info": "[事件手势 zhaojian]",
+            "group": "https://gitee.com/arkuievent"
+        },
+        "https://gitee.com/benb365": {
+            "info": "[焦点/根视图/通用属性 liuyongchang]",
+            "group": "https://gitee.com/arkuievent"
+        },
+        "https://gitee.com/sunfei2021": {
+            "info": "[架构/编译gn相关 sunfei]",
+            "group": "https://gitee.com/arkui_architecture"
+        },
+        "https://gitee.com/yan-shuifeng": {
+            "info": "[渲染核心数据结构 yanshuifeng]",
+            "group": "https://gitee.com/arkui_architecture"
+        },
+        "https://gitee.com/lightningHo": {
+            "info": "[渲染核心数据结构 hesu]",
+            "group": "https://gitee.com/arkui_architecture"
+        },
+        "https://gitee.com/liyi0309": {
+            "info": "[C-API框架 liyi]",
+            "group": "https://gitee.com/arkui_architecture"
+        },
+        "https://gitee.com/ileft2019": {
+            "info": "[图片能力公共 zuopengpeng]",
+            "group": "https://gitee.com/arkui_image"
+        },
+        "https://gitee.com/jinweiliu": {
+            "info": "[Image组件 liujinwei]",
+            "group": "https://gitee.com/arkui_image"
+        },
+        "https://gitee.com/lexiaoyao2": {
+            "info": "[Image/信息展示类组件 chennaifeng]",
+            "group": "https://gitee.com/arkui_image"
+        },
+        "https://gitee.com/liyujie43": {
+            "info": "[Image能力 liyujie]",
+            "group": "https://gitee.com/arkui_image"
+        },
+        "https://gitee.com/lixingchi1": {
+            "info": "[逻辑组件 lixingchi]",
+            "group": "https://gitee.com/arkuistatemgmt"
+        },
+        "https://gitee.com/s10021109": {
+            "info": "[状态管理 chenbenzhi]",
+            "group": "https://gitee.com/arkuistatemgmt"
+        },
+        "https://gitee.com/seaside_wu": {
+            "info": "[公共能力/预览 wuhaibin]",
+            "group": "https://gitee.com/arkuistatemgmt"
+        },
+        "https://gitee.com/lihong67": {
+            "info": "[工具链 lihong]",
+            "group": "https://gitee.com/arkuistatemgmt"
+        },
+        "https://gitee.com/guido_grassel": {
+            "info": "[状态管理 guido]",
+            "group": "https://gitee.com/arkuistatemgmt"
+        },
+        "https://gitee.com/cc520bf": {
+            "info": "[滚动组件公共 caocan]",
+            "group": "https://gitee.com/arkuiscroll"
+        },
+        "https://gitee.com/yangcan18": {
+            "info": "[Tabs组件 yangcan]",
+            "group": "https://gitee.com/arkuiscroll"
+        },
+        "https://gitee.com/yeyinglong_admin": {
+            "info": "[List/AlphabetIndexer/Refresh/Scroll/ScrollBar组件 yeyinglong]",
+            "group": "https://gitee.com/arkuiscroll"
+        },
+        "https://gitee.com/zcdqs": {
+            "info": "[Grid组件 lijunfeng]",
+            "group": "https://gitee.com/arkuiscroll"
+        },
+        "https://gitee.com/zhoutianer": {
+            "info": "[WaterFlow组件 zhoutianer]",
+            "group": "https://gitee.com/arkuiscroll"
+        },
+        "https://gitee.com/xuzhidan": {
+            "info": "[导航点 xuzhidan]",
+            "group": "https://gitee.com/arkuiscroll"
+        },
+        "https://gitee.com/Hu_ZeQi": {
+            "info": "[Swiper组件 huzeqi]",
+            "group": "https://gitee.com/arkuiscroll"
+        },
+        "https://gitee.com/zhangfanfan2": {
+            "info": "[弹出/表单类公共 zhangfanfan]",
+            "group": "https://gitee.com/arkuipopupwindow"
+        },
+        "https://gitee.com/niulihua": {
+            "info": "[弹窗类 niulihua]",
+            "group": "https://gitee.com/arkuipopupwindow"
+        },
+        "https://gitee.com/zhanghaibo0": {
+            "info": "[表单选择类 zhanghaibo]",
+            "group": "https://gitee.com/arkuipopupwindow"
+        },
+        "https://gitee.com/youzhi92": {
+            "info": "[高级组件 chenyouzhi]",
+            "group": "https://gitee.com/arkuipopupwindow"
+        },
+        "https://gitee.com/Armstrong15": {
+            "info": "[Menu相关 wangyihui]",
+            "group": "https://gitee.com/arkuipopupwindow"
+        },
+        "https://gitee.com/fredtt": {
+            "info": "[表单选择类 zhourenfeng]",
+            "group": "https://gitee.com/arkuipopupwindow"
+        },
+        "https://gitee.com/futurescape": {
+            "info": "Popup/Toast相关 miaoyu",
+            "group": "https://gitee.com/arkuipopupwindow"
+        },
+        "https://gitee.com/luoying_ace_admin": {
+            "info": "Dialog相关 luoying",
+            "group": "https://gitee.com/arkuipopupwindow"
+        },
+        "https://gitee.com/kangshihui": {
+            "info": "[AutoFill&文本菜单 kangshihui]",
+            "group": "https://gitee.com/huawei_g_five"
+        },
+        "https://gitee.com/luckclover": {
+            "info": "[光标&手柄 wangtao]",
+            "group": "https://gitee.com/huawei_g_five"
+        },
+        "https://gitee.com/lijuan124": {
+            "info": "[文本&文本布局 lijuan]",
+            "group": "https://gitee.com/huawei_g_five"
+        },
+        "https://gitee.com/tzcurtain": {
+            "info": "[键盘相关 zhoukechen]",
+            "group": "https://gitee.com/huawei_g_five"
+        },
+        "https://gitee.com/ZhangYu-Home": {
+            "info": "[绘制类组件/布局 zhangyu]",
+            "group": "https://gitee.com/arkuilayout"
+        },
+        "https://gitee.com/xiexiyun": {
+            "info": "[布局组件相关 xiexiyun]",
+            "group": "https://gitee.com/arkuilayout"
+        },
+        "https://gitee.com/keerecles": {
+            "info": "[绘制类组件 lishihao]",
+            "group": "https://gitee.com/arkuilayout"
+        },
+        "https://gitee.com/sunbees": {
+            "info": "[绘制类组件 sunqinjia]",
+            "group": "https://gitee.com/arkuilayout"
+        },
+    }
+}

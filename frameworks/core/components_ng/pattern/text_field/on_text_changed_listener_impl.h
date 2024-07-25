@@ -60,6 +60,7 @@ private:
     void PostSyncTaskToUI(const std::function<void()>& task, const std::string& name);
     void HandleKeyboardStatus(MiscServices::KeyboardStatus status);
     void HandleFunctionKey(MiscServices::FunctionKey functionKey);
+    int32_t CheckPreviewTextParams(const std::u16string &text, const MiscServices::Range &range);
 
     WeakPtr<TextInputClient> pattern_;
     int32_t patternInstanceId_ = -1;

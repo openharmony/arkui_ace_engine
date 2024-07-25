@@ -79,6 +79,8 @@ public:
     uint32_t GetSymbolById(uint32_t resId) const override;
     RefPtr<ThemeStyle> GetPatternByName(const std::string& patternName) override;
     void UpdateColorMode(ColorMode colorMode) override;
+    ColorMode GetResourceColorMode() const override;
+    void SetAppHasDarkRes(bool hasDarkRes);
 
 private:
     std::string GetActualResourceName(const std::string& resName) const;
@@ -93,6 +95,7 @@ private:
     std::shared_ptr<Global::Resource::ResourceManager> sysResourceManager_;
     std::string packagePathStr_;
     std::shared_ptr<Global::Resource::ResConfig> resConfig_;
+    bool appHasDarkRes_ = false;
     std::mutex updateResConfigMutex_;
     ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImplV2);
 };

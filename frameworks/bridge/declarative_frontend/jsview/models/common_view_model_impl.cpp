@@ -19,7 +19,7 @@
 #include "core/components/proxy/proxy_component.h"
 
 namespace OHOS::Ace::Framework {
-void CommonViewModelImpl::Create()
+void CommonViewModelImpl::Create(bool isLayoutNode)
 {
     auto specializedBox = AceType::MakeRefPtr<OHOS::Ace::ProxyComponent>();
     specializedBox->SetPassMinSize(false);

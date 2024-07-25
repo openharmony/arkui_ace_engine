@@ -75,6 +75,13 @@ HWTEST_F(RenderNodeTestNg, RenderNodePattern001, TestSize.Level1)
 
     renderNodePattern->Invalidate();
     EXPECT_EQ(renderNodePattern->renderNodeModifier_->renderNodeFlag_->Get(), 1);
+    
+    renderNodePattern->SetLabel("LabelOne");
+
+    const NG::InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    renderNodePattern->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("label"), "LabelOne");
 }
 
 /**

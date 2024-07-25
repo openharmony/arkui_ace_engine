@@ -36,12 +36,15 @@ ImageAnalyzerAdapterImpl::~ImageAnalyzerAdapterImpl()
     }
 }
 
-void ImageAnalyzerAdapterImpl::SetImageAnalyzerConfig(void* config)
+void ImageAnalyzerAdapterImpl::SetImageAnalyzerConfig(void* config, bool isOptions)
 {
     napi_ref configRef = nullptr;
     napi_value configValue = reinterpret_cast<napi_value>(config);
     napi_create_reference(env_, configValue, 1, &configRef);
     analyzerConfigRef_ = configRef;
+    if (isOptions) {
+        hasOptions_ = true;
+    }
 }
 
 void* ImageAnalyzerAdapterImpl::GetImageAnalyzerConfig()
@@ -67,15 +70,27 @@ void* ImageAnalyzerAdapterImpl::GetImageAnalyzerConfig()
 void* ImageAnalyzerAdapterImpl::ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap)
 {
 #if defined(PIXEL_MAP_SUPPORTED)
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env_, &scope);
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_RETURN(engine, {});
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     auto env = reinterpret_cast<napi_env>(nativeEngine);
     auto napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMap->GetPixelMapSharedPtr());
-    return napiValue;
+    napi_ref napiValueRef = nullptr;
+    napi_create_reference(env_, napiValue, 1, &napiValueRef);
+    napi_close_handle_scope(env_, scope);
+    return napiValueRef;
 #else
     return nullptr;
 #endif
+}
+
+bool ImageAnalyzerAdapterImpl::HasImageAnalyzerConfig()
+{
+    napi_value analyzerConfig = nullptr;
+    napi_get_reference_value(env_, analyzerConfigRef_, &analyzerConfig);
+    return analyzerConfig != nullptr && hasOptions_;
 }
 
 ImageAnalyzerAdapter* CreateImageAnalyzerAdapter()

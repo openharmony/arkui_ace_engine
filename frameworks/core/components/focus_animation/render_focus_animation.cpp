@@ -93,11 +93,11 @@ void RenderFocusAnimation::SetFocusAnimationProperties(const RRect& rrect, const
     }
     animationParamsSet_ = true;
     if ((offset_.GetX() + rrect.Width()) > layoutSize_.Width() && (offset_.GetX() + rrect.Width()) > 0) {
-        layoutSize_.SetWidth(offset_.GetX() + rrect.Width() + NormalizeToPx(blurMaskRadius_) * 2);
+        layoutSize_.SetWidth(offset_.GetX() + rrect.Width() + NormalizeToPx(blurMaskRadius_) * 2); // 2: two radius
         MarkNeedLayout();
     }
     if ((offset_.GetY() + rrect.Height()) > layoutSize_.Height() && (offset_.GetY() + rrect.Height()) > 0) {
-        layoutSize_.SetHeight((offset_.GetY() + rrect.Height()) + NormalizeToPx(blurMaskRadius_) * 2);
+        layoutSize_.SetHeight((offset_.GetY() + rrect.Height()) + NormalizeToPx(blurMaskRadius_) * 2); // 2: two radius
         MarkNeedLayout();
     }
 }

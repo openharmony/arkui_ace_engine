@@ -136,9 +136,9 @@ class FrameNode {
     if (node === null) {
       return;
     }
-    let child = node.getFirstChild();
+    let child = node.getFirstChildWithoutExpand();
     FrameNode.disposeTreeRecursively(child);
-    let sibling = node.getNextSibling();
+    let sibling = node.getNextSiblingWithoutExpand();
     FrameNode.disposeTreeRecursively(sibling);
     node.dispose();
   }
@@ -216,7 +216,7 @@ class FrameNode {
   }
 
   removeComponentContent(content: ComponentContent): void {
-    if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() == undefined) {
+    if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() === undefined) {
       return;
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -288,8 +288,34 @@ class FrameNode {
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
   }
 
+  getFirstChildWithoutExpand(): FrameNode | null {
+    const result = getUINativeModule().frameNode.getFirst(this.getNodePtr(), false);
+    const nodeId = result?.nodeId;
+    if (nodeId === undefined || nodeId === -1) {
+      return null;
+    }
+    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      return frameNode === undefined ? null : frameNode;
+    }
+    return this.convertToFrameNode(result.nodePtr, result.nodeId);
+  }
+
   getNextSibling(): FrameNode | null {
     const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr());
+    const nodeId = result?.nodeId;
+    if (nodeId === undefined || nodeId === -1) {
+      return null;
+    }
+    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      return frameNode === undefined ? null : frameNode;
+    }
+    return this.convertToFrameNode(result.nodePtr, result.nodeId);
+  }
+
+  getNextSiblingWithoutExpand(): FrameNode | null {
+    const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr(), false);
     const nodeId = result?.nodeId;
     if (nodeId === undefined || nodeId === -1) {
       return null;
@@ -475,6 +501,7 @@ class FrameNode {
   get commonAttribute(): ArkComponent {
     if (this._commonAttribute === undefined) {
       this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
+      this._commonAttribute.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     }
     this._commonAttribute.setNodePtr(this.nodePtr_);
     return this._commonAttribute;
@@ -610,6 +637,7 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
       this.attribute_ = this.attrCreator_(this.nodePtr_, ModifierType.FRAME_NODE);
     }
     this.attribute_.setNodePtr(this.nodePtr_);
+    this.attribute_.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     return this.attribute_;
   }
 
@@ -642,103 +670,128 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
 
 const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
   [
-    ["Text", (context: UIContext) => {
-      return new TypedFrameNode(context, "Text", (node: NodePtr, type: ModifierType) => {
+    ['Text', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Text', (node: NodePtr, type: ModifierType): ArkTextComponent => {
         return new ArkTextComponent(node, type);
       })
     }],
-    ["Column", (context: UIContext) => {
-      return new TypedFrameNode(context, "Column", (node: NodePtr, type: ModifierType) => {
+    ['Column', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Column', (node: NodePtr, type: ModifierType): ArkColumnComponent => {
         return new ArkColumnComponent(node, type);
       })
     }],
-    ["Row", (context: UIContext) => {
-      return new TypedFrameNode(context, "Row", (node: NodePtr, type: ModifierType) => {
+    ['Row', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Row', (node: NodePtr, type: ModifierType): ArkRowComponent => {
         return new ArkRowComponent(node, type);
       })
     }],
-    ["Stack", (context: UIContext) => {
-      return new TypedFrameNode(context, "Stack", (node: NodePtr, type: ModifierType) => {
+    ['Stack', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Stack', (node: NodePtr, type: ModifierType): ArkStackComponent => {
         return new ArkStackComponent(node, type);
       })
     }],
-    ["GridRow", (context: UIContext) => {
-      let node = new TypedFrameNode(context, "GridRow", (node: NodePtr, type: ModifierType) => {
+    ['GridRow', (context: UIContext): FrameNode=> {
+      let node = new TypedFrameNode(context, 'GridRow', (node: NodePtr, type: ModifierType): ArkGridRowComponent => {
         return new ArkGridRowComponent(node, type);
       });
       node.initialize();
       return node;
     }],
-    ["TextInput", (context: UIContext) => {
-      return new TypedFrameNode(context, "TextInput", (node: NodePtr, type: ModifierType) => {
+    ['TextInput', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'TextInput', (node: NodePtr, type: ModifierType): ArkTextInputComponent => {
         return new ArkTextInputComponent(node, type);
       })
     }],
-    ["GridCol", (context: UIContext) => {
-      let node = new TypedFrameNode(context, "GridCol", (node: NodePtr, type: ModifierType) => {
+    ['GridCol', (context: UIContext): FrameNode=> {
+      let node = new TypedFrameNode(context, 'GridCol', (node: NodePtr, type: ModifierType): ArkGridColComponent => {
         return new ArkGridColComponent(node, type);
       });
       node.initialize();
       return node;
     }],
-    ["Blank", (context: UIContext) => {
-      return new TypedFrameNode(context, "Blank", (node: NodePtr, type: ModifierType) => {
+    ['Blank', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Blank', (node: NodePtr, type: ModifierType): ArkBlankComponent => {
         return new ArkBlankComponent(node, type);
       })
     }],
-    ["Image", (context: UIContext) => {
-      return new TypedFrameNode(context, "Image", (node: NodePtr, type: ModifierType) => {
+    ['Image', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Image', (node: NodePtr, type: ModifierType): ArkImageComponent => {
         return new ArkImageComponent(node, type);
       })
     }],
-    ["Flex", (context: UIContext) => {
-      return new TypedFrameNode(context, "Flex", (node: NodePtr, type: ModifierType) => {
+    ['Flex', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Flex', (node: NodePtr, type: ModifierType): ArkFlexComponent => {
         return new ArkFlexComponent(node, type);
       })
     }],
-    ["Swiper", (context: UIContext) => {
-      return new TypedFrameNode(context, "Swiper", (node: NodePtr, type: ModifierType) => {
+    ['Swiper', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Swiper', (node: NodePtr, type: ModifierType): ArkSwiperComponent => {
         return new ArkSwiperComponent(node, type);
       })
     }],
-    ["Progress", (context: UIContext) => {
-      return new TypedFrameNode(context, "Progress", (node: NodePtr, type: ModifierType) => {
+    ['Progress', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Progress', (node: NodePtr, type: ModifierType): ArkProgressComponent => {
         return new ArkProgressComponent(node, type);
       })
     }],
-    ["Scroll", (context: UIContext) => {
-      return new TypedFrameNode(context, "Scroll", (node: NodePtr, type: ModifierType) => {
+    ['Scroll', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Scroll', (node: NodePtr, type: ModifierType): ArkScrollComponent => {
         return new ArkScrollComponent(node, type);
       })
     }],
-    ["RelativeContainer", (context: UIContext) => {
-      return new TypedFrameNode(context, "RelativeContainer", (node: NodePtr, type: ModifierType) => {
+    ['RelativeContainer', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'RelativeContainer', (node: NodePtr, type: ModifierType): ArkRelativeContainerComponent => {
         return new ArkRelativeContainerComponent(node, type);
       })
     }],
-    ["List", (context: UIContext) => {
-      return new TypedFrameNode(context, "List", (node: NodePtr, type: ModifierType) => {
+    ['List', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'List', (node: NodePtr, type: ModifierType): ArkListComponent => {
         return new ArkListComponent(node, type);
       })
     }],
-    ["ListItem", (context: UIContext) => {
-      return new TypedFrameNode(context, "ListItem", (node: NodePtr, type: ModifierType) => {
+    ['ListItem', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'ListItem', (node: NodePtr, type: ModifierType): ArkListItemComponent => {
         return new ArkListItemComponent(node, type);
       })
     }],
-    ["Divider", (context: UIContext) => {
-      return new TypedFrameNode(context, "Divider", (node: NodePtr, type: ModifierType) => {
+    ['Divider', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Divider', (node: NodePtr, type: ModifierType): ArkDividerComponent => {
         return new ArkDividerComponent(node, type);
       })
     }],
-    ["LoadingProgress", (context: UIContext) => {
-      return new TypedFrameNode(context, "LoadingProgress", (node: NodePtr, type: ModifierType) => {
+    ['LoadingProgress', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'LoadingProgress', (node: NodePtr, type: ModifierType): ArkLoadingProgressComponent => {
         return new ArkLoadingProgressComponent(node, type);
       })
     }],
-    ["Search", (context: UIContext) => {
-      return new TypedFrameNode(context, "Search", (node: NodePtr, type: ModifierType) => {
+    ['Search', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Search', (node: NodePtr, type: ModifierType): ArkSearchComponent => {
         return new ArkSearchComponent(node, type);
+      })
+    }],
+    ['Button', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Button', (node: NodePtr, type: ModifierType): ArkButtonComponent => {
+        return new ArkButtonComponent(node, type);
+      })
+    }],
+    ['XComponent', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'XComponent', (node: NodePtr, type: ModifierType): ArkXComponentComponent => {
+        return new ArkXComponentComponent(node, type);
+      })
+    }],
+    ['ListItemGroup', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'ListItemGroup', (node: NodePtr, type: ModifierType): ArkListItemGroupComponent => {
+        return new ArkListItemGroupComponent(node, type);
+      })
+    }],
+    ['WaterFlow', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'WaterFlow', (node: NodePtr, type: ModifierType): ArkWaterFlowComponent => {
+        return new ArkWaterFlowComponent(node, type);
+      })
+    }],
+    ['FlowItem', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'FlowItem', (node: NodePtr, type: ModifierType): ArkFlowItemComponent => {
+        return new ArkFlowItemComponent(node, type);
       })
     }],
   ]

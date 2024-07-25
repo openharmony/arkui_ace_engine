@@ -19,17 +19,7 @@
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
-#include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
-
 namespace OHOS::Ace {
-
-RefPtr<NG::FrameNode> AppBarHelper::CreateUIExtensionNode(const std::string& bundleName,
-    const std::string& abilityName, const std::map<std::string, std::string>& params,
-    std::function<void(int32_t)>&& onRelease,
-    std::function<void(int32_t, const std::string&, const std::string&)>&& onError)
-{
-    return NG::UIExtensionModelNG::Create(bundleName, abilityName, params, std::move(onRelease), std::move(onError));
-}
 
 std::string AppBarHelper::QueryAppGalleryBundleName()
 {

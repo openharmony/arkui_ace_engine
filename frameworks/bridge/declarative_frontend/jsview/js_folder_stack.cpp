@@ -21,6 +21,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
 #include "core/common/container.h"
+#include "core/common/display_info.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_event_info.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -66,7 +67,8 @@ JSRef<JSVal> HoverStatusChangeEventToJSValue(const NG::FolderEventInfo& eventInf
     obj->SetProperty("foldStatus", static_cast<int32_t>(eventInfo.GetFolderState()));
     obj->SetProperty("isHoverMode", static_cast<int32_t>(eventInfo.IsHoverMode()));
     obj->SetProperty("appRotation", static_cast<int32_t>(eventInfo.GetRotation()));
-    obj->SetProperty("windowMode", static_cast<int32_t>(eventInfo.GetWindowMode()));
+    obj->SetProperty("windowStatusType",
+        static_cast<int32_t>(JSFolderStack::NotifyWindowStatusChange(eventInfo.GetWindowMode())));
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -115,6 +117,20 @@ void JSFolderStack::JsEnableAnimation(const JSCallbackInfo& info)
     }
     auto isEnableAnimation = info[0]->ToBoolean();
     FolderStackModel::GetInstance()->SetEnableAnimation(isEnableAnimation);
+}
+
+WindowStatus JSFolderStack::NotifyWindowStatusChange(WindowMode mode)
+{
+    auto WindowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
+    if (mode == WindowMode::WINDOW_MODE_FLOATING) {
+        WindowStatus = WindowStatus::WINDOW_STATUS_FLOATING;
+    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        WindowStatus = WindowStatus::WINDOW_STATUS_SPLITSCREEN;
+    }
+    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        WindowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;
+    }
+    return WindowStatus;
 }
 
 void JSFolderStack::SetAutoHalfFold(const JSCallbackInfo& info)

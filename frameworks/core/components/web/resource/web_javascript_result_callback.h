@@ -22,12 +22,17 @@
 #include "nweb_javascript_result_callback.h"
 #include "nweb_value.h"
 #include "core/components/web/resource/web_javascript_value.h"
+#include "foundation/arkui/ace_engine/frameworks/base/memory/referenced.h"
 
 namespace OHOS::Ace {
 using namespace OHOS::NWeb;
+
+class WebDelegate;
+
 class WebJavaScriptResultCallBack : public NWebJavaScriptResultCallBack {
 public:
-    WebJavaScriptResultCallBack(int32_t instanceId) : instanceId_(instanceId) {}
+    WebJavaScriptResultCallBack() = delete;
+    WebJavaScriptResultCallBack(const WeakPtr<WebDelegate>& delegate) : webDelegate_(delegate) {}
 
     ~WebJavaScriptResultCallBack() = default;
 
@@ -60,7 +65,7 @@ protected:
     JavaScriptCallBackImpl javaScriptCallBackImpl_;
 
 private:
-    int32_t instanceId_ = -1;
+    WeakPtr<WebDelegate> webDelegate_;
 };
 } // namespace OHOS::Ace
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -125,6 +126,22 @@ void SetControllerCallback(const JSRef<JSObject>& object, const JsiExecutionCont
     }
 }
 
+std::shared_ptr<InnerXComponentController> GetXComponentController(
+    const JSRef<JSObject>& controller, std::optional<std::string>& id, const JsiExecutionContext& execCtx)
+{
+    std::shared_ptr<InnerXComponentController> xcomponentController = nullptr;
+    auto* jsXComponentController = controller->Unwrap<JSXComponentController>();
+    if (jsXComponentController) {
+        jsXComponentController->SetInstanceId(Container::CurrentId());
+        if (id.has_value()) {
+            XComponentClient::GetInstance().AddControllerToJSXComponentControllersMap(
+                id.value(), jsXComponentController);
+        }
+        xcomponentController = jsXComponentController->GetController();
+    }
+    return xcomponentController;
+}
+
 void JSXComponent::JSBind(BindingTarget globalObj)
 {
     JSClass<JSXComponent>::Declare("XComponent");
@@ -175,24 +192,24 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto id = paramObject->GetProperty("id");
-    if (!id->IsString()) {
-        return;
-    }
 
     auto type = paramObject->GetProperty("type");
     auto libraryNameValue = paramObject->GetProperty("libraryname");
+    std::optional<std::string> idOpt = std::nullopt;
+    std::optional<std::string> libraryNameOpt = std::nullopt;
+    if (id->IsString()) {
+        idOpt = id->ToString();
+    }
+    if (libraryNameValue->IsString()) {
+        libraryNameOpt = libraryNameValue->ToString();
+    }
     auto controller = paramObject->GetProperty("controller");
+    auto aiOptions = paramObject->GetProperty("imageAIOptions");
     std::shared_ptr<InnerXComponentController> xcomponentController = nullptr;
     JSRef<JSObject> controllerObj;
     if (controller->IsObject()) {
         controllerObj = JSRef<JSObject>::Cast(controller);
-        auto* jsXComponentController = controllerObj->Unwrap<JSXComponentController>();
-        if (jsXComponentController) {
-            jsXComponentController->SetInstanceId(Container::CurrentId());
-            XComponentClient::GetInstance().AddControllerToJSXComponentControllersMap(
-                id->ToString(), jsXComponentController);
-            xcomponentController = jsXComponentController->GetController();
-        }
+        xcomponentController = GetXComponentController(controllerObj, idOpt, info.GetExecutionContext());
     }
     XComponentType xcomponentType = XComponentType::SURFACE;
     if (type->IsString()) {
@@ -200,11 +217,8 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     } else if (type->IsNumber()) {
         xcomponentType = static_cast<XComponentType>(type->ToNumber<int32_t>());
     }
-
-    std::string libraryName = libraryNameValue->IsString() ? libraryNameValue->ToString() : "";
-    XComponentModel::GetInstance()->Create(
-        id->ToString(), xcomponentType, libraryName, xcomponentController);
-    if (libraryNameValue->IsEmpty() && xcomponentController && !controllerObj->IsUndefined()) {
+    XComponentModel::GetInstance()->Create(idOpt, xcomponentType, libraryNameOpt, xcomponentController);
+    if (!libraryNameOpt.has_value() && xcomponentController && !controllerObj->IsUndefined()) {
         SetControllerCallback(controllerObj, info.GetExecutionContext());
     }
 
@@ -217,6 +231,18 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     if (info.Length() > 1 && info[1]->IsString()) {
         auto soPath = info[1]->ToString();
         XComponentModel::GetInstance()->SetSoPath(soPath);
+    }
+
+    if (aiOptions->IsObject()) {
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        CHECK_NULL_VOID(nativeEngine);
+        panda::Local<JsiValue> value = aiOptions.Get().GetLocalHandle();
+        JSValueWrapper valueWrapper = value;
+        ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+        napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
+        XComponentModel::GetInstance()->SetImageAIOptions(optionsValue);
     }
 }
 
@@ -289,7 +315,7 @@ void JSXComponent::RegisterOnCreate(const JsiExecutionContext& execCtx, const Lo
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(frameNode_);
     CHECK_NULL_VOID(frameNode);
 
-    if (!func->IsFunction()) {
+    if (!func->IsFunction(execCtx.vm_)) {
         return;
     }
 
@@ -314,7 +340,7 @@ void JSXComponent::RegisterOnDestroy(const JsiExecutionContext& execCtx, const L
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(frameNode_);
     CHECK_NULL_VOID(frameNode);
 
-    if (!func->IsFunction()) {
+    if (!func->IsFunction(execCtx.vm_)) {
         return;
     }
 

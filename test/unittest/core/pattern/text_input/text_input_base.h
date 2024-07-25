@@ -127,6 +127,10 @@ const PreviewTextInfo PREVIEW_TWO = {"你", {-1, -1}};
 const PreviewTextInfo PREVIEW_THR = {"hello", {0, 5}};
 const PreviewTextInfo PREVIEW_FOR = {"ab", {0, 2}};
 const PreviewTextInfo PREVIEW_BAD_DATA = {"bad", {0, -1}};
+const TextOverflow OVERFLOW_ELLIPSIS = TextOverflow::ELLIPSIS;
+const TextOverflow OVERFLOW_MARQUEE = TextOverflow::MARQUEE;
+const TextOverflow OVERFLOW_DEFAULT = TextOverflow::DEFAULT;
+const WordBreak WORDBREAK_ALL = WordBreak::BREAK_ALL;
 template<typename CheckItem, typename Expected>
 struct TestItem {
     CheckItem item;

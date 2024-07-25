@@ -100,6 +100,7 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     config.dynamicMode = renderProps->GetDynamicModeValue(DynamicRangeMode::STANDARD);
     if (renderProps) {
         config.resizableSlice_ = renderProps->GetImageResizableSliceValue({});
+        config.resizableLattice_ = renderProps->GetImageResizableLatticeValue(nullptr);
     }
     auto pipelineCtx = PipelineBase::GetCurrentContext();
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -158,29 +159,19 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
     };
 }
 
-CanvasDrawFunction ImagePaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
+RefPtr<Modifier> ImagePaintMethod::GetOverlayModifier(PaintWrapper* paintWrapper)
 {
-    // draw selected mask effect
-    CHECK_NULL_RETURN(selected_, {});
+    return imageOverlayModifier_;
+}
 
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, {});
-    auto theme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_RETURN(theme, {});
-    auto selectedColor = theme->GetSelectedColor();
-    return [selectedColor, size = paintWrapper->GetContentSize(), offset = paintWrapper->GetContentOffset()](
-               RSCanvas& canvas) {
-        canvas.Save();
-        RSBrush brush;
-        brush.SetAntiAlias(true);
-        brush.SetColor(selectedColor.GetValue());
-        canvas.AttachBrush(brush);
-
-        canvas.DrawRect(
-            RSRect(offset.GetX(), offset.GetY(), offset.GetX() + size.Width(), offset.GetY() + size.Height()));
-
-        canvas.DetachBrush();
-        canvas.Restore();
-    };
+void ImagePaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    CHECK_NULL_VOID(imageOverlayModifier_);
+    auto size = paintWrapper->GetContentSize();
+    auto offset = paintWrapper->GetContentOffset();
+    imageOverlayModifier_->SetSize(size);
+    imageOverlayModifier_->SetOffset(offset);
+    imageOverlayModifier_->SetIsSelected(selected_);
 }
 } // namespace OHOS::Ace::NG

@@ -28,7 +28,8 @@ public:
     ~GridPositionController() override = default;
     Axis GetScrollDirection() const override;
 
-    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) override;
+    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START,
+        std::optional<float> extraOffset = std::nullopt) override;
     bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth,
         bool canOverScroll = false) override;
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;

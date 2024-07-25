@@ -61,8 +61,6 @@ public:
 #else
     static std::shared_ptr<RSData> LoadDataFromCachedFile(const std::string& uri);
 #endif
-    // TODO: maybe it's more approriate to move these interfaces to [ImageCache] with definition in abstract layer and
-    // implementation in adapter layer
 #ifndef USE_ROSEN_DRAWING
     static sk_sp<SkData> QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo);
 #else
@@ -147,7 +145,7 @@ public:
     std::shared_ptr<RSData> LoadImageData(
         const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
 #endif
-    static bool DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync);
+    static bool DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync, int32_t nodeId);
 };
 
 class InternalImageLoader final : public ImageLoader {

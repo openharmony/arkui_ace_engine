@@ -25,6 +25,12 @@ void SetImageAnimatorOnPause(ArkUINodeHandle node, void* extraParam);
 void SetImageAnimatorOnRepeat(ArkUINodeHandle node, void* extraParam);
 void SetImageAnimatorOnCancel(ArkUINodeHandle node, void* extraParam);
 void SetImageAnimatorOnFinish(ArkUINodeHandle node, void* extraParam);
+
+void ResetImageAnimatorOnStart(ArkUINodeHandle node);
+void ResetImageAnimatorOnPause(ArkUINodeHandle node);
+void ResetImageAnimatorOnRepeat(ArkUINodeHandle node);
+void ResetImageAnimatorOnCancel(ArkUINodeHandle node);
+void ResetImageAnimatorOnFinish(ArkUINodeHandle node);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_IMAGE_ANIMATOR_MODIFIER_H

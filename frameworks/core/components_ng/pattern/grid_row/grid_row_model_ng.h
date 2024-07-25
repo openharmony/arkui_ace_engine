@@ -33,6 +33,8 @@ public:
     static void SetColumns(FrameNode* frameNode, const RefPtr<V2::GridContainerSize>& col);
     static void SetBreakpoints(FrameNode* frameNode, const RefPtr<V2::BreakPoints>& breakpoints);
     static void SetDirection(FrameNode* frameNode, V2::GridRowDirection direction);
+    static void SetOnBreakPointChange(FrameNode* frameNode,
+        std::function<void(const std::string)>&& onBreakPointChange);
 };
 } // namespace OHOS::Ace::NG
 

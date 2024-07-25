@@ -89,9 +89,8 @@ HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText001, TestSize.Level1)
      * @tc.steps: step2. test previewText content
      */
     auto previewTextRecord = richEditorPattern->previewTextRecord_;
-    auto previewTextSpan = previewTextRecord.previewTextSpan;
-    EXPECT_NE(previewTextSpan, nullptr);
-    EXPECT_EQ(previewTextSpan->content, PREVIEW_TEXT_VALUE1);
+    auto previewContent = previewTextRecord.previewContent;
+    EXPECT_EQ(previewContent, PREVIEW_TEXT_VALUE1);
     EXPECT_EQ(previewTextRecord.startOffset, 0);
     auto length = static_cast<int32_t>(StringUtils::ToWstring(PREVIEW_TEXT_VALUE1).length());
     EXPECT_EQ(previewTextRecord.endOffset, previewTextRecord.startOffset + length);
@@ -145,10 +144,9 @@ HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText002, TestSize.Level1)
     /**
      * @tc.steps: step3. test previewText content
      */
-    auto previewTextRecord = richEditorPattern->previewTextRecord_;
-    auto previewTextSpan = previewTextRecord.previewTextSpan;
-    EXPECT_NE(previewTextSpan, nullptr);
-    EXPECT_EQ(previewTextSpan->content, PREVIEW_TEXT_VALUE2);
+    auto& previewTextRecord = richEditorPattern->previewTextRecord_;
+    auto previewContent = previewTextRecord.previewContent;
+    EXPECT_EQ(previewContent, PREVIEW_TEXT_VALUE2);
     EXPECT_EQ(previewTextRecord.startOffset, 0);
     auto length = static_cast<int32_t>(StringUtils::ToWstring(PREVIEW_TEXT_VALUE2).length());
     EXPECT_EQ(previewTextRecord.endOffset, previewTextRecord.startOffset + length);
@@ -156,59 +154,11 @@ HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText002, TestSize.Level1)
      * @tc.steps: step4. delete content  previewText
      */
     richEditorPattern->SetPreviewText(PREVIEW_TEXT_VALUE3, previewRange);
-    EXPECT_NE(previewTextSpan, nullptr);
-    EXPECT_EQ(previewTextSpan->content, PREVIEW_TEXT_VALUE3);
+    auto previewContent2 = previewTextRecord.previewContent;
+    EXPECT_EQ(previewContent2, PREVIEW_TEXT_VALUE3);
     EXPECT_EQ(previewTextRecord.startOffset, 0);
     length = static_cast<int32_t>(StringUtils::ToWstring(PREVIEW_TEXT_VALUE3).length());
     EXPECT_EQ(richEditorPattern->previewTextRecord_.endOffset, previewTextRecord.startOffset + length);
-}
-
-/**
- * @tc.name: SetPreviewText003
- * @tc.desc: test setPreviewText init, update, and delete available
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    /**
-     * @tc.steps: step1. set typingStyle
-     */
-    TextStyle textStyle;
-    textStyle.SetTextColor(TEXT_COLOR_VALUE);
-    textStyle.SetTextShadows(SHADOWS);
-    textStyle.SetFontSize(FONT_SIZE_VALUE);
-    textStyle.SetFontStyle(ITALIC_FONT_STYLE_VALUE);
-    textStyle.SetFontWeight(FONT_WEIGHT_VALUE);
-    textStyle.SetFontFamilies(FONT_FAMILY_VALUE);
-    textStyle.SetTextDecoration(TEXT_DECORATION_VALUE);
-    textStyle.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
-    UpdateSpanStyle typingStyle;
-    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
-    /**
-     * @tc.steps: step2. set previewText
-     */
-    PreviewRange previewRange;
-    previewRange.start = -1;
-    previewRange.end = -1;
-    richEditorPattern->SetPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
-    /**
-     * @tc.steps: step3. test previewText span textStyle
-     */
-    auto previewTextRecord = richEditorPattern->previewTextRecord_;
-    auto previewTextSpan = previewTextRecord.previewTextSpan;
-    ASSERT_NE(previewTextSpan, nullptr);
-    auto style = previewTextSpan->GetTextStyle();
-    EXPECT_EQ(style->GetTextColor(), TEXT_COLOR_VALUE);
-    EXPECT_EQ(style->GetTextShadows(), SHADOWS);
-    EXPECT_EQ(style->GetFontSize(), FONT_SIZE_VALUE);
-    EXPECT_EQ(style->GetFontStyle(), ITALIC_FONT_STYLE_VALUE);
-    EXPECT_EQ(style->GetFontWeight(), FONT_WEIGHT_VALUE);
-    EXPECT_EQ(style->GetFontFamilies(), FONT_FAMILY_VALUE);
-    EXPECT_EQ(style->GetTextDecoration(), TEXT_DECORATION_VALUE);
-    EXPECT_EQ(style->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
 }
 
 /**
@@ -236,8 +186,8 @@ HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview001, TestSize.Level1)
      * @tc.steps: step3. test previewText content
      */
     auto previewTextRecord = richEditorPattern->previewTextRecord_;
-    auto previewTextSpan = previewTextRecord.previewTextSpan;
-    EXPECT_EQ(previewTextSpan, nullptr);
+    auto previewContent = previewTextRecord.previewContent;
+    EXPECT_EQ(previewContent, "");
     EXPECT_EQ(previewTextRecord.startOffset, -1);
     EXPECT_EQ(previewTextRecord.endOffset, -1);
 }

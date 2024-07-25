@@ -34,6 +34,8 @@ namespace OHOS::Ace {
 enum class RefreshRateMode : int32_t {
     REFRESHRATE_MODE_AUTO = -1,
 };
+constexpr int32_t INVALID_ANIMATOR_EXPECTED_RATE = -1;
+
 class PipelineBase;
 
 class FrameRateRange : public AceType {
@@ -172,6 +174,7 @@ public:
     int64_t GetTargetTimestampData() const;
 
     RefPtr<DisplaySyncData> GetDisplaySyncData() const;
+    int32_t GetAnimatorExpectedRate();
 
     void SetRefreshRateMode(int32_t refreshRateMode);
     int32_t GetRefreshRateMode() const;

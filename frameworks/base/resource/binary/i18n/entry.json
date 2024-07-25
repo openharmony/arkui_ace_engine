@@ -3,7 +3,9 @@
         "common":{
             "ok":"确定",
             "cancel":"取消",
-            "more":"更多"
+            "more":"更多",
+            "prev":"上一步",
+            "next":"下一步"
         },
         "refresh":{
             "last_updated":"上次更新时间：%s",
@@ -44,13 +46,22 @@
             "year":"年",
             "month":"月",
             "day":"日"
+        },
+        "navigation":{
+            "back":"返回",
+            "more":"更多"
+        },
+        "patternlock":{
+            "accessibilitypasspoint":"已连接圆点"
         }
     },
     "en-US":{
         "common":{
             "ok":"OK",
             "cancel":"Cancel",
-            "more":"More"
+            "more":"More",
+            "prev":"Prev",
+            "next":"Next"
         },
         "refresh":{
             "last_updated":"Last updated: %s",
@@ -84,7 +95,12 @@
             "rightSide":"Show On Right"
         },
         "datepicker":{
-            "lunarSwitch":"Display Lunar"
+            "lunarSwitch":"Display Lunar",
+            "prev":"PREV"
+        },
+        "navigation":{
+            "back":"BACK",
+            "more":"MORE"
         }
     },
     "ml":{
@@ -2185,6 +2201,9 @@
         "window":{
             "leftSide":"視窗顯示在屏幕左側",
             "rightSide":"視窗顯示在屏幕右側"
+        },
+        "datepicker":{
+            "lunarSwitch":"顯示農曆"
         }
     },
     "zh-TW":{
@@ -2218,6 +2237,9 @@
         "window":{
             "leftSide":"視窗顯示在螢幕左側",
             "rightSide":"視窗顯示在螢幕右側"
+        },
+        "datepicker":{
+            "lunarSwitch":"顯示農曆"
         }
     },
     "hr":{

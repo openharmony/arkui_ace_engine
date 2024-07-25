@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/resource/web_javascript_result_callback.h"
 
 #include "base/log/log.h"
@@ -161,7 +162,9 @@ std::shared_ptr<NWebValue> WebJavaScriptResultCallBack::GetJavaScriptResult(
     // not used
     (void)object_id;
     (void)routing_id;
-    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, std::make_shared<NWebValue>(NWebValue::Type::NONE));
+    ContainerScope scope(delegate->GetInstanceId());
     std::shared_ptr<WebJSValue> result;
     auto jsArgs = GetWebJSValue(args);
 

@@ -767,6 +767,147 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest012, TestSize.Lev
     }
 }
 
+/**
+ * @tc.name: ChangeTextCallbackTest013
+ * @tc.desc: test for callback onWillchange/onDidChange, add symbol span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest013, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    InitContentChangeCallback(richEditorModel);
+
+    richEditorPattern->AddSymbolSpan(SYMBOL_SPAN_OPTIONS_1);
+
+    // check onWill rangeBefore
+    EXPECT_EQ(onWillRangeBefore.start, 0);
+    EXPECT_EQ(onWillRangeBefore.end, 0);
+
+    // check onWill span info
+    ASSERT_EQ(onWillReplacedSpans.size(), 0);
+    ASSERT_EQ(onWillReplacedImageSpans.size(), 0);
+    ASSERT_EQ(onWillReplacedSymbolSpans.size(), 1);
+
+    auto& spanResult = onWillReplacedSymbolSpans[0];
+    EXPECT_EQ(spanResult.spanIndex_, 0);
+    EXPECT_EQ(spanResult.offsetInSpan_, 0);
+    EXPECT_EQ(spanResult.eraseLength_, 2);
+    EXPECT_EQ(spanResult.spanRangeStart_, 0);
+    EXPECT_EQ(spanResult.spanRangeEnd_, 2);
+    EXPECT_EQ(spanResult.spanType_, SpanResultType::SYMBOL);
+    EXPECT_EQ(spanResult.symbolSpanStyle_, SymbolSpanStyle(TEXT_STYLE_1));
+
+    // check onDid rangeBefore
+    EXPECT_EQ(onDidRangeBefore, onWillRangeBefore);
+
+    // check onDid rangeAfter
+    EXPECT_EQ(onDidRangeAfter.start, 0);
+    EXPECT_EQ(onDidRangeAfter.end, 2);
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest014
+ * @tc.desc: test for callback onWillchange/onDidChange, add symbol span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest014, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    InitContentChangeCallback(richEditorModel);
+
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+    richEditorPattern->AddSymbolSpan(SYMBOL_SPAN_OPTIONS_1);
+
+    // check onWill rangeBefore
+    EXPECT_EQ(onWillRangeBefore.start, 6);
+    EXPECT_EQ(onWillRangeBefore.end, 6);
+
+    // check onWill span info
+    ASSERT_EQ(onWillReplacedSpans.size(), 0);
+    ASSERT_EQ(onWillReplacedImageSpans.size(), 0);
+    ASSERT_EQ(onWillReplacedSymbolSpans.size(), 1);
+
+    auto& spanResult = onWillReplacedSymbolSpans[0];
+    EXPECT_EQ(spanResult.spanIndex_, 1);
+    EXPECT_EQ(spanResult.offsetInSpan_, 0);
+    EXPECT_EQ(spanResult.eraseLength_, 2);
+    EXPECT_EQ(spanResult.spanRangeStart_, 6);
+    EXPECT_EQ(spanResult.spanRangeEnd_, 8);
+    EXPECT_EQ(spanResult.spanType_, SpanResultType::SYMBOL);
+    EXPECT_EQ(spanResult.symbolSpanStyle_, SymbolSpanStyle(TEXT_STYLE_1));
+
+    // check onDid rangeBefore
+    EXPECT_EQ(onDidRangeBefore, onWillRangeBefore);
+
+    // check onDid rangeAfter
+    EXPECT_EQ(onDidRangeAfter.start, 6);
+    EXPECT_EQ(onDidRangeAfter.end, 8);
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest015
+ * @tc.desc: test for callback onWillchange/onDidChange, add symbol span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest015, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    InitContentChangeCallback(richEditorModel);
+
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1); // add hello1
+    auto options = SYMBOL_SPAN_OPTIONS_1;
+    options.offset = 3;
+    richEditorPattern->AddSymbolSpan(options);
+
+    // check onWill rangeBefore
+    EXPECT_EQ(onWillRangeBefore.start, 3);
+    EXPECT_EQ(onWillRangeBefore.end, 3);
+
+    // check onWill span info
+    ASSERT_EQ(onWillReplacedSpans.size(), 0);
+    ASSERT_EQ(onWillReplacedImageSpans.size(), 0);
+    ASSERT_EQ(onWillReplacedSymbolSpans.size(), 1);
+
+    auto& spanResult = onWillReplacedSymbolSpans[0];
+    EXPECT_EQ(spanResult.spanIndex_, 1);
+    EXPECT_EQ(spanResult.offsetInSpan_, 0);
+    EXPECT_EQ(spanResult.eraseLength_, 2);
+    EXPECT_EQ(spanResult.spanRangeStart_, 3);
+    EXPECT_EQ(spanResult.spanRangeEnd_, 5);
+    EXPECT_EQ(spanResult.spanType_, SpanResultType::SYMBOL);
+    EXPECT_EQ(spanResult.symbolSpanStyle_, SymbolSpanStyle(TEXT_STYLE_1));
+
+    // check onDid rangeBefore
+    EXPECT_EQ(onDidRangeBefore, onWillRangeBefore);
+
+    // check onDid rangeAfter
+    EXPECT_EQ(onDidRangeAfter.start, 3);
+    EXPECT_EQ(onDidRangeAfter.end, 5);
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
 
 /**
  * @tc.name: HandleOnEditChanged001
@@ -834,7 +975,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged002, TestSize.Level1
 
 /**
  * @tc.name: HandleOnEditChanged003
- * @tc.desc: test Long press edit status is true
+ * @tc.desc: test Long press edit status is keep false
  * @tc.type: FUNC
  */
 HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged003, TestSize.Level1)
@@ -855,18 +996,18 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged003, TestSize.Level1
 
     GestureEvent info;
     richEditorPattern->HandleDoubleClickOrLongPress(info);
-    EXPECT_TRUE(richEditorController->IsEditing());
+    EXPECT_FALSE(richEditorController->IsEditing());
 
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
     richEditorModel.SetOnEditingChange([](bool value) {});
 
     /* *
-     * @tc.steps: step3. Long press to trigger the callback function and modify the editing status
+     * @tc.steps: step3. Long press to trigger the callback function and keep preview state
      */
 
     richEditorPattern->HandleDoubleClickOrLongPress(info);
-    EXPECT_TRUE(richEditorController->IsEditing());
+    EXPECT_FALSE(richEditorController->IsEditing());
 }
 
 /**
@@ -1018,13 +1159,13 @@ HWTEST_F(RichEditorChangeCallbackTestNg, OnSubmitTest, TestSize.Level1)
     TextInputAction action2 = TextInputAction::NEW_LINE;
     bool forceCloseKeyboard = false;
     richEditorPattern->PerformAction(action2, forceCloseKeyboard);
-    EXPECT_EQ(count, 0);
+    EXPECT_EQ(count, 1);
 
     action2 = TextInputAction::DONE;
     richEditorPattern->PerformAction(action2, forceCloseKeyboard);
-    EXPECT_EQ(count, 1);
-    richEditorPattern->PerformAction(action2, forceCloseKeyboard);
     EXPECT_EQ(count, 2);
+    richEditorPattern->PerformAction(action2, forceCloseKeyboard);
+    EXPECT_EQ(count, 3);
     ClearSpan();
 }
 
@@ -1145,6 +1286,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete002, TestSize.Level1)
      */
     AddSpan(INIT_VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
+    ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     EXPECT_EQ(textStyle1.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
     EXPECT_EQ(textStyle1.letterSpacing, LETTER_SPACING.ConvertToVp());
@@ -1199,6 +1341,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete003, TestSize.Level1)
      * @tc.steps: step3. add text span
      */
     auto info = richEditorController->GetSpansInfo(1, 5);
+    ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     for (const auto& pair : textStyle1.fontFeature) {
         EXPECT_EQ(pair.first, "subs");
@@ -1286,6 +1429,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect, TestSize.Level1)
     richEditorController->AddTextSpan(options);
     AddSpan(INIT_VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
+    ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     EXPECT_EQ(textStyle1.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
     EXPECT_EQ(textStyle1.letterSpacing, LETTER_SPACING.ConvertToVp());
@@ -1329,6 +1473,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect2, TestSize.Level1)
     options.style = style;
     richEditorController->AddTextSpan(options);
     auto info = richEditorController->GetSpansInfo(1, 5);
+    ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -1374,6 +1519,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect003, TestSize.Level1)
     richEditorController->AddTextSpan(options);
     AddSpan(INIT_VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
+    ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -1411,6 +1557,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect004, TestSize.Level1)
     options.style = style;
     richEditorController->AddTextSpan(options);
     auto info = richEditorController->GetSpansInfo(1, 5);
+    ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();

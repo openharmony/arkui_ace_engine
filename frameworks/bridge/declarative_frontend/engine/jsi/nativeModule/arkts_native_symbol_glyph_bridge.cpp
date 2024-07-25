@@ -42,9 +42,8 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetSymbolId(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     uint32_t content = 0;
-    if (ArkTSUtils::ParseJsSymbolId(vm, secondArg, content)) {
-        GetArkUINodeModifiers()->getSymbolGlyphModifier()->setSymbolId(nativeNode, content);
-    }
+    ArkTSUtils::ParseJsSymbolId(vm, secondArg, content);
+    GetArkUINodeModifiers()->getSymbolGlyphModifier()->setSymbolId(nativeNode, content);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -66,12 +65,11 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontColor(ArkUIRuntimeCallInfo* run
     for (uint32_t index = 0; index < length; index++) {
         Local<JSValueRef> value = panda::ArrayRef::GetValueAt(vm, array, index);
         Color color;
-        if (ArkTSUtils::ParseJsColorAlpha(vm, value, color)) {
-            colorArray.emplace_back(color.GetValue());
-        } else {
+        if (!ArkTSUtils::ParseJsSymbolColorAlpha(vm, value, color)) {
             colorArray.clear();
             break;
         }
+        colorArray.emplace_back(color.GetValue());
     }
     if (static_cast<uint32_t>(length) == colorArray.size() && (static_cast<uint32_t>(length) & 1)) {
         for (uint32_t i = 0; i < length; i++) {
@@ -126,9 +124,11 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontWeight(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString()) {
-        std::string weight = secondArg->ToString(vm)->ToString();
+    if (secondArg->IsString(vm)) {
+        std::string weight = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getSymbolGlyphModifier()->setFontWeightStr(nativeNode, weight.c_str());
+    } else if (secondArg->IsNumber()) {
+        GetArkUINodeModifiers()->getSymbolGlyphModifier()->setFontWeight(nativeNode, secondArg->Int32Value(vm));
     } else {
         GetArkUINodeModifiers()->getSymbolGlyphModifier()->resetFontWeight(nativeNode);
     }

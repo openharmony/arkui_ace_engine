@@ -270,6 +270,11 @@ public:
         return clickEventActuator_ != nullptr;
     }
 
+    bool IsUserClickable() const
+    {
+        return clickEventActuator_ != nullptr && clickEventActuator_->IsUserClickable();
+    }
+
     bool IsAccessibilityClickable();
     bool IsAccessibilityLongClickable();
 
@@ -556,6 +561,16 @@ public:
         return previewMode_;
     }
 
+    void SetContextMenuShowStatus(bool contextMenuShowStatus)
+    {
+        contextMenuShowStatus_ = contextMenuShowStatus;
+    }
+
+    bool GetContextMenuShowStatus()
+    {
+        return contextMenuShowStatus_;
+    }
+
     void SetPixelMap(RefPtr<PixelMap> pixelMap)
     {
         pixelMap_ = pixelMap;
@@ -593,6 +608,7 @@ public:
     void GenerateMousePixelMap(const GestureEvent& info);
     OffsetF GetPixelMapOffset(
         const GestureEvent& info, const SizeF& size, const float scale = 1.0f, const bool needScale = false) const;
+    RefPtr<PixelMap> GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap);
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
     bool IsPixelMapNeedScale() const;
     void InitDragDropEvent();
@@ -627,6 +643,17 @@ public:
     {
         externalParallelRecognizer_.clear();
         externalExclusiveRecognizer_.clear();
+    }
+
+    void CleanInnerRecognizer()
+    {
+        innerExclusiveRecognizer_ = nullptr;
+    }
+
+    void CleanNodeRecognizer()
+    {
+        nodeParallelRecognizer_ = nullptr;
+        nodeExclusiveRecognizer_ = nullptr;
     }
 
     bool parallelCombineClick = false;
@@ -682,6 +709,12 @@ private:
     void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson,
         float scale);
 
+    template<typename T>
+    const RefPtr<T> GetAccessibilityRecognizer();
+
+    template<typename T>
+    const RefPtr<T> AccessibilityRecursionSearchRecognizer(const RefPtr<NGGestureRecognizer>& recognizer);
+
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;
     RefPtr<TouchEventActuator> touchEventActuator_;
@@ -722,7 +755,7 @@ private:
 
     OffsetF frameNodeOffset_;
     SizeF frameNodeSize_;
-    GestureEvent gestureInfoForWeb_;
+    std::shared_ptr<GestureEvent> gestureInfoForWeb_;
     bool isReceivedDragGestureInfo_ = false;
     OnChildTouchTestFunc onChildTouchTestFunc_;
     OnReponseRegionFunc responseRegionFunc_;
@@ -737,6 +770,8 @@ private:
     GestureRecognizerJudgeFunc gestureRecognizerJudgeFunc_;
 
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
+    // the value from show parameter of context menu, which is controlled by caller manually
+    bool contextMenuShowStatus_  = false;
     bool isDragForbidden_ = false;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;

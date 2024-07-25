@@ -28,28 +28,30 @@ interface IView {
     debugInfo__() : string;
 
     getCardId(): number; // implemented in NativeViewPartialUpdate
-    getParent() : IView | undefined;
-    setParent(p : IView) : void;
-    addChild(c : IView): boolean;
-    getChildById(elmtId : number) : IView | undefined;
+    getParent(): IView | undefined;
+    setParent(p: IView) : void;
+    addChild(c: IView): boolean;
+    getChildById(elmtId: number) : IView | undefined;
     removeChild(child: IView): boolean;
     findViewPUInHierarchy(id: number): ViewPU | undefined;
 
     purgeDeleteElmtId(rmElmtId: number): boolean;
-    initialRenderView() : void;
+    initialRenderView(): void;
+    forceCompleteRerender(deep: boolean): void;
+    forceRerenderNode(elmtId: number): void;
     
-    uiNodeNeedUpdateV3(elmtId : number) : void;
+    uiNodeNeedUpdateV3(elmtId: number) : void;
     
     // FIXME replace updateStateVarsOfChildByElmtId by new solution
     updateStateVarsOfChildByElmtId(elmtId, params: Object): void;
 
     aboutToBeDeleted(): void;
-    isDeleting() : boolean;
+    isDeleting(): boolean;
     setDeleting(): void;
-    setDeleteStatusRecursively() : void;
+    setDeleteStatusRecursively(): void;
 
-    isCompFreezeAllowed() : boolean;
-    setActiveInternal(newState : boolean) : void;
+    isCompFreezeAllowed(): boolean;
+    setActiveInternal(newState: boolean): void;
 
     findProvidePU(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined;
 

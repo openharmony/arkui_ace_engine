@@ -61,6 +61,10 @@ protected:
 #else
         if (rsCanvas_) {
             auto smoothEdge = GetSmoothEdge();
+            if (SystemProperties::GetDebugEnabled()) {
+                TAG_LOGD(AceLogTag::ACE_IMAGE, "svg path:%{public}s, smoothEdge = %{public}f",
+                    path_.ConvertToSVGString().c_str(), smoothEdge);
+            }
             if (GreatNotEqual(smoothEdge, 0.0f)) {
                 RSFilter filter;
                 filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
@@ -98,6 +102,10 @@ protected:
 #else
         if (rsCanvas_) {
             auto smoothEdge = GetSmoothEdge();
+            if (SystemProperties::GetDebugEnabled()) {
+                TAG_LOGD(AceLogTag::ACE_IMAGE, "svg path:%{public}s, smoothEdge = %{public}f",
+                    path_.ConvertToSVGString().c_str(), smoothEdge);
+            }
             if (GreatNotEqual(smoothEdge, 0.0f)) {
                 RSFilter filter;
                 filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(

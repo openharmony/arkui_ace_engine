@@ -414,7 +414,7 @@ double RenderPickerOption::LayoutBox()
         SystemProperties::GetDeviceType() != DeviceType::UNKNOWN && selected_ && !autoLayout_) {
         auto pressInterval = NormalizeToPx(PRESS_INTERVAL);
         auto boxSize = realSize_;
-        boxSize.SetHeight(boxSize.Height() - 2.0 * pressInterval);
+        boxSize.SetHeight(boxSize.Height() - 2.0 * pressInterval); // 2.0: subtract two pressInterval
         boxLayout.SetFixedSize(boxSize);
         renderBox_->SetPosition(Offset(0.0, pressInterval));
         renderBox_->Layout(boxLayout);

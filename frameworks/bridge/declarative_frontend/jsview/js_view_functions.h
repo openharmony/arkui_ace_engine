@@ -120,7 +120,7 @@ private:
     JSWeak<JSFunc> jsAboutToRecycleFunc_;
     JSWeak<JSFunc> jsSetActive_;
     JSWeak<JSFunc> jsOnDumpInfo_;
-    JSWeak<JSFunc> jsOnDumpInspetor_;
+    JSWeak<JSFunc> jsOnDumpInspector_;
     JSWeak<JSFunc>jsOnFormRecycleFunc_;
     JSWeak<JSFunc>jsOnFormRecoverFunc_;
 

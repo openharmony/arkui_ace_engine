@@ -20,6 +20,7 @@
 
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkPostTaskToMainThread(void(*callback)());
+CJ_EXPORT bool FfiOHOSAceFrameworkHasContainer();
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_CONCURRENCY_FFI_H

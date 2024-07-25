@@ -113,6 +113,11 @@ public:
 
     void SetWindowId(uint32_t windowId) override {}
 
+    RefPtr<AceView> GetAceView() const override
+    {
+        return nullptr;
+    }
+
     void* GetView() const override
     {
         return nullptr;

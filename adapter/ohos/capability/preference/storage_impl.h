@@ -58,6 +58,7 @@ private:
     std::shared_ptr<NativePreferences::Preferences> GetPreference(const std::string& fileName);
     int errCode_ = 0;
     std::string fileName_;
+    std::unordered_map<std::string, std::shared_ptr<NativePreferences::Preferences>> preferences_;
 };
 
 class StorageProxyImpl : public StorageInterface {

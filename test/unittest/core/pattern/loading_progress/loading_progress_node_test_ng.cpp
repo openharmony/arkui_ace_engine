@@ -598,4 +598,305 @@ HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest011, TestSize.Level1)
      */
     EXPECT_EQ(false, isUsed);
 }
+
+/**
+ * @tc.name: LoadingProgressNodeTest012
+ * @tc.desc: Test contentModifierNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init LoadingProgress node
+     */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set loadingProgressConfiguration
+     */
+    modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(CHECKED, config.enableloading_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", 1, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    loadingProgressPattern->SetBuilderFunc(node);
+    loadingProgressPattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test contentModifierNode
+     */
+    auto buildNode = loadingProgressPattern->GetContentModifierNode();
+    /**
+     * @tc.steps: step6. change builder func nullptr
+     */
+    loadingProgressPattern->SetBuilderFunc(nullptr);
+    loadingProgressPattern->FireBuilder();
+    /**
+     * @tc.steps: step7. Test UseContentModifier
+     */
+    auto isUsed = loadingProgressPattern->UseContentModifier();
+    /**
+     * @tc.expected: isUsed is false
+     */
+    EXPECT_EQ(false, isUsed);
+}
+
+/**
+ * @tc.name: LoadingProgressNodeTest013
+ * @tc.desc: Test contentModifierNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init LoadingProgress node
+     */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set loadingProgressConfiguration
+     */
+    modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(CHECKED, config.enableloading_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", NEGATIVE_CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    loadingProgressPattern->SetBuilderFunc(node);
+    loadingProgressPattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test contentModifierNode
+     */
+    auto buildNode = loadingProgressPattern->GetContentModifierNode();
+    /**
+     * @tc.expected: Check the LoadingProgress child id
+     */
+    EXPECT_EQ(NEGATIVE_CHILD_NODE_ID, buildNode->GetId());
+    /**
+     * @tc.steps: step6. change builder func nullptr
+     */
+    loadingProgressPattern->SetBuilderFunc(nullptr);
+    loadingProgressPattern->FireBuilder();
+    /**
+     * @tc.steps: step7. Test UseContentModifier
+     */
+    auto isUsed = loadingProgressPattern->UseContentModifier();
+    /**
+     * @tc.expected: isUsed is false
+     */
+    EXPECT_EQ(false, isUsed);
+}
+
+/**
+ * @tc.name: LoadingProgressNodeTest014
+ * @tc.desc: Test contentModifierNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init LoadingProgress node
+     */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set loadingProgressConfiguration
+     */
+    modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(CHECKED, config.enableloading_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", 0, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    loadingProgressPattern->SetBuilderFunc(node);
+    loadingProgressPattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test contentModifierNode
+     */
+    auto buildNode = loadingProgressPattern->GetContentModifierNode();
+    /**
+     * @tc.expected: Check the LoadingProgress child id
+     */
+    EXPECT_EQ(0, buildNode->GetId());
+    /**
+     * @tc.steps: step6. change builder func nullptr
+     */
+    loadingProgressPattern->SetBuilderFunc(nullptr);
+    loadingProgressPattern->FireBuilder();
+    /**
+     * @tc.steps: step7. Test UseContentModifier
+     */
+    auto isUsed = loadingProgressPattern->UseContentModifier();
+    /**
+     * @tc.expected: isUsed is false
+     */
+    EXPECT_EQ(false, isUsed);
+}
+
+/**
+ * @tc.name: LoadingProgressNodeTest015
+ * @tc.desc: Test contentModifierNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init LoadingProgress node
+     */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set loadingProgressConfiguration
+     */
+    modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(CHECKED, config.enableloading_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", BIG_INT, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    loadingProgressPattern->SetBuilderFunc(node);
+    loadingProgressPattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test contentModifierNode
+     */
+    auto buildNode = loadingProgressPattern->GetContentModifierNode();
+    /**
+     * @tc.expected: Check the LoadingProgress child id
+     */
+    EXPECT_EQ(BIG_INT, buildNode->GetId());
+    /**
+     * @tc.steps: step6. change builder func nullptr
+     */
+    loadingProgressPattern->SetBuilderFunc(nullptr);
+    loadingProgressPattern->FireBuilder();
+    /**
+     * @tc.steps: step7. Test UseContentModifier
+     */
+    auto isUsed = loadingProgressPattern->UseContentModifier();
+    /**
+     * @tc.expected: isUsed is false
+     */
+    EXPECT_EQ(false, isUsed);
+}
+
+/**
+ * @tc.name: LoadingProgressNodeTest016
+ * @tc.desc: Test contentModifierNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init LoadingProgress node
+     */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set loadingProgressConfiguration
+     */
+    modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(CHECKED, config.enableloading_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", NEGATIVE_BIG_INT, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    loadingProgressPattern->SetBuilderFunc(node);
+    loadingProgressPattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test contentModifierNode
+     */
+    auto buildNode = loadingProgressPattern->GetContentModifierNode();
+    /**
+     * @tc.expected: Check the LoadingProgress child id
+     */
+    EXPECT_EQ(NEGATIVE_BIG_INT, buildNode->GetId());
+    /**
+     * @tc.steps: step6. change builder func nullptr
+     */
+    loadingProgressPattern->SetBuilderFunc(nullptr);
+    loadingProgressPattern->FireBuilder();
+    /**
+     * @tc.steps: step7. Test UseContentModifier
+     */
+    auto isUsed = loadingProgressPattern->UseContentModifier();
+    /**
+     * @tc.expected: isUsed is false
+     */
+    EXPECT_EQ(false, isUsed);
+}
 } // namespace OHOS::Ace::NG

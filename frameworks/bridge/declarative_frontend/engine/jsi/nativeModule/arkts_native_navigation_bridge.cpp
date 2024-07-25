@@ -109,8 +109,8 @@ ArkUINativeModuleValue NavigationBridge::SetSubtitle(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> subtitleArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    if (subtitleArg->IsString()) {
-        std::string subtitle = subtitleArg->ToString(vm)->ToString();
+    if (subtitleArg->IsString(vm)) {
+        std::string subtitle = subtitleArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getNavigationModifier()->setSubtitle(nativeNode, subtitle.c_str());
     } else {
         GetArkUINodeModifiers()->getNavigationModifier()->resetSubtitle(nativeNode);
@@ -398,18 +398,18 @@ ArkUINativeModuleValue NavigationBridge::SetIgnoreLayoutSafeArea(ArkUIRuntimeCal
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::string typeCppStr;
     std::string edgesCppStr;
-    if (secondArg->IsString()) {
-        typeCppStr = secondArg->ToString(vm)->ToString();
+    if (secondArg->IsString(vm)) {
+        typeCppStr = secondArg->ToString(vm)->ToString(vm);
     } else {
         //type system
-        typeCppStr = "1";
+        typeCppStr = "0";
     }
 
-    if (thirdArg->IsString()) {
-        edgesCppStr = thirdArg->ToString(vm)->ToString();
+    if (thirdArg->IsString(vm)) {
+        edgesCppStr = thirdArg->ToString(vm)->ToString(vm);
     } else {
-        //edge bottom and top
-        edgesCppStr = "1|2";
+        //edge top and bottom
+        edgesCppStr = "0|1";
     }
     const char* typeStr = typeCppStr.c_str();
     const char* edgesStr = edgesCppStr.c_str();

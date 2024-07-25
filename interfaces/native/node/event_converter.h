@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef ARKUI_NATIVE_NODE_EVENT_CONVERTER_H
+#define ARKUI_NATIVE_NODE_EVENT_CONVERTER_H
 
 #include "native_compatible.h"
 #include "native_node.h"
@@ -36,6 +37,7 @@ enum NodeEventCategory {
     NODE_EVENT_CATEGORY_INPUT_EVENT,
     NODE_EVENT_CATEGORY_COMPONENT_EVENT,
     NODE_EVENT_CATEGORY_STRING_ASYNC_EVENT,
+    NODE_EVENT_CATEGORY_MIXED_EVENT,
 };
 
 namespace OHOS::Ace::NodeModel {
@@ -58,3 +60,4 @@ int32_t ConvertToCMouseActionType(int32_t originActionType);
 int32_t ConvertToCMouseEventButtonType(int32_t originButtonType);
 
 }; // namespace OHOS::Ace::NodeModel
+#endif // ARKUI_NATIVE_NODE_EVENT_CONVERTER_H

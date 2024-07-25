@@ -238,10 +238,15 @@ public:
     RefPtr<VideoPattern> GetTargetVideoPattern();
     void EnableAnalyzer(bool enable);
     void SetImageAnalyzerConfig(void* config);
+    void SetImageAIOptions(void* options);
     bool GetAnalyzerState();
     void UpdateAnalyzerState(bool isCreated)
     {
         isAnalyzerCreated_ = isCreated;
+    }
+    void SetIsSeeking(bool isSeeking)
+    {
+        isSeeking_ = isSeeking;
     }
 
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -265,10 +270,12 @@ protected:
 
 private:
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnDetachFromMainTree() override;
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
+    void OnWindowHide() override;
 
     // Set properties for media player.
     void PrepareMediaPlayer();
@@ -316,6 +323,8 @@ private:
     // Fire error manually, eg. src is not existed. It must run on ui.
     void FireError();
 
+    HiddenChangeEvent CreateHiddenChangeEvent();
+
     void SetMediaFullScreen(bool isFullScreen)
     {
         mediaPlayer_->FullScreenChange(isFullScreen);
@@ -332,11 +341,14 @@ private:
     void ChangePlayerStatus(bool isPlaying, const PlaybackStatus& status);
 
     bool IsSupportImageAnalyzer();
+    bool ShouldUpdateImageAnalyzer();
     void StartImageAnalyzer();
+    void StartUpdateImageAnalyzer();
     void CreateAnalyzerOverlay();
     void DestroyAnalyzerOverlay();
     void UpdateAnalyzerOverlay();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
+    void UpdateOverlayVisibility(VisibleType type);
 
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<FrameNode> controlBar_;
@@ -363,6 +375,8 @@ private:
     bool isEnableAnalyzer_ = false;
     bool isAnalyzerCreated_ = false;
     bool isPaused_ = false;
+    bool isContentSizeChanged_ = false;
+    bool isSeeking_ = false;
 
     uint32_t currentPos_ = 0;
     uint32_t duration_ = 0;

@@ -150,14 +150,15 @@ void ElementRegister::Clear()
 }
 
 RefPtr<NG::GeometryTransition> ElementRegister::GetOrCreateGeometryTransition(
-    const std::string& id, bool followWithoutTransition)
+    const std::string& id, bool followWithoutTransition, bool doRegisterSharedTransition)
 {
     if (id.empty()) {
         return nullptr;
     }
     RefPtr<NG::GeometryTransition> geometryTransition;
     if (geometryTransitionMap_.find(id) == geometryTransitionMap_.end()) {
-        geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>(id, followWithoutTransition);
+        geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>(
+            id, followWithoutTransition, doRegisterSharedTransition);
         geometryTransitionMap_.emplace(id, geometryTransition);
     } else {
         geometryTransition = geometryTransitionMap_[id];

@@ -23,16 +23,17 @@ class ACE_EXPORT ForEachBaseNode : public UINode {
     DECLARE_ACE_TYPE(ForEachBaseNode, UINode);
 
 public:
-    ForEachBaseNode(const std::string& tag, int32_t nodeId, bool isRoot = false)
-        : UINode(tag, nodeId, isRoot) {}
+    ForEachBaseNode(const std::string& tag, int32_t nodeId, bool isRoot = false) : UINode(tag, nodeId, isRoot) {}
     virtual void MoveData(int32_t from, int32_t to) = 0;
     virtual RefPtr<FrameNode> GetFrameNode(int32_t index) = 0;
+    virtual void RecycleItems(int32_t from, int32_t to) {}
     virtual void FireOnMove(int32_t from, int32_t to)
     {
         if (onMoveEvent_) {
             onMoveEvent_(from, to);
         }
     }
+
 protected:
     std::function<void(int32_t, int32_t)> onMoveEvent_;
 };

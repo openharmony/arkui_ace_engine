@@ -34,6 +34,10 @@ public:
     void UpdateConfig(void** overlayData, void* config) override;
     void UpdateInnerConfig(void** overlayData, ImageAnalyzerInnerConfig* config) override;
     void Release(void** overlayData) override;
+    void UpdatePressOverlay(void** overlayData, ImageAnalyzerInnerConfig* config) override;
+    void UpdateOverlayStatus(void** overlayData, ImageAnalyzerInnerConfig* config) override;
+    void UpdateOverlayActiveStatus(void** overlayData, bool status) override;
+    void UpdateAIButtonConfig(void** overlayData, AIButtonConfig* config) override;
 
 private:
     ImageAnalyzerMgr();

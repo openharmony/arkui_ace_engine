@@ -200,6 +200,8 @@ private:
     bool HandleDayKeyEvent(uint32_t number);
     void FireChangeEvents(const std::string& info);
     void UpdateEntryButtonColor();
+    void UpdateEntryButtonBorderWidth();
+    void UpdateEdgeAlign();
 
     std::string GetEntryDateInfo();
 

@@ -130,7 +130,6 @@ void MenuElement::OnTargetContextCallback(const ComposeId& id, const Offset& poi
         LOGI("Window is ready, prepare to show the menu.");
         popup->ShowContextMenu(point);
     }
-
 }
 
 RefPtr<RenderBox> MenuElement::GetBoxRenderChild(const RefPtr<Element>& element)

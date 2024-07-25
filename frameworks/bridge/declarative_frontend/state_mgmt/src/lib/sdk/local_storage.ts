@@ -156,7 +156,7 @@ class LocalStorage extends NativeLocalStorage {
    * @since 9
    */
   public set<T>(propName: string, newValue: T): boolean {
-    stateMgmtProfiler.begin("LocalStorage.set");
+    stateMgmtProfiler.begin('LocalStorage.set');
     if (newValue === undefined && !Utils.isApiVersionEQAbove(12)) {
       stateMgmtConsole.warn(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
       stateMgmtProfiler.end();
@@ -186,7 +186,7 @@ class LocalStorage extends NativeLocalStorage {
    * @since 9
    */
   public setOrCreate<T>(propName: string, newValue: T): boolean {
-    stateMgmtProfiler.begin("LocalStorage.setOrCreate");
+    stateMgmtProfiler.begin('LocalStorage.setOrCreate');
     if (newValue == undefined && !Utils.isApiVersionEQAbove(12)) {
       stateMgmtConsole.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
       stateMgmtProfiler.end();
@@ -249,7 +249,7 @@ class LocalStorage extends NativeLocalStorage {
     if (ViewStackProcessor.UsesNewPipeline()) {
       newProp = new ObservedPropertyPU<T>(value, undefined, propName);
     } else {
-      newProp = (typeof value === "object") ?
+      newProp = (typeof value === 'object') ?
         new ObservedPropertyObject<T>(value, undefined, propName)
         : new ObservedPropertySimple<T>(value, undefined, propName);
     }
@@ -272,7 +272,7 @@ class LocalStorage extends NativeLocalStorage {
    * @since 9
    */
   public link<T>(propName: string, linkUser?: IPropertySubscriber, subscribersName?: string): SubscribedAbstractProperty<T> | undefined {
-    stateMgmtProfiler.begin("LocalStorage.link");
+    stateMgmtProfiler.begin('LocalStorage.link');
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (p == undefined) {
       stateMgmtConsole.warn(`${this.constructor.name}: link: no property ${propName} error.`);
@@ -305,7 +305,7 @@ class LocalStorage extends NativeLocalStorage {
    * @since 9
    */
   public setAndLink<T>(propName: string, defaultValue: T, linkUser?: IPropertySubscriber, subscribersName?: string): SubscribedAbstractProperty<T> {
-    stateMgmtProfiler.begin("LocalStorage.setAndLink");
+    stateMgmtProfiler.begin('LocalStorage.setAndLink');
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (!p) {
       this.setOrCreate(propName, defaultValue);
@@ -330,7 +330,7 @@ class LocalStorage extends NativeLocalStorage {
    * @since 9
    */
   public prop<T>(propName: string, propUser?: IPropertySubscriber, subscribersName?: string): SubscribedAbstractProperty<T> | undefined {
-    stateMgmtProfiler.begin("LocalStorage.prop");
+    stateMgmtProfiler.begin('LocalStorage.prop');
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (p == undefined) {
       stateMgmtConsole.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
@@ -362,7 +362,7 @@ class LocalStorage extends NativeLocalStorage {
    * @since 9
    */
   public setAndProp<T>(propName: string, defaultValue: T, propUser?: IPropertySubscriber, subscribersName?: string): SubscribedAbstractProperty<T> {
-    stateMgmtProfiler.begin("LocalStorage.setAndProp");
+    stateMgmtProfiler.begin('LocalStorage.setAndProp');
     let p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (!p) {
         this.setOrCreate(propName, defaultValue);
@@ -393,7 +393,7 @@ class LocalStorage extends NativeLocalStorage {
    * @since 9
   */
   public delete(propName: string): boolean {
-    stateMgmtProfiler.begin("LocalStorage.delete");
+    stateMgmtProfiler.begin('LocalStorage.delete');
     let p: ObservedPropertyAbstract<any> | undefined = this.storage_.get(propName);
     if (p) {
       if (p.numberOfSubscrbers()) {
@@ -423,7 +423,7 @@ class LocalStorage extends NativeLocalStorage {
    * @since 9
    */
   protected clear(): boolean {
-    stateMgmtProfiler.begin("LocalStorage.clean");
+    stateMgmtProfiler.begin('LocalStorage.clean');
     for (let propName of this.keys()) {
       var p: ObservedPropertyAbstract<any> = this.storage_.get(propName);
       if (p.numberOfSubscrbers()) {

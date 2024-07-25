@@ -71,9 +71,14 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // Measure swiper.
     auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(SWIPER_INDEX);
-    SizeF swiperSize;
     if (swiperWrapper) {
+        swiperWrapper->GetLayoutProperty()->UpdateLayoutDirection(layoutProperty->GetNonAutoLayoutDirection());
+    }
+    SizeF swiperSize;
+    if (swiperWrapper && swiperWrapper->GetHostNode() && swiperWrapper->GetHostNode()->TotalChildCount() > 0) {
         swiperSize = MeasureSwiper(layoutProperty, swiperWrapper, idealSize, tabBarSize, dividerStrokeWidth);
+    } else if (swiperWrapper && swiperWrapper->GetGeometryNode()) {
+        swiperWrapper->GetGeometryNode()->SetFrameSize(SizeF());
     }
 
     auto paddingH = layoutProperty->CreatePaddingAndBorder().Width();

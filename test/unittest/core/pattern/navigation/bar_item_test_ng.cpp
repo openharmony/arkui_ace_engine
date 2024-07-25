@@ -46,19 +46,19 @@ public:
 
     RefPtr<BarItemNode> frameNode_;
     RefPtr<BarItemPattern> barItemPattern_;
-    RefPtr<BarItemAccessibilityProperty> barItemAccessibilityProperty_;
 };
 
 void BarItemTestNg::DestroyBarItemObject()
 {
     frameNode_ = nullptr;
     barItemPattern_ = nullptr;
-    barItemAccessibilityProperty_ = nullptr;
 }
 
 void BarItemTestNg::InitBarItemTestNg()
 {
-    frameNode_ = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId());
+    auto barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    frameNode_ = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
     ASSERT_NE(frameNode_, nullptr);
     frameNode_->InitializePatternAndContext();
     barItemPattern_ = frameNode_->GetPattern<BarItemPattern>();
@@ -66,8 +66,6 @@ void BarItemTestNg::InitBarItemTestNg()
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     frameNode_->SetTextNode(textNode);
-    barItemAccessibilityProperty_ = frameNode_->GetAccessibilityProperty<BarItemAccessibilityProperty>();
-    ASSERT_NE(barItemAccessibilityProperty_, nullptr);
 }
 
 /**
@@ -155,9 +153,9 @@ HWTEST_F(BarItemTestNg, OnModifyDone002, TestSize.Level1)
  */
 HWTEST_F(BarItemTestNg, OnIconSrcUpdate001, TestSize.Level1)
 {
-    std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(barTag, nodeId);
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
     std::string value = EMPTY_STRING;
     int32_t ret = RET_OK;
     barItemNode->OnIconSrcUpdate(value);
@@ -173,7 +171,8 @@ HWTEST_F(BarItemTestNg, OnTextUpdate001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(barTag, nodeId);
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
     std::string value = EMPTY_STRING;
     int32_t ret = RET_OK;
     barItemNode->OnTextUpdate(value);
@@ -187,9 +186,9 @@ HWTEST_F(BarItemTestNg, OnTextUpdate001, TestSize.Level1)
  */
 HWTEST_F(BarItemTestNg, IsAtomicNode001, TestSize.Level1)
 {
-    std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(barTag, nodeId);
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto ret = barItemNode->IsAtomicNode();
     EXPECT_EQ(ret, false);
 }
@@ -201,9 +200,9 @@ HWTEST_F(BarItemTestNg, IsAtomicNode001, TestSize.Level1)
  */
 HWTEST_F(BarItemTestNg, SetTextNode001, TestSize.Level1)
 {
-    std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(barTag, nodeId);
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
     barItemNode->SetTextNode(nullptr);
     EXPECT_EQ(barItemNode->text_, nullptr);
 }
@@ -215,9 +214,9 @@ HWTEST_F(BarItemTestNg, SetTextNode001, TestSize.Level1)
  */
 HWTEST_F(BarItemTestNg, GetTextNode001, TestSize.Level1)
 {
-    std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(barTag, nodeId);
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto ret = barItemNode->GetTextNode();
     EXPECT_EQ(ret, nullptr);
 }
@@ -229,9 +228,9 @@ HWTEST_F(BarItemTestNg, GetTextNode001, TestSize.Level1)
  */
 HWTEST_F(BarItemTestNg, SetIconNode001, TestSize.Level1)
 {
-    std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(barTag, nodeId);
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
     barItemNode->SetIconNode(nullptr);
     EXPECT_EQ(barItemNode->icon_, nullptr);
 }
@@ -243,31 +242,11 @@ HWTEST_F(BarItemTestNg, SetIconNode001, TestSize.Level1)
  */
 HWTEST_F(BarItemTestNg, GetIconNode001, TestSize.Level1)
 {
-    std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(barTag, nodeId);
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto ret = barItemNode->GetIconNode();
     EXPECT_EQ(ret, nullptr);
-}
-
-/**
- * @tc.name: BarItemAccessibilityPropertyGetText001
- * @tc.desc: Test GetText of barItem.
- * @tc.type: FUNC
- */
-HWTEST_F(BarItemTestNg, BarItemAccessibilityPropertyGetText001, TestSize.Level1)
-{
-    InitBarItemTestNg();
-    EXPECT_EQ(barItemAccessibilityProperty_->GetText(), EMPTY_TEXT);
-    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<TextPattern>(); });
-    ASSERT_NE(textNode, nullptr);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(BAR_ITEM_TEXT);
-    frameNode_->SetTextNode(textNode);
-    EXPECT_EQ(barItemAccessibilityProperty_->GetText(), BAR_ITEM_TEXT);
-    DestroyBarItemObject();
 }
 
 /**

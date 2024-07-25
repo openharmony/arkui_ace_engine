@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
+#include "core/components_ng/pattern/select/select_properties.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/border_property.h"
@@ -183,22 +184,20 @@ void SelectPattern::ShowSelectMenu()
     auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuLayoutProps);
     menuLayoutProps->UpdateTargetSize(selectSize_);
-    
+
     auto select = GetHost();
     CHECK_NULL_VOID(select);
     auto selectGeometry = select->GetGeometryNode();
     CHECK_NULL_VOID(selectGeometry);
     auto selectProps = select->GetLayoutProperty();
     CHECK_NULL_VOID(selectProps);
-    
+
     if (isFitTrigger_) {
         auto selectWidth = selectSize_.Width();
-        
         auto menuPattern = menu->GetPattern<MenuPattern>();
         CHECK_NULL_VOID(menuPattern);
         menuPattern->SetIsWidthModifiedBySelect(true);
         menuLayoutProps->UpdateSelectMenuModifiedWidth(selectWidth);
-        
         auto scroll = DynamicCast<FrameNode>(menu->GetFirstChild());
         CHECK_NULL_VOID(scroll);
         auto scrollPattern = scroll->GetPattern<ScrollPattern>();
@@ -209,7 +208,7 @@ void SelectPattern::ShowSelectMenu()
         scrollLayoutProps->UpdateScrollWidth(selectWidth);
         UpdateOptionsWidth(selectWidth);
     }
-    
+
     auto offset = GetHost()->GetPaintRectOffset();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         offset.AddY(selectSize_.Height() + CALIBERATE_Y.ConvertToPx());
@@ -217,6 +216,7 @@ void SelectPattern::ShowSelectMenu()
     } else {
         offset.AddY(selectSize_.Height());
     }
+
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select click to show menu.");
     overlayManager->ShowMenu(GetHost()->GetId(), offset, menuWrapper_);
 }
@@ -320,9 +320,12 @@ void SelectPattern::RegisterOnPress()
     auto host = GetHost();
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
-        auto host = pattern->GetHost();
-        auto theme = host->GetContextRefPtr()->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContextRefPtr();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<SelectTheme>();
         auto touchType = info.GetTouches().front().GetTouchType();
         const auto& renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
@@ -624,7 +627,7 @@ void SelectPattern::SetOptionBgColor(const Color& color)
 {
     optionBgColor_ = color;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedBgColor_.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedBgColor_.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -637,7 +640,7 @@ void SelectPattern::SetOptionFontSize(const Dimension& value)
 {
     optionFont_.FontSize = value;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontSize.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontSize.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -650,7 +653,7 @@ void SelectPattern::SetOptionItalicFontStyle(const Ace::FontStyle& value)
 {
     optionFont_.FontStyle = value;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontStyle.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontStyle.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -663,7 +666,7 @@ void SelectPattern::SetOptionFontWeight(const FontWeight& value)
 {
     optionFont_.FontWeight = value;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontWeight.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontWeight.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -676,7 +679,7 @@ void SelectPattern::SetOptionFontFamily(const std::vector<std::string>& value)
 {
     optionFont_.FontFamily = value;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontFamily.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontFamily.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -689,7 +692,7 @@ void SelectPattern::SetOptionFontColor(const Color& color)
 {
     optionFont_.FontColor = color;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontColor.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontColor.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -887,9 +890,6 @@ void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps, c
     textProps->UpdateTextDecoration(theme->GetTextDecoration());
     textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textProps->UpdateMaxLines(SELECT_ITSELF_TEXT_LINES);
-    MarginProperty margin;
-    margin.left = CalcLength(theme->GetContentMargin());
-    textProps->UpdateMargin(margin);
 }
 
 void SelectPattern::InitSpinner(
@@ -907,10 +907,6 @@ void SelectPattern::InitSpinner(
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     spinnerLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
-    MarginProperty margin;
-    margin.right = CalcLength(selectTheme->GetContentMargin());
-    spinnerLayoutProperty->UpdateMargin(margin);
-
     auto spinnerRenderProperty = spinner->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(spinnerRenderProperty);
     spinnerRenderProperty->UpdateSvgFillColor(selectTheme->GetSpinnerColor());
@@ -925,9 +921,6 @@ void SelectPattern::InitSpinner(
     spinnerLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo{symbolId});
     spinnerLayoutProperty->UpdateSymbolColorList({selectTheme->GetSpinnerSymbolColor()});
     spinnerLayoutProperty->UpdateFontSize(selectTheme->GetFontSize());
-    MarginProperty margin;
-    margin.right = CalcLength(selectTheme->GetContentMargin());
-    spinnerLayoutProperty->UpdateMargin(margin);
 }
 
 // XTS inspector code
@@ -974,6 +967,7 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     std::string optionHeight =  std::to_string(menuLayoutProps->GetSelectModifiedHeightValue(0.0f));
     json->PutExtAttr("optionHeight", optionHeight.c_str(), filter);
     ToJsonMenuBackgroundStyle(json, filter);
+    ToJsonDivider(json, filter);
 }
 
 void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -1028,6 +1022,30 @@ void SelectPattern::ToJsonMenuBackgroundStyle(
             jsonValue->GetValue("backgroundBlurStyle")->GetValue("value"), filter);
     } else {
         json->PutExtAttr("menuBackgroundBlurStyle", "", filter);
+    }
+}
+
+void SelectPattern::ToJsonDivider(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    if (options_.empty()) {
+        json->PutExtAttr("divider", "", filter);
+    } else {
+        auto props = options_[0]->GetPaintProperty<OptionPaintProperty>();
+        CHECK_NULL_VOID(props);
+        auto divider = JsonUtil::Create(true);
+        if (props->HasDivider()) {
+            divider->Put("strokeWidth", props->GetDividerValue().strokeWidth.ToString().c_str());
+            divider->Put("startMargin", props->GetDividerValue().startMargin.ToString().c_str());
+            divider->Put("endMargin", props->GetDividerValue().endMargin.ToString().c_str());
+            divider->Put("color", props->GetDividerValue().color.ColorToString().c_str());
+            json->PutExtAttr("divider", divider->ToString().c_str(), filter);
+        } else {
+            json->PutExtAttr("divider", "", filter);
+        }
     }
 }
 
@@ -1404,8 +1422,39 @@ void SelectPattern::SetControlSize(const ControlSize& controlSize)
     ResetParams();
 }
 
+void SelectPattern::SetLayoutDirection(TextDirection value)
+{
+    auto select = GetHost();
+    auto menu = GetMenuNode();
+    std::function<void (decltype(select))> updateDirectionFunc = [&](decltype(select) node) {
+        if (!node) return;
+        auto updateProperty = node->GetLayoutProperty();
+        updateProperty->UpdateLayoutDirection(value);
+        if (node->GetHostTag() == V2::SCROLL_ETS_TAG) {
+            auto scrollPattern = AceType::DynamicCast<ScrollPattern>(node->GetPattern());
+            if (scrollPattern) scrollPattern->TriggerModifyDone();
+        }
+        for (auto child : node->GetAllChildrenWithBuild()) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(child);
+            if (!frameNode) continue;
+            updateDirectionFunc(frameNode);
+        }
+    };
+    updateDirectionFunc(select);
+    updateDirectionFunc(menu);
+}
+
 ControlSize SelectPattern::GetControlSize()
 {
     return controlSize_;
+}
+
+void SelectPattern::SetDivider(const SelectDivider& divider)
+{
+    for (auto&& option : options_) {
+        auto props = option->GetPaintProperty<OptionPaintProperty>();
+        CHECK_NULL_VOID(props);
+        props->UpdateDivider(divider);
+    }
 }
 } // namespace OHOS::Ace::NG

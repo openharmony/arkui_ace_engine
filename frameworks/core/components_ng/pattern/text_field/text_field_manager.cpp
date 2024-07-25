@@ -148,7 +148,6 @@ bool TextFieldManagerNG::ScrollTextFieldToSafeArea()
     CHECK_NULL_RETURN(pipeline, false);
     auto keyboardInset = pipeline->GetSafeAreaManager()->GetKeyboardInset();
     bool isShowKeyboard = keyboardInset.IsValid();
-    NotifyKeyboardChangedCallback(isShowKeyboard);
     if (isShowKeyboard) {
         auto bottomInset = pipeline->GetSafeArea().bottom_.Combine(keyboardInset);
         CHECK_NULL_RETURN(bottomInset.IsValid(), false);
@@ -179,34 +178,25 @@ void TextFieldManagerNG::UpdateScrollableParentViewPort(const RefPtr<FrameNode>&
     scrollableNode->SetViewPort(scrollableRect);
 }
 
-void TextFieldManagerNG::AvoidKeyboard()
-{
-    if (!ScrollTextFieldToSafeArea()) {
-        NavContentToSafeAreaHelper();
-    }
-}
-
-void TextFieldManagerNG::NavContentToSafeAreaHelper()
+void TextFieldManagerNG::AvoidKeyBoardInNavigation()
 {
     auto node = onFocusTextField_.Upgrade();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSafeAreaManager();
+    auto avoidKeyboardOffset =  manager ? manager->GetKeyboardOffset() : 0.0f;
     if (!node) {
         auto navNode = weakNavNode_.Upgrade();
-        if (!navNode) {
-            // if navNode is nullptr means TextField's parent
-            // dont't have navBar or navDestination
-            return;
-        }
-        SetNavContentKeyboardOffset(navNode);
+        CHECK_NULL_VOID(navNode);
+        SetNavContentAvoidKeyboardOffset(navNode, avoidKeyboardOffset);
         return;
     }
     auto frameNode = node->GetHost();
     CHECK_NULL_VOID(frameNode);
     auto navNode = FindNavNode(frameNode);
-    if (!navNode) {
-        return;
-    }
+    CHECK_NULL_VOID(navNode);
     weakNavNode_ = navNode;
-    SetNavContentKeyboardOffset(navNode);
+    SetNavContentAvoidKeyboardOffset(navNode, avoidKeyboardOffset);
 }
 
 RefPtr<FrameNode> TextFieldManagerNG::FindNavNode(const RefPtr<FrameNode>& textField)
@@ -215,6 +205,12 @@ RefPtr<FrameNode> TextFieldManagerNG::FindNavNode(const RefPtr<FrameNode>& textF
     auto parent = textField->GetAncestorNodeOfFrame();
     RefPtr<FrameNode> ret = nullptr;
     while (parent) {
+        // when the sheet showed in navdestination, sheet replaced navdestination to do avoid keyboard.
+        if (parent->GetHostTag() == V2::SHEET_WRAPPER_TAG) {
+            auto sheetNode = parent->GetChildAtIndex(0);
+            CHECK_NULL_RETURN(sheetNode, nullptr);
+            return AceType::DynamicCast<FrameNode>(sheetNode);
+        }
         if (parent->GetHostTag() == V2::NAVDESTINATION_VIEW_ETS_TAG ||
             parent->GetHostTag() == V2::NAVBAR_ETS_TAG) {
                 ret = parent;
@@ -222,45 +218,53 @@ RefPtr<FrameNode> TextFieldManagerNG::FindNavNode(const RefPtr<FrameNode>& textF
             }
         parent = parent->GetAncestorNodeOfFrame();
     }
-    return ret;
+    CHECK_NULL_RETURN(ret, nullptr);
+    
+    // return navdestination or navBar if the closest ancestor navigation can expandKeyboard
+    // if can't, recursively find the ancestor navigation can expandKeyboard.
+    auto navigationNode = ret->GetAncestorNodeOfFrame();
+    while (navigationNode) {
+        if (navigationNode->GetHostTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+            break;
+        }
+        navigationNode = navigationNode->GetAncestorNodeOfFrame();
+    }
+    CHECK_NULL_RETURN(navigationNode, nullptr);
+    auto layoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    auto& opts = layoutProperty->GetSafeAreaExpandOpts();
+    
+    // if the extended keyboard area is set for the navigation, top navdestination or navbar need to avoid keyboard,
+    // otherwise don't aovid, following parent navigation.
+    bool isExpandKeyboard = opts && (opts->type & SAFE_AREA_TYPE_KEYBOARD) && (opts->edges & SAFE_AREA_EDGE_BOTTOM);
+    if (isExpandKeyboard) {
+        return ret;
+    }
+    auto mayAvoidNavContentNode = FindNavNode(navigationNode);
+    if (mayAvoidNavContentNode) {
+        return mayAvoidNavContentNode;
+    }
+    SetNavContentAvoidKeyboardOffset(ret, 0.0f);
+    return nullptr;
 }
 
-void TextFieldManagerNG::SetNavContentKeyboardOffset(RefPtr<FrameNode> navNode)
+void TextFieldManagerNG::SetNavContentAvoidKeyboardOffset(RefPtr<FrameNode> navNode, float avoidKeyboardOffset)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto manager = pipeline->GetSafeAreaManager();
-    auto keyboardOffset =  manager ? manager->GetKeyboardOffset() : 0.0f;
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(navNode);
     if (navDestinationNode) {
         auto pattern = navDestinationNode->GetPattern<NavDestinationPattern>();
         if (pattern) {
-            pattern->SetKeyboardOffset(keyboardOffset);
+            avoidKeyboardOffset = pattern->NeedIgnoreKeyboard() ? 0.0f : avoidKeyboardOffset;
+            pattern->SetAvoidKeyboardOffset(avoidKeyboardOffset);
         }
     }
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navNode);
     if (navBarNode) {
         auto pattern = navBarNode->GetPattern<NavBarPattern>();
         if (pattern) {
-            pattern->SetKeyboardOffset(keyboardOffset);
+            pattern->SetAvoidKeyboardOffset(avoidKeyboardOffset);
         }
     }
     navNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-}
-
-void TextFieldManagerNG::NotifyKeyboardChangedCallback(bool isShowKeyboard)
-{
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto safeAreaManager = context->GetSafeAreaManager();
-    CHECK_NULL_VOID(safeAreaManager);
-    auto keyboardOffset = safeAreaManager->GetKeyboardOffset();
-    auto isChanged = !NearEqual(lastKeyboardOffset_, keyboardOffset);
-    for (const auto& pair : keyboardChangeCallbackMap_) {
-        if (pair.second) {
-            pair.second(isChanged, isShowKeyboard);
-        }
-    }
-    lastKeyboardOffset_ = keyboardOffset;
 }
 } // namespace OHOS::Ace::NG

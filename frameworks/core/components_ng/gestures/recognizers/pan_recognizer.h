@@ -71,10 +71,6 @@ public:
     RefPtr<Gesture> CreateGestureFromRecognizer() const override;
     void ForceCleanRecognizer() override;
 
-    bool AboutToAddCurrentFingers(int32_t touchId) override;
-
-    bool AboutToMinusCurrentFingers(int32_t touchId) override;
-
     double GetDistance() const
     {
         return distance_;
@@ -94,6 +90,10 @@ private:
         void Reset(int32_t id);
         void ResetAll();
         void SetDirection(int32_t directionType);
+        const std::map<int32_t, VelocityTracker>& GetVelocityMap() const
+        {
+            return trackerMap_;
+        }
 
     private:
         int32_t GetFastestTracker(std::function<double(VelocityTracker&)>&& func);
@@ -120,6 +120,7 @@ private:
     bool CalculateTruthFingers(bool isDirectionUp) const;
     void UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end = false);
     void UpdateAxisPointInVelocityTracker(const AxisEvent& event, bool end = false);
+    void UpdateTouchEventInfo(const TouchEvent& event, bool updateVelocity);
     Offset GetRawGlobalLocation(int32_t postEventNodeId);
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
@@ -130,11 +131,14 @@ private:
     double GetMainAxisDelta();
     RefPtr<DragEventActuator> GetDragEventActuator();
     bool HandlePanAccept();
+    GestureEvent GetGestureEventInfo();
 
     void OnResetStatus() override;
     void OnSucceedCancel() override;
 
     void AddOverTimeTrace();
+
+    void DispatchPanStartedToPerf(const TouchEvent& event);
 
     const TouchRestrict& GetTouchRestrict() const
     {

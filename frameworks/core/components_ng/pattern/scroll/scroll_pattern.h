@@ -88,6 +88,11 @@ public:
         return GetAxis() != Axis::NONE;
     }
 
+    bool IsPositiveScrollableDistance()
+    {
+        return Positive(scrollableDistance_);
+    }
+
     bool OnScrollCallback(float offset, int32_t source) override;
 
     void OnScrollEndCallback() override;
@@ -167,7 +172,8 @@ public:
     }
 
     void ScrollBy(float pixelX, float pixelY, bool smooth, const std::function<void()>& onFinish = nullptr);
-    void ScrollPage(bool reverse, bool smooth = false) override;
+    void ScrollPage(bool reverse, bool smooth = false,
+        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
     void ScrollTo(float position) override;
     void JumpToPosition(float position, int32_t source = SCROLL_FROM_JUMP);
     float GetMainContentSize() const override
@@ -380,7 +386,7 @@ private:
     void FireOnDidScroll(float scroll);
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void UpdateScrollBarOffset() override;
-    void SetAccessibilityAction();
+    void SetAccessibilityAction() override;
     bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
     bool ScrollSnapTrigger();
     void CheckScrollable();

@@ -28,7 +28,7 @@ ArkUINativeModuleValue StepperItemBridge::SetNextLabel(ArkUIRuntimeCallInfo* run
         GetArkUINodeModifiers()->getStepperItemModifier()->resetNextLabel(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    std::string nextLabel = valueArg->ToString(vm)->ToString();
+    std::string nextLabel = valueArg->ToString(vm)->ToString(vm);
     GetArkUINodeModifiers()->getStepperItemModifier()->setNextLabel(nativeNode, nextLabel.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
@@ -54,7 +54,7 @@ ArkUINativeModuleValue StepperItemBridge::SetPrevLabel(ArkUIRuntimeCallInfo* run
         GetArkUINodeModifiers()->getStepperItemModifier()->resetPrevLabel(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    std::string prevLabel = valueArg->ToString(vm)->ToString();
+    std::string prevLabel = valueArg->ToString(vm)->ToString(vm);
     GetArkUINodeModifiers()->getStepperItemModifier()->setPrevLabel(nativeNode, prevLabel.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
@@ -83,7 +83,7 @@ ArkUINativeModuleValue StepperItemBridge::SetStatus(ArkUIRuntimeCallInfo* runtim
     const std::array<std::string, 4> statusArray = { "normal", "disabled", "waiting", "skip" };
     std::string status = statusArray[0];
     int32_t index = valueArg->Int32Value(vm);
-    if (index > 0 && index < statusArray.size()) {
+    if (index > 0 && static_cast<size_t>(index) < statusArray.size()) {
         status = statusArray.at(index);
     }
     GetArkUINodeModifiers()->getStepperItemModifier()->setStatus(nativeNode, status.c_str());

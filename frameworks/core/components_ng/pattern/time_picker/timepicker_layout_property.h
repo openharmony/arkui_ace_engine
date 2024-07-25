@@ -99,6 +99,8 @@ public:
             options->Put("second", TimeFormat::GetSecondFormat(GetPrefixSecondValue(0)).c_str());
         }
         json->PutExtAttr("dateTimeOptions", options, filter);
+        auto hapticFeedback = GetIsEnableHapticFeedbackValue(false) ? "true" : "false";
+        json->PutExtAttr("enableHapticFeedback", hapticFeedback, filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsUseMilitaryTime, bool, PROPERTY_UPDATE_MEASURE);
@@ -138,6 +140,7 @@ public:
         SelectedTextStyle, FontFamily, SelectedFontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         SelectedTextStyle, ItalicFontStyle, SelectedFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsEnableHapticFeedback, bool, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerLayoutProperty);

@@ -73,7 +73,6 @@ template("js_engine_ark") {
       "jsi_stepper_bridge.cpp",
     ]
 
-    include_dirs = [ "$c_utils_root/base/include" ]
     cflags_cc = [ "-Wno-thread-safety-attributes" ]
 
     # xcomponent components supports phone, TV and wearable except PC Preview
@@ -93,10 +92,9 @@ template("js_engine_ark") {
       external_deps = [ "hilog:libhilog" ]
     }
     if (defined(config.build_for_preview) && config.build_for_preview) {
-      deps += [
-        ":gen_obj_src_abc_strip_native_min",
-        "//foundation/arkui/napi:ace_napi",
-      ]
+      deps += [ ":gen_obj_src_abc_strip_native_min" ]
+      external_deps += [ "napi:ace_napi" ]
+      include_dirs = [ "//commonlibrary/c_utils/base/include" ]
     } else if (defined(config.build_for_android) && config.build_for_android) {
       deps += [
         ":gen_obj_src_abc_strip_native_min",

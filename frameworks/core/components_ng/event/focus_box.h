@@ -19,9 +19,9 @@
 #include <optional>
 
 #include "base/geometry/calc_dimension.h"
+#include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
-
 namespace OHOS::Ace::NG {
 
 struct FocusBoxStyle {
@@ -38,6 +38,7 @@ public:
 
     void SetStyle(const FocusBoxStyle& style);
     bool HasCustomStyle() const;
+    static std::unique_ptr<JsonValue> ToJsonValue(const FocusBox& box);
 
 private:
     std::optional<FocusBoxStyle> paintStyle_;

@@ -34,15 +34,9 @@ public:
     PageEventHub() = default;
     ~PageEventHub() override = default;
 
-    void AddRadioToGroup(const std::string& group, int32_t radioId);
-    void RemoveRadioFromGroup(const std::string& group, int32_t radioId);
-    bool HasRadioId(const std::string& group, int32_t radioId);
-    void UpdateRadioGroupValue(const std::string& group, int32_t radioId);
-
     const RefPtr<GroupManager>& GetGroupManager() const;
 
 private:
-    std::unordered_map<std::string, std::list<int32_t>> radioGroupNotify_;
     RefPtr<GroupManager> groupManager_ = MakeRefPtr<GroupManager>();
 };
 

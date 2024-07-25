@@ -18,7 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/syntax/for_each_node.h"
+#include "core/components_ng/syntax/repeat_node.h"
 #include "core/components_ng/syntax/syntax_item.h"
 
 namespace OHOS::Ace::NG {
@@ -29,7 +29,7 @@ void RepeatModelNG::StartRender()
     ACE_SCOPED_TRACE("RepeatModelNG::StartRender");
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto repeatNode = ForEachNode::GetOrCreateRepeatNode(nodeId);
+    auto repeatNode = RepeatNode::GetOrCreateRepeatNode(nodeId);
     stack->Push(repeatNode);
 
     // move current id array and children to temp
@@ -39,7 +39,7 @@ void RepeatModelNG::StartRender()
 void RepeatModelNG::FinishRender(std::list<int32_t>& removedElmtId)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto repeatNode = AceType::DynamicCast<ForEachNode>(stack->GetMainElementNode());
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(stack->GetMainElementNode());
     CHECK_NULL_VOID(repeatNode);
     repeatNode->FinishRepeatRender(removedElmtId);
     stack->PopContainer();
@@ -49,7 +49,7 @@ void RepeatModelNG::MoveChild(uint32_t fromIndex)
 {
     ACE_SCOPED_TRACE("RepeatModelNG::MoveChild()");
     auto* stack = ViewStackProcessor::GetInstance();
-    auto repeatNode = AceType::DynamicCast<ForEachNode>(stack->GetMainElementNode());
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(stack->GetMainElementNode());
     CHECK_NULL_VOID(repeatNode);
     repeatNode->MoveChild(fromIndex);
 }
@@ -76,7 +76,7 @@ void RepeatModelNG::CreateNewChildFinish(const std::string& key)
 void RepeatModelNG::OnMove(std::function<void(int32_t, int32_t)>&& onMove)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto node = AceType::DynamicCast<ForEachNode>(stack->GetMainElementNode());
+    auto node = AceType::DynamicCast<RepeatNode>(stack->GetMainElementNode());
     CHECK_NULL_VOID(node);
     node->SetOnMove(std::move(onMove));
 }

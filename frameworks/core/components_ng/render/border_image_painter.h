@@ -26,12 +26,16 @@
 #include "core/components_ng/render/render_property.h"
 
 namespace OHOS::Ace::NG {
+struct DisplayScaleInfo {
+    double vpScale = 0.0;
+    double lpxScale = 0.0;
+};
 class BorderImagePainter : public virtual AceType {
     DECLARE_ACE_TYPE(BorderImagePainter, AceType);
 
 public:
     BorderImagePainter(BorderImageProperty bdImageProps, const std::unique_ptr<BorderWidthProperty>& widthProp,
-        const SizeF& paintSize, const RSImage& image, double dipScale);
+        const SizeF& paintSize, const RSImage& image, const DisplayScaleInfo& dipscaleInfoe);
     ~BorderImagePainter() override = default;
     void PaintBorderImage(const OffsetF& offset, RSCanvas& canvas) const;
 
@@ -63,6 +67,7 @@ private:
     double borderCenterHeight_ = 0.0;
 
     double dipScale_ = 0.0;
+    double lpxScale_ = 0.0;
     double leftWidth_ = 0.0;
     double topWidth_ = 0.0;
     double rightWidth_ = 0.0;

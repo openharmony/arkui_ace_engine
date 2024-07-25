@@ -107,7 +107,7 @@ public:
         ON_SURFACE_CHANGE,
         ON_FORM_LINK_INFO_UPDATE,
         ON_FORMSURFACE_DETACH,
-        ON_GET_RECT_RELATIVE_TO_WINDOW
+        ON_GET_RECT_RELATIVE_TO_WINDOW,
     };
 };
 } // namespace Ace

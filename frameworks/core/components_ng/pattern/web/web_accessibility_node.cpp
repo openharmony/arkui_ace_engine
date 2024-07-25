@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG {
 WebAccessibilityNode::WebAccessibilityNode(const RefPtr<WebPattern>& webPattern)
-    : FrameNode(V2::WEB_CORE_TAG, 0, MakeRefPtr<Pattern>())
+    : FrameNode(V2::WEB_CORE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<Pattern>())
 {
     webPattern_ = webPattern;
     if (webPattern != nullptr) {

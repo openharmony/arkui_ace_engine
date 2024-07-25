@@ -29,6 +29,12 @@
 #include "core/components/common/properties/text_layout_info.h"
 
 namespace OHOS::Ace::NG {
+
+enum RectHeightPolicy {
+    COVER_TEXT,
+    COVER_LINE
+};
+
 class LeadingMarginSize {
 public:
     LeadingMarginSize() = default;
@@ -232,12 +238,13 @@ public:
         return finalResult;
     }
     virtual void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) = 0;
+    virtual void GetTightRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) = 0;
     virtual void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) = 0;
     virtual bool ComputeOffsetForCaretDownstream(
         int32_t extent, CaretMetricsF& result, bool needLineHighest = true) = 0;
     virtual bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) = 0;
     virtual bool CalcCaretMetricsByPosition(
-        int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) = 0;
+        int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity, bool needLineHighest = true) = 0;
     virtual bool CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric,
         const OffsetF& lastTouchOffset, TextAffinity& textAffinity) = 0;
     virtual void SetIndents(const std::vector<float>& indents) = 0;

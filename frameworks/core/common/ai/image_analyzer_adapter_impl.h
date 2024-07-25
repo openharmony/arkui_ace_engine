@@ -24,12 +24,14 @@ class ImageAnalyzerAdapterImpl : public ImageAnalyzerAdapter {
 public:
     ImageAnalyzerAdapterImpl();
     ~ImageAnalyzerAdapterImpl() override;
-    void SetImageAnalyzerConfig(void* config) override;
+    void SetImageAnalyzerConfig(void* config, bool isOptions = false) override;
     void* GetImageAnalyzerConfig() override;
     void* ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap) override;
+    bool HasImageAnalyzerConfig() override;
 private:
     napi_env env_ = nullptr;
     napi_ref analyzerConfigRef_ = nullptr;
+    bool hasOptions_ = false;
 };
 }
 #endif

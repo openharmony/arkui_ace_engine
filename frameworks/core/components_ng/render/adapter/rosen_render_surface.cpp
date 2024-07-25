@@ -38,7 +38,7 @@ const uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
 const uint32_t DEFAULT_WEB_DRAW_LENGTH = 6167;
 const std::string SURFACE_WIDTH = "surface_width";
 const std::string SURFACE_HEIGHT = "surface_height";
-const int32_t SIZE_LIMIT = 7999;
+const int32_t SIZE_LIMIT = 5999;
 const int32_t PERMITTED_DIFFERENCE = 100;
 const int32_t FAILED_LIMIT = 3;
 
@@ -274,7 +274,6 @@ void RosenRenderSurface::DrawBuffer(int32_t width, int32_t height)
     }
     if (!CompareBufferSize(width, height, surfaceNode)) {
         LOGE("RosenRenderSurface buffer is not matched.");
-        return;
     }
     ACE_SCOPED_TRACE("Web DrawBuffer");
     rosenRenderContext->StartRecording();
@@ -321,6 +320,8 @@ bool RosenRenderSurface::CompareBufferSize(int32_t width, int32_t height,
         failTimes_++;
         if (failTimes_ <= FAILED_LIMIT) {
             pipeline->SetIsFreezeFlushMessage(true);
+            ACE_SCOPED_TRACE("Web SetIsFreezeFlushMessage (width %d, height %d, bufferWidth %d, bufferHeight %d)",
+                width, height, bufferWidth, bufferHeight);
             return false;
         }
     }

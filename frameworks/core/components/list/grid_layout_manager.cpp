@@ -178,7 +178,7 @@ void GridLayoutManager::RequestMoreItemsIfNeeded(int32_t viewBegin, int32_t view
     if (CalculateRepeatedIndex(cachedBegin) < beginIndex_ || CalculateRepeatedIndex(cachedEnd) > endIndex_) {
         int32_t requestBegin;
         int32_t requestEnd;
-        CalculateCachedRange(viewBegin, viewEnd, 2 * cachedCount_, requestBegin, requestEnd);
+        CalculateCachedRange(viewBegin, viewEnd, 2 * cachedCount_, requestBegin, requestEnd); // 2: double cache
         renderList_.RequestMoreItems(CalculateRepeatedIndex(requestBegin), CalculateRepeatedIndex(requestEnd));
     }
 }

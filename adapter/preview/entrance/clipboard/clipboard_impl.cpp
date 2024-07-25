@@ -29,6 +29,9 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&, bool is
     const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
     const std::function<void(const std::string&, bool isLastRecord)>& urlCallback, bool syncMode)
 {}
+void ClipboardImpl::GetSpanStringData(
+    const std::function<void(std::vector<uint8_t>&, const std::string&)>& callback, bool syncMode)
+{}
 
 RefPtr<PasteDataMix> ClipboardImpl::CreatePasteDataMix()
 {
@@ -76,6 +79,12 @@ void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
             }
         },
         TaskExecutor::TaskType::UI, "ArkUIClipboardHasData");
+}
+
+void ClipboardImpl::HasDataType(
+    const std::function<void(bool hasData)>& callback, const std::vector<std::string>& mimeTypes)
+{
+    HasData(callback);
 }
 
 void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption)

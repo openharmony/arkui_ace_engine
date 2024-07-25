@@ -42,6 +42,8 @@ public:
     void GetPixelMapData(const std::function<void(const RefPtr<PixelMap>&)>& callback, bool syncMode = false) override;
     void Clear() override;
     void HasData(const std::function<void(bool hasData)>& callback) override;
+    void HasDataType(
+        const std::function<void(bool hasData)>& callback, const std::vector<std::string>& mimeTypes) override;
     void RegisterCallbackSetClipboardPixmapData(CallbackSetClipboardPixmapData callback);
     void RegisterCallbackGetClipboardPixmapData(CallbackGetClipboardPixmapData callback);
     void AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap) override;
@@ -52,6 +54,8 @@ public:
     void GetData(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
         const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
         const std::function<void(const std::string&, bool isLastRecord)>& urlCallback, bool syncMode = false) override;
+    void GetSpanStringData(
+        const std::function<void(std::vector<uint8_t>&, const std::string&)>& callback, bool syncMode = false) override;
     RefPtr<PasteDataMix> CreatePasteDataMix() override;
 
 private:

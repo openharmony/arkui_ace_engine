@@ -213,7 +213,7 @@ public:
     int32_t selectedEnd = -1;
     void UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder);
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle());
+        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle(), bool isMarquee = false);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(
         const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
@@ -273,7 +273,7 @@ public:
     {
         return isParentText;
     }
-    std::string GetSpanContent(const std::string& rawContent);
+    std::string GetSpanContent(const std::string& rawContent, bool isMarquee = false);
     std::string GetSpanContent();
     uint32_t GetSymbolUnicode();
     std::string SymbolColorToString();
@@ -403,14 +403,19 @@ public:
         spanItem_->description = desc;
     }
 
+    void UpdateColorByResourceId()
+    {
+        spanItem_->fontStyle->UpdateColorByResourceId();
+    }
+
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, Color);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, DynamicColor);
     DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, TextDecoration);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, DynamicColor);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFeature, FONT_FEATURES_LIST);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextShadow, std::vector<Shadow>);
@@ -493,7 +498,8 @@ public:
     ~PlaceholderSpanItem() override = default;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle()) override;
+        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle(),
+        bool isMarquee = false) override;
 
     void DumpInfo() const
     {
@@ -584,6 +590,7 @@ public:
     }
     ~CustomSpanItem() override = default;
     RefPtr<SpanItem> GetSameStyleSpanItem() const override;
+    ResultObject GetSpanResultObject(int32_t start, int32_t end) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     ACE_DISALLOW_COPY_AND_MOVE(CustomSpanItem);
     std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure;
@@ -600,7 +607,8 @@ public:
     }
     ~ImageSpanItem() override = default;
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle()) override;
+        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle(),
+        bool isMarquee = false) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     void UpdatePlaceholderBackgroundStyle(const RefPtr<FrameNode>& imageNode);
     void SetImageSpanOptions(const ImageSpanOptions& options);

@@ -56,57 +56,14 @@ public:
         onShownEvent_ = onShown;
     }
 
-    void FireOnShownEvent(const std::string& name, const std::string& param) const
-    {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle chang to shown state.", name_.c_str());
-        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
-                                                                     NavDestinationState::ON_SHOWN);
-        if (onShownEvent_) {
-            auto onShownEvent = onShownEvent_;
-            onShownEvent();
-        }
-        if (onHiddenChange_) {
-            onHiddenChange_(true);
-        }
-        if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
-            auto host = GetFrameNode();
-            CHECK_NULL_VOID(host);
-            auto id = host->GetInspectorIdValue("");
-            Recorder::EventParamsBuilder builder;
-            builder.SetId(id)
-                .SetText(name)
-                .SetExtra(Recorder::KEY_PAGE_PARAM, param)
-                .SetDescription(host->GetAutoEventParamValue(""));
-            Recorder::EventRecorder::Get().OnNavDstShow(std::move(builder));
-        }
-    }
+    void FireOnShownEvent(const std::string& name, const std::string& param);
 
     void SetOnHidden(const std::function<void()>& onHidden)
     {
         onHiddenEvent_ = onHidden;
     }
 
-    void FireOnHiddenEvent(const std::string& name) const
-    {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle chang to hidden state.", name_.c_str());
-        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
-            NavDestinationState::ON_HIDDEN);
-        if (onHiddenEvent_) {
-            onHiddenEvent_();
-        }
-        if (onHiddenChange_) {
-            onHiddenChange_(false);
-        }
-
-        if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
-            auto host = GetFrameNode();
-            CHECK_NULL_VOID(host);
-            auto id = host->GetInspectorIdValue("");
-            Recorder::EventParamsBuilder builder;
-            builder.SetId(id).SetText(name).SetDescription(host->GetAutoEventParamValue(""));
-            Recorder::EventRecorder::Get().OnNavDstHide(std::move(builder));
-        }
-    }
+    void FireOnHiddenEvent(const std::string& name);
 
     void SetOnBackPressed(const std::function<bool()>& onBackPressed)
     {
@@ -118,39 +75,9 @@ public:
         return onBackPressedEvent_;
     }
 
-    bool FireOnBackPressedEvent()
-    {
-        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
-                                                                     NavDestinationState::ON_BACKPRESS);
-        if (onBackPressedEvent_) {
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination backButton press is happening.");
-            return onBackPressedEvent_();
-        }
-        return false;
-    }
+    bool FireOnBackPressedEvent();
 
-    void FireOnAppear() override
-    {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to appear state", name_.c_str());
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto navigationManager = pipeline->GetNavigationManager();
-        navigationManager->AddNavigationUpdateCallback([weakEventHub = WeakClaim(this)]() {
-            auto eventHub = weakEventHub.Upgrade();
-            CHECK_NULL_VOID(eventHub);
-            UIObserverHandler::GetInstance().NotifyNavigationStateChange(eventHub->GetNavDestinationPattern(),
-                NavDestinationState::ON_APPEAR);
-            if (eventHub->onAppear_) {
-                auto onAppear = eventHub->onAppear_;
-                onAppear();
-            }
-
-            if (eventHub->onJSFrameNodeAppear_) {
-                auto onJSFrameNodeAppear = eventHub->onJSFrameNodeAppear_;
-                onJSFrameNodeAppear();
-            }
-        });
-    }
+    void FireOnAppear() override;
 
     void FireDisappearCallback()
     {
@@ -193,61 +120,32 @@ public:
         onWillAppear_ = std::move(willAppear);
     }
 
-    void FireOnWillAppear()
-    {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to will appear state", name_.c_str());
-        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
-                                                                     NavDestinationState::ON_WILL_APPEAR);
-        if (onWillAppear_) {
-            onWillAppear_();
-        }
-    }
+    void FireOnWillAppear();
 
     void SetOnWillShow(std::function<void()>& willShow)
     {
         onWillShow_ = std::move(willShow);
     }
 
-    void FireOnWillShow()
-    {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to will show state", name_.c_str());
-        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
-                                                                     NavDestinationState::ON_WILL_SHOW);
-        if (onWillShow_) {
-            onWillShow_();
-        }
-    }
-
+    void FireOnWillShow();
+    
     void SetOnWillHide(std::function<void()>& willHide)
     {
         onWillHide_ = std::move(willHide);
     }
 
-    void FireOnWillHide()
-    {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to will hide state", name_.c_str());
-        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
-                                                                     NavDestinationState::ON_WILL_HIDE);
-        if (onWillHide_) {
-            onWillHide_();
-        }
-
-        FireAutoSave();
-    }
+    void FireOnWillHide();
 
     void SetOnWillDisAppear(std::function<void()>& willDisAppear)
     {
         onWillDisAppear_ = std::move(willDisAppear);
     }
 
-    void FireOnWillDisAppear()
+    void FireOnWillDisAppear();
+
+    NavDestinationState GetState()
     {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to will disappear state", name_.c_str());
-        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
-                                                                     NavDestinationState::ON_WILL_DISAPPEAR);
-        if (onWillDisAppear_) {
-            onWillDisAppear_();
-        }
+        return state_;
     }
 
 private:
@@ -272,6 +170,7 @@ private:
     std::function<void(bool)> onHiddenChange_;
     std::string name_;
     bool isActivated_ = false;
+    NavDestinationState state_;
 };
 } // namespace OHOS::Ace::NG
 

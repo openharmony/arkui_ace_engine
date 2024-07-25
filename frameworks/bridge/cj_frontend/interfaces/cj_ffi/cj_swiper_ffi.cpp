@@ -193,29 +193,6 @@ void FfiOHOSAceFrameworkSwiperSetOnChange(void (*callback)(int32_t index))
     SwiperModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
-void FfiOHOSAceFrameworkSwiperSetOnClick(void (*callback)(CJClickInfo newInfo))
-{
-    auto lambda = [ffiOnClick = CJLambda::Create(callback)](const ClickInfo& newInfo) -> void {
-        CJClickInfo ffiClickInfo {};
-        auto& globalLoc = newInfo.GetGlobalLocation();
-        ffiClickInfo.globalX = globalLoc.GetX();
-        ffiClickInfo.globalY = globalLoc.GetY();
-        auto& localLoc = newInfo.GetLocalLocation();
-        ffiClickInfo.localX = localLoc.GetX();
-        ffiClickInfo.localY = localLoc.GetY();
-        ffiOnClick(ffiClickInfo);
-    };
-    auto onClick = [lambda](const BaseEventInfo* info, const RefPtr<V2::InspectorFunctionImpl>& impl) {
-        const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
-        auto newInfo = *clickInfo;
-        if (impl) {
-            impl->UpdateEventInfo(newInfo);
-        }
-        lambda(newInfo);
-    };
-    SwiperModel::GetInstance()->SetOnClick(onClick);
-}
-
 int64_t FfiOHOSAceFrameworkSwiperControllerCtor()
 {
     auto ret_ = FFIData::Create<NativeSwiperController>();

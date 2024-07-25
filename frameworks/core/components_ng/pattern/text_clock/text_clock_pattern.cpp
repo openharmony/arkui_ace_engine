@@ -37,9 +37,13 @@ constexpr int32_t INTERVAL_OF_U_SECOND = 1000000;
 constexpr int32_t MICROSECONDS_OF_MILLISECOND = 1000;
 constexpr int32_t MILLISECONDS_OF_SECOND = 1000;
 constexpr int32_t TOTAL_SECONDS_OF_MINUTE = 60;
+constexpr int32_t STR_SIZE_ONE = 1;
+constexpr int32_t STR_SIZE_TWO = 2;
 constexpr bool ON_TIME_CHANGE = true;
+const char CHAR_0 = '0';
+const char CHAR_9 = '9';
+const std::string STR_0 = "0";
 const std::string DEFAULT_FORMAT = "aa hh:mm:ss";
-const std::string DEFAULT_FORMAT_24HOUR = "HH:mm:ss";
 const std::string FORM_FORMAT = "hh:mm";
 constexpr char TEXTCLOCK_WEEK[] = "textclock.week";
 constexpr char TEXTCLOCK_YEAR[] = "textclock.year";
@@ -113,7 +117,7 @@ void TextClockPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetTextColor().has_value()) {
         textLayoutProperty->UpdateTextColor(layoutProperty->GetTextColor().value());
     }
-    if (layoutProperty->GetFontFamily().has_value()) {
+    if (layoutProperty->GetFontFamily().has_value() && !layoutProperty->GetFontFamily().value().empty()) {
         textLayoutProperty->UpdateFontFamily(layoutProperty->GetFontFamily().value());
     }
     if (layoutProperty->GetItalicFontStyle().has_value()) {
@@ -230,7 +234,9 @@ void TextClockPattern::UpdateTimeText(bool isTimeChange)
         return;
     }
     FireBuilder();
-    RequestUpdateForNextSecond();
+    if (!isForm_) {
+        RequestUpdateForNextSecond();
+    }
     std::string currentTime = GetCurrentFormatDateTime();
     if (currentTime.empty()) {
         return;
@@ -269,7 +275,9 @@ void TextClockPattern::RequestUpdateForNextSecond()
     int32_t delayTime =
         (INTERVAL_OF_U_SECOND - static_cast<int32_t>(currentTime.tv_usec)) / MICROSECONDS_OF_MILLISECOND +
         1; // millisecond
-    if (isForm_) {
+    auto nextMinuteFlag = isForm_ || (!makeFunc_.has_value() && GetFormat().find('S') == std::string::npos
+            && GetFormat().find('s') == std::string::npos);
+    if (nextMinuteFlag) {
         time_t current = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         auto* timeZoneTime = std::localtime(&current);
         // delay to next minute
@@ -296,8 +304,6 @@ void TextClockPattern::RequestUpdateForNextSecond()
 
 std::string TextClockPattern::GetCurrentFormatDateTime()
 {
-    auto textClockLayoutProperty = GetLayoutProperty<TextClockLayoutProperty>();
-    CHECK_NULL_RETURN(textClockLayoutProperty, "");
     time_t current = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     auto* timeZoneTime = std::localtime(&current);
     if (!std::isnan(hourWest_)) {
@@ -306,27 +312,25 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     }
     CHECK_NULL_RETURN(timeZoneTime, "");
     DateTime dateTime; // This is for i18n date time.
-    dateTime.year = timeZoneTime->tm_year + BASE_YEAR;
-    dateTime.month = timeZoneTime->tm_mon;
-    dateTime.day = timeZoneTime->tm_mday;
-    dateTime.hour = timeZoneTime->tm_hour;
-    dateTime.minute = timeZoneTime->tm_min;
-    dateTime.second = timeZoneTime->tm_sec;
-    if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
-            textClockLayoutProperty->GetIsDefaultFormatValue(false)) && !isForm_) {
+    dateTime.year =static_cast<uint32_t>(timeZoneTime->tm_year + BASE_YEAR);
+    dateTime.month = static_cast<uint32_t>(timeZoneTime->tm_mon);
+    dateTime.day = static_cast<uint32_t>(timeZoneTime->tm_mday);
+    dateTime.hour = static_cast<uint32_t>(timeZoneTime->tm_hour);
+    dateTime.minute = static_cast<uint32_t>(timeZoneTime->tm_min);
+    dateTime.second = static_cast<uint32_t>(timeZoneTime->tm_sec);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && !isForm_) {
         return Localization::GetInstance()->FormatDateTime(dateTime, GetFormat());
     }
-    dateTime.week = timeZoneTime->tm_wday; // 0-6
+    dateTime.week = static_cast<uint32_t>(timeZoneTime->tm_wday); // 0-6
 
     // parse input format
     formatElementMap_.clear();
-    bool is24H = is24H_;
-    ParseInputFormat(is24H);
+    ParseInputFormat();
 
     // get date time from third party
     std::string dateTimeFormat = DEFAULT_FORMAT; // the format to get datetime value from the thirdlib
     dateTimeFormat = "yyyyMMdd";
-    dateTimeFormat += is24H ? "HH" : "hh";
+    dateTimeFormat += is24H_ ? "HH" : "hh";
     dateTimeFormat += "mmss";
     dateTimeFormat += "SSS";
     std::string dateTimeValue = Localization::GetInstance()->FormatDateTime(dateTime, dateTimeFormat);
@@ -383,7 +387,7 @@ std::string TextClockPattern::ParseDateTime(const std::string& dateTimeValue, in
     return outputDateTime;
 }
 
-void TextClockPattern::ParseInputFormat(bool& is24H)
+void TextClockPattern::ParseInputFormat()
 {
     std::string inputFormat = GetFormat();
     std::vector<std::string> formatSplitter;
@@ -396,7 +400,7 @@ void TextClockPattern::ParseInputFormat(bool& is24H)
     tempFormatElement.formatElementNum = 0;
     for (tempFormat = inputFormat[i]; i < len; i++) {
         if (inputFormat[i] == 'H') {
-            is24H = true;
+            is24H_ = true;
         }
         if ((i + 1) < len) {
             if (inputFormat[i] == inputFormat[i + 1]) {
@@ -497,6 +501,22 @@ std::string TextClockPattern::GetAmPm(const std::string& dateTimeValue)
     return curAmPm;
 }
 
+std::string TextClockPattern::AddZeroPrefix(const std::string& strTimeValue)
+{
+    if (strTimeValue.size() == STR_SIZE_ONE && CHAR_0 <= strTimeValue[0] && strTimeValue[0] <= CHAR_9) {
+        return std::string(STR_0) + strTimeValue;
+    }
+    return strTimeValue;
+}
+
+std::string TextClockPattern::RemoveZeroPrefix(const std::string& strTimeValue)
+{
+    if (strTimeValue.size() == STR_SIZE_TWO && strTimeValue[0] == CHAR_0) {
+        return strTimeValue.substr(1, 1);
+    }
+    return strTimeValue;
+}
+
 std::vector<std::string> TextClockPattern::ParseDateTimeValue(const std::string& strDateTimeValue)
 {
     std::string dateTimeValue = strDateTimeValue;
@@ -505,7 +525,7 @@ std::vector<std::string> TextClockPattern::ParseDateTimeValue(const std::string&
     auto dateSecondSplit = dateTimeValue.find('/', dateFirstSplit + 1);
     auto dateThirdSplit =
         (dateTimeValue.find(',') != std::string::npos) ? dateTimeValue.find(',') : dateTimeValue.find(' ');
-    if (curDateTime.size() != (int32_t)(TextClockElementIndex::CUR_MAX_INDEX)) {
+    if (curDateTime.size() != static_cast<size_t>(TextClockElementIndex::CUR_MAX_INDEX)) {
         return curDateTime;
     }
     if ((dateFirstSplit != std::string::npos) && (dateSecondSplit != std::string::npos) &&
@@ -514,37 +534,37 @@ std::vector<std::string> TextClockPattern::ParseDateTimeValue(const std::string&
         std::string dateFirst = dateTimeValue.substr(0, dateFirstSplit);
         std::string dateSecond = dateTimeValue.substr(dateFirstSplit + 1, dateSecondSplit - dateFirstSplit - 1);
         std::string dateThird = dateTimeValue.substr(dateSecondSplit + 1, dateThirdSplit - dateSecondSplit - 1);
-        if (dateFirstSplit > (int32_t)(TextClockElementLen::MON_DAY_FORMAT_MAX_LEN)) {
-            curDateTime[(int32_t)(TextClockElementIndex::CUR_YEAR_INDEX)] = dateFirst;
-            curDateTime[(int32_t)(TextClockElementIndex::CUR_MONTH_INDEX)] = dateSecond;
-            curDateTime[(int32_t)(TextClockElementIndex::CUR_DAY_INDEX)] = dateThird;
+        if (dateFirstSplit > static_cast<size_t>(TextClockElementLen::MON_DAY_FORMAT_MAX_LEN)) {
+            curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_YEAR_INDEX)] = dateFirst;
+            curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_MONTH_INDEX)] = dateSecond;
+            curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_DAY_INDEX)] = dateThird;
         } else {
-            curDateTime[(int32_t)(TextClockElementIndex::CUR_YEAR_INDEX)] = dateThird;
-            curDateTime[(int32_t)(TextClockElementIndex::CUR_MONTH_INDEX)] = dateFirst;
-            curDateTime[(int32_t)(TextClockElementIndex::CUR_DAY_INDEX)] = dateSecond;
+            curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_YEAR_INDEX)] = dateThird;
+            curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_MONTH_INDEX)] = dateFirst;
+            curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_DAY_INDEX)] = dateSecond;
         }
 
         // get short date
-        curDateTime[(int32_t)(TextClockElementIndex::CUR_SHORT_YEAR_INDEX)] =
-            (curDateTime[(int32_t)(TextClockElementIndex::CUR_YEAR_INDEX)].length() >
-                (int32_t)(TextClockElementLen::YEAR_FORMAT_MIN_LEN))
-                ? curDateTime[(int32_t)(TextClockElementIndex::CUR_YEAR_INDEX)].substr(
-                    (int32_t)(TextClockElementLen::SHORT_YEAR_IN_YEAR_INDEX),
-                    (int32_t)(TextClockElementLen::YEAR_FORMAT_MIN_LEN))
-                : curDateTime[(int32_t)(TextClockElementIndex::CUR_YEAR_INDEX)];
-        if (curDateTime[(int32_t)(TextClockElementIndex::CUR_MONTH_INDEX)].length() >
-            (int32_t)(TextClockElementLen::MON_DAY_FORMAT_MIN_LEN)) {
-            curDateTime[(int32_t)(TextClockElementIndex::CUR_SHORT_MONTH_INDEX)] =
-                (curDateTime[(int32_t)(TextClockElementIndex::CUR_MONTH_INDEX)].substr(0, 1) == "0")
-                    ? curDateTime[(int32_t)(TextClockElementIndex::CUR_MONTH_INDEX)].substr(1, 1)
-                    : curDateTime[(int32_t)(TextClockElementIndex::CUR_MONTH_INDEX)];
+        curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_SHORT_YEAR_INDEX)] =
+            (curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_YEAR_INDEX)].length() >
+                static_cast<size_t>(TextClockElementLen::YEAR_FORMAT_MIN_LEN))
+                ? curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_YEAR_INDEX)].substr(
+                    static_cast<size_t>(TextClockElementLen::SHORT_YEAR_IN_YEAR_INDEX),
+                    static_cast<size_t>(TextClockElementLen::YEAR_FORMAT_MIN_LEN))
+                : curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_YEAR_INDEX)];
+        if (curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_MONTH_INDEX)].length() >
+            static_cast<size_t>(TextClockElementLen::MON_DAY_FORMAT_MIN_LEN)) {
+            curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_SHORT_MONTH_INDEX)] =
+                (curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_MONTH_INDEX)].substr(0, 1) == "0")
+                    ? curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_MONTH_INDEX)].substr(1, 1)
+                    : curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_MONTH_INDEX)];
         }
-        if (curDateTime[(int32_t)(TextClockElementIndex::CUR_DAY_INDEX)].length() >
-            (int32_t)(TextClockElementLen::MON_DAY_FORMAT_MIN_LEN)) {
-            curDateTime[(int32_t)(TextClockElementIndex::CUR_SHORT_DAY_INDEX)] =
-                (curDateTime[(int32_t)(TextClockElementIndex::CUR_DAY_INDEX)].substr(0, 1) == "0")
-                    ? curDateTime[(int32_t)(TextClockElementIndex::CUR_DAY_INDEX)].substr(1, 1)
-                    : curDateTime[(int32_t)(TextClockElementIndex::CUR_DAY_INDEX)];
+        if (curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_DAY_INDEX)].length() >
+            static_cast<size_t>(TextClockElementLen::MON_DAY_FORMAT_MIN_LEN)) {
+            curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_SHORT_DAY_INDEX)] =
+                (curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_DAY_INDEX)].substr(0, 1) == "0")
+                    ? curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_DAY_INDEX)].substr(1, 1)
+                    : curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_DAY_INDEX)];
         }
 
         dateTimeValue.erase(0, dateThirdSplit);
@@ -561,22 +581,31 @@ std::vector<std::string> TextClockPattern::ParseDateTimeValue(const std::string&
         if ((timeFirstSplit != std::string::npos) && (timeSecondSplit != std::string::npos) &&
             (timeThirdSplit != std::string::npos) && (timeSecondSplit > timeFirstSplit) &&
             (timeThirdSplit > timeSecondSplit)) {
-            curDateTime[(int32_t)(TextClockElementIndex::CUR_HOUR_INDEX)] = dateTimeValue.substr(0, timeFirstSplit);
-            curDateTime[(int32_t)(TextClockElementIndex::CUR_MINUTE_INDEX)] =
+            if (GetPrefixHour() == ZeroPrefixType::SHOW && !is24H_) {
+                curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_HOUR_INDEX)] =
+                    AddZeroPrefix((dateTimeValue.substr(0, timeFirstSplit)));
+            } else if (GetPrefixHour() == ZeroPrefixType::HIDE && is24H_) {
+                curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_HOUR_INDEX)] =
+                    RemoveZeroPrefix((dateTimeValue.substr(0, timeFirstSplit)));
+            } else {
+                curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_HOUR_INDEX)] =
+                    dateTimeValue.substr(0, timeFirstSplit);
+            }
+            curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_MINUTE_INDEX)] =
                 dateTimeValue.substr(timeFirstSplit + 1, timeSecondSplit - timeFirstSplit - 1);
-            curDateTime[(int32_t)(TextClockElementIndex::CUR_SECOND_INDEX)] =
+            curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_SECOND_INDEX)] =
                 dateTimeValue.substr(timeSecondSplit + 1, timeThirdSplit - timeSecondSplit - 1);
-            curDateTime[(int32_t)(TextClockElementIndex::CUR_MILLISECOND_INDEX)] =
+            curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_MILLISECOND_INDEX)] =
                 (timeThirdSplit < (dateTimeValue.length() - 1))
                     ? dateTimeValue.substr(timeThirdSplit + 1, (dateTimeValue.length() - 1 - timeThirdSplit))
                     : "";
         }
-        curDateTime[(int32_t)(TextClockElementIndex::CUR_CENTISECOND_INDEX)] =
-            (curDateTime[(int32_t)(TextClockElementIndex::CUR_MILLISECOND_INDEX)].length() >
-                (int32_t)(TextClockElementLen::CENTISECOND_FORMAT_LEN))
-                ? curDateTime[(int32_t)(TextClockElementIndex::CUR_MILLISECOND_INDEX)].substr(
-                    0, (int32_t)(TextClockElementLen::CENTISECOND_FORMAT_LEN))
-                : curDateTime[(int32_t)(TextClockElementIndex::CUR_MILLISECOND_INDEX)];
+        curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_CENTISECOND_INDEX)] =
+            (curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_MILLISECOND_INDEX)].length() >
+                static_cast<size_t>(TextClockElementLen::CENTISECOND_FORMAT_LEN))
+                ? curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_MILLISECOND_INDEX)].substr(
+                    0, static_cast<size_t>(TextClockElementLen::CENTISECOND_FORMAT_LEN))
+                : curDateTime[static_cast<size_t>(TextClockElementIndex::CUR_MILLISECOND_INDEX)];
     }
     return curDateTime;
 }
@@ -696,8 +725,6 @@ std::string TextClockPattern::GetFormat() const
             return FORM_FORMAT;
         }
         return result;
-    } else if (textClockLayoutProperty->GetIsDefaultFormatValue(false)) {
-        return is24H_ ? DEFAULT_FORMAT_24HOUR : DEFAULT_FORMAT;
     }
     CHECK_NULL_RETURN(textClockLayoutProperty, DEFAULT_FORMAT);
     return textClockLayoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
@@ -741,9 +768,9 @@ void TextClockPattern::FireBuilder()
         for (const auto& child : children) {
             if (child->GetId() == nodeId_) {
                 host->RemoveChildAndReturnIndex(child);
+                host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
             }
         }
-        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
         return;
     }
     auto node = BuildContentModifierNode();
@@ -773,6 +800,12 @@ RefPtr<FrameNode> TextClockPattern::BuildContentModifierNode()
     auto enabled = eventHub->IsEnabled();
     TextClockConfiguration textClockConfiguration(timeZoneOffset, started, timeValue, enabled);
     return (makeFunc_.value())(textClockConfiguration);
+}
+
+void TextClockPattern::OnLanguageConfigurationUpdate()
+{
+    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "Language is changed and clock updates");
+    UpdateTimeText(true);
 }
 
 void TextClockPattern::DumpInfo()

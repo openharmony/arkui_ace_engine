@@ -55,7 +55,7 @@ ArkUINativeModuleValue TabsBridge::SetTabBarMode(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     TabBarMode barMode = TabBarMode::FIXED;
-    barMode = Framework::ConvertStrToTabBarMode(barModeArg->ToString(vm)->ToString());
+    barMode = Framework::ConvertStrToTabBarMode(barModeArg->ToString(vm)->ToString(vm));
     int32_t tabBarMode = static_cast<int32_t>(barMode);
     GetArkUINodeModifiers()->getTabsModifier()->setTabBarMode(nativeNode, tabBarMode);
 
@@ -604,6 +604,37 @@ ArkUINativeModuleValue TabsBridge::ResetTabClip(ArkUIRuntimeCallInfo* runtimeCal
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue TabsBridge::SetTabEdgeEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    int32_t effect = static_cast<int32_t>(EdgeEffect::SPRING);
+    if (secondArg->IsUndefined() || secondArg->IsNull()) {
+        effect = static_cast<int32_t>(EdgeEffect::SPRING);
+    } else {
+        effect = secondArg->Int32Value(vm);
+    }
+    if (effect < static_cast<int32_t>(EdgeEffect::SPRING) || effect > static_cast<int32_t>(EdgeEffect::NONE)) {
+        effect = static_cast<int32_t>(EdgeEffect::SPRING);
+    }
+    GetArkUINodeModifiers()->getTabsModifier()->setTabEdgeEffect(nativeNode, effect);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetTabEdgeEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabEdgeEffect(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue TabsBridge::SetWidthAuto(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -677,12 +708,16 @@ ArkUINativeModuleValue TabsBridge::SetAnimateMode(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> animateModeArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    if (animateModeArg->IsNull() || animateModeArg->IsUndefined()) {
+    if (!animateModeArg->IsNumber()) {
         GetArkUINodeModifiers()->getTabsModifier()->resetAnimateMode(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    TabAnimateMode animateMode = Framework::ConvertStrToAnimateMode(animateModeArg->ToString(vm)->ToString());
-    GetArkUINodeModifiers()->getTabsModifier()->setAnimateMode(nativeNode, static_cast<uint32_t>(animateMode));
+    uint32_t animateModeValue = animateModeArg->Uint32Value(vm);
+    if (animateModeValue >= static_cast<uint32_t>(TabAnimateMode::MAX_VALUE)) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetAnimateMode(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUINodeModifiers()->getTabsModifier()->setAnimateMode(nativeNode, animateModeValue);
     return panda::JSValueRef::Undefined(vm);
 }
 

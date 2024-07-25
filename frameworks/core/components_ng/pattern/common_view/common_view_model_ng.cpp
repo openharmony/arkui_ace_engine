@@ -20,13 +20,13 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void CommonViewModelNG::Create()
+void CommonViewModelNG::Create(bool isLayoutNode)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::COMMON_VIEW_ETS_TAG, nodeId);
-    auto blankNode = FrameNode::GetOrCreateFrameNode(
-        V2::COMMON_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CommonViewPattern>(); });
+    auto blankNode = FrameNode::GetOrCreateCommonNode(
+        V2::COMMON_VIEW_ETS_TAG, nodeId, isLayoutNode, []() { return AceType::MakeRefPtr<CommonViewPattern>(); });
     blankNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     stack->Push(blankNode);
 }

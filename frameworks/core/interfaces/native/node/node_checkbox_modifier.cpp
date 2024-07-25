@@ -153,7 +153,7 @@ void ResetSelectedColor(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto checkBoxTheme = pipelineContext->GetTheme<CheckboxTheme>();
     CheckBoxModelNG::SetSelectedColor(frameNode, checkBoxTheme->GetActiveColor());
@@ -163,7 +163,7 @@ void ResetUnSelectedColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto checkBoxTheme = pipelineContext->GetTheme<CheckboxTheme>();
     CheckBoxModelNG::SetUnSelectedColor(frameNode, checkBoxTheme->GetInactiveColor());
@@ -173,7 +173,7 @@ void ResetCheckboxWidth(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto checkBoxTheme = pipelineContext->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);
@@ -187,7 +187,7 @@ void ResetCheckboxHeight(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto checkBoxTheme = pipelineContext->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);
@@ -202,7 +202,7 @@ void ResetMark(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto checkBoxTheme = pipelineContext->GetTheme<CheckboxTheme>();
 
@@ -281,8 +281,8 @@ const ArkUICheckboxModifier *GetCheckboxModifier()
     static const ArkUICheckboxModifier modifier = { SetSelect, SetSelectedColor,
         SetUnSelectedColor, SetCheckboxWidth, SetCheckboxHeight, SetMark,  SetCheckboxPadding,
         SetCheckboxResponseRegion, ResetSelect, ResetSelectedColor,
-        ResetUnSelectedColor, ResetCheckboxWidth, ResetCheckboxHeight, ResetMark, SetCheckboxShape, ResetCheckboxShape,
-        ResetCheckboxPadding, ResetCheckboxResponseRegion,
+        ResetUnSelectedColor, ResetCheckboxWidth, ResetCheckboxHeight, ResetMark, SetCheckboxShape,
+        ResetCheckboxShape, ResetCheckboxPadding, ResetCheckboxResponseRegion,
         GetSelect, GetSelectedColor, GetUnSelectedColor, GetCheckMarkColor, GetCheckMarkSize, GetCheckMarkWidth,
         GetCheckboxShape };
     return &modifier;

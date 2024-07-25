@@ -127,7 +127,7 @@ bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
     if (modKeyFlags == KEY_NULL || modKeyFlags == KEY_SHIFT) {
         auto value = keyEvent.ConvertCodeToString();
         if (value != "") {
-            InsertValue(value);
+            InsertValue(value, true);
             return true;
         }
     }

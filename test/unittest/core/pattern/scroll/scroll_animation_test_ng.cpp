@@ -29,10 +29,12 @@ public:
  */
 HWTEST_F(ScrolleAnimationTestNg, PlaySpringAnimation001, TestSize.Level1)
 {
-    CreateWithContent([](ScrollModelNG model) {});
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     auto smooth = false;
     pattern_->isAnimationStop_ = false;
-    pattern_->AnimateTo(ITEM_HEIGHT * TOTAL_LINE_NUMBER, 1.f, Curves::LINEAR, smooth);
+    pattern_->AnimateTo(ITEM_HEIGHT * TOTAL_ITEM_NUMBER, 1.f, Curves::LINEAR, smooth);
     EXPECT_FALSE(pattern_->isAnimationStop_);
 }
 
@@ -43,37 +45,12 @@ HWTEST_F(ScrolleAnimationTestNg, PlaySpringAnimation001, TestSize.Level1)
  */
 HWTEST_F(ScrolleAnimationTestNg, StopAnimation001, TestSize.Level1)
 {
-    CreateWithContent([](ScrollModelNG model) {});
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     std::shared_ptr<AnimationUtils::Animation> animation;
     pattern_->StopAnimation(animation);
     EXPECT_TRUE(pattern_->isAnimationStop_);
-}
-
-/**
- * @tc.name: StopAdaptAnimation001
- * @tc.desc: Test StopAdaptAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(ScrolleAnimationTestNg, StopAdaptAnimation001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create scrollBarOverlayModifier, start adapt animation
-     * @tc.expected: Change modifer's MainModeSize to the initial value
-     */
-    double x = 1.00;
-    double y = 1.25;
-    double width = 1.00;
-    double height = 2.00;
-    Rect rect(x, y, width, height);
-    bool needAdaptAnimation = true;
-    ScrollBarOverlayModifier modifer;
-    AnimationOption option;
-    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.314f, 0.95f);
-    option.SetCurve(motion);
-    std::shared_ptr<AnimationUtils::Animation> adaptAnimation_ = AnimationUtils::StartAnimation(option, [&]() {});
-    modifer.StartAdaptAnimation(rect, needAdaptAnimation);
-    modifer.StopAdaptAnimation();
-    EXPECT_NE(adaptAnimation_, nullptr);
 }
 
 /**

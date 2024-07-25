@@ -29,5 +29,14 @@ void SetOnWaterFlowScrollStop(ArkUINodeHandle node, void* extraParam);
 void SetOnWaterFlowScrollFrameBegin(ArkUINodeHandle node, void* extraParam);
 void SetOnWaterFlowScrollIndex(ArkUINodeHandle node, void* extraParam);
 void SetOnWaterFlowReachStart(ArkUINodeHandle node, void* extraParam);
+
+void ResetOnWillScroll(ArkUINodeHandle node);
+void ResetOnWaterFlowReachEnd(ArkUINodeHandle node);
+void ResetOnDidScroll(ArkUINodeHandle node);
+void ResetOnWaterFlowScrollStart(ArkUINodeHandle node);
+void ResetOnWaterFlowScrollStop(ArkUINodeHandle node);
+void ResetOnWaterFlowScrollFrameBegin(ArkUINodeHandle node);
+void ResetOnWaterFlowScrollIndex(ArkUINodeHandle node);
+void ResetOnWaterFlowReachStart(ArkUINodeHandle node);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_WATER_FLOW_MODIFIER_H

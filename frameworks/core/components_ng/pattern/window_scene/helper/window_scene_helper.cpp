@@ -20,6 +20,7 @@
 #include "pointer_event.h"
 
 #include "adapter/ohos/entrance/ace_view_ohos.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
@@ -269,17 +270,7 @@ void WindowSceneHelper::InjectPointerEvent(
         return;
     }
     CaculatePoint(node, pointerEvent);
-    if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-            "PointerEvent Process to inject, eventInfo: id:%{public}d, "
-            "WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
-            "ViewPosX = %{public}d, ViewPosY = %{public}d. node: id:%{public}d, type:%{public}s, "
-            "inspectorId:%{public}s",
-            pointerEvent->GetId(), container->GetWindowId(), container->GetViewWidth(), container->GetViewHeight(),
-            container->GetViewPosX(), container->GetViewPosY(), node->GetId(), node->GetTag().c_str(),
-            node->GetInspectorIdValue("").c_str());
-    }
-    auto aceView = static_cast<OHOS::Ace::Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<OHOS::Ace::Platform::AceViewOhos>(container->GetAceView());
     if (!aceView) {
         MMI::InputManager::GetInstance()->MarkProcessed(
             pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
@@ -293,16 +284,54 @@ void WindowSceneHelper::InjectPointerEvent(
 bool WindowSceneHelper::InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme)
 {
     CHECK_NULL_RETURN(keyEvent, false);
-    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-        "KeyEvent Process to inject, eventInfo: id:%{public}d, "
-        "keyEvent info: keyCode is %{public}d, "
-        "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
-        keyEvent->GetId(), keyEvent->GetKeyCode(), keyEvent->GetKeyAction(), keyEvent->GetActionTime());
+    if (!SystemProperties::GetAceCommercialLogEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "KeyEvent Process to inject, eventInfo: id:%{public}d, "
+            "keyEvent info: keyCode is %{public}d, "
+            "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
+            keyEvent->GetId(), keyEvent->GetKeyCode(), keyEvent->GetKeyAction(), keyEvent->GetActionTime());
+    }
 
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
-    auto aceView = static_cast<OHOS::Ace::Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<OHOS::Ace::Platform::AceViewOhos>(container->GetAceView());
     CHECK_NULL_RETURN(aceView, false);
     return OHOS::Ace::Platform::AceViewOhos::DispatchKeyEvent(aceView, keyEvent, isPreIme);
+}
+
+bool WindowSceneHelper::IsWindowPattern(const RefPtr<FrameNode>& node)
+{
+    if (!node) {
+        return false;
+    }
+    return node->GetWindowPatternType() > static_cast<uint32_t>(WindowPatternType::SCREEN_SCENE);
+}
+
+bool WindowSceneHelper::HasWindowSession(const RefPtr<FrameNode>& node)
+{
+    if (!node) {
+        return false;
+    }
+    return node->GetWindowPatternType() > static_cast<uint32_t>(WindowPatternType::TRANSFORM_SCENE);
+}
+
+bool WindowSceneHelper::IsTransformScene(uint32_t type)
+{
+    return type == static_cast<uint32_t>(WindowPatternType::TRANSFORM_SCENE);
+}
+
+bool WindowSceneHelper::IsSystemWindowScene(uint32_t type)
+{
+    return type == static_cast<uint32_t>(WindowPatternType::SYSTEM_WINDOW_SCENE);
+}
+
+bool WindowSceneHelper::IsPanelScene(uint32_t type)
+{
+    return type == static_cast<uint32_t>(WindowPatternType::PANEL_SCENE);
+}
+
+bool WindowSceneHelper::IsScreenScene(uint32_t type)
+{
+    return type == static_cast<uint32_t>(WindowPatternType::SCREEN_SCENE);
 }
 } // namespace OHOS::Ace::NG

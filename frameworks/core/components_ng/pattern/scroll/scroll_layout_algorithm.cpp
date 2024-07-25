@@ -109,16 +109,13 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     auto scrollNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(scrollNode);
-    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(scrollNode->GetPattern());
     auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(childWrapper);
+    CHECK_NULL_VOID((scrollNode && geometryNode && childWrapper));
+    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(scrollNode->GetPattern());
     auto childGeometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_VOID(childGeometryNode);
     auto size = geometryNode->GetFrameSize();
-
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     viewSize_ = size;
@@ -144,9 +141,36 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (layoutProperty->GetPositionProperty() && layoutProperty->GetPositionProperty()->HasAlignment()) {
         scrollAlignment = layoutProperty->GetPositionProperty()->GetAlignment().value();
     }
+    if (layoutDirection == TextDirection::RTL && axis == Axis::VERTICAL) {
+        UpdateScrollAlignment(scrollAlignment);
+    }
     auto alignmentPosition = Alignment::GetAlignPosition(size, viewPortExtent_, scrollAlignment);
+    if (GreatNotEqual(viewPortExtent_.Width(), size.Width()) && layoutDirection == TextDirection::RTL &&
+        axis == Axis::VERTICAL) {
+        alignmentPosition.SetX(size.Width() - viewPortExtent_.Width());
+    }
     childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset + alignmentPosition);
     childWrapper->Layout();
+    auto frameNode = AceType::DynamicCast<FrameNode>(childWrapper);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkAndCheckNewOpIncNode();
+}
+
+void ScrollLayoutAlgorithm::UpdateScrollAlignment(Alignment& scrollAlignment)
+{
+    if (scrollAlignment == Alignment::TOP_LEFT) {
+        scrollAlignment = Alignment::TOP_RIGHT;
+    } else if (scrollAlignment == Alignment::TOP_RIGHT) {
+        scrollAlignment = Alignment::TOP_LEFT;
+    } else if (scrollAlignment == Alignment::BOTTOM_LEFT) {
+        scrollAlignment = Alignment::BOTTOM_RIGHT;
+    } else if (scrollAlignment == Alignment::BOTTOM_RIGHT) {
+        scrollAlignment = Alignment::BOTTOM_LEFT;
+    } else if (scrollAlignment == Alignment::CENTER_RIGHT) {
+        scrollAlignment = Alignment::CENTER_LEFT;
+    } else if (scrollAlignment == Alignment::CENTER_LEFT) {
+        scrollAlignment = Alignment::CENTER_RIGHT;
+    }
 }
 
 } // namespace OHOS::Ace::NG

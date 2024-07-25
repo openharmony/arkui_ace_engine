@@ -107,6 +107,8 @@ enum class AccessibilityEventType : size_t {
     ACCESSIBILITY_FOCUS_CLEARED = 0x00010000,
     TEXT_MOVE_UNIT = 0x00020000,
     SCROLL_START = 0x01000000,
+    PAGE_CLOSE = 0x08000000,
+    PAGE_OPEN = 0x20000000,
     UNKNOWN,
 };
 
@@ -195,6 +197,13 @@ struct AceCollectionItemInfo {
     int32_t column = 0;
     int32_t rowSpan = 0;
     int32_t columnSpan = 0;
+};
+
+enum class AccessibilityScrollType : int32_t {
+    SCROLL_DEFAULT = -1, // no parameter trans, do not add enum before
+    SCROLL_HALF = 0,
+    SCROLL_FULL = 1,
+    SCROLL_MAX_TYPE = SCROLL_FULL, // for check parameter, do not add enum after
 };
 
 bool CheckBetterRect(const Rect& nodeRect, int direction, const Rect& itemRect, const Rect& tempBest);

@@ -792,6 +792,13 @@ void JsFrontend::ForceFullGC()
     }
 }
 
+void JsFrontend::NotifyUIIdle()
+{
+    if (jsEngine_) {
+        jsEngine_->NotifyUIIdle();
+    }
+}
+
 void JsFrontend::RebuildAllPages()
 {
     if (delegate_) {

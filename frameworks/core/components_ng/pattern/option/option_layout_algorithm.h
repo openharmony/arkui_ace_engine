@@ -34,6 +34,7 @@ public:
 
 private:
     void MeasureRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint);
+    void UpdateIconMargin(LayoutWrapper* layoutWrapper);
     std::optional<float> GetIdealWidth(LayoutWrapper* layoutWrapper);
     float horInterval_ = 0.0f;
 

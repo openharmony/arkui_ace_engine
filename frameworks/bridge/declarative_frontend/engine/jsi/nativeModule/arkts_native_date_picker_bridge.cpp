@@ -54,8 +54,8 @@ ArkUINativeModuleValue DatePickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     fontSize = fontSizeData.ToString();
 
     std::string weight = "FontWeight.Medium";
-    if (fontWeightArgs->IsString() || fontWeightArgs->IsNumber()) {
-        weight = fontWeightArgs->ToString(vm)->ToString();
+    if (fontWeightArgs->IsString(vm) || fontWeightArgs->IsNumber()) {
+        weight = fontWeightArgs->ToString(vm)->ToString(vm);
     }
 
     std::string fontFamily;
@@ -112,8 +112,8 @@ ArkUINativeModuleValue DatePickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     fontSize = fontSizeData.ToString();
 
     std::string weight = "FontWeight.Regular";
-    if (fontWeightArgs->IsString() || fontWeightArgs->IsNumber()) {
-        weight = fontWeightArgs->ToString(vm)->ToString();
+    if (fontWeightArgs->IsString(vm) || fontWeightArgs->IsNumber()) {
+        weight = fontWeightArgs->ToString(vm)->ToString(vm);
     }
 
     std::string fontFamily;
@@ -170,8 +170,8 @@ ArkUINativeModuleValue DatePickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     fontSize = fontSizeData.ToString();
 
     std::string weight = "FontWeight.Regular";
-    if (fontWeightArgs->IsString() || fontWeightArgs->IsNumber()) {
-        weight = fontWeightArgs->ToString(vm)->ToString();
+    if (fontWeightArgs->IsString(vm) || fontWeightArgs->IsNumber()) {
+        weight = fontWeightArgs->ToString(vm)->ToString(vm);
     }
 
     std::string fontFamily;

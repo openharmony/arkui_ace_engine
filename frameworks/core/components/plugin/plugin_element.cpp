@@ -152,43 +152,46 @@ void PluginElement::Prepare(const WeakPtr<Element>& parent)
             auto element = weak.Upgrade();
             auto uiTaskExecutor = SingleTaskExecutor::Make(
                 element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask([weak] {
-                auto plugin = weak.Upgrade();
-                if (plugin) {
-                    plugin->HandleOnCompleteEvent();
-                }
-            }, "ArkUIPluginCompleteCallback");
+            uiTaskExecutor.PostTask(
+                [weak] {
+                    auto plugin = weak.Upgrade();
+                    if (plugin) {
+                        plugin->HandleOnCompleteEvent();
+                    }
+                }, "ArkUIPluginCompleteCallback");
         });
         pluginManagerBridge_->AddPluginUpdateCallback([weak = WeakClaim(this)](int64_t id, std::string data) {
             auto element = weak.Upgrade();
             auto uiTaskExecutor = SingleTaskExecutor::Make(
                 element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask([id, data, weak] {
-                auto plugin = weak.Upgrade();
-                if (plugin) {
-                    plugin->GetPluginSubContainer()->UpdatePlugin(data);
-                }
-            }, "ArkUIPluginUpdateCallback");
+            uiTaskExecutor.PostTask(
+                [id, data, weak] {
+                    auto plugin = weak.Upgrade();
+                    if (plugin) {
+                        plugin->GetPluginSubContainer()->UpdatePlugin(data);
+                    }
+                }, "ArkUIPluginUpdateCallback");
         });
         pluginManagerBridge_->AddPluginErrorCallback([weak = WeakClaim(this)](std::string code, std::string msg) {
             auto element = weak.Upgrade();
             auto uiTaskExecutor = SingleTaskExecutor::Make(
                 element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask([code, msg, weak] {
-                auto plugin = weak.Upgrade();
-                if (plugin) {
-                    plugin->HandleOnErrorEvent(code, msg);
-                }
+            uiTaskExecutor.PostTask(
+                [code, msg, weak] {
+                    auto plugin = weak.Upgrade();
+                    if (plugin) {
+                        plugin->HandleOnErrorEvent(code, msg);
+                    }
 
-                auto render = plugin->GetRenderNode();
-                if (!render) {
-                    return;
-                }
-                auto renderPlugin = AceType::DynamicCast<RenderPlugin>(render);
-                if (renderPlugin) {
-                    renderPlugin->RemoveChildren();
-                }
-            }, "ArkUIPluginErrorCallback");
+                    auto render = plugin->GetRenderNode();
+                    if (!render) {
+                        return;
+                    }
+                    auto renderPlugin = AceType::DynamicCast<RenderPlugin>(render);
+                    if (renderPlugin) {
+                        renderPlugin->RemoveChildren();
+                    }
+                }, "ArkUIPluginErrorCallback");
         });
     }
 }

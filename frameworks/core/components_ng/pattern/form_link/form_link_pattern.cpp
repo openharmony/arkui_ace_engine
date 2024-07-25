@@ -41,7 +41,6 @@ void FormLinkPattern::OnAreaChangedInner()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddFormLinkInfo(host->GetId(), formLinkInfo_.ToString());
-
 }
 
 } // namespace OHOS::Ace::NG

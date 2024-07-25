@@ -18,6 +18,7 @@
 #include "core/accessibility/accessibility_constants.h"
 #include "core/accessibility/accessibility_session_adapter.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
@@ -101,8 +102,8 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     TimeStamp time)
 {
     static constexpr size_t THROTTLE_INTERVAL_HOVER_EVENT = 100;
-    auto durationSigned = std::chrono::duration_cast<std::chrono::milliseconds>(time - hoverState_.time).count();
-    size_t duration = static_cast<size_t>(durationSigned);
+    uint64_t duration =
+        static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(time - hoverState_.time).count());
     if (!hoverState_.idle && duration < THROTTLE_INTERVAL_HOVER_EVENT) {
         return;
     }
@@ -153,23 +154,40 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
         currentHovering = currentNodesHovering.back().Upgrade();
         currentHoveringId = currentHovering->GetId();
     }
-    if (lastHoveringId != INVALID_NODE_ID && lastHoveringId != currentHoveringId) {
-        lastHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_EXIT_EVENT);
-        NotifyHoverEventToNodeSession(lastHovering, root, point,
-            sourceType, AccessibilityHoverEventType::EXIT, time);
-    }
-    if (currentHoveringId != INVALID_NODE_ID) {
-        if (currentHoveringId != lastHoveringId) {
-            currentHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_ENTER_EVENT);
+    if (!DeliverAccessibilityHoverEvent(currentHovering, point)) {
+        if (lastHoveringId != INVALID_NODE_ID && lastHoveringId != currentHoveringId) {
+            lastHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_EXIT_EVENT);
+            NotifyHoverEventToNodeSession(lastHovering, root, point,
+                sourceType, AccessibilityHoverEventType::EXIT, time);
         }
-        NotifyHoverEventToNodeSession(currentHovering, root, point,
-            sourceType, eventType, time);
+        if (currentHoveringId != INVALID_NODE_ID) {
+            if (currentHoveringId != lastHoveringId && (!IgnoreCurrentHoveringNode(currentHovering))) {
+                currentHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_ENTER_EVENT);
+            }
+            NotifyHoverEventToNodeSession(currentHovering, root, point,
+                sourceType, eventType, time);
+        }
     }
 
     hoverState_.nodesHovering = std::move(currentNodesHovering);
     hoverState_.time = time;
     hoverState_.source = sourceType;
     hoverState_.idle = eventType == AccessibilityHoverEventType::EXIT;
+}
+
+bool AccessibilityManagerNG::DeliverAccessibilityHoverEvent(const RefPtr<FrameNode>& hoverNode, const PointF& point)
+{
+    CHECK_NULL_RETURN(hoverNode, false);
+    auto hoverNodePattern = hoverNode->GetPattern();
+    CHECK_NULL_RETURN(hoverNodePattern, false);
+    return hoverNodePattern->OnAccessibilityHoverEvent(point);
+}
+
+bool AccessibilityManagerNG::IgnoreCurrentHoveringNode(const RefPtr<FrameNode> &node)
+{
+    auto sessionAdapter = AccessibilitySessionAdapter::GetSessionAdapter(node);
+    CHECK_NULL_RETURN(sessionAdapter, false);
+    return sessionAdapter->IgnoreHostNode();
 }
 
 void AccessibilityManagerNG::NotifyHoverEventToNodeSession(const RefPtr<FrameNode>& node,

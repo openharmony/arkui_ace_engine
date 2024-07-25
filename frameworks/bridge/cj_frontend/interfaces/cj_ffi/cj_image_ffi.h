@@ -31,6 +31,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkImageSetRenderMode(int32_t renderMode);
 CJ_EXPORT void FfiOHOSAceFrameworkImageSetSourceSize(
     double width, int32_t widthUnit, double height, int32_t heightUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkImageSetSyncLoad(bool syncLoad);
+CJ_EXPORT void FfiOHOSAceFrameworkImageSetBorderRadius();
 CJ_EXPORT void FfiOHOSAceFrameworkImageSetImageFill(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkImageSetAutoResize(bool autoResize);
 CJ_EXPORT void FfiOHOSAceFrameworkImageSetMatchTextDirection(bool isMatchTextDirection);

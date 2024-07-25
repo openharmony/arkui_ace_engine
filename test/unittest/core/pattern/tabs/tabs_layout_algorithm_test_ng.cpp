@@ -33,10 +33,11 @@ HWTEST_F(TabsLayoutAlgorithmTest, TabsLayoutAlgorithmMeasure001, TestSize.Level1
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -109,14 +110,15 @@ HWTEST_F(TabsLayoutAlgorithmTest, TabsLayoutAlgorithmMeasure002, TestSize.Level1
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        TabsItemDivider divider;
-        divider.strokeWidth = 10.0_vp;
-        model.SetDivider(divider);
-        model.SetWidthAuto(true);
-        model.SetHeightAuto(false);
-        model.SetIsVertical(true);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    TabsItemDivider divider;
+    divider.strokeWidth = 10.0_vp;
+    model.SetDivider(divider);
+    model.SetWidthAuto(true);
+    model.SetHeightAuto(false);
+    model.SetIsVertical(true);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -190,14 +192,15 @@ HWTEST_F(TabsLayoutAlgorithmTest, TabsLayoutAlgorithmMeasure003, TestSize.Level1
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        TabsItemDivider divider;
-        divider.strokeWidth = 10.0_vp;
-        model.SetDivider(divider);
-        model.SetWidthAuto(false);
-        model.SetHeightAuto(true);
-        model.SetIsVertical(false);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    TabsItemDivider divider;
+    divider.strokeWidth = 10.0_vp;
+    model.SetDivider(divider);
+    model.SetWidthAuto(false);
+    model.SetHeightAuto(true);
+    model.SetIsVertical(false);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -271,14 +274,15 @@ HWTEST_F(TabsLayoutAlgorithmTest, TabsLayoutAlgorithmMeasure004, TestSize.Level1
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        TabsItemDivider divider;
-        divider.strokeWidth = 10.0_vp;
-        model.SetDivider(divider);
-        model.SetWidthAuto(true);
-        model.SetIsVertical(true);
-        model.SetBarOverlap(true);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    TabsItemDivider divider;
+    divider.strokeWidth = 10.0_vp;
+    model.SetDivider(divider);
+    model.SetWidthAuto(true);
+    model.SetIsVertical(true);
+    model.SetBarOverlap(true);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -352,14 +356,15 @@ HWTEST_F(TabsLayoutAlgorithmTest, TabsLayoutAlgorithmMeasure005, TestSize.Level1
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        TabsItemDivider divider;
-        divider.strokeWidth = 10.0_vp;
-        model.SetDivider(divider);
-        model.SetHeightAuto(true);
-        model.SetIsVertical(false);
-        model.SetBarOverlap(true);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    TabsItemDivider divider;
+    divider.strokeWidth = 10.0_vp;
+    model.SetDivider(divider);
+    model.SetHeightAuto(true);
+    model.SetIsVertical(false);
+    model.SetBarOverlap(true);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -433,10 +438,11 @@ HWTEST_F(TabsLayoutAlgorithmTest, TabsLayoutAlgorithmMeasure006, TestSize.Level1
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetWidthAuto(true);
-        model.SetIsVertical(true);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetWidthAuto(true);
+    model.SetIsVertical(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -513,10 +519,11 @@ HWTEST_F(TabsLayoutAlgorithmTest, TabsLayoutAlgorithmMeasure007, TestSize.Level1
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetHeightAuto(true);
-        model.SetIsVertical(false);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetHeightAuto(true);
+    model.SetIsVertical(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -593,10 +600,11 @@ HWTEST_F(TabsLayoutAlgorithmTest, TabsLayoutAlgorithmMeasure008, TestSize.Level1
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetWidthAuto(true);
-        model.SetIsVertical(true);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetWidthAuto(true);
+    model.SetIsVertical(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -673,10 +681,11 @@ HWTEST_F(TabsLayoutAlgorithmTest, TabsLayoutAlgorithmMeasure009, TestSize.Level1
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetHeightAuto(true);
-        model.SetIsVertical(false);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetHeightAuto(true);
+    model.SetIsVertical(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -753,13 +762,14 @@ HWTEST_F(TabsLayoutAlgorithmTest, TabsLayoutAlgorithmMeasure010, TestSize.Level1
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        TabsItemDivider divider;
-        divider.strokeWidth = 10.0_vp;
-        model.SetDivider(divider);
-        model.SetWidthAuto(true);
-        model.SetIsVertical(true);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    TabsItemDivider divider;
+    divider.strokeWidth = 10.0_vp;
+    model.SetDivider(divider);
+    model.SetWidthAuto(true);
+    model.SetIsVertical(true);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -833,13 +843,14 @@ HWTEST_F(TabsLayoutAlgorithmTest, TabsLayoutAlgorithmMeasure011, TestSize.Level1
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        TabsItemDivider divider;
-        divider.strokeWidth = 10.0_vp;
-        model.SetDivider(divider);
-        model.SetHeightAuto(true);
-        model.SetIsVertical(false);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    TabsItemDivider divider;
+    divider.strokeWidth = 10.0_vp;
+    model.SetDivider(divider);
+    model.SetHeightAuto(true);
+    model.SetIsVertical(false);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -913,10 +924,11 @@ HWTEST_F(TabsLayoutAlgorithmTest, TabsLayoutAlgorithmMeasure012, TestSize.Level1
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetWidthAuto(true);
-        model.SetIsVertical(true);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetWidthAuto(true);
+    model.SetIsVertical(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -993,10 +1005,11 @@ HWTEST_F(TabsLayoutAlgorithmTest, TabsLayoutAlgorithmMeasure013, TestSize.Level1
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetHeightAuto(true);
-        model.SetIsVertical(false);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetHeightAuto(true);
+    model.SetIsVertical(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -1072,11 +1085,12 @@ HWTEST_F(TabsLayoutAlgorithmTest, TabsLayoutAlgorithmMeasure014, TestSize.Level1
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetWidthAuto(true);
-        model.SetIsVertical(true);
-        model.SetBarOverlap(true);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetWidthAuto(true);
+    model.SetIsVertical(true);
+    model.SetBarOverlap(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -1150,11 +1164,12 @@ HWTEST_F(TabsLayoutAlgorithmTest, TabsLayoutAlgorithmMeasure015, TestSize.Level1
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetHeightAuto(true);
-        model.SetIsVertical(false);
-        model.SetBarOverlap(true);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetHeightAuto(true);
+    model.SetIsVertical(false);
+    model.SetBarOverlap(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -1228,11 +1243,12 @@ HWTEST_F(TabsLayoutAlgorithmTest, TabsLayoutAlgorithmMeasure016, TestSize.Level1
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetWidthAuto(true);
-        model.SetIsVertical(true);
-        model.SetBarOverlap(true);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetWidthAuto(true);
+    model.SetIsVertical(true);
+    model.SetBarOverlap(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -1309,11 +1325,12 @@ HWTEST_F(TabsLayoutAlgorithmTest, TabsLayoutAlgorithmMeasure017, TestSize.Level1
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetHeightAuto(true);
-        model.SetIsVertical(false);
-        model.SetBarOverlap(true);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetHeightAuto(true);
+    model.SetIsVertical(false);
+    model.SetBarOverlap(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -1390,11 +1407,12 @@ HWTEST_F(TabsLayoutAlgorithmTest, TabsLayoutAlgorithmMeasure018, TestSize.Level1
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetWidthAuto(true);
-        model.SetIsVertical(true);
-        model.SetBarOverlap(true);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetWidthAuto(true);
+    model.SetIsVertical(true);
+    model.SetBarOverlap(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -1471,11 +1489,12 @@ HWTEST_F(TabsLayoutAlgorithmTest, TabsLayoutAlgorithmMeasure019, TestSize.Level1
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetHeightAuto(true);
-        model.SetIsVertical(false);
-        model.SetBarOverlap(true);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetHeightAuto(true);
+    model.SetIsVertical(false);
+    model.SetBarOverlap(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.

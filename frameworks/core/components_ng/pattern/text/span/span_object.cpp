@@ -820,4 +820,35 @@ bool LineHeightSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     auto lineHeight = lineHeightSpan->GetLineHeight();
     return lineHeight_ == lineHeight;
 }
+
+// ExtSpan
+ExtSpan::ExtSpan(int32_t start, int32_t end) : SpanBase(start, end) {}
+
+RefPtr<SpanBase> ExtSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    RefPtr<SpanBase> spanBase = MakeRefPtr<ExtSpan>(start, end);
+    return spanBase;
+}
+
+SpanType ExtSpan::GetSpanType() const
+{
+    return SpanType::ExtSpan;
+}
+
+std::string ExtSpan::ToString() const
+{
+    std::stringstream str;
+    str << "ExtSpan ( start:";
+    str << GetStartIndex();
+    str << " end:";
+    str << GetEndIndex();
+    str << "]";
+    std::string output = str.str();
+    return output;
+}
+
+bool ExtSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    return false;
+}
 } // namespace OHOS::Ace

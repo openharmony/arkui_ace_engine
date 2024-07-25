@@ -110,8 +110,8 @@ void TLVUtil::WriteFontFamily(std::vector<uint8_t>& buff, std::vector<std::strin
 {
     WriteUint8(buff, TLV_FONTFAMILIES_TAG);
     WriteInt32(buff, value.size());
-    for (auto i = 0; i < value.size(); i ++) {
-        WriteString(buff, value[i]);
+    for (auto& fontFamily: value) {
+        WriteString(buff, fontFamily);
     }
 }
 
@@ -164,8 +164,8 @@ void TLVUtil::WriteTextShadows(std::vector<uint8_t>& buff, std::vector<Shadow>& 
 {
     WriteUint8(buff, TLV_TEXTSHADOWS_TAG);
     WriteInt32(buff, value.size());
-    for (auto i = 0; i < value.size(); i ++) {
-        WriteTextShadow(buff, value[i]);
+    for (auto& shadow: value) {
+        WriteTextShadow(buff, shadow);
     }
 }
 

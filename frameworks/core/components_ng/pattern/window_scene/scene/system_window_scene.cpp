@@ -26,8 +26,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr uint32_t DELAY_TIME = 3000;
-}
+constexpr uint32_t DELAY_TIME = 3000;
+} // namespace
+
 SystemWindowScene::SystemWindowScene(const sptr<Rosen::Session>& session) : session_(session)
 {
     boundsChangedCallback_ = [weakThis = WeakClaim(this)](const Rosen::Vector4f& bounds) {
@@ -67,8 +68,8 @@ void SystemWindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
 void SystemWindowScene::OnVisibleChange(bool visible)
 {
     CHECK_NULL_VOID(session_);
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "system window scene will change visible to %{public}s",
-            visible ? "true" : "false");
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Visibility of %{public}s[id:%{public}d] changed: %{public}s",
+        session_->GetSessionInfo().bundleName_.c_str(), session_->GetPersistentId(), visible ? "visible" : "invisible");
     if (visible && session_->NeedCheckContextTransparent()) {
         PostCheckContextTransparentTask();
     } else if (session_->NeedCheckContextTransparent()) {
@@ -91,15 +92,8 @@ void SystemWindowScene::OnAttachToFrameNode()
     session_->SetUINodeId(host->GetAccessibilityId());
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
-
-    if (!session_->IsSystemInput()) {
-        context->SetRSNode(surfaceNode);
-        surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
-    } else {
-        auto rsNode = Rosen::RSCanvasNode::Create();
-        context->SetRSNode(rsNode);
-        rsNode->SetBoundsChangedCallback(boundsChangedCallback_);
-    }
+    context->SetRSNode(surfaceNode);
+    surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
 
     auto mouseEventHub = host->GetOrCreateInputEventHub();
     auto mouseCallback = [weakThis = WeakClaim(this), weakSession = wptr(session_)](MouseInfo& info) {
@@ -238,6 +232,11 @@ void SystemWindowScene::RegisterResponseRegionCallback()
         session->SetTouchHotAreas(hotAreas);
     };
     gestureHub->SetResponseRegionFunc(responseRegionCallback);
+}
+
+uint32_t SystemWindowScene::GetWindowPatternType() const
+{
+    return static_cast<uint32_t>(WindowPatternType::SYSTEM_WINDOW_SCENE);
 }
 
 void SystemWindowScene::RegisterFocusCallback()

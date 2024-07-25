@@ -40,12 +40,13 @@ bool StylusDetectorMgr::IsEnable()
     return false;
 }
 
-bool StylusDetectorMgr::RegisterStylusInteractionListener(const std::shared_ptr<IStylusDetectorCallback>& callback)
+bool StylusDetectorMgr::RegisterStylusInteractionListener(
+    const std::string& bundleName, const std::shared_ptr<IStylusDetectorCallback>& callback)
 {
     isRegistered_ = true;
     return false;
 }
-void StylusDetectorMgr::UnRegisterStylusInteractionListener() {}
+void StylusDetectorMgr::UnRegisterStylusInteractionListener(const std::string& bundleName) {}
 
 bool StylusDetectorMgr::Notify(const NotifyInfo& notifyInfo)
 {
@@ -78,6 +79,12 @@ RefPtr<NG::FrameNode> StylusDetectorMgr::FindTextInputFrameNodeByPosition(float 
     return nullptr;
 }
 bool StylusDetectorMgr::IsStylusTouchEvent(const TouchEvent& touchEvent) const
+{
+    return false;
+}
+
+bool StylusDetectorMgr::IsHitCleanNodeResponseArea(
+    const NG::PointF& point, const RefPtr<NG::FrameNode>& frameNode, uint64_t nanoTimestamp)
 {
     return false;
 }

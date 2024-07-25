@@ -31,7 +31,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkSpanSetFontFamily(const char* fontFamily);
 CJ_EXPORT void FfiOHOSAceFrameworkSpanSetLetterSpacing(double space, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkSpanSetTextCase(int32_t textCase);
 CJ_EXPORT void FfiOHOSAceFrameworkSpanSetDecoration(int32_t type, uint32_t color);
-CJ_EXPORT void FfiOHOSAceFrameworkSpanSetOnClick(void (*callback)(ClickInfoForSpan newInfo));
+CJ_EXPORT void FfiOHOSAceFrameworkSpanSetOnClick(void (*callback)(CJClickInfo clickInfo));
 }
 
 #endif // OHOS_ACE_FRAMWORK_CJ_SPAN_FFI_H

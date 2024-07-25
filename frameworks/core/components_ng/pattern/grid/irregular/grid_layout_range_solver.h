@@ -48,11 +48,11 @@ public:
     StartingRowInfo FindStartingRow(float mainGap);
 
     struct RangeInfo {
-        int32_t startRow; /**< Row index of the starting row. */
-        int32_t startIdx; /**< Index of the starting GridItem in layout range. */
-        float pos;        /**< Main position of the starting row in ViewBox. The new currentOffset_ */
-        int32_t endRow;   /**< Row index of the last row in layout range. */
-        int32_t endIdx;   /**< index of the last GridItem in layout range. */
+        int32_t startRow = 0; /**< Row index of the starting row. */
+        int32_t startIdx = 0; /**< Index of the starting GridItem in layout range. */
+        float pos = 0.0f;     /**< Main position of the starting row in ViewBox. The new currentOffset_ */
+        int32_t endRow = 0;   /**< Row index of the last row in layout range. */
+        int32_t endIdx = -1;  /**< index of the last GridItem in layout range. */
     };
     /**
      * @brief Finds the layout range when jumping to a new index.
@@ -83,17 +83,6 @@ private:
      * @param idx The index of the current starting row
      */
     StartingRowInfo SolveForward(float mainGap, float targetLen, int32_t idx);
-
-    /**
-     * @brief Adds the next rows to the layout in SolveForward.
-     *
-     * Because of irregular items, we might add multiples rows in a single iteration.
-     *
-     * @param mainGap The gap between rows.
-     * @param idx The index of the next row.
-     * @return A pair containing the number of rows added and the total height of the added rows.
-     */
-    std::pair<int32_t, float> AddNextRows(float mainGap, int32_t idx);
 
     /**
      * @brief Find the new starting row after offsetting by [targetLen] going backward (scrolling up).

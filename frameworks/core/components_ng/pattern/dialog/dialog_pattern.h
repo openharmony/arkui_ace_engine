@@ -17,11 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIALOG_DIALOG_PATTERN_H
 
 #include <cstdint>
+#include <functional>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/manager/focus/focus_view.h"
@@ -46,8 +48,8 @@ enum class DialogDismissReason {
     DIALOG_TOUCH_OUTSIDE,
     DIALOG_CLOSE_BUTTON,
 };
-class DialogPattern : public PopupBasePattern, public FocusView {
-    DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern, FocusView);
+class DialogPattern : public PopupBasePattern, public FocusView, public AutoFillTriggerStateHolder {
+    DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern, FocusView, AutoFillTriggerStateHolder);
 
 public:
     DialogPattern(const RefPtr<DialogTheme>& dialogTheme, const RefPtr<UINode>& customNode)
@@ -68,6 +70,19 @@ public:
     bool ShouldDismiss() const
     {
         if (onWillDismiss_) {
+            return true;
+        }
+        return false;
+    }
+
+    void SetOnWillDismissByNDK(const std::function<bool(const int32_t& info)>& onWillDismissByNDK)
+    {
+        onWillDismissByNDK_ = onWillDismissByNDK;
+    }
+
+    bool CallDismissInNDK(int reason)
+    {
+        if (onWillDismissByNDK_ && onWillDismissByNDK_(reason)) {
             return true;
         }
         return false;
@@ -245,11 +260,6 @@ public:
         return foldDisplayModeChangedCallbackId_.has_value();
     }
 
-    bool GetNeeedUpdateOrientation()
-    {
-        return neeedUpdateOrientation_;
-    }
-
     bool GetIsSuitableForAging()
     {
         return isSuitableForElderly_;
@@ -260,7 +270,29 @@ public:
         return fontScaleForElderly_;
     }
 
+    void SetIsPickerDiaglog(bool value)
+    {
+        isPickerDiaglog_ = value;
+    }
+
+    bool GetIsPickerDiaglog()
+    {
+        return isPickerDiaglog_;
+    }
+
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
+    void InitHostWindowRect();
+    void UpdateFontScale();
+
+    bool GetIsSuitOldMeasure()
+    {
+        return isSuitOldMeasure_;
+    }
+
+    void SetIsScrollHeightNegative(bool isScrollHeightNegative)
+    {
+        isScrollHeightNegative_ = isScrollHeightNegative;
+    }
 
 private:
     bool AvoidKeyboard() const override
@@ -272,7 +304,6 @@ private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
-    void InitHostWindowRect();
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleClick(const GestureEvent& info);
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -307,7 +338,7 @@ private:
         const Dimension& dividerLength, const Dimension& dividerWidth, const Color& color, const Dimension& space);
     RefPtr<FrameNode> CreateButton(
         const ButtonInfo& params, int32_t index, bool isCancel = false, bool isVertical = false, int32_t length = 0);
-    RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& colorStr, bool isVertical);
+    RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& colorStr);
     // to close dialog when button is clicked
     void BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_t buttonIdx);
     // build ActionSheet items
@@ -322,12 +353,15 @@ private:
     void UpdateSheetIconAndText();
     void UpdateButtonsProperty();
     void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
+    void UpdateAlignmentAndOffset();
     void DumpBoolProperty();
     void DumpObjectProperty();
     void UpdatePropertyForElderly(const std::vector<ButtonInfo>& buttons);
     bool NeedsButtonDirectionChange(const std::vector<ButtonInfo>& buttons);
-    void UpdateLandSpaceTextFontSizeForElderly(bool isLandSpace);
-    void UpdateTitleTextFontSizeForElderly(bool isLandSpace);
+    void OnFontConfigurationUpdate() override;
+    void UpdateTextFontScale();
+    void UpdateTitleTextFontScale();
+    void CheckScrollHeightIsNegative(const RefPtr<UINode>& contentColumn, const DialogProperties& props);
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
@@ -342,16 +376,19 @@ private:
     std::string title_;
     std::string subtitle_;
     std::function<void(const int32_t& info)> onWillDismiss_;
+    std::function<bool(const int32_t& info)> onWillDismissByNDK_;
 
     DialogProperties dialogProperties_;
     WeakPtr<FrameNode> menuNode_;
     bool isFirstDefaultFocus_ = true;
     RefPtr<FrameNode> buttonContainer_;
+    RefPtr<FrameNode> contentColumn_;
     RefPtr<RenderContext> contentRenderContext_;
     bool isSuitableForElderly_ = false;
-    bool isLandspace_ = false;
-    bool isThreeButtonsDialog_ = false;
-    bool neeedUpdateOrientation_ = false;
+    bool isPickerDiaglog_ = false;
+    bool notAdapationAging_ = false;
+    bool isSuitOldMeasure_ = false;
+    bool isScrollHeightNegative_ = false;
     float fontScaleForElderly_ = 1.0f;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
     RefPtr<FrameNode> titleContainer_;

@@ -130,7 +130,7 @@ ArkUINativeModuleValue GridRowBridge::SetBreakpoints(ArkUIRuntimeCallInfo* runti
         CalcDimension calvalue;
         std::string calcStr;
         auto item = panda::ArrayRef::GetValueAt(vm, arrayVal, index);
-        calcStr = item->ToString(vm)->ToString();
+        calcStr = item->ToString(vm)->ToString(vm);
         if (!ArkTSUtils::ParseJsDimensionVp(vm, item, calvalue, false)) {
             calvalue = CalcDimension(0, DimensionUnit::VP);
         }
@@ -227,66 +227,66 @@ ArkUINativeModuleValue GridRowBridge::SetGutter(ArkUIRuntimeCallInfo* runtimeCal
     Local<JSValueRef> yXl = runtimeCallInfo->GetCallArgRef(Y_XL + 1);
     Local<JSValueRef> yXxl = runtimeCallInfo->GetCallArgRef(Y_XXL + 1);
     int32_t containerSizeArray[MAX_NUMBER_GUTTER];
-    if (xXs->IsNumber() && xXs->Int32Value(vm) >= 0) {
+    if (xXs->IsNumber()) {
         containerSizeArray[X_XS] = xXs->Int32Value(vm);
     } else {
-        containerSizeArray[X_XS] = -1;
+        containerSizeArray[X_XS] = 0;
     }
-    if (xSm->IsNumber() && xSm->Int32Value(vm) >= 0) {
+    if (xSm->IsNumber()) {
         containerSizeArray[X_SM] = xSm->Int32Value(vm);
     } else {
-        containerSizeArray[X_SM] = -1;
+        containerSizeArray[X_SM] = containerSizeArray[X_XS];
     }
-    if (xMd->IsNumber() && xMd->Int32Value(vm) >= 0) {
+    if (xMd->IsNumber()) {
         containerSizeArray[X_MD] = xMd->Int32Value(vm);
     } else {
-        containerSizeArray[X_MD] = -1;
+        containerSizeArray[X_MD] = containerSizeArray[X_SM];
     }
-    if (xLg->IsNumber() && xLg->Int32Value(vm) >= 0) {
+    if (xLg->IsNumber()) {
         containerSizeArray[X_LG] = xLg->Int32Value(vm);
     } else {
-        containerSizeArray[X_LG] = -1;
+        containerSizeArray[X_LG] = containerSizeArray[X_MD];
     }
-    if (xXl->IsNumber() && xXl->Int32Value(vm) >= 0) {
+    if (xXl->IsNumber()) {
         containerSizeArray[X_XL] = xXl->Int32Value(vm);
     } else {
-        containerSizeArray[X_XL] = -1;
+        containerSizeArray[X_XL] = containerSizeArray[X_LG];
     }
-    if (xXxl->IsNumber() && xXxl->Int32Value(vm) >= 0) {
+    if (xXxl->IsNumber()) {
         containerSizeArray[X_XXL] = xXxl->Int32Value(vm);
     } else {
-        containerSizeArray[X_XXL] = -1;
+        containerSizeArray[X_XXL] = containerSizeArray[X_XL];
     }
 
-    if (yXs->IsNumber() && yXs->Int32Value(vm) >= 0) {
+    if (yXs->IsNumber()) {
         containerSizeArray[Y_XS] = yXs->Int32Value(vm);
     } else {
-        containerSizeArray[Y_XS] = -1;
+        containerSizeArray[Y_XS] = 0;
     }
-    if (ySm->IsNumber() && ySm->Int32Value(vm) >= 0) {
+    if (ySm->IsNumber()) {
         containerSizeArray[Y_SM] = ySm->Int32Value(vm);
     } else {
-        containerSizeArray[Y_SM] = -1;
+        containerSizeArray[Y_SM] = containerSizeArray[Y_XS];
     }
-    if (yMd->IsNumber() && yMd->Int32Value(vm) >= 0) {
+    if (yMd->IsNumber()) {
         containerSizeArray[Y_MD] = yMd->Int32Value(vm);
     } else {
-        containerSizeArray[Y_MD] = -1;
+        containerSizeArray[Y_MD] = containerSizeArray[Y_SM];
     }
-    if (yLg->IsNumber() && yLg->Int32Value(vm) >= 0) {
+    if (yLg->IsNumber()) {
         containerSizeArray[Y_LG] = yLg->Int32Value(vm);
     } else {
-        containerSizeArray[Y_LG] = -1;
+        containerSizeArray[Y_LG] = containerSizeArray[Y_MD];
     }
-    if (yXl->IsNumber() && yXl->Int32Value(vm) >= 0) {
+    if (yXl->IsNumber()) {
         containerSizeArray[Y_XL] = yXl->Int32Value(vm);
     } else {
-        containerSizeArray[Y_XL] = -1;
+        containerSizeArray[Y_XL] = containerSizeArray[Y_LG];
     }
-    if (yXxl->IsNumber() && yXxl->Int32Value(vm) >= 0) {
+    if (yXxl->IsNumber()) {
         containerSizeArray[Y_XXL] = yXxl->Int32Value(vm);
     } else {
-        containerSizeArray[Y_XXL] = -1;
+        containerSizeArray[Y_XXL] = containerSizeArray[Y_XL];
     }
     GetArkUINodeModifiers()->getGridRowModifier()->setGutter(nativeNode, containerSizeArray, MAX_NUMBER_GUTTER);
     return panda::JSValueRef::Undefined(vm);
@@ -300,5 +300,43 @@ ArkUINativeModuleValue GridRowBridge::ResetGutter(ArkUIRuntimeCallInfo* runtimeC
     GetArkUINodeModifiers()->getGridRowModifier()->resetGutter(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue GridRowBridge::SetOnBreakpointChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getGridRowModifier()->resetOnBreakpointChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const std::string&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const std::string& changeStr) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        panda::Local<panda::JSValueRef> params[1] = {
+            panda::StringRef::NewFromUtf8(vm, changeStr.c_str()) };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    GetArkUINodeModifiers()->getGridRowModifier()->setOnBreakpointChange(nativeNode,
+        reinterpret_cast<void*>(&callback));
+
+    return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue GridRowBridge::ResetOnBreakpointChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getGridRowModifier()->resetOnBreakpointChange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+}

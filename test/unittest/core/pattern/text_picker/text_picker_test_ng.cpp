@@ -15,7 +15,6 @@
 
 #include <functional>
 #include <optional>
-#include <securec.h>
 
 #include "gtest/gtest.h"
 
@@ -98,6 +97,7 @@ const std::string TEXT_PICKER_CONTENT = "text";
 const OffsetF CHILD_OFFSET(0.0f, 10.0f);
 const SizeF TEST_TEXT_FRAME_SIZE { 100.0f, 10.0f };
 const SizeF COLUMN_SIZE { 100.0f, 200.0f };
+const Dimension ICON_TEXT_SPACE = 8.0_vp;
 } // namespace
 
 class TextPickerTestNg : public testing::Test {
@@ -274,7 +274,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow001, TestSize.Level1)
     TextPickerSettingData settingData;
     settingData.columnKind = MIXTURE;
     settingData.height = Dimension(FONT_SIZE_10);
-    memcpy_s(&settingData.properties, sizeof(PickerTextProperties), &properties, sizeof(PickerTextProperties));
+    settingData.properties = properties;
     settingData.rangeVector = { { "", "1" }, { "", "2" }, { "", "3" } };
     settingData.selected = 0;
 
@@ -314,7 +314,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow002, TestSize.Level1)
     TextPickerSettingData settingData;
     settingData.columnKind = MIXTURE;
     settingData.height = Dimension(FONT_SIZE_10);
-    memcpy_s(&settingData.properties, sizeof(PickerTextProperties), &properties, sizeof(PickerTextProperties));
+    settingData.properties = properties;
     settingData.rangeVector = { { "", "1" }, { "", "2" }, { "", "3" } };
     settingData.selected = 0;
 
@@ -340,7 +340,6 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow003, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
 
     TextPickerSettingData settingData;
-    memset_s(&settingData, sizeof(TextPickerSettingData), 0x00, sizeof(TextPickerSettingData));
     settingData.columnKind = MIXTURE;
     settingData.height = Dimension(FONT_SIZE_10);
     settingData.rangeVector = { { "", "1" }, { "", "2" }, { "", "3" } };
@@ -368,7 +367,6 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow004, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
 
     TextPickerSettingData settingData;
-    memset_s(&settingData, sizeof(TextPickerSettingData), 0x00, sizeof(TextPickerSettingData));
     settingData.columnKind = TEXT;
     settingData.height = Dimension(FONT_SIZE_10);
     settingData.rangeVector = { { "", "1" }, { "", "2" }, { "", "3" } };
@@ -396,7 +394,6 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow005, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
 
     TextPickerSettingData settingData;
-    memset_s(&settingData, sizeof(TextPickerSettingData), 0x00, sizeof(TextPickerSettingData));
     settingData.columnKind = ICON;
     settingData.height = Dimension(FONT_SIZE_10);
     settingData.rangeVector = { { "", "1" }, { "", "2" }, { "", "3" } };
@@ -424,7 +421,6 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow006, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
 
     TextPickerSettingData settingData;
-    memset_s(&settingData, sizeof(TextPickerSettingData), 0x00, sizeof(TextPickerSettingData));
     settingData.columnKind = 0;
     settingData.height = Dimension(FONT_SIZE_10);
     settingData.rangeVector = { { "", "1" }, { "", "2" }, { "", "3" } };
@@ -467,7 +463,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow007, TestSize.Level1)
     TextPickerSettingData settingData;
     settingData.columnKind = MIXTURE;
     settingData.height = Dimension(FONT_SIZE_10);
-    memcpy_s(&settingData.properties, sizeof(PickerTextProperties), &properties, sizeof(PickerTextProperties));
+    settingData.properties = properties;
     settingData.rangeVector = { { "", "1" }, { "", "2" }, { "", "3" } };
     settingData.selected = 0;
 
@@ -493,7 +489,6 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow008, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
 
     TextPickerSettingData settingData;
-    memset_s(&settingData, sizeof(TextPickerSettingData), 0x00, sizeof(TextPickerSettingData));
     settingData.columnKind = TEXT;
     settingData.height = Dimension(FONT_SIZE_10);
     settingData.selectedValues = { 0, 0, 0 };
@@ -536,7 +531,6 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow009, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
 
     TextPickerSettingData settingData;
-    memset_s(&settingData, sizeof(TextPickerSettingData), 0x00, sizeof(TextPickerSettingData));
     settingData.columnKind = TEXT;
     settingData.height = Dimension(FONT_SIZE_10);
     settingData.selectedValues = { 0, 0 };
@@ -588,7 +582,6 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow010, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
 
     TextPickerSettingData settingData;
-    memset_s(&settingData, sizeof(TextPickerSettingData), 0x00, sizeof(TextPickerSettingData));
     settingData.columnKind = TEXT;
     settingData.height = Dimension(FONT_SIZE_10);
     settingData.selectedValues = { 0, 0, 0 };
@@ -1965,4 +1958,47 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest006, TestSize.Level1)
     EXPECT_EQ(TextPickerModelNG::isCascade_, true);
     EXPECT_EQ(TextPickerModelNG::isSingleRange_, false);
 }
+
+
+/**
+ * @tc.name: TextPickerModelTest007
+ * @tc.desc: Test TextPickerModelTest.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerModelTest007, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(0);
+    TextPickerModelNG::GetInstance()->Create(theme, MIXTURE);
+    std::vector<NG::RangeContent> range = { { "/demo/demo1.jpg", "test1" }, { "/demo/demo2.jpg", "test2" },
+        { "/demo/demo3.jpg", "test3" } };
+    TextPickerModelNG::GetInstance()->SetRange(range);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(false);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    columnPattern->FlushCurrentOptions(false, false);
+    auto linearLayoutNode = AceType::DynamicCast<FrameNode>(child->GetFirstChild());
+    ASSERT_NE(linearLayoutNode, nullptr);
+    auto imageNode = AceType::DynamicCast<FrameNode>(linearLayoutNode->GetFirstChild());
+    ASSERT_NE(imageNode, nullptr);
+    auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    EXPECT_FALSE(imageLayoutProperty->HasImageSourceInfo());
+    EXPECT_EQ(imageLayoutProperty->GetMarginProperty()->left, CalcLength(ICON_TEXT_SPACE));
+}
+
 } // namespace OHOS::Ace::NG

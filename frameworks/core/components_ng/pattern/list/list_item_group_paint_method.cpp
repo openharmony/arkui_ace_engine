@@ -62,7 +62,9 @@ void ListItemGroupPaintMethod::UpdateDividerList(const DividerGroupInfo& dgInfo,
             float mainPos = child.second.startPos - dgInfo.halfSpaceWidth;
             float crossPos = dgInfo.startMargin +
                 laneIdx * ((dgInfo.crossSize - fSpacingTotal_) / dgInfo.lanes + laneGutter_);
-            OffsetF offset = vertical_ ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
+            float verticalX = (layoutDirection_ == TextDirection::RTL) ?
+                (mainSize_ - mainPos - dgInfo.constrainStrokeWidth) : mainPos;
+            OffsetF offset = vertical_ ? OffsetF(verticalX, crossPos) : OffsetF(crossPos, mainPos);
             dividerPainter.DrawLine(canvas, offset + paddingOffset);
         }
         if (laneIdx == 0) {
@@ -82,7 +84,9 @@ void ListItemGroupPaintMethod::UpdateDividerList(const DividerGroupInfo& dgInfo,
                 float mainPos = itemPosition_.at(index).endPos + spaceWidth_ - dgInfo.halfSpaceWidth;
                 float crossPos = dgInfo.startMargin +
                     laneIdx * ((dgInfo.crossSize - fSpacingTotal_) / dgInfo.lanes + laneGutter_);
-                OffsetF offset = vertical_ ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
+                float verticalX = (layoutDirection_ == TextDirection::RTL) ?
+                    (mainSize_ - mainPos - dgInfo.constrainStrokeWidth) : mainPos;
+                OffsetF offset = vertical_ ? OffsetF(verticalX, crossPos) : OffsetF(crossPos, mainPos);
                 dividerPainter.DrawLine(canvas, offset);
             }
             laneIdx++;

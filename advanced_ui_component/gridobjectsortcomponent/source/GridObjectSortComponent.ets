@@ -67,9 +67,9 @@ interface PositionXY {
 }
 
 class MenuItem {
-  pubilc value: Resource;
-  pubilc isEnabled: boolean;
-  pubilc action: () => void;
+  public value: Resource;
+  public isEnabled: boolean;
+  public action: () => void;
 
   constructor(value: Resource, enabled: boolean, action: () => void) {
     this.value = value;
@@ -159,8 +159,8 @@ export struct GridObjectSortComponent {
     this.imageText = this.options.type === GridObjectSortComponentType.IMAGE_TEXT;
     this.colNum = this.imageText ? COL_IMAGE_TEXT : COL_TEXT;
     setTimeout(() => {
-      this.firstIn = false
-    }, 500)
+      this.firstIn = false;
+    }, 500);
   }
 
   // component disappear
@@ -183,28 +183,28 @@ export struct GridObjectSortComponent {
       if (!result.some(x => x.id === item.id)) {
         result.push(item);
       }
-    })
-    return result
+    });
+    return result;
   }
 
   // Listen to the change of the editing status of the component.
   onGridComStateChange() {
-    this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16
+    this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16;
     if (!this.imageText) {
-      this.blockHeight = this.gridComState ? 44 : BLOCK_TEXT_HEIGHT
+      this.blockHeight = this.gridComState ? 44 : BLOCK_TEXT_HEIGHT;
     }
   }
 
   sortBy() {
     return (a: GridObjectSortComponentItem, b: GridObjectSortComponentItem) => {
       return a.order - b.order;
-    }
+    };
   }
 
   // cancel edit function
   cancelEdit() {
     if (this.isStartDrag || this.clickAddBtn || this.clickRemoveBtn) {
-      return
+      return;
     }
     animateTo({
       duration: ENTER_EXIT_ICON_DURATION,
@@ -259,17 +259,17 @@ export struct GridObjectSortComponent {
       this.onSave && this.onSave(selected, unSelected);
     });
     setTimeout(() => {
-      this.saveClick = false
-    }, ENTER_EXIT_ICON_DURATION)
-    this.menuSwitch = false
+      this.saveClick = false;
+    }, ENTER_EXIT_ICON_DURATION);
+    this.menuSwitch = false;
   }
 
   // Drag and move triggering event
   onDragMoveEvent(event: ItemDragInfo, itemIndex: number, insertIndex: number) {
     if (!this.gridComState || (event.x < this.blockWidth / 3 && event.y < this.blockHeight / 3)) {
-      return
+      return;
     }
-    let targetIndex = insertIndex;
+    let targetIndex: number = insertIndex;
     if (targetIndex < 0) {
       targetIndex = this.selected.length - 1;
     }
@@ -279,7 +279,7 @@ export struct GridObjectSortComponent {
   // delete Editing an Area Item
   handleDeleteClick(content: GridObjectSortComponentItem) {
     if (this.clickAddBtn || this.clickRemoveBtn) {
-      return
+      return;
     }
     this.clickRemoveBtn = true;
     this.scaleIcon = 0;
@@ -292,21 +292,21 @@ export struct GridObjectSortComponent {
       this.selected.splice(currentIndex, 1);
       this.unSelected.unshift(content);
       this.editGridDataLength = this.editGridDataLength - 1;
-      this.editItemMoveX = 0
-      this.editItemMoveY = 0
+      this.editItemMoveX = 0;
+      this.editItemMoveY = 0;
       this.arraySelectIsChange = 2;
       this.clickRemoveBtn = false;
     } }, () => {
-      this.editItemMoveX = this.getAddItemGridPosition().x
-      this.editItemMoveY = this.getAddItemGridPosition().y
-    })
+      this.editItemMoveX = this.getAddItemGridPosition().x;
+      this.editItemMoveY = this.getAddItemGridPosition().y;
+    });
   }
 
   // get columnsTemplate
   customColumnsTemplate(): string {
-    let fr: string = "1fr 1fr 1fr 1fr";
+    let fr: string = '1fr 1fr 1fr 1fr';
     if (this.imageText) {
-      fr = "1fr 1fr 1fr";
+      fr = '1fr 1fr 1fr';
     }
     return fr;
   }
@@ -316,110 +316,110 @@ export struct GridObjectSortComponent {
       val.selected = state;
       val.order = startIndex + index;
       return val;
-    })
+    });
   }
 
   // Obtains the width of each girdItem.
   getBlockWidth(): number {
-    const blockWidth = (this.areaWidth - 32) / this.colNum;
+    const blockWidth: number = (this.areaWidth - 32) / this.colNum;
     return blockWidth;
   }
 
 
   // calculated altitude
   getGridHeight(data: GridObjectSortComponentItem[], state?: string): number {
-    let height = 0
-    let selectLen = data.length
-    let addRow = 0
-    let lastColumn = selectLen % this.colNum === 0
+    let height: number = 0;
+    let selectLen: number = data.length;
+    let addRow: number = 0;
+    let lastColumn: boolean = selectLen % this.colNum === 0;
     if (this.clickAddBtn && lastColumn) {
-      addRow = 1
+      addRow = 1;
     } else if (this.isStartDrag && lastColumn && state) {
-      addRow = 1
+      addRow = 1;
     } else if (this.clickRemoveBtn && lastColumn && !state) {
-      addRow = 1
+      addRow = 1;
     } else {
-      addRow = 0
+      addRow = 0;
     }
-    let rowNumber = Math.ceil(selectLen / this.colNum) + addRow
-    height = this.blockHeight * rowNumber
+    let rowNumber: number = Math.ceil(selectLen / this.colNum) + addRow;
+    height = this.blockHeight * rowNumber;
     if (selectLen === 0) {
-      height = 0
+      height = 0;
     }
-    return height
+    return height;
   }
   // Display area icon in image_text mode
   imageTextRemoveIcon(select: GridObjectSortComponentItem): Resource {
-    const clickRemoveIcon = this.clickRemoveBtn && this.content.id === select.id
-    const icon = clickRemoveIcon ? $r("sys.media.ohos_ic_public_add_norm_filled") : $r("sys.media.ohos_ic_public_remove_filled")
-    return icon
+    const clickRemoveIcon: boolean = this.clickRemoveBtn && this.content.id === select.id;
+    const icon = clickRemoveIcon ? $r("sys.media.ohos_ic_public_add_norm_filled") : $r("sys.media.ohos_ic_public_remove_filled");
+    return icon;
   }
   // Adding a Region Icon in image_text Mode
   imageTextAddIcon(select: GridObjectSortComponentItem): Resource {
-    const clickAddIcon = this.clickAddBtn && this.content.id === select.id && this.gridComState
-    const icon = clickAddIcon ? $r("sys.media.ohos_ic_public_remove_filled") : $r("sys.media.ohos_ic_public_add_norm_filled")
-    return icon
+    const clickAddIcon: boolean = this.clickAddBtn && this.content.id === select.id && this.gridComState;
+    const icon = clickAddIcon ? $r("sys.media.ohos_ic_public_remove_filled") : $r("sys.media.ohos_ic_public_add_norm_filled");
+    return icon;
   }
   // Displaying and hiding area icons in image_text mode
   imageTextAddIconVisible(select: GridObjectSortComponentItem): Visibility {
-    const iconHideShow = this.clickAddBtn && this.content.id === select.id && !this.gridComState
-    const visible = iconHideShow ? Visibility.Hidden : Visibility.Visible
-    return visible
+    const iconHideShow: boolean = this.clickAddBtn && this.content.id === select.id && !this.gridComState;
+    const visible = iconHideShow ? Visibility.Hidden : Visibility.Visible;
+    return visible;
   }
 
   // Drag position calculation in the editing area
   getCoodXY(index: number): PositionXY {
-    let x = 0;
-    let y = 0;
-    const gridCol = this.colNum;
-    const lastCol = Math.trunc(index % gridCol)
+    let x: number = 0;
+    let y: number = 0;
+    const gridCol: number = this.colNum;
+    const lastCol: number = Math.trunc(index % gridCol);
     if (index >= this.insertIndex) {
       // item  newline
       if (lastCol === gridCol - 1) {
-        x = x - this.blockWidth * (gridCol - 1)
-        y = y + this.blockHeight
+        x = x - this.blockWidth * (gridCol - 1);
+        y = y + this.blockHeight;
       } else {
         // right move
-        x = x + this.blockWidth
+        x = x + this.blockWidth;
       }
     }
     if (!this.isStartDrag) {
       x = 0;
       y = 0;
     }
-    return { x, y }
+    return { x, y };
   }
 
   // Position calculation when an item is deleted, Displacement to the first position. (top => bottom)
   getAddItemGridPosition(): PositionXY {
-    const len = this.selected.length
-    const col: number = this.colNum
-    const removeCol = (this.selectedIndex + 1) % col
-    const currentLine = Math.ceil((this.selectedIndex + 1) / col)
-    const totalRows = Math.ceil(len / col)
-    const bool = this.imageText
-    let xNew = 0
+    const len: number = this.selected.length;
+    const col: number = this.colNum;
+    const removeCol: number = (this.selectedIndex + 1) % col;
+    const currentLine: number = Math.ceil((this.selectedIndex + 1) / col);
+    const totalRows: number = Math.ceil(len / col);
+    const bool: boolean = this.imageText;
+    let xNew: number = 0;
     if (removeCol === 0) {
-      xNew = bool ? -this.blockWidth * 2 : -this.blockWidth * 3
+      xNew = bool ? -this.blockWidth * 2 : -this.blockWidth * 3;
     } else {
-      xNew = -this.blockWidth * (removeCol - 1)
+      xNew = -this.blockWidth * (removeCol - 1);
     }
-    const subTitleHeight: number = SUBTITLE_HEIGHT
-    let yNew = 0
-    const removeNumY = totalRows - currentLine
-    const minusLine = len % col
-    const line = minusLine === 1 ? removeNumY : removeNumY + 1
-    yNew = line * this.blockHeight + subTitleHeight
+    const subTitleHeight: number = SUBTITLE_HEIGHT;
+    let yNew: number = 0;
+    const removeNumY: number = totalRows - currentLine;
+    const minusLine: number = len % col;
+    const line: number = minusLine === 1 ? removeNumY : removeNumY + 1;
+    yNew = line * this.blockHeight + subTitleHeight;
     return {
       x: xNew,
       y: yNew
-    }
+    };
   }
 
   // When an item is deleted, the filling position of other items is calculated.
   getCoveringGridPosition(index: number): PositionXY {
-    let xNew = 0;
-    let yNew = 0;
+    let xNew: number = 0;
+    let yNew: number = 0;
     if (index > this.selectedIndex && this.arraySelectIsChange !== 2) {
       xNew = index % this.colNum === 0 ? this.blockWidth * (this.colNum - 1) : -this.blockWidth;
       yNew = index % this.colNum === 0 ? -this.blockHeight : 0;
@@ -427,68 +427,69 @@ export struct GridObjectSortComponent {
     return {
       x: xNew,
       y: yNew
-    }
+    };
   }
 
   // Position calculation when adding an item. (bottom => top)
   getEditItemGridPosition(data: GridObjectSortComponentItem[], removeIndex: number): PositionXY {
-    const len = data.length
-    const col: number = this.colNum
-    const insertCol = Math.trunc(len % col)
-    const removeCol = Math.trunc(removeIndex % col)
-    let xNew = Math.abs(insertCol - removeCol) * this.blockWidth
+    const len: number = data.length;
+    const col: number = this.colNum;
+    const insertCol: number = Math.trunc(len % col);
+    const removeCol: number = Math.trunc(removeIndex % col);
+    let xNew: number = Math.abs(insertCol - removeCol) * this.blockWidth;
 
     if (insertCol < removeCol) {
-      xNew = -xNew
+      xNew = -xNew;
     } else if (insertCol > removeCol) {
-      xNew = xNew
+      xNew = xNew;
     } else {
-      xNew = 0
+      xNew = 0;
     }
 
-    let yNew = 0
-    let itemHeight = 0
-    let removeRow = Math.trunc(removeIndex / this.colNum)
-    const subTitleHeight: number = SUBTITLE_HEIGHT
-    const textShowAreaEditItem = !this.imageText && this.gridComState && removeIndex > 3 
+    let yNew: number = 0;
+    let itemHeight: number = 0;
+    let removeRow: number = Math.trunc(removeIndex / this.colNum);
+    const subTitleHeight: number = SUBTITLE_HEIGHT;
+    const textShowAreaEditItem: boolean = !this.imageText && this.gridComState && removeIndex > 3;
     if (textShowAreaEditItem) {
-      itemHeight = (removeRow + 1) * (this.blockHeight - 8) + 8
+      itemHeight = (removeRow + 1) * (this.blockHeight - 8) + 8;
     } else {
-      itemHeight = (removeRow + 1) * this.blockHeight
+      itemHeight = (removeRow + 1) * this.blockHeight;
     }
-    yNew = itemHeight + subTitleHeight
+    yNew = itemHeight + subTitleHeight;
     return {
       x: xNew,
       y: yNew
-    }
+    };
   }
 
   // When an item is added, the filling of other items in the addition area is calculated.
   getCoveringGridPositionBottom(index: number): PositionXY {
-    let xNew = 0
-    let yNew = 0
-    const lastCol = index % this.colNum === 0
-    const textShowAreaItemHeight = this.gridComState && !this.imageText ? -this.blockHeight + 8 : -this.blockHeight
+    let xNew: number = 0;
+    let yNew: number = 0;
+    const lastCol: boolean = index % this.colNum === 0;
+    const textShowAreaItemHeight: number =
+      this.gridComState && !this.imageText ? -this.blockHeight + 8 : -this.blockHeight;
     if (index > this.unSelectedIndex && this.arrayUnSelectIsChange !== 2) {
-      xNew = lastCol ? this.blockWidth * (this.colNum - 1) : -this.blockWidth
-      yNew = lastCol ? textShowAreaItemHeight : 0
+      xNew = lastCol ? this.blockWidth * (this.colNum - 1) : -this.blockWidth;
+      yNew = lastCol ? textShowAreaItemHeight : 0;
     }
     return {
       x: xNew,
       y: yNew
-    }
+    };
   }
 
   // When an item is deleted, other items in the addition area are moved rightwards.
   getAddItemRightMove(index: number): PositionXY {
-    let x = this.blockWidth
-    let y = 0
-    let lastCol = (index + 1) % this.colNum === 0
+    let x: number = this.blockWidth;
+    let y: number = 0;
+    let lastCol: boolean = (index + 1) % this.colNum === 0;
     if (lastCol) {
-      x = -this.blockWidth * (this.colNum - 1)
-      y = this.imageText ? this.blockHeight : this.blockHeight - 8
+      x = -this.blockWidth * (this.colNum - 1);
+      y = this.imageText ? this.blockHeight : this.blockHeight - 8;
     }
-    return { x, y }
+    return { x, y };
   }
 
   // Display area movement function
@@ -498,7 +499,7 @@ export struct GridObjectSortComponent {
       return {
         x: this.getCoodXY(index).x,
         y: this.getCoodXY(index).y
-      }
+      };
     }
 
     // Position when remove item
@@ -506,7 +507,7 @@ export struct GridObjectSortComponent {
       return {
         x: this.editItemMoveX,
         y: this.editItemMoveY
-      }
+      };
     }
 
     // Filling position
@@ -514,10 +515,10 @@ export struct GridObjectSortComponent {
       return {
         x: this.getCoveringGridPosition(index).x,
         y: this.getCoveringGridPosition(index).y
-      }
+      };
     }
 
-    return { x: 0, y: 0 }
+    return { x: 0, y: 0 };
   }
 
   // Add area movement function
@@ -527,7 +528,7 @@ export struct GridObjectSortComponent {
         return {
           x: this.getAddItemRightMove(index).x,
           y: this.getAddItemRightMove(index).y
-        }
+        };
       }
 
     // Move the position when adding an item.
@@ -535,7 +536,7 @@ export struct GridObjectSortComponent {
         return {
           x: this.addItemMoveX,
           y: -this.addItemMoveY
-        }
+        };
     }
 
     // Filling position when adding
@@ -543,10 +544,10 @@ export struct GridObjectSortComponent {
       return {
         x: this.getCoveringGridPositionBottom(index).x,
         y: this.getCoveringGridPositionBottom(index).y
-      }
+      };
     }
 
-    return { x: 0, y: 0 }
+    return { x: 0, y: 0 };
   }
 
   @Builder
@@ -632,11 +633,11 @@ export struct GridObjectSortComponent {
       menuItems: [],
       title: this.options.editTitle || $r('sys.string.ohos_grid_edit_title_edit'),
       onCancel: () => {
-        this.cancelEdit()
+        this.cancelEdit();
       },
       onSave: () => {
-        this.saveClick = true
-        this.onSaveEdit()
+        this.saveClick = true;
+        this.onSaveEdit();
       }
     })
       .visibility(this.menuSwitch ? Visibility.Visible : Visibility.None)
@@ -670,35 +671,35 @@ export struct GridObjectSortComponent {
           })
           .onClick(() => {
             if (this.clickAddBtn || this.clickRemoveBtn) {
-              return
+              return;
             }
-            this.scaleIcon = 0
-            this.content = select
-            const index = this.unSelected.findIndex(i => i.id === select.id)
-            this.editGridDataLength = this.selected.length + 1
-            const endPosition = this.getEditItemGridPosition(this.selected, index)
-            this.unSelectedIndex = index
-            this.arrayUnSelectIsChange = 1
-            this.clickAddBtn = true
+            this.scaleIcon = 0;
+            this.content = select;
+            const index = this.unSelected.findIndex(i => i.id === select.id);
+            this.editGridDataLength = this.selected.length + 1;
+            const endPosition = this.getEditItemGridPosition(this.selected, index);
+            this.unSelectedIndex = index;
+            this.arrayUnSelectIsChange = 1;
+            this.clickAddBtn = true;
             animateTo({
               curve: REMOVE_ADD_SPRING,
               onFinish: () => {
                 if (!this.selected.some(val => val.id === select.id)) {
-                  this.arrayUnSelectIsChange = 2
-                  this.scaleIcon = 1
+                  this.arrayUnSelectIsChange = 2;
+                  this.scaleIcon = 1;
                   this.selected.push(select);
-                  this.unSelected.splice(index, 1)
-                  this.addItemMoveX = 0
-                  this.addItemMoveY = 0
+                  this.unSelected.splice(index, 1);
+                  this.addItemMoveX = 0;
+                  this.addItemMoveY = 0;
                   if (!this.gridComState) {
-                    this.onSaveEdit()
+                    this.onSaveEdit();
                   }
-                  this.clickAddBtn = false
+                  this.clickAddBtn = false;
                 }
               }
             }, () => {
-              this.addItemMoveX = endPosition.x
-              this.addItemMoveY = endPosition.y
+              this.addItemMoveX = endPosition.x;
+              this.addItemMoveY = endPosition.y;
             })
           })
 
@@ -898,16 +899,16 @@ export struct GridObjectSortComponent {
         GridItem() {
           Stack() {
             if (this.imageText) {
-              this.ImageTextBuilder(item, "add")
+              this.ImageTextBuilder(item, "add");
             } else {
-              this.TextBlockAddItemBuilder(item)
+              this.TextBlockAddItemBuilder(item);
             }
           }
           .onHover((isHover: boolean) => {
             if (isHover) {
-              this.hoverId = item.id
+              this.hoverId = item.id;
             } else {
-              this.hoverId = ''
+              this.hoverId = '';
             }
           })
           .margin({
@@ -916,56 +917,56 @@ export struct GridObjectSortComponent {
           .clickEffect({ level: ClickEffectLevel.LIGHT })
           .onTouch((event: TouchEvent) => {
             if (this.clickAddBtn || this.clickRemoveBtn) {
-              return
+              return;
             }
             if (event.type === TouchType.Down) {
-              this.content = item
-              this.isTouchDown = true
+              this.content = item;
+              this.isTouchDown = true;
             }
             if (event.type === TouchType.Up) {
-              this.isTouchDown = false
+              this.isTouchDown = false;
               if (this.addAreaLongPressGesture || this.longScaleOnePointTwo === 1.05 || this.imageText) {
-                return
+                return;
               }
               animateTo({
                 duration: ENTER_EXIT_ICON_DURATION,
                 curve: COMMON_BEZIER
               }, () => {
-                this.addIconShow = true
+                this.addIconShow = true;
               })
               if (this.options.type === GridObjectSortComponentType.TEXT) {
-                this.scaleAddIcon = 1
+                this.scaleAddIcon = 1;
               }
-              this.scaleIcon = 0
-              const index = this.unSelected.findIndex(i => i.id === item.id)
-              this.editGridDataLength = this.selected.length + 1
-              const endPosition = this.getEditItemGridPosition(this.selected, index)
-              this.content = item
-              this.unSelectedIndex = index
-              this.clickAddBtn = true
-              this.arrayUnSelectIsChange = 1
+              this.scaleIcon = 0;
+              const index = this.unSelected.findIndex(i => i.id === item.id);
+              this.editGridDataLength = this.selected.length + 1;
+              const endPosition = this.getEditItemGridPosition(this.selected, index);
+              this.content = item;
+              this.unSelectedIndex = index;
+              this.clickAddBtn = true;
+              this.arrayUnSelectIsChange = 1;
               animateTo({ curve: REMOVE_ADD_SPRING, onFinish: () => {
                 if (!this.selected.some(val => val.id === item.id)) {
-                  this.scaleIcon = 1
-                  this.scaleAddIcon = 0
+                  this.scaleIcon = 1;
+                  this.scaleAddIcon = 0;
                   this.selected.push(item);
-                  this.unSelected.splice(index, 1)
-                  this.arrayUnSelectIsChange = 2
-                  this.addItemMoveX = 0
-                  this.addItemMoveY = 0
+                  this.unSelected.splice(index, 1);
+                  this.arrayUnSelectIsChange = 2;
+                  this.addItemMoveX = 0;
+                  this.addItemMoveY = 0;
                   if (!this.gridComState) {
-                    this.onSaveEdit()
+                    this.onSaveEdit();
                   }
                   animateTo({
                     duration: ENTER_EXIT_ICON_DURATION,
                     curve: COMMON_BEZIER }, () => {
-                    this.addIconShow = false
-                  })
-                  this.clickAddBtn = false
+                    this.addIconShow = false;
+                  });
+                  this.clickAddBtn = false;
                 }
               } }, () => {
-                this.addItemMoveX = endPosition.x
-                this.addItemMoveY = endPosition.y
+                this.addItemMoveX = endPosition.x;
+                this.addItemMoveY = endPosition.y;
               })
             }
           })
@@ -977,27 +978,27 @@ export struct GridObjectSortComponent {
                     duration: ENTER_EXIT_ICON_DURATION,
                     curve: COMMON_BEZIER,
                   }, () => {
-                    this.addAreaLongPressGesture = true
-                    this.gridComState = true
-                  })
-                  this.menuSwitch = true
+                    this.addAreaLongPressGesture = true;
+                    this.gridComState = true;
+                  });
+                  this.menuSwitch = true;
                 } else {
                   animateTo({
                     duration: ENTER_EXIT_ICON_DURATION,
                     curve: LONG_TOUCH_SCALE
                   }, () => {
-                    this.longScaleOnePointTwo = 1.05
+                    this.longScaleOnePointTwo = 1.05;
                   })
                 }
               })
               .onActionEnd(() => {
-                this.addAreaLongPressGesture = false
+                this.addAreaLongPressGesture = false;
                 animateTo({
                   duration: ENTER_EXIT_ICON_DURATION,
                   curve: LONG_TOUCH_SCALE
                 }, () => {
-                  this.longScaleOnePointTwo = 1
-                })
+                  this.longScaleOnePointTwo = 1;
+                });
               })
           )
         }
@@ -1030,16 +1031,16 @@ export struct GridObjectSortComponent {
           GridItem() {
             Stack() {
               if (this.imageText) {
-                this.ImageTextBuilder(select, 'delete')
+                this.ImageTextBuilder(select, 'delete');
               } else {
-                this.TextBlockBuilder(select)
+                this.TextBlockBuilder(select);
               }
             }
             .onHover((isHover: boolean) => {
               if (isHover) {
-                this.hoverId = select.id
+                this.hoverId = select.id;
               } else {
-                this.hoverId = ''
+                this.hoverId = '';
               }
             })
             .clickEffect({ level: ClickEffectLevel.LIGHT })
@@ -1049,20 +1050,20 @@ export struct GridObjectSortComponent {
             })
             .onTouch((event: TouchEvent) => {
               if (this.clickAddBtn || this.clickRemoveBtn) {
-                return
+                return;
               }
               if (event.type === TouchType.Down) {
-                this.content = select
-                this.isTouchDown = true
+                this.content = select;
+                this.isTouchDown = true;
               }
 
               if (event.type === TouchType.Up) {
-                this.isTouchDown = false
+                this.isTouchDown = false;
                 animateTo({
                   duration: ENTER_EXIT_ICON_DURATION,
                   curve: LONG_TOUCH_SCALE
                 }, () => {
-                  this.longScaleOnePointTwo = 1
+                  this.longScaleOnePointTwo = 1;
                 })
               }
             })
@@ -1082,16 +1083,16 @@ export struct GridObjectSortComponent {
                 duration: ENTER_EXIT_ICON_DURATION,
                 curve: COMMON_BEZIER
               }, () => {
-                this.gridComState = true
-              })
-              this.menuSwitch = true
+                this.gridComState = true;
+              });
+              this.menuSwitch = true;
             } else {
               animateTo({
                 duration: ENTER_EXIT_ICON_DURATION,
                 curve: LONG_TOUCH_SCALE
               }, () => {
-                this.longScaleOnePointTwo = 1.05
-              })
+                this.longScaleOnePointTwo = 1.05;
+              });
 
               if (event.repeat && !this.vibrationDone) {
                 try {
@@ -1102,10 +1103,10 @@ export struct GridObjectSortComponent {
                     id: 0,
                     usage: 'alarm'
                   }).then(() => {
-                    this.vibrationDone = true
+                    this.vibrationDone = true;
                   })
                 } catch {
-                  this.vibrationDone = false
+                  this.vibrationDone = false;
                 }
               }
             }
@@ -1124,28 +1125,28 @@ export struct GridObjectSortComponent {
         curve: this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER,
       } : { duration: 0 })
       .onItemDragStart((event: ItemDragInfo, itemIndex: number) => {
-        this.selectedIndex = -1
+        this.selectedIndex = -1;
         if (!this.gridComState) {
-          return
+          return;
         }
-        this.isStartDrag = true
-        this.editGridDataLength = this.selected.length + 1
-        this.selected.splice(itemIndex, 1)
-        return this.PixelMapBuilder()
+        this.isStartDrag = true;
+        this.editGridDataLength = this.selected.length + 1;
+        this.selected.splice(itemIndex, 1);
+        return this.PixelMapBuilder();
       })
       .onItemDrop((event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => {
         if (!this.gridComState) {
-          return
+          return;
         }
-        this.vibrationDone = false
+        this.vibrationDone = false;
         animateTo({
           duration: ENTER_EXIT_ICON_DURATION,
           curve: LONG_TOUCH_SCALE
         }, () => {
-          this.longScaleOnePointTwo = 1
+          this.longScaleOnePointTwo = 1;
         })
-        this.isStartDrag = false
-        this.selected.splice(insertIndex === -1 ? itemIndex : insertIndex, 0, this.content)
+        this.isStartDrag = false;
+        this.selected.splice(insertIndex === -1 ? itemIndex : insertIndex, 0, this.content);
       })
       .onItemDragMove((event: ItemDragInfo, itemIndex: number, insertIndex: number) =>
         this.onDragMoveEvent(event, itemIndex, insertIndex))
@@ -1185,10 +1186,10 @@ export struct GridObjectSortComponent {
         }
         .onAreaChange((oldValue: Area, newValue: Area) => {
           this.areaWidth = Number(newValue.width);
-          this.blockWidth = this.getBlockWidth() // gridItem width
-          this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16
-          this.imageItemWidth = this.blockWidth - 16 // image Width
-          this.blockHeight = this.imageText ? this.imageItemWidth + 16 : this.gridComState ? 44 : BLOCK_TEXT_HEIGHT
+          this.blockWidth = this.getBlockWidth(); // gridItem width
+          this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16;
+          this.imageItemWidth = this.blockWidth - 16; // image Width
+          this.blockHeight = this.imageText ? this.imageItemWidth + 16 : this.gridComState ? 44 : BLOCK_TEXT_HEIGHT;
         }).width("100%")
       }
     }

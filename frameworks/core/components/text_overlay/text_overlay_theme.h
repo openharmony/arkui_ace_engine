@@ -96,10 +96,8 @@ public:
                 theme->moreOrBackIconColor_ = pattern->GetAttr<Color>("more_or_back_icon_color", Color());
                 theme->menuButtonTextStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
                 theme->menuButtonTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp));
-                theme->handleDiameter_ = pattern->GetAttr<Dimension>("handle_outer_diameter", 18.0_vp);
-                theme->handleDiameterInner_ = pattern->GetAttr<Dimension>("handle_inner_diameter", 16.0_vp);
-                theme->moreButtonHeight_ = pattern->GetAttr<Dimension>("more_button_height", 24.0_vp);
-                theme->selectOverlayMaxWidth_ = pattern->GetAttr<Dimension>("select_overlay_max_width", 280.0_vp);
+                theme->handleDiameter_ = pattern->GetAttr<Dimension>("handle_outer_diameter", 14.0_vp);
+                theme->handleDiameterInner_ = pattern->GetAttr<Dimension>("handle_inner_diameter", 12.0_vp);
                 theme->alphaDisabled_ =
                     pattern->GetAttr<double>(PATTERN_BG_COLOR_DISABLED_ALPHA, defaultTertiaryColorAlpha);
                 theme->cameraInput_ = pattern->GetAttr<std::string>("camera_input", "Camera input");
@@ -201,16 +199,6 @@ public:
         return menuButtonHeight_;
     }
 
-    const Dimension& GetMoreButtonHeight() const
-    {
-        return moreButtonHeight_;
-    }
-
-    const Dimension& GetSelectOverlayMaxWidth() const
-    {
-        return selectOverlayMaxWidth_;
-    }
-
     const TextStyle& GetMenuButtonTextStyle() const
     {
         return menuButtonTextStyle_;
@@ -277,8 +265,6 @@ private:
     Dimension menuSafeSpacing_;
     Dimension menuButtonWidth_;
     Dimension menuButtonHeight_;
-    Dimension moreButtonHeight_;
-    Dimension selectOverlayMaxWidth_;
     TextStyle menuButtonTextStyle_;
     double alphaDisabled_ = 0.0;
     std::string cameraInput_;

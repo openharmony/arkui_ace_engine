@@ -61,6 +61,7 @@ public:
     void UpdateResourceManager(const std::string& bundleName, const std::string& moduleName) override;
     uint32_t GetSymbolById(uint32_t resId) const override;
     uint32_t GetSymbolByName(const char* resName) const override;
+    ColorMode GetResourceColorMode() const override;
 private:
     static std::string GetActualResourceName(const std::string& resName);
 

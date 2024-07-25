@@ -61,7 +61,7 @@ public:
     virtual std::string GetCurrentPageUrl() = 0;
     virtual void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)> callback) = 0;
     virtual bool AllowPopLastPage() = 0;
-
+    virtual RefPtr<NG::FrameNode> GetCurrentPageNode() { return nullptr; }
     virtual bool PopWithExitCheck();
     void RunPage(const std::string& url, const std::string& params);
     void Push(const RouterPageInfo& target, const std::string& params, RouterMode = RouterMode::STANDARD);
@@ -69,10 +69,20 @@ public:
     void Replace(const RouterPageInfo& target, const std::string& params, RouterMode = RouterMode::STANDARD);
     void BackWithTarget(const RouterPageInfo& target, const std::string& params);
     void Clear();
-
+    virtual void FlushReload() = 0;
     void SetManifestParser(const RefPtr<Framework::ManifestParser>& manifestParser)
     {
         manifestParser_ = manifestParser;
+    }
+
+    std::list<int64_t> GetNativeViews()
+    {
+        return viewStack_;
+    }
+
+    void AddView(int64_t viewId)
+    {
+        viewStack_.emplace_back(viewId);
     }
 
 protected:
@@ -115,6 +125,7 @@ protected:
     bool inRouterOpt_ = false;
     RouterPageInfo ngBackUri_ = { "" };
     std::string backParam_;
+    std::list<int64_t> viewStack_;
 
 private:
     int32_t nextPageId_ = 0;

@@ -27,6 +27,7 @@ public:
     explicit JsHoverFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
     ~JsHoverFunction() override = default;
     void HoverExecute(bool isHover, HoverInfo& hoverInfo);
+    void AccessibilityHoverExecute(bool isHover, AccessibilityHoverInfo& hoverInfo);
 };
 
 } // namespace OHOS::Ace::Framework

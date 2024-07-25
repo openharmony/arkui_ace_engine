@@ -114,22 +114,23 @@ HWTEST_F(StageTestNg, PageEventHubTest001, TestSize.Level1)
      * @tc.steps: step1. Build a PageEventHub.
      */
     PageEventHub pageEventHub;
-    pageEventHub.UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_FIRST);
+    auto groupManager = pageEventHub.GetGroupManager();
+    groupManager->UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_FIRST);
 
     /**
      * @tc.steps: step2. Add radio to group.
      * @tc.expected: The HasRadioId function of PageEventHub meets expectations .
      */
-    pageEventHub.AddRadioToGroup(TEST_GROUP_NAME, RADIO_ID_FIRST);
-    EXPECT_TRUE(pageEventHub.HasRadioId(TEST_GROUP_NAME, RADIO_ID_FIRST));
-    EXPECT_FALSE(pageEventHub.HasRadioId(ERROR_GROUP_NAME, RADIO_ID_FIRST));
+    groupManager->AddRadioToGroup(TEST_GROUP_NAME, RADIO_ID_FIRST);
+    EXPECT_TRUE(groupManager->HasRadioId(TEST_GROUP_NAME, RADIO_ID_FIRST));
+    EXPECT_FALSE(groupManager->HasRadioId(ERROR_GROUP_NAME, RADIO_ID_FIRST));
 
     /**
      * @tc.steps: step3. Add another two radio to group.
      * @tc.expected: The HasRadioId function of PageEventHub meets expectations .
      */
-    pageEventHub.AddRadioToGroup(TEST_GROUP_NAME, RADIO_ID_SECOND);
-    pageEventHub.AddRadioToGroup(TEST_GROUP_NAME, RADIO_ID_THIRD);
+    groupManager->AddRadioToGroup(TEST_GROUP_NAME, RADIO_ID_SECOND);
+    groupManager->AddRadioToGroup(TEST_GROUP_NAME, RADIO_ID_THIRD);
 
     /**
      * @tc.steps: step4. Create real node and fake node to ElementRegister.
@@ -144,15 +145,15 @@ HWTEST_F(StageTestNg, PageEventHubTest001, TestSize.Level1)
     /**
      * @tc.steps: step5. UpdateRadioGroupValue.
      */
-    pageEventHub.UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_FIRST);
-    pageEventHub.UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_SECOND);
+    groupManager->UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_FIRST);
+    groupManager->UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_SECOND);
 
     /**
      * @tc.steps: step6. RemoveRadioFromGroup.
      * @tc.expected: The radio remove successful .
      */
-    pageEventHub.RemoveRadioFromGroup(TEST_GROUP_NAME, RADIO_ID_FIRST);
-    EXPECT_FALSE(pageEventHub.HasRadioId(TEST_GROUP_NAME, RADIO_ID_FIRST));
+    groupManager->RemoveRadioFromGroup(TEST_GROUP_NAME, RADIO_ID_FIRST);
+    EXPECT_FALSE(groupManager->HasRadioId(TEST_GROUP_NAME, RADIO_ID_FIRST));
 }
 
 /**
@@ -1386,5 +1387,138 @@ HWTEST_F(StageTestNg, StageLayoutAlgorithmTest001, TestSize.Level1)
         childLayoutWrapper->GetGeometryNode()->GetFrameOffset() ==
         OffsetF(stageLayoutAlgorithm.childInsets_.left_.Length(), stageLayoutAlgorithm.childInsets_.top_.Length());
     EXPECT_TRUE(bEqual);
+}
+
+/**
+ * @tc.name: PagePatternTest009
+ * @tc.desc: test OnBackPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PagePatternTest009, TestSize.Level1)
+{
+    const auto& pageNode = ViewStackProcessor::GetInstance()->GetPageNode();
+    auto pattern = pageNode->GetPattern<PagePattern>();
+    auto result = pattern->OnBackPressed();
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: PagePatternTest010
+ * @tc.desc: test OnBackPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PagePatternTest010, TestSize.Level1)
+{
+    const auto& pageNode = ViewStackProcessor::GetInstance()->GetPageNode();
+    auto pattern = pageNode->GetPattern<PagePattern>();
+    pattern->isPageInTransition_ = true;
+    auto result = pattern->OnBackPressed();
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: PagePatternTest011
+ * @tc.desc: test OnBackPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PagePatternTest011, TestSize.Level1)
+{
+    const auto& pageNode = ViewStackProcessor::GetInstance()->GetPageNode();
+    auto pattern = pageNode->GetPattern<PagePattern>();
+    auto backPressedFunc = []() -> bool { return false; };
+    pattern->isPageInTransition_ = false;
+    pattern->SetOnBackPressed(backPressedFunc);
+    auto result = pattern->OnBackPressed();
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: PagePatternTest012
+ * @tc.desc: test OnBackPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PagePatternTest012, TestSize.Level1)
+{
+    const auto& pageNode = ViewStackProcessor::GetInstance()->GetPageNode();
+    auto pattern = pageNode->GetPattern<PagePattern>();
+    auto backPressedFunc = []() -> bool { return false; };
+    pattern->isPageInTransition_ = false;
+    pattern->SetOnBackPressed(backPressedFunc);
+    auto overlayManagernode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto overlayManger = AceType::MakeRefPtr<OverlayManager>(overlayManagernode);
+    pattern->overlayManager_ = overlayManger;
+    auto result = pattern->OnBackPressed();
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: PagePatternTest015
+ * @tc.desc: test OnBackPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PagePatternTest015, TestSize.Level1)
+{
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto testStageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto UInode = AceType::DynamicCast<NG::UINode>(testStageManager);
+    testStageManager->stageNode_->children_.push_back(UInode);
+    testStageManager->stageInTrasition_ = true;
+    auto nodeTest = testStageManager->GetPrevPageWithTransition();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: PagePatternTest016
+ * @tc.desc: test OnBackPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PagePatternTest016, TestSize.Level1)
+{
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto testStageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto UInode = AceType::DynamicCast<NG::UINode>(testStageManager);
+    testStageManager->stageNode_->children_.push_back(UInode);
+    testStageManager->stageInTrasition_ = false;
+    auto nodeTest = testStageManager->GetPrevPageWithTransition();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: PagePatternTest017
+ * @tc.desc: test GetLastPageWithTransition
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PagePatternTest017, TestSize.Level1)
+{
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto testStageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto UInode = AceType::DynamicCast<NG::UINode>(testStageManager);
+    testStageManager->stageNode_->children_.push_back(UInode);
+    testStageManager->stageInTrasition_ = false;
+    testStageManager->stageNode_->children_.clear();
+    auto nodeTest = testStageManager->GetLastPageWithTransition();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: PagePatternTest018
+ * @tc.desc: test OnBackPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PagePatternTest018, TestSize.Level1)
+{
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto testStageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto UInode = AceType::DynamicCast<NG::UINode>(testStageManager);
+    testStageManager->stageNode_->children_.push_back(UInode);
+    testStageManager->stageInTrasition_ = false;
+    testStageManager->stageNode_->children_.clear();
+    auto nodeTest = testStageManager->GetPrevPageWithTransition();
+    SUCCEED();
 }
 } // namespace OHOS::Ace::NG

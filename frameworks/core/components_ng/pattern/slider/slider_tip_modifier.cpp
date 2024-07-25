@@ -17,6 +17,8 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/i18n/localization.h"
+#include "bridge/common/utils/utils.h"
+#include "core/common/font_manager.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components_ng/pattern/text/text_styles.h"
@@ -169,7 +171,8 @@ void SliderTipModifier::PaintVerticalBubble(float vertexOffsetFromBlock, RSPath&
     auto arrowVerticalOffset = static_cast<float>(ARROW_VERTICAL_OFFSET.ConvertToPx());
     float arrowRadius = static_cast<float>(ARROW_RADIUS.ConvertToPx());
     float circularRadius = bubbleSize_.Height() * HALF;
-    if (sliderGlobalOffset_->Get().GetX() + vertex_.GetX() < bubbleSize_.Width()) {
+    if (sliderGlobalOffset_->Get().GetX() + vertex_.GetX() < bubbleSize_.Width() ||
+        AceApplicationInfo::GetInstance().IsRightToLeft()) {
         vertex_.AddX(vertexOffsetFromBlock / HALF);
         isMask_ = true;
         path.MoveTo(vertex_.GetX(), vertex_.GetY());
@@ -277,7 +280,8 @@ void SliderTipModifier::PaintVerticalBubbleSuitableAging(float vertexOffsetFromB
     auto arrowVerticalOffset = static_cast<float>(ARROW_VERTICAL_OFFSET.ConvertToPx());
     float arrowRadius = static_cast<float>(ARROW_RADIUS.ConvertToPx());
     float circularRadius = bubbleSize_.Height() * (1.0f / 3.0f);
-    if (sliderGlobalOffset_->Get().GetX() + vertex_.GetX() < bubbleSize_.Width()) {
+    if (sliderGlobalOffset_->Get().GetX() + vertex_.GetX() < bubbleSize_.Width() ||
+        AceApplicationInfo::GetInstance().IsRightToLeft()) {
         vertex_.AddX(vertexOffsetFromBlock / HALF);
         isMask_ = true;
         path.MoveTo(vertex_.GetX(), vertex_.GetY());
@@ -464,6 +468,10 @@ void SliderTipModifier::BuildParagraph()
     fontStyle->UpdateFontSize(textFontSize_);
     TextStyle textStyle = CreateTextStyleUsingTheme(fontStyle, nullptr, pipeline->GetTheme<TextTheme>());
     auto content = content_->Get();
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager && fontManager->IsUseAppCustomFont()) {
+        textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
+    }
     CreateParagraphAndLayout(textStyle, content);
 }
 
@@ -567,11 +575,17 @@ bool SliderTipModifier::UpdateOverlayRect(const SizeF& frameSize)
         rect.SetSize(
             SizeF(contentSize.Width() + bubbleSize_.Width() / HALF, maxWidth + bubbleSize_.Height() + distance));
     } else {
+        float bubbleCenterX = rect.GetOffset().GetX() + bubbleSize_.Width() * HALF;
+        float sliderOffsetX = sliderGlobalOffset_->Get().GetX() - bubbleCenterX;
         auto maxWidth = std::max(circleSize.Width(), frameSize.Width());
         if (sliderGlobalOffset_->Get().GetX() + vertex.GetX() < bubbleSize_.Width()) {
-            rect.SetOffset(OffsetF(bubbleSize_.Width() + distance, -bubbleSize_.Height()));
+            rect.SetOffset(OffsetF(AceApplicationInfo::GetInstance().IsRightToLeft()
+                ? (sliderOffsetX + bubbleSize_.Width() + distance)
+                : (bubbleSize_.Width() + distance), -bubbleSize_.Height()));
         } else {
-            rect.SetOffset(OffsetF(-bubbleSize_.Width() - distance, -bubbleSize_.Height()));
+            rect.SetOffset(OffsetF(AceApplicationInfo::GetInstance().IsRightToLeft()
+                ? (sliderOffsetX - bubbleSize_.Width() - distance)
+                : (-bubbleSize_.Width() - distance), -bubbleSize_.Height()));
         }
         rect.SetSize(
             SizeF(maxWidth + bubbleSize_.Width() + distance, contentSize.Height() + bubbleSize_.Height() / HALF));

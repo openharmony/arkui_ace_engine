@@ -81,10 +81,10 @@ std::vector<double> CanvasRenderingContext2DModelImpl::GetLineDash()
     return pattern_ ? pattern_->GetLineDash().lineDash : std::vector<double> {};
 }
 
-void CanvasRenderingContext2DModelImpl::SetFillGradient(const Ace::Gradient& gradient)
+void CanvasRenderingContext2DModelImpl::SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateFillGradient(gradient);
+    pattern_->UpdateFillGradient(*gradient);
 }
 
 void CanvasRenderingContext2DModelImpl::SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern)
@@ -100,10 +100,10 @@ void CanvasRenderingContext2DModelImpl::SetFillColor(const Color& color, bool co
     }
 }
 
-void CanvasRenderingContext2DModelImpl::SetStrokeGradient(const Ace::Gradient& gradient)
+void CanvasRenderingContext2DModelImpl::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateStrokeGradient(gradient);
+    pattern_->UpdateStrokeGradient(*gradient);
 }
 
 void CanvasRenderingContext2DModelImpl::SetStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern)

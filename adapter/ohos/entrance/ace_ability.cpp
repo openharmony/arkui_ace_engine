@@ -699,7 +699,7 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [rect, density = density_, reason, container, rsTransaction]() {
-            auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+            auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
             CHECK_NULL_VOID(aceView);
             ViewportConfig config(rect.width_, rect.height_, density);
             Platform::AceViewOhos::SetViewportMetrics(aceView, config);
@@ -766,7 +766,7 @@ void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
     LOGI("AceAbility OnDrag called ");
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     CHECK_NULL_VOID(container);
-    auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     CHECK_NULL_VOID(aceView);
     DragEventAction action;
     switch (event) {
@@ -793,7 +793,7 @@ bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerE
     auto container = AceType::DynamicCast<Platform::AceContainer>(AceEngine::Get().GetContainer(abilityId_));
     CHECK_NULL_RETURN(container, false);
     container->SetCurPointerEvent(pointerEvent);
-    auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     CHECK_NULL_RETURN(aceView, false);
     aceView->DispatchTouchEvent(aceView, pointerEvent);
     return true;
@@ -803,7 +803,7 @@ bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) co
 {
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     CHECK_NULL_RETURN(container, false);
-    auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     CHECK_NULL_RETURN(aceView, false);
     int32_t keyCode = keyEvent->GetKeyCode();
     int32_t keyAction = keyEvent->GetKeyAction();

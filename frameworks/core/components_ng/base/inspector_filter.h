@@ -36,7 +36,7 @@ enum FixedAttrBit : uint64_t {
     FIXED_ATTR_FOCUSED      = 7, /* "focused"    */
 };
 
-class ACE_EXPORT InspectorFilter {
+class ACE_FORCE_EXPORT InspectorFilter {
 public:
     InspectorFilter() {}
     bool CheckFixedAttr(const FixedAttrBit attrBit) const;

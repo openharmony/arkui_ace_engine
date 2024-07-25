@@ -15,10 +15,10 @@
 
 const vibrator = requireNativeModule('ohos.vibrator');
 const curves = requireNativeModule('ohos.curves');
-
 const composetitlebar = requireNapi('arkui.advanced.ComposeTitleBar');
 const editabletitlebar = requireNapi('arkui.advanced.EditableTitleBar');
 const subheader = requireNapi('arkui.advanced.SubHeader');
+
 const ComposeTitleBar = composetitlebar.ComposeTitleBar;
 const EditableTitleBar = editabletitlebar.EditableTitleBar;
 const EditableLeftIconType = editabletitlebar.EditableLeftIconType;
@@ -35,39 +35,38 @@ const MARGIN_EIGHT = 8;
 const ROW_GAP = 16;
 const SUBTITLE_HEIGHT = 56;
 const ENTER_EXIT_ICON_DURATION = 200;
-const COMMON_BEZIER = curves.cubicBezierCurve(.33, 0, .67, 1);
+const COMMON_BEZIER = curves.cubicBezierCurve(0.33, 0, 0.67, 1);
 const DRAG_SPRING = curves.interpolatingSpring(0, 1, 400, 38);
 const REMOVE_ADD_SPRING = curves.interpolatingSpring(0, 1, 150, 24);
-const LONG_TOUCH_SCALE = curves.cubicBezierCurve(.2, 0, .2, 1);
-
+const LONG_TOUCH_SCALE = curves.cubicBezierCurve(0.2, 0, 0.2, 1);
 export var GridObjectSortComponentType;
-!function (e) {
-    e.IMAGE_TEXT = "image_text";
-    e.TEXT = "text"
-}(GridObjectSortComponentType || (GridObjectSortComponentType = {}));
-
+(function (x15) {
+    x15["IMAGE_TEXT"] = "image_text";
+    x15["TEXT"] = "text";
+})(GridObjectSortComponentType || (GridObjectSortComponentType = {}));
 class MenuItem {
-    constructor(e, t, i) {
-        this.value = e;
-        this.isEnabled = t;
-        this.action = i
+    constructor(u15, v15, w15) {
+        this.value = u15;
+        this.isEnabled = v15;
+        this.action = w15;
     }
 }
-
 export class GridObjectSortComponent extends ViewPU {
-    constructor(e, t, i, o = -1, s = void 0) {
-        super(e, i, o);
-        "function" == typeof s && (this.paramsGenerator_ = s);
-        this.__options = new SynchedPropertyObjectOneWayPU(t.options, this, "options");
+    constructor(n15, o15, p15, q15 = -1, r15 = undefined, s15) {
+        super(n15, p15, q15, s15);
+        if (typeof r15 === "function") {
+            this.paramsGenerator_ = r15;
+        }
+        this.__options = new SynchedPropertyObjectOneWayPU(o15.options, this, "options");
         this.dataList = [];
         this.__selected = new ObservedPropertyObjectPU([], this, "selected");
         this.__unSelected = new ObservedPropertyObjectPU([], this, "unSelected");
         this.__copySelected = new ObservedPropertyObjectPU([], this, "copySelected");
         this.__copyUnSelected = new ObservedPropertyObjectPU([], this, "copyUnSelected");
-        this.__content = new ObservedPropertyObjectPU({ id: "", text: "", selected: !1, order: 0 }, this, "content");
-        this.__hoverId = new ObservedPropertySimplePU("", this, "hoverId");
-        this.__gridComState = new ObservedPropertySimplePU(!1, this, "gridComState");
-        this.__menuSwitch = new ObservedPropertySimplePU(!1, this, "menuSwitch");
+        this.__content = new ObservedPropertyObjectPU({ id: '', text: '', selected: false, order: 0 }, this, "content");
+        this.__hoverId = new ObservedPropertySimplePU('', this, "hoverId");
+        this.__gridComState = new ObservedPropertySimplePU(false, this, "gridComState");
+        this.__menuSwitch = new ObservedPropertySimplePU(false, this, "menuSwitch");
         this.__areaWidth = new ObservedPropertySimplePU(0, this, "areaWidth");
         this.__blockWidth = new ObservedPropertySimplePU(0, this, "blockWidth");
         this.__blockHeight = new ObservedPropertySimplePU(0, this, "blockHeight");
@@ -75,174 +74,243 @@ export class GridObjectSortComponent extends ViewPU {
         this.__scaleGridItemNinetyPercent = new ObservedPropertySimplePU(1, this, "scaleGridItemNinetyPercent");
         this.__reboundSize = new ObservedPropertySimplePU(1, this, "reboundSize");
         this.__scaleIcon = new ObservedPropertySimplePU(1, this, "scaleIcon");
-        this.__addIconShow = new ObservedPropertySimplePU(!1, this, "addIconShow");
+        this.__addIconShow = new ObservedPropertySimplePU(false, this, "addIconShow");
         this.__scaleAddIcon = new ObservedPropertySimplePU(0, this, "scaleAddIcon");
-        this.__isStartDrag = new ObservedPropertySimplePU(!1, this, "isStartDrag");
+        this.__isStartDrag = new ObservedPropertySimplePU(false, this, "isStartDrag");
         this.__insertIndex = new ObservedPropertySimplePU(-1, this, "insertIndex");
         this.__editGridDataLength = new ObservedPropertySimplePU(-1, this, "editGridDataLength");
-        this.__isTouchDown = new ObservedPropertySimplePU(!1, this, "isTouchDown");
+        this.__isTouchDown = new ObservedPropertySimplePU(false, this, "isTouchDown");
         this.__addItemMoveX = new ObservedPropertySimplePU(0, this, "addItemMoveX");
         this.__addItemMoveY = new ObservedPropertySimplePU(0, this, "addItemMoveY");
         this.__editItemMoveX = new ObservedPropertySimplePU(0, this, "editItemMoveX");
         this.__editItemMoveY = new ObservedPropertySimplePU(0, this, "editItemMoveY");
         this.__unSelectedIndex = new ObservedPropertySimplePU(0, this, "unSelectedIndex");
-        this.__clickAddBtn = new ObservedPropertySimplePU(!1, this, "clickAddBtn");
+        this.__clickAddBtn = new ObservedPropertySimplePU(false, this, "clickAddBtn");
         this.__selectedIndex = new ObservedPropertySimplePU(-1, this, "selectedIndex");
-        this.__clickRemoveBtn = new ObservedPropertySimplePU(!1, this, "clickRemoveBtn");
-        this.__addAreaLongPressGesture = new ObservedPropertySimplePU(!1, this, "addAreaLongPressGesture");
+        this.__clickRemoveBtn = new ObservedPropertySimplePU(false, this, "clickRemoveBtn");
+        this.__addAreaLongPressGesture = new ObservedPropertySimplePU(false, this, "addAreaLongPressGesture");
         this.__arraySelectIsChange = new ObservedPropertySimplePU(0, this, "arraySelectIsChange");
         this.__arrayUnSelectIsChange = new ObservedPropertySimplePU(0, this, "arrayUnSelectIsChange");
         this.__textItemEditWidth = new ObservedPropertySimplePU(0, this, "textItemEditWidth");
         this.__imageItemWidth = new ObservedPropertySimplePU(0, this, "imageItemWidth");
-        this.__saveClick = new ObservedPropertySimplePU(!1, this, "saveClick");
-        this.__imageTextAddIconShow = new ObservedPropertySimplePU(!1, this, "imageTextAddIconShow");
-        this.__imageTextRemoveIconShow = new ObservedPropertySimplePU(!1, this, "imageTextRemoveIconShow");
-        this.__firstIn = new ObservedPropertySimplePU(!0, this, "firstIn");
-        this.colNum = 3;
-        this.vibrationDone = !1;
-        this.touchDown = {
-            id: -1,
-            type: 10001,
-            params: ["sys.color.ohos_id_color_click_effect"],
-            bundleName: "",
-            moduleName: ""
-        };
-        this.touchBorderRadius = {
-            id: -1,
-            type: 10002,
-            params: ["sys.float.ohos_id_corner_radius_clicked"],
-            bundleName: "",
-            moduleName: ""
-        };
-        this.hoverBackgroundColor = {
-            id: -1,
-            type: 10001,
-            params: ["sys.color.ohos_id_color_hover"],
-            bundleName: "",
-            moduleName: ""
-        };
-        this.focusBorder = {
-            id: -1,
-            type: 10001,
-            params: ["sys.color.ohos_id_color_focused_outline"],
-            bundleName: "",
-            moduleName: ""
-        };
-        this.imageText = !1;
-        this.menuItems = [new MenuItem({
-            id: -1,
-            type: 2e4,
-            params: ["sys.media.ohos_ic_public_edit"],
-            bundleName: "",
-            moduleName: ""
-        }, !0, (() => {
-            this.goEdit()
-        }))];
-        this.onSave = void 0;
-        this.onCancel = void 0;
-        this.setInitiallyProvidedValue(t);
-        this.declareWatch("gridComState", this.onGridComStateChange)
+        this.__saveClick = new ObservedPropertySimplePU(false, this, "saveClick");
+        this.__imageTextAddIconShow = new ObservedPropertySimplePU(false, this, "imageTextAddIconShow");
+        this.__imageTextRemoveIconShow = new ObservedPropertySimplePU(false, this, "imageTextRemoveIconShow");
+        this.__firstIn = new ObservedPropertySimplePU(true, this, "firstIn");
+        this.colNum = COL_IMAGE_TEXT;
+        this.vibrationDone = false;
+        this.touchDown = { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_click_effect'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+        this.touchBorderRadius = { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+        this.hoverBackgroundColor = { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+        this.focusBorder = { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+        this.imageText = false;
+        this.menuItems = [
+            new MenuItem({ "id": -1, "type": 20000, params: ['sys.media.ohos_ic_public_edit'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, true, () => {
+                this.goEdit();
+            }),
+        ];
+        this.onSave = undefined;
+        this.onCancel = undefined;
+        this.setInitiallyProvidedValue(o15);
+        this.declareWatch("gridComState", this.onGridComStateChange);
+        this.finalizeConstruction();
     }
-
-    setInitiallyProvidedValue(e) {
-        void 0 === e.options && this.__options.set({});
-        void 0 !== e.dataList && (this.dataList = e.dataList);
-        void 0 !== e.selected && (this.selected = e.selected);
-        void 0 !== e.unSelected && (this.unSelected = e.unSelected);
-        void 0 !== e.copySelected && (this.copySelected = e.copySelected);
-        void 0 !== e.copyUnSelected && (this.copyUnSelected = e.copyUnSelected);
-        void 0 !== e.content && (this.content = e.content);
-        void 0 !== e.hoverId && (this.hoverId = e.hoverId);
-        void 0 !== e.gridComState && (this.gridComState = e.gridComState);
-        void 0 !== e.menuSwitch && (this.menuSwitch = e.menuSwitch);
-        void 0 !== e.areaWidth && (this.areaWidth = e.areaWidth);
-        void 0 !== e.blockWidth && (this.blockWidth = e.blockWidth);
-        void 0 !== e.blockHeight && (this.blockHeight = e.blockHeight);
-        void 0 !== e.longScaleOnePointTwo && (this.longScaleOnePointTwo = e.longScaleOnePointTwo);
-        void 0 !== e.scaleGridItemNinetyPercent && (this.scaleGridItemNinetyPercent = e.scaleGridItemNinetyPercent);
-        void 0 !== e.reboundSize && (this.reboundSize = e.reboundSize);
-        void 0 !== e.scaleIcon && (this.scaleIcon = e.scaleIcon);
-        void 0 !== e.addIconShow && (this.addIconShow = e.addIconShow);
-        void 0 !== e.scaleAddIcon && (this.scaleAddIcon = e.scaleAddIcon);
-        void 0 !== e.isStartDrag && (this.isStartDrag = e.isStartDrag);
-        void 0 !== e.insertIndex && (this.insertIndex = e.insertIndex);
-        void 0 !== e.editGridDataLength && (this.editGridDataLength = e.editGridDataLength);
-        void 0 !== e.isTouchDown && (this.isTouchDown = e.isTouchDown);
-        void 0 !== e.addItemMoveX && (this.addItemMoveX = e.addItemMoveX);
-        void 0 !== e.addItemMoveY && (this.addItemMoveY = e.addItemMoveY);
-        void 0 !== e.editItemMoveX && (this.editItemMoveX = e.editItemMoveX);
-        void 0 !== e.editItemMoveY && (this.editItemMoveY = e.editItemMoveY);
-        void 0 !== e.unSelectedIndex && (this.unSelectedIndex = e.unSelectedIndex);
-        void 0 !== e.clickAddBtn && (this.clickAddBtn = e.clickAddBtn);
-        void 0 !== e.selectedIndex && (this.selectedIndex = e.selectedIndex);
-        void 0 !== e.clickRemoveBtn && (this.clickRemoveBtn = e.clickRemoveBtn);
-        void 0 !== e.addAreaLongPressGesture && (this.addAreaLongPressGesture = e.addAreaLongPressGesture);
-        void 0 !== e.arraySelectIsChange && (this.arraySelectIsChange = e.arraySelectIsChange);
-        void 0 !== e.arrayUnSelectIsChange && (this.arrayUnSelectIsChange = e.arrayUnSelectIsChange);
-        void 0 !== e.textItemEditWidth && (this.textItemEditWidth = e.textItemEditWidth);
-        void 0 !== e.imageItemWidth && (this.imageItemWidth = e.imageItemWidth);
-        void 0 !== e.saveClick && (this.saveClick = e.saveClick);
-        void 0 !== e.imageTextAddIconShow && (this.imageTextAddIconShow = e.imageTextAddIconShow);
-        void 0 !== e.imageTextRemoveIconShow && (this.imageTextRemoveIconShow = e.imageTextRemoveIconShow);
-        void 0 !== e.firstIn && (this.firstIn = e.firstIn);
-        void 0 !== e.colNum && (this.colNum = e.colNum);
-        void 0 !== e.vibrationDone && (this.vibrationDone = e.vibrationDone);
-        void 0 !== e.touchDown && (this.touchDown = e.touchDown);
-        void 0 !== e.touchBorderRadius && (this.touchBorderRadius = e.touchBorderRadius);
-        void 0 !== e.hoverBackgroundColor && (this.hoverBackgroundColor = e.hoverBackgroundColor);
-        void 0 !== e.focusBorder && (this.focusBorder = e.focusBorder);
-        void 0 !== e.imageText && (this.imageText = e.imageText);
-        void 0 !== e.menuItems && (this.menuItems = e.menuItems);
-        void 0 !== e.onSave && (this.onSave = e.onSave);
-        void 0 !== e.onCancel && (this.onCancel = e.onCancel)
+    setInitiallyProvidedValue(m15) {
+        if (m15.options === undefined) {
+            this.__options.set({});
+        }
+        if (m15.dataList !== undefined) {
+            this.dataList = m15.dataList;
+        }
+        if (m15.selected !== undefined) {
+            this.selected = m15.selected;
+        }
+        if (m15.unSelected !== undefined) {
+            this.unSelected = m15.unSelected;
+        }
+        if (m15.copySelected !== undefined) {
+            this.copySelected = m15.copySelected;
+        }
+        if (m15.copyUnSelected !== undefined) {
+            this.copyUnSelected = m15.copyUnSelected;
+        }
+        if (m15.content !== undefined) {
+            this.content = m15.content;
+        }
+        if (m15.hoverId !== undefined) {
+            this.hoverId = m15.hoverId;
+        }
+        if (m15.gridComState !== undefined) {
+            this.gridComState = m15.gridComState;
+        }
+        if (m15.menuSwitch !== undefined) {
+            this.menuSwitch = m15.menuSwitch;
+        }
+        if (m15.areaWidth !== undefined) {
+            this.areaWidth = m15.areaWidth;
+        }
+        if (m15.blockWidth !== undefined) {
+            this.blockWidth = m15.blockWidth;
+        }
+        if (m15.blockHeight !== undefined) {
+            this.blockHeight = m15.blockHeight;
+        }
+        if (m15.longScaleOnePointTwo !== undefined) {
+            this.longScaleOnePointTwo = m15.longScaleOnePointTwo;
+        }
+        if (m15.scaleGridItemNinetyPercent !== undefined) {
+            this.scaleGridItemNinetyPercent = m15.scaleGridItemNinetyPercent;
+        }
+        if (m15.reboundSize !== undefined) {
+            this.reboundSize = m15.reboundSize;
+        }
+        if (m15.scaleIcon !== undefined) {
+            this.scaleIcon = m15.scaleIcon;
+        }
+        if (m15.addIconShow !== undefined) {
+            this.addIconShow = m15.addIconShow;
+        }
+        if (m15.scaleAddIcon !== undefined) {
+            this.scaleAddIcon = m15.scaleAddIcon;
+        }
+        if (m15.isStartDrag !== undefined) {
+            this.isStartDrag = m15.isStartDrag;
+        }
+        if (m15.insertIndex !== undefined) {
+            this.insertIndex = m15.insertIndex;
+        }
+        if (m15.editGridDataLength !== undefined) {
+            this.editGridDataLength = m15.editGridDataLength;
+        }
+        if (m15.isTouchDown !== undefined) {
+            this.isTouchDown = m15.isTouchDown;
+        }
+        if (m15.addItemMoveX !== undefined) {
+            this.addItemMoveX = m15.addItemMoveX;
+        }
+        if (m15.addItemMoveY !== undefined) {
+            this.addItemMoveY = m15.addItemMoveY;
+        }
+        if (m15.editItemMoveX !== undefined) {
+            this.editItemMoveX = m15.editItemMoveX;
+        }
+        if (m15.editItemMoveY !== undefined) {
+            this.editItemMoveY = m15.editItemMoveY;
+        }
+        if (m15.unSelectedIndex !== undefined) {
+            this.unSelectedIndex = m15.unSelectedIndex;
+        }
+        if (m15.clickAddBtn !== undefined) {
+            this.clickAddBtn = m15.clickAddBtn;
+        }
+        if (m15.selectedIndex !== undefined) {
+            this.selectedIndex = m15.selectedIndex;
+        }
+        if (m15.clickRemoveBtn !== undefined) {
+            this.clickRemoveBtn = m15.clickRemoveBtn;
+        }
+        if (m15.addAreaLongPressGesture !== undefined) {
+            this.addAreaLongPressGesture = m15.addAreaLongPressGesture;
+        }
+        if (m15.arraySelectIsChange !== undefined) {
+            this.arraySelectIsChange = m15.arraySelectIsChange;
+        }
+        if (m15.arrayUnSelectIsChange !== undefined) {
+            this.arrayUnSelectIsChange = m15.arrayUnSelectIsChange;
+        }
+        if (m15.textItemEditWidth !== undefined) {
+            this.textItemEditWidth = m15.textItemEditWidth;
+        }
+        if (m15.imageItemWidth !== undefined) {
+            this.imageItemWidth = m15.imageItemWidth;
+        }
+        if (m15.saveClick !== undefined) {
+            this.saveClick = m15.saveClick;
+        }
+        if (m15.imageTextAddIconShow !== undefined) {
+            this.imageTextAddIconShow = m15.imageTextAddIconShow;
+        }
+        if (m15.imageTextRemoveIconShow !== undefined) {
+            this.imageTextRemoveIconShow = m15.imageTextRemoveIconShow;
+        }
+        if (m15.firstIn !== undefined) {
+            this.firstIn = m15.firstIn;
+        }
+        if (m15.colNum !== undefined) {
+            this.colNum = m15.colNum;
+        }
+        if (m15.vibrationDone !== undefined) {
+            this.vibrationDone = m15.vibrationDone;
+        }
+        if (m15.touchDown !== undefined) {
+            this.touchDown = m15.touchDown;
+        }
+        if (m15.touchBorderRadius !== undefined) {
+            this.touchBorderRadius = m15.touchBorderRadius;
+        }
+        if (m15.hoverBackgroundColor !== undefined) {
+            this.hoverBackgroundColor = m15.hoverBackgroundColor;
+        }
+        if (m15.focusBorder !== undefined) {
+            this.focusBorder = m15.focusBorder;
+        }
+        if (m15.imageText !== undefined) {
+            this.imageText = m15.imageText;
+        }
+        if (m15.menuItems !== undefined) {
+            this.menuItems = m15.menuItems;
+        }
+        if (m15.onSave !== undefined) {
+            this.onSave = m15.onSave;
+        }
+        if (m15.onCancel !== undefined) {
+            this.onCancel = m15.onCancel;
+        }
     }
-
-    updateStateVars(e) {
-        this.__options.reset(e.options)
+    updateStateVars(l15) {
+        this.__options.reset(l15.options);
     }
-
-    purgeVariableDependenciesOnElmtId(e) {
-        this.__options.purgeDependencyOnElmtId(e);
-        this.__selected.purgeDependencyOnElmtId(e);
-        this.__unSelected.purgeDependencyOnElmtId(e);
-        this.__copySelected.purgeDependencyOnElmtId(e);
-        this.__copyUnSelected.purgeDependencyOnElmtId(e);
-        this.__content.purgeDependencyOnElmtId(e);
-        this.__hoverId.purgeDependencyOnElmtId(e);
-        this.__gridComState.purgeDependencyOnElmtId(e);
-        this.__menuSwitch.purgeDependencyOnElmtId(e);
-        this.__areaWidth.purgeDependencyOnElmtId(e);
-        this.__blockWidth.purgeDependencyOnElmtId(e);
-        this.__blockHeight.purgeDependencyOnElmtId(e);
-        this.__longScaleOnePointTwo.purgeDependencyOnElmtId(e);
-        this.__scaleGridItemNinetyPercent.purgeDependencyOnElmtId(e);
-        this.__reboundSize.purgeDependencyOnElmtId(e);
-        this.__scaleIcon.purgeDependencyOnElmtId(e);
-        this.__addIconShow.purgeDependencyOnElmtId(e);
-        this.__scaleAddIcon.purgeDependencyOnElmtId(e);
-        this.__isStartDrag.purgeDependencyOnElmtId(e);
-        this.__insertIndex.purgeDependencyOnElmtId(e);
-        this.__editGridDataLength.purgeDependencyOnElmtId(e);
-        this.__isTouchDown.purgeDependencyOnElmtId(e);
-        this.__addItemMoveX.purgeDependencyOnElmtId(e);
-        this.__addItemMoveY.purgeDependencyOnElmtId(e);
-        this.__editItemMoveX.purgeDependencyOnElmtId(e);
-        this.__editItemMoveY.purgeDependencyOnElmtId(e);
-        this.__unSelectedIndex.purgeDependencyOnElmtId(e);
-        this.__clickAddBtn.purgeDependencyOnElmtId(e);
-        this.__selectedIndex.purgeDependencyOnElmtId(e);
-        this.__clickRemoveBtn.purgeDependencyOnElmtId(e);
-        this.__addAreaLongPressGesture.purgeDependencyOnElmtId(e);
-        this.__arraySelectIsChange.purgeDependencyOnElmtId(e);
-        this.__arrayUnSelectIsChange.purgeDependencyOnElmtId(e);
-        this.__textItemEditWidth.purgeDependencyOnElmtId(e);
-        this.__imageItemWidth.purgeDependencyOnElmtId(e);
-        this.__saveClick.purgeDependencyOnElmtId(e);
-        this.__imageTextAddIconShow.purgeDependencyOnElmtId(e);
-        this.__imageTextRemoveIconShow.purgeDependencyOnElmtId(e);
-        this.__firstIn.purgeDependencyOnElmtId(e)
+    purgeVariableDependenciesOnElmtId(k15) {
+        this.__options.purgeDependencyOnElmtId(k15);
+        this.__selected.purgeDependencyOnElmtId(k15);
+        this.__unSelected.purgeDependencyOnElmtId(k15);
+        this.__copySelected.purgeDependencyOnElmtId(k15);
+        this.__copyUnSelected.purgeDependencyOnElmtId(k15);
+        this.__content.purgeDependencyOnElmtId(k15);
+        this.__hoverId.purgeDependencyOnElmtId(k15);
+        this.__gridComState.purgeDependencyOnElmtId(k15);
+        this.__menuSwitch.purgeDependencyOnElmtId(k15);
+        this.__areaWidth.purgeDependencyOnElmtId(k15);
+        this.__blockWidth.purgeDependencyOnElmtId(k15);
+        this.__blockHeight.purgeDependencyOnElmtId(k15);
+        this.__longScaleOnePointTwo.purgeDependencyOnElmtId(k15);
+        this.__scaleGridItemNinetyPercent.purgeDependencyOnElmtId(k15);
+        this.__reboundSize.purgeDependencyOnElmtId(k15);
+        this.__scaleIcon.purgeDependencyOnElmtId(k15);
+        this.__addIconShow.purgeDependencyOnElmtId(k15);
+        this.__scaleAddIcon.purgeDependencyOnElmtId(k15);
+        this.__isStartDrag.purgeDependencyOnElmtId(k15);
+        this.__insertIndex.purgeDependencyOnElmtId(k15);
+        this.__editGridDataLength.purgeDependencyOnElmtId(k15);
+        this.__isTouchDown.purgeDependencyOnElmtId(k15);
+        this.__addItemMoveX.purgeDependencyOnElmtId(k15);
+        this.__addItemMoveY.purgeDependencyOnElmtId(k15);
+        this.__editItemMoveX.purgeDependencyOnElmtId(k15);
+        this.__editItemMoveY.purgeDependencyOnElmtId(k15);
+        this.__unSelectedIndex.purgeDependencyOnElmtId(k15);
+        this.__clickAddBtn.purgeDependencyOnElmtId(k15);
+        this.__selectedIndex.purgeDependencyOnElmtId(k15);
+        this.__clickRemoveBtn.purgeDependencyOnElmtId(k15);
+        this.__addAreaLongPressGesture.purgeDependencyOnElmtId(k15);
+        this.__arraySelectIsChange.purgeDependencyOnElmtId(k15);
+        this.__arrayUnSelectIsChange.purgeDependencyOnElmtId(k15);
+        this.__textItemEditWidth.purgeDependencyOnElmtId(k15);
+        this.__imageItemWidth.purgeDependencyOnElmtId(k15);
+        this.__saveClick.purgeDependencyOnElmtId(k15);
+        this.__imageTextAddIconShow.purgeDependencyOnElmtId(k15);
+        this.__imageTextRemoveIconShow.purgeDependencyOnElmtId(k15);
+        this.__firstIn.purgeDependencyOnElmtId(k15);
     }
-
     aboutToBeDeleted() {
         this.__options.aboutToBeDeleted();
         this.__selected.aboutToBeDeleted();
@@ -284,1510 +352,1467 @@ export class GridObjectSortComponent extends ViewPU {
         this.__imageTextRemoveIconShow.aboutToBeDeleted();
         this.__firstIn.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
-        this.aboutToBeDeletedInternal()
+        this.aboutToBeDeletedInternal();
     }
-
     get options() {
-        return this.__options.get()
+        return this.__options.get();
     }
-
-    set options(e) {
-        this.__options.set(e)
+    set options(j15) {
+        this.__options.set(j15);
     }
-
     get selected() {
-        return this.__selected.get()
+        return this.__selected.get();
     }
-
-    set selected(e) {
-        this.__selected.set(e)
+    set selected(i15) {
+        this.__selected.set(i15);
     }
-
     get unSelected() {
-        return this.__unSelected.get()
+        return this.__unSelected.get();
     }
-
-    set unSelected(e) {
-        this.__unSelected.set(e)
+    set unSelected(h15) {
+        this.__unSelected.set(h15);
     }
-
     get copySelected() {
-        return this.__copySelected.get()
+        return this.__copySelected.get();
     }
-
-    set copySelected(e) {
-        this.__copySelected.set(e)
+    set copySelected(g15) {
+        this.__copySelected.set(g15);
     }
-
     get copyUnSelected() {
-        return this.__copyUnSelected.get()
+        return this.__copyUnSelected.get();
     }
-
-    set copyUnSelected(e) {
-        this.__copyUnSelected.set(e)
+    set copyUnSelected(f15) {
+        this.__copyUnSelected.set(f15);
     }
-
     get content() {
-        return this.__content.get()
+        return this.__content.get();
     }
-
-    set content(e) {
-        this.__content.set(e)
+    set content(e15) {
+        this.__content.set(e15);
     }
-
     get hoverId() {
-        return this.__hoverId.get()
+        return this.__hoverId.get();
     }
-
-    set hoverId(e) {
-        this.__hoverId.set(e)
+    set hoverId(d15) {
+        this.__hoverId.set(d15);
     }
-
     get gridComState() {
-        return this.__gridComState.get()
+        return this.__gridComState.get();
     }
-
-    set gridComState(e) {
-        this.__gridComState.set(e)
+    set gridComState(c15) {
+        this.__gridComState.set(c15);
     }
-
     get menuSwitch() {
-        return this.__menuSwitch.get()
+        return this.__menuSwitch.get();
     }
-
-    set menuSwitch(e) {
-        this.__menuSwitch.set(e)
+    set menuSwitch(b15) {
+        this.__menuSwitch.set(b15);
     }
-
     get areaWidth() {
-        return this.__areaWidth.get()
+        return this.__areaWidth.get();
     }
-
-    set areaWidth(e) {
-        this.__areaWidth.set(e)
+    set areaWidth(a15) {
+        this.__areaWidth.set(a15);
     }
-
     get blockWidth() {
-        return this.__blockWidth.get()
+        return this.__blockWidth.get();
     }
-
-    set blockWidth(e) {
-        this.__blockWidth.set(e)
+    set blockWidth(z14) {
+        this.__blockWidth.set(z14);
     }
-
     get blockHeight() {
-        return this.__blockHeight.get()
+        return this.__blockHeight.get();
     }
-
-    set blockHeight(e) {
-        this.__blockHeight.set(e)
+    set blockHeight(y14) {
+        this.__blockHeight.set(y14);
     }
-
     get longScaleOnePointTwo() {
-        return this.__longScaleOnePointTwo.get()
+        return this.__longScaleOnePointTwo.get();
     }
-
-    set longScaleOnePointTwo(e) {
-        this.__longScaleOnePointTwo.set(e)
+    set longScaleOnePointTwo(x14) {
+        this.__longScaleOnePointTwo.set(x14);
     }
-
     get scaleGridItemNinetyPercent() {
-        return this.__scaleGridItemNinetyPercent.get()
+        return this.__scaleGridItemNinetyPercent.get();
     }
-
-    set scaleGridItemNinetyPercent(e) {
-        this.__scaleGridItemNinetyPercent.set(e)
+    set scaleGridItemNinetyPercent(w14) {
+        this.__scaleGridItemNinetyPercent.set(w14);
     }
-
     get reboundSize() {
-        return this.__reboundSize.get()
+        return this.__reboundSize.get();
     }
-
-    set reboundSize(e) {
-        this.__reboundSize.set(e)
+    set reboundSize(v14) {
+        this.__reboundSize.set(v14);
     }
-
     get scaleIcon() {
-        return this.__scaleIcon.get()
+        return this.__scaleIcon.get();
     }
-
-    set scaleIcon(e) {
-        this.__scaleIcon.set(e)
+    set scaleIcon(u14) {
+        this.__scaleIcon.set(u14);
     }
-
     get addIconShow() {
-        return this.__addIconShow.get()
+        return this.__addIconShow.get();
     }
-
-    set addIconShow(e) {
-        this.__addIconShow.set(e)
+    set addIconShow(t14) {
+        this.__addIconShow.set(t14);
     }
-
     get scaleAddIcon() {
-        return this.__scaleAddIcon.get()
+        return this.__scaleAddIcon.get();
     }
-
-    set scaleAddIcon(e) {
-        this.__scaleAddIcon.set(e)
+    set scaleAddIcon(s14) {
+        this.__scaleAddIcon.set(s14);
     }
-
     get isStartDrag() {
-        return this.__isStartDrag.get()
+        return this.__isStartDrag.get();
     }
-
-    set isStartDrag(e) {
-        this.__isStartDrag.set(e)
+    set isStartDrag(r14) {
+        this.__isStartDrag.set(r14);
     }
-
     get insertIndex() {
-        return this.__insertIndex.get()
+        return this.__insertIndex.get();
     }
-
-    set insertIndex(e) {
-        this.__insertIndex.set(e)
+    set insertIndex(q14) {
+        this.__insertIndex.set(q14);
     }
-
     get editGridDataLength() {
-        return this.__editGridDataLength.get()
+        return this.__editGridDataLength.get();
     }
-
-    set editGridDataLength(e) {
-        this.__editGridDataLength.set(e)
+    set editGridDataLength(p14) {
+        this.__editGridDataLength.set(p14);
     }
-
     get isTouchDown() {
-        return this.__isTouchDown.get()
+        return this.__isTouchDown.get();
     }
-
-    set isTouchDown(e) {
-        this.__isTouchDown.set(e)
+    set isTouchDown(o14) {
+        this.__isTouchDown.set(o14);
     }
-
     get addItemMoveX() {
-        return this.__addItemMoveX.get()
+        return this.__addItemMoveX.get();
     }
-
-    set addItemMoveX(e) {
-        this.__addItemMoveX.set(e)
+    set addItemMoveX(n14) {
+        this.__addItemMoveX.set(n14);
     }
-
     get addItemMoveY() {
-        return this.__addItemMoveY.get()
+        return this.__addItemMoveY.get();
     }
-
-    set addItemMoveY(e) {
-        this.__addItemMoveY.set(e)
+    set addItemMoveY(m14) {
+        this.__addItemMoveY.set(m14);
     }
-    
     get editItemMoveX() {
-        return this.__editItemMoveX.get()
+        return this.__editItemMoveX.get();
     }
-
-    set editItemMoveX(e) {
-        this.__editItemMoveX.set(e)
+    set editItemMoveX(l14) {
+        this.__editItemMoveX.set(l14);
     }
-
     get editItemMoveY() {
-        return this.__editItemMoveY.get()
+        return this.__editItemMoveY.get();
     }
-
-    set editItemMoveY(e) {
-        this.__editItemMoveY.set(e)
+    set editItemMoveY(k14) {
+        this.__editItemMoveY.set(k14);
     }
-
     get unSelectedIndex() {
-        return this.__unSelectedIndex.get()
+        return this.__unSelectedIndex.get();
     }
-
-    set unSelectedIndex(e) {
-        this.__unSelectedIndex.set(e)
+    set unSelectedIndex(j14) {
+        this.__unSelectedIndex.set(j14);
     }
-
     get clickAddBtn() {
-        return this.__clickAddBtn.get()
+        return this.__clickAddBtn.get();
     }
-
-    set clickAddBtn(e) {
-        this.__clickAddBtn.set(e)
+    set clickAddBtn(i14) {
+        this.__clickAddBtn.set(i14);
     }
-
     get selectedIndex() {
-        return this.__selectedIndex.get()
+        return this.__selectedIndex.get();
     }
-
-    set selectedIndex(e) {
-        this.__selectedIndex.set(e)
+    set selectedIndex(h14) {
+        this.__selectedIndex.set(h14);
     }
-
     get clickRemoveBtn() {
-        return this.__clickRemoveBtn.get()
+        return this.__clickRemoveBtn.get();
     }
-
-    set clickRemoveBtn(e) {
-        this.__clickRemoveBtn.set(e)
+    set clickRemoveBtn(g14) {
+        this.__clickRemoveBtn.set(g14);
     }
-
     get addAreaLongPressGesture() {
-        return this.__addAreaLongPressGesture.get()
+        return this.__addAreaLongPressGesture.get();
     }
-
-    set addAreaLongPressGesture(e) {
-        this.__addAreaLongPressGesture.set(e)
+    set addAreaLongPressGesture(f14) {
+        this.__addAreaLongPressGesture.set(f14);
     }
-
     get arraySelectIsChange() {
-        return this.__arraySelectIsChange.get()
+        return this.__arraySelectIsChange.get();
     }
-
-    set arraySelectIsChange(e) {
-        this.__arraySelectIsChange.set(e)
+    set arraySelectIsChange(e14) {
+        this.__arraySelectIsChange.set(e14);
     }
-
     get arrayUnSelectIsChange() {
-        return this.__arrayUnSelectIsChange.get()
+        return this.__arrayUnSelectIsChange.get();
     }
-
-    set arrayUnSelectIsChange(e) {
-        this.__arrayUnSelectIsChange.set(e)
+    set arrayUnSelectIsChange(d14) {
+        this.__arrayUnSelectIsChange.set(d14);
     }
-
     get textItemEditWidth() {
-        return this.__textItemEditWidth.get()
+        return this.__textItemEditWidth.get();
     }
-
-    set textItemEditWidth(e) {
-        this.__textItemEditWidth.set(e)
+    set textItemEditWidth(c14) {
+        this.__textItemEditWidth.set(c14);
     }
-
     get imageItemWidth() {
-        return this.__imageItemWidth.get()
+        return this.__imageItemWidth.get();
     }
-
-    set imageItemWidth(e) {
-        this.__imageItemWidth.set(e)
+    set imageItemWidth(b14) {
+        this.__imageItemWidth.set(b14);
     }
-
     get saveClick() {
-        return this.__saveClick.get()
+        return this.__saveClick.get();
     }
-
-    set saveClick(e) {
-        this.__saveClick.set(e)
+    set saveClick(a14) {
+        this.__saveClick.set(a14);
     }
-
     get imageTextAddIconShow() {
-        return this.__imageTextAddIconShow.get()
+        return this.__imageTextAddIconShow.get();
     }
-
-    set imageTextAddIconShow(e) {
-        this.__imageTextAddIconShow.set(e)
+    set imageTextAddIconShow(z13) {
+        this.__imageTextAddIconShow.set(z13);
     }
-
     get imageTextRemoveIconShow() {
-        return this.__imageTextRemoveIconShow.get()
+        return this.__imageTextRemoveIconShow.get();
     }
-
-    set imageTextRemoveIconShow(e) {
-        this.__imageTextRemoveIconShow.set(e)
+    set imageTextRemoveIconShow(y13) {
+        this.__imageTextRemoveIconShow.set(y13);
     }
-
     get firstIn() {
-        return this.__firstIn.get()
+        return this.__firstIn.get();
     }
-
-    set firstIn(e) {
-        this.__firstIn.set(e)
+    set firstIn(x13) {
+        this.__firstIn.set(x13);
     }
-
     aboutToAppear() {
         this.dataList.length = 50;
-        this.selected = this.dataList && this.deduplicate(this.dataList).filter((e => e.selected)).sort(this.sortBy());
-        this.unSelected = this.dataList && this.deduplicate(this.dataList).filter((e => !e.selected)).sort(this.sortBy());
+        this.selected = this.dataList && this.deduplicate(this.dataList).filter(w13 => w13.selected).sort(this.sortBy());
+        this.unSelected = this.dataList && this.deduplicate(this.dataList).filter(v13 => !v13.selected).sort(this.sortBy());
         this.copySelected = this.selected.slice();
         this.copyUnSelected = this.unSelected.slice();
         this.editGridDataLength = this.selected.length;
         this.imageText = this.options.type === GridObjectSortComponentType.IMAGE_TEXT;
-        this.colNum = this.imageText ? 3 : 4;
-        setTimeout((() => {
-            this.firstIn =!1
-        }), 500)
+        this.colNum = this.imageText ? COL_IMAGE_TEXT : COL_TEXT;
+        setTimeout(() => {
+            this.firstIn = false;
+        }, 500);
     }
-
     aboutToDisappear() {
-        Context.animateTo({ duration: 200, curve: COMMON_BEZIER }, (() => {
-            this.gridComState = !1
-        }));
-        this.menuSwitch = !1;
+        Context.animateTo({
+            duration: ENTER_EXIT_ICON_DURATION,
+            curve: COMMON_BEZIER,
+        }, () => {
+            this.gridComState = false;
+        });
+        this.menuSwitch = false;
         this.selected = this.copySelected;
-        this.unSelected = this.copyUnSelected
+        this.unSelected = this.copyUnSelected;
     }
-
-    deduplicate(e) {
-        const t = [];
-        e.forEach((e => {
-            t.some((t => t.id === e.id)) || t.push(e)
-        }));
-        return t
+    deduplicate(l13) {
+        const m13 = [];
+        l13.forEach(o13 => {
+            if (!m13.some(q13 => q13.id === o13.id)) {
+                m13.push(o13);
+            }
+        });
+        return m13;
     }
-
     onGridComStateChange() {
         this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16;
-        this.imageText || (this.blockHeight = this.gridComState ? 44 : 36)
-    }
-
-    sortBy() {
-        return (e, t) => e.order - t.order
-    }
-
-    cancelEdit() {
-        if(!(this.isStartDrag || this.clickAddBtn || this.clickRemoveBtn)) {
-            Context.animateTo({ duration: 200, curve: LONG_TOUCH_SCALE }, (() => {
-                this.longScaleOnePointTwo = 1
-            }));
-            Context.animateTo({ duration: 200, curve: COMMON_BEZIER }, (() => {
-                this.gridComState = !1
-            }));
-            this.menuSwitch = !1;
-            this.selected = this.copySelected.slice();
-            this.unSelected = this.copyUnSelected.slice();
-            this.editGridDataLength = this.selected.length;
-            this.onCancel && this.onCancel()
+        if (!this.imageText) {
+            this.blockHeight = this.gridComState ? 44 : BLOCK_TEXT_HEIGHT;
         }
     }
-
-    goEdit() {
-        Context.animateTo({ duration: 200, curve: COMMON_BEZIER }, (() => {
-            this.gridComState = !0
-        }));
-        this.menuSwitch = !0
+    sortBy() {
+        return (j13, k13) => {
+            return j13.order - k13.order;
+        };
     }
-
-    onSaveEdit() {
-        Context.animateTo({ duration: 200, curve: LONG_TOUCH_SCALE }, (() => {
-            this.longScaleOnePointTwo = 1
-        }));
+    cancelEdit() {
+        if (this.isStartDrag || this.clickAddBtn || this.clickRemoveBtn) {
+            return;
+        }
+        Context.animateTo({
+            duration: ENTER_EXIT_ICON_DURATION,
+            curve: LONG_TOUCH_SCALE
+        }, () => {
+            this.longScaleOnePointTwo = 1;
+        });
+        Context.animateTo({
+            duration: ENTER_EXIT_ICON_DURATION,
+            curve: COMMON_BEZIER,
+        }, () => {
+            this.gridComState = false;
+        });
+        this.menuSwitch = false;
+        this.selected = this.copySelected.slice();
+        this.unSelected = this.copyUnSelected.slice();
         this.editGridDataLength = this.selected.length;
-        Context.animateTo({ duration: 200, curve: COMMON_BEZIER }, (() => {
-            this.gridComState = !1;
+        this.onCancel && this.onCancel();
+    }
+    goEdit() {
+        Context.animateTo({
+            duration: ENTER_EXIT_ICON_DURATION,
+            curve: COMMON_BEZIER,
+        }, () => {
+            this.gridComState = true;
+        });
+        this.menuSwitch = true;
+    }
+    onSaveEdit() {
+        Context.animateTo({
+            duration: ENTER_EXIT_ICON_DURATION,
+            curve: LONG_TOUCH_SCALE
+        }, () => {
+            this.longScaleOnePointTwo = 1;
+        });
+        this.editGridDataLength = this.selected.length;
+        Context.animateTo({
+            duration: ENTER_EXIT_ICON_DURATION,
+            curve: COMMON_BEZIER,
+        }, () => {
+            this.gridComState = false;
             this.copySelected = this.selected.slice();
             this.copyUnSelected = this.unSelected.slice();
-            const e = this.getNewData(this.selected, !0, 0);
-            const t = this.getNewData(this.unSelected, !1, this.selected.length);
-            this.selected = e;
-            this.unSelected = t;
-            this.onSave && this.onSave(e, t)
-        }));
-        setTimeout((() => {
-            this.saveClick = !1
-        }), 200);
-        this.menuSwitch = !1
+            const d13 = this.getNewData(this.selected, true, 0);
+            const e13 = this.getNewData(this.unSelected, false, this.selected.length);
+            this.selected = d13;
+            this.unSelected = e13;
+            this.onSave && this.onSave(d13, e13);
+        });
+        setTimeout(() => {
+            this.saveClick = false;
+        }, ENTER_EXIT_ICON_DURATION);
+        this.menuSwitch = false;
     }
-
-    onDragMoveEvent(e, t, i) {
-        if (!this.gridComState || e.x < this.blockWidth / 3 && e.y < this.blockHeight / 3) return;
-        let o = i;
-        i < 0 && (o = this.selected.length - 1);
-        this.insertIndex = i
+    onDragMoveEvent(w12, x12, y12) {
+        if (!this.gridComState || (w12.x < this.blockWidth / 3 && w12.y < this.blockHeight / 3)) {
+            return;
+        }
+        let z12 = y12;
+        if (z12 < 0) {
+            z12 = this.selected.length - 1;
+        }
+        this.insertIndex = y12;
     }
-
-    handleDeleteClick(e) {
-        if (this.clickAddBtn || this.clickRemoveBtn) return;
-        this.clickRemoveBtn = !0;
+    handleDeleteClick(r12) {
+        if (this.clickAddBtn || this.clickRemoveBtn) {
+            return;
+        }
+        this.clickRemoveBtn = true;
         this.scaleIcon = 0;
         this.arraySelectIsChange = 1;
-        let t = this.selected.findIndex((t => t.id === e.id));
-        this.content = e;
-        this.selectedIndex = t;
-        Context.animateTo({ curve: REMOVE_ADD_SPRING, onFinish: ()=> {
+        let s12 = this.selected.findIndex(v12 => v12.id === r12.id);
+        this.content = r12;
+        this.selectedIndex = s12;
+        Context.animateTo({ curve: REMOVE_ADD_SPRING, onFinish: () => {
             this.scaleIcon = 1;
-            this.selected.splice(t, 1);
-            this.unSelected.unshift(e);
+            this.selected.splice(s12, 1);
+            this.unSelected.unshift(r12);
             this.editGridDataLength = this.editGridDataLength - 1;
             this.editItemMoveX = 0;
             this.editItemMoveY = 0;
             this.arraySelectIsChange = 2;
-            this.clickRemoveBtn = !1
-        } }, (() => {
+            this.clickRemoveBtn = false;
+        } }, () => {
             this.editItemMoveX = this.getAddItemGridPosition().x;
-            this.editItemMoveY = this.getAddItemGridPosition().y
-        }))
+            this.editItemMoveY = this.getAddItemGridPosition().y;
+        });
     }
-
     customColumnsTemplate() {
-        let e = "1fr 1fr 1fr 1fr";
-        this.imageText && (e = "1fr 1fr 1fr");
-        return e
+        let q12 = '1fr 1fr 1fr 1fr';
+        if (this.imageText) {
+            q12 = '1fr 1fr 1fr';
+        }
+        return q12;
     }
-
-    getNewData(e, t, i) {
-        return e.map(((e, o) => {
-            e.selected = t;
-            e.order = i + o;
-            return e
-        }))
+    getNewData(k12, l12, m12) {
+        return k12.map((o12, p12) => {
+            o12.selected = l12;
+            o12.order = m12 + p12;
+            return o12;
+        });
     }
-
     getBlockWidth() {
-        return (this.areaWidth - 32) / this.colNum
+        const j12 = (this.areaWidth - 32) / this.colNum;
+        return j12;
     }
-
-    getGridHeight(e, t) {
-        let i = 0;
-        let o = e.length;
-        let s = 0;
-        let n = o % this.colNum == 0;
-        s = this.clickAddBtn && n || this.isStartDrag && n && t || this.clickRemoveBtn && n && !t ? 1 : 0;
-        let d = Math.ceil(o / this.colNum) + s;
-        i = this.blockHeight * d;
-        0 === o && (i = 0);
-        return i
-    }
-
-    imageTextRemoveIcon(e) {
-        return this.clickRemoveBtn && this.content.id === e.id ? {
-            id: -1,
-            type: 2e4,
-            params: ["sys.media.ohos_ic_public_add_norm_filled"],
-            bundleName: "",
-            moduleName: ""
-        } : {
-            id: -1,
-            type: 2e4,
-            params: ["sys.media.ohos_ic_public_remove_filled"],
-            bundleName: "",
-            moduleName: ""
+    getGridHeight(c12, d12) {
+        let e12 = 0;
+        let f12 = c12.length;
+        let g12 = 0;
+        let h12 = f12 % this.colNum === 0;
+        if (this.clickAddBtn && h12) {
+            g12 = 1;
         }
-    }
-
-    imageTextAddIcon(e) {
-        return this.clickAddBtn && this.content.id === e.id && this.gridComState ? {
-            id: -1,
-            type: 2e4,
-            params: ["sys.media.ohos_ic_public_remove_filled"],
-            bundleName: "",
-            moduleName: ""
-        } : {
-            id: -1,
-            type: 2e4,
-            params: ["sys.media.ohos_ic_public_add_norm_filled"],
-            bundleName: "",
-            moduleName: ""
+        else if (this.isStartDrag && h12 && d12) {
+            g12 = 1;
         }
+        else if (this.clickRemoveBtn && h12 && !d12) {
+            g12 = 1;
+        }
+        else {
+            g12 = 0;
+        }
+        let i12 = Math.ceil(f12 / this.colNum) + g12;
+        e12 = this.blockHeight * i12;
+        if (f12 === 0) {
+            e12 = 0;
+        }
+        return e12;
     }
-
-    imageTextAddIconVisible(e) {
-        return this.clickAddBtn && this.content.id === e.id && !this.gridComState ? Visibility.Hidden : Visibility.Visible
+    imageTextRemoveIcon(z11) {
+        const a12 = this.clickRemoveBtn && this.content.id === z11.id;
+        const b12 = a12 ? { "id": -1, "type": 20000, params: ["sys.media.ohos_ic_public_add_norm_filled"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 20000, params: ["sys.media.ohos_ic_public_remove_filled"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+        return b12;
     }
-
-    getCoodXY(e) {
-        let t = 0;
-        let i = 0;
-        const o = this.colNum;
-        const s = Math.trunc(e % o);
-        if (e >= this.insertIndex) if (s === o - 1) {
-            t -= this.blockWidth * (o - 1);
-            i += this.blockHeight
-        } else t += this.blockWidth;
+    imageTextAddIcon(w11) {
+        const x11 = this.clickAddBtn && this.content.id === w11.id && this.gridComState;
+        const y11 = x11 ? { "id": -1, "type": 20000, params: ["sys.media.ohos_ic_public_remove_filled"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 20000, params: ["sys.media.ohos_ic_public_add_norm_filled"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+        return y11;
+    }
+    imageTextAddIconVisible(t11) {
+        const u11 = this.clickAddBtn && this.content.id === t11.id && !this.gridComState;
+        const v11 = u11 ? Visibility.Hidden : Visibility.Visible;
+        return v11;
+    }
+    getCoodXY(o11) {
+        let p11 = 0;
+        let q11 = 0;
+        const r11 = this.colNum;
+        const s11 = Math.trunc(o11 % r11);
+        if (o11 >= this.insertIndex) {
+            if (s11 === r11 - 1) {
+                p11 = p11 - this.blockWidth * (r11 - 1);
+                q11 = q11 + this.blockHeight;
+            }
+            else {
+                p11 = p11 + this.blockWidth;
+            }
+        }
         if (!this.isStartDrag) {
-            t = 0;
-            i = 0
+            p11 = 0;
+            q11 = 0;
         }
-        return { x: t, y: i }
+        return { x: p11, y: q11 };
     }
-
     getAddItemGridPosition() {
-        const e = this.selected.length;
-        const t = this.colNum;
-        const i = (this.selectedIndex + 1) % t;
-        const o = Math.ceil((this.selectedIndex + 1) / t);
-        const s = Math.ceil(e / t);
-        const n = this.imageText;
-        let d = 0;
-        d = 0 === i ? n ? 2 * -this.blockWidth : 3 * -this.blockWidth : -this.blockWidth * (i - 1);
-        let a = 0;
-        const r = s - o;
-        a = (1 === e % t ? r : r + 1) * this.blockHeight + 56;
-        return { x: d, y: a }
-    }
-
-    getCoveringGridPosition(e) {
-        let t = 0;
-        let i = 0;
-        if (e > this.selectedIndex && 2 !== this.arraySelectIsChange) {
-            t = e % this.colNum == 0 ? this.blockWidth * (this.colNum - 1) : -this.blockWidth;
-            i = e % this.colNum == 0 ? -this.blockHeight : 0
+        const c11 = this.selected.length;
+        const d11 = this.colNum;
+        const e11 = (this.selectedIndex + 1) % d11;
+        const f11 = Math.ceil((this.selectedIndex + 1) / d11);
+        const g11 = Math.ceil(c11 / d11);
+        const h11 = this.imageText;
+        let i11 = 0;
+        if (e11 === 0) {
+            i11 = h11 ? -this.blockWidth * 2 : -this.blockWidth * 3;
         }
-        return { x: t, y: i }
-    }
-
-    getEditItemGridPosition(e, t) {
-        const i = e.length;
-        const o = this.colNum;
-        const s = Math.trunc(i % o);
-        const n = Math.trunc(t % o);
-        let d = Math.abs(s - n) * this.blockWidth;
-        s < n ? d = -d : s > n || (d = 0);
-        let a = 0;
-        let r = 0;
-        let h = Math.trunc(t / this.colNum) ;
-        r = !this.imageText && this.gridComState && t > 3 ? (h + 1) * (this.blockHeight - 8) + 8 : (h + 1) * this.blockHeight;
-        a = r + 56;
-        return { x: d, y: a }
-    }
-
-    getCoveringGridPositionBottom(e) {
-        let t = 0;
-        let i = 0;
-        const o = e % this.colNum == 0;
-        const s = this.gridComState && !this.imageText ? 8 - this.blockHeight : -this.blockHeight;
-        if (e > this.unSelectedIndex && 2 !== this.arrayUnSelectIsChange) {
-            t = o ? this.blockWidth * (this.colNum - 1) : -this.blockWidth;
-            i = o ? s : 0
+        else {
+            i11 = -this.blockWidth * (e11 - 1);
         }
-        return { x: t, y: i }
+        const j11 = SUBTITLE_HEIGHT;
+        let k11 = 0;
+        const l11 = g11 - f11;
+        const m11 = c11 % d11;
+        const n11 = m11 === 1 ? l11 : l11 + 1;
+        k11 = n11 * this.blockHeight + j11;
+        return {
+            x: i11,
+            y: k11
+        };
     }
-
-    getAddItemRightMove(e) {
-        let t = this.blockWidth;
-        let i = 0;
-        if((e + 1) % this.colNum == 0) {
-            t = -this.blockWidth * (this.colNum - 1);
-            i = this.imageText ? this.blockHeight : this.blockHeight - 8
+    getCoveringGridPosition(z10) {
+        let a11 = 0;
+        let b11 = 0;
+        if (z10 > this.selectedIndex && this.arraySelectIsChange !== 2) {
+            a11 = z10 % this.colNum === 0 ? this.blockWidth * (this.colNum - 1) : -this.blockWidth;
+            b11 = z10 % this.colNum === 0 ? -this.blockHeight : 0;
         }
-        return { x: t, y: i }
+        return {
+            x: a11,
+            y: b11
+        };
     }
-
-    getShowAreaItemTranslate(e) {
-        return this.isStartDrag ? {
-            x: this.getCoodXY(e).x,
-            y: this.getCoodXY(e).y
-        } : this.isStartDrag || e !== this.selectedIndex ? !this.isStartDrag && e !== this.selectedIndex && this.clickRemoveBtn ? {
-            x: this.getCoveringGridPosition(e).x,
-            y: this.getCoveringGridPosition(e).y
-        } : { x: 0, y: 0 } : { x: this.editItemMoveX, y: this.editItemMoveY }
+    getEditItemGridPosition(n10, o10) {
+        const p10 = n10.length;
+        const q10 = this.colNum;
+        const r10 = Math.trunc(p10 % q10);
+        const s10 = Math.trunc(o10 % q10);
+        let t10 = Math.abs(r10 - s10) * this.blockWidth;
+        if (r10 < s10) {
+            t10 = -t10;
+        }
+        else if (r10 > s10) {
+            t10 = t10;
+        }
+        else {
+            t10 = 0;
+        }
+        let u10 = 0;
+        let v10 = 0;
+        let w10 = Math.trunc(o10 / this.colNum);
+        const x10 = SUBTITLE_HEIGHT;
+        const y10 = !this.imageText && this.gridComState && o10 > 3;
+        if (y10) {
+            v10 = (w10 + 1) * (this.blockHeight - 8) + 8;
+        }
+        else {
+            v10 = (w10 + 1) * this.blockHeight;
+        }
+        u10 = v10 + x10;
+        return {
+            x: t10,
+            y: u10
+        };
     }
-
-    getAddAreaItemTranslate(e) {
-        return this.clickRemoveBtn ? {
-            x: this.getAddItemRightMove(e).x,
-            y: this.getAddItemRightMove(e).y
-        } : this.clickRemoveBtn || e !== this.unSelectedIndex ? !this.clickRemoveBtn && e !== this.unSelectedIndex && this.clickAddBtn ? {
-            x: this.getCoveringGridPositionBottom(e).x,
-            y: this.getCoveringGridPositionBottom(e).y
-        } : { x: 0, y: 0 } : { x: this.addItemMoveX, y: -this.addItemMoveY }
+    getCoveringGridPositionBottom(i10) {
+        let j10 = 0;
+        let k10 = 0;
+        const l10 = i10 % this.colNum === 0;
+        const m10 = this.gridComState && !this.imageText ? -this.blockHeight + 8 : -this.blockHeight;
+        if (i10 > this.unSelectedIndex && this.arrayUnSelectIsChange !== 2) {
+            j10 = l10 ? this.blockWidth * (this.colNum - 1) : -this.blockWidth;
+            k10 = l10 ? m10 : 0;
+        }
+        return {
+            x: j10,
+            y: k10
+        };
     }
-
-    PixelMapBuilder(e = null) {
-        this.observeComponentCreation2(((e, t) => {
+    getAddItemRightMove(e10) {
+        let f10 = this.blockWidth;
+        let g10 = 0;
+        let h10 = (e10 + 1) % this.colNum === 0;
+        if (h10) {
+            f10 = -this.blockWidth * (this.colNum - 1);
+            g10 = this.imageText ? this.blockHeight : this.blockHeight - 8;
+        }
+        return { x: f10, y: g10 };
+    }
+    getShowAreaItemTranslate(d10) {
+        if (this.isStartDrag) {
+            return {
+                x: this.getCoodXY(d10).x,
+                y: this.getCoodXY(d10).y
+            };
+        }
+        if (!this.isStartDrag && d10 === this.selectedIndex) {
+            return {
+                x: this.editItemMoveX,
+                y: this.editItemMoveY
+            };
+        }
+        if (!this.isStartDrag && d10 !== this.selectedIndex && this.clickRemoveBtn) {
+            return {
+                x: this.getCoveringGridPosition(d10).x,
+                y: this.getCoveringGridPosition(d10).y
+            };
+        }
+        return { x: 0, y: 0 };
+    }
+    getAddAreaItemTranslate(c10) {
+        if (this.clickRemoveBtn) {
+            return {
+                x: this.getAddItemRightMove(c10).x,
+                y: this.getAddItemRightMove(c10).y
+            };
+        }
+        if (!this.clickRemoveBtn && c10 === this.unSelectedIndex) {
+            return {
+                x: this.addItemMoveX,
+                y: -this.addItemMoveY
+            };
+        }
+        if (!this.clickRemoveBtn && c10 !== this.unSelectedIndex && this.clickAddBtn) {
+            return {
+                x: this.getCoveringGridPositionBottom(c10).x,
+                y: this.getCoveringGridPositionBottom(c10).y
+            };
+        }
+        return { x: 0, y: 0 };
+    }
+    PixelMapBuilder(y8 = null) {
+        this.observeComponentCreation2((a10, b10) => {
             Stack.create({ alignContent: Alignment.Center });
-            Stack.clip(!1);
-            Stack.height(1.5 * this.blockHeight);
-            Stack.width(1.2 * this.blockWidth)
-        }), Stack);
-        this.observeComponentCreation2(((e, t) => {
+            Stack.clip(false);
+            Stack.height(this.blockHeight * 1.5);
+            Stack.width(this.blockWidth * 1.2);
+        }, Stack);
+        this.observeComponentCreation2((b9, c9) => {
             If.create();
-            this.imageText ? this.ifElseBranchUpdateFunction(0, (() => {
-                this.observeComponentCreation2(((e, t) => {
-                    Column.create();
-                    Column.alignItems(HorizontalAlign.Center);
-                    Column.justifyContent(FlexAlign.Center);
-                    Column.width(this.imageItemWidth);
-                    Column.height(this.imageItemWidth);
-                    Column.padding({ left: 8, right: 8 });
-                    Column.backgroundColor(this.touchDown);
-                    Column.borderRadius(this.touchBorderRadius);
-                    Column.scale({ x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo })
-                }), Column);
-                this.observeComponentCreation2(((e, t) => {
-                    Image.create(this.content.url);
-                    Image.draggable(!1);
-                    Image.height(this.options.imageSize || 56);
-                    Image.width(this.options.imageSize || 56)
-                }), Image);
-                this.observeComponentCreation2(((e, t) => {
-                    Text.create(this.content.text);
-                    Text.textAlign(TextAlign.Center);
-                    Text.fontSize({
-                        id: -1,
-                        type: 10002,
-                        params: ["sys.float.ohos_id_text_size_button3"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Text.margin({ top: 2 });
-                    Text.maxLines(1);
-                    Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-                    Text.textAlign(TextAlign.Center)
-                }), Text);
-                Text.pop();
-                this.observeComponentCreation2(((e, t) => {
-                    Image.create({
-                        id: -1,
-                        type: 2e4,
-                        params: ["sys.media.ohos_ic_public_remove_filled"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Image.draggable(!1);
-                    Image.fillColor({
-                        id: -1,
-                        type: 10001,
-                        params: ["sys.color.ohos_id_color_secondary"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Image.width(24);
-                    Image.height(24);
-                    Image.position({ x: this.blockWidth - 40, y: -8 })
-                }), Image);
-                Column.pop()
-            })) : this.ifElseBranchUpdateFunction(1, (() => {
-                this.observeComponentCreation2(((e, t) => {
-                    Row.create();
-                    Row.borderRadius(50);
-                    Row.padding({ left: 12, right: 12 });
-                    Row.scale({ x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo });
-                    Row.alignItems(VerticalAlign.Center);
-                    Row.justifyContent(FlexAlign.Center);
-                    Row.backgroundColor({
-                        id: -1,
-                        type: 10001,
-                        params: ["sys.color.ohos_id_color_button_normal"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Row.width(this.textItemEditWidth);
-                    Row.height(28)
-                }), Row);
-                this.observeComponentCreation2(((e, t) => {
-                    Text.create(this.content.text);
-                    Text.fontColor({
-                        id: -1,
-                        type: 10001,
-                        params: ["sys.color.ohos_id_color_text_primary"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Text.fontSize({
-                        id: -1,
-                        type: 10002,
-                        params: ["sys.float.ohos_id_text_size_button3"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-                    Text.textAlign(TextAlign.Center);
-                    Text.maxLines(1)
-                }), Text);
-                Text.pop();
-                this.observeComponentCreation2(((e, t) => {
-                    Image.create({
-                        id: -1,
-                        type: 2e4,
-                        params: ["sys.media.ohos_ic_public_remove_filled"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Image.draggable(!1);
-                    Image.fillColor({
-                        id: -1,
-                        type: 10001,
-                        params: ["sys.color.ohos_id_color_secondary"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Image.width(24);
-                    Image.height(24);
-                    Image.position({ x: this.blockWidth - 52, y: -8 })
-                }), Image);
-                Row.pop()
-            }))
-        }), If);
+            if (this.imageText) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((y9, z9) => {
+                        Column.create();
+                        Column.alignItems(HorizontalAlign.Center);
+                        Column.justifyContent(FlexAlign.Center);
+                        Column.width(this.imageItemWidth);
+                        Column.height(this.imageItemWidth);
+                        Column.padding({ left: MARGIN_EIGHT, right: MARGIN_EIGHT });
+                        Column.backgroundColor(this.touchDown);
+                        Column.borderRadius(this.touchBorderRadius);
+                        Column.scale({ x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo });
+                    }, Column);
+                    this.observeComponentCreation2((w9, x9) => {
+                        Image.create(this.content.url);
+                        Image.draggable(false);
+                        Image.height(this.options.imageSize || IMAGE_DEFAULT);
+                        Image.width((this.options.imageSize || IMAGE_DEFAULT));
+                    }, Image);
+                    this.observeComponentCreation2((u9, v9) => {
+                        Text.create(this.content.text);
+                        Text.textAlign(TextAlign.Center);
+                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.margin({ top: 2 });
+                        Text.maxLines(1);
+                        Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                        Text.textAlign(TextAlign.Center);
+                    }, Text);
+                    Text.pop();
+                    this.observeComponentCreation2((s9, t9) => {
+                        Image.create({ "id": -1, "type": 20000, params: ["sys.media.ohos_ic_public_remove_filled"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Image.draggable(false);
+                        Image.fillColor({ "id": -1, "type": 10001, params: ["sys.color.ohos_id_color_secondary"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Image.width(ICON_SIZE);
+                        Image.height(ICON_SIZE);
+                        Image.position({
+                            x: this.blockWidth - 40,
+                            y: -MARGIN_EIGHT
+                        });
+                    }, Image);
+                    Column.pop();
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.observeComponentCreation2((l9, m9) => {
+                        Row.create();
+                        Row.borderRadius(50);
+                        Row.padding({
+                            left: TEXT_PADDING_LEFT_RIGHT,
+                            right: TEXT_PADDING_LEFT_RIGHT,
+                        });
+                        Row.scale({ x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo });
+                        Row.alignItems(VerticalAlign.Center);
+                        Row.justifyContent(FlexAlign.Center);
+                        Row.backgroundColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_button_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Row.width(this.textItemEditWidth);
+                        Row.height(28);
+                    }, Row);
+                    this.observeComponentCreation2((j9, k9) => {
+                        Text.create(this.content.text);
+                        Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                        Text.textAlign(TextAlign.Center);
+                        Text.maxLines(1);
+                    }, Text);
+                    Text.pop();
+                    this.observeComponentCreation2((h9, i9) => {
+                        Image.create({ "id": -1, "type": 20000, params: ["sys.media.ohos_ic_public_remove_filled"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Image.draggable(false);
+                        Image.fillColor({ "id": -1, "type": 10001, params: ["sys.color.ohos_id_color_secondary"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Image.width(ICON_SIZE);
+                        Image.height(ICON_SIZE);
+                        Image.position({
+                            x: this.blockWidth - 52,
+                            y: -MARGIN_EIGHT
+                        });
+                    }, Image);
+                    Row.pop();
+                });
+            }
+        }, If);
         If.pop();
-        Stack.pop()
+        Stack.pop();
     }
-
-    HeaderTitleBuilder(e = null) {
-        this.observeComponentCreation2(((e, t) => {
+    HeaderTitleBuilder(d8 = null) {
+        this.observeComponentCreation2((w8, x8) => {
             __Common__.create();
-            __Common__.visibility(this.menuSwitch ? Visibility.None : Visibility.Visible)
-        }), __Common__);
-        this.observeComponentCreation2(((e, t) => {
-            if (t) {
-                let t = () => ({
-                    title: this.options.normalTitle || {
-                        id: -1,
-                        type: 10003,
-                        params: ["sys.string.ohos_grid_edit_title_chanel"],
-                        bundleName: "",
-                        moduleName: ""
-                    },
-                    menuItems: this.menuItems
-                });
-                ViewPU.create(new ComposeTitleBar(this, {
-                    title: this.options.normalTitle || {
-                        id: -1,
-                        type: 10003,
-                        params: ["sys.string.ohos_grid_edit_title_chanel"],
-                        bundleName: "",
-                        moduleName: ""
-                    },
-                    menuItems: this.menuItems
-                }, void 0, e, t))
-            } else this.updateStateVarsOfChildByElmtId(e, {})
-        }), null);
+            __Common__.visibility(!this.menuSwitch ? Visibility.Visible : Visibility.None);
+        }, __Common__);
+        {
+            this.observeComponentCreation2((q8, r8) => {
+                if (r8) {
+                    let s8 = new ComposeTitleBar(typeof PUV2ViewBase !== "undefined" && d8 instanceof PUV2ViewBase ? d8 : this, {
+                        title: this.options.normalTitle || { "id": -1, "type": 10003, params: ['sys.string.ohos_grid_edit_title_chanel'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                        menuItems: this.menuItems,
+                    }, undefined, q8, () => { }, { page: "library/src/main/ets/components/mainpage/GridObjectSortComponent.ets", line: 625, col: 5 });
+                    ViewPU.create(s8);
+                    let t8 = () => {
+                        return {
+                            title: this.options.normalTitle || { "id": -1, "type": 10003, params: ['sys.string.ohos_grid_edit_title_chanel'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                            menuItems: this.menuItems
+                        };
+                    };
+                    s8.paramsGenerator_ = t8;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(q8, {});
+                }
+            }, { name: "ComposeTitleBar" });
+        }
         __Common__.pop();
-        this.observeComponentCreation2(((e, t) => {
+        this.observeComponentCreation2((n8, o8) => {
             __Common__.create();
-            __Common__.visibility(this.menuSwitch ? Visibility.Visible : Visibility.None)
-        }), __Common__);
-        this.observeComponentCreation2(((e, t) => {
-            if (t) {
-                let t = () => ({
-                    leftIconStyle: EditableLeftIconType.Cancel,
-                    menuItems: [],
-                    title: this.options.editTitle || {
-                        id: -1,
-                        type: 10003,
-                        params: ["sys.string.ohos_grid_edit_title_edit"],
-                        bundleName: "",
-                        moduleName: ""
-                    },
-                    onCancel: () => {
-                        this.cancelEdit()
-                    },
-                    onSave: () => {
-                        this.saveClick = !0;
-                        this.onSaveEdit()
-                    }
-                });
-                ViewPU.create(new EditableTitleBar(this, {
-                    leftIconStyle: EditableLeftIconType.Cancel,
-                    menuItems: [],
-                    title: this.options.editTitle || {
-                        id: -1,
-                        type: 10003,
-                        params: ["sys.string.ohos_grid_edit_title_edit"],
-                        bundleName: "",
-                        moduleName: ""
-                    },
-                    onCancel: () => {
-                        this.cancelEdit()
-                    },
-                    onSave: () => {
-                        this.saveClick = !0;
-                        this.onSaveEdit()
-                    }
-                }, void 0, e, t))
-            } else this.updateStateVarsOfChildByElmtId(e, {})
-        }), null);
-        __Common__.pop()
+            __Common__.visibility(this.menuSwitch ? Visibility.Visible : Visibility.None);
+        }, __Common__);
+        {
+            this.observeComponentCreation2((h8, i8) => {
+                if (i8) {
+                    let j8 = new EditableTitleBar(typeof PUV2ViewBase !== "undefined" && d8 instanceof PUV2ViewBase ? d8 : this, {
+                        leftIconStyle: EditableLeftIconType.Cancel,
+                        menuItems: [],
+                        title: this.options.editTitle || { "id": -1, "type": 10003, params: ['sys.string.ohos_grid_edit_title_edit'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                        onCancel: () => {
+                            this.cancelEdit();
+                        },
+                        onSave: () => {
+                            this.saveClick = true;
+                            this.onSaveEdit();
+                        }
+                    }, undefined, h8, () => { }, { page: "library/src/main/ets/components/mainpage/GridObjectSortComponent.ets", line: 630, col: 5 });
+                    ViewPU.create(j8);
+                    let k8 = () => {
+                        return {
+                            leftIconStyle: EditableLeftIconType.Cancel,
+                            menuItems: [],
+                            title: this.options.editTitle || { "id": -1, "type": 10003, params: ['sys.string.ohos_grid_edit_title_edit'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                            onCancel: () => {
+                                this.cancelEdit();
+                            },
+                            onSave: () => {
+                                this.saveClick = true;
+                                this.onSaveEdit();
+                            }
+                        };
+                    };
+                    j8.paramsGenerator_ = k8;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(h8, {});
+                }
+            }, { name: "EditableTitleBar" });
+        }
+        __Common__.pop();
     }
-
-    ImageTextBuilder(e, t, i = null) {
-        this.observeComponentCreation2(((e, t) => {
+    ImageTextBuilder(z6, a7, b7 = null) {
+        this.observeComponentCreation2((b8, c8) => {
             Column.create();
-            Column.padding({ left: 8, right: 8 });
-            Column.width("100%")
-        }), Column);
-        this.observeComponentCreation2(((t, i) => {
+            Column.padding({ left: MARGIN_EIGHT, right: MARGIN_EIGHT });
+            Column.width('100%');
+        }, Column);
+        this.observeComponentCreation2((z7, a8) => {
             Column.create();
             Column.alignItems(HorizontalAlign.Center);
             Column.justifyContent(FlexAlign.Center);
-            Column.width("100%");
+            Column.width('100%');
             Column.height(this.imageItemWidth);
-            Column.padding({ left: 8, right: 8 });
-            Column.borderRadius(this.isTouchDown && e.id === this.content.id || e.id === this.hoverId ? this.touchBorderRadius : 0);
-            Column.backgroundColor(this.isTouchDown && e.id === this.content.id ? this.touchDown : e.id === this.hoverId ? this.hoverBackgroundColor : "");
-            Column.scale(e.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {})
-        }), Column);
-        this.observeComponentCreation2(((t, i) => {
-            Image.create(e.url);
-            Image.draggable(!1);
-            Image.height(this.options.imageSize || 56);
-            Image.width(this.options.imageSize || 56)
-        }), Image);
-        this.observeComponentCreation2(((t, i) => {
-            Text.create(e.text);
+            Column.padding({ left: MARGIN_EIGHT, right: MARGIN_EIGHT });
+            Column.borderRadius((this.isTouchDown && z6.id === this.content.id) ||
+                z6.id === this.hoverId ? this.touchBorderRadius : 0);
+            Column.backgroundColor(this.isTouchDown && z6.id === this.content.id
+                ? this.touchDown : z6.id === this.hoverId ? this.hoverBackgroundColor : '');
+            Column.scale(z6.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {});
+        }, Column);
+        this.observeComponentCreation2((x7, y7) => {
+            Image.create(z6.url);
+            Image.draggable(false);
+            Image.height(this.options.imageSize || IMAGE_DEFAULT);
+            Image.width((this.options.imageSize || IMAGE_DEFAULT));
+        }, Image);
+        this.observeComponentCreation2((v7, w7) => {
+            Text.create(z6.text);
             Text.textAlign(TextAlign.Center);
-            Text.fontSize({
-                id: -1,
-                type: 10002,
-                params: ["sys.float.ohos_id_text_size_button3"],
-                bundleName: "",
-                moduleName: ""
-            });
+            Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Text.margin({ top: 2 });
             Text.maxLines(1);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-            Text.textAlign(TextAlign.Center)
-        }), Text);
+            Text.textAlign(TextAlign.Center);
+        }, Text);
         Text.pop();
-        this.observeComponentCreation2(((i, o) => {
-            Image.create(this.imageTextAddIcon(e)); 
-            Image.draggable(!1);
-            Image.visibility("add" === t ? this.imageTextAddIconVisible(e) : Visibility.Hidden);
-            Image.fillColor({
-                id: -1,
-                type: 10001,
-                params: ["sys.color.ohos_id_color_secondary"],
-                bundleName: "",
-                moduleName: ""
+        this.observeComponentCreation2((l7, m7) => {
+            Image.create(this.imageTextAddIcon(z6));
+            Image.draggable(false);
+            Image.visibility(a7 === "add" ? this.imageTextAddIconVisible(z6) : Visibility.Hidden);
+            Image.fillColor({ "id": -1, "type": 10001, params: ["sys.color.ohos_id_color_secondary"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Image.width(ICON_SIZE);
+            Image.height(ICON_SIZE);
+            Image.position({
+                x: this.blockWidth - 40,
+                y: -MARGIN_EIGHT
             });
-            Image.width(24);
-            Image.height(24);
-            Image.position({ x: this.blockWidth - 40, y: -8 });
-            Image.onClick((() => {
-                if (this.clickAddBtn || this.clickRemoveBtn) return;
+            Image.onClick(() => {
+                if (this.clickAddBtn || this.clickRemoveBtn) {
+                    return;
+                }
                 this.scaleIcon = 0;
-                this.content = e;
-                const t = this.unSelected.findIndex((t => t.id === e.id));
+                this.content = z6;
+                const o7 = this.unSelected.findIndex(u7 => u7.id === z6.id);
                 this.editGridDataLength = this.selected.length + 1;
-                const i = this.getEditItemGridPosition(ObservedObject.GetRawObject(this.selected), t);
-                this.unSelectedIndex = t;
+                const p7 = this.getEditItemGridPosition(ObservedObject.GetRawObject(this.selected), o7);
+                this.unSelectedIndex = o7;
                 this.arrayUnSelectIsChange = 1;
-                this.clickAddBtn = !0;
-                Context.animateTo({ curve: REMOVE_ADD_SPRING, onFinish: ()=> {
-                    if (!this.selected.some((t => t.id === e.id))) {
-                        this.arrayUnSelectIsChange = 2;
-                        this.scaleIcon = 1;
-                        this.selected.push(e);
-                        this.unSelected.splice(t, 1);
-                        this.addItemMoveX = 0;
-                        this.addItemMoveY = 0;
-                        this.gridComState || this.onSaveEdit();
-                        this.clickAddBtn = !1
+                this.clickAddBtn = true;
+                Context.animateTo({
+                    curve: REMOVE_ADD_SPRING,
+                    onFinish: () => {
+                        if (!this.selected.some(t7 => t7.id === z6.id)) {
+                            this.arrayUnSelectIsChange = 2;
+                            this.scaleIcon = 1;
+                            this.selected.push(z6);
+                            this.unSelected.splice(o7, 1);
+                            this.addItemMoveX = 0;
+                            this.addItemMoveY = 0;
+                            if (!this.gridComState) {
+                                this.onSaveEdit();
+                            }
+                            this.clickAddBtn = false;
+                        }
                     }
-                } }, (() => {
-                    this.addItemMoveX = i.x;
-                    this.addItemMoveY = i.y
-                }))
-            }))
-        }), Image);
-        this.observeComponentCreation2(((i, o) => {
-            Image.create(this.imageTextRemoveIcon(e));
-            Image.draggable(!1);
-            Image.fillColor({
-                id: -1,
-                type: 10001,
-                params: ["sys.color.ohos_id_color_secondary"],
-                bundleName: "",
-                moduleName: ""
+                }, () => {
+                    this.addItemMoveX = p7.x;
+                    this.addItemMoveY = p7.y;
+                });
             });
-            Image.visibility("delete" === t && this.gridComState ? Visibility.Visible : Visibility.Hidden);
-            Image.width(24);
-            Image.height(24);
-            Image.position({ x: this.blockWidth - 40, y: -8 });
-            Image.onClick((() => this.handleDeleteClick(e)))
-        }), Image);
+        }, Image);
+        this.observeComponentCreation2((i7, j7) => {
+            Image.create(this.imageTextRemoveIcon(z6));
+            Image.draggable(false);
+            Image.fillColor({ "id": -1, "type": 10001, params: ["sys.color.ohos_id_color_secondary"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Image.visibility(a7 === "delete" && this.gridComState ? Visibility.Visible : Visibility.Hidden);
+            Image.width(ICON_SIZE);
+            Image.height(ICON_SIZE);
+            Image.position({
+                x: this.blockWidth - 40,
+                y: -MARGIN_EIGHT
+            });
+            Image.onClick(() => this.handleDeleteClick(z6));
+        }, Image);
         Column.pop();
-        Column.pop()
+        Column.pop();
     }
-
-    TextBlockBuilder(e, t = null) {
-        this.observeComponentCreation2(((t, i) => {
+    TextBlockBuilder(e6, f6 = null) {
+        this.observeComponentCreation2((x6, y6) => {
             Stack.create();
-            Stack.scale(e.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {});
-            Stack.padding({ left: 8, right: 8 });
-            Stack.height(28)
-        }), Stack);
-        this.observeComponentCreation2(((t, i) => {
-            Row.create();
-            Context.animation(this.firstIn ? { duration: 0 } : {
-                duration: 200,
-                curve: this.gridComState ? DRAG_SPRING : COMMON_BEZIER
+            Stack.scale(e6.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {});
+            Stack.padding({
+                left: MARGIN_EIGHT,
+                right: MARGIN_EIGHT
             });
+            Stack.height(28);
+        }, Stack);
+        this.observeComponentCreation2((v6, w6) => {
+            Row.create();
+            Context.animation(!this.firstIn ? {
+                duration: ENTER_EXIT_ICON_DURATION,
+                curve: this.gridComState ? DRAG_SPRING : COMMON_BEZIER
+            } : { duration: 0 });
             Row.borderRadius(50);
-            Row.width(this.clickRemoveBtn && e.id === this.content.id ? this.textItemEditWidth + 8 : this.textItemEditWidth);
-            Row.translate(this.gridComState ? this.clickRemoveBtn && e.id === this.content.id ? { x: 0 } : { x: -4 } : {
+            Row.width(this.clickRemoveBtn && e6.id === this.content.id ? this.textItemEditWidth + 8 : this.textItemEditWidth);
+            Row.translate(this.gridComState ? this.clickRemoveBtn &&
+                e6.id === this.content.id ? { x: 0 } : { x: -4 } : { x: 0 });
+            Row.height('100%');
+            Context.animation(null);
+            Row.backgroundColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_button_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+        }, Row);
+        Row.pop();
+        this.observeComponentCreation2((t6, u6) => {
+            Flex.create({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center });
+            Context.animation(!this.firstIn ? {
+                duration: ENTER_EXIT_ICON_DURATION,
+                curve: this.gridComState ? DRAG_SPRING : COMMON_BEZIER
+            } : { duration: 0 });
+            Flex.borderRadius(50);
+            Flex.padding({
+                left: TEXT_PADDING_LEFT_RIGHT,
+                right: TEXT_PADDING_LEFT_RIGHT,
+            });
+            Flex.backgroundColor(this.isTouchDown && e6.id === this.content.id ? this.touchDown
+                : e6.id === this.hoverId ? this.hoverBackgroundColor
+                    : '');
+            Flex.width(this.clickRemoveBtn && e6.id === this.content.id ? this.textItemEditWidth + 8 : this.textItemEditWidth);
+            Flex.translate(this.gridComState ? this.clickRemoveBtn && e6.id === this.content.id ? { x: 0 } : { x: -4 } : {
                 x: 0
             });
-            Row.height("100%");
+            Flex.height('100%');
             Context.animation(null);
-            Row.backgroundColor({
-                id: -1,
-                type: 10001,
-                params: ["sys.color.ohos_id_color_button_normal"],
-                bundleName: "",
-                moduleName: ""
-            })
-        }), Row);
-        Row.pop();
-        this.observeComponentCreation2(((t, i) => {
-            Flex.create({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center });
-            Context.animation(this.firstIn ? { duration: 0 } : {
-                duration: 200,
-                curve: this.gridComState ? DRAG_SPRING : COMMON_BEZIER
+        }, Flex);
+        this.observeComponentCreation2((r6, s6) => {
+            Image.create({ "id": -1, "type": 20000, params: ["sys.media.ohos_ic_public_add"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Context.animation({
+                duration: ENTER_EXIT_ICON_DURATION,
+                curve: COMMON_BEZIER
             });
-            Flex.borderRadius(50);
-            Flex.padding({ left: 12, right: 12 });
-            Flex.backgroundColor(this.isTouchDown && e.id === this.content.id ? this.touchDown : e.id === this.hoverId ? this.hoverBackgroundColor : "");
-            Flex.width(this.clickRemoveBtn && e.id === this.content.id ? this.textItemEditWidth + 8 : this.textItemEditWidth);
-            Flex.translate(this.gridComState ? this.clickRemoveBtn && e.id === this.content.id ? { x: 0 } : {
-                x: -4
-            } : { x: 0 });
-            Flex.height("100%");
-            Context.animation(null)
-        }), Flex);
-        this.observeComponentCreation2(((t, i) => {
-            Image.create({
-                id: -1,
-                type: 2e4,
-                params: ["sys.media.ohos_ic_public_add"],
-                bundleName: "",
-                moduleName: ""
-            });
-            Context.animation({ duration: 200, curve: COMMON_BEZIER });
             Image.width(12);
             Image.height(12);
-            Image.draggable(!1);
-            Image.fillColor({
-                id: -1,
-                type: 10001,
-                params: ["sys.color.ohos_id_color_text_secondary"],
-                bundleName: "",
-                moduleName: ""
-            });
-            Image.visibility(this.clickRemoveBtn && e.id === this.content.id ? Visibility.Visible : Visibility.None);
-            Image.transition({ type: TransitionType.All, scale: { x: 0, y: 0 } });
+            Image.draggable(false);
+            Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Image.visibility(this.clickRemoveBtn && e6.id === this.content.id ? Visibility.Visible : Visibility.None);
+            Image.transition({ type: TransitionType.All, scale: { x: 0, y: 0, } });
             Image.margin({ right: 4 });
-            Context.animation(null)
-        }), Image);
-        this.observeComponentCreation2(((t, i) => {
-            Text.create(e.text);
-            Text.fontColor({
-                id: -1,
-                type: 10001,
-                params: ["sys.color.ohos_id_color_text_primary"],
-                bundleName: "",
-                moduleName: ""
-            });
-            Text.fontSize({
-                id: -1,
-                type: 10002,
-                params: ["sys.float.ohos_id_text_size_button3"],
-                bundleName: "",
-                moduleName: ""
-            });
+            Context.animation(null);
+        }, Image);
+        this.observeComponentCreation2((p6, q6) => {
+            Text.create(e6.text);
+            Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.textAlign(TextAlign.Center);
             Text.maxLines(1);
-            Text.constraintSize(this.clickRemoveBtn && e.id === this.content.id ?  { maxWidth: 26 } : {})
-        }), Text);
+            Text.constraintSize(this.clickRemoveBtn && e6.id === this.content.id ? { maxWidth: 26 } : {});
+        }, Text);
         Text.pop();
-        this.observeComponentCreation2(((t, i) => {
-            Image.create({
-                id: -1,
-                type: 2e4,
-                params: ["sys.media.ohos_ic_public_remove_filled"],
-                bundleName: "",
-                moduleName: ""
+        this.observeComponentCreation2((m6, n6) => {
+            Image.create({ "id": -1, "type": 20000, params: ["sys.media.ohos_ic_public_remove_filled"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Context.animation({
+                duration: ENTER_EXIT_ICON_DURATION,
+                curve: COMMON_BEZIER,
             });
-            Context.animation({ duration: 200, curve: COMMON_BEZIER });
-            Image.draggable(!1);
-            Image.fillColor({
-                id: -1,
-                type: 10001,
-                params: ["sys.color.ohos_id_color_secondary"],
-                bundleName: "",
-                moduleName: ""
-            });
-            Image.width(24);
-            Image.transition({ type: TransitionType.All, scale: { x: 0, y: 0, centerX: "50%" } });
-            Image.scale(e.id === this.content.id ? { x: this.scaleIcon, y: this.scaleIcon} : {});
+            Image.draggable(false);
+            Image.fillColor({ "id": -1, "type": 10001, params: ["sys.color.ohos_id_color_secondary"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Image.width(ICON_SIZE);
+            Image.transition({ type: TransitionType.All, scale: { x: 0, y: 0, centerX: '50%' } });
+            Image.scale(e6.id === this.content.id ? { x: this.scaleIcon, y: this.scaleIcon } : {});
             Image.visibility(this.gridComState ? 0 : 1);
-            Image.position({ x: this.blockWidth - 52, y: -8 });
+            Image.position({
+                x: this.blockWidth - 52,
+                y: -MARGIN_EIGHT
+            });
             Context.animation(null);
-            Image.onClick((() => this.handleDeleteClick(e)))
-        }), Image);
+            Image.onClick(() => this.handleDeleteClick(e6));
+        }, Image);
         Flex.pop();
-        Stack.pop()
+        Stack.pop();
     }
-
-    TextBlockAddItemBuilder(e, t = null) {
-        this.observeComponentCreation2(((t, i) => {
+    TextBlockAddItemBuilder(f5, g5 = null) {
+        this.observeComponentCreation2((c6, d6) => {
             Stack.create();
-            Stack.scale(e.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {});
-            Stack.padding({ left: 8, right: 8 });
-            Stack.height(28)
-        }), Stack);
-        this.observeComponentCreation2(((t, i) => {
+            Stack.scale(f5.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {});
+            Stack.padding({
+                left: MARGIN_EIGHT,
+                right: MARGIN_EIGHT
+            });
+            Stack.height(28);
+        }, Stack);
+        this.observeComponentCreation2((a6, b6) => {
             Row.create();
-            Context.animation({ duration: 200, curve: COMMON_BEZIER });
+            Context.animation({
+                duration: ENTER_EXIT_ICON_DURATION,
+                curve: COMMON_BEZIER
+            });
             Row.borderRadius(50);
-            Row.height("100%");
-            Row.width(this.addIconShow && e.id === this.content.id ? this.textItemEditWidth : "100%");
-            Row.translate(this.addIconShow && e.id === this.content.id && this.gridComState ? { x: -4 } : { x: 0 });
+            Row.height('100%');
+            Row.width(this.addIconShow && f5.id === this.content.id ? this.textItemEditWidth : '100%');
+            Row.translate(this.addIconShow && f5.id === this.content.id && this.gridComState ? { x: -4 } : { x: 0 });
             Context.animation(null);
-            Row.backgroundColor({
-                id: -1,
-                type: 10001,
-                params: ["sys.color.ohos_id_color_button_normal"],
-                bundleName: "",
-                moduleName: ""
-            })
-        }), Row);
+            Row.backgroundColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_button_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+        }, Row);
         Row.pop();
-        this.observeComponentCreation2(((t, i) => {
+        this.observeComponentCreation2((y5, z5) => {
             Flex.create({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center });
-            Context.animation({ duration: 200, curve: COMMON_BEZIER });
+            Context.animation({
+                duration: ENTER_EXIT_ICON_DURATION,
+                curve: COMMON_BEZIER
+            });
             Flex.borderRadius(50);
-            Flex.padding({ left: 12, right: 12 });
-            Flex.backgroundColor(this.isTouchDown && e.id === this.content.id ? this.touchDown : e.id === this.hoverId ? this.hoverBackgroundColor : "");
-            Flex.width(this.addIconShow && e.id === this.content.id ? this.textItemEditWidth : "100%");
-            Flex.translate(this.addIconShow && e.id === this.content.id && this.gridComState ? { x: -4 } : { x: 0 });
+            Flex.padding({
+                left: TEXT_PADDING_LEFT_RIGHT,
+                right: TEXT_PADDING_LEFT_RIGHT,
+            });
+            Flex.backgroundColor(this.isTouchDown && f5.id === this.content.id ? this.touchDown
+                : f5.id === this.hoverId ? this.hoverBackgroundColor : '');
+            Flex.width(this.addIconShow && f5.id === this.content.id ? this.textItemEditWidth : '100%');
+            Flex.translate(this.addIconShow && f5.id === this.content.id && this.gridComState ? { x: -4 } : { x: 0 });
             Context.animation(null);
-            Flex.height("100%")
-        }), Flex);
-        this.observeComponentCreation2(((t, i) => {
-            Image.create({
-                id: -1,
-                type: 2e4,
-                params: ["sys.media.ohos_ic_public_add"],
-                bundleName: "",
-                moduleName: ""
+            Flex.height('100%');
+        }, Flex);
+        this.observeComponentCreation2((w5, x5) => {
+            Image.create({ "id": -1, "type": 20000, params: ["sys.media.ohos_ic_public_add"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Context.animation({
+                duration: ENTER_EXIT_ICON_DURATION,
+                curve: COMMON_BEZIER
             });
-            Context.animation({ duration: 200, curve: COMMON_BEZIER });
-            Image.draggable(!1);
-            Image.fillColor({
-                id: -1,
-                type: 10001,
-                params: ["sys.color.ohos_id_color_text_secondary"],
-                bundleName: "",
-                moduleName: ""
-            });
+            Image.draggable(false);
+            Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Image.width(12);
             Image.height(12);
-            Image.visibility(this.addIconShow && e.id === this.content.id ? Visibility.None : Visibility.Visible);
+            Image.visibility(this.addIconShow && f5.id === this.content.id ? Visibility.None : Visibility.Visible);
             Image.transition({ type: TransitionType.All, scale: { x: 0, y: 0 } });
             Image.margin({ right: 4 });
-            Context.animation(null)
-        }), Image);
-        this.observeComponentCreation2(((t, i) => {
-            Text.create(e.text);
-            Text.fontSize({
-                id: -1,
-                type: 10002,
-                params: ["sys.float.ohos_id_text_size_button3"],
-                bundleName: "",
-                moduleName: ""
-            });
+            Context.animation(null);
+        }, Image);
+        this.observeComponentCreation2((u5, v5) => {
+            Text.create(f5.text);
+            Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.textAlign(TextAlign.Start);
             Text.maxLines(1);
-            Text.constraintSize({ maxWidth: 26 })
-        }), Text);
+            Text.constraintSize({
+                maxWidth: 26
+            });
+        }, Text);
         Text.pop();
-        this.observeComponentCreation2(((t, i) => {
+        this.observeComponentCreation2((n5, o5) => {
             If.create();
-            this.gridComState && this.addIconShow && e.id === this.content.id ? this.ifElseBranchUpdateFunction(0, (() => {
-                this.observeComponentCreation2(((e, t) => {
-                    Image.create({
-                        id: -1,
-                        type: 2e4,
-                        params: ["sys.media.ohos_ic_public_remove_filled"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Image.draggable(!1);
-                    Image.transition({ type: TransitionType.All, scale: { x: 0, y: 0 } });
-                    Image.fillColor({
-                        id: -1,
-                        type: 10001,
-                        params: ["sys.color.ohos_id_color_secondary"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Image.width(24);
-                    Image.translate(this.gridComState ? { x: -8 } : {});
-                    Image.position({ x: this.blockWidth - 44, y: -8 })
-                }), Image)
-            })) : this.ifElseBranchUpdateFunction(1, (() => {
-            }))
-        }), If);
+            if (this.gridComState && this.addIconShow && f5.id === this.content.id) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((s5, t5) => {
+                        Image.create({ "id": -1, "type": 20000, params: ["sys.media.ohos_ic_public_remove_filled"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Image.draggable(false);
+                        Image.transition({ type: TransitionType.All, scale: { x: 0, y: 0 } });
+                        Image.fillColor({ "id": -1, "type": 10001, params: ["sys.color.ohos_id_color_secondary"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Image.width(ICON_SIZE);
+                        Image.translate(this.gridComState ? { x: -MARGIN_EIGHT } : {});
+                        Image.position({
+                            x: this.blockWidth - 44,
+                            y: -MARGIN_EIGHT
+                        });
+                    }, Image);
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
         If.pop();
         Flex.pop();
-        Stack.pop()
+        Stack.pop();
     }
-
-    AddTagBuilder(e = null) {
-        this.observeComponentCreation2(((e, t) => {
+    AddTagBuilder(j3 = null) {
+        this.observeComponentCreation2((d5, e5) => {
             Grid.create();
-            Context.animation({ duration: 200, curve:this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER });
-            Grid.translate(this.clickRemoveBtn && this.selected.length % this.colNum == 1 ? { y: -this.blockHeight } : {
+            Context.animation({
+                duration: ENTER_EXIT_ICON_DURATION,
+                curve: this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER,
             });
+            Grid.translate(this.clickRemoveBtn && this.selected.length % this.colNum === 1 ? { y: -this.blockHeight } : {});
             Context.animation(null);
             Grid.columnsTemplate(this.customColumnsTemplate());
-            Grid.padding({ left: 16, right: 16 });
-            Grid.clip(!1);
-            Grid.height(this.getGridHeight(ObservedObject.GetRawObject(this.unSelected)))
-        }), Grid);
-        this.observeComponentCreation2(((e, t) => {
-            ForEach.create();
-            this.forEachUpdateFunction(e, this.unSelected, ((e, t) => {
-                const i = e;
-                {
-                    const e = (e, i) => {
-                        ViewStackProcessor.StartGetAccessRecordingFor(e);
-                        GridItem.create((() => {
-                        }), !1);
-                        Context.animation({ 
-                            curve: this.clickRemoveBtn ? DRAG_SPRING : t === this.unSelectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING 
-                        });
-                        GridItem.clip(!1);
-                        GridItem.translate(this.getAddAreaItemTranslate(t));
-                        Context.animation(null);
-                        i || GridItem.pop();
-                        ViewStackProcessor.StopGetAccessRecording()
-                    };
-                    const o = () => {
-                        this.observeComponentCreation(e);
-                        this.observeComponentCreation2(((e, t) => {
-                            Stack.create();
-                            Stack.onHover((e => {
-                                this.hoverId = e ? i.id : ""
-                            }));
-                            Stack.margin({ bottom: this.imageText ? 16 : 8 });
-                            Stack.clickEffect({ level: ClickEffectLevel.LIGHT });
-                            Stack.onTouch((e => {
-                                if (!this.clickAddBtn && !this.clickRemoveBtn) {
-                                    if (e.type === TouchType.Down) {
-                                        this.content = i;
-                                        this.isTouchDown = !0
-                                    }
-                                    if (e.type === TouchType.Up) {
-                                        this.isTouchDown = !1;
-                                        if (this.addAreaLongPressGesture || 1.05 === this.longScaleOnePointTwo || this.imageText) return;
-                                        Context.animateTo({ duration: 200, curve: COMMON_BEZIER }, (() => {
-                                            this.addIconShow = !0
-                                        }));
-                                        this.options.type === GridObjectSortComponentType.TEXT && (this.scaleAddIcon = 1);
-                                        this.scaleIcon = 0;
-                                        const e = this.unSelected.findIndex((e => e.id === i.id));
-                                        this.editGridDataLength = this.selected.length + 1;
-                                        const t = this.getEditItemGridPosition(ObservedObject.GetRawObject(this.selected), e);
-                                        this.content = i;
-                                        this.unSelectedIndex = e;
-                                        this.clickAddBtn = !0;
-                                        this.arrayUnSelectIsChange = 1;
-                                        Context.animateTo({ curve: REMOVE_ADD_SPRING, onFinish: ()=> {
-                                            if (!this.selected.some((e => e.id === i.id))) {
-                                                this.scaleIcon = 1;
-                                                this.scaleAddIcon = 0;
-                                                this.selected.push(i);
-                                                this.unSelected.splice(e, 1);
-                                                this.arrayUnSelectIsChange = 2;
-                                                this.addItemMoveX = 0;
-                                                this.addItemMoveY = 0;
-                                                this.gridComState || this.onSaveEdit();
-                                                Context.animateTo({ duration: 200, curve: COMMON_BEZIER }, (() => {
-                                                    this.addIconShow = !1
-                                                }));
-                                                this.clickAddBtn = !1
-                                            }
-                                        } }, (() => {
-                                            this.addItemMoveX = t.x;
-                                            this.addItemMoveY = t.y
-                                        }))
-                                    }
-                                }
-                            }));
-                            Gesture.create(GesturePriority.Low);
-                            LongPressGesture.create({ repeat: !0 });
-                            LongPressGesture.onAction((e => {
-                                if (this.gridComState) Context.animateTo({
-                                    duration: 200,
-                                    curve: LONG_TOUCH_SCALE
-                                }, (() => {
-                                    this.longScaleOnePointTwo = 1.05
-                                })); else {
-                                    Context.animateTo({ duration: 200, curve: COMMON_BEZIER }, (() => {
-                                        this.addAreaLongPressGesture = !0;
-                                        this.gridComState = !0
-                                    }));
-                                    this.menuSwitch = !0
-                                }
-                            }));
-                            LongPressGesture.onActionEnd((() => {
-                                this.addAreaLongPressGesture = !1;
-                                Context.animateTo({ duration: 200, curve: LONG_TOUCH_SCALE }, (() => {
-                                    this.longScaleOnePointTwo = 1
-                                }))
-                            }));
-                            LongPressGesture.pop();
-                            Gesture.pop()
-                        }), Stack);
-                        this.observeComponentCreation2(((e, t) => {
-                            If.create();
-                            this.imageText ? this.ifElseBranchUpdateFunction(0, (() => {
-                                this.ImageTextBuilder.bind(this)(i, "add")
-                            })) : this.ifElseBranchUpdateFunction(1, (() => {
-                                this.TextBlockAddItemBuilder.bind(this)(i)
-                            }))
-                        }), If);
-                        If.pop();
-                        Stack.pop();
-                        GridItem.pop()
-                    };
-                    o()
-                }
-            }), (e => e.id.toString()), !0, !1)
-        }), ForEach);
-        ForEach.pop();
-        Grid.pop()
-    }
-
-    EditTagBuilder(e = null) {
-        this.observeComponentCreation2(((e, t) => {
-            Column.create()
-        }), Column);
-        this.observeComponentCreation2(((e, t) => {
-            Grid.create();
-            Context.animation(this.firstIn ? { duration: 0 } : { 
-                duration: 200, 
-                curve: this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER
+            Grid.padding({
+                left: ROW_GAP,
+                right: ROW_GAP,
             });
-            Gesture.create(GesturePriority.Parallel);
-            LongPressGesture.create({ repeat: !0 });
-            LongPressGesture.onAction((e => {
-                if (this.gridComState) {
-                    Context.animateTo({ duration: 200, curve: LONG_TOUCH_SCALE }, (() => {
-                        this.longScaleOnePointTwo = 1.05
-                    }));
-                    if (e.repeat && !this.vibrationDone) try {
-                        vibrator.startVibration({ type: "time", duration: 1e3 }, {
-                            id: 0,
-                            usage: "alarm"
-                        }).then((() => {
-                            this.vibrationDone = !0
-                        }))
-                    } catch (e) {
-                        this.vibrationDone = !1
-                    }
-                } else {
-                    Context.animateTo({ duration: 200, curve: COMMON_BEZIER }, (() => {
-                        this.gridComState = !0
-                    }));
-                    this.menuSwitch = !0
-                }
-            }));
-            LongPressGesture.pop();
-            Gesture.pop();
-            Grid.clip(!1);
-            Grid.editMode(this.gridComState);
-            Grid.columnsTemplate(this.customColumnsTemplate());
-            Grid.padding({ left: 16, right: 16 });
-            Grid.height(this.getGridHeight(ObservedObject.GetRawObject(this.selected), "edit"));
-            Context.animation(null);
-            Grid.onItemDragStart(((e, t) => {
-                this.selectedIndex = -1;
-                if (this.gridComState) {
-                    this.isStartDrag = !0;
-                    this.editGridDataLength = this.selected.length + 1;
-                    this.selected.splice(t, 1);
-                    return { builder: () => {
-                            this.PixelMapBuilder.call(this)
-                    } }
-                }
-            }));
-            Grid.onItemDrop(((e, t, i, o) => {
-                if (this.gridComState) {
-                    this.vibrationDone = !1;
-                    Context.animateTo({ duration: 200, curve: LONG_TOUCH_SCALE }, (() => {
-                        this.longScaleOnePointTwo = 1
-                    }));
-                    this.isStartDrag = !1;
-                    this.selected.splice(-1 === i ? t : i, 0, ObservedObject.GetRawObject(this.content))
-                }
-            }));
-            Grid.onItemDragMove(((e, t, i) => this.onDragMoveEvent(e, t, i)))
-        }), Grid);
-        this.observeComponentCreation2(((e, t) => {
+            Grid.clip(false);
+            Grid.height(this.getGridHeight(ObservedObject.GetRawObject(this.unSelected)));
+        }, Grid);
+        this.observeComponentCreation2((m3, n3) => {
             ForEach.create();
-            this.forEachUpdateFunction(e, this.selected, ((e, t) => {
-                const i = e;
+            const o3 = (s3, t3) => {
+                const u3 = s3;
                 {
-                    const e = (e, i) => {
-                        ViewStackProcessor.StartGetAccessRecordingFor(e);
-                        GridItem.create((() => {
-                        }), !1);
+                    const v3 = (a5, b5) => {
+                        GridItem.create(() => { }, false);
                         Context.animation({
-                            curve: this.isStartDrag ? DRAG_SPRING : t === this.selectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING
+                            curve: this.clickRemoveBtn ? DRAG_SPRING : t3 === this.unSelectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING
                         });
-                        GridItem.clip(!1);
-                        GridItem.translate(this.getShowAreaItemTranslate(t));
+                        GridItem.clip(false);
+                        GridItem.translate(this.getAddAreaItemTranslate(t3));
                         Context.animation(null);
-                        i || GridItem.pop();
-                        ViewStackProcessor.StopGetAccessRecording()
                     };
-                    (() => {
-                        this.observeComponentCreation(e);
-                        this.observeComponentCreation2(((e, t) => {
+                    const w3 = () => {
+                        this.observeComponentCreation2(v3, GridItem);
+                        this.observeComponentCreation2((f4, g4) => {
                             Stack.create();
-                            Stack.onHover((e => {
-                                this.hoverId = e ? i.id : ""
-                            }));
-                            Stack.clickEffect({ level: ClickEffectLevel.LIGHT });
-                            Stack.clip(!1);
-                            Stack.margin({ bottom: this.imageText || this.gridComState ? 16 : 8 });
-                            Stack.onTouch((e => {
-                                if (!this.clickAddBtn && !this.clickRemoveBtn) {
-                                    if (e.type === TouchType.Down) {
-                                        this.content = i;
-                                        this.isTouchDown = !0
-                                    }
-                                    if (e.type === TouchType.Up) {
-                                        this.isTouchDown = !1;
-                                        Context.animateTo({ duration: 200, curve: LONG_TOUCH_SCALE }, (() => {
-                                            this.longScaleOnePointTwo = 1
-                                        }))
-                                    }
+                            Stack.onHover((z4) => {
+                                if (z4) {
+                                    this.hoverId = u3.id;
                                 }
-                            }))
-                        }), Stack);
-                        this.observeComponentCreation2(((e, t) => {
+                                else {
+                                    this.hoverId = '';
+                                }
+                            });
+                            Stack.margin({
+                                bottom: this.imageText ? ROW_GAP : MARGIN_EIGHT
+                            });
+                            Stack.clickEffect({ level: ClickEffectLevel.LIGHT });
+                            Stack.onTouch((p4) => {
+                                if (this.clickAddBtn || this.clickRemoveBtn) {
+                                    return;
+                                }
+                                if (p4.type === TouchType.Down) {
+                                    this.content = u3;
+                                    this.isTouchDown = true;
+                                }
+                                if (p4.type === TouchType.Up) {
+                                    this.isTouchDown = false;
+                                    if (this.addAreaLongPressGesture || this.longScaleOnePointTwo === 1.05 || this.imageText) {
+                                        return;
+                                    }
+                                    Context.animateTo({
+                                        duration: ENTER_EXIT_ICON_DURATION,
+                                        curve: COMMON_BEZIER
+                                    }, () => {
+                                        this.addIconShow = true;
+                                    });
+                                    if (this.options.type === GridObjectSortComponentType.TEXT) {
+                                        this.scaleAddIcon = 1;
+                                    }
+                                    this.scaleIcon = 0;
+                                    const q4 = this.unSelected.findIndex(y4 => y4.id === u3.id);
+                                    this.editGridDataLength = this.selected.length + 1;
+                                    const r4 = this.getEditItemGridPosition(ObservedObject.GetRawObject(this.selected), q4);
+                                    this.content = u3;
+                                    this.unSelectedIndex = q4;
+                                    this.clickAddBtn = true;
+                                    this.arrayUnSelectIsChange = 1;
+                                    Context.animateTo({ curve: REMOVE_ADD_SPRING, onFinish: () => {
+                                        if (!this.selected.some(x4 => x4.id === u3.id)) {
+                                            this.scaleIcon = 1;
+                                            this.scaleAddIcon = 0;
+                                            this.selected.push(u3);
+                                            this.unSelected.splice(q4, 1);
+                                            this.arrayUnSelectIsChange = 2;
+                                            this.addItemMoveX = 0;
+                                            this.addItemMoveY = 0;
+                                            if (!this.gridComState) {
+                                                this.onSaveEdit();
+                                            }
+                                            Context.animateTo({
+                                                duration: ENTER_EXIT_ICON_DURATION,
+                                                curve: COMMON_BEZIER
+                                            }, () => {
+                                                this.addIconShow = false;
+                                            });
+                                            this.clickAddBtn = false;
+                                        }
+                                    } }, () => {
+                                        this.addItemMoveX = r4.x;
+                                        this.addItemMoveY = r4.y;
+                                    });
+                                }
+                            });
+                            Gesture.create(GesturePriority.Low);
+                            LongPressGesture.create({ repeat: true });
+                            LongPressGesture.onAction((m4) => {
+                                if (!this.gridComState) {
+                                    Context.animateTo({
+                                        duration: ENTER_EXIT_ICON_DURATION,
+                                        curve: COMMON_BEZIER,
+                                    }, () => {
+                                        this.addAreaLongPressGesture = true;
+                                        this.gridComState = true;
+                                    });
+                                    this.menuSwitch = true;
+                                }
+                                else {
+                                    Context.animateTo({
+                                        duration: ENTER_EXIT_ICON_DURATION,
+                                        curve: LONG_TOUCH_SCALE
+                                    }, () => {
+                                        this.longScaleOnePointTwo = 1.05;
+                                    });
+                                }
+                            });
+                            LongPressGesture.onActionEnd(() => {
+                                this.addAreaLongPressGesture = false;
+                                Context.animateTo({
+                                    duration: ENTER_EXIT_ICON_DURATION,
+                                    curve: LONG_TOUCH_SCALE
+                                }, () => {
+                                    this.longScaleOnePointTwo = 1;
+                                });
+                            });
+                            LongPressGesture.pop();
+                            Gesture.pop();
+                        }, Stack);
+                        this.observeComponentCreation2((b4, c4) => {
                             If.create();
-                            this.imageText ? this.ifElseBranchUpdateFunction(0, (() => {
-                                this.ImageTextBuilder.bind(this)(i, "delete")
-                            })) : this.ifElseBranchUpdateFunction(1, (() => {
-                                this.TextBlockBuilder.bind(this)(i)
-                            }))
-                        }), If);
+                            if (this.imageText) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    this.ImageTextBuilder.bind(this)(u3, "add", j3 ? j3 : this);
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                    this.TextBlockAddItemBuilder.bind(this)(u3, j3 ? j3 : this);
+                                });
+                            }
+                        }, If);
                         If.pop();
                         Stack.pop();
-                        GridItem.pop()
-                    })()
+                        GridItem.pop();
+                    };
+                    w3();
                 }
-            }), (e => e.id.toString()), !0, !1)
-        }), ForEach);
+            };
+            this.forEachUpdateFunction(m3, this.unSelected, o3, (r3) => r3.id.toString(), true, false);
+        }, ForEach);
         ForEach.pop();
         Grid.pop();
-        Column.pop()
     }
-
+    EditTagBuilder(g1 = null) {
+        this.observeComponentCreation2((h3, i3) => {
+            Column.create();
+        }, Column);
+        this.observeComponentCreation2((n2, o2) => {
+            Grid.create();
+            Context.animation(!this.firstIn ? {
+                duration: ENTER_EXIT_ICON_DURATION,
+                curve: this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER,
+            } : { duration: 0 });
+            Gesture.create(GesturePriority.Parallel);
+            LongPressGesture.create({ repeat: true });
+            LongPressGesture.onAction((d3) => {
+                if (!this.gridComState) {
+                    Context.animateTo({
+                        duration: ENTER_EXIT_ICON_DURATION,
+                        curve: COMMON_BEZIER
+                    }, () => {
+                        this.gridComState = true;
+                    });
+                    this.menuSwitch = true;
+                }
+                else {
+                    Context.animateTo({
+                        duration: ENTER_EXIT_ICON_DURATION,
+                        curve: LONG_TOUCH_SCALE
+                    }, () => {
+                        this.longScaleOnePointTwo = 1.05;
+                    });
+                    if (d3.repeat && !this.vibrationDone) {
+                        try {
+                            vibrator.startVibration({
+                                type: 'time',
+                                duration: 1000
+                            }, {
+                                id: 0,
+                                usage: 'alarm'
+                            }).then(() => {
+                                this.vibrationDone = true;
+                            });
+                        }
+                        catch {
+                            this.vibrationDone = false;
+                        }
+                    }
+                }
+            });
+            LongPressGesture.pop();
+            Gesture.pop();
+            Grid.clip(false);
+            Grid.editMode(this.gridComState);
+            Grid.columnsTemplate(this.customColumnsTemplate());
+            Grid.padding({
+                left: ROW_GAP,
+                right: ROW_GAP
+            });
+            Grid.height(this.getGridHeight(ObservedObject.GetRawObject(this.selected), 'edit'));
+            Context.animation(null);
+            Grid.onItemDragStart((b3, c3) => {
+                this.selectedIndex = -1;
+                if (!this.gridComState) {
+                    return;
+                }
+                this.isStartDrag = true;
+                this.editGridDataLength = this.selected.length + 1;
+                this.selected.splice(c3, 1);
+                return { builder: () => {
+                    this.PixelMapBuilder.call(this);
+                } };
+            });
+            Grid.onItemDrop((w2, x2, y2, z2) => {
+                if (!this.gridComState) {
+                    return;
+                }
+                this.vibrationDone = false;
+                Context.animateTo({
+                    duration: ENTER_EXIT_ICON_DURATION,
+                    curve: LONG_TOUCH_SCALE
+                }, () => {
+                    this.longScaleOnePointTwo = 1;
+                });
+                this.isStartDrag = false;
+                this.selected.splice(y2 === -1 ? x2 : y2, 0, ObservedObject.GetRawObject(this.content));
+            });
+            Grid.onItemDragMove((t2, u2, v2) => this.onDragMoveEvent(t2, u2, v2));
+        }, Grid);
+        this.observeComponentCreation2((k1, l1) => {
+            ForEach.create();
+            const m1 = (q1, r1) => {
+                const s1 = q1;
+                {
+                    const t1 = (k2, l2) => {
+                        GridItem.create(() => { }, false);
+                        Context.animation({
+                            curve: this.isStartDrag ? DRAG_SPRING : r1 === this.selectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING,
+                        });
+                        GridItem.clip(false);
+                        GridItem.translate(this.getShowAreaItemTranslate(r1));
+                        Context.animation(null);
+                    };
+                    const u1 = () => {
+                        this.observeComponentCreation2(t1, GridItem);
+                        this.observeComponentCreation2((d2, e2) => {
+                            Stack.create();
+                            Stack.onHover((j2) => {
+                                if (j2) {
+                                    this.hoverId = s1.id;
+                                }
+                                else {
+                                    this.hoverId = '';
+                                }
+                            });
+                            Stack.clickEffect({ level: ClickEffectLevel.LIGHT });
+                            Stack.clip(false);
+                            Stack.margin({
+                                bottom: this.imageText ? ROW_GAP : this.gridComState ? ROW_GAP : MARGIN_EIGHT
+                            });
+                            Stack.onTouch((h2) => {
+                                if (this.clickAddBtn || this.clickRemoveBtn) {
+                                    return;
+                                }
+                                if (h2.type === TouchType.Down) {
+                                    this.content = s1;
+                                    this.isTouchDown = true;
+                                }
+                                if (h2.type === TouchType.Up) {
+                                    this.isTouchDown = false;
+                                    Context.animateTo({
+                                        duration: ENTER_EXIT_ICON_DURATION,
+                                        curve: LONG_TOUCH_SCALE
+                                    }, () => {
+                                        this.longScaleOnePointTwo = 1;
+                                    });
+                                }
+                            });
+                        }, Stack);
+                        this.observeComponentCreation2((z1, a2) => {
+                            If.create();
+                            if (this.imageText) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    this.ImageTextBuilder.bind(this)(s1, 'delete', g1 ? g1 : this);
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                    this.TextBlockBuilder.bind(this)(s1, g1 ? g1 : this);
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        Stack.pop();
+                        GridItem.pop();
+                    };
+                    u1();
+                }
+            };
+            this.forEachUpdateFunction(k1, this.selected, m1, (p1) => p1.id.toString(), true, false);
+        }, ForEach);
+        ForEach.pop();
+        Grid.pop();
+        Column.pop();
+    }
     initialRender() {
-        this.observeComponentCreation2(((e, t) => {
+        this.observeComponentCreation2((e1, f1) => {
             Column.create();
-            Column.width("100%");
-            Column.height("90%")
-        }), Column);
-        this.HeaderTitleBuilder.bind(this)();
-        this.observeComponentCreation2(((e, t) => {
-            Scroll.create()
-        }), Scroll);
-        this.observeComponentCreation2(((e, t) => {
+            Column.width('100%');
+            Column.height('90%');
+        }, Column);
+        this.HeaderTitleBuilder.bind(this)(this);
+        this.observeComponentCreation2((c1, d1) => {
+            Scroll.create();
+        }, Scroll);
+        this.observeComponentCreation2((x, y) => {
             Column.create();
-            Column.onAreaChange(((e, t) => {
-                this.areaWidth = Number(t.width);
+            Column.onAreaChange((a1, b1) => {
+                this.areaWidth = Number(b1.width);
                 this.blockWidth = this.getBlockWidth();
                 this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16;
                 this.imageItemWidth = this.blockWidth - 16;
-                this.blockHeight = this.imageText ? this.imageItemWidth + 16 : this.gridComState ? 44 : 36
-            }));
-            Column.width("100%")
-        }), Column);
-        this.observeComponentCreation2(((e, t) => {
+                this.blockHeight = this.imageText ? this.imageItemWidth + 16 : this.gridComState ? 44 : BLOCK_TEXT_HEIGHT;
+            });
+            Column.width("100%");
+        }, Column);
+        this.observeComponentCreation2((v, w) => {
             __Common__.create();
-            __Common__.margin({ bottom: 8 })
-        }), __Common__);
-        this.observeComponentCreation2(((e, t) => {
-            if (t) {
-                let t = () => ({
-                    primaryTitle: "",
-                    secondaryTitle: this.options.showAreaTitle || {
-                        id: -1,
-                        type: 10003,
-                        params: ["sys.string.ohos_grid_edit_subtitle_sort"],
-                        bundleName: "",
-                        moduleName: ""
-                    },
-                    icon: "",
-                    operationType: OperationType.BUTTON
-                });
-                ViewPU.create(new SubHeader(this, {
-                    primaryTitle: "",
-                    secondaryTitle: this.options.showAreaTitle || {
-                        id: -1,
-                        type: 10003,
-                        params: ["sys.string.ohos_grid_edit_subtitle_sort"],
-                        bundleName: "",
-                        moduleName: ""
-                    },
-                    icon: "",
-                    operationType: OperationType.BUTTON
-                }, void 0, e, t))
-            } else this.updateStateVarsOfChildByElmtId(e, {
-                primaryTitle: "",
-                secondaryTitle: this.options.showAreaTitle || {
-                    id: -1,
-                    type: 10003,
-                    params: ["sys.string.ohos_grid_edit_subtitle_sort"],
-                    bundleName: "",
-                    moduleName: ""
-                },
-                icon: "",
-                operationType: OperationType.BUTTON
-            })
-        }), null);
+            __Common__.margin({ bottom: MARGIN_EIGHT });
+        }, __Common__);
+        {
+            this.observeComponentCreation2((p, q) => {
+                if (q) {
+                    let r = new SubHeader(this, {
+                        primaryTitle: '',
+                        secondaryTitle: this.options.showAreaTitle || { "id": -1, "type": 10003, params: ['sys.string.ohos_grid_edit_subtitle_sort'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                        icon: '',
+                        operationType: OperationType.BUTTON
+                    }, undefined, p, () => { }, { page: "library/src/main/ets/components/mainpage/GridObjectSortComponent.ets", line: 1163, col: 11 });
+                    ViewPU.create(r);
+                    let s = () => {
+                        return {
+                            primaryTitle: '',
+                            secondaryTitle: this.options.showAreaTitle || { "id": -1, "type": 10003, params: ['sys.string.ohos_grid_edit_subtitle_sort'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                            icon: '',
+                            operationType: OperationType.BUTTON
+                        };
+                    };
+                    r.paramsGenerator_ = s;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(p, {
+                        primaryTitle: '',
+                        secondaryTitle: this.options.showAreaTitle || { "id": -1, "type": 10003, params: ['sys.string.ohos_grid_edit_subtitle_sort'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                        icon: '',
+                        operationType: OperationType.BUTTON
+                    });
+                }
+            }, { name: "SubHeader" });
+        }
         __Common__.pop();
-        this.EditTagBuilder.bind(this)();
-        this.observeComponentCreation2(((e, t) => {
+        this.EditTagBuilder.bind(this)(this);
+        this.observeComponentCreation2((m, n) => {
             __Common__.create();
-            Context.animation({ duration: 200, curve: this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER });
-            __Common__.translate(this.clickRemoveBtn && this.selected.length % this.colNum == 1 ? {
-                y: -this.blockHeight
-            } : {});
+            Context.animation({
+                duration: ENTER_EXIT_ICON_DURATION,
+                curve: this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER,
+            });
+            __Common__.translate(this.clickRemoveBtn && this.selected.length % this.colNum === 1 ? { y: -this.blockHeight } : {});
             Context.animation(null);
-            __Common__.margin({ bottom: 8 })
-        }), __Common__);
-        this.observeComponentCreation2(((e, t) => {
-            if (t) {
-                let t = () => ({
-                    primaryTitle: "",
-                    secondaryTitle: this.options.addAreaTitle || {
-                        id: -1,
-                        type: 10003,
-                        params: ["sys.string.ohos_grid_edit_subtitle_add"],
-                        bundleName: "",
-                        moduleName: ""
-                    },
-                    icon: "",
-                    operationType: OperationType.BUTTON
-                });
-                ViewPU.create(new SubHeader(this, {
-                    primaryTitle: "",
-                    secondaryTitle: this.options.addAreaTitle || {
-                        id: -1,
-                        type: 10003,
-                        params: ["sys.string.ohos_grid_edit_subtitle_add"],
-                        bundleName: "",
-                        moduleName: ""
-                    },
-                    icon: "",
-                    operationType: OperationType.BUTTON
-                }, void 0, e, t))
-            } else this.updateStateVarsOfChildByElmtId(e, {
-                primaryTitle: "",
-                secondaryTitle: this.options.addAreaTitle || {
-                    id: -1,
-                    type: 10003,
-                    params: ["sys.string.ohos_grid_edit_subtitle_add"],
-                    bundleName: "",
-                    moduleName: ""
-                },
-                icon: "",
-                operationType: OperationType.BUTTON
-            })
-        }), null);
+            __Common__.margin({ bottom: MARGIN_EIGHT });
+        }, __Common__);
+        {
+            this.observeComponentCreation2((g, h) => {
+                if (h) {
+                    let i = new SubHeader(this, {
+                        primaryTitle: '',
+                        secondaryTitle: this.options.addAreaTitle || { "id": -1, "type": 10003, params: ['sys.string.ohos_grid_edit_subtitle_add'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                        icon: '',
+                        operationType: OperationType.BUTTON
+                    }, undefined, g, () => { }, { page: "library/src/main/ets/components/mainpage/GridObjectSortComponent.ets", line: 1172, col: 11 });
+                    ViewPU.create(i);
+                    let j = () => {
+                        return {
+                            primaryTitle: '',
+                            secondaryTitle: this.options.addAreaTitle || { "id": -1, "type": 10003, params: ['sys.string.ohos_grid_edit_subtitle_add'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                            icon: '',
+                            operationType: OperationType.BUTTON
+                        };
+                    };
+                    i.paramsGenerator_ = j;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(g, {
+                        primaryTitle: '',
+                        secondaryTitle: this.options.addAreaTitle || { "id": -1, "type": 10003, params: ['sys.string.ohos_grid_edit_subtitle_add'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                        icon: '',
+                        operationType: OperationType.BUTTON
+                    });
+                }
+            }, { name: "SubHeader" });
+        }
         __Common__.pop();
-        this.AddTagBuilder.bind(this)();
+        this.AddTagBuilder.bind(this)(this);
         Column.pop();
         Scroll.pop();
-        Column.pop()
+        Column.pop();
     }
-
     rerender() {
-        this.updateDirtyElements()
+        this.updateDirtyElements();
     }
 }
 

@@ -57,7 +57,7 @@ public:
 private:
     void UpdateTextStyleToModifier(
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, bool isDisabled);
-
+    void DoTextRaceIfNeed(PaintWrapper* paintWrapper);
 private:
     WeakPtr<Pattern> pattern_;
     RefPtr<TextFieldOverlayModifier> textFieldOverlayModifier_;

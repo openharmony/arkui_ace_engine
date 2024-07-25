@@ -19,22 +19,29 @@
 #include <string>
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/render/snapshot_param.h"
 
 namespace OHOS::Ace::NG {
+
 class ComponentSnapshot {
 public:
     using JsCallback = std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>;
     using NormalCallback = std::function<void(std::shared_ptr<Media::PixelMap>)>;
 
-    static void Get(const std::string& componentId, JsCallback&& callback);
+    static void Get(const std::string& componentId, JsCallback&& callback, const SnapshotOptions& options);
     // add delay to ensure Rosen has finished rendering
     static void Create(
-        const RefPtr<AceType>& customNode, JsCallback&& callback, bool enableInspector, const int32_t delayTime = 300,
+        const RefPtr<AceType>& customNode, JsCallback&& callback, bool enableInspector, const SnapshotParam& param,
         bool flag = true);
     static void GetNormalCapture(const RefPtr<FrameNode>& frameNode, NormalCallback&& callback);
 
 private:
     static std::shared_ptr<Rosen::RSNode> GetRsNode(const RefPtr<FrameNode>& node);
+    static void PostDelayedTaskOfBuiler(const RefPtr<TaskExecutor>& executor, JsCallback&& callback,
+        const RefPtr<FrameNode>& node, bool enableInspector, const RefPtr<PipelineContext>& pipeline,
+        const SnapshotParam& param);
+    static void BuilerTask(JsCallback&& callback, const RefPtr<FrameNode>& node, bool enableInspector,
+        const RefPtr<PipelineContext>& pipeline, const SnapshotParam& param);
 
     WeakPtr<FrameNode> node_;
 };

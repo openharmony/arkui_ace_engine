@@ -71,7 +71,7 @@ private:
     bool showHoliday_ = true;
     bool showLunar_ = false;
     bool isCalendarDialog_ = false;
-    uint32_t startOfWeek_ = 64;
+    int32_t startOfWeek_ = 64;
 
     // Default it exists 5 weeks in a month.
     int32_t rowCount_ = 5;
@@ -149,6 +149,8 @@ private:
     FontWeight lunarDayFontWeight_ = FontWeight::W500;
     FontWeight workStateFontWeight_ = FontWeight::W400;
     SizeF frameSize_;
+
+    std::vector<std::string> appFontFamilies_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CalendarPaintMethod);
 };

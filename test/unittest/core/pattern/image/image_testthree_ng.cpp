@@ -1117,4 +1117,586 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0044, TestSize.Level1)
     EXPECT_EQ(imagePattern->imageType_, ImagePattern::ImageType::ANIMATION);
 }
 
+/**
+ * @tc.name: ImagePatternCreateCompleteCallBackInDataReady
+ * @tc.desc: call CreateCompleteCallBackInDataReady.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternCreateCompleteCallBackInDataReady, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    ImageSourceInfo info;
+    imagePattern->CreateCompleteCallBackInDataReady()(info);
+    EXPECT_NE(imagePattern->loadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternSetOnFinishCallback
+ * @tc.desc: call SetOnFinishCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternSetOnFinishCallback, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->SetOnFinishCallback(canvasImage);
+    imagePattern->SetRedrawCallback(canvasImage);
+    EXPECT_EQ(imagePattern->image_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternCheckHandles
+ * @tc.desc: call CheckHandles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternCheckHandles, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    SelectHandleInfo info;
+    imagePattern->CheckHandles(info);
+    EXPECT_FALSE(info.isShow);
+}
+
+/**
+ * @tc.name: ImagePatternCalAndUpdateSelectOverlay
+ * @tc.desc: call CalAndUpdateSelectOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternCalAndUpdateSelectOverlay, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->OpenSelectOverlay();
+    imagePattern->CalAndUpdateSelectOverlay();
+    EXPECT_NE(imagePattern->selectOverlay_.GetRawPtr(), nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternGetParentGlobalOffset
+ * @tc.desc: call GetParentGlobalOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternGetParentGlobalOffset, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    OffsetF offset = imagePattern->GetParentGlobalOffset();
+    EXPECT_EQ(offset, OffsetF());
+}
+
+/**
+ * @tc.name: ImagePatternOnAreaChangedInner
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternOnAreaChangedInner, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->OpenSelectOverlay();
+    imagePattern->OnAreaChangedInner();
+    EXPECT_NE(imagePattern->selectOverlay_.GetRawPtr(), nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternStartDecoding
+ * @tc.desc: call StartDecoding.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternStartDecoding, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    frameNode->GetGeometryNode()->SetContentSize(SizeF());
+    imagePattern->StartDecoding(SizeF());
+    EXPECT_NE(frameNode->GetGeometryNode()->GetContent().get(), nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternOnRecycle
+ * @tc.desc: call OnRecycle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternOnRecycle, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->OnRecycle();
+    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternOnReuse
+ * @tc.desc: call OnReuse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternOnReuse, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->OnReuse();
+    EXPECT_NE(imagePattern->loadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternHandleCopy
+ * @tc.desc: call HandleCopy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternHandleCopy, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestThreeNg::CreateImageNodeWithDefaultProp(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(WIDTH, HEIGHT));
+    frameNode->SetGeometryNode(geometryNode);
+    frameNode->SetActive(true);
+    /**
+     * @tc.steps: step2. get ImagePattern and enter markModifyDone, load ImageLoadingContext.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    imageLayoutProperty->UpdateImageSourceInfo(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
+    imageLayoutProperty->UpdateAlt(ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT));
+    frameNode->MarkModifyDone();
+    /**
+     * @tc.steps: step3. AltImage loads successfully, and trigger alt callback.
+     */
+    imagePattern->altLoadingCtx_->DataReadyCallback(nullptr);
+
+    imagePattern->altLoadingCtx_->srcRect_ = { 0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT };
+    imagePattern->altLoadingCtx_->dstRect_ = { 0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_WIDTH };
+    imagePattern->altLoadingCtx_->SuccessCallback(nullptr);
+
+    // check onAltLoadSuccess result
+    ASSERT_NE(imagePattern->altImage_, nullptr);
+    EXPECT_EQ(*imagePattern->altSrcRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(*imagePattern->altDstRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_WIDTH));
+    ASSERT_NE(imagePattern->altImage_->paintConfig_, nullptr);
+    auto altImagePaintConfig = imagePattern->altImage_->GetPaintConfig();
+    EXPECT_EQ(altImagePaintConfig.imageFit_, IMAGE_FIT_DEFAULT);
+    /**
+     * @tc.steps: step4. Image loads successfully, and trigger Pattern->OnImageLoadSuccess.
+     */
+
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    ASSERT_NE(imagePattern->image_, nullptr);
+
+    imagePattern->HandleCopy();
+    EXPECT_NE(imagePattern->clipboard_.GetRawPtr(), nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternToJsonValue
+ * @tc.desc: call ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternToJsonValue, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    InspectorFilter filter;
+    imagePattern->ToJsonValue(json, filter);
+    EXPECT_FALSE(filter.IsFastFilter());
+}
+
+/**
+ * @tc.name: ImagePatternUpdateFillColorIfForegroundColor
+ * @tc.desc: call UpdateFillColorIfForegroundColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternUpdateFillColorIfForegroundColor, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    renderContext->UpdateForegroundColor(Color::BLACK);
+    imagePattern->UpdateFillColorIfForegroundColor();
+    EXPECT_TRUE(renderContext->HasForegroundColor());
+}
+
+/**
+ * @tc.name: ImagePatternBetweenSelectedPosition
+ * @tc.desc: call BetweenSelectedPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternBetweenSelectedPosition, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    bool b = imagePattern->BetweenSelectedPosition(Offset());
+    imagePattern->BeforeCreatePaintWrapper();
+    imagePattern->OnDirectionConfigurationUpdate();
+    imagePattern->OnIconConfigurationUpdate();
+    EXPECT_FALSE(b);
+}
+
+/**
+ * @tc.name: ImagePatternGetImageColorFilterStr
+ * @tc.desc: call GetImageColorFilterStr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternGetImageColorFilterStr, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    std::vector<float> colorFilter = { .0f, .0f };
+
+    std::string str1 = imagePattern->GetImageColorFilterStr(colorFilter);
+    std::string str2 = std::string("[") + std::to_string(colorFilter[0]) + ", " + std::to_string(colorFilter[1]) + "]";
+    EXPECT_STREQ(str1.c_str(), str2.c_str());
+}
+
+/**
+ * @tc.name: ImagePatternSetImageAnalyzerConfig
+ * @tc.desc: call SetImageAnalyzerConfig.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternSetImageAnalyzerConfig, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    ImageAnalyzerConfig config;
+    imagePattern->SetImageAnalyzerConfig(config);
+    imagePattern->SetImageAnalyzerConfig(nullptr);
+    EXPECT_FALSE(imagePattern->isEnableAnalyzer_);
+}
+
+/**
+ * @tc.name: ImagePatternCreateAnalyzerOverlay
+ * @tc.desc: call CreateAnalyzerOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternCreateAnalyzerOverlay, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestThreeNg::CreateImageNodeWithDefaultProp(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(WIDTH, HEIGHT));
+    frameNode->SetGeometryNode(geometryNode);
+    frameNode->SetActive(true);
+    /**
+     * @tc.steps: step2. get ImagePattern and enter markModifyDone, load ImageLoadingContext.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    imagePattern->EnableAnalyzer(true);
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    imageLayoutProperty->UpdateImageSourceInfo(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
+    imageLayoutProperty->UpdateAlt(ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT));
+    frameNode->MarkModifyDone();
+    /**
+     * @tc.steps: step3. AltImage loads successfully, and trigger alt callback.
+     */
+    imagePattern->altLoadingCtx_->DataReadyCallback(nullptr);
+
+    imagePattern->altLoadingCtx_->srcRect_ = { 0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT };
+    imagePattern->altLoadingCtx_->dstRect_ = { 0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_WIDTH };
+    imagePattern->altLoadingCtx_->SuccessCallback(nullptr);
+
+    // check onAltLoadSuccess result
+    ASSERT_NE(imagePattern->altImage_, nullptr);
+    EXPECT_EQ(*imagePattern->altSrcRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(*imagePattern->altDstRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_WIDTH));
+    ASSERT_NE(imagePattern->altImage_->paintConfig_, nullptr);
+    auto altImagePaintConfig = imagePattern->altImage_->GetPaintConfig();
+    EXPECT_EQ(altImagePaintConfig.imageFit_, IMAGE_FIT_DEFAULT);
+    /**
+     * @tc.steps: step4. Image loads successfully, and trigger Pattern->OnImageLoadSuccess.
+     */
+
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    ASSERT_NE(imagePattern->image_, nullptr);
+
+    imagePattern->CreateAnalyzerOverlay();
+    EXPECT_TRUE(imagePattern->imageAnalyzerManager_);
+}
+
+/**
+ * @tc.name:  ImagePatternUpdateAnalyzerOverlayLayout
+ * @tc.desc: call UpdateAnalyzerOverlayLayout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternUpdateAnalyzerOverlayLayout, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->UpdateAnalyzerOverlayLayout();
+    imagePattern->EnableAnalyzer(true);
+    imagePattern->UpdateAnalyzerOverlayLayout();
+    EXPECT_TRUE(imagePattern->imageAnalyzerManager_);
+}
+
+/**
+ * @tc.name:  ImagePatternDestroyAnalyzerOverlay
+ * @tc.desc: call DestroyAnalyzerOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternDestroyAnalyzerOverlay, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->DestroyAnalyzerOverlay();
+    imagePattern->EnableAnalyzer(true);
+    imagePattern->DestroyAnalyzerOverlay();
+    EXPECT_TRUE(imagePattern->imageAnalyzerManager_);
+}
+
+/**
+ * @tc.name:  ImagePatternReleaseImageAnalyzer
+ * @tc.desc: call ReleaseImageAnalyzer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternReleaseImageAnalyzer, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->ReleaseImageAnalyzer();
+    imagePattern->EnableAnalyzer(true);
+    imagePattern->ReleaseImageAnalyzer();
+    EXPECT_TRUE(imagePattern->imageAnalyzerManager_);
+}
+
+/**
+ * @tc.name:  ImagePatternUpdateAnalyzerUIConfig
+ * @tc.desc: call UpdateAnalyzerUIConfig.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternUpdateAnalyzerUIConfig, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->UpdateAnalyzerUIConfig(nullptr);
+    bool b = imagePattern->IsSupportImageAnalyzerFeature();
+    EXPECT_FALSE(b);
+}
+
+/**
+ * @tc.name:  ImagePatternhasSceneChanged
+ * @tc.desc: call hasSceneChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternhasSceneChanged, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    bool b = imagePattern->hasSceneChanged();
+    EXPECT_FALSE(b);
+}
+
+/**
+ * @tc.name:  ImagePatternResetImage
+ * @tc.desc: call ResetImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternResetImage, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->ResetImage();
+    EXPECT_EQ(imagePattern->image_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternResetAltImage001
+ * @tc.desc: call ResetAltImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternResetAltImage001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestThreeNg::CreateImageNodeWithDefaultProp(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(WIDTH, HEIGHT));
+    frameNode->SetGeometryNode(geometryNode);
+    frameNode->SetActive(true);
+    /**
+     * @tc.steps: step2. get ImagePattern and enter markModifyDone, load ImageLoadingContext.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    imagePattern->EnableAnalyzer(true);
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    imageLayoutProperty->UpdateImageSourceInfo(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
+    imageLayoutProperty->UpdateAlt(ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT));
+    frameNode->MarkModifyDone();
+    /**
+     * @tc.steps: step3. AltImage loads successfully, and trigger alt callback.
+     */
+    imagePattern->altLoadingCtx_->DataReadyCallback(nullptr);
+
+    imagePattern->altLoadingCtx_->srcRect_ = { 0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT };
+    imagePattern->altLoadingCtx_->dstRect_ = { 0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_WIDTH };
+    imagePattern->altLoadingCtx_->SuccessCallback(nullptr);
+
+    // check onAltLoadSuccess result
+    ASSERT_NE(imagePattern->altImage_, nullptr);
+    EXPECT_EQ(*imagePattern->altSrcRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(*imagePattern->altDstRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_WIDTH));
+    ASSERT_NE(imagePattern->altImage_->paintConfig_, nullptr);
+    auto altImagePaintConfig = imagePattern->altImage_->GetPaintConfig();
+    EXPECT_EQ(altImagePaintConfig.imageFit_, IMAGE_FIT_DEFAULT);
+    /**
+     * @tc.steps: step4. Image loads successfully, and trigger Pattern->OnImageLoadSuccess.
+     */
+
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    ASSERT_NE(imagePattern->image_, nullptr);
+
+    imagePattern->ResetAltImage();
+    EXPECT_EQ(imagePattern->altImage_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternResetAltImage002
+ * @tc.desc: call ResetAltImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternResetAltImage002, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->ResetAltImage();
+    EXPECT_EQ(imagePattern->altImage_, nullptr);
+}
+
+/**
+ * @tc.name:  ImagePatternResetPictureSize
+ * @tc.desc: call ResetPictureSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternResetPictureSize, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->ResetPictureSize();
+    EXPECT_FALSE(imagePattern->hasSizeChanged);
+}
+
+/**
+ * @tc.name:  ImagePatternSetColorFilter
+ * @tc.desc: call SetColorFilter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternSetColorFilter, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->SetColorFilter(frameNode);
+    EXPECT_FALSE(frameNode->GetPaintProperty<ImageRenderProperty>()->HasColorFilter());
+}
+
+/**
+ * @tc.name:  ImagePatternSetImageFit
+ * @tc.desc: call SetImageFit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternSetImageFit, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->SetImageFit(frameNode);
+    EXPECT_FALSE(frameNode->GetPaintProperty<ImageRenderProperty>()->HasImageFit());
+}
 } // namespace OHOS::Ace::NG

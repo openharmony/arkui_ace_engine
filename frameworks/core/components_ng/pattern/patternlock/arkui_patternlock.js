@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const __patternlock__ = requireInternal("arkui.patternlock");
+const __patternlock__ = requireInternal('arkui.patternlock');
 
 class PatternLock extends JSViewAbstract {
     static create(value) {

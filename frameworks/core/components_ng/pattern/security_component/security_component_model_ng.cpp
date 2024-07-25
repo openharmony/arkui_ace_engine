@@ -25,6 +25,9 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#ifdef SECURITY_COMPONENT_ENABLE
+#include "core/components_ng/pattern/security_component/security_component_handler.h"
+#endif
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -34,6 +37,9 @@
 namespace OHOS::Ace::NG {
 const static uint8_t DEFAULT_TRANSPARENCY_THRESHOLD = 0x1A;
 const static uint8_t FULL_TRANSPARENCY_VALUE = 0xFF;
+const static std::set<uint32_t> RELEASE_ATTRIBUTE_LIST = {
+    0x0C000000,
+};
 RefPtr<SecurityComponentTheme> SecurityComponentModelNG::GetTheme()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -245,6 +251,11 @@ bool SecurityComponentModelNG::IsArkuiComponent()
     return false;
 }
 
+bool SecurityComponentModelNG::IsInReleaseList(uint32_t value)
+{
+    return (RELEASE_ATTRIBUTE_LIST.find(value) != RELEASE_ATTRIBUTE_LIST.end());
+}
+
 bool SecurityComponentModelNG::IsBelowThreshold(const Color& value)
 {
     return value.GetAlpha() < DEFAULT_TRANSPARENCY_THRESHOLD;
@@ -292,8 +303,12 @@ void SecurityComponentModelNG::SetBackgroundColor(const Color& value)
         return;
     }
 
+    bool res = false;
+#ifdef SECURITY_COMPONENT_ENABLE
+    res = SecurityComponentHandler::IsSystemAppCalling();
+#endif
     Color resColor = value;
-    if (!IsArkuiComponent() && IsBelowThreshold(value)) {
+    if (!res && !IsInReleaseList(resColor.GetValue()) && !IsArkuiComponent() && IsBelowThreshold(value)) {
         resColor = value.ChangeAlpha(FULL_TRANSPARENCY_VALUE);
     }
     ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, BackgroundColor, resColor);

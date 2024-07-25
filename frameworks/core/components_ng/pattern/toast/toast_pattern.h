@@ -99,6 +99,8 @@ public:
     {
         return toastInfo_;
     }
+
+    void UpdateToastFontSize();
     
 private:
     void BeforeCreateLayoutWrapper() override;

@@ -70,6 +70,7 @@ public:
         auto geometryNode = host->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         paintRect_ = geometryNode->GetFrameRect();
+        geometryNode->SetPixelGridRoundOffset(paintRect_.GetOffset());
     }
 
     RectF GetPaintRectWithTransform() override
@@ -99,11 +100,17 @@ public:
         return 0;
     }
 
+    void SetOpacityMultiplier(float opacity)
+    {
+        opacityMultiplier_ = opacity;
+    }
+
     bool isVisible_ = true;
     RectF rect_;
     RectF paintRect_;
     Color blendColor_ = Color::TRANSPARENT;
     std::vector<double> transInfo_ = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    float opacityMultiplier_ = 1.0f;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H

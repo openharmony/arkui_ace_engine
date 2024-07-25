@@ -392,7 +392,8 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0025, TestSize.Level1)
 HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0027, TestSize.Level1)
 {
     auto algorithm = AceType::MakeRefPtr<BarItemLayoutAlgorithm>();
-    auto barItem = AceType::MakeRefPtr<BarItemNode>("barItem", 11);
+    auto barItem = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, 11, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto textNode = FrameNode::CreateFrameNode("textNode", 22, AceType::MakeRefPtr<TextPattern>());
@@ -453,10 +454,14 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0029, TestSize.Level1)
      */
     auto menu = FrameNode::CreateFrameNode("menu", 33, AceType::MakeRefPtr<TextPattern>());
     auto child1 = FrameNode::CreateFrameNode("child1", 44, AceType::MakeRefPtr<TextPattern>());
-    auto barItem = AceType::MakeRefPtr<BarItemNode>("barItem", 55);
-    auto barItem2 = AceType::MakeRefPtr<BarItemNode>("barItem", 66);
-    auto barItem3 = AceType::MakeRefPtr<BarItemNode>("barItem", 67);
-    auto barItem4 = AceType::MakeRefPtr<BarItemNode>("barItem", 68);
+    auto barItem = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, 55, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
+    auto barItem2 = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, 66, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
+    auto barItem3 = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, 67, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
+    auto barItem4 = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, 68, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
 
     auto icon = FrameNode::CreateFrameNode("icon", 77, AceType::MakeRefPtr<ImagePattern>());
     auto text = FrameNode::CreateFrameNode("text", 88, AceType::MakeRefPtr<TextPattern>());
@@ -1191,7 +1196,8 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0038, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>("BarItemNode", 1);
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, 1, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
     ASSERT_NE(barItemNode, nullptr);
     auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
     ASSERT_NE(barItemPattern, nullptr);
@@ -1236,7 +1242,8 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0039, TestSize.Level1)
     /**
      * @tc.steps: step1. create BarItemNode.
      */
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>("BarItemNode", 1);
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, 1, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
     ASSERT_NE(barItemNode, nullptr);
     auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
     ASSERT_NE(barItemPattern, nullptr);
@@ -1316,7 +1323,8 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0040, TestSize.Level1)
     /**
      * @tc.steps: step1. create BarItemNode.
      */
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>("BarItemNode", 1);
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, 1, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
     ASSERT_NE(barItemNode, nullptr);
     auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
     ASSERT_NE(barItemPattern, nullptr);
@@ -1714,5 +1722,40 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0046, TestSize.Level1)
     layoutWrapper->AppendChild(backButtonWrapper);
     algorithm->MeasureBackButton(AceType::RawPtr(layoutWrapper), titleBarNode, titleBarLayoutProperty);
     ASSERT_EQ(pipeline->minPlatformVersion_, 10);
+}
+
+/**
+ * @tc.name: AccessibilityTest001
+ * @tc.desc: Test navdestination "backbutton" and "more" button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterModelTestNg, AccessibilityTest001, TestSize.Level1)
+{
+    auto navdestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    auto backButtonNode = FrameNode::CreateFrameNode(
+        V2::BACK_BUTTON_ETS_TAG, 7, AceType::MakeRefPtr<ButtonPattern>());
+    titleBarNode->backButton_ = backButtonNode;
+    navdestinationNode->titleBarNode_ = titleBarNode;
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(navdestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleNode, nullptr);
+    EXPECT_NE(titleNode->GetBackButton(), nullptr);
+
+    auto AccessibilityProperty1 = backButtonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    AccessibilityProperty1->SetAccessibilityGroup(true);
+    AccessibilityProperty1->SetAccessibilityText("NavdestinationBackbutton");
+    auto text1 = AccessibilityProperty1->GetAccessibilityText();
+    EXPECT_EQ(text1, "NavdestinationBackbutton");
+
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuNode = AceType::MakeRefPtr<FrameNode>(V2::BAR_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuNode, nullptr);
+    titleBarNode->SetMenu(menuNode);
+    auto AccessibilityProperty2 = menuNode->GetAccessibilityProperty<AccessibilityProperty>();
+    AccessibilityProperty2->SetAccessibilityGroup(true);
+    AccessibilityProperty2->SetAccessibilityText("NavdestinationMenu");
+    auto text2 = AccessibilityProperty2->GetAccessibilityText();
+    EXPECT_EQ(text2, "NavdestinationMenu");
 }
 } // namespace OHOS::Ace::NG

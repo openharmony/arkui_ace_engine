@@ -84,10 +84,10 @@ std::vector<double> OffscreenCanvasRenderingContext2DModelNG::GetLineDash()
     return pattern_ ? pattern_->GetLineDash().lineDash : std::vector<double> {};
 }
 
-void OffscreenCanvasRenderingContext2DModelNG::SetFillGradient(const Ace::Gradient& gradient)
+void OffscreenCanvasRenderingContext2DModelNG::SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(pattern_);
-    pattern_->SetFillGradient(gradient);
+    pattern_->SetFillGradient(*gradient);
 }
 
 void OffscreenCanvasRenderingContext2DModelNG::SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern)
@@ -102,10 +102,10 @@ void OffscreenCanvasRenderingContext2DModelNG::SetFillColor(const Color& color, 
     pattern_->SetFillColor(color);
 }
 
-void OffscreenCanvasRenderingContext2DModelNG::SetStrokeGradient(const Ace::Gradient& gradient)
+void OffscreenCanvasRenderingContext2DModelNG::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(pattern_);
-    pattern_->SetStrokeGradient(gradient);
+    pattern_->SetStrokeGradient(*gradient);
 }
 
 void OffscreenCanvasRenderingContext2DModelNG::SetStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern)
@@ -123,15 +123,13 @@ void OffscreenCanvasRenderingContext2DModelNG::SetStrokeColor(const Color& color
 void OffscreenCanvasRenderingContext2DModelNG::DrawImage(const ImageInfo& imageInfo)
 {
     CHECK_NULL_VOID(pattern_);
-    if (imageInfo.isImage) {
-        pattern_->DrawImage(imageInfo.image, imageInfo.imgWidth, imageInfo.imgHeight);
-        return;
-    }
-    if (imageInfo.isSvg) {
-        pattern_->DrawSvgImage(imageInfo.svgDom, imageInfo.image, imageInfo.imageFit);
-        return;
-    }
-    pattern_->DrawPixelMap(imageInfo.pixelMap, imageInfo.image);
+    pattern_->DrawImage(imageInfo.image, imageInfo.imgWidth, imageInfo.imgHeight);
+}
+
+void OffscreenCanvasRenderingContext2DModelNG::DrawSvgImage(const ImageInfo& imageInfo)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->DrawSvgImage(imageInfo.svgDom, imageInfo.image, imageInfo.imageFit);
 }
 
 void OffscreenCanvasRenderingContext2DModelNG::PutImageData(const Ace::ImageData& imageData)
@@ -427,16 +425,6 @@ void OffscreenCanvasRenderingContext2DModelNG::SetTextBaseline(const TextBaselin
     pattern_->SetTextBaseline(baseline);
 }
 
-double OffscreenCanvasRenderingContext2DModelNG::GetMeasureTextWidth(const PaintState& state, const std::string& text)
-{
-    return pattern_ ? pattern_->MeasureText(text, state) : 0.0;
-}
-
-double OffscreenCanvasRenderingContext2DModelNG::GetMeasureTextHeight(const PaintState& state, const std::string& text)
-{
-    return pattern_ ? pattern_->MeasureTextHeight(text, state) : 0.0;
-}
-
 void OffscreenCanvasRenderingContext2DModelNG::FillRect(const Rect& rect)
 {
     CHECK_NULL_VOID(pattern_);
@@ -463,31 +451,23 @@ TransformParam OffscreenCanvasRenderingContext2DModelNG::GetTransform()
 RefPtr<Ace::PixelMap> OffscreenCanvasRenderingContext2DModelNG::GetPixelMap(const ImageSize& imageSize)
 {
 #ifdef PIXEL_MAP_SUPPORTED
-    // 1 Get data from canvas
-    auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
-    auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
-    if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
-        return nullptr;
-    }
-
-    // 2 Create pixelmap
+    // Create pixelmap
     OHOS::Media::InitializationOptions options;
     options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
     options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
     options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
-    options.size.width = static_cast<int32_t>(finalWidth);
-    options.size.height = static_cast<int32_t>(finalHeight);
+    options.size.width = static_cast<int32_t>(std::abs(imageSize.width));
+    options.size.height = static_cast<int32_t>(std::abs(imageSize.height));
     options.editable = true;
     auto pixelMap = Ace::PixelMap::Create(OHOS::Media::PixelMap::Create(options));
-    if (pixelMap) {
-        std::shared_ptr<Ace::ImageData> imageData = std::make_shared<Ace::ImageData>();
-        imageData->pixelMap = pixelMap;
-        imageData->dirtyX = static_cast<int32_t>(imageSize.left);
-        imageData->dirtyY = static_cast<int32_t>(imageSize.top);
-        imageData->dirtyWidth = static_cast<int32_t>(imageSize.width);
-        imageData->dirtyHeight = static_cast<int32_t>(imageSize.height);
-        GetImageData(imageData);
-    }
+    CHECK_NULL_RETURN(pixelMap, nullptr);
+    std::shared_ptr<Ace::ImageData> imageData = std::make_shared<Ace::ImageData>();
+    imageData->pixelMap = pixelMap;
+    imageData->dirtyX = static_cast<int32_t>(imageSize.left);
+    imageData->dirtyY = static_cast<int32_t>(imageSize.top);
+    imageData->dirtyWidth = static_cast<int32_t>(imageSize.width);
+    imageData->dirtyHeight = static_cast<int32_t>(imageSize.height);
+    GetImageData(imageData);
     return pixelMap;
 #else
     return nullptr;
@@ -497,42 +477,34 @@ RefPtr<Ace::PixelMap> OffscreenCanvasRenderingContext2DModelNG::GetPixelMap(cons
 void OffscreenCanvasRenderingContext2DModelNG::GetImageDataModel(const ImageSize& imageSize, uint8_t* buffer)
 {
 #ifdef PIXEL_MAP_SUPPORTED
-    auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
-    auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
-    if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
-        return;
-    }
     OHOS::Media::InitializationOptions options;
     options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
     options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
     options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
-    options.size.width = static_cast<int32_t>(finalWidth);
-    options.size.height = static_cast<int32_t>(finalHeight);
+    options.size.width = static_cast<int32_t>(std::abs(imageSize.width));
+    options.size.height = static_cast<int32_t>(std::abs(imageSize.height));
     options.editable = true;
     auto pixelMap = Ace::PixelMap::Create(OHOS::Media::PixelMap::Create(options));
-    if (pixelMap) {
-        std::shared_ptr<Ace::ImageData> imageData = std::make_shared<Ace::ImageData>();
-        imageData->pixelMap = pixelMap;
-        imageData->dirtyX = static_cast<int32_t>(imageSize.left);
-        imageData->dirtyY = static_cast<int32_t>(imageSize.top);
-        imageData->dirtyWidth = static_cast<int32_t>(imageSize.width);
-        imageData->dirtyHeight = static_cast<int32_t>(imageSize.height);
-        GetImageData(imageData);
-        auto pixelsSize = pixelMap->GetRowBytes() * pixelMap->GetHeight();
-        memcpy_s(buffer, pixelsSize, pixelMap->GetWritablePixels(), pixelsSize);
-    }
+    CHECK_NULL_VOID(pixelMap);
+    std::shared_ptr<Ace::ImageData> imageData = std::make_shared<Ace::ImageData>();
+    imageData->pixelMap = pixelMap;
+    imageData->dirtyX = static_cast<int32_t>(imageSize.left);
+    imageData->dirtyY = static_cast<int32_t>(imageSize.top);
+    imageData->dirtyWidth = static_cast<int32_t>(imageSize.width);
+    imageData->dirtyHeight = static_cast<int32_t>(imageSize.height);
+    GetImageData(imageData);
+    auto pixelsSize = pixelMap->GetRowBytes() * pixelMap->GetHeight();
+    memcpy_s(buffer, pixelsSize, pixelMap->GetWritablePixels(), pixelsSize);
 #else
     auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
     auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
     std::unique_ptr<Ace::ImageData> data = GetImageData(imageSize);
-
-    if (data != nullptr) {
-        for (uint32_t idx = 0; idx < finalHeight * finalWidth; ++idx) {
-            buffer[BUFFER_SIZE * idx] = data->data[idx].GetRed();
-            buffer[BUFFER_SIZE * idx + STEP_1] = data->data[idx].GetGreen();
-            buffer[BUFFER_SIZE * idx + STEP_2] = data->data[idx].GetBlue();
-            buffer[BUFFER_SIZE * idx + STEP_3] = data->data[idx].GetAlpha();
-        }
+    CHECK_NULL_VOID(data);
+    for (uint32_t idx = 0; idx < finalHeight * finalWidth; ++idx) {
+        buffer[BUFFER_SIZE * idx] = data->data[idx].GetRed();
+        buffer[BUFFER_SIZE * idx + STEP_1] = data->data[idx].GetGreen();
+        buffer[BUFFER_SIZE * idx + STEP_2] = data->data[idx].GetBlue();
+        buffer[BUFFER_SIZE * idx + STEP_3] = data->data[idx].GetAlpha();
     }
 #endif
 }

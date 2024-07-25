@@ -121,6 +121,11 @@ public:
         return ViewStackProcessor::GetInstance()->CheckTopNodeFirstBuilding();
     }
 
+    bool IsEmptyStack() const override
+    {
+        return ViewStackProcessor::GetInstance()->IsEmpty();
+    }
+
 private:
     std::unique_ptr<ScopedViewStackProcessor> scopeStack_;
 };

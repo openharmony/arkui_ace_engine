@@ -53,7 +53,7 @@ ArkUINativeModuleValue FlexBridge::SetFlexInitialize(ArkUIRuntimeCallInfo* runti
     if (options[1] != 0) {
         if (!crossArg->IsNull() && !crossArg->IsUndefined()) {
             CalcDimension crossValue;
-            if (crossArg->IsObject() && ArkTSUtils::ParseJsLengthMetrics(vm, crossArg, crossValue)) {
+            if (crossArg->IsObject(vm) && ArkTSUtils::ParseJsLengthMetrics(vm, crossArg, crossValue)) {
                 GetArkUINodeModifiers()->getFlexModifier()->setFlexCrossSpace(
                     nativeNode, crossValue.Value(), static_cast<int8_t>(crossValue.Unit()));
             }
@@ -61,7 +61,7 @@ ArkUINativeModuleValue FlexBridge::SetFlexInitialize(ArkUIRuntimeCallInfo* runti
     }
     if (!mainArg->IsNull() && !mainArg->IsUndefined()) {
         CalcDimension mainValue;
-        if (crossArg->IsObject() && ArkTSUtils::ParseJsLengthMetrics(vm, crossArg, mainValue)) {
+        if (crossArg->IsObject(vm) && ArkTSUtils::ParseJsLengthMetrics(vm, crossArg, mainValue)) {
             GetArkUINodeModifiers()->getFlexModifier()->setFlexMainSpace(
                 nativeNode, mainValue.Value(), static_cast<int8_t>(mainValue.Unit()));
         }

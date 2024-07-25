@@ -68,8 +68,7 @@ class SideBarAnimationController : public AceType {
     DECLARE_ACE_TYPE(SideBarAnimationController, AceType);
 
 public:
-    explicit SideBarAnimationController(const WeakPtr<PipelineContext>& context) :
-             context_(context) {}
+    explicit SideBarAnimationController(const WeakPtr<PipelineContext>& context) : context_(context) {}
     ~SideBarAnimationController() override = default;
 
     void SetAnimationStopCallback(StopAnimationCallback&& callback)

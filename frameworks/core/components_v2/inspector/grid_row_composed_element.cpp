@@ -129,7 +129,7 @@ std::string GridRowComposedElement::GetGridRowBreakpoints() const
         return "[";
     }
     std::string result = "[";
-    for (auto & breakpoint : breakpointPtr->breakpoints) {
+    for (auto& breakpoint : breakpointPtr->breakpoints) {
         result.append(breakpoint);
         result.append(", ");
     }

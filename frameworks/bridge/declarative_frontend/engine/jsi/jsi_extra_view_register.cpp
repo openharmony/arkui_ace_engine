@@ -34,14 +34,15 @@ void RegisterExtraViews(BindingTarget globalObj)
     }
 }
 
-void RegisterExtraViewByName(BindingTarget globalObj, const std::string& moduleName)
+bool RegisterExtraViewByName(BindingTarget globalObj, const std::string& moduleName)
 {
     auto func = extraBindFuncs.find(moduleName);
     if (func == extraBindFuncs.end()) {
         LOGW("JS module not exist in extra, name: %{public}s", moduleName.c_str());
-        return;
+        return false;
     }
     (*func).second(globalObj);
+    return true;
 }
 
 } // namespace OHOS::Ace::Framework

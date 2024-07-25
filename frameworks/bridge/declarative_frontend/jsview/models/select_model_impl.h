@@ -66,7 +66,9 @@ public:
     void SetHasOptionWidth(bool haveOptionWidth) override;
     void SetMenuBackgroundColor(const Color& color) override;
     void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) override;
+    void SetDivider(const NG::SelectDivider& divider) override {}
     void SetControlSize(const std::optional<ControlSize>& controlSize) override {}
+    void SetLayoutDirection(TextDirection value) override;
     ControlSize GetControlSize() override { return ControlSize{}; }
 };
 } // namespace OHOS::Ace::Framework

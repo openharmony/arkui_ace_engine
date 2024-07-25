@@ -46,6 +46,9 @@ RecycleViewModel* RecycleViewModel::GetInstance()
 namespace OHOS::Ace::Framework {
 void JSRecycleView::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        RecycleViewModel::GetInstance()->Create();
+    }
     return;
 }
 

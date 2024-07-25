@@ -67,7 +67,8 @@ private:
     void SizeCalculation(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
         const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
 
-    void SizeCalculationSplit(const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
+    void SizeCalculationSplit(const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
     void CheckSizeInSplit(const float frameWidth, const float userSetNavBarWidth, const float minNavBarWidth,
         const float minContentWidth);
 

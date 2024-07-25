@@ -117,9 +117,10 @@ public:
 
 private:
     void PaintImage(DrawingContext& context);
-    void PaintImageNode(DrawingContext& context, RefPtr<FrameNode> imageNode, RefPtr<ImagePattern> pattern,
-        OffsetF offset);
-    void PaintFrameNode(DrawingContext& context, RefPtr<FrameNode> frameNode, RefPtr<Pattern> pattern, OffsetF offset);
+    void PaintImageNode(DrawingContext& context, const RefPtr<FrameNode>& imageNode,
+        const RefPtr<ImagePattern>& pattern, const OffsetF& offset);
+    void PaintFrameNode(DrawingContext& context, const RefPtr<FrameNode>& frameNode,
+        const RefPtr<Pattern>& pattern, const OffsetF& offset);
     void PaintBackground(const RSPath& path, RSCanvas& canvas, RefPtr<TextDragPattern> textDragPattern,
         RefPtr<RichEditorPattern> richEditorPattern);
     void PaintSelBackground(RSCanvas& canvas, RefPtr<TextDragPattern> textDragPattern,

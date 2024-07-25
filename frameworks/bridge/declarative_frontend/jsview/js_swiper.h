@@ -60,6 +60,8 @@ protected:
     static void GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperDigitalParameters& digitalParameters);
     static void SetDisplayArrow(const JSCallbackInfo& info);
     static SwiperParameters GetDotIndicatorInfo(const JSRef<JSObject>& obj);
+    static void SetDotIndicatorInfo(const JSRef<JSObject>& obj, SwiperParameters& swiperParameters,
+        const RefPtr<SwiperIndicatorTheme>& swiperIndicatorTheme);
     static SwiperDigitalParameters GetDigitIndicatorInfo(const JSRef<JSObject>& obj);
     static std::optional<Dimension> ParseIndicatorDimension(const JSRef<JSVal>& value);
     static void SetIsIndicatorCustomSize(const Dimension& dimPosition, bool parseOk);
@@ -67,6 +69,7 @@ protected:
     static void SetNestedScroll(const JSCallbackInfo& info);
     static void SetCustomContentTransition(const JSCallbackInfo& info);
     static void SetOnContentDidScroll(const JSCallbackInfo& info);
+    static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
 };
 
 class JSSwiperController final : public Referenced {

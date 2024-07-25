@@ -26,12 +26,10 @@ namespace OHOS::Ace::NG {
 struct NavigationBackgroundOptions {
     std::optional<Color> color;
     std::optional<BlurStyle> blurStyle;
-    std::optional<BarStyle> barStyle;
 
     bool operator== (const NavigationBackgroundOptions& other) const
     {
-        return color == other.color && blurStyle == other.blurStyle
-            && barStyle == other.barStyle;
+        return color == other.color && blurStyle == other.blurStyle;
     }
 
     bool operator!= (const NavigationBackgroundOptions& other) const
@@ -40,12 +38,30 @@ struct NavigationBackgroundOptions {
     }
 };
 
+struct NavigationBarOptions {
+    std::optional<BarStyle> barStyle;
+    std::optional<CalcDimension> paddingStart;
+    std::optional<CalcDimension> paddingEnd;
+
+    bool operator== (const NavigationBarOptions& other) const
+    {
+        return barStyle == other.barStyle && paddingStart == other.paddingStart
+            && paddingEnd == other.paddingEnd;
+    }
+
+    bool operator!= (const NavigationBarOptions& other) const
+    {
+        return !(*this == other);
+    }
+};
+
 struct NavigationTitlebarOptions {
     NavigationBackgroundOptions bgOptions;
+    NavigationBarOptions brOptions;
 
     bool operator== (const NavigationTitlebarOptions& other) const
     {
-        return bgOptions == other.bgOptions;
+        return bgOptions == other.bgOptions &&  brOptions == other.brOptions;
     }
 
     bool operator!= (const NavigationTitlebarOptions& other) const

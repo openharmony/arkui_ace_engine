@@ -72,20 +72,24 @@ void UIDisplaySync::JudgeWhetherSkip()
 void UIDisplaySync::OnFrame()
 {
     ACE_SCOPED_TRACE("DisplaySyncId[%" PRIu64 "] Timestamp[%" PRIu64 "] TargetTimestamp[%" PRIu64 "]"
-                     "Preferred[%d] DrawFPS[%d] VSyncRate[%d] Rate[%d] noSkip[%d]",
-                     GetId(), data_->timestamp_, data_->targetTimestamp_,
-                     data_->rateRange_->preferred_, drawFPS_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
-    TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "Preferred[%{public}d] DrawFPS[%{public}d]"
-        "VSyncRate[%{public}d] Rate[%{public}d] noSkip[%{public}d]",
-        data_->rateRange_->preferred_, drawFPS_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
+                     "FrameRateRange[%d, %d, %d] DrawFPS[%d] VSyncRate[%d] Rate[%d] noSkip[%d]",
+                     GetId(), data_->timestamp_, data_->targetTimestamp_, data_->rateRange_->min_,
+                     data_->rateRange_->max_, data_->rateRange_->preferred_, drawFPS_, sourceVsyncRate_,
+                     data_->rate_, data_->noSkip_);
+    TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "FrameRateRange[%{public}d, %{public}d, %{public}d], "
+        "DrawFPS[%{public}d] VSyncRate[%{public}d] Rate[%{public}d] noSkip[%{public}d]",
+        data_->rateRange_->min_, data_->rateRange_->max_, data_->rateRange_->preferred_,
+        drawFPS_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
     if (data_->noSkip_ && data_->onFrame_) {
         data_->onFrame_();
     }
 
+    // Callback from JS_DisplaySync and Native_XComponent
     if (data_->noSkip_ && data_->onFrameWithData_) {
         data_->onFrameWithData_(data_);
     }
 
+    // Callback from Animator
     if (data_->noSkip_ && data_->onFrameWithTimestamp_) {
         data_->onFrameWithTimestamp_(data_->timestamp_);
     }
@@ -122,11 +126,13 @@ void UIDisplaySync::DelFromPipeline(WeakPtr<PipelineBase>& pipelineContext)
 {
     auto context = GetCurrentContext();
     if (!context) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[DisplaySync] CurrentContext is nullptr.");
         return;
     }
 
     RefPtr<UIDisplaySyncManager> dsm = context->GetOrCreateUIDisplaySyncManager();
     if (!dsm) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[DisplaySync] DSM is nullptr.");
         return;
     }
     dsm->RemoveDisplaySync(AceType::Claim(this));
@@ -334,6 +340,20 @@ bool UIDisplaySync::SetVsyncRate(int32_t vsyncRate)
 RefPtr<DisplaySyncData> UIDisplaySync::GetDisplaySyncData() const
 {
     return data_;
+}
+
+int32_t UIDisplaySync::GetAnimatorExpectedRate()
+{
+    // Callback from Animator
+    if (data_ && data_->onFrameWithTimestamp_ == nullptr) {
+        return INVALID_ANIMATOR_EXPECTED_RATE;
+    }
+
+    int32_t animatorExpectedRate = 0;
+    if (data_ && data_->rateRange_) {
+        animatorExpectedRate = data_->rateRange_->preferred_;
+    }
+    return animatorExpectedRate;
 }
 
 bool UIDisplaySync::IsCommonDivisor(int32_t expectedRate, int32_t vsyncRate)

@@ -131,7 +131,7 @@ PositionWithAffinity ParagraphManager::GetGlyphPositionAtCoordinate(Offset offse
         if (LessOrEqual(offset.GetY(), info.paragraph->GetHeight()) ||
             (idx == static_cast<int>(paragraphs_.size()) - 1)) {
             auto result = info.paragraph->GetGlyphPositionAtCoordinate(offset);
-            finalResult.position_ = result.position_ + info.start;
+            finalResult.position_ = result.position_ + static_cast<size_t>(info.start);
             TAG_LOGI(AceLogTag::ACE_TEXT,
                 "Current paragraph, originPos = %{public}zu, finalPos =%{public}zu and affinity = %{public}d",
                 result.position_, finalResult.position_, result.affinity_);
@@ -143,7 +143,7 @@ PositionWithAffinity ParagraphManager::GetGlyphPositionAtCoordinate(Offset offse
     }
     auto info = paragraphs_.back();
     auto result = info.paragraph->GetGlyphPositionAtCoordinate(offset);
-    finalResult.position_ = info.end;
+    finalResult.position_ = static_cast<size_t>(info.end);
     finalResult.affinity_ = static_cast<TextAffinity>(result.affinity_);
     TAG_LOGI(AceLogTag::ACE_TEXT,
         "Current paragraph, final position = %{public}zu and affinity = %{public}d", finalResult.position_,
@@ -240,21 +240,30 @@ TextLineMetrics ParagraphManager::GetLineMetrics(size_t lineNumber)
             "GetLineMetrics failed, lineNumber is greater than max lines:%{public}zu", lineNumber);
         return TextLineMetrics();
     }
+    size_t endIndex = 0;
+    double paragraphsHeight = 0.0;
     size_t lineNumberParam = lineNumber;
     for (auto &&info : paragraphs_) {
         auto lineCount = info.paragraph->GetLineCount();
         if (lineNumber > lineCount - 1) {
             lineNumber -= lineCount;
+            paragraphsHeight += info.paragraph->GetHeight();
+            auto lastLineMetrics = info.paragraph->GetLineMetrics(lineCount - 1);
+            endIndex += lastLineMetrics.endIndex + 1;
             continue;
         }
         auto lineMetrics = info.paragraph->GetLineMetrics(lineNumber);
+        lineMetrics.startIndex += endIndex;
+        lineMetrics.endIndex += endIndex;
         lineMetrics.lineNumber = lineNumberParam;
+        lineMetrics.y += paragraphsHeight;
+        lineMetrics.baseline += paragraphsHeight;
         return lineMetrics;
     }
     return TextLineMetrics();
 }
 
-std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end) const
+std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const
 {
     std::vector<RectF> res;
     float y = 0.0f;
@@ -265,7 +274,12 @@ std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end) const
         }
         if (info.end > start) {
             auto relativeStart = (start < info.start) ? 0 : start - info.start;
-            info.paragraph->GetRectsForRange(relativeStart, end - info.start, rects);
+            if (rectHeightPolicy == RectHeightPolicy::COVER_TEXT) {
+                info.paragraph->GetTightRectsForRange(relativeStart, end - info.start, rects);
+            } else {
+                info.paragraph->GetRectsForRange(relativeStart, end - info.start, rects);
+            }
+
             for (auto&& rect : rects) {
                 rect.SetTop(rect.Top() + y);
             }

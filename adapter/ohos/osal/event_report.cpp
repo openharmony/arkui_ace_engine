@@ -61,6 +61,9 @@ constexpr char EVENT_KEY_DURITION[] = "DURITION";
 constexpr char EVENT_KEY_TOTAL_FRAMES[] = "TOTAL_FRAMES";
 constexpr char EVENT_KEY_TOTAL_MISSED_FRAMES[] = "TOTAL_MISSED_FRAMES";
 constexpr char EVENT_KEY_MAX_FRAMETIME[] = "MAX_FRAMETIME";
+constexpr char EVENT_KEY_MAX_FRAMETIME_SINCE_START[] = "MAX_FRAMETIME_SINCE_START";
+constexpr char EVENT_KEY_MAX_HITCH_TIME[] = "MAX_HITCH_TIME";
+constexpr char EVENT_KEY_MAX_HITCH_TIME_SINCE_START[] = "MAX_HITCH_TIME_SINCE_START";
 constexpr char EVENT_KEY_MAX_SEQ_MISSED_FRAMES[] = "MAX_SEQ_MISSED_FRAMES";
 constexpr char EVENT_KEY_SOURCE_TYPE[] = "SOURCE_TYPE";
 constexpr char EVENT_KEY_NOTE[] = "NOTE";
@@ -90,7 +93,6 @@ constexpr char DOUBLE_CLICK_TITLE[] = "DOUBLE_CLICK_TITLE";
 constexpr char CURRENTPKG[] = "CURRENTPKG";
 constexpr char STATECHANGE[] = "STATECHANGE";
 constexpr char MAXMENUITEM[] = "MAXMENUITEM";
-constexpr char CHANGEDEFAULTSETTING[] = "CHANGEDEFAULTSETTING";
 constexpr char SCENE_BOARD_UE_DOMAIN[] = "SCENE_BOARD_UE";
 #ifdef VSYNC_TIMEOUT_CHECK
 constexpr char UI_VSYNC_TIMEOUT[] = "UI_VSYNC_TIMEOUT";
@@ -409,6 +411,9 @@ void EventReport::ReportEventJankFrame(DataBase& data)
     const auto& totalFrames = data.totalFrames;
     const auto& totalMissedFrames = data.totalMissed;
     const auto& maxFrameTime = data.maxFrameTime / NS_TO_MS;
+    const auto& maxFrameTimeSinceStart = data.maxFrameTimeSinceStart;
+    const auto& maxHitchTime = data.maxHitchTime;
+    const auto& maxHitchTimeSinceStart = data.maxHitchTimeSinceStart;
     const auto& maxSeqMissedFrames = data.maxSuccessiveFrames;
     const auto& note = data.baseInfo.note;
     const auto& isDisplayAnimator = data.isDisplayAnimator;
@@ -428,6 +433,9 @@ void EventReport::ReportEventJankFrame(DataBase& data)
         EVENT_KEY_TOTAL_FRAMES, totalFrames,
         EVENT_KEY_TOTAL_MISSED_FRAMES, totalMissedFrames,
         EVENT_KEY_MAX_FRAMETIME, static_cast<uint64_t>(maxFrameTime),
+        EVENT_KEY_MAX_FRAMETIME_SINCE_START, static_cast<uint64_t>(maxFrameTimeSinceStart),
+        EVENT_KEY_MAX_HITCH_TIME, static_cast<uint64_t>(maxHitchTime),
+        EVENT_KEY_MAX_HITCH_TIME_SINCE_START, static_cast<uint64_t>(maxHitchTimeSinceStart),
         EVENT_KEY_MAX_SEQ_MISSED_FRAMES, maxSeqMissedFrames,
         EVENT_KEY_NOTE, note,
         EVENT_KEY_DISPLAY_ANIMATOR, isDisplayAnimator);
@@ -486,11 +494,13 @@ void EventReport::ReportJankFrameFiltered(JankInfo& info)
         static_cast<long long>(skippedFrameTime / NS_TO_MS), windowName.c_str());
 }
 
-void EventReport::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName)
+void EventReport::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
+                                    const std::string& pageName)
 {
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, "APP_PAGE_INFO_UPDATE",
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_PAGE_URL, pageUrl, EVENT_KEY_BUNDLE_NAME, bundleName);
+        EVENT_KEY_PAGE_URL, pageUrl, EVENT_KEY_BUNDLE_NAME, bundleName,
+        EVENT_KEY_PAGE_NAME, pageName);
 }
 
 void EventReport::ReportDoubleClickTitle(int32_t stateChange)
@@ -511,7 +521,7 @@ void EventReport::ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stat
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         CURRENTPKG, packageName,
         MAXMENUITEM, maxMenuItem,
-        CHANGEDEFAULTSETTING, stateChange);
+        STATECHANGE, stateChange);
 }
 
 void EventReport::ReportPageNodeOverflow(const std::string& pageUrl, int32_t nodeCount, int32_t threshold)

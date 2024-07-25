@@ -37,6 +37,8 @@ public:
     virtual void TransferHoverEvent(const PointF& point, SourceType source,
         AccessibilityHoverEventType eventType, TimeStamp time) { }
 
+    virtual bool IgnoreHostNode() const;
+
     /*
     * Get session adapter of node if node type is in ${SESSION_ADAPTER_MAP}
     * {param} node: not-null

@@ -124,4 +124,22 @@ RefPtr<FrameNode> ImageBases::CreateSyncWebImageNode()
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     return frameNode;
 }
+
+std::vector<RefPtr<UINode>> PopUINodes()
+{
+    std::vector<RefPtr<UINode>> vec;
+    auto *stack = ViewStackProcessor::GetInstance();
+    for (auto uiNode = stack->Finish(); uiNode != nullptr;) {
+        vec.push_back(uiNode);
+        uiNode = stack->Finish();
+    }
+    return vec;
+}
+
+void PushUINodes(std::vector<RefPtr<UINode>> &vec)
+{
+    for (auto it = vec.rbegin(); it != vec.rend(); ++it) {
+        ViewStackProcessor::GetInstance()->Push(*it);
+    }
+}
 } // namespace OHOS::Ace::NG

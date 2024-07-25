@@ -238,6 +238,20 @@ inline FlexAlign ConvertStringToItemAlign(const std::string& str)
     return FlexAlign::AUTO;
 }
 
+inline std::string ConvertItemAlignToStirng(WrapAlignment align)
+{
+    static const LinearEnumMapNode<WrapAlignment, std::string> itemAlignTable[] = {
+        { WrapAlignment::START, "ItemAlign.Start" },
+        { WrapAlignment::CENTER, "ItemAlign.Center" },
+        { WrapAlignment::END, "ItemAlign.End" },
+        { WrapAlignment::STRETCH, "ItemAlign.Stretch" },
+        { WrapAlignment::BASELINE, "ItemAlign.Baseline" },
+    };
+
+    auto index = BinarySearchFindIndex(itemAlignTable, ArraySize(itemAlignTable), align);
+    return index < 0 ? "ItemAlign.Auto" : itemAlignTable[index].value;
+}
+
 inline std::string ConvertWrapAlignmentToStirng(WrapAlignment align)
 {
     if (align == WrapAlignment::START) {
@@ -511,13 +525,13 @@ inline std::string ConvertWrapCopyOptionToString(CopyOptions copyOptions)
 inline std::string ConvertWrapWordBreakToString(WordBreak wordBreak)
 {
     static const LinearEnumMapNode<WordBreak, std::string> wordBreakTable[] = {
-        { WordBreak::NORMAL, "normal" },
-        { WordBreak::BREAK_ALL, "break-all" },
-        { WordBreak::BREAK_WORD, "break-word" },
+        { WordBreak::NORMAL, "WordBreak.NORMAL" },
+        { WordBreak::BREAK_ALL, "WordBreak.BREAK_ALL" },
+        { WordBreak::BREAK_WORD, "WordBreak.BREAK_WORD" },
     };
 
     auto index = BinarySearchFindIndex(wordBreakTable, ArraySize(wordBreakTable), wordBreak);
-    return index < 0 ? "break-word" : wordBreakTable[index].value;
+    return index < 0 ? "WordBreak.BREAK_WORD" : wordBreakTable[index].value;
 }
 
 inline std::string ConvertEllipsisModeToString(EllipsisMode value)
@@ -541,6 +555,18 @@ inline std::string ConvertWrapLineBreakStrategyToString(LineBreakStrategy lineBr
 
     auto index = BinarySearchFindIndex(lineBreakStrategyTable, ArraySize(lineBreakStrategyTable), lineBreakStrategy);
     return index < 0 ? "line-break-strategy" : lineBreakStrategyTable[index].value;
+}
+
+inline std::string ConvertWrapTextSelectableToString(TextSelectableMode textSelectable)
+{
+    static const LinearEnumMapNode<TextSelectableMode, std::string> textSelectableTable[] = {
+        { TextSelectableMode::SELECTABLE_UNFOCUSABLE, "selectable-unfocusable" },
+        { TextSelectableMode::SELECTABLE_FOCUSABLE, "selectable-focusable" },
+        { TextSelectableMode::UNSELECTABLE, "unselectable" }
+    };
+
+    auto index = BinarySearchFindIndex(textSelectableTable, ArraySize(textSelectableTable), textSelectable);
+    return index < 0 ? "text-selectable" : textSelectableTable[index].value;
 }
 
 inline std::string ConvertColorToString(Color color)

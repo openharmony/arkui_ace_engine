@@ -80,9 +80,11 @@ public:
     using OnControllerAttachedCallback = std::function<void()>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
-                RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
+               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
+			   const std::string& sharedRenderProcessToken = "");
     WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback,
-                RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
+               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
+			   const std::string& sharedRenderProcessToken = "");
 
     ~WebPattern() override;
 
@@ -214,6 +216,16 @@ public:
         return incognitoMode_;
     }
 
+    void SetSharedRenderProcessToken(const std::string& sharedRenderProcessToken)
+    {
+        sharedRenderProcessToken_ = sharedRenderProcessToken;
+    }
+
+    const std::optional<std::string>& GetSharedRenderProcessToken() const
+    {
+        return sharedRenderProcessToken_;
+    }
+
     void SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback)
     {
         onControllerAttachedCallback_ = std::move(callback);
@@ -339,6 +351,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedModeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
     void RequestFullScreen();
     void ExitFullScreen();
     bool IsFullScreen() const
@@ -452,6 +466,8 @@ private:
     void OnOverScrollModeUpdate(const int32_t value);
     void OnTextAutosizingUpdate(bool isTextAutosizing);
     void OnMetaViewportUpdate(bool value);
+    void OnOverlayScrollbarEnabledUpdate(bool value);
+    void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
 
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -553,6 +569,7 @@ private:
     bool isParentHasScroll_ = false;
     OffsetF relativeOffsetOfScroll_;
     RefPtr<WebDelegateInterface> delegate_ = nullptr;
+    std::optional<std::string> sharedRenderProcessToken_;
 
     bool selectPopupMenuShowing_ = false;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;

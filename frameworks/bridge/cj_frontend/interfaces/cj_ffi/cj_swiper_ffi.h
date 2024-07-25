@@ -61,7 +61,6 @@ CJ_EXPORT void FfiOHOSAceFrameworkSwiperSetEnabled(bool value);
 CJ_EXPORT void FfiOHOSAceFrameworkSwiperSetDisableSwipe(bool disable);
 CJ_EXPORT void FfiOHOSAceFrameworkSwiperSetCurve(const char* curveStr);
 CJ_EXPORT void FfiOHOSAceFrameworkSwiperSetOnChange(void (*callback)(int32_t index));
-CJ_EXPORT void FfiOHOSAceFrameworkSwiperSetOnClick(void (*callback)(CJClickInfo newInfo));
 CJ_EXPORT int64_t FfiOHOSAceFrameworkSwiperControllerCtor();
 CJ_EXPORT void FfiOHOSAceFrameworkSwiperControllerShowNext(int64_t selfId);
 CJ_EXPORT void FfiOHOSAceFrameworkSwiperControllerShowPrevious(int64_t selfId);

@@ -167,6 +167,11 @@ public:
         return tabBarParam_;
     }
 
+    void SetCustomTabBar(FrameNode* node)
+    {
+        tabBarParam_.SetCustomNode(node);
+    }
+
     void SetTabBarStyle(TabBarStyle tabBarStyle)
     {
         tabBarParam_.SetTabBarStyle(tabBarStyle);
@@ -235,6 +240,16 @@ public:
     const PaddingProperty& GetPadding() const
     {
         return padding_;
+    }
+
+    void SetUseLocalizedPadding(bool useLocalizedPadding)
+    {
+        useLocalizedPadding_ = useLocalizedPadding;
+    }
+
+    bool GetUseLocalizedPadding()
+    {
+        return useLocalizedPadding_;
     }
 
     void SetSymmetricExtensible(bool isExtensible)
@@ -333,6 +348,7 @@ private:
     TabBarSymbol symbol_;
 
     bool firstTimeLayout_ = true;
+    bool useLocalizedPadding_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TabContentPattern);
 };

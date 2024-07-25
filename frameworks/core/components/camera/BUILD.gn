@@ -17,20 +17,6 @@ import(
 
 config("standard_camera_config") {
   cflags_cc = [ "-Wno-user-defined-warnings" ]
-
-  include_dirs = [
-    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include/",
-    "//drivers/peripheral/camera/interfaces/include/",
-    "//drivers/peripheral/camera/interfaces/include/callback/device/",
-    "//drivers/peripheral/camera/interfaces/include/callback/host/",
-    "//drivers/peripheral/camera/interfaces/include/callback/operator/",
-    "//drivers/peripheral/camera/interfaces/include/server/",
-    "//drivers/peripheral/camera/interfaces/metadata/include",
-    "//drivers/peripheral/codec/interfaces/include",
-    "//drivers/peripheral/display/interfaces/include",
-    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-    "//commonlibrary/c_utils/base/include",
-  ]
 }
 
 if (enable_camera_framework && enable_player_framework) {

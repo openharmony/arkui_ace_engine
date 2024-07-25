@@ -51,6 +51,14 @@ void GridModelNG::Create(const RefPtr<ScrollControllerBase>& positionController,
     pattern->AddScrollableFrameInfo(SCROLL_FROM_NONE);
 }
 
+RefPtr<ScrollControllerBase> GridModelNG::GetOrCreateController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetOrCreatePositionController();
+}
+
 void GridModelNG::Pop()
 {
     NG::ViewStackProcessor::GetInstance()->PopContainer();
@@ -196,6 +204,11 @@ void GridModelNG::SetFriction(double friction)
     auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetFriction(friction);
+}
+
+void GridModelNG::SetAlignItems(GridItemAlignment itemAlign)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, AlignItems, itemAlign);
 }
 
 void GridModelNG::SetOnScrollToIndex(ScrollToIndexFunc&& value)
@@ -491,6 +504,11 @@ void GridModelNG::SetFriction(FrameNode* frameNode, double friction)
         pattern->SetFriction(FRICTION);
     }
     pattern->SetFriction(friction);
+}
+
+void GridModelNG::SetAlignItems(FrameNode* frameNode, GridItemAlignment itemAlign)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, AlignItems, itemAlign, frameNode);
 }
 
 RefPtr<ScrollControllerBase> GridModelNG::CreatePositionController()

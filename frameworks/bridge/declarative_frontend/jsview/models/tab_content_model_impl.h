@@ -36,6 +36,7 @@ public:
     void SetLabelStyle(const LabelStyle& labelStyle) override {}
     void SetIconStyle(const IconStyle& iconStyle) override {}
     void SetPadding(const NG::PaddingProperty& padding) override {}
+    void SetUseLocalizedPadding(bool useLocalizedPadding) override {}
     void SetLayoutMode(LayoutMode layoutMode) override {}
     void SetVerticalAlign(FlexAlign verticalAlign) override {}
     void SetSymmetricExtensible(bool isExtensible) override {}

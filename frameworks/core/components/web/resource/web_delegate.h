@@ -31,6 +31,7 @@
 #include <GLES3/gl3.h>
 #include "base/image/pixel_map.h"
 #include "core/common/recorder/event_recorder.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/web/resource/web_client_impl.h"
 #include "core/components/web/resource/web_resource.h"
@@ -48,7 +49,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "surface.h"
 #endif
-#include "window.h"
+#include "wm/window.h"
 #endif
 
 namespace OHOS::Ace {
@@ -464,9 +465,8 @@ private:
 };
 
 class WebSurfaceCallback : public OHOS::SurfaceDelegate::ISurfaceCallback {
-
 public:
-    WebSurfaceCallback(const WeakPtr<WebDelegate>& delegate) : delegate_(delegate) {}
+    explicit WebSurfaceCallback(const WeakPtr<WebDelegate>& delegate) : delegate_(delegate) {}
     ~WebSurfaceCallback() = default;
 
     void OnSurfaceCreated(const OHOS::sptr<OHOS::Surface>& surface) override;
@@ -547,7 +547,7 @@ private:
 
 class NWebScreenLockCallbackImpl : public OHOS::NWeb::NWebScreenLockCallback {
 public:
-    NWebScreenLockCallbackImpl(const WeakPtr<PipelineBase>& context);
+    explicit NWebScreenLockCallbackImpl(const WeakPtr<PipelineBase>& context);
     ~NWebScreenLockCallbackImpl() = default;
 
     void Handle(bool key) override;
@@ -564,6 +564,8 @@ public:
     {}
     ~WebDelegateObserver();
     void NotifyDestory();
+    void OnAttachContext(const RefPtr<NG::PipelineContext> &context);
+    void OnDetachContext();
 
 private:
     RefPtr<WebDelegate> delegate_;
@@ -574,7 +576,7 @@ class GestureEventResultOhos : public GestureEventResult {
     DECLARE_ACE_TYPE(GestureEventResultOhos, GestureEventResult);
 
 public:
-    GestureEventResultOhos(std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result)
+    explicit GestureEventResultOhos(std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result)
         : result_(result) {}
 
     void SetGestureEventResult(bool result) override;
@@ -639,7 +641,10 @@ public:
     WebDelegate() = delete;
     ~WebDelegate() override;
     WebDelegate(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError, const std::string& type)
-        : WebResource(type, context, std::move(onError))
+        : WebResource(type, context, std::move(onError)), instanceId_(Container::CurrentId())
+    {}
+    WebDelegate(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError, const std::string& type, int32_t id)
+        : WebResource(type, context, std::move(onError)), instanceId_(id)
     {}
 
     void UnRegisterScreenLockFunction();
@@ -660,7 +665,6 @@ public:
     void Reload();
     void UpdateUrl(const std::string& url);
 #ifdef OHOS_STANDARD_SYSTEM
-    // TODO: add to separate this file into three file, base file, component impl and ng impl.
     void InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<NG::RenderSurface>& surface);
     void InitOHOSWeb(const WeakPtr<PipelineBase>& context);
     bool PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context);
@@ -718,6 +722,7 @@ public:
     void UpdateBlockNetwork(bool isNetworkBlocked);
     void UpdateHorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled);
     void UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
+    void UpdateOverlayScrollbarEnabled(bool isEnabled);
     void UpdateScrollBarColor(const std::string& colorValue);
     void UpdateOverScrollMode(const int32_t overscrollModeValue);
     void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
@@ -740,7 +745,11 @@ public:
                          bool fromOverlay = false);
     void HandleTouchCancel();
     void HandleTouchpadFlingEvent(const double& x, const double& y, const double& vx, const double& vy);
+    void WebHandleTouchpadFlingEvent(const double& x, const double& y,
+        const double& vx, const double& vy, const std::vector<int32_t>& pressedCodes);
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
+    void WebHandleAxisEvent(const double& x, const double& y,
+        const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
     bool WebOnKeyEvent(int32_t keyCode, int32_t keyAction, const std::vector<int32_t>& pressedCodes);
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count);
@@ -782,6 +791,9 @@ public:
     {
         richtextData_ = richtextData;
     }
+    void HandleAccessibilityHoverEvent(int32_t x, int32_t y);
+    void NotifyAutoFillViewData(const std::string& jsonStr);
+    void HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -789,6 +801,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response);
     RefPtr<WebResponse> OnInterceptRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool IsEmptyOnInterceptRequest();
+    void ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart);
     void RecordWebEvent(Recorder::EventType eventType, const std::string& param) const;
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
@@ -883,6 +896,7 @@ public:
     void GLContextInit(void* window);
     sptr<OHOS::SurfaceDelegate> GetSurfaceDelegateClient();
     void SetBoundsOrResize(const Size& drawSize, const Offset& offset, bool isKeyboard = false);
+    void ResizeVisibleViewport(const Size& visibleSize, bool isKeyboard = false);
     Offset GetWebRenderGlobalPos();
     bool InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context);
     int GetWebId();
@@ -894,6 +908,7 @@ public:
     void UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled);
     bool GetIsSmoothDragResizeEnabled();
     void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
+    std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
@@ -923,7 +938,8 @@ public:
     bool ShouldVirtualKeyboardOverlay();
     void ScrollBy(float deltaX, float deltaY);
     void ScrollByRefScreen(float deltaX, float deltaY, float vx = 0, float vy = 0);
-    void ExecuteAction(int64_t accessibilityId, AceAction action);
+    void ExecuteAction(int64_t accessibilityId, AceAction action,
+        const std::map<std::string, std::string>& actionArguments);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetFocusedAccessibilityNodeInfo(
         int64_t accessibilityId, bool isAccessibilityFocus);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeInfoById(int64_t accessibilityId);
@@ -949,6 +965,7 @@ public:
     Offset GetPosition(const std::string& embedId);
 
     void OnOnlineRenderToForeground();
+    void NotifyForNextTouchEvent();
 
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnAreaChange(const OHOS::Ace::Rect& area);
@@ -962,9 +979,35 @@ public:
 
     void OnCustomKeyboardClose();
 
+    void CreateOverlay(void* data, size_t len, int width, int height, int offsetX, int offsetY, int rectWidth,
+        int rectHeight, int pointX, int pointY);
+
+    void OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight);
+
+    void OnTextSelected();
+
+    void OnAttachContext(const RefPtr<NG::PipelineContext> &context);
+    void OnDetachContext();
+
+    int32_t GetInstanceId() const
+    {
+        return instanceId_;
+    }
+
     void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked);
+    void SetSurfaceId(const std::string& surfaceId);
 
     void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
+
+    void OnCursorUpdate(double x, double y, double width, double height);
+
+    void CloseCustomKeyboard()
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->Close();
+        }
+    }
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -979,6 +1022,9 @@ private:
     void BindRouterBackMethod();
     void BindPopPageSuccessMethod();
     void BindIsPagePathInvalidMethod();
+    void TextBlurReportByFocusEvent(int64_t accessibilityId);
+    void WebComponentClickReport(int64_t accessibilityId);
+    void TextBlurReportByBlurEvent(int64_t accessibilityId);
 
 #ifdef OHOS_STANDARD_SYSTEM
     sptr<OHOS::Rosen::Window> CreateWindow();
@@ -1111,8 +1157,8 @@ private:
     std::function<WebKeyboardOption(const std::shared_ptr<BaseEventInfo>&)> onInterceptKeyboardAttachV2_;
     EventCallbackV2 onAdsBlockedV2_;
 
-    int32_t renderMode_;
-    int32_t layoutMode_;
+    int32_t renderMode_ = -1;
+    int32_t layoutMode_ = -1;
     std::string bundlePath_;
     std::string bundleDataPath_;
     std::string hapPath_;
@@ -1123,13 +1169,13 @@ private:
     bool isEnhanceSurface_ = false;
     sptr<WebSurfaceCallback> surfaceCallback_;
     sptr<OHOS::SurfaceDelegate> surfaceDelegate_;
-    EGLNativeWindowType mEglWindow;
+    EGLNativeWindowType mEglWindow = nullptr;
     EGLDisplay mEGLDisplay = EGL_NO_DISPLAY;
     EGLConfig mEGLConfig = nullptr;
     EGLContext mEGLContext = EGL_NO_CONTEXT;
     EGLContext mSharedEGLContext = EGL_NO_CONTEXT;
     EGLSurface mEGLSurface = nullptr;
-    WindowsSurfaceInfo surfaceInfo_;
+    WindowsSurfaceInfo surfaceInfo_ = { nullptr, EGL_NO_DISPLAY, nullptr, EGL_NO_CONTEXT };
     bool forceDarkMode_ = false;
     WebDarkMode current_dark_mode_ = WebDarkMode::Auto;
     sptr<AppExecFwk::IConfigurationObserver> configChangeObserver_ = nullptr;
@@ -1141,6 +1187,7 @@ private:
     uint32_t rosenWindowId_ = 0;
     RefPtr<WebDelegateObserver> observer_;
     std::shared_ptr<Rosen::RSNode> rsNode_;
+    std::shared_ptr<Rosen::RSNode> surfaceRsNode_;
     Rosen::NodeId surfaceNodeId_ = 0;
     float visibleRatio_ = 1.0;
     uint32_t delayTime_ = 500;
@@ -1157,11 +1204,18 @@ private:
     bool isSmoothDragResizeEnabled_ = false;
     double resizeWidth_ = 0.0;
     double resizeHeight_ = 0.0;
+    double resizeVisibleWidth_ = -1.0;
+    double resizeVisibleHeight_ = -1.0;
     OHOS::Ace::Rect currentArea_;
     NG::SafeAreaInsets systemSafeArea_;
     NG::SafeAreaInsets cutoutSafeArea_;
     NG::SafeAreaInsets navigationIndicatorSafeArea_;
     sptr<Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
+    int32_t instanceId_;
+    std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler_ = nullptr;
+    std::string sharedRenderProcessToken_;
+    int64_t lastFocusInputId_ = 0;
+    int64_t lastFocusReportId_ = 0;
 #endif
 };
 

@@ -82,6 +82,13 @@ public:
     SafeAreaInsets GetSafeArea() const;
 
     /**
+     * @brief Retrieves the safe area insets only System.
+     *
+     * @return The System safe area insets.
+     */
+    SafeAreaInsets GetSafeAreaWithoutCutout() const;
+
+    /**
      * @brief Updates the safe area to accommodate the keyboard.
      *
      * This function is called to update the safe area when the keyboard is shown or hidden.
@@ -128,6 +135,8 @@ public:
     {
         needExpandNodes_.insert(node);
     }
+
+    bool AddNodeToExpandListIfNeeded(const WeakPtr<FrameNode>& node);
 
     void ClearNeedExpandNode()
     {
@@ -187,6 +196,7 @@ public:
     bool IsSafeAreaValid() const;
     // check if the page node needs to be avoid keyboard
     bool CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode);
+    PaddingPropertyF SafeAreaToPadding(bool withoutProcess = false);
 private:
     bool isAtomicService_ = false;
 

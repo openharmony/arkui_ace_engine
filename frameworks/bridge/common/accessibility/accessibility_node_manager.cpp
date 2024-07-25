@@ -475,7 +475,6 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateCommonAccessibilityNod
     {
         std::lock_guard<std::mutex> lock(mutex_);
         auto result = accessibilityNodes_.try_emplace(nodeId, accessibilityNode);
-
         if (!result.second) {
             return nullptr;
         }

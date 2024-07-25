@@ -1048,6 +1048,37 @@ class TextAreaOnDidDeleteModifier extends ModifierWithKey<Callback<DeleteValue>>
   }
 }
 
+class TextAreaEnablePreviewTextModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaEnablePreviewText');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetEnablePreviewText(node);
+    } else {
+      getUINativeModule().textArea.setEnablePreviewText(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> {
+  constructor(value: EditMenuOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textEditMenuOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetSelectionMenuOptions(node);
+    } else {
+      getUINativeModule().textArea.setSelectionMenuOptions(node, this.value);
+    }
+  }
+}
+
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1393,6 +1424,15 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   onDidDelete(callback: Callback<DeleteValue>): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaOnDidDeleteModifier.identity, TextAreaOnDidDeleteModifier, callback);
+    return this;
+  }
+  enablePreviewText(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaEnablePreviewTextModifier.identity, TextAreaEnablePreviewTextModifier, value);
+    return this;
+  }
+  editMenuOptions(value: EditMenuOptions): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaEditMenuOptionsModifier.identity,
+      TextAreaEditMenuOptionsModifier, value);
     return this;
   }
 }

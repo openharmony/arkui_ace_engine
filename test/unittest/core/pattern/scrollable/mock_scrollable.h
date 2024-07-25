@@ -33,13 +33,14 @@ private:
     MOCK_METHOD(bool, IsScrollable, (), (const, override));
     MOCK_METHOD(OverScrollOffset, GetOverScrollOffset, (double delta), (const, override));
     MOCK_METHOD(float, GetMainContentSize, (), (const, override));
+    MOCK_METHOD(bool, IsOutOfBoundary, (bool useCurrentDelta), (override));
 };
 
 class FullyMockedScrollable : public PartiallyMockedScrollable {
     DECLARE_ACE_TYPE(FullyMockedScrollable, PartiallyMockedScrollable);
 
 private:
-    MOCK_METHOD(bool, HandleScrollVelocity, (float), (override));
+    MOCK_METHOD(bool, HandleScrollVelocity, (float, const RefPtr<NestableScrollContainer>&), (override));
     MOCK_METHOD(void, OnScrollEndCallback, (), (override));
     MOCK_METHOD(bool, OutBoundaryCallback, (), (override));
 };

@@ -29,12 +29,21 @@ void InitMapping(std::map<std::string, int>& mapping);
 
 bool CheckCalcIsValid(const std::string& formula);
 
-void ReplaceSignNumber(const std::string& formula);
+void ReplaceSignNumber(std::string& formula);
 
 std::vector<std::string> ConvertDal2Rpn(std::string formula);
 
 double CalculateExp(const std::string& expression, const std::function<double(const Dimension&)>& calcFunc);
 
+#ifdef ACE_UNITTEST
+bool PushOpStack(const std::string& formula, std::string& curNum, std::vector<std::string>& result,
+    std::vector<std::string>& opStack);
+
+bool CalculateFourOperationsExp(const std::string& exp, const Dimension& num1, const Dimension& num2,
+    const std::function<double(const Dimension&)>& calcFunc, double& opRes);
+bool CalculateExpImpl(const std::vector<std::string>& rpnexp, const std::function<double(const Dimension&)>& calcFunc,
+    std::vector<Dimension>& result, double& opRes);
+#endif
 } // namespace OHOS::Ace::StringExpression
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_STRING_EXPRESSION_H

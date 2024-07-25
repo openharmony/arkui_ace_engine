@@ -23,6 +23,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
 
@@ -30,7 +31,7 @@ const std::unordered_set<SpanType> specailTypes = { SpanType::Image, SpanType::C
 
 std::wstring SpanString::GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length)
 {
-    if (start >= content.length()) {
+    if (start >= static_cast<int32_t>(content.length())) {
         return StringUtils::ToWstring("");
     }
     return content.substr(start, length);
@@ -38,7 +39,7 @@ std::wstring SpanString::GetWideStringSubstr(const std::wstring& content, int32_
 
 std::wstring SpanString::GetWideStringSubstr(const std::wstring& content, int32_t start)
 {
-    if (start >= content.length()) {
+    if (start >= static_cast<int32_t>(content.length())) {
         return StringUtils::ToWstring("");
     }
     return content.substr(start);
@@ -88,7 +89,7 @@ std::list<RefPtr<NG::SpanItem>>::iterator SpanString::SplitSpansAndForward(
     auto wString = StringUtils::ToWstring((*it)->content);
     auto newlineIndex = static_cast<int32_t>(wString.find(L'\n'));
     int32_t offset = (*it)->interval.first;
-    while (newlineIndex != -1 && newlineIndex != wString.size() - 1) {
+    while (newlineIndex != -1 && newlineIndex != static_cast<int32_t>(wString.size()) - 1) {
         auto newSpan = (*it)->GetSameStyleSpanItem();
         newSpan->interval = { offset + newlineIndex + 1, (*it)->interval.second };
         (*it)->interval = { offset, offset + newlineIndex + 1 };
@@ -348,6 +349,13 @@ void SpanString::RemoveSpan(int32_t start, int32_t length, SpanType key)
     if (!CheckRange(start, length)) {
         return;
     }
+    auto text = GetWideString();
+    TextEmojiSubStringRange range = TextEmojiProcessor::CalSubWstringRange(
+        start, length, text, true);
+    int startIndex = range.startIndex;
+    int endIndex = range.endIndex;
+    start = startIndex;
+    length = endIndex - startIndex;
     auto it = spansMap_.find(key);
     if (it == spansMap_.end()) {
         return;
@@ -396,6 +404,8 @@ RefPtr<SpanBase> SpanString::GetDefaultSpan(SpanType type)
             return MakeRefPtr<ParagraphStyleSpan>();
         case SpanType::LineHeight:
             return MakeRefPtr<LineHeightSpan>();
+        case SpanType::ExtSpan:
+            return MakeRefPtr<ExtSpan>();
         default:
             return nullptr;
     }
@@ -454,6 +464,16 @@ RefPtr<NG::SpanItem> SpanString::GetDefaultSpanItem(const std::string& text)
 void SpanString::SetString(const std::string& text)
 {
     text_ = text;
+}
+
+void SpanString::SetSpanItems(const std::list<RefPtr<NG::SpanItem>>&& spanItems)
+{
+    spans_ = spanItems;
+}
+
+void SpanString::SetSpanMap(std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>&& spansMap)
+{
+    spansMap_ = spansMap;
 }
 
 const std::string& SpanString::GetString() const

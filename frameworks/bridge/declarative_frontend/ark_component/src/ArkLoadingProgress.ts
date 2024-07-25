@@ -42,7 +42,7 @@ class ArkLoadingProgressComponent extends ArkComponent implements LoadingProgres
     return this;
   }
   contentModifier(value: ContentModifier<LoadingProgressConfiguration>): this {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, LoadingProgressContentModifier.identity, LoadingProgressContentModifier, value);
     return this;
   }
   setContentModifier(modifier: ContentModifier<LoadingProgressConfiguration>): this {
@@ -104,6 +104,17 @@ class LoadingProgressForegroundColorModifier extends ModifierWithKey<ResourceCol
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class LoadingProgressContentModifier extends ModifierWithKey<ContentModifier<LoadingProgressConfiguration>> {
+  constructor(value: ContentModifier<LoadingProgressConfiguration>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('loadingProgressContentModifier');
+  applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
+    let loadingProgressComponent = component as ArkLoadingProgressComponent;
+    loadingProgressComponent.setContentModifier(this.value);
   }
 }
 

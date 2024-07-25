@@ -32,7 +32,6 @@
 #include "serializeable_object.h"
 #include "viewport_config.h"
 #include "constants.h"
-
 namespace OHOS {
 
 namespace AbilityRuntime {
@@ -106,8 +105,8 @@ public:
         OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) = 0;
     virtual UIContentErrorCode InitializeByName(OHOS::Rosen::Window *window, const std::string &name,
                                                 napi_value storage) = 0;
-    virtual void InitializeDynamic(
-        const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint) {};
+    virtual void InitializeDynamic(const std::string& hapPath, const std::string& abcPath,
+        const std::string& entryPoint, const std::vector<std::string>& registerComponents) {};
 
     // UIExtensionAbility initialize for focusWindow ID
     virtual void Initialize(
@@ -149,6 +148,7 @@ public:
     // Window color
     virtual uint32_t GetBackgroundColor() = 0;
     virtual void SetBackgroundColor(uint32_t color) = 0;
+    virtual void SetUIContentType(UIContentType uIContentType) {};
 
     // Judge whether window need soft keyboard or not
     virtual bool NeedSoftKeyboard()
@@ -197,7 +197,6 @@ public:
     virtual void SetAccessibilityGetParentRectHandler(std::function<void(int32_t&, int32_t&)>&& callback) {};
     virtual void DeregisterAccessibilityChildTree() {};
     virtual void AccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) {};
-
 
     // for distribute UI source
     virtual SerializeableObjectArray DumpUITree()
@@ -410,8 +409,17 @@ public:
         const std::function<void(std::vector<Ace::RectF>)>& callback) const {};
 
     virtual void SetContentNodeGrayScale(float grayscale) {};
+    
+    virtual sptr<IRemoteObject> GetRemoteObj()
+    {
+        return {};
+    }
 
+    virtual void PreLayout() {};
+    
     virtual void SetStatusBarItemColor(uint32_t color) {};
+
+    virtual void SetForceSplitEnable(bool isForceSplit) {};
 };
 
 } // namespace OHOS::Ace

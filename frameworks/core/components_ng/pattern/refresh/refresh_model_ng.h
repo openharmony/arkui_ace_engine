@@ -43,6 +43,7 @@ public:
     void SetLoadingText(const std::string& loadingText) override;
     void SetRefreshOffset(const Dimension& offset) override;
     void SetPullToRefresh(bool isPullToRefresh) override;
+    void SetIsCustomBuilderExist(bool isCustomBuilderExist) override;
     // @deprecated
     void Pop() override {}
     void SetRefreshDistance(const Dimension& refreshDistance) override {}
@@ -69,6 +70,9 @@ public:
     static void SetPullToRefresh(FrameNode* frameNode, bool isPullToRefresh);
     static void SetPullDownRatio(FrameNode* frameNode, const std::optional<float>& pullDownRatio);
     static float GetPullDownRatio(FrameNode* frameNode);
+    static Dimension GetRefreshOffset(FrameNode* frameNode);
+    static bool GetPullToRefresh(FrameNode* frameNode);
+    static void SetChangeEvent(FrameNode* frameNode, RefreshChangeEvent&& changeEvent);
 };
 } // namespace OHOS::Ace::NG
 

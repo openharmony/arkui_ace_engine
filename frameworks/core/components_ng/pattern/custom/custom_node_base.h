@@ -25,10 +25,10 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
+#include "core/components_ng/pattern/recycle_view/recycle_manager.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_FORCE_EXPORT CustomNodeBase : public virtual AceType {
     DECLARE_ACE_TYPE(CustomNodeBase, AceType);
 
@@ -194,6 +194,16 @@ public:
         extraInfo_ = std::move(extraInfo);
     }
 
+    bool GetIsV2()
+    {
+        return isV2_;
+    }
+
+    void SetIsV2(bool isV2)
+    {
+        isV2_ = isV2;
+    }
+
     const ExtraInfo& GetExtraInfo() const
     {
         return extraInfo_;
@@ -232,6 +242,7 @@ public:
 protected:
     std::string jsViewName_;
     ExtraInfo extraInfo_;
+    bool isV2_ = false;
 
 private:
     std::function<void()> updateFunc_;
@@ -250,6 +261,7 @@ private:
     std::function<void*()> getThisFunc_;
     bool needRebuild_ = false;
     bool executeFireOnAppear_ = false;
+    RecycleNodeInfo recycleInfo_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -41,6 +41,10 @@ public:
     {
         return loadingPage_;
     }
+    void FlushReload() override
+    {
+        LOGE("not support in old pipeline");
+    }
 
 protected:
     void StartPush(const RouterPageInfo& target, const std::string& params, RouterMode mode) override;
@@ -76,7 +80,7 @@ private:
     void PostTask(std::function<void()> callback, bool isUI = true);
     void OnPrePageChange(const RefPtr<JsAcePage>&);
 
-    BaseId::IdType lastTransitionListener_;
+    BaseId::IdType lastTransitionListener_ = 0;
     std::list<RefPtr<JsAcePage>> pageRouterStack_;
     RefPtr<JsAcePage> loadingPage_;
 

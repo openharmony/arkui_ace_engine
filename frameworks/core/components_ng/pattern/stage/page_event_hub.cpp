@@ -26,43 +26,6 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-
-void PageEventHub::AddRadioToGroup(const std::string& group, int32_t radioId)
-{
-    radioGroupNotify_[group].push_back(radioId);
-}
-
-void PageEventHub::RemoveRadioFromGroup(const std::string& group, int32_t radioId)
-{
-    radioGroupNotify_[group].remove(radioId);
-}
-
-bool PageEventHub::HasRadioId(const std::string& group, int32_t radioId)
-{
-    auto list = radioGroupNotify_[group];
-    auto it = find(list.begin(), list.end(), radioId);
-    return it != list.end();
-}
-    
-void PageEventHub::UpdateRadioGroupValue(const std::string& group, int32_t radioId)
-{
-    const auto& list = radioGroupNotify_[group];
-    for (auto&& item : list) {
-        if (item == radioId) {
-            continue;
-        }
-        auto node = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(item));
-        if (!node) {
-            continue;
-        }
-        auto pattern = node->GetPattern<RadioPattern>();
-        if (!pattern) {
-            continue;
-        }
-        pattern->UpdateUncheckStatus(node);
-    }
-}
-
 const RefPtr<GroupManager>& PageEventHub::GetGroupManager() const
 {
     return groupManager_;

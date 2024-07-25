@@ -182,6 +182,7 @@ public:
         theme->lunarHeight_ = lunarHeight_;
         theme->timeSplitter_ = timeSplitter_;
         theme->rotateInterval_ = rotateInterval_;
+        theme->deviceHeightLimit_ = deviceHeightLimit_;
         theme->dividerThickness_ = dividerThickness_;
         theme->dividerSpacing_ = dividerSpacing_;
         theme->dividerColor_ = dividerColor_;
@@ -362,6 +363,11 @@ public:
         return rotateInterval_;
     }
 
+    double GetDeviceHeightLimit() const
+    {
+        return deviceHeightLimit_;
+    }
+
     const Dimension& GetDividerThickness() const
     {
         return dividerThickness_;
@@ -446,6 +452,60 @@ public:
         return showCountPortrait_;
     }
 
+    double GetTitleFontScaleLimit()
+    {
+        return titleFontScaleLimit_;
+    }
+
+    const Dimension& GetGradientHeightLimit() const
+    {
+        return gradientHeightLimit_;
+    }
+
+    const Dimension& GetDividerSpacingLimit() const
+    {
+        return dividerSpacingHeightLimit_;
+    }
+
+    const Dimension& GetPickerDialogFontPadding() const
+    {
+        return pickerDialogFontPadding_;
+    }
+
+    const Dimension& GetUseSetSelectedTextStyle() const
+    {
+        return selectedTextStyle_;
+    }
+
+    const Dimension& GetUserSetNormalTextStyle() const
+    {
+        return normalTextStyle_;
+    }
+
+    const Dimension& GetUserSetDisappearTextStyle() const
+    {
+        return disappearTextStyle_;
+    }
+
+    double GetNormalFontScale() const
+    {
+        return pickerDialogNormalFontScale_;
+    }
+
+    double GetMaxOneFontScale() const
+    {
+        return pickerDialogMaxOneFontScale_;
+    }
+
+    double GetMaxTwoFontScale() const
+    {
+        return pickerDialogMaxTwoFontScale_;
+    }
+
+    double GetMaxThirdFontScale() const
+    {
+        return pickerDialogMaxThirdFontScale_;
+    }
 private:
     PickerTheme() = default;
 
@@ -513,6 +573,18 @@ private:
 
     uint32_t showCountLandscape_ = 3;
     uint32_t showCountPortrait_ = 5;
+    double deviceHeightLimit_ = 640.0;
+    Dimension gradientHeightLimit_ = 54.0_vp;
+    Dimension dividerSpacingHeightLimit_ = 64.0_vp;
+    Dimension pickerDialogFontPadding_ = 8.0_vp;
+    Dimension selectedTextStyle_ = 40.0_vp;
+    Dimension normalTextStyle_ = 32.0_vp;
+    Dimension disappearTextStyle_ = 28.0_vp;
+    double pickerDialogNormalFontScale_ = 1.0f;
+    double pickerDialogMaxOneFontScale_ = 1.75f;
+    double pickerDialogMaxTwoFontScale_ = 2.0f;
+    double pickerDialogMaxThirdFontScale_ = 3.2f;
+    double titleFontScaleLimit_ = 1.45f;
 };
 
 } // namespace OHOS::Ace

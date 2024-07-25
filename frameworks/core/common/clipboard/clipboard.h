@@ -37,6 +37,8 @@ public:
     virtual void GetPixelMapData(
         const std::function<void(const RefPtr<PixelMap>&)>& callback, bool syncMode = false) = 0;
     virtual void HasData(const std::function<void(bool hasData)>& callback) = 0;
+    virtual void HasDataType(
+        const std::function<void(bool hasData)>& callback, const std::vector<std::string>& mimeTypes) = 0;
     virtual void AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap) = 0;
     virtual void AddImageRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& uri) = 0;
     virtual void AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& selectedStr) = 0;
@@ -47,6 +49,8 @@ public:
         const std::function<void(const std::string&, bool isLastRecord)>& urlCallback, bool syncMode = false) = 0;
     virtual RefPtr<PasteDataMix> CreatePasteDataMix() = 0;
     virtual void Clear() = 0;
+    virtual void GetSpanStringData(
+        const std::function<void(std::vector<uint8_t>&, const std::string&)>& callback, bool syncMode = false) = 0;
 
 protected:
     explicit Clipboard(const RefPtr<TaskExecutor>& taskExecutor) : taskExecutor_(taskExecutor) {}

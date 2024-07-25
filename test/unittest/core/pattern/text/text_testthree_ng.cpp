@@ -274,35 +274,6 @@ HWTEST_F(TextTestThreeNg, SetDraggable001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetMenuOptionItems001
- * @tc.desc: test text_model_ng.cpp SetMenuOptionItems function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestThreeNg, SetMenuOptionItems001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
-     */
-    auto [host, pattern] = Init();
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
-    /**
-     * @tc.steps: step2. construct menuOptionItems.
-     * @tc.expected: Running SetMenuOptionItems function and check the result.
-     */
-    std::vector<MenuOptionsParam> menuOptionItems;
-    MenuOptionsParam menuOptionItem1;
-    menuOptionItem1.content = "test1";
-    menuOptionItem1.action = [](const std::string&) {};
-    menuOptionItems.emplace_back(menuOptionItem1);
-    pattern->menuOptionItems_ = menuOptionItems;
-    textModelNG.SetMenuOptionItems(std::move(menuOptionItems));
-    EXPECT_EQ(pattern->menuOptionItems_.size(), 1);
-    EXPECT_EQ(pattern->menuOptionItems_[0].ToString(), menuOptionItem1.ToString());
-}
-
-/**
  * @tc.name: ClearOnClick001
  * @tc.desc: test text_model_ng.cpp ClearOnClick function
  * @tc.type: FUNC
@@ -1063,11 +1034,11 @@ HWTEST_F(TextTestThreeNg, HandleClickAISpanEvent, TestSize.Level1)
 }
 
 /**
- * @tc.name: ShowUIExtensionMenu
- * @tc.desc: test test_pattern.h ShowUIExtensionMenu function with valid textSelector
+ * @tc.name: ShowAIEntityMenu
+ * @tc.desc: test test_pattern.h ShowAIEntityMenu function with valid textSelector
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestThreeNg, ShowUIExtensionMenu, TestSize.Level1)
+HWTEST_F(TextTestThreeNg, ShowAIEntityMenu, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and pattern
@@ -1086,10 +1057,10 @@ HWTEST_F(TextTestThreeNg, ShowUIExtensionMenu, TestSize.Level1)
     aiSpan.type = TextDataDetectType::PHONE_NUMBER;
 
     /**
-     * @tc.steps: step2. call ShowUIExtensionMenu function
-     * @tc.expected: ShowUIExtensionMenu result is true.
+     * @tc.steps: step2. call ShowAIEntityMenu function
+     * @tc.expected: ShowAIEntityMenu result is true.
      */
-    EXPECT_TRUE(pattern->ShowUIExtensionMenu(aiSpan, nullptr, nullptr));
+    EXPECT_TRUE(pattern->ShowAIEntityMenu(aiSpan, nullptr, nullptr));
 }
 
 /**

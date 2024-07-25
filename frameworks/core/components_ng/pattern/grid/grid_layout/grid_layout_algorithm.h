@@ -50,6 +50,8 @@ private:
     float GetItemSize(int32_t row, int32_t col, bool height) const;
     GridItemRect GetItemRect(const RefPtr<GridLayoutProperty>& gridLayoutProperty,
         const RefPtr<GridItemLayoutProperty>& childLayoutProperty, int32_t index) const;
+    void PrintConflictingPositionLog(
+        int32_t itemIndex, GridItemRect rect, int32_t rowIndex, int32_t colIndex, int32_t rowSpan, int32_t colSpan);
 
     int32_t crossCount_ = 0;
     int32_t mainCount_ = 0;

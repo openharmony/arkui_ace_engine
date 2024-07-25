@@ -21,6 +21,8 @@
 namespace OHOS::Ace::NG {
 class XComponentBridge {
 public:
+    static ArkUINativeModuleValue SetXComponentInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetXComponentInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOpacity(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -59,6 +61,12 @@ public:
     static ArkUINativeModuleValue ResetPixelStretchEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetLinearGradientBlur(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetLinearGradientBlur(ArkUIRuntimeCallInfo* runtimeCallInfo);
+
+private:
+    static XComponentType ConvertToXComponentType(const std::string& type);
+    static void SetControllerCallback(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static void HandlerImageAIOptions(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static void HandlerDetachCallback(ArkUIRuntimeCallInfo *runtimeCallInfo);
 };
 }
 

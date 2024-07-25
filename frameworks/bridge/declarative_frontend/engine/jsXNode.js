@@ -17,6 +17,9 @@ var NodeRenderType;
     NodeRenderType[NodeRenderType["RENDER_TYPE_DISPLAY"] = 0] = "RENDER_TYPE_DISPLAY";
     NodeRenderType[NodeRenderType["RENDER_TYPE_TEXTURE"] = 1] = "RENDER_TYPE_TEXTURE";
 })(NodeRenderType || (NodeRenderType = {}));
+if (!globalThis.__hasUIFramework__) {
+    globalThis.requireNapi('arkui.mock');
+}
 class BaseNode extends __JSBaseNode__ {
     constructor(uiContext, options) {
         super(options);
@@ -24,7 +27,7 @@ class BaseNode extends __JSBaseNode__ {
             throw Error('Node constructor error, param uiContext error');
         }
         else {
-            if (!(typeof uiContext === "object") || !("instanceId_" in uiContext)) {
+            if (!(typeof uiContext === 'object') || !('instanceId_' in uiContext)) {
                 throw Error('Node constructor error, param uiContext is invalid');
             }
         }
@@ -92,6 +95,9 @@ class BuilderNode {
     recycle() {
         this._JSBuilderNode.recycle();
     }
+    updateConfiguration() {
+        this._JSBuilderNode.updateConfiguration();
+    }
 }
 class JSBuilderNode extends BaseNode {
     constructor(uiContext, options) {
@@ -101,6 +107,7 @@ class JSBuilderNode extends BaseNode {
         this.updateFuncByElmtId = new Map();
     }
     reuse(param) {
+        this.updateStart();
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
             if (child) {
@@ -113,6 +120,7 @@ class JSBuilderNode extends BaseNode {
                 }
             } // if child
         });
+        this.updateEnd();
     }
     recycle() {
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
@@ -201,6 +209,12 @@ class JSBuilderNode extends BaseNode {
         Array.from(this.updateFuncByElmtId.keys()).sort((a, b) => {
             return (a < b) ? -1 : (a > b) ? 1 : 0;
         }).forEach(elmtId => this.UpdateElement(elmtId));
+        for (const child of this.childrenWeakrefMap_.values()) {
+            const childView = child.deref();
+            if (childView) {
+                childView.forceCompleteRerender(true);
+            }
+        }
         this.updateEnd();
         __JSScopeUtil__.restoreInstanceId();
     }
@@ -249,7 +263,7 @@ class JSBuilderNode extends BaseNode {
     }
     observeComponentCreation2(compilerAssignedUpdateFunc, classObject) {
         const _componentName = classObject && 'name' in classObject ? Reflect.get(classObject, 'name') : 'unspecified UINode';
-        const _popFunc = classObject && "pop" in classObject ? classObject.pop : () => { };
+        const _popFunc = classObject && 'pop' in classObject ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
             __JSScopeUtil__.syncInstanceId(this.instanceId_);
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
@@ -322,7 +336,7 @@ class JSBuilderNode extends BaseNode {
         else {
             // Create array of new ids.
             arr.forEach((item, index) => {
-                newIdArray.push(`${itemGenFuncUsesIndex ? index + "_" : ""}` + idGenFunc(item));
+                newIdArray.push(`${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item));
             });
         }
         // Set new array on C++ side.
@@ -391,6 +405,9 @@ class JSBuilderNode extends BaseNode {
         this.updateNodePtr(nodePtr);
         this.updateInstanceId(instanceId);
     }
+    observeRecycleComponentCreation(name, recycleUpdateFunc) {
+        throw new Error('custom component in @Builder used by BuilderNode does not support @Reusable');
+    }
 }
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
@@ -412,7 +429,7 @@ class NodeAdapter {
         this.count_ = 0;
         this.nativeRef_ = getUINativeModule().nodeAdapter.createAdapter();
         this.nativePtr_ = this.nativeRef_.getNativeHandle();
-        getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this, this.onAttachToNodePtr, this.onDetachFromNodePtr, this.onGetChildId !== undefined ? this.onGetChildId : undefined, this.onCreateNewChild !== undefined ? this.onCreateNewNodePtr : undefined, this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined, this.onUpdateChild !== undefined ? this.onUpdateNodePtr : undefined);
+        getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this, this.onAttachToNodePtr, this.onDetachFromNodePtr, this.onGetChildId !== undefined ? this.onGetChildId : undefined, this.onCreateChild !== undefined ? this.onCreateNewNodePtr : undefined, this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined, this.onUpdateChild !== undefined ? this.onUpdateNodePtr : undefined);
     }
     dispose() {
         let hostNode = this.attachedNodeRef_.deref();
@@ -423,6 +440,9 @@ class NodeAdapter {
         this.nativePtr_ = null;
     }
     set totalNodeCount(count) {
+        if (count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.setTotalNodeCount(this.nativePtr_, count);
         this.count_ = count;
     }
@@ -433,15 +453,27 @@ class NodeAdapter {
         getUINativeModule().nodeAdapter.notifyItemReloaded(this.nativePtr_);
     }
     reloadItem(start, count) {
+        if (start < 0 || count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemChanged(this.nativePtr_, start, count);
     }
     removeItem(start, count) {
+        if (start < 0 || count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemRemoved(this.nativePtr_, start, count);
     }
     insertItem(start, count) {
+        if (start < 0 || count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemInserted(this.nativePtr_, start, count);
     }
     moveItem(from, to) {
+        if (from < 0 || to < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemMoved(this.nativePtr_, from, to);
     }
     getAllAvailableItems() {
@@ -473,6 +505,9 @@ class NodeAdapter {
         }
     }
     onDetachFromNodePtr() {
+        if (this === undefined) {
+            return;
+        }
         if (this.onDetachFromNode !== undefined) {
             this.onDetachFromNode();
         }
@@ -483,8 +518,8 @@ class NodeAdapter {
         this.nodeRefs_.splice(0, this.nodeRefs_.length);
     }
     onCreateNewNodePtr(index) {
-        if (this.onCreateNewChild !== undefined) {
-            let node = this.onCreateNewChild(index);
+        if (this.onCreateChild !== undefined) {
+            let node = this.onCreateChild(index);
             if (!this.nodeRefs_.includes(node)) {
                 this.nodeRefs_.push(node);
             }
@@ -515,9 +550,26 @@ class NodeAdapter {
         }
     }
     static attachNodeAdapter(adapter, node) {
-        getUINativeModule().nodeAdapter.attachNodeAdapter(adapter.nativePtr_, node.getNodePtr());
+        if (node === null || node === undefined) {
+            return false;
+        }
+        if (!node.isModifiable()) {
+            return false;
+        }
+        if (node.attribute_ !== undefined) {
+            if (node.attribute_.allowChildCount !== undefined) {
+                const allowCount = node.attribute_.allowChildCount();
+                if (allowCount <= 1) {
+                    return false;
+                }
+            }
+        }
+        return getUINativeModule().nodeAdapter.attachNodeAdapter(adapter.nativePtr_, node.getNodePtr());
     }
     static detachNodeAdapter(node) {
+        if (node === null || node === undefined) {
+            return;
+        }
         getUINativeModule().nodeAdapter.detachNodeAdapter(node.getNodePtr());
     }
 }
@@ -604,7 +656,7 @@ class NodeController {
         return this._nodeContainerId.__rootNodeOfNodeController__;
     }
     rebuild() {
-        if (this._nodeContainerId != undefined && this._nodeContainerId !== null && this._nodeContainerId._value >= 0) {
+        if (this._nodeContainerId !== undefined && this._nodeContainerId !== null && this._nodeContainerId._value >= 0) {
             getUINativeModule().nodeContainer.rebuild(this._nodeContainerId._value);
         }
     }
@@ -725,9 +777,9 @@ class FrameNode {
         if (node === null) {
             return;
         }
-        let child = node.getFirstChild();
+        let child = node.getFirstChildWithoutExpand();
         FrameNode.disposeTreeRecursively(child);
-        let sibling = node.getNextSibling();
+        let sibling = node.getNextSiblingWithoutExpand();
         FrameNode.disposeTreeRecursively(sibling);
         node.dispose();
     }
@@ -800,7 +852,7 @@ class FrameNode {
         }
     }
     removeComponentContent(content) {
-        if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() == undefined) {
+        if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() === undefined) {
             return;
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -868,8 +920,32 @@ class FrameNode {
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
+    getFirstChildWithoutExpand() {
+        const result = getUINativeModule().frameNode.getFirst(this.getNodePtr(), false);
+        const nodeId = result?.nodeId;
+        if (nodeId === undefined || nodeId === -1) {
+            return null;
+        }
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            return frameNode === undefined ? null : frameNode;
+        }
+        return this.convertToFrameNode(result.nodePtr, result.nodeId);
+    }
     getNextSibling() {
         const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr());
+        const nodeId = result?.nodeId;
+        if (nodeId === undefined || nodeId === -1) {
+            return null;
+        }
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            return frameNode === undefined ? null : frameNode;
+        }
+        return this.convertToFrameNode(result.nodePtr, result.nodeId);
+    }
+    getNextSiblingWithoutExpand() {
+        const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr(), false);
         const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
@@ -1025,6 +1101,7 @@ class FrameNode {
             this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
         }
         this._commonAttribute.setNodePtr(this.nodePtr_);
+        this._commonAttribute.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
         return this._commonAttribute;
     }
     get commonEvent() {
@@ -1143,6 +1220,7 @@ class TypedFrameNode extends FrameNode {
             this.attribute_ = this.attrCreator_(this.nodePtr_, ModifierType.FRAME_NODE);
         }
         this.attribute_.setNodePtr(this.nodePtr_);
+        this.attribute_.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
         return this.attribute_;
     }
     checkValid(node) {
@@ -1269,6 +1347,31 @@ const __creatorMap__ = new Map([
                 return new ArkSearchComponent(node, type);
             });
         }],
+    ["Button", (context) => {
+            return new TypedFrameNode(context, "Button", (node, type) => {
+                return new ArkButtonComponent(node, type);
+            });
+        }],
+    ["XComponent", (context) => {
+            return new TypedFrameNode(context, "XComponent", (node, type) => {
+                return new ArkXComponentComponent(node, type);
+            });
+        }],
+    ["ListItemGroup", (context) => {
+            return new TypedFrameNode(context, "ListItemGroup", (node, type) => {
+                return new ArkListItemGroupComponent(node, type);
+            });
+        }],
+    ["WaterFlow", (context) => {
+            return new TypedFrameNode(context, "WaterFlow", (node, type) => {
+                return new ArkWaterFlowComponent(node, type);
+            });
+        }],
+    ["FlowItem", (context) => {
+            return new TypedFrameNode(context, "FlowItem", (node, type) => {
+                return new ArkFlowItemComponent(node, type);
+            });
+        }],
 ]);
 class typeNode {
     static createNode(context, type) {
@@ -1388,14 +1491,14 @@ class ColorMetrics {
             return new ColorMetrics(Number.parseInt(red, 10), Number.parseInt(green, 10), Number.parseInt(blue, 10), Number.parseFloat(alpha) * MAX_CHANNEL_VALUE);
         }
         else {
-            const error = new Error("Parameter error. The format of the input color string is not rgb or rgba.");
+            const error = new Error('Parameter error. The format of the input color string is not RGB or RGBA.');
             error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
             throw error;
         }
     }
     static resourceColor(color) {
         if (color === undefined || color === null) {
-            const error = new Error("Parameter error. The type of input color parameter is not ResourceColor.");
+            const error = new Error('Parameter error. The type of the input color parameter is not ResourceColor.');
             error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
             throw error;
         }
@@ -1403,7 +1506,7 @@ class ColorMetrics {
         if (typeof color === 'object') {
             chanels = getUINativeModule().nativeUtils.parseResourceColor(color);
             if (chanels === undefined) {
-                const error = new Error("Get color resource failed.");
+                const error = new Error('Failed to obtain the color resource.');
                 error.code = ERROR_CODE_RESOURCE_GET_FAILED;
                 throw error;
             }
@@ -1425,7 +1528,7 @@ class ColorMetrics {
             }
         }
         else {
-            const error = new Error("Parameter error. The type of input color parameter is not ResourceColor.");
+            const error = new Error('Parameter error. The type of the input color parameter is not ResourceColor.');
             error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
             throw error;
         }
@@ -1464,13 +1567,13 @@ class ColorMetrics {
     }
     blendColor(overlayColor) {
         if (overlayColor === undefined || overlayColor === null) {
-            const error = new Error("Parameter error. The type of input parameter is not ColorMetrics.");
+            const error = new Error('Parameter error. The type of the input parameter is not ColorMetrics.');
             error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
             throw error;
         }
         const chanels = getUINativeModule().nativeUtils.blendColor(this.toNumeric(), overlayColor.toNumeric());
         if (chanels === undefined) {
-            const error = new Error("Parameter error. The type of input parameter is not ColorMetrics.");
+            const error = new Error('Parameter error. The type of the input parameter is not ColorMetrics.');
             error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
             throw error;
         }
@@ -1496,16 +1599,13 @@ class ColorMetrics {
         return this.alpha_;
     }
 }
-class ShapeMask {
+class BaseShape {
     constructor() {
         this.rect = null;
         this.roundRect = null;
         this.circle = null;
         this.oval = null;
         this.path = null;
-        this.fillColor = 0XFF000000;
-        this.strokeColor = 0XFF000000;
-        this.strokeWidth = 0;
     }
     setRectShape(rect) {
         this.rect = rect;
@@ -1543,13 +1643,27 @@ class ShapeMask {
         this.roundRect = null;
     }
 }
+class ShapeClip extends BaseShape {
+}
+class ShapeMask extends BaseShape {
+    constructor(...args) {
+        super(...args);
+        this.fillColor = 0XFF000000;
+        this.strokeColor = 0XFF000000;
+        this.strokeWidth = 0;
+    }
+}
 class RenderNode {
     constructor(type) {
         this.nodePtr = null;
         this.childrenList = [];
         this.parentRenderNode = null;
         this.backgroundColorValue = 0;
+        this.apiTargetVersion = getUINativeModule().common.getApiTargetVersion();
         this.clipToFrameValue = true;
+        if (this.apiTargetVersion && this.apiTargetVersion < 12) {
+            this.clipToFrameValue = false;
+        }
         this.frameValue = { x: 0, y: 0, width: 0, height: 0 };
         this.opacityValue = 1.0;
         this.pivotValue = { x: 0.5, y: 0.5 };
@@ -1557,6 +1671,7 @@ class RenderNode {
         this.scaleValue = { x: 1.0, y: 1.0 };
         this.shadowColorValue = 0;
         this.shadowOffsetValue = { x: 0, y: 0 };
+        this.labelValue = '';
         this.shadowAlphaValue = 0;
         this.shadowElevationValue = 0;
         this.shadowRadiusValue = 0;
@@ -1566,12 +1681,17 @@ class RenderNode {
             0, 0, 0, 1];
         this.translationValue = { x: 0, y: 0 };
         this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
+        this.markNodeGroupValue = false;
         if (type === 'BuilderRootFrameNode' || type === 'CustomFrameNode') {
             return;
         }
         this._nativeRef = getUINativeModule().renderNode.createRenderNode(this);
         this.nodePtr = this._nativeRef?.getNativeHandle();
-        this.clipToFrame = true;
+        if (this.apiTargetVersion && this.apiTargetVersion < 12) {
+            this.clipToFrame = false;
+        } else {
+            this.clipToFrame = true;
+        }
     }
     set backgroundColor(color) {
         this.backgroundColorValue = this.checkUndefinedOrNullWithDefaultValue(color, 0);
@@ -1650,6 +1770,10 @@ class RenderNode {
         }
         getUINativeModule().renderNode.setShadowOffset(this.nodePtr, this.shadowOffsetValue.x, this.shadowOffsetValue.y, this.lengthMetricsUnitValue);
     }
+    set label(label) {
+        this.labelValue = this.checkUndefinedOrNullWithDefaultValue(label, '');
+        getUINativeModule().renderNode.setLabel(this.nodePtr, this.labelValue);
+    }
     set shadowAlpha(alpha) {
         this.shadowAlphaValue = this.checkUndefinedOrNullWithDefaultValue(alpha, 0);
         getUINativeModule().renderNode.setShadowAlpha(this.nodePtr, this.shadowAlphaValue);
@@ -1706,10 +1830,20 @@ class RenderNode {
     }
     set lengthMetricsUnit(unit) {
         if (unit === undefined || unit == null) {
-            this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
-        } else {
-            this.lengthMetricsUnitValue = unit;
+            this.lengthMetricsUnit = LengthMetricsUnit.DEFAULT;
         }
+        else {
+            this.lengthMetricsUnit = unit;
+        }
+    }
+    set markNodeGroup(isNodeGroup) {
+        if (isNodeGroup === undefined || isNodeGroup === null) {
+            this.markNodeGroupValue = false;
+        }
+        else {
+            this.markNodeGroupValue = isNodeGroup;
+        }
+        getUINativeModule().renderNode.setMarkNodeGroup(this.nodePtr, this.markNodeGroupValue);
     }
     get backgroundColor() {
         return this.backgroundColorValue;
@@ -1741,6 +1875,9 @@ class RenderNode {
     get shadowOffset() {
         return this.shadowOffsetValue;
     }
+    get label() {
+        return this.labelValue;
+    }
     get shadowAlpha() {
         return this.shadowAlphaValue;
     }
@@ -1761,6 +1898,9 @@ class RenderNode {
     }
     get lengthMetricsUnit() {
         return this.lengthMetricsUnitValue;
+    }
+    get markNodeGroup() {
+        return this.markNodeGroupValue;
     }
     checkUndefinedOrNullWithDefaultValue(arg, defaultValue) {
         if (arg === undefined || arg === null) {
@@ -1953,9 +2093,9 @@ class RenderNode {
             getUINativeModule().renderNode.setCircleMask(this.nodePtr, circle.centerX, circle.centerY, circle.radius, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
         }
         else if (this.shapeMaskValue.roundRect !== null) {
-            const reoundRect = this.shapeMask.roundRect;
-            const corners = reoundRect.corners;
-            const rect = reoundRect.rect;
+            const roundRect = this.shapeMask.roundRect;
+            const corners = roundRect.corners;
+            const rect = roundRect.rect;
             getUINativeModule().renderNode.setRoundRectMask(this.nodePtr, corners.topLeft.x, corners.topLeft.y, corners.topRight.x, corners.topRight.y, corners.bottomLeft.x, corners.bottomLeft.y, corners.bottomRight.x, corners.bottomRight.y, rect.left, rect.top, rect.right, rect.bottom, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
         }
         else if (this.shapeMaskValue.oval !== null) {
@@ -1969,6 +2109,40 @@ class RenderNode {
     }
     get shapeMask() {
         return this.shapeMaskValue;
+    }
+    set shapeClip(shapeClip) {
+        if (shapeClip === undefined || shapeClip === null) {
+            this.shapeClipValue = new ShapeClip();
+        }
+        else {
+            this.shapeClipValue = shapeClip;
+        }
+        if (this.shapeClipValue.rect !== null) {
+            const rectClip = this.shapeClipValue.rect;
+            getUINativeModule().renderNode.setRectClip(this.nodePtr, rectClip.left, rectClip.top, rectClip.right, rectClip.bottom);
+        }
+        else if (this.shapeClipValue.circle !== null) {
+            const circle = this.shapeClipValue.circle;
+            getUINativeModule().renderNode.setCircleClip(this.nodePtr, circle.centerX, circle.centerY, circle.radius);
+        }
+        else if (this.shapeClipValue.roundRect !== null) {
+            const roundRect = this.shapeClipValue.roundRect;
+            const corners = roundRect.corners;
+            const rect = roundRect.rect;
+            getUINativeModule().renderNode.setRoundRectClip(this.nodePtr, corners.topLeft.x, corners.topLeft.y, corners.topRight.x, corners.topRight.y, corners.bottomLeft.x, corners.bottomLeft.y, corners.bottomRight.x, corners.bottomRight.y, rect.left, rect.top, rect.right, rect.bottom);
+        }
+        else if (this.shapeClipValue.oval !== null) {
+            const oval = this.shapeClipValue.oval;
+            getUINativeModule().renderNode.setOvalClip(this.nodePtr, oval.left, oval.top, oval.right, oval.bottom);
+        }
+        else if (this.shapeClipValue.path !== null) {
+            const path = this.shapeClipValue.path;
+            getUINativeModule().renderNode.setPathClip(this.nodePtr, path.commands);
+        }
+    }
+    get shapeClip() {
+        this.shapeClipValue = this.shapeClipValue ? this.shapeClipValue : new ShapeClip();
+        return this.shapeClipValue;
     }
 }
 function edgeColors(all) {
@@ -2088,8 +2262,8 @@ class ComponentContent extends Content {
     }
     dispose() {
         this.detachFromParent();
-        this.attachNodeRef_.dispose();
-        this.builderNode_.dispose();
+        this.attachNodeRef_?.dispose();
+        this.builderNode_?.dispose();
     }
     detachFromParent() {
         if (this.parentWeak_ === undefined) {
@@ -2106,10 +2280,13 @@ class ComponentContent extends Content {
         if (nodeType === "BuilderProxyNode") {
             const result = getUINativeModule().frameNode.getFirstUINode(node);
             this.attachNodeRef_ = getUINativeModule().nativeUtils.createNativeStrongRef(result);
-            getUINativeModule().frameNode.clearChildren(node);
+            getUINativeModule().frameNode.removeChild(node, result);
             return result;
         }
         return node;
+    }
+    updateConfiguration() {
+        this.builderNode_.updateConfiguration();
     }
 }
 /*
@@ -2156,7 +2333,7 @@ class NodeContent extends Content {
 
 export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
-    NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask,
+    NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask, ShapeClip,
     edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
     typeNode, NodeAdapter
 };

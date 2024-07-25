@@ -53,6 +53,7 @@ public:
     virtual void SetOnStop(VideoEventFunc&& onStop) {};
     virtual void EnableAnalyzer(bool enable) {}
     virtual void SetImageAnalyzerConfig(void* config) {}
+    virtual void SetImageAIOptions(void* options) {}
 private:
     static std::unique_ptr<VideoModel> instance_;
     static std::mutex mutex_;

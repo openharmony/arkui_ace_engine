@@ -57,7 +57,7 @@ public:
     static void SetDivider(const JSCallbackInfo& args);
     static void SetDirection(int32_t direction);
     static void SetScrollBar(const JSCallbackInfo& info);
-    static void SetScrollBarColor(const std::string& color);
+    static void SetScrollBarColor(const JSCallbackInfo& info);
     static void SetScrollBarWidth(const JSCallbackInfo& scrollWidth);
     static void SetEdgeEffect(const JSCallbackInfo& info);
     static void SetEditMode(bool editMode);
@@ -65,6 +65,7 @@ public:
     static void SetChainAnimation(bool enableChainAnimation);
     static void SetChainAnimationOptions(const JSCallbackInfo& info);
     static void SetChildrenMainSize(const JSCallbackInfo& args);
+    static void SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj);
     static void SetMultiSelectable(bool multiSelectable);
     static void SetListItemAlign(int32_t itemAlignment);
     static void SetLanes(const JSCallbackInfo& info);

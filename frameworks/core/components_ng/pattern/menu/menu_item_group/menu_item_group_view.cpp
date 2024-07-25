@@ -84,8 +84,14 @@ void MenuItemGroupView::SetHeader(const std::string& headerStr)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    layoutProps->UpdateTextColor(theme->GetSecondaryFontColor());
-    layoutProps->UpdateFontSize(theme->GetMenuFontSize());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        layoutProps->UpdateFontSize(theme->GetMenuItemGroupTitleTextFontSize());
+        layoutProps->UpdateFontWeight(FontWeight::BOLD);
+        layoutProps->UpdateTextColor(theme->GetMenuTextColor());
+    } else {
+        layoutProps->UpdateFontSize(theme->GetMenuFontSize());
+        layoutProps->UpdateTextColor(theme->GetSecondaryFontColor());
+    }
     layoutProps->UpdateMaxLines(1);
     layoutProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     pattern->AddHeaderContent(content);

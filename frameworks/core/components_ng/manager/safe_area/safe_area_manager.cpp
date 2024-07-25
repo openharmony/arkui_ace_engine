@@ -84,15 +84,9 @@ bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight)
 SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& opts) const
 {
     SafeAreaInsets res;
-#ifdef PREVIEW
-    if (ignoreSafeArea_) {
-        return res;
+    if (!IsSafeAreaValid()) {
+        return {};
     }
-#else
-    if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
-        return res;
-    }
-#endif
     if (opts.type & SAFE_AREA_TYPE_CUTOUT) {
         res = res.Combine(cutoutSafeArea_);
     }
@@ -107,7 +101,11 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
 
 bool SafeAreaManager::IsSafeAreaValid() const
 {
+#ifdef PREVIEW
+    return !ignoreSafeArea_;
+#else
     return !(ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_));
+#endif
 }
 
 bool SafeAreaManager::SetIsFullScreen(bool value)
@@ -167,7 +165,7 @@ SafeAreaInsets SafeAreaManager::GetSystemSafeArea() const
 
 SafeAreaInsets SafeAreaManager::GetCutoutSafeArea() const
 {
-    if (ignoreSafeArea_ || !isFullScreen_) {
+    if (!IsSafeAreaValid()) {
         return {};
     }
     return cutoutSafeArea_;
@@ -175,21 +173,53 @@ SafeAreaInsets SafeAreaManager::GetCutoutSafeArea() const
 
 SafeAreaInsets SafeAreaManager::GetSafeArea() const
 {
-#ifdef PREVIEW
-    if (ignoreSafeArea_) {
+    if (!IsSafeAreaValid()) {
         return {};
     }
-#else
-    if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
-        return {};
-    }
-#endif
     return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
+}
+
+SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutCutout() const
+{
+    if (!IsSafeAreaValid()) {
+        return {};
+    }
+    return systemSafeArea_.Combine(navSafeArea_);
 }
 
 SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutProcess() const
 {
     return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
+}
+
+PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess)
+{
+    if (!withoutProcess) {
+#ifdef PREVIEW
+        if (ignoreSafeArea_) {
+            return {};
+        }
+#else
+        if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
+            return {};
+        }
+#endif
+    }
+    auto combinedSafeArea = systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
+    PaddingPropertyF result;
+    if (combinedSafeArea.left_.IsValid()) {
+        result.left = combinedSafeArea.left_.Length();
+    }
+    if (combinedSafeArea.top_.IsValid()) {
+        result.top = combinedSafeArea.top_.Length();
+    }
+    if (combinedSafeArea.right_.IsValid()) {
+        result.right = combinedSafeArea.right_.Length();
+    }
+    if (combinedSafeArea.bottom_.IsValid()) {
+        result.bottom = combinedSafeArea.bottom_.Length();
+    }
+    return result;
 }
 
 float SafeAreaManager::GetKeyboardOffset() const
@@ -221,17 +251,25 @@ void SafeAreaManager::ExpandSafeArea()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSafeAreaManager();
-    bool isFocusOnPage = pipeline->CheckPageFocus();
     auto iter = needExpandNodes_.begin();
     while (iter != needExpandNodes_.end()) {
         auto frameNode = (*iter).Upgrade();
         if (frameNode) {
             manager->AddGeoRestoreNode(frameNode);
-            frameNode->ExpandSafeArea(isFocusOnPage);
+            frameNode->ExpandSafeArea();
         }
         ++iter;
     }
     ClearNeedExpandNode();
+}
+
+bool SafeAreaManager::AddNodeToExpandListIfNeeded(const WeakPtr<FrameNode>& node)
+{
+    if (needExpandNodes_.find(node) == needExpandNodes_.end()) {
+        AddNeedExpandNode(node);
+        return true;
+    }
+    return false;
 }
 
 bool SafeAreaManager::CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode)
@@ -241,12 +279,12 @@ bool SafeAreaManager::CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameN
     }
     // page will not avoid keyboard when lastChild is sheet
     RefPtr<OverlayManager> overlay;
-    if (!frameNode->PageLevelIsNavDestination()) {
+    if (frameNode->RootNodeIsPage()) {
         auto pattern = frameNode->GetPattern<PagePattern>();
         CHECK_NULL_RETURN(pattern, true);
         overlay = pattern->GetOverlayManager();
     } else {
-        auto navNode = FrameNode::GetFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG, frameNode->GetPageLevelNodeId());
+        auto navNode = FrameNode::GetFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG, frameNode->GetRootNodeId());
         CHECK_NULL_RETURN(navNode, true);
         auto pattern = navNode->GetPattern<NavDestinationPattern>();
         CHECK_NULL_RETURN(pattern, true);

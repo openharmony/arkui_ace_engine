@@ -166,7 +166,7 @@ void XComponentControllerNG::UpdateSurfaceBounds()
     pattern->UpdateSurfaceBounds(true);
 }
 
-void XComponentControllerNG::StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed)
+void XComponentControllerNG::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed)
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);

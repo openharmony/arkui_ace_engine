@@ -43,6 +43,9 @@ public:
     static void SetListChildrenMainSize(
         FrameNode* frameNode, float defaultSize, const std::vector<float>& mainSize);
     static void ResetListChildrenMainSize(FrameNode* frameNode);
+    static V2::ItemDivider GetDivider(FrameNode* frameNode);
+    static void SetSpace(FrameNode* frameNode, const Dimension& space);
+    static void SetStyle(FrameNode* frameNode, V2::ListItemGroupStyle style);
 };
 
 } // namespace OHOS::Ace::NG

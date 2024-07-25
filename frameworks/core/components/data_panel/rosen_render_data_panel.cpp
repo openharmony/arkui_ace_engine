@@ -932,8 +932,7 @@ void RosenRenderPercentageDataPanel::PaintColorSegment(RenderContext& context, c
     }
 #ifndef USE_ROSEN_DRAWING
     SkPaint segmentPaint;
-    SkRect rect;
-    rect = SkRect::MakeXYWH(xSegment, leftTop.GetY(), segmentValue, height);
+    SkRect rect = SkRect::MakeXYWH(xSegment, leftTop.GetY(), segmentValue, height);
     SkPoint segmentStartPoint;
     segmentStartPoint.set(rect.left(), rect.top());
     SkPoint segmentEndPoint;
@@ -947,8 +946,7 @@ void RosenRenderPercentageDataPanel::PaintColorSegment(RenderContext& context, c
     canvas->drawRect(rect, segmentPaint);
 #else
     RSBrush segmentBrush;
-    RSRect rect;
-    rect = RSRect(xSegment, leftTop.GetY(), segmentValue + xSegment, height + leftTop.GetY());
+    RSRect rect = RSRect(xSegment, leftTop.GetY(), segmentValue + xSegment, height + leftTop.GetY());
     RSPoint segmentStartPoint(rect.GetLeft(), rect.GetTop());
     RSPoint segmentEndPoint(rect.GetRight(), rect.GetBottom());
     RSPoint segmentPoint[2] = { segmentStartPoint, segmentEndPoint };

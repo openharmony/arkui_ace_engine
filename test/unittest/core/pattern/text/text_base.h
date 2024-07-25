@@ -41,6 +41,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -57,6 +58,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_paint_method.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/typed_text.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -162,16 +164,6 @@ constexpr int32_t AI_SPAN_START = 7;
 constexpr int32_t AI_SPAN_END = 18;
 constexpr int32_t AI_SPAN_START_II = 24;
 constexpr int32_t AI_SPAN_END_II = 37;
-const struct TextDataDetectResult TEXT_DATA_DETECT_RESULT = { 0,
-    "{\"phoneNum\":[{\"charOffset\":7,\"number\":\"18888888888\",\"oriText\":\"18888888888\",\"type\":1}]}", "0",
-    "{\"phoneNum\":[{\"option\":\"呼叫\"},{\"option\":\"发送信息\"},\
-        {\"option\":\"新建联系人\"},{\"option\":\"复制\"},{\"option\":\"选择文本\"}],\
-        \"url\":[{\"option\":\"打开\"},{\"option\":\"复制\"},{\"option\":\"选择文本\"}],\
-        \"email\":[{\"option\":\"新建邮箱\"},{\"option\":\"发送信息\"},\
-        {\"option\":\"新建联系人\"},{\"option\":\"复制\"},{\"option\":\"选择文本\"}],\
-        \"location\":[{\"option\":\"导航至该位置\"},{\"option\":\"在地图中打开\"},\
-        {\"option\":\"复制\"},{\"option\":\"选择文本\"}]}",
-    "{\"bundlename\":\"com.XXXXXX.hmsapp.hiai\",\"abilityname\":\"EntityMenuUIExtensionAbility\"}" };
 const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
 const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
 const std::string MULTIPLE_SPAN1 = "Span1";
@@ -180,6 +172,11 @@ const std::string MULTIPLE_SPAN3 = "Span3\n";
 const std::string MULTIPLE_SPAN4 = "Span4";
 using OnClickCallback = std::function<void(const BaseEventInfo* info)>;
 using DragDropBaseCallback = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
+constexpr uint32_t CODE1 = 6;
+constexpr uint32_t CODE2 = 10000;
+constexpr uint32_t CODE3 = 111888;
+const char TEXT_CONTENT1[] = "hi";
+const char TEXT_CONTENT2[] = "hello1";
 
 struct TestProperty {
     std::optional<Dimension> fontSizeValue = std::nullopt;

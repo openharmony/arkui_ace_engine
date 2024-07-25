@@ -149,7 +149,8 @@ public:
 
             auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
             if (frameNode && !frameNode->IsActive()) {
-                frameNode->SetJSViewActive(false);
+                ACE_SYNTAX_SCOPED_TRACE("LazyForEach not active index[%d]", index);
+                frameNode->SetJSViewActive(false, true);
                 expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
                 continue;
             }
@@ -192,6 +193,7 @@ public:
 
     void RemoveAllChild()
     {
+        ACE_SYNTAX_SCOPED_TRACE("LazyForEach RemoveAllChild");
         for (auto& [index, node] : cachedItems_) {
             if (!node.second) {
                 continue;
@@ -209,6 +211,7 @@ public:
 
     bool SetActiveChildRange(int32_t start, int32_t end)
     {
+        ACE_SYNTAX_SCOPED_TRACE("LazyForEach active range start[%d], end[%d]", start, end);
         int32_t count = GetTotalCount();
         bool needBuild = false;
         for (auto& [index, node] : cachedItems_) {
@@ -307,7 +310,7 @@ public:
             frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
         }
         context->ResetPredictNode();
-        itemInfo.second->SetJSViewActive(false);
+        itemInfo.second->SetJSViewActive(false, true);
         cachedItems_[index] = LazyForEachChild(itemInfo.first, nullptr);
 
         return itemInfo.second;
@@ -396,6 +399,7 @@ public:
     void ProcessCachedIndex(std::unordered_map<std::string, LazyForEachCacheChild>& cache,
         std::set<int32_t>& idleIndexes)
     {
+        const auto& cacheKeys = GetCacheKeys(idleIndexes);
         auto expiringIter = expiringItem_.begin();
         while (expiringIter != expiringItem_.end()) {
             const auto& key = expiringIter->first;
@@ -415,7 +419,12 @@ public:
                 NotifyDataDeleted(node.second, static_cast<size_t>(node.first), true);
                 ProcessOffscreenNode(node.second, true);
                 NotifyItemDeleted(RawPtr(node.second), key);
-                expiringIter = expiringItem_.erase(expiringIter);
+                if (cacheKeys.find(key) != cacheKeys.end()) {
+                    cache.try_emplace(key, node);
+                    expiringIter++;
+                } else {
+                    expiringIter = expiringItem_.erase(expiringIter);
+                }
             }
         }
     }
@@ -508,10 +517,10 @@ public:
             if (node.second.second == nullptr) {
                 continue;
             }
-            node.second.second->SetJSViewActive(active);
+            node.second.second->SetJSViewActive(active, true);
         }
         for (const auto& node : expiringItem_) {
-            node.second.second->SetJSViewActive(active);
+            node.second.second->SetJSViewActive(active, true);
         }
     }
 
@@ -540,6 +549,8 @@ protected:
     virtual int32_t OnGetTotalCount() = 0;
 
     virtual void OnItemDeleted(UINode* node, const std::string& key) {};
+
+    virtual std::set<std::string> GetCacheKeys(std::set<int32_t>& idleIndexes) = 0;
 
     virtual LazyForEachChild OnGetChildByIndex(
         int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cachedItems) = 0;

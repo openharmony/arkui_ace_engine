@@ -45,6 +45,9 @@ ArkUI_DrawableDescriptor* OH_ArkUI_DrawableDescriptor_CreateFromAnimatedPixelMap
     drawableDescriptor->size = size;
     std::vector<std::shared_ptr<OHOS::Media::PixelMap>> pixelMapList;
     for (int32_t index = 0; index < size; index++) {
+        if (!array[index]) {
+            continue;
+        }
         pixelMapList.push_back(array[index]->GetInnerPixelmap());
     }
     int32_t duration = -1;

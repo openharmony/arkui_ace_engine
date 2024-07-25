@@ -62,6 +62,9 @@ public:
     virtual void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) = 0;
     virtual void SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) = 0;
     virtual void SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) = 0;
+    virtual void HasUserDefinedDisappearFontFamily(bool isUserDefined) = 0;
+    virtual void HasUserDefinedNormalFontFamily(bool isUserDefined) = 0;
+    virtual void HasUserDefinedSelectedFontFamily(bool isUserDefined) = 0;
     virtual void MultiInit(const RefPtr<PickerTheme> pickerTheme) = 0;
     virtual void SetColumns(const std::vector<NG::TextCascadePickerOptions>& options) = 0;
     virtual void SetIsCascade(bool isCascade) = 0;

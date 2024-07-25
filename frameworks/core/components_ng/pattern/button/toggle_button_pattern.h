@@ -134,7 +134,7 @@ private:
     bool isPress_ = false;
     bool isSetClickedColor_ = false;
     bool IsNeedToHandleHoverOpacity();
-
+    bool isTouchPreventDefault_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ToggleButtonPattern);
 };
 } // namespace OHOS::Ace::NG

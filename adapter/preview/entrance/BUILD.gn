@@ -54,9 +54,11 @@ ohos_source_set("preview_entrance_source") {
       "foldable_window_preview.cpp",
       "msdp/interaction_impl.cpp",
       "subwindow_preview.cpp",
+      "timepicker/timepicker_haptic_factory.cpp",
       "touch_event_convertor.cpp",
       "udmf/udmf_impl.cpp",
       "ui_content_impl.cpp",
+      "vibrator/vibrator_impl.cpp",
       "xcollie/xcollieInterface_impl.cpp",
     ]
 
@@ -64,7 +66,6 @@ ohos_source_set("preview_entrance_source") {
       "$ace_napi:ace_napi",
       "$ace_root/frameworks/core/components/theme:build_theme_code",
       "$ace_root/interfaces/inner_api/ace:ace_uicontent",
-      "$skia_root_new:skia_$platform",
     ]
     external_deps = []
     include_dirs = [

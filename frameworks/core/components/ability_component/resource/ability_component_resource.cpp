@@ -110,21 +110,25 @@ std::string AbilityComponentResource::CallResRegisterMethod(
 
     if (useSyncTask) {
         std::string result;
-        platformTaskExecutor.PostSyncTask([method, param, weakRes, &result] {
-            auto resRegister = weakRes.Upgrade();
-            if (resRegister != nullptr) {
-                resRegister->OnMethodCall(method, param, result);
-            }
-        }, "ArkUIAbilityComponentCallResRegister");
+        platformTaskExecutor.PostSyncTask(
+            [method, param, weakRes, &result] {
+                auto resRegister = weakRes.Upgrade();
+                if (resRegister != nullptr) {
+                    resRegister->OnMethodCall(method, param, result);
+                }
+            },
+            "ArkUIAbilityComponentCallResRegister");
         return result;
     } else {
-        platformTaskExecutor.PostTask([method, param, weakRes] {
-            auto resRegister = weakRes.Upgrade();
-            if (resRegister != nullptr) {
-                std::string result;
-                resRegister->OnMethodCall(method, param, result);
-            }
-        }, "ArkUIAbilityComponentCallResRegister");
+        platformTaskExecutor.PostTask(
+            [method, param, weakRes] {
+                auto resRegister = weakRes.Upgrade();
+                if (resRegister != nullptr) {
+                    std::string result;
+                    resRegister->OnMethodCall(method, param, result);
+                }
+            },
+            "ArkUIAbilityComponentCallResRegister");
     }
     return "";
 }

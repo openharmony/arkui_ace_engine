@@ -30,8 +30,11 @@ struct VectorToCFFIArrayString {
     void (*free)(VectorToCFFIArrayString*);
 };
 
+typedef void (*ViewCallBack)(int64_t);
+typedef ExternalString (*IdCallBack)(int64_t);
+
 CJ_EXPORT void FfiOHOSAceFrameworkForEachCreateFU(
-    char* viewId, int64_t parentViewID, int64_t dataSize, void (*callbackView)(int64_t), char* (*callbackKey)(int64_t));
+    char* viewId, int64_t parentViewID, int64_t dataSize, ViewCallBack callbackView, IdCallBack callbackKey);
 CJ_EXPORT void FfiOHOSAceFrameworkForEachCreate();
 CJ_EXPORT void FfiOHOSAceFrameworkForEachPop();
 CJ_EXPORT VectorToCFFIArrayString FfiOHOSAceFrameworkViewGetIdArray(int64_t elmtId);
