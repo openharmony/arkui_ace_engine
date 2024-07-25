@@ -34,6 +34,7 @@ namespace {
 constexpr int32_t MAX_PAN_FINGERS = 10;
 constexpr int32_t DEFAULT_PAN_FINGERS = 1;
 constexpr int32_t AXIS_PAN_FINGERS = 1;
+constexpr float MIN_SPEED_THRESHOLD = 500.0f;
 
 } // namespace
 
@@ -295,7 +296,12 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        if (currentFingers_  == fingers_) {
+        if (currentFingers_ == fingers_) {
+            auto velocityTrackerIter = panVelocity_.GetVelocityMap().find(event.id);
+            if (velocityTrackerIter != panVelocity_.GetVelocityMap().end() &&
+                std::abs(panVelocity_.GetMainAxisVelocity()) <= MIN_SPEED_THRESHOLD) {
+                velocityTrackerIter->second.DumpVelocityPoints();
+            }
             // last one to fire end.
             isStartTriggered_ = false;
             SendCallbackMsg(onActionEnd_);
