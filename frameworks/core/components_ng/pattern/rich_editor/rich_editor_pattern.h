@@ -817,6 +817,10 @@ public:
         return isTouchCaret_;
     }
 
+    bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const override;
+
+    RectF ExpandDefaultResponseRegion(RectF& rect) override;
+
 protected:
     bool CanStartAITask() override;
 

@@ -53,7 +53,14 @@ bool StylusDetectorMgr::Notify(const NotifyInfo& notifyInfo)
     return false;
 }
 
-bool StylusDetectorMgr::IsNeedInterceptedTouchEvent(const TouchEvent& touchEvent)
+RefPtr<NG::FrameNode> StylusDetectorMgr::FindHitFrameNode(
+    const TouchEvent& touchEvent, const TouchTestResult& touchTestResult)
+{
+    return nullptr;
+}
+
+bool StylusDetectorMgr::IsNeedInterceptedTouchEvent(
+    const TouchEvent& touchEvent, std::unordered_map<size_t, TouchTestResult> touchTestResults)
 {
     return false;
 }
@@ -63,21 +70,11 @@ void StylusDetectorMgr::RemoveTextFieldFrameNode(const int32_t id) {}
 
 StylusDetectorMgr::StylusDetectorMgr() : engine_(nullptr), isRegistered_(false) {}
 
-bool StylusDetectorMgr::CheckTextEditable(const RefPtr<NG::FrameNode> parentNode)
+bool StylusDetectorMgr::CheckTextEditable(const RefPtr<NG::FrameNode> frameNode)
 {
     return false;
 }
 
-RefPtr<NG::FrameNode> StylusDetectorMgr::FindTargetInChildNodes(
-    const RefPtr<NG::UINode> parentNode, const FrameNodeSet& hitFrameNodes)
-{
-    return nullptr;
-}
-
-RefPtr<NG::FrameNode> StylusDetectorMgr::FindTextInputFrameNodeByPosition(float globalX, float globalY)
-{
-    return nullptr;
-}
 bool StylusDetectorMgr::IsStylusTouchEvent(const TouchEvent& touchEvent) const
 {
     return false;
