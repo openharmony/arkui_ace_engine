@@ -488,6 +488,8 @@ void WindowScene::OnForeground()
         auto surfaceNode = self->session_->GetSurfaceNode();
         CHECK_NULL_VOID(surfaceNode);
         surfaceNode->SetIsNotifyUIBufferAvailable(false);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
         self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
