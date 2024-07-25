@@ -220,6 +220,9 @@ public:
         animationDuration_ = animationDuration;
     }
 
+    void UpdateTabBarBackgroundColor(
+        RefPtr<FrameNode> columnFrameNode, const RefPtr<TabTheme>& tabTheme, int32_t focusedColumnId);
+
     void SetTouching(bool isTouching)
     {
         touching_ = isTouching;

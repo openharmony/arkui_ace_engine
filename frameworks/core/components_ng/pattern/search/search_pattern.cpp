@@ -898,11 +898,13 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
     }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    RoundRect focusRect;
-    GetInnerFocusPaintRect(focusRect);
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->PaintInnerFocusState(focusRect, true);
+    if (context->GetIsFocusActive()) {
+        RoundRect focusRect;
+        GetInnerFocusPaintRect(focusRect);
+        auto focusHub = host->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->PaintInnerFocusState(focusRect, true);
+    }
     host->MarkModifyDone();
 }
 

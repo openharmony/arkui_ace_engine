@@ -1850,7 +1850,7 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
         auto isSelected = columnNode->GetId() == selectedColumnId;
         auto isFocused = columnNode->GetId() == focusedColumnId;
         if (index >= 0 && index < static_cast<int32_t>(labelStyles_.size())) {
-            if (isFocused && isFocusSet_) {
+            if (isFocused && isFocusSet_ && pipelineContext->GetIsFocusActive()) {
                 textLayoutProperty->UpdateTextColor(labelStyles_[index].selectedColor.has_value()
                                                         ? labelStyles_[index].selectedColor.value()
                                                         : tabTheme->GetSubTabTextFocusedColor());
@@ -2070,13 +2070,24 @@ void TabBarPattern::UpdateSubTabBoard()
                 axis == Axis::HORIZONTAL) {
                 renderContext->UpdateBackgroundColor(indicatorStyles_[indicator_].color);
             } else {
-                renderContext->UpdateBackgroundColor((columnFrameNode->GetId() == focusedColumnId && isFocusSet_)
-                                                         ? tabTheme->GetTabBarFocusedColor()
-                                                         : Color::BLACK.BlendOpacity(0.0f));
+                UpdateTabBarBackgroundColor(columnFrameNode, tabTheme, focusedColumnId);
             }
             columnFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
     }
+}
+
+void TabBarPattern::UpdateTabBarBackgroundColor(
+    RefPtr<FrameNode> columnFrameNode, const RefPtr<TabTheme>& tabTheme, int32_t focusedColumnId)
+{
+    auto pipelineContext = GetHost()->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto renderContext = columnFrameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(
+        (columnFrameNode->GetId() == focusedColumnId && isFocusSet_ && pipelineContext->GetIsFocusActive())
+            ? tabTheme->GetTabBarFocusedColor()
+            : Color::BLACK.BlendOpacity(0.0f));
 }
 
 SelectedMode TabBarPattern::GetSelectedMode() const
