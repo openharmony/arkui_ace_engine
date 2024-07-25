@@ -2290,6 +2290,29 @@ HWTEST_F(RichEditorBaseTestNg, ParagraphManager010, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ParagraphManager011
+ * @tc.desc: Test the paragraph manager function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ParagraphManager011, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    bool clamp = true;
+    int32_t paragraphsIndex = richEditorPattern->paragraphs_.GetIndex(Offset(-1.0, -1.0), clamp);
+    EXPECT_EQ(paragraphsIndex, 0);
+
+    PositionWithAffinity finalResult = richEditorPattern->paragraphs_.GetGlyphPositionAtCoordinate(Offset(-1.0, -1.0));
+    EXPECT_EQ(finalResult.position_, 0);
+}
+
+/**
  * @tc.name: Controller001
  * @tc.desc: Test the controller function.
  * @tc.type: FUNC
