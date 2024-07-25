@@ -727,4 +727,117 @@ HWTEST_F(WaterFlowSWTest, ChangeLayoutMode001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
 }
+
+/**
+ * @tc.name: NotifyDataChange001
+ * @tc.desc: Test the return value of NotifyDataChange in regular layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, NotifyDataChange001, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(60);
+        },
+        false);
+    UpdateCurrentOffset(-1000.0f);
+    EXPECT_EQ(info_->startIndex_, 7);
+    EXPECT_EQ(info_->endIndex_, 10);
+
+    EXPECT_EQ(pattern_->layoutInfo_->Mode(), WaterFlowLayoutMode::SLIDING_WINDOW);
+    info_->NotifyDataChange(0, 1);
+    EXPECT_EQ(info_->newStartIndex_, 8);
+
+    info_->NotifyDataChange(1, 3);
+    info_->NotifyDataChange(1, -2);
+    EXPECT_EQ(info_->newStartIndex_, 9);
+
+    info_->NotifyDataChange(1, -2);
+    EXPECT_EQ(info_->newStartIndex_, 7);
+
+    info_->NotifyDataChange(1, -2);
+    EXPECT_EQ(info_->newStartIndex_, 5);
+
+    info_->NotifyDataChange(1, -5);
+    EXPECT_EQ(info_->newStartIndex_, -2);
+    info_->NotifyDataChange(1, 10);
+    EXPECT_EQ(info_->newStartIndex_, -2);
+
+    UpdateCurrentOffset(-1000.0f);
+    EXPECT_EQ(info_->newStartIndex_, -1);
+
+    EXPECT_EQ(info_->startIndex_, 13);
+    info_->NotifyDataChange(17, 0);
+    EXPECT_EQ(info_->newStartIndex_, -2);
+    info_->NotifyDataChange(0, 10);
+    EXPECT_EQ(info_->newStartIndex_, -2);
+}
+
+/**
+ * @tc.name: NotifyDataChange002
+ * @tc.desc: Test the return value of NotifyDataChange when updating the section in segment layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(45);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_10);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+
+    UpdateCurrentOffset(-1000.0f);
+    EXPECT_EQ(info_->startIndex_, 11);
+    EXPECT_EQ(info_->endIndex_, 22);
+
+    /**
+     * @tc.steps: step1. update the sections above the lanes
+     * @tc.expected: newStartIndex_ can be setted to the correct value.
+     */
+
+    std::vector<WaterFlowSections::Section> newSections = { WaterFlowSections::Section {
+        .itemsCount = 7, .crossCount = 5 } };
+    secObj->ChangeData(2, 2, newSections);
+    AddItems(2);
+    info_->NotifyDataChange(5, 2);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    EXPECT_EQ(info_->newStartIndex_, 13);
+
+    /**
+     * @tc.steps: step2. update the sections which in the lanes.
+     * @tc.expected: newStartIndex_ can be setted to -2.
+     */
+
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 13);
+
+    newSections = { WaterFlowSections::Section { .itemsCount = 2, .crossCount = 5 } };
+    secObj->ChangeData(5, 1, newSections);
+    EXPECT_EQ(info_->newStartIndex_, -2);
+
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 13);
+
+    /**
+     * @tc.steps: step3. update the sections which in back of the lanes.
+     * @tc.expected: newStartIndex_ can be setted to -2.
+     */
+
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 13);
+    EXPECT_EQ(info_->newStartIndex_, -1);
+
+    newSections = { WaterFlowSections::Section { .itemsCount = 30, .crossCount = 5 } };
+    secObj->ChangeData(6, 1, newSections);
+    EXPECT_EQ(info_->newStartIndex_, -2);
+}
 } // namespace OHOS::Ace::NG
