@@ -1278,6 +1278,9 @@ void OverlayManager::OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int3
             }
         },
         option.GetOnFinishEvent());
+    auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
+    CHECK_NULL_VOID(toastProperty);
+    toastProperty->SetSelectStatus(ToastLayoutProperty::SelectStatus::ON);
     toastNode->OnAccessibilityEvent(
         AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     toastNode->OnAccessibilityEvent(
@@ -1355,6 +1358,9 @@ void OverlayManager::PopToast(int32_t toastId)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
+    auto toastProperty = toastUnderPop->GetLayoutProperty<ToastLayoutProperty>();
+    CHECK_NULL_VOID(toastProperty);
+    toastProperty->SetSelectStatus(ToastLayoutProperty::SelectStatus::OFF);
     AccessibilityEvent event;
     event.type = AccessibilityEventType::CHANGE;
     event.windowContentChangeTypes = WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE;
