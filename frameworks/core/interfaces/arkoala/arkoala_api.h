@@ -2474,6 +2474,8 @@ struct ArkUIGridModifier {
     ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
     void (*setFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 flingSpeedLimit);
     void (*resetFlingSpeedLimit)(ArkUINodeHandle node);
+    void (*setGridAlignItems)(ArkUINodeHandle node, ArkUI_Int32 alignItems);
+    void (*resetGridAlignItems)(ArkUINodeHandle node);
 };
 
 struct ArkUIGridItemModifier {

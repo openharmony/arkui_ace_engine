@@ -3141,6 +3141,10 @@ void ArkUINativeModule::RegisterGridAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetFlingSpeedLimit));
     grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFlingSpeedLimit"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetFlingSpeedLimit));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlignItems"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetAlignItems));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignItems"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetAlignItems));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "grid"), grid);
 }
 
