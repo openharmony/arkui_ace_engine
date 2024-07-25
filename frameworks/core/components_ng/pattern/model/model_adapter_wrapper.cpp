@@ -91,7 +91,7 @@ void ModelAdapterWrapper::CreateTextureLayer()
         return;
     }
 #endif
-    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this)] {
+    Render3D::GraphicsTask::GetInstance().PushAsyncMessage([weak = WeakClaim(this)] {
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);
 
@@ -112,7 +112,7 @@ void ModelAdapterWrapper::CreateWidgetAdapter()
     auto key = GetKey();
     Render3D::HapInfo hapInfo = SetHapInfo();
     // init engine in async manager sometimes crash on screen rotation
-    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), key, &hapInfo] {
+    Render3D::GraphicsTask::GetInstance().PushAsyncMessage([weak = WeakClaim(this), key, hapInfo] {
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);
 
@@ -138,11 +138,13 @@ void ModelAdapterWrapper::OnAttachToFrameNode(const RefPtr<RenderContext>& conte
     CreateWidgetAdapter();
 
 #ifdef ENABLE_ROSEN_BACKEND
-    auto rsContext = DynamicCast<NG::RosenRenderContext>(context);
-    CHECK_NULL_VOID(rsContext);
-    auto rsNode = rsContext->GetRSNode();
-    CHECK_NULL_VOID(rsNode);
-    rsNode->SetFrameGravity(Rosen::Gravity::RESIZE);
+    Render3D::GraphicsTask::GetInstance().PushAsyncMessage([context] {
+        auto rsContext = DynamicCast<NG::RosenRenderContext>(context);
+        CHECK_NULL_VOID(rsContext);
+        auto rsNode = rsContext->GetRSNode();
+        CHECK_NULL_VOID(rsNode);
+        rsNode->SetFrameGravity(Rosen::Gravity::RESIZE);
+    });
 #endif
 }
 
@@ -155,32 +157,28 @@ void ModelAdapterWrapper::OnDirtyLayoutWrapperSwap(const Render3D::WindowChangeI
         return;
     }
 #endif
-    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &windowChangeInfo] {
-        auto adapter = weak.Upgrade();
-        CHECK_NULL_VOID(adapter);
-        CHECK_NULL_VOID(adapter->textureLayer_);
-
-        adapter->textureLayer_->OnWindowChange(windowChangeInfo);
-    });
-
-    Render3D::GraphicsTask::GetInstance().PushAsyncMessage([weak = WeakClaim(this)] {
+    Render3D::GraphicsTask::GetInstance().PushAsyncMessage([weak = WeakClaim(this), windowChangeInfo] {
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);
         CHECK_NULL_VOID(adapter->textureLayer_);
         CHECK_NULL_VOID(adapter->widgetAdapter_);
 
+        adapter->textureLayer_->OnWindowChange(windowChangeInfo);
         adapter->widgetAdapter_->OnWindowChange(adapter->textureLayer_->GetTextureInfo());
     });
 }
 
 void ModelAdapterWrapper::OnRebuildFrame(RefPtr<RenderContext>& context)
 {
-    CHECK_NULL_VOID(textureLayer_);
-
 #ifdef ENABLE_ROSEN_BACKEND
-    CHECK_NULL_VOID(context);
-    auto rsNode = DynamicCast<NG::RosenRenderContext>(context)->GetRSNode();
-    textureLayer_->SetParent(rsNode);
+    Render3D::GraphicsTask::GetInstance().PushAsyncMessage([weak = WeakClaim(this), context] {
+        auto adapter = weak.Upgrade();
+        CHECK_NULL_VOID(adapter);
+        CHECK_NULL_VOID(adapter->textureLayer_);
+
+        auto rsNode = DynamicCast<NG::RosenRenderContext>(context)->GetRSNode();
+        adapter->textureLayer_->SetParent(rsNode);
+    });
 #endif
 }
 
