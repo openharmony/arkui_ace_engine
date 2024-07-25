@@ -13,23 +13,27 @@
  * limitations under the License.
  */
 
-var __decorate = (this && this.__decorate) || function (t2, u2, v2, w2) {
-    var x2 = arguments.length, y2 = x2 < 3 ? u2 : w2 === null ? w2 = Object.getOwnPropertyDescriptor(u2, v2) : w2, z2;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-        y2 = Reflect.decorate(t2, u2, v2, w2);
-    else
-        for (var a3 = t2.length - 1; a3 >= 0; a3--)
-            if (z2 = t2[a3])
-                y2 = (x2 < 3 ? z2(y2) : x2 > 3 ? z2(u2, v2, y2) : z2(u2, v2)) || y2;
-    return x2 > 3 && y2 && Object.defineProperty(u2, v2, y2), y2;
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length,
+        r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 if (!("finalizeConstruction" in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => {
+    });
 }
 const animator = requireNapi('animator');
+const drawing = requireNapi('graphics.drawing');
+const vibrator = requireNapi('vibrator');
+const ColorMetrics = requireNapi('arkui.node').ColorMetrics;
+const hilog = requireNapi('hilog');
 
 const ANGULAR_TO_RADIAN = Math.PI / 180;
+const RADIAN_TO_ANGULAR = 180 / Math.PI;
 const PI_RADIAN = 180;
+const TWO_PI_RADIAN = 360;
 const ANGLE_OVER_MIN = 10;
 const LENGTH_OVER_MIN = 0.15;
 const APPROXIMATE_NUMBER = Math.pow(10, -7);
@@ -54,20 +58,29 @@ const SELECTED_COLOR_DEFAULT = '#FF5EA1FF';
 const MIN_STATUS = 'min';
 const MAX_STATUS = 'max';
 const NORMAL_STATUS = 'normal';
+const VIBRATOR_TYPE_TWO = 'watchhaptic.crown.strength2';
+const VIBRATOR_TYPE_SIX = 'watchhaptic.crown.strength6';
+const CROWN_EVENT_FLAG = 30;
+const CROWN_CONTROL_RATIO = 2.10;
+const CROWN_SENSITIVITY_LOW = 0.5;
+const CROWN_SENSITIVITY_MEDIUM = 1;
+const CROWN_SENSITIVITY_HIGH = 2;
+const INVALID_TIMEOUT_ID = -1;
+const RESTORE_TIMEOUT = 3000;
 let ArcSliderValueOptions = class ArcSliderValueOptions {
-    constructor(r2) {
+    constructor(options) {
         this.value = VALUE_DEFAULT;
         this.min = MIN_DEFAULT;
         this.max = MAX_DEFAULT;
-        if (r2) {
-            if (r2.value !== undefined && r2.value !== null) {
-                this.value = r2.value;
+        if (options) {
+            if (options.value !== undefined && options.value !== null) {
+                this.value = options.value;
             }
-            if (r2.min !== undefined && r2.min !== null) {
-                this.min = r2.min;
+            if (options.min !== undefined && options.min !== null) {
+                this.min = options.min;
             }
-            if (r2.max !== undefined && r2.max !== null) {
-                this.max = r2.max;
+            if (options.max !== undefined && options.max !== null) {
+                this.max = options.max;
             }
         }
     }
@@ -84,9 +97,10 @@ __decorate([
 ArcSliderValueOptions = __decorate([
     ObservedV2
 ], ArcSliderValueOptions);
+
 export { ArcSliderValueOptions };
 let ArcSliderLayoutOptions = class ArcSliderLayoutOptions {
-    constructor(q2) {
+    constructor(options) {
         this.x = X_DEFAULT;
         this.y = Y_DEFAULT;
         this.radius = RADIUS_DEFAULT;
@@ -96,33 +110,33 @@ let ArcSliderLayoutOptions = class ArcSliderLayoutOptions {
         this.activeStartAngle = ACTIVE_START_ANGLE_DEFAULT;
         this.activeEndAngle = ACTIVE_END_ANGLE_DEFAULT;
         this.reverse = REVERSE_DEFAULT;
-        if (q2) {
-            if (q2.x !== undefined && q2.x !== null) {
-                this.x = q2.x;
+        if (options) {
+            if (options.x !== undefined && options.x !== null) {
+                this.x = options.x;
             }
-            if (q2.y !== undefined && q2.y !== null) {
-                this.y = q2.y;
+            if (options.y !== undefined && options.y !== null) {
+                this.y = options.y;
             }
-            if (q2.radius !== undefined && q2.radius !== null) {
-                this.radius = q2.radius;
+            if (options.radius !== undefined && options.radius !== null) {
+                this.radius = options.radius;
             }
-            if (q2.padding !== undefined && q2.padding !== null) {
-                this.padding = q2.padding;
+            if (options.padding !== undefined && options.padding !== null) {
+                this.padding = options.padding;
             }
-            if (q2.startAngle !== undefined && q2.startAngle !== null) {
-                this.startAngle = q2.startAngle;
+            if (options.startAngle !== undefined && options.startAngle !== null) {
+                this.startAngle = options.startAngle;
             }
-            if (q2.endAngle !== undefined && q2.endAngle !== null) {
-                this.endAngle = q2.endAngle;
+            if (options.endAngle !== undefined && options.endAngle !== null) {
+                this.endAngle = options.endAngle;
             }
-            if (q2.activeStartAngle !== undefined && q2.activeStartAngle !== null) {
-                this.activeStartAngle = q2.activeStartAngle;
+            if (options.activeStartAngle !== undefined && options.activeStartAngle !== null) {
+                this.activeStartAngle = options.activeStartAngle;
             }
-            if (q2.activeEndAngle !== undefined && q2.activeEndAngle !== null) {
-                this.activeEndAngle = q2.activeEndAngle;
+            if (options.activeEndAngle !== undefined && options.activeEndAngle !== null) {
+                this.activeEndAngle = options.activeEndAngle;
             }
-            if (q2.reverse !== undefined && q2.reverse !== null) {
-                this.reverse = q2.reverse;
+            if (options.reverse !== undefined && options.reverse !== null) {
+                this.reverse = options.reverse;
             }
         }
     }
@@ -157,29 +171,30 @@ __decorate([
 ArcSliderLayoutOptions = __decorate([
     ObservedV2
 ], ArcSliderLayoutOptions);
+
 export { ArcSliderLayoutOptions };
 let ArcSliderStyleOptions = class ArcSliderStyleOptions {
-    constructor(p2) {
+    constructor(options) {
         this.trackThickness = TRACK_THICKNESS_DEFAULT;
         this.activeTrackThickness = ACTIVE_TRACK_THICKNESS_DEFAULT;
         this.trackColor = TRACK_COLOR_DEFAULT;
         this.selectedColor = SELECTED_COLOR_DEFAULT;
         this.trackBlur = TRACK_BLUR_DEFAULT;
-        if (p2) {
-            if (p2.trackThickness !== undefined && p2.trackThickness !== null) {
-                this.trackThickness = p2.trackThickness;
+        if (options) {
+            if (options.trackThickness !== undefined && options.trackThickness !== null) {
+                this.trackThickness = options.trackThickness;
             }
-            if (p2.activeTrackThickness !== undefined && p2.activeTrackThickness !== null) {
-                this.activeTrackThickness = p2.activeTrackThickness;
+            if (options.activeTrackThickness !== undefined && options.activeTrackThickness !== null) {
+                this.activeTrackThickness = options.activeTrackThickness;
             }
-            if (p2.trackColor !== undefined && p2.trackColor !== null) {
-                this.trackColor = p2.trackColor;
+            if (options.trackColor !== undefined && options.trackColor !== null) {
+                this.trackColor = options.trackColor;
             }
-            if (p2.selectedColor !== undefined && p2.selectedColor !== null) {
-                this.selectedColor = p2.selectedColor;
+            if (options.selectedColor !== undefined && options.selectedColor !== null) {
+                this.selectedColor = options.selectedColor;
             }
-            if (p2.trackBlur !== undefined && p2.trackBlur !== null) {
-                this.trackBlur = p2.trackBlur;
+            if (options.trackBlur !== undefined && options.trackBlur !== null) {
+                this.trackBlur = options.trackBlur;
             }
         }
     }
@@ -202,31 +217,36 @@ __decorate([
 ArcSliderStyleOptions = __decorate([
     ObservedV2
 ], ArcSliderStyleOptions);
+
 export { ArcSliderStyleOptions };
 let ArcSliderOptions = class ArcSliderOptions {
-    constructor(k2) {
+    constructor(options) {
         this.valueOptions = new ArcSliderValueOptions();
         this.layoutOptions = new ArcSliderLayoutOptions();
         this.styleOptions = new ArcSliderStyleOptions();
-        this.onTouch = (o2) => {
+        this.digitalCrownSensitivity = CrownSensitivity.MEDIUM;
+        this.onTouch = (event) => {
         };
-        this.onChange = (n2) => {
+        this.onChange = (value) => {
         };
-        if (k2) {
-            if (k2.valueOptions !== undefined && k2.valueOptions !== null) {
-                this.valueOptions = k2.valueOptions;
+        if (options) {
+            if (options.valueOptions !== undefined && options.valueOptions !== null) {
+                this.valueOptions = options.valueOptions;
             }
-            if (k2.layoutOptions !== undefined && k2.layoutOptions !== null) {
-                this.layoutOptions = k2.layoutOptions;
+            if (options.layoutOptions !== undefined && options.layoutOptions !== null) {
+                this.layoutOptions = options.layoutOptions;
             }
-            if (k2.styleOptions !== undefined && k2.styleOptions !== null) {
-                this.styleOptions = k2.styleOptions;
+            if (options.styleOptions !== undefined && options.styleOptions !== null) {
+                this.styleOptions = options.styleOptions;
             }
-            if (k2.onTouch !== undefined && k2.onTouch !== null) {
-                this.onTouch = k2.onTouch;
+            if (options.digitalCrownSensitivity !== undefined && options.digitalCrownSensitivity !== null) {
+                this.digitalCrownSensitivity = options.digitalCrownSensitivity;
             }
-            if (k2.onChange !== undefined && k2.onChange !== null) {
-                this.onChange = k2.onChange;
+            if (options.onTouch !== undefined && options.onTouch !== null) {
+                this.onTouch = options.onTouch;
+            }
+            if (options.onChange !== undefined && options.onChange !== null) {
+                this.onChange = options.onChange;
             }
         }
     }
@@ -242,6 +262,9 @@ __decorate([
 ], ArcSliderOptions.prototype, "styleOptions", void 0);
 __decorate([
     Trace
+], ArcSliderOptions.prototype, "digitalCrownSensitivity", void 0);
+__decorate([
+    Trace
 ], ArcSliderOptions.prototype, "onTouch", void 0);
 __decorate([
     Trace
@@ -249,23 +272,135 @@ __decorate([
 ArcSliderOptions = __decorate([
     ObservedV2
 ], ArcSliderOptions);
+
 export { ArcSliderOptions };
+
+class DrawParameters {
+    constructor() {
+        this.lineWidth = 0;
+        this.normalRadius = 0;
+        this.start = 0;
+        this.end = 0;
+        this.trackStart = 0;
+        this.selectArc = 0;
+        this.trackColor = ColorMetrics.resourceColor(TRACK_COLOR_DEFAULT);
+        this.selectedColor = ColorMetrics.resourceColor(SELECTED_COLOR_DEFAULT);
+        this.reverse = REVERSE_DEFAULT;
+        this.x = X_DEFAULT;
+        this.y = Y_DEFAULT;
+        this.blur = TRACK_BLUR_DEFAULT;
+        this.uiContext = undefined;
+    }
+}
+
+function checkApprox(num1, num2) {
+    return Math.abs(num1 - num2) < APPROXIMATE_NUMBER;
+}
+
+class MyFullDrawModifier extends DrawModifier {
+    constructor(parameters) {
+        super();
+        this.parameters = new DrawParameters();
+        this.parameters = parameters;
+    }
+
+    parseColorString(color) {
+        return { alpha: color.alpha, red: color.red, green: color.green, blue: color.blue };
+    }
+
+    drawTrack(context) {
+        if (this.parameters.uiContext === undefined) {
+            hilog.error(0x3900, 'ArcSlider', `uiContext is undefined`);
+            return;
+        }
+        const canvas = context.canvas;
+        const pen = new drawing.Pen();
+        pen.setAntiAlias(true);
+        pen.setColor(this.parseColorString(this.parameters.trackColor));
+        pen.setStrokeWidth(this.parameters.uiContext.vp2px(this.parameters.lineWidth));
+        pen.setCapStyle(drawing.CapStyle.ROUND_CAP);
+        canvas.attachPen(pen);
+        let path = new drawing.Path();
+        if (this.parameters.reverse) {
+            if (this.parameters.start < this.parameters.end) {
+                path.arcTo(this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius), this.parameters.end * RADIAN_TO_ANGULAR, TWO_PI_RADIAN + (this.parameters.trackStart - this.parameters.end) * RADIAN_TO_ANGULAR);
+            }
+            else {
+                path.arcTo(this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius), this.parameters.end * RADIAN_TO_ANGULAR, (this.parameters.trackStart - this.parameters.end) * RADIAN_TO_ANGULAR);
+            }
+        }
+        else {
+            if (this.parameters.start < this.parameters.end) {
+                path.arcTo(this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius), this.parameters.end * RADIAN_TO_ANGULAR, (this.parameters.trackStart - this.parameters.end) * RADIAN_TO_ANGULAR);
+            }
+            else {
+                path.arcTo(this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius), this.parameters.trackStart * RADIAN_TO_ANGULAR, TWO_PI_RADIAN + (this.parameters.end - this.parameters.trackStart) * RADIAN_TO_ANGULAR);
+            }
+        }
+        canvas.drawPath(path);
+        canvas.detachPen();
+    }
+
+    drawSelect(context) {
+        if (this.parameters.uiContext === undefined) {
+            hilog.error(0x3900, 'ArcSlider', `uiContext is undefined`);
+            return;
+        }
+        if (!checkApprox(this.parameters.start, this.parameters.selectArc)) {
+            const canvas = context.canvas;
+            const pen = new drawing.Pen();
+            pen.setAntiAlias(true);
+            pen.setColor(this.parseColorString(this.parameters.selectedColor));
+            pen.setStrokeWidth(this.parameters.uiContext.vp2px(this.parameters.lineWidth));
+            pen.setCapStyle(drawing.CapStyle.ROUND_CAP);
+            canvas.attachPen(pen);
+            let path = new drawing.Path();
+            if (this.parameters.reverse) {
+                if (this.parameters.start < this.parameters.end) {
+                    path.arcTo(this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius), this.parameters.selectArc * RADIAN_TO_ANGULAR, (this.parameters.start - this.parameters.selectArc) * RADIAN_TO_ANGULAR);
+                }
+                else {
+                    path.arcTo(this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius), this.parameters.selectArc * RADIAN_TO_ANGULAR, (this.parameters.start - this.parameters.selectArc) * RADIAN_TO_ANGULAR);
+                }
+            }
+            else {
+                if (this.parameters.start < this.parameters.end) {
+                    path.arcTo(this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius), this.parameters.selectArc * RADIAN_TO_ANGULAR, (this.parameters.start - this.parameters.selectArc) * RADIAN_TO_ANGULAR);
+                }
+                else {
+                    path.arcTo(this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius), this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius), this.parameters.start * RADIAN_TO_ANGULAR, (this.parameters.selectArc - this.parameters.start) * RADIAN_TO_ANGULAR);
+                }
+            }
+            canvas.drawPath(path);
+            canvas.detachPen();
+        }
+    }
+
+    drawContent(context) {
+        this.drawTrack(context);
+    }
+
+    drawFront(context) {
+        this.drawSelect(context);
+    }
+}
+
 export class ArcSlider extends ViewPU {
-    constructor(e2, f2, g2, h2 = -1, i2 = undefined, j2) {
-        super(e2, g2, h2, j2);
-        if (typeof i2 === "function") {
-            this.paramsGenerator_ = i2;
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
         }
         this.options = new ArcSliderOptions();
-        this.settings = new RenderingContextSettings(true);
-        this.trackContext = new CanvasRenderingContext2D(this.settings);
-        this.sliderContext = new CanvasRenderingContext2D(this.settings);
+        this.parameters = new DrawParameters();
+        this.fullModifier = new MyFullDrawModifier(this.parameters);
         this.touchAnimator = undefined;
         this.restoreAnimator = undefined;
         this.clickSelectedAnimator = undefined;
         this.maxRestoreAnimator = undefined;
         this.minRestoreAnimator = undefined;
         this.delta = 0;
+        this.crownDeltaAngle = 0;
         this.lineWidth = 0;
         this.lineWidthCurrent = 0;
         this.normalRadius = 0;
@@ -291,127 +426,145 @@ export class ArcSlider extends ViewPU {
         this.selectedMaxOrMin = NORMAL_STATUS;
         this.totalWidth = TOTAL_LENGTH;
         this.totalHeight = TOTAL_LENGTH;
-        this.setInitiallyProvidedValue(f2);
+        this.isFocus = false;
+        this.needVibrate = true;
+        this.crownEventCounter = 0;
+        this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(d2) {
-        if (d2.options !== undefined) {
-            this.options = d2.options;
+
+    setInitiallyProvidedValue(params) {
+        if (params.options !== undefined) {
+            this.options = params.options;
         }
-        if (d2.settings !== undefined) {
-            this.settings = d2.settings;
+        if (params.parameters !== undefined) {
+            this.parameters = params.parameters;
         }
-        if (d2.trackContext !== undefined) {
-            this.trackContext = d2.trackContext;
+        if (params.fullModifier !== undefined) {
+            this.fullModifier = params.fullModifier;
         }
-        if (d2.sliderContext !== undefined) {
-            this.sliderContext = d2.sliderContext;
+        if (params.touchAnimator !== undefined) {
+            this.touchAnimator = params.touchAnimator;
         }
-        if (d2.touchAnimator !== undefined) {
-            this.touchAnimator = d2.touchAnimator;
+        if (params.restoreAnimator !== undefined) {
+            this.restoreAnimator = params.restoreAnimator;
         }
-        if (d2.restoreAnimator !== undefined) {
-            this.restoreAnimator = d2.restoreAnimator;
+        if (params.clickSelectedAnimator !== undefined) {
+            this.clickSelectedAnimator = params.clickSelectedAnimator;
         }
-        if (d2.clickSelectedAnimator !== undefined) {
-            this.clickSelectedAnimator = d2.clickSelectedAnimator;
+        if (params.maxRestoreAnimator !== undefined) {
+            this.maxRestoreAnimator = params.maxRestoreAnimator;
         }
-        if (d2.maxRestoreAnimator !== undefined) {
-            this.maxRestoreAnimator = d2.maxRestoreAnimator;
+        if (params.minRestoreAnimator !== undefined) {
+            this.minRestoreAnimator = params.minRestoreAnimator;
         }
-        if (d2.minRestoreAnimator !== undefined) {
-            this.minRestoreAnimator = d2.minRestoreAnimator;
+        if (params.delta !== undefined) {
+            this.delta = params.delta;
         }
-        if (d2.delta !== undefined) {
-            this.delta = d2.delta;
+        if (params.crownDeltaAngle !== undefined) {
+            this.crownDeltaAngle = params.crownDeltaAngle;
         }
-        if (d2.lineWidth !== undefined) {
-            this.lineWidth = d2.lineWidth;
+        if (params.lineWidth !== undefined) {
+            this.lineWidth = params.lineWidth;
         }
-        if (d2.lineWidthCurrent !== undefined) {
-            this.lineWidthCurrent = d2.lineWidthCurrent;
+        if (params.lineWidthCurrent !== undefined) {
+            this.lineWidthCurrent = params.lineWidthCurrent;
         }
-        if (d2.normalRadius !== undefined) {
-            this.normalRadius = d2.normalRadius;
+        if (params.normalRadius !== undefined) {
+            this.normalRadius = params.normalRadius;
         }
-        if (d2.touchY !== undefined) {
-            this.touchY = d2.touchY;
+        if (params.touchY !== undefined) {
+            this.touchY = params.touchY;
         }
-        if (d2.endCurrent !== undefined) {
-            this.endCurrent = d2.endCurrent;
+        if (params.endCurrent !== undefined) {
+            this.endCurrent = params.endCurrent;
         }
-        if (d2.meter !== undefined) {
-            this.meter = d2.meter;
+        if (params.meter !== undefined) {
+            this.meter = params.meter;
         }
-        if (d2.start !== undefined) {
-            this.start = d2.start;
+        if (params.start !== undefined) {
+            this.start = params.start;
         }
-        if (d2.end !== undefined) {
-            this.end = d2.end;
+        if (params.end !== undefined) {
+            this.end = params.end;
         }
-        if (d2.trackStart !== undefined) {
-            this.trackStart = d2.trackStart;
+        if (params.trackStart !== undefined) {
+            this.trackStart = params.trackStart;
         }
-        if (d2.trackStartCurrent !== undefined) {
-            this.trackStartCurrent = d2.trackStartCurrent;
+        if (params.trackStartCurrent !== undefined) {
+            this.trackStartCurrent = params.trackStartCurrent;
         }
-        if (d2.selectArc !== undefined) {
-            this.selectArc = d2.selectArc;
+        if (params.selectArc !== undefined) {
+            this.selectArc = params.selectArc;
         }
-        if (d2.selectArcCurrent !== undefined) {
-            this.selectArcCurrent = d2.selectArcCurrent;
+        if (params.selectArcCurrent !== undefined) {
+            this.selectArcCurrent = params.selectArcCurrent;
         }
-        if (d2.selectRatioNow !== undefined) {
-            this.selectRatioNow = d2.selectRatioNow;
+        if (params.selectRatioNow !== undefined) {
+            this.selectRatioNow = params.selectRatioNow;
         }
-        if (d2.isEnlarged !== undefined) {
-            this.isEnlarged = d2.isEnlarged;
+        if (params.isEnlarged !== undefined) {
+            this.isEnlarged = params.isEnlarged;
         }
-        if (d2.isTouchAnimatorFinished !== undefined) {
-            this.isTouchAnimatorFinished = d2.isTouchAnimatorFinished;
+        if (params.isTouchAnimatorFinished !== undefined) {
+            this.isTouchAnimatorFinished = params.isTouchAnimatorFinished;
         }
-        if (d2.isClickAnimatorFinished !== undefined) {
-            this.isClickAnimatorFinished = d2.isClickAnimatorFinished;
+        if (params.isClickAnimatorFinished !== undefined) {
+            this.isClickAnimatorFinished = params.isClickAnimatorFinished;
         }
-        if (d2.clickValue !== undefined) {
-            this.clickValue = d2.clickValue;
+        if (params.clickValue !== undefined) {
+            this.clickValue = params.clickValue;
         }
-        if (d2.sliderValue !== undefined) {
-            this.sliderValue = d2.sliderValue;
+        if (params.sliderValue !== undefined) {
+            this.sliderValue = params.sliderValue;
         }
-        if (d2.startAngle !== undefined) {
-            this.startAngle = d2.startAngle;
+        if (params.startAngle !== undefined) {
+            this.startAngle = params.startAngle;
         }
-        if (d2.endAngle !== undefined) {
-            this.endAngle = d2.endAngle;
+        if (params.endAngle !== undefined) {
+            this.endAngle = params.endAngle;
         }
-        if (d2.activeStartAngle !== undefined) {
-            this.activeStartAngle = d2.activeStartAngle;
+        if (params.activeStartAngle !== undefined) {
+            this.activeStartAngle = params.activeStartAngle;
         }
-        if (d2.activeEndAngle !== undefined) {
-            this.activeEndAngle = d2.activeEndAngle;
+        if (params.activeEndAngle !== undefined) {
+            this.activeEndAngle = params.activeEndAngle;
         }
-        if (d2.selectedMaxOrMin !== undefined) {
-            this.selectedMaxOrMin = d2.selectedMaxOrMin;
+        if (params.selectedMaxOrMin !== undefined) {
+            this.selectedMaxOrMin = params.selectedMaxOrMin;
         }
-        if (d2.totalWidth !== undefined) {
-            this.totalWidth = d2.totalWidth;
+        if (params.totalWidth !== undefined) {
+            this.totalWidth = params.totalWidth;
         }
-        if (d2.totalHeight !== undefined) {
-            this.totalHeight = d2.totalHeight;
+        if (params.totalHeight !== undefined) {
+            this.totalHeight = params.totalHeight;
+        }
+        if (params.isFocus !== undefined) {
+            this.isFocus = params.isFocus;
+        }
+        if (params.needVibrate !== undefined) {
+            this.needVibrate = params.needVibrate;
+        }
+        if (params.crownEventCounter !== undefined) {
+            this.crownEventCounter = params.crownEventCounter;
         }
     }
-    updateStateVars(c2) {
+
+    updateStateVars(params) {
     }
-    purgeVariableDependenciesOnElmtId(b2) {
+
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
     }
+
     aboutToBeDeleted() {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
+
     aboutToAppear() {
         this.updateArcSlider();
     }
+
     checkParam() {
         if (this.options.valueOptions.max <= this.options.valueOptions.min) {
             this.options.valueOptions.max = MAX_DEFAULT;
@@ -467,6 +620,23 @@ export class ArcSlider extends ViewPU {
             this.options.styleOptions.trackBlur = TRACK_BLUR_DEFAULT;
         }
     }
+
+    updateModifier() {
+        this.fullModifier.parameters.lineWidth = this.lineWidth;
+        this.fullModifier.parameters.normalRadius = this.normalRadius;
+        this.fullModifier.parameters.start = this.start;
+        this.fullModifier.parameters.end = this.end;
+        this.fullModifier.parameters.trackStart = this.trackStart;
+        this.fullModifier.parameters.selectArc = this.selectArc;
+        this.fullModifier.parameters.trackColor = ColorMetrics.resourceColor(this.options.styleOptions.trackColor);
+        this.fullModifier.parameters.selectedColor = ColorMetrics.resourceColor(this.options.styleOptions.selectedColor);
+        this.fullModifier.parameters.reverse = this.options.layoutOptions.reverse;
+        this.fullModifier.parameters.x = this.options.layoutOptions.x;
+        this.fullModifier.parameters.y = this.options.layoutOptions.y;
+        this.fullModifier.parameters.blur = this.options.styleOptions.trackBlur;
+        this.fullModifier.parameters.uiContext = this.getUIContext();
+    }
+
     updateArcSlider() {
         this.checkParam();
         this.setReverse();
@@ -476,95 +646,73 @@ export class ArcSlider extends ViewPU {
         else {
             this.setSelected();
         }
-        this.drawTrack();
-        this.drawSelect();
+        this.updateModifier();
+        this.fullModifier.invalidate();
         return this.totalWidth;
     }
+
     setReverse() {
         if (!this.options.layoutOptions.reverse) {
-            let x1 = this.startAngle;
-            let y1 = this.endAngle;
-            let z1 = this.activeStartAngle;
-            let a2 = this.activeEndAngle;
-            this.startAngle = y1;
-            this.endAngle = x1;
-            this.activeStartAngle = a2;
-            this.activeEndAngle = z1;
+            let startAngleInitial = this.startAngle;
+            let endAngleInitial = this.endAngle;
+            let activeStartAngleInitial = this.activeStartAngle;
+            let activeEndAngleInitial = this.activeEndAngle;
+            this.startAngle = endAngleInitial;
+            this.endAngle = startAngleInitial;
+            this.activeStartAngle = activeEndAngleInitial;
+            this.activeEndAngle = activeStartAngleInitial;
         }
     }
+
     setNormal() {
         this.lineWidth = this.options.styleOptions.trackThickness;
         this.start = this.startAngle * ANGULAR_TO_RADIAN;
         this.end = this.endAngle * ANGULAR_TO_RADIAN;
         this.trackStart = this.startAngle * ANGULAR_TO_RADIAN;
-        let w1 = (this.options.valueOptions.value - this.options.valueOptions.min) /
+        let selectRatio = (this.options.valueOptions.value - this.options.valueOptions.min) /
             (this.options.valueOptions.max - this.options.valueOptions.min);
         if (this.end > this.start) {
             if (this.options.layoutOptions.reverse) {
-                this.selectArc = -w1 * (2 * Math.PI + this.start - this.end) + this.start;
+                this.selectArc = this.start - selectRatio * (2 * Math.PI - Math.abs(this.end - this.start));
             }
             else {
-                this.selectArc = w1 * (this.end - this.start) + this.start;
+                this.selectArc = this.start + selectRatio * Math.abs(this.end - this.start);
             }
         }
         else {
             if (this.options.layoutOptions.reverse) {
-                this.selectArc = w1 * (this.end - this.start) + this.start;
+                this.selectArc = this.start - selectRatio * Math.abs(this.end - this.start);
             }
             else {
-                this.selectArc = w1 * (2 * Math.PI + this.start - this.end) + this.start;
+                this.selectArc = this.start + selectRatio * (2 * Math.PI - Math.abs(this.end - this.start));
             }
         }
         this.normalRadius = this.options.layoutOptions.radius - (this.lineWidth / 2) -
-            this.options.layoutOptions.padding;
+        this.options.layoutOptions.padding;
     }
+
     setSelected() {
-        let v1 = (this.options.valueOptions.value - this.options.valueOptions.min) /
+        let selectRatio = (this.options.valueOptions.value - this.options.valueOptions.min) /
             (this.options.valueOptions.max - this.options.valueOptions.min);
         if (this.end > this.start) {
             if (this.options.layoutOptions.reverse) {
-                this.selectArc = -v1 * (2 * Math.PI + this.start - this.end) + this.start;
+                this.selectArc = this.start - selectRatio * (2 * Math.PI - Math.abs(this.end - this.start));
             }
             else {
-                this.selectArc = v1 * (this.end - this.start) + this.start;
+                this.selectArc = this.start + selectRatio * Math.abs(this.end - this.start);
             }
         }
         else {
             if (this.options.layoutOptions.reverse) {
-                this.selectArc = v1 * (this.end - this.start) + this.start;
+                this.selectArc = this.start - selectRatio * Math.abs(this.end - this.start);
             }
             else {
-                this.selectArc = -v1 * (2 * Math.PI + this.start - this.end) + this.start;
+                this.selectArc = this.start + selectRatio * (2 * Math.PI - Math.abs(this.end - this.start));
             }
         }
         this.normalRadius = this.options.layoutOptions.radius - (this.lineWidth / 2);
     }
-    drawTrack() {
-        this.trackContext.clearRect(0, 0, this.totalWidth, this.totalHeight);
-        this.trackContext.save();
-        this.trackContext.filter = 'blur(' + vp2px(this.options.styleOptions.trackBlur) + 'px)';
-        this.trackContext.strokeStyle = this.options.styleOptions.trackColor;
-        this.trackContext.lineWidth = this.lineWidth;
-        this.trackContext.beginPath();
-        this.trackContext.arc(this.options.layoutOptions.x, this.options.layoutOptions.y, this.normalRadius, this.trackStart, this.end, this.options.layoutOptions.reverse);
-        this.trackContext.stroke();
-        this.trackContext.restore();
-    }
-    drawSelect() {
-        if (!this.checkApprox(this.start, this.selectArc)) {
-            this.sliderContext.clearRect(0, 0, this.totalWidth, this.totalHeight);
-            this.sliderContext.save();
-            this.sliderContext.lineWidth = this.lineWidth;
-            this.sliderContext.strokeStyle = this.options.styleOptions.selectedColor;
-            this.sliderContext.beginPath();
-            this.sliderContext.arc(this.options.layoutOptions.x, this.options.layoutOptions.y, this.normalRadius, this.start, this.selectArc, this.options.layoutOptions.reverse);
-            this.sliderContext.stroke();
-            this.sliderContext.restore();
-        }
-        else {
-            this.sliderContext.clearRect(0, 0, this.totalWidth, this.totalHeight);
-        }
-    }
+
     startTouchAnimator() {
         this.touchAnimator = animator.create({
             duration: 200,
@@ -576,15 +724,15 @@ export class ArcSlider extends ViewPU {
             begin: 0,
             end: 1
         });
-        this.touchAnimator.onFrame = (u1) => {
-            this.lineWidth = u1 * (this.options.styleOptions.activeTrackThickness -
-                this.options.styleOptions.trackThickness) + this.options.styleOptions.trackThickness;
-            this.start = (u1 * (this.activeStartAngle - this.startAngle) + this.startAngle) * ANGULAR_TO_RADIAN;
-            this.trackStart = (u1 * (this.activeStartAngle - this.startAngle) + this.startAngle) * ANGULAR_TO_RADIAN;
-            this.end = (u1 * (this.activeEndAngle - this.endAngle) + this.endAngle) * ANGULAR_TO_RADIAN;
+        this.touchAnimator.onFrame = (value) => {
+            this.lineWidth = value * (this.options.styleOptions.activeTrackThickness -
+            this.options.styleOptions.trackThickness) + this.options.styleOptions.trackThickness;
+            this.start = (value * (this.activeStartAngle - this.startAngle) + this.startAngle) * ANGULAR_TO_RADIAN;
+            this.trackStart = (value * (this.activeStartAngle - this.startAngle) + this.startAngle) * ANGULAR_TO_RADIAN;
+            this.end = (value * (this.activeEndAngle - this.endAngle) + this.endAngle) * ANGULAR_TO_RADIAN;
             this.setSelected();
-            this.drawTrack();
-            this.drawSelect();
+            this.updateModifier();
+            this.fullModifier.invalidate();
         };
         this.touchAnimator.onFinish = () => {
             this.isTouchAnimatorFinished = true;
@@ -594,6 +742,7 @@ export class ArcSlider extends ViewPU {
             this.touchAnimator.play();
         }
     }
+
     startMaxRestoreAnimator() {
         this.maxRestoreAnimator = animator.create({
             duration: 333,
@@ -605,18 +754,19 @@ export class ArcSlider extends ViewPU {
             begin: 0,
             end: 1
         });
-        this.maxRestoreAnimator.onFrame = (r1) => {
-            this.lineWidth = r1 * (this.options.styleOptions.activeTrackThickness - this.lineWidthCurrent) +
-                this.lineWidthCurrent;
-            this.selectArc = r1 * (this.endCurrent - this.selectArcCurrent) + this.selectArcCurrent;
+        this.maxRestoreAnimator.onFrame = (value) => {
+            this.lineWidth = value * (this.options.styleOptions.activeTrackThickness - this.lineWidthCurrent) +
+            this.lineWidthCurrent;
+            this.selectArc = value * (this.endCurrent - this.selectArcCurrent) + this.selectArcCurrent;
             this.end = this.selectArc;
-            this.drawTrack();
-            this.drawSelect();
+            this.updateModifier();
+            this.fullModifier.invalidate();
         };
         if (this.maxRestoreAnimator) {
             this.maxRestoreAnimator.play();
         }
     }
+
     startMinRestoreAnimator() {
         this.minRestoreAnimator = animator.create({
             duration: 333,
@@ -628,18 +778,19 @@ export class ArcSlider extends ViewPU {
             begin: 0,
             end: 1
         });
-        this.minRestoreAnimator.onFrame = (p1) => {
-            this.lineWidth = p1 * (this.options.styleOptions.activeTrackThickness - this.lineWidthCurrent) +
-                this.lineWidthCurrent;
-            this.trackStart = p1 * (this.activeStartAngle * ANGULAR_TO_RADIAN - this.trackStartCurrent) +
-                this.trackStartCurrent;
-            this.drawTrack();
-            this.drawSelect();
+        this.minRestoreAnimator.onFrame = (value) => {
+            this.lineWidth = value * (this.options.styleOptions.activeTrackThickness - this.lineWidthCurrent) +
+            this.lineWidthCurrent;
+            this.trackStart = value * (this.activeStartAngle * ANGULAR_TO_RADIAN - this.trackStartCurrent) +
+            this.trackStartCurrent;
+            this.updateModifier();
+            this.fullModifier.invalidate();
         };
         if (this.minRestoreAnimator) {
             this.minRestoreAnimator.play();
         }
     }
+
     startRestoreAnimator() {
         this.restoreAnimator = animator.create({
             duration: 167,
@@ -651,21 +802,22 @@ export class ArcSlider extends ViewPU {
             begin: 0,
             end: 1
         });
-        this.restoreAnimator.onFrame = (n1) => {
-            this.lineWidth = n1 * (this.options.styleOptions.trackThickness -
-                this.options.styleOptions.activeTrackThickness) + this.options.styleOptions.activeTrackThickness;
-            this.start = (n1 * (this.startAngle - this.activeStartAngle) + this.activeStartAngle) * ANGULAR_TO_RADIAN;
-            this.trackStart = (n1 * (this.startAngle - this.activeStartAngle) + this.activeStartAngle) *
+        this.restoreAnimator.onFrame = (value) => {
+            this.lineWidth = value * (this.options.styleOptions.trackThickness -
+            this.options.styleOptions.activeTrackThickness) + this.options.styleOptions.activeTrackThickness;
+            this.start = (value * (this.startAngle - this.activeStartAngle) + this.activeStartAngle) * ANGULAR_TO_RADIAN;
+            this.trackStart = (value * (this.startAngle - this.activeStartAngle) + this.activeStartAngle) *
                 ANGULAR_TO_RADIAN;
-            this.end = (n1 * (this.endAngle - this.activeEndAngle) + this.activeEndAngle) * ANGULAR_TO_RADIAN;
+            this.end = (value * (this.endAngle - this.activeEndAngle) + this.activeEndAngle) * ANGULAR_TO_RADIAN;
             this.setNormal();
-            this.drawTrack();
-            this.drawSelect();
+            this.updateModifier();
+            this.fullModifier.invalidate();
         };
         if (this.restoreAnimator) {
             this.restoreAnimator.play();
         }
     }
+
     startClickAnimator() {
         this.clickSelectedAnimator = animator.create({
             duration: 0,
@@ -677,10 +829,11 @@ export class ArcSlider extends ViewPU {
             begin: this.sliderValue,
             end: this.clickValue
         });
-        this.clickSelectedAnimator.onFrame = (l1) => {
-            this.options.valueOptions.value = l1;
+        this.clickSelectedAnimator.onFrame = (value) => {
+            this.options.valueOptions.value = value;
             this.setSelected();
-            this.drawSelect();
+            this.updateModifier();
+            this.fullModifier.invalidate();
         };
         this.clickSelectedAnimator.onFinish = () => {
             this.isClickAnimatorFinished = true;
@@ -689,59 +842,131 @@ export class ArcSlider extends ViewPU {
             this.clickSelectedAnimator.play();
         }
     }
-    calcClickValue(f1, g1) {
-        if (g1 - this.options.layoutOptions.y > this.normalRadius) {
-            g1 = this.normalRadius + this.options.layoutOptions.y;
+
+    calcClickValue(clickX, clickY) {
+        if (clickY - this.options.layoutOptions.y > this.normalRadius) {
+            clickY = this.normalRadius + this.options.layoutOptions.y;
         }
-        else if (this.options.layoutOptions.y - g1 > this.normalRadius) {
-            g1 = this.options.layoutOptions.y - this.normalRadius;
+        else if (this.options.layoutOptions.y - clickY > this.normalRadius) {
+            clickY = this.options.layoutOptions.y - this.normalRadius;
         }
-        let h1 = Math.abs(g1 - this.options.layoutOptions.y) / this.normalRadius;
-        let i1 = Math.asin(h1);
-        if ((f1 < this.options.layoutOptions.x) && (g1 > this.options.layoutOptions.y)) {
-            i1 = Math.PI - i1;
+        let sin = Math.abs(clickY - this.options.layoutOptions.y) / this.normalRadius;
+        let radian = Math.asin(sin);
+        if ((clickX < this.options.layoutOptions.x) && (clickY > this.options.layoutOptions.y)) {
+            radian = Math.PI - radian;
         }
-        else if ((f1 < this.options.layoutOptions.x) && (g1 < this.options.layoutOptions.y)) {
-            i1 = i1 - Math.PI;
+        else if ((clickX < this.options.layoutOptions.x) && (clickY < this.options.layoutOptions.y)) {
+            radian = radian - Math.PI;
         }
-        else if ((f1 > this.options.layoutOptions.x) && (g1 < this.options.layoutOptions.y)) {
-            i1 = -i1;
+        else if ((clickX > this.options.layoutOptions.x) && (clickY < this.options.layoutOptions.y)) {
+            radian = -radian;
         }
-        this.selectArc = i1;
+        this.selectArc = radian;
         this.selectRatioNow = (this.selectArc - this.start) / (this.end - this.start);
         this.selectRatioNow = Math.min(1, this.selectRatioNow);
         this.selectRatioNow = Math.max(0, this.selectRatioNow);
         this.clickValue = this.selectRatioNow * (this.options.valueOptions.max - this.options.valueOptions.min) +
-            this.options.valueOptions.min;
+        this.options.valueOptions.min;
     }
-    calcSin(e1) {
-        if ((e1 >= Math.PI / 2) && (e1 <= Math.PI)) {
-            return Math.sin(e1);
+
+    calcSin(radian) {
+        if ((radian >= Math.PI / 2) && (radian <= Math.PI)) {
+            return Math.sin(radian);
         }
-        else if ((e1 <= Math.PI / 2) && (e1 >= -Math.PI / 2)) {
-            return 2 - Math.sin(e1);
+        else if ((radian <= Math.PI / 2) && (radian >= -Math.PI / 2)) {
+            return 2 - Math.sin(radian);
         }
-        else if ((e1 >= -Math.PI) && (e1 <= -Math.PI / 2)) {
-            return 4 + Math.sin(e1);
+        else if ((radian >= -Math.PI) && (radian <= -Math.PI / 2)) {
+            return 4 + Math.sin(radian);
         }
         return 0;
     }
-    calcValue(b1) {
-        this.delta = this.touchY - b1;
-        let c1 = this.normalRadius * (this.calcSin(this.activeEndAngle * ANGULAR_TO_RADIAN) -
-            this.calcSin(this.activeStartAngle * ANGULAR_TO_RADIAN));
-        let d1 = (this.options.valueOptions.value - this.options.valueOptions.min) /
+
+    calcValue(moveY) {
+        this.delta = this.touchY - moveY;
+        let total = this.normalRadius * (this.calcSin(this.activeEndAngle * ANGULAR_TO_RADIAN) -
+        this.calcSin(this.activeStartAngle * ANGULAR_TO_RADIAN));
+        let valueNow = (this.options.valueOptions.value - this.options.valueOptions.min) /
             (this.options.valueOptions.max - this.options.valueOptions.min);
-        d1 += this.delta / c1;
-        d1 = Math.min(1, d1);
-        d1 = Math.max(0, d1);
-        this.options.valueOptions.value = d1 *
+        valueNow += this.delta / total;
+        valueNow = Math.min(1, valueNow);
+        valueNow = Math.max(0, valueNow);
+        this.options.valueOptions.value = valueNow *
             (this.options.valueOptions.max - this.options.valueOptions.min) + this.options.valueOptions.min;
         this.setSelected();
-        this.drawTrack();
-        this.drawSelect();
-        this.touchY = b1;
+        this.updateModifier();
+        this.fullModifier.invalidate();
+        this.touchY = moveY;
     }
+
+    calcCrownTotal(activeStartAngle, activeEndAngle) {
+        if (activeEndAngle > activeStartAngle) {
+            if (this.options.layoutOptions.reverse) {
+                return (2 * PI_RADIAN - Math.abs(activeEndAngle - activeStartAngle)) * ANGULAR_TO_RADIAN;
+            }
+            else {
+                return Math.abs(activeEndAngle - activeStartAngle) * ANGULAR_TO_RADIAN;
+            }
+        }
+        else {
+            if (this.options.layoutOptions.reverse) {
+                return Math.abs(activeEndAngle - activeStartAngle) * ANGULAR_TO_RADIAN;
+            }
+            else {
+                return (2 * PI_RADIAN - Math.abs(activeEndAngle - activeStartAngle)) * ANGULAR_TO_RADIAN;
+            }
+        }
+    }
+
+    calcCrownValue(deltaCrownAngle) {
+        let totalAngle = this.calcCrownTotal(this.activeStartAngle, this.activeEndAngle);
+        let totalValue = this.options.valueOptions.max - this.options.valueOptions.min;
+        let valueNow = (this.options.valueOptions.value - this.options.valueOptions.min) / totalValue;
+        valueNow += deltaCrownAngle / totalAngle;
+        valueNow = Math.min(1, valueNow);
+        valueNow = Math.max(0, valueNow);
+        this.options.valueOptions.value = valueNow * totalValue + this.options.valueOptions.min;
+        if (this.options.valueOptions.value === this.options.valueOptions.max ||
+            this.options.valueOptions.value === this.options.valueOptions.min) {
+            if (this.needVibrate) {
+                this.needVibrate = false;
+                try {
+                    let ret = vibrator.isSupportEffectSync(VIBRATOR_TYPE_SIX);
+                    if (ret) {
+                        vibrator.startVibration({
+                            type: 'preset',
+                            effectId: VIBRATOR_TYPE_SIX,
+                            count: 1,
+                        }, {
+                            usage: 'unknown'
+                        }, (error) => {
+                            if (error) {
+                                hilog.error(0x3900, 'ArcSlider', `Failed to start vibration.
+                  Code: ${error.code}, message: ${error.message}`);
+                                return;
+                            }
+                            hilog.info(0x3900, 'ArcSlider', 'Succeed in starting vibration');
+                        });
+                    }
+                    else {
+                        hilog.error(0x3900, 'ArcSlider', `watchhaptic.crown.strength6 is not supported`);
+                    }
+                }
+                catch (error) {
+                    let e = error;
+                    hilog.error(0x3900, 'ArcSlider', `An unexpected error occurred in starting vibration.
+                    Code: ${e.code}, message: ${e.message}`);
+                }
+            }
+        }
+        else {
+            this.needVibrate = true;
+        }
+        this.setSelected();
+        this.updateModifier();
+        this.fullModifier.invalidate();
+    }
+
     calcMaxValueDeltaIsPositive() {
         if (this.options.layoutOptions.reverse) {
             if ((this.selectArc >= (this.endCurrent - ANGLE_OVER_MIN * ANGULAR_TO_RADIAN)) &&
@@ -778,6 +1003,7 @@ export class ArcSlider extends ViewPU {
             }
         }
     }
+
     calcMaxValueDeltaIsNegative() {
         if (this.options.layoutOptions.reverse) {
             if ((this.selectArc <= this.endCurrent) ||
@@ -807,18 +1033,20 @@ export class ArcSlider extends ViewPU {
             }
         }
     }
-    calcMaxValue(a1) {
-        this.delta = this.touchY - a1;
+
+    calcMaxValue(moveY) {
+        this.delta = this.touchY - moveY;
         if (this.delta >= 0) {
             this.calcMaxValueDeltaIsPositive();
         }
         else {
             this.calcMaxValueDeltaIsNegative();
         }
-        this.drawTrack();
-        this.drawSelect();
-        this.touchY = a1;
+        this.updateModifier();
+        this.fullModifier.invalidate();
+        this.touchY = moveY;
     }
+
     calcMinValueDeltaIsNegative() {
         if (this.options.layoutOptions.reverse) {
             if ((this.trackStart < this.start + ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) &&
@@ -850,6 +1078,7 @@ export class ArcSlider extends ViewPU {
             }
         }
     }
+
     calcMinValueDeltaIsPositive() {
         if (this.options.layoutOptions.reverse) {
             if ((this.trackStart > this.start) || (this.lineWidth <= this.options.styleOptions.activeTrackThickness)) {
@@ -881,144 +1110,156 @@ export class ArcSlider extends ViewPU {
             }
         }
     }
-    calcMinValue(z) {
-        this.delta = this.touchY - z;
+
+    calcMinValue(moveY) {
+        this.delta = this.touchY - moveY;
         if (this.delta <= 0) {
             this.calcMinValueDeltaIsNegative();
         }
         else {
             this.calcMinValueDeltaIsPositive();
         }
-        this.drawTrack();
-        this.drawSelect();
-        this.touchY = z;
+        this.updateModifier();
+        this.fullModifier.invalidate();
+        this.touchY = moveY;
     }
-    isHotRegion(t, u) {
-        let v = Math.sqrt(Math.pow(t - this.options.layoutOptions.x, 2) +
-            Math.pow(u - this.options.layoutOptions.y, 2));
-        if ((v < this.options.layoutOptions.radius - this.options.styleOptions.activeTrackThickness) ||
-            (v > this.options.layoutOptions.radius)) {
+
+    isHotRegion(touchX, touchY) {
+        let radius = Math.sqrt(Math.pow(touchX - this.options.layoutOptions.x, 2) +
+        Math.pow(touchY - this.options.layoutOptions.y, 2));
+        if ((radius < this.options.layoutOptions.radius - this.options.styleOptions.activeTrackThickness) ||
+            (radius > this.options.layoutOptions.radius)) {
+            this.isFocus = false;
             return false;
         }
-        let w = Math.abs(u - this.options.layoutOptions.y) / v;
-        let x = Math.asin(w);
-        let y = x / ANGULAR_TO_RADIAN;
-        if ((t < this.options.layoutOptions.x) && (u > this.options.layoutOptions.y)) {
-            y = PI_RADIAN - y;
+        let sin = Math.abs(touchY - this.options.layoutOptions.y) / radius;
+        let radian = Math.asin(sin);
+        let angle = radian / ANGULAR_TO_RADIAN;
+        if ((touchX < this.options.layoutOptions.x) && (touchY > this.options.layoutOptions.y)) {
+            angle = PI_RADIAN - angle;
         }
-        else if ((t < this.options.layoutOptions.x) && (u < this.options.layoutOptions.y)) {
-            y = y - PI_RADIAN;
+        else if ((touchX < this.options.layoutOptions.x) && (touchY < this.options.layoutOptions.y)) {
+            angle = angle - PI_RADIAN;
         }
-        else if ((t > this.options.layoutOptions.x) && (u < this.options.layoutOptions.y)) {
-            y = -y;
+        else if ((touchX > this.options.layoutOptions.x) && (touchY < this.options.layoutOptions.y)) {
+            angle = -angle;
         }
         if (this.options.layoutOptions.reverse) {
-            if (y > this.start / ANGULAR_TO_RADIAN || y < this.end / ANGULAR_TO_RADIAN) {
+            if (angle > this.start / ANGULAR_TO_RADIAN || angle < this.end / ANGULAR_TO_RADIAN) {
                 if (this.start > this.end) {
+                    this.isFocus = false;
                     return false;
                 }
                 else {
+                    this.isFocus = true;
                     return true;
                 }
             }
             else {
                 if (this.start > this.end) {
+                    this.isFocus = true;
                     return true;
                 }
                 else {
+                    this.isFocus = false;
                     return false;
                 }
             }
         }
         else {
-            if (y < this.start / ANGULAR_TO_RADIAN || y > this.end / ANGULAR_TO_RADIAN) {
+            if (angle < this.start / ANGULAR_TO_RADIAN || angle > this.end / ANGULAR_TO_RADIAN) {
                 if (this.start > this.end) {
+                    this.isFocus = true;
                     return true;
                 }
                 else {
+                    this.isFocus = false;
                     return false;
                 }
             }
             else {
                 if (this.start > this.end) {
+                    this.isFocus = false;
                     return false;
                 }
                 else {
+                    this.isFocus = true;
                     return true;
                 }
             }
         }
     }
-    checkApprox(r, s) {
-        return Math.abs(r - s) < APPROXIMATE_NUMBER;
+
+    calcDisplayControlRatio(crownSensitivity) {
+        if (crownSensitivity === CrownSensitivity.LOW) {
+            return CROWN_CONTROL_RATIO * CROWN_SENSITIVITY_LOW;
+        }
+        else if (crownSensitivity === CrownSensitivity.MEDIUM) {
+            return CROWN_CONTROL_RATIO * CROWN_SENSITIVITY_MEDIUM;
+        }
+        else if (crownSensitivity === CrownSensitivity.HIGH) {
+            return CROWN_CONTROL_RATIO * CROWN_SENSITIVITY_HIGH;
+        }
+        return CROWN_CONTROL_RATIO * CROWN_SENSITIVITY_MEDIUM;
     }
+
     initialRender() {
-        this.observeComponentCreation2((p, q) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
         }, Column);
-        this.observeComponentCreation2((n, o) => {
-            Stack.create();
-            Stack.width(this.totalWidth);
-            Stack.height(this.totalHeight);
-            Stack.hitTestBehavior(HitTestMode.Transparent);
-        }, Stack);
-        this.observeComponentCreation2((k, l) => {
-            Canvas.create(this.trackContext);
-            Canvas.width(this.updateArcSlider());
-            Canvas.height(this.totalHeight);
-            Canvas.onReady(() => {
-                this.trackContext.lineCap = 'round';
-                this.setNormal();
-                this.drawTrack();
-                this.drawSelect();
-            });
-            Canvas.hitTestBehavior(HitTestMode.Transparent);
-        }, Canvas);
-        Canvas.pop();
-        this.observeComponentCreation2((e, f) => {
-            Canvas.create(this.sliderContext);
-            Canvas.width(this.totalWidth);
-            Canvas.height(this.totalHeight);
-            Canvas.onReady(() => {
-                this.sliderContext.lineCap = 'round';
-                this.setNormal();
-                this.drawTrack();
-                this.drawSelect();
-            });
-            Canvas.onTouch((i) => {
-                if (i) {
-                    if (i.type === TouchType.Down && this.isEnlarged === false) {
-                        clearTimeout(this.meter);
-                        if (this.isHotRegion(i.touches[0].x, i.touches[0].y)) {
-                            this.options.onTouch?.(i);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Slider.create();
+            Slider.drawModifier(this.fullModifier);
+            Slider.width(this.updateArcSlider());
+            Slider.height(this.totalHeight);
+            Slider.hitTestBehavior(HitTestMode.Transparent);
+            Slider.onTouch((event) => {
+                if (event) {
+                    if (event.type === TouchType.Down && !this.isEnlarged) {
+                        this.touchY = event.touches[0].y;
+                        if (this.meter !== INVALID_TIMEOUT_ID) {
+                            clearTimeout(this.meter);
+                            this.meter = INVALID_TIMEOUT_ID;
+                        }
+                        if (this.isHotRegion(event.touches[0].x, event.touches[0].y)) {
+                            this.options.onTouch?.(event);
                             this.isEnlarged = true;
                             this.startTouchAnimator();
                         }
                     }
-                    else if (i.type === TouchType.Down && this.isEnlarged) {
-                        this.touchY = i.touches[0].y;
-                        if (this.isHotRegion(i.touches[0].x, i.touches[0].y)) {
-                            this.options.onTouch?.(i);
-                            clearTimeout(this.meter);
+                    else if (event.type === TouchType.Down && this.isEnlarged) {
+                        this.touchY = event.touches[0].y;
+                        if (this.isHotRegion(event.touches[0].x, event.touches[0].y)) {
+                            this.options.onTouch?.(event);
+                            if (this.meter !== INVALID_TIMEOUT_ID) {
+                                clearTimeout(this.meter);
+                                this.meter = INVALID_TIMEOUT_ID;
+                            }
                             if (this.isTouchAnimatorFinished) {
                                 this.sliderValue = this.options.valueOptions.value;
-                                this.calcClickValue(i.touches[0].x, i.touches[0].y);
+                                this.calcClickValue(event.touches[0].x, event.touches[0].y);
                                 this.startClickAnimator();
                             }
                             if (this.isClickAnimatorFinished) {
-                                clearTimeout(this.meter);
-                                this.touchY = i.touches[0].y;
-                                this.calcValue(i.touches[0].y);
+                                if (this.meter !== INVALID_TIMEOUT_ID) {
+                                    clearTimeout(this.meter);
+                                    this.meter = INVALID_TIMEOUT_ID;
+                                }
+                                this.touchY = event.touches[0].y;
+                                this.calcValue(event.touches[0].y);
                                 this.setSelected();
-                                this.drawTrack();
-                                this.drawSelect();
+                                this.updateModifier();
+                                this.fullModifier.invalidate();
                             }
                         }
                     }
-                    else if (this.isEnlarged && i.type === TouchType.Up) {
+                    else if (this.isEnlarged && event.type === TouchType.Up) {
                         this.options.onChange?.(this.options.valueOptions.value);
-                        this.options.onTouch?.(i);
-                        clearTimeout(this.meter);
+                        this.options.onTouch?.(event);
+                        if (this.meter !== INVALID_TIMEOUT_ID) {
+                            clearTimeout(this.meter);
+                            this.meter = INVALID_TIMEOUT_ID;
+                        }
                         this.meter = setTimeout(() => {
                             if (this.isEnlarged) {
                                 this.isTouchAnimatorFinished = false;
@@ -1026,7 +1267,7 @@ export class ArcSlider extends ViewPU {
                                 this.isEnlarged = false;
                                 this.startRestoreAnimator();
                             }
-                        }, 3000);
+                        }, RESTORE_TIMEOUT);
                         if (this.options.layoutOptions.reverse) {
                             if (this.selectedMaxOrMin === MAX_STATUS && this.selectArc < this.endCurrent) {
                                 this.lineWidthCurrent = this.lineWidth;
@@ -1053,71 +1294,153 @@ export class ArcSlider extends ViewPU {
                         }
                     }
                     else if ((this.isEnlarged) && (this.isTouchAnimatorFinished) &&
-                        (i.type === TouchType.Move)) {
-                        this.options.onTouch?.(i);
-                        clearTimeout(this.meter);
+                        (event.type === TouchType.Move)) {
+                        this.options.onTouch?.(event);
+                        if (this.meter !== INVALID_TIMEOUT_ID) {
+                            clearTimeout(this.meter);
+                            this.meter = INVALID_TIMEOUT_ID;
+                        }
                         if (this.options.layoutOptions.reverse) {
-                            if (((this.selectArc < this.endCurrent) || (this.checkApprox(this.selectArc, this.endCurrent))) &&
+                            if (((this.selectArc < this.endCurrent) || (checkApprox(this.selectArc, this.endCurrent))) &&
                                 (this.delta >= 0)) {
                                 this.selectedMaxOrMin = MAX_STATUS;
-                                this.calcMaxValue(i.touches[0].y);
+                                this.calcMaxValue(event.touches[0].y);
                             }
                             else if ((this.selectArc < this.endCurrent) && (this.delta <= 0)) {
                                 this.selectedMaxOrMin = MAX_STATUS;
-                                this.calcMaxValue(i.touches[0].y);
+                                this.calcMaxValue(event.touches[0].y);
                             }
-                            else if ((this.trackStart >= this.start) && (this.checkApprox(this.options.valueOptions.value, this.options.valueOptions.min)) && (this.delta <= 0)) {
+                            else if ((this.trackStart >= this.start) && (checkApprox(this.options.valueOptions.value, this.options.valueOptions.min)) && (this.delta <= 0)) {
                                 this.selectedMaxOrMin = MIN_STATUS;
-                                this.calcMinValue(i.touches[0].y);
+                                this.calcMinValue(event.touches[0].y);
                             }
                             else if ((this.trackStart > this.start) && (this.delta >= 0)) {
                                 this.selectedMaxOrMin = MIN_STATUS;
-                                this.calcMinValue(i.touches[0].y);
+                                this.calcMinValue(event.touches[0].y);
                             }
                             else {
-                                this.calcValue(i.touches[0].y);
+                                this.calcValue(event.touches[0].y);
                                 this.selectedMaxOrMin = NORMAL_STATUS;
                             }
                         }
                         else {
-                            if (((this.selectArc > this.endCurrent) || (this.checkApprox(this.selectArc, this.endCurrent))) &&
+                            if (((this.selectArc > this.endCurrent) || (checkApprox(this.selectArc, this.endCurrent))) &&
                                 (this.delta <= 0)) {
                                 this.selectedMaxOrMin = MAX_STATUS;
-                                this.calcMaxValue(i.touches[0].y);
+                                this.calcMaxValue(event.touches[0].y);
                             }
                             else if ((this.selectArc > this.endCurrent) && (this.delta >= 0)) {
                                 this.selectedMaxOrMin = MAX_STATUS;
-                                this.calcMaxValue(i.touches[0].y);
+                                this.calcMaxValue(event.touches[0].y);
                             }
-                            else if ((this.checkApprox(this.options.valueOptions.value, this.options.valueOptions.min)) &&
+                            else if ((checkApprox(this.options.valueOptions.value, this.options.valueOptions.min)) &&
                                 (this.delta >= 0) && ((this.trackStart <= this.start) ||
-                                (this.checkApprox(this.selectArc, this.endCurrent)))) {
+                                (checkApprox(this.selectArc, this.endCurrent)))) {
                                 this.selectedMaxOrMin = MIN_STATUS;
-                                this.calcMinValue(i.touches[0].y);
+                                this.calcMinValue(event.touches[0].y);
                             }
                             else if ((this.trackStart < this.start) && (this.delta <= 0)) {
                                 this.selectedMaxOrMin = MIN_STATUS;
-                                this.calcMinValue(i.touches[0].y);
+                                this.calcMinValue(event.touches[0].y);
                             }
                             else {
-                                this.calcValue(i.touches[0].y);
+                                this.calcValue(event.touches[0].y);
                                 this.selectedMaxOrMin = NORMAL_STATUS;
                             }
                         }
                     }
                 }
             });
-            Canvas.hitTestBehavior(HitTestMode.Transparent);
-        }, Canvas);
-        Canvas.pop();
-        Stack.pop();
+            Slider.focusable(true);
+            Slider.focusOnTouch(true);
+            Slider.onDigitalCrown((event) => {
+                if (event && this.isFocus) {
+                    this.crownEventCounter += 1;
+                    if (this.crownEventCounter % CROWN_EVENT_FLAG === 0) {
+                        try {
+                            let ret = vibrator.isSupportEffectSync(VIBRATOR_TYPE_TWO);
+                            if (ret) {
+                                vibrator.startVibration({
+                                    type: 'preset',
+                                    effectId: VIBRATOR_TYPE_TWO,
+                                    count: 1,
+                                }, {
+                                    usage: 'unknown'
+                                }, (error) => {
+                                    if (error) {
+                                        hilog.error(0x3900, 'ArcSlider', `Failed to start vibration.
+                          Code: ${error.code}, message: ${error.message}`);
+                                        this.crownEventCounter = 0;
+                                        return;
+                                    }
+                                    hilog.info(0x3900, 'ArcSlider', 'Succeed in starting vibration');
+                                });
+                            }
+                            else {
+                                hilog.error(0x3900, 'ArcSlider', `watchhaptic.crown.strength2 is not supported`);
+                            }
+                        }
+                        catch (error) {
+                            let e = error;
+                            hilog.error(0x3900, 'ArcSlider', `An unexpected error occurred in starting vibration.
+                    Code: ${e.code}, message: ${e.message}`);
+                        }
+                        this.crownEventCounter = 0;
+                    }
+                    if (event.action === CrownAction.BEGIN && !this.isEnlarged) {
+                        if (this.meter !== INVALID_TIMEOUT_ID) {
+                            clearTimeout(this.meter);
+                            this.meter = INVALID_TIMEOUT_ID;
+                        }
+                        this.isEnlarged = true;
+                        this.startTouchAnimator();
+                        this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
+                        this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.normalRadius;
+                        this.calcCrownValue(this.crownDeltaAngle);
+                    }
+                    else if (event.action === CrownAction.BEGIN && this.isEnlarged) {
+                        if (this.meter !== INVALID_TIMEOUT_ID) {
+                            clearTimeout(this.meter);
+                            this.meter = INVALID_TIMEOUT_ID;
+                        }
+                        this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
+                        this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.normalRadius;
+                        this.calcCrownValue(this.crownDeltaAngle);
+                    }
+                    else if ((this.isEnlarged) && (this.isTouchAnimatorFinished) &&
+                        (event.action === CrownAction.UPDATE)) {
+                        if (this.meter !== INVALID_TIMEOUT_ID) {
+                            clearTimeout(this.meter);
+                            this.meter = INVALID_TIMEOUT_ID;
+                        }
+                        this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
+                        this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.normalRadius;
+                        this.calcCrownValue(this.crownDeltaAngle);
+                    }
+                    else if (this.isEnlarged && event.action === CrownAction.END) {
+                        if (this.meter !== INVALID_TIMEOUT_ID) {
+                            clearTimeout(this.meter);
+                            this.meter = INVALID_TIMEOUT_ID;
+                        }
+                        this.meter = setTimeout(() => {
+                            if (this.isEnlarged) {
+                                this.isTouchAnimatorFinished = false;
+                                this.isClickAnimatorFinished = false;
+                                this.isEnlarged = false;
+                                this.startRestoreAnimator();
+                            }
+                        }, RESTORE_TIMEOUT);
+                    }
+                }
+            });
+        }, Slider);
         Column.pop();
     }
+
     rerender() {
         this.updateDirtyElements();
     }
 }
-
 
 export default {
     ArcSlider,
