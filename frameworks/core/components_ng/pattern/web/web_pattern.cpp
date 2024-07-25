@@ -4453,7 +4453,7 @@ bool WebPattern::OnBackPressedForFullScreen() const
         return false;
     }
 
-    TAG_LOGI(AceLogTag::ACE_WEB, "Web %{public}d receives back press event", host->GetId());
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web receives back press event for full screen");
     CHECK_NULL_RETURN(fullScreenExitHandler_, false);
     auto webFullScreenExitHandler = fullScreenExitHandler_->GetHandler();
     CHECK_NULL_RETURN(webFullScreenExitHandler, false);
