@@ -178,7 +178,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
             option.GetDuration(), option.GetCurve()->ToString().c_str(), option.GetIteration());
     }
     NG::ScopedViewStackProcessor scopedProcessor;
-    AceEngine::Get().NotifyContainers([triggerId](const RefPtr<Container>& container) {
+    AceEngine::Get().NotifyContainersOrderly([triggerId](const RefPtr<Container>& container) {
         if (!CheckContainer(container)) {
             return;
         }
@@ -195,7 +195,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
     // Execute the function.
     jsAnimateToFunc->Call(jsAnimateToFunc);
     pipelineContext->FlushOnceVsyncTask();
-    AceEngine::Get().NotifyContainers([triggerId](const RefPtr<Container>& container) {
+    AceEngine::Get().NotifyContainersOrderly([triggerId](const RefPtr<Container>& container) {
         if (!CheckContainer(container)) {
             return;
         }
