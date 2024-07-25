@@ -169,6 +169,8 @@ public:
     void ShowToast(const NG::ToastInfo& toastInfo, const std::function<void(int32_t)>& callback);
     void CloseToast(int32_t toastId, const std::function<void(int32_t)>& callback);
 
+    void FireAutoSave(const RefPtr<FrameNode>& ContainerNode, bool isBindSheet);
+
     std::unordered_map<int32_t, RefPtr<FrameNode>> GetDialogMap()
     {
         return dialogMap_;
@@ -764,8 +766,6 @@ private:
     void MountToParentWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     void RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     CustomKeyboardOffsetInfo CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard);
-
-    void FireAutoSave(const RefPtr<FrameNode>& ContainerNode, bool isBindSheet);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
