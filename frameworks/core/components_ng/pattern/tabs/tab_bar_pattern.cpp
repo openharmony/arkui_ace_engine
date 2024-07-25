@@ -1130,7 +1130,9 @@ void TabBarPattern::HandleBottomTabBarChange(int32_t index)
 {
     AnimationUtils::CloseImplicitAnimation();
     auto preIndex = GetImageColorOnIndex().value_or(indicator_);
-    SetImageColorOnIndex(index);
+    if (preIndex == index) {
+        return;
+    }
     UpdateImageColor(index);
     UpdateSymbolStats(index, preIndex);
     if (preIndex < 0 || preIndex >= static_cast<int32_t>(tabBarStyles_.size()) ||
@@ -1667,11 +1669,6 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
         tabBarPattern->ResetIndicatorAnimationState();
         auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
         CHECK_NULL_VOID(tabBarLayoutProperty);
-        auto preIndex = tabBarPattern->GetImageColorOnIndex().value_or(tabBarPattern->indicator_);
-        if (preIndex == index) {
-            tabBarPattern->SetMaskAnimationByCreate(false);
-            return;
-        }
         if (!tabBarPattern->IsMaskAnimationByCreate()) {
             tabBarPattern->HandleBottomTabBarChange(index);
         }
