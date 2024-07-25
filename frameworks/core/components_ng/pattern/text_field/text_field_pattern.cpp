@@ -2304,7 +2304,8 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
         RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex, lastCaretRect) && !firstGetFocus;
     bool isInlineSelectAllOrEmpty = inlineSelectAllFlag_ || contentController_->IsEmpty();
     do {
-        if (info.GetSourceDevice() == SourceType::MOUSE || (!isRepeatClickCaret && isInlineSelectAllOrEmpty)) {
+        if (info.GetSourceDevice() == SourceType::MOUSE || (!isRepeatClickCaret && isInlineSelectAllOrEmpty) ||
+            IsContentRectNonPositive()) {
             break;
         }
         if (GetNakedCharPosition() >= 0) {
@@ -2485,7 +2486,7 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
         StopTwinkling();
         SetIsSingleHandle(false);
     }
-    if (info.GetSourceDevice() != SourceType::MOUSE && !contentController_->IsEmpty()) {
+    if (info.GetSourceDevice() != SourceType::MOUSE && !contentController_->IsEmpty() && !IsContentRectNonPositive()) {
         ProcessOverlay({ .animation = true });
     }
     auto host = GetHost();
@@ -2510,7 +2511,7 @@ void TextFieldPattern::HandleTripleClickEvent(GestureEvent& info)
         StopTwinkling();
         SetIsSingleHandle(false);
     }
-    if (info.GetSourceDevice() != SourceType::MOUSE && !contentController_->IsEmpty()) {
+    if (info.GetSourceDevice() != SourceType::MOUSE && !contentController_->IsEmpty() && !IsContentRectNonPositive()) {
         ProcessOverlay({ .animation = true });
     }
     auto host = GetHost();
@@ -3111,16 +3112,23 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     } else if (CanChangeSelectState()) {
         selectController_->UpdateSelectByOffset(localOffset);
     }
+    ShowSelectOverlayForLongPress(shouldProcessOverlayAfterLayout);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextFieldPattern::ShowSelectOverlayForLongPress(bool shouldProcessOverlayAfterLayout)
+{
     if (IsSelected()) {
         StopTwinkling();
     }
     SetIsSingleHandle(!IsSelected());
-    if (shouldProcessOverlayAfterLayout) {
-        DelayProcessOverlay({ .menuIsShow = true, .animation = true,  });
-    } else {
-        ProcessOverlay({ .animation = true });
+    if (!IsContentRectNonPositive()) {
+        if (shouldProcessOverlayAfterLayout) {
+            DelayProcessOverlay({ .menuIsShow = true, .animation = true,  });
+        } else {
+            ProcessOverlay({ .animation = true });
+        }
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool TextFieldPattern::CanChangeSelectState()
@@ -3131,7 +3139,7 @@ bool TextFieldPattern::CanChangeSelectState()
     CHECK_NULL_RETURN(theme, false);
     Dimension fontSize = layoutProperty->GetFontSizeValue(theme->GetFontSize());
     // fontSize == 0 can not change
-    return !NearZero(fontSize.Value());
+    return !NearZero(fontSize.Value()) && !IsContentRectNonPositive();
 }
 
 bool TextFieldPattern::IsOnUnitByPosition(const Offset& globalOffset)
@@ -7866,5 +7874,10 @@ RectF TextFieldPattern::ExpandDefaultResponseRegion(RectF& rect)
 {
     return rect + NG::SizeF(0, OHOS::Ace::HOT_AREA_ADJUST_SIZE.ConvertToPx() * OHOS::Ace::HOT_AREA_EXPAND_TIME) +
            NG::OffsetF(0, -OHOS::Ace::HOT_AREA_ADJUST_SIZE.ConvertToPx());
+}
+
+bool TextFieldPattern::IsContentRectNonPositive()
+{
+    return NonPositive(contentRect_.Width());
 }
 } // namespace OHOS::Ace::NG

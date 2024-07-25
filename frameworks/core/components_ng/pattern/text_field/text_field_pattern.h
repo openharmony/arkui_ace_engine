@@ -1444,6 +1444,7 @@ private:
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
+    void ShowSelectOverlayForLongPress(bool shouldProcessOverlayAfterLayout);
     bool CanChangeSelectState();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void CursorMoveOnClick(const Offset& offset);
@@ -1609,6 +1610,7 @@ private:
 
     bool GetTouchInnerPreviewText(const Offset& offset) const;
     bool IsShowMenu(const std::optional<SelectionOptions>& options);
+    bool IsContentRectNonPositive();
 
     RectF frameRect_;
     RectF textRect_;

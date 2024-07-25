@@ -136,9 +136,13 @@ protected:
     virtual bool CreateParagraphEx(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) = 0;
 
+    LayoutConstraintF CalculateFrameSizeConstraint(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> inlineParagraph_;
     InlineMeasureItem inlineMeasureItem_;
+    LayoutConstraintF textFieldContentConstraint_;
 
     RectF textRect_;
     OffsetF parentGlobalOffset_;

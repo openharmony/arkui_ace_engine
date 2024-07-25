@@ -209,7 +209,7 @@ void TextFieldLayoutAlgorithm::GetInlineMeasureItem(
             pattern->GetSingleLineHeight() * textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
         inlineMeasureItem_.inlineSizeHeight = pattern->GetSingleLineHeight() * std::min(
             static_cast<uint32_t>(paragraph_->GetLineCount()),
-            textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE));
+                textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE));
     } else {
         // calc inline status in advance
         CalcInlineMeasureItem(layoutWrapper);
@@ -366,15 +366,6 @@ float TextFieldLayoutAlgorithm::CalculateContentWidth(const LayoutConstraintF& c
 {
     auto contentWidth = contentConstraint.maxSize.Width() - imageWidth;
     auto textFieldWidth = contentWidth;
-    auto frameNode = layoutWrapper->GetHostNode();
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-
-    if (pattern->GetCleanNodeResponseArea()) {
-        textFieldWidth -= pattern->GetCleanNodeResponseArea()->GetFrameSize().Width();
-    }
-    if (pattern->GetResponseArea()) {
-        textFieldWidth -= pattern->GetResponseArea()->GetFrameSize().Width();
-    }
 
     std::optional<SizeF> minSize;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
@@ -714,9 +705,27 @@ LayoutConstraintF TextFieldLayoutAlgorithm::CalculateContentMaxSizeWithCalculate
         finalSize.SetHeight(
             finalSize.Height().value_or(frameIdealSize.Height()) - pattern->GetVerticalPaddingAndBorderSum());
         maxIdealSize.UpdateSizeWhenSmaller(finalSize.ConvertToSizeT());
+        maxIdealSize.UpdateSizeWhenLarger(textFieldContentConstraint.minSize);
     }
     textFieldContentConstraint.maxSize = maxIdealSize;
     return textFieldContentConstraint;
+}
+
+LayoutConstraintF TextFieldLayoutAlgorithm::CalculateFrameSizeConstraint(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    LayoutConstraintF frameSizeConstraintF = contentConstraint;
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, frameSizeConstraintF);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, frameSizeConstraintF);
+    auto left = pattern->GetBorderLeft() + pattern->GetPaddingLeft();
+    auto right = pattern->GetBorderRight() + pattern->GetPaddingRight();
+    auto top = pattern->GetBorderTop() + pattern->GetPaddingTop();
+    auto bottom = pattern->GetBorderBottom() + pattern->GetPaddingBottom();
+    frameSizeConstraintF.maxSize.AddPadding(left, right, top, bottom);
+    frameSizeConstraintF.minSize.AddPadding(left, right, top, bottom);
+    return frameSizeConstraintF;
 }
 
 void TextFieldLayoutAlgorithm::FontRegisterCallback(
@@ -1269,6 +1278,6 @@ bool TextFieldLayoutAlgorithm::IsAdaptExceedLimit(const SizeF& maxSize)
     return (paragraph->GetLineCount() > 1) || paragraph->DidExceedMaxLines() ||
         GreatNotEqual(paragraph->GetLongestLine(), maxSize.Width()) ||
         IsAdaptFontSizeExceedLineHeight(paragraph) ||
-        GreatNotEqual(paragraph->GetHeight(), maxSize.Height());
+           GreatNotEqual(paragraph->GetHeight(), maxSize.Height());
 }
 } // namespace OHOS::Ace::NG
