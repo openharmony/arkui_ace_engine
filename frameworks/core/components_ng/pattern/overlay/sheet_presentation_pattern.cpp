@@ -145,6 +145,7 @@ void SheetPresentationPattern::InitPageHeight()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
+    auto currentTopSafeArea = sheetTopSafeArea_;
     TAG_LOGD(AceLogTag::ACE_SHEET, "statusBarHeight of sheet by GetSafeAreaWithoutProcess : %{public}u",
         safeAreaInsets.top_.Length());
     sheetTopSafeArea_ =
@@ -171,6 +172,9 @@ void SheetPresentationPattern::InitPageHeight()
         sheetTopSafeArea_ = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
     }
     TAG_LOGD(AceLogTag::ACE_SHEET, "sheetTopSafeArea of sheet is : %{public}f", sheetTopSafeArea_);
+    if (!NearEqual(currentTopSafeArea, sheetTopSafeArea_)) {
+        topSafeAreaChanged_ = true;
+    }
     auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
     sheetThemeType_ = sheetTheme->GetSheetType();
@@ -1171,7 +1175,7 @@ void SheetPresentationPattern::CheckSheetHeightChange()
         isFirstInit_ = false;
     } else {
         if ((!NearEqual(sheetGeometryNode->GetFrameSize().Height(), sheetHeight_)) || (sheetType_ != GetSheetType()) ||
-            windowChanged_) {
+            windowChanged_ || topSafeAreaChanged_) {
             sheetType_ = GetSheetType();
             sheetHeight_ = sheetGeometryNode->GetFrameSize().Height();
             const auto& overlayManager = GetOverlayManager();
@@ -1188,6 +1192,7 @@ void SheetPresentationPattern::CheckSheetHeightChange()
             }
             overlayManager->PlaySheetTransition(host, true, false);
             windowChanged_ = false;
+            topSafeAreaChanged_ = false;
         }
     }
     if (firstMeasure_) {
