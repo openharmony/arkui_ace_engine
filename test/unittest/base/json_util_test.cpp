@@ -396,6 +396,16 @@ HWTEST_F(JsonUtilTest, JsonUtilTest014, TestSize.Level1)
      */
     bool ret2 = jsonValue.Put(key2, value2);
     EXPECT_FALSE(ret2);
+
+    /**
+     * @tc.steps: step5. construct value not null
+     */
+    char c2 = 'v';
+    const char* value3 = &c2;
+    bool ret3 = jsonValue.Put(key2, value3);
+    EXPECT_TRUE(ret3);
+    bool ret4 = jsonValue.Put(key, value3);
+    EXPECT_FALSE(ret4);
 }
 
 /**
@@ -452,6 +462,16 @@ HWTEST_F(JsonUtilTest, JsonUtilTest016, TestSize.Level1)
      */
     bool ret2 = jsonValue.Put(key2, value2);
     EXPECT_FALSE(ret2);
+
+    /**
+     * @tc.steps: step3. construct the value not null
+     */
+    char valueStr = '5';
+    const char* valueTemp = &valueStr;
+    bool ret3 = jsonValue.Put(key2, valueTemp);
+    EXPECT_TRUE(ret3);
+    bool ret4 = jsonValue.Put(key, valueTemp);
+    EXPECT_FALSE(ret4);
 }
 
 /**
@@ -542,7 +562,7 @@ HWTEST_F(JsonUtilTest, JsonUtilTest020, TestSize.Level1)
     const char* key = nullptr;
     double value = 8.0;
     std::unique_ptr<JsonValue> jsonValue = JsonUtil::Create(false);
-    
+
     /**
      * @tc.steps: step2. get  results
      * @tc.expected: step2.  the results are correct.
@@ -598,7 +618,7 @@ HWTEST_F(JsonUtilTest, JsonUtilTest021, TestSize.Level1)
     bool ret3 = jsonValue->Replace(key, value);
     EXPECT_FALSE(ret3);
 
-     /**
+    /**
      * @tc.steps: step4. construct key(exist) and value
      * @tc.expected: step3. true
      */
@@ -640,7 +660,7 @@ HWTEST_F(JsonUtilTest, JsonUtilTest022, TestSize.Level1)
     bool ret2 = jsonValue->Replace(key2, value2);
     EXPECT_FALSE(ret2);
 
-     /**
+    /**
      * @tc.steps: step5. repalce key(not exist) and value
      * @tc.expected: step5. repalce fail
      */
@@ -719,7 +739,7 @@ HWTEST_F(JsonUtilTest, JsonUtilTest024, TestSize.Level1)
     bool ret3 = jsonValue->Replace(key, valueTmp);
     EXPECT_FALSE(ret3);
 
-     /**
+    /**
      * @tc.steps: step4. construct key(exist) and value
      * @tc.expected: step3. true
      */
@@ -766,7 +786,7 @@ HWTEST_F(JsonUtilTest, JsonUtilTest026, TestSize.Level1)
     int64_t ret = jsonValue->GetInt64();
     ASSERT_EQ(ret, 0);
 
-     /**
+    /**
      * @tc.steps: step3. get key(not exist)
      * @tc.expected: step3. reture defalut value 0
      */
@@ -783,8 +803,8 @@ HWTEST_F(JsonUtilTest, JsonUtilTest026, TestSize.Level1)
     jsonValue->Put(keyPut, value);
     int64_t ret4 = jsonValue->GetInt64(key, 0);
     ASSERT_EQ(ret4, 0);
-    
-     /**
+
+    /**
      * @tc.steps: step5. get key(exist) and value is a number
      * @tc.expected: step5. reture value
      */
@@ -1209,7 +1229,7 @@ HWTEST_F(JsonUtilTest, JsonUtilTest040, TestSize.Level1)
      */
     std::unique_ptr<JsonValue> jsonValue = JsonUtil::Create(false);
 
-     /**
+    /**
      * @tc.steps: step2. get key(not exist)
      * @tc.expected: step2. reture defalut value 0
      */
@@ -1228,8 +1248,8 @@ HWTEST_F(JsonUtilTest, JsonUtilTest040, TestSize.Level1)
     int64_t ret42 = jsonValue->GetInt(key, 0);
     ASSERT_EQ(ret4, 0);
     ASSERT_EQ(ret42, 0);
-    
-     /**
+
+    /**
      * @tc.steps: step5. get key(exist) and value is a number
      * @tc.expected: step5. reture value
      */
@@ -1239,5 +1259,29 @@ HWTEST_F(JsonUtilTest, JsonUtilTest040, TestSize.Level1)
     ASSERT_EQ(ret5, 100);
     std::string ret52 = jsonValue->GetString(keyPut, "default");
     ASSERT_EQ(ret52, "default");
+}
+
+/**
+ * @tc.name: JsonUtilTest041
+ * @tc.desc: Check json util Put(const std::unique_ptr<JsonValue>& value)/ReleaseJsonObject
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest041, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> value = nullptr;
+    JsonValue jsonValue;
+    ASSERT_FALSE(jsonValue.Put(value));
+
+    // ReleaseJsonObject() isRoot_ false
+    JsonObject* ret = jsonValue.ReleaseJsonObject();
+    ASSERT_TRUE(ret == nullptr);
+    // PutRef() isRoot_ true
+    char keyChar = 'k';
+    char* keyPtr = &keyChar;
+    std::unique_ptr<JsonValue> value2 = JsonUtil::Create(true);
+    bool ret2 = jsonValue.PutRef(keyPtr, std::move(value2));
+    ASSERT_TRUE(ret2);
+    bool ret3 = jsonValue.PutRef(std::move(value2));
+    ASSERT_TRUE(ret3);
 }
 } // namespace OHOS::Ace
