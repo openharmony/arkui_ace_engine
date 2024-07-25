@@ -24,6 +24,11 @@ namespace OHOS::Ace::NG {
 
 void FocusView::FocusViewShow(bool isTriggerByStep)
 {
+    if (!GetFocusViewFocusable()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d is not focusable, cannot be shown",
+            GetFrameName().c_str(), GetFrameId());
+        return;
+    }
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d show", GetFrameName().c_str(), GetFrameId());
     auto viewRootScope = GetViewRootScope();
     if (viewRootScope && GetIsViewRootScopeFocused()) {
@@ -154,9 +159,9 @@ RefPtr<FocusHub> FocusView::GetViewRootScope()
     CHECK_NULL_RETURN(focusViewFrame, nullptr);
     auto focusViewHub = focusViewFrame->GetFocusHub();
     CHECK_NULL_RETURN(focusViewHub, nullptr);
-    std::list<int32_t> rootScopeDeepth = GetRouteOfFirstScope();
+    std::list<int32_t> rootScopeDepth = GetRouteOfFirstScope();
     RefPtr<FocusHub> rootScope = focusViewHub;
-    for (const auto& index : rootScopeDeepth) {
+    for (const auto& index : rootScopeDepth) {
         CHECK_NULL_RETURN(rootScope, focusViewHub);
         auto children = rootScope->GetChildren();
         auto iter = children.begin();
@@ -306,5 +311,27 @@ bool FocusView::TriggerFocusMove()
         return a.first < b.first;
     });
     return viewFocusHub->GoToFocusByTabNodeIdx(tabIndexNodes, 0);
+}
+
+bool FocusView::GetFocusViewFocusable()
+{
+    auto focusViewHub = GetFocusHub();
+    CHECK_NULL_RETURN(focusViewHub, false);
+    if (!focusViewHub->IsFocusable()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "focusViewHub: %{public}s/%{public}d is unFocusable.",
+            focusViewHub->GetFrameName().c_str(), focusViewHub->GetFrameId());
+        return false;
+    }
+
+    auto viewRootScope = GetViewRootScope();
+    while (viewRootScope != focusViewHub) {
+        if (viewRootScope && viewRootScope->IsFocusable()) {
+            viewRootScope = viewRootScope->GetParentFocusHub();
+            continue;
+        }
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "viewRootScope not exist or parent is unFocusable.");
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG
