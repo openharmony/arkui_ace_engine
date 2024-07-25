@@ -27,7 +27,6 @@
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/render/drawing_forward.h"
-
 namespace OHOS::Ace::NG {
 class RichEditorDragPattern : public TextDragPattern {
     DECLARE_ACE_TYPE(RichEditorDragPattern, TextDragPattern);
