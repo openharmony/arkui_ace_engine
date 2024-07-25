@@ -71,6 +71,7 @@ struct TextConfig;
             (targetNode)->AddPropertyInfo(propertyInfo);                            \
         }                                                                           \
     } while (false)
+#define CONTENT_MODIFY_LOCK(patternPtr) ContentModifyLock contentModifyLock(patternPtr)
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -162,6 +163,27 @@ public:
         {
             return !previewContent.empty() && isPreviewTextInputting && startOffset >= 0 && endOffset >= startOffset;
         }
+    };
+
+    class ContentModifyLock {
+    public:
+        ContentModifyLock();
+        ContentModifyLock(RichEditorPattern* pattern)
+        {
+            pattern->isModifyingContent_ = true;
+            pattern_ = WeakClaim(pattern);
+        }
+        ~ContentModifyLock()
+        {
+            auto pattern = pattern_.Upgrade();
+            if (!pattern) {
+                TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pattern is null, unlock failed");
+                return;
+            }
+            pattern->isModifyingContent_ = false;
+        }
+    private:
+        WeakPtr<RichEditorPattern> pattern_;
     };
 
     int32_t SetPreviewText(const std::string& previewTextValue, const PreviewRange range) override;
@@ -1191,6 +1213,7 @@ private:
     bool editingLongPress_ = false;
     bool needMoveCaretToContentRect_ = false;
     std::queue<std::function<void()>> tasks_;
+    bool isModifyingContent_ = false;
 };
 } // namespace OHOS::Ace::NG
 
