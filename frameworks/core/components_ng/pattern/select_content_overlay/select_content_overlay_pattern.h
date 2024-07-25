@@ -38,6 +38,7 @@ public:
     void CancelHiddenHandleTask();
     SelectMenuInfo GetSelectMenuInfo();
     void UpdateViewPort(const std::optional<RectF>& viewPort);
+    void UpdateSelectArea(const RectF& selectArea) override;
 protected:
     void CheckHandleReverse() override;
     void UpdateHandleHotZone() override;
