@@ -154,12 +154,10 @@ void ArcScrollBar::HandlingTouch(const TouchEventInfo& info)
             inRegion = InBarTouchRegion(point);
         } else if (info.GetSourceDevice() == SourceType::MOUSE) {
             inRegion = InBarHoverRegion(point);
-            MarkNeedRender();
         }
         SetPressed(inRegion);
-        if (!IsHover()) {
-            PlayScrollBarGrowAnimation();
-        }
+        shrinkDelayTask_.Cancel();
+        PlayScrollBarGrowAnimation();
     }
 
     if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
@@ -253,16 +251,6 @@ void ArcScrollBar::ScheduleShrinkDelayTask()
         });
         taskExecutor->PostDelayedTask(shrinkDelayTask_, TaskExecutor::TaskType::UI, BAR_SHRINK_DELAY_DURATION,
             "ArkUIScrollBarInnerShrinkAnimation");
-    }
-}
-
-void ArcScrollBar::PlayScrollBarAppearAnimation()
-{
-    ScrollBar::PlayScrollBarAppearAnimation();
-
-    if (GetDisplayMode() != DisplayMode::AUTO) {
-        shrinkDelayTask_.Cancel();
-        MarkNeedRender();
     }
 }
 } // namespace OHOS::Ace::NG

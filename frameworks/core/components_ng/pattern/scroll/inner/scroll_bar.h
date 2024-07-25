@@ -301,7 +301,7 @@ public:
         }
     }
 
-    virtual void PlayScrollBarAppearAnimation()
+    void PlayScrollBarAppearAnimation()
     {
         if (displayMode_ == DisplayMode::AUTO && isScrollable_) {
             disappearDelayTask_.Cancel();
