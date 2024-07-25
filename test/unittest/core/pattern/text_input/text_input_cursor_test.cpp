@@ -1387,11 +1387,11 @@ HWTEST_F(TextInputCursorTest, FinishTextPreview002, TestSize.Level1)
     FlushLayoutTask(frameNode_);
 
     /**
-     * @tc.steps: call HandleBlurEvent
-     * @tc.expected: check GetIsPreviewText return false
+     * @tc.steps: call HandleBlurEvent, none operation for previewText
+     * @tc.expected: check GetIsPreviewText return change to true from false
      */
     pattern_->HandleBlurEvent();
-    EXPECT_FALSE(pattern_->GetIsPreviewText());
+    EXPECT_TRUE(pattern_->GetIsPreviewText());
     FlushLayoutTask(frameNode_);
 }
 

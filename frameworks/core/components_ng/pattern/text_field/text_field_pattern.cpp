@@ -1340,9 +1340,6 @@ void TextFieldPattern::HandleBlurEvent()
     ModifyInnerStateInBlurEvent();
     magnifierController_->UpdateShowMagnifier();
     CloseSelectOverlay(!isKeyboardClosedByUser_ && blurReason_ == BlurReason::FOCUS_SWITCH);
-    if (GetIsPreviewText()) {
-        FinishTextPreviewOperation();
-    }
     StopTwinkling();
     if (((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_)) {
         CloseKeyboard(true);
