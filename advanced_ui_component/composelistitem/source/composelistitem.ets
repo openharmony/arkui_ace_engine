@@ -126,7 +126,9 @@ const ICON_SIZE_MAP: Map<number, number> = new Map([
   [IconType.VERTICAL, VERTICAL_SIZE]
 ])
 const FOCUSABLE: boolean = LengthMetrics.resource($r('sys.float.composeListItem_focus_dynamic_effect')).value !== 1;
-const recoveryScale = 1;
+const RECOVERYSCALE = 1;
+const CLEARSHADOW: ShadowStyle = -1;
+const CLEARBLUR = 0;
 
 @Component
 struct ContentItemStruct {
@@ -204,7 +206,7 @@ struct ContentItemStruct {
           .width(this.iconMagnitude || ICON_SIZE_MAP.get(this.iconStyle))
           .height(this.iconMagnitude || ICON_SIZE_MAP.get(this.iconStyle))
           .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
-          .focusable(FOCUSABLE)
+          .focusable(true)
           .draggable(false)
           .fillColor(this.iconColor || $r('sys.color.icon_primary'))
           .attributeModifier(this.iconImageModifier)
@@ -219,7 +221,7 @@ struct ContentItemStruct {
             maxHeight: ICON_SIZE_MAP.get(this.iconStyle)
           })
           .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
-          .focusable(FOCUSABLE)
+          .focusable(true)
           .draggable(false)
           .fillColor($r('sys.color.icon_primary'))
           .attributeModifier(this.iconImageModifier)
@@ -235,14 +237,14 @@ struct ContentItemStruct {
         .fontSize(this.primaryTextSize || $r('sys.float.ohos_id_text_size_body1'))
         .fontColor(this.primaryTextColors || this.primaryTextColor)
         .fontWeight(FontWeight.Medium)
-        .focusable(FOCUSABLE)
+        .focusable(true)
         .draggable(false)
         .attributeModifier(this.primaryTextModifier);
       if (this.secondaryText != null) {
         Text(this.secondaryText)
           .fontSize(this.secondaryThirdTextSize || $r('sys.float.ohos_id_text_size_body2'))
           .fontColor(this.secondaryTextColors || this.secondaryTextColor)
-          .focusable(FOCUSABLE)
+          .focusable(true)
           .draggable(false)
           .attributeModifier(this.secondaryTextModifier);
       }
@@ -250,7 +252,7 @@ struct ContentItemStruct {
         Text(this.description)
           .fontSize(this.secondaryThirdTextSize || $r('sys.float.ohos_id_text_size_body2'))
           .fontColor(this.descriptionColors || this.descriptionColor)
-          .focusable(FOCUSABLE)
+          .focusable(true)
           .draggable(false)
           .attributeModifier(this.descriptionModifier);
       }
@@ -367,14 +369,13 @@ struct OperateItemStruct {
     Button() {
       Row() {
         Text(this.button?.text as ResourceStr)
-          .focusable(FOCUSABLE)
+          .focusable(true)
       }
       .padding({
         left: $r('sys.float.padding_level4'),
         right: $r('sys.float.padding_level4')
-      }).focusable(FOCUSABLE)
+      })
     }
-    .focusable(FOCUSABLE)
     .hitTestBehavior(HitTestMode.Block)
     .buttonStyle(ButtonStyleMode.NORMAL)
     .controlSize(ControlSize.SMALL)
@@ -413,11 +414,11 @@ struct OperateItemStruct {
       Image(param.icon?.value)
         .height(OPERATEITEM_ICONLIKE_SIZE)
         .width(OPERATEITEM_ICONLIKE_SIZE)
-        .focusable(FOCUSABLE)
+        .focusable(true)
         .fillColor(this.iconColor || $r('sys.color.icon_primary'))
         .draggable(false)
     }
-    .focusable(FOCUSABLE)
+    .shadow(CLEARSHADOW)
     .margin({ end: LengthMetrics.vp(OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL2) })
     .hitTestBehavior(HitTestMode.Block)
     .backgroundColor(Color.Transparent)
@@ -467,7 +468,6 @@ struct OperateItemStruct {
       .onAppear(()=>{
         this.isParentCanTouch = true;
       })
-      .focusable(FOCUSABLE)
   }
 
   @Builder
@@ -484,7 +484,7 @@ struct OperateItemStruct {
         fadeout: LengthMetrics.resource($r('sys.float.composeListItem_marqueeOptions_right')).value === 1
       })
       .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value === 1 ? 1 : null)
-      .focusable(FOCUSABLE)
+      .focusable(true)
       .draggable(false)
       .flexShrink(1)
       .onAppear(()=>{
@@ -498,11 +498,11 @@ struct OperateItemStruct {
       Image(this.arrow?.value)
         .height(OPERATEITEM_ICONLIKE_SIZE)
         .width(OPERATEITEM_ARROW_WIDTH)
-        .focusable(FOCUSABLE)
+        .focusable(true)
         .fillColor($r('sys.color.icon_fourth'))
         .draggable(false)
     }
-    .focusable(FOCUSABLE)
+    .shadow(CLEARSHADOW)
     .hitTestBehavior(HitTestMode.Block)
     .backgroundColor(Color.Transparent)
     .height(OPERATEITEM_ICONLIKE_SIZE)
@@ -549,7 +549,6 @@ struct OperateItemStruct {
       .onChange(this.radio?.onChange)
       .height(OPERATEITEM_ICONLIKE_SIZE)
       .width(OPERATEITEM_ICONLIKE_SIZE)
-      .focusable(FOCUSABLE)
       .onFocus(() => {
         this.parentCanFocus = false
       })
@@ -588,7 +587,6 @@ struct OperateItemStruct {
       .onChange(this.checkBox?.onChange)
       .height(OPERATEITEM_ICONLIKE_SIZE)
       .width(OPERATEITEM_ICONLIKE_SIZE)
-      .focusable(FOCUSABLE)
       .onFocus(() => {
         this.parentCanFocus = false
       })
@@ -629,7 +627,6 @@ struct OperateItemStruct {
         })
         .hitTestBehavior(HitTestMode.Block)
     }
-    .focusable(FOCUSABLE)
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .justifyContent(FlexAlign.Center)
@@ -666,7 +663,7 @@ struct OperateItemStruct {
         Text(this.text)
           .fontSize($r('sys.float.ohos_id_text_size_body2'))
           .fontColor($r('sys.color.font_secondary'))
-          .focusable(FOCUSABLE)
+          .focusable(true)
           .draggable(false)
           .constraintSize({
             maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
@@ -675,11 +672,11 @@ struct OperateItemStruct {
           .height(OPERATEITEM_ICONLIKE_SIZE)
           .width(OPERATEITEM_ARROW_WIDTH)
           .fillColor($r('sys.color.icon_fourth'))
-          .focusable(FOCUSABLE)
+          .focusable(true)
           .draggable(false)
       }
     }
-    .focusable(FOCUSABLE)
+    .shadow(CLEARSHADOW)
     .hitTestBehavior(HitTestMode.Block)
     .backgroundColor(Color.Transparent)
     .borderRadius($r('sys.float.corner_radius_level8'))
@@ -1056,26 +1053,13 @@ export struct ComposeListItem {
         }
       }
       .constraintSize({ minHeight: this.itemHeight })
+      .focusable(FOCUSABLE)
       .borderRadius($r('sys.float.corner_radius_level8'))
       .backgroundColor(this.frontColor)
       .onFocus(() => {
         this.canFocus = true
         this.isFocus = true;
         this.frontColor = $r('sys.color.composeListItem_focused_backboard') || Color.Transparent.toString();
-      })
-      .onClick(() => {
-        if (!FOCUSABLE) {
-          this.isOnClick = !this.isOnClick;
-          if (this.operateItem?.icon) {
-            this.operateItem?.icon.action();
-          }
-          if (this.operateItem?.subIcon) {
-            this.operateItem?.subIcon.action();
-          }
-          if (this.operateItem?.arrow) {
-            this.operateItem?.arrow.action();
-          }
-        }
       })
       .onBlur(() => {
         this.canFocus = false
@@ -1111,11 +1095,6 @@ export struct ComposeListItem {
             color: $r('sys.color.composeListItem_color_border_focused') || this.focusOutlineColor,
             style: BorderStyle.Solid
           })
-          .scale({
-            x: LengthMetrics.resource($r('sys.float.composeListItem_focused_magnification')).value,
-            y: LengthMetrics.resource($r('sys.float.composeListItem_focused_magnification')).value
-          } || null)
-          .shadow(LengthMetrics.resource($r('sys.float.composeListItem_focused_shadow_attribute')).value as ShadowStyle)
         },
         normal: {
           .border({
@@ -1123,16 +1102,43 @@ export struct ComposeListItem {
             color: $r('sys.color.composeListItem_normal_stroke_color') || Color.Transparent,
             width: $r('sys.float.composeListItem_normal_stroke_thickness') || null,
           })
-          .blur(LengthMetrics.resource($r('sys.float.composeListItem_normal_fuzzy_value')).value)
-          .shadow(LengthMetrics.resource($r('sys.float.composeListItem_normal_shadow_attribute')).value as ShadowStyle)
           .scale({
-            x: recoveryScale,
-            y: recoveryScale
+            x: RECOVERYSCALE,
+            y: RECOVERYSCALE
           })
         },
       }).padding(this.containerPadding)
     }
-    .padding({
+    .onFocus(() => {
+      this.isFocus = true;
+      this.frontColor = $r('sys.color.composeListItem_focused_backboard') || Color.Transparent.toString();
+    })
+    .onBlur(() => {
+      this.isFocus = false;
+      this.frontColor = $r('sys.color.composeListItem_color_background_normal') || Color.Transparent.toString();
+    })
+    .borderRadius(this.isFocus ? $r('sys.float.composeListItem_normal_radio') : $r('sys.float.composeListItem_focused_circular_bead'))
+    .onClick(() => {
+      if (!FOCUSABLE) {
+        this.isOnClick = !this.isOnClick;
+        if (this.operateItem?.icon) {
+          this.operateItem?.icon.action();
+        }
+        if (this.operateItem?.subIcon) {
+          this.operateItem?.subIcon.action();
+        }
+        if (this.operateItem?.arrow) {
+          this.operateItem?.arrow.action();
+        }
+      }
+    })
+    .scale({
+      x: this.isFocus ? LengthMetrics.resource($r('sys.float.composeListItem_focused_magnification')).value : RECOVERYSCALE,
+      y: this.isFocus ? LengthMetrics.resource($r('sys.float.composeListItem_focused_magnification')).value : RECOVERYSCALE
+    })
+    .blur(this.isFocus ? CLEARBLUR : LengthMetrics.resource($r('sys.float.composeListItem_normal_fuzzy_value')).value)
+    .shadow(this.isFocus ? LengthMetrics.resource($r('sys.float.composeListItem_focused_shadow_attribute')).value as ShadowStyle : LengthMetrics.resource($r('sys.float.composeListItem_normal_shadow_attribute')).value as ShadowStyle)
+    .margin({
       start: this.getComposeItemLeftPadding(),
       end: this.getComposeItemRightPadding()
     });
