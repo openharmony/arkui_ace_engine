@@ -14,13 +14,119 @@
  */
 #include "core/interfaces/native/node/drag_adapter_impl.h"
 
+#include "native_type.h"
+
+#include "base/image/pixel_map.h"
+#include "base/utils/utils.h"
+#include "core/common/ace_engine.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
+#include "core/components_ng/manager/drag_drop/utils/internal_drag_action.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::DragAdapter {
 namespace {
+static void DragActionConvert(
+    ArkUIDragAction* dragAction, std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> internalDragAction)
+{
+    internalDragAction->pointer = dragAction->pointerId;
+    internalDragAction->size = dragAction->size;
+    auto* pixelMapTemp = reinterpret_cast<std::shared_ptr<void*>*>(dragAction->pixelmapArray);
+    for (int index = 0; index < dragAction->size; index++) {
+        auto pixelMap = PixelMap::CreatePixelMap(&pixelMapTemp[index]);
+        internalDragAction->pixelMapList.push_back(pixelMap);
+    }
+    internalDragAction->previewOption.isScaleEnabled = dragAction->dragPreviewOption.isScaleEnabled;
+    if (!internalDragAction->previewOption.isScaleEnabled) {
+        internalDragAction->previewOption.isDefaultShadowEnabled = dragAction->dragPreviewOption.isDefaultShadowEnabled;
+        internalDragAction->previewOption.isDefaultRadiusEnabled = dragAction->dragPreviewOption.isDefaultRadiusEnabled;
+    }
+    internalDragAction->previewOption.defaultAnimationBeforeLifting =
+        dragAction->dragPreviewOption.defaultAnimationBeforeLifting;
+    internalDragAction->previewOption.isMultiSelectionEnabled = dragAction->dragPreviewOption.isMultiSelectionEnabled;
+    internalDragAction->previewOption.isNumber = dragAction->dragPreviewOption.isNumberBadgeEnabled;
+    if (dragAction->dragPreviewOption.badgeNumber > 1) {
+        internalDragAction->previewOption.badgeNumber = dragAction->dragPreviewOption.badgeNumber;
+    } else {
+        internalDragAction->previewOption.isShowBadge = dragAction->dragPreviewOption.isShowBadge;
+    }
+    RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedDataForNative(dragAction->unifiedData);
+    internalDragAction->unifiedData = udData;
+    internalDragAction->instanceId = dragAction->instanceId;
+    internalDragAction->touchPointX = dragAction->touchPointX;
+    internalDragAction->touchPointY = dragAction->touchPointY;
+    internalDragAction->hasTouchPoint = dragAction->hasTouchPoint;
+}
+
+ArkUI_Int32 StartDrag(ArkUIDragAction* dragAction)
+{
+    CHECK_NULL_RETURN(dragAction, -1);
+    auto internalDragAction = std::make_shared<OHOS::Ace::NG::ArkUIInteralDragAction>();
+
+    CHECK_NULL_RETURN(internalDragAction, -1);
+    auto callbacks = [listener = dragAction->listener, userData = dragAction->userData,
+                         instanceId = dragAction->instanceId](const DragNotifyMsg& dragNotifyMsg, int32_t status) {
+        auto pipelineContext = NG::PipelineContext::GetContextByContainerId(instanceId);
+        CHECK_NULL_VOID(pipelineContext);
+        auto manager = pipelineContext->GetDragDropManager();
+        CHECK_NULL_VOID(manager);
+        ArkUIDragEvent dragEvent;
+        dragEvent.dragResult = static_cast<int32_t>(dragNotifyMsg.result);
+        dragEvent.dragBehavior = static_cast<int32_t>(dragNotifyMsg.dragBehavior);
+
+        auto action = manager->GetDragAction();
+        if (action != nullptr) {
+            action->hasHandle = false;
+        }
+        ArkUIDragAndDropInfo outInfo;
+        outInfo.status = status;
+        outInfo.dragEvent = &dragEvent;
+        CHECK_NULL_VOID(listener);
+        listener(&outInfo, userData);
+    };
+    internalDragAction->callback = callbacks;
+    DragActionConvert(dragAction, internalDragAction);
+    OHOS::Ace::NG::DragDropFuncWrapper::StartDragAction(internalDragAction);
+    return 0;
+}
+
+void RegisterStatusListener(ArkUIDragAction* dragAction, void* userData, DragStatusCallback listener)
+{
+    CHECK_NULL_VOID(dragAction);
+    dragAction->listener = listener;
+    dragAction->userData = userData;
+}
+
+void UnRegisterStatusListener(ArkUIDragAction* dragAction)
+{
+    CHECK_NULL_VOID(dragAction);
+    dragAction->listener = nullptr;
+    dragAction->userData = nullptr;
+}
+
+ArkUIDragAction* CreateDragActionWithNode(ArkUINodeHandle node)
+{
+    auto* dragAction = new ArkUIDragAction();
+    CHECK_NULL_RETURN(node, nullptr);
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    dragAction->instanceId = pipeline->GetInstanceId();
+    return dragAction;
+}
+
+ArkUIDragAction* CreateDragActionWithContext(ArkUIContext* context)
+{
+    auto* dragAction = new ArkUIDragAction();
+    CHECK_NULL_RETURN(context, nullptr);
+    dragAction->instanceId = context->id;
+    return dragAction;
+}
 
 void SetDragPreview(ArkUINodeHandle node, void* dragPreview)
 {
@@ -44,11 +150,9 @@ void SetDragEventStrictReportingEnabledWithContext(ArkUI_Int32 instanceId, bool 
 } // namespace
 const ArkUIDragAdapterAPI* GetDragAdapterAPI()
 {
-    static const ArkUIDragAdapterAPI impl {
-        SetDragPreview,
-        SetDragEventStrictReportingEnabledWithNode,
-        SetDragEventStrictReportingEnabledWithContext
-    };
+    static const ArkUIDragAdapterAPI impl { StartDrag, RegisterStatusListener, UnRegisterStatusListener,
+        CreateDragActionWithNode, CreateDragActionWithContext, SetDragPreview,
+        SetDragEventStrictReportingEnabledWithNode, SetDragEventStrictReportingEnabledWithContext };
     return &impl;
 }
 } // namespace OHOS::Ace::DragAdapter
