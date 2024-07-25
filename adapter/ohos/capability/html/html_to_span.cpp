@@ -40,6 +40,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/text/html_utils.h"
 
 namespace OHOS::Ace {
 constexpr int ONE_PARAM = 1;
@@ -1102,5 +1103,12 @@ RefPtr<MutableSpanString> HtmlToSpan::ToSpanString(const std::string& html)
     ParaseHtmlToSpanInfo(root, pos, content, 0, spanInfos);
     PrintSpanInfos(spanInfos);
     return GenerateSpans(content, spanInfos);
+}
+
+RefPtr<MutableSpanString> HtmlUtils::FromHtml(const std::string& html)
+{
+    HtmlToSpan hts;
+    auto styledString = hts.ToSpanString(html);
+    return styledString;
 }
 } // namespace OHOS::Ace
