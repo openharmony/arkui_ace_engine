@@ -156,12 +156,12 @@ class __Repeat<T> implements RepeatAPI<T> {
     private isVirtualScroll = false;
 
     constructor(owningView: ViewV2 | ViewPU, arr: Array<T>) {
-        this.config.owningView_= owningView instanceof ViewV2 ? owningView : undefined;
+        this.config.owningView_ = owningView instanceof ViewV2 ? owningView : undefined;
         this.config.arr = arr ?? [];
         this.config.itemGenFuncs = {};
         this.config.keyGenFunc = __RepeatDefaultKeyGen.funcWithIndex;
-        this.config.typeGenFunc= (() => '');
-        this.config.totalCountSpecified= false;
+        this.config.typeGenFunc = (() => '');
+        this.config.totalCountSpecified = false;
         this.config.totalCount = this.config.arr.length;
         this.config.templateOptions = {};
 
@@ -191,9 +191,9 @@ class __Repeat<T> implements RepeatAPI<T> {
     public virtualScroll(options? : { totalCount?: number }): RepeatAPI<T> {
         if (options && options.totalCount && Number.isInteger(options.totalCount)) {
             this.config.totalCount = options.totalCount;
-            this.config.totalCountSpecified= true;
+            this.config.totalCountSpecified = true;
         } else {
-            this.config.totalCountSpecified= false;
+            this.config.totalCountSpecified = false;
         }
         this.isVirtualScroll = true;
         return this;
@@ -250,7 +250,6 @@ class __Repeat<T> implements RepeatAPI<T> {
             : {
                 cachedCountSpecified: false
             };
-            stateMgmtConsole.error("template options " + JSON.stringify(value));
             return value;
     }
 }; // __Repeat<T>

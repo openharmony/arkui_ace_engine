@@ -27,6 +27,7 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<RepeatVirtualScrollModel> RepeatVirtualScrollModel::instance_ = nullptr;
+#define UNUSED_CACHED_SIZE_PARAM 2
 
 RepeatVirtualScrollModel* RepeatVirtualScrollModel::GetInstance()
 {
@@ -100,7 +101,7 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
 
     // arg 1
     auto templateOptsArray = JSRef<JSArray>::Cast(info[PARAM_TEMPLATE_OPTS]);
-    std::map<std::string, std::pair<bool,uint32_t>> templateCachedCountMap;
+    std::map<std::string, std::pair<bool, uint32_t>> templateCachedCountMap;
     for (size_t i = 0; i < templateOptsArray->Length(); i++) {
         JSRef<JSArray> pair = templateOptsArray->GetValueAt(i);
         auto type = pair->GetValueAt(0)->ToString();
@@ -109,7 +110,7 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
         templateCachedCountMap[type] =
             opts->GetProperty("cachedCountSpecified")->ToNumber <bool>()
                 ? std::pair<bool, uint32_t>(true, opts->GetProperty("cachedCount")->ToNumber<uint32_t>())
-                : std::pair<bool, uint32_t>(false, 2);
+                : std::pair<bool, uint32_t>(false, UNUSED_CACHED_SIZE_PARAM);
     }
 
     // arg 2

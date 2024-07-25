@@ -9816,7 +9816,6 @@ class __Repeat {
             : {
                 cachedCountSpecified: false
             };
-        stateMgmtConsole.error("template options " + JSON.stringify(value));
         return value;
     }
 }
@@ -10139,7 +10138,9 @@ class __RepeatVirtualScrollImpl {
                 let ttype = (_a = this.typeGenFunc_(this.arr_[i], i)) !== null && _a !== void 0 ? _a : '';
                 if (!this.itemGenFuncs_[ttype]) {
                     stateMgmtConsole.applicationError(`Repeat with virtual scroll elmtId: ${this.repeatElmtId_}. Factory function .templateId  returns template id '${ttype}'.` +
-                        (ttype == '') ? `Missing Repeat.each ` : `missing Repeat.template for id '${ttype}'` + `! Unrecoverable application error!"`);
+                        (ttype === '') ? 'Missing Repeat.each ' : `missing Repeat.template for id '${ttype}'` + '! Unrecoverable application error!');
+                    // fallback to use .each function and try to continue the app with it.
+                    ttype = '';
                 }
                 result.push(ttype);
             } // for
@@ -10169,13 +10170,13 @@ class __RepeatVirtualScrollImpl {
         // execute the itemGen function
         const itemType = (_a = this.typeGenFunc_(repeatItem.item, repeatItem.index)) !== null && _a !== void 0 ? _a : '';
         const itemFunc = (_b = this.itemGenFuncs_[itemType]) !== null && _b !== void 0 ? _b : this.itemGenFuncs_[''];
-        if (typeof itemFunc === "function") {
+        if (typeof itemFunc === 'function') {
             itemFunc(repeatItem);
         }
         else {
-            stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${this.repeatElmtId_}: `
-                + (itemType == '') ? "Missing Repeat.each " : `missing Repeat.template for id '${itemType}'`
-                + "! Unrecoverable application error!");
+            stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${this.repeatElmtId_}: ` +
+                (itemType === '') ? 'Missing Repeat.each ' : `missing Repeat.template for id '${itemType}'` +
+                '! Unrecoverable application error!');
         }
     }
     /**

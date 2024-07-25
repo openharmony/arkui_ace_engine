@@ -103,6 +103,11 @@ public:
      */
     bool RebuildL1(const std::function<bool(int32_t index, const RefPtr<UINode>& node)>& cbFunc);
 
+    /**
+     * dito with only key as cb function parameter
+     */
+    bool RebuildL1WithKey(const std::function<bool(const std::string& key)>& cbFunc);
+    
     /*
         drop L1 entry with given index from L1
         keep it in L2
@@ -272,7 +277,7 @@ private:
     // memorize active ranges of past 2 (last, prev)
     // from SetActiveChildRange calls and use to calc scroll direction
     // active range:= visible range + pre-render items above and below
-    // number of pre-render items defined by Gird/List.cacheCount and informed 
+    // number of pre-render items defined by Gird/List.cacheCount and informed
     // as cacheStart and cacheEnd in SetActiveChildRange
     std::pair<uint32_t, uint32_t> lastActiveRanges_[2] = { { 0, 0 }, { 0, 0 } };
 
