@@ -32,6 +32,7 @@ napi_value JsOnChange(napi_env env, napi_callback_info info);
 napi_value JsOnAnimationStart(napi_env env, napi_callback_info info);
 napi_value JsOnAnimationEnd(napi_env env, napi_callback_info info);
 napi_value JsOnGestureSwipe(napi_env env, napi_callback_info info);
+napi_value JsSetDigitalCrownSensitivity(napi_env env, napi_callback_info info);
 napi_value ShowNext(napi_env env, napi_callback_info info);
 napi_value ShowPrevious(napi_env env, napi_callback_info info);
 napi_value FinishAnimation(napi_env env, napi_callback_info info);

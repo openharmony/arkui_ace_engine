@@ -75,6 +75,10 @@ constexpr float VERTICAL_ENTRY_SCALE_REDUCTION_FACTOR = 0.015f;
 constexpr float VERTICAL_ENTRY_WHOLE_REDUCTION_FACTOR = 330 / 200;
 constexpr int32_t HALF = 2;
 constexpr int32_t ANIMATION_SIZE = 8;
+#ifdef SUPPORT_DIGITAL_CROWN
+constexpr int32_t MIN_TURN_PAGE_VELOCITY = 1200;
+constexpr int32_t NEW_MIN_TURN_PAGE_VELOCITY = 780;
+#endif
 } // namespace name
 
 
@@ -1143,4 +1147,223 @@ void ArcSwiperPattern::ResetAnimationParam()
     verticalEntryNodeScale_ = VERTICAL_ENTRY_SCALE_VALUE;
     verticalEntryNodeOpacity_ = 0;
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void ArcSwiperPattern::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
+{
+    crownSensitivity_ = sensitivity;
+}
+
+void ArcSwiperPattern::InitOnCrownEventInternal(const RefPtr<FocusHub>& focusHub)
+{
+    auto host = GetHost();
+    auto onCrownEvent = [weak = WeakClaim(this), weakNode = AceType::WeakClaim(AceType::RawPtr(
+        host))](const CrownEvent& event) -> bool {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        auto node = weakNode.Upgrade();
+        CHECK_NULL_RETURN(node, false);
+
+        auto offset = node->GetGeometryNode()->GetFrameOffset();
+        auto contentSize = node->GetGeometryNode()->GetFrameSize();
+        auto swiperPattern = node->GetPattern<SwiperPattern>();
+        float centerX = contentSize.Width() * 0.5 + offset.GetX();
+        float centerY = contentSize.Height() * 0.5 + offset.GetY();
+        OffsetF center;
+        center.SetX(centerX);
+        center.SetY(centerY);
+        pattern->HandleCrownEvent(event, center, offset);
+        return true;
+    };
+    focusHub->SetOnCrownEventInternal(std::move(onCrownEvent));
+}
+
+bool ArcSwiperPattern::IsCrownSpring() const
+{
+    return isCrownSpring_;
+}
+
+void ArcSwiperPattern::SetIsCrownSpring(bool isCrownSpring)
+{
+    isCrownSpring_ = false;
+}
+
+void ArcSwiperPattern::HandleCrownEvent(const CrownEvent& event, const OffsetF& center, const OffsetF& offset)
+{
+    DimensionOffset centerDimension(center);
+    Offset globalLocation(centerDimension.GetX().ConvertToPx(), centerDimension.GetY().ConvertToPx());
+    GestureEvent info;
+    info.SetSourceDevice(SourceType::CROWN);
+    info.SetSourceTool(SourceTool::UNKNOWN);
+    info.SetGlobalLocation(globalLocation);
+    double mainDelta = GetCrownRotatePx(event);
+    switch (event.action) {
+        case CrownAction::BEGIN:
+            HandleCrownActionBegin(event.degree, mainDelta, info);
+            break;
+        case CrownAction::UPDATE:
+            HandleCrownActionUpdate(event.degree, mainDelta, info, offset);
+            break;
+        case CrownAction::END:
+            HandleCrownActionEnd(event.degree, mainDelta, info, offset);
+            break;
+        default:
+            HandleCrownActionCancel();
+            break;
+    }
+}
+
+void ArcSwiperPattern::HandleCrownActionBegin(double degree, double mainDelta, GestureEvent& info)
+{
+    accumulativeCrownPx_.Reset();
+    UpdateCrownVelocity(degree, mainDelta);
+    info.SetMainDelta(mainDelta);
+    info.SetMainVelocity(crownVelocity_);
+    InitIndexCanChangeMap();
+    FireAndCleanScrollingListener();
+    HandleDragStart(info);
+    NotifyParentScrollStart(direction_ == Axis::HORIZONTAL ? info.GetGlobalLocation().GetX()
+                                    : info.GetGlobalLocation().GetY());
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetGlobalLocation(info.GetGlobalLocation());
+    HandleTouchDown(touchLocationInfo);
+    isCrownSpring_ = false;
+    isHandleCrownActionEnd_ = false;
+}
+
+void ArcSwiperPattern::HandleCrownActionUpdate(
+    double degree, double mainDelta, GestureEvent& info, const OffsetF& offset)
+{
+    if (isCrownSpring_) {
+        return;
+    }
+    if (!isDragging_) {
+        HandleCrownActionBegin(degree, mainDelta, info);
+        return;
+    }
+    UpdateCrownVelocity(degree, mainDelta);
+    info.SetMainDelta(mainDelta);
+    info.SetMainVelocity(crownVelocity_);
+    HandleDragUpdate(info);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(theme);
+    if (degree < theme->GetSpringVelocityThreshold()) {
+        auto length = (direction_ == Axis::HORIZONTAL ? info.GetGlobalLocation().GetX() - offset.GetX():
+                    info.GetGlobalLocation().GetY() - offset.GetY()) * 2;
+        double offsetLen = direction_ == Axis::VERTICAL ? accumulativeCrownPx_.GetY() : accumulativeCrownPx_.GetX();
+        if (std::abs(offsetLen) >= length * theme->GetCrownTranslocationRatio()) {
+            isCrownSpring_ = true;
+            HandleDragEnd(crownTurnVelocity_);
+            HandleTouchUp();
+        }
+    } else {
+        isCrownSpring_ = true;
+        HandleDragEnd(crownVelocity_);
+        HandleTouchUp();
+    }
+}
+
+void ArcSwiperPattern::HandleCrownActionEnd(
+    double degree, double mainDelta, GestureEvent& info, const OffsetF& offset)
+{
+    if (!isDragging_ || isHandleCrownActionEnd_) {
+        return;
+    }
+    isHandleCrownActionEnd_ = true;
+    UpdateCrownVelocity(degree, mainDelta, true);
+    info.SetMainDelta(mainDelta);
+    info.SetMainVelocity(crownVelocity_);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(theme);
+    isCrownSpring_ = true;
+    if (degree < theme->GetSpringVelocityThreshold()) {
+        auto length = (direction_ == Axis::HORIZONTAL ? info.GetGlobalLocation().GetX() - offset.GetX():
+                    info.GetGlobalLocation().GetY() - offset.GetY()) * 2;
+        double offsetLen = direction_ == Axis::VERTICAL ? accumulativeCrownPx_.GetY() : accumulativeCrownPx_.GetX();
+        if (std::abs(offsetLen) >= length * theme->GetCrownTranslocationRatio()) {
+            HandleDragEnd(crownTurnVelocity_);
+            HandleTouchUp();
+        } else {
+            HandleDragEnd(0.0);
+            HandleTouchUp();
+        }
+    } else {
+        HandleDragEnd(crownVelocity_);
+        HandleTouchUp();
+    }
+}
+
+void ArcSwiperPattern::HandleCrownActionCancel()
+{
+    isCrownSpring_ = false;
+    isHandleCrownActionEnd_ = false;
+    if (!isDragging_) {
+        return;
+    }
+
+    HandleDragEnd(0.0);
+    HandleTouchUp();
+    isDragging_ = false;
+}
+
+double ArcSwiperPattern::GetCrownRotatePx(const CrownEvent& event) const
+{
+    double velocity = event.degree;
+    double px = 0.0;
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, 0.0);
+    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_RETURN(theme, 0.0);
+
+    if (LessOrEqualCustomPrecision(velocity, theme->GetSlowVelocityThreshold(), 0.01f)) {
+        px = theme->GetDisplayControlRatioSlow() * velocity;
+    } else {
+        px = theme->GetDisplayControlRatioFast() * velocity;
+    }
+
+    switch (crownSensitivity_) {
+        case CrownSensitivity::LOW:
+            px *= theme->GetCrownSensitivityLow();
+            break;
+        case CrownSensitivity::MEDIUM:
+            px *= theme->GetCrownSensitivityMedium();
+            break;
+        case CrownSensitivity::HIGH:
+            px *= theme->GetCrownSensitivityHigh();
+            break;
+        default:
+            break;
+    }
+    return px;
+}
+
+void ArcSwiperPattern::UpdateCrownVelocity(double degree, double mainDelta, bool isEnd)
+{
+    if (isEnd) {
+        return;
+    }
+    if (direction_ == Axis::VERTICAL) {
+        accumulativeCrownPx_ += Offset(0, mainDelta);
+    } else {
+        accumulativeCrownPx_ += Offset(mainDelta, 0);
+    }
+    auto turnVelocity = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)
+                                                        ? NEW_MIN_TURN_PAGE_VELOCITY
+                                                        : MIN_TURN_PAGE_VELOCITY;
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(theme);
+    crownVelocity_ = degree * turnVelocity / theme->GetSpringVelocityThreshold();
+    if (degree > 0) {
+        crownTurnVelocity_ = turnVelocity + 1;
+    } else {
+        crownTurnVelocity_ = -turnVelocity - 1;
+    }
+}
+#endif
 } // namespace OHOS::Ace::NG

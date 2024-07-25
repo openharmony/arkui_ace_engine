@@ -161,6 +161,16 @@ public:
             theme->arcMaskStartColor_ = swiperPattern->GetAttr<Color>("mask_color_start", Color::TRANSPARENT);
             theme->arcMaskEndColor_ = swiperPattern->GetAttr<Color>("mask_color_end", Color::TRANSPARENT);
             theme->arcContainerColor_ = swiperPattern->GetAttr<Color>("container_color", Color::TRANSPARENT);
+#ifdef SUPPORT_DIGITAL_CROWN
+            theme->slowVelocityThreshold_ = swiperPattern->GetAttr<double>("swiper_slow_velocity_threshold", 0.0f);
+            theme->displayControlRatioSlow_ = swiperPattern->GetAttr<double>("swiper_display_control_ratio_slow", 0.0f);
+            theme->displayControlRatioFast_ = swiperPattern->GetAttr<double>("swiper_display_control_ratio_fast", 0.0f);
+            theme->crownSensitivityLow_ = swiperPattern->GetAttr<double>("swiper_crown_sensitivity_low", 0.0f);
+            theme->crownSensitivityMedium_ = swiperPattern->GetAttr<double>("swiper_crown_sensitivity_medium", 0.0f);
+            theme->crownSensitivityHigh_ = swiperPattern->GetAttr<double>("swiper_crown_sensitivity_high", 0.0f);
+            theme->springVelocityThreshold_ = swiperPattern->GetAttr<double>("swiper_spring_velocity_threshold", 0.0f);
+            theme->crownTranslocationRatio_ = swiperPattern->GetAttr<double>("swiper_crown_translocation_ratio", 0.0f);
+#endif
         }
     };
 
@@ -468,6 +478,48 @@ public:
         return downSymbolId_;
     }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    double GetSlowVelocityThreshold() const
+    {
+        return slowVelocityThreshold_;
+    }
+
+    double GetDisplayControlRatioSlow() const
+    {
+        return displayControlRatioSlow_;
+    }
+
+    double GetDisplayControlRatioFast() const
+    {
+        return displayControlRatioFast_;
+    }
+
+    double GetCrownSensitivityLow() const
+    {
+        return crownSensitivityLow_;
+    }
+
+    double GetCrownSensitivityMedium() const
+    {
+        return crownSensitivityMedium_;
+    }
+
+    double GetCrownSensitivityHigh() const
+    {
+        return crownSensitivityHigh_;
+    }
+
+    double GetSpringVelocityThreshold() const
+    {
+        return springVelocityThreshold_;
+    }
+
+    double GetCrownTranslocationRatio() const
+    {
+        return crownTranslocationRatio_;
+    }
+#endif
+
 protected:
     SwiperIndicatorTheme() = default;
 
@@ -532,6 +584,16 @@ private:
     uint32_t rightSymbolId_ = 0;
     uint32_t upSymbolId_ = 0;
     uint32_t downSymbolId_ = 0;
+#ifdef SUPPORT_DIGITAL_CROWN
+    double slowVelocityThreshold_ = 0.0f;
+    double displayControlRatioSlow_ = 0.0f;
+    double displayControlRatioFast_ = 0.0f;
+    double crownSensitivityLow_ = 0.0f;
+    double crownSensitivityMedium_ = 0.0f;
+    double crownSensitivityHigh_ = 0.0f;
+    double springVelocityThreshold_ = 0.0f;
+    double crownTranslocationRatio_ = 0.0f;
+#endif
 };
 
 } // namespace OHOS::Ace
