@@ -1311,8 +1311,7 @@ public:
             offset.deltaX = rect_.left + rect_.width - ((rectf.Width() + size.width) / POPUP_CALCULATE_RATIO);
         }
 
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "popup offset.deltaX:%{public}f", offset.deltaX);
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "popup offset.deltaY:%{public}f", offset.deltaY);
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "popup offset x=%{public}f, y=%{public}f", offset.deltaX, offset.deltaY);
         config.targetOffset = offset;
     }
 

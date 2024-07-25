@@ -73,7 +73,7 @@ namespace {
 const std::string IMAGE_POINTER_CONTEXT_MENU_PATH = "etc/webview/ohos_nweb/context-menu.svg";
 const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
-constexpr int32_t AUTOFILL_DELAY_TIME = 100;
+constexpr int32_t AUTOFILL_DELAY_TIME = 200;
 constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
 constexpr int32_t TOUCH_EVENT_MAX_SIZE = 5;
 constexpr int32_t KEYEVENT_MAX_NUM = 1000;
@@ -3352,7 +3352,7 @@ void WebPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool ne
 void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
     RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "called");
+    TAG_LOGI(AceLogTag::ACE_WEB, "autofill request success");
     CHECK_NULL_VOID(viewDataWrap);
     auto nodeInfoWraps = viewDataWrap->GetPageNodeInfoWraps();
     auto jsonNode = JsonUtil::Create(true);
@@ -3372,7 +3372,7 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
 
 void WebPattern::NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent, bool isPopup)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "called, errCode:%{public}d", errCode);
+    TAG_LOGI(AceLogTag::ACE_WEB, "autofill request fail, errCode:%{public}d", errCode);
 }
 
 void WebPattern::ParseViewDataNumber(const std::string& key, int32_t value,
@@ -3497,43 +3497,38 @@ AceAutoFillType WebPattern::GetFocusedType()
 
 void WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "called");
+    TAG_LOGI(AceLogTag::ACE_WEB, "receive autofill event from nweb");
     OHOS::NWeb::NWebAutofillEvent eventType = OHOS::NWeb::NWebAutofillEvent::UNKNOWN;
     ParseNWebViewDataJson(viewDataJson, pageNodeInfo_, eventType);
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-
-    auto task = [weak = WeakClaim(this), eventType]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (eventType == OHOS::NWeb::NWebAutofillEvent::SAVE) {
-            pattern->RequestAutoSave();
-        } else if (eventType == OHOS::NWeb::NWebAutofillEvent::FILL) {
-            pattern->RequestAutoFill(pattern->GetFocusedType());
-        } else if (eventType == OHOS::NWeb::NWebAutofillEvent::UPDATE) {
-            pattern->UpdateAutoFillPopup();
-        } else if (eventType == OHOS::NWeb::NWebAutofillEvent::CLOSE) {
-            pattern->CloseAutoFillPopup();
-        }
-    };
-
     if (eventType == OHOS::NWeb::NWebAutofillEvent::FILL) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostDelayedTask(
-            task, TaskExecutor::TaskType::UI, AUTOFILL_DELAY_TIME, "ArkUIWebHandleAutoFillEvent");
-    } else {
-        taskExecutor->PostTask(
-            task, TaskExecutor::TaskType::UI, "ArkUIWebHandleAutoFillEvent");
+            [weak = WeakClaim(this)] () {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->RequestAutoFill(pattern->GetFocusedType());
+            },
+            TaskExecutor::TaskType::UI, AUTOFILL_DELAY_TIME, "ArkUIWebHandleAutoFillEvent");
+    }
+
+    if (eventType == OHOS::NWeb::NWebAutofillEvent::SAVE) {
+        RequestAutoSave();
+    } else if (eventType == OHOS::NWeb::NWebAutofillEvent::UPDATE) {
+        UpdateAutoFillPopup();
+    } else if (eventType == OHOS::NWeb::NWebAutofillEvent::CLOSE) {
+        CloseAutoFillPopup();
     }
 }
 
 bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "called");
+    TAG_LOGI(AceLogTag::ACE_WEB, "begin to RequestAutoFill");
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto container = Container::Current();
@@ -3547,7 +3542,7 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
 
 bool WebPattern::RequestAutoSave()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "called");
+    TAG_LOGI(AceLogTag::ACE_WEB, "begin to RequestAutoSave");
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto container = Container::Current();
@@ -3560,7 +3555,7 @@ bool WebPattern::RequestAutoSave()
 
 bool WebPattern::UpdateAutoFillPopup()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "called");
+    TAG_LOGI(AceLogTag::ACE_WEB, "begin to UpdateAutoFillPopup");
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto container = Container::Current();
@@ -3573,7 +3568,7 @@ bool WebPattern::UpdateAutoFillPopup()
 
 bool WebPattern::CloseAutoFillPopup()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "called");
+    TAG_LOGI(AceLogTag::ACE_WEB, "begin to CloseAutoFillPopup");
     auto container = Container::Current();
     if (container == nullptr) {
         container = Container::GetActive();
