@@ -3357,6 +3357,16 @@ void PipelineContext::FlushWindowSizeChangeCallback(int32_t width, int32_t heigh
     }
 }
 
+void PipelineContext::RequireSummary()
+{
+    auto manager = GetDragDropManager();
+    if (!manager) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "require summary, dragDropManager is null");
+        return;
+    }
+    manager->RequireSummary();
+}
+
 void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
     const RefPtr<NG::FrameNode>& node)
 {

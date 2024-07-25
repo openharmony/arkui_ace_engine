@@ -1753,6 +1753,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 
     InitializeSafeArea(container);
     InitializeDisplayAvailableRect(container);
+    InitDragSummaryMap(container);
 
     // set container temp dir
     if (abilityContext) {
@@ -1841,6 +1842,14 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
         if (ret == Rosen::DMError::DM_OK) {
             pipeline->UpdateDisplayAvailableRect(ConvertDMRect2Rect(availableArea));
         }
+    }
+}
+
+void UIContentImpl::InitDragSummaryMap(const RefPtr<Platform::AceContainer>& container)
+{
+    auto pipeline = container->GetPipelineContext();
+    if (pipeline && container->IsUIExtensionWindow()) {
+        pipeline->RequireSummary();
     }
 }
 

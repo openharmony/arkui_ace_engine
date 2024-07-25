@@ -957,6 +957,8 @@ public:
         return false;
     }
 
+    virtual void RequireSummary() {}
+
     void SetPluginOffset(const Offset& offset)
     {
         pluginOffset_ = offset;
