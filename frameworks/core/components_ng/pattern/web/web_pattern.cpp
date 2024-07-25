@@ -3650,9 +3650,7 @@ void WebPattern::OnWindowShow()
 
 void WebPattern::OnWindowHide()
 {
-    if (!isOfflineMode_) {
-        delegate_->OnRenderToBackground();
-    }
+    delegate_->OnRenderToBackground();
     if (!isWindowShow_ || !isVisible_) {
         return;
     }
