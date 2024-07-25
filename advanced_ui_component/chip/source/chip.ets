@@ -24,6 +24,14 @@ import componentUtils from '@ohos.arkui.componentUtils';
 import hilog from '@ohos.hilog';
 
 const resourceFn = resourceManager.getSystemResourceManager();
+const shadowStyleList: ShadowStyle[] = [
+  ShadowStyle.OUTER_DEFAULT_XS,
+  ShadowStyle.OUTER_DEFAULT_SM,
+  ShadowStyle.OUTER_DEFAULT_MD,
+  ShadowStyle.OUTER_DEFAULT_LG,
+  ShadowStyle.OUTER_FLOATING_SM,
+  ShadowStyle.OUTER_FLOATING_MD,
+];
 
 export enum ChipSize {
   NORMAL = "NORMAL",
@@ -167,31 +175,15 @@ interface ChipTheme {
   chipNode: ChipNodeTheme;
 }
 
-function sizeToVp(sizeResource: Resource): number {
-  let metrics = LengthMetrics.resource(sizeResource);
-  let value = metrics.value;
-  let unit = metrics.unit;
-  if (unit === LengthUnit.PX) {
-    return px2vp(value);
-  } else if (unit === LengthUnit.VP) {
-    return value;
-  } else if (unit === LengthUnit.FP) {
-    return px2vp(fp2px(value));
-  } else if (unit === LengthUnit.LPX) {
-    return px2vp(lpx2px((value)));
-  }
-}
-
 function getShadowStyle(resourceNum: Resource): ShadowStyle | undefined {
-  const shadowStyleList: ShadowStyle[] = [
-    ShadowStyle.OUTER_DEFAULT_XS,
-    ShadowStyle.OUTER_DEFAULT_SM,
-    ShadowStyle.OUTER_DEFAULT_MD,
-    ShadowStyle.OUTER_DEFAULT_LG,
-    ShadowStyle.OUTER_FLOATING_SM,
-    ShadowStyle.OUTER_FLOATING_MD,
-  ];
-  let index = Number(sizeToVp(resourceNum));
+  let index = 6;
+  try {
+    let resourceToIndex = resourceFn.getNumberByName((((resourceNum as Resource)
+      .params as string[])[0]).split('.')[2]);
+    index = resourceToIndex;
+  } catch (error) {
+    index = 6;
+  }
   if (index < shadowStyleList.length) {
     return shadowStyleList[index];
   } else {
@@ -270,7 +262,7 @@ export const defaultTheme: ChipTheme = {
   defaultSymbol: {
     normalFontColor: [$r('sys.color.chip_usually_icon_color')],
     activatedFontColor: [$r('sys.color.chip_active_icon_color')],
-    fontSize: sizeToVp($r('sys.float.chip_suffix_icon_size_default')),
+    fontSize: $r('sys.float.chip_suffix_icon_size_default'),
   },
   chipNode: {
     suitAgeScale: 1.75,
@@ -284,10 +276,10 @@ export const defaultTheme: ChipTheme = {
     focusOutlineColor: $r('sys.color.ohos_id_color_focused_outline'),
     normalBorderColor: $r('sys.color.chip_normal_border_color'),
     smallBorderColor: $r('sys.color.chip_small_border_color'),
-    normalBorderWidth: sizeToVp($r('sys.float.chip_normal_border_width')),
-    smallBorderWidth: sizeToVp($r('sys.float.chip_small_border_width')),
-    normalBorderRadius: sizeToVp($r('sys.float.chip_normal_radius')),
-    smallBorderRadius: sizeToVp($r('sys.float.chip_small_radius')),
+    normalBorderWidth: $r('sys.float.chip_normal_border_width'),
+    smallBorderWidth: $r('sys.float.chip_small_border_width'),
+    normalBorderRadius: $r('sys.float.chip_normal_radius'),
+    smallBorderRadius: $r('sys.float.chip_small_radius'),
     borderWidth: 2,
     focusBtnScaleX: $r('sys.float.chip_focused_btn_scale_x'),
     focusBtnScaleY: $r('sys.float.chip_focused_btn_scale_y'),
@@ -415,6 +407,22 @@ export struct ChipComponent {
 
   private isChipSizeEnum(): boolean {
     return typeof (this.chipSize) === 'string';
+  }
+
+  private sizeToVp(sizeResource: Resource): number {
+    let getUIContext = this.getUIContext();
+    let metrics = LengthMetrics.resource(sizeResource);
+    let value = metrics.value;
+    let unit = metrics.unit;
+    if (unit === LengthUnit.PX) {
+      return getUIContext.px2vp(value);
+    } else if (unit === LengthUnit.VP) {
+      return value;
+    } else if (unit === LengthUnit.FP) {
+      return getUIContext.px2vp(getUIContext.fp2px(value));
+    } else if (unit === LengthUnit.LPX) {
+      return getUIContext.px2vp(getUIContext.lpx2px((value)));
+    }
   }
 
   private getFocusFontSize(): Dimension {
@@ -560,9 +568,9 @@ export struct ChipComponent {
 
   private getChipNodeBorderWidth(): Dimension {
     if (this.chipSize === ChipSize.NORMAL && !this.isSetbackgroundColor()) {
-      return this.theme.chipNode.normalBorderWidth;
+      return this.sizeToVp(this.theme.chipNode.normalBorderWidth as Resource);
     } else if (this.chipSize === ChipSize.SMALL && !this.isSetbackgroundColor()) {
-      return this.theme.chipNode.smallBorderWidth;
+      return this.sizeToVp(this.theme.chipNode.smallBorderWidth as Resource);
     } else {
       return 0;
     }
@@ -583,17 +591,17 @@ export struct ChipComponent {
     if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) ||
       this.prefixIcon?.src) {
       if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
-        labelMargin.left = sizeToVp(this.theme.label.smallDefaultMargin.left as Resource);
+        labelMargin.left = this.sizeToVp(this.theme.label.smallDefaultMargin.left as Resource);
       } else {
-        labelMargin.left = sizeToVp(this.theme.label.normalDefaultMargin.left as Resource);
+        labelMargin.left = this.sizeToVp(this.theme.label.normalDefaultMargin.left as Resource);
       }
     }
     if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
       this.suffixIcon?.src || this.useDefaultSuffixIcon || this.allowClose) {
       if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
-        labelMargin.right = sizeToVp(this.theme.label.smallDefaultMargin.right as Resource);
+        labelMargin.right = this.sizeToVp(this.theme.label.smallDefaultMargin.right as Resource);
       } else {
-        labelMargin.right = sizeToVp(this.theme.label.normalDefaultMargin.right as Resource);
+        labelMargin.right = this.sizeToVp(this.theme.label.normalDefaultMargin.right as Resource);
       }
     }
     return labelMargin;
@@ -697,7 +705,7 @@ export struct ChipComponent {
       suffixIconSize.width = this.suffixIcon?.size?.width;
     } else {
       if (this.getSuffixIconSrc()) {
-        suffixIconSize.width = sizeToVp(this.theme.suffixIcon.size.width as Resource);
+        suffixIconSize.width = this.sizeToVp(this.theme.suffixIcon.size.width as Resource);
       } else {
         suffixIconSize.width = 0;
       }
@@ -721,7 +729,7 @@ export struct ChipComponent {
       prefixIconSize.width = this.prefixIcon?.size?.width;
     } else {
       if (this.prefixIcon?.src) {
-        prefixIconSize.width = sizeToVp(this.theme.prefixIcon.size.width as Resource);
+        prefixIconSize.width = this.sizeToVp(this.theme.prefixIcon.size.width as Resource);
       } else {
         prefixIconSize.width = 0;
       }
@@ -838,7 +846,8 @@ export struct ChipComponent {
       return this.chipNodeRadius as Dimension;
     } else {
       return ((this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) ?
-      this.theme.chipNode.smallBorderRadius : this.theme.chipNode.normalBorderRadius);
+      this.sizeToVp(this.theme.chipNode.smallBorderRadius as Resource) :
+      this.sizeToVp(this.theme.chipNode.normalBorderRadius as Resource));
     }
   }
 
@@ -934,7 +943,7 @@ export struct ChipComponent {
     } else if (this.suffixIcon?.src) {
       return this.getSuffixIconSize().width;
     } else if (!this.suffixIcon?.src && this.allowClose) {
-      return this.theme.defaultSymbol.fontSize;
+      return this.sizeToVp(this.theme.defaultSymbol.fontSize as Resource);
     } else {
       return 0;
     }

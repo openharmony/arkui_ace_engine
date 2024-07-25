@@ -28,6 +28,14 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 }
 
 const resourceFn = resourceManager.getSystemResourceManager();
+const shadowStyleList = [
+    ShadowStyle.OUTER_DEFAULT_XS,
+    ShadowStyle.OUTER_DEFAULT_SM,
+    ShadowStyle.OUTER_DEFAULT_MD,
+    ShadowStyle.OUTER_DEFAULT_LG,
+    ShadowStyle.OUTER_FLOATING_SM,
+    ShadowStyle.OUTER_FLOATING_MD,
+];
 export var ChipSize;
 (function (ChipSize) {
     ChipSize["NORMAL"] = "NORMAL";
@@ -39,33 +47,16 @@ var BreakPointsType;
     BreakPointsType["MD"] = "MD";
     BreakPointsType["LG"] = "LG";
 })(BreakPointsType || (BreakPointsType = {}));
-function sizeToVp(sizeResource) {
-    let metrics = LengthMetrics.resource(sizeResource);
-    let value = metrics.value;
-    let unit = metrics.unit;
-    if (unit === LengthUnit.PX) {
-        return px2vp(value);
-    }
-    else if (unit === LengthUnit.VP) {
-        return value;
-    }
-    else if (unit === LengthUnit.FP) {
-        return px2vp(fp2px(value));
-    }
-    else if (unit === LengthUnit.LPX) {
-        return px2vp(lpx2px((value)));
-    }
-}
 function getShadowStyle(resourceNum) {
-    const shadowStyleList = [
-        ShadowStyle.OUTER_DEFAULT_XS,
-        ShadowStyle.OUTER_DEFAULT_SM,
-        ShadowStyle.OUTER_DEFAULT_MD,
-        ShadowStyle.OUTER_DEFAULT_LG,
-        ShadowStyle.OUTER_FLOATING_SM,
-        ShadowStyle.OUTER_FLOATING_MD,
-    ];
-    let index = Number(sizeToVp(resourceNum));
+    let index = 6;
+    try {
+        let resourceToIndex = resourceFn.getNumberByName((resourceNum
+            .params[0]).split('.')[2]);
+        index = resourceToIndex;
+    }
+    catch (error) {
+        index = 6;
+    }
     if (index < shadowStyleList.length) {
         return shadowStyleList[index];
     }
@@ -146,7 +137,7 @@ export const defaultTheme = {
     defaultSymbol: {
         normalFontColor: [{ "id": -1, "type": 10001, params: ['sys.color.chip_usually_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }],
         activatedFontColor: [{ "id": -1, "type": 10001, params: ['sys.color.chip_active_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }],
-        fontSize: sizeToVp({ "id": -1, "type": 10002, params: ['sys.float.chip_suffix_icon_size_default'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+        fontSize: { "id": -1, "type": 10002, params: ['sys.float.chip_suffix_icon_size_default'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
     },
     chipNode: {
         suitAgeScale: 1.75,
@@ -160,10 +151,10 @@ export const defaultTheme = {
         focusOutlineColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         normalBorderColor: { "id": -1, "type": 10001, params: ['sys.color.chip_normal_border_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         smallBorderColor: { "id": -1, "type": 10001, params: ['sys.color.chip_small_border_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        normalBorderWidth: sizeToVp({ "id": -1, "type": 10002, params: ['sys.float.chip_normal_border_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
-        smallBorderWidth: sizeToVp({ "id": -1, "type": 10002, params: ['sys.float.chip_small_border_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
-        normalBorderRadius: sizeToVp({ "id": -1, "type": 10002, params: ['sys.float.chip_normal_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
-        smallBorderRadius: sizeToVp({ "id": -1, "type": 10002, params: ['sys.float.chip_small_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+        normalBorderWidth: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_border_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        smallBorderWidth: { "id": -1, "type": 10002, params: ['sys.float.chip_small_border_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        normalBorderRadius: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        smallBorderRadius: { "id": -1, "type": 10002, params: ['sys.float.chip_small_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         borderWidth: 2,
         focusBtnScaleX: { "id": -1, "type": 10002, params: ['sys.float.chip_focused_btn_scale_x'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         focusBtnScaleY: { "id": -1, "type": 10002, params: ['sys.float.chip_focused_btn_scale_y'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
@@ -218,7 +209,7 @@ export function Chip(options, parent = null) {
                     chipDirection: options.direction,
                     onClose: options.onClose,
                     onClicked: options.onClicked,
-                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/chip.ets", line: 346, col: 3 });
+                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/chip.ets", line: 338, col: 3 });
                 ViewPU.create(componentCall);
                 let paramsLambda = () => {
                     return {
@@ -700,6 +691,24 @@ export class ChipComponent extends ViewPU {
     isChipSizeEnum() {
         return typeof (this.chipSize) === 'string';
     }
+    sizeToVp(sizeResource) {
+        let getUIContext = this.getUIContext();
+        let metrics = LengthMetrics.resource(sizeResource);
+        let value = metrics.value;
+        let unit = metrics.unit;
+        if (unit === LengthUnit.PX) {
+            return getUIContext.px2vp(value);
+        }
+        else if (unit === LengthUnit.VP) {
+            return value;
+        }
+        else if (unit === LengthUnit.FP) {
+            return getUIContext.px2vp(getUIContext.fp2px(value));
+        }
+        else if (unit === LengthUnit.LPX) {
+            return getUIContext.px2vp(getUIContext.lpx2px((value)));
+        }
+    }
     getFocusFontSize() {
         if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
             try {
@@ -845,10 +854,10 @@ export class ChipComponent extends ViewPU {
     }
     getChipNodeBorderWidth() {
         if (this.chipSize === ChipSize.NORMAL && !this.isSetbackgroundColor()) {
-            return this.theme.chipNode.normalBorderWidth;
+            return this.sizeToVp(this.theme.chipNode.normalBorderWidth);
         }
         else if (this.chipSize === ChipSize.SMALL && !this.isSetbackgroundColor()) {
-            return this.theme.chipNode.smallBorderWidth;
+            return this.sizeToVp(this.theme.chipNode.smallBorderWidth);
         }
         else {
             return 0;
@@ -870,19 +879,19 @@ export class ChipComponent extends ViewPU {
         if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) ||
             this.prefixIcon?.src) {
             if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
-                labelMargin.left = sizeToVp(this.theme.label.smallDefaultMargin.left);
+                labelMargin.left = this.sizeToVp(this.theme.label.smallDefaultMargin.left);
             }
             else {
-                labelMargin.left = sizeToVp(this.theme.label.normalDefaultMargin.left);
+                labelMargin.left = this.sizeToVp(this.theme.label.normalDefaultMargin.left);
             }
         }
         if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
             this.suffixIcon?.src || this.useDefaultSuffixIcon || this.allowClose) {
             if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
-                labelMargin.right = sizeToVp(this.theme.label.smallDefaultMargin.right);
+                labelMargin.right = this.sizeToVp(this.theme.label.smallDefaultMargin.right);
             }
             else {
-                labelMargin.right = sizeToVp(this.theme.label.normalDefaultMargin.right);
+                labelMargin.right = this.sizeToVp(this.theme.label.normalDefaultMargin.right);
             }
         }
         return labelMargin;
@@ -990,7 +999,7 @@ export class ChipComponent extends ViewPU {
         }
         else {
             if (this.getSuffixIconSrc()) {
-                suffixIconSize.width = sizeToVp(this.theme.suffixIcon.size.width);
+                suffixIconSize.width = this.sizeToVp(this.theme.suffixIcon.size.width);
             }
             else {
                 suffixIconSize.width = 0;
@@ -1017,7 +1026,7 @@ export class ChipComponent extends ViewPU {
         }
         else {
             if (this.prefixIcon?.src) {
-                prefixIconSize.width = sizeToVp(this.theme.prefixIcon.size.width);
+                prefixIconSize.width = this.sizeToVp(this.theme.prefixIcon.size.width);
             }
             else {
                 prefixIconSize.width = 0;
@@ -1129,7 +1138,8 @@ export class ChipComponent extends ViewPU {
         }
         else {
             return ((this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) ?
-            this.theme.chipNode.smallBorderRadius : this.theme.chipNode.normalBorderRadius);
+            this.sizeToVp(this.theme.chipNode.smallBorderRadius) :
+            this.sizeToVp(this.theme.chipNode.normalBorderRadius));
         }
     }
     getChipNodeBackGroundColor() {
@@ -1227,7 +1237,7 @@ export class ChipComponent extends ViewPU {
             return this.getSuffixIconSize().width;
         }
         else if (!this.suffixIcon?.src && this.allowClose) {
-            return this.theme.defaultSymbol.fontSize;
+            return this.sizeToVp(this.theme.defaultSymbol.fontSize);
         }
         else {
             return 0;
