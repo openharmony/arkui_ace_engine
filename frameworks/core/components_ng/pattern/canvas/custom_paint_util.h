@@ -30,6 +30,13 @@ constexpr int32_t MAX_LENGTH = 2048 * 2048;
 constexpr double HANGING_PERCENT = 0.8;
 constexpr double DEFAULT_QUALITY = 0.92;
 
+struct CanvasModifierDump {
+    int64_t timestamp;
+    double width;
+    double height;
+    size_t opItemSize;
+};
+
 // If args is empty or invalid format, use default: image/png
 std::string GetMimeType(const std::string& args);
 

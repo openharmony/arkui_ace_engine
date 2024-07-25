@@ -456,4 +456,19 @@ void CanvasPaintMethod::ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextS
     Constants::ConvertTxtStyle(textStyle, context_, txtStyle);
 }
 #endif
+
+std::string CanvasPaintMethod::GetDumpInfo()
+{
+    CHECK_NULL_RETURN(rsCanvas_, "Canvas is nullptr");
+    // translate
+    std::string trans = "TRANS: " + std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::TRANS_X)) + ", " +
+                        std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::TRANS_Y)) + "; ";
+    // scale
+    std::string scale = "SCALE: " + std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SCALE_X)) + ", " +
+                        std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SCALE_Y)) + "; ";
+    // rotate
+    std::string skew = "SKEW: " + std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SKEW_X)) + ", " +
+                       std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SKEW_Y)) + "; ";
+    return trans.append(scale).append(skew);
+}
 } // namespace OHOS::Ace::NG
