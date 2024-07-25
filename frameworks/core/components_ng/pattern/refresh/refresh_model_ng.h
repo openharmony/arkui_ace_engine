@@ -41,6 +41,7 @@ public:
     void SetPullDownRatio(const std::optional<float>& pullDownRatio) override;
     void SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) override;
     void SetLoadingText(const std::string& loadingText) override;
+    void ResetLoadingText() override;
     void SetRefreshOffset(const Dimension& offset) override;
     void SetPullToRefresh(bool isPullToRefresh) override;
     void SetIsCustomBuilderExist(bool isCustomBuilderExist) override;

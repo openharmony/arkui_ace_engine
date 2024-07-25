@@ -738,6 +738,19 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     return true;
 }
 
+void EventManager::ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent)
+{
+    refereeNG_->CleanGestureScope(touchEvent.id);
+    referee_->CleanGestureScope(touchEvent.id);
+    touchTestResults_.erase(touchEvent.id);
+    touchEvent.isMocked = true;
+    touchEvent.type = TouchType::CANCEL;
+    for (const auto& iter : downFingerIds_) {
+        touchEvent.id = iter;
+        DispatchTouchEvent(touchEvent);
+    }
+}
+
 void EventManager::CleanRecognizersForDragBegin(TouchEvent& touchEvent)
 {
     downFingerIds_.erase(touchEvent.id);

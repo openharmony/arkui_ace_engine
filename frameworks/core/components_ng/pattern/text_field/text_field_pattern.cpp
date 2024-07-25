@@ -1463,8 +1463,9 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnSelectAll");
     auto textSize = static_cast<int32_t>(contentController_->GetWideText().length());
     if (inlineStyle) {
-        if (static_cast<int32_t>(contentController_->GetWideText().rfind(L'.')) < textSize - FIND_TEXT_ZERO_INDEX) {
-            textSize = static_cast<int32_t>(contentController_->GetWideText().rfind(L'.'));
+        auto dotPos = contentController_->GetWideText().rfind(L'.');
+        if (dotPos != std::string::npos && static_cast<int32_t>(dotPos) < textSize - FIND_TEXT_ZERO_INDEX) {
+            textSize = static_cast<int32_t>(dotPos);
         }
         UpdateSelection(0, textSize);
     } else {
@@ -7837,5 +7838,33 @@ bool TextFieldPattern::GetTouchInnerPreviewText(const Offset& offset) const
 {
     auto touchDownIndex = selectController_->ConvertTouchOffsetToPosition(offset);
     return GetPreviewTextStart() <= touchDownIndex && touchDownIndex <= GetPreviewTextEnd() && HasFocus();
+}
+
+bool TextFieldPattern::IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const
+{
+    if (touchEvent.sourceTool != SourceTool::PEN || touchEvent.type != TouchType::DOWN) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    if (!focusHub->IsFocusable() || !host->IsVisible()) {
+        return false;
+    }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto opacity = renderContext->GetOpacity();
+    // if opacity is 0.0f, no need to hit frameNode.
+    if (NearZero(opacity.value_or(1.0f))) {
+        return false;
+    }
+    return !IsInPasswordMode();
+}
+
+RectF TextFieldPattern::ExpandDefaultResponseRegion(RectF& rect)
+{
+    return rect + NG::SizeF(0, OHOS::Ace::HOT_AREA_ADJUST_SIZE.ConvertToPx() * OHOS::Ace::HOT_AREA_EXPAND_TIME) +
+           NG::OffsetF(0, -OHOS::Ace::HOT_AREA_ADJUST_SIZE.ConvertToPx());
 }
 } // namespace OHOS::Ace::NG

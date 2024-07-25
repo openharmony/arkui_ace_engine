@@ -1511,6 +1511,14 @@ float PipelineContext::GetPageAvoidOffset()
     return safeAreaManager_->GetKeyboardOffset();
 }
 
+bool PipelineContext::CheckNeedAvoidInSubWindow()
+{
+    CHECK_NULL_RETURN(NearZero(GetPageAvoidOffset()), true);
+    CHECK_NULL_RETURN(safeAreaManager_->KeyboardSafeAreaEnabled(), false);
+    auto KeyboardInsetLength = safeAreaManager_->GetKeyboardInset().Length();
+    return GreatNotEqual(KeyboardInsetLength, 0.0f);
+}
+
 void PipelineContext::SyncSafeArea(SafeAreaSyncType syncType)
 {
     bool keyboardSafeArea =
@@ -2063,15 +2071,16 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
         touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
-        if (StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEvent(scalePoint)) {
-            return;
-        }
 
         eventManager_->TouchTest(scalePoint, node, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
         if (!touchRestrict.childTouchTestList.empty()) {
             scalePoint.childTouchTestList = touchRestrict.childTouchTestList;
         }
         touchTestResults_ = eventManager_->touchTestResults_;
+        if (StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEvent(scalePoint, touchTestResults_)) {
+            eventManager_->ClearTouchTestTargetForPenStylus(scalePoint);
+            return;
+        }
 
         HandleEtsCardTouchEvent(oriPoint, etsSerializedGesture);
 

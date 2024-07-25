@@ -2404,43 +2404,6 @@ void SwiperPattern::HandleTouchBottomLoop()
     return;
 }
 
-void SwiperPattern::CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex)
-{
-    auto currentIndex = GetLoopIndex(currentIndex_);
-    auto currentFirstIndex = GetLoopIndex(currentFirstIndex_);
-    if (IsHorizontalAndRightToLeft()) {
-        preFirstIndex = TotalCount() - 1 - preFirstIndex;
-        currentFirstIndex = TotalCount() - 1 - currentFirstIndex;
-        currentIndex = TotalCount() - 1 - currentIndex;
-    }
-
-    // Keep follow hand
-    if (preFirstIndex == 0 && currentFirstIndex == TotalCount() - 1) {
-        needTurn_ = true;
-        if (isTouchDown_ && LessOrEqual(mainDeltaSum_, 0.0f)) {
-            needTurn_ = false;
-        }
-    } else if (preFirstIndex == TotalCount() - 1 && currentFirstIndex == 0) {
-        needTurn_ = true;
-        if (isTouchDown_ && GreatOrEqual(mainDeltaSum_, 0.0f)) {
-            needTurn_ = false;
-        }
-    }
-
-    if (GreatNotEqual(additionalOffset, 0.0f)) {
-        gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
-        needTurn_ = false;
-    } else if (LessNotEqual(additionalOffset, 0.0f)) {
-        gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
-        needTurn_ = false;
-    } else if (currentFirstIndex >= currentIndex) {
-        gestureState_ = needTurn_ ? GestureState::GESTURE_STATE_FOLLOW_LEFT : GestureState::GESTURE_STATE_FOLLOW_RIGHT;
-    } else if (currentFirstIndex < currentIndex) {
-        gestureState_ = needTurn_ ? GestureState::GESTURE_STATE_FOLLOW_RIGHT : GestureState::GESTURE_STATE_FOLLOW_LEFT;
-    }
-    return;
-}
-
 std::pair<float, float> SwiperPattern::CalcCurrentPageStatusOnRTL(float additionalOffset) const
 {
     float currentTurnPageRate = FLT_MAX;
@@ -2520,7 +2483,6 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset,
         return;
     }
 
-    int32_t preFirstIndex = currentFirstIndex_;
     auto currentPageStatus = IsHorizontalAndRightToLeft() ? CalcCurrentPageStatusOnRTL(additionalOffset)
                                                           : CalcCurrentPageStatus(additionalOffset);
     float currentTurnPageRate = currentPageStatus.first;
@@ -2529,7 +2491,8 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset,
     currentFirstIndex_ = nextIndex.value_or(currentFirstIndex_);
     UpdateNextValidIndex();
     currentFirstIndex_ = GetLoopIndex(currentFirstIndex_);
-    CalculateGestureState(additionalOffset - ignoreBlankSpringOffset_, currentTurnPageRate, preFirstIndex);
+    gestureState_ = CalculateGestureState(
+        additionalOffset - ignoreBlankSpringOffset_, GetLoopIndex(currentIndex_), currentFirstIndex_);
     turnPageRate_ = (currentTurnPageRate == FLT_MAX ? turnPageRate_ : currentTurnPageRate);
     touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     CheckMarkForIndicatorBoundary();
@@ -3147,8 +3110,8 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (GetDuration() == 0) {
-        //if the duration is 0, the animation will be end immediately, so the start event should be triggered 
-        //after Layout Task to ensure the timing of events.
+        // if the duration is 0, the animation will be end immediately, so the start event should be triggered
+        // after Layout Task to ensure the timing of events.
         pipeline->AddAfterLayoutTask([weak = WeakClaim(this), info, nextIndex = GetLoopIndex(nextIndex)]() {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
@@ -5316,6 +5279,24 @@ void SwiperPattern::FireAndCleanScrollingListener()
 void SwiperPattern::CleanScrollingListener()
 {
     scrollingListener_.clear();
+}
+
+GestureState SwiperPattern::CalculateGestureState(
+    float additionalOffset, int32_t currentIndex, int32_t currentFirstIndex) const
+{
+    if (GreatNotEqual(additionalOffset, 0.0f)) {
+        return GestureState::GESTURE_STATE_RELEASE_LEFT;
+    }
+
+    if (LessNotEqual(additionalOffset, 0.0f)) {
+        return GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    }
+
+    if (currentFirstIndex == currentIndex) {
+        return GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    }
+
+    return GestureState::GESTURE_STATE_FOLLOW_LEFT;
 }
 
 void SwiperPattern::StopIndicatorAnimation(bool ifImmediately)

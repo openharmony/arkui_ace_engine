@@ -528,6 +528,14 @@ std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
     return value;
 }
 
+CopyOptions TextPattern::HandleOnCopyOptions()
+{
+    if (copyOption_ == CopyOptions::None && dataDetectorAdapter_->hasClickedMenuOption_) {
+        return CopyOptions::Local;
+    }
+    return copyOption_;
+}
+
 void TextPattern::HandleOnCopy()
 {
     CHECK_NULL_VOID(clipboard_);
@@ -536,11 +544,11 @@ void TextPattern::HandleOnCopy()
         return;
     }
     auto value = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
-    if (IsSelectableAndCopy()) {
+    if (IsSelectableAndCopy() || dataDetectorAdapter_->hasClickedMenuOption_) {
         if (isSpanStringMode_ && !externalParagraph_) {
             HandleOnCopySpanString();
         } else if (!value.empty()) {
-            clipboard_->SetData(value, copyOption_);
+            clipboard_->SetData(value, HandleOnCopyOptions());
         }
     }
     HiddenMenu();
@@ -560,7 +568,7 @@ void TextPattern::HandleOnCopySpanString()
     std::vector<uint8_t> tlvData;
     subSpanString->EncodeTlv(tlvData);
     clipboard_->AddSpanStringRecord(pasteData, tlvData);
-    clipboard_->SetData(pasteData, copyOption_);
+    clipboard_->SetData(pasteData, HandleOnCopyOptions());
 }
 
 void TextPattern::HiddenMenu()
@@ -882,9 +890,6 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
                                              const std::string& action) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (!(pattern->IsSelectableAndCopy())) {
-            return;
-        }
         pattern->CloseSelectOverlay();
         pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
         if (action == std::string(COPY_ACTION)) {
@@ -2204,6 +2209,11 @@ void TextPattern::InitCopyOption()
     if (onClick_ || IsSelectableAndCopy() || CanStartAITask()) {
         InitClickEvent(gestureEventHub);
         if (CanStartAITask()) {
+            auto context = PipelineContext::GetCurrentContextSafely();
+            CHECK_NULL_VOID(context);
+            if (!clipboard_ && context) {
+                clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
+            }
             InitMouseEvent();
         }
     }
@@ -2900,6 +2910,11 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
             case PropertyInfo::TEXTSHADOW:
                 if (textLayoutProp->HasTextShadow()) {
                     child->UpdateTextShadowWithoutFlushDirty(textLayoutProp->GetTextShadow().value());
+                }
+                break;
+            case PropertyInfo::HALFLEADING:
+                if (textLayoutProp->HasHalfLeading()) {
+                    child->UpdateHalfLeadingWithoutFlushDirty(textLayoutProp->GetHalfLeading().value());
                 }
                 break;
             default:

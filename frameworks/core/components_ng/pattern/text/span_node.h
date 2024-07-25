@@ -310,6 +310,7 @@ enum class PropertyInfo {
     BASELINE_OFFSET,
     LINESPACING,
     SYMBOL_EFFECT_OPTIONS,
+    HALFLEADING,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
@@ -431,6 +432,7 @@ public:
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineSpacing, Dimension);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(HalfLeading, bool);
 
     // Mount to the previous Span node or Text node.
     void MountToParagraph();

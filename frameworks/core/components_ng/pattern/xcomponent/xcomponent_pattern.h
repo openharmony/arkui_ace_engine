@@ -415,7 +415,7 @@ private:
     OffsetF globalPosition_;
     SizeF drawSize_;
     SizeF surfaceSize_;
-    RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>();
+    RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>(UIObjectType::DISPLAYSYNC_XCOMPONENT);
 
     std::optional<float> selfIdealSurfaceWidth_;
     std::optional<float> selfIdealSurfaceHeight_;

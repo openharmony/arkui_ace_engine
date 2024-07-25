@@ -290,9 +290,23 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
+    UpdateSessionConfig();
     lifecycleListener_ = std::make_shared<UIExtensionLifecycleListener>(AceType::WeakClaim(this));
     session_->RegisterLifecycleListener(lifecycleListener_);
     InitAllCallback();
+}
+
+void SessionWrapperImpl::UpdateSessionConfig()
+{
+    auto extConfig = session_->GetSystemConfig();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto hostConfig = pipeline->GetKeyboardAnimationConfig();
+    extConfig.keyboardAnimationConfig_.curveType_ = hostConfig.curveType_;
+    extConfig.keyboardAnimationConfig_.curveParams_ = hostConfig.curveParams_;
+    extConfig.keyboardAnimationConfig_.durationIn_ = hostConfig.durationIn_;
+    extConfig.keyboardAnimationConfig_.durationOut_ = hostConfig.durationOut_;
+    session_->SetSystemConfig(extConfig);
 }
 
 void SessionWrapperImpl::DestroySession()

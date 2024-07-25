@@ -614,6 +614,16 @@ public:
         return 0;
     }
     
+    virtual bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const
+    {
+        return false;
+    }
+
+    virtual RectF ExpandDefaultResponseRegion(RectF& rect)
+    {
+        return RectF();
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
