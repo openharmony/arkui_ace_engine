@@ -111,7 +111,7 @@ private:
     void UpdateImageSource();
     void UpdateSymbolSource();
     void InitSymbolEffectOptions();
-    bool isShowSymbol();
+    bool IsShowSymbol();
     bool IsShowPasswordIcon();
     float GetIconRightOffset();
     float GetIconSize();

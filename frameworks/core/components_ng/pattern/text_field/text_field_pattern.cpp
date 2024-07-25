@@ -5981,7 +5981,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("style", GetInputStyleString().c_str(), filter);
 
     auto jsonValue = JsonUtil::Create(true);
-    if (isPasswordSymbol_) {
+    if (IsShowPasswordSymbol()) {
         jsonValue->Put("onIconSrc", static_cast<int64_t>(GetTheme()->GetShowSymbolId()));
         jsonValue->Put("offIconSrc", static_cast<int64_t>(GetTheme()->GetHideSymbolId()));
     } else {

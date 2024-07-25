@@ -1316,9 +1316,10 @@ public:
         isPasswordSymbol_ = isPasswordSymbol;
     }
 
-    bool GetIsPasswordSymbol() const
+    bool IsShowPasswordSymbol() const
     {
-        return isPasswordSymbol_;
+        return isPasswordSymbol_ &&
+            AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN);
     }
 
 protected:
