@@ -1360,23 +1360,18 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerHandleTouchUpEvent002, TestSize.L
     clickRecognizer.refereeState_ = RefereeState::SUCCEED;
     clickRecognizer.currentFingers_ = 0;
     clickRecognizer.CleanRecognizerState();
-
     clickRecognizer.refereeState_ = RefereeState::FAIL;
     clickRecognizer.currentFingers_ = 0;
     clickRecognizer.CleanRecognizerState();
-
     clickRecognizer.refereeState_ = RefereeState::DETECTING;
     clickRecognizer.currentFingers_ = 0;
     clickRecognizer.CleanRecognizerState();
-
     clickRecognizer.refereeState_ = RefereeState::SUCCEED_BLOCKED;
     clickRecognizer.currentFingers_ = 0;
     clickRecognizer.CleanRecognizerState();
-
     clickRecognizer.refereeState_ = RefereeState::DETECTING;
     clickRecognizer.currentFingers_ = 1;
     clickRecognizer.CleanRecognizerState();
-
     clickRecognizer.refereeState_ = RefereeState::SUCCEED_BLOCKED;
     clickRecognizer.currentFingers_ = 1;
     clickRecognizer.CleanRecognizerState();

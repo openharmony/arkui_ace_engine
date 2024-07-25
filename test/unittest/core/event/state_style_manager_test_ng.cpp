@@ -26,7 +26,9 @@
 
 #include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/event/ace_events.h"
 
 using namespace testing;
@@ -521,5 +523,73 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest014, TestSize.Level1)
     RefPtr<FrameNode> node;
     stateStyleMgr->Transform(current, node);
     EXPECT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: StateStyleTest015
+ * @tc.desc: test HandleScrollingParent
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest015, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
+    bool hasScrollingParent = true;
+    auto parent = AceType::MakeRefPtr<FrameNode>(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<ListPattern>());
+    frameNode->SetParent(parent);
+    auto swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    parent->pattern_ = swiperPattern;
+    stateStyleMgr->HandleScrollingParent();
+    auto scrollingListener = swiperPattern->scrollingListener_;
+    for (auto listener : scrollingListener) {
+        listener->NotifyScrollingEvent();
+    }
+    CancelableCallback<void()> cancelableTask;
+    cancelableTask.Reset([] { ; });
+    stateStyleMgr->pressStyleTask_ = cancelableTask;
+    for (auto listener : scrollingListener) {
+        listener->NotifyScrollingEvent();
+    }
+    EXPECT_EQ(true, hasScrollingParent);
+}
+
+/**
+ * @tc.name: StateStyleTest016
+ * @tc.desc: test FireStateFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest016, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<CustomNode> customNode =
+        CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "test");
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
+    bool hasScrollingParent = true;
+    auto swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    customNode->AddChild(frameNode);
+    stateStyleMgr->FireStateFunc(hasScrollingParent);
+    EXPECT_EQ(true, hasScrollingParent);
+}
+
+/**
+ * @tc.name: StateStyleTest017
+ * @tc.desc: test FireStateFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest017, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    RefPtr<CustomNode> customNode =
+        CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "test");
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
+    bool hasScrollingParent = true;
+    auto popupBasePattern = AceType::MakeRefPtr<PopupBasePattern>();
+    contentNode->pattern_ = popupBasePattern;
+    customNode->SetParent(contentNode);
+    frameNode->SetParent(contentNode);
+    stateStyleMgr->FireStateFunc(hasScrollingParent);
+    EXPECT_EQ(true, hasScrollingParent);
 }
 } // namespace OHOS::Ace::NG

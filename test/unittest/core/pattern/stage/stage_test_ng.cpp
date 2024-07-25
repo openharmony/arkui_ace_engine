@@ -1453,40 +1453,6 @@ HWTEST_F(StageTestNg, PagePatternTest012, TestSize.Level1)
 }
 
 /**
- * @tc.name: PagePatternTest013
- * @tc.desc: test OnBackPressed
- * @tc.type: FUNC
- */
-HWTEST_F(StageTestNg, PagePatternTest013, TestSize.Level1)
-{
-    auto stageNode = FrameNode::CreateFrameNode(
-        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
-    auto testStageManager = AceType::MakeRefPtr<StageManager>(stageNode);
-    auto UInode = AceType::DynamicCast<NG::UINode>(testStageManager);
-    testStageManager->stageNode_->children_.push_back(UInode);
-    testStageManager->stageInTrasition_ = false;
-    auto nodeTest = testStageManager->GetLastPageWithTransition();
-    SUCCEED();
-}
-
-/**
- * @tc.name: PagePatternTest014
- * @tc.desc: test OnBackPressed
- * @tc.type: FUNC
- */
-HWTEST_F(StageTestNg, PagePatternTest014, TestSize.Level1)
-{
-    auto stageNode = FrameNode::CreateFrameNode(
-        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
-    auto testStageManager = AceType::MakeRefPtr<StageManager>(stageNode);
-    auto UInode = AceType::DynamicCast<NG::UINode>(testStageManager);
-    testStageManager->stageNode_->children_.push_back(UInode);
-    testStageManager->stageInTrasition_ = true;
-    auto nodeTest = testStageManager->GetLastPageWithTransition();
-    SUCCEED();
-}
-
-/**
  * @tc.name: PagePatternTest015
  * @tc.desc: test OnBackPressed
  * @tc.type: FUNC
@@ -1516,6 +1482,42 @@ HWTEST_F(StageTestNg, PagePatternTest016, TestSize.Level1)
     auto UInode = AceType::DynamicCast<NG::UINode>(testStageManager);
     testStageManager->stageNode_->children_.push_back(UInode);
     testStageManager->stageInTrasition_ = false;
+    auto nodeTest = testStageManager->GetPrevPageWithTransition();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: PagePatternTest017
+ * @tc.desc: test GetLastPageWithTransition
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PagePatternTest017, TestSize.Level1)
+{
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto testStageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto UInode = AceType::DynamicCast<NG::UINode>(testStageManager);
+    testStageManager->stageNode_->children_.push_back(UInode);
+    testStageManager->stageInTrasition_ = false;
+    testStageManager->stageNode_->children_.clear();
+    auto nodeTest = testStageManager->GetLastPageWithTransition();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: PagePatternTest018
+ * @tc.desc: test OnBackPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PagePatternTest018, TestSize.Level1)
+{
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto testStageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto UInode = AceType::DynamicCast<NG::UINode>(testStageManager);
+    testStageManager->stageNode_->children_.push_back(UInode);
+    testStageManager->stageInTrasition_ = false;
+    testStageManager->stageNode_->children_.clear();
     auto nodeTest = testStageManager->GetPrevPageWithTransition();
     SUCCEED();
 }
