@@ -295,13 +295,6 @@ void MenuPattern::UpdateMenuBorderAndBackgroundBlur()
         menuLayoutProperty->UpdateBorderWidth(borderWidth);
         renderContext->UpdateBorderWidth(borderWidth);
     }
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        !renderContext->GetBackBlurStyle().has_value()) {
-        BlurStyleOption blurStyleOption;
-        auto blurStyle = static_cast<BlurStyle>(theme->GetMenuNormalBackgroundBlurStyle());
-        blurStyleOption.blurStyle = blurStyle;
-        renderContext->UpdateBackBlurStyle(blurStyleOption);
-    }
 }
 
 RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)

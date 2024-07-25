@@ -480,6 +480,7 @@ void SelectPattern::SetFocusStyle()
         textRenderContext->UpdateForegroundColor(selectTheme->GetSelectFocusTextColor());
         text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+    SetFocusIconStyle(selectTheme);
 }
 
 void SelectPattern::ClearFocusStyle()
@@ -524,6 +525,35 @@ void SelectPattern::ClearFocusStyle()
         textRenderContext->UpdateForegroundColor(selectTheme->GetFontColor());
         text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+    ClearFocusIconStyle(selectTheme);
+}
+
+void SelectPattern::SetFocusIconStyle(RefPtr<SelectTheme> selectTheme)
+{
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto spinnerLayoutProperty = spinner_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(spinnerLayoutProperty);
+        spinnerLayoutProperty->UpdateSymbolColorList({selectTheme->GetSpinnerFocusedSymbolColor()});
+    } else {
+        auto spinnerRenderProperty = spinner_->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(spinnerRenderProperty);
+        spinnerRenderProperty->UpdateSvgFillColor(selectTheme->GetSpinnerFocusedColor());
+    }
+    spinner_->MarkDirtyNode();
+}
+
+void SelectPattern::ClearFocusIconStyle(RefPtr<SelectTheme> selectTheme)
+{
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto spinnerLayoutProperty = spinner_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(spinnerLayoutProperty);
+        spinnerLayoutProperty->UpdateSymbolColorList({selectTheme->GetSpinnerSymbolColor()});
+    } else {
+        auto spinnerRenderProperty = spinner_->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(spinnerRenderProperty);
+        spinnerRenderProperty->UpdateSvgFillColor(selectTheme->GetSpinnerColor());
+    }
+    spinner_->MarkDirtyNode();
 }
 
 void SelectPattern::AddIsFocusActiveUpdateEvent()

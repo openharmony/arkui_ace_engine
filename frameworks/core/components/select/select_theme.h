@@ -335,6 +335,11 @@ public:
             theme->menuBlendBgColor_ = pattern->GetAttr<int>("menu_is_blend_bg_color", 0);
             theme->optionFocusedBoxPadding_ =
                 pattern->GetAttr<Dimension>("option_focused_box_padding", 0.0_vp);
+            theme->spinnerFocusedSymbolColor_ =
+                pattern->GetAttr<Color>("select_focused_symbol_color", theme->spinnerFocusedSymbolColor_);
+            theme->spinnerFocusedColor_ =
+                pattern->GetAttr<Color>("select_focused_icon_color", theme->spinnerFocusedColor_);
+            theme->optionApplyFocusedStyle_ = pattern->GetAttr<int>("option_is_apply_focus_style", 0);
         }
     };
 
@@ -469,6 +474,9 @@ public:
         theme->selectNormalLeftRightMargin_ = selectNormalLeftRightMargin_;
         theme->menuBlendBgColor_ = menuBlendBgColor_;
         theme->optionFocusedBoxPadding_ = optionFocusedBoxPadding_;
+        theme->spinnerFocusedSymbolColor_ = spinnerFocusedSymbolColor_;
+        theme->spinnerFocusedColor_ = spinnerFocusedColor_;
+        theme->optionApplyFocusedStyle_ = optionApplyFocusedStyle_;
         return theme;
     }
 
@@ -1283,6 +1291,21 @@ public:
     {
         return optionFocusedBoxPadding_;
     }
+
+    const Color& GetSpinnerFocusedSymbolColor() const
+    {
+        return spinnerFocusedSymbolColor_;
+    }
+
+    const Color& GetSpinnerFocusedColor() const
+    {
+        return spinnerFocusedColor_;
+    }
+
+    const bool& GetoptionApplyFocusedStyle() const
+    {
+        return optionApplyFocusedStyle_;
+    }
 private:
     Color disabledColor_;
     Color clickedColor_;
@@ -1429,6 +1452,9 @@ private:
     Dimension selectNormalLeftRightMargin_  = 8.0_vp;
     bool menuBlendBgColor_ = false;
     Dimension optionFocusedBoxPadding_ = 0.0_vp;
+    Color spinnerFocusedSymbolColor_ = Color(0xff182431);
+    Color spinnerFocusedColor_ = Color(0xE5182431);
+    bool optionApplyFocusedStyle_ = false;
 };
 
 } // namespace OHOS::Ace

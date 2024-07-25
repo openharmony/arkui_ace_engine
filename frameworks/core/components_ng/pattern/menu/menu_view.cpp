@@ -122,8 +122,11 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
 
     auto renderContext = menuNode->GetRenderContext();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
+        auto pipeLineContext = PipelineContext::GetCurrentContext();
+        auto selectTheme = pipeLineContext->GetTheme<SelectTheme>();
+        auto blurStyle = static_cast<BlurStyle>(selectTheme->GetMenuNormalBackgroundBlurStyle());
         BlurStyleOption styleOption;
-        styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+        styleOption.blurStyle = blurStyle;
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         renderContext->UpdateBackBlurStyle(styleOption);
     }
