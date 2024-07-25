@@ -776,7 +776,10 @@ void DragEventActuator::HandleDragDampingMove(const Point& point, int32_t pointe
     auto delta = Offset(dragTotalDistance.GetX(), dragTotalDistance.GetY());
     // delta.GetDistance(): pixelMap real move distance
     if (delta.GetDistance() > dragPanDistance * dragStartDampingRatio) {
-        return;
+        if (dragDropManager->GetDampingOverflowCount() == 1) {
+            return;
+        }
+        dragDropManager->SetDampingOverflowCount();
     }
     // linear decrease for menu scale from 100% to 95% within drag damping range
     auto previewMenuSacle = 1.0f - delta.GetDistance() / (dragPanDistance * dragStartDampingRatio) * MENU_DRAG_SCALE;
