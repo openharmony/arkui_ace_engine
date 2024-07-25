@@ -311,6 +311,7 @@ void ButtonLayoutAlgorithm::MarkNeedFlushMouseEvent(LayoutWrapper* layoutWrapper
     if (frameSize != pattern->GetPreFrameSize()) {
         pattern->SetPreFrameSize(frameSize);
         auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
         context->MarkNeedFlushMouseEvent();
     }
 }
