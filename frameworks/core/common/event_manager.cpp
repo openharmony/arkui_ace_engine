@@ -312,7 +312,9 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result, 
         std::list<std::pair<int32_t, std::string>> dumpList;
         eventTree_.Dump(dumpList, 0, DUMP_START_NUMBER);
         for (auto& item : dumpList) {
-            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
+            if (!SystemProperties::GetAceCommercialLogEnabled()) {
+                TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
+            }
         }
     }
 }
@@ -691,6 +693,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
             if (point.type == TouchType::CANCEL && point.pullType == TouchType::PULL_MOVE) {
                 CleanRecognizersForDragBegin(point);
                 lastEventTime_ = point.time;
+                lastTouchEventEndTimestamp_ = GetSysTimestamp();
                 return true;
             }
             // Need update here: onTouch/Recognizer need update
@@ -730,6 +733,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     }
 
     lastEventTime_ = point.time;
+    lastTouchEventEndTimestamp_ = GetSysTimestamp();
     lastDownFingerNumber_ = static_cast<int32_t>(downFingerIds_.size());
     return true;
 }
@@ -860,6 +864,7 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
         axisTouchTestResults_.erase(event.id);
     }
     lastEventTime_ = event.time;
+    lastTouchEventEndTimestamp_ = GetSysTimestamp();
     return true;
 }
 

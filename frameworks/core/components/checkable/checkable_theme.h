@@ -418,10 +418,22 @@ public:
         return pointAnimationDuration_;
     }
 
+    const Color& GetInteractiveHoverColor() const
+    {
+        return interactiveHoverColor_;
+    }
+
+    const Color& GetInteractivePressedColor() const
+    {
+        return interactivePressedColor_;
+    }
+
 private:
     double colorAnimationDuration_ = 0.0;
     double pointAnimationDuration_ = 0.0;
     Color focusedPointColorUnselected_;
+    Color interactiveHoverColor_;
+    Color interactivePressedColor_;
     Dimension focusBoardWidth_;
     Dimension focusBoardHeight_;
     Dimension focusBoardRadius_;

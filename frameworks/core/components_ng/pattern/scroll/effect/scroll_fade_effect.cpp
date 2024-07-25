@@ -74,9 +74,6 @@ double ScrollFadeEffect::CalculateOverScroll(double oldPosition, bool isReachMax
 
 void ScrollFadeEffect::SetPaintDirection(Axis axis, float overScroll, bool isNotPositiveScrollableDistance)
 {
-    if (isRtl_) {
-        overScroll = -overScroll;
-    }
     if (NearZero(overScroll) || !fadePainter_) {
         return;
     }
@@ -176,10 +173,5 @@ void ScrollFadeEffect::SetOpacityAndScale(float opacity, float scale)
 void ScrollFadeEffect::SetHandleOverScrollCallback(const HandleOverScrollCallback& callback)
 {
     handleOverScrollCallback_ = callback;
-}
-
-void ScrollFadeEffect::SetScrollRtl(bool isRtl)
-{
-    isRtl_ = isRtl;
 }
 } // namespace OHOS::Ace::NG

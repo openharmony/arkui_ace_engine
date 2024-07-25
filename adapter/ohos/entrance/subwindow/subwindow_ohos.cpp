@@ -222,6 +222,7 @@ bool SubwindowOhos::InitContainer()
     subPipelineContext->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
     subPipelineContext->SetupSubRootElement();
     subPipelineContext->SetKeyboardAnimationConfig(parentPipeline->GetKeyboardAnimationConfig());
+    subPipelineContext->SetDragNodeGrayscale(parentPipeline->GetDragNodeGrayscale());
     return true;
 }
 
@@ -301,10 +302,10 @@ void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
+    ResizeWindow();
     ShowWindow(popupInfo.focusable);
     CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
-    ResizeWindow();
     ContainerScope scope(childContainerId_);
     overlayManager->ShowPopup(targetId, popupInfo, std::move(onWillDismiss), interactiveDismiss);
     window_->SetFocusable(true);
@@ -425,6 +426,7 @@ void SubwindowOhos::HideWindow()
     auto focusHub = rootNode->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetIsDefaultHasFocused(false);
+    context->SetIsFocusActive(false);
 #else
     if (Container::IsCurrentUseNewPipeline()) {
         auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -438,6 +440,7 @@ void SubwindowOhos::HideWindow()
         auto focusHub = rootNode->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetIsDefaultHasFocused(false);
+        context->SetIsFocusActive(false);
     } else {
         auto context = DynamicCast<PipelineContext>(aceContainer->GetPipelineContext());
         CHECK_NULL_VOID(context);
@@ -548,7 +551,7 @@ void SubwindowOhos::HideDragPreviewWindowNG()
 void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG::MenuParam& menuParam,
     const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
     CHECK_NULL_VOID(customNode);
     CHECK_NULL_VOID(targetNode);
     ContainerScope scope(childContainerId_);
@@ -576,7 +579,7 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG:
 void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
     const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
     ContainerScope scope(childContainerId_);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -607,7 +610,7 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
 
 void SubwindowOhos::HideMenuNG(bool showPreviewAnimation, bool startDrag)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");
     if (!isShowed_) {
         return;
     }
@@ -627,7 +630,7 @@ void SubwindowOhos::HideMenuNG(bool showPreviewAnimation, bool startDrag)
 
 void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");
     if (!isShowed_) {
         return;
     }
@@ -686,7 +689,7 @@ void SubwindowOhos::ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::Fr
 
 void SubwindowOhos::ClearMenuNG(int32_t targetId, bool inWindow, bool showAnimation)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menu ng enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "clear menu ng enter");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -726,14 +729,14 @@ void SubwindowOhos::ClearPopupNG()
 
 void SubwindowOhos::ShowMenu(const RefPtr<Component>& newComponent)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show menu enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show menu enter");
     ShowWindow();
     AddMenu(newComponent);
 }
 
 void SubwindowOhos::CloseMenu()
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close menu enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "close menu enter");
 #ifndef NG_BUILD
     if (!isShowed_) {
         return;
@@ -1125,8 +1128,8 @@ void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::fun
     CHECK_NULL_VOID(parentContainer);
     if (parentContainer->IsScenceBoardWindow() || toastInfo.showMode == NG::ToastShowMode::TOP_MOST ||
         toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
-        ShowWindow(false);
         ResizeWindow();
+        ShowWindow(false);
         CHECK_NULL_VOID(window_);
         window_->SetTouchable(false);
     }

@@ -170,9 +170,9 @@ private:
     RefPtr<PipelineContext> GetCurrentPipelineContext();
 
     void LayoutPreviewMenu(LayoutWrapper* layoutWrapper);
+    void UpdatePreviewPositionAndOffset(
+        RefPtr<LayoutWrapper>& previewLayoutWrapper, RefPtr<LayoutWrapper>& menuLayoutWrapper);
     void ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrapper);
-    void ModifyNormalPreviewMenuPlacement(LayoutWrapper* layoutWrapper);
-    void ModifyNormalPreviewMenuPortraitPlacement(LayoutWrapper* layoutWrapper);
     void GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& child, const Rect& windowGlobalRect,
         RefPtr<LayoutWrapper>& previewLayoutWrapper, SizeF& size, bool isShowHoverImage);
     void GetPreviewNodeTargetHoverImageChild(const RefPtr<LayoutWrapper>& child,
@@ -180,7 +180,6 @@ private:
     SizeF GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<FrameNode>& frameNode,
         RefPtr<LayoutWrapper>& previewLayoutWrapper, RefPtr<LayoutWrapper>& menuLayoutWrapper);
 
-    void LayoutNormalPreviewMenu(LayoutWrapper* layoutWrapper);
     void LayoutNormalTopPreviewBottomMenu(const RefPtr<GeometryNode>& previewGeometryNode,
         const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize, float menuItemTotalHeight);
     void LayoutNormalTopPreviewBottomMenuLessThan(const RefPtr<GeometryNode>& previewGeometryNode,
@@ -194,7 +193,6 @@ private:
     void LayoutNormalBottomPreviewTopMenuGreateThan(const RefPtr<GeometryNode>& previewGeometryNode,
         const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize);
 
-    void LayoutOtherDevicePreviewMenu(LayoutWrapper* layoutWrapper);
     void LayoutOtherDeviceLeftPreviewRightMenu(const RefPtr<GeometryNode>& previewGeometryNode,
         const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize, float menuItemTotalHeight);
     void LayoutOtherDeviceLeftPreviewRightMenuLessThan(const RefPtr<GeometryNode>& previewGeometryNode,

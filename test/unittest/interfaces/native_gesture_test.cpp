@@ -50,15 +50,41 @@ HWTEST_F(NativeGestureTest, NativeGestureTest001, TestSize.Level1)
     auto rotateGesture = gestureAPI->createRotationGesture(2, 90);
     gestureAPI->addChildGesture(group, tapGesture);
     gestureAPI->addChildGesture(group, longPressGesture);
-    gestureAPI->addChildGesture(group, panGesture);
-    gestureAPI->addChildGesture(group, swipeGesture);
-    gestureAPI->addChildGesture(group, pinchGesture);
-    gestureAPI->addChildGesture(group, rotateGesture);
     auto onActionCallBack = [](ArkUI_GestureEvent *event, void *extraParam) {};
     gestureAPI->setGestureEventTarget(
         longPressGesture, GESTURE_EVENT_ACTION_ACCEPT,
         gestureNode, onActionCallBack);
+    auto onInterruptCallback = [](ArkUI_GestureInterruptInfo* info) -> ArkUI_GestureInterruptResult {
+        return GESTURE_INTERRUPT_RESULT_REJECT;
+    };
+    gestureAPI->setGestureInterrupterToNode(gestureNode, onInterruptCallback);
     auto ret = gestureAPI->addGestureToNode(gestureNode, group, PRIORITY, NORMAL_GESTURE_MASK);
     EXPECT_EQ(ret, 0);
+    gestureAPI->removeGestureFromNode(gestureNode, group);
+    gestureAPI->removeChildGesture(group, tapGesture);
+    gestureAPI->removeChildGesture(group, longPressGesture);
+    gestureAPI->dispose(tapGesture);
+    gestureAPI->dispose(longPressGesture);
+    gestureAPI->dispose(panGesture);
+    gestureAPI->dispose(swipeGesture);
+    gestureAPI->dispose(pinchGesture);
+    gestureAPI->dispose(rotateGesture);
+}
+
+/**
+ * @tc.name: NativeGestureTest002
+ * @tc.desc: Test createTapGesture function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, NativeGestureTest002, TestSize.Level1)
+{
+    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_1"));
+    auto pinchGesture = gestureAPI->createPinchGesture(2, 0.0f);
+    auto swipeGesture = gestureAPI->createSwipeGesture(1, 1, 0.0f);
+    auto panGesture = gestureAPI->createPanGesture(0, GESTURE_DIRECTION_DOWN, 5);
+    gestureAPI->dispose(pinchGesture);
+    gestureAPI->dispose(swipeGesture);
+    gestureAPI->dispose(panGesture);
 }
 

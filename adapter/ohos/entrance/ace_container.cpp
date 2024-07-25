@@ -894,7 +894,7 @@ void AceContainer::InitializeCallback()
                 ContainerScope scope(id);
                 result = context->OnKeyEvent(event);
             },
-            TaskExecutor::TaskType::UI, "ArkUIAceContainerKeyEvent");
+            TaskExecutor::TaskType::UI, "ArkUIAceContainerKeyEvent", PriorityType::VIP);
         return result;
     };
     aceView_->RegisterKeyEventCallback(keyEventCallback);
@@ -1295,11 +1295,23 @@ public:
         if (placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
             placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
             placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
-            offset.deltaY = rect_.top + rect_.height +
-                ((size.height + rectf.GetY() - rectf.Height()) / POPUP_CALCULATE_RATIO);
+            offset.deltaY = rect_.top + rect_.height -
+                ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO);
         } else {
-            offset.deltaY = rect_.top + ((rectf.GetY() - size.height - rectf.Height()) / POPUP_CALCULATE_RATIO);
+            offset.deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO);
         }
+
+        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_LEFT ||
+            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT) {
+            offset.deltaX = rect_.left - ((rectf.Width() - size.width) / POPUP_CALCULATE_RATIO);
+        }
+
+        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_RIGHT ||
+            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
+            offset.deltaX = rect_.left + rect_.width - ((rectf.Width() + size.width) / POPUP_CALCULATE_RATIO);
+        }
+
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "popup offset.deltaX:%{public}f", offset.deltaX);
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "popup offset.deltaY:%{public}f", offset.deltaY);
         config.targetOffset = offset;
     }
@@ -1334,6 +1346,12 @@ bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
         OverwritePageNodeInfo(node, viewData);
     }
     AbilityRuntime::AutoFillManager::GetInstance().UpdateCustomPopupUIExtension(autoFillSessionId, viewData);
+    return true;
+}
+
+bool AceContainer::ClosePopupUIExtension(uint32_t autoFillSessionId)
+{
+    AbilityRuntime::AutoFillManager::GetInstance().CloseUIExtension(autoFillSessionId);
     return true;
 }
 
@@ -1547,7 +1565,7 @@ private:
 };
 
 bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
-    const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative)
+    const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative, int32_t instanceId)
 {
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
     CHECK_NULL_RETURN(uiWindow_, false);
@@ -1555,7 +1573,7 @@ bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std:
     auto uiContentImpl = reinterpret_cast<UIContentImpl*>(uiContent);
     CHECK_NULL_RETURN(uiContentImpl, false);
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
-    uiContentImpl->DumpViewData(node, viewDataWrap);
+    uiContentImpl->DumpViewData(node, viewDataWrap, false, true);
 
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -1571,6 +1589,12 @@ bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std:
     autoFillRequest.autoFillCommand = AbilityRuntime::AutoFill::AutoFillCommand::SAVE;
     autoFillRequest.autoFillType = ViewDataWrap::ViewDataToType(viewData);
     autoFillRequest.doAfterAsyncModalBinding = std::move(onUIExtNodeBindingCompleted);
+    if (instanceId != -1) {
+        auto uiWindow = GetUIWindow(instanceId);
+        CHECK_NULL_RETURN(uiWindow, false);
+        uiContent = uiWindow->GetUIContent();
+        CHECK_NULL_RETURN(uiContent, false);
+    }
     AbilityRuntime::AutoFill::AutoFillResult result;
     if (AbilityRuntime::AutoFillManager::GetInstance().RequestAutoSave(
         uiContent, autoFillRequest, callback, result) != 0) {
@@ -2733,6 +2757,24 @@ RefPtr<DisplayInfo> AceContainer::GetDisplayInfo()
     return displayInfo_;
 }
 
+void AceContainer::InitIsFoldable()
+{
+    auto isFoldable = Rosen::DisplayManager::GetInstance().IsFoldable();
+    displayInfo_->SetIsFoldable(isFoldable);
+}
+
+bool AceContainer::IsFoldable() const
+{
+    return displayInfo_->GetIsFoldable();
+}
+
+FoldStatus AceContainer::GetCurrentFoldStatus()
+{
+    auto dmFoldStatus = Rosen::DisplayManager::GetInstance().GetFoldStatus();
+    displayInfo_->SetFoldStatus(static_cast<FoldStatus>(static_cast<uint32_t>(dmFoldStatus)));
+    return displayInfo_->GetFoldStatus();
+}
+
 void AceContainer::UpdateSharedImage(
     std::vector<std::string>& picNameArray, std::vector<int32_t>& byteLenArray, std::vector<int>& fileDescriptorArray)
 {
@@ -2826,18 +2868,10 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
     currentPointerEvent_ = currentEvent;
-    int32_t pointerAction = currentEvent->GetPointerAction();
     MMI::PointerEvent::PointerItem pointerItem;
     currentEvent->GetPointerItem(currentEvent->GetPointerId(), pointerItem);
     int32_t originId = pointerItem.GetOriginPointerId();
-    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_UP ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
-        currentEvents_.erase(originId);
-    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-        currentEvents_[originId] = currentEvent;
-    }
+    currentEvents_[originId] = currentEvent;
     auto callbacksIter = stopDragCallbackMap_.begin();
     while (callbacksIter != stopDragCallbackMap_.end()) {
         auto pointerId = callbacksIter->first;
@@ -3123,7 +3157,9 @@ void AceContainer::NotifyDensityUpdate()
 void AceContainer::NotifyDirectionUpdate()
 {
     bool fullUpdate = NeedFullUpdate(DIRECTION_KEY);
-    ConfigurationChange configurationChange { .directionUpdate = true };
-    pipelineContext_->FlushReload(configurationChange, fullUpdate);
+    if (fullUpdate) {
+        ConfigurationChange configurationChange { .directionUpdate = true };
+        pipelineContext_->FlushReload(configurationChange, fullUpdate);
+    }
 }
 } // namespace OHOS::Ace::Platform

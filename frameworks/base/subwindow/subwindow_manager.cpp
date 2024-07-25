@@ -549,6 +549,7 @@ void SubwindowManager::HideDialogSubWindow(int32_t instanceId)
     auto subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
     CHECK_NULL_VOID(subwindow);
     auto overlay = subwindow->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
     if (overlay->GetDialogMap().size() == 0) {
         subwindow->HideSubWindowNG();
     }
@@ -961,5 +962,20 @@ void SubwindowManager::OnWindowSizeChanged(int32_t instanceId, Rect windowRect, 
     CHECK_NULL_VOID(overlayManager);
     overlayManager->OnUIExtensionWindowSizeChange();
     uiExtensionWindowRect_ = windowRect;
+}
+
+RefPtr<NG::FrameNode> SubwindowManager::GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node)
+{
+    auto iter = subwindowMap_.begin();
+    while (iter != subwindowMap_.end()) {
+        auto overlay = iter->second->GetOverlayManager();
+        CHECK_NULL_RETURN(overlay, nullptr);
+        auto dialogNode = overlay->GetDialogNodeWithExistContent(node);
+        if (dialogNode) {
+            return dialogNode;
+        }
+        ++iter;
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace

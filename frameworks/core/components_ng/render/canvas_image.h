@@ -20,6 +20,7 @@
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/image/drawing_color_filter.h"
+#include "base/image/drawing_lattice.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
@@ -56,6 +57,7 @@ struct ImagePaintConfig {
     int32_t frameCount_ = 1;
     std::vector<ObscuredReasons> obscuredReasons_;
     ImageResizableSlice resizableSlice_;
+    RefPtr<DrawingLattice> resizableLattice_ = nullptr;
     ImageSourceInfo sourceInfo_;
 };
 

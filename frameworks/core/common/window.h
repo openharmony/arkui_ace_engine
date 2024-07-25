@@ -84,7 +84,7 @@ public:
 
     virtual void FlushModifier() {}
 
-    virtual bool HasUIAnimation()
+    virtual bool HasUIRunningAnimation()
     {
         return false;
     }
@@ -137,6 +137,16 @@ public:
     uint64_t GetLastRequestVsyncTime() const
     {
         return lastRequestVsyncTime_;
+    }
+
+    int64_t GetLastVsyncEndTimestamp() const
+    {
+        return lastVsyncEndTimestamp_;
+    }
+
+    void SetLastVsyncEndTimestamp(int64_t lastVsyncEndTimestamp)
+    {
+        lastVsyncEndTimestamp_ = lastVsyncEndTimestamp;
     }
 
     virtual void SetKeepScreenOn(bool keepScreenOn) {};
@@ -202,6 +212,7 @@ protected:
     std::list<struct VsyncCallback> callbacks_;
 
     uint64_t lastRequestVsyncTime_ = 0;
+    int64_t lastVsyncEndTimestamp_ = 0;
     uint32_t windowId_ = 0;
 
 private:

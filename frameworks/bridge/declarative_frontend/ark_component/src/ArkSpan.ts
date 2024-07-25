@@ -311,9 +311,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
-    if (classType === ModifierType.STATE) {
-      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
-    }
+    this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     this._nativePtrChanged = false;
   }
   initialize(value: Object[]) {
@@ -333,7 +331,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     if (this.nativePtr !== instance.nativePtr) {
       this.nativePtr = instance.nativePtr;
       this._nativePtrChanged = true;
-      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(instance.nativePtr);
+      this._weakPtr = instance._weakPtr;
     }
   }
 

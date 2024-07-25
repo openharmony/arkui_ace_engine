@@ -108,7 +108,7 @@ protected:
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitHoverEvent(const RefPtr<InputEventHub>& inputHub);
-    void HandleTouchEvent(const TouchEventInfo& info);
+    virtual void HandleTouchEvent(const TouchEventInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
 

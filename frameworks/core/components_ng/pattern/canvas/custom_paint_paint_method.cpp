@@ -50,7 +50,7 @@ constexpr double CONIC_START_ANGLE = 0.0;
 constexpr double CONIC_END_ANGLE = 359.9;
 constexpr double MAX_GRAYSCALE = 255.0;
 constexpr double HANGING_PERCENT = 0.8;
-
+constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
 const int32_t PX2REM_NUM = 15;
 
 #ifndef ACE_UNITTEST
@@ -1938,6 +1938,8 @@ void CustomPaintPaintMethod::ResetStates()
     state_.fillState = PaintState();
     state_.strokeState = StrokePaintState();
     state_.globalState = GlobalPaintState();
+    // The initial value of the font size in canvas is 14px.
+    SetFontSize(DEFAULT_FONT_SIZE);
     state_.shadow = Shadow();
     imageBrush_ = RSBrush();
     lastFilters_.clear();

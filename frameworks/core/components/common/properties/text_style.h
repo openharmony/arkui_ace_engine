@@ -328,12 +328,12 @@ public:
         minFontScale_ = minFontScale;
     }
 
-    float GetMaxFontScale() const
+    std::optional<float> GetMaxFontScale() const
     {
         return maxFontScale_;
     }
 
-    float GetMinFontScale() const
+    std::optional<float> GetMinFontScale() const
     {
         return minFontScale_;
     }
@@ -348,12 +348,22 @@ public:
         fontWeight_ = fontWeight;
     }
 
-    const Color& GetTextColor() const
+    const Color GetTextColor() const
+    {
+        return textColor_.ToColor();
+    }
+
+    const DynamicColor GetDynamicTextColor() const
     {
         return textColor_;
     }
 
     void SetTextColor(const Color& textColor)
+    {
+        textColor_ = textColor;
+    }
+
+    void SetTextColor(const DynamicColor& textColor)
     {
         textColor_ = textColor;
     }
@@ -378,12 +388,17 @@ public:
         wordSpacing_ = wordSpacing;
     }
 
-    const Color& GetTextDecorationColor() const
+    const Color GetTextDecorationColor() const
+    {
+        return textDecorationColor_.ToColor();
+    }
+
+    const Color GetDynamicTextDecorationColor() const
     {
         return textDecorationColor_;
     }
 
-    void SetTextDecorationColor(const Color& textDecorationColor)
+    void SetTextDecorationColor(const DynamicColor& textDecorationColor)
     {
         textDecorationColor_ = textDecorationColor;
     }
@@ -776,16 +791,16 @@ private:
     TextCase textCase_ { TextCase::NORMAL };
     EllipsisMode ellipsisMode_ = EllipsisMode::TAIL;
     LineBreakStrategy lineBreakStrategy_ { LineBreakStrategy::GREEDY };
-    Color textColor_ { Color::BLACK };
-    Color textDecorationColor_ { Color::BLACK };
+    DynamicColor textColor_ { Color::BLACK };
+    DynamicColor textDecorationColor_ { Color::BLACK };
     uint32_t maxLines_ = UINT32_MAX;
     bool hasHeightOverride_ = false;
     bool adaptTextSize_ = false;
     bool adaptHeight_ = false; // whether adjust text size with height.
     bool allowScale_ = true;
     bool halfLeading_ = false;
-    float minFontScale_ = 0.0f;
-    float maxFontScale_ = static_cast<float>(INT32_MAX);
+    std::optional<float> minFontScale_;
+    std::optional<float> maxFontScale_;
 
     // for Symbol
     std::vector<Color> renderColors_;

@@ -412,8 +412,10 @@ void CalendarPattern::UpdateTitleNode()
     CHECK_NULL_VOID(textLayoutProperty);
 
     DateTime date;
-    date.year = currentMonth_.year;
-    date.month = currentMonth_.month - 1; // W3C's month start from 0 to 11
+    date.year = currentMonth_.year < 0 ? 0 : static_cast<uint32_t>(currentMonth_.year);
+    date.month = currentMonth_.month - 1 < 0
+                     ? 0
+                     : static_cast<uint32_t>(currentMonth_.month - 1); // W3C's month start from 0 to 11
     textLayoutProperty->UpdateContent(Localization::GetInstance()->FormatDateTime(date, "YYYYMM"));
 
     auto pipelineContext = GetHost()->GetContext();

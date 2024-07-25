@@ -158,8 +158,8 @@ void CalendarPickerPattern::UpdateEntryButtonBorderWidth()
     }
     addButtonNode->GetLayoutProperty()->UpdateBorderWidth(addBorderWidth);
     subButtonNode->GetLayoutProperty()->UpdateBorderWidth(subBorderWidth);
-    addButtonNode->MarkModifyDone();
-    subButtonNode->MarkModifyDone();
+    addButtonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    subButtonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void CalendarPickerPattern::UpdateEdgeAlign()

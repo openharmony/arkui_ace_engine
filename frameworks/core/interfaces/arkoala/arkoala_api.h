@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 118
+#define ARKUI_FULL_API_VERSION 119
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 118
+#define ARKUI_NODE_API_VERSION 119
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -217,6 +217,33 @@ struct ArkUIMouseEvent {
     ArkUI_Int32 subKind;
     ArkUI_Int32 sourceType;
     ArkUI_Int32 interceptResult;
+};
+
+struct ArkUIDragEvent {
+    void* unifiedData;
+    void* unifiedDataSummary;
+    ArkUI_Int32 dragResult;
+    ArkUI_Float64 touchPointX;
+    ArkUI_Float64 touchPointY;
+    ArkUI_Float64 previewRectWidth;
+    ArkUI_Float64 previewRectHeight;
+    ArkUI_Float64 velocityX;
+    ArkUI_Float64 velocityY;
+    ArkUI_Float64 velocity;
+    ArkUI_Float64 windowX;
+    ArkUI_Float64 windowY;
+    ArkUI_Float64 displayX;
+    ArkUI_Float64 displayY;
+    ArkUI_Float64 screenX;
+    ArkUI_Float64 screenY;
+    ArkUI_Int64 modifierKeyState;
+    ArkUI_Int32 dragBehavior;
+    bool useCustomDropAnimation;
+    ArkUI_Int32 subKind;
+    ArkUI_Int32 preDragStatus;
+    ArkUI_Int32 dataTypesCount;
+    ArkUI_CharPtr* dataTypes;
+    ArkUI_Int32 dataTypesMaxStrLength;
 };
 
 struct ArkUIStringAndFloat {
@@ -673,6 +700,7 @@ enum ArkUIEventCategory {
     TEXT_ARRAY = 8,
     MOUSE_INPUT_EVENT = 9,
     MIXED_EVENT = 10,
+    DRAG_EVENT = 11,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -695,6 +723,13 @@ enum ArkUIEventSubKind {
     ON_ATTACH,
     ON_DETACH,
     ON_ACCESSIBILITY_ACTIONS,
+    ON_DRAG_START,
+    ON_DRAG_ENTER,
+    ON_DRAG_DROP,
+    ON_DRAG_MOVE,
+    ON_DRAG_LEAVE,
+    ON_DRAG_END,
+    ON_PRE_DRAG,
     ON_DETECT_RESULT_UPDATE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT,
     ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
     ON_IMAGE_ERROR,
@@ -994,6 +1029,7 @@ struct ArkUINodeEvent {
         ArkUIAPIEventTextArray textArrayEvent;
         ArkUIMouseEvent mouseEvent;
         ArkUIMixedEvent mixedEvent;
+        ArkUIDragEvent dragEvent;
     };
 };
 
@@ -1290,6 +1326,20 @@ struct ArkUIDragInteractionOptions {
     ArkUI_Bool defaultAnimationBeforeLifting;
 };
 
+struct ArkUIDragPreViewAndInteractionOptions {
+    bool isScaleEnabled = false;
+    bool defaultAnimationBeforeLifting = false;
+    bool isMultiSelectionEnabled = false;
+    bool isNumberBadgeEnabled = false;
+    bool isDefaultShadowEnabled = false;
+    bool isDefaultRadiusEnabled = false;
+    ArkUI_Int32 badgeNumber = 0;
+    bool isShowBadge = true;
+};
+
+struct ArkUI_DialogDismissEvent;
+typedef ArkUI_DialogDismissEvent* ArkUIDialogDismissEvent;
+
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
@@ -1315,8 +1365,7 @@ struct ArkUICommonModifier {
     void (*resetPositionEdges)(ArkUINodeHandle node);
     void (*setBorderStyle)(ArkUINodeHandle node, const ArkUI_Int32* styles, ArkUI_Int32 length);
     void (*resetBorderStyle)(ArkUINodeHandle node);
-    void (*setBackShadow)(
-        ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length, ArkUI_Int32 unit);
+    void (*setBackShadow)(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length);
     void (*resetBackShadow)(ArkUINodeHandle node);
     void (*setHitTestBehavior)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetHitTestBehavior)(ArkUINodeHandle node);
@@ -1726,6 +1775,11 @@ struct ArkUICommonModifier {
     void (*setTransition)(ArkUINodeHandle node, ArkUITransitionEffectOption* option);
     void (*setDragPreview)(ArkUINodeHandle node, ArkUIDragPreview dragPreview);
     void (*resetDragPreview)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getNodeUniqueId)(ArkUINodeHandle node);
+    void (*setFocusBoxStyle)(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int32 marginUnit,
+        ArkUI_Float32 valueStrokeWidth, ArkUI_Int32 widthUnit, ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue);
+    void (*resetFocusBoxStyle)(ArkUINodeHandle node);
+    void (*setDisAllowDrop)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -1916,6 +1970,9 @@ struct ArkUITextModifier {
     void (*resetTextMinFontScale)(ArkUINodeHandle node);
     void (*setTextMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 number);
     void (*resetTextMaxFontScale)(ArkUINodeHandle node);
+    void (*setTextSelectionMenuOptions)(
+        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
+    void (*resetTextSelectionMenuOptions)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -2900,6 +2957,9 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaEnablePreviewText)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextAreaEnablePreviewText)(ArkUINodeHandle node);
     void (*getTextAreaPadding)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit);
+    void (*setTextAreaSelectionMenuOptions)(
+        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
+    void (*resetTextAreaSelectionMenuOptions)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -3093,6 +3153,9 @@ struct ArkUITextInputModifier {
     void (*getTextInputMargin)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit);
     void (*setTextInputEnablePreviewText)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextInputEnablePreviewText)(ArkUINodeHandle node);
+    void (*setTextInputSelectionMenuOptions)(
+        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
+    void (*resetTextInputSelectionMenuOptions)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -3672,6 +3735,9 @@ struct ArkUISearchModifier {
     void (*resetSearchOnDidDelete)(ArkUINodeHandle node);
     void (*setSearchEnablePreviewText)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetSearchEnablePreviewText)(ArkUINodeHandle node);
+    void (*setSearchSelectionMenuOptions)(
+        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
+    void (*resetSearchSelectionMenuOptions)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {
@@ -4661,6 +4727,8 @@ struct ArkUIDialogAPI {
     ArkUI_Int32 (*show)(ArkUIDialogHandle handle, ArkUI_Bool showInSubWindow);
     ArkUI_Int32 (*close)(ArkUIDialogHandle handle);
     ArkUI_Int32 (*registerOnWillDismiss)(ArkUIDialogHandle handle, bool (*eventHandler)(ArkUI_Int32));
+    ArkUI_Int32 (*registerOnWillDismissWithUserData)(
+        ArkUIDialogHandle handler, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event));
 };
 
 struct ArkUIBasicNodeAPI {
@@ -4776,6 +4844,12 @@ typedef struct {
     ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle host);
 } ArkUINodeAdapterAPI;
 
+typedef struct {
+    void (*setDragPreview)(ArkUINodeHandle node, void* dragPreview);
+    void (*setDragEventStrictReportingEnabledWithNode)(bool enabled);
+    void (*setDragEventStrictReportingEnabledWithContext)(ArkUI_Int32 instanceId, bool enabled);
+} ArkUIDragAdapterAPI;
+
 /**
  * An API to control an implementation. When making changes modifying binary
  * layout, i.e. adding new events - increase ARKUI_NODE_API_VERSION above for binary
@@ -4792,6 +4866,7 @@ struct ArkUIFullNodeAPI {
     const ArkUIDialogAPI* (*getDialogAPI)();
     const ArkUIExtendedNodeAPI* (*getExtendedAPI)();
     const ArkUINodeAdapterAPI* (*getNodeAdapterAPI)();
+    const ArkUIDragAdapterAPI* (*getDragAdapterAPI)();
 };
 
 struct ArkUIAnyAPI {

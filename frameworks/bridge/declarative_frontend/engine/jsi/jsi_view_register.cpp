@@ -525,36 +525,38 @@ panda::Local<panda::JSValueRef> JsGetI18nResource(panda::JsiRuntimeCallInfo* run
     auto targetStringKeyValue = splitStr[1];
     auto resultStrJson = JsiDeclarativeEngineInstance::GetI18nStringResource(targetStringKey, targetStringKeyValue);
     auto resultStr = resultStrJson->GetString();
-    if (argc == 2) {
-        panda::LocalScope scope(vm);
-        Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-        if (secondArg->IsArray(vm)) {
-            auto arrayVal = panda::Local<panda::ArrayRef>(secondArg);
-            auto len = arrayVal->Length(vm);
-            std::vector<std::string> arrayResult;
-            for (auto i = 0U; i < len; i++) {
-                auto subItemVal = panda::ArrayRef::GetValueAt(vm, arrayVal, i);
-                if (!subItemVal->IsString(vm)) {
-                    arrayResult.emplace_back(std::string());
-                    continue;
-                }
-                auto itemVal = panda::Local<panda::StringRef>(subItemVal);
-                arrayResult.emplace_back(itemVal->ToString(vm));
+    if (argc == 1) {
+        return panda::StringRef::NewFromUtf8(vm, resultStr.c_str());
+    }
+
+    panda::LocalScope scope(vm);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondArg->IsArray(vm)) {
+        auto arrayVal = panda::Local<panda::ArrayRef>(secondArg);
+        auto len = arrayVal->Length(vm);
+        std::vector<std::string> arrayResult;
+        for (auto i = 0U; i < len; i++) {
+            auto subItemVal = panda::ArrayRef::GetValueAt(vm, arrayVal, i);
+            if (!subItemVal->IsString(vm)) {
+                arrayResult.emplace_back(std::string());
+                continue;
             }
-            ReplacePlaceHolderArray(resultStr, arrayResult);
-        } else if (secondArg->IsObject(vm)) {
-            auto value = panda::JSON::Stringify(vm, secondArg);
-            if (value->IsString(vm)) {
-                auto valueStr = panda::Local<panda::StringRef>(value);
-                std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(valueStr->ToString(vm));
-                ReplacePlaceHolder(resultStr, argsPtr);
-            }
-        } else if (secondArg->IsNumber()) {
-            double count = secondArg->ToNumber(vm)->Value();
-            auto pluralChoice = Localization::GetInstance()->PluralRulesFormat(count);
-            if (!pluralChoice.empty()) {
-                resultStr = ParserPluralResource(resultStrJson, pluralChoice, str);
-            }
+            auto itemVal = panda::Local<panda::StringRef>(subItemVal);
+            arrayResult.emplace_back(itemVal->ToString(vm));
+        }
+        ReplacePlaceHolderArray(resultStr, arrayResult);
+    } else if (secondArg->IsObject(vm)) {
+        auto value = panda::JSON::Stringify(vm, secondArg);
+        if (value->IsString(vm)) {
+            auto valueStr = panda::Local<panda::StringRef>(value);
+            std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(valueStr->ToString(vm));
+            ReplacePlaceHolder(resultStr, argsPtr);
+        }
+    } else if (secondArg->IsNumber()) {
+        double count = secondArg->ToNumber(vm)->Value();
+        auto pluralChoice = Localization::GetInstance()->PluralRulesFormat(count);
+        if (!pluralChoice.empty()) {
+            resultStr = ParserPluralResource(resultStrJson, pluralChoice, str);
         }
     }
 
@@ -1626,7 +1628,12 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
 
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "MainAxisAlign"), *mainAxisAlign);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "CrossAxisAlign"), *crossAxisAlign);
-    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Direction"), *direction);
+
+    auto container = Container::Current();
+    if (container == nullptr || !container->IsDynamicRender()) {
+        globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Direction"), *direction);
+    }
+
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "StackFit"), *stackFit);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Align"), *alignment);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Overflow"), *overflow);

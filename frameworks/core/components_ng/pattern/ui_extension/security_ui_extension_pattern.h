@@ -64,8 +64,7 @@ public:
     int32_t GetInstanceId();
 
     void OnAreaChangedInner() override;
-    bool OnDirtyLayoutWrapperSwap(
-        const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnSyncGeometryNode(const DirtySwapConfig& config) override;
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnAttachToFrameNode() override;
@@ -105,6 +104,7 @@ private:
     void HandleFocusEvent() override;
     void HandleBlurEvent() override;
     void DispatchFocusActiveEvent(bool isFocusActive) override;
+    void HandleTouchEvent(const TouchEventInfo& info) override;
     void DispatchFocusState(bool focusState);
 
     enum class AbilityState {

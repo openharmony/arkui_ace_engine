@@ -177,8 +177,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       : false;
   }
 
-  public getOwningView() :ViewPUInfo {
-    return { componentName: this.owningView_?.constructor.name, id: this.owningView_?.id__() }
+  public getOwningView(): ViewPUInfo {
+    return { componentName: this.owningView_?.constructor.name, id: this.owningView_?.id__() };
   }
 
   public dumpSyncPeers(isProfiler: boolean, changedTrackPropertyName?: string): ObservedPropertyInfo<T>[] {

@@ -92,6 +92,16 @@ public:
         moreMenuNode_ = moreMenuNode;
     }
 
+    void SetInnerParentId(const std::string& id)
+    {
+        innerChildId_ = id;
+    }
+
+    std::string GetInnerParentId() const
+    {
+        return innerChildId_;
+    }
+
     // The function is only used for fast preview.
     void FastPreviewUpdateChild(int32_t slot, const RefPtr<UINode>& newChild) override;
 
@@ -111,6 +121,7 @@ private:
     RefPtr<UINode> menu_;
     RefPtr<UINode> prevMenu_;
     RefPtr<UINode> moreMenuNode_;
+    std::string innerChildId_;
 };
 
 } // namespace OHOS::Ace::NG

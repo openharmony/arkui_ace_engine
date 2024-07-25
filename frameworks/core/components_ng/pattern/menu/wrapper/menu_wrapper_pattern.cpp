@@ -25,6 +25,7 @@
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -308,17 +309,18 @@ RefPtr<FrameNode> MenuWrapperPattern::MenuFocusViewShow()
     auto iter = host->GetChildren().begin();
     int32_t focusNodeId = 2;
     std::advance(iter, host->GetChildren().size() - focusNodeId);
-    auto focusMenu = *iter;
-    if (focusMenu) {
-        auto menuHub = DynamicCast<FrameNode>(focusMenu);
-        CHECK_NULL_RETURN(menuHub, nullptr);
-        // SelectOverlay's custom menu does not need to be focused.
-        auto isCustomMenu = IsSelectOverlayCustomMenu(menuHub);
-        if (!isCustomMenu) {
-            auto menuPattern = menuHub->GetPattern<MenuPattern>();
-            CHECK_NULL_RETURN(menuPattern, nullptr);
-            menuPattern->FocusViewShow();
-        }
+    auto focusMenu = DynamicCast<FrameNode>(*iter);
+    CHECK_NULL_RETURN(focusMenu, nullptr);
+    if (focusMenu->GetPattern<MenuPreviewPattern>()) {
+        focusMenu = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+        CHECK_NULL_RETURN(focusMenu, nullptr);
+    }
+    // SelectOverlay's custom menu does not need to be focused.
+    auto isCustomMenu = IsSelectOverlayCustomMenu(focusMenu);
+    if (!isCustomMenu) {
+        auto menuPattern = focusMenu->GetPattern<MenuPattern>();
+        CHECK_NULL_RETURN(menuPattern, nullptr);
+        menuPattern->FocusViewShow();
     }
     return DynamicCast<FrameNode>(focusMenu);
 }

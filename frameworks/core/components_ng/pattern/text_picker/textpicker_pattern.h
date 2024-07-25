@@ -322,6 +322,8 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    void OnDirectionConfigurationUpdate() override;
+
     void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
     {
         contentRowNode_ = contentRowNode;
@@ -493,11 +495,15 @@ private:
         std::vector<NG::RangeContent>& rangeContents, uint32_t patterIndex);
     void ProcessCascadeOptionsValues(const std::vector<std::string>& rangeResultValue, uint32_t index);
     void SetFocusCornerRadius(RoundRect& paintRect);
+    void UpdateConfirmButtonMargin(
+        const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
+    void UpdateCancelButtonMargin(
+        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
 
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
-    double defaultPickerItemHeight_;
-    double resizePickerItemHeight_;
+    double defaultPickerItemHeight_ = 0.0;
+    double resizePickerItemHeight_ = 0.0;
     uint32_t selectedIndex_ = 0;
     std::vector<NG::RangeContent> range_;
     std::vector<NG::RangeContent> options_;
@@ -541,6 +547,7 @@ private:
     Dimension gradientHeight_;
     Dimension dividerSpacing_;
     float paintDividerSpacing_ = 1.0f;
+    bool isNeedUpdateSelectedIndex_ = true;
 };
 } // namespace OHOS::Ace::NG
 

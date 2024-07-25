@@ -122,8 +122,8 @@ void CalendarElement::RegisterChangeEndListener(
         CHECK_NULL_VOID(renderText);
         auto currentDate = controller->GetCurrentMonth();
         DateTime dateTime;
-        dateTime.year = currentDate.year;
-        dateTime.month = currentDate.month;
+        dateTime.year = currentDate.year < 0 ? 0 : static_cast<uint32_t>(currentDate.year);
+        dateTime.month = currentDate.month < 0 ? 0 : static_cast<uint32_t>(currentDate.month);
         auto date = Localization::GetInstance()->FormatDateTime(dateTime, "yyyyMMM");
         auto textComponent = AceType::MakeRefPtr<TextComponent>(date);
         auto cardTheme = renderText->GetTheme<CalendarTheme>();

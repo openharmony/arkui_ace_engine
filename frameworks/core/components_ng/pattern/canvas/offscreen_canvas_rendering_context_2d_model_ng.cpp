@@ -456,8 +456,8 @@ RefPtr<Ace::PixelMap> OffscreenCanvasRenderingContext2DModelNG::GetPixelMap(cons
     options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
     options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
     options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
-    options.size.width = static_cast<int32_t>(std::abs(imageSize.height));
-    options.size.height = static_cast<int32_t>(std::abs(imageSize.width));
+    options.size.width = static_cast<int32_t>(std::abs(imageSize.width));
+    options.size.height = static_cast<int32_t>(std::abs(imageSize.height));
     options.editable = true;
     auto pixelMap = Ace::PixelMap::Create(OHOS::Media::PixelMap::Create(options));
     CHECK_NULL_RETURN(pixelMap, nullptr);

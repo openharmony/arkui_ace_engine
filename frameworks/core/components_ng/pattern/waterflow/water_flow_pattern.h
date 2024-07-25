@@ -160,6 +160,8 @@ public:
         return predictLayoutParam_;
     }
 
+    void NotifyDataChange(int32_t index, int32_t count) override;
+
     // ------------------------ Focus adapter --------------------------------
     FocusPattern GetFocusPattern() const override
     {
@@ -202,6 +204,8 @@ private:
     SizeF lastSize_;
     std::pair<int32_t, int32_t> itemRange_ = { -1, -1 };
     WeakPtr<UINode> footer_;
+    //for keepVisiableContentPosition mode temporarily.
+    bool keepContentPosition_ = true;
 
     // clip padding of WaterFlow
     RefPtr<WaterFlowContentModifier> contentModifier_;

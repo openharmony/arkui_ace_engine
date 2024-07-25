@@ -1163,24 +1163,10 @@ void CanvasPattern::ReleaseImageAnalyzer()
     imageAnalyzerManager_->ReleaseImageAnalyzer();
 }
 
-void CanvasPattern::DumpAdvanceInfo()
+void CanvasPattern::DumpInfo()
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
-        DumpLog::GetInstance().AddDesc(
-            std::string("PixelGridRoundSize: ")
-                .append(dirtyPixelGridRoundSize_.ToString())
-                .append(", lase PixelGridRoundSize: ")
-                .append(lastDirtyPixelGridRoundSize_.ToString()));
-    } else {
-        DumpLog::GetInstance().AddDesc(
-            std::string("contentSizeChange: ").append(recordConfig_.contentSizeChange ? "true" : "false"));
-        DumpLog::GetInstance().AddDesc(
-            std::string("frameSizeChange: ").append(recordConfig_.frameSizeChange ? "true" : "false"));
-        DumpLog::GetInstance().AddDesc(
-            std::string("frameOffsetChange: ").append(recordConfig_.frameOffsetChange ? "true" : "false"));
-        DumpLog::GetInstance().AddDesc(
-            std::string("contentOffsetChange: ").append(recordConfig_.contentOffsetChange ? "true" : "false"));
-    }
+    CHECK_NULL_VOID(paintMethod_);
+    DumpLog::GetInstance().AddDesc(paintMethod_->GetDumpInfo());
     DumpLog::GetInstance().AddDesc(contentModifier_->GetDumpInfo());
 }
 

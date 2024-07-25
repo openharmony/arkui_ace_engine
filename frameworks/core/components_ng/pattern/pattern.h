@@ -300,6 +300,7 @@ public:
     }
 
     virtual void BeforeSyncGeometryProperties(const DirtySwapConfig& config) {}
+    virtual void OnSyncGeometryNode(const DirtySwapConfig& config) {}
 
     // Called on main thread to check if need rerender of the content.
     virtual bool OnDirtyLayoutWrapperSwap(
@@ -378,7 +379,7 @@ public:
 
     virtual void DumpInfo() {}
     virtual void DumpAdvanceInfo() {}
-    virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
+    virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
     virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
     virtual void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) {}
@@ -608,6 +609,11 @@ public:
         return false;
     }
 
+    virtual uint32_t GetWindowPatternType() const
+    {
+        return 0;
+    }
+    
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

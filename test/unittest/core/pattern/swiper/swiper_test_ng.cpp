@@ -1915,7 +1915,7 @@ HWTEST_F(SwiperTestNg, FadeOverScroll001, TestSize.Level1)
     offset = 0.0f;
     EXPECT_FALSE(pattern_->FadeOverScroll(offset));
     EXPECT_FALSE(pattern_->IsVisibleChildrenSizeLessThanSwiper());
-    offset = -20.0f;
+    offset = 10.0f;
     EXPECT_TRUE(pattern_->FadeOverScroll(offset));
 }
 
@@ -1944,7 +1944,7 @@ HWTEST_F(SwiperTestNg, IsOutOfStart001, TestSize.Level1)
      * @tc.steps: step2. call mirror func.
      */
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    offset = -10.0f;
+    offset = 10.0f;
     EXPECT_TRUE(pattern_->IsOutOfStart(offset));
 }
 
@@ -1993,7 +1993,7 @@ HWTEST_F(SwiperTestNg, IsOutOfBoundary001, TestSize.Level1)
      * @tc.steps: step2. call mirror func.
      */
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    EXPECT_TRUE(pattern_->IsOutOfBoundary(10.0f));
+    EXPECT_TRUE(pattern_->IsOutOfBoundary(-10.0f));
 }
 
 /**

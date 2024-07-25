@@ -280,6 +280,7 @@ void SelectContentOverlayManager::UpdateExistOverlay(const SelectOverlayInfo& in
 
 void SelectContentOverlayManager::SwitchToHandleMode(HandleLevelMode mode, bool forceChange)
 {
+    CHECK_NULL_VOID(shareOverlayInfo_);
     if (shareOverlayInfo_->handleLevelMode == mode) {
         return;
     }
@@ -344,9 +345,9 @@ void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
             menuPattern->UpdateSelectMenuInfo(menuInfo);
         }
         if ((dirty & DIRTY_COPY_ALL_ITEM) == DIRTY_COPY_ALL_ITEM) {
-            SelectMenuInfo menuInfo;
-            selectOverlayHolder_->OnUpdateMenuInfo(menuInfo, DIRTY_COPY_ALL_ITEM);
             auto oldMenuInfo = menuPattern->GetSelectMenuInfo();
+            SelectMenuInfo menuInfo = { .showCopy = oldMenuInfo.showCopy, .showCopyAll = oldMenuInfo.showCopyAll };
+            selectOverlayHolder_->OnUpdateMenuInfo(menuInfo, DIRTY_COPY_ALL_ITEM);
             oldMenuInfo.showCopyAll = menuInfo.showCopyAll;
             oldMenuInfo.showCopy = menuInfo.showCopy;
             menuPattern->UpdateSelectMenuInfo(oldMenuInfo);

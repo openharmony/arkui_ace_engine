@@ -831,71 +831,57 @@ export class ChipComponent extends ViewPU {
         return c4;
     }
 
-    toVp(a4) {
-        if (a4 === void (0)) {
+    toVp(v3) {
+        if (v3 === void (0)) {
             return Number.NEGATIVE_INFINITY;
         }
-        switch (typeof (a4)) {
+        switch (typeof (v3)) {
             case 'number':
-                return a4;
+                return v3;
             case 'object':
                 try {
-                    if (a4.id !== -1) {
-                        return getContext(this).resourceManager.getNumber(a4.id);
+                    if (v3.id !== -1) {
+                        return px2vp(getContext(this).resourceManager.getNumber(v3.id));
                     }
                     else {
-                        return getContext(this)
+                        return px2vp(getContext(this)
                             .resourceManager
-                            .getNumberByName((a4.params[0]).split('.')[2]);
+                            .getNumberByName((v3.params[0]).split('.')[2]));
                     }
                 }
-                catch (b4) {
-                    try {
-                        if (a4.id !== -1) {
-                            return this.parseStringToVp(getContext(this).resourceManager.getStringSync(a4.id));
-                        }
-                        else {
-                            return this.parseStringToVp(getContext(this).resourceManager
-                                .getStringByNameSync((a4.params[0]).split('.')[2]));
-                        }
-                    }
-                    catch (c4) {
-                        return Number.NEGATIVE_INFINITY;
-                    }
+                catch (a4) {
+                    return Number.NEGATIVE_INFINITY;
                 }
             case 'string':
-                return this.parseStringToVp(a4);
+                let w3 = new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i");
+                let x3 = v3.match(w3);
+                if (!x3) {
+                    return Number.NEGATIVE_INFINITY;
+                }
+                let y3 = Number(x3?.[1] ?? 0);
+                let z3 = x3?.[2] ?? 'vp';
+                switch (z3.toLowerCase()) {
+                    case 'px':
+                        y3 = px2vp(y3);
+                        break;
+                    case 'fp':
+                        y3 = px2vp(fp2px(y3));
+                        break;
+                    case 'lpx':
+                        y3 = px2vp(lpx2px(y3));
+                        break;
+                    case '%':
+                        y3 = Number.NEGATIVE_INFINITY;
+                        break;
+                    case 'vp':
+                        break;
+                    default:
+                        break;
+                }
+                return y3;
             default:
                 return Number.NEGATIVE_INFINITY;
         }
-    }
-    parseStringToVp(v3) {
-        let w3 = new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i');
-        let x3 = v3.match(w3);
-        if (!x3) {
-            return Number.NEGATIVE_INFINITY;
-        }
-        let y3 = Number(x3?.[1] ?? 0);
-        let z3 = x3?.[2] ?? 'vp';
-        switch (z3.toLowerCase()) {
-            case 'px':
-                y3 = px2vp(y3);
-                break;
-            case 'fp':
-                y3 = px2vp(fp2px(y3));
-                break;
-            case 'lpx':
-                y3 = px2vp(lpx2px(y3));
-                break;
-            case '%':
-                y3 = Number.NEGATIVE_INFINITY;
-                break;
-            case 'vp':
-                break;
-            default:
-                break;
-        }
-        return y3;
     }
 
     getLabelMargin() {

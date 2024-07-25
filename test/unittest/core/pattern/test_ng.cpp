@@ -37,8 +37,11 @@ void TestNG::TearDownTestSuite()
     MockContainer::TearDown();
 }
 
-RefPtr<PaintWrapper> TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
+RefPtr<PaintWrapper> TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode, bool markDirty)
 {
+    if (markDirty) {
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
     frameNode->SetActive();
     frameNode->isLayoutDirtyMarked_ = true;
     frameNode->CreateLayoutTask();

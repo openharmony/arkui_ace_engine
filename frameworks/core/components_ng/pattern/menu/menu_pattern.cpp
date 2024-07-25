@@ -68,13 +68,14 @@ const RefPtr<InterpolatingSpring> MENU_ANIMATION_CURVE =
 const RefPtr<InterpolatingSpring> STACK_MENU_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, STACK_MENU_DAMPING);
 const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 380.0f, 34.0f);
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 34.0f);
+const RefPtr<InterpolatingSpring> MAIN_MENU_ANIMATION_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 528.0f, 35.0f);
 const float MINIMUM_AMPLITUDE_RATION = 0.08f;
 
 constexpr double MOUNT_MENU_FINAL_SCALE = 0.95f;
 constexpr double SEMI_CIRCLE_ANGEL = 90.0f;
 constexpr Dimension PADDING = 4.0_vp;
-constexpr Dimension MENU_DEFAULT_RADIUS = 20.0_vp;
 
 
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
@@ -301,7 +302,11 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     auto renderContext = scroll->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(theme->GetMenuBorderRadius());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        borderRadius.SetRadius(theme->GetMenuDefaultRadius());
+    } else {
+        borderRadius.SetRadius(theme->GetMenuBorderRadius());
+    }
     renderContext->UpdateBorderRadius(borderRadius);
     return scroll;
 }
@@ -421,7 +426,7 @@ void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
             auto touchGlobalLocation = info.GetTouches().front().GetGlobalLocation();
             auto position = OffsetF(static_cast<float>(touchGlobalLocation.GetX()),
                 static_cast<float>(touchGlobalLocation.GetY()));
-            TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu.");
+            TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, position is %{public}s.", position.ToString().c_str());
             HideMenu(true, position);
         }
         lastTouchOffset_.reset();
@@ -910,7 +915,7 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     // make menu round rect
     BorderRadiusProperty borderRadius;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        borderRadius.SetRadius(MENU_DEFAULT_RADIUS);
+        borderRadius.SetRadius(theme->GetMenuDefaultRadius());
     } else {
         borderRadius.SetRadius(theme->GetMenuBorderRadius());
     }
@@ -1116,7 +1121,7 @@ void MenuPattern::ShowMenuAppearAnimation()
         renderContext->UpdateOpacity(0.0f);
 
         AnimationOption option = AnimationOption();
-        option.SetCurve(MENU_ANIMATION_CURVE);
+        option.SetCurve(MAIN_MENU_ANIMATION_CURVE);
         AnimationUtils::Animate(option, [this, renderContext, menuPosition]() {
             CHECK_NULL_VOID(renderContext);
             if (IsSelectOverlayExtensionMenu()) {
@@ -1331,10 +1336,10 @@ void MenuPattern::ShowMenuDisappearAnimation()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto menuContext = host->GetRenderContext();
-    MENU_ANIMATION_CURVE->UpdateMinimumAmplitudeRatio(MINIMUM_AMPLITUDE_RATION);
+    MAIN_MENU_ANIMATION_CURVE->UpdateMinimumAmplitudeRatio(MINIMUM_AMPLITUDE_RATION);
     auto menuPosition = GetEndOffset();
     AnimationOption option = AnimationOption();
-    option.SetCurve(MENU_ANIMATION_CURVE);
+    option.SetCurve(MAIN_MENU_ANIMATION_CURVE);
     AnimationUtils::Animate(option, [menuContext, menuPosition]() {
         if (menuContext) {
             menuContext->UpdatePosition(
@@ -1345,24 +1350,8 @@ void MenuPattern::ShowMenuDisappearAnimation()
     });
 }
 
-void MenuPattern::CallMenuAboutToAppearCallback()
-{
-    auto menuWrapper = GetMenuWrapper();
-    CHECK_NULL_VOID(menuWrapper);
-    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    menuWrapperPattern->CallMenuAboutToAppearCallback();
-    menuWrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
-    auto pipeline = menuWrapper->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    overlayManager->SetIsMenuShow(true);
-}
-
 bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    CallMenuAboutToAppearCallback();
     ShowPreviewMenuAnimation();
     ShowMenuAppearAnimation();
     ShowStackExpandMenu();
@@ -1384,7 +1373,8 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto menuProp = DynamicCast<MenuLayoutProperty>(dirty->GetLayoutProperty());
     CHECK_NULL_RETURN(menuProp, false);
     BorderRadiusProperty radius;
-    auto defaultRadius = theme->GetMenuBorderRadius();
+    auto defaultRadius = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ?
+        theme->GetMenuDefaultRadius() : theme->GetMenuBorderRadius();
     radius.SetRadius(defaultRadius);
     if (menuProp->GetBorderRadius().has_value()) {
         auto borderRadius = menuProp->GetBorderRadiusValue();
@@ -1405,7 +1395,8 @@ BorderRadiusProperty MenuPattern::CalcIdealBorderRadius(const BorderRadiusProper
     CHECK_NULL_RETURN(pipeline, radius);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, radius);
-    auto defaultRadius = theme->GetMenuBorderRadius();
+    auto defaultRadius = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ?
+        theme->GetMenuDefaultRadius() : theme->GetMenuBorderRadius();
     radius.SetRadius(defaultRadius);
     auto radiusTopLeft = borderRadius.radiusTopLeft.value_or(Dimension()).ConvertToPx();
     auto radiusTopRight = borderRadius.radiusTopRight.value_or(Dimension()).ConvertToPx();

@@ -74,7 +74,7 @@ std::pair<float, float> OverlengthDotIndicatorModifier::GetTouchBottomCenterX(Co
     float rightCenterX = contentProperty.longPointRightCenterX;
 
     if (isCustomSize_ || contentProperty.vectorBlackPointCenterX.empty() ||
-        contentProperty.vectorBlackPointCenterX.size() < maxDisplayCount_) {
+        static_cast<int32_t>(contentProperty.vectorBlackPointCenterX.size()) < maxDisplayCount_) {
         return { leftCenterX, rightCenterX };
     }
 
@@ -359,18 +359,13 @@ void OverlengthDotIndicatorModifier::UpdateSelectedCenterXOnDrag(const LinearVec
     auto rightMoveRate = longPointRightCenterMoveRate_;
     if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT &&
         touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
-        if (isHorizontalAndRTL_) {
-            leftMoveRate = longPointLeftCenterMoveRate_ - 1.0f;
-            rightMoveRate = longPointRightCenterMoveRate_ - 1.0f;
-        } else {
-            leftMoveRate = 1.0f - longPointLeftCenterMoveRate_;
-            rightMoveRate = 1.0f - longPointRightCenterMoveRate_;
-        }
+        leftMoveRate = 1.0f - longPointLeftCenterMoveRate_;
+        rightMoveRate = 1.0f - longPointRightCenterMoveRate_;
     }
 
-    auto targetIndex = currentSelectedIndex_ + 1;
+    auto targetIndex = isHorizontalAndRTL_ ? currentSelectedIndex_ - 1 : currentSelectedIndex_ + 1;
     if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
-        targetIndex = currentSelectedIndex_ - 1;
+        targetIndex = isHorizontalAndRTL_ ? currentSelectedIndex_ + 1 : currentSelectedIndex_ - 1;
     }
 
     auto longPointEndCenterX = CalcLongPointEndCenterXWithBlack(targetIndex, itemHalfSizes);
@@ -389,15 +384,8 @@ void OverlengthDotIndicatorModifier::UpdateSelectedCenterXOnDrag(const LinearVec
             rightDistance = longPointEndCenterX.second - overlongSelectedStartCenterX_.second;
         }
 
-        if (isHorizontalAndRTL_) {
-            overlongSelectedEndCenterX_.first =
-                overlongSelectedStartCenterX_.first - std::abs(leftDistance) * leftMoveRate;
-            overlongSelectedEndCenterX_.second =
-                overlongSelectedStartCenterX_.second - std::abs(rightDistance) * rightMoveRate;
-        } else {
-            overlongSelectedEndCenterX_.first = overlongSelectedStartCenterX_.first + leftDistance * leftMoveRate;
-            overlongSelectedEndCenterX_.second = overlongSelectedStartCenterX_.second + rightDistance * rightMoveRate;
-        }
+        overlongSelectedEndCenterX_.first = overlongSelectedStartCenterX_.first + leftDistance * leftMoveRate;
+        overlongSelectedEndCenterX_.second = overlongSelectedStartCenterX_.second + rightDistance * rightMoveRate;
     }
 }
 
@@ -455,14 +443,16 @@ int32_t OverlengthDotIndicatorModifier::CalcTargetIndexOnDrag() const
         return animationEndIndex_;
     }
 
-    if (animationStartIndex_ == animationEndIndex_) {
-        if (animationStartIndex_ == realItemCount_ - 1) {
+    auto startIndex = isHorizontalAndRTL_ ? realItemCount_ - 1 - animationStartIndex_ : animationStartIndex_;
+    auto endIndex = isHorizontalAndRTL_ ? realItemCount_ - 1 - animationEndIndex_ : animationEndIndex_;
+    if (startIndex == endIndex) {
+        if (startIndex == realItemCount_ - 1) {
             return animationStartIndex_;
         }
-        return animationStartIndex_ + 1;
+        return isHorizontalAndRTL_ ? animationStartIndex_ - 1 : animationStartIndex_ + 1;
     }
 
-    if (animationStartIndex_ == 0 && animationEndIndex_ == realItemCount_ - 1) {
+    if (startIndex == 0 && endIndex == realItemCount_ - 1) {
         return animationStartIndex_;
     }
 
@@ -537,10 +527,6 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveForward(const
         targetOverlongType_ = currentOverlongType_;
 
         auto opacityMoveRate = GetMoveRateOnAllMove();
-        if (isHorizontalAndRTL_) {
-            opacityMoveRate = 1.0f - opacityMoveRate;
-        }
-
         auto firstPointOpacity = static_cast<uint8_t>(UINT8_MAX * opacityMoveRate);
         auto newPointOpacity = static_cast<uint8_t>(UINT8_MAX * (1.0f - opacityMoveRate));
         firstPointOpacity_->Set(firstPointOpacity);
@@ -583,10 +569,6 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveBackward(cons
         targetOverlongType_ = currentOverlongType_;
 
         auto opacityMoveRate = GetMoveRateOnAllMove();
-        if (isHorizontalAndRTL_) {
-            opacityMoveRate = 1.0f - opacityMoveRate;
-        }
-
         auto firstPointOpacity = static_cast<uint8_t>(UINT8_MAX * (1.0f - opacityMoveRate));
         auto newPointOpacity = static_cast<uint8_t>(UINT8_MAX * opacityMoveRate);
         firstPointOpacity_->Set(firstPointOpacity);

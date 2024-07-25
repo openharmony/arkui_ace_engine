@@ -142,9 +142,12 @@ public:
         return isSuccess_;
     }
 
-    void SetInteractiveAnimation(std::shared_ptr<AnimationUtils::InteractiveAnimation> interactiveAnimation)
+    void SetInteractiveAnimation(
+        std::shared_ptr<AnimationUtils::InteractiveAnimation> interactiveAnimation,
+        const std::function<void()>& finishCallback)
     {
         interactiveAnimation_ = interactiveAnimation;
+        interactiveFinishCallback_ = finishCallback;
     }
 
     void StartAnimation()
@@ -152,7 +155,10 @@ public:
         if (!interactiveAnimation_) {
             return;
         }
-        AnimationUtils::StartInteractiveAnimation(interactiveAnimation_);
+        // if error code is 0, start interactive success
+        int32_t errorCode = AnimationUtils::StartInteractiveAnimation(interactiveAnimation_);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "update start interactive animation code is %{public}d", errorCode);
+        isStartAnimation_ = errorCode == 0;
     }
 
     void UpdateTransition(float progress)
@@ -174,6 +180,13 @@ public:
         }
         hasFinished_ = true;
         isSuccess_ = true;
+        if (!isStartAnimation_) {
+            interactiveFinishCallback_();
+            if (endCallback_) {
+                endCallback_(true);
+            }
+            return;
+        }
         AnimationUtils::ContinueInteractiveAnimation(interactiveAnimation_);
     }
 
@@ -185,6 +198,13 @@ public:
         }
         hasFinished_ = true;
         isSuccess_ = false;
+        if (!isStartAnimation_) {
+            interactiveFinishCallback_();
+            if (endCallback_) {
+                endCallback_(false);
+            }
+            return;
+        }
         AnimationUtils::ReverseInteractiveAnimation(interactiveAnimation_);
     }
 
@@ -194,11 +214,13 @@ private:
     std::function<void()> finishCallback_; // finish transition callback to continue animation
     std::function<void()> cancelAnimation_; // cancel transition callback to reverse animation
     std::function<void(bool)> endCallback_;
+    std::function<void()> interactiveFinishCallback_;
     NavigationOperation operation_;
     std::shared_ptr<AnimationUtils::InteractiveAnimation> interactiveAnimation_;
     bool hasFinished_ = false; // current transition is finish or not
     bool isSuccess_ = true; // set current custom transition is start success or not
     bool interactive_ = false; // set current interactive animation
+    bool isStartAnimation_ = false;
 };
 
 struct NavigationTransition {

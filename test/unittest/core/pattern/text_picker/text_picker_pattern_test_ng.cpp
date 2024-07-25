@@ -1741,4 +1741,44 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternUpdateColumnChildPosition002,
     textPickerColumnPattern_->UpdateColumnChildPosition(1.0);
     EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, 0.0f);
 }
+
+/**
+ * @tc.name: LinearFontSize001
+ * @tc.desc: TextPickerColumnPattern LinearFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, LinearFontSize001, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    Dimension dimension = Dimension(FONT_SIZE_10);
+    Dimension dimension1;
+    dimension1 = textPickerColumnPattern_->LinearFontSize(dimension, dimension, 1);
+    EXPECT_FALSE(dimension < dimension1);
+}
+
+/**
+ * @tc.name: LinearFontSize002
+ * @tc.desc: TextPickerColumnPattern LinearFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, LinearFontSize002, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    Dimension dimension = Dimension(FONT_SIZE_10);
+    Dimension dimension1;
+    dimension1 = textPickerColumnPattern_->LinearFontSize(dimension, dimension, 2);
+    EXPECT_FALSE(dimension < dimension1);
+}
+
+/**
+ * @tc.name: GetOverScrollDeltaIndex001
+ * @tc.desc: TextPickerColumnPattern GetOverScrollDeltaIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, GetOverScrollDeltaIndex001, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    int32_t index = textPickerColumnPattern_->GetOverScrollDeltaIndex();
+    ASSERT_FALSE(index > 0);
+}
 } // namespace OHOS::Ace::NG

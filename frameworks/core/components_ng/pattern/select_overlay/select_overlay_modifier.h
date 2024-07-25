@@ -35,9 +35,9 @@ public:
 
     void onDraw(DrawingContext& drawingContext) override;
 
-    void SetOtherPointRadius(const Dimension& radius);
+    void SetOtherPointRadius(const Dimension& radius, bool noAnimation = false);
 
-    void SetHeadPointRadius(const Dimension& radius);
+    void SetHeadPointRadius(const Dimension& radius, bool noAnimation = false);
 
     void SetMenuOptionOffset(const OffsetF& offset)
     {
@@ -46,7 +46,7 @@ public:
         }
     }
 
-    void SetLineEndOffset(bool isMore);
+    void SetLineEndOffset(bool isMore, bool noAnimation = false);
 
     void SetHasExtensionMenu(bool hasExtensionMenu)
     {
@@ -91,8 +91,10 @@ private:
 
     void DrawbBackArrow(DrawingContext& context);
     void DrawbCircles(DrawingContext& context);
-    void LineEndOffsetWithAnimation(bool isMore);
-    void BackArrowTransitionAnimation();
+    void LineEndOffsetWithAnimation(bool isMore, bool noAnimation);
+    void BackArrowTransitionAnimation(bool noAnimation);
+    void ChangeCircle();
+    void BackArrowTransitionChange(const OffsetF& coordinate, int32_t i);
 
     RefPtr<PropertyBool> firstHandleIsShow_;
     RefPtr<PropertyBool> secondHandleIsShow_;

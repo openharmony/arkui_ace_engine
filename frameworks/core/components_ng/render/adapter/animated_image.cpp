@@ -227,7 +227,7 @@ void AnimatedRSImage::DecodeImpl(uint32_t idx)
 #endif
 
     SkCodec::Options options;
-    options.fFrameIndex = idx;
+    options.fFrameIndex = static_cast<int32_t>(idx);
 
     SkCodec::FrameInfo info {};
     codec_->getFrameInfo(idx, &info);

@@ -635,6 +635,11 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollMultiChildren001, TestSize.
     pattern_->HandleScroll(-5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     EXPECT_TRUE(pattern_->childScrolling_);
     EXPECT_FALSE(pattern_->usePropertyAnimation_);
+    pattern_->OnScrollEndRecursive(std::nullopt);
+
+    // self scroll
+    pattern_->HandleScroll(-5.0f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    EXPECT_FALSE(pattern_->childScrolling_);
 }
 
 /**

@@ -23,6 +23,7 @@
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -82,29 +83,15 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     CHECK_NULL_RETURN(navBarWrapper, 0.0f);
     auto geometryNode = navBarWrapper->GetGeometryNode();
     auto navigationGeometryNode = layoutWrapper->GetGeometryNode();
-    if (position == NavBarPosition::END) {
-        auto navBarOffset =
-            OffsetT<float>(navigationGeometryNode->GetFrameSize().Width() - geometryNode->GetFrameSize().Width(),
-                geometryNode->GetFrameOffset().GetY());
-        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            navBarOffset = OffsetT<float>(0.0f, geometryNode->GetFrameOffset().GetY());
-        }
-        const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
-        navBarOffset.AddX(padding.left.value_or(0));
-        navBarOffset.AddY(padding.top.value_or(0));
-        geometryNode->SetMarginFrameOffset(navBarOffset);
-        navBarWrapper->Layout();
-        returnNavBarOffset = navBarOffset;
-        return isZeroNavbarWidth ? 0.0f : geometryNode->GetFrameSize().Width();
-    }
     auto navBarOffset = OffsetT<float>(0.0f, 0.0f);
-    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-        navBarOffset =
-            OffsetT<float>(navigationGeometryNode->GetFrameSize().Width() - geometryNode->GetFrameSize().Width(), 0.0f);
+    bool isNavBarInRight = (position == NavBarPosition::END && !AceApplicationInfo::GetInstance().IsRightToLeft()) ||
+        (position == NavBarPosition::START && AceApplicationInfo::GetInstance().IsRightToLeft());
+    if (isNavBarInRight) {
+        navBarOffset.SetX(navigationGeometryNode->GetFrameSize().Width() - geometryNode->GetFrameSize().Width());
     }
     const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
-    navBarOffset.AddX(padding.left.value_or(0));
-    navBarOffset.AddY(padding.top.value_or(0));
+    navBarOffset.AddX(padding.left.value_or(0.0f));
+    navBarOffset.AddY(padding.top.value_or(0.0f));
     geometryNode->SetMarginFrameOffset(navBarOffset);
     navBarWrapper->Layout();
     returnNavBarOffset = navBarOffset;
@@ -362,16 +349,16 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     bool modeChange = navigationPattern->GetNavigationMode() != usrNavigationMode;
     bool isFirstTimeLayout = (navigationPattern->GetNavigationMode() == INITIAL_MODE);
-    if (isFirstTimeLayout) {
-        navigationPattern->UpdateFoldState();  // Init fold state
-    }
     bool doModeSwitchAnimationInAnotherTask = modeChange && !isFirstTimeLayout && !hostNode->IsOnModeSwitchAnimation();
     if (doModeSwitchAnimationInAnotherTask) {
-        // If screen-fold-state changed, no need to do mode switch animation.
-        doModeSwitchAnimationInAnotherTask =
-            !navigationPattern->IsFoldStateChange() && doModeSwitchAnimationInAnotherTask;
-        // Only when navigation-mode changed, it is necessary to update the current screen-fold-state.
-        navigationPattern->UpdateFoldState();
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        if (container->IsFoldable()) {
+            // If screen-fold-state changed, no need to do mode switch animation.
+            // Only when navigation-mode changed, it is necessary to update the current screen-fold-state.
+            doModeSwitchAnimationInAnotherTask =
+                !navigationPattern->JudgeFoldStateChangeAndUpdateState() && doModeSwitchAnimationInAnotherTask;
+        }
     }
     if (!doModeSwitchAnimationInAnotherTask) {
         navigationPattern->SetNavigationMode(usrNavigationMode);

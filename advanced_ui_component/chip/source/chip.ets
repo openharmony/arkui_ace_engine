@@ -390,58 +390,45 @@ export struct ChipComponent {
       case 'object':
         try {
           if ((value as Resource).id !== -1) {
-            return getContext(this).resourceManager.getNumber((value as Resource).id)
+            return px2vp(getContext(this).resourceManager.getNumber((value as Resource).id))
           } else {
-            return getContext(this)
+            return px2vp(getContext(this)
               .resourceManager
-              .getNumberByName(((value.params as string[])[0]).split('.')[2])
+              .getNumberByName(((value.params as string[])[0]).split('.')[2]))
           }
         } catch (error) {
-          try {
-            if ((value as Resource).id !== -1) {
-              return this.parseStringToVp(getContext(this).resourceManager.getStringSync((value as Resource).id))
-            } else {
-              return this.parseStringToVp(getContext(this).resourceManager
-                .getStringByNameSync(((value.params as string[])[0]).split('.')[2]))
-            }
-          } catch (error) {
-            return Number.NEGATIVE_INFINITY
-          }
+          return Number.NEGATIVE_INFINITY
         }
       case 'string':
-        return this.parseStringToVp(value)
+        let regex: RegExp = new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i");
+        let matches: RegExpMatchArray | null = value.match(regex);
+        if (!matches) {
+          return Number.NEGATIVE_INFINITY
+        }
+        let length: number = Number(matches?.[1] ?? 0);
+        let unit: string = matches?.[2] ?? 'vp'
+        switch (unit.toLowerCase()) {
+          case 'px':
+            length = px2vp(length)
+            break
+          case 'fp':
+            length = px2vp(fp2px(length))
+            break
+          case 'lpx':
+            length = px2vp(lpx2px(length))
+            break
+          case '%':
+            length = Number.NEGATIVE_INFINITY
+            break
+          case 'vp':
+            break
+          default:
+            break
+        }
+        return length
       default:
         return Number.NEGATIVE_INFINITY
     }
-  }
-
-  private parseStringToVp(value: string): number {
-    let regex: RegExp = new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i');
-    let matches: RegExpMatchArray | null = value.match(regex);
-    if (!matches) {
-      return Number.NEGATIVE_INFINITY
-    }
-    let length: number = Number(matches?.[1] ?? 0);
-    let unit: string = matches?.[2] ?? 'vp'
-    switch (unit.toLowerCase()) {
-      case 'px':
-        length = px2vp(length)
-        break
-      case 'fp':
-        length = px2vp(fp2px(length))
-        break
-      case 'lpx':
-        length = px2vp(lpx2px(length))
-        break
-      case '%':
-        length = Number.NEGATIVE_INFINITY
-        break
-      case 'vp':
-        break
-      default:
-        break
-    }
-    return length;
   }
 
   private getLabelMargin(): Margin {

@@ -473,4 +473,127 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest014, TestSize.Level1)
     focusManager->focusHubScopeMap_["scop5"] = std::make_pair(nullptr, focusHubScopeEmptyList);
     focusManager->RemoveScopePriorityNode("scop5", pageFocusHub);
 }
+
+/**
+ * @tc.name: FocusManagerTest015
+ * @tc.desc: FlushFocusView
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusManagerTestNg, FocusManagerTest015, TestSize.Level1)
+{
+    auto focusManager = AceType::MakeRefPtr<FocusManager>(nullptr);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
+    auto rootFocusHub = rootNode->GetOrCreateFocusHub();
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
+    auto pageFocusHub = pageNode->GetOrCreateFocusHub();
+    rootFocusHub->currentFocus_ = true;
+    pageFocusHub->currentFocus_ = true;
+    auto pagePattern2 = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode2 = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern2);
+    auto pageFocusHub2 = pageNode2->GetOrCreateFocusHub();
+    pageFocusHub2->currentFocus_ = true;
+    rootNode->AddChild(pageNode2);
+    pageNode2->AddChild(pageNode);
+
+    auto pagePattern3 = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode3 = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern3);
+    auto pageFocusHub3 = pageNode3->GetOrCreateFocusHub();
+    pageFocusHub3->currentFocus_ = false;
+    pageNode2->AddChild(pageNode3);
+
+    auto pageFouceView = AceType::WeakClaim<PagePattern>(AceType::RawPtr<PagePattern>(pagePattern));
+    auto pageFouceView2 = AceType::WeakClaim<PagePattern>(AceType::RawPtr<PagePattern>(pagePattern2));
+    auto pageFouceView3 = AceType::WeakClaim<PagePattern>(AceType::RawPtr<PagePattern>(pagePattern3));
+
+    focusManager->lastFocusView_ = pageFouceView3;
+    focusManager->focusViewStack_.push_back(pageFouceView);
+    focusManager->focusViewStack_.push_back(pageFouceView2);
+    focusManager->focusViewStack_.push_back(pageFouceView3);
+
+    focusManager->FlushFocusView();
+    EXPECT_FALSE(focusManager->lastFocusView_.Invalid());
+}
+
+/**
+ * @tc.name: FocusManagerTest016
+ * @tc.desc: GetFocusViewMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusManagerTestNg, FocusManagerTest016, TestSize.Level1)
+{
+    auto focusManager = AceType::MakeRefPtr<FocusManager>(nullptr);
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
+    auto pageFocusHub = pageNode->GetOrCreateFocusHub();
+    pageFocusHub->currentFocus_ = false;
+
+    auto pagePattern2 = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageFouceView = AceType::WeakClaim<PagePattern>(AceType::RawPtr<PagePattern>(pagePattern));
+    auto pageFouceView2 = AceType::WeakClaim<PagePattern>(AceType::RawPtr<PagePattern>(pagePattern2));
+
+    focusManager->lastFocusView_ = pageFouceView;
+    focusManager->focusViewStack_.push_back(pageFouceView);
+    focusManager->focusViewStack_.push_back(pageFouceView2);
+
+    std::unordered_map<int32_t, std::pair<WeakPtr<FocusView>, std::list<WeakPtr<FocusView>>>> focusViewMap;
+    focusViewMap[1] = std::make_pair(pageFouceView, focusManager->focusViewStack_);
+
+    focusManager->GetFocusViewMap(focusViewMap);
+    EXPECT_FALSE(focusViewMap[1].second.empty());
+}
+
+/**
+ * @tc.name: FocusManagerTest017
+ * @tc.desc: DumpFocusManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusManagerTestNg, FocusManagerTest017, TestSize.Level1)
+{
+    auto focusManager = AceType::MakeRefPtr<FocusManager>(nullptr);
+    auto ss = std::make_unique<std::ostringstream>();
+    DumpLog::GetInstance().SetDumpFile(std::move(ss));
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 2, pagePattern);
+    auto pageFocusHub = pageNode->GetOrCreateFocusHub();
+    pageFocusHub->currentFocus_ = false;
+
+    auto pagePattern2 = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageFouceView = AceType::WeakClaim<PagePattern>(AceType::RawPtr<PagePattern>(pagePattern));
+    auto pageFouceView2 = AceType::WeakClaim<PagePattern>(AceType::RawPtr<PagePattern>(pagePattern2));
+
+    focusManager->lastFocusView_ = pageFouceView;
+    focusManager->focusViewStack_.push_back(pageFouceView);
+    std::unordered_map<int32_t, std::pair<WeakPtr<FocusView>, std::list<WeakPtr<FocusView>>>> focusViewMap;
+    focusViewMap[1] = std::make_pair(pageFouceView, focusManager->focusViewStack_);
+    focusManager->DumpFocusManager();
+    setFocusManagerViewStack(focusManager);
+    focusManager->DumpFocusManager();
+    EXPECT_TRUE(DumpLog::GetInstance().GetDumpFile());
+}
+
+/**
+ * @tc.name: FocusManagerTest018
+ * @tc.desc: AddFocusScope
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusManagerTestNg, FocusManagerTest018, TestSize.Level1)
+{
+    auto focusManager = AceType::MakeRefPtr<FocusManager>(nullptr);
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
+    auto pageFocusHub = pageNode->GetOrCreateFocusHub();
+
+    std::unordered_map<std::string, std::pair<WeakPtr<FocusHub>, std::list<WeakPtr<FocusHub>>>> focusHubScopeMap;
+    std::list<WeakPtr<FocusHub>> focusHubScopeList;
+    focusHubScopeList.push_back(pageFocusHub);
+    focusHubScopeMap["scop1"] = std::make_pair(pageFocusHub, focusHubScopeList);
+    std::list<WeakPtr<FocusHub>> focusHubScopeEmptyList;
+    focusHubScopeMap["scop2"] = std::make_pair(nullptr, focusHubScopeEmptyList);
+    focusManager->focusHubScopeMap_ = focusHubScopeMap;
+
+    focusManager->AddFocusScope("scop1", pageFocusHub);
+    focusManager->AddFocusScope("scop3", pageFocusHub);
+    EXPECT_TRUE(focusManager->focusHubScopeMap_["scop3"].second.empty());
+}
 } // namespace OHOS::Ace::NG

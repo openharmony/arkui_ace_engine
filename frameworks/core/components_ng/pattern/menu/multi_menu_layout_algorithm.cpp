@@ -141,7 +141,7 @@ float MultiMenuLayoutAlgorithm::GetChildrenMaxWidth(
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto childConstraint = ResetLayoutConstraintMinWidth(child, layoutConstraint);
         child->Measure(childConstraint);
-        auto childSize = child->GetGeometryNode()->GetFrameSize();
+        auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         maxWidth = std::max(maxWidth, childSize.Width());
     }
     return maxWidth;

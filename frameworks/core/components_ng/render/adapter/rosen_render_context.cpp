@@ -308,6 +308,10 @@ void RosenRenderContext::DetachModifiers()
     if (scaleXYUserModifier_) {
         rsNode_->RemoveModifier(scaleXYUserModifier_);
     }
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    if (pipeline) {
+        pipeline->RequestFrame();
+    }
 }
 
 void RosenRenderContext::StartRecording()
@@ -829,10 +833,9 @@ void RosenRenderContext::PaintBackground()
         return;
     }
     auto srcSize = bgLoadingCtx_->GetImageSize();
-    SizeF renderSize = ImagePainter::CalculateBgImageSize(
-        GetHost()->GetGeometryNode()->GetFrameSize(), srcSize, GetBackgroundImageSize());
-    OffsetF positionOffset = ImagePainter::CalculateBgImagePosition(
-        GetHost()->GetGeometryNode()->GetFrameSize(), renderSize, GetBackgroundImagePosition());
+    SizeF renderSize = ImagePainter::CalculateBgImageSize(paintRect_.GetSize(), srcSize, GetBackgroundImageSize());
+    OffsetF positionOffset =
+        ImagePainter::CalculateBgImagePosition(paintRect_.GetSize(), renderSize, GetBackgroundImagePosition());
     auto slice = GetBackgroundImageResizableSliceValue(ImageResizableSlice());
     Rosen::Vector4f rect(slice.left.ConvertToPxWithSize(srcSize.Width()),
         slice.top.ConvertToPxWithSize(srcSize.Height()),
@@ -935,6 +938,22 @@ void RosenRenderContext::SetBackBlurFilter()
     rsNode_->SetBackgroundFilter(backFilter);
 }
 
+void RosenRenderContext::UpdateWindowFocusState(bool isFocused)
+{
+    if (GetBackBlurStyle().has_value() &&
+        GetBackBlurStyle()->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        auto blurStyle = GetBackBlurStyle().value();
+        blurStyle.isWindowFocused = isFocused;
+        UpdateBackBlurStyle(blurStyle);
+    }
+    if (GetBackgroundEffect().has_value() &&
+        GetBackgroundEffect()->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        auto effect = GetBackgroundEffect().value();
+        effect.isWindowFocused = isFocused;
+        UpdateBackgroundEffect(effect);
+    }
+}
+
 void RosenRenderContext::SetFrontBlurFilter()
 {
     CHECK_NULL_VOID(rsNode_);
@@ -962,6 +981,38 @@ void RosenRenderContext::SetFrontBlurFilter()
     rsNode_->SetFilter(frontFilter);
 }
 
+bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<BlurStyleOption>& bgBlurStyle)
+{
+    if (!bgBlurStyle.has_value()) {
+        return false;
+    }
+    bool blurEnable = bgBlurStyle->policy == BlurStyleActivePolicy::ALWAYS_ACTIVE ||
+        (bgBlurStyle->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE && bgBlurStyle->isWindowFocused);
+    if (bgBlurStyle->isValidColor) {
+        if (blurEnable) {
+            rsNode_->SetBackgroundColor(GetBackgroundColor().value_or(Color::TRANSPARENT).GetValue());
+        } else {
+            rsNode_->SetBackgroundColor(bgBlurStyle->inactiveColor.GetValue());
+        }
+    }
+    return blurEnable;
+}
+
+bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<EffectOption>& efffectOption)
+{
+    bool blurEnable = efffectOption->policy == BlurStyleActivePolicy::ALWAYS_ACTIVE ||
+        (efffectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE && efffectOption->isWindowFocused);
+    if (efffectOption->isValidColor) {
+        if (blurEnable) {
+            rsNode_->SetBackgroundColor(GetBackgroundColor().value_or(Color::TRANSPARENT).GetValue());
+        } else {
+            rsNode_->SetBackgroundColor(efffectOption->inactiveColor.GetValue());
+        }
+    }
+    return blurEnable;
+}
+
+
 void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -979,6 +1030,11 @@ void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption
     } else {
         groupProperty->propBlurStyleOption = bgBlurStyle;
     }
+
+    if (!UpdateBlurBackgroundColor(bgBlurStyle)) {
+        rsNode_->SetBackgroundFilter(nullptr);
+        return;
+    }
     SetBackBlurFilter();
 }
 
@@ -991,6 +1047,10 @@ void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption
     }
     groupProperty->propEffectOption = effectOption;
     if (!effectOption.has_value()) {
+        return;
+    }
+    if (!UpdateBlurBackgroundColor(effectOption)) {
+        rsNode_->SetBackgroundFilter(nullptr);
         return;
     }
     auto context = PipelineBase::GetCurrentContext();
@@ -1590,16 +1650,16 @@ public:
     void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
     {
         if (pixelMap) {
-            std::unique_lock<std::mutex> lock(g_mutex);
 #ifdef PIXEL_MAP_SUPPORTED
             g_pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
 #endif // PIXEL_MAP_SUPPORTED
         } else {
             g_pixelMap = nullptr;
-            TAG_LOGW(AceLogTag::ACE_DRAG, "get drag thumbnail pixelMap failed!");
+            TAG_LOGE(AceLogTag::ACE_DRAG, "get thumbnail pixelMap failed!");
         }
 
         if (callback_ == nullptr) {
+            std::unique_lock<std::mutex> lock(g_mutex);
             thumbnailGet.notify_all();
             return;
         }
@@ -1624,10 +1684,12 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale)
     auto ret =
         RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY, true);
     if (!ret) {
+        LOGE("TakeSurfaceCaptureForUI failed!");
         return nullptr;
     }
     std::unique_lock<std::mutex> lock(g_mutex);
     if (thumbnailGet.wait_for(lock, PIXELMAP_TIMEOUT_DURATION) == std::cv_status::timeout) {
+        LOGE("get thumbnail pixelMap timeout!");
         return nullptr;
     }
     return g_pixelMap;
@@ -2568,7 +2630,9 @@ void RosenRenderContext::PaintAccessibilityFocus()
     Dimension paintWidth(lineWidth, DimensionUnit::PX);
     const auto& bounds = rsNode_->GetStagingProperties().GetBounds();
     RoundRect frameRect;
-    frameRect.SetRect(RectF(lineWidth, lineWidth, bounds.z_ - (2 * lineWidth), bounds.w_ - (2 * lineWidth)));
+    double noGreenBorderWidth = (bounds.w_ - (2 * lineWidth)) > 0 ? (bounds.w_ - (2 * lineWidth)) : 0;
+    double noGreenBorderHeight = (bounds.z_ - (2 * lineWidth)) > 0 ? (bounds.z_ - (2 * lineWidth)) : 0;
+    frameRect.SetRect(RectF(lineWidth, lineWidth, noGreenBorderHeight, noGreenBorderWidth));
     RectT<int32_t> localRect = GetAccessibilityFocusRect().value_or(RectT<int32_t>());
     if (localRect != RectT<int32_t>()) {
         RectF globalRect = frameRect.GetRect();
@@ -3393,6 +3457,11 @@ void RosenRenderContext::SetPositionToRSNode()
         return;
     }
     paintRect_ = rect;
+    if (frameNode->ParentExpansive() && !frameNode->SelfExpansive()) {
+        // Dynamically modify position, need consider parent expand
+        frameNode->AdjustNotExpandNode();
+        rect = paintRect_;
+    }
     if (AnimationUtils::IsImplicitAnimationOpen()) {
         auto preBounds = rsNode_->GetStagingProperties().GetBounds();
         if (!NearEqual(preBounds[0], rect.GetX()) || !NearEqual(preBounds[1], rect.GetY())) {

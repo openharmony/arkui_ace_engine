@@ -1557,12 +1557,15 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern001, TestSize.Level1)
     EXPECT_GT(width, defaultWidth);
 
     for (const auto& child : children) {
+        auto childNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(childNode);
+        auto newWidth = childNode->GetGeometryNode()->GetFrameSize().Width();
         auto buttonNode = AceType::DynamicCast<FrameNode>(child->GetFirstChild());
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         EXPECT_EQ(buttonLayoutProperty->GetMeasureType(), MeasureType::MATCH_PARENT_MAIN_AXIS);
         EXPECT_EQ(buttonLayoutProperty->GetTypeValue(), ButtonType::NORMAL);
         auto calcSize = buttonLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.value();
-        EXPECT_EQ(calcSize.Width().value(), CalcLength(defaultWidth - PRESS_INTERVAL.ConvertToPx()));
+        EXPECT_EQ(calcSize.Width().value(), CalcLength(newWidth - PRESS_INTERVAL.ConvertToPx()));
         EXPECT_EQ(calcSize.Height().value(), CalcLength(height - PRESS_INTERVAL));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         EXPECT_EQ(buttonConfirmRenderContext->GetBackgroundColorValue(), Color::TRANSPARENT);

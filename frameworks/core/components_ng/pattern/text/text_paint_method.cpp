@@ -64,7 +64,9 @@ void TextPaintMethod::DoStartTextRace()
         option.step = DEFAULT_MARQUEE_STEP_VP.ConvertToPx();
     }
     option.loop = layoutProperty->GetTextMarqueeLoop().value_or(-1);
-    option.direction = layoutProperty->GetTextMarqueeDirection().value_or(MarqueeDirection::LEFT);
+    auto defaultDirection = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::LTR ? MarqueeDirection::LEFT
+                                                                                              : MarqueeDirection::RIGHT;
+    option.direction = layoutProperty->GetTextMarqueeDirection().value_or(defaultDirection);
     option.delay = layoutProperty->GetTextMarqueeDelay().value_or(0);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

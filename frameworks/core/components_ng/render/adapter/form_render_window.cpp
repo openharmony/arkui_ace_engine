@@ -82,9 +82,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
             return;
         }
 
-        uiTaskRunner.PostTask([callback = std::move(onVsync)]() {
-            callback();
-        }, "ArkUIFormRenderWindowVsync");
+        taskExecutor->PostTask(onVsync, TaskExecutor::TaskType::UI, "ArkUIFormRenderWindowVsync", PriorityType::VIP);
     };
 
     frameCallback_.userData_ = nullptr;

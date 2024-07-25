@@ -169,6 +169,7 @@ void ListItemGroupLayoutAlgorithm::SyncGeometry(RefPtr<LayoutWrapper>& wrapper)
     auto host = wrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     host->ForceSyncGeometryNode();
+    host->ResetLayoutAlgorithm();
 }
 
 bool ListItemGroupLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const
@@ -863,7 +864,7 @@ void ListItemGroupLayoutAlgorithm::AdjustItemPosition()
             itemInfo.startIndex = start.first;
             itemInfo.startPos = start.second.startPos;
         }
-        if (end.first >= itemInfo.endIndex || LessNotEqual(end.second.endPos, itemInfo.endPos)) {
+        if (end.first >= itemInfo.endIndex || GreatNotEqual(end.second.endPos, itemInfo.endPos)) {
             itemInfo.endIndex = end.first;
             itemInfo.endPos = end.second.endPos;
         }

@@ -146,6 +146,9 @@ float OH_ArkUI_PinchGesture_GetCenterY(const ArkUI_GestureEvent* event)
 
 ArkUI_NodeHandle OH_ArkUI_GestureEvent_GetNode(const ArkUI_GestureEvent* event)
 {
+    if (!event) {
+        return nullptr;
+    }
     return reinterpret_cast<ArkUI_NodeHandle>(event->attachNode);
 }
 

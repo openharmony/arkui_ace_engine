@@ -208,6 +208,7 @@ void InputMethodManager::HideKeyboardAcrossProcesses()
 void InputMethodManager::ProcessModalPageScene()
 {
     auto currentFocusNode = curFocusNode_.Upgrade();
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "ProcessModalPageScene");
     if (currentFocusNode && currentFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
         HideKeyboardAcrossProcesses();
     } else {

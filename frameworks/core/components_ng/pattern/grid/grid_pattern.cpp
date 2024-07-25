@@ -1721,6 +1721,16 @@ void GridPattern::DumpAdvanceInfo()
     property->GetScrollEnabled().has_value()
         ? DumpLog::GetInstance().AddDesc("ScrollEnabled:" + std::to_string(property->GetScrollEnabled().value()))
         : DumpLog::GetInstance().AddDesc("ScrollEnabled:null");
+    switch (property->GetAlignItems().value_or(GridItemAlignment::DEFAULT)) {
+        case GridItemAlignment::STRETCH: {
+            DumpLog::GetInstance().AddDesc("AlignItems:GridItemAlignment.STRETCH");
+            break;
+        }
+        default: {
+            DumpLog::GetInstance().AddDesc("AlignItems:GridItemAlignment.DEFAULT");
+            break;
+        }
+    }
     switch (gridLayoutInfo_.scrollAlign_) {
         case ScrollAlign::NONE: {
             DumpLog::GetInstance().AddDesc("ScrollAlign:NONE");

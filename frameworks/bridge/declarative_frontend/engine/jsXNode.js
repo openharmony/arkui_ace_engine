@@ -17,6 +17,9 @@ var NodeRenderType;
     NodeRenderType[NodeRenderType["RENDER_TYPE_DISPLAY"] = 0] = "RENDER_TYPE_DISPLAY";
     NodeRenderType[NodeRenderType["RENDER_TYPE_TEXTURE"] = 1] = "RENDER_TYPE_TEXTURE";
 })(NodeRenderType || (NodeRenderType = {}));
+if (!globalThis.__hasUIFramework__) {
+    globalThis.requireNapi('arkui.mock');
+}
 class BaseNode extends __JSBaseNode__ {
     constructor(uiContext, options) {
         super(options);
@@ -91,6 +94,9 @@ class BuilderNode {
     }
     recycle() {
         this._JSBuilderNode.recycle();
+    }
+    updateConfiguration() {
+        this._JSBuilderNode.updateConfiguration();
     }
 }
 class JSBuilderNode extends BaseNode {
@@ -203,6 +209,12 @@ class JSBuilderNode extends BaseNode {
         Array.from(this.updateFuncByElmtId.keys()).sort((a, b) => {
             return (a < b) ? -1 : (a > b) ? 1 : 0;
         }).forEach(elmtId => this.UpdateElement(elmtId));
+        for (const child of this.childrenWeakrefMap_.values()) {
+            const childView = child.deref();
+            if (childView) {
+                childView.forceCompleteRerender(true);
+            }
+        }
         this.updateEnd();
         __JSScopeUtil__.restoreInstanceId();
     }
@@ -1634,8 +1646,8 @@ class BaseShape {
 class ShapeClip extends BaseShape {
 }
 class ShapeMask extends BaseShape {
-    constructor() {
-        super(...arguments);
+    constructor(...args) {
+        super(...args);
         this.fillColor = 0XFF000000;
         this.strokeColor = 0XFF000000;
         this.strokeWidth = 0;
@@ -2272,6 +2284,9 @@ class ComponentContent extends Content {
             return result;
         }
         return node;
+    }
+    updateConfiguration() {
+        this.builderNode_.updateConfiguration();
     }
 }
 /*

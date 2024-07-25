@@ -90,7 +90,9 @@ bool GetToastMessage(napi_env env, napi_value messageNApi, std::string& messageS
             NapiThrow(env, "Can not get message from resource manager.", ERROR_CODE_INTERNAL_ERROR);
             return false;
         }
-        TAG_LOGD(AceLogTag::ACE_DIALOG, "Toast message: %{public}s", messageString.c_str());
+        if (messageString.size() == 0) {
+            TAG_LOGD(AceLogTag::ACE_DIALOG, "Toast message is empty");
+        }
     } else {
         NapiThrow(env, "The type of message is incorrect.", ERROR_CODE_PARAM_INVALID);
         return false;

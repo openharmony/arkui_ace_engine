@@ -71,6 +71,9 @@ struct DataBase {
     int64_t beginVsyncTime {0};
     int64_t endVsyncTime {0};
     int64_t maxFrameTime {0};
+    int64_t maxFrameTimeSinceStart {0};
+    int64_t maxHitchTime {0};
+    int64_t maxHitchTimeSinceStart {0};
     bool needReportRs {false};
     bool isDisplayAnimator {false};
     PerfSourceType sourceType {UNKNOWN_SOURCE};
@@ -103,6 +106,9 @@ public:
     int64_t beginVsyncTime {0};
     int64_t endVsyncTime {0};
     int64_t  maxFrameTime {0};
+    int64_t maxFrameTimeSinceStart {0};
+    int64_t maxHitchTime {0};
+    int64_t maxHitchTimeSinceStart {0};
     int32_t maxSuccessiveFrames {0};
     int32_t totalMissed {0};
     int32_t totalFrames {0};

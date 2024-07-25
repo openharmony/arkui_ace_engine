@@ -95,6 +95,7 @@ void LongPressRecognizer::OnRejected()
     if (refereeState_ == RefereeState::SUCCEED) {
         return;
     }
+    SendRejectMsg();
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
 }
@@ -451,6 +452,7 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
     }
     auto info = std::make_shared<LongPressGestureEvent>();
     info->SetTimeStamp(time_);
+    info->SetDeviceId(deviceId_);
     info->SetRepeat(repeat_);
     info->SetFingerList(fingerList_);
     TouchEvent trackPoint = {};

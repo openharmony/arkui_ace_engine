@@ -59,7 +59,8 @@ private:
     AceEngine();
 
     mutable std::shared_mutex mutex_;
-    std::unordered_map<int32_t, RefPtr<Container>> containerMap_;
+    // ordered container
+    std::map<int32_t, RefPtr<Container>> containerMap_;
     RefPtr<WatchDog> watchDog_;
     ACE_DISALLOW_COPY_AND_MOVE(AceEngine);
 };

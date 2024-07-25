@@ -135,6 +135,7 @@ public:
     void OnColorConfigurationUpdate() override;
     void UpdateBubbleText();
     void UpdateText(const RefPtr<UINode>& node, const RefPtr<PopupTheme>& popupTheme);
+    void AddPipelineCallBack();
 
     void SetMessageColor(bool isSetMessageColor)
     {
@@ -290,6 +291,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(BubblePattern);
 
     bool hasTransition_ = false;
+    bool hasOnAreaChange_ = false;
 };
 } // namespace OHOS::Ace::NG
 

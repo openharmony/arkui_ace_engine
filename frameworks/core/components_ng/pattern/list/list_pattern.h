@@ -223,8 +223,15 @@ public:
     }
     bool CanReplaceSwiperItem()
     {
-        if (!swiperItem_.Upgrade()) {
+        auto listItemPattern = swiperItem_.Upgrade();
+        if (!listItemPattern) {
             canReplaceSwiperItem_ = true;
+            return canReplaceSwiperItem_;
+        }
+        auto host = listItemPattern->GetHost();
+        if (!host || !host->IsOnMainTree()) {
+            canReplaceSwiperItem_ = true;
+            return canReplaceSwiperItem_;
         }
         return canReplaceSwiperItem_;
     }
@@ -353,8 +360,8 @@ private:
     void UpdateListDirectionInCardStyle();
     bool UpdateStartListItemIndex();
     bool UpdateEndListItemIndex();
-    float GetStartOverScrollOffset(float offset) const;
-    float GetEndOverScrollOffset(float offset) const;
+    float GetStartOverScrollOffset(float offset, float startMainPos) const;
+    float GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const;
     RefPtr<ListContentModifier> listContentModifier_;
 
     void ReadThemeToFadingEdge();

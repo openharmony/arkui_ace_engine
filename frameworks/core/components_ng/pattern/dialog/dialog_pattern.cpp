@@ -93,6 +93,7 @@ constexpr Dimension ADAPT_SUBTITLE_MIN_FONT_SIZE = 12.0_fp;
 constexpr uint32_t ADAPT_TITLE_MAX_LINES = 2;
 constexpr int32_t TEXT_ALIGN_TITLE_CENTER = 1;
 constexpr int32_t BUTTON_TYPE_NORMAL = 1;
+constexpr Dimension DIALOG_BUTTON_BORDER_RADIUS = 20.0_vp;
 
 std::string GetBoolStr(bool isTure)
 {
@@ -158,6 +159,8 @@ void DialogPattern::OnFontConfigurationUpdate()
         auto buttonContainerNew = BuildButtons(dialogProperties_.buttons, DialogButtonDirection::VERTICAL);
         CHECK_NULL_VOID(buttonContainerNew);
         buttonContainerNew->MountToParent(contentColumn_);
+        buttonContainer_ = buttonContainerNew;
+        CheckScrollHeightIsNegative(contentColumn_, dialogProperties_);
         UpdateTextFontScale();
     }
 }
@@ -196,7 +199,9 @@ void DialogPattern::HandleClick(const GestureEvent& info)
             CHECK_NULL_VOID(pipeline);
             auto overlayManager = pipeline->GetOverlayManager();
             CHECK_NULL_VOID(overlayManager);
-            if (this->ShouldDismiss()) {
+            if (this->CallDismissInNDK(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE))) {
+                return;
+            } else if (this->ShouldDismiss()) {
                 overlayManager->SetDismissDialogId(host->GetId());
                 this->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE));
                 TAG_LOGI(AceLogTag::ACE_DIALOG, "Dialog Should Dismiss");
@@ -462,6 +467,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
         auto buttonContainerNew = BuildButtons(props.buttons, DialogButtonDirection::VERTICAL);
         buttonContainerNew->MountToParent(contentColumn);
         buttonContainer_ = buttonContainerNew;
+        CheckScrollHeightIsNegative(contentColumn, props);
     }
     contentColumn_ = contentColumn;
     UpdateTextFontScale();
@@ -770,6 +776,8 @@ void DialogPattern::UpdateDialogButtonProperty(
     if (dialogTheme_->GetButtonType() == BUTTON_TYPE_NORMAL) {
         buttonProp->UpdateButtonStyle(ButtonStyleMode::NORMAL);
     }
+    buttonProp->UpdateType(ButtonType::NORMAL);
+    buttonProp->UpdateBorderRadius(BorderRadiusProperty(DIALOG_BUTTON_BORDER_RADIUS));
     PaddingProperty buttonPadding;
     buttonPadding.left = CalcLength(SHEET_LIST_PADDING);
     buttonPadding.right = CalcLength(SHEET_LIST_PADDING);
@@ -810,10 +818,18 @@ RefPtr<FrameNode> DialogPattern::CreateDivider(
     CHECK_NULL_RETURN(dividerPaintProps, nullptr);
     dividerPaintProps->UpdateDividerColor(color);
     // add divider margin
-    MarginProperty margin = {
-        .left = CalcLength((space - dividerWidth) / 2),
-        .right = CalcLength((space - dividerWidth) / 2),
-    };
+    MarginProperty margin;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        margin = {
+            .left = CalcLength((space + space - Dimension(dividerWidth.ConvertToVp(), DimensionUnit::VP)) / 2),
+            .right = CalcLength((space + space - Dimension(dividerWidth.ConvertToVp(), DimensionUnit::VP)) / 2),
+        };
+    } else {
+        margin = {
+            .left = CalcLength((space - dividerWidth) / 2),
+            .right = CalcLength((space - dividerWidth) / 2),
+        };
+    }
     dividerProps->UpdateMargin(margin);
     return dividerNode;
 }
@@ -1337,7 +1353,9 @@ bool DialogPattern::NeedsButtonDirectionChange(const std::vector<ButtonInfo>& bu
     auto props = host->GetLayoutProperty<DialogLayoutProperty>();
     CHECK_NULL_RETURN(props, false);
     auto buttonLayoutConstraint = props->GetLayoutConstraint();
+    isSuitOldMeasure_ = true;
     host->Measure(buttonLayoutConstraint);
+    isSuitOldMeasure_ = false;
     const auto& children = buttonContainer_->GetChildren();
     for (const auto& child : children) {
         if (child->GetTag() == V2::BUTTON_ETS_TAG) {
@@ -1373,6 +1391,31 @@ bool DialogPattern::NeedsButtonDirectionChange(const std::vector<ButtonInfo>& bu
         }
     }
     return false;
+}
+
+void DialogPattern::CheckScrollHeightIsNegative(
+    const RefPtr<UINode>& contentColumn, const DialogProperties& Dialogprops)
+{
+    CHECK_NULL_VOID(buttonContainer_);
+    if (Dialogprops.buttons.size() == ONE_BUTTON_MODE || buttonContainer_->GetTag() == V2::ROW_ETS_TAG) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto props = host->GetLayoutProperty<DialogLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    auto buttonLayoutConstraint = props->GetLayoutConstraint();
+    isSuitOldMeasure_ = true;
+    host->Measure(buttonLayoutConstraint);
+    isSuitOldMeasure_ = false;
+    if (isScrollHeightNegative_) {
+        isSuitableForElderly_ = false;
+        notAdapationAging_ = true;
+        contentColumn->RemoveChild(buttonContainer_);
+        auto buttonContainerNew = BuildButtons(Dialogprops.buttons, Dialogprops.buttonDirection);
+        buttonContainerNew->MountToParent(contentColumn);
+        buttonContainer_ = buttonContainerNew;
+    }
 }
 
 void DialogPattern::UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation)

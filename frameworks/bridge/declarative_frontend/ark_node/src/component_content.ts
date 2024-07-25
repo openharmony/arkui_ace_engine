@@ -74,4 +74,8 @@ class ComponentContent extends Content {
     }
     return node;
   }
+
+  public updateConfiguration(): void {
+    this.builderNode_.updateConfiguration();
+  }
 }

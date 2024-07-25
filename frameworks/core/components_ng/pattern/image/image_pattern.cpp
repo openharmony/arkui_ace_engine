@@ -451,7 +451,7 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     ImageFit imageFit = props->GetImageFit().value_or(ImageFit::COVER);
     const std::optional<SizeF>& sourceSize = props->GetSourceSize();
     auto renderProp = host->GetPaintProperty<ImageRenderProperty>();
-    bool hasValidSlice = renderProp && renderProp->HasImageResizableSlice();
+    bool hasValidSlice = renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice());
     DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
     bool isHdrDecoderNeed = false;
     if (renderProp && renderProp->HasDynamicMode()) {
@@ -520,7 +520,7 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
         return MakeRefPtr<ImagePaintMethod>(
             obscuredImage_, isSelected_, overlayMod_, sensitive, interpolationDefault_);
     }
-    return nullptr;
+    return MakeRefPtr<ImagePaintMethod>(nullptr, isSelected_, overlayMod_, sensitive, interpolationDefault_);
 }
 
 bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -544,7 +544,7 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     StartDecoding(dstSize);
     if (loadingCtx_) {
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
-        if (renderProp && renderProp->HasImageResizableSlice() && image_) {
+        if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) && image_) {
             loadingCtx_->ResizableCalcDstSize();
             SetImagePaintConfig(image_, loadingCtx_->GetSrcRect(), loadingCtx_->GetDstRect(), loadingCtx_->GetSrc(),
                 loadingCtx_->GetFrameCount());
@@ -553,7 +553,8 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 
     if (altLoadingCtx_) {
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
-        if (renderProp && renderProp->HasImageResizableSlice() && altImage_) {
+        if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) &&
+            altImage_) {
             altLoadingCtx_->ResizableCalcDstSize();
             SetImagePaintConfig(altImage_, altLoadingCtx_->GetSrcRect(), altLoadingCtx_->GetDstRect(),
                 altLoadingCtx_->GetSrc(), altLoadingCtx_->GetFrameCount());
@@ -589,10 +590,9 @@ void ImagePattern::LoadImage(
     const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag, VisibleType visibleType)
 {
     if (loadingCtx_) {
-        auto srcPixelMap = src.GetPixmap();
-        auto loadPixelMap = loadingCtx_->GetSourceInfo().GetPixmap();
-        isPixelMapChanged_ = !srcPixelMap || !loadPixelMap || srcPixelMap->GetRawPixelMapPtr() !=
-                                                              loadPixelMap->GetRawPixelMapPtr();
+        auto srcKey = src.GetKey();
+        auto loadKey = loadingCtx_->GetSourceInfo().GetKey();
+        isPixelMapChanged_ = srcKey != loadKey;
     }
     LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
     loadNotifier.onDataReadyComplete_ = CreateCompleteCallBackInDataReady();
@@ -1368,10 +1368,10 @@ void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
     if (loadingCtx_->GetSourceInfo().IsPixmap()) {
         auto pixelMap = image_->GetPixelMap();
         CHECK_NULL_VOID(pixelMap);
-        const uint8_t* pixels = pixelMap->GetPixels();
-        CHECK_NULL_VOID(pixels);
-        int32_t length = pixelMap->GetByteCount();
-        std::vector<uint8_t> data(pixels, pixels + length);
+        std::vector<uint8_t> data;
+        if (!pixelMap->GetPixelsVec(data)) {
+            return;
+        }
         PixelMapRecordDetails details = { pixelMap->GetWidth(), pixelMap->GetHeight(), pixelMap->GetPixelFormat(),
             pixelMap->GetAlphaType() };
         UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data, details);
@@ -2026,6 +2026,8 @@ void ImagePattern::ResetImageAndAlt()
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->ClearDrawCommands();
+    CloseSelectOverlay();
+    DestroyAnalyzerOverlay();
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

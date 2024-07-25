@@ -387,7 +387,7 @@ private:
     uint32_t currentIndex_ = 0;
     double yLast_ = 0.0;
     double yOffset_ = 0.0;
-    double jumpInterval_;
+    double jumpInterval_ = 0.0;
     uint32_t showCount_ = 0;
     bool isVertical_ = true;
     float gradientHeight_ = 0.0f;

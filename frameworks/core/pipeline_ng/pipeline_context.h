@@ -50,6 +50,7 @@
 #endif
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/recycle_view/recycle_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/web/itouch_event_callback.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -88,7 +89,7 @@ public:
     static RefPtr<PipelineContext> GetCurrentContextSafelyWithCheck();
 
     static PipelineContext* GetCurrentContextPtrSafely();
-    
+
     static PipelineContext* GetCurrentContextPtrSafelyWithCheck();
 
 
@@ -191,6 +192,8 @@ public:
     {
         return {};
     }
+
+    bool HasOnAreaChangeNode(int32_t nodeId);
 
     void AddOnAreaChangeNode(int32_t nodeId);
 
@@ -297,6 +300,8 @@ public:
     void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
 
     float GetPageAvoidOffset() override;
+
+    bool CheckNeedAvoidInSubWindow() override;
 
     void CheckAndUpdateKeyboardInset() override;
 
@@ -564,7 +569,7 @@ public:
     {
         storeNode_.erase(restoreId);
     }
-    void SetNeedRenderNode(const RefPtr<FrameNode>& node);
+    void SetNeedRenderNode(const WeakPtr<FrameNode>& node);
 
     void SetIgnoreViewSafeArea(bool value) override;
     void SetIsLayoutFullScreen(bool value) override;
@@ -576,9 +581,8 @@ public:
     void DumpJsInfo(const std::vector<std::string>& params) const;
 
     bool DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
-        bool skipSubAutoFillContainer = false);
+        bool skipSubAutoFillContainer = false, bool needsRecordData = false);
     bool CheckNeedAutoSave();
-    bool CheckPageFocus();
     bool CheckOverlayFocus();
     void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap);
     void NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode,
@@ -709,6 +713,11 @@ public:
         return navigationMgr_;
     }
 
+    const std::unique_ptr<RecycleManager>& GetRecycleManager() const
+    {
+        return recycleManager_;
+    }
+
     RefPtr<PrivacySensitiveManager> GetPrivacySensitiveManager() const
     {
         return privacySensitiveManager_;
@@ -808,18 +817,15 @@ public:
         return isDensityChanged_;
     }
 
-
-    void UpdateLastVsyncEndTimestamp(uint64_t lastVsyncEndTimestamp) override
-    {
-        lastVsyncEndTimestamp_ = lastVsyncEndTimestamp;
-    }
     void GetInspectorTree();
     void NotifyAllWebPattern(bool isRegister);
-    void AddFrameNodeChangeListener(const RefPtr<FrameNode>& node);
-    void RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node);
-    void AddChangedFrameNode(const RefPtr<FrameNode>& node);
+    void AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node);
+    void RemoveFrameNodeChangeListener(int32_t nodeId);
+    bool AddChangedFrameNode(const WeakPtr<FrameNode>& node);
+    void RemoveChangedFrameNode(int32_t nodeId);
     void SetForceSplitEnable(bool isForceSplit)
     {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "set force split %{public}s", isForceSplit ? "enable" : "disable");
         isForceSplit_ = isForceSplit;
     }
 
@@ -850,7 +856,7 @@ protected:
 
     void OnVirtualKeyboardHeightChange(float keyboardHeight,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
-        const bool supportAvoidance = false) override;
+        const bool supportAvoidance = false, bool forceChange = false) override;
     void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false) override;
 
@@ -877,7 +883,7 @@ private:
     void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
 
     void FlushTouchEvents();
-
+    void FlushWindowPatternInfo();
     void FlushFocusView();
     void FlushFocusScroll();
 
@@ -932,10 +938,10 @@ private:
         }
     };
 
-    std::pair<float, float> LinearInterpolation(const std::tuple<float, float, uint64_t>& history,
+    std::tuple<float, float, float, float> LinearInterpolation(const std::tuple<float, float, uint64_t>& history,
         const std::tuple<float, float, uint64_t>& current, const uint64_t nanoTimeStamp);
 
-    std::pair<float, float> GetResampleCoord(const std::vector<TouchEvent>& history,
+    std::tuple<float, float, float, float> GetResampleCoord(const std::vector<TouchEvent>& history,
         const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp, const bool isScreen);
 
     std::tuple<float, float, uint64_t> GetAvgPoint(const std::vector<TouchEvent>& events, const bool isScreen);
@@ -959,7 +965,7 @@ private:
     // window on show or on hide
     std::set<int32_t> onWindowStateChangedCallbacks_;
     // window on focused or on unfocused
-    std::list<int32_t> onWindowFocusChangedCallbacks_;
+    std::set<int32_t> onWindowFocusChangedCallbacks_;
     // window on drag
     std::list<int32_t> onWindowSizeChangeCallbacks_;
 
@@ -973,7 +979,7 @@ private:
 
     int32_t curFocusNodeId_ = -1;
 
-    std::set<RefPtr<FrameNode>> needRenderNode_;
+    std::set<WeakPtr<FrameNode>> needRenderNode_;
 
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
@@ -1011,7 +1017,6 @@ private:
     uint32_t nextScheduleTaskId_ = 0;
     int32_t mouseStyleNodeId_ = -1;
     uint64_t resampleTimeStamp_ = 0;
-    uint64_t lastVsyncEndTimestamp_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
@@ -1067,6 +1072,7 @@ private:
     int32_t preNodeId_ = -1;
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
+    std::unique_ptr<RecycleManager> recycleManager_ = std::make_unique<RecycleManager>();
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
     bool customTitleSettedShow_ = true;
@@ -1077,8 +1083,8 @@ private:
 
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
     uint32_t transform_ = 0;
-    std::list<RefPtr<FrameNode>> changeInfoListeners_;
-    std::list<RefPtr<FrameNode>> changedNodes_;
+    std::list<WeakPtr<FrameNode>> changeInfoListeners_;
+    std::list<WeakPtr<FrameNode>> changedNodes_;
 };
 } // namespace OHOS::Ace::NG
 

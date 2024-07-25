@@ -37,7 +37,7 @@ public:
     void InsertString(int32_t start, const std::string& other);
     void RemoveString(int32_t start, int32_t length);
     void ReplaceSpan(int32_t start, int32_t length, const RefPtr<SpanBase>& span);
-    void RemoveSpans(int32_t start, int32_t length);
+    void RemoveSpans(int32_t start, int32_t length, bool removeSpecialSpan = true);
     void ClearAllSpans();
     void ReplaceSpanString(int32_t start, int32_t length, const RefPtr<SpanString>& spanString);
     void InsertSpanString(int32_t start, const RefPtr<SpanString>& spanString);

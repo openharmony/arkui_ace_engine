@@ -585,7 +585,7 @@ public:
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::string content);
-    void InitValueText(const std::string& content);
+    bool InitValueText(const std::string& content);
 
     void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);
@@ -597,13 +597,17 @@ public:
     }
     void NotifyKeyboardClosedByUser() override
     {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosedByUser");
         isKeyboardClosedByUser_ = true;
         FocusHub::LostFocusToViewRoot();
         isKeyboardClosedByUser_ = false;
     }
 
+    void OnDirectionConfigurationUpdate() override;
+
     void NotifyKeyboardClosed() override
     {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosed");
         if (HasFocus()) {
             FocusHub::LostFocusToViewRoot();
         }
@@ -1092,7 +1096,7 @@ public:
 
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
-    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
+    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) override;
@@ -1100,11 +1104,6 @@ public:
     void OnColorConfigurationUpdate() override;
     bool NeedPaintSelect();
     void SetCustomKeyboardOption(bool supportAvoidance);
-
-    void SetIsFocusedBeforeClick(bool isFocusedBeforeClick)
-    {
-        isFocusedBeforeClick_ = isFocusedBeforeClick;
-    }
 
     void SetIsCustomFont(bool isCustomFont)
     {
@@ -1369,6 +1368,11 @@ public:
         start = selectController_->GetStartIndex();
         end = selectController_->GetEndIndex();
     }
+
+    void SetTextChangedAtCreation(bool changed)
+    {
+        isTextChangedAtCreation_ = changed;
+    }
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override
@@ -1380,6 +1384,11 @@ protected:
     {
         isDetachFromMainTree_ = true;
     }
+    
+    bool IsReverse() const override
+    {
+        return false;
+    };
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
@@ -1430,11 +1439,12 @@ private:
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
+    bool CanChangeSelectState();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void CursorMoveOnClick(const Offset& offset);
 
     void DelayProcessOverlay(const OverlayRequest& request = OverlayRequest());
-    void ProcessOverlayAfterLayout(bool isGlobalAreaChanged);
+    void ProcessOverlayAfterLayout(const OffsetF& prevOffset);
     void ProcessOverlay(const OverlayRequest& request = OverlayRequest());
 
     bool SelectOverlayIsOn()
@@ -1593,6 +1603,7 @@ private:
     bool FinishTextPreviewByPreview(const std::string& insertValue);
 
     bool GetTouchInnerPreviewText(const Offset& offset) const;
+    bool IsShowMenu(const std::optional<SelectionOptions>& options);
 
     RectF frameRect_;
     RectF textRect_;
@@ -1739,7 +1750,7 @@ private:
     RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
     RefPtr<TextInputResponseArea> cleanNodeResponseArea_;
-    std::string lastAutoFillPasswordTextValue_;
+    std::string lastAutoFillTextValue_;
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
@@ -1784,6 +1795,7 @@ private:
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;
+    bool isTextChangedAtCreation_ = false;
 };
 } // namespace OHOS::Ace::NG
 

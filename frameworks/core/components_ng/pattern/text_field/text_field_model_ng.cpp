@@ -58,7 +58,8 @@ void TextFieldModelNG::CreateNode(
     pattern->ResetContextAttr();
     auto textValue = pattern->GetTextValue();
     if (value.has_value() && value.value() != textValue) {
-        pattern->InitValueText(value.value());
+        auto changed = pattern->InitValueText(value.value());
+        pattern->SetTextChangedAtCreation(changed);
     }
     textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
     if (!isTextArea) {
@@ -360,6 +361,7 @@ void TextFieldModelNG::SetMaxLength(uint32_t value)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    CHECK_NULL_VOID(pattern->HasFocus());
     pattern->UpdateShowCountBorderStyle();
 }
 
@@ -1043,6 +1045,7 @@ void TextFieldModelNG::SetMaxLength(FrameNode* frameNode, uint32_t value)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    CHECK_NULL_VOID(pattern->HasFocus());
     pattern->UpdateShowCountBorderStyle();
 }
 
@@ -1956,6 +1959,14 @@ void TextFieldModelNG::SetOnDidDeleteEvent(FrameNode* frameNode,
 void TextFieldModelNG::SetSelectionMenuOptions(
     const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
 {
+    auto textFieldPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+void TextFieldModelNG::SetSelectionMenuOptions(FrameNode* frameNode,
+    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
+{
+    CHECK_NULL_VOID(frameNode);
     auto textFieldPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));

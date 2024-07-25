@@ -371,21 +371,20 @@ void SwiperArrowPattern::UpdateArrowContent()
     CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);
+    bool isRtl = swiperLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (V2::SWIPER_LEFT_ARROW_ETS_TAG == GetHost()->GetTag()) {
         if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
-            symbolLayoutProperty->UpdateSymbolSourceInfo(
-                SymbolSourceInfo(swiperIndicatorTheme->GetLeftSymbolId()));
+            symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(
+                isRtl ? swiperIndicatorTheme->GetRightSymbolId() : swiperIndicatorTheme->GetLeftSymbolId()));
         } else {
-            symbolLayoutProperty->UpdateSymbolSourceInfo(
-                SymbolSourceInfo(swiperIndicatorTheme->GetUpSymbolId()));
+            symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(swiperIndicatorTheme->GetUpSymbolId()));
         }
     } else if (V2::SWIPER_RIGHT_ARROW_ETS_TAG == GetHost()->GetTag()) {
         if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
-            symbolLayoutProperty->UpdateSymbolSourceInfo(
-                SymbolSourceInfo(swiperIndicatorTheme->GetRightSymbolId()));
+            symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(
+                isRtl ? swiperIndicatorTheme->GetLeftSymbolId() : swiperIndicatorTheme->GetRightSymbolId()));
         } else {
-            symbolLayoutProperty->UpdateSymbolSourceInfo(
-                SymbolSourceInfo(swiperIndicatorTheme->GetDownSymbolId()));
+            symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(swiperIndicatorTheme->GetDownSymbolId()));
         }
     }
     symbolLayoutProperty->UpdateFontSize(swiperArrowLayoutProperty->GetArrowSizeValue());

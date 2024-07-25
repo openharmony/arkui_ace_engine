@@ -59,7 +59,11 @@ void SequencedRecognizer::OnRejected()
     while (iter != recognizers_.end()) {
         auto recognizer = *iter;
         if (recognizer) {
+            if (recognizer->IsBridgeMode()) {
+                continue;
+            }
             recognizer->OnRejected();
+            recognizer->OnRejectBridgeObj();
         }
         ++iter;
     }

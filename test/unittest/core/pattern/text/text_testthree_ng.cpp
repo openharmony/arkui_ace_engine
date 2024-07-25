@@ -1034,11 +1034,11 @@ HWTEST_F(TextTestThreeNg, HandleClickAISpanEvent, TestSize.Level1)
 }
 
 /**
- * @tc.name: ShowUIExtensionMenu
- * @tc.desc: test test_pattern.h ShowUIExtensionMenu function with valid textSelector
+ * @tc.name: ShowAIEntityMenu
+ * @tc.desc: test test_pattern.h ShowAIEntityMenu function with valid textSelector
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestThreeNg, ShowUIExtensionMenu, TestSize.Level1)
+HWTEST_F(TextTestThreeNg, ShowAIEntityMenu, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and pattern
@@ -1057,10 +1057,10 @@ HWTEST_F(TextTestThreeNg, ShowUIExtensionMenu, TestSize.Level1)
     aiSpan.type = TextDataDetectType::PHONE_NUMBER;
 
     /**
-     * @tc.steps: step2. call ShowUIExtensionMenu function
-     * @tc.expected: ShowUIExtensionMenu result is true.
+     * @tc.steps: step2. call ShowAIEntityMenu function
+     * @tc.expected: ShowAIEntityMenu result is true.
      */
-    EXPECT_TRUE(pattern->ShowUIExtensionMenu(aiSpan, nullptr, nullptr));
+    EXPECT_TRUE(pattern->ShowAIEntityMenu(aiSpan, nullptr, nullptr));
 }
 
 /**

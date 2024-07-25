@@ -92,7 +92,6 @@ const std::string TEXT_TAG = "text";
 const OffsetF MENU_OFFSET(10.0, 10.0);
 const std::string MESSAGE = "hello world";
 const std::string BOTTOMSTRING = "test";
-const std::string LONGEST_CONTENT = "新建文件夹";
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 } // namespace
 
@@ -161,6 +160,7 @@ void OverlayManagerTestUpdateNg::TearDownTestCase()
 {
     MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 RefPtr<FrameNode> OverlayManagerTestUpdateNg::CreateTargetNode()
@@ -1949,7 +1949,7 @@ HWTEST_F(OverlayManagerTestUpdateNg, OnBindSheet031, TestSize.Level1)
  * @tc.desc: Test OverlayManager::OnBindSheet closeIcon test.
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerTestNg, OnBindSheet032, TestSize.Level1)
+HWTEST_F(OverlayManagerTestUpdateNg, OnBindSheet032, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create target node.

@@ -241,4 +241,21 @@ GridModelNG GridTestNg::CreateRepeatGrid(int32_t itemNumber, float itemHeight)
     repeatModel.Create(itemNumber, {}, createFunc, updateFunc, getKeys, getTypes);
     return model;
 }
+
+void GridTestNg::CreateAdaptChildSizeGridItems(
+    int32_t itemNumber, GridItemStyle gridItemStyle)
+{
+    for (int32_t i = 0; i < itemNumber; i++) {
+        ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+        GridItemModelNG itemModel;
+        itemModel.Create(gridItemStyle);
+        {
+            auto columnFrameNode =
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
 } // namespace OHOS::Ace::NG

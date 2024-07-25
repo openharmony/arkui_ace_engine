@@ -1197,6 +1197,7 @@ void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
         paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
 
         if (!changeIndexWithAnimation_) {
+            overlongDotIndicatorModifier_->StopAnimation(true);
             overlongDotIndicatorModifier_->SetCurrentOverlongType(OverlongType::NONE);
         }
     }

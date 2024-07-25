@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <sstream>
 
 #include "base/log/ace_trace.h"
@@ -77,6 +78,7 @@ constexpr int32_t INDEX_TWO = 2;
 constexpr int32_t LENGTH_ONE = 1;
 constexpr int32_t LENGTH_TWO = 2;
 constexpr int32_t LENGTH_THREE = 3;
+int32_t g_animationCount = 0;
 enum class AnimationInterface : int32_t {
     ANIMATION = 0,
     ANIMATE_TO,
@@ -103,7 +105,7 @@ std::unordered_map<int32_t, std::string> BIND_SHEET_ERROR_MAP = {
         "2. Incorrect parameter types; 3. Parameter verification failed." }
 };
 
-void PrintInfiniteAnimation(const AnimationOption& option, AnimationInterface interface)
+void PrintAnimationInfo(const AnimationOption& option, AnimationInterface interface, const std::optional<int32_t>& cnt)
 {
     if (option.GetIteration() == ANIMATION_REPEAT_INFINITE) {
         if (interface == AnimationInterface::KEYFRAME_ANIMATE_TO) {
@@ -116,6 +118,11 @@ void PrintInfiniteAnimation(const AnimationOption& option, AnimationInterface in
                 g_animationInterfaceNames[static_cast<int>(interface)], option.GetDuration(),
                 option.GetCurve()->ToString().c_str());
         }
+        return;
+    }
+    if (cnt) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "%{public}s starts, [%{public}s], finish cnt:%{public}d",
+            g_animationInterfaceNames[static_cast<int>(interface)], option.ToString().c_str(), cnt.value());
     }
 }
 
@@ -158,11 +165,12 @@ bool GetAnyContextIsLayouting(const RefPtr<PipelineBase>& currentPipeline)
 }
 
 void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
-    JSRef<JSFunc> jsAnimateToFunc, std::function<void()>& onFinishEvent, bool immediately)
+    JSRef<JSFunc> jsAnimateToFunc, const std::optional<int32_t>& count, bool immediately)
 {
     auto triggerId = pipelineContext->GetInstanceId();
-    ACE_SCOPED_TRACE("duration:%d, curve:%s, iteration:%d, delay:%d, instanceId:%d", option.GetDuration(),
-        option.GetCurve()->ToString().c_str(), option.GetIteration(), option.GetDelay(), triggerId);
+    ACE_SCOPED_TRACE("%s, instanceId:%d, finish cnt:%d", option.ToString().c_str(), triggerId, count.value_or(-1));
+    PrintAnimationInfo(
+        option, immediately ? AnimationInterface::ANIMATE_TO_IMMEDIATELY : AnimationInterface::ANIMATE_TO, count);
     if (!ViewStackModel::GetInstance()->IsEmptyStack()) {
         TAG_LOGW(AceLogTag::ACE_ANIMATION,
             "when call animateTo, node stack is not empty, not suitable for animateTo. param is [duration:%{public}d, "
@@ -170,20 +178,19 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
             option.GetDuration(), option.GetCurve()->ToString().c_str(), option.GetIteration());
     }
     NG::ScopedViewStackProcessor scopedProcessor;
-    AceEngine::Get().NotifyContainers([triggerId, option](const RefPtr<Container>& container) {
+    AceEngine::Get().NotifyContainers([triggerId](const RefPtr<Container>& container) {
         if (!CheckContainer(container)) {
             return;
         }
         auto context = container->GetPipelineContext();
+        ContainerScope scope(container->GetInstanceId());
+        context->FlushBuild();
         if (context->GetInstanceId() == triggerId) {
             return;
         }
-        ContainerScope scope(container->GetInstanceId());
-        context->FlushBuild();
         context->PrepareOpenImplicitAnimation();
     });
-    pipelineContext->FlushBuild();
-    pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
+    pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), option.GetOnFinishEvent());
     pipelineContext->SetSyncAnimationOption(option);
     // Execute the function.
     jsAnimateToFunc->Call(jsAnimateToFunc);
@@ -193,14 +200,13 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
             return;
         }
         auto context = container->GetPipelineContext();
+        ContainerScope scope(container->GetInstanceId());
+        context->FlushBuild();
         if (context->GetInstanceId() == triggerId) {
             return;
         }
-        ContainerScope scope(container->GetInstanceId());
-        context->FlushBuild();
         context->PrepareCloseImplicitAnimation();
     });
-    pipelineContext->FlushBuild();
     pipelineContext->CloseImplicitAnimation();
     pipelineContext->SetSyncAnimationOption(AnimationOption());
     pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
@@ -213,11 +219,12 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
 }
 
 void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
-    JSRef<JSFunc> jsAnimateToFunc, std::function<void()>& onFinishEvent, bool immediately)
+    JSRef<JSFunc> jsAnimateToFunc, const std::optional<int32_t>& count, bool immediately)
 {
-    ACE_SCOPED_TRACE("duration:%d, curve:%s, iteration:%d, delay:%d, instanceId:%d", option.GetDuration(),
-        option.GetCurve()->ToString().c_str(), option.GetIteration(), option.GetDelay(),
-        pipelineContext->GetInstanceId());
+    ACE_SCOPED_TRACE("%s, instanceId:%d, finish cnt:%d", option.ToString().c_str(), pipelineContext->GetInstanceId(),
+        count.value_or(-1));
+    PrintAnimationInfo(
+        option, immediately ? AnimationInterface::ANIMATE_TO_IMMEDIATELY : AnimationInterface::ANIMATE_TO, count);
     if (!ViewStackModel::GetInstance()->IsEmptyStack()) {
         TAG_LOGW(AceLogTag::ACE_ANIMATION,
             "when call animateTo, node stack is not empty, not suitable for animateTo. param is [duration:%{public}d, "
@@ -226,7 +233,7 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
     }
     NG::ScopedViewStackProcessor scopedProcessor;
     pipelineContext->FlushBuild();
-    pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
+    pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), option.GetOnFinishEvent());
     pipelineContext->SetSyncAnimationOption(option);
     jsAnimateToFunc->Call(jsAnimateToFunc);
     pipelineContext->FlushBuild();
@@ -534,7 +541,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     if (SystemProperties::GetRosenBackendEnabled()) {
         option.SetAllowRunningAsynchronously(true);
     }
-    PrintInfiniteAnimation(option, AnimationInterface::ANIMATION);
+    PrintAnimationInfo(option, AnimationInterface::ANIMATION, std::nullopt);
     AceScopedTrace paramTrace("duration:%d, curve:%s, iteration:%d", option.GetDuration(),
         option.GetCurve()->ToString().c_str(), option.GetIteration());
     ViewContextModel::GetInstance()->openAnimation(option);
@@ -593,18 +600,22 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;
+    std::optional<int32_t> count;
     auto traceStreamPtr = std::make_shared<std::stringstream>();
     if (onFinish->IsFunction()) {
+        count = g_animationCount++;
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                            id = Container::CurrentIdSafely(), traceStreamPtr, node = frameNode]() mutable {
+                            id = Container::CurrentIdSafely(), traceStreamPtr, node = frameNode, count]() mutable {
             CHECK_NULL_VOID(func);
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCOPED_TRACE("onFinish[cnt:%d]", count.value());
             auto pipelineContext = PipelineContext::GetCurrentContextSafely();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->UpdateCurrentActiveNode(node);
+            TAG_LOGI(AceLogTag::ACE_ANIMATION, "animateTo finish, cnt:%{public}d", count.value());
             func->Execute();
             func = nullptr;
             AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
@@ -616,6 +627,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     }
 
     AnimationOption option = CreateAnimation(obj, pipelineContext->IsFormRender());
+    option.SetOnFinishEvent(onFinishEvent);
     *traceStreamPtr << "AnimateTo, Options"
                     << " duration:" << option.GetDuration()
                     << ",iteration:" << option.GetIteration()
@@ -623,8 +635,6 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
                     << ",tempo:" << option.GetTempo()
                     << ",direction:" << (uint32_t) option.GetAnimationDirection()
                     << ",curve:" << (option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
-    PrintInfiniteAnimation(
-        option, immediately ? AnimationInterface::ANIMATE_TO_IMMEDIATELY : AnimationInterface::ANIMATE_TO);
     AceAsyncTraceBegin(0, traceStreamPtr->str().c_str(), true);
     if (CheckIfSetFormAnimationDuration(pipelineContext, option)) {
         option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext));
@@ -639,21 +649,21 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
                     "pipeline is layouting, post animateTo, duration:%{public}d, curve:%{public}s",
                     option.GetDuration(), option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
                 pipelineContext->GetTaskExecutor()->PostTask(
-                    [id = Container::CurrentIdSafely(), option, func = JSRef<JSFunc>::Cast(info[1]),
-                        onFinishEvent, immediately]() mutable {
+                    [id = Container::CurrentIdSafely(), option, func = JSRef<JSFunc>::Cast(info[1]), count,
+                        immediately]() mutable {
                         ContainerScope scope(id);
                         auto container = Container::CurrentSafely();
                         CHECK_NULL_VOID(container);
                         auto pipelineContext = container->GetPipelineContext();
                         CHECK_NULL_VOID(pipelineContext);
-                        AnimateToForStageMode(pipelineContext, option, func, onFinishEvent, immediately);
+                        AnimateToForStageMode(pipelineContext, option, func, count, immediately);
                     },
                     TaskExecutor::TaskType::UI, "ArkUIAnimateToForStageMode", PriorityType::IMMEDIATE);
                 return;
             }
-            AnimateToForStageMode(pipelineContext, option, JSRef<JSFunc>::Cast(info[1]), onFinishEvent, immediately);
+            AnimateToForStageMode(pipelineContext, option, JSRef<JSFunc>::Cast(info[1]), count, immediately);
         } else {
-            AnimateToForFaMode(pipelineContext, option, JSRef<JSFunc>::Cast(info[1]), onFinishEvent, immediately);
+            AnimateToForFaMode(pipelineContext, option, JSRef<JSFunc>::Cast(info[1]), count, immediately);
         }
     } else {
         pipelineContext->FlushBuild();
@@ -703,7 +713,8 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
     overallAnimationOption.SetDuration(duration);
     // actual curve is in keyframe, this curve will not be effective
     overallAnimationOption.SetCurve(Curves::EASE_IN_OUT);
-    PrintInfiniteAnimation(overallAnimationOption, AnimationInterface::KEYFRAME_ANIMATE_TO);
+    PrintAnimationInfo(overallAnimationOption, AnimationInterface::KEYFRAME_ANIMATE_TO, std::nullopt);
+    NG::ScopedViewStackProcessor scopedProcessor;
     pipelineContext->FlushBuild();
     pipelineContext->OpenImplicitAnimation(
         overallAnimationOption, overallAnimationOption.GetCurve(), overallAnimationOption.GetOnFinishEvent());

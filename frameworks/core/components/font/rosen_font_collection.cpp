@@ -156,6 +156,7 @@ void RosenFontCollection::LoadThemeFont(const char* fontFamily, std::unique_ptr<
 #endif
 #else
         fontCollection_->LoadThemeFont("", nullptr, 0);
+        LOGD("LoadThemeFont [%{public}s:%{public}d]", familyName.c_str(), static_cast<int32_t>(size));
         fontCollection_->LoadThemeFont(familyName, data, size);
 #endif
     }
@@ -171,38 +172,38 @@ void RosenFontCollection::LoadFontFamily(const char* fontFamily, const char* fam
     InitializeFontCollection();
     auto ret = StdFilesystemExists(path);
     if (!ret) {
-        LOGE("font is not exist");
+        LOGW("FontFamily %{public}s not exist", path.c_str());
         return;
     }
 
     std::ifstream ifs(path, std::ios_base::in);
     if (!ifs.is_open()) {
-        LOGE("path file open fail");
+        LOGW("FontFamily file open fail, %{public}s", path.c_str());
         return;
     }
     ifs.seekg(0, ifs.end);
     if (!ifs.good()) {
         ifs.close();
-        LOGE("font file is bad");
+        LOGW("font file is bad");
         return;
     }
     auto size = ifs.tellg();
     if (ifs.fail()) {
         ifs.close();
-        LOGE("get size failed");
+        LOGW("get size failed");
         return;
     }
     ifs.seekg(ifs.beg);
     if (!ifs.good()) {
         ifs.close();
-        LOGE("file seek failed");
+        LOGW("file seek failed");
         return;
     }
     std::unique_ptr<char[]> buffer = std::make_unique<char[]>(size);
     ifs.read(buffer.get(), size);
     if (!ifs.good()) {
         ifs.close();
-        LOGE("read file failed");
+        LOGW("read file failed");
         return;
     }
     ifs.close();

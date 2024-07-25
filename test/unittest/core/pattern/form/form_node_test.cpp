@@ -19,6 +19,15 @@
 
 #include "gtest/gtest.h"
 
+#define protected public
+#define private public
+
+#include "mock/mock_form_utils.h"
+#include "mock/mock_sub_container.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
+
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/form/form_node.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
@@ -26,12 +35,35 @@
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
-
 class FormNodeTest : public testing::Test {
 public:
-    static void SetUpTestSuite() {};
-    static void TearDownTEstSuite() {};
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+protected:
+    static RefPtr<FormNode> CreateFromNode();
 };
+
+void FormNodeTest::SetUpTestSuite()
+{
+    MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+}
+
+void FormNodeTest::TearDownTestSuite()
+{
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
+}
+
+RefPtr<FormNode> FormNodeTest::CreateFromNode()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto formNode = FormNode::GetOrCreateFormNode(
+        "FormComponent", stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<FormPattern>(); });
+    auto pattern = formNode->GetPattern<FormPattern>();
+    pattern->frameNode_ = formNode;
+    return formNode;
+}
 
 /**
  * @tc.name: FormNodeTest_001
@@ -49,9 +81,173 @@ HWTEST_F(FormNodeTest, FormNodeTest_001, TestSize.Level1)
     int32_t touchId = 0;
     TouchTestResult responseLinkResult;
     bool isDispatch = false;
-    FormNode formNode;
-    auto res = formNode.TouchTest(globalPoint, parentLocalPoint,
+    auto formNode = CreateFromNode();
+    auto res = formNode->TouchTest(globalPoint, parentLocalPoint,
+        parentRevertPoint, touchRestrict, result, touchId, responseLinkResult, isDispatch);
+    EXPECT_EQ(res, HitTestResult::OUT_OF_REGION);
+  
+    touchRestrict.hitTestType = SourceType::NONE;
+    res = formNode->TouchTest(globalPoint, parentLocalPoint,
+        parentRevertPoint, touchRestrict, result, touchId, responseLinkResult, isDispatch);
+    EXPECT_EQ(res, HitTestResult::OUT_OF_REGION);
+
+    PipelineContext* contextBak = formNode->GetContext();
+    formNode->context_ = nullptr;
+    res = formNode->TouchTest(globalPoint, parentLocalPoint,
+        parentRevertPoint, touchRestrict, result, touchId, responseLinkResult, isDispatch);
+    EXPECT_EQ(res, HitTestResult::OUT_OF_REGION);
+    formNode->context_ = contextBak;
+
+    auto patternBak = formNode->GetPattern<FormPattern>();
+    formNode->pattern_ = nullptr;
+    res = formNode->TouchTest(globalPoint, parentLocalPoint,
+        parentRevertPoint, touchRestrict, result, touchId, responseLinkResult, isDispatch);
+    EXPECT_EQ(res, HitTestResult::OUT_OF_REGION);
+    formNode->pattern_ = patternBak;
+
+    auto pattern = formNode->GetPattern<FormPattern>();
+    WeakPtr<PipelineContext> context = WeakPtr<PipelineContext>();
+    auto subContainer = AceType::MakeRefPtr<MockSubContainer>(context);
+    ASSERT_NE(subContainer, nullptr);
+    subContainer->instanceId_ = 0;
+
+    EXPECT_EQ(pattern->subContainer_, nullptr);
+    res = formNode->TouchTest(globalPoint, parentLocalPoint,
+        parentRevertPoint, touchRestrict, result, touchId, responseLinkResult, isDispatch);
+    EXPECT_EQ(res, HitTestResult::OUT_OF_REGION);
+    pattern->subContainer_ = subContainer;
+
+    FrontendType uiSyntaxBak = FrontendType::JS_CARD;
+    pattern->subContainer_->uiSyntax_ = FrontendType::ETS_CARD;
+    res = formNode->TouchTest(globalPoint, parentLocalPoint,
+        parentRevertPoint, touchRestrict, result, touchId, responseLinkResult, isDispatch);
+    EXPECT_EQ(res, HitTestResult::OUT_OF_REGION);
+    pattern->subContainer_->uiSyntax_ = uiSyntaxBak;
+
+    res = formNode->TouchTest(globalPoint, parentLocalPoint,
         parentRevertPoint, touchRestrict, result, touchId, responseLinkResult, isDispatch);
     EXPECT_EQ(res, HitTestResult::OUT_OF_REGION);
 }
+
+/**
+ * @tc.name: FormNodeTest_002
+ * @tc.desc: OnAccessibilityDumpChildInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormNodeTest, FormNodeTest_002, TestSize.Level1)
+{
+    RefPtr<FrameNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    pattern->OnAccessibilityDumpChildInfo(params, info);
+    ASSERT_NE(pattern->formManagerBridge_, nullptr);
+    pattern->UpdateStaticCard();
+    auto retRef = pattern->GetAccessibilitySessionAdapter();
+    ASSERT_NE(retRef, nullptr);
 }
+
+/**
+ * @tc.name: FormNodeTest_003
+ * @tc.desc: GetFormOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormNodeTest, FormNodeTest_003, TestSize.Level1)
+{
+    auto formNode = CreateFromNode();
+    EXPECT_NE(formNode, nullptr);
+
+    auto pattern = formNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    WeakPtr<PipelineBase> context = WeakPtr<PipelineBase>();
+    formNode->renderContext_ = nullptr;
+    pattern->frameNode_ = formNode;
+
+    OffsetF res = formNode->GetFormOffset();
+    EXPECT_EQ(res, OffsetF());
+}
+
+/**
+ * @tc.name: FormNodeTest_004
+ * @tc.desc: OnAccessibilityChildTreeRegister and  OnAccessibilityChildTreeDeregister
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormNodeTest, FormNodeTest_004, TestSize.Level1)
+{
+    RefPtr<FormNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::vector<std::string> infos;
+    std::string tmpStr = "action";
+    infos.emplace_back(tmpStr);
+    pattern->SetFormLinkInfos(infos);
+    uint32_t windowId = 0;
+    int32_t treeId = 0;
+    formNode->OnAccessibilityChildTreeRegister(windowId, treeId);
+    ASSERT_NE(pattern->formManagerBridge_, nullptr);
+
+    formNode->OnAccessibilityChildTreeDeregister();
+    ASSERT_NE(pattern->formManagerBridge_, nullptr);
+}
+
+/**
+ * @tc.name: FormNodeTest_005
+ * @tc.desc: OnDetachFromMainTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormNodeTest, FormNodeTest_005, TestSize.Level1)
+{
+    auto formNode = CreateFromNode();
+    auto focusHub = formNode->GetFocusHub();
+    EXPECT_EQ(focusHub, nullptr);
+
+    auto formNode1 = CreateFromNode();
+    formNode->AddChild(formNode1);
+    formNode1->OnDetachFromMainTree(true);
+    auto root = formNode1->GetParent();
+    EXPECT_EQ(root, 1);
+
+    auto formNode2 = CreateFromNode();
+    formNode->AddChild(formNode2);
+    formNode2->OnDetachFromMainTree(false);
+    root = formNode2->GetParent();
+    EXPECT_NE(root, 0);
+}
+
+/**
+ * @tc.name: FormNodeTest_006
+ * @tc.desc: OnSetAccessibilityChildTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormNodeTest, FormNodeTest_006, TestSize.Level1)
+{
+    auto formNode = CreateFromNode();
+    int32_t childWindowId = 1;
+    int32_t childTreeId = 2;
+    formNode->OnSetAccessibilityChildTree(childWindowId, childTreeId);
+    auto accessibilityProperty = formNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetChildWindowId(), childWindowId);
+    EXPECT_EQ(accessibilityProperty->GetChildTreeId(), childTreeId);
+}
+
+/**
+ * @tc.name: FormNodeTest_007
+ * @tc.desc: OnAccessibilityDumpChildInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormNodeTest, FormNodeTest_007, TestSize.Level1)
+{
+    RefPtr<FrameNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    pattern->OnAccessibilityDumpChildInfo(params, info);
+    ASSERT_NE(pattern->formManagerBridge_, nullptr);
+}
+} // namespace OHOS::Ace::NG

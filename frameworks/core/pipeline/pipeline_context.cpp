@@ -1577,7 +1577,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         return;
     }
     auto scalePoint = point.CreateScalePoint(viewScale_);
-    ResSchedReport::GetInstance().OnTouchEvent(scalePoint.type);
+    ResSchedReport::GetInstance().OnTouchEvent(scalePoint);
     if (scalePoint.type == TouchType::DOWN) {
         eventManager_->HandleOutOfRectCallback(
             { scalePoint.x, scalePoint.y, scalePoint.sourceType }, rectCallbackList_);
@@ -2021,7 +2021,8 @@ void PipelineContext::OnIdle(int64_t deadline)
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance,
+    bool forceChange)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();

@@ -94,6 +94,8 @@ void ACE_EXPORT AceCountTraceWidthArgs(int32_t count, const char* format, ...);
 // for commercial trace
 void ACE_EXPORT AceTraceBeginCommercial(const char* name);
 void ACE_EXPORT AceTraceEndCommercial();
+void ACE_EXPORT AceAsyncTraceBeginCommercial(int32_t taskId, const char* name, bool isAnimationTrace = false);
+void ACE_EXPORT AceAsyncTraceEndCommercial(int32_t taskId, const char* name, bool isAnimationTrace = false);
 
 class ACE_FORCE_EXPORT AceScopedTrace final {
 public:

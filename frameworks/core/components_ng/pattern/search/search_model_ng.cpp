@@ -521,7 +521,7 @@ void SearchModelNG::SetOnChange(std::function<void(const std::string&, PreviewTe
         CHECK_NULL_VOID(pattern);
         auto searchPattern = AceType::DynamicCast<SearchPattern>(pattern);
         CHECK_NULL_VOID(searchPattern);
-        searchPattern->UpdateChangeEvent(value);
+        searchPattern->UpdateChangeEvent(value + previewText.value);
     };
     eventHub->SetOnChange(std::move(searchChangeFunc));
 }
@@ -721,7 +721,8 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     auto textValue = pattern->GetTextValue();
     if (textFieldLayoutProperty) {
         if (value.has_value() && value.value() != textValue) {
-            pattern->InitValueText(value.value());
+            auto changed = pattern->InitValueText(value.value());
+            pattern->SetTextChangedAtCreation(changed);
         }
         textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
         textFieldLayoutProperty->UpdateMaxLines(1);
@@ -1534,7 +1535,7 @@ void SearchModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const s
         CHECK_NULL_VOID(pattern);
         auto searchPattern = AceType::DynamicCast<SearchPattern>(pattern);
         CHECK_NULL_VOID(searchPattern);
-        searchPattern->UpdateChangeEvent(value);
+        searchPattern->UpdateChangeEvent(value + previewText.value);
     };
     eventHub->SetOnChange(std::move(searchChangeFunc));
 }
@@ -1740,6 +1741,17 @@ void SearchModelNG::SetSelectionMenuOptions(
     const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+
+void SearchModelNG::SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+    const NG::OnMenuItemClickCallback&& onMenuItemClick)
+{
     CHECK_NULL_VOID(frameNode);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     CHECK_NULL_VOID(textFieldChild);

@@ -354,7 +354,8 @@ enum class DynamicRangeMode {
 };
 
 enum class AIImageQuality {
-    NONE = 1,
+    NONE = 0,
+    LOW,
     NORMAL,
     HIGH,
 };

@@ -542,7 +542,7 @@ ArkUINativeModuleValue ListBridge::ResetScrollSnapAlign(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getListModifier()->resetAlignListItem(nativeNode);
+    GetArkUINodeModifiers()->getListModifier()->resetScrollSnapAlign(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

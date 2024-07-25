@@ -161,10 +161,16 @@ void UINode::AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& si
     DoAddChild(it, child, false);
 }
 
-void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode)
+void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode, bool addModalUiextension)
 {
     CHECK_NULL_VOID(child);
     CHECK_NULL_VOID(siblingNode);
+    if (!addModalUiextension && modalUiextensionCount_ > 0) {
+        LOGW("AddChildBefore Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d), "
+            "Current modalUiextension count is : %{public}d",
+            GetId(), child->GetTag().c_str(), child->GetId(), modalUiextensionCount_);
+        return;
+    }
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
         LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
@@ -203,6 +209,11 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
         AddDisappearingChild(child, std::distance(children_.begin(), iter));
     }
     MarkNeedSyncRenderTree(true);
+    if (isTraversing_) {
+        LOGF("Try to remove the child([%{public}s][%{public}d]) of node [%{public}s][%{public}d] when its children "
+            "is traversing", (*iter)->GetTag().c_str(), (*iter)->GetId(), GetTag().c_str(), GetId());
+        abort();
+    }
     auto result = children_.erase(iter);
     return result;
 }
@@ -554,9 +565,11 @@ void UINode::DetachFromMainTree(bool recursive)
     OnDetachFromMainTree(recursive);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
+    isTraversing_ = true;
     for (const auto& child : GetChildren()) {
         child->DetachFromMainTree(isRecursive);
     }
+    isTraversing_ = false;
 }
 
 void UINode::ProcessOffscreenTask(bool recursive)
@@ -664,16 +677,17 @@ void UINode::UpdateGeometryTransition()
 
 bool UINode::IsAutoFillContainerNode()
 {
-    return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG;
+    return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG || tag_ == V2::DIALOG_ETS_TAG;
 }
 
-void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer)
+void UINode::DumpViewDataPageNodes(
+    RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer, bool needsRecordData)
 {
     auto frameNode = AceType::DynamicCast<FrameNode>(this);
     if (frameNode && !frameNode->IsVisible()) {
         return;
     }
-    DumpViewDataPageNode(viewDataWrap);
+    DumpViewDataPageNode(viewDataWrap, needsRecordData);
     for (const auto& item : GetChildren()) {
         if (!item) {
             continue;
@@ -681,7 +695,7 @@ void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipS
         if (skipSubAutoFillContainer && item->IsAutoFillContainerNode()) {
             continue;
         }
-        item->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer);
+        item->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer, needsRecordData);
     }
 }
 
@@ -1357,12 +1371,12 @@ bool UINode::SetParentLayoutConstraint(const SizeF& size) const
 
 void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
 {
+    if (nodeStatus_ == nodeStatus) {
+        return;
+    }
     nodeStatus_ = nodeStatus;
+    OnAttachToBuilderNode(nodeStatus_);
     for (const auto& child : children_) {
-        if (child->GetNodeStatus() == nodeStatus_) {
-            continue;
-        }
-        child->OnAttachToBuilderNode(nodeStatus_);
         child->UpdateNodeStatus(nodeStatus_);
     }
 }
@@ -1383,7 +1397,7 @@ void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
     std::list<int32_t>& removedElmtId, bool isEntry)
 {
     for (auto const& child : children) {
-        if (!child->IsDisappearing()) {
+        if (!child->IsDisappearing() && child->GetTag() != V2::RECYCLE_VIEW_ETS_TAG) {
             CollectRemovedChild(child, removedElmtId);
         }
     }

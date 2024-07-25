@@ -211,6 +211,7 @@ public:
         return TEXT_DRAG_RADIUS;
     }
 
+    Color GetDragBackgroundColor();
 protected:
     static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode);
     static RectF GetHandler(const bool isLeftHandler, const std::vector<RectF> boxes, const RectF contentRect,

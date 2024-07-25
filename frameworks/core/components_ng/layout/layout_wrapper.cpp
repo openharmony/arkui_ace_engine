@@ -201,6 +201,28 @@ RectF LayoutWrapper::GetFrameRectWithSafeArea(bool checkPosition) const
     return geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect();
 }
 
+void LayoutWrapper::AdjustNotExpandNode()
+{
+    auto host = GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    auto parent = host->GetAncestorNodeOfFrame();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto adjustedRect = geometryNode->GetFrameRect();
+    if (safeAreaManager->IsSafeAreaValid()) {
+        adjustedRect += geometryNode->GetParentAdjust();
+    }
+    geometryNode->SetSelfAdjust(adjustedRect - geometryNode->GetFrameRect());
+    renderContext->UpdatePaintRect(
+        adjustedRect + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
+}
+
 void LayoutWrapper::ExpandSafeArea()
 {
     auto host = GetHostNode();
@@ -212,23 +234,13 @@ void LayoutWrapper::ExpandSafeArea()
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
     auto selfExpansive = host->SelfExpansive();
     if (!selfExpansive) {
-        auto parent = host->GetAncestorNodeOfFrame();
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        auto geometryNode = GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto adjustedRect = geometryNode->GetFrameRect();
-        if (safeAreaManager->IsSafeAreaValid()) {
-            adjustedRect += geometryNode->GetParentAdjust();
-        }
-        geometryNode->SetSelfAdjust(adjustedRect - geometryNode->GetFrameRect());
-        renderContext->UpdatePaintRect(
-            adjustedRect + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
+        AdjustNotExpandNode();
         return;
     }
     CHECK_NULL_VOID(selfExpansive);
     opts->switchToNone = false;
     auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     OffsetF keyboardAdjust;
     if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
         keyboardAdjust = ExpandIntoKeyboard();
@@ -260,17 +272,7 @@ void LayoutWrapper::ExpandSafeArea()
         frame.SetHeight(frame.Height() + (safeArea.bottom_.end - frame.Bottom()));
     }
 
-    // reset if User has fixed size
-    auto layoutProperty = GetLayoutProperty();
-    if (layoutProperty->HasFixedWidth()) {
-        frame.SetWidth(geometryNode->GetFrameRect().Width());
-    }
-    if (layoutProperty->HasFixedHeight()) {
-        frame.SetHeight(geometryNode->GetFrameRect().Height());
-    }
-    if (layoutProperty->HasAspectRatio()) {
-        frame.SetHeight(frame.Width() / layoutProperty->GetAspectRatio());
-    }
+    AdjustNotExpandNode(frame);
     auto parent = host->GetAncestorNodeOfFrame();
     auto parentScrollable = (parent && parent->GetPattern<ScrollablePattern>());
     // restore to local offset
@@ -287,6 +289,24 @@ void LayoutWrapper::ExpandSafeArea()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdatePaintRect(frame + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
+}
+
+void LayoutWrapper::AdjustNotExpandNode(RectF& frame)
+{
+    // reset if User has fixed size
+    auto layoutProperty = GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    if (layoutProperty->HasFixedWidth()) {
+        frame.SetWidth(geometryNode->GetFrameRect().Width());
+    }
+    if (layoutProperty->HasFixedHeight()) {
+        frame.SetHeight(geometryNode->GetFrameRect().Height());
+    }
+    if (layoutProperty->HasAspectRatio()) {
+        frame.SetHeight(frame.Width() / layoutProperty->GetAspectRatio());
+    }
 }
 
 void LayoutWrapper::ResetSafeAreaPadding()

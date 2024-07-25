@@ -16,6 +16,9 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 #include "ecmascript/napi/include/jsnapi.h"
+#include "jsnapi_expo.h"
+
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/base/image/pixel_map.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -34,6 +37,8 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
+constexpr int PARAM_ARR_LENGTH_1 = 1;
+constexpr int PARAM_ARR_LENGTH_2 = 2;
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
 const std::regex FLOAT_PATTERN(R"(-?(0|[1-9]\d*)(\.\d+))", std::regex::icase);
 const std::string RESOURCE_TOKEN_PATTERN = "(app|sys|\\[.+?\\])\\.(\\S+?)\\.(\\S+)";
@@ -48,6 +53,7 @@ constexpr  int32_t REPLACEHOLDER_INDEX = 2;
 const Color DEFAULT_TEXT_SHADOW_COLOR = Color::BLACK;
 constexpr bool DEFAULT_TEXT_SHADOW_FILL = false;
 constexpr ShadowType DEFAULT_TEXT_SHADOW_TYPE = ShadowType::COLOR;
+constexpr char JS_TEXT_MENU_ID_CLASS_NAME[] = "TextMenuItemId";
 enum class ResourceType : uint32_t {
     COLOR = 10001,
     FLOAT,
@@ -73,7 +79,7 @@ uint32_t ArkTSUtils::ColorAlphaAdapt(uint32_t origin)
 
 bool ArkTSUtils::ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result)
 {
-    if (value->IsNumber() && value->IntegerValue(vm) >= 0) {
+    if (value->IsNumber()) {
         result = Color(value->Uint32Value(vm));
         return true;
     }
@@ -96,7 +102,7 @@ bool ArkTSUtils::ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRe
     if (!value->IsNumber() && !value->IsString(vm) && !value->IsObject(vm)) {
         return false;
     }
-    if (value->IsNumber() && value->IntegerValue(vm) >= 0) {
+    if (value->IsNumber()) {
         result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
     } else if (value->IsString(vm)) {
         Color::ParseColorString(value->ToString(vm)->ToString(vm), result);
@@ -108,7 +114,7 @@ bool ArkTSUtils::ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRe
 
 bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result)
 {
-    if (value->IsNumber() && value->IntegerValue(vm) >= 0) {
+    if (value->IsNumber()) {
         result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
         return true;
     }
@@ -128,8 +134,7 @@ bool ArkTSUtils::ParseJsColorAlpha(
         return false;
     }
     if (value->IsNumber()) {
-        result = value->IntegerValue(vm) >= 0 ? Color(ColorAlphaAdapt(value->Uint32Value(vm))) :
-            defaultColor;
+        result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
         return true;
     }
     if (value->IsString(vm)) {
@@ -1930,4 +1935,189 @@ RefPtr<PixelMap> ArkTSUtils::CreatePixelMapFromNapiValue(const EcmaVM* vm, Local
     return PixelMap::CreatePixelMap(pixmapPtrAddr);
 }
 #endif
+
+bool ArkTSUtils::ParseSelectionMenuOptions(ArkUIRuntimeCallInfo* info, const EcmaVM* vm,
+    NG::OnCreateMenuCallback& onCreateMenuCallback, NG::OnMenuItemClickCallback& onMenuItemClickCallback)
+{
+    Local<JSValueRef> firstArg = info->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = info->GetCallArgRef(NUM_1);
+    if (!secondArg->IsObject(vm) || secondArg->IsUndefined()) {
+        return false;
+    }
+    auto* nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto menuOptionsObject = secondArg->ToObject(vm);
+    auto jsValueOnCreateMenu = menuOptionsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "onCreateMenu"));
+    ParseOnCreateMenu(vm, frameNode, jsValueOnCreateMenu, onCreateMenuCallback);
+    auto jsValueOnMenuItemClick = menuOptionsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "onMenuItemClick"));
+    ParseOnMenuItemClick(vm, frameNode, jsValueOnMenuItemClick, onMenuItemClickCallback);
+    return true;
+}
+
+Local<panda::ArrayRef> ArkTSUtils::CreateJsSystemMenuItems(
+    const EcmaVM* vm, const std::vector<NG::MenuItemParam>& systemMenuItems)
+{
+    Local<panda::ArrayRef> systemMenuItemsArray = panda::ArrayRef::New(vm);
+    uint32_t idx = 0;
+    for (const auto& item : systemMenuItems) {
+        systemMenuItemsArray->SetValueAt(vm, systemMenuItemsArray, idx++, CreateJsTextMenuItem(vm, item));
+    }
+    return systemMenuItemsArray;
+}
+
+Local<panda::ObjectRef> ArkTSUtils::CreateJsTextMenuItem(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam)
+{
+    Local<panda::ObjectRef> obj = CreateJsTextMenuId(vm, menuItemParam.menuOptionsParam.id);
+    const char* keys[] = { "content", "id" };
+    Local<JSValueRef> values[] = {
+        panda::StringRef::NewFromUtf8(vm, menuItemParam.menuOptionsParam.content.value_or("").c_str()), obj
+    };
+    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+}
+
+Local<panda::ObjectRef> ArkTSUtils::CreateJsTextMenuId(const EcmaVM* vm, const std::string& id)
+{
+    Local<panda::ObjectRef> empty = panda::ObjectRef::New(vm);
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, empty);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, empty);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+
+    napi_value global = nullptr;
+    napi_status ret = napi_get_global(env, &global);
+    if (ret != napi_ok) {
+        return empty;
+    }
+    napi_value constructor = nullptr;
+    ret = napi_get_named_property(env, global, JS_TEXT_MENU_ID_CLASS_NAME, &constructor);
+    if (ret != napi_ok) {
+        return empty;
+    }
+
+    napi_value obj = nullptr;
+    napi_value menuId = nullptr;
+
+    ret = napi_create_string_utf8(env, id.c_str(), id.length(), &menuId);
+    if (ret != napi_ok) {
+        return empty;
+    }
+    ret = napi_new_instance(env, constructor, NUM_1, &menuId, &obj);
+    if (ret != napi_ok) {
+        return empty;
+    }
+
+    auto value = Framework::JsConverter::ConvertNapiValueToJsVal(obj);
+    if (!value->IsObject()) {
+        return empty;
+    }
+
+    return value->GetLocalHandle();
+}
+
+void ArkTSUtils::ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode, const Local<JSValueRef>& jsValueOnCreateMenu,
+    NG::OnCreateMenuCallback& onCreateMenuCallback)
+{
+    if (jsValueOnCreateMenu.IsEmpty() || !jsValueOnCreateMenu->IsFunction(vm)) {
+        return;
+    }
+    panda::Local<panda::FunctionRef> func = jsValueOnCreateMenu->ToObject(vm);
+    auto containerId = Container::CurrentId();
+    auto jsCallback = [vm, frameNode, func = panda::CopyableGlobal(vm, func), containerId](
+                          const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
+        ContainerScope scope(containerId);
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        std::vector<NG::MenuOptionsParam> menuParams;
+        auto textMenuItemArrayObj = CreateJsSystemMenuItems(vm, systemMenuItems);
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { textMenuItemArrayObj };
+        auto menuItems = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+        if (!menuItems->IsArray(vm)) {
+            return menuParams;
+        }
+        WrapMenuParams(vm, menuParams, menuItems);
+        return menuParams;
+    };
+    onCreateMenuCallback = jsCallback;
+}
+
+void ArkTSUtils::WrapMenuParams(
+    const EcmaVM* vm, std::vector<NG::MenuOptionsParam>& menuParams, const Local<JSValueRef>& menuItems)
+{
+    auto menuItemsArray = Local<panda::ArrayRef>(menuItems);
+    auto length = menuItemsArray->Length(vm);
+    for (uint32_t index = 0; index < length; index++) {
+        Local<JSValueRef> menuItem = panda::ArrayRef::GetValueAt(vm, menuItemsArray, index);
+        if (!menuItem->IsObject(vm)) {
+            continue;
+        }
+        auto menuItemObject = menuItem->ToObject(vm);
+        NG::MenuOptionsParam menuOptionsParam;
+        auto jsContent = menuItemObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "content"));
+        std::string content;
+        ParseJsString(vm, jsContent, content);
+        menuOptionsParam.content = content;
+        auto jsStartIcon = menuItemObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "icon"));
+        std::string icon;
+        ParseJsMedia(vm, jsStartIcon, icon);
+        menuOptionsParam.icon = icon;
+        auto jsTextMenuId = menuItemObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+        std::string id;
+        if (jsTextMenuId->IsObject(vm)) {
+            auto textMenuIdObject = jsTextMenuId->ToObject(vm);
+            auto jsId = textMenuIdObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "id_"));
+            ParseJsString(vm, jsId, id);
+        }
+        menuOptionsParam.id = id;
+        menuParams.emplace_back(menuOptionsParam);
+    }
+}
+
+void ArkTSUtils::ParseOnMenuItemClick(const EcmaVM* vm, FrameNode* frameNode,
+    const Local<JSValueRef>& jsValueOnMenuItemClick, NG::OnMenuItemClickCallback& onMenuItemClickCallback)
+{
+    if (jsValueOnMenuItemClick.IsEmpty() || !jsValueOnMenuItemClick->IsFunction(vm)) {
+        return;
+    }
+    panda::Local<panda::FunctionRef> func = jsValueOnMenuItemClick->ToObject(vm);
+    auto containerId = Container::CurrentId();
+    auto jsCallback = [vm, frameNode, func = panda::CopyableGlobal(vm, func), containerId](
+                          const NG::MenuItemParam& menuOptionsParam) -> bool {
+        ContainerScope scope(containerId);
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        auto paramArrayObj = CreateJsOnMenuItemClick(vm, menuOptionsParam);
+        if (paramArrayObj->Length(vm) != PARAM_ARR_LENGTH_2) {
+            return false;
+        }
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
+            panda::ArrayRef::GetValueAt(vm, paramArrayObj, 0), panda::ArrayRef::GetValueAt(vm, paramArrayObj, 1)
+        };
+        auto ret = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean(vm)->Value();
+        }
+        return false;
+    };
+    onMenuItemClickCallback = jsCallback;
+}
+
+Local<panda::ArrayRef> ArkTSUtils::CreateJsOnMenuItemClick(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam)
+{
+    Local<panda::ArrayRef> paramsArray = panda::ArrayRef::New(vm);
+    paramsArray->SetValueAt(vm, paramsArray, 0, CreateJsTextMenuItem(vm, menuItemParam));
+    paramsArray->SetValueAt(vm, paramsArray, 1, CreateJsTextRange(vm, menuItemParam));
+    return paramsArray;
+}
+
+Local<panda::ObjectRef> ArkTSUtils::CreateJsTextRange(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam)
+{
+    const char* keys[] = { "start", "end" };
+    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, menuItemParam.start),
+        panda::NumberRef::New(vm, menuItemParam.end) };
+    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+}
 } // namespace OHOS::Ace::NG

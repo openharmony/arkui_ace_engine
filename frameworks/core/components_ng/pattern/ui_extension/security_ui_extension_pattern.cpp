@@ -281,20 +281,9 @@ void SecurityUIExtensionPattern::OnAreaChangedInner()
 void SecurityUIExtensionPattern::FireBindModalCallback()
 {}
 
-bool SecurityUIExtensionPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+void SecurityUIExtensionPattern::OnSyncGeometryNode(const DirtySwapConfig& config)
 {
-    CHECK_NULL_RETURN(sessionWrapper_, false);
-    CHECK_NULL_RETURN(dirty, false);
-    auto host = dirty->GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate();
-    auto geometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto displaySize = geometryNode->GetFrameSize();
-    displayArea_ = RectF(displayOffset, displaySize);
-    sessionWrapper_->NotifyDisplayArea(displayArea_);
-    return false;
+    DispatchDisplayArea(true);
 }
 
 void SecurityUIExtensionPattern::OnWindowShow()
@@ -524,7 +513,7 @@ void SecurityUIExtensionPattern::SetSyncCallbacks(
 
 void SecurityUIExtensionPattern::FireSyncCallbacks()
 {
-    PLATFORM_LOGD("The size of sync callbacks = %{public}zu.", onSyncOnCallbackList_.size());
+    PLATFORM_LOGI("The size of sync callbacks = %{public}zu.", onSyncOnCallbackList_.size());
     ContainerScope scope(instanceId_);
     for (const auto& callback : onSyncOnCallbackList_) {
         if (callback) {
@@ -541,7 +530,7 @@ void SecurityUIExtensionPattern::SetAsyncCallbacks(
 
 void SecurityUIExtensionPattern::FireAsyncCallbacks()
 {
-    PLATFORM_LOGD("The size of async callbacks = %{public}zu.", onSyncOnCallbackList_.size());
+    PLATFORM_LOGI("The size of async callbacks = %{public}zu.", onSyncOnCallbackList_.size());
     ContainerScope scope(instanceId_);
     for (const auto& callback : onAsyncOnCallbackList_) {
         if (callback) {
@@ -615,6 +604,15 @@ void SecurityUIExtensionPattern::RegisterVisibleAreaChange()
     CHECK_NULL_VOID(host);
     std::vector<double> ratioList = { 0.0 };
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+}
+
+void SecurityUIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocusImmediately();
 }
 
 void SecurityUIExtensionPattern::OnLanguageConfigurationUpdate()

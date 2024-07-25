@@ -1743,6 +1743,33 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitDragDropEvent001
+ * @tc.desc: Test InitDragDropEvent, if already init, will not create dragEvent again
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, InitDragDropEvent001, TestSize.Level1)
+{
+    auto onMoveEvent = [](int32_t from, int32_t to) {};
+    CreateForEachList(3, 1, onMoveEvent);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. InitDragDropEvent, if already init, will not create dragEvent again
+     */
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
+    auto syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachNode->GetChildAtIndex(0));
+    auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
+    auto listItemPattern = listItem->GetPattern<ListItemPattern>();
+    auto dragManager = listItemPattern->dragManager_;
+    auto listItemEventHub = listItem->GetEventHub<ListItemEventHub>();
+    auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
+    // InitDragDropEvent
+    auto dragEvent = gestureHub->dragEventActuator_->userCallback_;
+    dragManager->InitDragDropEvent();
+    EXPECT_EQ(dragEvent, gestureHub->dragEventActuator_->userCallback_);
+}
+
+/**
  * @tc.name: HandleOnItemLongPress001
  * @tc.desc: Test HandleOnItemLongPress
  * @tc.type: FUNC

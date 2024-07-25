@@ -170,10 +170,10 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0047, TestSize.Level1)
     focusHub->PaintAllFocusState();
     focusHub->CalculatePosition();
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
-    EXPECT_TRUE(focusHub->CalculatePosition());
+    EXPECT_FALSE(focusHub->CalculatePosition());
     focusHub1->focusType_ = FocusType::NODE;
     EXPECT_FALSE(focusHub->PaintAllFocusState());
-    EXPECT_TRUE(focusHub->CalculatePosition());
+    EXPECT_FALSE(focusHub->CalculatePosition());
 }
 
 /**
@@ -752,9 +752,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0066, TestSize.Level1)
     frameNode->children_.push_back(frameNode4);
 
     auto res = focusHub->AcceptFocusByRectOfLastFocusScope(RectF(0, 0, -1, -1));
-    ASSERT_TRUE(res);
+    ASSERT_FALSE(res);
     focusHub->AcceptFocusByRectOfLastFocusScope(RectF());
-    ASSERT_TRUE(res);
+    ASSERT_FALSE(res);
 }
 
 /**
@@ -1173,7 +1173,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0079, TestSize.Level1)
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
     auto res = focusHub->TryRequestFocus(focusHub1, RectF(), FocusStep::LEFT);
-    ASSERT_TRUE(res);
+    ASSERT_FALSE(res);
 }
 
 /**

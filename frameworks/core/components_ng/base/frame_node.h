@@ -465,6 +465,9 @@ public:
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
 
+    void OnAccessibilityEvent(
+        AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType);
+
     void MarkNeedRenderOnly();
 
     void OnDetachFromMainTree(bool recursive) override;
@@ -813,6 +816,7 @@ public:
         return localMat_;
     }
     OffsetF GetOffsetInScreen();
+    OffsetF GetOffsetInSubwindow(const OffsetF& subwindowOffset);
     RefPtr<PixelMap> GetPixelMap();
     RefPtr<FrameNode> GetPageNode();
     RefPtr<FrameNode> GetFirstAutoFillContainerNode();
@@ -938,6 +942,16 @@ public:
         return currentRect;
     }
 
+    void SetIsUseTransitionAnimator(bool isUseTransitionAnimator)
+    {
+        isUseTransitionAnimator_ = isUseTransitionAnimator;
+    }
+
+    bool GetIsUseTransitionAnimator()
+    {
+        return isUseTransitionAnimator_;
+    }
+    
     // this method will check the cache state and return the cached revert matrix preferentially,
     // but the caller can pass in true to forcible refresh the cache
     Matrix4& GetOrRefreshRevertMatrixFromCache(bool forceRefresh = false);
@@ -980,6 +994,12 @@ public:
     void ProcessFrameNodeChangeFlag();
     void OnNodeTransformInfoUpdate(bool changed);
     void OnNodeTransitionInfoUpdate();
+    uint32_t GetWindowPatternType() const;
+
+    void ResetLayoutAlgorithm()
+    {
+        layoutAlgorithm_.Reset();
+    }
 
 protected:
     void DumpInfo() override;
@@ -1030,7 +1050,7 @@ private:
     void DumpAlignRulesInfo();
     void DumpExtensionHandlerInfo();
     void DumpAdvanceInfo() override;
-    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
+    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void DumpOnSizeChangeInfo();
     bool CheckAutoSave() override;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
@@ -1177,6 +1197,8 @@ private:
     bool isGeometryTransitionIn_ = false;
     bool isLayoutNode_ = false;
     bool isCalculateInnerVisibleRectClip_ = false;
+
+    bool isUseTransitionAnimator_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

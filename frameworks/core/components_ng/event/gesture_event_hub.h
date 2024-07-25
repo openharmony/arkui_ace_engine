@@ -608,6 +608,7 @@ public:
     void GenerateMousePixelMap(const GestureEvent& info);
     OffsetF GetPixelMapOffset(
         const GestureEvent& info, const SizeF& size, const float scale = 1.0f, const bool needScale = false) const;
+    RefPtr<PixelMap> GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap);
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
     bool IsPixelMapNeedScale() const;
     void InitDragDropEvent();
@@ -707,6 +708,12 @@ private:
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson,
         float scale);
+
+    template<typename T>
+    const RefPtr<T> GetAccessibilityRecognizer();
+
+    template<typename T>
+    const RefPtr<T> AccessibilityRecursionSearchRecognizer(const RefPtr<NGGestureRecognizer>& recognizer);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;

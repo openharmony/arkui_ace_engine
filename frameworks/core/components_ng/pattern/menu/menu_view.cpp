@@ -16,14 +16,15 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 
 #include "base/geometry/dimension.h"
+#include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/placement.h"
-#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -37,8 +38,8 @@
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -58,7 +59,7 @@ constexpr float PAN_MAX_VELOCITY = 2000.0f;
 constexpr float HALF_DIVIDE = 2.0f;
 constexpr float PREVIEW_ORIGIN_SCALE = 1.0f;
 const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 380.0f, 34.0f);
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 34.0f);
 const std::string HOVER_IMAGE_CLIP_PROPERTY_NAME = "hoverImageClip";
 
 void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode)
@@ -215,7 +216,9 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     CHECK_NULL_RETURN(renderContext, nullptr);
     BorderRadiusProperty borderRadius;
     if (theme) {
-        borderRadius.SetRadius(theme->GetMenuBorderRadius());
+        auto defaultRadius = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ?
+            theme->GetMenuDefaultRadius() : theme->GetMenuBorderRadius();
+        borderRadius.SetRadius(defaultRadius);
     }
     renderContext->UpdateBorderRadius(borderRadius);
     return scroll;
@@ -242,7 +245,7 @@ void OptionKeepMenu(RefPtr<FrameNode>& option, WeakPtr<FrameNode>& menuWeak)
 bool GetHasIcon(const std::vector<OptionParam>& params)
 {
     for (size_t i = 0; i < params.size(); ++i) {
-        if (!params[i].icon.empty()) {
+        if (!params[i].icon.empty() || params[i].isPasteOption) {
             return true;
         }
     }
@@ -1205,7 +1208,8 @@ void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
         auto theme = pipeLineContext->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
         BorderRadiusProperty outerRadiusProp;
-        outerRadiusProp.SetRadius(Dimension(theme->GetMenuBorderRadius()));
+        outerRadiusProp.SetRadius(Dimension(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ?
+            theme->GetMenuDefaultRadius() : theme->GetMenuBorderRadius()));
         BorderWidthProperty outerWidthProp;
         outerWidthProp.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
         renderContext->SetOuterBorderStyle(styleProp);
@@ -1215,7 +1219,8 @@ void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
         BorderColorProperty innerColorProp;
         innerColorProp.SetColor(menuTheme->GetInnerBorderColor());
         BorderRadiusProperty innerRadiusProp;
-        innerRadiusProp.SetRadius(Dimension(theme->GetMenuBorderRadius()));
+        innerRadiusProp.SetRadius(Dimension(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ?
+            theme->GetMenuDefaultRadius() : theme->GetMenuBorderRadius()));
         BorderWidthProperty innerWidthProp;
         innerWidthProp.SetBorderWidth(Dimension(menuTheme->GetInnerBorderWidth()));
         renderContext->SetBorderStyle(styleProp);

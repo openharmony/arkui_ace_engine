@@ -14,6 +14,7 @@
  */
 
 #include "node/animate_impl.h"
+#include <cstddef>
 
 #include "node/node_model.h"
 
@@ -76,7 +77,7 @@ int32_t KeyframeAnimateTo(ArkUI_ContextHandle context, ArkUI_KeyframeAnimateOpti
     animateOption.onFinish = option->onFinish;
     animateOption.userData = option->userData;
     ArkUIKeyframeState keyframes[option->keyframes.size()];
-    for (int32_t i = 0; i < option->keyframes.size(); i++) {
+    for (size_t i = 0; i < option->keyframes.size(); i++) {
         keyframes[i].duration = option->keyframes[i].duration;
         keyframes[i].event = option->keyframes[i].event;
         keyframes[i].userData = option->keyframes[i].userData;
@@ -94,7 +95,7 @@ int32_t KeyframeAnimateTo(ArkUI_ContextHandle context, ArkUI_KeyframeAnimateOpti
         keyframes[i].curveType = curve->type;
     }
     animateOption.keyframes = keyframes;
-    animateOption.keyframeSize = option->keyframes.size();
+    animateOption.keyframeSize = static_cast<int32_t>(option->keyframes.size());
 
     impl->getAnimation()->keyframeAnimateTo(reinterpret_cast<ArkUIContext*>(context), &animateOption);
     return ERROR_CODE_NO_ERROR;

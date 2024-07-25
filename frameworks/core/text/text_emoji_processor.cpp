@@ -116,7 +116,7 @@ int32_t TextEmojiProcessor::GetCharacterNum(const std::string& content)
     int32_t charNum = 0;
     std::u16string u16Content = StringUtils::Str8ToStr16(content);
     int32_t pos = 0;
-    while (pos < u16Content.length()) {
+    while (pos < static_cast<int32_t>(u16Content.length())) {
         std::u32string u32Content;
         int32_t forwardLenU16 = GetEmojiLengthU16Forward(u32Content, pos, u16Content);
         if (forwardLenU16 > 1) {

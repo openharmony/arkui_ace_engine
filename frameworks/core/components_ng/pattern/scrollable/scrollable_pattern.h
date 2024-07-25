@@ -586,7 +586,7 @@ public:
         return nullptr;
     }
 
-    void CheckRestartSpring(bool sizeDiminished);
+    void CheckRestartSpring(bool sizeDiminished, bool needNestedScrolling = true);
 
     Axis GetScrollablePanDirection()
     {
@@ -620,6 +620,15 @@ public:
     }
 
     virtual void SetAccessibilityAction();
+
+    /**
+     * @brief Notify component the position and count when data has changed.
+     *        This function should not be implemented here.
+     *
+     * @param index the position of change.
+     * @param count the count of change. nagative/0/positive implies delete/change/add respectively.
+     */
+    virtual void NotifyDataChange(int32_t index, int32_t count) {};
 
 protected:
     void SuggestOpIncGroup(bool flag);
@@ -761,13 +770,14 @@ private:
     void OnScrollEndRecursiveInner(const std::optional<float>& velocity);
     void OnScrollStartRecursive(float position, float velocity = 0.f) override;
     void OnScrollStartRecursiveInner(float position, float velocity = 0.f);
+    void OnScrollDragEndRecursive() override;
 
     ScrollResult HandleScrollParentFirst(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollSelfFirst(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollSelfOnly(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollParallel(float& offset, int32_t source, NestedState state);
     bool HandleOutBoundary(float& offset, int32_t source, NestedState state, ScrollResult& result);
-    bool HandleSelfOutBoundary(float& offset, int32_t source);
+    bool HandleSelfOutBoundary(float& offset, int32_t source, const float backOverOffset, float oppositeOverOffset);
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
 

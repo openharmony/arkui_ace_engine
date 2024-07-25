@@ -44,7 +44,8 @@ public:
     void AttachNodeContent(NodeContent* content)
     {
         CHECK_NULL_VOID(content);
-        if (content_ && (RawPtr(content_) != content)) {
+        // When content_ is held by other slot, the current slot cannot operate the slot held by this content_.
+        if (content_ && (RawPtr(content_) != content) && (content_->GetContentSlot().Upgrade() == this)) {
             content_->DetachFromNode();
         }
         content_ = content;

@@ -44,7 +44,6 @@ public:
     void HandleOverScroll(Axis axis, float overScroll, const SizeF& viewPort,
         bool isScrollFromUpdate = false, bool isNotPositiveScrollableDistance = false) override;
     void SetHandleOverScrollCallback(const HandleOverScrollCallback& callback) override;
-    void SetScrollRtl(bool isRtl) override;
 
 private:
     void ResetFadeEffect(const Color& color);
@@ -55,8 +54,6 @@ private:
     RefPtr<ScrollFadePainter> fadePainter_;
     RefPtr<ScrollFadeController> fadeController_;
     HandleOverScrollCallback handleOverScrollCallback_ = nullptr;
-    // Under fade attribute, RTL is true and LTR is false.
-    bool isRtl_ = false;
 };
 } // namespace OHOS::Ace::NG
 

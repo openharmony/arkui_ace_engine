@@ -168,6 +168,7 @@ void ContainerModalPatternEnhance::ChangeControlButtons(bool isFocus)
     auto maximizeButton =
         AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
     auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
     MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
     InternalResource::ResourceId maxId =
@@ -200,6 +201,14 @@ void ContainerModalPatternEnhance::ChangeFloatingTitle(bool isFocus)
         windowManager->SetCurrentWindowMaximizeMode(MaximizeMode::MODE_RECOVER);
     }
 
+    auto floatingTitleRow = GetFloatingTitleRow();
+    CHECK_NULL_VOID(floatingTitleRow);
+    auto floatingContext = floatingTitleRow->GetRenderContext();
+    CHECK_NULL_VOID(floatingContext);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
+    floatingContext->UpdateBackgroundColor(theme->GetBackGroundColor(isFocus));
     // update floating custom title label
     auto customFloatingTitleNode = GetFloatingTitleNode();
     CHECK_NULL_VOID(customFloatingTitleNode);

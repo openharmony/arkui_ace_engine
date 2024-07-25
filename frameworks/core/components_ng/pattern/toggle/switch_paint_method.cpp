@@ -35,7 +35,8 @@ constexpr uint8_t ENABLED_ALPHA = 255;
 constexpr uint8_t DISABLED_ALPHA = 102;
 } // namespace
 
-SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float dragOffsetX)
+SwitchModifier::SwitchModifier(const SizeF& size, const OffsetF& offset, float pointOffset, bool isSelect,
+    const Color& boardColor, float dragOffsetX)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -44,14 +45,14 @@ SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float dra
     animatableBoardColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(boardColor));
     animateTouchHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
     animatePointColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(switchTheme->GetPointColor()));
-    pointOffset_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f);
+    pointOffset_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(pointOffset);
     dragOffsetX_ = AceType::MakeRefPtr<PropertyFloat>(dragOffsetX);
     isSelect_ = AceType::MakeRefPtr<PropertyBool>(isSelect);
     isHover_ = AceType::MakeRefPtr<PropertyBool>(false);
     isFocused_ = AceType::MakeRefPtr<PropertyBool>(false);
     isOn_ = AceType::MakeRefPtr<PropertyBool>(false);
-    offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
-    size_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF());
+    offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(offset);
+    size_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(size);
     enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
     useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
     animatePointRadius_ = AceType::MakeRefPtr<PropertyFloat>(SWITCH_ERROR_RADIUS);
@@ -81,8 +82,13 @@ void SwitchModifier::InitializeParam()
     CHECK_NULL_VOID(switchTheme);
     activeColor_ = switchTheme->GetActiveColor();
     inactiveColor_ = switchTheme->GetInactiveColor();
-    clickEffectColor_ = switchTheme->GetClickEffectColor();
-    hoverColor_ = switchTheme->GetHoverColor();
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        clickEffectColor_ = switchTheme->GetClickEffectColor();
+        hoverColor_ = switchTheme->GetHoverColor();
+    } else {
+        clickEffectColor_ = switchTheme->GetInteractivePressedColor();
+        hoverColor_ = switchTheme->GetInteractiveHoverColor();
+    }
     hoverRadius_ = switchTheme->GetHoverRadius();
     userActiveColor_ = activeColor_;
     hoverDuration_ = switchTheme->GetHoverDuration();
@@ -90,6 +96,18 @@ void SwitchModifier::InitializeParam()
     touchDuration_ = switchTheme->GetTouchDuration();
     colorAnimationDuration_ = switchTheme->GetColorAnimationDuration();
     pointAnimationDuration_ = switchTheme->GetPointAnimationDuration();
+}
+
+float SwitchModifier::CalcActualWidth(float width, float height, double actualGap, double defaultWidthGap)
+{
+    float result = 0.0f;
+    if (GreatOrEqual(width, height)) {
+        result = (pointRadius_ * NUM_TWO > height ? (width - (actualGap * NUM_TWO)) : width) + defaultWidthGap;
+    } else {
+        result = (pointRadius_ > actualTrackRadius_ ? (width + (pointRadius_ - actualTrackRadius_) * NUM_TWO) : width) +
+                 defaultWidthGap;
+    }
+    return result;
 }
 
 void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize)
@@ -124,7 +142,7 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
         defaultWidth - (switchTheme->GetWidth() - switchTheme->GetHotZoneHorizontalPadding() * 2).ConvertToPx();
     auto defaultHeightGap =
         defaultHeight - (switchTheme->GetHeight() - hotZoneVerticalPadding * 2).ConvertToPx();
-    actualWidth_ = (pointRadius_ * NUM_TWO > height ? (width - (actualGap * NUM_TWO)) : width) + defaultWidthGap;
+    actualWidth_ = CalcActualWidth(width, height, actualGap, defaultWidthGap);
     actualHeight_ = (pointRadius_ * NUM_TWO > height ? pointRadius_ * NUM_TWO : height) + defaultHeightGap;
     if ((animateTrackRadius_->Get() < 0) && (animateTrackRadius_->Get() < 0)) {
         hoverRadius_ = hoverRadius_ * height /
@@ -136,7 +154,9 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     OffsetF hoverBoardOffset;
     hoverBoardOffset.SetX(xOffset - (actualWidth_ - width) / 2.0);
     hoverBoardOffset.SetY(yOffset - (actualHeight_ - height) / 2.0);
-    DrawTouchAndHoverBoard(canvas, hoverBoardOffset);
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        DrawTouchAndHoverBoard(canvas, hoverBoardOffset);
+    }
     DrawFocusBoard(canvas, contentOffset, contentSize, actualGap);
     DrawRectCircle(canvas, contentOffset, contentSize, actualGap);
 }
@@ -168,12 +188,22 @@ void SwitchModifier::DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffs
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(roundRect);
     canvas.DetachBrush();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        brush.SetColor(ToRSColor(animateTouchHoverColor_->Get()));
+        canvas.AttachBrush(brush);
+        canvas.DrawRoundRect(roundRect);
+        canvas.DetachBrush();
+    }
     brush.SetColor(ToRSColor(animatePointColor_->Get()));
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
 
     RSPoint point;
-    point.SetX(xOffset + actualGap + pointRadius_ + pointOffset_->Get());
+    if (GreatOrEqual(contentSize.Width(), contentSize.Height())) {
+        point.SetX(xOffset + actualGap + pointRadius_ + pointOffset_->Get());
+    } else {
+        point.SetX(xOffset + pointOffset_->Get());
+    }
     point.SetY(yOffset + radius);
     canvas.DrawCircle(point, pointRadius_);
     canvas.DetachBrush();

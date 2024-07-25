@@ -1350,7 +1350,7 @@ HWTEST_F(ImageProviderTestNg, DownloadImageSuccess001, TestSize.Level1)
     auto data = AceType::MakeRefPtr<SkiaImageData>(nullptr, 0);
     auto imageObject = ImageProvider::BuildImageObject(src, data);
     ctx->DownloadImageSuccess("image data");
-    EXPECT_NE(ctx->imageDataCopy_, "image data");
+    EXPECT_NE(ctx->downloadedUrlData_, "image data");
 }
 
 /**

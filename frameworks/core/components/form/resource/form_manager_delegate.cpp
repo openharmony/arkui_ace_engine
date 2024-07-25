@@ -214,9 +214,12 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
     newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, needHandleCachedClick);
 
     onFormSurfaceNodeCallback_(rsSurfaceNode, newWant);
-    if (!formRendererDispatcher_) {
-        sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
+
+    sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
+    if (proxy != nullptr) {
         formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_FORM, "want renderer dispatcher null");
     }
 
     isDynamic_ = formInfo.isDynamic;

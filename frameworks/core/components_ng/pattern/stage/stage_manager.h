@@ -51,7 +51,8 @@ public:
     void PageChangeCloseKeyboard();
 
     static void FirePageHide(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
-    static void FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
+    static void FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE,
+        bool needFocus = true);
 
     virtual RefPtr<FrameNode> GetLastPage() const;
     RefPtr<FrameNode> GetPageById(int32_t pageId);
@@ -64,6 +65,11 @@ public:
 
     virtual RefPtr<FrameNode> GetLastPageWithTransition() const;
     virtual RefPtr<FrameNode> GetPrevPageWithTransition() const;
+
+    virtual RefPtr<FrameNode> GetFocusPage() const
+    {
+        return nullptr;
+    }
 
     void SetStageInTrasition (bool stageInTrasition) {
         stageInTrasition_ = stageInTrasition;
@@ -81,7 +87,9 @@ public:
     }
 #endif
 
-    virtual void SyncPageSafeArea(const RefPtr<FrameNode>& lastPage, PropertyChangeFlag changeFlag);
+    virtual void SyncPageSafeArea(bool keyboardSafeArea);
+    
+    virtual bool CheckPageFocus();
 
 protected:
     // ace performance check

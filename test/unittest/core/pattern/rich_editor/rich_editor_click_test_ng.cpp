@@ -1120,11 +1120,9 @@ HWTEST_F(RichEditorClickTestNg, CreateAndShowSingleHandle, TestSize.Level1)
     /**
      * @tc.steps: step2. Construct GestureEvent data and call CreatAndShowSingleHandle
      */
-    GestureEvent info;
-    info.localLocation_ = Offset(0, 0);
-
-    richEditorPattern->CreateAndShowSingleHandle(info);
-    EXPECT_TRUE(richEditorPattern->isSingleHandle_);
+    ASSERT_NE(richEditorPattern->selectOverlay_, nullptr);
+    richEditorPattern->CreateAndShowSingleHandle();
+    EXPECT_TRUE(richEditorPattern->selectOverlay_->IsSingleHandle());
 }
 
 /**

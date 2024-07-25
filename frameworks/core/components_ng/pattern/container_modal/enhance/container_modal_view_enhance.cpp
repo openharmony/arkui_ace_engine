@@ -93,8 +93,12 @@ const Color MENU_ITEM_COLOR = Color(0xffffff);
 const int32_t DOUBLE_CLICK_TO_MAXIMIZE = 1;
 const int32_t DOUBLE_CLICK_TO_RECOVER = 2;
 
+const int32_t MAX_BUTTON_CLICK_TO_MAXIMIZE = 1;
+const int32_t MAX_BUTTON_CLICK_TO_RECOVER = 2;
+
 const int32_t MAX_MENU_ITEM_LEFT_SPLIT = 1;
 const int32_t MAX_MENU_ITEM_RIGHT_SPLIT = 2;
+const int32_t MAX_MENU_ITEM_MAXIMIZE = 3;
 
 const int32_t MAX_MENU_DEFAULT_NOT_CHANGE = 3;
 
@@ -196,8 +200,10 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
             auto currentMode = windowManager->GetCurrentWindowMaximizeMode();
             if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || currentMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR ||
                 mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+                EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_RECOVER);
                 windowManager->WindowRecover();
             } else {
+                EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_MAXIMIZE);
                 windowManager->WindowMaximize(true);
             }
             containerNode->OnWindowFocused();

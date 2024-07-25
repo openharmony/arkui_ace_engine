@@ -763,6 +763,7 @@ void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
 
 WebDelegate::~WebDelegate()
 {
+    SetAccessibilityState(false);
     OnNativeEmbedAllDestory();
     ReleasePlatformResource();
     if (IsDeviceTabletOr2in1() && GetWebOptimizationValue()) {
@@ -2734,8 +2735,9 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
     }
     auto ret = OHOS::Rosen::RSInterfaces::GetInstance().RegisterSurfaceOcclusionChangeCallback(
         surfaceNodeId_,
-        [weak = WeakClaim(this), weakContext = context_](float visibleRatio) {
+        [weak = WeakClaim(this)](float visibleRatio) {
             auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
             auto context = delegate->context_.Upgrade();
             CHECK_NULL_VOID(context);
             context->GetTaskExecutor()->PostTask(
@@ -3945,6 +3947,7 @@ void WebDelegate::LoadUrl()
 
 void WebDelegate::OnInactive()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnInactive, webId:%{public}d", GetWebId());
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -3964,6 +3967,7 @@ void WebDelegate::OnInactive()
 
 void WebDelegate::OnActive()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnActive, webId:%{public}d", GetWebId());
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -6569,25 +6573,17 @@ void WebDelegate::SetAccessibilityState(bool state)
     if (state == accessibilityState_) {
         return;
     }
+    CHECK_NULL_VOID(nweb_);
     accessibilityState_ = state;
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), state]() {
-            auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID(delegate);
-            CHECK_NULL_VOID(delegate->nweb_);
-            delegate->nweb_->SetAccessibilityState(state);
-            if (state) {
-                auto accessibilityEventListenerImpl =
-                    std::make_shared<AccessibilityEventListenerImpl>();
-                CHECK_NULL_VOID(accessibilityEventListenerImpl);
-                accessibilityEventListenerImpl->SetWebDelegate(weak);
-                delegate->nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
-                delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
-            }
-        },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetAccessibilityState");
+    nweb_->SetAccessibilityState(state);
+    if (state) {
+        auto accessibilityEventListenerImpl =
+            std::make_shared<AccessibilityEventListenerImpl>();
+        CHECK_NULL_VOID(accessibilityEventListenerImpl);
+        accessibilityEventListenerImpl->SetWebDelegate(WeakClaim(this));
+        nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
+        nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
+    }
 }
 
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAccessibilityNodeInfo(
@@ -7080,8 +7076,6 @@ NG::WebInfoType WebDelegate::GetWebInfoType()
 
 void WebDelegate::OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "OnAdsBlocked %{public}s", url.c_str());
-
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     context->GetTaskExecutor()->PostTask(

@@ -19,6 +19,7 @@
 #include <list>
 #include <memory>
 #include <string>
+#include "drag_event.h"
 
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
@@ -614,6 +615,24 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     return result;
 }
 
+RefPtr<PixelMap> GestureEventHub::GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap)
+{
+    float preScale = 1.0f;
+    RefPtr<PixelMap> preScaledPixelMap = dragEventActuator_->GetPreScaledPixelMapForDragThroughTouch(preScale);
+    if (preScale == targetScale && preScaledPixelMap != nullptr) {
+        return preScaledPixelMap;
+    }
+#if defined(PIXEL_MAP_SUPPORTED)
+    preScaledPixelMap = PixelMap::CopyPixelMap(defaultPixelMap);
+    if (!preScaledPixelMap) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "duplicate PixelMap failed!");
+        preScaledPixelMap = defaultPixelMap;
+    }
+    preScaledPixelMap->Scale(targetScale, targetScale, AceAntiAliasingOption::HIGH);
+#endif
+    return preScaledPixelMap;
+}
+
 float GestureEventHub::GetPixelMapScale(const int32_t height, const int32_t width) const
 {
     float scale = 1.0f;
@@ -818,7 +837,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         };
         SnapshotParam param;
         param.delay = CREATE_PIXELMAP_TIME;
-        NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), false, param);
+        NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), true, param);
         PrintBuilderNode(dragPreviewInfo.customNode);
         return;
     }
@@ -937,7 +956,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             CHECK_NULL_VOID(textDragPattern);
             auto dragNode = textDragPattern->MoveDragNode();
             if (dragNode) {
-                auto dragNodeOffset = dragNode->GetOffsetInScreen();
+                auto dragNodeOffset = dragNode->GetPaintRectOffset();
                 DragEventActuator::UpdatePreviewPositionAndScale(imageNode, dragNodeOffset);
             }
         }
@@ -977,15 +996,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             dragEventActuator_->SetIsNotInPreviewState(true);
         }
     }
-    RefPtr<PixelMap> pixelMapDuplicated = pixelMap;
-#if defined(PIXEL_MAP_SUPPORTED)
-    pixelMapDuplicated = PixelMap::CopyPixelMap(pixelMap);
-    if (!pixelMapDuplicated) {
-        TAG_LOGW(AceLogTag::ACE_DRAG, "Copy PixelMap is failure!");
-        pixelMapDuplicated = pixelMap;
-    }
-#endif
-    pixelMapDuplicated->Scale(scale, scale, AceAntiAliasingOption::HIGH);
+    RefPtr<PixelMap> pixelMapDuplicated = GetPreScaledPixelMapIfExist(scale, pixelMap);
     auto width = pixelMapDuplicated->GetWidth();
     auto height = pixelMapDuplicated->GetHeight();
     auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale, IsPixelMapNeedScale());
@@ -996,8 +1007,10 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
                                 ? dragDropInfo.extraInfo.substr(EXTRA_INFO_MAX_LENGTH + 1)
                                 : dragDropInfo.extraInfo;
     auto arkExtraInfoJson = JsonUtil::Create(true);
+    auto dragNodeGrayscale = pipeline->GetDragNodeGrayscale();
     auto dipScale = pipeline->GetDipScale();
     arkExtraInfoJson->Put("dip_scale", dipScale);
+    arkExtraInfoJson->Put("drag_node_gray_scale", dragNodeGrayscale);
     UpdateExtraInfo(frameNode, arkExtraInfoJson, scale);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -1032,6 +1045,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         auto gatherNode = DragEventActuator::GetOrCreateGatherNode(overlayManager,
             dragEventActuator_, gatherNodeChildrenInfo);
         DragEventActuator::MountGatherNode(subWindowOverlayManager, frameNode, gatherNode, gatherNodeChildrenInfo);
+        DragEventActuator::UpdatePreviewPositionAndScale(
+            imageNode, imageNode->GetOffsetInSubwindow(window->GetRect().GetOffset()));
+        if (textNode) {
+            DragEventActuator::UpdatePreviewPositionAndScale(
+                textNode, textNode->GetOffsetInSubwindow(window->GetRect().GetOffset()));
+        }
         DragEventActuator::MountPixelMap(subWindowOverlayManager, eventHub->GetGestureEventHub(), imageNode, textNode);
         pipeline->FlushSyncGeometryNodeTasks();
         DragAnimationHelper::ShowBadgeAnimation(textNode);
@@ -1308,6 +1327,46 @@ OnAccessibilityEventFunc GestureEventHub::GetOnAccessibilityEventFunc()
     return callback;
 }
 
+template<typename T>
+const RefPtr<T> GestureEventHub::AccessibilityRecursionSearchRecognizer(const RefPtr<NGGestureRecognizer>& recognizer)
+{
+    auto CheckRecognizer = [](const RefPtr<NGGestureRecognizer>& recognizer) {
+        const auto re = AceType::DynamicCast<ClickRecognizer>(recognizer);
+        if (re != nullptr && re->GetFingers() == 1 && re->GetCount() == 1) {
+            return true;
+        } else if (AceType::DynamicCast<LongPressRecognizer>(recognizer) != nullptr &&
+                   AceType::DynamicCast<LongPressRecognizer>(recognizer)->GetFingers() == 1) {
+            return true;
+        }
+        return false;
+    };
+
+    const auto re = AceType::DynamicCast<T>(recognizer);
+    if (re != nullptr && CheckRecognizer(recognizer)) {
+        return re;
+    } else if (AceType::DynamicCast<RecognizerGroup>(recognizer) != nullptr) {
+        for (const auto& recognizerElement : AceType::DynamicCast<RecognizerGroup>(recognizer)->GetGroupRecognizer()) {
+            const auto& tmpRecognizer = AccessibilityRecursionSearchRecognizer<T>(recognizerElement);
+            if (tmpRecognizer != nullptr) {
+                return tmpRecognizer;
+            }
+        }
+    }
+    return nullptr;
+}
+
+template<typename T>
+const RefPtr<T> GestureEventHub::GetAccessibilityRecognizer()
+{
+    for (const auto& recognizer : gestureHierarchy_) {
+        const auto& re = AccessibilityRecursionSearchRecognizer<T>(recognizer);
+        if (re != nullptr) {
+            return re;
+        }
+    }
+    return nullptr;
+}
+
 bool GestureEventHub::ActClick(std::shared_ptr<JsonValue> secComphandle)
 {
     auto host = GetFrameNode();
@@ -1340,15 +1399,12 @@ bool GestureEventHub::ActClick(std::shared_ptr<JsonValue> secComphandle)
         click(info);
         return true;
     }
-    RefPtr<ClickRecognizer> clickRecognizer;
-    for (auto gestureRecognizer : gestureHierarchy_) {
-        clickRecognizer = AceType::DynamicCast<ClickRecognizer>(gestureRecognizer);
-        if (clickRecognizer && clickRecognizer->GetFingers() == 1 && clickRecognizer->GetCount() == 1) {
-            click = clickRecognizer->GetTapActionFunc();
-            click(info);
-            host->OnAccessibilityEvent(AccessibilityEventType::CLICK);
-            return true;
-        }
+    const RefPtr<ClickRecognizer> clickRecognizer = GetAccessibilityRecognizer<ClickRecognizer>();
+    if (clickRecognizer) {
+        click = clickRecognizer->GetTapActionFunc();
+        click(info);
+        host->OnAccessibilityEvent(AccessibilityEventType::CLICK);
+        return true;
     }
     return false;
 }
@@ -1482,28 +1538,12 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
 
 bool GestureEventHub::IsAccessibilityClickable()
 {
-    bool ret = IsClickable();
-    RefPtr<ClickRecognizer> clickRecognizer;
-    for (auto gestureRecognizer : gestureHierarchy_) {
-        clickRecognizer = AceType::DynamicCast<ClickRecognizer>(gestureRecognizer);
-        if (clickRecognizer && clickRecognizer->GetFingers() == 1 && clickRecognizer->GetCount() == 1) {
-            return true;
-        }
-    }
-    return ret;
+    return IsClickable() || GetAccessibilityRecognizer<ClickRecognizer>() != nullptr;
 }
 
 bool GestureEventHub::IsAccessibilityLongClickable()
 {
-    bool ret = IsLongClickable();
-    RefPtr<LongPressRecognizer> longPressRecognizer;
-    for (auto gestureRecognizer : gestureHierarchy_) {
-        longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(gestureRecognizer);
-        if (longPressRecognizer && longPressRecognizer->GetFingers() == 1) {
-            return true;
-        }
-    }
-    return ret;
+    return IsLongClickable() || GetAccessibilityRecognizer<LongPressRecognizer>() != nullptr;
 }
 
 bool GestureEventHub::GetMonopolizeEvents() const

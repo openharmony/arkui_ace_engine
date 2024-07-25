@@ -468,10 +468,10 @@ static uint8_t SelectPartition(int32_t seed, int32_t x, int32_t y, int32_t z, in
     seed11 >>= sh3;
     seed12 >>= sh3;
 
-    uint32_t a = seed1 * x + seed2 * y + seed11 * z + (num >> 14);
-    uint32_t b = seed3 * x + seed4 * y + seed12 * z + (num >> 10);
-    uint32_t c = seed5 * x + seed6 * y + seed9 * z + (num >> 6);
-    uint32_t d = seed7 * x + seed8 * y + seed10 * z + (num >> 2);
+    uint32_t a = static_cast<uint32_t>(seed1 * x + seed2 * y + seed11 * z + (num >> 14));
+    uint32_t b = static_cast<uint32_t>(seed3 * x + seed4 * y + seed12 * z + (num >> 10));
+    uint32_t c = static_cast<uint32_t>(seed5 * x + seed6 * y + seed9 * z + (num >> 6));
+    uint32_t d = static_cast<uint32_t>(seed7 * x + seed8 * y + seed10 * z + (num >> 2));
 
     // Apply the saw
     a &= 0x3F;

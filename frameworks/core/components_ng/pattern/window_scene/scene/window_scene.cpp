@@ -19,6 +19,7 @@
 #include "transaction/rs_sync_transaction_controller.h"
 #include "ui/rs_surface_node.h"
 
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -261,7 +262,7 @@ void WindowScene::BufferAvailableCallback()
         CHECK_NULL_VOID(self->startingWindow_);
         const auto& config =
             Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
-        if (config.enabled_) {
+        if (config.enabled_ && self->session_->NeedStartingWindowExitAnimation()) {
             auto context = self->startingWindow_->GetRenderContext();
             CHECK_NULL_VOID(context);
             context->SetMarkNodeGroup(true);
@@ -598,5 +599,10 @@ void WindowScene::CleanBlankOrSnapshotWindow()
     });
     taskExecutor->PostDelayedTask(
         deleteWindowTask_, TaskExecutor::TaskType::UI, CLEAN_WINDOW_DELAY_TIME, "ArkUICleanBlankOrSnapshotWindow");
+}
+
+uint32_t WindowScene::GetWindowPatternType() const
+{
+    return static_cast<uint32_t>(WindowPatternType::WINDOW_SCENE);
 }
 } // namespace OHOS::Ace::NG

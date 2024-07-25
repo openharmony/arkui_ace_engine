@@ -33,18 +33,4 @@ bool TextLayoutadapter::IsRightTOLeftArabic(int32_t charOfShowingText)
     UChar32 uCharOfShowingText = charOfShowingText;
     return u_charDirection(uCharOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT_ARABIC;
 }
-double TextLayoutadapter::TextConvertToPx(const Dimension& value, FontScaleParameter parameter)
-{
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, value.Value());
-    double fontSize = pipelineContext->NormalizeToPx(value);
-    if (parameter.allowScale && value.Unit() == DimensionUnit::FP) {
-        float fontScale = std::clamp(pipelineContext->GetFontScale(),
-            parameter.minFontScale, std::max(parameter.minFontScale, parameter.maxFontScale));
-        fontSize = pipelineContext->NormalizeToPx(value * fontScale);
-    } else if (value.Unit() == DimensionUnit::PERCENT) {
-        fontSize = value.ConvertToPxWithSize(parameter.height);
-    }
-    return fontSize;
-}
 } // namespace OHOS::Ace::NG

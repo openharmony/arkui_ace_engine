@@ -370,7 +370,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage011, TestSi
     PointF point(100.0, 100.0);
     dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, childNode);
     dragDropManager->summaryMap_.insert(make_pair(NODE_TAG, frameNodeNullId));
-    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::UNKNOWN);
+    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::UNKNOWN, -1);
     EXPECT_FALSE(dragDropManager->summaryMap_.empty());
 
     /**
@@ -380,7 +380,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage011, TestSi
     dragDropManager->summaryMap_.clear();
     dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
     dragDropManager->summaryMap_.insert(make_pair(NODE_TAG, frameNodeNullId));
-    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::UNKNOWN);
+    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::UNKNOWN, -1);
     EXPECT_FALSE(dragDropManager->summaryMap_.empty());
 
     /**
@@ -389,7 +389,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage011, TestSi
      */
     dragDropManager->summaryMap_.clear();
     dragDropManager->summaryMap_.insert(make_pair(NODE_TAG, frameNodeNullId));
-    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::MOVE);
+    dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::MOVE, -1);
     EXPECT_FALSE(dragDropManager->summaryMap_.empty());
 
     /**
@@ -398,7 +398,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage011, TestSi
      */
     dragDropManager->summaryMap_.clear();
     dragDropManager->summaryMap_.insert(make_pair(ROOT_ETS_TAG, frameNodeNullId));
-    dragDropManager->UpdateDragAllowDrop(frameNode, static_cast<DragBehavior>(-100));
+    dragDropManager->UpdateDragAllowDrop(frameNode, static_cast<DragBehavior>(-100), -1);
     EXPECT_TRUE(allowDrop.find(ROOT_ETS_TAG) == allowDrop.end());
 }
 

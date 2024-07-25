@@ -582,14 +582,13 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     CHECK_NULL_VOID(pipeline);
     auto curWindow = pipeline->GetCurrentWindowRect();
     displayArea_ = displayArea + OffsetF(curWindow.Left(), curWindow.Top());
-    PLATFORM_LOGD("The display area with '%{public}s' is notified to the provider.",
-        displayArea_.ToString().c_str());
     std::shared_ptr<Rosen::RSTransaction> transaction;
     auto parentSession = session_->GetParentSession();
     auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
     auto persistentId = parentSession ? parentSession->GetPersistentId() : session_->GetPersistentId();
     ACE_SCOPED_TRACE("NotifyDisplayArea id: %d, reason [%d]", persistentId, reason);
-    PLATFORM_LOGD("NotifyDisplayArea id: %{public}d, reason = %{public}d", persistentId, reason);
+    PLATFORM_LOGI("DisplayArea: %{public}s, persistentId: %{public}d, reason: %{public}d",
+        displayArea_.ToString().c_str(), persistentId, reason);
     if (reason == Rosen::SizeChangeReason::ROTATION) {
         if (transaction_.lock()) {
             transaction = transaction_.lock();

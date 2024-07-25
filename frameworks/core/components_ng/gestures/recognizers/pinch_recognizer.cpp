@@ -73,6 +73,7 @@ void PinchRecognizer::OnRejected()
     if (refereeState_ == RefereeState::SUCCEED) {
         return;
     }
+    SendRejectMsg();
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
 }
@@ -383,7 +384,6 @@ Offset PinchRecognizer::ComputePinchCenter()
 void PinchRecognizer::OnResetStatus()
 {
     MultiFingersRecognizer::OnResetStatus();
-    distance_ = 0.0;
     initialDev_ = 0.0;
     currentDev_ = 0.0;
     scale_ = 1.0;
@@ -437,6 +437,7 @@ GestureJudgeResult PinchRecognizer::TriggerGestureJudgeCallback()
     }
     auto info = std::make_shared<PinchGestureEvent>();
     info->SetTimeStamp(time_);
+    info->SetDeviceId(deviceId_);
     UpdateFingerListInfo();
     info->SetFingerList(fingerList_);
     info->SetScale(scale_);
