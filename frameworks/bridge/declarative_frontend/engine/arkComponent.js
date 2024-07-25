@@ -10922,6 +10922,24 @@ class TextEditMenuOptionsModifier extends ModifierWithKey {
 }
 TextEditMenuOptionsModifier.identity = Symbol('textEditMenuOptions');
 
+class TextHalfLeadingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetHalfLeading(node);
+    }
+    else {
+      getUINativeModule().text.setHalfLeading(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextHalfLeadingModifier.identity = Symbol('textHalfLeading');
+
 class ArkTextComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -11102,6 +11120,10 @@ class ArkTextComponent extends ArkComponent {
   editMenuOptions(value) {
     modifierWithKey(this._modifiersWithKeys, TextEditMenuOptionsModifier.identity,
       TextEditMenuOptionsModifier, value);
+    return this;
+  }
+  halfLeading(value) {
+    modifierWithKey(this._modifiersWithKeys, TextHalfLeadingModifier.identity, TextHalfLeadingModifier, value);
     return this;
   }
 }

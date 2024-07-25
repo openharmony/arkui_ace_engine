@@ -1061,6 +1061,20 @@ void ResetTextSelectionMenuOptions(ArkUINodeHandle node)
     NG::OnMenuItemClickCallback onMenuItemClick;
     TextModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
+
+void SetTextHalfLeading(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetHalfLeading(frameNode, value);
+}
+
+void ResetTextHalfLeading(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetHalfLeading(frameNode, false);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1178,7 +1192,9 @@ const ArkUITextModifier* GetTextModifier()
         SetTextMaxFontScale,
         ResetTextMaxFontScale,
         SetTextSelectionMenuOptions,
-        ResetTextSelectionMenuOptions
+        ResetTextSelectionMenuOptions,
+        SetTextHalfLeading,
+        ResetTextHalfLeading
     };
 
     return &modifier;

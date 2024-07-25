@@ -2912,6 +2912,11 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
                     child->UpdateTextShadowWithoutFlushDirty(textLayoutProp->GetTextShadow().value());
                 }
                 break;
+            case PropertyInfo::HALFLEADING:
+                if (textLayoutProp->HasHalfLeading()) {
+                    child->UpdateHalfLeadingWithoutFlushDirty(textLayoutProp->GetHalfLeading().value());
+                }
+                break;
             default:
                 break;
         }

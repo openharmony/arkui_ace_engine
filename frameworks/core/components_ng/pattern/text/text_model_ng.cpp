@@ -1105,4 +1105,14 @@ void TextModelNG::SetResponseRegion(bool isUserSetResponseRegion)
     CHECK_NULL_VOID(textPattern);
     textPattern->SetIsUserSetResponseRegion(isUserSetResponseRegion);
 }
+
+void TextModelNG::SetHalfLeading(bool halfLeading)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, HalfLeading, halfLeading);
+}
+
+void TextModelNG::SetHalfLeading(FrameNode* frameNode, bool halfLeading)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, HalfLeading, halfLeading, frameNode);
+}
 } // namespace OHOS::Ace::NG

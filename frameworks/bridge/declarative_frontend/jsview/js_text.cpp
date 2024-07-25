@@ -971,6 +971,20 @@ void JSText::JsResponseRegion(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetResponseRegion(true);
 }
 
+void JSText::SetHalfLeading(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto halfLeading = info[0];
+    if (!halfLeading->IsBoolean()) {
+        TextModel::GetInstance()->SetHalfLeading(false);
+        return;
+    }
+    auto enable = halfLeading->ToBoolean();
+    TextModel::GetInstance()->SetHalfLeading(enable);
+}
+
 void JSText::JSBind(BindingTarget globalObj)
 {
     JSClass<JSText>::Declare("Text");
@@ -1036,6 +1050,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onMarqueeStateChange", &JSText::SetOnMarqueeStateChange);
     JSClass<JSText>::StaticMethod("editMenuOptions", &JSText::EditMenuOptions);
     JSClass<JSText>::StaticMethod("responseRegion", &JSText::JsResponseRegion);
+    JSClass<JSText>::StaticMethod("halfLeading", &JSText::SetHalfLeading);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
