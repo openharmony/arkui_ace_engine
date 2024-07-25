@@ -152,7 +152,7 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
                                            : GetGlobalGeometry(node);
     auto localGeometry = GetLocalGeometry(node);
     if (!globalGeometry || !localGeometry) {
-        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "name:%{public}s globalGeo is null:%{public}d localGeo:%{public}d",
+        TAG_LOGD(AceLogTag::ACE_WINDOW_PIPELINE, "name:%{public}s globalGeo is null:%{public}d localGeo:%{public}d",
             GetWindowName(node).c_str(), globalGeometry == nullptr, localGeometry == nullptr);
         return;
     }
