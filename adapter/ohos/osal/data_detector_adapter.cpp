@@ -105,6 +105,8 @@ void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
     CHECK_NULL_VOID(runtimeContext);
     auto token = runtimeContext->GetToken();
     auto bundleName = runtimeContext->GetBundleName();
+
+    hasClickedMenuOption_ = true;
     if (onClickMenu_ && menuOption.first == std::string(COPY_ACTION)) {
         onClickMenu_(std::string(COPY_ACTION));
     } else if (onClickMenu_ && menuOption.first == std::string(SELECT_ACTION)) {
@@ -120,6 +122,7 @@ void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
     } else {
         TAG_LOGW(AceLogTag::ACE_TEXT, "No matching menu option");
     }
+    hasClickedMenuOption_ = false;
 }
 
 void DataDetectorAdapter::ResponseBestMatchItem(const AISpan& aiSpan)
