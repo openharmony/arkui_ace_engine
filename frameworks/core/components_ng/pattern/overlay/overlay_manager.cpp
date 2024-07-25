@@ -609,15 +609,17 @@ void OverlayManager::UpdateContextMenuDisappearPosition(const NG::OffsetF& offse
     if (isRedragStart) {
         overlayManager->ResetContextMenuRestartDragVector();
     }
+
+    if (menuMap_.empty()) {
+        return;
+    }
+    
     overlayManager->UpdateDragMoveVector(offset);
 
     if (overlayManager->IsOriginDragMoveVector() || !overlayManager->IsUpdateDragMoveVector()) {
         return;
     }
 
-    if (menuMap_.empty()) {
-        return;
-    }
     auto rootNode = rootNodeWeak_.Upgrade();
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
