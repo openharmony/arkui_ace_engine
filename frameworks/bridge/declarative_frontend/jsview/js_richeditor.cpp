@@ -2123,7 +2123,9 @@ void JSRichEditorBaseController::SetTypingStyle(const JSCallbackInfo& info)
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     auto controller = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(controller);
-    if (!info[0]->IsObject()) {
+    bool isBelowApi12 = !AceApplicationInfo::GetInstance().
+        GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
+    if (isBelowApi12 && !info[0]->IsObject()) {
         return;
     }
     auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -2133,11 +2135,21 @@ void JSRichEditorBaseController::SetTypingStyle(const JSCallbackInfo& info)
     }
     auto theme = pipelineContext->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
-    JSRef<JSObject> richEditorTextStyle = JSRef<JSObject>::Cast(info[0]);
-    typingStyle_.ResetStyle();
-    typingStyle_.updateTextColor = theme->GetTextStyle().GetTextColor();
-    if (!richEditorTextStyle->IsUndefined()) {
-        ParseJsTextStyle(richEditorTextStyle, textStyle, typingStyle_);
+    bool isUndefined = false;
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> richEditorTextStyle = JSRef<JSObject>::Cast(info[0]);
+        isUndefined = richEditorTextStyle->IsUndefined();
+        typingStyle_.ResetStyle();
+        typingStyle_.updateTextColor = theme->GetTextStyle().GetTextColor();
+        if (!richEditorTextStyle->IsUndefined()) {
+            ParseJsTextStyle(richEditorTextStyle, textStyle, typingStyle_);
+        }
+    }
+    bool isNeedReset = !isBelowApi12 && (!info[0]->IsObject() || isUndefined);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetTypingStyle %{public}d", isNeedReset);
+    if (isNeedReset) {
+        controller->SetTypingStyle(std::nullopt, std::nullopt);
+        return;
     }
     controller->SetTypingStyle(typingStyle_, textStyle);
 }

@@ -1573,15 +1573,12 @@ UpdateSpanStyle RichEditorPattern::GetUpdateSpanStyle()
     return updateSpanStyle_;
 }
 
-void RichEditorPattern::SetTypingStyle(struct UpdateSpanStyle typingStyle, TextStyle textStyle)
+void RichEditorPattern::SetTypingStyle(std::optional<UpdateSpanStyle> typingStyle,
+    std::optional<TextStyle> textStyle)
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetTypingStyle");
     typingStyle_ = typingStyle;
     typingTextStyle_ = textStyle;
-    if (presetParagraph_) {
-        presetParagraph_->Reset();
-        presetParagraph_ = nullptr;
-    }
+    presetParagraph_ = nullptr;
 }
 
 void RichEditorPattern::UpdateFontFeatureTextStyle(
