@@ -6698,7 +6698,7 @@ class ViewPU extends PUV2ViewBase {
             return;
         }
         const _componentName = (classObject && ('name' in classObject)) ? Reflect.get(classObject, 'name') : 'unspecified UINode';
-        if (_componentName === "__Recycle__") {
+        if (_componentName === '__Recycle__') {
             return;
         }       
         const _popFunc = (classObject && 'pop' in classObject) ? classObject.pop : () => { };
