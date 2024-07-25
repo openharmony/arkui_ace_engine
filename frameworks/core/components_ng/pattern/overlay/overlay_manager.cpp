@@ -664,6 +664,31 @@ void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
         TaskExecutor::TaskType::UI, "ArkUIOverlayDialogCloseEvent");
 }
 
+void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode, bool isBindSheet = false)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "fire auto save enter");
+    CHECK_NULL_VOID(ContainerNode);
+    if (!ContainerNode->NeedRequestAutoSave()) {
+        return;
+    }
+    auto container = Container::Current();
+    auto currentId = Container::CurrentId();
+    CHECK_NULL_VOID(container);
+
+    if (isBindSheet) {
+        auto layoutProperty = ContainerNode->GetLayoutProperty<SheetPresentationProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto currentStyle = layoutProperty->GetSheetStyleValue();
+        auto currentInstanceId = currentStyle.instanceId;
+        if (currentInstanceId.has_value()) {
+            currentId = CONTAINER_ID_DIVIDE_SIZE;
+        }
+    } else if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+    }
+    container->RequestAutoSave(ContainerNode, nullptr, nullptr, true, currentId);
+}
+
 void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "on dialog close event enter");
@@ -1364,31 +1389,6 @@ void OverlayManager::ClearToast()
     for (auto [id, toastNodeWeak] : toastMap_) {
         PopToast(id);
     }
-}
-
-void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode, bool isBindSheet = false)
-{
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "fire auto save enter");
-    CHECK_NULL_VOID(ContainerNode);
-    if (!ContainerNode->NeedRequestAutoSave()) {
-        return;
-    }
-    auto container = Container::Current();
-    auto currentId = Container::CurrentId();
-    CHECK_NULL_VOID(container);
-
-    if (isBindSheet) {
-        auto layoutProperty = ContainerNode->GetLayoutProperty<SheetPresentationProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        auto currentStyle = layoutProperty->GetSheetStyleValue();
-        auto currentInstanceId = currentStyle.instanceId;
-        if (currentInstanceId.has_value()) {
-            currentId = CONTAINER_ID_DIVIDE_SIZE;
-        }
-    } else if (container->IsSubContainer()) {
-        currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
-    }
-    container->RequestAutoSave(ContainerNode, nullptr, nullptr, true, currentId);
 }
 
 void OverlayManager::ShowPopupAnimation(const RefPtr<FrameNode>& popupNode)
