@@ -2557,7 +2557,7 @@ class WaterFlowSections {
   }
 
   isNonNegativeInt32(input) {
-    return Number.isSafeInteger(input) && input > 0 && input <= 2147483647;
+    return Number.isSafeInteger(input) && input >= 0 && input <= 2147483647;
   }
 
   toArrayIndex(origin, limit) {

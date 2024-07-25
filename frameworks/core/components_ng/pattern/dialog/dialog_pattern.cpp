@@ -199,7 +199,9 @@ void DialogPattern::HandleClick(const GestureEvent& info)
             CHECK_NULL_VOID(pipeline);
             auto overlayManager = pipeline->GetOverlayManager();
             CHECK_NULL_VOID(overlayManager);
-            if (this->ShouldDismiss()) {
+            if (this->CallDismissInNDK(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE))) {
+                return;
+            } else if (this->ShouldDismiss()) {
                 overlayManager->SetDismissDialogId(host->GetId());
                 this->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE));
                 TAG_LOGI(AceLogTag::ACE_DIALOG, "Dialog Should Dismiss");
@@ -816,10 +818,18 @@ RefPtr<FrameNode> DialogPattern::CreateDivider(
     CHECK_NULL_RETURN(dividerPaintProps, nullptr);
     dividerPaintProps->UpdateDividerColor(color);
     // add divider margin
-    MarginProperty margin = {
-        .left = CalcLength((space - dividerWidth) / 2),
-        .right = CalcLength((space - dividerWidth) / 2),
-    };
+    MarginProperty margin;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        margin = {
+            .left = CalcLength((space + space - Dimension(dividerWidth.ConvertToVp(), DimensionUnit::VP)) / 2),
+            .right = CalcLength((space + space - Dimension(dividerWidth.ConvertToVp(), DimensionUnit::VP)) / 2),
+        };
+    } else {
+        margin = {
+            .left = CalcLength((space - dividerWidth) / 2),
+            .right = CalcLength((space - dividerWidth) / 2),
+        };
+    }
     dividerProps->UpdateMargin(margin);
     return dividerNode;
 }

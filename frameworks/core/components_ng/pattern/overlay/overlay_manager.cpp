@@ -664,12 +664,29 @@ void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
         TaskExecutor::TaskType::UI, "ArkUIOverlayDialogCloseEvent");
 }
 
+void OverlayManager::FireDialogAutoSave(const RefPtr<FrameNode>& ContainerNode)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "fire dialog auto save enter");
+    CHECK_NULL_VOID(ContainerNode);
+    if (!ContainerNode->NeedRequestAutoSave()) {
+        return;
+    }
+    auto container = Container::Current();
+    auto currentId = Container::CurrentId();
+    CHECK_NULL_VOID(container);
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+    }
+    container->RequestAutoSave(ContainerNode, nullptr, nullptr, true, currentId);
+}
+
 void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "on dialog close event enter");
     CHECK_NULL_VOID(node);
 
     BlurOverlayNode(node);
+    FireDialogAutoSave(node);
 
     auto dialogPattern = node->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
@@ -698,7 +715,7 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     node->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     DeleteDialogHotAreas(node);
-    root->RemoveChild(node);
+    root->RemoveChild(node, node->GetIsUseTransitionAnimator());
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
     if (container->IsDialogContainer() || isShowInSubWindow) {
@@ -2870,7 +2887,9 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
         }
         auto dialogPattern = DynamicCast<DialogPattern>(pattern);
         CHECK_NULL_RETURN(dialogPattern, OVERLAY_EXISTS);
-        if (dialogPattern->ShouldDismiss()) {
+        if (dialogPattern->CallDismissInNDK(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK))) {
+            return OVERLAY_REMOVE;
+        } else if (dialogPattern->ShouldDismiss()) {
             SetDismissDialogId(overlay->GetId());
             dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK));
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
@@ -3486,12 +3505,12 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     SaveLastModalNode();
     MountToParentWithService(rootNode, modalNode);
     modalNode->AddChild(builder);
-    if (!isAllowedBeCovered_ && rootNode) {
+    if (!isAllowedBeCovered_ && modalNode->GetParent()) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY,
-            "RootNode %{public}d mark IsProhibitedAddChildNode when sessionId %{public}d.",
-            rootNode->GetId(), targetId);
+            "modalNode->GetParent() %{public}d mark IsProhibitedAddChildNode when sessionId %{public}d.",
+            modalNode->GetParent()->GetId(), targetId);
         if (AddCurSessionId(targetId)) {
-            rootNode->UpdateModalUiextensionCount(true);
+            modalNode->GetParent()->UpdateModalUiextensionCount(true);
         }
     }
 
@@ -4044,6 +4063,10 @@ void OverlayManager::PlaySheetTransition(
                 return;
             }
         }
+        if (sheetPattern->IsFoldable()) {
+            option.SetDuration(0);
+            option.SetCurve(Curves::LINEAR);
+        }
         sheetPattern->FireOnTypeDidChange();
         sheetPattern->FireOnWidthDidChange(sheetNode);
         option.SetOnFinishEvent(
@@ -4073,6 +4096,7 @@ void OverlayManager::PlaySheetTransition(
                 }
             },
             option.GetOnFinishEvent());
+        sheetPattern->SetIsFoldable(false);
     } else {
         option.SetOnFinishEvent(
             [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), weakOverlayManager = WeakClaim(this)] {
@@ -4388,7 +4412,7 @@ void OverlayManager::SaveSheePageNode(
     int32_t targetId = targetNode->GetId();
     auto root = AceType::DynamicCast<FrameNode>(rootNodeWeak_.Upgrade());
     CHECK_NULL_VOID(root);
-    bool isValidTarget = (root->GetId() != targetId);
+    bool isValidTarget = CheckTargetIdIsValid(targetId);
     SheetKey sheetKey;
     if (isStartByUIContext) {
         sheetKey = SheetKey(isValidTarget, sheetContentNode->GetId(), targetId);
@@ -4403,6 +4427,17 @@ void OverlayManager::SaveSheePageNode(
     modalList_.emplace_back(WeakClaim(RawPtr(sheetPageNode)));
     SaveLastModalNode();
     sheetNodePattern->SetOverlay(AceType::WeakClaim(this));
+}
+
+bool OverlayManager::CheckTargetIdIsValid(int32_t targetId)
+{
+    if (targetId < 0) {
+        return false;
+    }
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto rootId = rootNode->GetId();
+    return rootId != targetId;
 }
 
 RefPtr<FrameNode> OverlayManager::CreateSheetMask(const RefPtr<FrameNode>& sheetPageNode,
@@ -4438,7 +4473,7 @@ bool OverlayManager::CreateSheetKey(const RefPtr<NG::FrameNode>& sheetContentNod
     SheetKey& sheetKey)
 {
     CHECK_NULL_RETURN(sheetContentNode, false);
-    bool isTargetIdValid = (targetId >= 0);
+    bool isTargetIdValid = CheckTargetIdIsValid(targetId);
     if (!isTargetIdValid) {
         auto rootNode = rootNodeWeak_.Upgrade();
         CHECK_NULL_RETURN(rootNode, false);
@@ -5373,7 +5408,20 @@ void OverlayManager::ResetRootNode(int32_t sessionId)
     curSessionIds_.erase(sessionId);
     auto rootNode = FindWindowScene(nullptr);
     CHECK_NULL_VOID(rootNode);
-    rootNode->UpdateModalUiextensionCount(false);
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetInstallationFree()) {
+        // it is in atomicservice
+        for (auto child : rootNode->GetChildren()) {
+            CHECK_NULL_VOID(child);
+            if (child->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
+                child->UpdateModalUiextensionCount(false);
+                break;
+            }
+        }
+    } else {
+        rootNode->UpdateModalUiextensionCount(false);
+    }
 }
 
 void OverlayManager::SetIsAllowedBeCovered(bool isAllowedBeCovered)
@@ -5804,7 +5852,12 @@ void OverlayManager::MarkDirty(PropertyChangeFlag flag)
     CHECK_NULL_VOID(root);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    for (auto&& child : root->GetChildren()) {
+    auto markNode = root;
+    if (pipeline->GetInstallationFree()) {
+        markNode = root->GetFirstChild();
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "atomicService node need marked");
+    }
+    for (auto&& child : markNode->GetChildren()) {
         // first child is Stage node in main window, subwindow not has Stage node.
         if (child != root->GetFirstChild() || pipeline->IsSubPipeline()) {
             child->MarkDirtyNode(flag);
@@ -6371,7 +6424,7 @@ void OverlayManager::SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, con
             CHECK_NULL_VOID(childNode);
             if (childNode->GetTag() == V2::APP_BAR_ETS_TAG) {
                 TAG_LOGD(AceLogTag::ACE_OVERLAY, "setNodeBeforeAppbar AddChildBefore");
-                child->AddChildBefore(node, childNode);
+                child->AddChildBefore(node, childNode, node->GetTag() == V2::MODAL_PAGE_TAG);
                 return;
             }
         }

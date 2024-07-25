@@ -95,13 +95,13 @@ struct UpdateSpanStyle {
         isSymbolStyle = false;
     }
 
-    std::optional<Color> updateTextColor = std::nullopt;
+    std::optional<DynamicColor> updateTextColor = std::nullopt;
     std::optional<CalcDimension> updateFontSize = std::nullopt;
     std::optional<FontStyle> updateItalicFontStyle = std::nullopt;
     std::optional<FontWeight> updateFontWeight = std::nullopt;
     std::optional<std::vector<std::string>> updateFontFamily = std::nullopt;
     std::optional<TextDecoration> updateTextDecoration = std::nullopt;
-    std::optional<Color> updateTextDecorationColor = std::nullopt;
+    std::optional<DynamicColor> updateTextDecorationColor = std::nullopt;
     std::optional<TextDecorationStyle> updateTextDecorationStyle = std::nullopt;
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
     std::optional<NG::FONT_FEATURES_LIST> updateFontFeature = std::nullopt;
@@ -227,7 +227,7 @@ struct PlaceholderOptions {
     std::optional<std::string> value;
     std::optional<FontWeight> fontWeight;
     std::optional<Dimension> fontSize;
-    std::optional<Color> fontColor;
+    std::optional<DynamicColor> fontColor;
     std::optional<FontStyle> fontStyle;
     std::vector<std::string> fontFamilies;
 
@@ -325,8 +325,8 @@ public:
     virtual void SetTextDetectEnable(bool value) = 0;
     virtual void SetSupportPreviewText(bool value) = 0;
     virtual void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) = 0;
-    virtual void SetSelectedBackgroundColor(const Color& selectedColor) = 0;
-    virtual void SetCaretColor(const Color& color) = 0;
+    virtual void SetSelectedBackgroundColor(const DynamicColor& selectedColor) = 0;
+    virtual void SetCaretColor(const DynamicColor& color) = 0;
     virtual void SetOnEditingChange(std::function<void(const bool&)>&& func) = 0;
     virtual void SetEnterKeyType(TextInputAction value) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) = 0;

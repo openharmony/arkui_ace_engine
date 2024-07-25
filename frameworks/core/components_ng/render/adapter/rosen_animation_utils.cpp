@@ -199,6 +199,10 @@ void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animat
     for (auto& ani : animation->animations_) {
         ani->Pause();
     }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (pipeline && !pipeline->GetOnShow()) {
+        pipeline->FlushMessages();
+    }
 }
 
 void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)

@@ -618,7 +618,7 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     info.obscuredMode = isFormObscured_;
     info.obscuredMode |= CheckFormBundleForbidden(info.bundleName);
     HandleFormComponent(info);
-    return false;
+    return true;
 }
 
 void FormPattern::HandleFormComponent(const RequestFormInfo& info)

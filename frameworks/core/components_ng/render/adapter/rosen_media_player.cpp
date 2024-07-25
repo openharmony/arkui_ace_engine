@@ -196,8 +196,11 @@ bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
         return false;
     }
     auto hapPath = container->GetHapPath();
-    CHECK_NULL_RETURN(hapPath.c_str(), false);
-    auto hapFd = open(hapPath.c_str(), O_RDONLY);
+    char realPath[PATH_MAX] = { 0x00 };
+    if (!RealPath(hapPath, realPath)) {
+        return false;
+    }
+    auto hapFd = open(realPath, O_RDONLY);
     if (hapFd < 0) {
         LOGE("Open hap file failed");
         return false;
@@ -230,8 +233,11 @@ bool RosenMediaPlayer::RawFilePlay(const std::string& filePath)
         return false;
     }
     auto hapPath = container->GetHapPath();
-    CHECK_NULL_RETURN(hapPath.c_str(), false);
-    auto hapFd = open(hapPath.c_str(), O_RDONLY);
+    char realPath[PATH_MAX] = { 0x00 };
+    if (!RealPath(hapPath, realPath)) {
+        return false;
+    }
+    auto hapFd = open(realPath, O_RDONLY);
     if (hapFd < 0) {
         LOGE("Open hap file failed");
         return false;
@@ -261,8 +267,11 @@ bool RosenMediaPlayer::RelativePathPlay(const std::string& filePath)
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto hapPath = container->GetHapPath();
-    CHECK_NULL_RETURN(hapPath.c_str(), false);
-    auto hapFd = open(hapPath.c_str(), O_RDONLY);
+    char realPath[PATH_MAX] = { 0x00 };
+    if (!RealPath(hapPath, realPath)) {
+        return false;
+    }
+    auto hapFd = open(realPath, O_RDONLY);
     if (hapFd < 0) {
         LOGE("Open hap file failed");
         return false;

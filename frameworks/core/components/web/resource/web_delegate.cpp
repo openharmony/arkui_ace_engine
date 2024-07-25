@@ -763,6 +763,7 @@ void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
 
 WebDelegate::~WebDelegate()
 {
+    SetAccessibilityState(false);
     OnNativeEmbedAllDestory();
     ReleasePlatformResource();
     if (IsDeviceTabletOr2in1() && GetWebOptimizationValue()) {
@@ -6572,25 +6573,17 @@ void WebDelegate::SetAccessibilityState(bool state)
     if (state == accessibilityState_) {
         return;
     }
+    CHECK_NULL_VOID(nweb_);
     accessibilityState_ = state;
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), state]() {
-            auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID(delegate);
-            CHECK_NULL_VOID(delegate->nweb_);
-            delegate->nweb_->SetAccessibilityState(state);
-            if (state) {
-                auto accessibilityEventListenerImpl =
-                    std::make_shared<AccessibilityEventListenerImpl>();
-                CHECK_NULL_VOID(accessibilityEventListenerImpl);
-                accessibilityEventListenerImpl->SetWebDelegate(weak);
-                delegate->nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
-                delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
-            }
-        },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetAccessibilityState");
+    nweb_->SetAccessibilityState(state);
+    if (state) {
+        auto accessibilityEventListenerImpl =
+            std::make_shared<AccessibilityEventListenerImpl>();
+        CHECK_NULL_VOID(accessibilityEventListenerImpl);
+        accessibilityEventListenerImpl->SetWebDelegate(WeakClaim(this));
+        nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
+        nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
+    }
 }
 
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAccessibilityNodeInfo(

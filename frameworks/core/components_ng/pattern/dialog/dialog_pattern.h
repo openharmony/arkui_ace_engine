@@ -17,11 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIALOG_DIALOG_PATTERN_H
 
 #include <cstdint>
+#include <functional>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/manager/focus/focus_view.h"
@@ -46,8 +48,8 @@ enum class DialogDismissReason {
     DIALOG_TOUCH_OUTSIDE,
     DIALOG_CLOSE_BUTTON,
 };
-class DialogPattern : public PopupBasePattern, public FocusView {
-    DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern, FocusView);
+class DialogPattern : public PopupBasePattern, public FocusView, public AutoFillTriggerStateHolder {
+    DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern, FocusView, AutoFillTriggerStateHolder);
 
 public:
     DialogPattern(const RefPtr<DialogTheme>& dialogTheme, const RefPtr<UINode>& customNode)
@@ -68,6 +70,19 @@ public:
     bool ShouldDismiss() const
     {
         if (onWillDismiss_) {
+            return true;
+        }
+        return false;
+    }
+
+    void SetOnWillDismissByNDK(const std::function<bool(const int32_t& info)>& onWillDismissByNDK)
+    {
+        onWillDismissByNDK_ = onWillDismissByNDK;
+    }
+
+    bool CallDismissInNDK(int reason)
+    {
+        if (onWillDismissByNDK_ && onWillDismissByNDK_(reason)) {
             return true;
         }
         return false;
@@ -361,6 +376,7 @@ private:
     std::string title_;
     std::string subtitle_;
     std::function<void(const int32_t& info)> onWillDismiss_;
+    std::function<bool(const int32_t& info)> onWillDismissByNDK_;
 
     DialogProperties dialogProperties_;
     WeakPtr<FrameNode> menuNode_;

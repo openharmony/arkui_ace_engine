@@ -477,8 +477,9 @@ void TextFieldLayoutAlgorithm::UpdateCounterNode(
     CHECK_NULL_VOID(textFieldLayoutProperty);
 
     std::string counterText;
-    TextStyle countTextStyle =
-        pattern->GetShowCounterStyleValue() ? theme->GetOverCountTextStyle() : theme->GetCountTextStyle();
+    TextStyle countTextStyle = (pattern->GetShowCounterStyleValue() && pattern->HasFocus()) ?
+                                theme->GetOverCountTextStyle() :
+                                theme->GetCountTextStyle();
     auto counterType = textFieldLayoutProperty->GetSetCounterValue(DEFAULT_MODE);
     auto limitSize = static_cast<uint32_t>(static_cast<int32_t>(maxLength) * counterType / SHOW_COUNTER_PERCENT);
     if (counterType == DEFAULT_MODE || (textLength >= limitSize && counterType != DEFAULT_MODE)) {
@@ -551,35 +552,10 @@ void TextFieldLayoutAlgorithm::HandleTextArea(LayoutWrapper* layoutWrapper, cons
     RefPtr<GeometryNode> counterGeometryNode = counterNode->GetGeometryNode();
     CHECK_NULL_VOID(counterGeometryNode);
     RectF frameRect = layoutWrapper->GetGeometryNode()->GetFrameRect();
-    countX = -content->GetRect().Width() + counterGeometryNode->GetFrameRect().Width();
-    if (isRTL) {
-        HandleRTLTextArea(content, counterGeometryNode, countX, counterGeometryNode->GetContentSize().Width());
-    } else {
-        HandleLTRTextArea(content, counterGeometryNode, countX);
-    }
+    countX = content->GetRect().GetX();
     counterGeometryNode->SetFrameOffset(OffsetF(countX,
         frameRect.Height() - pattern->GetPaddingBottom() - counterGeometryNode->GetFrameRect().Height()));
     counterNode->Layout();
-}
-
-void TextFieldLayoutAlgorithm::HandleRTLTextArea(const std::unique_ptr<GeometryProperty>& content,
-    const RefPtr<GeometryNode>& textGeometryNode, float& countX, float errTextWidth)
-{
-    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-        countX = content->GetRect().GetX();
-    } else {
-        countX = -content->GetRect().Width() + errTextWidth;
-    }
-}
-
-void TextFieldLayoutAlgorithm::HandleLTRTextArea(const std::unique_ptr<GeometryProperty>& content,
-    const RefPtr<GeometryNode>& textGeometryNode, float& countX)
-{
-    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-        countX = content->GetRect().Width();
-    } else {
-        countX = content->GetRect().GetX();
-    }
 }
 
 float TextFieldLayoutAlgorithm::CounterNodeMeasure(float contentWidth, LayoutWrapper* layoutWrapper)

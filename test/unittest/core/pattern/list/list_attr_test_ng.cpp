@@ -17,11 +17,37 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+constexpr float DEVIATION_HEIGHT = 20.f;
+constexpr float HALF_ITEM_HEIGHT = ITEM_HEIGHT / 2;
+constexpr float LESS_THAN_HALF_ITEM_HEIGHT = HALF_ITEM_HEIGHT - 1.f;
+constexpr float GREATER_THAN_HALF_ITEM_HEIGHT = HALF_ITEM_HEIGHT + 1.f;
+constexpr float SPECIAL_ITEM_HEIGHT = ITEM_HEIGHT * 1.5;
+constexpr float LESS_THAN_HALF_SPECIAL_ITEM_HEIGHT = SPECIAL_ITEM_HEIGHT / 2 - 1.f;
+constexpr float GREATER_THAN_HALF_SPECIAL_ITEM_HEIGHT = SPECIAL_ITEM_HEIGHT / 2 + 1.f;
+} // namespace
 
 class ListAttrTestNg : public ListTestNg {
 public:
+    void CreateSnapList(V2::ScrollSnapAlign scrollSnapAlign, int32_t itemNumber = TOTAL_ITEM_NUMBER);
+    void SetListItemHeight(int32_t index, float height);
 };
+
+void ListAttrTestNg::CreateSnapList(V2::ScrollSnapAlign scrollSnapAlign, int32_t itemNumber)
+{
+    ListModelNG model = CreateList();
+    // Make ListHeight not an integer multiple of ListItems
+    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - DEVIATION_HEIGHT));
+    model.SetScrollSnapAlign(scrollSnapAlign);
+    CreateListItems(itemNumber);
+    CreateDone(frameNode_);
+}
+
+void ListAttrTestNg::SetListItemHeight(int32_t index, float height)
+{
+    GetChildLayoutProperty<ListItemLayoutProperty>(frameNode_, index)
+        ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(height)));
+}
 
 /**
  * @tc.name: ListLayoutProperty001
@@ -815,37 +841,51 @@ HWTEST_F(ListAttrTestNg, AttrAlignListItem002, TestSize.Level1)
  */
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign001, TestSize.Level1)
 {
-    /**
-     * @tc.steps: stpe1. Set list height:380.f for not align the last item, Set ScrollSnapAlign::START
-     */
-    ListModelNG model = CreateList();
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - 20.f)); // 380.f
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    float scrollableDistance = pattern_->GetScrollableDistance();
-    EXPECT_EQ(scrollableDistance, 220.f);
+    CreateSnapList(V2::ScrollSnapAlign::START);
 
     /**
-     * @tc.steps: stpe2. Scroll delta less than half of ITEM_HEIGHT
-     * @tc.expected: The item(index:0) align to start
+     * @tc.steps: step1. Scroll Down, the delta less than half of ITEM_HEIGHT
+     * @tc.expected: Align item not change
      */
-    ScrollSnapForEqualHeightItem(-49.f, -1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    ScrollSnap(-LESS_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.0);
 
     /**
-     * @tc.steps: stpe3. Scroll delta greater than half of ITEM_HEIGHT
+     * @tc.steps: step2. Scroll Down, the delta greater than half of ITEM_HEIGHT
      * @tc.expected: The item(index:1) align to start
      */
-    ScrollSnapForEqualHeightItem(-51.f, -1200.f);
+    ScrollSnap(-GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
     EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT);
 
     /**
-     * @tc.steps: stpe4. Scroll to over bottom
-     * @tc.expected: The last item(index:9) align to end
+     * @tc.steps: step3. Scroll Down, the delta over bottom
+     * @tc.expected: The last item align to end
      */
-    ScrollSnapForEqualHeightItem(-500.f, -1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), scrollableDistance); // 220.f
+    ScrollSnap(-500.0, 0.0);
+    float scrollableDistance = pattern_->GetScrollableDistance();
+    EXPECT_EQ(scrollableDistance, ITEM_HEIGHT * 2 + DEVIATION_HEIGHT); // 220.f
+    EXPECT_EQ(pattern_->GetTotalOffset(), scrollableDistance);
+
+    /**
+     * @tc.steps: step4. Scroll Up, the delta is small
+     * @tc.expected: The item(index:2) align to start
+     */
+    ScrollSnap(1.0, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 2);
+
+    /**
+     * @tc.steps: step5. Scroll Up, the delta less than half of ITEM_HEIGHT
+     * @tc.expected: Align item not change
+     */
+    ScrollSnap(LESS_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 2);
+
+    /**
+     * @tc.steps: step6. Scroll Up, the delta greater than half of ITEM_HEIGHT
+     * @tc.expected: The item(index:1) align to start
+     */
+    ScrollSnap(GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT);
 }
 
 /**
@@ -855,31 +895,47 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign001, TestSize.Level1)
  */
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign002, TestSize.Level1)
 {
+    CreateSnapList(V2::ScrollSnapAlign::END);
+
     /**
-     * @tc.steps: stpe1. Set list height:380.f for not align the last item, Set ScrollSnapAlign::END
-     * @tc.expected: The last item in the view will be align to end
+     * @tc.steps: step1. The first item(index:0) will be align to start in init
      */
-    ListModelNG model = CreateList();
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - 20.f)); // 380.f
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    // The first item(index:0) will be align to start in init
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
 
     /**
-     * @tc.steps: stpe2. Scroll delta less than half of ITEM_HEIGHT
-     * @tc.expected: The last item(index:7) in the view will be align to end
+     * @tc.steps: step2. Scroll Down, the delta is small
+     * @tc.expected: The item(index:3) align to end
      */
-    ScrollSnap(-49.f, 1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 20.f);
+    ScrollSnap(-1.0, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), DEVIATION_HEIGHT);
 
     /**
-     * @tc.steps: stpe3. Scroll delta greater than half of ITEM_HEIGHT
-     * @tc.expected: The last item(index:8) will be align to end
+     * @tc.steps: step3. Scroll Down, the delta less than half of ITEM_HEIGHT
+     * @tc.expected: Align item not change
      */
-    ScrollSnap(-51.f, 1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT + 20.f); // 120.f
+    ScrollSnap(-LESS_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), DEVIATION_HEIGHT);
+
+    /**
+     * @tc.steps: step4. Scroll Down, the delta greater than half of ITEM_HEIGHT
+     * @tc.expected: The item(index:4) align to end
+     */
+    ScrollSnap(-GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT + DEVIATION_HEIGHT);
+
+    /**
+     * @tc.steps: step5. Scroll Up, the delta less than half of ITEM_HEIGHT
+     * @tc.expected: Align item not change
+     */
+    ScrollSnap(LESS_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT + DEVIATION_HEIGHT);
+
+    /**
+     * @tc.steps: step6. Scroll Up, the delta greater than half of ITEM_HEIGHT
+     * @tc.expected: The item(index:3) align to end
+     */
+    ScrollSnap(GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), DEVIATION_HEIGHT);
 }
 
 /**
@@ -889,177 +945,222 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign002, TestSize.Level1)
  */
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign003, TestSize.Level1)
 {
+    CreateSnapList(V2::ScrollSnapAlign::CENTER);
+
     /**
-     * @tc.steps: stpe1. Set ScrollSnapAlign::CENTER
-     * @tc.expected: The middle item in the view will be align to center
+     * @tc.steps: step1. The middle item in the view will be align to center
      */
-    ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    const float defaultOffset = -(LIST_HEIGHT - ITEM_HEIGHT) / 2; // -150.f
+    const float defaultOffset = -(LIST_HEIGHT - DEVIATION_HEIGHT - ITEM_HEIGHT) / 2; // -140.f
     EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+
+    /**
+     * @tc.steps: step2. Scroll Down, the delta less than half of ITEM_HEIGHT
+     * @tc.expected: Align item not change
+     */
+    ScrollSnap(-LESS_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+
+    /**
+     * @tc.steps: step3. Scroll Down, the delta greater than half of ITEM_HEIGHT
+     * @tc.expected: The item(index:1) align to center
+     */
+    ScrollSnap(-GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset + ITEM_HEIGHT);
+
+    /**
+     * @tc.steps: step4. Scroll Down, the delta over bottom
+     * @tc.expected: The last item align to center
+     */
+    ScrollSnap(-1000.f, 0.0);
     float scrollableDistance = pattern_->GetScrollableDistance();
-    EXPECT_EQ(scrollableDistance, 200.f); // still is 200.f
+    EXPECT_EQ(scrollableDistance, ITEM_HEIGHT * 2 + DEVIATION_HEIGHT); // 220.f
+    EXPECT_EQ(pattern_->GetTotalOffset(), scrollableDistance - defaultOffset);
 
     /**
-     * @tc.steps: stpe2. Scroll delta less than half of ITEM_HEIGHT
-     * @tc.expected: The fitst item(index:0) align to center
+     * @tc.steps: step5. Scroll Up, the delta less than half of ITEM_HEIGHT
+     * @tc.expected: Align item not change
      */
-    ScrollSnapForEqualHeightItem(-49.f, -1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset); // -150.f
+    ScrollSnap(LESS_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), scrollableDistance - defaultOffset);
 
     /**
-     * @tc.steps: stpe3. Scroll delta greater than half of ITEM_HEIGHT
-     * @tc.expected: The fitst item(index:1) align to center
+     * @tc.steps: step6. Scroll Up, the delta greater than half of ITEM_HEIGHT
+     * @tc.expected: The item(index:4) align to start
      */
-    ScrollSnapForEqualHeightItem(-51.f, -1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset + ITEM_HEIGHT); // -50.f
-
-    /**
-     * @tc.steps: stpe4. Scroll to over bottom
-     * @tc.expected: The last item(index:9) align to center
-     */
-    ScrollSnapForEqualHeightItem(-1000.f, -1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), scrollableDistance - defaultOffset); // 350.f
+    ScrollSnap(GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), scrollableDistance - defaultOffset - ITEM_HEIGHT);
 }
 
 /**
  * @tc.name: AttrScrollSnapAlign004
- * @tc.desc: Test LayoutProperty about ScrollSnapAlign different itemHeight
+ * @tc.desc: Test LayoutProperty about ScrollSnapAlign with different itemHeight
  * @tc.type: FUNC
  */
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign004, TestSize.Level1)
 {
-    /**
-     * @tc.steps: stpe1. Set ScrollSnapAlign::START, set item(index:1) height:150.f
-     */
-    ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    GetChildLayoutProperty<ListItemLayoutProperty>(frameNode_, 1)
-        ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(ITEM_HEIGHT * 1.5)));
-    /**
-     * @tc.steps: stpe2. Scroll delta greater than half of item(index:0) height
-     * @tc.expected: The item(index:1) align to start
-     */
-    ScrollSnap(-51.f, 1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT); // 100.f
+    CreateSnapList(V2::ScrollSnapAlign::START);
+    SetListItemHeight(1, SPECIAL_ITEM_HEIGHT);
 
     /**
-     * @tc.steps: stpe3. Scroll delta greater than half of item(index:1) height(half height:75.f)
+     * @tc.steps: step1. Scroll Down, the delta greater than half of ITEM_HEIGHT
+     * @tc.expected: The item(index:1) align to start
+     */
+    ScrollSnap(-GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT);
+
+    /**
+     * @tc.steps: step2. Scroll Down, the delta less than half of SPECIAL_ITEM_HEIGHT
+     * @tc.expected: Align item not change
+     */
+    ScrollSnap(-LESS_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT);
+
+    /**
+     * @tc.steps: step3. Scroll Down, the delta greater than half of SPECIAL_ITEM_HEIGHT
      * @tc.expected: The item(index:2) align to start
      */
-    ScrollSnap(-76.f, 1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 2.5); // 250.f
+    ScrollSnap(-GREATER_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 2.5);
+
+    /**
+     * @tc.steps: step4. Scroll Up, the delta less than half of SPECIAL_ITEM_HEIGHT
+     * @tc.expected: Align item not change
+     */
+    ScrollSnap(LESS_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 2.5);
+
+    /**
+     * @tc.steps: step5. Scroll Up, the delta greater than half of SPECIAL_ITEM_HEIGHT
+     * @tc.expected: The item(index:1) align to start
+     */
+    ScrollSnap(GREATER_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT);
 }
 
 /**
  * @tc.name: AttrScrollSnapAlign005
- * @tc.desc: Test LayoutProperty about ScrollSnapAlign different itemHeight
+ * @tc.desc: Test LayoutProperty about ScrollSnapAlign with different itemHeight
  * @tc.type: FUNC
  */
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign005, TestSize.Level1)
 {
-    /**
-     * @tc.steps: stpe1. Set ScrollSnapAlign::END, set item(index:5) height:150.f
-     */
-    ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    GetChildLayoutProperty<ListItemLayoutProperty>(frameNode_, TOTAL_ITEM_NUMBER - 1)
-        ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(ITEM_HEIGHT * 1.5)));
+    CreateSnapList(V2::ScrollSnapAlign::END);
+    SetListItemHeight(TOTAL_ITEM_NUMBER - 2, SPECIAL_ITEM_HEIGHT);
 
     /**
-     * @tc.steps: stpe2. Scroll delta greater than half of item(index:8) height
-     * @tc.expected: The item(index:8) align to end
+     * @tc.steps: step1. Scroll Down, the delta is small
+     * @tc.expected: The item(index:3) align to end
      */
-    ScrollSnap(-51.f, 1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT); // 100.f
+    ScrollSnap(-1.0, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), DEVIATION_HEIGHT);
 
     /**
-     * @tc.steps: stpe3. Scroll delta greater than half of item(index:9) height(half height:75.f)
-     * @tc.expected: The item(index:9) align to end
+     * @tc.steps: step2. Scroll Down, the delta less than half of SPECIAL_ITEM_HEIGHT
+     * @tc.expected: Align item not change
      */
-    ScrollSnap(-76.f, 1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 2.5); // 250.f
+    ScrollSnap(-LESS_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), DEVIATION_HEIGHT);
+
+    /**
+     * @tc.steps: step3. Scroll Down, the delta greater than half of SPECIAL_ITEM_HEIGHT
+     * @tc.expected: The item(index:4) align to end
+     */
+    ScrollSnap(-GREATER_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), SPECIAL_ITEM_HEIGHT + DEVIATION_HEIGHT);
+
+    /**
+     * @tc.steps: step4. Scroll Up, the delta less than half of SPECIAL_ITEM_HEIGHT
+     * @tc.expected: Align item not change
+     */
+    ScrollSnap(LESS_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), SPECIAL_ITEM_HEIGHT + DEVIATION_HEIGHT);
+
+    /**
+     * @tc.steps: step5. Scroll Up, the delta greater than half of SPECIAL_ITEM_HEIGHT
+     * @tc.expected: The item(index:3) align to end
+     */
+    ScrollSnap(GREATER_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), DEVIATION_HEIGHT);
 }
 
 /**
  * @tc.name: AttrScrollSnapAlign006
- * @tc.desc: Test LayoutProperty about ScrollSnapAlign different itemHeight
+ * @tc.desc: Test LayoutProperty about ScrollSnapAlign with different itemHeight
  * @tc.type: FUNC
  */
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign006, TestSize.Level1)
 {
-    /**
-     * @tc.steps: stpe1. Set ScrollSnapAlign::CENTER, set item(index:1) height:150.f
-     */
-    ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    GetChildLayoutProperty<ListItemLayoutProperty>(frameNode_, 1)
-        ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(ITEM_HEIGHT * 1.5)));
-    EXPECT_EQ(pattern_->GetTotalOffset(), -(LIST_HEIGHT - ITEM_HEIGHT) / 2); // -150.f
+    CreateSnapList(V2::ScrollSnapAlign::CENTER);
+    SetListItemHeight(1, SPECIAL_ITEM_HEIGHT);
 
     /**
-     * @tc.steps: stpe2. Scroll delta greater than half of item(index:0) height
+     * @tc.steps: step1. The middle item in the view will be align to center
+     */
+    const float defaultOffset = -(LIST_HEIGHT - DEVIATION_HEIGHT - ITEM_HEIGHT) / 2; // -140.f
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+
+    /**
+     * @tc.steps: step2. Scroll Down, the delta less than half of ITEM_HEIGHT
+     * @tc.expected: Align item not change
+     */
+    ScrollSnap(-LESS_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+
+    /**
+     * @tc.steps: step3. Scroll Down, the delta greater than half of ITEM_HEIGHT
      * @tc.expected: The item(index:1) align to center
      */
-    ScrollSnap(-51.f, 1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), -25.f); // item(index:0) height and item(index:1) half-height
+    ScrollSnap(-GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset + (SPECIAL_ITEM_HEIGHT + ITEM_HEIGHT) / 2);
 
     /**
-     * @tc.steps: stpe3. Scroll delta greater than half of item(index:1) height(half height:75.f)
-     * @tc.expected: The item(index:2) align to center
+     * @tc.steps: step5. Scroll Up, the delta less than half of SPECIAL_ITEM_HEIGHT
+     * @tc.expected: Align item not change
      */
-    ScrollSnap(-76.f, 1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 100.f); // item(index:0,1) height and item(index:2) half-height
+    ScrollSnap(LESS_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset + (SPECIAL_ITEM_HEIGHT + ITEM_HEIGHT) / 2);
+
+    /**
+     * @tc.steps: step6. Scroll Up, the delta greater than half of SPECIAL_ITEM_HEIGHT
+     * @tc.expected: The item(index:0) align to center
+     */
+    ScrollSnap(GREATER_THAN_HALF_SPECIAL_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
 }
 
 /**
  * @tc.name: AttrScrollSnapAlign007
- * @tc.desc: Test LayoutProperty about ScrollSnapAlign in UnScrollable List
+ * @tc.desc: Test LayoutProperty about ScrollSnapAlign invalid condition
  * @tc.type: FUNC
  */
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign007, TestSize.Level1)
 {
-    ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
-    CreateListItems(VIEW_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->GetScrollableDistance(), 0.f);
-
     /**
-     * @tc.steps: stpe1. Scroll delta greater than half of ITEM_HEIGHT
-     * @tc.expected: The item(index:0) align to start
+     * @tc.steps: step1. Empty ListItems
+     * @tc.expected: Can not scroll snap
      */
-    ScrollSnapForEqualHeightItem(-51.f, -1200.f);
+    CreateSnapList(V2::ScrollSnapAlign::START, 0);
+    EXPECT_EQ(pattern_->GetScrollableDistance(), 0.f);
+    ScrollSnap(-GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-}
-
-/**
- * @tc.name: AttrScrollSnapAlign008
- * @tc.desc: Test LayoutProperty about ScrollSnapAlign::NONE
- * @tc.type: FUNC
- */
-HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign008, TestSize.Level1)
-{
-    ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::NONE);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->GetScrollableDistance(), 200.f);
 
     /**
-     * @tc.steps: stpe1. Scroll delta greater than half of ITEM_HEIGHT
+     * @tc.steps: step2. UnScrollable List
+     * @tc.expected: Can not scroll snap
+     */
+    ClearOldNodes();
+    CreateSnapList(V2::ScrollSnapAlign::START, 1);
+    ScrollSnap(-GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+
+    /**
+     * @tc.steps: step3. ScrollSnapAlign::NONE
      * @tc.expected: Has no Snap effect
      */
-    ScrollSnapForEqualHeightItem(-51.f, -1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 51.f);
+    ClearOldNodes();
+    CreateSnapList(V2::ScrollSnapAlign::NONE);
+    ScrollSnap(-GREATER_THAN_HALF_ITEM_HEIGHT, 0.0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), GREATER_THAN_HALF_ITEM_HEIGHT);
 }
 
 /**

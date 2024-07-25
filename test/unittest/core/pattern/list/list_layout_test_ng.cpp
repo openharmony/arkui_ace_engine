@@ -1104,50 +1104,52 @@ HWTEST_F(ListLayoutTestNg, Pattern008, TestSize.Level1)
 }
 
 /**
- * @tc.name: Pattern010
- * @tc.desc: Test layout
+ * @tc.name: ListSize001
+ * @tc.desc: Test List size in diff condition
  * @tc.type: FUNC
  */
-HWTEST_F(ListLayoutTestNg, Pattern010, TestSize.Level1)
+HWTEST_F(ListLayoutTestNg, ListSize001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. do not set selfIdealSize, 0 listItem
+     * @tc.steps: step1. Not set size to List, but no ListItems
+     * @tc.expected: List with is rootWidth
      */
-    CreateList();
-    ViewAbstract::SetWidth(CalcLength(LIST_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
+    const float rootWidth = MockPipelineContext::GetCurrent()->rootWidth_;
+    ListModelNG model;
+    model.Create();
+    GetList();
     CreateDone(frameNode_);
-    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), LIST_WIDTH);
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), rootWidth);
 
     /**
-     * @tc.steps: step1. do not set selfIdealSize, TOTAL_ITEM_NUMBER listItem
+     * @tc.steps: step2. Not set size to List and has ListItems
+     * @tc.expected: List with is rootWidth
      */
-    CreateList();
-    ViewAbstract::SetWidth(CalcLength(LIST_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
+    model.Create();
     CreateListItems(TOTAL_ITEM_NUMBER);
+    GetList();
     CreateDone(frameNode_);
-    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), LIST_WIDTH);
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), rootWidth);
 
     /**
-     * @tc.steps: step1. set width Infinity
+     * @tc.steps: step3. Set List width to Infinity
+     * @tc.expected: List with is Infinity
      */
     CreateList();
     ViewAbstract::SetWidth(CalcLength(Infinity<float>()));
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), Infinity<float>());
 
     /**
-     * @tc.steps: step1. set width Infinity, but no item
+     * @tc.steps: step4. Set List width to Infinity, but no ListItems
+     * @tc.expected: List with is 0
      */
     ClearOldNodes();
     CreateList();
     ViewAbstract::SetWidth(CalcLength(Infinity<float>()));
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
     CreateDone(frameNode_);
-    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), 0);
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), 0.f);
 }
 
 /**

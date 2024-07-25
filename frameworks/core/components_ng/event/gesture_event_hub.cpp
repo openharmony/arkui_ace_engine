@@ -19,6 +19,7 @@
 #include <list>
 #include <memory>
 #include <string>
+#include "drag_event.h"
 
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
@@ -614,6 +615,24 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     return result;
 }
 
+RefPtr<PixelMap> GestureEventHub::GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap)
+{
+    float preScale = 1.0f;
+    RefPtr<PixelMap> preScaledPixelMap = dragEventActuator_->GetPreScaledPixelMapForDragThroughTouch(preScale);
+    if (preScale == targetScale && preScaledPixelMap != nullptr) {
+        return preScaledPixelMap;
+    }
+#if defined(PIXEL_MAP_SUPPORTED)
+    preScaledPixelMap = PixelMap::CopyPixelMap(defaultPixelMap);
+    if (!preScaledPixelMap) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "duplicate PixelMap failed!");
+        preScaledPixelMap = defaultPixelMap;
+    }
+    preScaledPixelMap->Scale(targetScale, targetScale, AceAntiAliasingOption::HIGH);
+#endif
+    return preScaledPixelMap;
+}
+
 float GestureEventHub::GetPixelMapScale(const int32_t height, const int32_t width) const
 {
     float scale = 1.0f;
@@ -818,7 +837,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         };
         SnapshotParam param;
         param.delay = CREATE_PIXELMAP_TIME;
-        NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), false, param);
+        NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), true, param);
         PrintBuilderNode(dragPreviewInfo.customNode);
         return;
     }
@@ -977,15 +996,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             dragEventActuator_->SetIsNotInPreviewState(true);
         }
     }
-    RefPtr<PixelMap> pixelMapDuplicated = pixelMap;
-#if defined(PIXEL_MAP_SUPPORTED)
-    pixelMapDuplicated = PixelMap::CopyPixelMap(pixelMap);
-    if (!pixelMapDuplicated) {
-        TAG_LOGW(AceLogTag::ACE_DRAG, "Copy PixelMap is failure!");
-        pixelMapDuplicated = pixelMap;
-    }
-#endif
-    pixelMapDuplicated->Scale(scale, scale, AceAntiAliasingOption::HIGH);
+    RefPtr<PixelMap> pixelMapDuplicated = GetPreScaledPixelMapIfExist(scale, pixelMap);
     auto width = pixelMapDuplicated->GetWidth();
     auto height = pixelMapDuplicated->GetHeight();
     auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale, IsPixelMapNeedScale());

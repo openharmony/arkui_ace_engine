@@ -574,7 +574,8 @@ public:
         bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true) override;
     bool IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
-        const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative = true) override;
+        const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative = true,
+        int32_t instanceId = -1) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
     void OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode, AbilityBase::ViewData& viewData);
     bool ChangeType(AbilityBase::ViewData& viewData);

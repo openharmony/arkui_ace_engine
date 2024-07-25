@@ -291,6 +291,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(BubblePattern);
 
     bool hasTransition_ = false;
+    bool hasOnAreaChange_ = false;
 };
 } // namespace OHOS::Ace::NG
 

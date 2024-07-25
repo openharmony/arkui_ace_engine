@@ -128,6 +128,12 @@ protected:
 
     void OnItemDeleted(UINode* node, const std::string& key) override;
 
+    // used in ArkTS side.
+    std::set<std::string> GetCacheKeys(std::set<int32_t>& idleIndexes) override
+    {
+        return {};
+    }
+
     // used in ArkTS side for tabs.
     LazyForEachChild OnGetChildByIndexNew(int32_t index, std::map<int32_t, LazyForEachChild>& cachedItems,
         std::unordered_map<std::string, LazyForEachCacheChild>& expiringItems) override

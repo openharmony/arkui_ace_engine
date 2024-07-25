@@ -1326,6 +1326,9 @@ struct ArkUIDragInteractionOptions {
     ArkUI_Bool defaultAnimationBeforeLifting;
 };
 
+struct ArkUI_DialogDismissEvent;
+typedef ArkUI_DialogDismissEvent* ArkUIDialogDismissEvent;
+
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
@@ -4712,6 +4715,8 @@ struct ArkUIDialogAPI {
     ArkUI_Int32 (*show)(ArkUIDialogHandle handle, ArkUI_Bool showInSubWindow);
     ArkUI_Int32 (*close)(ArkUIDialogHandle handle);
     ArkUI_Int32 (*registerOnWillDismiss)(ArkUIDialogHandle handle, bool (*eventHandler)(ArkUI_Int32));
+    ArkUI_Int32 (*registerOnWillDismissWithUserData)(
+        ArkUIDialogHandle handler, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event));
 };
 
 struct ArkUIBasicNodeAPI {

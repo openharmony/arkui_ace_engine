@@ -52,7 +52,11 @@ RefPtr<FrameNode> Create(int32_t index)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
     BorderRadiusProperty border;
-    border.SetRadius(theme->GetInnerBorderRadius());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        border.SetRadius(theme->GetMenuDefaultInnerRadius());
+    } else {
+        border.SetRadius(theme->GetInnerBorderRadius());
+    }
     renderContext->UpdateBorderRadius(border);
 
     auto props = node->GetPaintProperty<OptionPaintProperty>();
@@ -158,9 +162,16 @@ RefPtr<FrameNode> OptionView::CreateSymbol(const std::function<void(WeakPtr<NG::
 void OptionView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,
     const std::function<void()>& onClickFunc, const std::string& icon)
 {
-    auto pasteNode =
-        PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
-            static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE), static_cast<int32_t>(ButtonType::NORMAL), true);
+    RefPtr<FrameNode> pasteNode;
+    if (optionsHasIcon) {
+        pasteNode =
+            PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
+                static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE), static_cast<int32_t>(ButtonType::NORMAL), true);
+    } else {
+        pasteNode =
+            PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
+                static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::NORMAL), true);
+    }
     CHECK_NULL_VOID(pasteNode);
     auto pattern = option->GetPattern<OptionPattern>();
     CHECK_NULL_VOID(pattern);
@@ -181,7 +192,9 @@ void OptionView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>&
     pasteLayoutProperty->UpdateBackgroundBorderRadius(theme->GetInnerBorderRadius());
     pasteLayoutProperty->UpdateIconSize(theme->GetIconSideLength());
     pastePaintProperty->UpdateIconColor(theme->GetMenuIconColor());
-    pasteLayoutProperty->UpdateTextIconSpace(theme->GetIconContentPadding());
+    if (optionsHasIcon) {
+        pasteLayoutProperty->UpdateTextIconSpace(theme->GetIconContentPadding());
+    }
     pasteNode->MountToParent(row);
     pasteNode->MarkModifyDone();
 
@@ -248,8 +261,7 @@ RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, std::vector<
 
 #ifdef OHOS_PLATFORM
     constexpr char BUTTON_PASTE[] = "textoverlay.paste";
-    if (params[index].value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE) ||
-        params[index].isPasteOption) {
+    if (params[index].value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
         CreatePasteButton(optionsHasIcon, option, row, params[index].action);
     } else {
         CreateOption(optionsHasIcon, params, index, row, option);
@@ -270,7 +282,7 @@ RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const Option
 
 #ifdef OHOS_PLATFORM
     constexpr char BUTTON_PASTE[] = "textoverlay.paste";
-    if (value.value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE) || value.isPasteOption) {
+    if (value.value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
         CreatePasteButton(optionsHasIcon, option, row, onClickFunc, icon);
     } else {
         CreateOption(optionsHasIcon, value.value, icon, row, option, onClickFunc);

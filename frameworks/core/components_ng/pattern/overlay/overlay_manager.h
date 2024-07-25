@@ -617,6 +617,7 @@ private:
     void SaveSheePageNode(
         const RefPtr<FrameNode>& sheetPageNode, const RefPtr<FrameNode>& sheetContentNode,
         const RefPtr<FrameNode>& targetNode, bool isStartByUIContext);
+    bool CheckTargetIdIsValid(int32_t targetId);
     RefPtr<FrameNode> CreateSheetMask(const RefPtr<FrameNode>& sheetPageNode,
         const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle);
     void UpdateSheetRender(const RefPtr<FrameNode>& sheetPageNode, NG::SheetStyle& sheetStyle, bool isPartialUpdate);
@@ -765,6 +766,8 @@ private:
     void MountToParentWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     void RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     CustomKeyboardOffsetInfo CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard);
+
+    void FireDialogAutoSave(const RefPtr<FrameNode>& ContainerNode);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index

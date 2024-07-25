@@ -94,8 +94,9 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
     if (visibleContentRect.IsEmpty()) {
         return false;
     }
-    PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
-    PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
+    auto paintLeft = paintRect.Left() + paintRect.Width() / 2.0f;
+    PointF bottomPoint = { paintLeft, paintRect.Bottom() - BOX_EPSILON };
+    PointF topPoint = { paintLeft, paintRect.Top() + BOX_EPSILON };
     visibleContentRect.SetLeft(visibleContentRect.GetX() - BOX_EPSILON);
     visibleContentRect.SetWidth(visibleContentRect.Width() + DOUBLE * BOX_EPSILON);
     visibleContentRect.SetTop(visibleContentRect.GetY() - BOX_EPSILON);

@@ -938,7 +938,10 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
 
     if (!targetIndex_) {
-        SetIndicatorJumpIndex(jumpIndex_);
+        if (isUserFinish_) {
+            SetIndicatorJumpIndex(jumpIndex_);
+        }
+
         CheckMarkDirtyNodeForRenderIndicator();
     }
 
@@ -1963,6 +1966,10 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     if (direction_ == GetDirection() && panEvent_) {
         return;
+    }
+    // fade offset need to be reset when is still dragging
+    if (direction_ != GetDirection()) {
+        fadeOffset_ = 0.f;
     }
     direction_ = GetDirection();
 

@@ -399,6 +399,7 @@ public:
     void ProcessCachedIndex(std::unordered_map<std::string, LazyForEachCacheChild>& cache,
         std::set<int32_t>& idleIndexes)
     {
+        const auto& cacheKeys = GetCacheKeys(idleIndexes);
         auto expiringIter = expiringItem_.begin();
         while (expiringIter != expiringItem_.end()) {
             const auto& key = expiringIter->first;
@@ -418,7 +419,12 @@ public:
                 NotifyDataDeleted(node.second, static_cast<size_t>(node.first), true);
                 ProcessOffscreenNode(node.second, true);
                 NotifyItemDeleted(RawPtr(node.second), key);
-                expiringIter = expiringItem_.erase(expiringIter);
+                if (cacheKeys.find(key) != cacheKeys.end()) {
+                    cache.try_emplace(key, node);
+                    expiringIter++;
+                } else {
+                    expiringIter = expiringItem_.erase(expiringIter);
+                }
             }
         }
     }
@@ -543,6 +549,8 @@ protected:
     virtual int32_t OnGetTotalCount() = 0;
 
     virtual void OnItemDeleted(UINode* node, const std::string& key) {};
+
+    virtual std::set<std::string> GetCacheKeys(std::set<int32_t>& idleIndexes) = 0;
 
     virtual LazyForEachChild OnGetChildByIndex(
         int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cachedItems) = 0;

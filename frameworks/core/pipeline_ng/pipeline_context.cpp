@@ -83,6 +83,9 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/window_scene/scene/window_scene_layout_manager.h"
+#endif
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -613,6 +616,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         dragWindowVisibleCallback_ = nullptr;
     }
     FlushMessages();
+    FlushWindowPatternInfo();
     InspectDrew();
     UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
     if (onShow_ && onFocus_ && isWindowHasFocused_) {
@@ -638,6 +642,26 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
     window_->Unlock();
+}
+
+void PipelineContext::FlushWindowPatternInfo()
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (!container->IsScenceBoardWindow()) {
+        return;
+    }
+    auto screenNode = screenNode_.Upgrade();
+    if (!screenNode) {
+        return;
+    }
+    ACE_SCOPED_TRACE("FlushWindowPatternInfo");
+    auto instance = WindowSceneLayoutManager::GetInstance();
+    if (instance != nullptr) {
+        instance->FlushWindowPatternInfo(screenNode);
+    }
+#endif
 }
 
 void PipelineContext::InspectDrew()
@@ -2272,7 +2296,7 @@ bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<Vie
     CHECK_NULL_RETURN(dumpNode, false);
     dumpNode->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer, needsRecordData);
     auto nodeTag = node->GetTag();
-    if (nodeTag == V2::SHEET_PAGE_TAG || nodeTag == V2::MODAL_PAGE_TAG) {
+    if (nodeTag == V2::DIALOG_ETS_TAG || nodeTag == V2::SHEET_PAGE_TAG || nodeTag == V2::MODAL_PAGE_TAG) {
         viewDataWrap->SetPageUrl(nodeTag);
         return true;
     }
@@ -2938,6 +2962,11 @@ void PipelineContext::RemoveOnAreaChangeNode(int32_t nodeId)
 {
     onAreaChangeNodeIds_.erase(nodeId);
     isOnAreaChangeNodesCacheVaild_ = false;
+}
+
+bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
+{
+    return onAreaChangeNodeIds_.find(nodeId) != onAreaChangeNodeIds_.end();
 }
 
 void PipelineContext::HandleOnAreaChangeEvent(uint64_t nanoTimestamp)

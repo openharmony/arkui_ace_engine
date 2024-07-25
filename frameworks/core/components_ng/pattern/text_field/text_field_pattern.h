@@ -597,6 +597,7 @@ public:
     }
     void NotifyKeyboardClosedByUser() override
     {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosedByUser");
         isKeyboardClosedByUser_ = true;
         FocusHub::LostFocusToViewRoot();
         isKeyboardClosedByUser_ = false;
@@ -606,6 +607,7 @@ public:
 
     void NotifyKeyboardClosed() override
     {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosed");
         if (HasFocus()) {
             FocusHub::LostFocusToViewRoot();
         }

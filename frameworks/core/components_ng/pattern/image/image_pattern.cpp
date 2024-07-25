@@ -590,10 +590,9 @@ void ImagePattern::LoadImage(
     const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag, VisibleType visibleType)
 {
     if (loadingCtx_) {
-        auto srcPixelMap = src.GetPixmap();
-        auto loadPixelMap = loadingCtx_->GetSourceInfo().GetPixmap();
-        isPixelMapChanged_ = !srcPixelMap || !loadPixelMap || srcPixelMap->GetRawPixelMapPtr() !=
-                                                              loadPixelMap->GetRawPixelMapPtr();
+        auto srcKey = src.GetKey();
+        auto loadKey = loadingCtx_->GetSourceInfo().GetKey();
+        isPixelMapChanged_ = srcKey != loadKey;
     }
     LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
     loadNotifier.onDataReadyComplete_ = CreateCompleteCallBackInDataReady();

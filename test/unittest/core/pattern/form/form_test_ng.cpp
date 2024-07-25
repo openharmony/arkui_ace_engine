@@ -150,7 +150,11 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level1)
             auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm, skipMeasures[i]);
             layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
             auto isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-            ASSERT_EQ(isSwap, false);
+            if (config.skipMeasure && config.skipLayout) {
+                ASSERT_EQ(isSwap, false);
+            } else {
+                ASSERT_EQ(isSwap, true);
+            }
         }
     }
 
@@ -164,7 +168,7 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level1)
     pattern->cardInfo_.allowUpdate = !formInfo.allowUpdate;
     auto isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     ASSERT_EQ(pattern->cardInfo_.allowUpdate, formInfo.allowUpdate);
-    ASSERT_EQ(isSwap, false);
+    ASSERT_EQ(isSwap, true);
 
     /**
      * @tc.steps: ste4. Set call methods OnDirtyLayoutWrapperSwap when card info dose not change , but the value of
@@ -176,7 +180,7 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level1)
     pattern->cardInfo_.allowUpdate = !formInfo.allowUpdate;
     isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     ASSERT_EQ(pattern->cardInfo_.allowUpdate, formInfo.allowUpdate);
-    ASSERT_EQ(isSwap, false);
+    ASSERT_EQ(isSwap, true);
 
     /**
      * @tc.steps: step5. Set call methods OnDirtyLayoutWrapperSwap when card info dose not change , and the value of
@@ -186,7 +190,7 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level1)
     pattern->formManagerBridge_ = nullptr;
     isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     ASSERT_EQ(pattern->cardInfo_.allowUpdate, formInfo.allowUpdate);
-    ASSERT_EQ(isSwap, false);
+    ASSERT_EQ(isSwap, true);
 }
 
 /**
@@ -345,7 +349,7 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
             auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm, false);
             layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
             auto isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-            ASSERT_EQ(isSwap, false);
+            ASSERT_EQ(isSwap, true);
             if (i == 1 && j == 1) {
                 ASSERT_EQ(pattern->cardInfo_.bundleName, formInfo.bundleName);
             } else {
@@ -369,7 +373,7 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
             auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm, false);
             layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
             auto isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-            ASSERT_EQ(isSwap, false);
+            ASSERT_EQ(isSwap, true);
             ASSERT_EQ(pattern->cardInfo_.width, Dimension(length[i]));
             ASSERT_EQ(pattern->cardInfo_.height, Dimension(length[j]));
         }
@@ -416,7 +420,7 @@ HWTEST_F(FormTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm, false);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
     auto isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    ASSERT_EQ(isSwap, false);
+    ASSERT_EQ(isSwap, true);
     ASSERT_EQ(pattern->cardInfo_.allowUpdate, true);
     ASSERT_EQ(pattern->cardInfo_.width, Dimension(NORMAL_LENGTH));
     ASSERT_EQ(pattern->cardInfo_.height, Dimension(NORMAL_LENGTH));

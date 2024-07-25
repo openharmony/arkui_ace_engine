@@ -179,10 +179,9 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);
-    auto isNewAvoid = info_->isNewAvoid && !info_->isSingleHandle;
     auto shouldInActiveByHandle =
         !info_->firstHandle.isShow && !info_->secondHandle.isShow && !info_->isSelectRegionVisible;
-    if ((!CheckInShowArea(*info_) || (!isNewAvoid && shouldInActiveByHandle)) && !info_->isUsingMouse) {
+    if ((!CheckInShowArea(*info_) || (!info_->isNewAvoid && shouldInActiveByHandle)) && !info_->isUsingMouse) {
         menu->SetActive(false);
         return;
     }

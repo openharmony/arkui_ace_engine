@@ -60,6 +60,10 @@ bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, RefPtr<Navigatio
     std::string message = Localization::GetInstance()->GetEntryLetters("navigation.more");
     SetAccessibility(menuItemNode, message);
 
+    // set navdestination titleBar "more" button inspectorId
+    SetInnerChildId(menuItemNode, NG::DES_FIELD, menuNode->GetTag(),
+        "More", titleBarNode->GetInnerParentId());
+
     barItemNode->MountToParent(menuItemNode);
     barItemNode->MarkModifyDone();
     menuItemNode->MarkModifyDone();
@@ -98,6 +102,11 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
         } else {
             auto menuItemNode = CreateMenuItemNode(theme, menuItem, isButtonEnabled);
             CHECK_NULL_RETURN(menuItemNode, nullptr);
+
+            // set navdestination titleBar menuitem inspectorId
+            std::string menuItemId = menuItemNode->GetTag() + std::to_string(count);
+            NavigationTitleUtil::SetInnerChildId(menuItemNode, NG::DES_FIELD, menuNode->GetTag(),
+                menuItemId, titleBarNode->GetInnerParentId());
 
             // read navdestination menu button
             SetAccessibility(menuItemNode, menuItem.text.value_or(""));

@@ -89,7 +89,7 @@ public:
     static RefPtr<PipelineContext> GetCurrentContextSafelyWithCheck();
 
     static PipelineContext* GetCurrentContextPtrSafely();
-    
+
     static PipelineContext* GetCurrentContextPtrSafelyWithCheck();
 
 
@@ -192,6 +192,8 @@ public:
     {
         return {};
     }
+
+    bool HasOnAreaChangeNode(int32_t nodeId);
 
     void AddOnAreaChangeNode(int32_t nodeId);
 
@@ -821,6 +823,7 @@ public:
     void RemoveChangedFrameNode(int32_t nodeId);
     void SetForceSplitEnable(bool isForceSplit)
     {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "set force split %{public}s", isForceSplit ? "enable" : "disable");
         isForceSplit_ = isForceSplit;
     }
 
@@ -878,7 +881,7 @@ private:
     void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
 
     void FlushTouchEvents();
-
+    void FlushWindowPatternInfo();
     void FlushFocusView();
     void FlushFocusScroll();
 

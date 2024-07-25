@@ -1565,7 +1565,7 @@ private:
 };
 
 bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
-    const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative)
+    const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative, int32_t instanceId)
 {
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
     CHECK_NULL_RETURN(uiWindow_, false);
@@ -1589,6 +1589,12 @@ bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std:
     autoFillRequest.autoFillCommand = AbilityRuntime::AutoFill::AutoFillCommand::SAVE;
     autoFillRequest.autoFillType = ViewDataWrap::ViewDataToType(viewData);
     autoFillRequest.doAfterAsyncModalBinding = std::move(onUIExtNodeBindingCompleted);
+    if (instanceId != -1) {
+        auto uiWindow = GetUIWindow(instanceId);
+        CHECK_NULL_RETURN(uiWindow, false);
+        uiContent = uiWindow->GetUIContent();
+        CHECK_NULL_RETURN(uiContent, false);
+    }
     AbilityRuntime::AutoFill::AutoFillResult result;
     if (AbilityRuntime::AutoFillManager::GetInstance().RequestAutoSave(
         uiContent, autoFillRequest, callback, result) != 0) {
