@@ -364,7 +364,8 @@ bool ButtonLayoutAlgorithm::IsAging(LayoutWrapper* layoutWrapper)
         return false;
     }
     const auto& calcConstraint = buttonLayoutProperty->GetCalcLayoutConstraint();
-    if (calcConstraint && calcConstraint->selfIdealSize.has_value()) {
+    if (calcConstraint && calcConstraint->selfIdealSize->Height().has_value() &&
+        calcConstraint->selfIdealSize->Width().has_value()) {
         return false;
     }
     auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
