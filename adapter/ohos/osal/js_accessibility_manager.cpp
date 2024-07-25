@@ -2390,7 +2390,7 @@ void JsAccessibilityManager::SendEventToAccessibilityWithNode(
         eventInfo.SetWindowId(accessibilityEvent.windowId);
     }
     FillEventInfoWithNode(frameNode, eventInfo, ngPipeline, accessibilityEvent.nodeId);
-    if (ngPipeline->IsFormRender()) {
+    if ((ngPipeline != nullptr) && (ngPipeline->IsFormRender())) {
         eventInfo.SetWindowId(static_cast<int32_t>(GetWindowId()));
     }
     GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo);
@@ -2439,7 +2439,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
     if (accessibilityEvent.type == AccessibilityEventType::PAGE_CHANGE && accessibilityEvent.windowId != 0) {
         eventInfo.SetWindowId(accessibilityEvent.windowId);
     }
-    if (ngPipeline->IsFormRender()) {
+    if ((ngPipeline != nullptr) && (ngPipeline->IsFormRender())) {
         eventInfo.SetWindowId(static_cast<int32_t>(GetWindowId()));
     }
 
