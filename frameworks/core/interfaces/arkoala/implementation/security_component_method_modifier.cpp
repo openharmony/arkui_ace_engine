@@ -21,9 +21,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void LayoutDirectionImpl(Ark_NativePointer node, Ark_Int32 value) {
         }
-        void PositionImpl(Ark_NativePointer node, const Position* value) {
+        void PositionImpl(Ark_NativePointer node, const Ark_Position* value) {
         }
-        void MarkAnchorImpl(Ark_NativePointer node, const Position* value) {
+        void MarkAnchorImpl(Ark_NativePointer node, const Ark_Position* value) {
         }
         void OffsetImpl(Ark_NativePointer node, const Type_SecurityComponentMethod_offset_Arg0* value) {
         }
@@ -59,9 +59,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void HeightImpl(Ark_NativePointer node, const Ark_Length* value) {
         }
-        void SizeImpl(Ark_NativePointer node, const SizeOptions* value) {
+        void SizeImpl(Ark_NativePointer node, const Ark_SizeOptions* value) {
         }
-        void ConstraintSizeImpl(Ark_NativePointer node, const ConstraintSizeOptions* value) {
+        void ConstraintSizeImpl(Ark_NativePointer node, const Ark_ConstraintSizeOptions* value) {
         }
     } // SecurityComponentMethodModifier
     const GENERATED_ArkUISecurityComponentMethodModifier* GetSecurityComponentMethodModifier() {

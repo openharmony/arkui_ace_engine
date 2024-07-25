@@ -19,7 +19,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     namespace PasteButtonInterfaceModifier {
         void _setPasteButtonOptions_Impl(Ark_NativePointer node) {
         }
-        void _setPasteButtonOptions_PasteButtonOptionsImpl(Ark_NativePointer node, const PasteButtonOptions* options) {
+        void _setPasteButtonOptions_PasteButtonOptionsImpl(Ark_NativePointer node, const Ark_PasteButtonOptions* options) {
         }
     } // PasteButtonInterfaceModifier
     namespace PasteButtonAttributeModifier {

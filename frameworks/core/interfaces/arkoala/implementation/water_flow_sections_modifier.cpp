@@ -23,13 +23,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         Ark_NativePointer GetFinalizerImpl() {
             return 0;
         }
-        Ark_Boolean SpliceImpl(WaterFlowSectionsPeer* peer, const Ark_Number* start, const Opt_Ark_Number* deleteCount, const Opt_Array_SectionOptions* sections) {
+        Ark_Boolean SpliceImpl(WaterFlowSectionsPeer* peer, const Ark_Number* start, const Opt_Number* deleteCount, const Opt_Array_SectionOptions* sections) {
             return 0;
         }
-        Ark_Boolean PushImpl(WaterFlowSectionsPeer* peer, const SectionOptions* section) {
+        Ark_Boolean PushImpl(WaterFlowSectionsPeer* peer, const Ark_SectionOptions* section) {
             return 0;
         }
-        Ark_Boolean UpdateImpl(WaterFlowSectionsPeer* peer, const Ark_Number* sectionIndex, const SectionOptions* section) {
+        Ark_Boolean UpdateImpl(WaterFlowSectionsPeer* peer, const Ark_Number* sectionIndex, const Ark_SectionOptions* section) {
             return 0;
         }
         Ark_NativePointer ValuesImpl(WaterFlowSectionsPeer* peer) {

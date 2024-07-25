@@ -41,7 +41,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier) {
         }
-        void DateTimeOptionsImpl(Ark_NativePointer node, const Opt_Ark_CustomObject* dateTimeOptions) {
+        void DateTimeOptionsImpl(Ark_NativePointer node, const Opt_CustomObject* dateTimeOptions) {
         }
     } // TextClockAttributeModifier
     const GENERATED_ArkUITextClockModifier* GetTextClockModifier() {

@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     namespace WaterFlowAttributeModifier {
         void ColumnsTemplateImpl(Ark_NativePointer node, const Ark_String* value) {
         }
-        void ItemConstraintSizeImpl(Ark_NativePointer node, const ConstraintSizeOptions* value) {
+        void ItemConstraintSizeImpl(Ark_NativePointer node, const Ark_ConstraintSizeOptions* value) {
         }
         void RowsTemplateImpl(Ark_NativePointer node, const Ark_String* value) {
         }
@@ -33,7 +33,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void LayoutDirectionImpl(Ark_NativePointer node, Ark_Int32 value) {
         }
-        void NestedScrollImpl(Ark_NativePointer node, const NestedScrollOptions* value) {
+        void NestedScrollImpl(Ark_NativePointer node, const Ark_NestedScrollOptions* value) {
         }
         void EnableScrollInteractionImpl(Ark_NativePointer node, Ark_Boolean value) {
         }

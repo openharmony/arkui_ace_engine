@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace SymbolSpanInterfaceModifier {
-        void _setSymbolSpanOptionsImpl(Ark_NativePointer node, const Ark_CustomObject* value) {
+        void _setSymbolSpanOptionsImpl(Ark_NativePointer node, const Ark_Resource* value) {
         }
     } // SymbolSpanInterfaceModifier
     namespace SymbolSpanAttributeModifier {

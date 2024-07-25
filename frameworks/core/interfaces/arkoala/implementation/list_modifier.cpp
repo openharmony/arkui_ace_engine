@@ -31,7 +31,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void EdgeEffectImpl(Ark_NativePointer node, Ark_Int32 value, const Opt_EdgeEffectOptions* options) {
         }
-        void FadingEdgeImpl(Ark_NativePointer node, const Opt_Ark_Boolean* value) {
+        void FadingEdgeImpl(Ark_NativePointer node, const Opt_Boolean* value) {
         }
         void ContentStartOffsetImpl(Ark_NativePointer node, const Ark_Number* value) {
         }
@@ -47,13 +47,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void ChainAnimationImpl(Ark_NativePointer node, Ark_Boolean value) {
         }
-        void ChainAnimationOptionsImpl(Ark_NativePointer node, const ChainAnimationOptions* value) {
+        void ChainAnimationOptionsImpl(Ark_NativePointer node, const Ark_ChainAnimationOptions* value) {
         }
         void StickyImpl(Ark_NativePointer node, Ark_Int32 value) {
         }
         void ScrollSnapAlignImpl(Ark_NativePointer node, Ark_Int32 value) {
         }
-        void NestedScrollImpl(Ark_NativePointer node, const NestedScrollOptions* value) {
+        void NestedScrollImpl(Ark_NativePointer node, const Ark_NestedScrollOptions* value) {
         }
         void EnableScrollInteractionImpl(Ark_NativePointer node, Ark_Boolean value) {
         }

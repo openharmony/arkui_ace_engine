@@ -27,9 +27,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void ShowPreviousImpl(SwiperControllerPeer* peer) {
         }
-        void ChangeIndexImpl(SwiperControllerPeer* peer, const Ark_Number* index, const Opt_Ark_Boolean* useAnimation) {
+        void ChangeIndexImpl(SwiperControllerPeer* peer, const Ark_Number* index, const Opt_Boolean* useAnimation) {
         }
-        void FinishAnimationImpl(SwiperControllerPeer* peer, const Opt_Ark_Function* callback) {
+        void FinishAnimationImpl(SwiperControllerPeer* peer, const Opt_Function* callback) {
         }
     } // SwiperControllerModifier
     const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor() {

@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void FontColorImpl(Ark_NativePointer node, const ResourceColor* value) {
         }
-        void SearchIconImpl(Ark_NativePointer node, const IconOptions* value) {
+        void SearchIconImpl(Ark_NativePointer node, const Type_SearchAttribute_searchIcon_Arg0* value) {
         }
         void CancelButtonImpl(Ark_NativePointer node, const Type_SearchAttribute_cancelButton_Arg0* value) {
         }
@@ -37,7 +37,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void SelectedBackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value) {
         }
-        void CaretStyleImpl(Ark_NativePointer node, const CaretStyle* value) {
+        void CaretStyleImpl(Ark_NativePointer node, const Ark_CaretStyle* value) {
         }
         void PlaceholderColorImpl(Ark_NativePointer node, const ResourceColor* value) {
         }
@@ -77,7 +77,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void CustomKeyboardImpl(Ark_NativePointer node, const CustomBuilder* value, const Opt_KeyboardOptions* options) {
         }
-        void DecorationImpl(Ark_NativePointer node, const TextDecorationOptions* value) {
+        void DecorationImpl(Ark_NativePointer node, const Ark_TextDecorationOptions* value) {
         }
         void LetterSpacingImpl(Ark_NativePointer node, const Type_SearchAttribute_letterSpacing_Arg0* value) {
         }

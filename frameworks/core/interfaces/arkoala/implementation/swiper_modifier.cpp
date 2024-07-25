@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void IndicatorImpl(Ark_NativePointer node, const Type_SwiperAttribute_indicator_Arg0* value) {
         }
-        void DisplayArrowImpl(Ark_NativePointer node, const Type_SwiperAttribute_displayArrow_Arg0* value, const Opt_Ark_Boolean* isHoverShow) {
+        void DisplayArrowImpl(Ark_NativePointer node, const Type_SwiperAttribute_displayArrow_Arg0* value, const Opt_Boolean* isHoverShow) {
         }
         void LoopImpl(Ark_NativePointer node, Ark_Boolean value) {
         }
@@ -43,7 +43,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void CachedCountImpl(Ark_NativePointer node, const Ark_Number* value) {
         }
-        void DisplayCountImpl(Ark_NativePointer node, const Type_SwiperAttribute_displayCount_Arg0* value, const Opt_Ark_Boolean* swipeByGroup) {
+        void DisplayCountImpl(Ark_NativePointer node, const Type_SwiperAttribute_displayCount_Arg0* value, const Opt_Boolean* swipeByGroup) {
         }
         void EffectModeImpl(Ark_NativePointer node, Ark_Int32 value) {
         }
@@ -55,9 +55,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void IndicatorStyleImpl(Ark_NativePointer node, const Opt_IndicatorStyle* value) {
         }
-        void PrevMarginImpl(Ark_NativePointer node, const Ark_Length* value, const Opt_Ark_Boolean* ignoreBlank) {
+        void PrevMarginImpl(Ark_NativePointer node, const Ark_Length* value, const Opt_Boolean* ignoreBlank) {
         }
-        void NextMarginImpl(Ark_NativePointer node, const Ark_Length* value, const Opt_Ark_Boolean* ignoreBlank) {
+        void NextMarginImpl(Ark_NativePointer node, const Ark_Length* value, const Opt_Boolean* ignoreBlank) {
         }
         void OnAnimationStartImpl(Ark_NativePointer node, Ark_Function event) {
         }
@@ -67,7 +67,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void NestedScrollImpl(Ark_NativePointer node, Ark_Int32 value) {
         }
-        void CustomContentTransitionImpl(Ark_NativePointer node, const SwiperContentAnimatedTransition* transition) {
+        void CustomContentTransitionImpl(Ark_NativePointer node, const Ark_SwiperContentAnimatedTransition* transition) {
         }
         void OnContentDidScrollImpl(Ark_NativePointer node, Ark_Function handler) {
         }

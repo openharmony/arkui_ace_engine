@@ -13,27 +13,41 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "base/log/log_wrapper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace CommonMethodModifier {
         void WidthImpl(Ark_NativePointer node, const Ark_Length* value) {
+            auto* frameNode = reinterpret_cast<FrameNode*>(node);
+            CHECK_NULL_VOID(frameNode);
+            auto result = Converter::ConvertOrDefault(*value, CalcLength());
+            ViewAbstract::SetWidth(frameNode, result);
         }
         void HeightImpl(Ark_NativePointer node, const Ark_Length* value) {
+            auto* frameNode = reinterpret_cast<FrameNode*>(node);
+            CHECK_NULL_VOID(frameNode);
+            auto result = Converter::ConvertOrDefault(*value, CalcLength());
+            ViewAbstract::SetHeight(frameNode, result);
         }
         void DrawModifierImpl(Ark_NativePointer node, const Type_CommonMethod_drawModifier_Arg0* modifier) {
         }
         void CustomPropertyImpl(Ark_NativePointer node, const Ark_String* name, const Opt_Object* value) {
         }
-        void ExpandSafeAreaImpl(Ark_NativePointer node, const Opt_Array_Ark_SafeAreaType* types, const Opt_Array_Ark_SafeAreaEdge* edges) {
+        void ExpandSafeAreaImpl(Ark_NativePointer node, const Opt_Array_SafeAreaType* types, const Opt_Array_SafeAreaEdge* edges) {
         }
         void ResponseRegionImpl(Ark_NativePointer node, const Type_CommonMethod_responseRegion_Arg0* value) {
         }
         void MouseResponseRegionImpl(Ark_NativePointer node, const Type_CommonMethod_mouseResponseRegion_Arg0* value) {
         }
-        void SizeImpl(Ark_NativePointer node, const SizeOptions* value) {
+        void SizeImpl(Ark_NativePointer node, const Ark_SizeOptions* value) {
         }
-        void ConstraintSizeImpl(Ark_NativePointer node, const ConstraintSizeOptions* value) {
+        void ConstraintSizeImpl(Ark_NativePointer node, const Ark_ConstraintSizeOptions* value) {
         }
         void TouchableImpl(Ark_NativePointer node, Ark_Boolean value) {
         }
@@ -50,10 +64,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void BackgroundImpl(Ark_NativePointer node, const CustomBuilder* builder, const Opt_Type_CommonMethod_background_Arg1* options) {
         }
         void BackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value) {
+            auto frameNode = reinterpret_cast<FrameNode *>(node);
+            auto color = Converter::OptConvert<Color>(*value);
+            if (color) {
+                ViewAbstract::SetBackgroundColor(frameNode, color.value());
+            } else {
+                LOGI("#### CommonMethod::BackgroundColor impl: color is empty");
+            }
         }
-        void PixelRoundImpl(Ark_NativePointer node, const PixelRoundPolicy* value) {
+        void PixelRoundImpl(Ark_NativePointer node, const Ark_PixelRoundPolicy* value) {
         }
-        void BackgroundImageImpl(Ark_NativePointer node, const Type_CommonMethod_backgroundImage_Arg0* src, const Opt_Ark_ImageRepeat* repeat) {
+        void BackgroundImageImpl(Ark_NativePointer node, const Type_CommonMethod_backgroundImage_Arg0* src, const Opt_ImageRepeat* repeat) {
         }
         void BackgroundImageSizeImpl(Ark_NativePointer node, const Type_CommonMethod_backgroundImageSize_Arg0* value) {
         }
@@ -61,11 +82,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void BackgroundBlurStyleImpl(Ark_NativePointer node, Ark_Int32 value, const Opt_BackgroundBlurStyleOptions* options) {
         }
-        void BackgroundEffectImpl(Ark_NativePointer node, const BackgroundEffectOptions* options) {
+        void BackgroundEffectImpl(Ark_NativePointer node, const Ark_BackgroundEffectOptions* options) {
         }
-        void BackgroundImageResizableImpl(Ark_NativePointer node, const ResizableOptions* value) {
+        void BackgroundImageResizableImpl(Ark_NativePointer node, const Ark_ResizableOptions* value) {
         }
-        void ForegroundEffectImpl(Ark_NativePointer node, const ForegroundEffectOptions* options) {
+        void ForegroundEffectImpl(Ark_NativePointer node, const Ark_ForegroundEffectOptions* options) {
         }
         void VisualEffectImpl(Ark_NativePointer node, const Ark_CustomObject* effect) {
         }
@@ -79,7 +100,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void OpacityImpl(Ark_NativePointer node, const Type_CommonMethod_opacity_Arg0* value) {
         }
-        void BorderImpl(Ark_NativePointer node, const BorderOptions* value) {
+        void BorderImpl(Ark_NativePointer node, const Ark_BorderOptions* value) {
         }
         void BorderStyleImpl(Ark_NativePointer node, const Type_CommonMethod_borderStyle_Arg0* value) {
         }
@@ -89,9 +110,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void BorderRadiusImpl(Ark_NativePointer node, const Type_CommonMethod_borderRadius_Arg0* value) {
         }
-        void BorderImageImpl(Ark_NativePointer node, const BorderImageOption* value) {
+        void BorderImageImpl(Ark_NativePointer node, const Ark_BorderImageOption* value) {
         }
-        void OutlineImpl(Ark_NativePointer node, const OutlineOptions* value) {
+        void OutlineImpl(Ark_NativePointer node, const Ark_OutlineOptions* value) {
         }
         void OutlineStyleImpl(Ark_NativePointer node, const Type_CommonMethod_outlineStyle_Arg0* value) {
         }
@@ -103,9 +124,82 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void ForegroundColorImpl(Ark_NativePointer node, const Type_CommonMethod_foregroundColor_Arg0* value) {
         }
-        void OnClickImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnClickImpl(Ark_NativePointer node, Ark_Function callback) {
+            auto frameNode = reinterpret_cast<FrameNode *>(node);
+            CHECK_NULL_VOID(frameNode);
+            auto onEvent = [frameNode](GestureEvent& info) {
+                Ark_ClickEvent onClick;
+
+                Offset globalOffset = info.GetGlobalLocation();
+                Offset localOffset = info.GetLocalLocation();
+                Offset screenOffset = info.GetScreenLocation();
+
+                onClick.axisHorizontal.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+                onClick.axisVertical.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+                onClick.displayX.tag = Ark_Tag::ARK_TAG_FLOAT32;
+                onClick.displayX.f32 = static_cast<float>(
+                        PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
+
+                onClick.displayY.tag = Ark_Tag::ARK_TAG_FLOAT32;
+                onClick.displayY.f32 = static_cast<float>(
+                        PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
+
+                onClick.pressure.tag = Ark_Tag::ARK_TAG_FLOAT32;
+                onClick.pressure.f32 = 0.0f;
+                onClick.preventDefault.id = 0;
+
+                onClick.screenX.tag = Ark_Tag::ARK_TAG_FLOAT32;
+                onClick.screenX.f32 = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+
+                onClick.screenY.tag = Ark_Tag::ARK_TAG_FLOAT32;
+                onClick.screenY.f32 = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+
+                onClick.source = static_cast<int32_t>(info.GetSourceDevice());
+
+                onClick.sourceTool = 0;
+                onClick.target.area.globalPosition.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+                onClick.target.area.globalPosition.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+                onClick.target.area.height.type = 0;
+                onClick.target.area.height.unit = 1;
+                onClick.target.area.height.value = 0;
+                onClick.target.area.width.type = 0;
+                onClick.target.area.width.unit = 1;
+                onClick.target.area.width.value = 0;
+                onClick.target.area.position.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+                onClick.target.area.position.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+
+                onClick.tiltX.tag = Ark_Tag::ARK_TAG_FLOAT32;
+                onClick.tiltX.f32 = 0;
+                onClick.tiltY.tag = Ark_Tag::ARK_TAG_FLOAT32;
+                onClick.tiltY.f32 = 0;
+                
+                onClick.timestamp.tag = Ark_Tag::ARK_TAG_FLOAT32;
+                onClick.timestamp.f32 = static_cast<float>(info.GetTimeStamp().time_since_epoch().count());
+
+                onClick.windowX.tag = Ark_Tag::ARK_TAG_FLOAT32;
+                onClick.windowX.f32 = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+
+                onClick.windowY.tag = Ark_Tag::ARK_TAG_FLOAT32;
+                onClick.windowY.f32 = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+
+                onClick.x.tag = Ark_Tag::ARK_TAG_FLOAT32;
+                onClick.x.f32 = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
+
+                onClick.y.tag = Ark_Tag::ARK_TAG_FLOAT32;
+                onClick.y.f32 = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
+
+                GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onClick(frameNode->GetId(), onClick);
+            };
+
+            if (frameNode->GetTag() == "Span") {
+                SpanModelNG::SetOnClick(reinterpret_cast<UINode *>(node), std::move(onEvent));
+            } else {
+                ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
+            }
         }
         void OnHoverImpl(Ark_NativePointer node, Ark_Function event) {
+        }
+        void OnAccessibilityHoverImpl(Ark_NativePointer node, Ark_Function callback) {
         }
         void HoverEffectImpl(Ark_NativePointer node, Ark_Int32 value) {
         }
@@ -131,29 +225,29 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void FocusOnTouchImpl(Ark_NativePointer node, Ark_Boolean value) {
         }
-        void FocusBoxImpl(Ark_NativePointer node, const FocusBoxStyle* style) {
+        void FocusBoxImpl(Ark_NativePointer node, const Ark_FocusBoxStyle* style) {
         }
-        void FocusScopeIdImpl(Ark_NativePointer node, const Ark_String* id, const Opt_Ark_Boolean* isGroup) {
+        void FocusScopeIdImpl(Ark_NativePointer node, const Ark_String* id, const Opt_Boolean* isGroup) {
         }
-        void FocusScopePriorityImpl(Ark_NativePointer node, const Ark_String* scopeId, const Opt_Ark_FocusPriority* priority) {
+        void FocusScopePriorityImpl(Ark_NativePointer node, const Ark_String* scopeId, const Opt_FocusPriority* priority) {
         }
-        void AnimationImpl(Ark_NativePointer node, const AnimateParam* value) {
+        void AnimationImpl(Ark_NativePointer node, const Ark_AnimateParam* value) {
         }
         void Transition_TransitionOptionsTransitionEffectImpl(Ark_NativePointer node, const Type_CommonMethod_transition_Arg0* value) {
         }
-        void Transition_TransitionEffect_TransitionFinishCallbackundefinedImpl(Ark_NativePointer node, const TransitionEffect* effect, const Opt_Ark_Function* onFinish) {
+        void Transition_TransitionEffect_TransitionFinishCallbackundefinedImpl(Ark_NativePointer node, const Ark_TransitionEffect* effect, const Opt_Function* onFinish) {
         }
-        void GestureImpl(Ark_NativePointer node, const GestureType* gesture, const Opt_Ark_GestureMask* mask) {
+        void GestureImpl(Ark_NativePointer node, const Ark_GestureType* gesture, const Opt_GestureMask* mask) {
         }
-        void PriorityGestureImpl(Ark_NativePointer node, const GestureType* gesture, const Opt_Ark_GestureMask* mask) {
+        void PriorityGestureImpl(Ark_NativePointer node, const Ark_GestureType* gesture, const Opt_GestureMask* mask) {
         }
-        void ParallelGestureImpl(Ark_NativePointer node, const GestureType* gesture, const Opt_Ark_GestureMask* mask) {
+        void ParallelGestureImpl(Ark_NativePointer node, const Ark_GestureType* gesture, const Opt_GestureMask* mask) {
         }
         void BlurImpl(Ark_NativePointer node, const Ark_Number* value, const Opt_BlurOptions* options) {
         }
-        void LinearGradientBlurImpl(Ark_NativePointer node, const Ark_Number* value, const LinearGradientBlurOptions* options) {
+        void LinearGradientBlurImpl(Ark_NativePointer node, const Ark_Number* value, const Ark_LinearGradientBlurOptions* options) {
         }
-        void MotionBlurImpl(Ark_NativePointer node, const MotionBlurOptions* value) {
+        void MotionBlurImpl(Ark_NativePointer node, const Ark_MotionBlurOptions* value) {
         }
         void BrightnessImpl(Ark_NativePointer node, const Ark_Number* value) {
         }
@@ -183,15 +277,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void FreezeImpl(Ark_NativePointer node, Ark_Boolean value) {
         }
-        void TranslateImpl(Ark_NativePointer node, const TranslateOptions* value) {
+        void TranslateImpl(Ark_NativePointer node, const Ark_TranslateOptions* value) {
         }
-        void ScaleImpl(Ark_NativePointer node, const ScaleOptions* value) {
+        void ScaleImpl(Ark_NativePointer node, const Ark_ScaleOptions* value) {
         }
         void GridSpanImpl(Ark_NativePointer node, const Ark_Number* value) {
         }
         void GridOffsetImpl(Ark_NativePointer node, const Ark_Number* value) {
         }
-        void RotateImpl(Ark_NativePointer node, const RotateOptions* value) {
+        void RotateImpl(Ark_NativePointer node, const Ark_RotateOptions* value) {
         }
         void TransformImpl(Ark_NativePointer node, const Ark_CustomObject* value) {
         }
@@ -235,9 +329,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void UseSizeTypeImpl(Ark_NativePointer node, const Type_CommonMethod_useSizeType_Arg0* value) {
         }
-        void AlignRules_AlignRuleOptionImpl(Ark_NativePointer node, const AlignRuleOption* value) {
+        void AlignRules_AlignRuleOptionImpl(Ark_NativePointer node, const Ark_AlignRuleOption* value) {
         }
-        void AlignRules_LocalizedAlignRuleOptionsImpl(Ark_NativePointer node, const LocalizedAlignRuleOptions* alignRule) {
+        void AlignRules_LocalizedAlignRuleOptionsImpl(Ark_NativePointer node, const Ark_LocalizedAlignRuleOptions* alignRule) {
         }
         void ChainModeImpl(Ark_NativePointer node, Ark_Int32 direction, Ark_Int32 style) {
         }
@@ -263,7 +357,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void DragPreviewImpl(Ark_NativePointer node, const Type_CommonMethod_dragPreview_Arg0* value) {
         }
-        void DragPreviewOptionsImpl(Ark_NativePointer node, const DragPreviewOptions* value, const Opt_DragInteractionOptions* options) {
+        void DragPreviewOptionsImpl(Ark_NativePointer node, const Ark_DragPreviewOptions* value, const Opt_DragInteractionOptions* options) {
         }
         void OnPreDragImpl(Ark_NativePointer node, Ark_Function callback) {
         }
@@ -275,11 +369,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void RadialGradientImpl(Ark_NativePointer node, const Type_CommonMethod_radialGradient_Arg0* value) {
         }
-        void MotionPathImpl(Ark_NativePointer node, const MotionPathOptions* value) {
+        void MotionPathImpl(Ark_NativePointer node, const Ark_MotionPathOptions* value) {
         }
         void ShadowImpl(Ark_NativePointer node, const Type_CommonMethod_shadow_Arg0* value) {
         }
-        void BlendModeImpl(Ark_NativePointer node, Ark_Int32 value, const Opt_Ark_BlendApplyType* type) {
+        void BlendModeImpl(Ark_NativePointer node, Ark_Int32 value, const Opt_BlendApplyType* type) {
         }
         void Clip_booleanImpl(Ark_NativePointer node, Ark_Boolean value) {
         }
@@ -311,43 +405,43 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void BindContextMenu_boolean_CustomBuilder_ContextMenuOptionsImpl(Ark_NativePointer node, Ark_Boolean isShown, const CustomBuilder* content, const Opt_ContextMenuOptions* options) {
         }
-        void BindContentCover_booleanundefined_CustomBuilder_ModalTransitionImpl(Ark_NativePointer node, const Opt_Ark_Boolean* isShow, const CustomBuilder* builder, const Opt_Ark_ModalTransition* type) {
+        void BindContentCover_booleanundefined_CustomBuilder_ModalTransitionImpl(Ark_NativePointer node, const Opt_Boolean* isShow, const CustomBuilder* builder, const Opt_ModalTransition* type) {
         }
-        void BindContentCover_booleanundefined_CustomBuilder_ContentCoverOptionsImpl(Ark_NativePointer node, const Opt_Ark_Boolean* isShow, const CustomBuilder* builder, const Opt_ContentCoverOptions* options) {
+        void BindContentCover_booleanundefined_CustomBuilder_ContentCoverOptionsImpl(Ark_NativePointer node, const Opt_Boolean* isShow, const CustomBuilder* builder, const Opt_ContentCoverOptions* options) {
         }
-        void BindSheetImpl(Ark_NativePointer node, const Opt_Ark_Boolean* isShow, const CustomBuilder* builder, const Opt_SheetOptions* options) {
+        void BindSheetImpl(Ark_NativePointer node, const Opt_Boolean* isShow, const CustomBuilder* builder, const Opt_SheetOptions* options) {
         }
-        void StateStylesImpl(Ark_NativePointer node, const StateStyles* value) {
+        void StateStylesImpl(Ark_NativePointer node, const Ark_StateStyles* value) {
         }
         void RestoreIdImpl(Ark_NativePointer node, const Ark_Number* value) {
         }
-        void OnVisibleAreaChangeImpl(Ark_NativePointer node, const Array_Ark_Number* ratios, Ark_Function event) {
+        void OnVisibleAreaChangeImpl(Ark_NativePointer node, const Array_Number* ratios, Ark_Function event) {
         }
         void SphericalEffectImpl(Ark_NativePointer node, const Ark_Number* value) {
         }
         void LightUpEffectImpl(Ark_NativePointer node, const Ark_Number* value) {
         }
-        void PixelStretchEffectImpl(Ark_NativePointer node, const PixelStretchEffectOptions* options) {
+        void PixelStretchEffectImpl(Ark_NativePointer node, const Ark_PixelStretchEffectOptions* options) {
         }
-        void KeyboardShortcutImpl(Ark_NativePointer node, const Type_CommonMethod_keyboardShortcut_Arg0* value, const Array_Ark_ModifierKey* keys, const Opt_Ark_Function* action) {
+        void KeyboardShortcutImpl(Ark_NativePointer node, const Type_CommonMethod_keyboardShortcut_Arg0* value, const Array_ModifierKey* keys, const Opt_Function* action) {
         }
         void AccessibilityGroupImpl(Ark_NativePointer node, Ark_Boolean value) {
         }
         void AccessibilityText_stringImpl(Ark_NativePointer node, const Ark_String* value) {
         }
-        void AccessibilityText_ResourceImpl(Ark_NativePointer node, const Ark_CustomObject* text) {
+        void AccessibilityText_ResourceImpl(Ark_NativePointer node, const Ark_Resource* text) {
         }
         void AccessibilityTextHintImpl(Ark_NativePointer node, const Ark_String* value) {
         }
         void AccessibilityDescription_stringImpl(Ark_NativePointer node, const Ark_String* value) {
         }
-        void AccessibilityDescription_ResourceImpl(Ark_NativePointer node, const Ark_CustomObject* description) {
+        void AccessibilityDescription_ResourceImpl(Ark_NativePointer node, const Ark_Resource* description) {
         }
         void AccessibilityLevelImpl(Ark_NativePointer node, const Ark_String* value) {
         }
         void AccessibilityVirtualNodeImpl(Ark_NativePointer node, const CustomBuilder* builder) {
         }
-        void ObscuredImpl(Ark_NativePointer node, const Array_Ark_ObscuredReasons* reasons) {
+        void ObscuredImpl(Ark_NativePointer node, const Array_ObscuredReasons* reasons) {
         }
         void ReuseIdImpl(Ark_NativePointer node, const Ark_String* id) {
         }
@@ -355,7 +449,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void GestureModifierImpl(Ark_NativePointer node, const Ark_Materialized* modifier) {
         }
-        void BackgroundBrightnessImpl(Ark_NativePointer node, const BackgroundBrightnessOptions* params) {
+        void BackgroundBrightnessImpl(Ark_NativePointer node, const Ark_BackgroundBrightnessOptions* params) {
         }
         void OnGestureJudgeBeginImpl(Ark_NativePointer node, Ark_Function callback) {
         }
@@ -417,6 +511,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::ForegroundColorImpl,
             CommonMethodModifier::OnClickImpl,
             CommonMethodModifier::OnHoverImpl,
+            CommonMethodModifier::OnAccessibilityHoverImpl,
             CommonMethodModifier::HoverEffectImpl,
             CommonMethodModifier::OnMouseImpl,
             CommonMethodModifier::OnTouchImpl,

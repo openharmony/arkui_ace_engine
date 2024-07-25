@@ -47,9 +47,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void OnWillHideImpl(Ark_NativePointer node, Ark_Function callback) {
         }
-        void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node, const Opt_Array_Ark_LayoutSafeAreaType* types, const Opt_Array_Ark_LayoutSafeAreaEdge* edges) {
+        void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node, const Opt_Array_LayoutSafeAreaType* types, const Opt_Array_LayoutSafeAreaEdge* edges) {
         }
-        void SystemBarStyleImpl(Ark_NativePointer node, const Opt_Ark_CustomObject* style) {
+        void SystemBarStyleImpl(Ark_NativePointer node, const Opt_CustomObject* style) {
         }
     } // NavDestinationAttributeModifier
     const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier() {

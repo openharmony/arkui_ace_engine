@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         Ark_NativePointer GetFinalizerImpl() {
             return 0;
         }
-        void HandleFileListImpl(FileSelectorResultPeer* peer, const Array_Ark_String* fileList) {
+        void HandleFileListImpl(FileSelectorResultPeer* peer, const Array_String* fileList) {
         }
     } // FileSelectorResultModifier
     const GENERATED_ArkUIFileSelectorResultAccessor* GetFileSelectorResultAccessor() {

@@ -25,11 +25,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void LoopImpl(Ark_NativePointer node, Ark_Boolean value) {
         }
-        void DisappearTextStyleImpl(Ark_NativePointer node, const PickerTextStyle* value) {
+        void DisappearTextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value) {
         }
-        void TextStyleImpl(Ark_NativePointer node, const PickerTextStyle* value) {
+        void TextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value) {
         }
-        void SelectedTextStyleImpl(Ark_NativePointer node, const PickerTextStyle* value) {
+        void SelectedTextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value) {
         }
         void DateTimeOptionsImpl(Ark_NativePointer node, const Ark_CustomObject* value) {
         }

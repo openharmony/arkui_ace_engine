@@ -17,13 +17,13 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace SideBarContainerInterfaceModifier {
-        void _setSideBarContainerOptionsImpl(Ark_NativePointer node, const Opt_Ark_SideBarContainerType* type) {
+        void _setSideBarContainerOptionsImpl(Ark_NativePointer node, const Opt_SideBarContainerType* type) {
         }
     } // SideBarContainerInterfaceModifier
     namespace SideBarContainerAttributeModifier {
         void ShowSideBarImpl(Ark_NativePointer node, Ark_Boolean value) {
         }
-        void ControlButtonImpl(Ark_NativePointer node, const ButtonStyle* value) {
+        void ControlButtonImpl(Ark_NativePointer node, const Ark_ButtonStyle* value) {
         }
         void ShowControlButtonImpl(Ark_NativePointer node, Ark_Boolean value) {
         }

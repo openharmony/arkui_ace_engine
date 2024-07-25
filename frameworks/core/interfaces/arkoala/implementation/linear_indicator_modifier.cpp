@@ -17,15 +17,15 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace LinearIndicatorInterfaceModifier {
-        void _setLinearIndicatorOptionsImpl(Ark_NativePointer node, const Opt_Ark_Number* count, const Opt_LinearIndicatorController* controller) {
+        void _setLinearIndicatorOptionsImpl(Ark_NativePointer node, const Opt_Number* count, const Opt_LinearIndicatorController* controller) {
         }
     } // LinearIndicatorInterfaceModifier
     namespace LinearIndicatorAttributeModifier {
         void IndicatorStyleImpl(Ark_NativePointer node, const Opt_LinearIndicatorStyle* style) {
         }
-        void IndicatorLoopImpl(Ark_NativePointer node, const Opt_Ark_Boolean* loop) {
+        void IndicatorLoopImpl(Ark_NativePointer node, const Opt_Boolean* loop) {
         }
-        void OnChangeImpl(Ark_NativePointer node, const Opt_Ark_Function* callback) {
+        void OnChangeImpl(Ark_NativePointer node, const Opt_Function* callback) {
         }
     } // LinearIndicatorAttributeModifier
     const GENERATED_ArkUILinearIndicatorModifier* GetLinearIndicatorModifier() {

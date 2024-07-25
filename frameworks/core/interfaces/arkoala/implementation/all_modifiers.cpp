@@ -54,6 +54,7 @@ namespace OHOS::Ace::NG {
         void SetCustomCallback(Ark_VMContext context, Ark_NodeHandle node, Ark_Int32 callback);
         Ark_Int32 MeasureLayoutAndDraw(Ark_VMContext vmContext, Ark_NodeHandle rootPtr);
         Ark_Int32 MeasureNode(Ark_VMContext vmContext, Ark_NodeHandle node, Ark_Float32* data);
+        Ark_Int32 LayoutNode(Ark_VMContext vmContext, Ark_NodeHandle node, Ark_Float32 (*data)[2]);
         Ark_Int32 DrawNode(Ark_VMContext vmContext, Ark_NodeHandle node, Ark_Float32* data);
         void SetAttachNodePtr(Ark_NodeHandle node, void* value);
         void* GetAttachNodePtr(Ark_NodeHandle node);
@@ -68,9 +69,14 @@ namespace OHOS::Ace::NG {
         void SetAlignment(Ark_NodeHandle node, Ark_Int32 value);
         Ark_Int32 GetAlignment(Ark_NodeHandle node);
         void GetLayoutConstraint(Ark_NodeHandle node, Ark_Int32* value);
+        Ark_Int32 IndexerChecker(Ark_VMContext vmContext, Ark_NodeHandle nodePtr);
+        void SetRangeUpdater(Ark_NodeHandle nodePtr, Ark_Int32 updaterId);
+        void SetLazyItemIndexer(Ark_VMContext vmContext, Ark_NodeHandle nodePtr, Ark_Int32 indexerId);
         Ark_PipelineContext GetPipelineContext(Ark_NodeHandle node);
         void SetVsyncCallback(Ark_VMContext vmContext, Ark_PipelineContext pipelineContext, Ark_Int32 callbackId);
         void UnblockVsyncWait(Ark_VMContext vmContext, Ark_PipelineContext pipelineContext);
+        void CallContinuation(Ark_Int32 continuationId, Ark_Int32 argCount, ArkUIEventCallbackArg* args);
+        void SetChildTotalCount(Ark_NodeHandle node, Ark_Int32 totalCount);
         void ShowCrash(Ark_CharPtr message);
     } // namespace OHOS::Ace::NG::ApiImpl
 
@@ -86,12 +92,16 @@ namespace OHOS::Ace::NG {
         void SendAsyncEvent(GENERATED_Ark_NodeEvent* event) {
             NodeEvent::SendArkUIAsyncEvent(reinterpret_cast<ArkUINodeEvent*>(event));
         }
+        void CallContinuation(Ark_Int32 continuationId, Ark_Int32 argCount, GENERATED_Ark_EventCallbackArg* args) {
+            ApiImpl::CallContinuation(continuationId, argCount, reinterpret_cast<ArkUIEventCallbackArg*>(args));
+        }
     }
 
     namespace GeneratedEvents {
       const GENERATED_ArkUIEventsAPI* GENERATED_GetArkUiEventsAPI();
       void GENERATED_SetArkUiEventsAPI(const GENERATED_ArkUIEventsAPI* api);
     }
+
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -236,7 +246,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUINavDestinationContextAccessor* GetNavDestinationContextAccessor();
     const GENERATED_ArkUIPatternLockControllerAccessor* GetPatternLockControllerAccessor();
     const GENERATED_ArkUIEditMenuOptionsAccessor* GetEditMenuOptionsAccessor();
-    const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor();
     const GENERATED_ArkUIRichEditorControllerAccessor* GetRichEditorControllerAccessor();
     const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor();
     const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccessor();
@@ -429,7 +438,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetNavDestinationContextAccessor,
             GetPatternLockControllerAccessor,
             GetEditMenuOptionsAccessor,
-            GetTextMenuItemIdAccessor,
             GetRichEditorControllerAccessor,
             GetRichEditorBaseControllerAccessor,
             GetTextEditControllerExAccessor,
@@ -521,7 +529,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             OHOS::Ace::NG::ApiImpl::SetCustomCallback,
             OHOS::Ace::NG::ApiImpl::MeasureLayoutAndDraw,
             OHOS::Ace::NG::ApiImpl::MeasureNode,
-            nullptr, // OHOS::Ace::NG::ApiImpl::LayoutNode,
+            OHOS::Ace::NG::ApiImpl::LayoutNode,
             OHOS::Ace::NG::ApiImpl::DrawNode,
             OHOS::Ace::NG::ApiImpl::SetAttachNodePtr,
             OHOS::Ace::NG::ApiImpl::GetAttachNodePtr,
@@ -536,16 +544,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             OHOS::Ace::NG::ApiImpl::GetLayoutConstraint,
             OHOS::Ace::NG::ApiImpl::SetAlignment,
             OHOS::Ace::NG::ApiImpl::GetAlignment,
-            nullptr, // OHOS::Ace::NG::ApiImpl::IndexerChecker,
-            nullptr, // OHOS::Ace::NG::ApiImpl::SetRangeUpdater,
-            nullptr, // OHOS::Ace::NG::ApiImpl::SetLazyItemIndexer,
+            OHOS::Ace::NG::ApiImpl::IndexerChecker,
+            OHOS::Ace::NG::ApiImpl::SetRangeUpdater,
+            OHOS::Ace::NG::ApiImpl::SetLazyItemIndexer,
             OHOS::Ace::NG::ApiImpl::GetPipelineContext,
             OHOS::Ace::NG::ApiImpl::SetVsyncCallback,
             OHOS::Ace::NG::ApiImpl::UnblockVsyncWait,
             OHOS::Ace::NG::Bridge::CheckEvent,
             OHOS::Ace::NG::Bridge::SendAsyncEvent,
-            nullptr, // OHOS::Ace::NG::Bridge::CallContinuation,
-            nullptr, // OHOS::Ace::NG::ApiImpl::SetChildTotalCount,
+            OHOS::Ace::NG::Bridge::CallContinuation,
+            OHOS::Ace::NG::ApiImpl::SetChildTotalCount,
             OHOS::Ace::NG::ApiImpl::ShowCrash
         };
         return &extendedNodeAPIImpl;
@@ -559,9 +567,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             nullptr,
             nullptr,
             nullptr,
-            GeneratedEvents::GENERATED_GetArkUiEventsAPI,
+            OHOS::Ace::NG::GeneratedEvents::GENERATED_GetArkUiEventsAPI,
             GENERATED_GetExtendedAPI,
-            GeneratedEvents::GENERATED_SetArkUiEventsAPI
+            OHOS::Ace::NG::GeneratedEvents::GENERATED_SetArkUiEventsAPI
         };
         return &fullAPIImpl;
     }

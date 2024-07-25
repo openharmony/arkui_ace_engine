@@ -70,7 +70,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             }
         }
 
-        void MarkImpl(Ark_NativePointer node, const MarkStyle* value) {
+        void MarkImpl(Ark_NativePointer node, const Ark_MarkStyle* value) {
             auto frameNode = reinterpret_cast<FrameNode *>(node);
             CHECK_NULL_VOID(frameNode);
 
@@ -97,7 +97,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                 GetFullAPI()->getEventsAPI()->getCheckboxEventsReceiver()->onChange(frameNode->GetId(), value);
             };
 
-            CheckBoxModelNG::SetOnChange(frameNode, std::move(onEvent));
+            CheckBoxModel::GetInstance()->SetOnChange(onEvent);
         }
 
         void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier) {

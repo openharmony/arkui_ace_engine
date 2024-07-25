@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void EdgeEffectImpl(Ark_NativePointer node, Ark_Int32 edgeEffect, const Opt_EdgeEffectOptions* options) {
         }
-        void NestedScrollImpl(Ark_NativePointer node, const NestedScrollOptions* value) {
+        void NestedScrollImpl(Ark_NativePointer node, const Ark_NestedScrollOptions* value) {
         }
         void EnableScrollInteractionImpl(Ark_NativePointer node, Ark_Boolean value) {
         }

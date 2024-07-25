@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void ChangeIndexImpl(TabsControllerPeer* peer, const Ark_Number* value) {
         }
-        Ark_NativePointer PreloadItemsImpl(TabsControllerPeer* peer, const Opt_Array_Ark_Number* indices) {
+        Ark_NativePointer PreloadItemsImpl(TabsControllerPeer* peer, const Opt_Array_Number* indices) {
             return 0;
         }
     } // TabsControllerModifier

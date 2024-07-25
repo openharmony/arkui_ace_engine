@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         Ark_NativePointer GetAccessibleResourceImpl(PermissionRequestPeer* peer) {
             return 0;
         }
-        void GrantImpl(PermissionRequestPeer* peer, const Array_Ark_String* resources) {
+        void GrantImpl(PermissionRequestPeer* peer, const Array_String* resources) {
         }
     } // PermissionRequestModifier
     const GENERATED_ArkUIPermissionRequestAccessor* GetPermissionRequestAccessor() {

@@ -61,7 +61,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void FontFamilyImpl(Ark_NativePointer node, const ResourceStr* value) {
         }
-        void InputFilterImpl(Ark_NativePointer node, const ResourceStr* value, const Opt_Ark_Function* error) {
+        void InputFilterImpl(Ark_NativePointer node, const ResourceStr* value, const Opt_Function* error) {
         }
         void OnCopyImpl(Ark_NativePointer node, Ark_Function callback) {
         }
@@ -77,7 +77,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void StyleImpl(Ark_NativePointer node, const Type_TextInputAttribute_style_Arg0* value) {
         }
-        void CaretStyleImpl(Ark_NativePointer node, const CaretStyle* value) {
+        void CaretStyleImpl(Ark_NativePointer node, const Ark_CaretStyle* value) {
         }
         void SelectedBackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value) {
         }
@@ -85,7 +85,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void EnableKeyboardOnFocusImpl(Ark_NativePointer node, Ark_Boolean value) {
         }
-        void PasswordIconImpl(Ark_NativePointer node, const PasswordIcon* value) {
+        void PasswordIconImpl(Ark_NativePointer node, const Ark_PasswordIcon* value) {
         }
         void ShowErrorImpl(Ark_NativePointer node, const Opt_Type_TextInputAttribute_showError_Arg0* value) {
         }
@@ -121,7 +121,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void EnableAutoFillImpl(Ark_NativePointer node, Ark_Boolean value) {
         }
-        void DecorationImpl(Ark_NativePointer node, const TextDecorationOptions* value) {
+        void DecorationImpl(Ark_NativePointer node, const Ark_TextDecorationOptions* value) {
         }
         void LetterSpacingImpl(Ark_NativePointer node, const Type_TextInputAttribute_letterSpacing_Arg0* value) {
         }

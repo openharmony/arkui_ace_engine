@@ -17,9 +17,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace BadgeInterfaceModifier {
-        void _setBadgeOptions_BadgeParamWithNumberImpl(Ark_NativePointer node, const BadgeParamWithNumber* value) {
+        void _setBadgeOptions_BadgeParamWithNumberImpl(Ark_NativePointer node, const Ark_BadgeParamWithNumber* value) {
         }
-        void _setBadgeOptions_BadgeParamWithStringImpl(Ark_NativePointer node, const BadgeParamWithString* value) {
+        void _setBadgeOptions_BadgeParamWithStringImpl(Ark_NativePointer node, const Ark_BadgeParamWithString* value) {
         }
     } // BadgeInterfaceModifier
     const GENERATED_ArkUIBadgeModifier* GetBadgeModifier() {

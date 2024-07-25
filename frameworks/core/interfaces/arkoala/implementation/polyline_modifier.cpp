@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
     } // PolylineInterfaceModifier
     namespace PolylineAttributeModifier {
-        void PointsImpl(Ark_NativePointer node, const Array_Ark_CustomObject* value) {
+        void PointsImpl(Ark_NativePointer node, const Array_CustomObject* value) {
         }
     } // PolylineAttributeModifier
     const GENERATED_ArkUIPolylineModifier* GetPolylineModifier() {

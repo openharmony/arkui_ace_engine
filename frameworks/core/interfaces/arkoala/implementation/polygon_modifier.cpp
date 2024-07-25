@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
     } // PolygonInterfaceModifier
     namespace PolygonAttributeModifier {
-        void PointsImpl(Ark_NativePointer node, const Array_Ark_CustomObject* value) {
+        void PointsImpl(Ark_NativePointer node, const Array_CustomObject* value) {
         }
     } // PolygonAttributeModifier
     const GENERATED_ArkUIPolygonModifier* GetPolygonModifier() {

@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
     } // SpanInterfaceModifier
     namespace SpanAttributeModifier {
-        void FontImpl(Ark_NativePointer node, const Font* value) {
+        void FontImpl(Ark_NativePointer node, const Ark_Font* value) {
         }
         void FontColorImpl(Ark_NativePointer node, const ResourceColor* value) {
         }
@@ -33,7 +33,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void FontFamilyImpl(Ark_NativePointer node, const Type_SpanAttribute_fontFamily_Arg0* value) {
         }
-        void DecorationImpl(Ark_NativePointer node, const DecorationStyleInterface* value) {
+        void DecorationImpl(Ark_NativePointer node, const Ark_DecorationStyleInterface* value) {
         }
         void LetterSpacingImpl(Ark_NativePointer node, const Type_SpanAttribute_letterSpacing_Arg0* value) {
         }

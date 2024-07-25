@@ -19,7 +19,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     namespace ImageInterfaceModifier {
         void _setImageOptions_PixelMapResourceStrDrawableDescriptorImpl(Ark_NativePointer node, const Type_ImageInterface__setImageOptions_Arg0* src) {
         }
-        void _setImageOptions_PixelMapResourceStrDrawableDescriptor_ImageAIOptionsImpl(Ark_NativePointer node, const Type_ImageInterface__setImageOptions1_Arg0* src, const ImageAIOptions* imageAIOptions) {
+        void _setImageOptions_PixelMapResourceStrDrawableDescriptorImageContentImpl(Ark_NativePointer node, const Type_ImageInterface__setImageOptions1_Arg0* src) {
+        }
+        void _setImageOptions_PixelMapResourceStrDrawableDescriptor_ImageAIOptionsImpl(Ark_NativePointer node, const Type_ImageInterface__setImageOptions2_Arg0* src, const Ark_ImageAIOptions* imageAIOptions) {
         }
     } // ImageInterfaceModifier
     namespace ImageAttributeModifier {
@@ -53,7 +55,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void DraggableImpl(Ark_NativePointer node, Ark_Boolean value) {
         }
-        void PointLightImpl(Ark_NativePointer node, const PointLightStyle* value) {
+        void PointLightImpl(Ark_NativePointer node, const Ark_PointLightStyle* value) {
         }
         void EdgeAntialiasingImpl(Ark_NativePointer node, const Ark_Number* value) {
         }
@@ -65,9 +67,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void EnableAnalyzerImpl(Ark_NativePointer node, Ark_Boolean enable) {
         }
-        void AnalyzerConfigImpl(Ark_NativePointer node, const ImageAnalyzerConfig* config) {
+        void AnalyzerConfigImpl(Ark_NativePointer node, const Ark_ImageAnalyzerConfig* config) {
         }
-        void ResizableImpl(Ark_NativePointer node, const ResizableOptions* value) {
+        void ResizableImpl(Ark_NativePointer node, const Ark_ResizableOptions* value) {
         }
         void PrivacySensitiveImpl(Ark_NativePointer node, Ark_Boolean supported) {
         }
@@ -77,6 +79,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIImageModifier* GetImageModifier() {
         static const GENERATED_ArkUIImageModifier ArkUIImageModifierImpl {
             ImageInterfaceModifier::_setImageOptions_PixelMapResourceStrDrawableDescriptorImpl,
+            ImageInterfaceModifier::_setImageOptions_PixelMapResourceStrDrawableDescriptorImageContentImpl,
             ImageInterfaceModifier::_setImageOptions_PixelMapResourceStrDrawableDescriptor_ImageAIOptionsImpl,
             ImageAttributeModifier::AltImpl,
             ImageAttributeModifier::MatchTextDirectionImpl,

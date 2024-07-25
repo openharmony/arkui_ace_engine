@@ -27,7 +27,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void UnselectedColorImpl(Ark_NativePointer node, const ResourceColor* value) {
         }
-        void MarkImpl(Ark_NativePointer node, const MarkStyle* value) {
+        void MarkImpl(Ark_NativePointer node, const Ark_MarkStyle* value) {
         }
         void OnChangeImpl(Ark_NativePointer node, Ark_Function callback) {
         }

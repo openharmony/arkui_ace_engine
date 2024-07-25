@@ -46,7 +46,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         Ark_NativePointer CreateLinearGradientImpl(CanvasRendererPeer* peer, const Ark_Number* x0, const Ark_Number* y0, const Ark_Number* x1, const Ark_Number* y1) {
             return 0;
         }
-        Ark_NativePointer CreatePatternImpl(CanvasRendererPeer* peer, const Ark_Materialized* image, const Union_Ark_String_Ark_Undefined* repetition) {
+        Ark_NativePointer CreatePatternImpl(CanvasRendererPeer* peer, const Ark_Materialized* image, const Union_String_Ark_Undefined* repetition) {
             return 0;
         }
         Ark_NativePointer CreateRadialGradientImpl(CanvasRendererPeer* peer, const Ark_Number* x0, const Ark_Number* y0, const Ark_Number* r0, const Ark_Number* x1, const Ark_Number* y1, const Ark_Number* r1) {
@@ -58,7 +58,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         Ark_NativePointer CreateImageData_number_numberImpl(CanvasRendererPeer* peer, const Ark_Number* sw, const Ark_Number* sh) {
             return 0;
         }
-        Ark_NativePointer CreateImageData_ImageDataImpl(CanvasRendererPeer* peer, const ImageData* imagedata) {
+        Ark_NativePointer CreateImageData_ImageDataImpl(CanvasRendererPeer* peer, const Ark_ImageData* imagedata) {
             return 0;
         }
         Ark_NativePointer GetImageDataImpl(CanvasRendererPeer* peer, const Ark_Number* sx, const Ark_Number* sy, const Ark_Number* sw, const Ark_Number* sh) {
@@ -67,13 +67,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         Ark_NativePointer GetPixelMapImpl(CanvasRendererPeer* peer, const Ark_Number* sx, const Ark_Number* sy, const Ark_Number* sw, const Ark_Number* sh) {
             return 0;
         }
-        void PutImageData_ImageData_numberstring_numberstringImpl(CanvasRendererPeer* peer, const ImageData* imagedata, const Union_Ark_Number_Ark_String* dx, const Union_Ark_Number_Ark_String* dy) {
+        void PutImageData_ImageData_numberstring_numberstringImpl(CanvasRendererPeer* peer, const Ark_ImageData* imagedata, const Union_Number_String* dx, const Union_Number_String* dy) {
         }
-        void PutImageData_ImageData_numberstring_numberstring_numberstring_numberstring_numberstring_numberstringImpl(CanvasRendererPeer* peer, const ImageData* imagedata, const Union_Ark_Number_Ark_String* dx, const Union_Ark_Number_Ark_String* dy, const Union_Ark_Number_Ark_String* dirtyX, const Union_Ark_Number_Ark_String* dirtyY, const Union_Ark_Number_Ark_String* dirtyWidth, const Union_Ark_Number_Ark_String* dirtyHeight) {
+        void PutImageData_ImageData_numberstring_numberstring_numberstring_numberstring_numberstring_numberstringImpl(CanvasRendererPeer* peer, const Ark_ImageData* imagedata, const Union_Number_String* dx, const Union_Number_String* dy, const Union_Number_String* dirtyX, const Union_Number_String* dirtyY, const Union_Number_String* dirtyWidth, const Union_Number_String* dirtyHeight) {
         }
         void GetLineDashImpl(CanvasRendererPeer* peer) {
         }
-        void SetLineDashImpl(CanvasRendererPeer* peer, const Array_Ark_Number* segments) {
+        void SetLineDashImpl(CanvasRendererPeer* peer, const Array_Number* segments) {
         }
         void ClearRectImpl(CanvasRendererPeer* peer, const Ark_Number* x, const Ark_Number* y, const Ark_Number* w, const Ark_Number* h) {
         }
@@ -85,12 +85,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void SaveImpl(CanvasRendererPeer* peer) {
         }
-        void FillTextImpl(CanvasRendererPeer* peer, const Ark_String* text, const Ark_Number* x, const Ark_Number* y, const Opt_Ark_Number* maxWidth) {
+        void FillTextImpl(CanvasRendererPeer* peer, const Ark_String* text, const Ark_Number* x, const Ark_Number* y, const Opt_Number* maxWidth) {
         }
         Ark_NativePointer MeasureTextImpl(CanvasRendererPeer* peer, const Ark_String* text) {
             return 0;
         }
-        void StrokeTextImpl(CanvasRendererPeer* peer, const Ark_String* text, const Ark_Number* x, const Ark_Number* y, const Opt_Ark_Number* maxWidth) {
+        void StrokeTextImpl(CanvasRendererPeer* peer, const Ark_String* text, const Ark_Number* x, const Ark_Number* y, const Opt_Number* maxWidth) {
         }
         Ark_NativePointer GetTransformImpl(CanvasRendererPeer* peer) {
             return 0;
@@ -118,6 +118,78 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void RestoreLayerImpl(CanvasRendererPeer* peer) {
         }
         void ResetImpl(CanvasRendererPeer* peer) {
+        }
+        Ark_Int32 GetGlobalAlphaImpl(CanvasRendererPeer* peer) {
+            return 0;
+        }
+        void SetGlobalAlphaImpl(CanvasRendererPeer* peer, const Ark_Number* globalAlpha) {
+        }
+        void GetGlobalCompositeOperationImpl(CanvasRendererPeer* peer) {
+        }
+        void SetGlobalCompositeOperationImpl(CanvasRendererPeer* peer, const Ark_String* globalCompositeOperation) {
+        }
+        void SetFillStyleImpl(CanvasRendererPeer* peer, const Union_String_Number_CanvasGradient_CanvasPattern* fillStyle) {
+        }
+        void SetStrokeStyleImpl(CanvasRendererPeer* peer, const Union_String_Number_CanvasGradient_CanvasPattern* strokeStyle) {
+        }
+        void GetFilterImpl(CanvasRendererPeer* peer) {
+        }
+        void SetFilterImpl(CanvasRendererPeer* peer, const Ark_String* filter) {
+        }
+        Ark_Boolean GetImageSmoothingEnabledImpl(CanvasRendererPeer* peer) {
+            return 0;
+        }
+        void SetImageSmoothingEnabledImpl(CanvasRendererPeer* peer, Ark_Boolean imageSmoothingEnabled) {
+        }
+        void SetImageSmoothingQualityImpl(CanvasRendererPeer* peer, const ImageSmoothingQuality* imageSmoothingQuality) {
+        }
+        void SetLineCapImpl(CanvasRendererPeer* peer, const CanvasLineCap* lineCap) {
+        }
+        Ark_Int32 GetLineDashOffsetImpl(CanvasRendererPeer* peer) {
+            return 0;
+        }
+        void SetLineDashOffsetImpl(CanvasRendererPeer* peer, const Ark_Number* lineDashOffset) {
+        }
+        void SetLineJoinImpl(CanvasRendererPeer* peer, const CanvasLineJoin* lineJoin) {
+        }
+        Ark_Int32 GetLineWidthImpl(CanvasRendererPeer* peer) {
+            return 0;
+        }
+        void SetLineWidthImpl(CanvasRendererPeer* peer, const Ark_Number* lineWidth) {
+        }
+        Ark_Int32 GetMiterLimitImpl(CanvasRendererPeer* peer) {
+            return 0;
+        }
+        void SetMiterLimitImpl(CanvasRendererPeer* peer, const Ark_Number* miterLimit) {
+        }
+        Ark_Int32 GetShadowBlurImpl(CanvasRendererPeer* peer) {
+            return 0;
+        }
+        void SetShadowBlurImpl(CanvasRendererPeer* peer, const Ark_Number* shadowBlur) {
+        }
+        void GetShadowColorImpl(CanvasRendererPeer* peer) {
+        }
+        void SetShadowColorImpl(CanvasRendererPeer* peer, const Ark_String* shadowColor) {
+        }
+        Ark_Int32 GetShadowOffsetXImpl(CanvasRendererPeer* peer) {
+            return 0;
+        }
+        void SetShadowOffsetXImpl(CanvasRendererPeer* peer, const Ark_Number* shadowOffsetX) {
+        }
+        Ark_Int32 GetShadowOffsetYImpl(CanvasRendererPeer* peer) {
+            return 0;
+        }
+        void SetShadowOffsetYImpl(CanvasRendererPeer* peer, const Ark_Number* shadowOffsetY) {
+        }
+        void SetDirectionImpl(CanvasRendererPeer* peer, const CanvasDirection* direction) {
+        }
+        void GetFontImpl(CanvasRendererPeer* peer) {
+        }
+        void SetFontImpl(CanvasRendererPeer* peer, const Ark_String* font) {
+        }
+        void SetTextAlignImpl(CanvasRendererPeer* peer, const CanvasTextAlign* textAlign) {
+        }
+        void SetTextBaselineImpl(CanvasRendererPeer* peer, const CanvasTextBaseline* textBaseline) {
         }
     } // CanvasRendererModifier
     const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor() {
@@ -167,6 +239,38 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CanvasRendererModifier::SaveLayerImpl,
             CanvasRendererModifier::RestoreLayerImpl,
             CanvasRendererModifier::ResetImpl,
+            CanvasRendererModifier::GetGlobalAlphaImpl,
+            CanvasRendererModifier::SetGlobalAlphaImpl,
+            CanvasRendererModifier::GetGlobalCompositeOperationImpl,
+            CanvasRendererModifier::SetGlobalCompositeOperationImpl,
+            CanvasRendererModifier::SetFillStyleImpl,
+            CanvasRendererModifier::SetStrokeStyleImpl,
+            CanvasRendererModifier::GetFilterImpl,
+            CanvasRendererModifier::SetFilterImpl,
+            CanvasRendererModifier::GetImageSmoothingEnabledImpl,
+            CanvasRendererModifier::SetImageSmoothingEnabledImpl,
+            CanvasRendererModifier::SetImageSmoothingQualityImpl,
+            CanvasRendererModifier::SetLineCapImpl,
+            CanvasRendererModifier::GetLineDashOffsetImpl,
+            CanvasRendererModifier::SetLineDashOffsetImpl,
+            CanvasRendererModifier::SetLineJoinImpl,
+            CanvasRendererModifier::GetLineWidthImpl,
+            CanvasRendererModifier::SetLineWidthImpl,
+            CanvasRendererModifier::GetMiterLimitImpl,
+            CanvasRendererModifier::SetMiterLimitImpl,
+            CanvasRendererModifier::GetShadowBlurImpl,
+            CanvasRendererModifier::SetShadowBlurImpl,
+            CanvasRendererModifier::GetShadowColorImpl,
+            CanvasRendererModifier::SetShadowColorImpl,
+            CanvasRendererModifier::GetShadowOffsetXImpl,
+            CanvasRendererModifier::SetShadowOffsetXImpl,
+            CanvasRendererModifier::GetShadowOffsetYImpl,
+            CanvasRendererModifier::SetShadowOffsetYImpl,
+            CanvasRendererModifier::SetDirectionImpl,
+            CanvasRendererModifier::GetFontImpl,
+            CanvasRendererModifier::SetFontImpl,
+            CanvasRendererModifier::SetTextAlignImpl,
+            CanvasRendererModifier::SetTextBaselineImpl,
         };
         return &CanvasRendererAccessorImpl;
     }

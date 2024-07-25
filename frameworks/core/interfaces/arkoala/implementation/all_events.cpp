@@ -17,1590 +17,1714 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedEvents {
-    void AbilityComponent_onConnectImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void AbilityComponent_onDisconnectImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void AlphabetIndexer_onSelectedImpl(Ark_Int32 nodeId,const Ark_Number index) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void AlphabetIndexer_onSelectImpl(Ark_Int32 nodeId,const Ark_Number index) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void AlphabetIndexer_onRequestPopupDataImpl(Ark_Int32 nodeId,const Ark_Number index) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void AlphabetIndexer_onPopupSelectImpl(Ark_Int32 nodeId,const Ark_Number index) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Animator_onStartImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Animator_onPauseImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Animator_onRepeatImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Animator_onCancelImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Animator_onFinishImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Animator_onFrameImpl(Ark_Int32 nodeId,const Ark_Number value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Calendar_onSelectChangeImpl(Ark_Int32 nodeId,const CalendarSelectedDate event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Calendar_onRequestDataImpl(Ark_Int32 nodeId,const CalendarRequestedData event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CalendarPicker_onChangeImpl(Ark_Int32 nodeId,const Ark_CustomObject value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Canvas_onReadyImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Checkbox_onChangeImpl(Ark_Int32 nodeId,const Ark_Boolean value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CheckboxGroup_onChangeImpl(Ark_Int32 nodeId,const CheckboxGroupResult event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onChildTouchTestImpl(Ark_Int32 nodeId,const Array_TouchTestInfo value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onClickImpl(Ark_Int32 nodeId,const ClickEvent event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onHoverImpl(Ark_Int32 nodeId,const Ark_Boolean isHover,const HoverEvent event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onMouseImpl(Ark_Int32 nodeId,const MouseEvent event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onTouchImpl(Ark_Int32 nodeId,const TouchEvent event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onKeyEventImpl(Ark_Int32 nodeId,const KeyEvent event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onKeyPreImeImpl(Ark_Int32 nodeId,const KeyEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onFocusImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onBlurImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onAppearImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onDisAppearImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onAttachImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onDetachImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onAreaChangeImpl(Ark_Int32 nodeId,const Area oldValue,const Area newValue) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onDragStartImpl(Ark_Int32 nodeId,const DragEvent event,const Opt_Ark_String extraParams) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onDragEnterImpl(Ark_Int32 nodeId,const DragEvent event,const Opt_Ark_String extraParams) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onDragMoveImpl(Ark_Int32 nodeId,const DragEvent event,const Opt_Ark_String extraParams) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onDragLeaveImpl(Ark_Int32 nodeId,const DragEvent event,const Opt_Ark_String extraParams) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onDropImpl(Ark_Int32 nodeId,const DragEvent event,const Opt_Ark_String extraParams) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onDragEndImpl(Ark_Int32 nodeId,const DragEvent event,const Opt_Ark_String extraParams) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onPreDragImpl(Ark_Int32 nodeId,const Ark_Int32 data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onVisibleAreaChangeImpl(Ark_Int32 nodeId,const Ark_Boolean isVisible,const Ark_Number currentRatio) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_keyboardShortcutImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onGestureJudgeBeginImpl(Ark_Int32 nodeId,const GestureInfo gestureInfo,const BaseGestureEvent event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onGestureRecognizerJudgeBeginImpl(Ark_Int32 nodeId,const BaseGestureEvent event,const Ark_Materialized current,const Array_GestureRecognizer recognizers) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_shouldBuiltInRecognizerParallelWithImpl(Ark_Int32 nodeId,const Ark_Materialized current,const Array_GestureRecognizer others) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onTouchInterceptImpl(Ark_Int32 nodeId,const TouchEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void CommonMethod_onSizeChangeImpl(Ark_Int32 nodeId,const SizeOptions oldValue,const SizeOptions newValue) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void ScrollableCommonMethod_onScrollImpl(Ark_Int32 nodeId,const Ark_Number scrollOffset,const Ark_Int32 scrollState) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void ScrollableCommonMethod_onDidScrollImpl(Ark_Int32 nodeId,const Ark_Number scrollOffset,const Ark_Int32 scrollState) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void ScrollableCommonMethod_onReachStartImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void ScrollableCommonMethod_onReachEndImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void ScrollableCommonMethod_onScrollStartImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void ScrollableCommonMethod_onScrollStopImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Counter_onIncImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Counter_onDecImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void DatePicker_onChangeImpl(Ark_Int32 nodeId,const DatePickerResult value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void DatePicker_onDateChangeImpl(Ark_Int32 nodeId,const Ark_CustomObject value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void FolderStack_onFolderStateChangeImpl(Ark_Int32 nodeId,const Literal_foldStatus_Ark_FoldStatus event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void FolderStack_onHoverStatusChangeImpl(Ark_Int32 nodeId,const HoverEventParam param) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void FormComponent_onAcquiredImpl(Ark_Int32 nodeId,const FormCallbackInfo data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void FormComponent_onErrorImpl(Ark_Int32 nodeId,const Literal_errcode_Ark_Number_msg_Ark_String info) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void FormComponent_onRouterImpl(Ark_Int32 nodeId,const Ark_CustomObject info) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void FormComponent_onUninstallImpl(Ark_Int32 nodeId,const FormCallbackInfo data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void FormComponent_onLoadImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Grid_onScrollBarUpdateImpl(Ark_Int32 nodeId,const Ark_Number index,const Ark_Number offset) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Grid_onScrollIndexImpl(Ark_Int32 nodeId,const Ark_Number first,const Ark_Number last) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Grid_onItemDragStartImpl(Ark_Int32 nodeId,const ItemDragInfo event,const Ark_Number itemIndex) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Grid_onItemDragEnterImpl(Ark_Int32 nodeId,const ItemDragInfo event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Grid_onItemDragMoveImpl(Ark_Int32 nodeId,const ItemDragInfo event,const Ark_Number itemIndex,const Ark_Number insertIndex) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Grid_onItemDragLeaveImpl(Ark_Int32 nodeId,const ItemDragInfo event,const Ark_Number itemIndex) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Grid_onItemDropImpl(Ark_Int32 nodeId,const ItemDragInfo event,const Ark_Number itemIndex,const Ark_Number insertIndex,const Ark_Boolean isSuccess) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Grid_onScrollImpl(Ark_Int32 nodeId,const Ark_Number scrollOffset,const Ark_Int32 scrollState) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Grid_onReachStartImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Grid_onReachEndImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Grid_onScrollStartImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Grid_onScrollStopImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Grid_onScrollFrameBeginImpl(Ark_Int32 nodeId,const Ark_Number offset,const Ark_Int32 state) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void GridItem_onSelectImpl(Ark_Int32 nodeId,const Ark_Boolean isSelected) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void GridRow_onBreakpointChangeImpl(Ark_Int32 nodeId,const Ark_String breakpoints) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Image_onCompleteImpl(Ark_Int32 nodeId,const Opt_Literal_width_Ark_Number_height_Ark_Number_componentWidth_Ark_Number_componentHeight_Ark_Number_loadingStatus_Ark_Number_contentWidth_Ark_Number_contentHeight_Ark_Number_contentOffsetX_Ark_Number_contentOffsetY_Ark_Number event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Image_onErrorImpl(Ark_Int32 nodeId,const ImageError error) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Image_onFinishImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void ImageAnimator_onStartImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void ImageAnimator_onPauseImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void ImageAnimator_onRepeatImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void ImageAnimator_onCancelImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void ImageAnimator_onFinishImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void ImageSpan_onCompleteImpl(Ark_Int32 nodeId,const ImageLoadResult result) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void ImageSpan_onErrorImpl(Ark_Int32 nodeId,const ImageError error) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void List_onScrollImpl(Ark_Int32 nodeId,const Ark_Number scrollOffset,const Ark_Int32 scrollState) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void List_onScrollIndexImpl(Ark_Int32 nodeId,const Ark_Number start,const Ark_Number end,const Ark_Number center) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void List_onScrollVisibleContentChangeImpl(Ark_Int32 nodeId,const VisibleListContentInfo start,const VisibleListContentInfo end) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void List_onReachStartImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void List_onReachEndImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void List_onScrollStartImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void List_onScrollStopImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void List_onItemDeleteImpl(Ark_Int32 nodeId,const Ark_Number index) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void List_onItemMoveImpl(Ark_Int32 nodeId,const Ark_Number from,const Ark_Number to) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void List_onItemDragStartImpl(Ark_Int32 nodeId,const ItemDragInfo event,const Ark_Number itemIndex) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void List_onItemDragEnterImpl(Ark_Int32 nodeId,const ItemDragInfo event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void List_onItemDragMoveImpl(Ark_Int32 nodeId,const ItemDragInfo event,const Ark_Number itemIndex,const Ark_Number insertIndex) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void List_onItemDragLeaveImpl(Ark_Int32 nodeId,const ItemDragInfo event,const Ark_Number itemIndex) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void List_onItemDropImpl(Ark_Int32 nodeId,const ItemDragInfo event,const Ark_Number itemIndex,const Ark_Number insertIndex,const Ark_Boolean isSuccess) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void List_onScrollFrameBeginImpl(Ark_Int32 nodeId,const Ark_Number offset,const Ark_Int32 state) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void ListItem_onSelectImpl(Ark_Int32 nodeId,const Ark_Boolean isSelected) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void LocationButton_onClickImpl(Ark_Int32 nodeId,const ClickEvent event,const Ark_Int32 result) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Marquee_onStartImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Marquee_onBounceImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Marquee_onFinishImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void MenuItem_onChangeImpl(Ark_Int32 nodeId,const Ark_Boolean selected) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void NavDestination_onShownImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void NavDestination_onHiddenImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void NavDestination_onBackPressedImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void NavDestination_onWillAppearImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void NavDestination_onWillDisappearImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void NavDestination_onWillShowImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void NavDestination_onWillHideImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void NavRouter_onStateChangeImpl(Ark_Int32 nodeId,const Ark_Boolean isActivated) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Navigation_onTitleModeChangeImpl(Ark_Int32 nodeId,const Ark_Int32 titleMode) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Navigation_onNavBarStateChangeImpl(Ark_Int32 nodeId,const Ark_Boolean isVisible) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Navigation_onNavigationModeChangeImpl(Ark_Int32 nodeId,const Ark_Int32 mode) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Navigation_navDestinationImpl(Ark_Int32 nodeId,const Ark_String name,const Ark_CustomObject param) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Navigation_customNavContentTransitionImpl(Ark_Int32 nodeId,const NavContentInfo from,const NavContentInfo to,const Ark_Int32 operation) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Panel_onChangeImpl(Ark_Int32 nodeId,const Ark_Number width,const Ark_Number height,const Ark_Int32 mode) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Panel_onHeightChangeImpl(Ark_Int32 nodeId,const Ark_Number value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void PasteButton_onClickImpl(Ark_Int32 nodeId,const ClickEvent event,const Ark_Int32 result) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void PatternLock_onPatternCompleteImpl(Ark_Int32 nodeId,const Array_Ark_Number input) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void PluginComponent_onCompleteImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void PluginComponent_onErrorImpl(Ark_Int32 nodeId,const Literal_errcode_Ark_Number_msg_Ark_String info) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Radio_onChangeImpl(Ark_Int32 nodeId,const Ark_Boolean isChecked) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Rating_onChangeImpl(Ark_Int32 nodeId,const Ark_Number value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Refresh_onStateChangeImpl(Ark_Int32 nodeId,const Ark_Int32 state) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Refresh_onRefreshingImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Refresh_onOffsetChangeImpl(Ark_Int32 nodeId,const Ark_Number data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void RichEditor_onReadyImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void RichEditor_onSelectImpl(Ark_Int32 nodeId,const RichEditorSelection data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void RichEditor_onSelectionChangeImpl(Ark_Int32 nodeId,const RichEditorRange data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void RichEditor_aboutToIMEInputImpl(Ark_Int32 nodeId,const RichEditorInsertValue data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void RichEditor_onIMEInputCompleteImpl(Ark_Int32 nodeId,const RichEditorTextSpanResult data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void RichEditor_aboutToDeleteImpl(Ark_Int32 nodeId,const RichEditorDeleteValue data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void RichEditor_onDeleteCompleteImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void RichEditor_onPasteImpl(Ark_Int32 nodeId,const Opt_PasteEvent event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void RichEditor_onEditingChangeImpl(Ark_Int32 nodeId,const Ark_Boolean data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void RichEditor_onSubmitImpl(Ark_Int32 nodeId,const Ark_Int32 enterKey,const SubmitEvent event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void RichEditor_onWillChangeImpl(Ark_Int32 nodeId,const RichEditorChangeValue data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void RichEditor_onDidChangeImpl(Ark_Int32 nodeId,const TextRange rangeBefore,const TextRange rangeAfter) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void RichEditor_onCutImpl(Ark_Int32 nodeId,const CutEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void RichEditor_onCopyImpl(Ark_Int32 nodeId,const CopyEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void RichText_onStartImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void RichText_onCompleteImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void SaveButton_onClickImpl(Ark_Int32 nodeId,const ClickEvent event,const Ark_Int32 result) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Scroll_onScrollImpl(Ark_Int32 nodeId,const Ark_Number xOffset,const Ark_Number yOffset) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Scroll_onDidScrollImpl(Ark_Int32 nodeId,const Ark_Number xOffset,const Ark_Number yOffset,const Ark_Int32 scrollState) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Scroll_onScrollEdgeImpl(Ark_Int32 nodeId,const Ark_Int32 side) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Scroll_onScrollStartImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Scroll_onScrollEndImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Scroll_onScrollStopImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Scroll_onScrollFrameBeginImpl(Ark_Int32 nodeId,const Ark_Number offset,const Ark_Int32 state) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Search_inputFilterImpl(Ark_Int32 nodeId,const Ark_String data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Search_onEditChangeImpl(Ark_Int32 nodeId,const Ark_Boolean data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Search_onSubmitImpl(Ark_Int32 nodeId,const Ark_String value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Search_onChangeImpl(Ark_Int32 nodeId,const Ark_String value,const Opt_TextRange previewRange) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Search_onTextSelectionChangeImpl(Ark_Int32 nodeId,const Ark_Number selectionStart,const Ark_Number selectionEnd) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Search_onContentScrollImpl(Ark_Int32 nodeId,const Ark_Number totalOffsetX,const Ark_Number totalOffsetY) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Search_onCopyImpl(Ark_Int32 nodeId,const Ark_String value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Search_onCutImpl(Ark_Int32 nodeId,const Ark_String value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Search_onPasteImpl(Ark_Int32 nodeId,const Ark_String value,const PasteEvent event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Search_onWillInsertImpl(Ark_Int32 nodeId,const InsertValue data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Search_onDidInsertImpl(Ark_Int32 nodeId,const InsertValue data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Search_onWillDeleteImpl(Ark_Int32 nodeId,const DeleteValue data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Search_onDidDeleteImpl(Ark_Int32 nodeId,const DeleteValue data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Select_onSelectImpl(Ark_Int32 nodeId,const Ark_Number index,const Ark_String value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Slider_onChangeImpl(Ark_Int32 nodeId,const Ark_Number value,const Ark_Int32 mode) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Stepper_onFinishImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Stepper_onSkipImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Stepper_onChangeImpl(Ark_Int32 nodeId,const Ark_Number prevIndex,const Ark_Number index) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Stepper_onNextImpl(Ark_Int32 nodeId,const Ark_Number index,const Ark_Number pendingIndex) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Stepper_onPreviousImpl(Ark_Int32 nodeId,const Ark_Number index,const Ark_Number pendingIndex) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Swiper_onChangeImpl(Ark_Int32 nodeId,const Ark_Number index) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Swiper_onAnimationStartImpl(Ark_Int32 nodeId,const Ark_Number index,const Ark_Number targetIndex,const SwiperAnimationEvent extraInfo) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Swiper_onAnimationEndImpl(Ark_Int32 nodeId,const Ark_Number index,const SwiperAnimationEvent extraInfo) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Swiper_onGestureSwipeImpl(Ark_Int32 nodeId,const Ark_Number index,const SwiperAnimationEvent extraInfo) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Swiper_onContentDidScrollImpl(Ark_Int32 nodeId,const Ark_Number selectedIndex,const Ark_Number index,const Ark_Number position,const Ark_Number mainAxisLength) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Tabs_onChangeImpl(Ark_Int32 nodeId,const Ark_Number index) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Tabs_onTabBarClickImpl(Ark_Int32 nodeId,const Ark_Number index) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Tabs_onAnimationStartImpl(Ark_Int32 nodeId,const Ark_Number index,const Ark_Number targetIndex,const TabsAnimationEvent event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Tabs_onAnimationEndImpl(Ark_Int32 nodeId,const Ark_Number index,const TabsAnimationEvent event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Tabs_onGestureSwipeImpl(Ark_Int32 nodeId,const Ark_Number index,const TabsAnimationEvent event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Tabs_customContentTransitionImpl(Ark_Int32 nodeId,const Ark_Number from,const Ark_Number to) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Tabs_onContentWillChangeImpl(Ark_Int32 nodeId,const Ark_Number currentIndex,const Ark_Number comingIndex) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TabContent_onWillShowImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TabContent_onWillHideImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Text_onCopyImpl(Ark_Int32 nodeId,const Ark_String value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Text_onTextSelectionChangeImpl(Ark_Int32 nodeId,const Ark_Number selectionStart,const Ark_Number selectionEnd) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Text_onMarqueeStateChangeImpl(Ark_Int32 nodeId,const Ark_Int32 data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextArea_inputFilterImpl(Ark_Int32 nodeId,const Ark_String value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextArea_onSubmitImpl(Ark_Int32 nodeId,const Ark_Int32 enterKey) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextArea_onChangeImpl(Ark_Int32 nodeId,const Ark_String value,const Opt_TextRange previewRange) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextArea_onTextSelectionChangeImpl(Ark_Int32 nodeId,const Ark_Number selectionStart,const Ark_Number selectionEnd) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextArea_onContentScrollImpl(Ark_Int32 nodeId,const Ark_Number totalOffsetX,const Ark_Number totalOffsetY) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextArea_onEditChangeImpl(Ark_Int32 nodeId,const Ark_Boolean isEditing) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextArea_onCopyImpl(Ark_Int32 nodeId,const Ark_String value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextArea_onCutImpl(Ark_Int32 nodeId,const Ark_String value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextArea_onPasteImpl(Ark_Int32 nodeId,const Ark_String value,const PasteEvent event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextArea_onWillInsertImpl(Ark_Int32 nodeId,const InsertValue data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextArea_onDidInsertImpl(Ark_Int32 nodeId,const InsertValue data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextArea_onWillDeleteImpl(Ark_Int32 nodeId,const DeleteValue data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextArea_onDidDeleteImpl(Ark_Int32 nodeId,const DeleteValue data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextClock_onDateChangeImpl(Ark_Int32 nodeId,const Ark_Number value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextInput_onEditChangedImpl(Ark_Int32 nodeId,const Ark_Boolean isEditing) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextInput_onEditChangeImpl(Ark_Int32 nodeId,const Ark_Boolean isEditing) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextInput_onSubmitImpl(Ark_Int32 nodeId,const Ark_Int32 enterKey,const SubmitEvent event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextInput_onChangeImpl(Ark_Int32 nodeId,const Ark_String value,const Opt_TextRange previewRange) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextInput_onTextSelectionChangeImpl(Ark_Int32 nodeId,const Ark_Number selectionStart,const Ark_Number selectionEnd) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextInput_onContentScrollImpl(Ark_Int32 nodeId,const Ark_Number totalOffsetX,const Ark_Number totalOffsetY) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextInput_inputFilterImpl(Ark_Int32 nodeId,const Ark_String value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextInput_onCopyImpl(Ark_Int32 nodeId,const Ark_String value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextInput_onCutImpl(Ark_Int32 nodeId,const Ark_String value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextInput_onPasteImpl(Ark_Int32 nodeId,const Ark_String value,const PasteEvent event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextInput_onSecurityStateChangeImpl(Ark_Int32 nodeId,const Ark_Boolean data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextInput_onWillInsertImpl(Ark_Int32 nodeId,const InsertValue data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextInput_onDidInsertImpl(Ark_Int32 nodeId,const InsertValue data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextInput_onWillDeleteImpl(Ark_Int32 nodeId,const DeleteValue data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextInput_onDidDeleteImpl(Ark_Int32 nodeId,const DeleteValue data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextPicker_onAcceptImpl(Ark_Int32 nodeId,const Ark_String value,const Ark_Number index) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextPicker_onCancelImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextPicker_onChangeImpl(Ark_Int32 nodeId,const Union_Ark_String_Array_Ark_String value,const Union_Ark_Number_Array_Ark_Number index) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TextTimer_onTimerImpl(Ark_Int32 nodeId,const Ark_Number utc,const Ark_Number elapsedTime) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void TimePicker_onChangeImpl(Ark_Int32 nodeId,const TimePickerResult value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Toggle_onChangeImpl(Ark_Int32 nodeId,const Ark_Boolean isOn) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Video_onStartImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Video_onPauseImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Video_onFinishImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Video_onFullscreenChangeImpl(Ark_Int32 nodeId,const Literal_fullscreen_Ark_Boolean event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Video_onPreparedImpl(Ark_Int32 nodeId,const Literal_duration_Ark_Number event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Video_onSeekingImpl(Ark_Int32 nodeId,const Literal_time_Ark_Number event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Video_onSeekedImpl(Ark_Int32 nodeId,const Literal_time_Ark_Number event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Video_onUpdateImpl(Ark_Int32 nodeId,const Literal_time_Ark_Number event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Video_onErrorImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Video_onStopImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onPageEndImpl(Ark_Int32 nodeId,const OnPageEndEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onPageBeginImpl(Ark_Int32 nodeId,const OnPageBeginEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onProgressChangeImpl(Ark_Int32 nodeId,const OnProgressChangeEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onTitleReceiveImpl(Ark_Int32 nodeId,const OnTitleReceiveEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onGeolocationHideImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onGeolocationShowImpl(Ark_Int32 nodeId,const OnGeolocationShowEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onRequestSelectedImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onAlertImpl(Ark_Int32 nodeId,const OnAlertEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onBeforeUnloadImpl(Ark_Int32 nodeId,const OnBeforeUnloadEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onConfirmImpl(Ark_Int32 nodeId,const OnConfirmEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onPromptImpl(Ark_Int32 nodeId,const OnPromptEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onConsoleImpl(Ark_Int32 nodeId,const OnConsoleEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onErrorReceiveImpl(Ark_Int32 nodeId,const OnErrorReceiveEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onHttpErrorReceiveImpl(Ark_Int32 nodeId,const OnHttpErrorReceiveEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onDownloadStartImpl(Ark_Int32 nodeId,const OnDownloadStartEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onRefreshAccessedHistoryImpl(Ark_Int32 nodeId,const OnRefreshAccessedHistoryEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onUrlLoadInterceptImpl(Ark_Int32 nodeId,const Opt_Literal_data_Union_Ark_String_WebResourceRequest event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onSslErrorReceiveImpl(Ark_Int32 nodeId,const Opt_Literal_handler_Function_error_Ark_CustomObject event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onShowFileSelectorImpl(Ark_Int32 nodeId,const OnShowFileSelectorEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onFileSelectorShowImpl(Ark_Int32 nodeId,const Opt_Literal_callback_Function_fileSelector_Ark_CustomObject event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onResourceLoadImpl(Ark_Int32 nodeId,const OnResourceLoadEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onFullScreenExitImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onFullScreenEnterImpl(Ark_Int32 nodeId,const FullScreenEnterEvent event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onScaleChangeImpl(Ark_Int32 nodeId,const OnScaleChangeEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onHttpAuthRequestImpl(Ark_Int32 nodeId,const OnHttpAuthRequestEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onInterceptRequestImpl(Ark_Int32 nodeId,const OnInterceptRequestEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onPermissionRequestImpl(Ark_Int32 nodeId,const OnPermissionRequestEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onScreenCaptureRequestImpl(Ark_Int32 nodeId,const OnScreenCaptureRequestEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onContextMenuShowImpl(Ark_Int32 nodeId,const OnContextMenuShowEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onContextMenuHideImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onSearchResultReceiveImpl(Ark_Int32 nodeId,const OnSearchResultReceiveEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onScrollImpl(Ark_Int32 nodeId,const OnScrollEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onSslErrorEventReceiveImpl(Ark_Int32 nodeId,const OnSslErrorEventReceiveEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onSslErrorEventImpl(Ark_Int32 nodeId,const SslErrorEvent sslErrorEvent) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onClientAuthenticationRequestImpl(Ark_Int32 nodeId,const OnClientAuthenticationEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onWindowNewImpl(Ark_Int32 nodeId,const OnWindowNewEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onWindowExitImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onInterceptKeyEventImpl(Ark_Int32 nodeId,const KeyEvent event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onTouchIconUrlReceivedImpl(Ark_Int32 nodeId,const OnTouchIconUrlReceivedEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onFaviconReceivedImpl(Ark_Int32 nodeId,const OnFaviconReceivedEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onPageVisibleImpl(Ark_Int32 nodeId,const OnPageVisibleEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onDataResubmittedImpl(Ark_Int32 nodeId,const OnDataResubmittedEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onAudioStateChangedImpl(Ark_Int32 nodeId,const OnAudioStateChangedEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onFirstContentfulPaintImpl(Ark_Int32 nodeId,const OnFirstContentfulPaintEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onFirstMeaningfulPaintImpl(Ark_Int32 nodeId,const FirstMeaningfulPaint firstMeaningfulPaint) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onLargestContentfulPaintImpl(Ark_Int32 nodeId,const LargestContentfulPaint largestContentfulPaint) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onLoadInterceptImpl(Ark_Int32 nodeId,const OnLoadInterceptEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onControllerAttachedImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onOverScrollImpl(Ark_Int32 nodeId,const OnOverScrollEvent data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onSafeBrowsingCheckResultImpl(Ark_Int32 nodeId,const Ark_Int32 threatType) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onNavigationEntryCommittedImpl(Ark_Int32 nodeId,const LoadCommittedDetails loadCommittedDetails) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onIntelligentTrackingPreventionResultImpl(Ark_Int32 nodeId,const IntelligentTrackingPreventionDetails details) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onNativeEmbedLifecycleChangeImpl(Ark_Int32 nodeId,const NativeEmbedDataInfo event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onNativeEmbedGestureEventImpl(Ark_Int32 nodeId,const NativeEmbedTouchInfo event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onOverrideUrlLoadingImpl(Ark_Int32 nodeId,const Ark_Materialized webResourceRequest) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onRenderProcessNotRespondingImpl(Ark_Int32 nodeId,const RenderProcessNotRespondingData data) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onRenderProcessRespondingImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onViewportFitChangedImpl(Ark_Int32 nodeId,const Ark_Int32 viewportFit) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onInterceptKeyboardAttachImpl(Ark_Int32 nodeId,const WebKeyboardCallbackInfo keyboardCallbackInfo) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void Web_onAdsBlockedImpl(Ark_Int32 nodeId,const AdsBlockedDetails details) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void XComponent_onLoadImpl(Ark_Int32 nodeId,const Opt_Ark_CustomObject event) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void XComponent_onDestroyImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void SideBarContainer_onChangeImpl(Ark_Int32 nodeId,const Ark_Boolean value) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void WaterFlow_onReachStartImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void WaterFlow_onReachEndImpl(Ark_Int32 nodeId) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void WaterFlow_onScrollFrameBeginImpl(Ark_Int32 nodeId,const Ark_Number offset,const Ark_Int32 state) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void WaterFlow_onScrollIndexImpl(Ark_Int32 nodeId,const Ark_Number first,const Ark_Number last) {
-        // GENERATED EMPTY IMPLEMENTATION
-    }
-    void UIExtensionComponent_onTerminatedImpl(Ark_Int32 nodeId,const TerminationInfo data) {
-        // GENERATED EMPTY IMPLEMENTATION
+    namespace AbilityComponent {
+        void onConnectImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDisconnectImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace AlphabetIndexer {
+        void onSelectedImpl(Ark_Int32 nodeId, const Ark_Number index) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onSelectImpl(Ark_Int32 nodeId, const Ark_Number index) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onRequestPopupDataImpl(Ark_Int32 nodeId, const Ark_Number index) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onPopupSelectImpl(Ark_Int32 nodeId, const Ark_Number index) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Animator {
+        void onStartImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onPauseImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onRepeatImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onCancelImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onFinishImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onFrameImpl(Ark_Int32 nodeId, const Ark_Number value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Calendar {
+        void onSelectChangeImpl(Ark_Int32 nodeId, const Ark_CalendarSelectedDate event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onRequestDataImpl(Ark_Int32 nodeId, const Ark_CalendarRequestedData event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace CalendarPicker {
+        void onChangeImpl(Ark_Int32 nodeId, const Ark_CustomObject value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Canvas {
+        void onReadyImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Checkbox {
+        void onChangeImpl(Ark_Int32 nodeId, const Ark_Boolean value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace CheckboxGroup {
+        void onChangeImpl(Ark_Int32 nodeId, const Ark_CheckboxGroupResult event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace CommonMethod {
+        void onChildTouchTestImpl(Ark_Int32 nodeId, const Array_TouchTestInfo value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onClickImpl(Ark_Int32 nodeId, const Ark_ClickEvent event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onHoverImpl(Ark_Int32 nodeId, const Ark_Boolean isHover, const Ark_HoverEvent event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onAccessibilityHoverImpl(Ark_Int32 nodeId, const Ark_Boolean isHover, const Ark_AccessibilityHoverEvent event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onMouseImpl(Ark_Int32 nodeId, const Ark_MouseEvent event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onTouchImpl(Ark_Int32 nodeId, const Ark_TouchEvent event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onKeyEventImpl(Ark_Int32 nodeId, const Ark_KeyEvent event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onKeyPreImeImpl(Ark_Int32 nodeId, const Ark_KeyEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onFocusImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onBlurImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onAppearImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDisAppearImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onAttachImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDetachImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onAreaChangeImpl(Ark_Int32 nodeId, const Ark_Area oldValue, const Ark_Area newValue) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDragStartImpl(Ark_Int32 nodeId, const Ark_DragEvent event, const Opt_String extraParams) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDragEnterImpl(Ark_Int32 nodeId, const Ark_DragEvent event, const Opt_String extraParams) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDragMoveImpl(Ark_Int32 nodeId, const Ark_DragEvent event, const Opt_String extraParams) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDragLeaveImpl(Ark_Int32 nodeId, const Ark_DragEvent event, const Opt_String extraParams) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDropImpl(Ark_Int32 nodeId, const Ark_DragEvent event, const Opt_String extraParams) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDragEndImpl(Ark_Int32 nodeId, const Ark_DragEvent event, const Opt_String extraParams) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onPreDragImpl(Ark_Int32 nodeId, const Ark_Int32 data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onVisibleAreaChangeImpl(Ark_Int32 nodeId, const Ark_Boolean isVisible, const Ark_Number currentRatio) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void keyboardShortcutImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onGestureJudgeBeginImpl(Ark_Int32 nodeId, const Ark_GestureInfo gestureInfo, const Ark_BaseGestureEvent event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onGestureRecognizerJudgeBeginImpl(Ark_Int32 nodeId, const Ark_BaseGestureEvent event, const Ark_Materialized current, const Array_GestureRecognizer recognizers) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void shouldBuiltInRecognizerParallelWithImpl(Ark_Int32 nodeId, const Ark_Materialized current, const Array_GestureRecognizer others) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onTouchInterceptImpl(Ark_Int32 nodeId, const Ark_TouchEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onSizeChangeImpl(Ark_Int32 nodeId, const Ark_SizeOptions oldValue, const Ark_SizeOptions newValue) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace ScrollableCommonMethod {
+        void onScrollImpl(Ark_Int32 nodeId, const Ark_Number scrollOffset, const Ark_Int32 scrollState) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDidScrollImpl(Ark_Int32 nodeId, const Ark_Number scrollOffset, const Ark_Int32 scrollState) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onReachStartImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onReachEndImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollStartImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollStopImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Counter {
+        void onIncImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDecImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace DatePicker {
+        void onChangeImpl(Ark_Int32 nodeId, const Ark_DatePickerResult value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDateChangeImpl(Ark_Int32 nodeId, const Ark_CustomObject value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace FolderStack {
+        void onFolderStateChangeImpl(Ark_Int32 nodeId, const Literal_foldStatus_FoldStatus event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onHoverStatusChangeImpl(Ark_Int32 nodeId, const Ark_HoverEventParam param) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace FormComponent {
+        void onAcquiredImpl(Ark_Int32 nodeId, const Ark_FormCallbackInfo data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onErrorImpl(Ark_Int32 nodeId, const Literal_errcode_Number_msg_String info) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onRouterImpl(Ark_Int32 nodeId, const Ark_CustomObject info) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onUninstallImpl(Ark_Int32 nodeId, const Ark_FormCallbackInfo data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onLoadImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Grid {
+        void onScrollBarUpdateImpl(Ark_Int32 nodeId, const Ark_Number index, const Ark_Number offset) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollIndexImpl(Ark_Int32 nodeId, const Ark_Number first, const Ark_Number last) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onItemDragStartImpl(Ark_Int32 nodeId, const Ark_ItemDragInfo event, const Ark_Number itemIndex) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onItemDragEnterImpl(Ark_Int32 nodeId, const Ark_ItemDragInfo event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onItemDragMoveImpl(Ark_Int32 nodeId, const Ark_ItemDragInfo event, const Ark_Number itemIndex, const Ark_Number insertIndex) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onItemDragLeaveImpl(Ark_Int32 nodeId, const Ark_ItemDragInfo event, const Ark_Number itemIndex) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onItemDropImpl(Ark_Int32 nodeId, const Ark_ItemDragInfo event, const Ark_Number itemIndex, const Ark_Number insertIndex, const Ark_Boolean isSuccess) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollImpl(Ark_Int32 nodeId, const Ark_Number scrollOffset, const Ark_Int32 scrollState) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onReachStartImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onReachEndImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollStartImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollStopImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollFrameBeginImpl(Ark_Int32 nodeId, const Ark_Number offset, const Ark_Int32 state) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace GridItem {
+        void onSelectImpl(Ark_Int32 nodeId, const Ark_Boolean isSelected) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace GridRow {
+        void onBreakpointChangeImpl(Ark_Int32 nodeId, const Ark_String breakpoints) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Image {
+        void onCompleteImpl(Ark_Int32 nodeId, const Opt_Literal_width_Number_height_Number_componentWidth_Number_componentHeight_Number_loadingStatus_Number_contentWidth_Number_contentHeight_Number_contentOffsetX_Number_contentOffsetY_Number event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onErrorImpl(Ark_Int32 nodeId, const Ark_ImageError error) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onFinishImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace ImageAnimator {
+        void onStartImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onPauseImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onRepeatImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onCancelImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onFinishImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace ImageSpan {
+        void onCompleteImpl(Ark_Int32 nodeId, const Ark_ImageLoadResult result) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onErrorImpl(Ark_Int32 nodeId, const Ark_ImageError error) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace List {
+        void onScrollImpl(Ark_Int32 nodeId, const Ark_Number scrollOffset, const Ark_Int32 scrollState) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollIndexImpl(Ark_Int32 nodeId, const Ark_Number start, const Ark_Number end, const Ark_Number center) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollVisibleContentChangeImpl(Ark_Int32 nodeId, const Ark_VisibleListContentInfo start, const Ark_VisibleListContentInfo end) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onReachStartImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onReachEndImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollStartImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollStopImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onItemDeleteImpl(Ark_Int32 nodeId, const Ark_Number index) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onItemMoveImpl(Ark_Int32 nodeId, const Ark_Number from, const Ark_Number to) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onItemDragStartImpl(Ark_Int32 nodeId, const Ark_ItemDragInfo event, const Ark_Number itemIndex) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onItemDragEnterImpl(Ark_Int32 nodeId, const Ark_ItemDragInfo event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onItemDragMoveImpl(Ark_Int32 nodeId, const Ark_ItemDragInfo event, const Ark_Number itemIndex, const Ark_Number insertIndex) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onItemDragLeaveImpl(Ark_Int32 nodeId, const Ark_ItemDragInfo event, const Ark_Number itemIndex) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onItemDropImpl(Ark_Int32 nodeId, const Ark_ItemDragInfo event, const Ark_Number itemIndex, const Ark_Number insertIndex, const Ark_Boolean isSuccess) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollFrameBeginImpl(Ark_Int32 nodeId, const Ark_Number offset, const Ark_Int32 state) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace ListItem {
+        void onSelectImpl(Ark_Int32 nodeId, const Ark_Boolean isSelected) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace LocationButton {
+        void onClickImpl(Ark_Int32 nodeId, const Ark_ClickEvent event, const Ark_Int32 result) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Marquee {
+        void onStartImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onBounceImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onFinishImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace MenuItem {
+        void onChangeImpl(Ark_Int32 nodeId, const Ark_Boolean selected) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace NavDestination {
+        void onShownImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onHiddenImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onBackPressedImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onWillAppearImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onWillDisappearImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onWillShowImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onWillHideImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace NavRouter {
+        void onStateChangeImpl(Ark_Int32 nodeId, const Ark_Boolean isActivated) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Navigation {
+        void onTitleModeChangeImpl(Ark_Int32 nodeId, const Ark_Int32 titleMode) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onNavBarStateChangeImpl(Ark_Int32 nodeId, const Ark_Boolean isVisible) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onNavigationModeChangeImpl(Ark_Int32 nodeId, const Ark_Int32 mode) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void navDestinationImpl(Ark_Int32 nodeId, const Ark_String name, const Ark_CustomObject param) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void customNavContentTransitionImpl(Ark_Int32 nodeId, const Ark_NavContentInfo from, const Ark_NavContentInfo to, const Ark_Int32 operation) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Panel {
+        void onChangeImpl(Ark_Int32 nodeId, const Ark_Number width, const Ark_Number height, const Ark_Int32 mode) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onHeightChangeImpl(Ark_Int32 nodeId, const Ark_Number value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace PasteButton {
+        void onClickImpl(Ark_Int32 nodeId, const Ark_ClickEvent event, const Ark_Int32 result) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace PatternLock {
+        void onPatternCompleteImpl(Ark_Int32 nodeId, const Array_Number input) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace PluginComponent {
+        void onCompleteImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onErrorImpl(Ark_Int32 nodeId, const Literal_errcode_Number_msg_String info) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Radio {
+        void onChangeImpl(Ark_Int32 nodeId, const Ark_Boolean isChecked) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Rating {
+        void onChangeImpl(Ark_Int32 nodeId, const Ark_Number value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Refresh {
+        void onStateChangeImpl(Ark_Int32 nodeId, const Ark_Int32 state) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onRefreshingImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onOffsetChangeImpl(Ark_Int32 nodeId, const Ark_Number data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace RichEditor {
+        void onReadyImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onSelectImpl(Ark_Int32 nodeId, const Ark_RichEditorSelection data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onSelectionChangeImpl(Ark_Int32 nodeId, const Ark_RichEditorRange data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void aboutToIMEInputImpl(Ark_Int32 nodeId, const Ark_RichEditorInsertValue data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onIMEInputCompleteImpl(Ark_Int32 nodeId, const Ark_RichEditorTextSpanResult data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void aboutToDeleteImpl(Ark_Int32 nodeId, const Ark_RichEditorDeleteValue data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDeleteCompleteImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onPasteImpl(Ark_Int32 nodeId, const Opt_PasteEvent event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onEditingChangeImpl(Ark_Int32 nodeId, const Ark_Boolean data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onSubmitImpl(Ark_Int32 nodeId, const Ark_Int32 enterKey, const Ark_SubmitEvent event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onWillChangeImpl(Ark_Int32 nodeId, const Ark_RichEditorChangeValue data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDidChangeImpl(Ark_Int32 nodeId, const Ark_TextRange rangeBefore, const Ark_TextRange rangeAfter) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onCutImpl(Ark_Int32 nodeId, const Ark_CutEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onCopyImpl(Ark_Int32 nodeId, const Ark_CopyEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace RichText {
+        void onStartImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onCompleteImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace SaveButton {
+        void onClickImpl(Ark_Int32 nodeId, const Ark_ClickEvent event, const Ark_Int32 result) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Scroll {
+        void onScrollImpl(Ark_Int32 nodeId, const Ark_Number xOffset, const Ark_Number yOffset) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDidScrollImpl(Ark_Int32 nodeId, const Ark_Number xOffset, const Ark_Number yOffset, const Ark_Int32 scrollState) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollEdgeImpl(Ark_Int32 nodeId, const Ark_Int32 side) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollStartImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollEndImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollStopImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollFrameBeginImpl(Ark_Int32 nodeId, const Ark_Number offset, const Ark_Int32 state) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Search {
+        void inputFilterImpl(Ark_Int32 nodeId, const Ark_String data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onEditChangeImpl(Ark_Int32 nodeId, const Ark_Boolean data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onSubmitImpl(Ark_Int32 nodeId, const Ark_String value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onChangeImpl(Ark_Int32 nodeId, const Ark_String value, const Opt_PreviewText previewText) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onTextSelectionChangeImpl(Ark_Int32 nodeId, const Ark_Number selectionStart, const Ark_Number selectionEnd) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onContentScrollImpl(Ark_Int32 nodeId, const Ark_Number totalOffsetX, const Ark_Number totalOffsetY) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onCopyImpl(Ark_Int32 nodeId, const Ark_String value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onCutImpl(Ark_Int32 nodeId, const Ark_String value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onPasteImpl(Ark_Int32 nodeId, const Ark_String value, const Ark_PasteEvent event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onWillInsertImpl(Ark_Int32 nodeId, const Ark_InsertValue data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDidInsertImpl(Ark_Int32 nodeId, const Ark_InsertValue data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onWillDeleteImpl(Ark_Int32 nodeId, const Ark_DeleteValue data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDidDeleteImpl(Ark_Int32 nodeId, const Ark_DeleteValue data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Select {
+        void onSelectImpl(Ark_Int32 nodeId, const Ark_Number index, const Ark_String value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Slider {
+        void onChangeImpl(Ark_Int32 nodeId, const Ark_Number value, const Ark_Int32 mode) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Stepper {
+        void onFinishImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onSkipImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onChangeImpl(Ark_Int32 nodeId, const Ark_Number prevIndex, const Ark_Number index) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onNextImpl(Ark_Int32 nodeId, const Ark_Number index, const Ark_Number pendingIndex) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onPreviousImpl(Ark_Int32 nodeId, const Ark_Number index, const Ark_Number pendingIndex) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Swiper {
+        void onChangeImpl(Ark_Int32 nodeId, const Ark_Number index) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onAnimationStartImpl(Ark_Int32 nodeId, const Ark_Number index, const Ark_Number targetIndex, const Ark_SwiperAnimationEvent extraInfo) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onAnimationEndImpl(Ark_Int32 nodeId, const Ark_Number index, const Ark_SwiperAnimationEvent extraInfo) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onGestureSwipeImpl(Ark_Int32 nodeId, const Ark_Number index, const Ark_SwiperAnimationEvent extraInfo) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onContentDidScrollImpl(Ark_Int32 nodeId, const Ark_Number selectedIndex, const Ark_Number index, const Ark_Number position, const Ark_Number mainAxisLength) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Tabs {
+        void onChangeImpl(Ark_Int32 nodeId, const Ark_Number index) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onTabBarClickImpl(Ark_Int32 nodeId, const Ark_Number index) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onAnimationStartImpl(Ark_Int32 nodeId, const Ark_Number index, const Ark_Number targetIndex, const Ark_TabsAnimationEvent event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onAnimationEndImpl(Ark_Int32 nodeId, const Ark_Number index, const Ark_TabsAnimationEvent event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onGestureSwipeImpl(Ark_Int32 nodeId, const Ark_Number index, const Ark_TabsAnimationEvent event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void customContentTransitionImpl(Ark_Int32 nodeId, const Ark_Number from, const Ark_Number to) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onContentWillChangeImpl(Ark_Int32 nodeId, const Ark_Number currentIndex, const Ark_Number comingIndex) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace TabContent {
+        void onWillShowImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onWillHideImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Text {
+        void onCopyImpl(Ark_Int32 nodeId, const Ark_String value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onTextSelectionChangeImpl(Ark_Int32 nodeId, const Ark_Number selectionStart, const Ark_Number selectionEnd) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onMarqueeStateChangeImpl(Ark_Int32 nodeId, const Ark_Int32 data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace TextArea {
+        void inputFilterImpl(Ark_Int32 nodeId, const Ark_String value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onSubmitImpl(Ark_Int32 nodeId, const Ark_Int32 enterKey) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onChangeImpl(Ark_Int32 nodeId, const Ark_String value, const Opt_PreviewText previewText) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onTextSelectionChangeImpl(Ark_Int32 nodeId, const Ark_Number selectionStart, const Ark_Number selectionEnd) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onContentScrollImpl(Ark_Int32 nodeId, const Ark_Number totalOffsetX, const Ark_Number totalOffsetY) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onEditChangeImpl(Ark_Int32 nodeId, const Ark_Boolean isEditing) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onCopyImpl(Ark_Int32 nodeId, const Ark_String value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onCutImpl(Ark_Int32 nodeId, const Ark_String value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onPasteImpl(Ark_Int32 nodeId, const Ark_String value, const Ark_PasteEvent event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onWillInsertImpl(Ark_Int32 nodeId, const Ark_InsertValue data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDidInsertImpl(Ark_Int32 nodeId, const Ark_InsertValue data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onWillDeleteImpl(Ark_Int32 nodeId, const Ark_DeleteValue data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDidDeleteImpl(Ark_Int32 nodeId, const Ark_DeleteValue data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace TextClock {
+        void onDateChangeImpl(Ark_Int32 nodeId, const Ark_Number value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace TextInput {
+        void onEditChangedImpl(Ark_Int32 nodeId, const Ark_Boolean isEditing) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onEditChangeImpl(Ark_Int32 nodeId, const Ark_Boolean isEditing) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onSubmitImpl(Ark_Int32 nodeId, const Ark_Int32 enterKey, const Ark_SubmitEvent event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onChangeImpl(Ark_Int32 nodeId, const Ark_String value, const Opt_PreviewText previewText) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onTextSelectionChangeImpl(Ark_Int32 nodeId, const Ark_Number selectionStart, const Ark_Number selectionEnd) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onContentScrollImpl(Ark_Int32 nodeId, const Ark_Number totalOffsetX, const Ark_Number totalOffsetY) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void inputFilterImpl(Ark_Int32 nodeId, const Ark_String value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onCopyImpl(Ark_Int32 nodeId, const Ark_String value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onCutImpl(Ark_Int32 nodeId, const Ark_String value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onPasteImpl(Ark_Int32 nodeId, const Ark_String value, const Ark_PasteEvent event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onSecurityStateChangeImpl(Ark_Int32 nodeId, const Ark_Boolean data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onWillInsertImpl(Ark_Int32 nodeId, const Ark_InsertValue data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDidInsertImpl(Ark_Int32 nodeId, const Ark_InsertValue data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onWillDeleteImpl(Ark_Int32 nodeId, const Ark_DeleteValue data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDidDeleteImpl(Ark_Int32 nodeId, const Ark_DeleteValue data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace TextPicker {
+        void onAcceptImpl(Ark_Int32 nodeId, const Ark_String value, const Ark_Number index) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onCancelImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onChangeImpl(Ark_Int32 nodeId, const Union_String_Array_String value, const Union_Number_Array_Number index) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace TextTimer {
+        void onTimerImpl(Ark_Int32 nodeId, const Ark_Number utc, const Ark_Number elapsedTime) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace TimePicker {
+        void onChangeImpl(Ark_Int32 nodeId, const Ark_TimePickerResult value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Toggle {
+        void onChangeImpl(Ark_Int32 nodeId, const Ark_Boolean isOn) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Video {
+        void onStartImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onPauseImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onFinishImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onFullscreenChangeImpl(Ark_Int32 nodeId, const Literal_fullscreen_Boolean event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onPreparedImpl(Ark_Int32 nodeId, const Literal_duration_Number event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onSeekingImpl(Ark_Int32 nodeId, const Literal_time_Number event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onSeekedImpl(Ark_Int32 nodeId, const Literal_time_Number event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onUpdateImpl(Ark_Int32 nodeId, const Literal_time_Number event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onErrorImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onStopImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace Web {
+        void onPageEndImpl(Ark_Int32 nodeId, const Ark_OnPageEndEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onPageBeginImpl(Ark_Int32 nodeId, const Ark_OnPageBeginEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onProgressChangeImpl(Ark_Int32 nodeId, const Ark_OnProgressChangeEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onTitleReceiveImpl(Ark_Int32 nodeId, const Ark_OnTitleReceiveEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onGeolocationHideImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onGeolocationShowImpl(Ark_Int32 nodeId, const Ark_OnGeolocationShowEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onRequestSelectedImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onAlertImpl(Ark_Int32 nodeId, const Ark_OnAlertEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onBeforeUnloadImpl(Ark_Int32 nodeId, const Ark_OnBeforeUnloadEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onConfirmImpl(Ark_Int32 nodeId, const Ark_OnConfirmEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onPromptImpl(Ark_Int32 nodeId, const Ark_OnPromptEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onConsoleImpl(Ark_Int32 nodeId, const Ark_OnConsoleEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onErrorReceiveImpl(Ark_Int32 nodeId, const Ark_OnErrorReceiveEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onHttpErrorReceiveImpl(Ark_Int32 nodeId, const Ark_OnHttpErrorReceiveEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDownloadStartImpl(Ark_Int32 nodeId, const Ark_OnDownloadStartEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onRefreshAccessedHistoryImpl(Ark_Int32 nodeId, const Ark_OnRefreshAccessedHistoryEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onUrlLoadInterceptImpl(Ark_Int32 nodeId, const Opt_Literal_data_Union_String_WebResourceRequest event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onSslErrorReceiveImpl(Ark_Int32 nodeId, const Opt_Literal_handler_Function_error_CustomObject event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onShowFileSelectorImpl(Ark_Int32 nodeId, const Ark_OnShowFileSelectorEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onFileSelectorShowImpl(Ark_Int32 nodeId, const Opt_Literal_callback_Function_fileSelector_CustomObject event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onResourceLoadImpl(Ark_Int32 nodeId, const Ark_OnResourceLoadEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onFullScreenExitImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onFullScreenEnterImpl(Ark_Int32 nodeId, const Ark_FullScreenEnterEvent event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScaleChangeImpl(Ark_Int32 nodeId, const Ark_OnScaleChangeEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onHttpAuthRequestImpl(Ark_Int32 nodeId, const Ark_OnHttpAuthRequestEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onInterceptRequestImpl(Ark_Int32 nodeId, const Ark_OnInterceptRequestEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onPermissionRequestImpl(Ark_Int32 nodeId, const Ark_OnPermissionRequestEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScreenCaptureRequestImpl(Ark_Int32 nodeId, const Ark_OnScreenCaptureRequestEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onContextMenuShowImpl(Ark_Int32 nodeId, const Ark_OnContextMenuShowEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onContextMenuHideImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onSearchResultReceiveImpl(Ark_Int32 nodeId, const Ark_OnSearchResultReceiveEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollImpl(Ark_Int32 nodeId, const Ark_OnScrollEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onSslErrorEventReceiveImpl(Ark_Int32 nodeId, const Ark_OnSslErrorEventReceiveEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onSslErrorEventImpl(Ark_Int32 nodeId, const Ark_SslErrorEvent sslErrorEvent) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onClientAuthenticationRequestImpl(Ark_Int32 nodeId, const Ark_OnClientAuthenticationEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onWindowNewImpl(Ark_Int32 nodeId, const Ark_OnWindowNewEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onWindowExitImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onInterceptKeyEventImpl(Ark_Int32 nodeId, const Ark_KeyEvent event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onTouchIconUrlReceivedImpl(Ark_Int32 nodeId, const Ark_OnTouchIconUrlReceivedEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onFaviconReceivedImpl(Ark_Int32 nodeId, const Ark_OnFaviconReceivedEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onPageVisibleImpl(Ark_Int32 nodeId, const Ark_OnPageVisibleEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDataResubmittedImpl(Ark_Int32 nodeId, const Ark_OnDataResubmittedEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onAudioStateChangedImpl(Ark_Int32 nodeId, const Ark_OnAudioStateChangedEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onFirstContentfulPaintImpl(Ark_Int32 nodeId, const Ark_OnFirstContentfulPaintEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onFirstMeaningfulPaintImpl(Ark_Int32 nodeId, const Ark_FirstMeaningfulPaint firstMeaningfulPaint) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onLargestContentfulPaintImpl(Ark_Int32 nodeId, const Ark_LargestContentfulPaint largestContentfulPaint) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onLoadInterceptImpl(Ark_Int32 nodeId, const Ark_OnLoadInterceptEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onControllerAttachedImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onOverScrollImpl(Ark_Int32 nodeId, const Ark_OnOverScrollEvent data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onSafeBrowsingCheckResultImpl(Ark_Int32 nodeId, const Ark_Int32 threatType) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onNavigationEntryCommittedImpl(Ark_Int32 nodeId, const Ark_LoadCommittedDetails loadCommittedDetails) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onIntelligentTrackingPreventionResultImpl(Ark_Int32 nodeId, const Ark_IntelligentTrackingPreventionDetails details) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onNativeEmbedLifecycleChangeImpl(Ark_Int32 nodeId, const Ark_NativeEmbedDataInfo event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onNativeEmbedGestureEventImpl(Ark_Int32 nodeId, const Ark_NativeEmbedTouchInfo event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onOverrideUrlLoadingImpl(Ark_Int32 nodeId, const Ark_Materialized webResourceRequest) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onRenderProcessNotRespondingImpl(Ark_Int32 nodeId, const Ark_RenderProcessNotRespondingData data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onRenderProcessRespondingImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onViewportFitChangedImpl(Ark_Int32 nodeId, const Ark_Int32 viewportFit) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onInterceptKeyboardAttachImpl(Ark_Int32 nodeId, const Ark_WebKeyboardCallbackInfo keyboardCallbackInfo) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onAdsBlockedImpl(Ark_Int32 nodeId, const Ark_AdsBlockedDetails details) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace XComponent {
+        void onLoadImpl(Ark_Int32 nodeId, const Opt_CustomObject event) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onDestroyImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace SideBarContainer {
+        void onChangeImpl(Ark_Int32 nodeId, const Ark_Boolean value) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace WaterFlow {
+        void onReachStartImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onReachEndImpl(Ark_Int32 nodeId) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollFrameBeginImpl(Ark_Int32 nodeId, const Ark_Number offset, const Ark_Int32 state) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+        void onScrollIndexImpl(Ark_Int32 nodeId, const Ark_Number first, const Ark_Number last) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
+    }
+    namespace UIExtensionComponent {
+        void onTerminatedImpl(Ark_Int32 nodeId, const Ark_TerminationInfo data) {
+            // GENERATED EMPTY IMPLEMENTATION
+        }
     }
     const GENERATED_ArkUIAbilityComponentEventsReceiver* GetAbilityComponentEventsReceiver() {
         static const GENERATED_ArkUIAbilityComponentEventsReceiver GENERATED_ArkUIAbilityComponentEventsReceiverImpl {
-            AbilityComponent_onConnectImpl,
-            AbilityComponent_onDisconnectImpl,
+            AbilityComponent::onConnectImpl,
+            AbilityComponent::onDisconnectImpl,
         };
 
         return &GENERATED_ArkUIAbilityComponentEventsReceiverImpl;
     }
     const GENERATED_ArkUIAlphabetIndexerEventsReceiver* GetAlphabetIndexerEventsReceiver() {
         static const GENERATED_ArkUIAlphabetIndexerEventsReceiver GENERATED_ArkUIAlphabetIndexerEventsReceiverImpl {
-            AlphabetIndexer_onSelectedImpl,
-            AlphabetIndexer_onSelectImpl,
-            AlphabetIndexer_onRequestPopupDataImpl,
-            AlphabetIndexer_onPopupSelectImpl,
+            AlphabetIndexer::onSelectedImpl,
+            AlphabetIndexer::onSelectImpl,
+            AlphabetIndexer::onRequestPopupDataImpl,
+            AlphabetIndexer::onPopupSelectImpl,
         };
 
         return &GENERATED_ArkUIAlphabetIndexerEventsReceiverImpl;
     }
     const GENERATED_ArkUIAnimatorEventsReceiver* GetAnimatorEventsReceiver() {
         static const GENERATED_ArkUIAnimatorEventsReceiver GENERATED_ArkUIAnimatorEventsReceiverImpl {
-            Animator_onStartImpl,
-            Animator_onPauseImpl,
-            Animator_onRepeatImpl,
-            Animator_onCancelImpl,
-            Animator_onFinishImpl,
-            Animator_onFrameImpl,
+            Animator::onStartImpl,
+            Animator::onPauseImpl,
+            Animator::onRepeatImpl,
+            Animator::onCancelImpl,
+            Animator::onFinishImpl,
+            Animator::onFrameImpl,
         };
 
         return &GENERATED_ArkUIAnimatorEventsReceiverImpl;
     }
     const GENERATED_ArkUICalendarEventsReceiver* GetCalendarEventsReceiver() {
         static const GENERATED_ArkUICalendarEventsReceiver GENERATED_ArkUICalendarEventsReceiverImpl {
-            Calendar_onSelectChangeImpl,
-            Calendar_onRequestDataImpl,
+            Calendar::onSelectChangeImpl,
+            Calendar::onRequestDataImpl,
         };
 
         return &GENERATED_ArkUICalendarEventsReceiverImpl;
     }
     const GENERATED_ArkUICalendarPickerEventsReceiver* GetCalendarPickerEventsReceiver() {
         static const GENERATED_ArkUICalendarPickerEventsReceiver GENERATED_ArkUICalendarPickerEventsReceiverImpl {
-            CalendarPicker_onChangeImpl,
+            CalendarPicker::onChangeImpl,
         };
 
         return &GENERATED_ArkUICalendarPickerEventsReceiverImpl;
     }
     const GENERATED_ArkUICanvasEventsReceiver* GetCanvasEventsReceiver() {
         static const GENERATED_ArkUICanvasEventsReceiver GENERATED_ArkUICanvasEventsReceiverImpl {
-            Canvas_onReadyImpl,
+            Canvas::onReadyImpl,
         };
 
         return &GENERATED_ArkUICanvasEventsReceiverImpl;
     }
     const GENERATED_ArkUICheckboxEventsReceiver* GetCheckboxEventsReceiver() {
         static const GENERATED_ArkUICheckboxEventsReceiver GENERATED_ArkUICheckboxEventsReceiverImpl {
-            Checkbox_onChangeImpl,
+            Checkbox::onChangeImpl,
         };
 
         return &GENERATED_ArkUICheckboxEventsReceiverImpl;
     }
     const GENERATED_ArkUICheckboxGroupEventsReceiver* GetCheckboxGroupEventsReceiver() {
         static const GENERATED_ArkUICheckboxGroupEventsReceiver GENERATED_ArkUICheckboxGroupEventsReceiverImpl {
-            CheckboxGroup_onChangeImpl,
+            CheckboxGroup::onChangeImpl,
         };
 
         return &GENERATED_ArkUICheckboxGroupEventsReceiverImpl;
     }
     const GENERATED_ArkUICommonMethodEventsReceiver* GetCommonMethodEventsReceiver() {
         static const GENERATED_ArkUICommonMethodEventsReceiver GENERATED_ArkUICommonMethodEventsReceiverImpl {
-            CommonMethod_onChildTouchTestImpl,
-            CommonMethod_onClickImpl,
-            CommonMethod_onHoverImpl,
-            CommonMethod_onMouseImpl,
-            CommonMethod_onTouchImpl,
-            CommonMethod_onKeyEventImpl,
-            CommonMethod_onKeyPreImeImpl,
-            CommonMethod_onFocusImpl,
-            CommonMethod_onBlurImpl,
-            CommonMethod_onAppearImpl,
-            CommonMethod_onDisAppearImpl,
-            CommonMethod_onAttachImpl,
-            CommonMethod_onDetachImpl,
-            CommonMethod_onAreaChangeImpl,
-            CommonMethod_onDragStartImpl,
-            CommonMethod_onDragEnterImpl,
-            CommonMethod_onDragMoveImpl,
-            CommonMethod_onDragLeaveImpl,
-            CommonMethod_onDropImpl,
-            CommonMethod_onDragEndImpl,
-            CommonMethod_onPreDragImpl,
-            CommonMethod_onVisibleAreaChangeImpl,
-            CommonMethod_keyboardShortcutImpl,
-            CommonMethod_onGestureJudgeBeginImpl,
-            CommonMethod_onGestureRecognizerJudgeBeginImpl,
-            CommonMethod_shouldBuiltInRecognizerParallelWithImpl,
-            CommonMethod_onTouchInterceptImpl,
-            CommonMethod_onSizeChangeImpl,
+            CommonMethod::onChildTouchTestImpl,
+            CommonMethod::onClickImpl,
+            CommonMethod::onHoverImpl,
+            CommonMethod::onAccessibilityHoverImpl,
+            CommonMethod::onMouseImpl,
+            CommonMethod::onTouchImpl,
+            CommonMethod::onKeyEventImpl,
+            CommonMethod::onKeyPreImeImpl,
+            CommonMethod::onFocusImpl,
+            CommonMethod::onBlurImpl,
+            CommonMethod::onAppearImpl,
+            CommonMethod::onDisAppearImpl,
+            CommonMethod::onAttachImpl,
+            CommonMethod::onDetachImpl,
+            CommonMethod::onAreaChangeImpl,
+            CommonMethod::onDragStartImpl,
+            CommonMethod::onDragEnterImpl,
+            CommonMethod::onDragMoveImpl,
+            CommonMethod::onDragLeaveImpl,
+            CommonMethod::onDropImpl,
+            CommonMethod::onDragEndImpl,
+            CommonMethod::onPreDragImpl,
+            CommonMethod::onVisibleAreaChangeImpl,
+            CommonMethod::keyboardShortcutImpl,
+            CommonMethod::onGestureJudgeBeginImpl,
+            CommonMethod::onGestureRecognizerJudgeBeginImpl,
+            CommonMethod::shouldBuiltInRecognizerParallelWithImpl,
+            CommonMethod::onTouchInterceptImpl,
+            CommonMethod::onSizeChangeImpl,
         };
 
         return &GENERATED_ArkUICommonMethodEventsReceiverImpl;
     }
     const GENERATED_ArkUIScrollableCommonMethodEventsReceiver* GetScrollableCommonMethodEventsReceiver() {
         static const GENERATED_ArkUIScrollableCommonMethodEventsReceiver GENERATED_ArkUIScrollableCommonMethodEventsReceiverImpl {
-            ScrollableCommonMethod_onScrollImpl,
-            ScrollableCommonMethod_onDidScrollImpl,
-            ScrollableCommonMethod_onReachStartImpl,
-            ScrollableCommonMethod_onReachEndImpl,
-            ScrollableCommonMethod_onScrollStartImpl,
-            ScrollableCommonMethod_onScrollStopImpl,
+            ScrollableCommonMethod::onScrollImpl,
+            ScrollableCommonMethod::onDidScrollImpl,
+            ScrollableCommonMethod::onReachStartImpl,
+            ScrollableCommonMethod::onReachEndImpl,
+            ScrollableCommonMethod::onScrollStartImpl,
+            ScrollableCommonMethod::onScrollStopImpl,
         };
 
         return &GENERATED_ArkUIScrollableCommonMethodEventsReceiverImpl;
     }
     const GENERATED_ArkUICounterEventsReceiver* GetCounterEventsReceiver() {
         static const GENERATED_ArkUICounterEventsReceiver GENERATED_ArkUICounterEventsReceiverImpl {
-            Counter_onIncImpl,
-            Counter_onDecImpl,
+            Counter::onIncImpl,
+            Counter::onDecImpl,
         };
 
         return &GENERATED_ArkUICounterEventsReceiverImpl;
     }
     const GENERATED_ArkUIDatePickerEventsReceiver* GetDatePickerEventsReceiver() {
         static const GENERATED_ArkUIDatePickerEventsReceiver GENERATED_ArkUIDatePickerEventsReceiverImpl {
-            DatePicker_onChangeImpl,
-            DatePicker_onDateChangeImpl,
+            DatePicker::onChangeImpl,
+            DatePicker::onDateChangeImpl,
         };
 
         return &GENERATED_ArkUIDatePickerEventsReceiverImpl;
     }
     const GENERATED_ArkUIFolderStackEventsReceiver* GetFolderStackEventsReceiver() {
         static const GENERATED_ArkUIFolderStackEventsReceiver GENERATED_ArkUIFolderStackEventsReceiverImpl {
-            FolderStack_onFolderStateChangeImpl,
-            FolderStack_onHoverStatusChangeImpl,
+            FolderStack::onFolderStateChangeImpl,
+            FolderStack::onHoverStatusChangeImpl,
         };
 
         return &GENERATED_ArkUIFolderStackEventsReceiverImpl;
     }
     const GENERATED_ArkUIFormComponentEventsReceiver* GetFormComponentEventsReceiver() {
         static const GENERATED_ArkUIFormComponentEventsReceiver GENERATED_ArkUIFormComponentEventsReceiverImpl {
-            FormComponent_onAcquiredImpl,
-            FormComponent_onErrorImpl,
-            FormComponent_onRouterImpl,
-            FormComponent_onUninstallImpl,
-            FormComponent_onLoadImpl,
+            FormComponent::onAcquiredImpl,
+            FormComponent::onErrorImpl,
+            FormComponent::onRouterImpl,
+            FormComponent::onUninstallImpl,
+            FormComponent::onLoadImpl,
         };
 
         return &GENERATED_ArkUIFormComponentEventsReceiverImpl;
     }
     const GENERATED_ArkUIGridEventsReceiver* GetGridEventsReceiver() {
         static const GENERATED_ArkUIGridEventsReceiver GENERATED_ArkUIGridEventsReceiverImpl {
-            Grid_onScrollBarUpdateImpl,
-            Grid_onScrollIndexImpl,
-            Grid_onItemDragStartImpl,
-            Grid_onItemDragEnterImpl,
-            Grid_onItemDragMoveImpl,
-            Grid_onItemDragLeaveImpl,
-            Grid_onItemDropImpl,
-            Grid_onScrollImpl,
-            Grid_onReachStartImpl,
-            Grid_onReachEndImpl,
-            Grid_onScrollStartImpl,
-            Grid_onScrollStopImpl,
-            Grid_onScrollFrameBeginImpl,
+            Grid::onScrollBarUpdateImpl,
+            Grid::onScrollIndexImpl,
+            Grid::onItemDragStartImpl,
+            Grid::onItemDragEnterImpl,
+            Grid::onItemDragMoveImpl,
+            Grid::onItemDragLeaveImpl,
+            Grid::onItemDropImpl,
+            Grid::onScrollImpl,
+            Grid::onReachStartImpl,
+            Grid::onReachEndImpl,
+            Grid::onScrollStartImpl,
+            Grid::onScrollStopImpl,
+            Grid::onScrollFrameBeginImpl,
         };
 
         return &GENERATED_ArkUIGridEventsReceiverImpl;
     }
     const GENERATED_ArkUIGridItemEventsReceiver* GetGridItemEventsReceiver() {
         static const GENERATED_ArkUIGridItemEventsReceiver GENERATED_ArkUIGridItemEventsReceiverImpl {
-            GridItem_onSelectImpl,
+            GridItem::onSelectImpl,
         };
 
         return &GENERATED_ArkUIGridItemEventsReceiverImpl;
     }
     const GENERATED_ArkUIGridRowEventsReceiver* GetGridRowEventsReceiver() {
         static const GENERATED_ArkUIGridRowEventsReceiver GENERATED_ArkUIGridRowEventsReceiverImpl {
-            GridRow_onBreakpointChangeImpl,
+            GridRow::onBreakpointChangeImpl,
         };
 
         return &GENERATED_ArkUIGridRowEventsReceiverImpl;
     }
     const GENERATED_ArkUIImageEventsReceiver* GetImageEventsReceiver() {
         static const GENERATED_ArkUIImageEventsReceiver GENERATED_ArkUIImageEventsReceiverImpl {
-            Image_onCompleteImpl,
-            Image_onErrorImpl,
-            Image_onFinishImpl,
+            Image::onCompleteImpl,
+            Image::onErrorImpl,
+            Image::onFinishImpl,
         };
 
         return &GENERATED_ArkUIImageEventsReceiverImpl;
     }
     const GENERATED_ArkUIImageAnimatorEventsReceiver* GetImageAnimatorEventsReceiver() {
         static const GENERATED_ArkUIImageAnimatorEventsReceiver GENERATED_ArkUIImageAnimatorEventsReceiverImpl {
-            ImageAnimator_onStartImpl,
-            ImageAnimator_onPauseImpl,
-            ImageAnimator_onRepeatImpl,
-            ImageAnimator_onCancelImpl,
-            ImageAnimator_onFinishImpl,
+            ImageAnimator::onStartImpl,
+            ImageAnimator::onPauseImpl,
+            ImageAnimator::onRepeatImpl,
+            ImageAnimator::onCancelImpl,
+            ImageAnimator::onFinishImpl,
         };
 
         return &GENERATED_ArkUIImageAnimatorEventsReceiverImpl;
     }
     const GENERATED_ArkUIImageSpanEventsReceiver* GetImageSpanEventsReceiver() {
         static const GENERATED_ArkUIImageSpanEventsReceiver GENERATED_ArkUIImageSpanEventsReceiverImpl {
-            ImageSpan_onCompleteImpl,
-            ImageSpan_onErrorImpl,
+            ImageSpan::onCompleteImpl,
+            ImageSpan::onErrorImpl,
         };
 
         return &GENERATED_ArkUIImageSpanEventsReceiverImpl;
     }
     const GENERATED_ArkUIListEventsReceiver* GetListEventsReceiver() {
         static const GENERATED_ArkUIListEventsReceiver GENERATED_ArkUIListEventsReceiverImpl {
-            List_onScrollImpl,
-            List_onScrollIndexImpl,
-            List_onScrollVisibleContentChangeImpl,
-            List_onReachStartImpl,
-            List_onReachEndImpl,
-            List_onScrollStartImpl,
-            List_onScrollStopImpl,
-            List_onItemDeleteImpl,
-            List_onItemMoveImpl,
-            List_onItemDragStartImpl,
-            List_onItemDragEnterImpl,
-            List_onItemDragMoveImpl,
-            List_onItemDragLeaveImpl,
-            List_onItemDropImpl,
-            List_onScrollFrameBeginImpl,
+            List::onScrollImpl,
+            List::onScrollIndexImpl,
+            List::onScrollVisibleContentChangeImpl,
+            List::onReachStartImpl,
+            List::onReachEndImpl,
+            List::onScrollStartImpl,
+            List::onScrollStopImpl,
+            List::onItemDeleteImpl,
+            List::onItemMoveImpl,
+            List::onItemDragStartImpl,
+            List::onItemDragEnterImpl,
+            List::onItemDragMoveImpl,
+            List::onItemDragLeaveImpl,
+            List::onItemDropImpl,
+            List::onScrollFrameBeginImpl,
         };
 
         return &GENERATED_ArkUIListEventsReceiverImpl;
     }
     const GENERATED_ArkUIListItemEventsReceiver* GetListItemEventsReceiver() {
         static const GENERATED_ArkUIListItemEventsReceiver GENERATED_ArkUIListItemEventsReceiverImpl {
-            ListItem_onSelectImpl,
+            ListItem::onSelectImpl,
         };
 
         return &GENERATED_ArkUIListItemEventsReceiverImpl;
     }
     const GENERATED_ArkUILocationButtonEventsReceiver* GetLocationButtonEventsReceiver() {
         static const GENERATED_ArkUILocationButtonEventsReceiver GENERATED_ArkUILocationButtonEventsReceiverImpl {
-            LocationButton_onClickImpl,
+            LocationButton::onClickImpl,
         };
 
         return &GENERATED_ArkUILocationButtonEventsReceiverImpl;
     }
     const GENERATED_ArkUIMarqueeEventsReceiver* GetMarqueeEventsReceiver() {
         static const GENERATED_ArkUIMarqueeEventsReceiver GENERATED_ArkUIMarqueeEventsReceiverImpl {
-            Marquee_onStartImpl,
-            Marquee_onBounceImpl,
-            Marquee_onFinishImpl,
+            Marquee::onStartImpl,
+            Marquee::onBounceImpl,
+            Marquee::onFinishImpl,
         };
 
         return &GENERATED_ArkUIMarqueeEventsReceiverImpl;
     }
     const GENERATED_ArkUIMenuItemEventsReceiver* GetMenuItemEventsReceiver() {
         static const GENERATED_ArkUIMenuItemEventsReceiver GENERATED_ArkUIMenuItemEventsReceiverImpl {
-            MenuItem_onChangeImpl,
+            MenuItem::onChangeImpl,
         };
 
         return &GENERATED_ArkUIMenuItemEventsReceiverImpl;
     }
     const GENERATED_ArkUINavDestinationEventsReceiver* GetNavDestinationEventsReceiver() {
         static const GENERATED_ArkUINavDestinationEventsReceiver GENERATED_ArkUINavDestinationEventsReceiverImpl {
-            NavDestination_onShownImpl,
-            NavDestination_onHiddenImpl,
-            NavDestination_onBackPressedImpl,
-            NavDestination_onWillAppearImpl,
-            NavDestination_onWillDisappearImpl,
-            NavDestination_onWillShowImpl,
-            NavDestination_onWillHideImpl,
+            NavDestination::onShownImpl,
+            NavDestination::onHiddenImpl,
+            NavDestination::onBackPressedImpl,
+            NavDestination::onWillAppearImpl,
+            NavDestination::onWillDisappearImpl,
+            NavDestination::onWillShowImpl,
+            NavDestination::onWillHideImpl,
         };
 
         return &GENERATED_ArkUINavDestinationEventsReceiverImpl;
     }
     const GENERATED_ArkUINavRouterEventsReceiver* GetNavRouterEventsReceiver() {
         static const GENERATED_ArkUINavRouterEventsReceiver GENERATED_ArkUINavRouterEventsReceiverImpl {
-            NavRouter_onStateChangeImpl,
+            NavRouter::onStateChangeImpl,
         };
 
         return &GENERATED_ArkUINavRouterEventsReceiverImpl;
     }
     const GENERATED_ArkUINavigationEventsReceiver* GetNavigationEventsReceiver() {
         static const GENERATED_ArkUINavigationEventsReceiver GENERATED_ArkUINavigationEventsReceiverImpl {
-            Navigation_onTitleModeChangeImpl,
-            Navigation_onNavBarStateChangeImpl,
-            Navigation_onNavigationModeChangeImpl,
-            Navigation_navDestinationImpl,
-            Navigation_customNavContentTransitionImpl,
+            Navigation::onTitleModeChangeImpl,
+            Navigation::onNavBarStateChangeImpl,
+            Navigation::onNavigationModeChangeImpl,
+            Navigation::navDestinationImpl,
+            Navigation::customNavContentTransitionImpl,
         };
 
         return &GENERATED_ArkUINavigationEventsReceiverImpl;
     }
     const GENERATED_ArkUIPanelEventsReceiver* GetPanelEventsReceiver() {
         static const GENERATED_ArkUIPanelEventsReceiver GENERATED_ArkUIPanelEventsReceiverImpl {
-            Panel_onChangeImpl,
-            Panel_onHeightChangeImpl,
+            Panel::onChangeImpl,
+            Panel::onHeightChangeImpl,
         };
 
         return &GENERATED_ArkUIPanelEventsReceiverImpl;
     }
     const GENERATED_ArkUIPasteButtonEventsReceiver* GetPasteButtonEventsReceiver() {
         static const GENERATED_ArkUIPasteButtonEventsReceiver GENERATED_ArkUIPasteButtonEventsReceiverImpl {
-            PasteButton_onClickImpl,
+            PasteButton::onClickImpl,
         };
 
         return &GENERATED_ArkUIPasteButtonEventsReceiverImpl;
     }
     const GENERATED_ArkUIPatternLockEventsReceiver* GetPatternLockEventsReceiver() {
         static const GENERATED_ArkUIPatternLockEventsReceiver GENERATED_ArkUIPatternLockEventsReceiverImpl {
-            PatternLock_onPatternCompleteImpl,
+            PatternLock::onPatternCompleteImpl,
         };
 
         return &GENERATED_ArkUIPatternLockEventsReceiverImpl;
     }
     const GENERATED_ArkUIPluginComponentEventsReceiver* GetPluginComponentEventsReceiver() {
         static const GENERATED_ArkUIPluginComponentEventsReceiver GENERATED_ArkUIPluginComponentEventsReceiverImpl {
-            PluginComponent_onCompleteImpl,
-            PluginComponent_onErrorImpl,
+            PluginComponent::onCompleteImpl,
+            PluginComponent::onErrorImpl,
         };
 
         return &GENERATED_ArkUIPluginComponentEventsReceiverImpl;
     }
     const GENERATED_ArkUIRadioEventsReceiver* GetRadioEventsReceiver() {
         static const GENERATED_ArkUIRadioEventsReceiver GENERATED_ArkUIRadioEventsReceiverImpl {
-            Radio_onChangeImpl,
+            Radio::onChangeImpl,
         };
 
         return &GENERATED_ArkUIRadioEventsReceiverImpl;
     }
     const GENERATED_ArkUIRatingEventsReceiver* GetRatingEventsReceiver() {
         static const GENERATED_ArkUIRatingEventsReceiver GENERATED_ArkUIRatingEventsReceiverImpl {
-            Rating_onChangeImpl,
+            Rating::onChangeImpl,
         };
 
         return &GENERATED_ArkUIRatingEventsReceiverImpl;
     }
     const GENERATED_ArkUIRefreshEventsReceiver* GetRefreshEventsReceiver() {
         static const GENERATED_ArkUIRefreshEventsReceiver GENERATED_ArkUIRefreshEventsReceiverImpl {
-            Refresh_onStateChangeImpl,
-            Refresh_onRefreshingImpl,
-            Refresh_onOffsetChangeImpl,
+            Refresh::onStateChangeImpl,
+            Refresh::onRefreshingImpl,
+            Refresh::onOffsetChangeImpl,
         };
 
         return &GENERATED_ArkUIRefreshEventsReceiverImpl;
     }
     const GENERATED_ArkUIRichEditorEventsReceiver* GetRichEditorEventsReceiver() {
         static const GENERATED_ArkUIRichEditorEventsReceiver GENERATED_ArkUIRichEditorEventsReceiverImpl {
-            RichEditor_onReadyImpl,
-            RichEditor_onSelectImpl,
-            RichEditor_onSelectionChangeImpl,
-            RichEditor_aboutToIMEInputImpl,
-            RichEditor_onIMEInputCompleteImpl,
-            RichEditor_aboutToDeleteImpl,
-            RichEditor_onDeleteCompleteImpl,
-            RichEditor_onPasteImpl,
-            RichEditor_onEditingChangeImpl,
-            RichEditor_onSubmitImpl,
-            RichEditor_onWillChangeImpl,
-            RichEditor_onDidChangeImpl,
-            RichEditor_onCutImpl,
-            RichEditor_onCopyImpl,
+            RichEditor::onReadyImpl,
+            RichEditor::onSelectImpl,
+            RichEditor::onSelectionChangeImpl,
+            RichEditor::aboutToIMEInputImpl,
+            RichEditor::onIMEInputCompleteImpl,
+            RichEditor::aboutToDeleteImpl,
+            RichEditor::onDeleteCompleteImpl,
+            RichEditor::onPasteImpl,
+            RichEditor::onEditingChangeImpl,
+            RichEditor::onSubmitImpl,
+            RichEditor::onWillChangeImpl,
+            RichEditor::onDidChangeImpl,
+            RichEditor::onCutImpl,
+            RichEditor::onCopyImpl,
         };
 
         return &GENERATED_ArkUIRichEditorEventsReceiverImpl;
     }
     const GENERATED_ArkUIRichTextEventsReceiver* GetRichTextEventsReceiver() {
         static const GENERATED_ArkUIRichTextEventsReceiver GENERATED_ArkUIRichTextEventsReceiverImpl {
-            RichText_onStartImpl,
-            RichText_onCompleteImpl,
+            RichText::onStartImpl,
+            RichText::onCompleteImpl,
         };
 
         return &GENERATED_ArkUIRichTextEventsReceiverImpl;
     }
     const GENERATED_ArkUISaveButtonEventsReceiver* GetSaveButtonEventsReceiver() {
         static const GENERATED_ArkUISaveButtonEventsReceiver GENERATED_ArkUISaveButtonEventsReceiverImpl {
-            SaveButton_onClickImpl,
+            SaveButton::onClickImpl,
         };
 
         return &GENERATED_ArkUISaveButtonEventsReceiverImpl;
     }
     const GENERATED_ArkUIScrollEventsReceiver* GetScrollEventsReceiver() {
         static const GENERATED_ArkUIScrollEventsReceiver GENERATED_ArkUIScrollEventsReceiverImpl {
-            Scroll_onScrollImpl,
-            Scroll_onDidScrollImpl,
-            Scroll_onScrollEdgeImpl,
-            Scroll_onScrollStartImpl,
-            Scroll_onScrollEndImpl,
-            Scroll_onScrollStopImpl,
-            Scroll_onScrollFrameBeginImpl,
+            Scroll::onScrollImpl,
+            Scroll::onDidScrollImpl,
+            Scroll::onScrollEdgeImpl,
+            Scroll::onScrollStartImpl,
+            Scroll::onScrollEndImpl,
+            Scroll::onScrollStopImpl,
+            Scroll::onScrollFrameBeginImpl,
         };
 
         return &GENERATED_ArkUIScrollEventsReceiverImpl;
     }
     const GENERATED_ArkUISearchEventsReceiver* GetSearchEventsReceiver() {
         static const GENERATED_ArkUISearchEventsReceiver GENERATED_ArkUISearchEventsReceiverImpl {
-            Search_inputFilterImpl,
-            Search_onEditChangeImpl,
-            Search_onSubmitImpl,
-            Search_onChangeImpl,
-            Search_onTextSelectionChangeImpl,
-            Search_onContentScrollImpl,
-            Search_onCopyImpl,
-            Search_onCutImpl,
-            Search_onPasteImpl,
-            Search_onWillInsertImpl,
-            Search_onDidInsertImpl,
-            Search_onWillDeleteImpl,
-            Search_onDidDeleteImpl,
+            Search::inputFilterImpl,
+            Search::onEditChangeImpl,
+            Search::onSubmitImpl,
+            Search::onChangeImpl,
+            Search::onTextSelectionChangeImpl,
+            Search::onContentScrollImpl,
+            Search::onCopyImpl,
+            Search::onCutImpl,
+            Search::onPasteImpl,
+            Search::onWillInsertImpl,
+            Search::onDidInsertImpl,
+            Search::onWillDeleteImpl,
+            Search::onDidDeleteImpl,
         };
 
         return &GENERATED_ArkUISearchEventsReceiverImpl;
     }
     const GENERATED_ArkUISelectEventsReceiver* GetSelectEventsReceiver() {
         static const GENERATED_ArkUISelectEventsReceiver GENERATED_ArkUISelectEventsReceiverImpl {
-            Select_onSelectImpl,
+            Select::onSelectImpl,
         };
 
         return &GENERATED_ArkUISelectEventsReceiverImpl;
     }
     const GENERATED_ArkUISliderEventsReceiver* GetSliderEventsReceiver() {
         static const GENERATED_ArkUISliderEventsReceiver GENERATED_ArkUISliderEventsReceiverImpl {
-            Slider_onChangeImpl,
+            Slider::onChangeImpl,
         };
 
         return &GENERATED_ArkUISliderEventsReceiverImpl;
     }
     const GENERATED_ArkUIStepperEventsReceiver* GetStepperEventsReceiver() {
         static const GENERATED_ArkUIStepperEventsReceiver GENERATED_ArkUIStepperEventsReceiverImpl {
-            Stepper_onFinishImpl,
-            Stepper_onSkipImpl,
-            Stepper_onChangeImpl,
-            Stepper_onNextImpl,
-            Stepper_onPreviousImpl,
+            Stepper::onFinishImpl,
+            Stepper::onSkipImpl,
+            Stepper::onChangeImpl,
+            Stepper::onNextImpl,
+            Stepper::onPreviousImpl,
         };
 
         return &GENERATED_ArkUIStepperEventsReceiverImpl;
     }
     const GENERATED_ArkUISwiperEventsReceiver* GetSwiperEventsReceiver() {
         static const GENERATED_ArkUISwiperEventsReceiver GENERATED_ArkUISwiperEventsReceiverImpl {
-            Swiper_onChangeImpl,
-            Swiper_onAnimationStartImpl,
-            Swiper_onAnimationEndImpl,
-            Swiper_onGestureSwipeImpl,
-            Swiper_onContentDidScrollImpl,
+            Swiper::onChangeImpl,
+            Swiper::onAnimationStartImpl,
+            Swiper::onAnimationEndImpl,
+            Swiper::onGestureSwipeImpl,
+            Swiper::onContentDidScrollImpl,
         };
 
         return &GENERATED_ArkUISwiperEventsReceiverImpl;
     }
     const GENERATED_ArkUITabsEventsReceiver* GetTabsEventsReceiver() {
         static const GENERATED_ArkUITabsEventsReceiver GENERATED_ArkUITabsEventsReceiverImpl {
-            Tabs_onChangeImpl,
-            Tabs_onTabBarClickImpl,
-            Tabs_onAnimationStartImpl,
-            Tabs_onAnimationEndImpl,
-            Tabs_onGestureSwipeImpl,
-            Tabs_customContentTransitionImpl,
-            Tabs_onContentWillChangeImpl,
+            Tabs::onChangeImpl,
+            Tabs::onTabBarClickImpl,
+            Tabs::onAnimationStartImpl,
+            Tabs::onAnimationEndImpl,
+            Tabs::onGestureSwipeImpl,
+            Tabs::customContentTransitionImpl,
+            Tabs::onContentWillChangeImpl,
         };
 
         return &GENERATED_ArkUITabsEventsReceiverImpl;
     }
     const GENERATED_ArkUITabContentEventsReceiver* GetTabContentEventsReceiver() {
         static const GENERATED_ArkUITabContentEventsReceiver GENERATED_ArkUITabContentEventsReceiverImpl {
-            TabContent_onWillShowImpl,
-            TabContent_onWillHideImpl,
+            TabContent::onWillShowImpl,
+            TabContent::onWillHideImpl,
         };
 
         return &GENERATED_ArkUITabContentEventsReceiverImpl;
     }
     const GENERATED_ArkUITextEventsReceiver* GetTextEventsReceiver() {
         static const GENERATED_ArkUITextEventsReceiver GENERATED_ArkUITextEventsReceiverImpl {
-            Text_onCopyImpl,
-            Text_onTextSelectionChangeImpl,
-            Text_onMarqueeStateChangeImpl,
+            Text::onCopyImpl,
+            Text::onTextSelectionChangeImpl,
+            Text::onMarqueeStateChangeImpl,
         };
 
         return &GENERATED_ArkUITextEventsReceiverImpl;
     }
     const GENERATED_ArkUITextAreaEventsReceiver* GetTextAreaEventsReceiver() {
         static const GENERATED_ArkUITextAreaEventsReceiver GENERATED_ArkUITextAreaEventsReceiverImpl {
-            TextArea_inputFilterImpl,
-            TextArea_onSubmitImpl,
-            TextArea_onChangeImpl,
-            TextArea_onTextSelectionChangeImpl,
-            TextArea_onContentScrollImpl,
-            TextArea_onEditChangeImpl,
-            TextArea_onCopyImpl,
-            TextArea_onCutImpl,
-            TextArea_onPasteImpl,
-            TextArea_onWillInsertImpl,
-            TextArea_onDidInsertImpl,
-            TextArea_onWillDeleteImpl,
-            TextArea_onDidDeleteImpl,
+            TextArea::inputFilterImpl,
+            TextArea::onSubmitImpl,
+            TextArea::onChangeImpl,
+            TextArea::onTextSelectionChangeImpl,
+            TextArea::onContentScrollImpl,
+            TextArea::onEditChangeImpl,
+            TextArea::onCopyImpl,
+            TextArea::onCutImpl,
+            TextArea::onPasteImpl,
+            TextArea::onWillInsertImpl,
+            TextArea::onDidInsertImpl,
+            TextArea::onWillDeleteImpl,
+            TextArea::onDidDeleteImpl,
         };
 
         return &GENERATED_ArkUITextAreaEventsReceiverImpl;
     }
     const GENERATED_ArkUITextClockEventsReceiver* GetTextClockEventsReceiver() {
         static const GENERATED_ArkUITextClockEventsReceiver GENERATED_ArkUITextClockEventsReceiverImpl {
-            TextClock_onDateChangeImpl,
+            TextClock::onDateChangeImpl,
         };
 
         return &GENERATED_ArkUITextClockEventsReceiverImpl;
     }
     const GENERATED_ArkUITextInputEventsReceiver* GetTextInputEventsReceiver() {
         static const GENERATED_ArkUITextInputEventsReceiver GENERATED_ArkUITextInputEventsReceiverImpl {
-            TextInput_onEditChangedImpl,
-            TextInput_onEditChangeImpl,
-            TextInput_onSubmitImpl,
-            TextInput_onChangeImpl,
-            TextInput_onTextSelectionChangeImpl,
-            TextInput_onContentScrollImpl,
-            TextInput_inputFilterImpl,
-            TextInput_onCopyImpl,
-            TextInput_onCutImpl,
-            TextInput_onPasteImpl,
-            TextInput_onSecurityStateChangeImpl,
-            TextInput_onWillInsertImpl,
-            TextInput_onDidInsertImpl,
-            TextInput_onWillDeleteImpl,
-            TextInput_onDidDeleteImpl,
+            TextInput::onEditChangedImpl,
+            TextInput::onEditChangeImpl,
+            TextInput::onSubmitImpl,
+            TextInput::onChangeImpl,
+            TextInput::onTextSelectionChangeImpl,
+            TextInput::onContentScrollImpl,
+            TextInput::inputFilterImpl,
+            TextInput::onCopyImpl,
+            TextInput::onCutImpl,
+            TextInput::onPasteImpl,
+            TextInput::onSecurityStateChangeImpl,
+            TextInput::onWillInsertImpl,
+            TextInput::onDidInsertImpl,
+            TextInput::onWillDeleteImpl,
+            TextInput::onDidDeleteImpl,
         };
 
         return &GENERATED_ArkUITextInputEventsReceiverImpl;
     }
     const GENERATED_ArkUITextPickerEventsReceiver* GetTextPickerEventsReceiver() {
         static const GENERATED_ArkUITextPickerEventsReceiver GENERATED_ArkUITextPickerEventsReceiverImpl {
-            TextPicker_onAcceptImpl,
-            TextPicker_onCancelImpl,
-            TextPicker_onChangeImpl,
+            TextPicker::onAcceptImpl,
+            TextPicker::onCancelImpl,
+            TextPicker::onChangeImpl,
         };
 
         return &GENERATED_ArkUITextPickerEventsReceiverImpl;
     }
     const GENERATED_ArkUITextTimerEventsReceiver* GetTextTimerEventsReceiver() {
         static const GENERATED_ArkUITextTimerEventsReceiver GENERATED_ArkUITextTimerEventsReceiverImpl {
-            TextTimer_onTimerImpl,
+            TextTimer::onTimerImpl,
         };
 
         return &GENERATED_ArkUITextTimerEventsReceiverImpl;
     }
     const GENERATED_ArkUITimePickerEventsReceiver* GetTimePickerEventsReceiver() {
         static const GENERATED_ArkUITimePickerEventsReceiver GENERATED_ArkUITimePickerEventsReceiverImpl {
-            TimePicker_onChangeImpl,
+            TimePicker::onChangeImpl,
         };
 
         return &GENERATED_ArkUITimePickerEventsReceiverImpl;
     }
     const GENERATED_ArkUIToggleEventsReceiver* GetToggleEventsReceiver() {
         static const GENERATED_ArkUIToggleEventsReceiver GENERATED_ArkUIToggleEventsReceiverImpl {
-            Toggle_onChangeImpl,
+            Toggle::onChangeImpl,
         };
 
         return &GENERATED_ArkUIToggleEventsReceiverImpl;
     }
     const GENERATED_ArkUIVideoEventsReceiver* GetVideoEventsReceiver() {
         static const GENERATED_ArkUIVideoEventsReceiver GENERATED_ArkUIVideoEventsReceiverImpl {
-            Video_onStartImpl,
-            Video_onPauseImpl,
-            Video_onFinishImpl,
-            Video_onFullscreenChangeImpl,
-            Video_onPreparedImpl,
-            Video_onSeekingImpl,
-            Video_onSeekedImpl,
-            Video_onUpdateImpl,
-            Video_onErrorImpl,
-            Video_onStopImpl,
+            Video::onStartImpl,
+            Video::onPauseImpl,
+            Video::onFinishImpl,
+            Video::onFullscreenChangeImpl,
+            Video::onPreparedImpl,
+            Video::onSeekingImpl,
+            Video::onSeekedImpl,
+            Video::onUpdateImpl,
+            Video::onErrorImpl,
+            Video::onStopImpl,
         };
 
         return &GENERATED_ArkUIVideoEventsReceiverImpl;
     }
     const GENERATED_ArkUIWebEventsReceiver* GetWebEventsReceiver() {
         static const GENERATED_ArkUIWebEventsReceiver GENERATED_ArkUIWebEventsReceiverImpl {
-            Web_onPageEndImpl,
-            Web_onPageBeginImpl,
-            Web_onProgressChangeImpl,
-            Web_onTitleReceiveImpl,
-            Web_onGeolocationHideImpl,
-            Web_onGeolocationShowImpl,
-            Web_onRequestSelectedImpl,
-            Web_onAlertImpl,
-            Web_onBeforeUnloadImpl,
-            Web_onConfirmImpl,
-            Web_onPromptImpl,
-            Web_onConsoleImpl,
-            Web_onErrorReceiveImpl,
-            Web_onHttpErrorReceiveImpl,
-            Web_onDownloadStartImpl,
-            Web_onRefreshAccessedHistoryImpl,
-            Web_onUrlLoadInterceptImpl,
-            Web_onSslErrorReceiveImpl,
-            Web_onShowFileSelectorImpl,
-            Web_onFileSelectorShowImpl,
-            Web_onResourceLoadImpl,
-            Web_onFullScreenExitImpl,
-            Web_onFullScreenEnterImpl,
-            Web_onScaleChangeImpl,
-            Web_onHttpAuthRequestImpl,
-            Web_onInterceptRequestImpl,
-            Web_onPermissionRequestImpl,
-            Web_onScreenCaptureRequestImpl,
-            Web_onContextMenuShowImpl,
-            Web_onContextMenuHideImpl,
-            Web_onSearchResultReceiveImpl,
-            Web_onScrollImpl,
-            Web_onSslErrorEventReceiveImpl,
-            Web_onSslErrorEventImpl,
-            Web_onClientAuthenticationRequestImpl,
-            Web_onWindowNewImpl,
-            Web_onWindowExitImpl,
-            Web_onInterceptKeyEventImpl,
-            Web_onTouchIconUrlReceivedImpl,
-            Web_onFaviconReceivedImpl,
-            Web_onPageVisibleImpl,
-            Web_onDataResubmittedImpl,
-            Web_onAudioStateChangedImpl,
-            Web_onFirstContentfulPaintImpl,
-            Web_onFirstMeaningfulPaintImpl,
-            Web_onLargestContentfulPaintImpl,
-            Web_onLoadInterceptImpl,
-            Web_onControllerAttachedImpl,
-            Web_onOverScrollImpl,
-            Web_onSafeBrowsingCheckResultImpl,
-            Web_onNavigationEntryCommittedImpl,
-            Web_onIntelligentTrackingPreventionResultImpl,
-            Web_onNativeEmbedLifecycleChangeImpl,
-            Web_onNativeEmbedGestureEventImpl,
-            Web_onOverrideUrlLoadingImpl,
-            Web_onRenderProcessNotRespondingImpl,
-            Web_onRenderProcessRespondingImpl,
-            Web_onViewportFitChangedImpl,
-            Web_onInterceptKeyboardAttachImpl,
-            Web_onAdsBlockedImpl,
+            Web::onPageEndImpl,
+            Web::onPageBeginImpl,
+            Web::onProgressChangeImpl,
+            Web::onTitleReceiveImpl,
+            Web::onGeolocationHideImpl,
+            Web::onGeolocationShowImpl,
+            Web::onRequestSelectedImpl,
+            Web::onAlertImpl,
+            Web::onBeforeUnloadImpl,
+            Web::onConfirmImpl,
+            Web::onPromptImpl,
+            Web::onConsoleImpl,
+            Web::onErrorReceiveImpl,
+            Web::onHttpErrorReceiveImpl,
+            Web::onDownloadStartImpl,
+            Web::onRefreshAccessedHistoryImpl,
+            Web::onUrlLoadInterceptImpl,
+            Web::onSslErrorReceiveImpl,
+            Web::onShowFileSelectorImpl,
+            Web::onFileSelectorShowImpl,
+            Web::onResourceLoadImpl,
+            Web::onFullScreenExitImpl,
+            Web::onFullScreenEnterImpl,
+            Web::onScaleChangeImpl,
+            Web::onHttpAuthRequestImpl,
+            Web::onInterceptRequestImpl,
+            Web::onPermissionRequestImpl,
+            Web::onScreenCaptureRequestImpl,
+            Web::onContextMenuShowImpl,
+            Web::onContextMenuHideImpl,
+            Web::onSearchResultReceiveImpl,
+            Web::onScrollImpl,
+            Web::onSslErrorEventReceiveImpl,
+            Web::onSslErrorEventImpl,
+            Web::onClientAuthenticationRequestImpl,
+            Web::onWindowNewImpl,
+            Web::onWindowExitImpl,
+            Web::onInterceptKeyEventImpl,
+            Web::onTouchIconUrlReceivedImpl,
+            Web::onFaviconReceivedImpl,
+            Web::onPageVisibleImpl,
+            Web::onDataResubmittedImpl,
+            Web::onAudioStateChangedImpl,
+            Web::onFirstContentfulPaintImpl,
+            Web::onFirstMeaningfulPaintImpl,
+            Web::onLargestContentfulPaintImpl,
+            Web::onLoadInterceptImpl,
+            Web::onControllerAttachedImpl,
+            Web::onOverScrollImpl,
+            Web::onSafeBrowsingCheckResultImpl,
+            Web::onNavigationEntryCommittedImpl,
+            Web::onIntelligentTrackingPreventionResultImpl,
+            Web::onNativeEmbedLifecycleChangeImpl,
+            Web::onNativeEmbedGestureEventImpl,
+            Web::onOverrideUrlLoadingImpl,
+            Web::onRenderProcessNotRespondingImpl,
+            Web::onRenderProcessRespondingImpl,
+            Web::onViewportFitChangedImpl,
+            Web::onInterceptKeyboardAttachImpl,
+            Web::onAdsBlockedImpl,
         };
 
         return &GENERATED_ArkUIWebEventsReceiverImpl;
     }
     const GENERATED_ArkUIXComponentEventsReceiver* GetXComponentEventsReceiver() {
         static const GENERATED_ArkUIXComponentEventsReceiver GENERATED_ArkUIXComponentEventsReceiverImpl {
-            XComponent_onLoadImpl,
-            XComponent_onDestroyImpl,
+            XComponent::onLoadImpl,
+            XComponent::onDestroyImpl,
         };
 
         return &GENERATED_ArkUIXComponentEventsReceiverImpl;
     }
     const GENERATED_ArkUISideBarContainerEventsReceiver* GetSideBarContainerEventsReceiver() {
         static const GENERATED_ArkUISideBarContainerEventsReceiver GENERATED_ArkUISideBarContainerEventsReceiverImpl {
-            SideBarContainer_onChangeImpl,
+            SideBarContainer::onChangeImpl,
         };
 
         return &GENERATED_ArkUISideBarContainerEventsReceiverImpl;
     }
     const GENERATED_ArkUIWaterFlowEventsReceiver* GetWaterFlowEventsReceiver() {
         static const GENERATED_ArkUIWaterFlowEventsReceiver GENERATED_ArkUIWaterFlowEventsReceiverImpl {
-            WaterFlow_onReachStartImpl,
-            WaterFlow_onReachEndImpl,
-            WaterFlow_onScrollFrameBeginImpl,
-            WaterFlow_onScrollIndexImpl,
+            WaterFlow::onReachStartImpl,
+            WaterFlow::onReachEndImpl,
+            WaterFlow::onScrollFrameBeginImpl,
+            WaterFlow::onScrollIndexImpl,
         };
 
         return &GENERATED_ArkUIWaterFlowEventsReceiverImpl;
     }
     const GENERATED_ArkUIUIExtensionComponentEventsReceiver* GetUIExtensionComponentEventsReceiver() {
         static const GENERATED_ArkUIUIExtensionComponentEventsReceiver GENERATED_ArkUIUIExtensionComponentEventsReceiverImpl {
-            UIExtensionComponent_onTerminatedImpl,
+            UIExtensionComponent::onTerminatedImpl,
         };
 
         return &GENERATED_ArkUIUIExtensionComponentEventsReceiverImpl;

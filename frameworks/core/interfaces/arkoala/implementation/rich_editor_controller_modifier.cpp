@@ -32,12 +32,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         Ark_Int32 AddBuilderSpanImpl(RichEditorControllerPeer* peer, const CustomBuilder* value, const Opt_RichEditorBuilderSpanOptions* options) {
             return 0;
         }
-        Ark_Int32 AddSymbolSpanImpl(RichEditorControllerPeer* peer, const Ark_CustomObject* value, const Opt_RichEditorSymbolSpanOptions* options) {
+        Ark_Int32 AddSymbolSpanImpl(RichEditorControllerPeer* peer, const Ark_Resource* value, const Opt_RichEditorSymbolSpanOptions* options) {
             return 0;
         }
         void UpdateSpanStyleImpl(RichEditorControllerPeer* peer, const Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions* value) {
         }
-        void UpdateParagraphStyleImpl(RichEditorControllerPeer* peer, const RichEditorParagraphStyleOptions* value) {
+        void UpdateParagraphStyleImpl(RichEditorControllerPeer* peer, const Ark_RichEditorParagraphStyleOptions* value) {
         }
         void DeleteSpansImpl(RichEditorControllerPeer* peer, const Opt_RichEditorRange* value) {
         }
@@ -53,7 +53,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         Ark_NativePointer FromStyledStringImpl(RichEditorControllerPeer* peer, const Ark_Materialized* value) {
             return 0;
         }
-        Ark_NativePointer ToStyledStringImpl(RichEditorControllerPeer* peer, const RichEditorRange* value) {
+        Ark_NativePointer ToStyledStringImpl(RichEditorControllerPeer* peer, const Ark_RichEditorRange* value) {
             return 0;
         }
     } // RichEditorControllerModifier

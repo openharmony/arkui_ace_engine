@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace ScrollBarInterfaceModifier {
-        void _setScrollBarOptionsImpl(Ark_NativePointer node, const ScrollBarOptions* value) {
+        void _setScrollBarOptionsImpl(Ark_NativePointer node, const Ark_ScrollBarOptions* value) {
         }
     } // ScrollBarInterfaceModifier
     const GENERATED_ArkUIScrollBarModifier* GetScrollBarModifier() {

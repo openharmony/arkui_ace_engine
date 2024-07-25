@@ -21,15 +21,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
     } // Component3DInterfaceModifier
     namespace Component3DAttributeModifier {
-        void EnvironmentImpl(Ark_NativePointer node, const Ark_CustomObject* uri) {
+        void EnvironmentImpl(Ark_NativePointer node, const Ark_Resource* uri) {
         }
-        void CustomRenderImpl(Ark_NativePointer node, const Ark_CustomObject* uri, Ark_Boolean selfRenderUpdate) {
+        void CustomRenderImpl(Ark_NativePointer node, const Ark_Resource* uri, Ark_Boolean selfRenderUpdate) {
         }
-        void ShaderImpl(Ark_NativePointer node, const Ark_CustomObject* uri) {
+        void ShaderImpl(Ark_NativePointer node, const Ark_Resource* uri) {
         }
-        void ShaderImageTextureImpl(Ark_NativePointer node, const Ark_CustomObject* uri) {
+        void ShaderImageTextureImpl(Ark_NativePointer node, const Ark_Resource* uri) {
         }
-        void ShaderInputBufferImpl(Ark_NativePointer node, const Array_Ark_Number* buffer) {
+        void ShaderInputBufferImpl(Ark_NativePointer node, const Array_Number* buffer) {
         }
         void RenderWidthImpl(Ark_NativePointer node, const Ark_Length* value) {
         }

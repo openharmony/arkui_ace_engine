@@ -29,6 +29,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/property/calc_length.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/utility/generated/converter_generated.h"
 
@@ -140,6 +141,11 @@ namespace OHOS::Ace::NG::Converter
     }
 
     template<>
+    inline std::vector<std::string> Convert(const Ark_Resource& src) {
+        return {};
+    }
+
+    template<>
     inline std::vector<std::string> Convert(const Ark_CustomObject& src) {
         return {};
     }
@@ -174,6 +180,19 @@ namespace OHOS::Ace::NG::Converter
     inline std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_Number& src) {
         Ark_Float32 value = src.tag == ARK_TAG_FLOAT32 ? src.f32 : src.i32;
         return std::make_tuple(value, static_cast<Ark_Int32>(DimensionUnit::VP));
+    }
+    template<>
+    inline CalcLength Convert(const Ark_Length& src) {
+        if (src.type == Ark_Tag::ARK_TAG_RESOURCE) {
+            LOGE("Convert [Ark_Length] to [CalcLength] is not supported.");
+            return CalcLength();
+        }
+        auto unit = static_cast<OHOS::Ace::DimensionUnit>(src.unit);
+        auto value = src.value;
+        if (unit == OHOS::Ace::DimensionUnit::PERCENT) {
+            value /= 100.0f; // percent is normalized [0..1]
+        }
+        return CalcLength(value, unit);
     }
 
     // Implementation is in cpp

@@ -17,7 +17,6 @@
 declare_args() {
   include_generated_sources = true
 }
-
 generated_sources = [
     "../arkoala/implementation/ability_component_modifier.cpp",
     "../arkoala/implementation/alphabet_indexer_modifier.cpp",
@@ -157,7 +156,6 @@ generated_sources = [
     "../arkoala/implementation/nav_destination_context_modifier.cpp",
     "../arkoala/implementation/pattern_lock_controller_modifier.cpp",
     "../arkoala/implementation/edit_menu_options_modifier.cpp",
-    "../arkoala/implementation/text_menu_item_id_modifier.cpp",
     "../arkoala/implementation/rich_editor_controller_modifier.cpp",
     "../arkoala/implementation/rich_editor_base_controller_modifier.cpp",
     "../arkoala/implementation/text_edit_controller_ex_modifier.cpp",

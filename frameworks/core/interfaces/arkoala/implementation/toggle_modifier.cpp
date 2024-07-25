@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void SwitchPointColorImpl(Ark_NativePointer node, const ResourceColor* color) {
         }
-        void SwitchStyleImpl(Ark_NativePointer node, const SwitchStyle* value) {
+        void SwitchStyleImpl(Ark_NativePointer node, const Ark_SwitchStyle* value) {
         }
     } // ToggleAttributeModifier
     const GENERATED_ArkUIToggleModifier* GetToggleModifier() {

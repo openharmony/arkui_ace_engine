@@ -32,17 +32,47 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         Ark_NativePointer MultiplyImpl(Matrix2DPeer* peer, const Opt_Matrix2D* other) {
             return 0;
         }
-        Ark_NativePointer Rotate_number_numberImpl(Matrix2DPeer* peer, const Opt_Ark_Number* rx, const Opt_Ark_Number* ry) {
+        Ark_NativePointer Rotate_number_numberImpl(Matrix2DPeer* peer, const Opt_Number* rx, const Opt_Number* ry) {
             return 0;
         }
-        Ark_NativePointer Rotate_number_number_numberImpl(Matrix2DPeer* peer, const Ark_Number* degree, const Opt_Ark_Number* rx, const Opt_Ark_Number* ry) {
+        Ark_NativePointer Rotate_number_number_numberImpl(Matrix2DPeer* peer, const Ark_Number* degree, const Opt_Number* rx, const Opt_Number* ry) {
             return 0;
         }
-        Ark_NativePointer TranslateImpl(Matrix2DPeer* peer, const Opt_Ark_Number* tx, const Opt_Ark_Number* ty) {
+        Ark_NativePointer TranslateImpl(Matrix2DPeer* peer, const Opt_Number* tx, const Opt_Number* ty) {
             return 0;
         }
-        Ark_NativePointer ScaleImpl(Matrix2DPeer* peer, const Opt_Ark_Number* sx, const Opt_Ark_Number* sy) {
+        Ark_NativePointer ScaleImpl(Matrix2DPeer* peer, const Opt_Number* sx, const Opt_Number* sy) {
             return 0;
+        }
+        Ark_Int32 GetScaleXImpl(Matrix2DPeer* peer) {
+            return 0;
+        }
+        void SetScaleXImpl(Matrix2DPeer* peer, const Ark_Number* scaleX) {
+        }
+        Ark_Int32 GetRotateYImpl(Matrix2DPeer* peer) {
+            return 0;
+        }
+        void SetRotateYImpl(Matrix2DPeer* peer, const Ark_Number* rotateY) {
+        }
+        Ark_Int32 GetRotateXImpl(Matrix2DPeer* peer) {
+            return 0;
+        }
+        void SetRotateXImpl(Matrix2DPeer* peer, const Ark_Number* rotateX) {
+        }
+        Ark_Int32 GetScaleYImpl(Matrix2DPeer* peer) {
+            return 0;
+        }
+        void SetScaleYImpl(Matrix2DPeer* peer, const Ark_Number* scaleY) {
+        }
+        Ark_Int32 GetTranslateXImpl(Matrix2DPeer* peer) {
+            return 0;
+        }
+        void SetTranslateXImpl(Matrix2DPeer* peer, const Ark_Number* translateX) {
+        }
+        Ark_Int32 GetTranslateYImpl(Matrix2DPeer* peer) {
+            return 0;
+        }
+        void SetTranslateYImpl(Matrix2DPeer* peer, const Ark_Number* translateY) {
         }
     } // Matrix2DModifier
     const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor() {
@@ -56,6 +86,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             Matrix2DModifier::Rotate_number_number_numberImpl,
             Matrix2DModifier::TranslateImpl,
             Matrix2DModifier::ScaleImpl,
+            Matrix2DModifier::GetScaleXImpl,
+            Matrix2DModifier::SetScaleXImpl,
+            Matrix2DModifier::GetRotateYImpl,
+            Matrix2DModifier::SetRotateYImpl,
+            Matrix2DModifier::GetRotateXImpl,
+            Matrix2DModifier::SetRotateXImpl,
+            Matrix2DModifier::GetScaleYImpl,
+            Matrix2DModifier::SetScaleYImpl,
+            Matrix2DModifier::GetTranslateXImpl,
+            Matrix2DModifier::SetTranslateXImpl,
+            Matrix2DModifier::GetTranslateYImpl,
+            Matrix2DModifier::SetTranslateYImpl,
         };
         return &Matrix2DAccessorImpl;
     }

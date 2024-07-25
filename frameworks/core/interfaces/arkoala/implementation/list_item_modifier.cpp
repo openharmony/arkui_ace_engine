@@ -19,7 +19,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     namespace ListItemInterfaceModifier {
         void _setListItemOptions_ListItemOptionsImpl(Ark_NativePointer node, const Opt_ListItemOptions* value) {
         }
-        void _setListItemOptions_stringImpl(Ark_NativePointer node, const Opt_Ark_String* value) {
+        void _setListItemOptions_stringImpl(Ark_NativePointer node, const Opt_String* value) {
         }
     } // ListItemInterfaceModifier
     namespace ListItemAttributeModifier {
@@ -31,7 +31,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void SelectedImpl(Ark_NativePointer node, Ark_Boolean value) {
         }
-        void SwipeActionImpl(Ark_NativePointer node, const SwipeActionOptions* value) {
+        void SwipeActionImpl(Ark_NativePointer node, const Ark_SwipeActionOptions* value) {
         }
         void OnSelectImpl(Ark_NativePointer node, Ark_Function event) {
         }

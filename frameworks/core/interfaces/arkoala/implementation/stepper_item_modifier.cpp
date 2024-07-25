@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void NextLabelImpl(Ark_NativePointer node, const Ark_String* value) {
         }
-        void StatusImpl(Ark_NativePointer node, const Opt_Ark_ItemState* value) {
+        void StatusImpl(Ark_NativePointer node, const Opt_ItemState* value) {
         }
     } // StepperItemAttributeModifier
     const GENERATED_ArkUIStepperItemModifier* GetStepperItemModifier() {

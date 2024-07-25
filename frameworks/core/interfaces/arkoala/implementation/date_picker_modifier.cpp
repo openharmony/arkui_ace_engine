@@ -23,11 +23,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     namespace DatePickerAttributeModifier {
         void LunarImpl(Ark_NativePointer node, Ark_Boolean value) {
         }
-        void DisappearTextStyleImpl(Ark_NativePointer node, const PickerTextStyle* value) {
+        void DisappearTextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value) {
         }
-        void TextStyleImpl(Ark_NativePointer node, const PickerTextStyle* value) {
+        void TextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value) {
         }
-        void SelectedTextStyleImpl(Ark_NativePointer node, const PickerTextStyle* value) {
+        void SelectedTextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value) {
         }
         void OnChangeImpl(Ark_NativePointer node, Ark_Function callback) {
         }

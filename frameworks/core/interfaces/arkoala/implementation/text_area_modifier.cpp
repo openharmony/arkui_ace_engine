@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     namespace TextAreaAttributeModifier {
         void PlaceholderColorImpl(Ark_NativePointer node, const ResourceColor* value) {
         }
-        void PlaceholderFontImpl(Ark_NativePointer node, const Font* value) {
+        void PlaceholderFontImpl(Ark_NativePointer node, const Ark_Font* value) {
         }
         void EnterKeyTypeImpl(Ark_NativePointer node, Ark_Int32 value) {
         }
@@ -45,9 +45,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void TextIndentImpl(Ark_NativePointer node, const Ark_Length* value) {
         }
-        void InputFilterImpl(Ark_NativePointer node, const ResourceStr* value, const Opt_Ark_Function* error) {
+        void InputFilterImpl(Ark_NativePointer node, const ResourceStr* value, const Opt_Function* error) {
         }
-        void CaretStyleImpl(Ark_NativePointer node, const CaretStyle* value) {
+        void CaretStyleImpl(Ark_NativePointer node, const Ark_CaretStyle* value) {
         }
         void SelectedBackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value) {
         }
@@ -95,7 +95,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void CustomKeyboardImpl(Ark_NativePointer node, const CustomBuilder* value, const Opt_KeyboardOptions* options) {
         }
-        void DecorationImpl(Ark_NativePointer node, const TextDecorationOptions* value) {
+        void DecorationImpl(Ark_NativePointer node, const Ark_TextDecorationOptions* value) {
         }
         void LetterSpacingImpl(Ark_NativePointer node, const Type_TextAreaAttribute_letterSpacing_Arg0* value) {
         }

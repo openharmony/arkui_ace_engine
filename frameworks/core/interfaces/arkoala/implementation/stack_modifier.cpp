@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     namespace StackAttributeModifier {
         void AlignContentImpl(Ark_NativePointer node, Ark_Int32 value) {
         }
-        void PointLightImpl(Ark_NativePointer node, const PointLightStyle* value) {
+        void PointLightImpl(Ark_NativePointer node, const Ark_PointLightStyle* value) {
         }
     } // StackAttributeModifier
     const GENERATED_ArkUIStackModifier* GetStackModifier() {

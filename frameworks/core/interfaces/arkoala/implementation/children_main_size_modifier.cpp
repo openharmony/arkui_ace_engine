@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         Ark_NativePointer GetFinalizerImpl() {
             return 0;
         }
-        void SpliceImpl(ChildrenMainSizePeer* peer, const Ark_Number* start, const Opt_Ark_Number* deleteCount, const Opt_Array_Ark_Number* childrenSize) {
+        void SpliceImpl(ChildrenMainSizePeer* peer, const Ark_Number* start, const Opt_Number* deleteCount, const Opt_Array_Number* childrenSize) {
         }
         void UpdateImpl(ChildrenMainSizePeer* peer, const Ark_Number* index, const Ark_Number* childSize) {
         }

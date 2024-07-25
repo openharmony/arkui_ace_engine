@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace PanGestureOptionsModifier {
-        Ark_NativePointer CtorImpl(const Opt_Literal_fingers_Opt_Ark_Number_direction_Ark_PanDirection_distance_Opt_Ark_Number* value) {
+        Ark_NativePointer CtorImpl(const Opt_Literal_fingers_Opt_Number_direction_PanDirection_distance_Opt_Number* value) {
             return 0;
         }
         Ark_NativePointer GetFinalizerImpl() {

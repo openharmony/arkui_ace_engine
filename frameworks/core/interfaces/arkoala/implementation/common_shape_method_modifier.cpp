@@ -37,7 +37,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void AntiAliasImpl(Ark_NativePointer node, Ark_Boolean value) {
         }
-        void StrokeDashArrayImpl(Ark_NativePointer node, const Array_Ark_CustomObject* value) {
+        void StrokeDashArrayImpl(Ark_NativePointer node, const Array_CustomObject* value) {
         }
     } // CommonShapeMethodModifier
     const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier() {

@@ -19,7 +19,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     namespace NavRouterInterfaceModifier {
         void _setNavRouterOptions_Impl(Ark_NativePointer node) {
         }
-        void _setNavRouterOptions_RouteInfoImpl(Ark_NativePointer node, const RouteInfo* value) {
+        void _setNavRouterOptions_RouteInfoImpl(Ark_NativePointer node, const Ark_RouteInfo* value) {
         }
     } // NavRouterInterfaceModifier
     namespace NavRouterAttributeModifier {

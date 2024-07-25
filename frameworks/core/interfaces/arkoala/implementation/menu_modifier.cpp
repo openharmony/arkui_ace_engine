@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     namespace MenuAttributeModifier {
         void FontSizeImpl(Ark_NativePointer node, const Ark_Length* value) {
         }
-        void FontImpl(Ark_NativePointer node, const Font* value) {
+        void FontImpl(Ark_NativePointer node, const Ark_Font* value) {
         }
         void FontColorImpl(Ark_NativePointer node, const ResourceColor* value) {
         }

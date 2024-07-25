@@ -33,11 +33,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void DescriptionImpl(Ark_NativePointer node, const CustomBuilder* value) {
         }
-        void TrackShadowImpl(Ark_NativePointer node, const GaugeShadowOptions* value) {
+        void TrackShadowImpl(Ark_NativePointer node, const Ark_GaugeShadowOptions* value) {
         }
-        void IndicatorImpl(Ark_NativePointer node, const GaugeIndicatorOptions* value) {
+        void IndicatorImpl(Ark_NativePointer node, const Ark_GaugeIndicatorOptions* value) {
         }
-        void PrivacySensitiveImpl(Ark_NativePointer node, const Opt_Ark_Boolean* isPrivacySensitiveMode) {
+        void PrivacySensitiveImpl(Ark_NativePointer node, const Opt_Boolean* isPrivacySensitiveMode) {
         }
         void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier) {
         }
