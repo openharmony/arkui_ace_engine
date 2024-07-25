@@ -2086,6 +2086,7 @@ class NavPathInfo {
     this.index = -1;
     this.needUpdate = false;
     this.needBuildNewInstance = false;
+    this.navDestinationId = undefined;
   }
 }
 
@@ -2132,10 +2133,10 @@ class NavPathStack {
     for (let i = this.popArray.length - 1; i >= 0; i--) {
       if (name === this.popArray[i].name) {
         let info = this.popArray.splice(i, 1);
-        return info[0].index;
+        return [info[0].index, info[0].navDestinationId];
       }
     }
-    return -1; // add new navdestination
+    return [-1, undefined]; // add new navdestination
   }
   setNativeStack(stack) {
     this.nativeStack = stack;
@@ -2151,7 +2152,7 @@ class NavPathStack {
   }
   pushName(name, param) {
     let info = new NavPathInfo(name, param);
-    info.index = this.findInPopArray(name);
+    [info.index, info.navDestinationId] = this.findInPopArray(name);
     this.pathArray.push(info);
     this.isReplace = 0;
     this.nativeStack?.onStateChanged();
@@ -2166,7 +2167,7 @@ class NavPathStack {
     } else {
       info = new NavPathInfo(name, param, onPop);
     }
-    info.index = this.findInPopArray(name);
+    [info.index, info.navDestinationId] = this.findInPopArray(name);
     this.pathArray.push(info);
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
@@ -2200,7 +2201,7 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    info.index = this.findInPopArray(name);
+    [info.index, info.navDestinationId] = this.findInPopArray(name);
     this.pathArray.push(info);
     this.nativeStack?.onStateChanged();
     return promise;
@@ -2249,7 +2250,7 @@ class NavPathStack {
     if (ret) {
       return;
     }
-    info.index = this.findInPopArray(info.name);
+    [info.index, info.navDestinationId] = this.findInPopArray(info.name);
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
@@ -2272,7 +2273,7 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    info.index = this.findInPopArray(info.name);
+    [info.index, info.navDestinationId] = this.findInPopArray(info.name);
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
@@ -2474,6 +2475,16 @@ class NavPathStack {
       this.nativeStack?.onStateChanged();
     }
     return cnt;
+  }
+  removeByNavDestinationId(navDestinationId) {
+    let index = this.pathArray.findIndex(element => element.navDestinationId === navDestinationId);
+    if (index === -1) {
+      return false;
+    }
+    this.pathArray.splice(index, 1);
+    this.isReplace = 0;
+    this.nativeStack?.onStateChanged();
+    return true;
   }
   removeIndex(index) {
     if (index >= this.pathArray.length) {
