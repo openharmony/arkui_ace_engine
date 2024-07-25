@@ -27,7 +27,12 @@ extern "C" {
 void FfiOHOSAceFrameworkLineCreate(double width, int32_t widthUnit, double height, int32_t heightUnit)
 {
     LineModel::GetInstance()->Create();
-    FfiOHOSAceFrameworkShapeSetSize(width, widthUnit, height, heightUnit);
+    if (width > 0.0) {
+        FfiOHOSAceFrameworkShapeSetWidth(width, widthUnit);
+    }
+    if (height > 0.0) {
+        FfiOHOSAceFrameworkShapeSetHeight(height, heightUnit);
+    }
 }
 
 void FfiOHOSAceFrameworkLineSetStart(double x, double y)
