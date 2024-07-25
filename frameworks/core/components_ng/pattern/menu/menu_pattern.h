@@ -468,7 +468,7 @@ public:
         }
     }
 
-    static bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
+    bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
 
     bool UseContentModifier()
     {
