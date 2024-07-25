@@ -3143,8 +3143,8 @@ void OverlayManager::PlayTransitionEffectOut(const RefPtr<FrameNode>& topModalNo
             FireNavigationStateChange(false, topModalNode);
         }
         auto rootNode = FindWindowScene(topModalNode);
-        RemoveChildWithService(rootNode, topModalNode);
         FireAutoSave(topModalNode);
+        RemoveChildWithService(rootNode, topModalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         // Fire shown event of navdestination under the disappeared modal
         FireNavigationStateChange(true);
@@ -3162,8 +3162,8 @@ void OverlayManager::PlayTransitionEffectOut(const RefPtr<FrameNode>& topModalNo
                     // Fire hidden event of navdestination on the disappeared modal
                     overlayManager->FireNavigationStateChange(false, modal);
                 }
-                overlayManager->RemoveChildWithService(root, modal);
                 overlayManager->FireAutoSave(modal);
+                overlayManager->RemoveChildWithService(root, modal);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                 // Fire shown event of navdestination under the disappeared modal
                 overlayManager->FireNavigationStateChange(true);
@@ -3200,8 +3200,8 @@ bool OverlayManager::ModalPageExitProcess(const RefPtr<FrameNode>& topModalNode)
         topModalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
         // Fire hidden event of navdestination on the disappeared modal
         FireNavigationStateChange(false, topModalNode);
-        RemoveChildWithService(rootNode, topModalNode);
         FireAutoSave(topModalNode);
+        RemoveChildWithService(rootNode, topModalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     topModalNode->GetPattern<ModalPresentationPattern>()->FireCallback("false");
@@ -3560,8 +3560,8 @@ void OverlayManager::HandleModalPop(
             // Fire hidden event of navdestination on the disappeared modal
             FireNavigationStateChange(false, topModalNode);
         }
-        RemoveChildWithService(rootNode, topModalNode);
         FireAutoSave(topModalNode);
+        RemoveChildWithService(rootNode, topModalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     modalStack_.pop();
@@ -3658,8 +3658,8 @@ void OverlayManager::PlayDefaultModalOut(
                 // Fire hidden event of navdestination on the disappeared modal
                 overlayManager->FireNavigationStateChange(false, modal);
             }
-            overlayManager->RemoveChildWithService(root, modal);
             overlayManager->FireAutoSave(modal);
+            overlayManager->RemoveChildWithService(root, modal);
             root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             // Fire shown event of navdestination under the disappeared modal
             overlayManager->FireNavigationStateChange(true);
@@ -3720,8 +3720,8 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
                     // Fire hidden event of navdestination on the disappeared modal
                     overlayManager->FireNavigationStateChange(false, modal);
                 }
-                overlayManager->RemoveChildWithService(root, modal);
                 overlayManager->FireAutoSave(modal);
+                overlayManager->RemoveChildWithService(root, modal);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                 // Fire shown event of navdestination under the disappeared modal
                 overlayManager->FireNavigationStateChange(true);
