@@ -6700,7 +6700,7 @@ class ViewPU extends PUV2ViewBase {
         const _componentName = (classObject && ('name' in classObject)) ? Reflect.get(classObject, 'name') : 'unspecified UINode';
         if (_componentName === "__Recycle__") {
             return;
-        }       
+        }
         const _popFunc = (classObject && 'pop' in classObject) ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
             var _a, _b;
@@ -9808,13 +9808,16 @@ class __Repeat {
     }
     // normalize template options
     normTemplateOptions(options) {
-        if (options) {
-            const cachedCount = options.cachedCount;
-            if (Number.isInteger(cachedCount) && cachedCount >= 0) {
-                return options;
+        const value = (options && Number.isInteger(options.cachedCount) && options.cachedCount >= 0)
+            ? {
+                cachedCount: Math.max(0, options.cachedCount),
+                cachedCountSpecified: true
             }
-        }
-        return { cachedCount: 1 };
+            : {
+                cachedCountSpecified: false
+            };
+        stateMgmtConsole.error("template options " + JSON.stringify(value));
+        return value;
     }
 }
 ; // __Repeat<T>

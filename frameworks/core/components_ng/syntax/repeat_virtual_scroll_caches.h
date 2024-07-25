@@ -49,7 +49,7 @@ class RepeatVirtualScrollCaches {
     friend struct KeySorterClass;
 
 public:
-    RepeatVirtualScrollCaches(const std::map<std::string, uint32_t>& cacheCountL24ttype,
+    RepeatVirtualScrollCaches(const std::map<std::string, std::pair<bool, uint32_t>>& cacheCountL24ttype,
         const std::function<void(uint32_t)>& onCreateNode,
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
@@ -253,7 +253,7 @@ private:
     bool FetchMoreKeysTTypes(uint32_t from, uint32_t to);
 
     // Map ttype -> cacheSize. Each ttype incl default has own L2 size
-    std::map<std::string, uint32_t> cacheCountL24ttype_;
+    std::map<std::string, std::pair<bool, uint32_t>> cacheCountL24ttype_;
 
     // request TS to create new sub-tree for given index or update existing
     // update subtree cached for (old) index
@@ -270,7 +270,10 @@ private:
     std::function<std::list<std::string>(uint32_t, uint32_t)> onGetKeys4Range_;
 
     // memorize active ranges of past 2 (last, prev)
-    // SetActiveRange calls and use to calc scroll direction
+    // from SetActiveChildRange calls and use to calc scroll direction
+    // active range:= visible range + pre-render items above and below
+    // number of pre-render items defined by Gird/List.cacheCount and informed 
+    // as cacheStart and cacheEnd in SetActiveChildRange
     std::pair<uint32_t, uint32_t> lastActiveRanges_[2] = { { 0, 0 }, { 0, 0 } };
 
     // keys of active nodes, UINodes must be on the UI tree,

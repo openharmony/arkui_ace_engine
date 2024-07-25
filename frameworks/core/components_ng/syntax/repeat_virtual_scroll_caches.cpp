@@ -33,7 +33,8 @@ bool KeySorterClass::operator()(const std::string& left, const std::string& righ
     return virtualScroll_->CompareKeyByIndexDistance(left, right);
 }
 
-RepeatVirtualScrollCaches::RepeatVirtualScrollCaches(const std::map<std::string, uint32_t>& cacheCountL24ttype,
+RepeatVirtualScrollCaches::RepeatVirtualScrollCaches(
+    const std::map<std::string, std::pair<bool, uint32_t>>& cacheCountL24ttype,
     const std::function<void(uint32_t)>& onCreateNode,
     const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
@@ -45,7 +46,14 @@ RepeatVirtualScrollCaches::RepeatVirtualScrollCaches(const std::map<std::string,
       // API might need to change to tell which old item to update
       onCreateNode_(onCreateNode), onUpdateNode_(onUpdateNode), onGetTypes4Range_(onGetTypes4Range),
       onGetKeys4Range_(onGetKeys4Range)
-{}
+{
+    for (auto iter = cacheCountL24ttype_.begin(); iter != cacheCountL24ttype_.end(); iter++) {
+        std::pair<bool, uint32_t>& optCacheCount = iter->second;
+        TAG_LOGD(AceLogTag::ACE_REPEAT,
+            "Permissable size of spare nodes cache for ttype '%{public}s': defined %{public}d - value %{public}d .",
+            iter->first.c_str(), (int)optCacheCount.first, (int)optCacheCount.second);
+    }
+}
 
 std::optional<std::string> RepeatVirtualScrollCaches::GetKey4Index(uint32_t index, bool allowFetch)
 {
@@ -243,7 +251,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::UpdateFromL2(uint32_t forIndex)
     onUpdateNode_(oldKey.value(), forIndex);
 
     TAG_LOGD(AceLogTag::ACE_REPEAT,
-        "for index %{public}d, from old key %{public}s requesting TS to update child UINodes -done ",
+        "for index %{public}d, from old key %{public}s requesting TS to update child UINodes - done ",
         static_cast<int32_t>(forIndex), oldKey.value().c_str());
 
     return UINodeHasBeenUpdated(ttype, oldKey.value(), forKey);
@@ -392,12 +400,24 @@ RefPtr<UINode> RepeatVirtualScrollCaches::DropFromL1(const std::string& key)
     return uiNode;
 }
 
-
 void RepeatVirtualScrollCaches::SetLastActiveRange(uint32_t from, uint32_t to)
 {
     // STATE_MGMT_NOTE, only update when from or to != stActiveRanges_[0] ?
     lastActiveRanges_[1] = lastActiveRanges_[0];
     lastActiveRanges_[0] = { from, to };
+
+    const auto updatedPermissableCacheCount = to - from + 1;
+    for (auto iter = cacheCountL24ttype_.begin(); iter != cacheCountL24ttype_.end(); iter++ ) {
+        std::pair<bool, uint32_t>& optCacheCount = iter->second;
+        if (optCacheCount.first==false) {
+            // Repeat.template({ cachedCount }) options not specified
+            if (optCacheCount.second < updatedPermissableCacheCount) {
+                TAG_LOGD(AceLogTag::ACE_REPEAT, "Growing permissable size of spare nodes cache for ttype '%{public}s' to %{public}d .",
+                    iter->first.c_str(), updatedPermissableCacheCount);
+                optCacheCount.second = updatedPermissableCacheCount;
+            }
+        }
+    }
 }
 
 /**
@@ -562,11 +582,14 @@ bool RepeatVirtualScrollCaches::Purge()
     for (auto& itTType : node4key4ttype_) {
         const auto& ttype = itTType.first;
         auto& uiNode4Key = itTType.second;
-        
-        // cacheCount specifies the number of extra items per side 
-        // of the visible area, hence need to multuply by 2.
-        uint32_t cacheCount = 2*cacheCountL24ttype_[ttype];
 
+        // size of the unused node pool L2
+        // defined either in template { caacheCount }
+        // or set dynamically by framework to maximum number of items in L1
+        uint32_t cacheCount = (cacheCountL24ttype_.find(ttype) == cacheCountL24ttype_.end())
+                                  ? 0 // unknown ttype should never happen
+                                  : cacheCountL24ttype_[ttype].second;
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "Cache::Purge cacheCount %{public}d", (int)cacheCount);
         std::set<std::string, KeySorterClass> l2Keys = GetSortedL2KeysForTType(uiNode4Key);
 
         // l2_keys is sorted by increasing distance from lastActiveRange
@@ -578,6 +601,10 @@ bool RepeatVirtualScrollCaches::Purge()
 
         while (itL2Key != l2Keys.end()) {
             // delete remaining keys
+            TAG_LOGE(AceLogTag::ACE_REPEAT,
+                "   ... purging spare node cache item old key '%{public}s' -> node %{public}s, ttype: '%{public}s', "
+                "permissable spare nodes count %{public}d",
+                itL2Key->c_str(), DumpUINodeWithKey(*itL2Key).c_str(), ttype.c_str(), (int)cacheCount);
             uiNode4Key.erase(*itL2Key);
             node4key_.erase(*itL2Key);
             // check out transition case.
@@ -586,9 +613,9 @@ bool RepeatVirtualScrollCaches::Purge()
         }
     } 
     if (deletedCount > 0) {
-        TAG_LOGE(AceLogTag::ACE_REPEAT, "WARN: Purged %d items", (int) deletedCount);
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "Purged total %d items.", (int) deletedCount);
         ACE_SCOPED_TRACE("RepeatVirtualScrollCaches::Purge %d items", (int) deletedCount);
-    }
+    } 
     return (deletedCount > 0);
 }
 
@@ -734,18 +761,16 @@ std::set<std::string, KeySorterClass> RepeatVirtualScrollCaches::GetSortedL2Keys
 
 std::string RepeatVirtualScrollCaches::DumpL1() const
 {
-    std::string result = "activeNodeKeysInL1_: size=" + std::to_string(activeNodeKeysInL1_.size()) +
-                         "--------------\n";
+    std::string result = "L1 (visible + pre-rendered items, their count defined by List/Grid.cacheCount: total number=" +
+                         std::to_string(activeNodeKeysInL1_.size()) + "--------------\n";
     for (const auto& it : activeNodeKeysInL1_) {
         const std::string& key = it;
         auto indexIter = index4Key_.find(key);
         if (indexIter == index4Key_.end()) {
             continue;
         }
-        result += "  index " +  std::to_string(indexIter->second) +
-                  " -> key: '" + key +
-                  "', node: " + DumpUINodeWithKey(key) +
-                  "\n";
+        result += "  index " + std::to_string(indexIter->second) + " -> key: '" + key +
+                  "', node: " + DumpUINodeWithKey(key) + "\n";
     }
     return result;
 }
@@ -759,9 +784,9 @@ std::string RepeatVirtualScrollCaches::DumpL2() const
     std::set<std::string, KeySorterClass> l2KeyResult = GetSortedL2KeysForTType(allCaches);
 
     std::string result =
-        "l2_keys (sorted by distance): size=" + std::to_string(l2KeyResult.size()) + "--------------\n";
+        "Spare items available for update, not on render tree: size=" + std::to_string(l2KeyResult.size()) + "--------------\n";
     for (const auto& it : l2KeyResult) {
-        result += "   key '" + it + "', node: " + DumpUINodeWithKey(it) + "\n";
+        result += "   old key '" + it + "', node: " + DumpUINodeWithKey(it) + "\n";
     }
     return result;
 }

@@ -143,7 +143,7 @@ interface __RepeatConfig<T> {
     typeGenFunc?: RepeatTypeGenFunc<T>;
     totalCountSpecified?: boolean;
     totalCount?: number;
-    templateOptions?: { [type: string]: RepeatTemplateOptions };
+    templateOptions?: { [type: string]: RepeatTemplateImplOptions };
     mkRepeatItem?: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
     onMoveHandler?: OnMoveHandler;
 };
@@ -241,13 +241,16 @@ class __Repeat<T> implements RepeatAPI<T> {
     }
 
     // normalize template options
-    private normTemplateOptions(options: RepeatTemplateOptions): RepeatTemplateOptions {
-        if (options) {
-            const cachedCount: number = options.cachedCount;
-            if (Number.isInteger(cachedCount) && cachedCount >= 0) {
-                return options;
+    private normTemplateOptions(options: RepeatTemplateOptions): RepeatTemplateImplOptions {
+        const value = (options && Number.isInteger(options.cachedCount) && options.cachedCount >= 0)
+            ? {
+                cachedCount: Math.max(0, options.cachedCount),
+                cachedCountSpecified: true
             }
-        }
-        return { cachedCount: 1 };
+            : {
+                cachedCountSpecified: false
+            };
+            stateMgmtConsole.error("template options " + JSON.stringify(value));
+            return value;
     }
 }; // __Repeat<T>

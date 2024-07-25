@@ -26,7 +26,7 @@ class __RepeatVirtualScrollImpl<T> {
 
     private totalCount_: number;
     private totalCountSpecified : boolean = false;
-    private templateOptions_: { [type: string]: RepeatTemplateOptions };
+    private templateOptions_: { [type: string]: RepeatTemplateImplOptions };
 
     private mkRepeatItem_: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
     private onMoveHandler_?: OnMoveHandler;
@@ -221,7 +221,7 @@ class __RepeatVirtualScrollImpl<T> {
     }
 
     private reRender() {
-        stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): reRender ...`);
+    stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): reRender ...`);
         this.purgeKeyCache();
         RepeatVirtualScrollNative.invalidateKeyCache(this.totalCount_);
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): reRender - done`);
