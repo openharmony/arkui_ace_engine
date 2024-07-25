@@ -233,15 +233,12 @@ void PipelineBase::SetRootSize(double density, float width, float height)
         }
         context->SetRootRect(width, height);
     };
-#ifdef NG_BUILD
+
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         task();
     } else {
         taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize");
     }
-#else
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize");
-#endif
 }
 
 void PipelineBase::SetFontScale(float fontScale)
