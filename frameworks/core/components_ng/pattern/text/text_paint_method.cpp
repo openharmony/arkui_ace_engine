@@ -82,30 +82,24 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
     CHECK_NULL_VOID(textContentModifier_);
-
-    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(textPattern);
-    auto pManager = textPattern->GetParagraphManager();
+    auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    auto pManager = pattern->GetParagraphManager();
     CHECK_NULL_VOID(pManager);
-
     UpdateParagraphAndImageSpanNodeList();
-
     SizeF contentSize = paintWrapper->GetContentSize();
     textContentModifier_->SetContentSize(contentSize);
     auto offset = paintWrapper->GetContentOffset();
     textContentModifier_->SetContentOffset(offset);
     auto paintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     textContentModifier_->SetPrintOffset(paintOffset);
-
-    auto frameNode = textPattern->GetHost();
+    pattern->SetPrintInfo("ContentOffset:", paintOffset);
+    auto frameNode = pattern->GetHost();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_VOID(pattern);
-
     auto textOverflow = layoutProperty->GetTextOverflow();
     if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE &&
         pManager->GetLongestLine() > contentSize.Width()) {
@@ -113,7 +107,6 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     } else {
         textContentModifier_->StopTextRace();
     }
-
     auto reasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
     textContentModifier_->SetObscured(reasons);
     auto spanItemChildren = pattern->GetSpanItemChildren();
@@ -127,7 +120,6 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (renderContext->GetClipEdge().has_value()) {
         textContentModifier_->SetClip(renderContext->GetClipEdge().value());
     }
-
     PropertyChangeFlag flag = 0;
     if (textContentModifier_->NeedMeasureUpdate(flag)) {
         frameNode->MarkDirtyNode(flag);

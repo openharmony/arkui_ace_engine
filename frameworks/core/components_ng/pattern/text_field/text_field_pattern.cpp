@@ -6450,6 +6450,7 @@ void TextFieldPattern::DumpInfo()
     CHECK_NULL_VOID(layoutProperty);
     auto& dumpLog = DumpLog::GetInstance();
     dumpLog.AddDesc(std::string("Content:").append(GetTextValue()));
+    dumpLog.AddDesc(std::string("autoWidth: ").append(std::to_string(layoutProperty->GetWidthAutoValue(false))));
     dumpLog.AddDesc(std::string("MaxLength:").append(std::to_string(GetMaxLength())));
     dumpLog.AddDesc(std::string("fontSize:").append(GetFontSize()));
     dumpLog.AddDesc(std::string("fontWeight:").append(V2::ConvertWrapFontWeightToStirng(GetFontWeight())));
@@ -6476,21 +6477,19 @@ void TextFieldPattern::DumpInfo()
     dumpLog.AddDesc(std::string("PreviewTextStart:").append(std::to_string(GetPreviewTextStart())));
     dumpLog.AddDesc(std::string("PreviewTextEnd:").append(std::to_string(GetPreviewTextEnd())));
     dumpLog.AddDesc(std::string("PreTextValue:").append(GetPreviewTextValue()));
-#if defined(ENABLE_STANDARD_INPUT)
-    auto miscTextConfig = GetMiscTextConfig();
-    CHECK_NULL_VOID(miscTextConfig.has_value());
-    MiscServices::TextConfig textConfig = miscTextConfig.value();
-    dumpLog.AddDesc(std::string("RequestKeyboard calling window :")
-                                       .append(std::to_string(textConfig.windowId)));
-#endif
     dumpLog.AddDesc(textSelector_.ToString());
-    if (customKeyboard_ || customKeyboardBuilder_) {
-        dumpLog.AddDesc(std::string("CustomKeyboard: true")
-                                           .append(", Attached: ")
-                                           .append(std::to_string(isCustomKeyboardAttached_)));
-    }
     dumpLog.AddDesc(std::string("wordBreak:")
             .append(V2::ConvertWrapWordBreakToString(layoutProperty->GetWordBreak().value_or(WordBreak::BREAK_WORD))));
+    dumpLog.AddDesc(
+        std::string("HeightAdaptivePolicy: ")
+            .append(V2::ConvertWrapTextHeightAdaptivePolicyToString(
+                layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))));
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto fontScale = pipeline->GetFontScale();
+    auto fontWeightScale = pipeline->GetFontWeightScale();
+    dumpLog.AddDesc(std::string("fontScale: ").append(std::to_string(fontScale)));
+    dumpLog.AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
 }
 
 void TextFieldPattern::DumpAdvanceInfo()
@@ -6504,8 +6503,6 @@ void TextFieldPattern::DumpAdvanceInfo()
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     DumpLog::GetInstance().AddDesc(std::string("FontColor: ").append(GetTextColor()));
-    DumpLog::GetInstance().AddDesc(
-        std::string("autoWidth: ").append(std::to_string(layoutProperty->GetWidthAutoValue(false))));
     DumpLog::GetInstance().AddDesc(std::string("MinFontSize:").append(GetMinFontSize()));
     DumpLog::GetInstance().AddDesc(std::string("MaxFontSize:").append(GetMaxFontSize()));
     DumpLog::GetInstance().AddDesc(std::string("from TextEngine paragraphs_ info :"));
@@ -6524,6 +6521,9 @@ void TextFieldPattern::DumpAdvanceInfo()
 #if defined(ENABLE_STANDARD_INPUT)
     auto miscTextConfig = GetMiscTextConfig();
     CHECK_NULL_VOID(miscTextConfig.has_value());
+    MiscServices::TextConfig textConfig = miscTextConfig.value();
+    DumpLog::GetInstance().AddDesc(
+        std::string("RequestKeyboard calling window :").append(std::to_string(textConfig.windowId)));
     MiscServices::CursorInfo cursorInfo = miscTextConfig.value().cursorInfo;
     DumpLog::GetInstance().AddDesc(std::string("cursorInfo, left:")
                                        .append(std::to_string(cursorInfo.left))
@@ -6537,12 +6537,6 @@ void TextFieldPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc(std::string("textRect: ").append(contentRect_.ToString()));
     DumpLog::GetInstance().AddDesc(std::string("contentRect: ").append(contentRect_.ToString()));
     DumpLog::GetInstance().AddDesc(textSelector_.ToString());
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto fontScale = pipeline->GetFontScale();
-    auto fontWeightScale = pipeline->GetFontWeightScale();
-    DumpLog::GetInstance().AddDesc(std::string("fontScale: ").append(std::to_string(fontScale)));
-    DumpLog::GetInstance().AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
 }
 
 void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData)

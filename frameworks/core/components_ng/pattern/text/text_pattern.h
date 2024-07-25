@@ -620,6 +620,11 @@ public:
         parentGlobalOffset_ = GetParentGlobalOffset();
     }
 
+    void SetPrintInfo(const std::string& area, const OffsetF& paintOffset)
+    {
+        paintInfo_ = area + paintOffset.ToString();
+    }
+
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
     {
         isUserSetResponseRegion_ = isUserSetResponseRegion;
@@ -717,6 +722,7 @@ protected:
     CopyOptions copyOption_ = CopyOptions::None;
 
     std::string textForDisplay_;
+    std::string paintInfo_ = "NA";
     std::optional<TextStyle> textStyle_;
     std::list<RefPtr<SpanItem>> spans_;
     mutable std::list<RefPtr<UINode>> childNodes_;
