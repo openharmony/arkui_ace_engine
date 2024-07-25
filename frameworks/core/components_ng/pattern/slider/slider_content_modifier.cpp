@@ -398,7 +398,6 @@ void SliderContentModifier::SetBoardColor()
     CHECK_NULL_VOID(theme);
     Color shadowColor = Color::TRANSPARENT;
     shadowColor = mouseHoverFlag_ ? theme->GetBlockHoverColor() : shadowColor;
-    mouseHoverFlag_ ? SetIsHover(true) : SetIsHover(false);
     shadowColor = mousePressedFlag_ ? theme->GetBlockPressedColor() : shadowColor;
     auto duration = mousePressedFlag_ ? static_cast<int32_t>(theme->GetPressAnimationDuration())
                                       : static_cast<int32_t>(theme->GetHoverAnimationDuration());
@@ -414,6 +413,7 @@ void SliderContentModifier::UpdateData(const Parameters& parameters)
     mouseHoverFlag_ = parameters.mouseHoverFlag_;
     mousePressedFlag_ = parameters.mousePressedFlag_;
     hotCircleShadowWidth_ = parameters.hotCircleShadowWidth;
+    mouseHoverFlag_ ? SetIsHover(true) : SetIsHover(false);
 }
 
 void SliderContentModifier::JudgeNeedAnimate(bool reverse)
