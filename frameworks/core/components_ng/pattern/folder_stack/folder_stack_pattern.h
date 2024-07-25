@@ -115,10 +115,7 @@ public:
 
     bool HasFoldStatusDelayTask() const
     {
-        if (foldStatusDelayTask_) {
-            return true;
-        }
-        return false;
+        return hasFoldStatusDelayTask_;
     }
 
 private:
@@ -146,6 +143,7 @@ private:
     FoldStatus lastFoldStatus_ = FoldStatus::UNKNOWN;
     CancelableCallback<void()> foldStatusDelayTask_;
     std::time_t lastTime_ = std::time(0);
+    bool hasFoldStatusDelayTask_ = false;
 };
 } // namespace OHOS::Ace::NG
 
