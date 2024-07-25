@@ -52,7 +52,7 @@ extern "C" {
  */
 typedef enum {
     /** The drag and drop operation succeeded. */
-    ARKUI_DRAG_RESULT_SUCCESSFUL,
+    ARKUI_DRAG_RESULT_SUCCESSFUL = 0,
     /** The drag and drop operation failed. */
     ARKUI_DRAG_RESULT_FAILED,
     /** The drag and drop operation was canceled. */
@@ -66,7 +66,7 @@ typedef enum {
  */
 typedef enum {
     /** Copy. */
-    ARKUI_DROP_OPERATION_COPY,
+    ARKUI_DROP_OPERATION_COPY = 0,
     /** Cut. */
     ARKUI_DROP_OPERATION_MOVE,
 } ArkUI_DropOperation;
@@ -105,7 +105,7 @@ typedef enum {
      * The system automatically changes the position of the dragged point based on the scenario and
      * scales the drag preview based on set rules.
      */
-    ARKUI_DRAG_PREVIEW_SCALE_AUTO,
+    ARKUI_DRAG_PREVIEW_SCALE_AUTO = 0,
     /** The system does not scale the drag preview. */
     ARKUI_DRAG_PREVIEW_SCALE_DISABLED,
 } ArkUI_DragPreviewScaleMode;
@@ -117,7 +117,7 @@ typedef enum {
  */
 typedef enum {
     /** Unknown. */
-    ARKUI_DRAG_STATUS_UNKNOWN = 0,
+    ARKUI_DRAG_STATUS_UNKNOWN = -1,
     /** Started. */
     ARKUI_DRAG_STATUS_STARTED,
     /** Ended. */

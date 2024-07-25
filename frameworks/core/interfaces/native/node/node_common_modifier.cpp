@@ -2825,6 +2825,13 @@ void ResetAllowDrop(ArkUINodeHandle node)
     ViewAbstract::SetAllowDrop(frameNode, allowDrop);
 }
 
+void SetDisAllowDrop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDisallowDropForcedly(true);
+}
+
 void SetAccessibilityLevel(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -6178,7 +6185,7 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
         SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
-        ResetDragPreview, GetNodeUniqueId, SetFocusBoxStyle, ResetFocusBoxStyle };
+        ResetDragPreview, GetNodeUniqueId, SetFocusBoxStyle, ResetFocusBoxStyle, SetDisAllowDrop };
 
     return &modifier;
 }
