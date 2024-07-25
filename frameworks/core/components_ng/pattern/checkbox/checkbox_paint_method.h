@@ -123,10 +123,6 @@ public:
         checkboxModifier_->SetEnabled(enabled_);
         checkboxModifier_->SetTouchHoverAnimationType(touchHoverType_);
         checkboxModifier_->UpdateAnimatableProperty();
-        checkboxModifier_->SetHasUnselectedColor(paintProperty->HasCheckBoxUnSelectedColor());
-        checkboxModifier_->SetCheckboxStyle(checkBoxStyle_);
-        checkboxModifier_->SetUseContentModifier(useContentModifier_);
-        checkboxModifier_->SetHasBuilder(hasBuilder_);
 
         SetHoverEffectType(paintProperty);
         SetModifierBoundsRect(size, offset);
