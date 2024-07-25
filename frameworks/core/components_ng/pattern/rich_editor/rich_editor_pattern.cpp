@@ -8610,7 +8610,14 @@ void RichEditorPattern::GetDeletedSpan(
     }
     const std::list<RichEditorAbstractSpanResult>& resultList = info.GetRichEditorDeleteSpans();
     for (auto& it : resultList) {
-        changeValue.SetRichEditorOriginalSpans(it);
+        if (it.GetType() == SpanResultType::TEXT) {
+            changeValue.SetRichEditorOriginalSpans(it);
+        } else if (it.GetType() == SpanResultType::SYMBOL && textSelector_.SelectNothing() &&
+            previewTextRecord_.previewContent.empty()) {
+            int32_t symbolStart = innerPosition - 1;
+            changeValue.SetRangeBefore({ symbolStart, symbolStart + SYMBOL_SPAN_LENGTH });
+            changeValue.SetRangeAfter({ symbolStart, symbolStart });
+        }
     }
 }
 
@@ -8886,8 +8893,8 @@ bool RichEditorPattern::BeforeChangeText(
     if (RecordType::DRAG == type) {
         BeforeDrag(changeValue, innerPosition, record);
     }
-
-    if (changeValue.GetRichEditorOriginalSpans().empty()) {
+    bool isDelete = RecordType::DEL_FORWARD == type || RecordType::DEL_BACKWARD == type;
+    if (changeValue.GetRichEditorOriginalSpans().empty() && !isDelete) {
         // only add, do not delete
         changeValue.SetRangeBefore({ caretPosition_, caretPosition_ });
     }
