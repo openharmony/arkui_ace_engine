@@ -22,18 +22,18 @@ export enum QrcodeState {
 }
 
 class ConfigDataConstants {
-  static readonly TIPS = $r('sys.string.qrcode_expiration_prompt');
-  static readonly ANIMATION_CURVE = '0.33,0,0.67,1';
-  static readonly ONE_HUNDRED_TWENTY_FIVE_VP = 125;
-  static readonly ONE_HUNDRED_ONE_VP = 101;
-  static readonly TWENTY_EIGHT_VP = 28;
-  static readonly THIRTY_FOUR_VP = 34;
-  static readonly TWELVE = 12;
-  static readonly ELEVEN_FP = '11fp';
-  static readonly SIX_VP = '6vp';
-  static readonly FIVE_HUNDRED = 500;
-  static readonly DEFAULT_OPACITY = 0.4;
-  static readonly DEFAULT_TIMES = 200;
+  public static readonly TIPS = $r('sys.string.qrcode_expiration_prompt');
+  public static readonly ANIMATION_CURVE = '0.33,0,0.67,1';
+  public static readonly ONE_HUNDRED_TWENTY_FIVE_VP = 125;
+  public static readonly ONE_HUNDRED_ONE_VP = 101;
+  public static readonly TWENTY_EIGHT_VP = 28;
+  public static readonly THIRTY_FOUR_VP = 34;
+  public static readonly TWELVE = 12;
+  public static readonly ELEVEN_FP = '11fp';
+  public static readonly SIX_VP = '6vp';
+  public static readonly FIVE_HUNDRED = 500;
+  public static readonly DEFAULT_OPACITY = 0.4;
+  public static readonly DEFAULT_TIMES = 200;
 }
 
 interface CommonQrcodeOptions {
@@ -115,21 +115,21 @@ interface CommonQrcodeOptions {
 
 @ObservedV2
 export class QrcodeOptions {
-  @Trace edgeLength?: LengthMetrics;
-  @Trace color?: ColorMetrics;
-  @Trace backgroundColor?: ColorMetrics;
-  @Trace textColor?: ColorMetrics;
-  @Trace textContent?: ResourceStr;
-  @Trace borderRadius?: LengthMetrics;
-  @Trace opacity?: number | Resource;
-  @Trace animationCurve?: Curve | string | ICurve;
-  @Trace animationDuration?: number;
-  @Trace qrcodeSideLength?: LengthMetrics;
-  @Trace expiredImageLength?: LengthMetrics;
-  @Trace textSize?: ResourceStr;
-  @Trace textWeight?: number | FontWeight | string;
-  @Trace space?: ResourceStr;
-  @Trace loadingImageLength?: LengthMetrics;
+  @Trace public edgeLength?: LengthMetrics;
+  @Trace public color?: ColorMetrics;
+  @Trace public backgroundColor?: ColorMetrics;
+  @Trace public textColor?: ColorMetrics;
+  @Trace public textContent?: ResourceStr;
+  @Trace public borderRadius?: LengthMetrics;
+  @Trace public opacity?: number | Resource;
+  @Trace public animationCurve?: Curve | string | ICurve;
+  @Trace public animationDuration?: number;
+  @Trace public qrcodeSideLength?: LengthMetrics;
+  @Trace public expiredImageLength?: LengthMetrics;
+  @Trace public textSize?: ResourceStr;
+  @Trace public textWeight?: number | FontWeight | string;
+  @Trace public space?: ResourceStr;
+  @Trace public loadingImageLength?: LengthMetrics;
 
   constructor(options: CommonQrcodeOptions) {
     this.edgeLength = options.edgeLength ??
@@ -155,75 +155,63 @@ export class QrcodeOptions {
   }
 }
 
+
+
 @ComponentV2
 export struct Qrcode {
   @Require @Param options: QrcodeOptions;
-  @Consumer() value: string = '';
-  @Consumer() state: QrcodeState = QrcodeState.NORMAL;
-  @Require @Param onAction: VoidCallback;
+  @Require @Param value: string;
+  @Require @Param state: QrcodeState;
+
+  @Builder symbolGlyphBuilder() {
+    SymbolGlyph($r('sys.symbol.arrow_clockwise')).fontSize(this.options.expiredImageLength?.value)
+      .fontColor([this.options.textColor?.color])
+      .visibility(this.state == QrcodeState.EXPIRED ? Visibility.Visible : Visibility.None)
+  }
+
+  @Builder textBuilder() {
+    Text(this.options.textContent).margin({ top: this.options.space }).fontColor(this.options.textColor?.color)
+      .fontSize(this.options.textSize).fontWeight(this.options.textWeight).textAlign(TextAlign.Center)
+      .width(this.options.qrcodeSideLength?.value)
+      .visibility(this.state == QrcodeState.EXPIRED ? Visibility.Visible : Visibility.None)
+  }
+
+  @Builder loadinProgressBuilder() {
+    LoadingProgress().color(Color.White).height(this.options.loadingImageLength?.value)
+      .width(this.options.loadingImageLength?.value)
+      .visibility(this.state == QrcodeState.LOADING ? Visibility.Visible : Visibility.None)
+      .animation({ duration: this.options.animationDuration, curve: this.options.animationCurve,
+        playMode: PlayMode.Normal
+      })
+  }
 
   build() {
     Stack() {
       if (this.options !== void 0) {
         Column() {
-          QRCode(this.value)
-            .color(this.options.color?.color)
-            .backgroundColor(Color.Transparent)
-            .width(this.options.qrcodeSideLength?.value)
-            .height(this.options.qrcodeSideLength?.value)
+          QRCode(this.value).color(this.options.color?.color).backgroundColor(Color.Transparent)
+            .width(this.options.qrcodeSideLength?.value).height(this.options.qrcodeSideLength?.value)
         }
-        .height(this.options.edgeLength?.value)
-        .width(this.options.edgeLength?.value)
-        .backgroundColor(this.options.backgroundColor?.color)
-        .borderRadius(this.options.borderRadius?.value)
+        .height(this.options.edgeLength?.value).width(this.options.edgeLength?.value)
+        .backgroundColor(this.options.backgroundColor?.color).borderRadius(this.options.borderRadius?.value)
         .opacity(this.state != QrcodeState.NORMAL ? this.options.opacity : 1)
-        .animation({
-          duration: this.options.animationDuration,
-          curve: this.options.animationCurve,
+        .animation({ duration: this.options.animationDuration, curve: this.options.animationCurve,
           playMode: PlayMode.Normal
         })
         .justifyContent(FlexAlign.Center)
 
-
         Column() {
-          SymbolGlyph($r('sys.symbol.arrow_clockwise'))
-            .fontSize(this.options.expiredImageLength?.value)
-            .fontColor([this.options.textColor?.color])
-            .visibility(this.state == QrcodeState.EXPIRED ? Visibility.Visible : Visibility.None)
-
+          this.symbolGlyphBuilder()
           if (this.state == QrcodeState.LOADING) {
-            LoadingProgress()
-              .color(Color.White)
-              .height(this.options.loadingImageLength?.value)
-              .width(this.options.loadingImageLength?.value)
-              .visibility(this.state == QrcodeState.LOADING ? Visibility.Visible : Visibility.None)
-              .animation({
-                duration: this.options.animationDuration,
-                curve: this.options.animationCurve,
-                playMode: PlayMode.Normal
-              })
+            this.loadinProgressBuilder()
           }
-
-          Text(this.options.textContent)
-            .margin({ top: this.options.space })
-            .fontColor(this.options.textColor?.color)
-            .fontSize(this.options.textSize)
-            .fontWeight(this.options.textWeight)
-            .textAlign(TextAlign.Center)
-            .width(this.options.qrcodeSideLength?.value)
-            .visibility(this.state == QrcodeState.EXPIRED ? Visibility.Visible : Visibility.None)
-
+          this.textBuilder()
         }
         .visibility(this.state == QrcodeState.NORMAL ? Visibility.None : Visibility.Visible)
-        .animation({
-          duration: this.options.animationDuration,
-          curve: this.options.animationCurve,
+        .animation({ duration: this.options.animationDuration, curve: this.options.animationCurve,
           playMode: PlayMode.Normal
         })
       }
     }
-    .onClick(() => {
-      this.onAction && this.onAction()
-    })
   }
 }

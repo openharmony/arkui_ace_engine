@@ -121,17 +121,47 @@ export class Qrcode extends ViewV2 {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
         super(parent, elmtId, extraInfo);
         this.initParam("options", (params && "options" in params) ? params.options : undefined);
-        this.value = '';
-        this.state = QrcodeState.NORMAL;
-        this.initParam("onAction", (params && "onAction" in params) ? params.onAction : undefined);
+        this.initParam("value", (params && "value" in params) ? params.value : undefined);
+        this.initParam("state", (params && "state" in params) ? params.state : undefined);
         this.finalizeConstruction();
+    }
+    symbolGlyphBuilder(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            SymbolGlyph.create({ "id": -1, "type": 40000, params: ['sys.symbol.arrow_clockwise'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            SymbolGlyph.fontSize(this.options.expiredImageLength?.value);
+            SymbolGlyph.fontColor([this.options.textColor?.color]);
+            SymbolGlyph.visibility(this.state == QrcodeState.EXPIRED ? Visibility.Visible : Visibility.None);
+        }, SymbolGlyph);
+    }
+    textBuilder(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(this.options.textContent);
+            Text.margin({ top: this.options.space });
+            Text.fontColor(this.options.textColor?.color);
+            Text.fontSize(this.options.textSize);
+            Text.fontWeight(this.options.textWeight);
+            Text.textAlign(TextAlign.Center);
+            Text.width(this.options.qrcodeSideLength?.value);
+            Text.visibility(this.state == QrcodeState.EXPIRED ? Visibility.Visible : Visibility.None);
+        }, Text);
+        Text.pop();
+    }
+    loadinProgressBuilder(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            LoadingProgress.create();
+            Context.animation({ duration: this.options.animationDuration, curve: this.options.animationCurve,
+                playMode: PlayMode.Normal
+            });
+            LoadingProgress.color(Color.White);
+            LoadingProgress.height(this.options.loadingImageLength?.value);
+            LoadingProgress.width(this.options.loadingImageLength?.value);
+            LoadingProgress.visibility(this.state == QrcodeState.LOADING ? Visibility.Visible : Visibility.None);
+            Context.animation(null);
+        }, LoadingProgress);
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
-            Stack.onClick(() => {
-                this.onAction && this.onAction();
-            });
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
@@ -139,9 +169,7 @@ export class Qrcode extends ViewV2 {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
-                        Context.animation({
-                            duration: this.options.animationDuration,
-                            curve: this.options.animationCurve,
+                        Context.animation({ duration: this.options.animationDuration, curve: this.options.animationCurve,
                             playMode: PlayMode.Normal
                         });
                         Column.height(this.options.edgeLength?.value);
@@ -163,37 +191,18 @@ export class Qrcode extends ViewV2 {
                     Column.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
-                        Context.animation({
-                            duration: this.options.animationDuration,
-                            curve: this.options.animationCurve,
+                        Context.animation({ duration: this.options.animationDuration, curve: this.options.animationCurve,
                             playMode: PlayMode.Normal
                         });
                         Column.visibility(this.state == QrcodeState.NORMAL ? Visibility.None : Visibility.Visible);
                         Context.animation(null);
                     }, Column);
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        SymbolGlyph.create({ "id": -1, "type": 40000, params: ['sys.symbol.arrow_clockwise'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        SymbolGlyph.fontSize(this.options.expiredImageLength?.value);
-                        SymbolGlyph.fontColor([this.options.textColor?.color]);
-                        SymbolGlyph.visibility(this.state == QrcodeState.EXPIRED ? Visibility.Visible : Visibility.None);
-                    }, SymbolGlyph);
+                    this.symbolGlyphBuilder.bind(this)(this);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
                         if (this.state == QrcodeState.LOADING) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    LoadingProgress.create();
-                                    Context.animation({
-                                        duration: this.options.animationDuration,
-                                        curve: this.options.animationCurve,
-                                        playMode: PlayMode.Normal
-                                    });
-                                    LoadingProgress.color(Color.White);
-                                    LoadingProgress.height(this.options.loadingImageLength?.value);
-                                    LoadingProgress.width(this.options.loadingImageLength?.value);
-                                    LoadingProgress.visibility(this.state == QrcodeState.LOADING ? Visibility.Visible : Visibility.None);
-                                    Context.animation(null);
-                                }, LoadingProgress);
+                                this.loadinProgressBuilder.bind(this)(this);
                             });
                         }
                         else {
@@ -202,17 +211,7 @@ export class Qrcode extends ViewV2 {
                         }
                     }, If);
                     If.pop();
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create(this.options.textContent);
-                        Text.margin({ top: this.options.space });
-                        Text.fontColor(this.options.textColor?.color);
-                        Text.fontSize(this.options.textSize);
-                        Text.fontWeight(this.options.textWeight);
-                        Text.textAlign(TextAlign.Center);
-                        Text.width(this.options.qrcodeSideLength?.value);
-                        Text.visibility(this.state == QrcodeState.EXPIRED ? Visibility.Visible : Visibility.None);
-                    }, Text);
-                    Text.pop();
+                    this.textBuilder.bind(this)(this);
                     Column.pop();
                 });
             }
@@ -231,8 +230,11 @@ export class Qrcode extends ViewV2 {
         if ("options" in params) {
             this.updateParam("options", params.options);
         }
-        if ("onAction" in params) {
-            this.updateParam("onAction", params.onAction);
+        if ("value" in params) {
+            this.updateParam("value", params.value);
+        }
+        if ("state" in params) {
+            this.updateParam("state", params.state);
         }
     }
     rerender() {
@@ -243,13 +245,10 @@ __decorate([
     Param
 ], Qrcode.prototype, "options", void 0);
 __decorate([
-    Consumer()
+    Param
 ], Qrcode.prototype, "value", void 0);
 __decorate([
-    Consumer()
-], Qrcode.prototype, "state", void 0);
-__decorate([
     Param
-], Qrcode.prototype, "onAction", void 0);
+], Qrcode.prototype, "state", void 0);
 //# sourceMappingURL=Qrcode.js.map
-export default {Qrcode,QrcodeOptions,QrcodeState}
+export default {Qrcode, QrcodeOptions, QrcodeState}
