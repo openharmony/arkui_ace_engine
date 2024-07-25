@@ -34,6 +34,14 @@ public:
     std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const override;
     bool IsLoop() const override;
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) override;
+    void InitOnCrownEventInternal(const RefPtr<FocusHub>& focusHub) override;
+    bool IsCrownSpring() const override;
+    void SetIsCrownSpring(bool isCrownSpring) override;
+    void HandleCrownEvent(const CrownEvent& event, const OffsetF& center, const OffsetF& offset);
+#endif
+
 private:
     std::string GradientToJson(Gradient colors) const;
     mutable std::shared_ptr<SwiperArcDotParameters> swiperArcDotParameters_;
@@ -114,7 +122,15 @@ private:
     std::shared_ptr<AnimationUtils::Animation> Animation(bool exit, AnimationParam& param);
     void ResetBackcolor();
     void ResetScrollAnimation();
-    
+#ifdef SUPPORT_DIGITAL_CROWN
+    void HandleCrownActionBegin(double degree, double mainDelta, GestureEvent& info);
+    void HandleCrownActionUpdate(double degree, double mainDelta, GestureEvent& info, const OffsetF& offset);
+    void HandleCrownActionEnd(double degree, double mainDelta, GestureEvent& info, const OffsetF& offset);
+    void HandleCrownActionCancel();
+    double GetCrownRotatePx(const CrownEvent& event) const;
+    void UpdateCrownVelocity(double degree, double mainDelta, bool isEnd = false);
+#endif
+
     std::shared_ptr<Color> preNodeBackgroundColor_;
     std::shared_ptr<Color> entryNodeBackground_;
     OffsetF offset_;
@@ -137,6 +153,14 @@ private:
     float verticalEntryNodeOpacity_ = 0;
     bool hasGetExitColor_ = false;
     bool hasGetEntryColor_ = false;
+#ifdef SUPPORT_DIGITAL_CROWN
+    CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
+    Offset accumulativeCrownPx_;
+    bool isCrownSpring_ = false;
+    double crownVelocity_ = 0.0;
+    double crownTurnVelocity_ = 0.0;
+    bool isHandleCrownActionEnd_ = false;
+#endif
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_ARC_SWIPER_PATTERN_H

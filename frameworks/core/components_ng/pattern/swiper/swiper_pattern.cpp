@@ -371,6 +371,9 @@ void SwiperPattern::OnModifyDone()
     if (focusHub) {
         InitOnKeyEvent(focusHub);
         InitOnFocusInternal(focusHub);
+#ifdef SUPPORT_DIGITAL_CROWN
+        InitOnCrownEventInternal(focusHub);
+#endif
     }
 
     SetSwiperEventCallback(disableSwipe);
@@ -969,6 +972,11 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             PlayTranslateAnimation(currentOffset_, currentOffset_ - swiperLayoutAlgorithm->GetTargetStartPos(),
                 targetIndexValue, false, velocity_.value_or(0.0f));
         }
+#ifdef SUPPORT_DIGITAL_CROWN
+        if (IsCrownSpring()) {
+            SetIsCrownSpring(false);
+        }
+#endif
         velocity_.reset();
         pauseTargetIndex_ = targetIndex_;
     }
@@ -2728,6 +2736,11 @@ int32_t SwiperPattern::ComputeNextIndexInSinglePage(float velocity, bool onlyDis
 
 int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDistance) const
 {
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (IsCrownSpring() && velocity == 0.0f) {
+        return currentIndex_;
+    }
+#endif
     velocity = IsHorizontalAndRightToLeft() ? -velocity : velocity;
     if (IsSwipeByGroup()) {
         return ComputeSwipePageNextIndex(velocity, onlyDistance);
@@ -2809,6 +2822,11 @@ void SwiperPattern::UpdateCurrentFocus()
 
 bool SwiperPattern::CheckDragOutOfBoundary(double dragVelocity)
 {
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (IsCrownSpring()) {
+        return false;
+    }
+#endif
     if (IsLoop()) {
         return false;
     }
@@ -3129,6 +3147,12 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()
         }
         return curve;
     }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (IsCrownSpring()) {
+        return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity_, 1.0f, 228.0f, 30.0f);
+    }
+#endif
     // use spring motion feature.
     // interpolatingSpring: (mass: 1, stiffness:328, damping: 34)
     return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity_, 1, 328, 34);

@@ -41,6 +41,9 @@
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/components_v2/inspector/utils.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 
 namespace OHOS::Ace::NG {
 class SwiperPattern : public NestableScrollContainer {
@@ -665,6 +668,12 @@ public:
         frameRateRange_[type] = rateRange;
     }
     void UpdateNodeRate();
+#ifdef SUPPORT_DIGITAL_CROWN
+    virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {}
+    virtual void InitOnCrownEventInternal(const RefPtr<FocusHub>& focusHub) {}
+    virtual bool IsCrownSpring() const { return false; }
+    virtual void SetIsCrownSpring(bool isCrownSpring) {}
+#endif
 
 protected:
     void MarkDirtyNodeSelf();
@@ -682,6 +691,24 @@ protected:
     float GetCustomPropertyTargetOffset() const;
     float CalculateVisibleSize() const;
 
+    void HandleDragStart(const GestureEvent& info);
+    void HandleDragUpdate(const GestureEvent& info);
+    void HandleDragEnd(double dragVelocity);
+
+    void HandleTouchDown(const TouchLocationInfo& locationInfo);
+    void HandleTouchUp();
+
+    /**
+     * @brief Notifies the parent component that the scroll has started at the specified position.
+     *
+     * @param position The position where the scroll has started.
+     */
+    void NotifyParentScrollStart(float position);
+    /**
+     * @brief Notifies the parent NestableScrollContainer that the scroll has ended.
+     */
+    void NotifyParentScrollEnd();
+
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     SwiperLayoutAlgorithm::PositionMap itemPosition_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;
@@ -697,6 +724,8 @@ protected:
     bool isDragging_ = false;
     float motionVelocity_ = 0.0f;
     float currentIndexOffset_ = 0.0f;
+
+    Axis direction_ = Axis::HORIZONTAL;
 
 private:
     void OnModifyDone() override;
@@ -729,13 +758,7 @@ private:
     void InitIndicator();
     void InitArrow();
 
-    void HandleDragStart(const GestureEvent& info);
-    void HandleDragUpdate(const GestureEvent& info);
-    void HandleDragEnd(double dragVelocity);
-
     void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchDown(const TouchLocationInfo& locationInfo);
-    void HandleTouchUp();
 
     void HandleMouseEvent(const MouseInfo& info);
     void PlayTranslateAnimation(
@@ -892,17 +915,6 @@ private:
     void OnScrollStartRecursive(float position, float velocity = 0.f) override;
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
 
-    /**
-     * @brief Notifies the parent component that the scroll has started at the specified position.
-     *
-     * @param position The position where the scroll has started.
-     */
-    void NotifyParentScrollStart(float position);
-    /**
-     * @brief Notifies the parent NestableScrollContainer that the scroll has ended.
-     */
-    void NotifyParentScrollEnd();
-
     inline bool ChildFirst(NestedState state);
     void HandleTouchBottomLoop();
     void CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
@@ -1050,8 +1062,6 @@ private:
     bool childScrolling_ = false;
     bool isTouchDown_ = false;
     std::optional<bool> preLoop_;
-
-    Axis direction_ = Axis::HORIZONTAL;
 
     ChangeEventPtr changeEvent_;
     ChangeEventPtr onIndexChangeEvent_;

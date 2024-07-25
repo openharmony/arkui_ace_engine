@@ -28,6 +28,9 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_content_transition_proxy.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
+#ifndef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -151,6 +154,7 @@ public:
     virtual void SetSwipeByGroup(bool swipeByGroup) {}
     virtual void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) {}
     virtual void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) {}
+    virtual void SetDigitalCrownSensitivity(int32_t sensitivity) {}
 private:
     static std::unique_ptr<SwiperModel> instance_;
     static std::mutex mutex_;

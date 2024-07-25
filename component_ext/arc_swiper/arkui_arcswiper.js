@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const __ArcSwiper__ = requireInternal("arkui.arcswiper");
+const __ArcSwiper__ = requireInternal("arkui.ArcSwiper");
 
 class ArcSwiper extends JSViewAbstract {
     static create(value) {
@@ -54,6 +54,10 @@ class ArcSwiper extends JSViewAbstract {
 
     static onGestureSwipe(value) {
         __ArcSwiper__.onGestureSwipe(value);
+    }
+
+    static digitalCrownSensitivity(value) {
+        __ArcSwiper__.digitalCrownSensitivity(value);
     }
 
     static onClick(value) {

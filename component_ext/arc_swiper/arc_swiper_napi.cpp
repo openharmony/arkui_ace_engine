@@ -330,6 +330,22 @@ napi_value JsOnGestureSwipe(napi_env env, napi_callback_info info)
     return ExtNapiUtils::CreateNull(env);
 }
 
+napi_value JsSetDigitalCrownSensitivity(napi_env env, napi_callback_info info)
+{
+    size_t argc = MAX_ARG_NUM;
+    napi_value thisVal = nullptr;
+    napi_value argv[MAX_ARG_NUM] = { nullptr };
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
+    NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
+    int32_t sensitivity = 1;
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_number)) {
+        sensitivity = static_cast<int32_t>(ExtNapiUtils::GetCInt32(env, argv[0]));
+    }
+
+    SwiperModel::GetInstance()->SetDigitalCrownSensitivity(sensitivity);
+    return ExtNapiUtils::CreateNull(env);
+}
+
 napi_value ShowNext(napi_env env, napi_callback_info info)
 {
     napi_value thisVar = nullptr;
@@ -558,6 +574,7 @@ napi_value InitArcSwiper(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("onAnimationStart", JsOnAnimationStart),
         DECLARE_NAPI_FUNCTION("onAnimationEnd", JsOnAnimationEnd),
         DECLARE_NAPI_FUNCTION("onGestureSwipe", JsOnGestureSwipe),
+        DECLARE_NAPI_FUNCTION("digitalCrownSensitivity", JsSetDigitalCrownSensitivity),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
@@ -622,7 +639,7 @@ napi_value ExportArcSwiper(napi_env env, napi_value exports)
 
 } // namespace OHOS::Ace
 
-extern "C" __attribute__((visibility("default"))) void NAPI_arkui_arcswiper_GetJSCode(const char** buf, int* bufLen)
+extern "C" __attribute__((visibility("default"))) void NAPI_arkui_ArcSwiper_GetJSCode(const char** buf, int* bufLen)
 {
     if (buf != nullptr) {
         *buf = _binary_arkui_arcswiper_js_start;
@@ -634,7 +651,7 @@ extern "C" __attribute__((visibility("default"))) void NAPI_arkui_arcswiper_GetJ
 }
 
 // arkui_arcswiper JS register
-extern "C" __attribute__((visibility("default"))) void NAPI_arkui_arcswiper_GetABCCode(const char** buf, int* buflen)
+extern "C" __attribute__((visibility("default"))) void NAPI_arkui_ArcSwiper_GetABCCode(const char** buf, int* buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_arkui_arcswiper_abc_start;
@@ -649,7 +666,7 @@ static napi_module arcSwiperModule = {
     .nm_flags = 0,
     .nm_filename = nullptr,
     .nm_register_func = OHOS::Ace::ExportArcSwiper,
-    .nm_modname = "arkui.arcswiper",
+    .nm_modname = "arkui.ArcSwiper",
     .nm_priv = ((void*)0),
     .reserved = { 0 },
 };
