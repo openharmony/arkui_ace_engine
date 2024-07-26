@@ -983,18 +983,11 @@ void JSNavigationStack::RecoveryNavigationStack()
         if (!pattern) {
             continue;
         }
-        auto navPathInfo = pattern->GetNavPathInfo();
-        if (!navPathInfo) {
+        auto context = pattern->GetNavDestinationContext();
+        if (!context) {
             continue;
         }
-        JSRef<JSObject> item = JSRef<JSObject>::New();
-        item->SetProperty<std::string>("name", navPathInfo->GetName());
-        item->SetProperty<int32_t>("index", navDestinationGroupNode->GetIndex());
-        auto jsPathInfo = AceType::DynamicCast<JSNavPathInfo>(navPathInfo);
-        if (jsPathInfo) {
-            item->SetProperty("param", jsPathInfo->GetParam());
-            item->SetProperty("onPop", jsPathInfo->GetOnPop());
-        }
+        JSRef<JSObject> item = CreatePathInfoWithNecessaryProperty(context);
         pathArray->SetValueAt(index, item);
     }
     dataSourceObj_->SetPropertyObject("pathArray", pathArray);
@@ -1048,4 +1041,21 @@ JSRef<JSObject> JSNavigationStack::GetJsPathInfo(int32_t index)
     }
     return JSRef<JSObject>::Cast(pathInfo);
 }
+
+JSRef<JSObject> JSNavigationStack::CreatePathInfoWithNecessaryProperty(
+    const RefPtr<NG::NavDestinationContext>& context)
+{
+    auto pathInfo = JSRef<JSObject>::New();
+    CHECK_NULL_RETURN(context, pathInfo);
+    auto jsPathInfo = AceType::DynamicCast<JSNavPathInfo>(context->GetNavPathInfo());
+    CHECK_NULL_RETURN(jsPathInfo, pathInfo);
+
+    pathInfo->SetProperty<std::string>("name", jsPathInfo->GetName());
+    pathInfo->SetProperty<int32_t>("index", context->GetIndex());
+    pathInfo->SetProperty<std::string>("navDestinationId", std::to_string(context->GetNavDestinationId()));
+    pathInfo->SetProperty("param", jsPathInfo->GetParam());
+    pathInfo->SetProperty("onPop", jsPathInfo->GetOnPop());
+    return pathInfo;
+}
+
 } // namespace OHOS::Ace::Framework
