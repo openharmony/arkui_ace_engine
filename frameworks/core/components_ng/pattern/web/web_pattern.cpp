@@ -3380,15 +3380,12 @@ void WebPattern::ParseViewDataNumber(const std::string& key, int32_t value,
 {
     CHECK_NULL_VOID(viewScale > 0);
     CHECK_NULL_VOID(node);
-    std::optional<OffsetF> offset = GetCoordinatePoint();
     if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_FOCUS) {
         node->SetIsFocus(static_cast<bool>(value));
     } else if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_RECT_X) {
-        float x = value / viewScale;
-        rect.SetLeft(x + offset.value_or(OffsetF()).GetX());
+        rect.SetLeft(value / viewScale);
     } else if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_RECT_Y) {
-        float y = value / viewScale;
-        rect.SetTop(y + offset.value_or(OffsetF()).GetY());
+        rect.SetTop(value / viewScale);
     } else if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_RECT_W) {
         rect.SetWidth(value / viewScale);
     } else if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_RECT_H) {
@@ -3536,6 +3533,7 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
         container = Container::GetActive();
     }
     CHECK_NULL_RETURN(container, false);
+    isAutoFillClosing_ = false;
     bool isPopup = false;
     return container->RequestAutoFill(host, autoFillType, false, isPopup, autoFillSessionId_, false);
 }
@@ -3556,6 +3554,10 @@ bool WebPattern::RequestAutoSave()
 bool WebPattern::UpdateAutoFillPopup()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "begin to UpdateAutoFillPopup");
+    if (isAutoFillClosing_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "autofill popup is closing, no need to update");
+        return false;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto container = Container::Current();
@@ -3574,6 +3576,7 @@ bool WebPattern::CloseAutoFillPopup()
         container = Container::GetActive();
     }
     CHECK_NULL_RETURN(container, false);
+    isAutoFillClosing_ = true;
     return container->ClosePopupUIExtension(autoFillSessionId_);
 }
 
