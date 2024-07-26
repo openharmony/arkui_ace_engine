@@ -3352,7 +3352,7 @@ void WebPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool ne
 void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
     RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "autofill request success");
+    TAG_LOGI(AceLogTag::ACE_WEB, "called");
     CHECK_NULL_VOID(viewDataWrap);
     auto nodeInfoWraps = viewDataWrap->GetPageNodeInfoWraps();
     auto jsonNode = JsonUtil::Create(true);
@@ -3372,7 +3372,7 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
 
 void WebPattern::NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent, bool isPopup)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "autofill request fail, errCode:%{public}d", errCode);
+    TAG_LOGI(AceLogTag::ACE_WEB, "called, errCode:%{public}d", errCode);
 }
 
 void WebPattern::ParseViewDataNumber(const std::string& key, int32_t value,
@@ -3494,7 +3494,7 @@ AceAutoFillType WebPattern::GetFocusedType()
 
 void WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "receive autofill event from nweb");
+    TAG_LOGI(AceLogTag::ACE_WEB, "AutoFillEvent");
     OHOS::NWeb::NWebAutofillEvent eventType = OHOS::NWeb::NWebAutofillEvent::UNKNOWN;
     ParseNWebViewDataJson(viewDataJson, pageNodeInfo_, eventType);
 
@@ -3525,7 +3525,7 @@ void WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessa
 
 bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "begin to RequestAutoFill");
+    TAG_LOGI(AceLogTag::ACE_WEB, "RequestAutoFill");
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto container = Container::Current();
@@ -3540,7 +3540,7 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
 
 bool WebPattern::RequestAutoSave()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "begin to RequestAutoSave");
+    TAG_LOGI(AceLogTag::ACE_WEB, "RequestAutoSave");
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto container = Container::Current();
@@ -3553,9 +3553,8 @@ bool WebPattern::RequestAutoSave()
 
 bool WebPattern::UpdateAutoFillPopup()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "begin to UpdateAutoFillPopup");
+    TAG_LOGI(AceLogTag::ACE_WEB, "UpdateAutoFillPopup");
     if (isAutoFillClosing_) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "autofill popup is closing, no need to update");
         return false;
     }
     auto host = GetHost();
@@ -3570,7 +3569,7 @@ bool WebPattern::UpdateAutoFillPopup()
 
 bool WebPattern::CloseAutoFillPopup()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "begin to CloseAutoFillPopup");
+    TAG_LOGI(AceLogTag::ACE_WEB, "CloseAutoFillPopup");
     auto container = Container::Current();
     if (container == nullptr) {
         container = Container::GetActive();
