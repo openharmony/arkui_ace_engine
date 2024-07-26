@@ -1036,8 +1036,10 @@ void JSRichEditor::SetPlaceholder(const JSCallbackInfo& info)
     Font font;
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(info[1]);
-        JSRef<JSObject> fontObject = object->GetProperty("font");
-        ParseJsFont(fontObject, font);
+        auto fontObject = object->GetProperty("font");
+        if (fontObject->IsObject()) {
+            ParseJsFont(fontObject, font);
+        }
         JSRef<JSVal> colorVal = object->GetProperty("fontColor");
         Color fontColor;
         if (!colorVal->IsNull() && JSContainerBase::ParseJsColor(colorVal, fontColor)) {
