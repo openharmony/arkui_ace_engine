@@ -1573,7 +1573,7 @@ UpdateSpanStyle RichEditorPattern::GetUpdateSpanStyle()
     return updateSpanStyle_;
 }
 
-void RichEditorPattern::SetTypingStyle(std::optional<UpdateSpanStyle> typingStyle,
+void RichEditorPattern::SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
     std::optional<TextStyle> textStyle)
 {
     typingStyle_ = typingStyle;

@@ -262,7 +262,8 @@ class ACE_EXPORT RichEditorBaseControllerBase : public AceType {
 public:
     virtual int32_t GetCaretOffset() = 0;
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
-    virtual void SetTypingStyle(std::optional<UpdateSpanStyle> typingStyle, std::optional<TextStyle> textStyle) = 0;
+    virtual void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
+        std::optional<TextStyle> textStyle) = 0;
     virtual void CloseSelectionMenu() = 0;
     virtual bool IsEditing() = 0;
     virtual void StopEditing() = 0;

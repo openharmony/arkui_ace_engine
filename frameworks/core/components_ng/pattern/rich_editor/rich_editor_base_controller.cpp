@@ -45,7 +45,7 @@ bool RichEditorBaseController::SetCaretOffset(int32_t caretPosition)
     return richEditorPattern->SetCaretOffset(caretPosition);
 }
 
-void RichEditorBaseController::SetTypingStyle(std::optional<UpdateSpanStyle> typingStyle,
+void RichEditorBaseController::SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
     std::optional<TextStyle> textStyle)
 {
     auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
