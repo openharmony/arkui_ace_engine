@@ -217,15 +217,7 @@ void TextInputLayoutAlgorithm::UpdateContentPosition(const UpdateContentPosition
 
 void TextInputLayoutAlgorithm::UpdateTextRect(const UpdateTextRectParams& params)
 {
-    auto buttonWidth = 0.0f;
-    if (params.cleanResponseArea) {
-        buttonWidth += params.cleanResponseArea->GetAreaRect().Width();
-    }
-    if (params.responseArea) {
-        buttonWidth += params.responseArea->GetAreaRect().Width();
-    }
-    if (LessOrEqual(textRect_.Width(), params.contentSize.Width()) ||
-        LessOrEqual(textRect_.Width() - buttonWidth, params.contentSize.Width())) {
+    if (LessOrEqual(textRect_.Width(), params.contentSize.Width())) {
         float textRectOffsetX = 0.0f;
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             textRectOffsetX = params.pattern->GetPaddingLeft();
