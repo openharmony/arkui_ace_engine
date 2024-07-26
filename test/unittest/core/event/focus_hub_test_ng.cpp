@@ -189,6 +189,7 @@ HWTEST_F(FocusHubTestNg, FocusHubRemoveSelfTest004, TestSize.Level1)
      * @tc.steps: step3. Remove self.
      * @tc.expected: The nodeParent children size is 0.
      */
+    focusHub->focusScopeId_="1";
     focusHub->RemoveSelf();
     EXPECT_EQ(nodeParent->GetChildren().size(), NODE_SIZE);
 }
@@ -1040,6 +1041,18 @@ HWTEST_F(FocusHubTestNg, FocusHubHandleDumpFocusTreeTest023, TestSize.Level1)
     DumpLog::GetInstance().description_.push_back("test");
     focusHub->currentFocus_ = false;
     focusHub->focusable_ = false;
+    focusHub->DumpFocusTree(depth);
+    EXPECT_TRUE(DumpLog::GetInstance().description_.empty());
+
+    DumpLog::GetInstance().description_.push_back("test");
+    focusHub->focusType_ = FocusType::PRIOR;
+    focusHub->currentFocus_ = true;
+    focusHub->DumpFocusTree(depth);
+    EXPECT_TRUE(DumpLog::GetInstance().description_.empty());
+
+    DumpLog::GetInstance().description_.push_back("test");
+    focusHub->focusType_ = FocusType::PREVIOUS;
+    focusHub->currentFocus_ = true;
     focusHub->DumpFocusTree(depth);
     EXPECT_TRUE(DumpLog::GetInstance().description_.empty());
 }

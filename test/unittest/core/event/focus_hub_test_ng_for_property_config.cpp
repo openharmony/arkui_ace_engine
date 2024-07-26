@@ -405,4 +405,168 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0120, TestSize.Level1)
     focusHub->isFocusScope_ = true;
     ASSERT_FALSE(focusHub->SetLastWeakFocusNodeToPreviousNode());
 }
+
+/**
+ * @tc.name: IsCurrentFocusWholePath001
+ * @tc.desc: Test the function IsCurrentFocusWholePath.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, IsCurrentFocusWholePath001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+
+    focusHub->currentFocus_ = true;
+    focusHub->focusType_ = FocusType::SCOPE;
+    focusHub->focusDepend_ = FocusDependence::SELF;
+    ASSERT_FALSE(focusHub->IsCurrentFocusWholePath());
+    focusHub->focusDepend_ = FocusDependence::AUTO;
+    ASSERT_FALSE(focusHub->IsCurrentFocusWholePath());
+    focusHub->focusDepend_ = FocusDependence::CHILD;
+    ASSERT_FALSE(focusHub->IsCurrentFocusWholePath());
+}
+
+/**
+ * @tc.name: OnKeyPreIme001
+ * @tc.desc: Test the function OnKeyPreIme.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, OnKeyPreIme001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_TAB;
+    keyEvent.pressedCodes.emplace_back(KeyCode::KEY_HOME);
+    auto info = KeyEventInfo(keyEvent);
+    ASSERT_FALSE(focusHub->OnKeyPreIme(info, keyEvent));
+}
+
+/**
+ * @tc.name: GetProjectAreaOnRect001
+ * @tc.desc: Test the function GetProjectAreaOnRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, GetProjectAreaOnRect001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    FocusStep step = FocusStep::UP;
+    RectF rect = RectF(1, 1, 0, 10);
+    RectF projectRect = RectF(1, 1, 0, 0);
+    focusHub->GetProjectAreaOnRect(rect, projectRect, step);
+
+    rect = RectF(1, 1, 0, 0);
+    projectRect = RectF(10, 1, 0, 0);
+    focusHub->GetProjectAreaOnRect(rect, projectRect, step);
+
+    step = FocusStep::DOWN;
+    rect = RectF(1, 1, 0, 10);
+    projectRect = RectF(1, 1, 0, 0);
+    focusHub->GetProjectAreaOnRect(rect, projectRect, step);
+
+    rect = RectF(1, 1, 0, 0);
+    projectRect = RectF(10, 1, 0, 0);
+    focusHub->GetProjectAreaOnRect(rect, projectRect, step);
+
+    step = FocusStep::LEFT;
+    rect = RectF(1, 1, 0, 10);
+    projectRect = RectF(1, 1, 0, 0);
+    focusHub->GetProjectAreaOnRect(rect, projectRect, step);
+
+    rect = RectF(1, 1, 0, 0);
+    projectRect = RectF(10, 1, 0, 0);
+    focusHub->GetProjectAreaOnRect(rect, projectRect, step);
+
+    step = FocusStep::RIGHT;
+    rect = RectF(1, 1, 0, 10);
+    projectRect = RectF(1, 1, 0, 0);
+    focusHub->GetProjectAreaOnRect(rect, projectRect, step);
+
+    rect = RectF(1, 1, 0, 0);
+    projectRect = RectF(10, 1, 0, 0);
+    focusHub->GetProjectAreaOnRect(rect, projectRect, step);
+    ASSERT_EQ(step, FocusStep::RIGHT);
+}
+
+/**
+ * @tc.name: GetFirstChildFocusView001
+ * @tc.desc: Test the function GetFirstChildFocusView.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, GetFirstChildFocusView001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto nodeParent =
+        AceType::MakeRefPtr<FrameNodeOnTree>(V2::BLANK_ETS_TAG, -1, AceType::MakeRefPtr<FlexLayoutPattern>());
+    frameNode->GetOrCreateFocusHub();
+    nodeParent->GetOrCreateFocusHub();
+    frameNode->SetParent(nodeParent);
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    RefPtr<FocusView> result = focusHub->GetFirstChildFocusView();
+    ASSERT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: DumpFocusTree001
+ * @tc.desc: Test the function DumpFocusTree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, DumpFocusTree001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps: step2. Create FocusHub.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+
+    /**
+     * @tc.steps: step3. test function DumpFocusNodeTree.
+     * @tc.expected: After DumpFocusTree, the DumpLog.description_ is empty.
+     */
+    int32_t depth = 1;
+    focusHub->focusScopeId_ = "TEST";
+    /**
+     * @tc.steps: step4. test function DumpFocusScopeTree.
+     * @tc.expected: After DumpFocusTree, the DumpLog.description_ is empty.
+     */
+    DumpLog::GetInstance().description_.push_back("test");
+    focusHub->focusType_ = FocusType::SCOPE;
+    focusHub->focusPriority_ = FocusPriority::PRIOR;
+    focusHub->currentFocus_ = true;
+    focusHub->DumpFocusTree(depth);
+    EXPECT_TRUE(DumpLog::GetInstance().description_.empty());
+
+    DumpLog::GetInstance().description_.push_back("PREVIOUS");
+    focusHub->focusPriority_ = FocusPriority::PREVIOUS;
+    focusHub->currentFocus_ = true;
+    focusHub->DumpFocusTree(depth);
+    EXPECT_TRUE(DumpLog::GetInstance().description_.empty());
+
+    focusHub->focusType_ = FocusType::NODE;
+    focusHub->focusPriority_ = FocusPriority::PRIOR;
+    focusHub->currentFocus_ = true;
+    focusHub->DumpFocusTree(depth);
+    EXPECT_TRUE(DumpLog::GetInstance().description_.empty());
+
+    DumpLog::GetInstance().description_.push_back("PREVIOUS");
+    focusHub->focusPriority_ = FocusPriority::PREVIOUS;
+    focusHub->currentFocus_ = true;
+    focusHub->DumpFocusTree(depth);
+    EXPECT_TRUE(DumpLog::GetInstance().description_.empty());
+}
 } // namespace OHOS::Ace::NG123456

@@ -1973,4 +1973,24 @@ HWTEST_F(FocusHubTestNg, GetRootFocusHub001, TestSize.Level1)
     ASSERT_NE(focusHub, nullptr);
     ASSERT_NE(focusHub->GetRootFocusHub(), nullptr);
 }
+
+/**
+ * @tc.name: SetFocusable001
+ * @tc.desc: Test the function SetFocusable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, SetFocusable001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->focusType_ = FocusType::SCOPE;
+    focusHub->focusable_ = true;
+    focusHub->implicitFocusable_ = true;
+    focusHub->focusDepend_ = FocusDependence::AUTO;
+    focusHub->SetFocusable(true, true);
+    focusHub->focusDepend_ = FocusDependence::CHILD;
+    focusHub->SetFocusable(true, true);
+    ASSERT_NE(focusHub->focusDepend_, FocusDependence::CHILD);
+}
 } // namespace OHOS::Ace::NG
