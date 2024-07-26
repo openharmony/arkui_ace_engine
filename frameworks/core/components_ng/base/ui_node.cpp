@@ -1003,12 +1003,7 @@ void UINode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
     ACE_LAYOUT_TRACE_BEGIN("Build[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
         GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
-    std::vector<RefPtr<UINode>> children;
-    children.reserve(GetChildren().size());
     for (const auto& child : GetChildren()) {
-        children.push_back(child);
-    }
-    for (const auto& child : children) {
         if (InstanceOf<CustomNode>(child)) {
             auto custom = DynamicCast<CustomNode>(child);
             if (custom->HasExtraInfo()) {
