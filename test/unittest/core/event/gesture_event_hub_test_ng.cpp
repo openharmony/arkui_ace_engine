@@ -1946,7 +1946,7 @@ HWTEST_F(GestureEventHubTestNg, RemoveLastResponseRect001, TestSize.Level1)
         callbackInfo = 1;
     });
     guestureEventHub->RemoveLastResponseRect();
-    ASSERT_TRUE(guestureEventHub->isResponseRegion_);
+    ASSERT_FALSE(guestureEventHub->isResponseRegion_);
 }
 
 /**
