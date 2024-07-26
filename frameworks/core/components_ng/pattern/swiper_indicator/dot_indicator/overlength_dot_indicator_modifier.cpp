@@ -63,7 +63,6 @@ void OverlengthDotIndicatorModifier::onDraw(DrawingContext& context)
     contentProperty.firstPointOpacity = firstPointOpacity_->Get();
     contentProperty.newPointOpacity = newPointOpacity_->Get();
 
-    SetFocusedAndSelectedColor(contentProperty);
     PaintBackground(context, contentProperty);
     PaintContent(context, contentProperty);
 }
