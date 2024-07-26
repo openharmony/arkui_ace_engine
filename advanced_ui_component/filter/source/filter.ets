@@ -222,7 +222,7 @@ struct ListFilterRow {
         x1: 0,
         y1: LIST_ROW_HEIGHT / 2
       })
-    }
+    }.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
   }
 }
 
