@@ -28181,6 +28181,25 @@ class MediaCachedImageSrcModifier extends ModifierWithKey {
   }
 }
 MediaCachedImageSrcModifier.identity = Symbol('mediaCachedImageSrc');
+class MediaCachedImageAltModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (getUINativeAdvancedModule() === undefined) {
+      return;
+    }
+    if (reset) {
+      getUINativeAdvancedModule().mediaCachedImage.resetAlt(node);
+    } else {
+      getUINativeAdvancedModule().mediaCachedImage.setAlt(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+MediaCachedImageAltModifier.identity = Symbol('mediaCachedImageAlt');
 class ArkMediaCachedImageComponent extends ArkImageComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -28191,8 +28210,11 @@ class ArkMediaCachedImageComponent extends ArkImageComponent {
     }
     return this;
   }
+  alt(value) {
+    modifierWithKey(this._modifiersWithKeys, MediaCachedImageAltModifier.identity, MediaCachedImageAltModifier, value);
+    return this;
+  }
 }
-
 // @ts-ignore
 if (globalThis.MediaCachedImage !== undefined) {
   globalThis.MediaCachedImage.attributeModifier = function (modifier) {
