@@ -301,7 +301,7 @@ bool WaterFlowLayoutSW::FillBackSection(float viewportBound, int32_t& idx, int32
 
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     while (!q.empty() && idx <= maxChildIdx) {
-        auto [pos, laneIdx] = q.top();
+        auto [_, laneIdx] = q.top();
         q.pop();
         info_->idxToLane_[idx] = laneIdx;
         float endPos = FillBackHelper(props, idx++, laneIdx);
