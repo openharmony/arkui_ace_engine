@@ -825,7 +825,7 @@ private:
 
     inline bool ChildFirst(NestedState state);
     void HandleTouchBottomLoop();
-    GestureState CalculateGestureState(float additionalOffset, int32_t currentIndex, int32_t currentFirstIndex) const;
+    void CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     std::pair<float, float> CalcCurrentPageStatus(float additionalOffset) const;
     std::pair<float, float> CalcCurrentPageStatusOnRTL(float additionalOffset) const;
     void StopIndicatorAnimation(bool ifImmediately = false);
@@ -975,6 +975,7 @@ private:
     bool indicatorIsBoolean_ = true;
     bool isAtHotRegion_ = false;
     bool isDragging_ = false;
+    bool needTurn_ = false;
     bool isParentHiddenChange_ = false;
     /**
      * @brief Indicates whether the child NestableScrollContainer is currently scrolling and affecting Swiper.
