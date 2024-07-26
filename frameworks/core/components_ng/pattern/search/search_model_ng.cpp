@@ -109,6 +109,7 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     BorderWidthProperty borderWidth;
     borderColor.SetColor(searchTheme->GetBorderColor());
     borderWidth.SetBorderWidth(searchTheme->GetBorderWidth());
+    layoutProperty->UpdateCancelButtonStyle(searchTheme->GetCancelButtonStyle());
     if (!layoutProperty->GetBorderWidthProperty()) {
         if (!renderContext->HasBorderWidth()) {
             layoutProperty->UpdateBorderWidth(borderWidth);

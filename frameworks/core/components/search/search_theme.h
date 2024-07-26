@@ -96,6 +96,8 @@ public:
             theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
             theme->focusBgColor_ = pattern->GetAttr<Color>("search_focus_bg_color", Color());
             theme->focusIconColor_ = pattern->GetAttr<Color>("search_focus_icon_color", Color());
+            theme->cancelButtonStyle_ = static_cast<CancelButtonStyle>(
+                static_cast<int32_t>(pattern->GetAttr<double>("search_cancel_button_style", 2.0f)));
         }
     };
 

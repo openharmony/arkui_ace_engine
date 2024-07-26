@@ -1189,12 +1189,16 @@ void SearchPattern::InitSearchTheme()
     searchHoverColor_ = searchTheme->GetHoverColor();
     searchTouchColor_ = searchTheme->GetTouchColor();
     focusBgColor_ = searchTheme->GetFocusBgColor();
-    normalIconColor_ = searchTheme->GetSearchIconColor();
     focusIconColor_ = searchTheme->GetFocusIconColor();
     normalTextColor_ = searchTheme->GetTextColor();
     focusTextColor_ = searchTheme->GetFocusTextColor();
     normalPlaceholderColor_ = searchTheme->GetPlaceholderColor();
     focusPlaceholderColor_ = searchTheme->GetFocusPlaceholderColor();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        normalIconColor_ = searchTheme->GetSymbolIconColor();
+    } else {
+        normalIconColor_ = searchTheme->GetSearchIconColor();
+    }
 }
 
 void SearchPattern::InitHoverEvent()
