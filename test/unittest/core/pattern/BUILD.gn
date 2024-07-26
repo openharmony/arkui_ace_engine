@@ -64,6 +64,7 @@ group("core_pattern_unittest") {
     "option:option_test_ng",
     "overlay:overlay_manager_test_ng",
     "panel:panel_test_ng",
+    "particle:particle_test_ng",
     "patternlock:patternlock_test_ng",
     "picker:date_picker_test_ng",
     "progress:progress_test_ng",
