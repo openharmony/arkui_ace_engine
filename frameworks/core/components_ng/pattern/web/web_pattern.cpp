@@ -3378,7 +3378,7 @@ void WebPattern::NotifyFillRequestFailed(int32_t errCode, const std::string& fil
 void WebPattern::ParseViewDataNumber(const std::string& key, int32_t value,
     RefPtr<PageNodeInfoWrap> node, RectT<float>& rect, float viewScale)
 {
-    CHECK_NULL_VOID(viewScale > 0);
+    CHECK_NULL_VOID(viewScale > FLT_EPSILON);
     CHECK_NULL_VOID(node);
     if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_FOCUS) {
         node->SetIsFocus(static_cast<bool>(value));
@@ -3412,7 +3412,7 @@ void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     float viewScale = pipelineContext->GetViewScale();
-    CHECK_NULL_VOID(viewScale > 0);
+    CHECK_NULL_VOID(viewScale > FLT_EPSILON);
 
     RefPtr<PageNodeInfoWrap> node = PageNodeInfoWrap::CreatePageNodeInfoWrap();
     std::string attribute = child->GetKey();
