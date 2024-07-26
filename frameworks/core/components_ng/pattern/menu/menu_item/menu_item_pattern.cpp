@@ -357,9 +357,8 @@ void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
         props->UpdateExpandingMode(expandingMode_);
         if (expandingMode_ == SubMenuExpandingMode::STACK) {
             AddStackSubMenuHeader(frameNode);
-            pattern->BlockFurtherExpand();
+            pattern->SetIsStackSubmenu();
         } else if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
-            pattern->BlockFurtherExpand();
             pattern->SetIsEmbedded();
             return;
         }
@@ -1090,8 +1089,9 @@ void MenuItemPattern::AddExpandIcon(RefPtr<FrameNode>& row)
     auto menuPattern = menuNode ? menuNode->GetPattern<MenuPattern>() : nullptr;
     auto menuProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
     CHECK_NULL_VOID(menuProperty);
-    auto canExpand = (menuPattern ? menuPattern->CanExpand() : true) && GetSubBuilder() != nullptr &&
-        (expandingMode_ == SubMenuExpandingMode::EMBEDDED || expandingMode_ == SubMenuExpandingMode::STACK);
+    auto canExpand = GetSubBuilder() != nullptr && menuPattern
+        && !menuPattern->IsEmbedded() && !menuPattern->IsStackSubmenu()
+        && (expandingMode_ == SubMenuExpandingMode::EMBEDDED || expandingMode_ == SubMenuExpandingMode::STACK);
     if (!canExpand) {
         if (expandIcon_) {
             row->RemoveChild(expandIcon_);

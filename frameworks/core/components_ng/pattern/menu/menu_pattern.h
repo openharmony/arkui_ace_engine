@@ -480,16 +480,6 @@ public:
     BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
 
     void OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover = false);
-    
-    void BlockFurtherExpand()
-    {
-        canExpand_ = false;
-    }
-    
-    bool CanExpand()
-    {
-        return canExpand_;
-    }
 
     RefPtr<FrameNode> GetLastSelectedItem()
     {
@@ -508,6 +498,14 @@ public:
     bool IsEmbedded()
     {
         return isEmbedded_;
+    }
+    void SetIsStackSubmenu()
+    {
+        isStackSubmenu_ = true;
+    }
+    bool IsStackSubmenu()
+    {
+        return isStackSubmenu_;
     }
 protected:
     void UpdateMenuItemChildren(RefPtr<UINode>& host);
@@ -599,9 +597,9 @@ private:
     bool hasOptionWidth_ = false;
     SizeF targetSize_;
     bool expandDisplay_ = false;
-    bool canExpand_ = true;
     RefPtr<FrameNode> lastSelectedItem_ = nullptr;
     bool isEmbedded_ = false;
+    bool isStackSubmenu_ = false;
     bool isNeedDivider_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
