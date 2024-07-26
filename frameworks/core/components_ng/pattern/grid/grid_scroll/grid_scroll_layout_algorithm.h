@@ -183,6 +183,8 @@ private:
     
     void ResetOffsetWhenHeightChanged();
 
+    void MergeRemainingLines(std::map<int32_t, std::map<int32_t, int32_t>> matrix, int32_t forwardLines);
+
 protected:
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
