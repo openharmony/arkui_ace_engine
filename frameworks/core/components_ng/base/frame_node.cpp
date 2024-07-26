@@ -19,8 +19,8 @@
 #include "base/geometry/ng/rect_t.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#include "core/common/layout_inspector.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #endif
 #include "base/geometry/dimension.h"
@@ -1036,8 +1036,21 @@ void FrameNode::UpdateGeometryTransition()
     }
 }
 
+void FrameNode::TriggerRsProfilerNodeMountCallbackIfExist()
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    CHECK_NULL_VOID(renderContext_);
+    auto callback = LayoutInspector::GetRsProfilerNodeMountCallback();
+    if (callback) {
+        FrameNodeInfo info { GetId(), renderContext_->GetNodeId(), GetTag(), GetDebugLine() };
+        callback(info);
+    }
+#endif
+}
+
 void FrameNode::OnAttachToMainTree(bool recursive)
 {
+    TriggerRsProfilerNodeMountCallbackIfExist();
     eventHub_->FireOnAttach();
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear(recursive);

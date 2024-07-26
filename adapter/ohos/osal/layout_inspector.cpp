@@ -124,7 +124,8 @@ const OHOS::sptr<OHOS::Rosen::Window> GetWindow(int32_t containerId)
 
 bool LayoutInspector::stateProfilerStatus_ = false;
 bool LayoutInspector::layoutInspectorStatus_ = false;
-std::function<void(bool)> LayoutInspector::jsStateProfilerStatusCallback_ = nullptr;
+ProfilerStatusCallback LayoutInspector::jsStateProfilerStatusCallback_ = nullptr;
+RsProfilerNodeMountCallback LayoutInspector::rsProfilerNodeMountCallback_ = nullptr;
 const char PNG_TAG[] = "png";
 
 void LayoutInspector::SupportInspector()
@@ -166,7 +167,7 @@ void LayoutInspector::TriggerJsStateProfilerStatusCallback(bool status)
     }
 }
 
-void LayoutInspector::SetJsStateProfilerStatusCallback(ProfilerStatusCallback callback)
+void LayoutInspector::SetJsStateProfilerStatusCallback(ProfilerStatusCallback&& callback)
 {
     jsStateProfilerStatusCallback_ = callback;
 }
@@ -174,6 +175,16 @@ void LayoutInspector::SetJsStateProfilerStatusCallback(ProfilerStatusCallback ca
 bool LayoutInspector::GetStateProfilerStatus()
 {
     return stateProfilerStatus_;
+}
+
+RsProfilerNodeMountCallback LayoutInspector::GetRsProfilerNodeMountCallback()
+{
+    return rsProfilerNodeMountCallback_;
+}
+
+void LayoutInspector::SetRsProfilerNodeMountCallback(RsProfilerNodeMountCallback&& callback)
+{
+    rsProfilerNodeMountCallback_ = callback;
 }
 
 void LayoutInspector::SendStateProfilerMessage(const std::string& message)
