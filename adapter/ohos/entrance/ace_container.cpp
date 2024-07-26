@@ -1166,16 +1166,18 @@ UIContentErrorCode AceContainer::RunPage(
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
 
-    if (front->GetType() != FrontendType::DECLARATIVE_CJ && !isFormRender && !isNamedRouter &&
-        isStageModel && !CheckUrlValid(content, container->GetHapPath())) {
-        return UIContentErrorCode::INVALID_URL;
+    if (front->GetType() != FrontendType::DECLARATIVE_CJ && !isFormRender && isStageModel) {
+        if (isNamedRouter) {
+            RefPtr<OHOS::Ace::DeclarativeFrontend> declarativeFront = AceType::DynamicCast<DeclarativeFrontend>(front);
+            CHECK_NULL_RETURN(declarativeFront, UIContentErrorCode::NULL_POINTER);
+            std::string name = declarativeFront->GetJsEngine()->SearchRouterRegisterMap(content);
+            CHECK_NULL_RETURN(name.size(), UIContentErrorCode::INVALID_URL);
+        } else {
+            CHECK_NULL_RETURN(CheckUrlValid(content, container->GetHapPath()), UIContentErrorCode::INVALID_URL);
+        }
     }
-
+    
     if (isNamedRouter) {
-        RefPtr<OHOS::Ace::DeclarativeFrontend> declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(front);
-        CHECK_NULL_RETURN(declarativeFrontend, UIContentErrorCode::NULL_POINTER);
-        std::string name = declarativeFrontend->GetJsEngine()->SearchRouterRegisterMap(content);
-        CHECK_NULL_RETURN(name.size(), UIContentErrorCode::INVALID_URL);
         return front->RunPageByNamedRouter(content, params);
     }
 
