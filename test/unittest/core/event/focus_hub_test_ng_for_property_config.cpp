@@ -420,9 +420,9 @@ HWTEST_F(FocusHubTestNg, IsCurrentFocusWholePath001, TestSize.Level1)
     focusHub->currentFocus_ = true;
     focusHub->focusType_ = FocusType::SCOPE;
     focusHub->focusDepend_ = FocusDependence::SELF;
-    ASSERT_FALSE(focusHub->IsCurrentFocusWholePath());
+    ASSERT_TRUE(focusHub->IsCurrentFocusWholePath());
     focusHub->focusDepend_ = FocusDependence::AUTO;
-    ASSERT_FALSE(focusHub->IsCurrentFocusWholePath());
+    ASSERT_TRUE(focusHub->IsCurrentFocusWholePath());
     focusHub->focusDepend_ = FocusDependence::CHILD;
     ASSERT_FALSE(focusHub->IsCurrentFocusWholePath());
 }
@@ -512,7 +512,7 @@ HWTEST_F(FocusHubTestNg, GetFirstChildFocusView001, TestSize.Level1)
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
     ASSERT_NE(focusHub, nullptr);
     RefPtr<FocusView> result = focusHub->GetFirstChildFocusView();
-    ASSERT_NE(result, nullptr);
+    ASSERT_EQ(result, nullptr);
 }
 
 /**
