@@ -585,7 +585,7 @@ public:
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::string content);
-    bool InitValueText(const std::string& content);
+    bool InitValueText(std::string content);
 
     void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);

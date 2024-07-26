@@ -3242,17 +3242,16 @@ void TextFieldPattern::InitEditingValueText(std::string content)
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
-bool TextFieldPattern::InitValueText(const std::string& content)
+bool TextFieldPattern::InitValueText(std::string content)
 {
-    auto initContent = content;
     if (GetIsPreviewText()) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Init when has previewText");
-        initContent = contentController_->GetTextValue();
+        return false;
     }
     if (HasInputOperation() && content != "") {
         return false;
     }
-    contentController_->SetTextValueOnly(std::move(initContent));
+    contentController_->SetTextValueOnly(std::move(content));
     selectController_->UpdateCaretIndex(GetWideText().length());
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     return true;
