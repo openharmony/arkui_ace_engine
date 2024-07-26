@@ -352,6 +352,8 @@ private:
 
     void UpdateElementInfosTreeId(std::list<Accessibility::AccessibilityElementInfo>& infos);
 
+    bool NeedRegisterChildTree(uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId);
+
     void FillEventInfoWithNode(
         const RefPtr<NG::FrameNode>& node,
         Accessibility::AccessibilityEventInfo& eventInfo,
@@ -372,6 +374,7 @@ private:
     std::unordered_map<int64_t, std::shared_ptr<AccessibilityChildTreeCallback>> childTreeCallbackMap_;
     int64_t parentElementId_ = INVALID_PARENT_ID;
     uint32_t parentWindowId_ = 0;
+    int32_t parentTreeId_ = 0;
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;
 };
 
