@@ -1317,7 +1317,7 @@ void OverlayManager::PopToast(int32_t toastId)
         CHECK_NULL_VOID(context);
         auto rootNode = context->GetRootElement();
         CHECK_NULL_VOID(rootNode);
-        TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast remove from root");
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "toast remove from root");
         rootNode->RemoveChild(toastUnderPop);
         overlayManager->toastMap_.erase(toastId);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
