@@ -4910,7 +4910,9 @@ bool SwiperPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableSc
     if (IsDisableSwipe()) {
         return false;
     }
-
+    if (IsHorizontalAndRightToLeft()) {
+        velocity = -velocity;
+    }
     DestructSetter<bool> scope(childScrolling_, false);
     // haven't reached edge
     if (GetDistanceToEdge() > 0.0f || IsLoop()) {
@@ -4933,6 +4935,9 @@ bool SwiperPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableSc
 
 ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedState state, float velocity)
 {
+    if (IsHorizontalAndRightToLeft() && state != NestedState::GESTURE) {
+        offset = -offset;
+    }
     if (IsDisableSwipe()) {
         return { offset, true };
     }
