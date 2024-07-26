@@ -116,7 +116,7 @@ void SetDragEventProperty(const RefPtr<OHOS::Ace::DragEvent>& info, ArkUINodeEve
         ++index;
     }
     event.dragEvent.dataTypes = strList.data();
-    event.dragEvent.dataTypesMaxStrLength = maxLength;
+    event.dragEvent.dataTypesMaxStrLength = maxLength + 1;
 }
 
 void SetOnDragDrop(ArkUINodeHandle node, void* extraParam)
@@ -272,7 +272,7 @@ void SetOnDragEnd(ArkUINodeHandle node, void* extraParam)
             ++index;
         }
         event.dragEvent.dataTypes = strList.data();
-        event.dragEvent.dataTypesMaxStrLength = maxLength;
+        event.dragEvent.dataTypesMaxStrLength = maxLength + 1;
 
         auto unifiedData = UdmfClient::GetInstance()->TransformUnifiedDataPtr(info->GetData());
 

@@ -522,6 +522,7 @@ public:
     bool IsSelectAll();
     void HandleOnCopy();
     void HandleOnCopySpanString();
+    virtual CopyOptions HandleOnCopyOptions();
     virtual void HandleOnSelectAll();
     void SetTextSelectableMode(TextSelectableMode value);
 

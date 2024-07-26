@@ -491,11 +491,10 @@ class AppStorage extends LocalStorage {
     private static instance_: AppStorage = undefined;
 
     /**
-    * not a public / sdk function
+    * not a public / sdk function 
     */
     private static getOrCreate(): AppStorage {
         if (!AppStorage.instance_) {
-            stateMgmtConsole.warn('AppStorage instance missing. Use AppStorage.createInstance(initObj). Creating instance without any initialization.');
             AppStorage.instance_ = new AppStorage({});
         }
         return AppStorage.instance_;

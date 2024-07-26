@@ -927,11 +927,12 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsOutOfTouchTestRegion0025, TestSize.Level1)
      */
     PointF pointF;
     std::vector<RectF> rectF;
-    auto test = FRAME_NODE2->IsOutOfTouchTestRegion(std::move(pointF), 0);
+    TouchEvent touchEvent;
+    auto test = FRAME_NODE2->IsOutOfTouchTestRegion(std::move(pointF), touchEvent);
     EXPECT_TRUE(test);
 
     auto test1 = FRAME_NODE2->InResponseRegionList(pointF, rectF);
-    auto test2 = FRAME_NODE2->IsOutOfTouchTestRegion(std::move(pointF), 0);
+    auto test2 = FRAME_NODE2->IsOutOfTouchTestRegion(std::move(pointF), touchEvent);
     EXPECT_FALSE(test1);
     EXPECT_TRUE(test2);
 }

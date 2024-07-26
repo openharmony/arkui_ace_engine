@@ -17,6 +17,9 @@
 
 #include <optional>
 
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+#include "accessibility_element_info.h"
+#endif
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/mousestyle/mouse_style.h"
@@ -580,6 +583,7 @@ void SideBarContainerPattern::CreateAndMountControlButton(const RefPtr<NG::Frame
 
     auto buttonNode = CreateControlButton(sideBarTheme);
     CHECK_NULL_VOID(buttonNode);
+    RegisterElementInfoCallBack(buttonNode);
     auto imgNode = CreateControlImage(sideBarTheme, parentNode);
     CHECK_NULL_VOID(imgNode);
 
@@ -1381,5 +1385,30 @@ void SideBarContainerPattern::OnWindowSizeChanged(int32_t width, int32_t height,
 {
     TAG_LOGI(AceLogTag::ACE_SIDEBAR, "mark need retrieve sidebar property because of window rotation or resize");
     MarkNeedInitRealSideBarWidth(true);
+}
+
+void SideBarContainerPattern::RegisterElementInfoCallBack(const RefPtr<FrameNode>& buttonNode)
+{
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+    CHECK_NULL_VOID(buttonNode);
+    auto accessibilityProperty = buttonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto callBack = [weak = WeakClaim(this)] (Accessibility::ExtraElementInfo& extraElementInfo) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto showSideBar = pattern->GetShowSideBar();
+        extraElementInfo.SetExtraElementInfo(
+            "SideBarContainerStates", static_cast<int32_t>(showSideBar));
+    };
+    accessibilityProperty->SetRelatedElementInfoCallback(callBack);
+#endif
+}
+
+void SideBarContainerPattern::SetAccessibilityEvent()
+{
+    auto controlButton = GetControlButtonNode();
+    CHECK_NULL_VOID(controlButton);
+    // use TEXT_CHANGE event to report information update
+    controlButton->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, "", "");
 }
 } // namespace OHOS::Ace::NG

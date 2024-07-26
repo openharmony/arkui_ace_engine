@@ -817,7 +817,8 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
         int64_t startTime = GetSysTimestamp();
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineContext::GetCurrentContext());
         // After completing layout tasks at all nodes on the page, perform performance testing and management
-        pipeline->AddAfterLayoutTask([weakNav = WeakClaim(this), weakNode = WeakPtr<FrameNode>(curNode), startTime]() {
+        pipeline->AddAfterLayoutTask([weakNav = WeakClaim(this), weakNode = WeakPtr<FrameNode>(curNode), startTime,
+                                         path = curNavDestination->GetNavDestinationPathInfo()]() {
             auto navigation = weakNav.Upgrade();
             CHECK_NULL_VOID(navigation);
             auto curNode = weakNode.Upgrade();
@@ -825,8 +826,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             CHECK_NULL_VOID(curNode);
             PerformanceCheckNodeMap nodeMap;
             curNode->GetPerformanceCheckData(nodeMap);
-            AceScopedPerformanceCheck::RecordPerformanceCheckDataForNavigation(
-                nodeMap, endTime - startTime, navigation->GetNavigationPathInfo());
+            AceScopedPerformanceCheck::RecordPerformanceCheckData(nodeMap, endTime - startTime, path);
         });
     }
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)

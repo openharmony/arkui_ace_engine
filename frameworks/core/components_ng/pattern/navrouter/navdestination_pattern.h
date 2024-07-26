@@ -222,6 +222,8 @@ public:
         overlayManager_.Reset();
     }
 
+    int32_t GetTitlebarZIndex() const;
+
     void SetNavigationId(const std::string& id)
     {
         inspectorId_ = id;

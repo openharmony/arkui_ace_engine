@@ -34,7 +34,9 @@
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/canvas_rendering_context_2d_modifier.h"
 #include "core/interfaces/native/node/custom_dialog_model.h"
+#include "core/interfaces/native/node/drag_adapter_impl.h"
 #include "core/interfaces/native/node/grid_modifier.h"
+#include "core/interfaces/native/node/image_animator_modifier.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/interfaces/native/node/node_animate.h"
 #include "core/interfaces/native/node/node_canvas_modifier.h"
@@ -43,6 +45,7 @@
 #include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
+#include "core/interfaces/native/node/node_list_item_modifier.h"
 #include "core/interfaces/native/node/node_list_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
@@ -54,18 +57,12 @@
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
-#include "core/interfaces/native/node/image_animator_modifier.h"
-#include "core/interfaces/native/node/util_modifier.h"
-#include "core/interfaces/native/node/grid_modifier.h"
-#include "core/interfaces/native/node/alphabet_indexer_modifier.h"
-#include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/radio_modifier.h"
 #include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/select_modifier.h"
 #include "core/interfaces/native/node/util_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
-#include "core/interfaces/native/node/node_list_item_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -2018,6 +2015,7 @@ ArkUIFullNodeAPI impl_full = {
     GetDialogAPI,
     GetExtendedAPI,         // Extended
     NodeAdapter::GetNodeAdapterAPI,         // adapter.
+    DragAdapter::GetDragAdapterAPI,        // drag adapter.
 };
 /* clang-format on */
 } // namespace

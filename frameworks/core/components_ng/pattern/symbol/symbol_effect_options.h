@@ -74,9 +74,15 @@ public:
 
     void Reset()
     {
-        if (isTxtActiveSource_ == 1) {
+        if (isTxtActiveSource_ == 1 && effectType_ != SymbolEffectType::REPLACE) {
             isTxtActive_ = false;
         }
+    }
+
+    void updateReplaceUnicode(std::uint32_t lastReplaceCodeId, std::uint32_t curReplaceCodeId)
+    {
+        lastReplaceCodeId_ = lastReplaceCodeId;
+        curReplaceCodeId_ = curReplaceCodeId;
     }
 
     void SetTriggerNum(int32_t triggerNum)
@@ -177,6 +183,16 @@ public:
         return triggerNum_;
     }
 
+    std::uint32_t GetLastReplaceUnicode() const
+    {
+        return lastReplaceCodeId_;
+    }
+
+    std::uint32_t GetCurReplaceUnicode() const
+    {
+        return curReplaceCodeId_;
+    }
+
     bool operator==(const SymbolEffectOptions& info) const;
     bool operator!=(const SymbolEffectOptions& info) const;
 
@@ -209,8 +225,11 @@ private:
     std::optional<int32_t> triggerNum_;
     std::optional<bool> isTriggerNumChanged_;
     bool isTxtActive_ = false;
-    int16_t isTxtActiveSource_ = -1; // -1:未设置开关   0:isActive   1:用户js接口的Trigger
+    // -1:未设置开关   0:isActive   1:需回置动效开关为false（替换动效需要连续两次true,暂不回置）
+    int16_t isTxtActiveSource_ = -1;
     int32_t repeatCount_ = 1;
+    std::uint32_t lastReplaceCodeId_;
+    std::uint32_t curReplaceCodeId_;
 };
 } // namespace OHOS::Ace::NG
 

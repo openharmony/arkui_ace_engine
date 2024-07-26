@@ -177,7 +177,7 @@ public:
     }
 
     void StartHiddenHandleTask(bool isDelay = true);
-    void UpdateSelectArea(const RectF& selectArea);
+    virtual void UpdateSelectArea(const RectF& selectArea);
 
     void SetIsNewAvoid(bool isNewAvoid);
 

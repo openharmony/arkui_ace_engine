@@ -429,6 +429,7 @@ export struct SelectDialog {
                       .hitTestBehavior(HitTestMode.None)
                       .id(String(index))
                       .focusable(false)
+                      .accessibilityLevel('no')
                       .onFocus(() => {
                         this.isFocus = true;
                         this.currentFocusIndex = index;
@@ -1447,6 +1448,8 @@ function setButtonProperties(buttonOptions: ButtonOptions, controller?: CustomDi
   .defaultFocus(true)
   .buttonStyle(buttonOptions.buttonStyle ?? ALERT_BUTTON_STYLE)
   .layoutWeight(BUTTON_LAYOUT_WEIGHT)
+  .type(ButtonType.Normal)
+  .borderRadius($r('sys.float.corner_radius_level10'))
 }
 
 /**

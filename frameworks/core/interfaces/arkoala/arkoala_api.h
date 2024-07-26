@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 119
+#define ARKUI_FULL_API_VERSION 120
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 119
+#define ARKUI_NODE_API_VERSION 120
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -1326,6 +1326,17 @@ struct ArkUIDragInteractionOptions {
     ArkUI_Bool defaultAnimationBeforeLifting;
 };
 
+struct ArkUIDragPreViewAndInteractionOptions {
+    bool isScaleEnabled = false;
+    bool defaultAnimationBeforeLifting = false;
+    bool isMultiSelectionEnabled = false;
+    bool isNumberBadgeEnabled = false;
+    bool isDefaultShadowEnabled = false;
+    bool isDefaultRadiusEnabled = false;
+    ArkUI_Int32 badgeNumber = 0;
+    bool isShowBadge = true;
+};
+
 struct ArkUI_DialogDismissEvent;
 typedef ArkUI_DialogDismissEvent* ArkUIDialogDismissEvent;
 
@@ -1765,9 +1776,10 @@ struct ArkUICommonModifier {
     void (*setDragPreview)(ArkUINodeHandle node, ArkUIDragPreview dragPreview);
     void (*resetDragPreview)(ArkUINodeHandle node);
     ArkUI_Int32 (*getNodeUniqueId)(ArkUINodeHandle node);
-    void (*setFocusBoxStyle)(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Float32 valueStrokeWidth,
-        ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue);
+    void (*setFocusBoxStyle)(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int32 marginUnit,
+        ArkUI_Float32 valueStrokeWidth, ArkUI_Int32 widthUnit, ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue);
     void (*resetFocusBoxStyle)(ArkUINodeHandle node);
+    void (*setDisAllowDrop)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -1961,6 +1973,8 @@ struct ArkUITextModifier {
     void (*setTextSelectionMenuOptions)(
         ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
     void (*resetTextSelectionMenuOptions)(ArkUINodeHandle node);
+    void (*setTextHalfLeading)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetTextHalfLeading)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -4832,6 +4846,12 @@ typedef struct {
     ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle host);
 } ArkUINodeAdapterAPI;
 
+typedef struct {
+    void (*setDragPreview)(ArkUINodeHandle node, void* dragPreview);
+    void (*setDragEventStrictReportingEnabledWithNode)(bool enabled);
+    void (*setDragEventStrictReportingEnabledWithContext)(ArkUI_Int32 instanceId, bool enabled);
+} ArkUIDragAdapterAPI;
+
 /**
  * An API to control an implementation. When making changes modifying binary
  * layout, i.e. adding new events - increase ARKUI_NODE_API_VERSION above for binary
@@ -4848,6 +4868,7 @@ struct ArkUIFullNodeAPI {
     const ArkUIDialogAPI* (*getDialogAPI)();
     const ArkUIExtendedNodeAPI* (*getExtendedAPI)();
     const ArkUINodeAdapterAPI* (*getNodeAdapterAPI)();
+    const ArkUIDragAdapterAPI* (*getDragAdapterAPI)();
 };
 
 struct ArkUIAnyAPI {

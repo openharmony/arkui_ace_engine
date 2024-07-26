@@ -1172,6 +1172,10 @@ UIContentErrorCode AceContainer::RunPage(
     }
 
     if (isNamedRouter) {
+        RefPtr<OHOS::Ace::DeclarativeFrontend> declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(front);
+        CHECK_NULL_RETURN(declarativeFrontend, UIContentErrorCode::NULL_POINTER);
+        std::string name = declarativeFrontend->GetJsEngine()->SearchRouterRegisterMap(content);
+        CHECK_NULL_RETURN(name.size(), UIContentErrorCode::INVALID_URL);
         return front->RunPageByNamedRouter(content, params);
     }
 
@@ -2867,19 +2871,19 @@ bool AceContainer::IsSceneBoardEnabled()
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
+    CHECK_NULL_VOID(currentEvent);
     currentPointerEvent_ = currentEvent;
-    int32_t pointerAction = currentEvent->GetPointerAction();
+    auto pointerAction = currentEvent->GetPointerAction();
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
+        return;
+    }
     MMI::PointerEvent::PointerItem pointerItem;
     currentEvent->GetPointerItem(currentEvent->GetPointerId(), pointerItem);
     int32_t originId = pointerItem.GetOriginPointerId();
-    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_UP ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
-        currentEvents_.erase(originId);
-    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-        currentEvents_[originId] = currentEvent;
-    }
+    currentEvents_[originId] = currentEvent;
     auto callbacksIter = stopDragCallbackMap_.begin();
     while (callbacksIter != stopDragCallbackMap_.end()) {
         auto pointerId = callbacksIter->first;

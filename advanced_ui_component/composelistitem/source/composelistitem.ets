@@ -400,6 +400,7 @@ struct OperateItemStruct {
         .focusable(true)
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .draggable(false)
+        .matchTextDirection(true)
     }
     .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
     .hitTestBehavior(HitTestMode.Transparent)
@@ -569,6 +570,7 @@ struct OperateItemStruct {
           .fillColor($r('sys.color.ohos_id_color_fourth'))
           .focusable(true)
           .draggable(false)
+          .matchTextDirection(true)
       }
       .padding({
         start: LengthMetrics.vp(TEXT_SAFE_MARGIN),

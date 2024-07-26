@@ -41,11 +41,13 @@ namespace OHOS::Ace::NG {
 typedef struct OperationInfo {
     OperationInfo():node(nullptr) {}
     int32_t changeCount = 0;
+    int32_t fromDiffTo = 0;
     std::string key;
     RefPtr<UINode> node;
     bool isDeleting = false;
     bool isChanged = false;
     bool moveIn = false;
+    bool isExchange = false;
     std::vector<std::string> extraKey;
 } OperationInfo;
 
@@ -93,6 +95,9 @@ public:
     void RepairDatasetItems(std::map<int32_t, LazyForEachChild>& cachedTemp,
         std::map<int32_t, LazyForEachChild>& expiringTempItem_, std::map<int32_t, int32_t>& indexChangedMap);
 
+    void RepairMoveOrExchange(std::map<int32_t, LazyForEachChild>& expiringTempItem_,
+        OperationInfo& info, LazyForEachChild& child, int32_t index, int32_t changedIndex);
+
     void CollectIndexChangedCount(std::map<int32_t, int32_t>& indexChangedMap);
 
     bool ClassifyOperation(V2::Operation& operation, int32_t& initialIndex,
@@ -106,6 +111,9 @@ public:
         std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp);
 
     void OperateChange(V2::Operation& operation, int32_t& initialIndex,
+        std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp);
+
+    std::map<int32_t, LazyForEachChild>::iterator FindItem(int32_t index,
         std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp);
 
     void OperateExchange(V2::Operation& operation, int32_t& initialIndex,

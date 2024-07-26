@@ -256,22 +256,22 @@ using EndPosQ = std::priority_queue<lanePos, std::vector<lanePos>, std::greater<
 
 using Lanes = std::vector<WaterFlowLayoutInfoSW::Lane>;
 
-void PrepareStartPosQueue(StartPosQ& q, Lanes& lanes, float mainGap, float viewportBound)
+void PrepareStartPosQueue(StartPosQ& q, const Lanes& lanes, float mainGap, float viewportBound)
 {
     for (size_t i = 0; i < lanes.size(); ++i) {
-        float startPos = lanes[i].startPos - (lanes[i].items_.empty() ? 0.0f : mainGap);
-        if (GreatNotEqual(startPos, viewportBound)) {
-            q.push({ startPos, i });
+        const float nextPos = lanes[i].startPos - (lanes[i].items_.empty() ? 0.0f : mainGap);
+        if (GreatNotEqual(nextPos, viewportBound)) {
+            q.push({ lanes[i].startPos, i });
         }
     }
 }
 
-void PrepareEndPosQueue(EndPosQ& q, Lanes& lanes, float mainGap, float viewportBound)
+void PrepareEndPosQueue(EndPosQ& q, const Lanes& lanes, float mainGap, float viewportBound)
 {
     for (size_t i = 0; i < lanes.size(); ++i) {
-        float endPos = lanes[i].endPos + (lanes[i].items_.empty() ? 0.0f : mainGap);
-        if (LessNotEqual(endPos, viewportBound)) {
-            q.push({ endPos, i });
+        const float nextPos = lanes[i].endPos + (lanes[i].items_.empty() ? 0.0f : mainGap);
+        if (LessNotEqual(nextPos, viewportBound)) {
+            q.push({ lanes[i].endPos, i });
         }
     }
 }

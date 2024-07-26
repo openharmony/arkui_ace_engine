@@ -2121,6 +2121,13 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
     LOGI("[%{public}s][%{public}s][%{public}d]: UIContentImpl: UpdateConfiguration called", bundleName_.c_str(),
         moduleName_.c_str(), instanceId_);
     CHECK_NULL_VOID(config);
+
+    auto dialogContainer = Platform::DialogContainer::GetContainer(instanceId_);
+    if (dialogContainer) {
+        UpdateDialogContainerConfig(config);
+        return;
+    }
+
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
@@ -2407,6 +2414,7 @@ void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& contain
         aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
         aceResCfg.SetColorMode(SystemProperties::GetColorMode());
         aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
+        aceResCfg.SetColorModeIsSetByApp(true);
         dialogContainer->SetResourceConfiguration(aceResCfg);
     }
 }
@@ -3424,13 +3432,36 @@ void UIContentImpl::SetStatusBarItemColor(uint32_t color)
     appBar->SetStatusBarItemColor(IsDarkColor(color));
 }
 
-void UIContentImpl::SetForceSplitEnable(bool isForceSplit)
+void UIContentImpl::SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
 {
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(context);
-    context->SetForceSplitEnable(isForceSplit);
+    context->SetForceSplitEnable(isForceSplit, homePage);
+}
+
+void UIContentImpl::UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
+{
+    CHECK_NULL_VOID(config);
+    auto container = Platform::DialogContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [weakContainer = WeakPtr<Platform::DialogContainer>(container), config, instanceId = instanceId_,
+            bundleName = bundleName_, moduleName = moduleName_]() {
+            auto container = weakContainer.Upgrade();
+            CHECK_NULL_VOID(container);
+            Platform::ParsedConfig parsedConfig;
+            parsedConfig.colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+            container->UpdateConfiguration(parsedConfig);
+            TAG_LOGI(AceLogTag::ACE_DIALOG,
+                "[%{public}d][%{public}s][%{public}s] UIContentImpl: UpdateDialogContainerConfig called End, "
+                "name:%{public}s",
+                instanceId, bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());
+        },
+        TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfiguration");
 }
 } // namespace OHOS::Ace

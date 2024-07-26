@@ -1024,35 +1024,36 @@ void JSRichEditor::SetPlaceholder(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    if (!pipelineContext) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
+        return;
+    }
     std::string placeholderValue;
     PlaceholderOptions options;
     JSContainerBase::ParseJsString(info[0], placeholderValue);
     options.value = placeholderValue;
+    Font font;
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(info[1]);
         JSRef<JSObject> fontObject = object->GetProperty("font");
-        Font font;
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        if (!pipelineContext) {
-            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
-            return;
-        }
-        auto textTheme = pipelineContext->GetTheme<TextTheme>();
-        TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
         ParseJsFont(fontObject, font);
-        options.fontSize = font.fontSize.value_or(textStyle.GetFontSize());
-        options.fontFamilies = !font.fontFamilies.empty() ? font.fontFamilies : textStyle.GetFontFamilies();
-        options.fontWeight = font.fontWeight.value_or(textStyle.GetFontWeight());
-        options.fontStyle = font.fontStyle.value_or(textStyle.GetFontStyle());
-
         JSRef<JSVal> colorVal = object->GetProperty("fontColor");
         Color fontColor;
         if (!colorVal->IsNull() && JSContainerBase::ParseJsColor(colorVal, fontColor)) {
             options.fontColor = DynamicColor(fontColor, ParseColorResourceId(colorVal));
-        } else {
-            auto richEditorTheme = pipelineContext->GetTheme<NG::RichEditorTheme>();
-            options.fontColor = richEditorTheme ? richEditorTheme->GetPlaceholderColor() : fontColor;
         }
+    }
+    auto textTheme = pipelineContext->GetTheme<TextTheme>();
+    TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
+    options.fontSize = font.fontSize.value_or(textStyle.GetFontSize());
+    options.fontFamilies = !font.fontFamilies.empty() ? font.fontFamilies : textStyle.GetFontFamilies();
+    options.fontWeight = font.fontWeight.value_or(textStyle.GetFontWeight());
+    options.fontStyle = font.fontStyle.value_or(textStyle.GetFontStyle());
+    if (!options.fontColor.has_value()) {
+        Color fontColor;
+        auto richEditorTheme = pipelineContext->GetTheme<NG::RichEditorTheme>();
+        options.fontColor = richEditorTheme ? richEditorTheme->GetPlaceholderColor() : fontColor;
     }
     RichEditorModel::GetInstance()->SetPlaceholder(options);
 }
@@ -1971,6 +1972,12 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
             CalcDimension height;
             JSContainerBase::ParseJsDimensionVp(widthVal, width);
             JSContainerBase::ParseJsDimensionVp(heightVal, height);
+            if (width.Unit() == DimensionUnit::PERCENT) {
+                width = Dimension(0.0);
+            }
+            if (height.Unit() == DimensionUnit::PERCENT) {
+                height = Dimension(0.0);
+            }
             style.leadingMargin->size = NG::LeadingMarginSize(width, height);
         } else if (sizeVal->IsUndefined()) {
             std::string resWidthStr;
@@ -2123,7 +2130,9 @@ void JSRichEditorBaseController::SetTypingStyle(const JSCallbackInfo& info)
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     auto controller = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(controller);
-    if (!info[0]->IsObject()) {
+    bool isBelowApi12 = !AceApplicationInfo::GetInstance().
+        GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
+    if (isBelowApi12 && !info[0]->IsObject()) {
         return;
     }
     auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -2133,11 +2142,23 @@ void JSRichEditorBaseController::SetTypingStyle(const JSCallbackInfo& info)
     }
     auto theme = pipelineContext->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
-    JSRef<JSObject> richEditorTextStyle = JSRef<JSObject>::Cast(info[0]);
-    typingStyle_.ResetStyle();
-    typingStyle_.updateTextColor = theme->GetTextStyle().GetTextColor();
-    if (!richEditorTextStyle->IsUndefined()) {
-        ParseJsTextStyle(richEditorTextStyle, textStyle, typingStyle_);
+    bool isUndefined = false;
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> richEditorTextStyle = JSRef<JSObject>::Cast(info[0]);
+        isUndefined = richEditorTextStyle->IsUndefined();
+        typingStyle_.ResetStyle();
+        if (isBelowApi12) {
+            typingStyle_.updateTextColor = theme->GetTextStyle().GetTextColor();
+        }
+        if (!richEditorTextStyle->IsUndefined()) {
+            ParseJsTextStyle(richEditorTextStyle, textStyle, typingStyle_);
+        }
+    }
+    bool isNeedReset = !isBelowApi12 && (!info[0]->IsObject() || isUndefined);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetTypingStyle %{public}d", isNeedReset);
+    if (isNeedReset) {
+        controller->SetTypingStyle(std::nullopt, std::nullopt);
+        return;
     }
     controller->SetTypingStyle(typingStyle_, textStyle);
 }

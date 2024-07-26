@@ -361,8 +361,7 @@ protected:
     void OnTouchDown();
     void OnTouchUp();
     void HandleHoverEvent(bool isHover);
-    void UpdateTexOverflow(bool isMarqueeStart);
-    void HandleButtonStyle();
+    void HandleBackgroundColor();
     void HandleEnabled();
     void InitButtonLabel();
     Color GetColorFromType(const RefPtr<ButtonTheme>& theme, const int32_t& type);
@@ -381,7 +380,6 @@ private:
     Color focusBorderColor_;
     Color themeBgColor_;
     Color themeTextColor_;
-    Color borderColor_;
     bool isSetClickedColor_ = false;
     ComponentButtonType buttonType_ = ComponentButtonType::BUTTON;
     void FireBuilder();
@@ -394,37 +392,18 @@ private:
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> hoverListener_;
     bool isHover_ = false;
-    bool isFocus_ = false;
     bool isPress_ = false;
 
     bool isInHover_ = false;
     Offset localLocation_;
     Dimension focusBorderWidth_;
-    Dimension borderWidth_;
 
     std::optional<Color> blendClickColor_ = std::nullopt;
     std::optional<Color> blendHoverColor_ = std::nullopt;
 
-    bool isTextFadeOut_ = false;
     bool isColorUpdateFlag_ = false;
     SizeF preFrameSize_;
     ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);
-    bool focusEventInitialized_ = false;
-    bool focusTextColorModify_ = false;
-    bool bgColorModify_ = false;
-    bool scaleModify_ = false;
-    bool shadowModify_ = false;
-    
-    void HandleBorderStyle(RefPtr<ButtonLayoutProperty>& layoutProperty,
-        RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
-    void HandleBackgroundStyle(RefPtr<ButtonLayoutProperty>& layoutProperty,
-        RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
-    void HandleFocusStatusStyle(RefPtr<ButtonLayoutProperty>& layoutProperty,
-        RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
-    void HandleFocusStyleTask(RefPtr<ButtonLayoutProperty>,
-        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
-    void HandleBlurStyleTask(RefPtr<ButtonLayoutProperty>,
-        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
 };
 } // namespace OHOS::Ace::NG
 

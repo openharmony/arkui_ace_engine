@@ -36,6 +36,7 @@ void CheckBoxModelNG::Create(
     ViewStackProcessor::GetInstance()->Push(frameNode);
 
     auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
     if (name.has_value()) {
         eventHub->SetName(name.value());
     }

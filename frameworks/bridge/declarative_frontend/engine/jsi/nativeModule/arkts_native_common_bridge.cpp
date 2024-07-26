@@ -7379,10 +7379,10 @@ ArkUINativeModuleValue CommonBridge::SetFocusBox(ArkUIRuntimeCallInfo* runtimeCa
     auto marginArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto widthArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto colorArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    int32_t hasValue = 0;
+    ArkUI_Uint32 hasValue = 0;
     CalcDimension margin;
     if (!marginArg->IsUndefined() && !marginArg->IsNull()) {
-        if (ArkTSUtils::ParseJsDimensionVpNG(vm, marginArg, margin, true)) {
+        if (ArkTSUtils::ParseJsDimensionFpNG(vm, marginArg, margin, false)) {
             hasValue = 1;
         } else if (ArkTSUtils::ParseJsLengthMetrics(vm, marginArg, margin)) {
             hasValue = 1;
@@ -7391,7 +7391,7 @@ ArkUINativeModuleValue CommonBridge::SetFocusBox(ArkUIRuntimeCallInfo* runtimeCa
     hasValue = hasValue << 1;
     CalcDimension width;
     if (!widthArg->IsUndefined() && !widthArg->IsNull()) {
-        if (ArkTSUtils::ParseJsDimensionVpNG(vm, widthArg, width, true) && GreatOrEqual(width.Value(), 0.0f)) {
+        if (ArkTSUtils::ParseJsDimensionFpNG(vm, widthArg, width, false) && GreatOrEqual(width.Value(), 0.0f)) {
             hasValue += 1;
         } else if (ArkTSUtils::ParseJsLengthMetrics(vm, widthArg, width) && GreatOrEqual(width.Value(), 0.0f)) {
             hasValue += 1;
@@ -7402,8 +7402,9 @@ ArkUINativeModuleValue CommonBridge::SetFocusBox(ArkUIRuntimeCallInfo* runtimeCa
     if (!colorArg->IsUndefined() && !colorArg->IsNull() && ParseColorMetricsToColor(vm, colorArg, strokeColor)) {
         hasValue += 1;
     }
-    GetArkUINodeModifiers()->getCommonModifier()->setFocusBoxStyle(
-        nativeNode, margin.Value(), width.Value(), strokeColor.GetValue(), hasValue);
+    GetArkUINodeModifiers()->getCommonModifier()->setFocusBoxStyle(nativeNode, margin.Value(),
+        static_cast<int>(margin.Unit()), width.Value(), static_cast<int>(width.Unit()), strokeColor.GetValue(),
+        hasValue);
     return panda::JSValueRef::Undefined(vm);
 }
 

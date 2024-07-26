@@ -346,13 +346,15 @@ public:
     void NotifyKeyboardClosedByUser() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosedByUser");
+        CloseSelectOverlay();
+        ResetSelection();
         FocusHub::LostFocusToViewRoot();
     }
     void NotifyKeyboardClosed() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
-        if (!isCustomKeyboardAttached_ && HasFocus()) {
-            FocusHub::LostFocusToViewRoot();
+        if (!isCustomKeyboardAttached_ && caretTwinkling_) {
+            StopTwinkling();
         }
     }
     void ClearOperationRecords();
@@ -442,7 +444,7 @@ public:
     void UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style);
     void UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const struct UpdateParagraphStyle& style);
     std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
-    void SetTypingStyle(struct UpdateSpanStyle typingStyle, TextStyle textStyle);
+    void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle, std::optional<TextStyle> textStyle);
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool updateCaret = true);
     void DisableDrag(RefPtr<ImageSpanNode> imageNode);
@@ -816,6 +818,10 @@ public:
     {
         return isTouchCaret_;
     }
+
+    bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const override;
+
+    RectF ExpandDefaultResponseRegion(RectF& rect) override;
 
 protected:
     bool CanStartAITask() override;

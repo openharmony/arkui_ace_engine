@@ -796,4 +796,28 @@ HWTEST_F(GridOptionLayoutTestNg, OutOfBounds001, TestSize.Level1)
     EXPECT_GT(GetChildRect(frameNode_, 29).Bottom(), GRID_HEIGHT);
     EXPECT_FALSE(pattern_->IsOutOfBoundary(true));
 }
+
+/**
+ * @tc.name: ScrollTo001
+ * @tc.desc: Test ScrollTo Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, ScrollTo001, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = { 45 };
+    GridModelNG model = CreateGrid();
+    model.SetLayoutOptions(option);
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(50);
+    CreateDone(frameNode_);
+
+    pattern_->ScrollTo(ITEM_HEIGHT * 40);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 40);
+
+    pattern_->ScrollTo(ITEM_HEIGHT * 20);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 20);
+}
 } // namespace OHOS::Ace::NG

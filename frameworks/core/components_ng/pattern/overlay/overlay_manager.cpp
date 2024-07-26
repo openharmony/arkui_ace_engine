@@ -609,15 +609,17 @@ void OverlayManager::UpdateContextMenuDisappearPosition(const NG::OffsetF& offse
     if (isRedragStart) {
         overlayManager->ResetContextMenuRestartDragVector();
     }
+
+    if (menuMap_.empty()) {
+        return;
+    }
+    
     overlayManager->UpdateDragMoveVector(offset);
 
     if (overlayManager->IsOriginDragMoveVector() || !overlayManager->IsUpdateDragMoveVector()) {
         return;
     }
 
-    if (menuMap_.empty()) {
-        return;
-    }
     auto rootNode = rootNodeWeak_.Upgrade();
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
@@ -972,12 +974,8 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->OnShowMenuAnimationFinished(menuWK, weak, id);
-            menuWK.Upgrade()->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE,
-                WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
-                static_cast<int32_t>(AccessibilityEventType::PAGE_CHANGE));
+            overlayManager->SendToAccessibility(menuWK, true);
         });
-
     if (wrapperPattern->GetPreviewMode() == MenuPreviewMode::CUSTOM) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
@@ -994,6 +992,23 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     }
     wrapperPattern->SetAniamtinOption(option);
     SetPatternFirstShow(menu);
+}
+
+void OverlayManager::SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow)
+{
+    auto menuWrapper = node.Upgrade();
+    CHECK_NULL_VOID(menuWrapper);
+    auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    auto menu = wrapperPattern->GetMenu();
+    CHECK_NULL_VOID(menu);
+    auto accessibilityProperty = menu->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityIsShow(isShow);
+    menuWrapper->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE,
+        WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
+        static_cast<int32_t>(AccessibilityEventType::PAGE_CHANGE));
 }
 
 void OverlayManager::SetPatternFirstShow(const RefPtr<FrameNode>& menu)
@@ -1120,12 +1135,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
         ContainerScope scope(id);
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
-        auto menuWrapper = menuWK.Upgrade();
-        menuWrapper->OnAccessibilityEvent(
-            AccessibilityEventType::PAGE_CHANGE,
-            WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
-            static_cast<int32_t>(AccessibilityEventType::PAGE_CHANGE));
+        overlayManager->SendToAccessibility(menuWK, false);
         overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
     });
     ShowMenuClearAnimation(menu, option, showPreviewAnimation, startDrag);
@@ -1877,8 +1887,6 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
         menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         ShowMenuAnimation(menu);
         menu->MarkModifyDone();
-        menu->OnAccessibilityEvent(
-            AccessibilityEventType::PAGE_CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     }
     menu->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
@@ -1977,15 +1985,8 @@ RefPtr<FrameNode> OverlayManager::GetMenuNode(int32_t targetId)
 void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide menu enter");
-    auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(wrapperPattern);
-    bool isShowMenu = wrapperPattern->IsShow();
     PopMenuAnimation(menu);
     menu->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-    if (isShowMenu) {
-        menu->OnAccessibilityEvent(
-            AccessibilityEventType::PAGE_CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-    }
     RemoveEventColumn();
     if (isMenuOnTouch) {
         RemovePixelMap();
@@ -2864,6 +2865,7 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
     }
     CHECK_EQUAL_RETURN(overlay->GetTag(), V2::STAGE_ETS_TAG, OVERLAY_EXISTS);
     CHECK_EQUAL_RETURN(overlay->GetTag(), V2::OVERLAY_ETS_TAG, OVERLAY_EXISTS);
+    CHECK_EQUAL_RETURN(overlay->GetTag(), V2::ATOMIC_SERVICE_ETS_TAG, OVERLAY_EXISTS);
     // close dialog with animation
     if (InstanceOf<DialogPattern>(pattern)) {
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && isPageRouter) {
@@ -4683,14 +4685,14 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<Frame
 }
 
 // if device is phone, fold status, screen is in landscape mode, preferType is BOTTOM
-void OverlayManager::CheckDeviceInLandscape(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode,
-    uint32_t& statusBarHeight)
+void OverlayManager::CheckDeviceInLandscape(
+    NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode, float& sheetTopSafeArea)
 {
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
     if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM &&
         sheetPattern->IsPhoneInLandScape()) {
-        statusBarHeight = 0.0f;
+        sheetTopSafeArea = 0.0f;
     }
 }
 
@@ -4699,21 +4701,10 @@ void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, Re
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
     auto sheetMaxHeight = sheetPattern->GetPageHeightWithoutOffset();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
-    auto statusBarHeight = safeAreaInsets.top_.Length();
-    auto windowManager = pipelineContext->GetWindowManager();
-    auto sheetType = sheetPattern->GetSheetType();
-    if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        statusBarHeight = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
-    } else if (sheetType == SheetType::SHEET_BOTTOMLANDSPACE &&
-        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        statusBarHeight = 0.0f;
-    }
+    auto sheetTopSafeArea = sheetPattern->GetSheetTopSafeArea();
 
-    CheckDeviceInLandscape(sheetStyle, sheetNode, statusBarHeight);
-    auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - statusBarHeight;
+    CheckDeviceInLandscape(sheetStyle, sheetNode, sheetTopSafeArea);
+    auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - sheetTopSafeArea;
     if (sheetStyle.sheetMode.has_value()) {
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
             sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE;
@@ -4731,7 +4722,7 @@ void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, Re
     } else {
         float height = 0.0f;
         if (sheetStyle.height->Unit() == DimensionUnit::PERCENT) {
-            height = sheetStyle.height->ConvertToPxWithSize(sheetMaxHeight - statusBarHeight);
+            height = sheetStyle.height->ConvertToPxWithSize(sheetMaxHeight - sheetTopSafeArea);
         } else {
             height = sheetStyle.height->ConvertToPx();
         }
@@ -4750,20 +4741,9 @@ void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPt
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
     auto sheetMaxHeight = sheetPattern->GetPageHeightWithoutOffset();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
-    auto statusBarHeight = safeAreaInsets.top_.Length();
-    auto windowManager = pipelineContext->GetWindowManager();
-    auto sheetType = sheetPattern->GetSheetType();
-    if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        statusBarHeight = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
-    } else if (sheetType == SheetType::SHEET_BOTTOMLANDSPACE &&
-        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        statusBarHeight = 0.0f;
-    }
-    CheckDeviceInLandscape(sheetStyle, sheetNode, statusBarHeight);
-    auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - statusBarHeight;
+    auto sheetTopSafeArea = sheetPattern->GetSheetTopSafeArea();
+    CheckDeviceInLandscape(sheetStyle, sheetNode, sheetTopSafeArea);
+    auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - sheetTopSafeArea;
     auto selection = sheetStyle.detents[sheetPattern->GetDetentsIndex()];
     if (selection.sheetMode.has_value()) {
         if (selection.sheetMode == SheetMode::MEDIUM) {
@@ -4782,7 +4762,7 @@ void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPt
     } else {
         float height = 0.0f;
         if (selection.height->Unit() == DimensionUnit::PERCENT) {
-            height = selection.height->ConvertToPxWithSize(sheetMaxHeight - statusBarHeight);
+            height = selection.height->ConvertToPxWithSize(sheetMaxHeight - sheetTopSafeArea);
         } else {
             height = selection.height->ConvertToPx();
         }

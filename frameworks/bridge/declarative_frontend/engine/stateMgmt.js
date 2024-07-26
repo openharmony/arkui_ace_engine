@@ -297,13 +297,13 @@ class LocalStorage extends NativeLocalStorage {
     set(propName, newValue) {
         
         if (newValue === undefined && !Utils.isApiVersionEQAbove(12)) {
-            stateMgmtConsole.warn(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
+            
             
             return false;
         }
         var p = this.storage_.get(propName);
         if (p === undefined) {
-            stateMgmtConsole.warn(`${this.constructor.name}: set: no property ${propName} error.`);
+            
             
             return false;
         }
@@ -325,7 +325,7 @@ class LocalStorage extends NativeLocalStorage {
     setOrCreate(propName, newValue) {
         
         if (newValue == undefined && !Utils.isApiVersionEQAbove(12)) {
-            stateMgmtConsole.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
+            
             
             return false;
         }
@@ -406,7 +406,7 @@ class LocalStorage extends NativeLocalStorage {
         
         var p = this.storage_.get(propName);
         if (p == undefined) {
-            stateMgmtConsole.warn(`${this.constructor.name}: link: no property ${propName} error.`);
+            
             
             return undefined;
         }
@@ -461,7 +461,7 @@ class LocalStorage extends NativeLocalStorage {
         
         var p = this.storage_.get(propName);
         if (p == undefined) {
-            stateMgmtConsole.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
+            
             
             return undefined;
         }
@@ -534,7 +534,7 @@ class LocalStorage extends NativeLocalStorage {
             return true;
         }
         else {
-            stateMgmtConsole.warn(`${this.constructor.name}: Attempt to delete unknown property ${propName}.`);
+            
             
             return false;
         }
@@ -1076,7 +1076,6 @@ class AppStorage extends LocalStorage {
     */
     static getOrCreate() {
         if (!AppStorage.instance_) {
-            stateMgmtConsole.warn('AppStorage instance missing. Use AppStorage.createInstance(initObj). Creating instance without any initialization.');
             AppStorage.instance_ = new AppStorage({});
         }
         return AppStorage.instance_;
@@ -5356,10 +5355,6 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
                 // code path for 
                 // 1- source is of same type C in parent, source is its value, not the backing store ObservedPropertyObject
                 // 2- nested Object/Array inside observed another object/array in parent, source is its value
-                if (typeof sourceValue == 'object' && !((sourceValue instanceof SubscribableAbstract) || ObservedObject.IsObservedObject(sourceValue))) {
-                    stateMgmtConsole.applicationWarn(`${this.debugInfo()}: Provided source object's class lacks @Observed class decorator.
-            Object property changes will not be observed.`);
-                }
                 
                 this.createSourceDependency(sourceValue);
                 this.source_ = new ObservedPropertyObjectPU(sourceValue, this, this.getPropSourceObservedPropertyFakeName());
@@ -6698,7 +6693,7 @@ class ViewPU extends PUV2ViewBase {
             return;
         }
         const _componentName = (classObject && ('name' in classObject)) ? Reflect.get(classObject, 'name') : 'unspecified UINode';
-        if (_componentName === "__Recycle__") {
+        if (_componentName === '__Recycle__') {
             return;
         }       
         const _popFunc = (classObject && 'pop' in classObject) ? classObject.pop : () => { };

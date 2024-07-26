@@ -70,7 +70,7 @@ HWTEST_F(TextInputCursorTest, CaretPosition002, TestSize.Level1)
     testItems.emplace_back(TextInputType::TEXT, text.length(), "TextInputType::TEXT");
     testItems.emplace_back(TextInputType::NUMBER, 10, "TextInputType::NUMBER");
     testItems.emplace_back(TextInputType::PHONE, 15, "TextInputType::PHONE");
-    testItems.emplace_back(TextInputType::EMAIL_ADDRESS, text.length() - 5, "TextInputType::EMAIL_ADDRESS");
+    testItems.emplace_back(TextInputType::EMAIL_ADDRESS, text.length() - 3, "TextInputType::EMAIL_ADDRESS");
     testItems.emplace_back(TextInputType::VISIBLE_PASSWORD, text.length(), "TextInputType::VISIBLE_PASSWORD");
     testItems.emplace_back(TextInputType::NUMBER_PASSWORD, 10, "TextInputType::NUMBER_PASSWORD");
     testItems.emplace_back(TextInputType::SCREEN_LOCK_PASSWORD, text.length(), "TextInputType::SCREEN_LOCK_PASSWORD");

@@ -145,4 +145,180 @@ HWTEST_F(RenderNodeTestNg, RenderNodeLayoutAlgorithm001, TestSize.Level1)
     renderNodeLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(geometryNode->GetContentOffset(), OffsetF(0, 0));
 }
+
+/**
+ * @tc.name: RenderNodeLayoutAlgorithmTest001
+ * @tc.desc: RenderNodeLayoutAlgorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeTestNg, RenderNodeLayoutAlgorithmTest001, TestSize.Level1)
+{
+    LayoutConstraintF layoutConstraintF = {
+        .minSize = { 1, 1 },
+        .maxSize = { 10, 10 },        // 10 is the maxSize of width and height
+        .percentReference = { 5, 5 }, // 5 is the percentReference of width and height
+        .parentIdealSize = { 2, 2 },  // 2 is the parentIdealSize of width and height
+    };
+    auto frameNode = FrameNode::CreateFrameNode("frame", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto childOne = FrameNode::CreateFrameNode("RenderNode", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    auto childTwo = FrameNode::CreateFrameNode("child", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    auto childThree = FrameNode::CreateFrameNode("childThree", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    auto renderNodeLayoutAlgorithm = AceType::MakeRefPtr<RenderNodeLayoutAlgorithm>();
+    auto childLayoutWrapperOne = childOne->CreateLayoutWrapper();
+    auto childLayoutWrapperTwo = childTwo->CreateLayoutWrapper();
+    auto childLayoutWrapperThree = childThree->CreateLayoutWrapper();
+    layoutWrapper->cachedList_ = std::list<RefPtr<LayoutWrapper>>();
+    layoutWrapper->cachedList_.push_back(childLayoutWrapperOne);
+    layoutWrapper->cachedList_.push_back(childLayoutWrapperTwo);
+    childLayoutWrapperTwo->GetLayoutProperty()->UpdateParentLayoutConstraint(layoutConstraintF);
+    layoutWrapper->cachedList_.push_back(childLayoutWrapperThree);
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_->selfIdealSize =
+        CalcSize(CalcLength(1.0), CalcLength(0.0));
+    renderNodeLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().ToString(), "[1.00 x 0.00]");
+}
+
+/**
+ * @tc.name: RenderNodeLayoutAlgorithmTest002
+ * @tc.desc: RenderNodeLayoutAlgorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeTestNg, RenderNodeLayoutAlgorithmTest002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("frame", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto renderNodeLayoutAlgorithm = AceType::MakeRefPtr<RenderNodeLayoutAlgorithm>();
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    std::optional<CalcLength> width = CalcLength(1.0);
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_->selfIdealSize = CalcSize(width, std::nullopt);
+    renderNodeLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().ToString(), "[0.00 x 0.00]");
+}
+
+/**
+ * @tc.name: RenderNodeLayoutAlgorithmTest003
+ * @tc.desc: RenderNodeLayoutAlgorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeTestNg, RenderNodeLayoutAlgorithmTest003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("frame", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto renderNodeLayoutAlgorithm = AceType::MakeRefPtr<RenderNodeLayoutAlgorithm>();
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_->selfIdealSize = std::nullopt;
+    renderNodeLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().ToString(), "[0.00 x 0.00]");
+}
+
+/**
+ * @tc.name: RenderNodeLayoutAlgorithmTest004
+ * @tc.desc: RenderNodeLayoutAlgorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeTestNg, RenderNodeLayoutAlgorithmTest004, TestSize.Level1)
+{
+    LayoutConstraintF layoutConstraintF = {
+        .minSize = { 1, 1 },
+        .maxSize = { 10, 10 },        // 10 is the maxSize of width and height
+        .percentReference = { 5, 5 }, // 5 is the percentReference of width and height
+        .parentIdealSize = { 2, 2 },  // 2 is the parentIdealSize of width and height
+        .selfIdealSize = OptionalSizeF(std::nullopt, std::nullopt),
+    };
+    auto frameNode = FrameNode::CreateFrameNode("frame", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto renderNodeLayoutAlgorithm = AceType::MakeRefPtr<RenderNodeLayoutAlgorithm>();
+    renderNodeLayoutAlgorithm->MeasureContent(layoutConstraintF, AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().ToString(), "[0.00 x 0.00]");
+}
+
+/**
+ * @tc.name: RenderNodeLayoutAlgorithmTest005
+ * @tc.desc: RenderNodeLayoutAlgorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeTestNg, RenderNodeLayoutAlgorithmTest005, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("frame", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto childOne = FrameNode::CreateFrameNode("RenderNode", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    auto childTwo = FrameNode::CreateFrameNode("child", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    auto renderNodeLayoutAlgorithm = AceType::MakeRefPtr<RenderNodeLayoutAlgorithm>();
+    auto childLayoutWrapperOne = childOne->CreateLayoutWrapper();
+    auto childLayoutWrapperTwo = childTwo->CreateLayoutWrapper();
+    layoutWrapper->cachedList_ = std::list<RefPtr<LayoutWrapper>>();
+    layoutWrapper->cachedList_.push_back(childLayoutWrapperOne);
+    layoutWrapper->cachedList_.push_back(childLayoutWrapperTwo);
+    layoutWrapper->GetLayoutProperty()->positionProperty_ = std::make_unique<PositionProperty>();
+    Alignment align;
+    align.horizontal_ = 0.0f;
+    layoutWrapper->GetLayoutProperty()->positionProperty_->UpdateAlignment(align);
+    layoutWrapper->GetGeometryNode()->content_ = nullptr;
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_->selfIdealSize =
+        CalcSize(CalcLength(1.0), CalcLength(0.0));
+    renderNodeLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().ToString(), "[0.00 x 0.00]");
+}
+
+/**
+ * @tc.name: RenderNodeLayoutAlgorithmTest006
+ * @tc.desc: RenderNodeLayoutAlgorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeTestNg, RenderNodeLayoutAlgorithmTest006, TestSize.Level1)
+{
+    LayoutConstraintF layoutConstraintF = {
+        .minSize = { 1, 1 },
+        .maxSize = { 10, 10 },        // 10 is the maxSize of width and height
+        .percentReference = { 5, 5 }, // 5 is the percentReference of width and height
+        .parentIdealSize = { 2, 2 },  // 2 is the parentIdealSize of width and height
+    };
+    auto frameNode = FrameNode::CreateFrameNode("frame", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto childOne = FrameNode::CreateFrameNode("frame", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    auto childTwo =
+        FrameNode::CreateFrameNode(V2::CUSTOM_FRAME_NODE_ETS_TAG, 0, AceType::MakeRefPtr<RenderNodePattern>());
+    auto childThree = FrameNode::CreateFrameNode("childThree", 0, AceType::MakeRefPtr<RenderNodePattern>());
+    auto renderNodeLayoutAlgorithm = AceType::MakeRefPtr<RenderNodeLayoutAlgorithm>();
+    auto childLayoutWrapperOne = childOne->CreateLayoutWrapper();
+    auto childLayoutWrapperTwo = childTwo->CreateLayoutWrapper();
+    auto childLayoutWrapperThree = childThree->CreateLayoutWrapper();
+    layoutWrapper->cachedList_ = std::list<RefPtr<LayoutWrapper>>();
+    layoutWrapper->cachedList_.push_back(childLayoutWrapperOne);
+    layoutWrapper->cachedList_.push_back(childLayoutWrapperTwo);
+    childLayoutWrapperTwo->GetLayoutProperty()->UpdateParentLayoutConstraint(layoutConstraintF);
+    layoutWrapper->cachedList_.push_back(childLayoutWrapperThree);
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_->selfIdealSize =
+        CalcSize(CalcLength(1.0), CalcLength(0.0));
+    renderNodeLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().ToString(), "[1.00 x 0.00]");
+}
 }

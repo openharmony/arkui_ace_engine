@@ -674,7 +674,7 @@ abstract class ViewPU extends PUV2ViewBase
       return;
     }
     const _componentName: string = (classObject && ('name' in classObject)) ? Reflect.get(classObject, 'name') as string : 'unspecified UINode';
-    if (_componentName === "__Recycle__") {
+    if (_componentName === '__Recycle__') {
       return;
     }
     const _popFunc: () => void = (classObject && 'pop' in classObject) ? classObject.pop! : (): void => { };

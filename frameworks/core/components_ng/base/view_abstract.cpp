@@ -4632,6 +4632,15 @@ void ViewAbstract::SetDragEventStrictReportingEnabled(bool dragEventStrictReport
     dragDropManager->SetEventStrictReportingEnabled(dragEventStrictReportingEnabled);
 }
 
+void ViewAbstract::SetDragEventStrictReportingEnabled(int32_t instanceId, bool dragEventStrictReportingEnabled)
+{
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetEventStrictReportingEnabled(dragEventStrictReportingEnabled);
+}
+
 void ViewAbstract::SetDisallowDropForcedly(bool isDisallowDropForcedly)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

@@ -436,7 +436,9 @@ HWTEST_F(MenuTestNg, DesktopMenuPattern001, TestSize.Level1)
     pattern1->BeforeCreateLayoutWrapper();
     containerPattern->OnModifyDone();
     EXPECT_EQ(pattern1->type_, MenuType::MULTI_MENU);
-    EXPECT_EQ(container->GetRenderContext()->GetBackShadow(), ShadowConfig::DefaultShadowM);
+    Shadow shadow;
+    pattern1->GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow);
+    EXPECT_EQ(container->GetRenderContext()->GetBackShadow(), shadow);
 }
 
 /**

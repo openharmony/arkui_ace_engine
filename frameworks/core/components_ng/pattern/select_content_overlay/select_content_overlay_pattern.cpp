@@ -218,4 +218,12 @@ void SelectContentOverlayPattern::UpdateViewPort(const std::optional<RectF>& vie
     info_->ancestorViewPort = viewPort;
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
+
+void SelectContentOverlayPattern::UpdateSelectArea(const RectF& selectArea)
+{
+    SelectOverlayPattern::UpdateSelectArea(selectArea);
+    if (info_->menuInfo.menuIsShow && selectArea.IsEmpty()) {
+        UpdateMenuIsShow(false);
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -402,4 +402,9 @@ void NavDestinationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& styl
         }
     }
 }
+
+int32_t NavDestinationPattern::GetTitlebarZIndex() const
+{
+    return DEFAULT_TITLEBAR_ZINDEX;
+}
 } // namespace OHOS::Ace::NG
