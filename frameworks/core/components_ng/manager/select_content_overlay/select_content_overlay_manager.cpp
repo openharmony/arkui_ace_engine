@@ -830,10 +830,10 @@ bool SelectContentOverlayManager::IsTouchInNormalSelectOverlayArea(const PointF&
     const auto& children = current->GetChildren();
     for (const auto& it : children) {
         auto child = DynamicCast<FrameNode>(it);
-        if (child == nullptr) {
+        if (child == nullptr || !child->GetGeometryNode()) {
             continue;
         }
-        auto frameRect = child->GetGeometryNode()->GetFrameRect();
+        auto frameRect = RectF(child->GetTransformRelativeOffset(), child->GetGeometryNode()->GetFrameSize());
         if (frameRect.IsInRegion(point)) {
             return true;
         }
