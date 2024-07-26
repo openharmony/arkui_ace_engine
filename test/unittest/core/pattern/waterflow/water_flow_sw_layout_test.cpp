@@ -333,26 +333,30 @@ HWTEST_F(WaterFlowSWTest, Update001, TestSize.Level1)
 
     auto section = SECTION_11[1];
     section.itemsCount += 4;
+    section.crossCount = 3;
     secObj->ChangeData(1, 1, { section });
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 0), 5.0f);
     EXPECT_EQ(GetChildY(frameNode_, 3), 325.0f);
-    EXPECT_EQ(GetChildHeight(frameNode_, 3), 100.0f);
-    UpdateCurrentOffset(-335.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 3), -10.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 6), 430.0f);
+    UpdateCurrentOffset(-365.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 3), -40.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 6), 65.0f);
 
     /* remove 4 items from 3 */
     section.itemsCount -= 4;
+    section.crossCount = 2;
     secObj->ChangeData(1, 1, { section });
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     for (int i = 0; i < 4; ++i) {
         frameNode_->RemoveChildAtIndex(3);
     }
-    frameNode_->ChildrenUpdatedFrom(0);
+    frameNode_->ChildrenUpdatedFrom(3);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 3), -40.0f);
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
     FlushLayoutTask(frameNode_);
 
