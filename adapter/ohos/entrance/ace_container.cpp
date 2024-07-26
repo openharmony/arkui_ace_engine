@@ -1172,6 +1172,10 @@ UIContentErrorCode AceContainer::RunPage(
     }
 
     if (isNamedRouter) {
+        RefPtr<OHOS::Ace::DeclarativeFrontend> declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(front);
+        CHECK_NULL_RETURN(declarativeFrontend, UIContentErrorCode::NULL_POINTER);
+        std::string name = declarativeFrontend->GetJsEngine()->SearchRouterRegisterMap(content);
+        CHECK_NULL_RETURN(name.size(), UIContentErrorCode::INVALID_URL);
         return front->RunPageByNamedRouter(content, params);
     }
 
