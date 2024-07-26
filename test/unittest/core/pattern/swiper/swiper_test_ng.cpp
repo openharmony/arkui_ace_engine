@@ -1318,65 +1318,36 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnDirtyLayoutWrapperSwap003, TestSize.Level1
  */
 HWTEST_F(SwiperTestNg, CalculateGestureState001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {}, 4);
+    CreateWithItem([](SwiperModelNG model) {});
     EXPECT_EQ(pattern_->TotalCount(), 4);
     pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(1.0f, 0, 0), GestureState::GESTURE_STATE_RELEASE_LEFT);
+    pattern_->CalculateGestureState(1.0f, 0.0f, 1);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_RELEASE_LEFT);
 
     pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(-1.0f, 0, 0), GestureState::GESTURE_STATE_RELEASE_RIGHT);
+    pattern_->CalculateGestureState(-1.0f, 0.0f, 1);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_RELEASE_RIGHT);
 
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->turnPageRate_ = -1.0f;
     pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 0, 0), GestureState::GESTURE_STATE_FOLLOW_RIGHT);
+    pattern_->CalculateGestureState(0.0f, -1.1f, 1);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
 
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 1;
+    pattern_->turnPageRate_ = -1.0f;
     pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 3, 3), GestureState::GESTURE_STATE_FOLLOW_RIGHT);
+    pattern_->CalculateGestureState(0.0f, -1.1f, 1);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
 
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->turnPageRate_ = -1.0f;
     pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 0, 1), GestureState::GESTURE_STATE_FOLLOW_LEFT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 1, 0), GestureState::GESTURE_STATE_FOLLOW_LEFT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 3, 0), GestureState::GESTURE_STATE_FOLLOW_LEFT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 0, 3), GestureState::GESTURE_STATE_FOLLOW_LEFT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 2, 3), GestureState::GESTURE_STATE_FOLLOW_LEFT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 3, 2), GestureState::GESTURE_STATE_FOLLOW_LEFT);
-}
-
-/**
- * @tc.name: CalculateGestureState002
- * @tc.desc: test Swiper indicator gesture state
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, CalculateGestureState002, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {}, 2);
-    EXPECT_EQ(pattern_->TotalCount(), 2);
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(1.0f, 0, 0), GestureState::GESTURE_STATE_RELEASE_LEFT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(-1.0f, 0, 0), GestureState::GESTURE_STATE_RELEASE_RIGHT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 0, 0), GestureState::GESTURE_STATE_FOLLOW_RIGHT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 1, 1), GestureState::GESTURE_STATE_FOLLOW_RIGHT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 0, 1), GestureState::GESTURE_STATE_FOLLOW_LEFT);
-
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    EXPECT_EQ(pattern_->CalculateGestureState(0.0f, 1, 0), GestureState::GESTURE_STATE_FOLLOW_LEFT);
+    pattern_->CalculateGestureState(0.0f, -0.9f, 1);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
 }
 
 /**
