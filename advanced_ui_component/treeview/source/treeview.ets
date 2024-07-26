@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
 
@@ -37,6 +36,7 @@ const Y_BOTTOM_OFF_SET: string = '-1.25vp'
 const Y_BASE_PLATE_OFF_SET: string = '1.5vp'
 const COLOR_IMAGE_EDIT: string = '#FFFFFF'
 const COLOR_IMAGE_ROW: string = '#00000000'
+const COLOR_SELECT: string = '#1A0A59F7'
 const SHADOW_COLOR: string = '#00001E'
 const GRAG_POP_UP_HEIGHT: string = '48'
 const FLOOR_MIN_WIDTH: string = '128vp'
@@ -46,6 +46,7 @@ const TEXT_MAX_WIDTH: string = '160vp'
 const MIN_WIDTH: string = '112vp'
 const MAX_WIDTH: string = '192vp'
 const TRANS_COLOR: string = '#00FFFFFF'
+const DELAY_TIME: number = 100;
 
 const ARROW_DOWN: Resource | string = $r('sys.media.ohos_ic_public_arrow_down');
 
@@ -262,12 +263,8 @@ class TreeViewTheme {
 
 @Observed
 export class NodeInfo {
-  private childNodeInfo: childNodeInfo;
   public imageSource: Resource | string | undefined = '';
-  private parentNodeId: number;
-  private currentNodeId: number;
   private nodeHeight: Resource | number;
-  private nodeLevel: number;
   private nodeItem: nodeItem;
   private nodeLeftPadding: number;
   private nodeColor: ResourceColor;
@@ -276,7 +273,6 @@ export class NodeInfo {
   private nodeBorder: nodeBorder;
   private popUpInfo: popUpInfo;
   private listItemHeight: number;
-  private container: () => void;
   private isShowTitle: boolean;
   private isShowInputText: boolean;
   private isSelected: boolean;
@@ -294,15 +290,29 @@ export class NodeInfo {
   public treeViewTheme: TreeViewTheme = new TreeViewTheme();
   public fontColor: ResourceColor = '';
 
-  constructor(node: NodeItem) {
-    this.childNodeInfo = node.getChildNodeInfo();
+  constructor(node: NodeItem, nodeParam: NodeParam) {
+    this.node = node;
     this.nodeItem = {
       imageNode: undefined,
       inputText: new InputText(),
-      mainTitleNode: node.getNodeItem().mainTitleNode,
+      mainTitleNode: new MainTitleNode(''),
       imageCollapse: undefined,
       fontColor: undefined,
     };
+    this.nodeParam = nodeParam;
+    if (nodeParam.icon) {
+      this.nodeItem.imageNode = new ImageNode(
+        nodeParam.icon,
+        $r('sys.float.ohos_id_alpha_content_fourth'),
+        IMAGE_NODE_HEIGHT,
+        IMAGE_NODE_WIDTH,
+        nodeParam.selectedIcon,
+        nodeParam.editIcon,
+      );
+    }
+    if (nodeParam.primaryTitle) {
+      this.nodeItem.mainTitleNode = new MainTitleNode(nodeParam.primaryTitle);
+    }
     this.popUpInfo = {
       popUpIsShow: false,
       popUpEnableArrow: false,
@@ -310,17 +320,11 @@ export class NodeInfo {
       popUpText: '',
       popUpTextColor: undefined,
     };
-    this.nodeItem.imageNode = node.getNodeItem().imageNode;
-    this.nodeItem.imageCollapse = node.getNodeItem().imageCollapse;
-    this.container = node.container;
-    this.parentNodeId = node.parentNodeId;
-    this.currentNodeId = node.currentNodeId;
     this.nodeHeight = NODE_HEIGHT;
-    this.nodeLevel = node.nodeLevel;
     this.nodeLeftPadding = node.nodeLevel * 12 + 8; // calculate left padding
     this.nodeColor = $r('sys.color.ohos_id_color_background');
-    this.nodeIsShow = (this.nodeLevel > 0) ? false : true;
-    this.listItemHeight = (this.nodeLevel > 0) ? LIST_ITEM_HEIGHT_NONE : LIST_ITEM_HEIGHT;
+    this.nodeIsShow = (this.node.nodeLevel > 0) ? false : true;
+    this.listItemHeight = (this.node.nodeLevel > 0) ? LIST_ITEM_HEIGHT_NONE : LIST_ITEM_HEIGHT;
     this.isShowTitle = true;
     this.isShowInputText = false;
     this.isSelected = false;
@@ -337,8 +341,22 @@ export class NodeInfo {
       borderRadius: $r('sys.float.ohos_id_corner_radius_clicked')
     };
     this.flagLineLeftMargin = node.nodeLevel * 12 + 8;
-    this.node = node;
-    this.nodeParam = node.data;
+  }
+
+  addImageCollapse(isHasChildNode: boolean): void {
+    if (isHasChildNode) {
+      this.nodeItem.imageCollapse = new ImageNode(
+        ARROW_RIGHT,
+        $r('sys.float.ohos_id_alpha_content_tertiary'),
+        IMAGE_NODE_HEIGHT,
+        IMAGE_NODE_WIDTH,
+        undefined,
+        undefined,
+      );
+      this.nodeItem.imageCollapse.itemRightMargin = ($r('sys.float.ohos_id_text_paragraph_margin_xs'));
+    } else {
+      this.nodeItem.imageCollapse = undefined;
+    }
   }
 
   setFontColor(color: ResourceColor) {
@@ -428,11 +446,11 @@ export class NodeInfo {
   }
 
   getNodeCurrentNodeId(): number {
-    return this.currentNodeId;
+    return this.node.currentNodeId;
   }
 
   getNodeParentNodeId(): number {
-    return this.parentNodeId;
+    return this.node.parentNodeId;
   }
 
   getNodeLeftPadding(): number {
@@ -451,15 +469,15 @@ export class NodeInfo {
     return this.nodeIsShow;
   }
 
-  getNodeItem() {
+  getNodeItem(): nodeItem {
     return this.nodeItem;
   }
 
-  getNodeStatus() {
+  getNodeStatus(): status {
     return this.status;
   }
 
-  getNodeBorder() {
+  getNodeBorder(): nodeBorder {
     return this.nodeBorder;
   }
 
@@ -467,23 +485,19 @@ export class NodeInfo {
     this.nodeBorder.borderWidth = isClearFocusStatus ? this.borderWidth.has : this.borderWidth.none;
   }
 
-  getChildNodeInfo() {
-    return this.childNodeInfo;
+  getChildNodeInfo(): childNodeInfo {
+    return this.node.childNodeInfo;
   }
 
-  getCurrentNodeId(): number {
-    return this.currentNodeId;
+  getMenu(): () => void {
+    return this.nodeParam.container as () => void;
   }
 
-  getMenu() {
-    return this.container;
-  }
-
-  setIsSelected(isSelected: boolean) {
+  setIsSelected(isSelected: boolean): void {
     this.isSelected = isSelected;
   }
 
-  getIsSelected() {
+  getIsSelected(): boolean {
     return this.isSelected;
   }
 
@@ -497,11 +511,11 @@ export class NodeInfo {
     return this.node;
   }
 
-  public getIsFolder() {
+  public getIsFolder(): boolean | undefined {
     return this.nodeParam.isFolder;
   }
 
-  public setCanShowFlagLine(canShowFlagLine: boolean) {
+  public setCanShowFlagLine(canShowFlagLine: boolean): void {
     this.canShowFlagLine = canShowFlagLine;
   }
 
@@ -509,7 +523,7 @@ export class NodeInfo {
     return this.canShowFlagLine;
   }
 
-  public setFlagLineLeftMargin(currentNodeLevel: number | undefined) {
+  public setFlagLineLeftMargin(currentNodeLevel: number | undefined): void {
     if (currentNodeLevel === undefined) {
       return;
     }
@@ -521,26 +535,26 @@ export class NodeInfo {
   }
 
   public getNodeLevel(): number {
-    return this.nodeLevel;
+    return this.node.nodeLevel;
   }
 
-  public setIsOverBorder(isOverBorder: boolean) {
+  public setIsOverBorder(isOverBorder: boolean): void {
     this.isOverBorder = isOverBorder;
   }
 
-  public getIsOverBorder() {
+  public getIsOverBorder(): boolean {
     return this.isOverBorder;
   }
 
-  public setCanShowBottomFlagLine(canShowBottomFlagLine: boolean) {
+  public setCanShowBottomFlagLine(canShowBottomFlagLine: boolean): void {
     this.canShowBottomFlagLine = canShowBottomFlagLine;
   }
 
-  public getCanShowBottomFlagLine() {
+  public getCanShowBottomFlagLine(): boolean {
     return this.canShowBottomFlagLine;
   }
 
-  public setIsHighLight(isHighLight: boolean) {
+  public setIsHighLight(isHighLight: boolean): void {
     this.isHighLight = isHighLight;
   }
 
@@ -548,7 +562,7 @@ export class NodeInfo {
     return this.isHighLight;
   }
 
-  public setIsModify(isModify: boolean) {
+  public setIsModify(isModify: boolean): void {
     this.isModify = isModify;
   }
 
@@ -679,7 +693,7 @@ export class TreeListener {
   public on(type: TreeListenType, callback: (callbackParam: CallbackParam) => void): void {
     if (Array.isArray(type)) {
       for (let i = 0, l = type.length; i < l; i++) {
-        this.on((type as Array<TreeListenType>)[i], callback);
+        this.on((type as TreeListenType[])[i], callback);
       }
     } else {
       (this._events[type] || (this._events[type] = [])).push(callback);
@@ -728,7 +742,7 @@ export class TreeListener {
     }
     if (Array.isArray(type)) {
       for (let i: number = 0, l: number = type.length; i < l; i++) {
-        this.off((type as Array<TreeListenType>)[i], callback);
+        this.off((type as TreeListenType[])[i], callback);
       }
     }
     let cbs: [(callbackParam: CallbackParam) => void] = this._events[type];
@@ -757,7 +771,7 @@ export class TreeListener {
    */
   public emit(event: TreeListenType, argument: CallbackParam) {
     if (this._once_events[event]) {
-      let cbs_once: Array<(callbackParam: CallbackParam) => void> = Array.from<(callbackParam: CallbackParam) => void>(this._once_events[event]);
+      let cbs_once: ((callbackParam: CallbackParam) => void)[] = Array.from<(callbackParam: CallbackParam) => void>(this._once_events[event]);
       if (cbs_once) {
         for (let i: number = 0, l: number = cbs_once.length; i < l; i++) {
           try {
@@ -769,7 +783,7 @@ export class TreeListener {
         this._once_events[event] = null;
       }
     } else if (this._events[event]) {
-      let cbs_on: Array<(callbackParam: CallbackParam) => void> = Array.from<(callbackParam: CallbackParam) => void>(this._events[event]);
+      let cbs_on: ((callbackParam: CallbackParam) => void)[] = Array.from<(callbackParam: CallbackParam) => void>(this._events[event]);
       if (cbs_on) {
         for (let i: number = 0, l: number = cbs_on.length; i < l; i++) {
           try {
@@ -1148,7 +1162,7 @@ export struct TreeView {
       }
 
       let currentNodeInfo: NodeInfo | undefined = this.listNodeDataSource.getData(index);
-      let currentNodeId: number | undefined = currentNodeInfo?.getCurrentNodeId();
+      let currentNodeId: number | undefined = currentNodeInfo?.getNodeCurrentNodeId();
 
       /**
        * handle a situation that "draggingCurrentNodeId" is parent of "insertNodeCurrentNodeId";
@@ -1159,8 +1173,8 @@ export struct TreeView {
         if (isParentNodeOfInsertNode) {
           this.listNodeDataSource.setPassIndex(index);
           if (currentNodeId !== undefined) {
-            this.listNodeDataSource.clearTimeOutAboutDelayHighLightAndExpand(findCurrentNodeIndex(this.listNodeDataSource,
-              currentNodeId));
+              this.listNodeDataSource.clearTimeOutAboutDelayHighLightAndExpand(
+                  this.listNodeDataSource.findIndex(currentNodeId));
           }
           this.listNodeDataSource.setFlag(Flag.NONE);
           return;
@@ -1173,7 +1187,7 @@ export struct TreeView {
 
       /* Automatically HighLight one second delay and expand after two second delay. */
       if (currentNodeId !== undefined && currentNodeId !== this.listNodeDataSource.getDraggingCurrentNodeId()) {
-        this.listNodeDataSource.delayHighLightAndExpandNode(findCurrentNodeIndex(this.listNodeDataSource, currentNodeId),
+        this.listNodeDataSource.delayHighLightAndExpandNode(this.listNodeDataSource.findIndex(currentNodeId),
           currentNodeId, index);
       }
     })
@@ -1255,7 +1269,7 @@ export struct TreeView {
         this.listNodeDataSource.setIsDrag(false);
 
         /* set the position of focus. */
-        let currentFocusIndex: number = findCurrentNodeIndex(this.listNodeDataSource, draggingCurrentNodeId);
+        let currentFocusIndex: number = this.listNodeDataSource.findIndex(draggingCurrentNodeId);
         this.listNodeDataSource.setClickIndex(currentFocusIndex);
         this.listNodeDataSource.handleEvent(Event.DRAG, currentFocusIndex);
         return;
@@ -1264,15 +1278,15 @@ export struct TreeView {
       /* Collapse drag node. */
       if (this.listNodeDataSource.getExpandAndCollapseInfo(draggingCurrentNodeId) === NodeStatus.Expand) {
         this.listNodeDataSource.expandAndCollapseNode(
-          findCurrentNodeIndex(this.listNodeDataSource, draggingCurrentNodeId));
+          this.listNodeDataSource.findIndex(draggingCurrentNodeId));
       }
 
       let flag: boolean = false;
 
       /* Expand insert node. */
       if (this.listNodeDataSource.getExpandAndCollapseInfo(insertNodeCurrentNodeId) === NodeStatus.Collapse) {
-        let currentIndex: number = findCurrentNodeIndex(this.listNodeDataSource, insertNodeCurrentNodeId);
-        if (this.listNodeDataSource.ListNode[currentIndex].getIsHighLight()) {
+        let currentIndex: number = this.listNodeDataSource.findIndex(insertNodeCurrentNodeId);
+        if (this.listNodeDataSource.listNode[currentIndex].getIsHighLight()) {
           this.listNodeDataSource.expandAndCollapseNode(currentIndex);
         }
         flag = true;
@@ -1290,15 +1304,14 @@ export struct TreeView {
         this.listNodeDataSource.setLastPassId(draggingCurrentNodeId);
         this.listNodeDataSource.hideLastLine();
       }
-      let lastDelayHighLightIndex: number = findCurrentNodeIndex(this.listNodeDataSource,
-        this.listNodeDataSource.getLastDelayHighLightId());
+      let lastDelayHighLightIndex: number = this.listNodeDataSource.findIndex(this.listNodeDataSource.getLastDelayHighLightId());
       this.listNodeDataSource.setLastDelayHighLightIndex(lastDelayHighLightIndex);
       this.listNodeDataSource.clearLastTimeoutHighLight();
       this.listNodeDataSource.initialParameterAboutDelayHighLightAndExpandIndex();
       this.listNodeDataSource.setIsDrag(false);
 
       /* set the position of focus. */
-      let currentFocusIndex: number = findCurrentNodeIndex(this.listNodeDataSource, draggingCurrentNodeId);
+      let currentFocusIndex: number = this.listNodeDataSource.findIndex(draggingCurrentNodeId);
       this.listNodeDataSource.setClickIndex(currentFocusIndex);
       this.listNodeDataSource.handleEvent(Event.DRAG, currentFocusIndex);
 
@@ -1551,17 +1564,6 @@ export interface NodeParam {
   container?: () => void,
 }
 
-/* nodeId to find index */
-function findCurrentNodeIndex(listNodeDataSource: ListNodeDataSource, currentNodeId: number): number {
-  let thisIndex: number = 0;
-  listNodeDataSource.ListNode.forEach((value, index) => {
-    if (value.getNodeCurrentNodeId() === currentNodeId) {
-      thisIndex = index;
-    }
-  })
-  return thisIndex;
-}
-
 /**
  * Declare TreeController.
  * @syscap SystemCapability.ArkUI.ArkUI.Full
@@ -1576,7 +1578,6 @@ function findCurrentNodeIndex(listNodeDataSource: ListNodeDataSource, currentNod
 export class TreeController {
   public readonly ROOT_NODE_ID: number = -1;
   private nodeIdList: number[] = [];
-  private listNodeUtils: ListNodeUtils = new ListNodeUtils();
   private listNodeDataSource: ListNodeDataSource = new ListNodeDataSource();
   private initBuild: boolean = true;
   public treeViewTheme: TreeViewTheme = new TreeViewTheme();
@@ -1585,14 +1586,14 @@ export class TreeController {
     return this.listNodeDataSource;
   }
 
-  public getClickNodeChildrenInfo(): Array<nodeInfo> {
+  public getClickNodeChildrenInfo(): nodeInfo[] {
     let clickNodeId: number = this.listNodeDataSource.getClickNodeId();
-    return this.listNodeUtils.getClickNodeChildrenInfo(clickNodeId);
+    return this.listNodeDataSource.getClickNodeChildrenInfo(clickNodeId);
   }
 
-  public getChildrenId(): Array<number> {
+  public getChildrenId(): number[] {
     let clickNodeId: number = this.listNodeDataSource.getClickNodeId();
-    return this.listNodeUtils.getClickChildId(clickNodeId);
+    return this.listNodeDataSource.getClickChildId(clickNodeId);
   }
 
   /**
@@ -1613,15 +1614,15 @@ export class TreeController {
     if (clickNodeId < 0) {
       return;
     }
-    let parentNodeId: number = this.listNodeUtils.findParentNodeId(clickNodeId);
-    let removeNodeIdList: number[] = this.listNodeUtils.removeNode(clickNodeId, parentNodeId);
+    let parentNodeId: number = this.listNodeDataSource.findParentNodeId(clickNodeId);
+    let removeNodeIdList: number[] = this.listNodeDataSource.removeNode(clickNodeId, parentNodeId);
     this.listNodeDataSource.refreshData(
-      this.listNodeUtils,
       MenuOperation.REMOVE_NODE,
       parentNodeId,
       removeNodeIdList
     );
     this.nodeIdList.splice(this.nodeIdList.indexOf(clickNodeId), 1);
+    this.listNodeDataSource.lastIndex = -1;
   }
 
   /**
@@ -1642,26 +1643,25 @@ export class TreeController {
     this.listNodeDataSource.setItemVisibilityOnEdit(clickNodeId, MenuOperation.MODIFY_NODE);
   }
 
-  public add(): void {
+  public add(initBuild: boolean): void {
     let clickNodeId: number = this.listNodeDataSource.getClickNodeId();
     if (clickNodeId === this.listNodeDataSource.ROOT_NODE_ID || !this.listNodeDataSource.getIsFolder(clickNodeId)) {
       return;
     }
-    let newNodeInfo: NodeParam = this.listNodeUtils.getNewNodeInfo(clickNodeId);
+    let newNodeParam: NodeParam = this.listNodeDataSource.getNewNodeParam(clickNodeId);
     this.nodeIdList.push(this.nodeIdList[this.nodeIdList.length - 1] + 1);
     let newNodeId: number = this.nodeIdList[this.nodeIdList.length - 1];
-    this.listNodeUtils.addNewNodeId = newNodeId;
-    this.listNodeUtils.addNode(clickNodeId, newNodeId,
+    this.listNodeDataSource.addNode(clickNodeId, newNodeId,
       {
-        isFolder: newNodeInfo.isFolder,
-        icon: newNodeInfo.icon,
-        selectedIcon: newNodeInfo.selectedIcon,
-        editIcon: newNodeInfo.editIcon,
+        isFolder: newNodeParam.isFolder,
+        icon: newNodeParam.icon,
+        selectedIcon: newNodeParam.selectedIcon,
+        editIcon: newNodeParam.editIcon,
         primaryTitle: '新建文件夹',
-        container: newNodeInfo.container,
-        secondaryTitle: newNodeInfo.secondaryTitle as ResourceStr,
-      });
-    this.listNodeDataSource.refreshData(this.listNodeUtils, MenuOperation.ADD_NODE, clickNodeId, [newNodeId]);
+        container: newNodeParam.container,
+        secondaryTitle: newNodeParam.secondaryTitle as ResourceStr,
+      }, initBuild);
+    this.listNodeDataSource.refreshData(MenuOperation.ADD_NODE, clickNodeId, [newNodeId]);
 
     this.listNodeDataSource.setPopUpInfo(
       PopUpType.WARNINGS,
@@ -1675,7 +1675,7 @@ export class TreeController {
     );
     this.listNodeDataSource.listNode[this.listNodeDataSource.getLastIndex()]
       .setFontColor(this.treeViewTheme.primaryTitleFontColor);
-    let newNodeIndex: number = findCurrentNodeIndex(this.listNodeDataSource, newNodeId);
+    let newNodeIndex: number = this.listNodeDataSource.findIndex(newNodeId);
     this.listNodeDataSource.setClickIndex(newNodeIndex);
     this.listNodeDataSource.handleEvent(Event.TOUCH_UP, newNodeIndex);
   }
@@ -1709,11 +1709,11 @@ export class TreeController {
    */
   public addNode(nodeParam?: NodeParam): TreeController {
     if (nodeParam === undefined) {
-      this.add();
+      this.add(this.initBuild);
       return this;
     } else {
       if (nodeParam.primaryTitle !== undefined &&
-        !this.listNodeUtils.checkMainTitleIsValid(nodeParam.primaryTitle.toString())) {
+        !this.listNodeDataSource.checkMainTitleIsValid(nodeParam.primaryTitle.toString())) {
         throw new Error('ListTreeNode[addNode]: ' +
           'The directory name cannot contain the following characters\ /: *? "< > | or exceeds the maximum length.');
         return this;
@@ -1732,13 +1732,12 @@ export class TreeController {
       }
       if (nodeParam.parentNodeId !== undefined) {
         if (nodeParam.currentNodeId !== undefined) {
-          this.listNodeUtils.addNode(nodeParam.parentNodeId, nodeParam.currentNodeId, nodeParam);
+          this.listNodeDataSource.addNode(nodeParam.parentNodeId, nodeParam.currentNodeId, nodeParam, this.initBuild);
         }
       }
       if (!this.initBuild && nodeParam.parentNodeId !== undefined) {
         let newNodeId: number = this.nodeIdList[this.nodeIdList.length - 1];
         this.listNodeDataSource.refreshData(
-          this.listNodeUtils,
           MenuOperation.ADD_NODE,
           nodeParam.parentNodeId,
           [newNodeId]
@@ -1791,8 +1790,13 @@ export class TreeController {
    * @since 11
    */
   public buildDone(): void {
-    this.listNodeDataSource.init(this.listNodeUtils);
-    this.nodeIdList.sort((a, b) => a - b);
+    this.listNodeDataSource.initSection();
+    this.listNodeDataSource.delayInit();
+    this.listNodeDataSource.updateAllChildNum();
+    let taskId: number = setTimeout(() => {
+      concurrentSortNodeIdList(this.nodeIdList);
+      clearTimeout(taskId);
+    }, DELAY_TIME);
     this.initBuild = false;
   }
 }
@@ -1855,18 +1859,46 @@ class BasicDataSource implements IDataSource {
   }
 }
 
+function concurrentUpdateParentChildNum(isAdd: boolean, count: number, 
+  nodeIdNodeItemMap: Map<number, NodeItem>, updateNodeIdList: Array<number>): void {
+  updateNodeIdList.forEach((parentNodeId) => {
+    let tmpParentNodeId: number = parentNodeId;
+    while (tmpParentNodeId >= 0) {
+      if (nodeIdNodeItemMap.has(tmpParentNodeId)) {
+        let parent: NodeItem = nodeIdNodeItemMap.get(tmpParentNodeId) as NodeItem;
+        parent.getChildNodeInfo().allChildNum = 
+          isAdd ? parent.getChildNodeInfo().allChildNum + count : parent.getChildNodeInfo().allChildNum - count;
+        tmpParentNodeId = parent.parentNodeId;
+      } else {
+        throw new Error('concurrentUpdateParentChildNum: Parent node not found.');
+      }
+    }
+  })
+}
+
+function concurrentSortNodeIdList(nodeIdList: Array<number>): void {
+  nodeIdList.sort((a, b) => a - b);
+}
+
 class ListNodeDataSource extends BasicDataSource {
   public readonly ROOT_NODE_ID = -1;
-  public listNodeUtils: ListNodeUtils = new ListNodeUtils();
-  public listNode: NodeInfo[] = [];
+  public _root: NodeItem = new NodeItem(emptyNodeInfo);
+  private readonly maxNodeLevel: number = 50;
+  private readonly MAX_CN_LENGTH: number = 254;
+  private readonly MAX_EN_LENGTH: number = 255;
   private readonly INITIAL_INVALID_VALUE = -1;
+  public listNode: NodeInfo[] = [];
+  public loadedListNode: NodeInfo[] = [];
+  public nodeIdNodeItemMap: Map<number, NodeItem> = new Map<number, NodeItem>();
+  public nodeIdNodeParamMap: Map<number, NodeParam> = new Map<number, NodeParam>();
   public lastIndex: number = -1; // record the last focused node.
   public thisIndex: number = -1; // records clicked nodes in the current period.
   private modifyNodeIndex: number = -1; // records the nodes edited in the current period.
   public modifyNodeId: number = -1;
   private currentOperation?: MenuOperation;
   private expandAndCollapseInfo: Map<number, NodeStatus> = new Map<number, NodeStatus>();
-  public loadedNodeIdAndIndexMap: Map<number, number> = new Map<number, number>(); // [currentNodeId, index]
+  public loadedNodeIdAndIndexMap: Map<number, number> = new Map<number, number>();
+  public nodeIdAndNodeIndexMap: Map<number, number> = new Map<number, number>();
   private isTouchDown: boolean = false;
   private appEventBus: TreeListener = TreeListenerManager.getInstance().getTreeListener();
   /* parameter of the drag event. */
@@ -1892,7 +1924,7 @@ class ListNodeDataSource extends BasicDataSource {
   private lastDelayHighLightIndex: number = this.INITIAL_INVALID_VALUE;
   //record last passing node Id in HighLight event.
   private lastDelayHighLightId: number = this.INITIAL_INVALID_VALUE;
-  private nodeIdAndSubtitleMap: Map<number, ResourceStr> = new Map<number, ResourceStr>(); // [currentNodeId, subtitle]
+  private nodeIdAndSubtitleMap: Map<number, ResourceStr> = new Map<number, ResourceStr>();
   private flag: Flag = Flag.NONE;
   private selectedParentNodeId: number = this.INITIAL_INVALID_VALUE;
   private selectedParentNodeSubtitle: ResourceStr = '';
@@ -1901,6 +1933,7 @@ class ListNodeDataSource extends BasicDataSource {
   private lastFocusNodeId: number = this.INITIAL_INVALID_VALUE;
   private addFocusNodeId: number = this.INITIAL_INVALID_VALUE;
   public treeViewTheme: TreeViewTheme = new TreeViewTheme();
+  public updateNodeIdList: number[] = [];
   public readonly FLAG_LINE: flagLine = {
     flagLineHeight: FLAG_LINE_HEIGHT,
     flagLineColor: $r('sys.color.ohos_id_color_emphasize'),
@@ -1940,6 +1973,13 @@ class ListNodeDataSource extends BasicDataSource {
     margin: { left: $r('sys.float.padding_level2'), right: $r('sys.float.padding_level12') }
   }
 
+  constructor() {
+    super();
+    this._root.nodeLevel = -1;
+    this.nodeIdNodeItemMap.set(-1, this._root);
+    this.nodeIdNodeParamMap.set(-1, emptyNodeInfo);
+  }
+
   public changeNodeColor(index: number, color: ResourceColor | undefined): void {
     this.listNode[index].setNodeColor(color);
     this.listNode[index].setNodeBorder(false);
@@ -1973,7 +2013,7 @@ class ListNodeDataSource extends BasicDataSource {
     let nodeInfo: NodeInfo = this.listNode[index];
     if (nodeInfo.getNodeItem().imageCollapse !== undefined) {
       nodeInfo.getNodeItem().imageCollapse?.setImageCollapseSource(interactionStatus,
-        this.expandAndCollapseInfo.get(nodeInfo.getCurrentNodeId()));
+        this.expandAndCollapseInfo.get(nodeInfo.getNodeCurrentNodeId()));
     }
   }
 
@@ -1984,142 +2024,190 @@ class ListNodeDataSource extends BasicDataSource {
     this.setImageSource(this.lastIndex, InteractionStatus.Normal);
     this.changeNodeColor(this.lastIndex, this.listNode[this.lastIndex].getNodeStatus().normal);
     this.handleFocusEffect(this.lastIndex, false);
-    this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(this.listNode[this.lastIndex].getCurrentNodeId()));
+    this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(this.listNode[this.lastIndex].getNodeCurrentNodeId()));
   }
 
-  private changeNodeStatus(clickIndex: number): void {
-    let thisIndex: number = clickIndex;
-    let tmp: NodeInfo[] = this.ListNode;
-    let nodeId: number = tmp[clickIndex].getCurrentNodeId();
-    if (this.expandAndCollapseInfo.get(nodeId) === NodeStatus.Expand) {
-      this.expandAndCollapseInfo.set(nodeId, NodeStatus.Collapse);
-      tmp[thisIndex].getNodeItem().imageCollapse?.changeImageCollapseSource(NodeStatus.Collapse);
-    } else if (this.expandAndCollapseInfo.get(nodeId) === NodeStatus.Collapse) {
-      this.expandAndCollapseInfo.set(nodeId, NodeStatus.Expand);
-      tmp[thisIndex].getNodeItem().imageCollapse?.changeImageCollapseSource(NodeStatus.Expand);
+  private loadedListNodeFunction(): void {
+    let index: number = 0;
+    this.loadedNodeIdAndIndexMap.clear();
+    this.nodeIdAndNodeIndexMap.clear();
+    this.loadedListNode.splice(0, this.loadedListNode.length);
+    for (let i: number = 0; i < this.listNode.length; i++) {
+      this.nodeIdAndNodeIndexMap.set(this.listNode[i].getNodeCurrentNodeId(), i);
+      if (this.listNode[i].getNodeIsShow()) {
+        this.loadedNodeIdAndIndexMap.set(this.listNode[i].getNodeCurrentNodeId(), index++);
+        this.loadedListNode.push(this.listNode[i]);
+      }
     }
   }
 
-  private handleExpandAndCollapse(clickIndex: number) {
+  private changeNodeStatus(clickIndex: number): void {
+    if (clickIndex >= this.listNode.length) {
+      throw new Error('changeNodeStatus clickIndex error.');
+    }
     let thisIndex: number = clickIndex;
-    let tmp: NodeInfo[] = this.ListNode;
-    let nodeId: number = tmp[thisIndex].getCurrentNodeId();
+    let nodeId: number = this.listNode[clickIndex].getNodeCurrentNodeId();
+    if (this.expandAndCollapseInfo.get(nodeId) === NodeStatus.Expand) {
+      this.expandAndCollapseInfo.set(nodeId, NodeStatus.Collapse);
+      this.listNode[thisIndex].getNodeItem().imageCollapse?.changeImageCollapseSource(NodeStatus.Collapse);
+    } else if (this.expandAndCollapseInfo.get(nodeId) === NodeStatus.Collapse) {
+      this.expandAndCollapseInfo.set(nodeId, NodeStatus.Expand);
+      this.listNode[thisIndex].getNodeItem().imageCollapse?.changeImageCollapseSource(NodeStatus.Expand);
+    }
+  }
+
+  private handleExpandAndCollapse(clickIndex: number, isRefreshList: boolean): void {
+    if (clickIndex >= this.listNode.length) {
+      throw new Error('handleExpandAndCollapse clickIndex error.');
+    }
+    let thisIndex: number = clickIndex;
+    let nodeId: number = this.listNode[thisIndex].getNodeCurrentNodeId();
     if (!this.expandAndCollapseInfo.has(nodeId)) {
       return;
     }
 
     let rootNodeStatus: NodeStatus | undefined = this.expandAndCollapseInfo.get(nodeId);
-    if (tmp[thisIndex].getChildNodeInfo().isHasChildNode && rootNodeStatus === NodeStatus.Collapse) {
-      for (let i: number = 0; i < tmp[thisIndex].getChildNodeInfo().allChildNum; i++) {
-        tmp[thisIndex + 1 + i].setNodeIsShow(false);
-        tmp[thisIndex + 1 + i].setListItemHeight(LIST_ITEM_HEIGHT_NONE);
+    if (this.listNode[thisIndex].getChildNodeInfo().isHasChildNode && rootNodeStatus === NodeStatus.Collapse) {
+      for (let i: number = 0; i < this.listNode[thisIndex].getChildNodeInfo().allChildNum; i++) {
+        this.listNode[thisIndex + 1 + i].setNodeIsShow(false);
+        this.listNode[thisIndex + 1 + i].setListItemHeight(LIST_ITEM_HEIGHT_NONE);
       }
+      this.loadedListNodeFunction();
       this.notifyDataReload();
       return;
     }
 
-    let childNum: number[] | null = new Array(tmp[thisIndex].getChildNodeInfo().childNum);
+    let childNum: number[] | null = new Array(this.listNode[thisIndex].getChildNodeInfo().childNum);
     childNum[0] = thisIndex + 1;
     let index: number = 1;
-    while (index < tmp[thisIndex].getChildNodeInfo().childNum) {
-      childNum[index] = childNum[index - 1] + tmp[childNum[index - 1]].getChildNodeInfo().allChildNum + 1;
+    while (index < this.listNode[thisIndex].getChildNodeInfo().childNum) {
+      childNum[index] = childNum[index - 1] + this.listNode[childNum[index - 1]].getChildNodeInfo().allChildNum + 1;
       index++;
     }
     if (rootNodeStatus === NodeStatus.Expand) {
       for (let i: number = 0; i < childNum.length; i++) {
-        tmp[childNum[i]].setNodeIsShow(true);
-        tmp[childNum[i]].setListItemHeight(LIST_ITEM_HEIGHT);
-        let nodeId: number = tmp[childNum[i]].getCurrentNodeId();
+        this.listNode[childNum[i]].setNodeIsShow(true);
+        this.listNode[childNum[i]].setListItemHeight(LIST_ITEM_HEIGHT);
+        let nodeId: number = this.listNode[childNum[i]].getNodeCurrentNodeId();
         if (this.expandAndCollapseInfo.get(nodeId) === NodeStatus.Expand) {
-          this.handleExpandAndCollapse(childNum[i]);
+          this.handleExpandAndCollapse(childNum[i], false);
         }
       }
     }
     childNum = null;
-    this.notifyDataReload();
+    if (isRefreshList) {
+      this.loadedListNodeFunction();
+      this.notifyDataReload();
+    }
   }
 
-  public init(listNodeUtils: ListNodeUtils) {
+  public updateAllChildNum(): void {
+    let taskId: number = setTimeout(() => {
+      concurrentUpdateParentChildNum(true, 1, this.nodeIdNodeItemMap, this.updateNodeIdList);
+      clearTimeout(taskId);
+    }, DELAY_TIME);
+  }
+
+  private initHandler(listNode: Array<NodeInfo>, startLevel: number, endLevel?: number): void {
     let index: number = 0;
-    this.listNode = [];
-    this.listNodeUtils = listNodeUtils;
+    let listIndex: number = 0;
+    listNode.splice(0, listNode.length);
     this.loadedNodeIdAndIndexMap.clear();
-    this.listNodeUtils.traverseNodeDF((node: NodeItem): boolean => {
-      if (node.currentNodeId >= 0) {
-        let nodeInfo: NodeInfo = new NodeInfo(node);
-        this.listNode.push(nodeInfo);
+    this.loadedListNode.splice(0, this.loadedListNode.length);
+    this.nodeIdAndNodeIndexMap.clear();
+    this.nodeIdAndSubtitleMap.clear();
+    this.traverseSectionNodeDF((node: NodeItem): boolean => {
+      if (node.getCurrentNodeId() >= 0 && this.nodeIdNodeParamMap.has(node.getCurrentNodeId())) {
+        let nodeInfo: NodeInfo = new NodeInfo(node, this.nodeIdNodeParamMap.get(node.getCurrentNodeId()) as NodeParam);
+        nodeInfo.addImageCollapse(node.getChildNodeInfo().isHasChildNode);
+        listNode.push(nodeInfo);
+        this.nodeIdAndNodeIndexMap.set(nodeInfo.getNodeCurrentNodeId(), listIndex++);
         if (nodeInfo.getChildNodeInfo().isHasChildNode) {
-          this.expandAndCollapseInfo.set(nodeInfo.getCurrentNodeId(), NodeStatus.Collapse);
+          this.expandAndCollapseInfo.set(nodeInfo.getNodeCurrentNodeId(), NodeStatus.Collapse);
         }
         if (nodeInfo.getNodeIsShow()) {
-          this.loadedNodeIdAndIndexMap.set(nodeInfo.getCurrentNodeId(), index++);
+          this.loadedNodeIdAndIndexMap.set(nodeInfo.getNodeCurrentNodeId(), index++);
+          this.loadedListNode.push(nodeInfo);
         }
         if (nodeInfo.getIsFolder()) {
           if (nodeInfo.getNodeInfoData().secondaryTitle !== undefined) {
             this.nodeIdAndSubtitleMap.set(
-              nodeInfo.getCurrentNodeId(),
+              nodeInfo.getNodeCurrentNodeId(),
               nodeInfo.getNodeInfoData().secondaryTitle as ResourceStr,
             );
           } else {
-            this.nodeIdAndSubtitleMap.set(nodeInfo.getCurrentNodeId(), '');
+            this.nodeIdAndSubtitleMap.set(nodeInfo.getNodeCurrentNodeId(), '');
           }
         }
       }
       return false;
-    });
+    }, this._root, startLevel, endLevel);
   }
 
-  private refreshRemoveNodeData(removeNodeIdList: number[], parentNodeInfo: NodeInfo) {
+  public delayInit(): void {
+    let timeId: number = setTimeout(() => {
+      let listNode: NodeInfo[] = [];
+      this.initHandler(listNode, 0);
+      this.listNode.splice(0, this.listNode.length);
+      this.listNode.push(...listNode);
+      clearTimeout(timeId);
+    }, DELAY_TIME);
+  }
+
+  public initSection(): void {
+    this.initHandler(this.listNode, 0, 1);
+  }
+
+  private refreshRemoveNodeData(removeNodeIdList: number[], parentNodeInfo: NodeInfo): void {
     let deleteIndexList: number[] = [];
+    if (removeNodeIdList.length === 0) {
+      return;
+    }
+    let startIndex: number | undefined = undefined;
     for (let i: number = 0; i < removeNodeIdList.length; i++) {
-      for (let j: number = 0; j < this.listNode.length; j++) {
-        if (this.listNode[j].getNodeCurrentNodeId() === removeNodeIdList[i]) {
-          let currentNodeId: number = this.listNode[j].getNodeCurrentNodeId();
-          if (this.loadedNodeIdAndIndexMap.has(currentNodeId)) {
-            // this.listNode index to lazyForEach index.
-            deleteIndexList.push(this.loadedNodeIdAndIndexMap.get(currentNodeId) as number);
-          }
-          let deleteNode: NodeInfo[] | null = this.listNode.splice(j, 1);
-          deleteNode = null; // free memory
-          if (this.expandAndCollapseInfo.has(removeNodeIdList[i])) {
-            this.expandAndCollapseInfo.delete(removeNodeIdList[i]); // delete deleteNode expandAndCollapseInfo.
-          }
-          break;
-        }
+      if (this.loadedNodeIdAndIndexMap.has(removeNodeIdList[i])) {
+        let loadedIndex: number = this.loadedNodeIdAndIndexMap.get(removeNodeIdList[i]) as number;
+        deleteIndexList.push(loadedIndex);
+      }
+      if (startIndex === undefined && this.nodeIdAndNodeIndexMap.has(removeNodeIdList[i])) {
+        startIndex = this.nodeIdAndNodeIndexMap.get(removeNodeIdList[i]);
+      }
+      if (startIndex !== undefined) {
+        let deleteNode: NodeInfo[] | null = this.listNode.splice(startIndex, 1);
+        deleteNode = null;
+      }
+      if (this.expandAndCollapseInfo.has(removeNodeIdList[i])) {
+        this.expandAndCollapseInfo.delete(removeNodeIdList[i]); // delete deleteNode expandAndCollapseInfo.
       }
     }
     deleteIndexList.forEach((value) => {
       this.notifyDataDelete(value); // notifyDataDelete do not  update data.
       this.notifyDataChange(value); // call notifyDataChange to update data.
     })
-    let index: number = 0;
-    for (let i: number = 0; i < this.listNode.length; i++) {
-      if (this.listNode[i].getNodeCurrentNodeId() === parentNodeInfo.getNodeCurrentNodeId()) {
-        if (parentNodeInfo.getNodeItem().imageCollapse === null) {
-          this.listNode[i].handleImageCollapseAfterAddNode(false);
-          // delete deleteNode parentNode expandAndCollapseInfo.
-          this.expandAndCollapseInfo.delete(parentNodeInfo.getNodeCurrentNodeId());
-          this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(this.listNode[i].getNodeCurrentNodeId()));
-        }
-        break;
+    if (parentNodeInfo.getNodeItem().imageCollapse === null) {
+      if (this.nodeIdAndNodeIndexMap.has(parentNodeInfo.getNodeCurrentNodeId())) {
+        let parentIndex: number = this.nodeIdAndNodeIndexMap.get(parentNodeInfo.getNodeCurrentNodeId()) as number;
+        this.listNode[parentIndex]?.handleImageCollapseAfterAddNode(false);
       }
+      // delete deleteNode parentNode expandAndCollapseInfo.
+      this.expandAndCollapseInfo.delete(parentNodeInfo.getNodeCurrentNodeId());
+      this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(parentNodeInfo.getNodeCurrentNodeId()));
     }
     let callbackParam: CallbackParam = {
       currentNodeId: parentNodeInfo.getNodeCurrentNodeId(),
       parentNodeId: parentNodeInfo.getNodeParentNodeId(),
     };
+    this.loadedListNodeFunction();
     this.appEventBus.emit(TreeListenType.NODE_DELETE, callbackParam);
   }
 
-  private refreshAddNodeData(addNodeIdList: number[]) {
-    let addNodeInfo: NodeInfo = new NodeInfo(new NodeItem(emptyNodeInfo));
-    this.listNodeUtils.traverseNodeDF((node: NodeItem): boolean => {
-      if (node.currentNodeId === addNodeIdList[0]) {
-        addNodeInfo = new NodeInfo(node);
-        return true;
-      }
-      return false;
-    });
+  private refreshAddNodeData(addNodeIdList: number[]): void {
+    let addNodeInfo: NodeInfo = new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
+    if (this.nodeIdNodeItemMap.has(addNodeIdList[0])) {
+      let node: NodeItem = this.nodeIdNodeItemMap.get(addNodeIdList[0]) as NodeItem;
+      addNodeInfo = new NodeInfo(node, this.nodeIdNodeParamMap.get(addNodeIdList[0]) as NodeParam);
+      addNodeInfo.addImageCollapse(node.getChildNodeInfo().isHasChildNode);
+    }
     addNodeInfo.setIsModify(true);
 
     let index: number = 0;
@@ -2133,10 +2221,11 @@ class ListNodeDataSource extends BasicDataSource {
           this.changeNodeStatus(index);
         }
         this.listNode.splice(i + 1, 0, addNodeInfo);
-        this.listNode[i + 1].setTitleAndInputTextStatus(true); // false->true: realize inner Interaction.
+        this.listNode[i + 1].setTitleAndInputTextStatus(true);
         this.listNode[i + 1].setNodeIsShow(true);
         this.listNode[i + 1].setListItemHeight(LIST_ITEM_HEIGHT);
-        this.setImageSource(i + 1, InteractionStatus.Edit); // Normal->Edit : realize inner Interaction.
+        this.nodeIdAndNodeIndexMap.set(addNodeIdList[0], i + 1);
+        this.setImageSource(i + 1, InteractionStatus.Edit);
         this.currentOperation = MenuOperation.ADD_NODE;
         this.notifyDataAdd(i + 1);
         this.notificationNodeInfo(i + 1, this.currentOperation);
@@ -2147,20 +2236,17 @@ class ListNodeDataSource extends BasicDataSource {
     this.setClickIndex(index);
     this.lastIndex = index;
     this.expandAndCollapseInfo.set(addNodeInfo.getNodeParentNodeId(), NodeStatus.Expand);
-    this.handleExpandAndCollapse(index);
+    this.handleExpandAndCollapse(index, true);
   }
 
-  public refreshData(listNodeUtils: ListNodeUtils, operation: MenuOperation,
-                     parentNodeId: number, changeNodeIdList: number[]) {
-    let parentNodeInfo: NodeInfo = new NodeInfo(new NodeItem(emptyNodeInfo));
-    this.listNodeUtils = listNodeUtils;
-    this.listNodeUtils.traverseNodeDF((node: NodeItem): boolean => {
-      if (node.currentNodeId === parentNodeId) {
-        parentNodeInfo = new NodeInfo(node);
-        return true;
-      }
-      return false;
-    });
+  public refreshData(operation: MenuOperation,
+                     parentNodeId: number, changeNodeIdList: number[]): void {
+    let parentNodeInfo: NodeInfo = new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
+    if (this.nodeIdNodeItemMap.has(parentNodeId)) {
+      let parentNode: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
+      parentNodeInfo = new NodeInfo(parentNode, this.nodeIdNodeParamMap.get(parentNodeId) as NodeParam);
+      parentNodeInfo.addImageCollapse(parentNode.getChildNodeInfo().isHasChildNode);
+    }
 
     if (operation === MenuOperation.REMOVE_NODE) {
       this.nodeIdAndSubtitleMap.set(parentNodeId, this.selectedParentNodeSubtitle);
@@ -2181,15 +2267,15 @@ class ListNodeDataSource extends BasicDataSource {
   }
 
   public getClickNodeId(): number {
-    if (this.thisIndex < 0 || this.thisIndex >= this.ListNode.length) {
+    if (this.thisIndex < 0 || this.thisIndex >= this.listNode.length) {
       return -1;
     }
-    return this.ListNode[this.thisIndex].getCurrentNodeId();
+    return this.listNode[this.thisIndex].getNodeCurrentNodeId();
   }
 
-  public expandAndCollapseNode(clickIndex: number) {
+  public expandAndCollapseNode(clickIndex: number): void {
     this.changeNodeStatus(clickIndex);
-    this.handleExpandAndCollapse(clickIndex);
+    this.handleExpandAndCollapse(clickIndex, true);
   }
 
   public getIsTouchDown(): boolean {
@@ -2202,11 +2288,9 @@ class ListNodeDataSource extends BasicDataSource {
 
   public findIndex(currentNodeId: number): number {
     let thisIndex: number = -1;
-    this.ListNode.forEach((value, index) => {
-      if (value.getNodeCurrentNodeId() === currentNodeId) {
-        thisIndex = index;
-      }
-    })
+    if (this.nodeIdAndNodeIndexMap.has(currentNodeId)) {
+      thisIndex = this.nodeIdAndNodeIndexMap.get(currentNodeId) as number;
+    }
     return thisIndex;
   }
 
@@ -2214,7 +2298,7 @@ class ListNodeDataSource extends BasicDataSource {
     this.setImageSource(index, InteractionStatus.Normal);
     this.changeNodeColor(index, this.listNode[index].getNodeStatus().normal);
     this.handleFocusEffect(index, false);
-    this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(this.listNode[index].getCurrentNodeId()));
+    this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(this.listNode[index].getNodeCurrentNodeId()));
   }
 
   public handleEvent(event: Event, index: number) {
@@ -2229,7 +2313,8 @@ class ListNodeDataSource extends BasicDataSource {
       }
     }
 
-    let lazyForEachIndex: number = this.loadedNodeIdAndIndexMap.get(this.listNode[index].getCurrentNodeId()) as number;
+    let lazyForEachIndex: number = 
+      this.loadedNodeIdAndIndexMap.get(this.listNode[index].getNodeCurrentNodeId()) as number;
     switch (event) {
       case Event.TOUCH_DOWN:
         this.isTouchDown = true;
@@ -2292,7 +2377,7 @@ class ListNodeDataSource extends BasicDataSource {
       let backParamModify: CallbackParam = {
         currentNodeId: modifyNodeInfo.getNodeCurrentNodeId(),
         parentNodeId: modifyNodeInfo.getNodeParentNodeId(),
-      }
+      };
       this.appEventBus.emit(TreeListenType.NODE_MODIFY, backParamModify);
     } else if (operation === MenuOperation.ADD_NODE) {
       let addNodeInfo: NodeInfo = this.listNode[addNodeId];
@@ -2308,7 +2393,7 @@ class ListNodeDataSource extends BasicDataSource {
       let callbackParam: CallbackParam = {
         currentNodeId: addNodeInfo.getNodeCurrentNodeId(),
         parentNodeId: addNodeInfo.getNodeParentNodeId(),
-      }
+      };
       this.appEventBus.emit(TreeListenType.NODE_ADD, callbackParam);
     }
   }
@@ -2331,7 +2416,7 @@ class ListNodeDataSource extends BasicDataSource {
     }
     if (operation === MenuOperation.MODIFY_NODE) {
       for (let i: number = 0; i < this.listNode.length; i++) { // nodeId to find index
-        if (this.listNode[i].getCurrentNodeId() === nodeId) {
+        if (this.listNode[i].getNodeCurrentNodeId() === nodeId) {
           index = i;
           break;
         }
@@ -2372,7 +2457,7 @@ class ListNodeDataSource extends BasicDataSource {
       this.setImageSource(index, InteractionStatus.FinishEdit);
       this.setImageCollapseSource(index, InteractionStatus.FinishEdit);
       this.notificationNodeInfo(this.modifyNodeIndex, this.currentOperation);
-      this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(nodeInfo.getCurrentNodeId()));
+      this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(nodeInfo.getNodeCurrentNodeId()));
     }
   }
 
@@ -2383,7 +2468,7 @@ class ListNodeDataSource extends BasicDataSource {
     }
     nodeInfo.setPopUpIsShow(isShow);
     // this.listNode index to lazyForEach index.
-    let lazyForEachIndex: number = this.loadedNodeIdAndIndexMap.get(nodeInfo.getCurrentNodeId()) as number;
+    let lazyForEachIndex: number = this.loadedNodeIdAndIndexMap.get(nodeInfo.getNodeCurrentNodeId()) as number;
     if (!isShow) {
       this.notifyDataChange(lazyForEachIndex);
       return;
@@ -2417,7 +2502,8 @@ class ListNodeDataSource extends BasicDataSource {
     if (this.listNode[index].getNodeItem().mainTitleNode !== null) {
       this.listNode[index].getNodeItem().mainTitleNode.popUpTimeout = timeout;
     }
-    let lazyForEachIndex: number = this.loadedNodeIdAndIndexMap.get(this.listNode[index].getCurrentNodeId()) as number;
+    let lazyForEachIndex: number = 
+      this.loadedNodeIdAndIndexMap.get(this.listNode[index].getNodeCurrentNodeId()) as number;
     this.notifyDataChange(lazyForEachIndex);
   }
 
@@ -2428,43 +2514,28 @@ class ListNodeDataSource extends BasicDataSource {
     }
   }
 
-  public get ListNode(): NodeInfo[] {
-    return this.listNode;
-  }
-
   public totalCount(): number {
-    let count: number = 0;
-    let index: number = 0;
-    this.loadedNodeIdAndIndexMap.clear();
-    for (let i: number = 0; i < this.listNode.length; i++) {
-      if (this.listNode[i].getNodeIsShow()) {
-        this.loadedNodeIdAndIndexMap.set(this.listNode[i].getCurrentNodeId(), index++);
-        count++;
-      }
-    }
-    return count;
+    return this.loadedNodeIdAndIndexMap.size;
   }
 
   public getData(index: number): NodeInfo | undefined {
-    let count: number = 0;
-    for (let i: number = 0; i < this.listNode.length; i++) {
-      if (this.listNode[i].getNodeIsShow()) {
-        if (index === count) {
-          return this.listNode[i];
-        }
-        count++;
-      }
+    if (index < 0 || index >= this.loadedListNode.length) {
+      return undefined;
     }
-    return undefined;
+    return this.loadedListNode[index];
   }
 
   public addData(index: number, data: NodeInfo): void {
     this.listNode.splice(index, 0, data);
+    this.nodeIdAndNodeIndexMap.set(data.getNodeCurrentNodeId(), index);
+    this.loadedListNodeFunction();
     this.notifyDataAdd(index);
   }
 
   public pushData(data: NodeInfo): void {
     this.listNode.push(data);
+    this.nodeIdAndNodeIndexMap.set(data.getNodeCurrentNodeId(), this.listNode.length);
+    this.loadedListNodeFunction();
     this.notifyDataAdd(this.listNode.length - 1);
   }
 
@@ -2522,7 +2593,7 @@ class ListNodeDataSource extends BasicDataSource {
   }
 
   public getListItemOpacity(item: NodeInfo) {
-    return item.getCurrentNodeId() === this.getDraggingCurrentNodeId() ? this.listItemOpacity : 1;
+    return item.getNodeCurrentNodeId() === this.getDraggingCurrentNodeId() ? this.listItemOpacity : 1;
   }
 
   public getDragPopupPara() {
@@ -2542,16 +2613,15 @@ class ListNodeDataSource extends BasicDataSource {
       return false;
     }
     let selectedNodeItem: NodeItem = this.currentNodeInfo.getNodeInfoNode();
-    let isParentNodeOfInsertNode: boolean = false;
-    let callback: (node: NodeItem) => boolean = (node: NodeItem): boolean => {
-      if (node.currentNodeId === insertNodeId) {
-        isParentNodeOfInsertNode = true;
+    let parentId: number | undefined = selectedNodeItem.parentNodeId;
+    while (parentId !== undefined && parentId !== -1) {
+      if (parentId === insertNodeId) {
         return true;
+      } else {
+        parentId = this.nodeIdNodeItemMap.get(parentId as number)?.parentNodeId;
       }
-      return false;
-    };
-    this.listNodeUtils.traverseNodeDF(callback, selectedNodeItem);
-    return isParentNodeOfInsertNode;
+    }
+    return false;
   }
 
   public setPassIndex(thisPassIndex: number) {
@@ -2565,9 +2635,10 @@ class ListNodeDataSource extends BasicDataSource {
   public clearTimeOutAboutDelayHighLightAndExpand(currentIndex: number) {
     if (this.lastPassId !== this.INITIAL_INVALID_VALUE && this.loadedNodeIdAndIndexMap.has(this.lastPassId as number)) {
       let index: number = this.loadedNodeIdAndIndexMap.get(this.lastPassId as number) as number;
-      this.ListNode.forEach((value) => {
+      this.listNode.forEach((value) => {
         if (value.getNodeCurrentNodeId() === this.lastPassId) {
           value.setCanShowFlagLine(false);
+          return;
         }
       })
       this.notifyDataChange(index);
@@ -2579,7 +2650,7 @@ class ListNodeDataSource extends BasicDataSource {
       if (this.lastDelayHighLightIndex !== this.INITIAL_INVALID_VALUE) {
         this.clearHighLight(this.lastDelayHighLightIndex);
         let index: number = this.loadedNodeIdAndIndexMap
-          .get(this.listNode[this.lastDelayHighLightIndex].getCurrentNodeId()) as number;
+          .get(this.listNode[this.lastDelayHighLightIndex].getNodeCurrentNodeId()) as number;
         this.notifyDataChange(index);
       }
       this.clearTimeoutHighLightId = this.lastTimeoutHighLightId;
@@ -2615,14 +2686,14 @@ class ListNodeDataSource extends BasicDataSource {
     this.thisPassIndex = index;
     if ((isChanged || isOverBorder) && this.isInnerDrag) {
       this.flag = flag;
-      let currentNodeId: number | undefined = this.getData(index)?.getCurrentNodeId();
+      let currentNodeId: number | undefined = this.getData(index)?.getNodeCurrentNodeId();
       let currentNodeLevel: number | undefined = this.getData(index)?.getNodeLevel();
       if (currentNodeId !== undefined) {
         currentNodeLevel = (this.expandAndCollapseInfo.get(currentNodeId) === NodeStatus.Expand &&
           this.flag === Flag.DOWN_FLAG) ? (currentNodeLevel ? currentNodeLevel + 1 : undefined) : currentNodeLevel;
         if (this.lastPassId !== this.INITIAL_INVALID_VALUE && this.loadedNodeIdAndIndexMap.has(this.lastPassId as number)) {
           let lastIndex: number = this.loadedNodeIdAndIndexMap.get(this.lastPassId as number) as number;
-          this.ListNode.forEach((value) => {
+          this.listNode.forEach((value) => {
             if (value.getNodeCurrentNodeId() === this.lastPassId) {
               value.setCanShowFlagLine(false);
             }
@@ -2683,7 +2754,7 @@ class ListNodeDataSource extends BasicDataSource {
         let delayHighLightTime: number = this.isInnerDrag ? 1000 : 0; // ms
         this.timeoutHighLightId = setTimeout(() => {
           this.delayHighLight(currentIndex);
-        }, delayHighLightTime)
+        }, delayHighLightTime);
       }
       if (isOverBorder || (this.lastTimeoutHighLightId !== this.INITIAL_INVALID_VALUE &&
         this.clearTimeoutHighLightId !== this.lastTimeoutHighLightId)) {
@@ -2699,14 +2770,15 @@ class ListNodeDataSource extends BasicDataSource {
 
       /* alter flagLine and expand node time-out. */
       if (!isOverBorder && this.expandAndCollapseInfo.get(currentNodeId) === NodeStatus.Collapse) {
-        let firstChildNodeId: number | undefined = this.getData(showIndex)?.getNodeInfoNode().children[0].currentNodeId;
+        let firstChildNodeId: number | undefined = 
+          this.getData(showIndex)?.getNodeInfoNode().children[0]?.currentNodeId;
         let delayAlterFlagLineAndExpandNodeTime: number = 2000; // ms
         this.timeoutExpandId = setTimeout(() => {
           this.clearHighLight(this.lastDelayHighLightIndex);
           if (firstChildNodeId !== undefined) {
             this.alterFlagLineAndExpandNode(currentIndex, firstChildNodeId);
           }
-        }, delayAlterFlagLineAndExpandNodeTime)
+        }, delayAlterFlagLineAndExpandNodeTime);
       }
       if (isOverBorder || (this.lastTimeoutExpandId !== this.INITIAL_INVALID_VALUE &&
         this.clearTimeoutExpandId !== this.lastTimeoutExpandId)) {
@@ -2718,10 +2790,11 @@ class ListNodeDataSource extends BasicDataSource {
   }
 
   public delayHighLight(currentIndex: number) {
-    this.ListNode.forEach((value) => {
+    this.listNode.forEach((value) => {
       if (value.getNodeCurrentNodeId() === this.lastPassId) {
         value.setCanShowFlagLine(false);
         value.setCanShowBottomFlagLine(false);
+        return;
       }
     })
     this.changeNodeColor(currentIndex, this.listNode[currentIndex].getNodeStatus().highLight);
@@ -2733,28 +2806,29 @@ class ListNodeDataSource extends BasicDataSource {
   }
 
   public alterFlagLineAndExpandNode(currentIndex: number, firstChildNodeId: number) {
-    this.ListNode.forEach((value) => {
+    this.listNode.forEach((value) => {
       if (value.getNodeCurrentNodeId() === this.lastPassId) {
         value.setCanShowFlagLine(false);
         value.setCanShowBottomFlagLine(false);
       }
     })
-    this.ListNode.forEach((value) => {
+    this.listNode.forEach((value) => {
       if (this.isInnerDrag && value.getNodeCurrentNodeId() === firstChildNodeId) {
         value.setCanShowFlagLine(true);
       }
     })
     this.changeNodeStatus(currentIndex);
-    this.handleExpandAndCollapse(currentIndex);
+    this.handleExpandAndCollapse(currentIndex, true);
     this.lastPassId = firstChildNodeId;
   }
 
   public hideLastLine() {
     if (this.lastPassId !== this.INITIAL_INVALID_VALUE && this.loadedNodeIdAndIndexMap.has(this.lastPassId as number)) {
-      this.ListNode.forEach((value) => {
+      this.listNode.forEach((value) => {
         if (value.getNodeCurrentNodeId() === this.lastPassId) {
           value.setCanShowFlagLine(false);
           value.setCanShowBottomFlagLine(false);
+          return;
         }
       })
       let index: number = this.loadedNodeIdAndIndexMap.get(this.lastPassId as number) as number;
@@ -2833,9 +2907,9 @@ class ListNodeDataSource extends BasicDataSource {
   }
 
   public setLastDelayHighLightId() {
-    this.ListNode.forEach((value, index) => {
+    this.listNode.forEach((value, index) => {
       if (index === this.lastDelayHighLightIndex) {
-        this.lastDelayHighLightId = value.getCurrentNodeId();
+        this.lastDelayHighLightId = value.getNodeCurrentNodeId();
       }
     })
   }
@@ -2882,7 +2956,7 @@ class ListNodeDataSource extends BasicDataSource {
     }
 
     for (let i: number = 0; i < this.listNode.length; i++) {
-      if (this.listNode[i].getCurrentNodeId() === rearCurrentNodeId) {
+      if (this.listNode[i].getNodeCurrentNodeId() === rearCurrentNodeId) {
         isHighLight = this.listNode[i].getIsHighLight();
         if (this.flag === Flag.DOWN_FLAG && this.expandAndCollapseInfo.get(rearCurrentNodeId) === NodeStatus.Expand) {
           parentNodeId = rearCurrentNodeId;
@@ -2912,12 +2986,10 @@ class ListNodeDataSource extends BasicDataSource {
     /* To store dragging node information by the array named 'dragNodeParam'. */
     dragNodeParam.push({ parentId: parentNodeId, currentId: currentNodeId, data: nodeParam });
 
-    let oneself: NodeItem | null = null;
     let callback: (node: NodeItem, listNode: NodeInfo[]) => boolean = (node: NodeItem, listNode: NodeInfo[]): boolean => {
       if (node) {
-        oneself = node;
-        parentNodeId = oneself.parentNodeId;
-        currentNodeId = oneself.currentNodeId;
+        parentNodeId = node.parentNodeId;
+        currentNodeId = node.currentNodeId;
         for (let i: number = 0; i < listNode.length; i++) {
           if (listNode[i].getNodeCurrentNodeId() === currentNodeId) {
             nodeInfo = listNode[i];
@@ -2935,10 +3007,10 @@ class ListNodeDataSource extends BasicDataSource {
       }
       return false;
     }
-    this.listNodeUtils.dragTraverseNodeDF(callback, nodeInfoNode, this.listNode);
+    this.dragTraverseNodeDF(callback, nodeInfoNode, this.listNode);
 
     /* Delete the dragging node from the tree. */
-    this.listNodeUtils.removeNode(dragCurrentNodeId, dragParentNodeId);
+    this.removeNode(dragCurrentNodeId, dragParentNodeId);
 
     /**
      * Add the dragging node to the tree
@@ -2951,7 +3023,7 @@ class ListNodeDataSource extends BasicDataSource {
     if (this.expandAndCollapseInfo.get(rearCurrentNodeId) === NodeStatus.Expand) {
       isAfter = false;
       this.listNode.forEach((value) => {
-        if (value.getCurrentNodeId() === rearCurrentNodeId && value.getCanShowFlagLine() === false) {
+        if (value.getNodeCurrentNodeId() === rearCurrentNodeId && value.getCanShowFlagLine() === false) {
           if (value.getNodeInfoNode().children.length) {
             insertCurrentNodeId = value.getNodeInfoNode().children[0].currentNodeId;
           } else {
@@ -2963,18 +3035,18 @@ class ListNodeDataSource extends BasicDataSource {
       this.expandAndCollapseInfo.set(rearCurrentNodeId, NodeStatus.Expand);
     }
 
-    this.listNodeUtils.addDragNode(dragNodeParam[0].parentId, dragNodeParam[0].currentId, insertCurrentNodeId,
+    this.addDragNode(dragNodeParam[0].parentId, dragNodeParam[0].currentId, insertCurrentNodeId,
       isAfter, dragNodeParam[0].data);
 
     /* Add remaining node. */
     for (let j: number = 1; j < dragNodeParam.length; j++) {
-      this.listNodeUtils.addNode(dragNodeParam[j].parentId, dragNodeParam[j].currentId, dragNodeParam[j].data);
+      this.addNode(dragNodeParam[j].parentId, dragNodeParam[j].currentId, dragNodeParam[j].data, false);
     }
 
     /* Update node data and reload the array named 'listNode'. */
     for (let i: number = 0; i < this.listNode.length; i++) {
-      if (this.listNode[i].getCurrentNodeId() === dragParentNodeId) {
-        if (this.listNode[i].getNodeInfoNode().getNodeItem().imageCollapse === null) {
+      if (this.listNode[i].getNodeCurrentNodeId() === dragParentNodeId) {
+        if (this.listNode[i].getNodeItem().imageCollapse === null) {
           this.listNode[i].handleImageCollapseAfterAddNode(false);
           this.expandAndCollapseInfo.delete(dragParentNodeId);
           break;
@@ -2982,43 +3054,47 @@ class ListNodeDataSource extends BasicDataSource {
       }
     }
     let tmp: NodeInfo[] = [...this.listNode];
-    this.reloadListNode(this.listNodeUtils, tmp);
-
+    this.reloadListNode(tmp);
   }
 
   /**
    * Reload the array named 'listNode'
-   * @param listNodeUtils
    * @param tmp
    */
-  public reloadListNode(listNodeUtils: ListNodeUtils, tmp: NodeInfo[]) {
+  public reloadListNode(tmp: NodeInfo[]) {
     let index: number = 0;
-    this.listNode = [];
-    this.listNodeUtils = listNodeUtils;
+    let listIndex: number = 0;
+    this.listNode.splice(0, this.listNode.length);
     this.loadedNodeIdAndIndexMap.clear();
-    this.listNodeUtils.traverseNodeDF((node: NodeItem): boolean => {
-      if (node.currentNodeId >= 0) {
-        let nodeInfo: NodeInfo = new NodeInfo(node);
-        this.listNode.push(nodeInfo);
-
-        if (this.expandAndCollapseInfo.get(node.currentNodeId) === NodeStatus.Expand) {
-          nodeInfo.getNodeItem().imageCollapse?.changeImageCollapseSource(NodeStatus.Expand);
-        } else if (this.expandAndCollapseInfo.get(node.currentNodeId) === NodeStatus.Collapse) {
-          nodeInfo.getNodeItem().imageCollapse?.changeImageCollapseSource(NodeStatus.Collapse);
-        }
-
-        for (let i: number = 0; i < tmp.length; i++) {
-          if (tmp[i].getCurrentNodeId() === nodeInfo.getCurrentNodeId()) {
-            nodeInfo.setNodeIsShow(tmp[i].getNodeIsShow());
-            nodeInfo.setListItemHeight(tmp[i].getListItemHeight());
-            if (nodeInfo.getNodeItem().mainTitleNode && nodeInfo.getIsShowTitle()) {
-              nodeInfo.getNodeItem().mainTitleNode.title = tmp[i].getNodeItem().mainTitleNode?.title as string;
-            }
-            break;
+    this.loadedListNode.splice(0, this.loadedListNode.length);
+    this.traverseNodeDF((node: NodeItem): boolean => {
+      let currentNodeId: number = node.currentNodeId;
+      if (currentNodeId >= 0) {
+        if (this.nodeIdNodeParamMap.has(currentNodeId)) {
+          let nodeInfo: NodeInfo = new NodeInfo(node, this.nodeIdNodeParamMap.get(currentNodeId) as NodeParam);
+          nodeInfo.addImageCollapse(node.getChildNodeInfo().isHasChildNode);
+          this.listNode.push(nodeInfo);
+          this.nodeIdAndNodeIndexMap.set(nodeInfo.getNodeCurrentNodeId(), listIndex++);
+          if (this.expandAndCollapseInfo.get(currentNodeId) === NodeStatus.Expand) {
+            nodeInfo.getNodeItem().imageCollapse?.changeImageCollapseSource(NodeStatus.Expand);
+          } else if (this.expandAndCollapseInfo.get(currentNodeId) === NodeStatus.Collapse) {
+            nodeInfo.getNodeItem().imageCollapse?.changeImageCollapseSource(NodeStatus.Collapse);
           }
-        }
-        if (nodeInfo.getNodeIsShow()) {
-          this.loadedNodeIdAndIndexMap.set(nodeInfo.getCurrentNodeId(), index++);
+
+          for (let i: number = 0; i < tmp.length; i++) {
+            if (tmp[i].getNodeCurrentNodeId() === nodeInfo.getNodeCurrentNodeId()) {
+              nodeInfo.setNodeIsShow(tmp[i].getNodeIsShow());
+              nodeInfo.setListItemHeight(tmp[i].getListItemHeight());
+              if (nodeInfo.getNodeItem().mainTitleNode && nodeInfo.getIsShowTitle()) {
+                nodeInfo.getNodeItem().mainTitleNode.title = tmp[i].getNodeItem().mainTitleNode?.title as string;
+              }
+              break;
+            }
+          }
+          if (nodeInfo.getNodeIsShow()) {
+            this.loadedNodeIdAndIndexMap.set(nodeInfo.getNodeCurrentNodeId(), index++);
+            this.loadedListNode.push(nodeInfo);
+          }
         }
       }
       return false;
@@ -3030,7 +3106,7 @@ class ListNodeDataSource extends BasicDataSource {
   }
 
   public getVisibility(nodeInfo: NodeInfo): Visibility {
-    let lastShowIndex: number = this.loadedNodeIdAndIndexMap.get(nodeInfo.getCurrentNodeId()) as number - 1;
+    let lastShowIndex: number = this.loadedNodeIdAndIndexMap.get(nodeInfo.getNodeCurrentNodeId()) as number - 1;
     if (lastShowIndex > this.INITIAL_INVALID_VALUE) {
       let lastNodeInfo: NodeInfo | undefined = this.getData(lastShowIndex);
       return (nodeInfo.getCanShowFlagLine() === true && !nodeInfo.getIsHighLight() && !lastNodeInfo?.getIsHighLight()) ?
@@ -3058,17 +3134,17 @@ class ListNodeDataSource extends BasicDataSource {
 
   private getChildIndex(rearParentNodeId: number, rearCurrentNodeId: number) {
     let insertChildIndex: number = this.INITIAL_INVALID_VALUE;
-    this.listNodeUtils.traverseNodeBF((node): boolean => {
+    if (this.nodeIdNodeItemMap.has(rearParentNodeId)) {
+      let node: NodeItem = this.nodeIdNodeItemMap.get(rearParentNodeId) as NodeItem;
       if (node.getCurrentNodeId() === rearParentNodeId) {
         node.children.forEach((value, index) => {
           if (value.getCurrentNodeId() === rearCurrentNodeId) {
             insertChildIndex = index;
+            return;
           }
         })
-        return true;
       }
-      return false;
-    });
+    }
     return insertChildIndex;
   }
 
@@ -3094,6 +3170,376 @@ class ListNodeDataSource extends BasicDataSource {
 
   public setFlag(flag: Flag) {
     this.flag = flag;
+  }
+
+  traverseNodeDF(callback: (currentNode: NodeItem) => boolean, root: NodeItem = this._root) {
+    let stack: NodeItem[] = [];
+    let found: boolean = false;
+    stack.unshift(root);
+    let currentNode: NodeItem = stack.shift() as NodeItem;
+    while (!found && currentNode) {
+      found = callback(currentNode) === true;
+      if (!found) {
+        stack.unshift(...currentNode.children);
+        currentNode = stack.shift() as NodeItem;
+      }
+    }
+  }
+
+  traverseSectionNodeDF(callback: (currentNode: NodeItem) => boolean, root: NodeItem = this._root, 
+    startLevel?: number, endLevel?: number): void {
+    let stack: NodeItem[] = [];
+    let found: boolean = false;
+    let isPassNode: boolean = false;
+    stack.unshift(root);
+    let currentNode: NodeItem = stack.shift() as NodeItem;
+    while (!found && currentNode) {
+      try {
+        if (startLevel !== undefined && currentNode.nodeLevel < startLevel) {
+          isPassNode = true;
+        }
+        if (endLevel !== undefined && currentNode.nodeLevel > endLevel) {
+          isPassNode = true;
+        }
+        if (!isPassNode) {
+          found = callback(currentNode);
+        }
+      } catch (err) {
+        throw new Error('traverseSectionNodeDF function callbacks error');
+      }
+      if (!found) {
+        stack.unshift(...currentNode.children);
+        currentNode = stack.shift() as NodeItem;
+        isPassNode = false;
+      }
+    }
+  }
+
+  private updateParentChildNum(parentNode: NodeItem, isAdd: boolean, count: number): void {
+    let parentNodeId: number = parentNode.parentNodeId;
+    while (parentNodeId >= 0) {
+      if (this.nodeIdNodeItemMap.has(parentNodeId)) {
+        let parent: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
+        parent.getChildNodeInfo().allChildNum = 
+          isAdd ? parent.getChildNodeInfo().allChildNum + count : parent.getChildNodeInfo().allChildNum - count;
+        parentNodeId = parent.parentNodeId;
+      } else {
+        throw new Error('updateParentChildNum: Parent node not found');
+      }
+    }
+  }
+  
+  findParentNodeId(currentNodeId: number): number {
+    let current: NodeItem = new NodeItem(emptyNodeInfo);
+    if (this.nodeIdNodeItemMap.has(currentNodeId)) {
+      current = this.nodeIdNodeItemMap.get(currentNodeId) as NodeItem;
+    }
+    return current.parentNodeId;
+  }
+  
+  addNode(parentNodeId: number,
+          currentNodeId: number,
+          data: NodeParam, initBuild: boolean): void {
+    if (this._root === null) {
+      this._root = new NodeItem(emptyNodeInfo);
+      this._root.nodeLevel = -1;
+      this.nodeIdNodeItemMap.set(-1, this._root);
+      this.nodeIdNodeParamMap.set(-1, emptyNodeInfo);
+    }
+    if (this.nodeIdNodeItemMap.has(parentNodeId)) {
+      let parent: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
+      let currentNode: NodeItem = new NodeItem(data);
+      if (parent.nodeLevel > this.maxNodeLevel) {
+        throw new Error('ListNodeUtils[addNode]: The level of the tree view cannot exceed 50.');
+      }
+      currentNode.nodeLevel = parent.nodeLevel + 1;
+      currentNode.parentNodeId = parentNodeId;
+      currentNode.currentNodeId = currentNodeId;
+      currentNode.indexOfParent = parent.children.length;
+      data.parentNodeId = parentNodeId;
+      data.currentNodeId = currentNodeId;
+      parent.children.push(currentNode);
+      parent.getChildNodeInfo().isHasChildNode = true;
+      parent.getChildNodeInfo().childNum = parent.children.length;
+      parent.getChildNodeInfo().allChildNum += 1;
+      if (initBuild) {
+        this.updateNodeIdList.push(parent.parentNodeId);
+      } else {
+        let updateNodeIdList: number[] = [];
+        updateNodeIdList.push(parent.parentNodeId);
+        let taskId: number = setTimeout(() => {
+          concurrentUpdateParentChildNum(true, 1, this.nodeIdNodeItemMap, updateNodeIdList);
+          clearTimeout(taskId);
+        }, DELAY_TIME);
+      }
+      this.nodeIdNodeParamMap.set(currentNodeId, data);
+      this.nodeIdNodeItemMap.set(currentNodeId, currentNode);
+      return;
+    } else {
+      throw new Error('ListDataSource[addNode]: Parent node not found.');
+    }
+  }
+  
+  findNodeIndex(children: NodeItem[], currentNodeId: number): number {
+    let index: number = this.INITIAL_INVALID_VALUE;
+    for (let i: number = 0, len: number = children.length; i < len; i++) {
+      if (children[i].currentNodeId === currentNodeId) {
+        index = i;
+        break;
+      }
+    }
+    return index;
+  }
+  
+  private freeNodeMemory(rootNode: NodeItem, removeNodeIdList: number[]): void {
+    let deleteNode: NodeItem[] = [];
+    let callback = (node: NodeItem): boolean => {
+      deleteNode.push(node);
+      return false;
+    };
+    this.traverseNodeDF(callback, rootNode);
+    deleteNode.forEach((value: NodeItem) => {
+      removeNodeIdList.push(value.getCurrentNodeId());
+      this.nodeIdNodeItemMap.delete(value.getCurrentNodeId());
+      this.nodeIdNodeParamMap.delete(value.getCurrentNodeId());
+      value = new NodeItem(emptyNodeInfo);
+    })
+  }
+  
+  removeNode(currentNodeId: number, parentNodeId: number): number[] {
+    if (this.nodeIdNodeItemMap.has(parentNodeId) && this.nodeIdNodeItemMap.has(currentNodeId)) {
+      let parent: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
+      let current: NodeItem = this.nodeIdNodeItemMap.get(currentNodeId) as NodeItem;
+      let removeNodeIdList: number[] = [];
+      let index: number = current.indexOfParent;
+      let deleteNodeAllChildNum: number = 0;
+      if (index < 0) {
+        throw new Error('Node does not exist.');
+      } else {
+        deleteNodeAllChildNum = parent.children[index].getChildNodeInfo().allChildNum + 1;
+        this.freeNodeMemory(parent.children[index], removeNodeIdList);
+        for (let i: number = index; i < parent.children.length; i++) {
+          parent.children[i].indexOfParent -= 1;
+        }
+        let node: NodeItem[] | null = parent.children.splice(index, 1);
+        node = null;
+        if (parent.children.length === 0) {
+          if (this.nodeIdAndNodeIndexMap.has(parentNodeId)) {
+            let parentIndex: number = this.nodeIdAndNodeIndexMap.get(parentNodeId) as number;
+            this.listNode[parentIndex]?.addImageCollapse(false);
+          }
+        }
+      }
+      parent.getChildNodeInfo().childNum = parent.children.length;
+      parent.getChildNodeInfo().allChildNum -= (deleteNodeAllChildNum);
+      let updateNodeIdList: number[] = [];
+      updateNodeIdList.push(parent.parentNodeId);
+      let taskId: number = setTimeout(() => {
+        concurrentUpdateParentChildNum(false, deleteNodeAllChildNum, this.nodeIdNodeItemMap, updateNodeIdList);
+        clearTimeout(taskId);
+      }, DELAY_TIME);
+      return removeNodeIdList;
+    } else {
+      throw new Error('Parent does not exist.');
+    }
+  }
+
+  getNodeInfoByNodeItem(nodeItem: NodeItem): NodeInfo {
+    if (nodeItem?.currentNodeId === undefined) {
+      throw new Error('getNodeInfoByNodeItem: currentId is undefined');
+    }
+    if (!this.nodeIdAndNodeIndexMap.has(nodeItem.currentNodeId)) {
+      throw new Error('getNodeInfoByNodeItem: not has nodeItem');
+    }
+    let index: number = this.nodeIdAndNodeIndexMap.get(nodeItem.currentNodeId) as number;
+    return this.listNode[index];
+  }
+  
+  getNewNodeParam(nodeId: number): NodeParam {
+    let parent: NodeItem = new NodeItem(emptyNodeInfo);
+    if (this.nodeIdNodeItemMap.has(nodeId)) {
+      parent = this.nodeIdNodeItemMap.get(nodeId) as NodeItem;
+    }
+    let newNodeParam: NodeParam = emptyNodeInfo;
+    if (parent) {
+      let nodeInfo: NodeInfo = this.getNodeInfoByNodeItem(parent);
+      if (parent.children.length === 0) {
+        if (nodeInfo.getNodeItem().imageNode !== undefined) {
+          newNodeParam.icon = nodeInfo.getNodeItem().imageNode?.normalSource;
+          newNodeParam.selectedIcon = nodeInfo.getNodeItem().imageNode?.selectedSource;
+          newNodeParam.editIcon = nodeInfo.getNodeItem().imageNode?.editSource;
+          newNodeParam.container = nodeInfo.getMenu();
+        } else {
+          newNodeParam.icon = undefined;
+          newNodeParam.selectedIcon = undefined;
+          newNodeParam.editIcon = undefined;
+          newNodeParam.container = nodeInfo.getMenu();
+        }
+      } else if (parent.children.length > 0) {
+        let childNodeInfo: NodeInfo = this.getNodeInfoByNodeItem(parent.children[0]);
+        if (nodeInfo.getNodeItem().imageNode !== null) {
+          newNodeParam.icon = (childNodeInfo.getNodeItem().imageNode !== undefined) ?
+            childNodeInfo.getNodeItem().imageNode?.normalSource : undefined;
+          newNodeParam.selectedIcon = (childNodeInfo.getNodeItem().imageNode !== undefined) ?
+            childNodeInfo.getNodeItem().imageNode?.selectedSource : undefined;
+          newNodeParam.editIcon = (childNodeInfo.getNodeItem().imageNode !== undefined) ?
+            childNodeInfo.getNodeItem().imageNode?.editSource : undefined;
+          newNodeParam.container = childNodeInfo.getMenu();
+        } else {
+          newNodeParam.icon = undefined;
+          newNodeParam.selectedIcon = undefined;
+          newNodeParam.editIcon = undefined;
+          newNodeParam.container = childNodeInfo.getMenu();
+        }
+      }
+    }
+    return newNodeParam;
+  }
+  
+  getClickChildId(nodeId: number): Array<number> {
+    let parent: NodeItem = new NodeItem(emptyNodeInfo);
+    if (this.nodeIdNodeItemMap.has(nodeId)) {
+      parent = this.nodeIdNodeItemMap.get(nodeId) as NodeItem;
+    }
+    if (parent) {
+      if (parent.children.length === 0) {
+        return [];
+      } else if (parent.children.length > 0) {
+        let childrenNodeInfo: Array<number> = new Array(parent.children.length);
+        for (let i: number = 0; i < childrenNodeInfo.length; i++) {
+          childrenNodeInfo[i] = 0;
+        }
+        for (let i: number = 0; i < parent.children.length && i < childrenNodeInfo.length; i++) {
+          childrenNodeInfo[i] = parent.children[i].currentNodeId;
+        }
+        return childrenNodeInfo;
+      }
+    }
+    return [];
+  }
+  
+  getClickNodeChildrenInfo(nodeId: number): Array<nodeInfo> {
+    let parent: NodeItem = new NodeItem(emptyNodeInfo);
+    if (this.nodeIdNodeItemMap.has(nodeId)) {
+      parent = this.nodeIdNodeItemMap.get(nodeId) as NodeItem;
+    }
+    if (parent) {
+      if (parent.children.length === 0) {
+        return [];
+      } else if (parent.children.length > 0) {
+        let childrenNodeInfo: Array<nodeInfo> = new Array(parent.children.length);
+        for (let i: number = 0; i < childrenNodeInfo.length; i++) {
+          childrenNodeInfo[i] = {};
+        }
+        for (let i: number = 0; i < parent.children.length && i < childrenNodeInfo.length; i++) {
+          childrenNodeInfo[i].itemId = parent.children[i].currentNodeId;
+          let nodeInfo: NodeInfo = this.getNodeInfoByNodeItem(parent.children[i]);
+          if (nodeInfo.getNodeItem().imageNode) {
+            childrenNodeInfo[i].itemIcon = nodeInfo.getNodeItem().imageNode?.source;
+          }
+          if (nodeInfo.getNodeItem().mainTitleNode) {
+            childrenNodeInfo[i].itemTitle = nodeInfo.getNodeItem().mainTitleNode?.title;
+          }
+          childrenNodeInfo[i].isFolder = nodeInfo.getIsFolder();
+        }
+        return childrenNodeInfo;
+      }
+    }
+    return [];
+  }
+  
+  public checkMainTitleIsValid(title: string): boolean {
+    if (new RegExp('/[\\\/:*?"<>|]/').test(title)) {
+      return false;
+    }
+    if ((new RegExp('/^[\u4e00-\u9fa5]+$/').test(title) && title.length > this.MAX_CN_LENGTH) ||
+      (!new RegExp('/^[\u4e00-\u9fa5]+$/').test(title) && title.length > this.MAX_EN_LENGTH)) {
+      return false;
+    }
+    return true;
+  }
+  
+  /**
+   * DFS: Depth first traversal in drag event.
+   * @param callback
+   */
+  dragTraverseNodeDF(callback: (node: NodeItem, listNode: NodeInfo[]) => boolean,
+                     root: NodeItem = this._root, listNode: NodeInfo[]): void {
+    let stack: NodeItem[] = [];
+    let found: boolean = false;
+    stack.unshift(root);
+    let currentNode: NodeItem = stack.shift() as NodeItem;
+    while (!found && currentNode) {
+      found = callback(currentNode, listNode) === true;
+      if (!found) {
+        stack.unshift(...currentNode.children);
+        currentNode = stack.shift() as NodeItem;
+      }
+    }
+  }
+
+  updateChildIndexOfParent(insertIndex: number, parent: NodeItem): void {
+    for (let i: number = insertIndex; i < parent.children.length; i++) {
+      parent.children[i].indexOfParent += 1;
+    }
+  }
+  
+  /**
+   * Add the first dragging node in dragging nodes
+   * 1.the first dragging node needs to distinguish the position to insert
+   */
+  addDragNode(parentNodeId: number,
+              currentNodeId: number,
+              insertCurrentNodeId: number,
+              isAfter: boolean,
+              data: NodeParam): void {
+  
+    if (this._root === null) {
+      this._root = new NodeItem(emptyNodeInfo);
+      this._root.nodeLevel = this.INITIAL_INVALID_VALUE;
+    }  
+    
+    if (this.nodeIdNodeItemMap.has(parentNodeId)) {
+      let parent: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
+      let currentNode: NodeItem = new NodeItem(data);
+      if (parent.nodeLevel > this.maxNodeLevel) {
+        throw new Error('ListNodeUtils[addNode]: The level of the tree view cannot exceed 50.');
+      }
+      currentNode.nodeLevel = parent.nodeLevel + 1;
+      currentNode.parentNodeId = parentNodeId;
+      currentNode.currentNodeId = currentNodeId;
+      data.parentNodeId = parentNodeId;
+      data.currentNodeId = currentNodeId;
+      let insertIndex: number = this.INITIAL_INVALID_VALUE;
+      if (parent.children.length) {
+        for (let i: number = 0; i < parent.children.length; i++) {
+          if (parent.children[i].getCurrentNodeId() === insertCurrentNodeId) {
+            insertIndex = i;
+            break;
+          }
+        }
+        if (isAfter) {
+          currentNode.indexOfParent = insertIndex + 1;
+          this.updateChildIndexOfParent(currentNode.indexOfParent, parent);
+          parent.children.splice(insertIndex + 1, 0, currentNode);
+        } else {
+          currentNode.indexOfParent = insertIndex < 0 ? parent.children.length + insertIndex : insertIndex;
+          this.updateChildIndexOfParent(currentNode.indexOfParent, parent);
+          parent.children.splice(insertIndex, 0, currentNode);
+        }
+      } else {
+        currentNode.indexOfParent = parent.children.length;
+        parent.children.push(currentNode);
+      }
+      parent.getChildNodeInfo().isHasChildNode = true;
+      parent.getChildNodeInfo().childNum = parent.children.length;
+      parent.getChildNodeInfo().allChildNum += 1;
+      this.updateParentChildNum(parent, true, 1);
+      this.nodeIdNodeItemMap.set(currentNodeId, currentNode);
+      this.nodeIdNodeParamMap.set(currentNodeId, data);
+    } else {
+      throw new Error('addDragNode: Parent node not found.');
+    }  
   }
 }
 
@@ -3232,7 +3678,7 @@ export struct TreeViewInner {
                         bottom: LengthMetrics.resource(this.textInputPadding.bottom),
                       })
                       .onChange((value: string) => {
-                        let thisIndex: number = findCurrentNodeIndex(this.listNodeDataSource, this.item.getNodeCurrentNodeId());
+                        let thisIndex: number = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId());
                         let res: string = '';
                         let isInvalidError: boolean = false;
                         let isLengthError: boolean = false;
@@ -3264,7 +3710,7 @@ export struct TreeViewInner {
                         }
                       })
                       .onSubmit((enterKey: EnterKeyType) => {
-                        let thisIndex: number = findCurrentNodeIndex(this.listNodeDataSource, this.item.getNodeCurrentNodeId());
+                        let thisIndex: number = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId());
                         this.listNodeDataSource.setPopUpInfo(
                           PopUpType.WARNINGS,
                           InputError.NONE,
@@ -3285,9 +3731,9 @@ export struct TreeViewInner {
               .layoutWeight(1)
               .focusable(true)
 
-              if (this.listNodeDataSource.hasSubtitle(this.item.getCurrentNodeId())) {
+              if (this.listNodeDataSource.hasSubtitle(this.item.getNodeCurrentNodeId())) {
                 Row() {
-                  Text(this.listNodeDataSource.getSubtitle(this.item.getCurrentNodeId()))
+                  Text(this.listNodeDataSource.getSubtitle(this.item.getNodeCurrentNodeId()))
                     .fontSize(this.listNodeDataSource.getSubTitlePara().fontSize)
                     .fontColor(this.item.getIsHighLight() || this.item.getIsModify() ?
                     $r('sys.color.ohos_id_color_primary_contrary') : this.treeViewTheme.secondaryTitleFontColor)
@@ -3313,8 +3759,8 @@ export struct TreeViewInner {
                       this.item.getNodeItem().imageCollapse?.opacity : this.item.getNodeItem().imageCollapse?.noOpacity)
                     .onTouch((event: TouchEvent) => {
                       if (event.type === TouchType.Down) {
-                        this.listNodeDataSource.expandAndCollapseNode(findCurrentNodeIndex(this.listNodeDataSource, this.item.getNodeCurrentNodeId()));
-                        this.listNodeDataSource.setCurrentFocusNodeId(this.item.getCurrentNodeId());
+                        this.listNodeDataSource.expandAndCollapseNode(this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId()));
+                        this.listNodeDataSource.setCurrentFocusNodeId(this.item.getNodeCurrentNodeId());
                       }
                       event.stopPropagation();
                     })
@@ -3331,10 +3777,10 @@ export struct TreeViewInner {
             .focusable(true)
             .width('100%')
             .gesture(
-              TapGesture({ count: 2 })// doubleClick
+              TapGesture({ count: 2 })
                 .onAction((event: GestureEvent) => {
                   this.listNodeDataSource.expandAndCollapseNode(
-                    findCurrentNodeIndex(this.listNodeDataSource, this.item.getNodeCurrentNodeId()));
+                    this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId()));
                 })
             )
             .height(this.item.getNodeHeight())
@@ -3358,7 +3804,7 @@ export struct TreeViewInner {
             return;
           }
 
-          let thisIndex: number = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId())
+          this.index = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId())
           this.listNodeDataSource.setClickIndex(this.index);
           let currentId: number = this.item.getNodeCurrentNodeId();
 
@@ -3368,21 +3814,22 @@ export struct TreeViewInner {
 
           else if (event.type === TouchType.Up) {
             if (!(typeof this.treeViewTheme.itemSelectedBgColor === 'string')) {
-              this.item.setNodeColor(COLOR_SELECT)
+              this.item.setNodeColor(COLOR_SELECT);
             } else {
-              this.item.setNodeColor(this.treeViewTheme.itemSelectedBgColor)
+              this.item.setNodeColor(this.treeViewTheme.itemSelectedBgColor);
             }
             if (this.item.getNodeItem().imageNode !== null) {
               this.item.getNodeItem().imageNode?.setImageSource(InteractionStatus.Selected);
+              this.listNodeDataSource.setImageSource(this.index, InteractionStatus.Selected);
               this.item.imageSource = this.item.getNodeItem().imageNode?.source;
             }
 
-            this.item.getNodeItem().mainTitleNode?.setMainTitleSelected(true)
+            this.item.getNodeItem().mainTitleNode?.setMainTitleSelected(true);
             let callParam: CallbackParam = { currentNodeId: currentId };
             this.appEventBus.emit(TreeListenType.NODE_CLICK, callParam);
           }
 
-          if (this.listNodeDataSource.getLastIndex() !== -1 && thisIndex !== this.listNodeDataSource.getLastIndex()) {
+          if (this.listNodeDataSource.getLastIndex() !== -1 && this.index !== this.listNodeDataSource.getLastIndex()) {
             this.listNodeDataSource.setPopUpInfo(
               PopUpType.WARNINGS,
               InputError.NONE,
@@ -3394,7 +3841,7 @@ export struct TreeViewInner {
               MenuOperation.COMMIT_NODE
             );
           }
-          this.lastIndex = thisIndex;
+          this.lastIndex = this.index;
           this.count--;
         })
         /* backgroundColor when editing and in other states. */
@@ -3408,10 +3855,10 @@ export struct TreeViewInner {
         .height(LIST_ITEM_HEIGHT)
         .focusable(true)
         .onMouse((event: MouseEvent) => {
-          let thisIndex: number = findCurrentNodeIndex(this.listNodeDataSource, this.item.getNodeCurrentNodeId());
+          let thisIndex: number = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId());
           if (event.button === MouseButton.Right) {
             this.listNodeDataSource.handleEvent(Event.MOUSE_BUTTON_RIGHT,
-              findCurrentNodeIndex(this.listNodeDataSource, this.item.getNodeCurrentNodeId()));
+              this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId()));
             this.listTreeViewMenu = this.item.getMenu();
             this.listNodeDataSource.setClickIndex(thisIndex);
             clearTimeout(this.item.getNodeItem().mainTitleNode?.popUpTimeout);
@@ -3453,79 +3900,34 @@ export struct TreeViewInner {
 }
 
 export class NodeItem {
-  private nodeItem: nodeItem;
-  private childNodeInfo: childNodeInfo;
-  public container: () => void;
+  public childNodeInfo: childNodeInfo;
   public nodeLevel: number;
+  public children: NodeItem[];
+  public indexOfParent: number;
   public parentNodeId: number;
   public currentNodeId: number;
-  public children: Array<NodeItem>;
-  public data: NodeParam;
+  public isFolder?: boolean;
 
-  constructor(data: NodeParam) {
-    this.data = data;
+  constructor(nodeParam: NodeParam) {
+    this.currentNodeId = nodeParam.currentNodeId ?? -1;
+    this.parentNodeId = nodeParam.parentNodeId ?? -1;
+    this.isFolder = nodeParam.isFolder;
     this.nodeLevel = -1;
-    this.parentNodeId = -1;
-    this.currentNodeId = -1;
-    this.nodeItem = {
-      imageNode: undefined,
-      inputText: new InputText(),
-      mainTitleNode: new MainTitleNode(''),
-      imageCollapse: undefined,
-      fontColor: undefined,
-    };
+    this.indexOfParent = -1;
     this.childNodeInfo = { isHasChildNode: false, childNum: 0, allChildNum: 0 };
-    this.container = data.container as () => void;
-    if (data.icon) {
-      this.nodeItem.imageNode = new ImageNode(
-        data.icon,
-        $r('sys.float.ohos_id_alpha_content_fourth'),
-        IMAGE_NODE_HEIGHT,
-        IMAGE_NODE_WIDTH,
-        data.selectedIcon,
-        data.editIcon,
-      );
-    }
-    if (data.primaryTitle) {
-      this.nodeItem.mainTitleNode = new MainTitleNode(data.primaryTitle);
-    }
     this.children = [];
   }
 
-  addImageCollapse(isHasChildNode: boolean) {
-    if (isHasChildNode) {
-      this.nodeItem.imageCollapse = new ImageNode(
-        ARROW_RIGHT,
-        $r('sys.float.ohos_id_alpha_content_tertiary'),
-        IMAGE_NODE_HEIGHT,
-        IMAGE_NODE_WIDTH,
-        undefined,
-        undefined,
-      );
-      this.nodeItem.imageCollapse.itemRightMargin = ($r('sys.float.ohos_id_text_paragraph_margin_xs'));
-    } else {
-      this.nodeItem.imageCollapse = undefined;
-    }
-  }
-
-  getNodeItem() {
-    return this.nodeItem;
-  }
-
-  getChildNodeInfo() {
+  getChildNodeInfo(): childNodeInfo {
     return this.childNodeInfo;
   }
 
-  getMenu(): () => void {
-    return this.container;
-  }
-
-  getCurrentNodeId() {
+  getCurrentNodeId(): number {
     return this.currentNodeId;
   }
 
-  getIsFolder() {
-    return this.data.isFolder;
+  getIsFolder(): boolean | undefined {
+    return this.isFolder;
   }
 }
 
@@ -3822,386 +4224,6 @@ export class InputText extends NodeBaseInfo {
 
   get textInputStatusColor() {
     return this.status;
-  }
-}
-
-export class ListNodeUtils {
-  private _root: NodeItem;
-  public addNewNodeId: number;
-  private readonly maxNodeLevel = 50;
-  private readonly MAX_CN_LENGTH: number = 254;
-  private readonly MAX_EN_LENGTH: number = 255;
-  private readonly INITIAL_INVALID_VALUE = -1;
-
-  constructor() {
-    this._root = new NodeItem(emptyNodeInfo);
-    this._root.nodeLevel = -1;
-    this._root.parentNodeId = -1;
-    this._root.currentNodeId = -1;
-    this.addNewNodeId = -1;
-  }
-
-  getNewNodeId() {
-    return this.addNewNodeId;
-  }
-
-  traverseNodeDF(callback: (currentNode: NodeItem) => boolean, root: NodeItem = this._root) {
-    let stack: Array<NodeItem> = [];
-    let found: boolean = false;
-    stack.unshift(root);
-    let currentNode: NodeItem = stack.shift() as NodeItem;
-    while (!found && currentNode) {
-      found = callback(currentNode) === true;
-      if (!found) {
-        stack.unshift(...currentNode.children);
-        currentNode = stack.shift() as NodeItem;
-      }
-    }
-  }
-
-  traverseNodeBF(callback: (currentNode: NodeItem) => boolean) {
-    let queue: Array<NodeItem> = [];
-    let found: boolean = false;
-    queue.push(this._root);
-    let currentNode: NodeItem = queue.shift() as NodeItem;
-    while (!found && currentNode) {
-      try {
-        found = callback(currentNode);
-      } catch (err) {
-        throw new Error('traverseNodeBF function callbacks error.');
-      }
-      if (!found) {
-        queue.push(...currentNode.children)
-        currentNode = queue.shift() as NodeItem;
-      }
-    }
-  }
-
-  private contains(callback: (currentNode: NodeItem) => boolean, traversal: (callback: (currentNode: NodeItem) => boolean) => void) {
-    traversal(callback);
-  }
-
-  private updateParentChildNum(parentNode: NodeItem, isAdd: boolean, count: number) {
-    let parentNodeId: number = parentNode.parentNodeId;
-    while (parentNodeId >= 0) {
-      this.traverseNodeDF((node: NodeItem): boolean => {
-        if (node.currentNodeId === parentNodeId) {
-          node.getChildNodeInfo().allChildNum =
-            isAdd ? node.getChildNodeInfo().allChildNum + count : node.getChildNodeInfo().allChildNum - count;
-          parentNodeId = node.parentNodeId;
-          return false;
-        }
-        return false;
-      })
-    }
-  }
-
-  findParentNodeId(currentNodeId: number): number {
-    let current: NodeItem = new NodeItem(emptyNodeInfo);
-    let callback: (node: NodeItem) => boolean = (node: NodeItem) => {
-      if (node.currentNodeId === currentNodeId) {
-        current = node;
-        return true;
-      }
-      return false;
-    };
-    this.traverseNodeBF(callback);
-    return current.parentNodeId;
-  }
-
-  addNode(parentNodeId: number,
-          currentNodeId: number,
-          data: NodeParam): ListNodeUtils {
-    if (this._root === null) {
-      this._root = new NodeItem(emptyNodeInfo);
-      this._root.nodeLevel = -1;
-      this._root.parentNodeId = -1;
-      this._root.currentNodeId = -1;
-    }
-
-    let parent: NodeItem = new NodeItem(emptyNodeInfo);
-    let callback: (node: NodeItem) => boolean = (node: NodeItem) => {
-      if (node.currentNodeId === parentNodeId) {
-        parent = node;
-        return true;
-      }
-      return false;
-    };
-    this.traverseNodeBF(callback);
-    if (parent) {
-      let currentNode: NodeItem = new NodeItem(data as NodeParam);
-      if (parent.nodeLevel > this.maxNodeLevel) {
-        throw new Error('ListNodeUtils[addNode]: The level of the tree view cannot exceed 50.');
-      }
-      currentNode.nodeLevel = parent.nodeLevel + 1; // nodeLevel
-      currentNode.parentNodeId = parentNodeId;
-      currentNode.currentNodeId = currentNodeId;
-      parent.children.push(currentNode);
-      parent.getChildNodeInfo().isHasChildNode = true;
-      parent.getChildNodeInfo().childNum = parent.children.length;
-      parent.getChildNodeInfo().allChildNum += 1; // childNum
-      parent.addImageCollapse(parent.getChildNodeInfo().isHasChildNode);
-      this.updateParentChildNum(parent, true, 1);
-      return this;
-    } else {
-      throw new Error('ListNodeUtils[addNode]: Parent node not found.');
-    }
-  }
-
-  findNodeIndex(children: Array<NodeItem>, currentNodeId: number) {
-    let index: number = this.INITIAL_INVALID_VALUE;
-    for (let i: number = 0, len: number = children.length; i < len; i++) {
-      if (children[i].currentNodeId === currentNodeId) {
-        index = i;
-        break;
-      }
-    }
-    return index;
-  }
-
-  private freeNodeMemory(rootNode: NodeItem, removeNodeIdList: number[]) {
-    let deleteNode: NodeItem[] = [];
-    let callback = (node: NodeItem): boolean => {
-      deleteNode.push(node);
-      return false;
-    };
-    this.traverseNodeDF(callback, rootNode);
-    deleteNode.forEach((value: NodeItem) => {
-      removeNodeIdList.push(value.currentNodeId);
-      value = new NodeItem(emptyNodeInfo);
-    })
-  }
-
-  removeNode(currentNodeId: number, parentNodeId: number) {
-    let parent: NodeItem = new NodeItem(emptyNodeInfo);
-    let callback: (node: NodeItem) => boolean = (node: NodeItem): boolean => {
-      if (node.currentNodeId === parentNodeId) {
-        parent = node;
-        return true;
-      }
-      return false;
-    };
-    this.traverseNodeBF(callback);
-
-    if (parent) {
-      let removeNodeIdList: number[] = [];
-      let index: number = this.findNodeIndex(parent.children, currentNodeId);
-      let deleteNodeAllChildNum: number = 0;
-      if (index < 0) {
-        throw new Error('Node does not exist.');
-      } else {
-        deleteNodeAllChildNum = parent.children[index].getChildNodeInfo().allChildNum + 1;
-        this.freeNodeMemory(parent.children[index], removeNodeIdList);
-        let node: NodeItem[] | null = parent.children.splice(index, 1);
-        node = null;
-        if (parent.children.length === 0) {
-          parent.addImageCollapse(false);
-        }
-      }
-      parent.getChildNodeInfo().childNum = parent.children.length;
-      parent.getChildNodeInfo().allChildNum -= (deleteNodeAllChildNum);
-      this.updateParentChildNum(parent, false, deleteNodeAllChildNum);
-      return removeNodeIdList;
-    } else {
-      throw new Error('Parent does not exist.');
-    }
-  }
-
-  getNewNodeInfo(nodeId: number): NodeParam {
-    let parent: NodeItem = new NodeItem(emptyNodeInfo);
-    let callback: (node: NodeItem) => boolean = (node: NodeItem): boolean => {
-      if (node.currentNodeId === nodeId) {
-        parent = node;
-        return true;
-      }
-      return false;
-    };
-    this.traverseNodeBF(callback);
-    let newNodeInfo: NodeParam = emptyNodeInfo;
-    if (parent) {
-      if (parent.children.length === 0) {
-        if (parent.getNodeItem().imageNode !== undefined) {
-          newNodeInfo.icon = parent.getNodeItem().imageNode?.normalSource;
-          newNodeInfo.selectedIcon = parent.getNodeItem().imageNode?.selectedSource;
-          newNodeInfo.editIcon = parent.getNodeItem().imageNode?.editSource;
-          newNodeInfo.container = parent.getMenu();
-        } else {
-          newNodeInfo.icon = undefined;
-          newNodeInfo.selectedIcon = undefined;
-          newNodeInfo.editIcon = undefined;
-          newNodeInfo.container = parent.getMenu();
-        }
-      } else if (parent.children.length > 0) {
-        if (parent.getNodeItem().imageNode !== null) {
-          newNodeInfo.icon = (parent.children[0].getNodeItem().imageNode !== undefined) ?
-            parent.children[0].getNodeItem().imageNode?.normalSource : undefined;
-          newNodeInfo.selectedIcon = (parent.children[0].getNodeItem().imageNode !== undefined) ?
-            parent.children[0].getNodeItem().imageNode?.selectedSource : undefined;
-          newNodeInfo.editIcon = (parent.children[0].getNodeItem().imageNode !== undefined) ?
-            parent.children[0].getNodeItem().imageNode?.editSource : undefined;
-          newNodeInfo.container = parent.children[0].getMenu();
-        } else {
-          newNodeInfo.icon = undefined;
-          newNodeInfo.selectedIcon = undefined;
-          newNodeInfo.editIcon = undefined;
-          newNodeInfo.container = parent.children[0].getMenu();
-        }
-      }
-    }
-    return newNodeInfo;
-  }
-
-  getClickChildId(nodeId: number) {
-    let parent: NodeItem = new NodeItem(emptyNodeInfo);
-    let callback: (node: NodeItem) => boolean = (node: NodeItem): boolean => {
-      if (node.currentNodeId === nodeId) {
-        parent = node;
-        return true;
-      }
-      return false;
-    };
-    this.traverseNodeBF(callback);
-    if (parent) {
-      if (parent.children.length === 0) {
-        return [];
-      } else if (parent.children.length > 0) {
-        let nodeInfo: nodeInfo = { itemId: undefined, itemIcon: undefined, itemTitle: undefined }
-        let childrenNodeInfo: number[] = new Array(parent.children.length);
-        for (let i: number = 0; i < childrenNodeInfo.length; i++) {
-          childrenNodeInfo[i] = 0;
-        }
-        for (let i: number = 0; i < parent.children.length && i < childrenNodeInfo.length; i++) {
-          childrenNodeInfo[i] = parent.children[i].currentNodeId;
-        }
-        return childrenNodeInfo;
-      }
-    }
-    return [];
-  }
-
-  getClickNodeChildrenInfo(nodeId: number) {
-    let parent: NodeItem = new NodeItem(emptyNodeInfo);
-    let callback: (node: NodeItem) => boolean = (node: NodeItem): boolean => {
-      if (node.currentNodeId === nodeId) {
-        parent = node;
-        return true;
-      }
-      return false;
-    };
-    this.traverseNodeBF(callback);
-    if (parent) {
-      if (parent.children.length === 0) {
-        return [];
-      } else if (parent.children.length > 0) {
-        let childrenNodeInfo: nodeInfo[] = new Array(parent.children.length);
-        for (let i: number = 0; i < childrenNodeInfo.length; i++) {
-          childrenNodeInfo[i] = {};
-        }
-        for (let i: number = 0; i < parent.children.length && i < childrenNodeInfo.length; i++) {
-          childrenNodeInfo[i].itemId = parent.children[i].currentNodeId;
-          if (parent.children[i].getNodeItem().imageNode) {
-            childrenNodeInfo[i].itemIcon = parent.children[i].getNodeItem().imageNode?.source;
-          }
-          if (parent.children[i].getNodeItem().mainTitleNode) {
-            childrenNodeInfo[i].itemTitle = parent.children[i].getNodeItem().mainTitleNode?.title;
-          }
-          childrenNodeInfo[i].isFolder = parent.children[i].getIsFolder();
-        }
-        return childrenNodeInfo;
-      }
-    }
-    return [];
-  }
-
-  public checkMainTitleIsValid(title: string): boolean {
-    if (new RegExp('/[\\\/:*?"<>|]/').test(title)) {
-      return false;
-    }
-    if ((new RegExp('/^[\u4e00-\u9fa5]+$/').test(title) && title.length > this.MAX_CN_LENGTH) ||
-      (!new RegExp('/^[\u4e00-\u9fa5]+$/').test(title) && title.length > this.MAX_EN_LENGTH)) {
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * DFS: Depth first traversal in drag event.
-   * @param callback
-   */
-  dragTraverseNodeDF(callback: (node: NodeItem, listNode: NodeInfo[]) => boolean,
-                     root: NodeItem = this._root, listNode: NodeInfo[]) {
-    let stack: Array<NodeItem> = [];
-    let found: boolean = false;
-    stack.unshift(root);
-    let currentNode: NodeItem = stack.shift() as NodeItem;
-    while (!found && currentNode) {
-      found = callback(currentNode, listNode) === true;
-      if (!found) {
-        stack.unshift(...currentNode.children);
-        currentNode = stack.shift() as NodeItem;
-      }
-    }
-  }
-
-  /**
-   * Add the first dragging node in dragging nodes
-   * 1.the first dragging node needs to distinguish the position to insert
-   */
-  addDragNode(parentNodeId: number,
-              currentNodeId: number,
-              insertCurrentNodeId: number,
-              isAfter: boolean,
-              data: NodeParam): ListNodeUtils {
-
-    if (this._root === null) {
-      this._root = new NodeItem(emptyNodeInfo);
-      this._root.nodeLevel = this.INITIAL_INVALID_VALUE;
-      this._root.parentNodeId = this.INITIAL_INVALID_VALUE;
-      this._root.currentNodeId = this.INITIAL_INVALID_VALUE;
-    }
-
-    let parent: NodeItem = new NodeItem(emptyNodeInfo);
-    let callback: (node: NodeItem) => boolean = (node: NodeItem): boolean => {
-      if (node.currentNodeId === parentNodeId) {
-        parent = node;
-        return true;
-      }
-      return false;
-    };
-    this.traverseNodeBF(callback);
-    if (parent) {
-      let currentNode: NodeItem = new NodeItem(data);
-      if (parent.nodeLevel > this.maxNodeLevel) {
-        throw new Error('ListNodeUtils[addNode]: The level of the tree view cannot exceed 50.');
-      }
-      currentNode.nodeLevel = parent.nodeLevel + 1;
-      currentNode.parentNodeId = parentNodeId;
-      currentNode.currentNodeId = currentNodeId;
-      let insertIndex: number = this.INITIAL_INVALID_VALUE;
-      if (parent.children.length) {
-        for (let i: number = 0; i < parent.children.length; i++) {
-          if (parent.children[i].getCurrentNodeId() === insertCurrentNodeId) {
-            insertIndex = i;
-            break;
-          }
-        }
-        if (isAfter) {
-          parent.children.splice(insertIndex + 1, 0, currentNode);
-        } else {
-          parent.children.splice(insertIndex, 0, currentNode);
-        }
-      } else {
-        parent.children.push(currentNode);
-      }
-      parent.getChildNodeInfo().isHasChildNode = true;
-      parent.getChildNodeInfo().childNum = parent.children.length;
-      parent.getChildNodeInfo().allChildNum += 1;
-      parent.addImageCollapse(parent.getChildNodeInfo().isHasChildNode);
-      this.updateParentChildNum(parent, true, 1);
-      return this;
-    } else {
-      throw new Error('ListNodeUtils[addNode]: Parent node not found.');
-    }
   }
 }
 
