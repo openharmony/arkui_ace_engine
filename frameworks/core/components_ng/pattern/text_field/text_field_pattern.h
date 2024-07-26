@@ -1363,6 +1363,11 @@ public:
 
     RectF ExpandDefaultResponseRegion(RectF& rect) override;
 
+    void UpdateParentGlobalOffset()
+    {
+        parentGlobalOffset_ = GetPaintRectGlobalOffset();
+    }
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override
