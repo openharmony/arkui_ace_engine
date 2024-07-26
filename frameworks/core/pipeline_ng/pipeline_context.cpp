@@ -2271,8 +2271,7 @@ bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<Vie
     }
     CHECK_NULL_RETURN(dumpNode, false);
     dumpNode->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer);
-    auto nodeTag = node->GetTag();
-    if (nodeTag == V2::DIALOG_ETS_TAG) {
+    if (node && node->GetTag() == V2::DIALOG_ETS_TAG) {
         viewDataWrap->SetPageUrl(nodeTag);
         return true;
     }
