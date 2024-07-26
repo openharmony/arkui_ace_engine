@@ -280,9 +280,8 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
     auto frameOffset = geometryNode->GetFrameOffset();
     auto frameSize = geometryNode->GetFrameSize();
     if (layoutProperty->GetShowErrorTextValue(false) && errorParagraph_) {
-        auto contentOffset = geometryNode->GetContentOffset();
-        auto errorTextWidth = errorParagraph_->GetLongestLine();
-        RectF boundsRect(contentOffset.GetX(), frameOffset.GetY(), errorTextWidth,
+        auto textWidth = std::max(errorParagraph_->GetLongestLine(), frameSize.Width());
+        RectF boundsRect(0.0f, 0.0f, textWidth,
             errorParagraph_->GetHeight() + ERROR_TEXT_TOP_MARGIN.ConvertToPx() +
                 ERROR_TEXT_BOTTOM_MARGIN.ConvertToPx() + frameSize.Height());
         textFieldOverlayModifier_->SetBoundsRect(boundsRect);
@@ -294,7 +293,7 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
         maxFrameOffsetY_ = LessOrEqual(frameOffset.GetY(), maxFrameOffsetY_) ? frameOffset.GetY()
                                                                              : maxFrameOffsetY_ - frameOffset.GetY();
         maxFrameHeight_ = LessOrEqual(frameSize.Height(), maxFrameHeight_) ? maxFrameHeight_ : frameSize.Height();
-        RectF boundsRect(frameOffset.GetX(), maxFrameOffsetY_, frameSize.Width(), maxFrameHeight_);
+        RectF boundsRect(0.0f, 0.0f, frameSize.Width(), maxFrameHeight_ + UNDERLINE_WIDTH.ConvertToPx());
         textFieldOverlayModifier_->SetBoundsRect(boundsRect);
     }
     return paint;
