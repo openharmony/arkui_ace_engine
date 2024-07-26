@@ -4063,12 +4063,13 @@ void JsAccessibilityManager::JsInteractionOperation::GetCursorPosition(const int
     CHECK_NULL_VOID(jsAccessibilityManager);
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
     CHECK_NULL_VOID(context);
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    RefPtr<NG::FrameNode> node;
+    auto ngPipeline = jsAccessibilityManager->FindPipelineByElementId(splitElementId, node);
     CHECK_NULL_VOID(ngPipeline);
 #ifdef WINDOW_SCENE_SUPPORTED
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
-    if (uiExtensionManager->IsWrapExtensionAbilityId(elementId)) {
+    if (uiExtensionManager->IsWrapExtensionAbilityId(splitElementId)) {
         auto unWrapIdPair = uiExtensionManager->UnWrapExtensionAbilityId(NG::UI_EXTENSION_OFFSET_MAX, elementId);
         int64_t uiExtensionId = unWrapIdPair.first;
         auto rootNode = ngPipeline->GetRootElement();
