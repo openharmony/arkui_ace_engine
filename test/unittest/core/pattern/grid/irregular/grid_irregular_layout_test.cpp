@@ -1995,4 +1995,39 @@ HWTEST_F(GridIrregularLayoutTest, Stretch002, TestSize.Level1)
     auto childRect4 = pattern_->GetItemRect(4);
     EXPECT_EQ(childRect4.Height(), 0);
 }
+
+/**
+ * @tc.name: ScrollItem001
+ * @tc.desc: Test an error condition
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, ScrollItem001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo14());
+    model.SetColumnsGap(Dimension { 1.0f });
+    model.SetRowsGap(Dimension { 5.0f });
+        
+    CreateFixedHeightItems(100, 400.0F);
+    ViewAbstract::SetHeight(CalcLength(600.0f));
+    CreateDone(frameNode_);
+
+    const auto & info = pattern_->gridLayoutInfo_;
+
+    pattern_->ScrollToIndex(88, false);
+    FlushLayoutTask(frameNode_);
+    pattern_->ScrollToIndex(2, false, ScrollAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.startIndex_, 1);
+    EXPECT_EQ(info.endIndex_, 5);
+
+    for (int i = 0; i < 100; i++) {
+        if (i >= info.startIndex_ && i <= info.endIndex_) {
+            EXPECT_TRUE(GetChildFrameNode(frameNode_, i)->IsActive());
+        }else {
+            EXPECT_FALSE(GetChildFrameNode(frameNode_, i)->IsActive());
+        }
+    }
+}
 } // namespace OHOS::Ace::NG
