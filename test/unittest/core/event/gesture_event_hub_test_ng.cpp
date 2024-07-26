@@ -1070,7 +1070,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest017, TestSize.Level1)
     auto dragEvent = AceType::MakeRefPtr<DragEvent>(
         std::move(dragActionStart), std::move(dragActionUpdate), std::move(dragActionEnd), std::move(dragActionCancel));
     guestureEventHub->dragEventActuator_->userCallback_ = dragEvent;
-    guestureEventHub->userParallelClickEventActuator_ = AceType::MakeRefPtr<ClickEventActuator>(AceType::WeakClaim(AceType::RawPtr(guestureEventHub)));
+    guestureEventHub->userParallelClickEventActuator_ =
+        AceType::MakeRefPtr<ClickEventActuator>(AceType::WeakClaim(AceType::RawPtr(guestureEventHub)));
     result = guestureEventHub->ProcessTouchTestHit(
         coordinateOffset, touchRestrict, innerTargets, finalResult, 2, localPoint, nullptr, responseLinkResult);
     EXPECT_FALSE(result);
