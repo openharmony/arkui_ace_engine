@@ -436,9 +436,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (host->GetChildrenUpdated() != -1) {
-        if (hasCachedCapture_) {
-            InitCapture();
-        }
+        InitCapture();
         if (NeedAutoPlay() && !translateTask_) {
             StartAutoPlay();
         }
