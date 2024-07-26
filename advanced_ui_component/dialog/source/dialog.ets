@@ -168,6 +168,7 @@ export struct TipsDialog {
               this.onCheckedChange(checked);
             }
           })
+          .accessibilityLevel('yes')
           .margin({ right: $r('sys.float.padding_level4') })
         Text(this.checkTips)
           .fontSize($r('sys.float.Body_L'))
@@ -177,14 +178,15 @@ export struct TipsDialog {
           .layoutWeight(1)
           .focusable(false)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .onClick(() => {
-            this.isChecked = !this.isChecked;
-            if (this.checkAction) {
-              this.checkAction(this.isChecked);
-            }
-          })
       }
     }
+    .accessibilityGroup(true)
+    .onClick(() => {
+      this.isChecked = !this.isChecked;
+      if (this.checkAction) {
+        this.checkAction(this.isChecked);
+      }
+    })
     .padding({ top: 8, bottom: 8 })
     .constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT })
     .width('100%')
@@ -681,6 +683,7 @@ export struct ConfirmDialog {
           }
         })
         .hitTestBehavior(HitTestMode.Block)
+        .accessibilityLevel('yes')
         .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) })
 
       Text(this.checkTips)
@@ -691,10 +694,11 @@ export struct ConfirmDialog {
         .focusable(false)
         .layoutWeight(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .onClick(() => {
-          this.isChecked = !this.isChecked;
-        })
     }
+    .accessibilityGroup(true)
+    .onClick(() => {
+      this.isChecked = !this.isChecked;
+    })
     .width('100%')
     .padding({ top: 8, bottom: 8 })
   }
@@ -1349,7 +1353,7 @@ struct CustomDialogContentComponent {
     if (this.buttons) {
       Column() {
         ForEach(this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), (item: ButtonOptions, index: number) => {
-          this.buildButtonWithDivider(this.buttons.length === HORIZON_BUTTON_MAX_COUNT ?
+          this.buildButtonWithDivider(this.buttons?.length === HORIZON_BUTTON_MAX_COUNT ?
             HORIZON_BUTTON_MAX_COUNT - index - 1 : index);
         }, (item: ButtonOptions) => item.value.toString());
       }
