@@ -627,7 +627,18 @@ int32_t PageRouterManager::GetCurrentPageIndex() const
         return static_cast<int32_t>(restorePageStack_.size()) + 1;
     } else {
         // Page has been inserted into top position of pageRouterStack_.
-        return static_cast<int32_t>(restorePageStack_.size() + pageRouterStack_.size());
+        auto index = static_cast<int32_t>(restorePageStack_.size() + pageRouterStack_.size());
+        if (isNewPageReplacing_) {
+            /**
+             * example:
+             *  stack bottom -> stack top
+             *  [1]PageA -> [2]PageB
+             *   call router.replace(PageC)
+             *   then we need keep index of PageC same with PageB, that is 2
+             */
+            index--;
+        }
+        return index;
     }
 }
 
