@@ -989,7 +989,11 @@ void OverlayManager::SendToAccessibility(const WeakPtr<FrameNode> node, bool isS
 {
     auto menuWrapper = node.Upgrade();
     CHECK_NULL_VOID(menuWrapper);
-    auto accessibilityProperty = menuWrapper->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    auto menu = wrapperPattern->GetMenu();
+    CHECK_NULL_VOID(menu);
+    auto accessibilityProperty = menu->GetAccessibilityProperty<MenuAccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityIsShow(isShow);
     menuWrapper->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE,
