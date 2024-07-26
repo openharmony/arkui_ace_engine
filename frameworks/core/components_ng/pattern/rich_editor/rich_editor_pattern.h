@@ -346,13 +346,15 @@ public:
     void NotifyKeyboardClosedByUser() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosedByUser");
+        CloseSelectOverlay();
+        ResetSelection();
         FocusHub::LostFocusToViewRoot();
     }
     void NotifyKeyboardClosed() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
-        if (!isCustomKeyboardAttached_ && HasFocus()) {
-            FocusHub::LostFocusToViewRoot();
+        if (!isCustomKeyboardAttached_ && caretTwinkling_) {
+            StopTwinkling();
         }
     }
     void ClearOperationRecords();
