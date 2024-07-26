@@ -1962,4 +1962,48 @@ HWTEST_F(ImageTestNg, TestImageFit001, TestSize.Level1)
     EXPECT_EQ(imageLayoutProperty->GetImageFitValue(), ImageFit::BOTTOM_END);
     EXPECT_EQ(imageRenderProperty->GetImageFitValue(), ImageFit::BOTTOM_END);
 }
+
+/**
+ * @tc.name: TestImageResizable001
+ * @tc.desc: Test image resizable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestImageResizable001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+
+    /**
+     * @tc.steps: step2. get ImagePattern RadiusProperty layoutProperty.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+
+    /**
+     * @tc.steps: step3. set ImageResizableSlice
+     */
+    std::vector<std::vector<int>> cases = {
+        {1, 2, 3, 4},
+        {5, 6, 7, 8}
+    };
+    ImageResizableSlice defaultImageResizableSlice = ImageResizableSlice {
+        .left = Dimension(-1),
+        .right = Dimension(-1),
+        .top = Dimension(-1),
+        .bottom = Dimension(-1)
+    };
+    for (uint32_t i = 0; i < cases.size(); ++i) {
+        ImageResizableSlice tmp;
+        tmp.bottom = Dimension(cases[i][0]);
+        tmp.top = Dimension(cases[i][1]);
+        tmp.left = Dimension(cases[i][2]);
+        tmp.right = Dimension(cases[i][3]);
+        imageRenderProperty->UpdateImageResizableSlice(tmp);
+        frameNode->MarkModifyDone();
+        EXPECT_EQ(imageRenderProperty->GetImageResizableSliceValue(defaultImageResizableSlice), tmp);
+    }
+}
 } // namespace OHOS::Ace::NG
