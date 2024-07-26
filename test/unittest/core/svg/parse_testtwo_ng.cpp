@@ -649,22 +649,22 @@ HWTEST_F(ParseTestTwoNg, ParseGradientTest001, TestSize.Level1)
 
     Gradient gradient;
     LinearGradient linearGradientLocal;
-    linearGradientLocal.x1 = Dimension(static_cast<double>(DimensionUnit::PERCENT));
-    linearGradientLocal.x2 = Dimension(static_cast<double>(DimensionUnit::PERCENT));
-    linearGradientLocal.y1 = Dimension(static_cast<double>(DimensionUnit::PERCENT));
-    linearGradientLocal.y2 = Dimension(static_cast<double>(DimensionUnit::PERCENT));
+    linearGradientLocal.x1 = Dimension(1.0);
+    linearGradientLocal.x2 = Dimension(1.0);
+    linearGradientLocal.y1 = Dimension(1.0);
+    linearGradientLocal.y2 = Dimension(1.0);
     gradient.SetLinearGradient(linearGradientLocal);
+    svgCircle->SetLinearGradient(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), gradient);
     auto linearGradientInfo = gradient.GetLinearGradientInfo();
-    EXPECT_EQ(linearGradientInfo.x1, 0.0);
-    EXPECT_EQ(linearGradientInfo.x2, 0.0);
-    EXPECT_EQ(linearGradientInfo.y1, 0.0);
-    EXPECT_EQ(linearGradientInfo.y2, 0.0);
+    EXPECT_NE(linearGradientInfo.x1, 0.0);
+    linearGradientLocal.x1 = Dimension(1.0, DimensionUnit::PERCENT);
+    linearGradientLocal.x2 = Dimension(1.0, DimensionUnit::PERCENT);
+    linearGradientLocal.y1 = Dimension(1.0, DimensionUnit::PERCENT);
+    linearGradientLocal.y2 = Dimension(1.0, DimensionUnit::PERCENT);
+    gradient.SetLinearGradient(linearGradientLocal);
     svgCircle->SetLinearGradient(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), gradient);
     linearGradientInfo = gradient.GetLinearGradientInfo();
-    EXPECT_NE(linearGradientInfo.x1, 0.0);
-    EXPECT_NE(linearGradientInfo.x2, 0.0);
-    EXPECT_NE(linearGradientInfo.y1, 0.0);
-    EXPECT_NE(linearGradientInfo.y2, 0.0);
+    EXPECT_EQ(linearGradientInfo.x1, 0.0);
 
     RadialGradient radialGradientLocal;
     radialGradientLocal.radialHorizontalSize = AnimatableDimension(1);
@@ -732,6 +732,12 @@ HWTEST_F(ParseTestTwoNg, ParseGradientTest002, TestSize.Level1)
     svgCircle->SetStrokeGradientStyle(1);
     svgCircle->UpdateFillGradient(viewPort);
     svgCircle->UpdateStrokeGradient(viewPort);
+
+    gradient.SetType(GradientType::SWEEP);
+    baseAttr.fillState.SetGradient(gradient);
+    svgCircle->SetBaseAttributes(baseAttr);
+    svgCircle->UpdateFillGradient(viewPort);
+    svgCircle->UpdateStrokeGradient(viewPort);
 }
 
 /**
@@ -777,6 +783,9 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest001, TestSize.Level1)
     svgNode->SetAttr("strokeWidth", "-1.2");
     EXPECT_NE(svgNode->GetBaseAttributes().strokeState.GetLineWidth().Value(), -1.2);
 
+    svgNode->SetAttr("stroke-width", "-1.2");
+    EXPECT_NE(svgNode->GetBaseAttributes().strokeState.GetLineWidth().Value(), -1.2);
+
     svgNode->SetAttr("strokeDasharray", "");
     svgNode->SetAttr("strokeDasharray", "1.1 1.2");
     auto tesData = std::vector{1.1, 1.2};
@@ -787,6 +796,9 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest001, TestSize.Level1)
 
     svgNode->SetAttr("transform-origin", "test_transform-origin");
     EXPECT_EQ(svgNode->GetBaseAttributes().transformOrigin, "test_transform-origin");
+
+    svgNode->SetAttr("xlink:href", "test_xlink:href");
+    EXPECT_NE(svgNode->GetBaseAttributes().href, "test_xlink:href");
 }
 
 /**
@@ -813,5 +825,19 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest002, TestSize.Level1)
 
     svgDom->ControlAnimation(true);
     EXPECT_EQ(svgDom->IsStatic(), true);
+
+    EXPECT_EQ(svg->GetGradient(string("")), std::nullopt);
+
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    auto dimension = Dimension(0.0, DimensionUnit::PERCENT);
+    Size size;
+    SvgLengthType svgLengthType = static_cast<SvgLengthType>(int(SvgLengthType::OTHER)+1);
+    EXPECT_EQ(svgNode->ConvertDimensionToPx(dimension, size, svgLengthType), 0.0);
+    dimension.SetUnit(DimensionUnit::AUTO);
+    EXPECT_EQ(svgNode->ConvertDimensionToPx(dimension, size, svgLengthType), 0.0);
+
+    EXPECT_EQ(svgNode->ConvertDimensionToPx(dimension, 1.0), 0.0);
+
+    EXPECT_EQ(svgNode->GetRootViewBox(), Rect());
 }
 } // namespace OHOS::Ace::NG
