@@ -68,6 +68,7 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
+#include "core/components/theme/app_theme.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -326,6 +327,18 @@ public:
     {
         FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::FORCE_NONE };
         focusPattern.SetIsFocusActiveWhenFocused(true);
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, focusPattern);
+        auto theme = pipelineContext->GetTheme<AppTheme>();
+        CHECK_NULL_RETURN(theme, focusPattern);
+        FocusPaintParam focusPaintParam;
+        if (theme->IsFocusBoxGlow()) {
+            focusPaintParam.SetPaintColor(theme->GetFocusBorderColor());
+            focusPaintParam.SetPaintWidth(theme->GetFocusBorderWidth());
+            focusPaintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
+            focusPattern.SetStyleType(FocusStyleType::OUTER_BORDER);
+            focusPattern.SetFocusPaintParams(focusPaintParam);
+        }
         return focusPattern;
     }
 
