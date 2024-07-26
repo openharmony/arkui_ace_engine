@@ -263,6 +263,7 @@ protected:
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;
+    bool isHandleMoving_ = false;
 
 private:
     void FindScrollableParentAndSetCallback(const RefPtr<FrameNode>& host);

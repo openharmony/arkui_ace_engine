@@ -6534,7 +6534,6 @@ void RichEditorPattern::ShowHandles()
 }
 void RichEditorPattern::OnAreaChangedInner()
 {
-    float selectLineHeight = 0.0f;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = PipelineContext::GetCurrentContext();
@@ -6544,11 +6543,8 @@ void RichEditorPattern::OnAreaChangedInner()
         parentGlobalOffset_ = parentGlobalOffset;
         UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
         CHECK_NULL_VOID(SelectOverlayIsOn() || selectOverlay_->SelectOverlayIsCreating());
-        textSelector_.selectionBaseOffset.SetX(
-            CalcCursorOffsetByPosition(textSelector_.GetStart(), selectLineHeight).GetX());
-        textSelector_.selectionDestinationOffset.SetX(
-            CalcCursorOffsetByPosition(textSelector_.GetEnd(), selectLineHeight).GetX());
-        CreateHandles();
+        CalculateHandleOffsetAndShowOverlay();
+        selectOverlay_->UpdateHandleOffset();
     }
 }
 
