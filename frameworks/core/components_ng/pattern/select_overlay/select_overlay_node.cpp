@@ -1867,7 +1867,7 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
 
     auto gestureEventHub = menuWrapper->GetOrCreateGestureEventHub();
     if (gestureEventHub) {
-        gestureEventHub->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
+        gestureEventHub->SetHitTestMode(HitTestMode::HTMDEFAULT);
     }
     return menuWrapper;
 }
