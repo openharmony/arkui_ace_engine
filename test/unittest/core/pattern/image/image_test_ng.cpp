@@ -1928,9 +1928,9 @@ HWTEST_F(ImageTestNg, TestImageFit001, TestSize.Level1)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
+    imageInfoConfig.isImageSpan = true;
     image.Create(imageInfoConfig, pixMap);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);

@@ -590,10 +590,9 @@ void ImagePattern::LoadImage(
     const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag, VisibleType visibleType)
 {
     if (loadingCtx_) {
-        auto srcPixelMap = src.GetPixmap();
-        auto loadPixelMap = loadingCtx_->GetSourceInfo().GetPixmap();
-        isPixelMapChanged_ = !srcPixelMap || !loadPixelMap || srcPixelMap->GetRawPixelMapPtr() !=
-                                                              loadPixelMap->GetRawPixelMapPtr();
+        auto srcKey = src.GetKey();
+        auto loadKey = loadingCtx_->GetSourceInfo().GetKey();
+        isPixelMapChanged_ = srcKey != loadKey;
     }
     LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
     loadNotifier.onDataReadyComplete_ = CreateCompleteCallBackInDataReady();
@@ -696,6 +695,35 @@ void ImagePattern::OnModifyDone()
         default:
             break;
     }
+
+    InitOnKeyEvent();
+}
+
+void ImagePattern::InitOnKeyEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto focusHub = hub->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto onKeyEvent = [weak = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        pattern->OnKeyEvent();
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+void ImagePattern::OnKeyEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->PaintFocusState(true);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void ImagePattern::OnAnimatedModifyDone()

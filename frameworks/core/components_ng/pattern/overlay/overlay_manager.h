@@ -500,8 +500,7 @@ public:
 
     void ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
 
-    void CheckDeviceInLandscape(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode,
-        uint32_t& statusBarHeight);
+    void CheckDeviceInLandscape(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode, float& sheetTopSafeArea);
 
     void SetSheetHeight(float height)
     {
@@ -615,6 +614,7 @@ private:
     void SaveSheePageNode(
         const RefPtr<FrameNode>& sheetPageNode, const RefPtr<FrameNode>& sheetContentNode,
         const RefPtr<FrameNode>& targetNode, bool isStartByUIContext);
+    bool CheckTargetIdIsValid(int32_t targetId);
     RefPtr<FrameNode> CreateSheetMask(const RefPtr<FrameNode>& sheetPageNode,
         const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle);
     void UpdateSheetRender(const RefPtr<FrameNode>& sheetPageNode, NG::SheetStyle& sheetStyle, bool isPartialUpdate);
@@ -763,6 +763,7 @@ private:
     void MountToParentWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     void RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     CustomKeyboardOffsetInfo CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard);
+    void SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow);
 
     void FireDialogAutoSave(const RefPtr<FrameNode>& ContainerNode);
 

@@ -46,6 +46,8 @@ public:
     virtual void SetSymbolEffect(const std::uint32_t effectStrategy) = 0;
     virtual void SetClipEdge() = 0;
     virtual void SetSymbolEffectOptions(NG::SymbolEffectOptions& symbolEffectOptions) = 0;
+    virtual bool CheckIfIdenticalReplace(
+        NG::SymbolEffectOptions &lastSymbolEffectOptions, NG::SymbolEffectOptions &symbolEffectOptions) = 0;
 
 private:
     static std::unique_ptr<SymbolModel> instance_;

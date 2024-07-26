@@ -496,7 +496,7 @@ public:
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
     void RemoveLastHotZoneRect() const;
 
-    virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType);
+    virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent);
 
     bool IsLayoutDirtyMarked() const
     {
@@ -942,6 +942,16 @@ public:
         return currentRect;
     }
 
+    void SetIsUseTransitionAnimator(bool isUseTransitionAnimator)
+    {
+        isUseTransitionAnimator_ = isUseTransitionAnimator;
+    }
+
+    bool GetIsUseTransitionAnimator()
+    {
+        return isUseTransitionAnimator_;
+    }
+    
     // this method will check the cache state and return the cached revert matrix preferentially,
     // but the caller can pass in true to forcible refresh the cache
     Matrix4& GetOrRefreshRevertMatrixFromCache(bool forceRefresh = false);
@@ -984,6 +994,7 @@ public:
     void ProcessFrameNodeChangeFlag();
     void OnNodeTransformInfoUpdate(bool changed);
     void OnNodeTransitionInfoUpdate();
+    uint32_t GetWindowPatternType() const;
 
     void ResetLayoutAlgorithm()
     {
@@ -1039,7 +1050,7 @@ private:
     void DumpAlignRulesInfo();
     void DumpExtensionHandlerInfo();
     void DumpAdvanceInfo() override;
-    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
+    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void DumpOnSizeChangeInfo();
     bool CheckAutoSave() override;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
@@ -1090,6 +1101,8 @@ private:
 
     void TriggerShouldParallelInnerWith(
         const TouchTestResult& currentRecognizers, const TouchTestResult& responseLinkRecognizers);
+
+    void TriggerRsProfilerNodeMountCallbackIfExist();
 
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
 
@@ -1186,6 +1199,8 @@ private:
     bool isGeometryTransitionIn_ = false;
     bool isLayoutNode_ = false;
     bool isCalculateInnerVisibleRectClip_ = false;
+
+    bool isUseTransitionAnimator_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

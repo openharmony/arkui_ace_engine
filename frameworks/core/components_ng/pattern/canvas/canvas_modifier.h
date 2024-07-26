@@ -24,6 +24,7 @@
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
+struct CanvasModifierDump;
 class CanvasModifier : public ContentModifier {
     DECLARE_ACE_TYPE(CanvasModifier, ContentModifier)
 
@@ -62,6 +63,7 @@ private:
     std::shared_ptr<RSRecordingCanvas> rsRecordingCanvas_;
     SizeT<int32_t> recordingCanvasDrawSize_ = { 0.0f, 0.0f };
     SizeT<int32_t> drawCmdSize_ = { 0.0f, 0.0f };
+    std::vector<CanvasModifierDump> dumpInfos_;
     ACE_DISALLOW_COPY_AND_MOVE(CanvasModifier);
 };
 } // namespace OHOS::Ace::NG

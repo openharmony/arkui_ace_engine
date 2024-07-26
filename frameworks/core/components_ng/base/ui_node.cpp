@@ -161,10 +161,16 @@ void UINode::AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& si
     DoAddChild(it, child, false);
 }
 
-void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode)
+void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode, bool addModalUiextension)
 {
     CHECK_NULL_VOID(child);
     CHECK_NULL_VOID(siblingNode);
+    if (!addModalUiextension && modalUiextensionCount_ > 0) {
+        LOGW("AddChildBefore Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d), "
+            "Current modalUiextension count is : %{public}d",
+            GetId(), child->GetTag().c_str(), child->GetId(), modalUiextensionCount_);
+        return;
+    }
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
         LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
@@ -477,7 +483,7 @@ void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const
 
 void UINode::GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
 {
-    for (const auto& uiChild : GetChildren()) {
+    for (const auto& uiChild : GetChildren(true)) {
         if (uiChild && !uiChild->IsOnMainTree()) {
             continue;
         }
@@ -674,13 +680,14 @@ bool UINode::IsAutoFillContainerNode()
     return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG || tag_ == V2::DIALOG_ETS_TAG;
 }
 
-void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer)
+void UINode::DumpViewDataPageNodes(
+    RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer, bool needsRecordData)
 {
     auto frameNode = AceType::DynamicCast<FrameNode>(this);
     if (frameNode && !frameNode->IsVisible()) {
         return;
     }
-    DumpViewDataPageNode(viewDataWrap);
+    DumpViewDataPageNode(viewDataWrap, needsRecordData);
     for (const auto& item : GetChildren()) {
         if (!item) {
             continue;
@@ -688,7 +695,7 @@ void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipS
         if (skipSubAutoFillContainer && item->IsAutoFillContainerNode()) {
             continue;
         }
-        item->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer);
+        item->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer, needsRecordData);
     }
 }
 

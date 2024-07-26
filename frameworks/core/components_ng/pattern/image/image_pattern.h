@@ -89,7 +89,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, false };
+        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
     }
 
     const RefPtr<CanvasImage>& GetCanvasImage()
@@ -374,6 +374,7 @@ public:
         InitDefaultValue();
         return interpolationDefault_;
     }
+    void InitOnKeyEvent();
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
@@ -491,6 +492,7 @@ private:
     void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
     void ControlAnimation(int32_t index);
     void SetObscured();
+    void OnKeyEvent();
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
@@ -548,7 +550,7 @@ private:
     bool isFormAnimationEnd_ = false;
     bool isImageAnimator_ = false;
     bool hasSizeChanged = false;
-    bool isPixelMapChanged_ = true;
+    bool isPixelMapChanged_ = false;
     bool isSrcUndefined_ = false;
 
     std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;

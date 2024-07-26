@@ -588,6 +588,7 @@ void FormPattern::OnModifyDone()
     layoutProperty->UpdateRequestFormInfo(info);
     UpdateBackgroundColorWhenUnTrustForm();
     info.obscuredMode = isFormObscured_;
+    info.obscuredMode |= CheckFormBundleForbidden(info.bundleName);
     HandleFormComponent(info);
 }
 
@@ -615,8 +616,9 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     UpdateBackgroundColorWhenUnTrustForm();
     info.obscuredMode = isFormObscured_;
+    info.obscuredMode |= CheckFormBundleForbidden(info.bundleName);
     HandleFormComponent(info);
-    return false;
+    return true;
 }
 
 void FormPattern::HandleFormComponent(const RequestFormInfo& info)
@@ -680,7 +682,7 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
 #else
     formManagerBridge_->AddForm(host->GetContextRefPtr(), info);
 #endif
-    if (formManagerBridge_->CheckFormBundleForbidden(info.bundleName)) {
+    if (CheckFormBundleForbidden(info.bundleName)) {
         LoadDisableFormStyle(info);
     }
 }
@@ -1282,12 +1284,10 @@ void FormPattern::InitFormManagerDelegate()
     formManagerBridge_->AddGetRectRelativeToWindowCallback(
         [weak = WeakClaim(this), instanceID](int32_t &top, int32_t &left) {
             ContainerScope scope(instanceID);
-            auto form = weak.Upgrade();
-            CHECK_NULL_VOID(form);
-            auto host = form->GetHost();
-            CHECK_NULL_VOID(host);
+            auto context = PipelineContext::GetCurrentContextSafely();
+            CHECK_NULL_VOID(context);
             auto uiTaskExecutor =
-                SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+                SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
             uiTaskExecutor.PostSyncTask([weak, instanceID, &top, &left] {
                 ContainerScope scope(instanceID);
                 auto form = weak.Upgrade();
@@ -1892,5 +1892,11 @@ void FormPattern::UnregisterAccessibility()
     auto formNode = DynamicCast<FormNode>(host);
     CHECK_NULL_VOID(formNode);
     formNode->ClearAccessibilityChildTreeRegisterFlag();
+}
+
+bool FormPattern::CheckFormBundleForbidden(const std::string &bundleName)
+{
+    CHECK_NULL_RETURN(formManagerBridge_, false);
+    return formManagerBridge_->CheckFormBundleForbidden(bundleName);
 }
 } // namespace OHOS::Ace::NG

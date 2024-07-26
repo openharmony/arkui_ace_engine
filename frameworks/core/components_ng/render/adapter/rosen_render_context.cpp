@@ -3457,6 +3457,11 @@ void RosenRenderContext::SetPositionToRSNode()
         return;
     }
     paintRect_ = rect;
+    if (frameNode->ParentExpansive() && !frameNode->SelfExpansive()) {
+        // Dynamically modify position, need consider parent expand
+        frameNode->AdjustNotExpandNode();
+        rect = paintRect_;
+    }
     if (AnimationUtils::IsImplicitAnimationOpen()) {
         auto preBounds = rsNode_->GetStagingProperties().GetBounds();
         if (!NearEqual(preBounds[0], rect.GetX()) || !NearEqual(preBounds[1], rect.GetY())) {

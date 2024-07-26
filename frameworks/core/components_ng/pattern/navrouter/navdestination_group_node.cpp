@@ -116,9 +116,7 @@ void NavDestinationGroupNode::ProcessShallowBuilder()
  */
 RefPtr<CustomNodeBase> NavDestinationGroupNode::GetNavDestinationCustomNode()
 {
-    auto pattern = GetPattern<NavDestinationPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    return DynamicCast<CustomNodeBase>(pattern->GetCustomNode());
+    return customNode_.Upgrade();
 }
 
 void NavDestinationGroupNode::SetNavDestinationMode(NavDestinationMode mode)

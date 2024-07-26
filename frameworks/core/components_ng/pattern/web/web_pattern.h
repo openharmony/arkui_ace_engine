@@ -190,7 +190,7 @@ public:
 
     void OnModifyDone() override;
 
-    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
+    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
 
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
@@ -515,7 +515,7 @@ public:
     void OnDateTimeChooserClose();
     void OnShowAutofillPopup(const float offsetX, const float offsetY, const std::vector<std::string>& menu_items);
     void OnHideAutofillPopup();
-    void UpdateTouchHandleForOverlay();
+    void UpdateTouchHandleForOverlay(bool fromOverlay = false);
     bool IsSelectOverlayDragging()
     {
         return selectOverlayDragging_;
@@ -540,10 +540,12 @@ public:
         std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, int32_t nodeId);
     void ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson,
         std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, OHOS::NWeb::NWebAutofillEvent& eventType);
+    AceAutoFillType GetFocusedType();
     void HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool RequestAutoFill(AceAutoFillType autoFillType);
     bool RequestAutoSave();
     bool UpdateAutoFillPopup();
+    bool CloseAutoFillPopup();
     void UpdateSelectHandleInfo();
     bool IsSelectHandleReverse();
     void OnCompleteSwapWithNewSize();
@@ -913,6 +915,7 @@ private:
     void GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId);
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
+    void InitAiEngine();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;

@@ -59,7 +59,6 @@ CheckBoxModifier::CheckBoxModifier(bool isSelect, const Color& boardColor, const
     animateTouchHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
 
     isSelect_ = AceType::MakeRefPtr<PropertyBool>(isSelect);
-    isFocused_ = AceType::MakeRefPtr<PropertyBool>(false);
     enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
     hasBuilder_ = AceType::MakeRefPtr<PropertyBool>(false);
     useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
@@ -73,7 +72,6 @@ CheckBoxModifier::CheckBoxModifier(bool isSelect, const Color& boardColor, const
     AttachProperty(checkStroke_);
     AttachProperty(strokeSize_);
     AttachProperty(isSelect_);
-    AttachProperty(isFocused_);
     AttachProperty(offset_);
     AttachProperty(size_);
     AttachProperty(enabled_);
@@ -106,76 +104,36 @@ void CheckBoxModifier::InitializeParam()
     hoverToTouchDuration_ = checkBoxTheme->GetHoverToTouchDuration();
     touchDuration_ = checkBoxTheme->GetTouchDuration();
     colorAnimationDuration_ = checkBoxTheme->GetColorAnimationDuration();
-    focusBoardColor_ = checkBoxTheme->GetFocusBoardColor();
-    focusBoardSize_ = checkBoxTheme->GetFocusBoardSize();
-    borderFocusedColor_ = checkBoxTheme->GetBorderFocusedColor();
-    focusedBGColorUnselected_ = checkBoxTheme->GetFocusedBGColorUnselected();
 }
 
 void CheckBoxModifier::PaintCheckBox(RSCanvas& canvas, const OffsetF& paintOffset, const SizeF& contentSize) const
 {
-    DrawFocusBoard(canvas, contentSize, paintOffset);
-
-    DrawTouchAndHoverBoard(canvas, contentSize, paintOffset);
-
-    // draw background
     RSPen pen;
+    RSBrush brush;
     pen.SetWidth(borderWidth_);
     pen.SetAntiAlias(true);
+    DrawTouchAndHoverBoard(canvas, contentSize, paintOffset);
     RSPen shadowPen = RSPen(pen);
-    RSBrush brush;
     brush.SetColor(ToRSColor(animatableBoardColor_->Get()));
     brush.SetAntiAlias(true);
     if (!enabled_->Get()) {
         brush.SetColor(
             ToRSColor(animatableBoardColor_->Get().BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
     }
-    if (isFocused_->Get() && !isSelect_->Get()) {
-        brush.SetColor(ToRSColor(focusedBGColorUnselected_));
-    }
     DrawBackboard(canvas, paintOffset, brush, contentSize);
-
-    // draw border
     pen.SetColor(ToRSColor(animatableBorderColor_->Get()));
     if (!enabled_->Get()) {
         pen.SetColor(
             ToRSColor(animatableBorderColor_->Get().BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
     }
-    if (!isSelect_->Get() && isFocused_->Get() && !hasUnselectedColor_) {
-        pen.SetColor(ToRSColor(borderFocusedColor_));
-    }
     if (enabled_->Get() || !isSelect_->Get()) {
         DrawBorder(canvas, paintOffset, pen, contentSize);
     }
-
-    // draw check
     pen.SetColor(ToRSColor(animatableCheckColor_->Get()));
     shadowPen.SetColor(ToRSColor(animatableShadowColor_->Get()));
     if (!hasBuilder_->Get()) {
         DrawCheck(canvas, paintOffset, pen, shadowPen, contentSize);
     }
-}
-
-void CheckBoxModifier::DrawFocusBoard(RSCanvas& canvas, const SizeF& size, const OffsetF& offset) const
-{
-    RSBrush brush;
-    if (isFocused_->Get()) {
-        brush.SetColor(ToRSColor(focusBoardColor_));
-    } else {
-        brush.SetColor(ToRSColor(Color::TRANSPARENT));
-    }
-    brush.SetAntiAlias(true);
-    auto bgSizeOffset = focusBoardSize_.ConvertToPx();
-    float originX = offset.GetX() - bgSizeOffset;
-    float originY = offset.GetY() - bgSizeOffset;
-    float endX = offset.GetX() + bgSizeOffset + size.Width();
-    float endY = offset.GetY() + bgSizeOffset + size.Height();
-    float useFocusBoardRadoius = borderRadius_ + bgSizeOffset;
-    auto rrect = RSRoundRect({ originX, originY, endX, endY }, useFocusBoardRadoius, useFocusBoardRadoius);
-
-    canvas.AttachBrush(brush);
-    DrawRectOrCircle(canvas, rrect);
-    canvas.DetachBrush();
 }
 
 void CheckBoxModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& size, const OffsetF& offset) const
@@ -203,7 +161,22 @@ void CheckBoxModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& siz
     }
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, hoverRadius_.ConvertToPx(), hoverRadius_.ConvertToPx());
     canvas.AttachBrush(brush);
-    DrawRectOrCircle(canvas, rrect);
+    if (CheckBoxStyle::SQUARE_STYLE == checkBoxStyle_) {
+        canvas.DrawRoundRect(rrect);
+    } else {
+        RSScalar halfDenominator = 2.0f;
+        RSScalar radius = 0.0f;
+        RSRect rect = rrect.GetRect();
+        RSScalar x = (rect.GetLeft() + rect.GetRight()) / halfDenominator;
+        RSScalar y = (rect.GetTop() + rect.GetBottom()) / halfDenominator;
+        RSPoint centerPt(x, y);
+        if (rect.GetWidth() > rect.GetHeight()) {
+            radius = rect.GetHeight() / halfDenominator;
+        } else {
+            radius = rect.GetWidth() / halfDenominator;
+        }
+        canvas.DrawCircle(centerPt, radius);
+    }
     canvas.DetachBrush();
 }
 
@@ -215,7 +188,22 @@ void CheckBoxModifier::DrawBorder(RSCanvas& canvas, const OffsetF& origin, RSPen
     float endY = originY + paintSize.Height() - borderWidth_;
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, borderRadius_, borderRadius_);
     canvas.AttachPen(pen);
-    DrawRectOrCircle(canvas, rrect);
+    if (CheckBoxStyle::SQUARE_STYLE == checkBoxStyle_) {
+        canvas.DrawRoundRect(rrect);
+    } else {
+        RSScalar halfDenominator = 2.0f;
+        RSScalar radius = 0.0f;
+        RSRect rect = rrect.GetRect();
+        RSScalar x = (rect.GetLeft() + rect.GetRight()) / halfDenominator;
+        RSScalar y = (rect.GetTop() + rect.GetBottom()) / halfDenominator;
+        RSPoint centerPt(x, y);
+        if (rect.GetWidth() > rect.GetHeight()) {
+            radius = rect.GetHeight() / halfDenominator;
+        } else {
+            radius = rect.GetWidth() / halfDenominator;
+        }
+        canvas.DrawCircle(centerPt, radius);
+    }
     canvas.DetachPen();
 }
 
@@ -228,7 +216,22 @@ void CheckBoxModifier::DrawBackboard(
     float endY = originY + paintSize.Height();
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, borderRadius_, borderRadius_);
     canvas.AttachBrush(brush);
-    DrawRectOrCircle(canvas, rrect);
+    if (CheckBoxStyle::SQUARE_STYLE == checkBoxStyle_) {
+        canvas.DrawRoundRect(rrect);
+    } else {
+        RSScalar halfDenominator = 2.0f;
+        RSScalar radius = 0.0f;
+        RSRect rect = rrect.GetRect();
+        RSScalar x = (rect.GetLeft() + rect.GetRight()) / halfDenominator;
+        RSScalar y = (rect.GetTop() + rect.GetBottom()) / halfDenominator;
+        RSPoint centerPt(x, y);
+        if (rect.GetWidth() > rect.GetHeight()) {
+            radius = rect.GetHeight() / halfDenominator;
+        } else {
+            radius = rect.GetWidth() / halfDenominator;
+        }
+        canvas.DrawCircle(centerPt, radius);
+    }
     canvas.DetachBrush();
 }
 
@@ -269,21 +272,6 @@ void CheckBoxModifier::DrawCheck(
     canvas.AttachPen(pen);
     canvas.DrawPath(path);
     canvas.DetachPen();
-}
-
-void CheckBoxModifier::DrawRectOrCircle(RSCanvas& canvas, const RSRoundRect& rrect) const
-{
-    if (CheckBoxStyle::SQUARE_STYLE == checkBoxStyle_) {
-        canvas.DrawRoundRect(rrect);
-    } else {
-        RSScalar halfDenominator = 2.0f;
-        RSRect rect = rrect.GetRect();
-        RSScalar x = (rect.GetLeft() + rect.GetRight()) / halfDenominator;
-        RSScalar y = (rect.GetTop() + rect.GetBottom()) / halfDenominator;
-        RSPoint centerPt(x, y);
-        RSScalar radius = std::min(rect.GetWidth(), rect.GetHeight()) / halfDenominator;
-        canvas.DrawCircle(centerPt, radius);
-    }
 }
 
 } // namespace OHOS::Ace::NG

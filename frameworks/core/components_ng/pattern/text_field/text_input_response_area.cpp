@@ -63,6 +63,19 @@ void TextInputResponseArea::LayoutChild(LayoutWrapper* layoutWrapper, int32_t in
     nodeWidth += childFrameSize.Width();
 }
 
+OffsetF TextInputResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth)
+{
+    auto offset = Alignment::GetAlignPosition(parentSize, childSize, Alignment::CENTER);
+    auto textFieldPattern = hostPattern_.Upgrade();
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if (isRTL) {
+        return OffsetF(nodeWidth, offset.GetY());
+    } else {
+        return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, offset.GetY());
+    }
+}
+
 SizeF TextInputResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index)
 {
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
@@ -72,11 +85,6 @@ SizeF TextInputResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index
     auto childLayoutConstraint = textfieldLayoutProperty->CreateChildConstraint();
     CHECK_NULL_RETURN(childWrapper, size);
     auto childLayoutProperty = childWrapper->GetLayoutProperty();
-    auto&& layoutConstraint = childLayoutProperty->GetCalcLayoutConstraint();
-    if (layoutConstraint && layoutConstraint->selfIdealSize) {
-        layoutConstraint->selfIdealSize->SetHeight(
-            CalcLength(layoutWrapper->GetGeometryNode()->GetFrameSize().Height()));
-    }
     childWrapper->Measure(childLayoutConstraint);
     auto geometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, size);
@@ -271,18 +279,6 @@ void PasswordResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, f
     LayoutChild(layoutWrapper, index, nodeWidth);
 }
 
-OffsetF PasswordResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth)
-{
-    auto textFieldPattern = hostPattern_.Upgrade();
-    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    if (isRTL) {
-        return OffsetF(nodeWidth, 0);
-    } else {
-        return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, 0);
-    }
-}
-
 float PasswordResponseArea::GetIconSize()
 {
     auto textFieldPattern = hostPattern_.Upgrade();
@@ -417,18 +413,6 @@ void UnitResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, float
     LayoutChild(layoutWrapper, index, nodeWidth);
 }
 
-OffsetF UnitResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth)
-{
-    auto textFieldPattern = hostPattern_.Upgrade();
-    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    if (isRTL) {
-        return OffsetF(nodeWidth, 0);
-    } else {
-        return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, 0);
-    }
-}
-
 bool UnitResponseArea::IsShowUnit()
 {
     auto pattern = hostPattern_.Upgrade();
@@ -470,18 +454,6 @@ void CleanNodeResponseArea::Layout(LayoutWrapper *layoutWrapper, int32_t index, 
         return;
     }
     LayoutChild(layoutWrapper, index, nodeWidth);
-}
-
-OffsetF CleanNodeResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth)
-{
-    auto textFieldPattern = hostPattern_.Upgrade();
-    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    if (isRTL) {
-        return OffsetF(nodeWidth, 0);
-    } else {
-        return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, 0);
-    }
 }
 
 const RefPtr<FrameNode> CleanNodeResponseArea::GetFrameNode()

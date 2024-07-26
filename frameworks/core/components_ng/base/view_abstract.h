@@ -656,6 +656,7 @@ public:
     static TextDirection GetDirection(FrameNode* frameNode);
     static std::map<AlignDirection, AlignRule> GetAlignRules(FrameNode* frameNode);
     static FlexAlign GetAlignSelf(FrameNode* frameNode);
+    static void SetDragEventStrictReportingEnabled(int32_t instanceId, bool dragEventStrictReportingEnabled);
     // used in JS FrameNode
     static void SetJSFrameNodeOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc);
     static void SetJSFrameNodeOnTouch(FrameNode* frameNode, TouchEventFunc&& touchEventFunc);

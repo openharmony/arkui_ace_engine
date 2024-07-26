@@ -436,9 +436,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (host->GetChildrenUpdated() != -1) {
-        if (hasCachedCapture_) {
-            InitCapture();
-        }
+        InitCapture();
         if (NeedAutoPlay() && !translateTask_) {
             StartAutoPlay();
         }
@@ -938,7 +936,10 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
 
     if (!targetIndex_) {
-        SetIndicatorJumpIndex(jumpIndex_);
+        if (isUserFinish_) {
+            SetIndicatorJumpIndex(jumpIndex_);
+        }
+
         CheckMarkDirtyNodeForRenderIndicator();
     }
 
@@ -1963,6 +1964,10 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     if (direction_ == GetDirection() && panEvent_) {
         return;
+    }
+    // fade offset need to be reset when is still dragging
+    if (direction_ != GetDirection()) {
+        fadeOffset_ = 0.f;
     }
     direction_ = GetDirection();
 
@@ -3140,8 +3145,8 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (GetDuration() == 0) {
-        //if the duration is 0, the animation will be end immediately, so the start event should be triggered 
-        //after Layout Task to ensure the timing of events.
+        // if the duration is 0, the animation will be end immediately, so the start event should be triggered
+        // after Layout Task to ensure the timing of events.
         pipeline->AddAfterLayoutTask([weak = WeakClaim(this), info, nextIndex = GetLoopIndex(nextIndex)]() {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);

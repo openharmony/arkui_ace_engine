@@ -25,6 +25,9 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#ifdef SECURITY_COMPONENT_ENABLE
+#include "core/components_ng/pattern/security_component/security_component_handler.h"
+#endif
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -300,8 +303,12 @@ void SecurityComponentModelNG::SetBackgroundColor(const Color& value)
         return;
     }
 
+    bool res = false;
+#ifdef SECURITY_COMPONENT_ENABLE
+    res = SecurityComponentHandler::IsSystemAppCalling();
+#endif
     Color resColor = value;
-    if (!IsInReleaseList(resColor.GetValue()) && !IsArkuiComponent() && IsBelowThreshold(value)) {
+    if (!res && !IsInReleaseList(resColor.GetValue()) && !IsArkuiComponent() && IsBelowThreshold(value)) {
         resColor = value.ChangeAlpha(FULL_TRANSPARENCY_VALUE);
     }
     ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, BackgroundColor, resColor);

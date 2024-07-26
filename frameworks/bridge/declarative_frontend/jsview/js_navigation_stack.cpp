@@ -312,6 +312,15 @@ void JSNavigationStack::InitNavPathIndex(const std::vector<std::string>& pathNam
     func->Call(dataSourceObj_, 1, params);
 }
 
+void JSNavigationStack::SetDestinationIdToJsStack(int32_t index, const std::string& navDestinationId)
+{
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return;
+    }
+    pathInfo->SetProperty<std::string>("navDestinationId", navDestinationId);
+}
+
 RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& customNode)
 {
     auto name = GetNameByIndex(index);
@@ -412,7 +421,7 @@ JSRef<JSVal> JSNavigationStack::GetOnPopByIndex(int32_t index) const
 }
 
 bool JSNavigationStack::GetNavDestinationNodeInUINode(
-    RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode)
+    RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode)
 {
     RefPtr<NG::CustomNode> customNode;
     while (node) {
@@ -427,8 +436,8 @@ bool JSNavigationStack::GetNavDestinationNodeInUINode(
             customNode->Render();
         } else if (node->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
             desNode = AceType::DynamicCast<NG::NavDestinationGroupNode>(node);
-            if (customNode) {
-                node = customNode;
+            if (desNode) {
+                desNode->SetNavDestinationCustomNode(AceType::WeakClaim(AceType::RawPtr(customNode)));
             }
             return true;
         }
@@ -963,7 +972,7 @@ void JSNavigationStack::RecoveryNavigationStack()
         return;
     }
     JSRef<JSArray> pathArray = JSRef<JSArray>::New();
-    for (uint32_t index = 0; index < navPathList_.size(); index++) {
+    for (int32_t index = 0; index < static_cast<int32_t>(navPathList_.size()); index++) {
         auto node = navPathList_[index].second;
         auto navDestinationGroupNode = AceType::DynamicCast<NG::NavDestinationGroupNode>(
             NG::NavigationGroupNode::GetNavDestinationNode(node));

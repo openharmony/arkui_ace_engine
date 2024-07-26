@@ -712,7 +712,7 @@ class SearchEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> {
     super(value);
   }
   static identity: Symbol = Symbol('textEditMenuOptions');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().search.resetSelectionMenuOptions(node);
     } else {
@@ -940,7 +940,7 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     modifierWithKey(this._modifiersWithKeys, SearchEnablePreviewTextModifier.identity, SearchEnablePreviewTextModifier, value);
     return this;
   }
-  editMenuOptions(value: EditMenuOptions) {
+  editMenuOptions(value: EditMenuOptions): this {
     modifierWithKey(this._modifiersWithKeys, SearchEditMenuOptionsModifier.identity,
       SearchEditMenuOptionsModifier, value);
     return this;

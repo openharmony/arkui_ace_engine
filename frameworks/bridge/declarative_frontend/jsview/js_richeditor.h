@@ -76,6 +76,7 @@ public:
     static std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr);
     static CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj);
     static void EditMenuOptions(const JSCallbackInfo& info);
+    static std::optional<uint32_t> ParseColorResourceId(JSRef<JSVal> colorVal);
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,

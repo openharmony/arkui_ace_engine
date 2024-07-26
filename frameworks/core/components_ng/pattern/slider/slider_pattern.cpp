@@ -786,6 +786,7 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
         GetReverseValue(sliderLayoutProperty) ? borderBlank_ + sliderLength_ - length : length - borderBlank_;
     float min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
     float max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
+    float step = sliderPaintProperty->GetStep().value_or(1.0f);
     touchLength = std::clamp(touchLength, 0.0f, sliderLength_);
     CHECK_NULL_VOID(sliderLength_ != 0);
     valueRatio_ = touchLength / sliderLength_;
@@ -793,7 +794,8 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     valueRatio_ = NearEqual(valueRatio_, 1) ? 1 : std::round(valueRatio_ / stepRatio_) * stepRatio_;
 
     float oldValue = value_;
-    value_ = std::clamp(valueRatio_ * (max - min) + min, min, max);
+    value_ = NearEqual(valueRatio_, 1) ? max : (std::round(valueRatio_ / stepRatio_) * step + min);
+    value_ = std::clamp(value_, min, max);
     sliderPaintProperty->UpdateValue(value_);
     valueChangeFlag_ = !NearEqual(oldValue, value_);
     UpdateCircleCenterOffset();
@@ -1302,8 +1304,8 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     // Distance between slide track and Content boundary
     auto centerWidth = direction_ == Axis::HORIZONTAL ? contentSize->Height() : contentSize->Width();
     centerWidth *= HALF;
-    Gradient defaultSelectGradientColor = SliderModelNG::CreateSolidGradient(theme->GetTrackSelectedColor());
-    parameters.selectGradientColor = paintProperty->GetSelectGradientColor().value_or(defaultSelectGradientColor);
+    parameters.selectColor = paintProperty->GetSelectColor().value_or(theme->GetTrackSelectedColor());
+
     Gradient defaultValue = SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor());
     parameters.trackBackgroundColor = paintProperty->GetTrackBackgroundColor().value_or(defaultValue);
     parameters.blockColor = paintProperty->GetBlockColor().value_or(theme->GetBlockColor());

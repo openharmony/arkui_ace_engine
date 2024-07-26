@@ -90,7 +90,7 @@ RefPtr<ResourceAdapter> ResourceAdapter::CreateV2()
 RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
     const std::string& bundleName, const std::string& moduleName)
 {
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, nullptr);
     auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
     CHECK_NULL_RETURN(aceContainer, nullptr);

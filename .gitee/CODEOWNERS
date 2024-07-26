@@ -2639,6 +2639,8 @@ frameworks/core/interfaces/native/node/data_panel_modifier.cpp @arkui_image
 frameworks/core/interfaces/native/node/data_panel_modifier.h @arkui_image
 frameworks/core/interfaces/native/node/divider_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/divider_modifier.h @arkuilayout
+frameworks/core/interfaces/native/node/drag_adapter_impl.cpp @arkuievent
+frameworks/core/interfaces/native/node/drag_adapter_impl.h @arkuievent
 frameworks/core/interfaces/native/node/extension_companion_node.cpp @arkuiframework
 frameworks/core/interfaces/native/node/extension_companion_node.h @arkuiframework
 frameworks/core/interfaces/native/node/extension_custom_node.cpp @arkuiframework

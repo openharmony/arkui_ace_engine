@@ -816,7 +816,7 @@ void Scrollable::StartSpringMotion(
     springOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     ACE_SCOPED_TRACE("Scrollable spring animation start, start:%f, end:%f, vel:%f, id:%d, tag:%s", mainPosition,
         finalPosition_, mainVelocity, nodeId_, nodeTag_.c_str());
-    lastVsyncTime_ = GetSysTimestamp();
+    lastVsyncTime_ = static_cast<uint64_t>(GetSysTimestamp());
     springOffsetProperty_->AnimateWithVelocity(
         option, finalPosition_, mainVelocity, [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);

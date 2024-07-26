@@ -89,7 +89,7 @@ public:
     static RefPtr<PipelineContext> GetCurrentContextSafelyWithCheck();
 
     static PipelineContext* GetCurrentContextPtrSafely();
-    
+
     static PipelineContext* GetCurrentContextPtrSafelyWithCheck();
 
 
@@ -192,6 +192,8 @@ public:
     {
         return {};
     }
+
+    bool HasOnAreaChangeNode(int32_t nodeId);
 
     void AddOnAreaChangeNode(int32_t nodeId);
 
@@ -298,6 +300,8 @@ public:
     void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
 
     float GetPageAvoidOffset() override;
+
+    bool CheckNeedAvoidInSubWindow() override;
 
     void CheckAndUpdateKeyboardInset() override;
 
@@ -577,7 +581,7 @@ public:
     void DumpJsInfo(const std::vector<std::string>& params) const;
 
     bool DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
-        bool skipSubAutoFillContainer = false);
+        bool skipSubAutoFillContainer = false, bool needsRecordData = false);
     bool CheckNeedAutoSave();
     bool CheckOverlayFocus();
     void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap);
@@ -819,14 +823,21 @@ public:
     void RemoveFrameNodeChangeListener(int32_t nodeId);
     bool AddChangedFrameNode(const WeakPtr<FrameNode>& node);
     void RemoveChangedFrameNode(int32_t nodeId);
-    void SetForceSplitEnable(bool isForceSplit)
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
     {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "set force split %{public}s", isForceSplit ? "enable" : "disable");
         isForceSplit_ = isForceSplit;
+        homePageConfig_ = homePage;
     }
 
     bool GetForceSplitEnable() const
     {
         return isForceSplit_;
+    }
+
+    std::string GetHomePageConfig() const
+    {
+        return homePageConfig_;
     }
 
     bool IsWindowFocused() const override
@@ -878,7 +889,7 @@ private:
     void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
 
     void FlushTouchEvents();
-
+    void FlushWindowPatternInfo();
     void FlushFocusView();
     void FlushFocusScroll();
 
@@ -1075,6 +1086,7 @@ private:
     int32_t lastAnimatorExpectedFrameRate_ = -1;
     bool isDoKeyboardAvoidAnimate_ = true;
     bool isForceSplit_ = false;
+    std::string homePageConfig_;
 
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
     uint32_t transform_ = 0;

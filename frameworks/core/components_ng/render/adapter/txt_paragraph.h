@@ -110,6 +110,7 @@ public:
     float GetMaxIntrinsicWidth() override;
     bool DidExceedMaxLines() override;
     float GetLongestLine() override;
+    float GetLongestLineWithIndent() override;
     float GetMaxWidth() override;
     float GetAlphabeticBaseline() override;
     float GetCharacterWidth(int32_t index) override;

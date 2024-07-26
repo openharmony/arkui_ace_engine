@@ -80,6 +80,7 @@ void NavDestinationPattern::OnModifyDone()
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarRenderContext = titleBarNode->GetRenderContext();
     CHECK_NULL_VOID(titleBarRenderContext);
+    titleBarNode->SetInnerParentId(hostNode->GetInspectorId().value_or(""));
     // set the titlebar to float on the top
     titleBarRenderContext->UpdateZIndex(DEFAULT_TITLEBAR_ZINDEX);
     auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
@@ -400,5 +401,10 @@ void NavDestinationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& styl
             navigationPattern->TryRestoreSystemBarStyle(windowManager);
         }
     }
+}
+
+int32_t NavDestinationPattern::GetTitlebarZIndex() const
+{
+    return DEFAULT_TITLEBAR_ZINDEX;
 }
 } // namespace OHOS::Ace::NG

@@ -19,8 +19,8 @@
 #include "base/geometry/ng/rect_t.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#include "core/common/layout_inspector.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #endif
 #include "base/geometry/dimension.h"
@@ -41,6 +41,7 @@
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/extension_handler.h"
@@ -883,10 +884,10 @@ void FrameNode::DumpAdvanceInfo()
     }
 }
 
-void FrameNode::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap)
+void FrameNode::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData)
 {
     if (pattern_) {
-        pattern_->DumpViewDataPageNode(viewDataWrap);
+        pattern_->DumpViewDataPageNode(viewDataWrap, needsRecordData);
     }
 }
 
@@ -1035,8 +1036,21 @@ void FrameNode::UpdateGeometryTransition()
     }
 }
 
+void FrameNode::TriggerRsProfilerNodeMountCallbackIfExist()
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    CHECK_NULL_VOID(renderContext_);
+    auto callback = LayoutInspector::GetRsProfilerNodeMountCallback();
+    if (callback) {
+        FrameNodeInfo info { GetId(), renderContext_->GetNodeId(), GetTag(), GetDebugLine() };
+        callback(info);
+    }
+#endif
+}
+
 void FrameNode::OnAttachToMainTree(bool recursive)
 {
+    TriggerRsProfilerNodeMountCallbackIfExist();
     eventHub_->FireOnAttach();
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear(recursive);
@@ -1484,15 +1498,15 @@ void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceD
     auto& visibleAreaInnerCallback = eventHub_->GetVisibleAreaCallback(false);
 
     if (forceDisappear || IsFrameDisappear(timestamp)) {
-        if (!NearEqual(lastVisibleRatio_, VISIBLE_RATIO_MIN)) {
-            ProcessAllVisibleCallback(
-                visibleAreaUserRatios, visibleAreaUserCallback, VISIBLE_RATIO_MIN, lastVisibleCallbackRatio_);
-            lastVisibleRatio_ = VISIBLE_RATIO_MIN;
-        }
         if (!NearEqual(lastInnerVisibleRatio_, VISIBLE_RATIO_MIN)) {
             ProcessAllVisibleCallback(visibleAreaInnerRatios, visibleAreaInnerCallback, VISIBLE_RATIO_MIN,
                 lastInnerVisibleCallbackRatio_, false, true);
             lastInnerVisibleRatio_ = VISIBLE_RATIO_MIN;
+        }
+        if (!NearEqual(lastVisibleRatio_, VISIBLE_RATIO_MIN)) {
+            ProcessAllVisibleCallback(
+                visibleAreaUserRatios, visibleAreaUserCallback, VISIBLE_RATIO_MIN, lastVisibleCallbackRatio_);
+            lastVisibleRatio_ = VISIBLE_RATIO_MIN;
         }
         return;
     }
@@ -2261,11 +2275,14 @@ bool FrameNode::IsPaintRectWithTransformValid()
     return false;
 }
 
-bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, int32_t sourceType)
+bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, const TouchEvent& touchEvent)
 {
     bool isInChildRegion = false;
     auto paintRect = renderContext_->GetPaintRectWithoutTransform();
-    auto responseRegionList = GetResponseRegionList(paintRect, sourceType);
+    if (pattern_->IsResponseRegionExpandingNeededForStylus(touchEvent)) {
+        paintRect = pattern_->ExpandDefaultResponseRegion(paintRect);
+    }
+    auto responseRegionList = GetResponseRegionList(paintRect, static_cast<int32_t>(touchEvent.sourceType));
 
     auto revertPoint = parentRevertPoint;
     MapPointTo(revertPoint, GetOrRefreshRevertMatrixFromCache());
@@ -2278,7 +2295,7 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, int32_t 
         }
         for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
             const auto& child = iter->Upgrade();
-            if (child && !child->IsOutOfTouchTestRegion(subRevertPoint, sourceType)) {
+            if (child && !child->IsOutOfTouchTestRegion(subRevertPoint, touchEvent)) {
                 isInChildRegion = true;
                 break;
             }
@@ -2342,6 +2359,9 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         parentId = parent->GetId();
     }
 
+    if (pattern_->IsResponseRegionExpandingNeededForStylus(touchRestrict.touchEvent)) {
+        origRect = pattern_->ExpandDefaultResponseRegion(origRect);
+    }
     auto responseRegionList = GetResponseRegionList(origRect, static_cast<int32_t>(touchRestrict.sourceType));
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT, "TouchTest: point is %{public}s in %{public}s, depth: %{public}d",
@@ -2353,7 +2373,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     {
         ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
-        bool isOutOfRegion = IsOutOfTouchTestRegion(parentRevertPoint, static_cast<int32_t>(touchRestrict.sourceType));
+        bool isOutOfRegion = IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent);
         AddFrameNodeSnapshot(!isOutOfRegion, parentId, responseRegionList);
         if ((!isDispatch) && isOutOfRegion) {
             return HitTestResult::OUT_OF_REGION;
@@ -4955,5 +4975,11 @@ void FrameNode::NotifyWebPattern(bool isRegister)
     }
 #endif
     UINode::NotifyWebPattern(isRegister);
+}
+
+uint32_t FrameNode::GetWindowPatternType() const
+{
+    CHECK_NULL_RETURN(pattern_, 0);
+    return pattern_->GetWindowPatternType();
 }
 } // namespace OHOS::Ace::NG

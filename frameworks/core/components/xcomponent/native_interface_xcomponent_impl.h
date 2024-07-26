@@ -448,7 +448,7 @@ private:
     NativeNode_Callback attachNativeNodeCallback_ = nullptr;
     NativeNode_Callback detachNativeNodeCallback_ = nullptr;
     OnTouchIntercept_Callback onTouchInterceptCallback_ = nullptr;
-    void* container_;
+    void* container_ = nullptr;
     bool needSoftKeyboard_ = false;
     std::pair<int32_t, OH_NativeXComponent_EventSourceType> curSourceType_ { -1,
         OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_UNKNOWN };

@@ -136,6 +136,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
     CHECK_NULL_RETURN(hub, nullptr);
     auto isButtonEnabled = hub->IsEnabled();
 
+    std::string parentId = navigationGroupNode->GetInspectorId().value_or("");
     uint32_t count = 0;
     std::vector<OptionParam> params;
     OptionParam param;
@@ -162,6 +163,12 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
 
             // read navigation menu button
             NavigationTitleUtil::SetAccessibility(menuItemNode, menuItem.text.value_or(""));
+
+            // set navigation titleBar menu inspectorId
+            std::string menuItemValue = menuItemNode->GetTag() + std::to_string(count);
+            // Field field;
+            NavigationTitleUtil::SetInnerChildId(menuItemNode, NG::NAV_FIELD,
+                menuNode->GetTag(), menuItemValue, parentId);
 
             barItemNode->MountToParent(menuItemNode);
             barItemNode->MarkModifyDone();
@@ -198,6 +205,9 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         // read navigation "more" button
         std::string message  = Localization::GetInstance()->GetEntryLetters("navigation.more");
         NavigationTitleUtil::SetAccessibility(menuItemNode, message);
+
+        // set navigation titleBar "more" button inspectorId
+        NavigationTitleUtil::SetInnerChildId(menuItemNode, NG::NAV_FIELD, menuNode->GetTag(), "More", parentId);
 
         barItemNode->MountToParent(menuItemNode);
         barItemNode->MarkModifyDone();
@@ -489,6 +499,10 @@ void NavBarPattern::OnModifyDone()
     isHideToolbar_ = navBarLayoutProperty->GetHideToolBarValue(false);
     isHideTitlebar_ = navBarLayoutProperty->GetHideTitleBarValue(false);
     titleMode_ = navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+
+    auto parent = hostNode->GetParent();
+    CHECK_NULL_VOID(parent);
+    titleBarNode->SetInnerParentId(parent->GetInspectorId().value_or(""));
 }
 
 void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)

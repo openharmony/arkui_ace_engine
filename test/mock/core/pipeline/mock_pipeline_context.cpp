@@ -575,6 +575,11 @@ float PipelineContext::GetPageAvoidOffset()
     return 0.0f;
 }
 
+bool PipelineContext::CheckNeedAvoidInSubWindow()
+{
+    return false;
+}
+
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node) {}
 
 void PipelineContext::RemoveFontNodeNG(const WeakPtr<UINode>& node) {}
@@ -708,6 +713,11 @@ void PipelineContext::RemoveChangedFrameNode(int32_t nodeId) {}
 void PipelineContext::FlushNodeChangeFlag() {}
 
 void PipelineContext::CleanNodeChangeFlag() {}
+
+bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
+{
+    return false;
+}
 
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================

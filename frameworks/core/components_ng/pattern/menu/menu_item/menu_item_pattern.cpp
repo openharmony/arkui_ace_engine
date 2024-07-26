@@ -337,6 +337,12 @@ void MenuItemPattern::ShowSubMenu()
     CHECK_NULL_VOID(subMenu);
     ShowSubMenuHelper(subMenu);
     menuPattern->SetShowedSubMenu(subMenu);
+    auto accessibilityProperty = menuNode->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityIsShow(true);
+    host->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
+        static_cast<int32_t>(AccessibilityEventType::PAGE_CHANGE));
 }
 
 void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
@@ -1137,7 +1143,11 @@ void MenuItemPattern::AddClickableArea()
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
         BorderRadiusProperty border;
-        border.SetRadius(theme->GetInnerBorderRadius());
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            border.SetRadius(theme->GetMenuDefaultInnerRadius());
+        } else {
+            border.SetRadius(theme->GetInnerBorderRadius());
+        }
         auto clickableContext = clickableArea->GetRenderContext();
         CHECK_NULL_VOID(clickableContext);
         clickableContext->UpdateBorderRadius(border);

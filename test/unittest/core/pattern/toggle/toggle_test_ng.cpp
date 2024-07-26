@@ -35,6 +35,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/components_ng/pattern/root/root_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1729,6 +1730,147 @@ HWTEST_F(ToggleTestNg, SwitchPatternTest001, TestSize.Level1)
     EXPECT_TRUE(accessibility->IsChecked());
 
     pattern->OnAfterModifyDone();
+}
+
+/**
+ * @tc.name: ToggleModelTest007
+ * @tc.desc: Test ToggleModelNG::ReplaceAllChild
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, ToggleModelTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.CreateFrameNode(0, ToggleType::CHECKBOX, true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create oldframenode with RootPattern and call ReplaceAllChild.
+     */
+    auto oldFrameNodeRoot = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto childRootNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 1, AceType::MakeRefPtr<ButtonPattern>());
+    childRootNode->MountToParent(oldFrameNodeRoot);
+    toggleModelNG.ReplaceAllChild(oldFrameNodeRoot);
+    auto children = oldFrameNodeRoot->GetChildren();
+    EXPECT_EQ(children.size(), 1);
+}
+
+/**
+ * @tc.name: ToggleModelTest008
+ * @tc.desc: Test ToggleModelNG::ReplaceAllChild
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, ToggleModelTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.CreateFrameNode(1, ToggleType::CHECKBOX, true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2 - 1. create oldframenode with switchPattern and call ReplaceAllChild.
+     */
+    auto oldFrameNodeSwitch = FrameNode::CreateFrameNode(V2::SWITCH_ETS_TAG, 1, AceType::MakeRefPtr<SwitchPattern>());
+    auto childNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<ButtonPattern>());
+    childNode->MountToParent(oldFrameNodeSwitch);
+    auto switchPattern = oldFrameNodeSwitch->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+    auto modifierNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    switchPattern->contentModifierNode_ = modifierNode;
+    switchPattern->nodeId_ = childNode->GetId();
+    toggleModelNG.ReplaceAllChild(oldFrameNodeSwitch);
+    auto children = oldFrameNodeSwitch->GetChildren();
+    EXPECT_EQ(children.size(), 1);
+}
+
+/**
+ * @tc.name: ToggleModelTest009
+ * @tc.desc: Test ToggleModelNG::ReplaceAllChild
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, ToggleModelTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.CreateFrameNode(0, ToggleType::SWITCH, true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2 - 2. create oldframenode with checkboxPattern and call ReplaceAllChild.
+     */
+    auto oldFrameNodeCheckbox =
+        FrameNode::CreateFrameNode(V2::CHECKBOX_ETS_TAG, 1, AceType::MakeRefPtr<CheckBoxPattern>());
+    auto childCheckboxNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 1, AceType::MakeRefPtr<ButtonPattern>());
+    childCheckboxNode->MountToParent(oldFrameNodeCheckbox);
+    auto checkboxPattern = oldFrameNodeCheckbox->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(checkboxPattern, nullptr);
+    auto modifierNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    checkboxPattern->contentModifierNode_ = modifierNode;
+    toggleModelNG.ReplaceAllChild(oldFrameNodeCheckbox);
+    auto children = oldFrameNodeCheckbox->GetChildren();
+    EXPECT_EQ(children.size(), 1);
+}
+
+/**
+ * @tc.name: ToggleModelTest010
+ * @tc.desc: Test ToggleModelNG::ReplaceAllChild
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, ToggleModelTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.CreateFrameNode(0, ToggleType::SWITCH, true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2 - 3. create oldframenode with toggleButtonPattern and call ReplaceAllChild.
+     */
+    auto oldFrameNodeToggle =
+        FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, 1, AceType::MakeRefPtr<ToggleButtonPattern>());
+    auto childToggleNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 1, AceType::MakeRefPtr<ButtonPattern>());
+    childToggleNode->MountToParent(oldFrameNodeToggle);
+    auto togglePattern = oldFrameNodeToggle->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(togglePattern, nullptr);
+    auto modifierNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    togglePattern->contentModifierNode_ = modifierNode;
+    togglePattern->nodeId_ = childToggleNode->GetId();
+    toggleModelNG.ReplaceAllChild(oldFrameNodeToggle);
+    auto children = oldFrameNodeToggle->GetChildren();
+    EXPECT_EQ(children.size(), 1);
+}
+
+/**
+ * @tc.name: ToggleModelTest011
+ * @tc.desc: Test ToggleModelNG::SetUnselectedColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, ToggleModelTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(switchFrameNode, nullptr);
+    /**
+     * @tc.steps: step2. set Modifer.
+     */
+    ToggleModelNG toggleModelNGEx;
+    toggleModelNGEx.SetUnselectedColor(AceType::RawPtr(switchFrameNode), SELECTED_COLOR);
+    toggleModelNGEx.SetTrackBorderRadius(AceType::RawPtr(switchFrameNode), TOGGLE_WIDTH);
+    toggleModelNGEx.ResetTrackBorderRadius(AceType::RawPtr(switchFrameNode));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
 }
 
 } // namespace OHOS::Ace::NG

@@ -84,7 +84,8 @@ public:
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false);
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
-    void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
+    void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode,
+        bool addModalUiextension = false);
 
     std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child, bool allowTransition = false);
     int32_t RemoveChildAndReturnIndex(const RefPtr<UINode>& child);
@@ -107,7 +108,7 @@ public:
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     [[deprecated]] void AttachToMainTree(bool recursive = false);
     void AttachToMainTree(bool recursive, PipelineContext* context);
-    void DetachFromMainTree(bool recursive = false);
+    virtual void DetachFromMainTree(bool recursive = false);
     void UpdateConfigurationUpdate(const ConfigurationChange& configurationChange);
     virtual void OnConfigurationUpdate(const ConfigurationChange& configurationChange) {}
 
@@ -189,7 +190,8 @@ public:
     virtual void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout);
 
     bool IsAutoFillContainerNode();
-    void DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer = false);
+    void DumpViewDataPageNodes(
+        RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer = false, bool needsRecordData = false);
     bool NeedRequestAutoSave();
     // DFX info.
     void DumpTree(int32_t depth);
@@ -771,7 +773,7 @@ protected:
     // dump self info.
     virtual void DumpInfo() {}
     virtual void DumpAdvanceInfo() {}
-    virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
+    virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
     virtual bool CheckAutoSave()
     {
         return false;

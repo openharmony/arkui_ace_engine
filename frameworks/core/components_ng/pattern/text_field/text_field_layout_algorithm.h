@@ -136,9 +136,13 @@ protected:
     virtual bool CreateParagraphEx(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) = 0;
 
+    LayoutConstraintF CalculateFrameSizeConstraint(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> inlineParagraph_;
     InlineMeasureItem inlineMeasureItem_;
+    LayoutConstraintF textFieldContentConstraint_;
 
     RectF textRect_;
     OffsetF parentGlobalOffset_;
@@ -178,10 +182,6 @@ private:
         const RefPtr<TextFieldPattern>& pattern, bool isRTL, float& countX);
     void HandleTextArea(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& counterNode,
         const RefPtr<TextFieldPattern>& pattern, bool isRTL, float& countX);
-    void HandleRTLTextArea(const std::unique_ptr<GeometryProperty>& content,
-        const RefPtr<GeometryNode>& textGeometryNode, float& countX, float errTextWidth);
-    void HandleLTRTextArea(const std::unique_ptr<GeometryProperty>& content,
-        const RefPtr<GeometryNode>& textGeometryNode, float &countX);
     float CalculateContentWidth(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
         float imageWidth);
     float CalculateContentHeight(const LayoutConstraintF& contentConstraint);

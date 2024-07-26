@@ -61,7 +61,6 @@ constexpr float PREVIEW_ORIGIN_SCALE = 1.0f;
 const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 34.0f);
 const std::string HOVER_IMAGE_CLIP_PROPERTY_NAME = "hoverImageClip";
-const std::string BUTTON_PASTE = "textoverlay.paste";
 
 void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode)
 {
@@ -217,7 +216,9 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     CHECK_NULL_RETURN(renderContext, nullptr);
     BorderRadiusProperty borderRadius;
     if (theme) {
-        borderRadius.SetRadius(theme->GetMenuBorderRadius());
+        auto defaultRadius = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ?
+            theme->GetMenuDefaultRadius() : theme->GetMenuBorderRadius();
+        borderRadius.SetRadius(defaultRadius);
     }
     renderContext->UpdateBorderRadius(borderRadius);
     return scroll;
@@ -244,7 +245,7 @@ void OptionKeepMenu(RefPtr<FrameNode>& option, WeakPtr<FrameNode>& menuWeak)
 bool GetHasIcon(const std::vector<OptionParam>& params)
 {
     for (size_t i = 0; i < params.size(); ++i) {
-        if (!params[i].icon.empty() || params[i].value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
+        if (!params[i].icon.empty() || params[i].isPasteOption) {
             return true;
         }
     }
@@ -1207,7 +1208,8 @@ void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
         auto theme = pipeLineContext->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
         BorderRadiusProperty outerRadiusProp;
-        outerRadiusProp.SetRadius(Dimension(theme->GetMenuBorderRadius()));
+        outerRadiusProp.SetRadius(Dimension(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ?
+            theme->GetMenuDefaultRadius() : theme->GetMenuBorderRadius()));
         BorderWidthProperty outerWidthProp;
         outerWidthProp.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
         renderContext->SetOuterBorderStyle(styleProp);
@@ -1217,7 +1219,8 @@ void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
         BorderColorProperty innerColorProp;
         innerColorProp.SetColor(menuTheme->GetInnerBorderColor());
         BorderRadiusProperty innerRadiusProp;
-        innerRadiusProp.SetRadius(Dimension(theme->GetMenuBorderRadius()));
+        innerRadiusProp.SetRadius(Dimension(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ?
+            theme->GetMenuDefaultRadius() : theme->GetMenuBorderRadius()));
         BorderWidthProperty innerWidthProp;
         innerWidthProp.SetBorderWidth(Dimension(menuTheme->GetInnerBorderWidth()));
         renderContext->SetBorderStyle(styleProp);

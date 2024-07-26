@@ -135,14 +135,14 @@ private:
     void MeasureChild(LayoutWrapper* layoutWrapper);
     BarrierDirection BarrierDirectionRtl(BarrierDirection barrierDirection);
     void AdjustOffsetRtl(LayoutWrapper* layoutWrapper);
-
+    bool versionGreatorOrEqualToEleven_ = false;
     bool isHorizontalRelyOnContainer_ = false;
     bool isVerticalRelyOnContainer_ = false;
     std::list<std::string> renderList_;
-    std::map<std::string, ChildMeasureWrapper> idNodeMap_;
-    std::map<std::string, uint32_t> incomingDegreeMap_;
-    std::map<std::string, std::set<std::string>> reliedOnMap_;
-    std::map<std::string, OffsetF> recordOffsetMap_;
+    std::unordered_map<std::string, ChildMeasureWrapper> idNodeMap_;
+    std::unordered_map<std::string, uint32_t> incomingDegreeMap_;
+    std::unordered_map<std::string, std::set<std::string>> reliedOnMap_;
+    std::unordered_map<std::string, OffsetF> recordOffsetMap_;
     std::unordered_map<std::string, BarrierParams> barriers_;
     std::unordered_map<std::string, GuidelineParams> guidelines_;
     std::unordered_map<std::string, ChainParam> horizontalChains_;
