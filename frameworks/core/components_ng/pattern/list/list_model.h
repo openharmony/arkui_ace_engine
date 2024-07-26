@@ -80,7 +80,6 @@ public:
     virtual void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) = 0;
     virtual void SetOnItemDrop(OnItemDropFunc&& onItemDrop) = 0;
     virtual void SetScrollSnapAlign(V2::ScrollSnapAlign scrollSnapAlign) {};
-    virtual void SetFadingEdge(bool fadingEdge) = 0;
     virtual RefPtr<NG::ListChildrenMainSize> GetOrCreateListChildrenMainSize()
     {
         return nullptr;
