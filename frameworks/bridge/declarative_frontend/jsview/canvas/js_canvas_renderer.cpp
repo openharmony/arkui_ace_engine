@@ -210,9 +210,14 @@ void JSCanvasRenderer::JsFillText(const JSCallbackInfo& info)
         textInfo.x *= density;
         textInfo.y *= density;
         if (info.Length() >= 4) {
-            double maxWidth = FLT_MAX;
-            if (info.GetDoubleArg(3, maxWidth)) {
+            double maxWidth = 0.0;
+            if (info.GetDoubleArg(3, maxWidth)) { // Parse the 3rd parameter.
                 maxWidth *= density;
+            } else if (info[3]->IsUndefined()) { // Is the 3rd parameter undefined.
+                maxWidth = FLT_MAX;
+            }
+            if (maxWidth < 0) {
+                return;
             }
             textInfo.maxWidth = maxWidth;
         }
@@ -229,9 +234,14 @@ void JSCanvasRenderer::JsStrokeText(const JSCallbackInfo& info)
         textInfo.x *= density;
         textInfo.y *= density;
         if (info.Length() >= 4) {
-            double maxWidth = FLT_MAX;
-            if (info.GetDoubleArg(3, maxWidth)) {
+            double maxWidth = 0.0;
+            if (info.GetDoubleArg(3, maxWidth)) { // Parse the 3rd parameter.
                 maxWidth *= density;
+            } else if (info[3]->IsUndefined()) { // Is the 3rd parameter undefined.
+                maxWidth = FLT_MAX;
+            }
+            if (maxWidth < 0) {
+                return;
             }
             textInfo.maxWidth = maxWidth;
         }
