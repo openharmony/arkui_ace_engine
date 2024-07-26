@@ -3926,8 +3926,12 @@ int32_t SetTextInputPlaceholder(ArkUI_NodeHandle node, const ArkUI_AttributeItem
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
+    ArkUI_CharPtr itemString = item->string;
+    if (!itemString) {
+        itemString = "";
+    }
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputPlaceholderString(
-        node->uiNodeHandle, item->string);
+        node->uiNodeHandle, itemString);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -3949,7 +3953,12 @@ int32_t SetTextInputText(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputTextString(node->uiNodeHandle, item->string);
+    ArkUI_CharPtr itemString = item->string;
+    if (!itemString) {
+        itemString = "";
+    }
+    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputTextString(
+        node->uiNodeHandle, itemString);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -5837,7 +5846,12 @@ int32_t SetTextAreaPlaceholder(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaPlaceholderString(node->uiNodeHandle, item->string);
+    ArkUI_CharPtr itemString = item->string;
+    if (!itemString) {
+        itemString = "";
+    }
+    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaPlaceholderString(
+        node->uiNodeHandle, itemString);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -5859,7 +5873,12 @@ int32_t SetTextAreaText(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaTextString(node->uiNodeHandle, item->string);
+    ArkUI_CharPtr itemString = item->string;
+    if (!itemString) {
+        itemString = "";
+    }
+    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaTextString(
+        node->uiNodeHandle, itemString);
     return ERROR_CODE_NO_ERROR;
 }
 
