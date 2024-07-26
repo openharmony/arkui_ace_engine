@@ -499,6 +499,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle,
         bool& isNewAvoid);
     void OnQuickMenuDismissed();
+    void HideHandleAndQuickMenuIfNecessary(bool hide);
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
@@ -938,6 +939,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<PanEvent> panEvent_ = nullptr;
+    bool selectTemporarilyHidden_ = false;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_ = nullptr;
     RefPtr<WebPaintProperty> webPaintProperty_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle_ = nullptr;

@@ -1143,11 +1143,6 @@ void WebPattern::InitWebEventHubDragMove(const RefPtr<WebEventHub>& eventHub)
             return;
         }
 
-        if (pattern->selectOverlayProxy_ && !pattern->selectOverlayProxy_->IsClosed()) {
-            pattern->needRestoreMenuForDrag_ = true;
-            pattern->OnQuickMenuDismissed();
-        }
-
         // update drag status
         info->SetResult(pattern->GetDragAcceptableStatus());
 
@@ -1197,7 +1192,6 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
             "DragDrop event WebEventHub onDragEndId, x:%{public}lf, y:%{public}lf, webId:%{public}d",
             info->GetX(), info->GetY(), pattern->GetWebId());
         pattern->HandleDragEnd(pattern->dropX_, pattern->dropY_);
-        pattern->DragDropSelectionMenu();
     };
     // set custom OnDragStart function
     eventHub->SetOnDragEnd(std::move(onDragEndId));
@@ -1554,17 +1548,20 @@ void WebPattern::HandleFocusEvent()
 void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
 {
     TAG_LOGD(AceLogTag::ACE_WEB,
-        "WebPattern::HandleBlurEvent selectPopupMenuShowing: %{public}d.", selectPopupMenuShowing_);
+        "WebPattern::HandleBlurEvent selectPopupMenuShowing: %{public}d, isReceivedArkDrag: %{public}d.",
+        selectPopupMenuShowing_, isReceivedArkDrag_);
     CHECK_NULL_VOID(delegate_);
     isFocus_ = false;
+
+    if (isReceivedArkDrag_) {
+        return;
+    }
     if (!selectPopupMenuShowing_) {
         delegate_->SetBlurReason(static_cast<OHOS::NWeb::BlurReason>(blurReason));
         delegate_->OnBlur();
     }
     OnQuickMenuDismissed();
-    if (isReceivedArkDrag_) {
-        return;
-    }
+    SelectCancel();
     CloseContextSelectionMenu();
 }
 
@@ -2936,6 +2933,7 @@ std::optional<OffsetF> WebPattern::GetCoordinatePoint()
 
 RectF WebPattern::ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle)
 {
+    CHECK_NULL_RETURN(touchHandle, RectF());
     RectF paintRect;
     auto offset = GetCoordinatePoint().value_or(OffsetF());
     auto size = GetHostFrameSize().value_or(SizeF());
@@ -2980,6 +2978,7 @@ void WebPattern::CloseSelectOverlay()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    selectTemporarilyHidden_ = false;
     if (selectOverlayProxy_) {
         TAG_LOGI(AceLogTag::ACE_WEB, "Close Select Overlay Now");
         SetSelectOverlayDragging(false);
@@ -3163,6 +3162,40 @@ void WebPattern::UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
     selectInfo.handleReverse = false;
 }
 
+void WebPattern::HideHandleAndQuickMenuIfNecessary(bool hide)
+{
+    WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle_, startSelectionHandle_, endSelectionHandle_);
+    TAG_LOGI(AceLogTag::ACE_WEB, "HideHandleAndQuickMenuIfNecessary hide:%{public}d, overlayType:%{public}d",
+        hide, overlayType);
+    if (overlayType != SELECTION_OVERLAY) {
+        return;
+    }
+    SelectHandleInfo firstInfo;
+    SelectHandleInfo secondInfo;
+    selectTemporarilyHidden_ = hide;
+    if (hide) {
+        if (selectOverlayProxy_) {
+            selectOverlayProxy_->ShowOrHiddenMenu(true, true);
+            firstInfo.isShow = false;
+            firstInfo.paintRect = ComputeTouchHandleRect(startSelectionHandle_);
+            secondInfo.isShow = false;
+            secondInfo.paintRect = ComputeTouchHandleRect(endSelectionHandle_);
+            selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstInfo, secondInfo);
+        }
+    } else {
+        if (!selectOverlayProxy_ || selectOverlayProxy_->IsMenuShow()) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "select menu is closed or displayed");
+            return;
+        }
+        firstInfo.isShow = IsTouchHandleShow(startSelectionHandle_);
+        firstInfo.paintRect = ComputeTouchHandleRect(startSelectionHandle_);
+        secondInfo.isShow = IsTouchHandleShow(endSelectionHandle_);
+        secondInfo.paintRect = ComputeTouchHandleRect(endSelectionHandle_);
+        selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstInfo, secondInfo);
+        selectOverlayProxy_->ShowOrHiddenMenu(false);
+    }
+}
+
 bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
 {
@@ -3179,6 +3212,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     if (selectOverlayProxy_) {
         CloseSelectOverlay();
     }
+    selectTemporarilyHidden_ = false;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
@@ -3642,6 +3676,10 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
     insertHandle_ = insertHandle;
     startSelectionHandle_ = startSelectionHandle;
     endSelectionHandle_ = endSelectionHandle;
+    if (selectTemporarilyHidden_) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "select menu temporarily hidden");
+        return;
+    }
     if (!selectOverlayProxy_) {
         if (overlayType == INSERT_OVERLAY) {
             SelectOverlayInfo selectInfo;
