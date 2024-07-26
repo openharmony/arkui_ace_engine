@@ -132,18 +132,16 @@ void OffscreenCanvasPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
     offscreenPaintMethod_->QuadraticCurveTo(param);
 }
 
-void OffscreenCanvasPattern::FillText(
-    const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state)
+void OffscreenCanvasPattern::FillText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
     UpdateTextDefaultDirection();
-    offscreenPaintMethod_->FillText(text, x, y, maxWidth, state);
+    offscreenPaintMethod_->FillText(text, x, y, maxWidth);
 }
 
-void OffscreenCanvasPattern::StrokeText(
-    const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state)
+void OffscreenCanvasPattern::StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
     UpdateTextDefaultDirection();
-    offscreenPaintMethod_->StrokeText(text, x, y, maxWidth, state);
+    offscreenPaintMethod_->StrokeText(text, x, y, maxWidth);
 }
 
 TextMetrics OffscreenCanvasPattern::MeasureTextMetrics(const std::string& text, const PaintState& state)

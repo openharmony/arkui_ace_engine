@@ -172,7 +172,7 @@ std::string CanvasRenderingContext2DModelNG::GetJsonData(const std::string& path
 
 std::string CanvasRenderingContext2DModelNG::ToDataURL(const std::string& dataUrl, double quality)
 {
-    return pattern_ ? pattern_->ToDataURL(dataUrl + "," + std::to_string(quality)) : "";
+    return pattern_ ? pattern_->ToDataURL(dataUrl, quality) : "";
 }
 
 void CanvasRenderingContext2DModelNG::SetLineCap(const LineCapStyle& lineCap)
