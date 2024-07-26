@@ -68,14 +68,13 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
         UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = pattern->GetTextValue();
         UpdateTextStyleTextOverflowAndWordBreak(textStyle, isTextArea, isInlineStyle, textFieldLayoutProperty);
+        UpdateTextFadeoutTextStyle(frameNode, textFieldTheme, textStyle);
     } else {
         UpdatePlaceholderTextStyle(
             frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetPlaceholderValue("");
         showPlaceHolder = true;
     }
-
-    UpdateTextFadeoutTextStyle(frameNode, textFieldTheme, textStyle);
 
     textIndent_ = textStyle.GetTextIndent();
     auto fontManager = pipeline->GetFontManager();
@@ -285,8 +284,6 @@ SizeF TextFieldLayoutAlgorithm::PlaceHolderMeasureContent(const LayoutConstraint
 
     auto contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph_, imageWidth);
     CounterNodeMeasure(contentWidth, layoutWrapper);
-
-    UpdateParagraphTextFadeoutWidth(contentConstraint, layoutWrapper->GetHostNode());
 
     auto height = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
                       ? paragraph_->GetHeight()
