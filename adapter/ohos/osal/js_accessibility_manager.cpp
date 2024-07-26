@@ -873,6 +873,29 @@ RefPtr<NG::FrameNode> GetWebCoreNodeById(const NG::FrameNode* frameNode, int64_t
 }
 #endif
 
+bool FindFrameNodeByAccessibilityId(int64_t id, const std::list<RefPtr<NG::UINode>>& children,
+    std::queue<NG::UINode*>& nodes, RefPtr<NG::FrameNode>& result)
+{
+    NG::FrameNode* frameNode = nullptr;
+    for (const auto& child : children) {
+        frameNode = AceType::DynamicCast<NG::FrameNode>(Referenced::RawPtr(child));
+        if (frameNode != nullptr && !frameNode->CheckAccessibilityLevelNo()) {
+            if (frameNode->GetAccessibilityId() == id) {
+                result = AceType::DynamicCast<NG::FrameNode>(child);
+                return true;
+            }
+#ifdef WEB_SUPPORTED
+            result = GetWebCoreNodeById(frameNode, id);
+            if (result) {
+                return true;
+            }
+#endif
+        }
+        nodes.push(Referenced::RawPtr(child));
+    }
+    return false;
+}
+
 RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>& root, int64_t id)
 {
     CHECK_NULL_RETURN(root, nullptr);
@@ -887,37 +910,27 @@ RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>&
 #endif
     std::queue<NG::UINode*> nodes;
     nodes.push(Referenced::RawPtr(root));
-    NG::FrameNode* frameNode = nullptr;
+    NG::UINode* virtualNode = nullptr;
+    RefPtr<NG::FrameNode> frameNodeResult = nullptr;
 
     while (!nodes.empty()) {
         auto current = nodes.front();
         nodes.pop();
-        std::list<RefPtr<NG::UINode>> children = current->GetChildren();
-
-        auto fnode = AceType::DynamicCast<NG::FrameNode>(current);
+        virtualNode = nullptr;
+        auto fnode = current->GetVirtualAccessibilityProperty();
         if (fnode != nullptr) {
-            auto property = fnode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-            auto virtualNode = property->GetAccessibilityVirtualNode();
-            if (virtualNode) {
-                children.clear();
-                children.push_back(virtualNode);
-            }
+            virtualNode = fnode->GetAccessibilityVirtualNodePtr();
         }
-        for (const auto& child : children) {
-            frameNode = AceType::DynamicCast<NG::FrameNode>(Referenced::RawPtr(child));
-            if (frameNode != nullptr && !frameNode->CheckAccessibilityLevelNo()) {
-                if (frameNode->GetAccessibilityId() == id) {
-                    return AceType::DynamicCast<NG::FrameNode>(child);
-                }
-#ifdef WEB_SUPPORTED
-                auto result = GetWebCoreNodeById(frameNode, id);
-                if (result) {
-                    return result;
-                }
-#endif
+        if (virtualNode) {
+            const auto& children = std::list<RefPtr<NG::UINode>> { fnode->GetAccessibilityVirtualNode() };
+            if (FindFrameNodeByAccessibilityId(id, children, nodes, frameNodeResult)) {
+                return frameNodeResult;
             }
-
-            nodes.push(Referenced::RawPtr(child));
+        } else {
+            const auto& children = current->GetChildren();
+            if (FindFrameNodeByAccessibilityId(id, children, nodes, frameNodeResult)) {
+                return frameNodeResult;
+            }
         }
     }
     return nullptr;
