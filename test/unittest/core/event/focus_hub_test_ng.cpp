@@ -1043,18 +1043,6 @@ HWTEST_F(FocusHubTestNg, FocusHubHandleDumpFocusTreeTest023, TestSize.Level1)
     focusHub->focusable_ = false;
     focusHub->DumpFocusTree(depth);
     EXPECT_TRUE(DumpLog::GetInstance().description_.empty());
-
-    DumpLog::GetInstance().description_.push_back("test");
-    focusHub->focusType_ = FocusType::PRIOR;
-    focusHub->currentFocus_ = true;
-    focusHub->DumpFocusTree(depth);
-    EXPECT_TRUE(DumpLog::GetInstance().description_.empty());
-
-    DumpLog::GetInstance().description_.push_back("test");
-    focusHub->focusType_ = FocusType::PREVIOUS;
-    focusHub->currentFocus_ = true;
-    focusHub->DumpFocusTree(depth);
-    EXPECT_TRUE(DumpLog::GetInstance().description_.empty());
 }
 
 /**

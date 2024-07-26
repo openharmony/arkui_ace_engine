@@ -540,6 +540,7 @@ HWTEST_F(FocusHubTestNg, DumpFocusTree001, TestSize.Level1)
      */
     int32_t depth = 1;
     focusHub->focusScopeId_ = "TEST";
+    focusHub->isFocusScope_ = true;
     /**
      * @tc.steps: step4. test function DumpFocusScopeTree.
      * @tc.expected: After DumpFocusTree, the DumpLog.description_ is empty.
@@ -568,5 +569,25 @@ HWTEST_F(FocusHubTestNg, DumpFocusTree001, TestSize.Level1)
     focusHub->currentFocus_ = true;
     focusHub->DumpFocusTree(depth);
     EXPECT_TRUE(DumpLog::GetInstance().description_.empty());
+}
+
+/**
+ * @tc.name: CheckFocusStateStyle001
+ * @tc.desc: Test the function CheckFocusStateStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, CheckFocusStateStyle001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto nodeParent =
+        AceType::MakeRefPtr<FrameNodeOnTree>(V2::BLANK_ETS_TAG, -1, AceType::MakeRefPtr<FlexLayoutPattern>());
+    frameNode->GetOrCreateFocusHub();
+    nodeParent->GetOrCreateFocusHub();
+    frameNode->SetParent(nodeParent);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->CheckFocusStateStyle(true);
 }
 } // namespace OHOS::Ace::NG123456
