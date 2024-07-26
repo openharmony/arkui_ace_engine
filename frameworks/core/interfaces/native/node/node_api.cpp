@@ -51,6 +51,7 @@
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_swiper_modifier.h"
+#include "core/interfaces/native/node/node_span_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/node/node_text_modifier.h"
@@ -1323,6 +1324,20 @@ void RegisterCustomNodeAsyncEvent(ArkUINodeHandle node, int32_t eventType, void*
     }
 }
 
+void RegisterCustomSpanAsyncEvent(ArkUINodeHandle node, int32_t eventType, void* extraParam)
+{
+    switch (eventType) {
+        case ArkUIAPINodeFlags::CUSTOM_MEASURE:
+            NodeModifier::SetCustomSpanOnMeasure(node, extraParam);
+            break;
+        case ArkUIAPINodeFlags::CUSTOM_DRAW:
+            NodeModifier::SetCustomSpanOnDraw(node, extraParam);
+            break;
+        default:
+            break;
+    }
+}
+
 ArkUI_Int32 UnregisterCustomNodeEvent(ArkUINodeHandle node, ArkUI_Int32 eventType)
 {
     auto companion = ViewModel::GetCompanion(node);
@@ -1763,6 +1778,7 @@ ArkUIExtendedNodeAPI impl_extended = {
     SetCustomMethodFlag,
     GetCustomMethodFlag,
     RegisterCustomNodeAsyncEvent,
+    RegisterCustomSpanAsyncEvent,
     UnregisterCustomNodeEvent,
     RegisterCustomNodeEventReceiver,
     SetCustomCallback, // setCustomCallback

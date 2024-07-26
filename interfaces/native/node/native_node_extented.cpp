@@ -114,6 +114,143 @@ ArkUI_NodeCustomEventType OH_ArkUI_NodeCustomEvent_GetEventType(ArkUI_NodeCustom
     return static_cast<ArkUI_NodeCustomEventType>(event->event->kind);
 }
 
+int32_t OH_ArkUI_NodeCustomEvent_GetCustomSpanMeasureInfo(
+    ArkUI_NodeCustomEvent* event, ArkUI_CustomSpanMeasureInfo* info)
+{
+    if (!event || !info || !event->event) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    info->fontSize = event->event->numberData[0].f32;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_NodeCustomEvent_SetCustomSpanMetrics(
+    ArkUI_NodeCustomEvent* event, ArkUI_CustomSpanMetrics* metrics)
+{
+    if (!event || !metrics || !event->event) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    event->event->numberReturnData[0].f32 = metrics->width;
+    event->event->numberReturnData[1].f32 = metrics->height;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_NodeCustomEvent_GetCustomSpanDrawInfo(
+    ArkUI_NodeCustomEvent* event, ArkUI_CustomSpanDrawInfo* info)
+{
+    if (!event || !info || !event->event) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    info->optionsX = event->event->numberData[0].f32;
+    info->optionsLineTop = event->event->numberData[1].f32;
+    info->optionsLineBottom = event->event->numberData[2].f32;
+    info->optionsBaseLine = event->event->numberData[3].f32;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_CustomSpanMeasureInfo* OH_ArkUI_CustomSpanMeasureInfo_Create()
+{
+    ArkUI_CustomSpanMeasureInfo* info = new ArkUI_CustomSpanMeasureInfo { 0 };
+    return info;
+}
+
+void OH_ArkUI_CustomSpanMeasureInfo_Dispose(ArkUI_CustomSpanMeasureInfo* info)
+{
+    if (!info) {
+        return;
+    }
+    delete info;
+    info = nullptr;
+}
+
+float OH_ArkUI_CustomSpanMeasureInfo_GetFontSize(ArkUI_CustomSpanMeasureInfo* info)
+{
+    if (!info) {
+        return 0.0f;
+    }
+    return info->fontSize;
+}
+
+ArkUI_CustomSpanMetrics* OH_ArkUI_CustomSpanMetrics_Create()
+{
+    ArkUI_CustomSpanMetrics* metrics = new ArkUI_CustomSpanMetrics { 0, 0 };
+    return metrics;
+}
+
+void OH_ArkUI_CustomSpanMetrics_Dispose(ArkUI_CustomSpanMetrics* metrics)
+{
+    if (!metrics) {
+        return;
+    }
+    delete metrics;
+    metrics = nullptr;
+}
+
+int32_t OH_ArkUI_CustomSpanMetrics_SetWidth(ArkUI_CustomSpanMetrics* metrics, float width)
+{
+    if (!metrics) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    metrics->width = width;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_CustomSpanMetrics_SetHeight(ArkUI_CustomSpanMetrics* metrics, float height)
+{
+    if (!metrics) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    metrics->height = height;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_CustomSpanDrawInfo* OH_ArkUI_CustomSpanDrawInfo_Create()
+{
+    ArkUI_CustomSpanDrawInfo* info = new ArkUI_CustomSpanDrawInfo { 0, 0, 0, 0 };
+    return info;
+}
+
+void OH_ArkUI_CustomSpanDrawInfo_Dispose(ArkUI_CustomSpanDrawInfo* info)
+{
+    if (!info) {
+        return;
+    }
+    delete info;
+    info = nullptr;
+}
+
+float OH_ArkUI_CustomSpanDrawInfo_GetXOffset(ArkUI_CustomSpanDrawInfo* info)
+{
+    if (!info) {
+        return 0.0f;
+    }
+    return info->optionsX;
+}
+
+float OH_ArkUI_CustomSpanDrawInfo_GetLineTop(ArkUI_CustomSpanDrawInfo* info)
+{
+    if (!info) {
+        return 0.0f;
+    }
+    return info->optionsLineTop;
+}
+
+float OH_ArkUI_CustomSpanDrawInfo_GetLineBottom(ArkUI_CustomSpanDrawInfo* info)
+{
+    if (!info) {
+        return 0.0f;
+    }
+    return info->optionsLineBottom;
+}
+
+float OH_ArkUI_CustomSpanDrawInfo_GetBaseLine(ArkUI_CustomSpanDrawInfo* info)
+{
+    if (!info) {
+        return 0.0f;
+    }
+    return info->optionsBaseLine;
+}
+
 int32_t OH_ArkUI_LayoutConstraint_GetMaxWidth(const ArkUI_LayoutConstraint* constraint)
 {
     CHECK_NULL_RETURN(constraint, -1);
