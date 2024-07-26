@@ -1771,7 +1771,22 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         }
 
         SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
+
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+            "origin positionY: %{public}f, height %{public}f", positionY, height);
+
         float positionYWithOffset = positionY;
+        float currentPos = manager->GetClickPosition().GetY() - context->GetRootRect().GetOffset().GetY() +
+            context->GetCurrentWindowRect().Top() - context->GetSafeAreaManager()->GetKeyboardOffset();
+        if (manager->GetIfFocusTextFieldIsInline()) {
+            manager->GetInlineTextFieldAvoidPositionYAndHeight(positionY, height);
+            positionYWithOffset = positionY;
+        } else if (!NearEqual(positionY, currentPos) && !context->IsEnableKeyBoardAvoidMode()) {
+            positionY = currentPos;
+            positionYWithOffset = currentPos;
+            height = manager->GetHeight();
+        }
+
         if (rootSize.Height() - positionY - height < 0) {
             height = rootSize.Height() - positionY;
         }
