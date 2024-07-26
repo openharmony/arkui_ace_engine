@@ -311,6 +311,8 @@ enum class PropertyInfo {
     LINESPACING,
     SYMBOL_EFFECT_OPTIONS,
     HALFLEADING,
+    MIN_FONT_SCALE,
+    MAX_FONT_SCALE,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
@@ -425,6 +427,8 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolRenderingStrategy, uint32_t);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectStrategy, uint32_t);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectOptions, SymbolEffectOptions);
+    DEFINE_SPAN_FONT_STYLE_ITEM(MinFontScale, float);
+    DEFINE_SPAN_FONT_STYLE_ITEM(MaxFontScale, float);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);

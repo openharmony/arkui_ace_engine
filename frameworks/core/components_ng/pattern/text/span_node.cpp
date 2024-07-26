@@ -605,7 +605,8 @@ TextStyle SpanItem::InheritParentProperties(const RefPtr<FrameNode>& frameNode, 
     INHERIT_TEXT_STYLE(fontStyle, TextDecorationColor, SetTextDecorationColor);
     INHERIT_TEXT_STYLE(fontStyle, TextDecorationStyle, SetTextDecorationStyle);
     INHERIT_TEXT_STYLE(fontStyle, LetterSpacing, SetLetterSpacing);
-
+    INHERIT_TEXT_STYLE(fontStyle, MinFontScale, SetMinFontScale);
+    INHERIT_TEXT_STYLE(fontStyle, MaxFontScale, SetMaxFontScale);
     INHERIT_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
     INHERIT_TEXT_STYLE(textLineStyle, LineSpacing, SetLineSpacing);
     return textStyle;
@@ -1076,8 +1077,8 @@ std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
         PropertyInfo::TEXT_ALIGN, PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
         PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY, PropertyInfo::WORD_BREAK,
         PropertyInfo::LINE_BREAK_STRATEGY, PropertyInfo::FONTFEATURE, PropertyInfo::LINESPACING,
-        PropertyInfo::SYMBOL_EFFECT_OPTIONS, PropertyInfo::HALFLEADING };
-
+        PropertyInfo::SYMBOL_EFFECT_OPTIONS, PropertyInfo::HALFLEADING, PropertyInfo::MIN_FONT_SCALE,
+        PropertyInfo::MAX_FONT_SCALE };
     set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
         propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
     return inheritPropertyInfo;

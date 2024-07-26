@@ -2917,6 +2917,16 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
                     child->UpdateHalfLeadingWithoutFlushDirty(textLayoutProp->GetHalfLeading().value());
                 }
                 break;
+            case PropertyInfo::MIN_FONT_SCALE:
+                if (textLayoutProp->HasMinFontScale()) {
+                    child->UpdateMinFontScaleWithoutFlushDirty(textLayoutProp->GetMinFontScale().value());
+                }
+                break;
+            case PropertyInfo::MAX_FONT_SCALE:
+                if (textLayoutProp->HasMaxFontScale()) {
+                    child->UpdateMaxFontScaleWithoutFlushDirty(textLayoutProp->GetMaxFontScale().value());
+                }
+                break;
             default:
                 break;
         }
