@@ -59,7 +59,9 @@
         "common":{
             "ok":"OK",
             "cancel":"Cancel",
-            "more":"More"
+            "more":"More",
+            "prev":"Prev",
+            "next":"Next"
         },
         "refresh":{
             "last_updated":"Last updated: %s",
@@ -713,7 +715,9 @@
     "bo-CN":{
         "common":{
             "ok":"གཏན་འཁེལ།",
-            "cancel":"འདོར་བ།"
+            "cancel":"འདོར་བ།",
+            "prev":"སྔོན་འགྲོ",
+            "next":"རྗེས་འགྲོ"
         },
         "textoverlay":{
             "paste":"སྦྱར་བ།",
@@ -1993,7 +1997,9 @@
     "ug":{
         "common":{
             "ok":"جەزملەش",
-            "cancel":"بىكار قىلىش"
+            "cancel":"بىكار قىلىش",
+            "prev":"ئالدىنقى قەدەم",
+            "next":"كېيىنكى قەدەم"
         },
         "textoverlay":{
             "paste":"چاپلاش",
@@ -2171,7 +2177,9 @@
     "zh-HK":{
         "common":{
             "ok":"確定",
-            "cancel":"取消"
+            "cancel":"取消",
+            "prev":"上一步",
+            "next":"下一步"
         },
         "textoverlay":{
             "paste":"貼上",
@@ -2204,7 +2212,9 @@
     "zh-TW":{
         "common":{
             "ok":"確定",
-            "cancel":"取消"
+            "cancel":"取消",
+            "prev":"上一步",
+            "next":"下一步"
         },
         "textoverlay":{
             "paste":"貼上",
