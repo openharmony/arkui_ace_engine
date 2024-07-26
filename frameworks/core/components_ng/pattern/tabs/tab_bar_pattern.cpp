@@ -780,6 +780,9 @@ void TabBarPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         (columnPaintRect.GetOffset().GetY() + outLineWidth.ConvertToPx() / 2)));
     columnPaintRect.SetSize(SizeF((columnPaintRect.GetSize().Width() - outLineWidth.ConvertToPx()),
         (columnPaintRect.GetSize().Height() - outLineWidth.ConvertToPx())));
+    auto focusPadding = tabTheme->GetFocusPadding().ConvertToPx();
+    columnPaintRect -= OffsetF(focusPadding, focusPadding);
+    columnPaintRect += SizeF(focusPadding + focusPadding, focusPadding + focusPadding);
 
     paintRect.SetRect(columnPaintRect);
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),

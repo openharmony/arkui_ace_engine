@@ -133,6 +133,7 @@ public:
             theme->dialog_radius_level10_ = pattern->GetAttr<Dimension>("dialog_radius_level10", 20.0_vp);
             theme->dialog_iconColor_ = pattern->GetAttr<Color>("dialog_icon_primary", Color(0xff182431));
             theme->dialog_fontColor_ = pattern->GetAttr<Color>("dialog_font_primary", Color(0xff182431));
+            theme->focusPadding_ = pattern->GetAttr<Dimension>("tab_bar_focus_padding", 0.0_vp);
         }
     };
 
@@ -443,7 +444,12 @@ public:
     {
         return dialog_fontColor_;
     }
-    
+
+    const Dimension& GetFocusPadding() const
+    {
+        return focusPadding_;
+    }
+
 protected:
     TabTheme() = default;
 
@@ -510,6 +516,7 @@ private:
     Color dialog_iconColor_;
     Color dialog_fontColor_;
     int bottomTabBackgroundBlurStyle_;
+    Dimension focusPadding_;
 };
 
 } // namespace OHOS::Ace
