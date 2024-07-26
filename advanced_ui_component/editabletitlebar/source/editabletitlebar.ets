@@ -133,7 +133,6 @@ export struct EditableTitleBar {
     this.editableTitleBarTheme.iconColor = theme.colors.iconPrimary;
     this.editableTitleBarTheme.titleColor = theme.colors.fontPrimary;
     this.editableTitleBarTheme.subTitleColor = theme.colors.fontSecondary;
-    this.editableTitleBarTheme.iconBackgroundColor = theme.colors.compBackgroundTertiary;
     this.editableTitleBarTheme.iconBackgroundPressedColor = theme.colors.interactivePressed;
     this.editableTitleBarTheme.iconBackgroundHoverColor = theme.colors.interactiveHover;
     this.editableTitleBarTheme.iconBackgroundFocusOutlineColor = theme.colors.interactiveFocus;
