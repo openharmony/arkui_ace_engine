@@ -70,8 +70,8 @@ private:
     void PaintDefaultDividerLines(RSCanvas& canvas, const RectF &contentRect, double dividerHeight);
     void PaintCustomDividerLines(RSCanvas& canvas, const RectF &contentRect, const RectF &frameRect,
         const ItemDivider &divider, double dividerHeight);
-    bool SetStrokeWidth(const ItemDivider &divider, double dividerHeight, DividerInfo& info);
     void PaintLine(const OffsetF& offset, const DividerInfo &info, RSCanvas& canvas);
+    bool SetStrokeWidth(const ItemDivider &divider, double dividerHeight, DividerInfo& info);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_PICKER_TEXT_PICKER_PAINT_METHOD_H
