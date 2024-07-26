@@ -342,6 +342,38 @@ class ScrollOnDidScrollModifier extends ModifierWithKey<(xOffset: number,
   }
 }
 
+class ScrollOnWillScrollModifier extends ModifierWithKey<(xOffset: number, yOffset: number,
+  scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult> {
+  constructor(value: (xOffset: number, yOffset: number,
+    scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scrollOnWillScroll');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnWillScroll(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnWillScroll(node, this.value);
+    }
+  }
+}
+
+class ScrollOnScrollFrameBeginModifier extends ModifierWithKey<(offset: number, state: ScrollState) =>
+  { offsetRemain: number }> {
+  constructor(value: (offset: number, state: ScrollState) =>
+    { offsetRemain: number }) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scrollOnScrollFrameBegin');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnScrollFrameBegin(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnScrollFrameBegin(node, this.value);
+    }
+  }
+}
+
 class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -406,8 +438,14 @@ class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
     modifierWithKey(this._modifiersWithKeys, ScrollEdgeEffectModifier.identity, ScrollEdgeEffectModifier, effect);
     return this;
   }
-  onScrollFrameBegin(event: (offset: number, state: ScrollState) => { offsetRemain: number; }): this {
-    throw new Error('Method not implemented.');
+  onScrollFrameBegin(callback: (offset: number, state: ScrollState) => { offsetRemain: number }): this {
+    modifierWithKey(this._modifiersWithKeys, ScrollOnScrollFrameBeginModifier.identity, ScrollOnScrollFrameBeginModifier, callback);
+    return this;
+  }
+  onWillScroll(callback: (xOffset: number, yOffset: number,
+    scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): this {
+    modifierWithKey(this._modifiersWithKeys, ScrollOnWillScrollModifier.identity, ScrollOnWillScrollModifier, callback);
+    return this;
   }
 
   onDidScroll(callback: (xOffset: number, yOffset: number, scrollState: ScrollState) => void): this {

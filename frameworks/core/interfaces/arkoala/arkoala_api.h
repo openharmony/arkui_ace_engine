@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 119
+#define ARKUI_FULL_API_VERSION 120
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 119
+#define ARKUI_NODE_API_VERSION 120
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -2497,6 +2497,10 @@ struct ArkUIScrollModifier {
     void (*resetScrollOnScrollEdge)(ArkUINodeHandle node);
     void (*setScrollOnDidScrollCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetScrollOnDidScroll)(ArkUINodeHandle node);
+    void (*setScrollOnWillScrollCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetScrollOnWillScrollCallBack)(ArkUINodeHandle node);
+    void (*setOnScrollFrameBeginCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnScrollFrameBeginCallBack)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemModifier {

@@ -16385,6 +16385,34 @@ class ScrollOnDidScrollModifier extends ModifierWithKey {
 }
 ScrollOnDidScrollModifier.identity = Symbol('scrollOnDidScroll');
 
+class ScrollOnWillScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnWillScroll(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnWillScroll(node, this.value);
+    }
+  }
+}
+ScrollOnWillScrollModifier.identity = Symbol('scrollOnWillScroll');
+
+class ScrollOnScrollFrameBeginModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnScrollFrameBegin(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnScrollFrameBegin(node, this.value);
+    }
+  }
+}
+ScrollOnScrollFrameBeginModifier.identity = Symbol('scrollOnScrollFrameBegin');
+
 class ArkScrollComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -16446,8 +16474,14 @@ class ArkScrollComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ScrollEdgeEffectModifier.identity, ScrollEdgeEffectModifier, effect);
     return this;
   }
-  onScrollFrameBegin(event) {
-    throw new Error('Method not implemented.');
+  onScrollFrameBegin(callback) {
+    modifierWithKey(this._modifiersWithKeys, ScrollOnScrollFrameBeginModifier.identity, ScrollOnScrollFrameBeginModifier, callback);
+    return this;
+  }
+
+  onWillScroll(callback) {
+    modifierWithKey(this._modifiersWithKeys, ScrollOnWillScrollModifier.identity, ScrollOnWillScrollModifier, callback);
+    return this;
   }
 
   onDidScroll(callback) {
