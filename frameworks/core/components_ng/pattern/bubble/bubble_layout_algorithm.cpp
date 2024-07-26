@@ -477,9 +477,9 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     targetOffsetForPaint_ = targetOffset_;
     childOffsetForPaint_ = childOffset_;
     arrowPositionForPaint_ = arrowPosition_;
-    UpdateClipOffset(frameNode);
     auto isBlock = bubbleProp->GetBlockEventValue(true);
     SetHotAreas(showInSubWindow, isBlock, frameNode, bubblePattern->GetContainerId());
+    UpdateClipOffset(frameNode);
 }
 
 void BubbleLayoutAlgorithm::SetHotAreas(bool showInSubWindow, bool isBlock,
@@ -541,9 +541,9 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
     padding_ = popupTheme->GetPadding();
+    userSetTargetSpace_ = layoutProp->GetTargetSpace().value_or(Dimension(0.0f));
     borderRadius_ = layoutProp->GetRadius().value_or(popupTheme->GetRadius().GetX());
     border_.SetBorderRadius(Radius(borderRadius_));
-    userSetTargetSpace_ = layoutProp->GetTargetSpace().value_or(Dimension(0.0f));
     targetSpace_ = layoutProp->GetTargetSpace().value_or(popupTheme->GetTargetSpace());
     placement_ = layoutProp->GetPlacement().value_or(Placement::BOTTOM);
     isCaretMode_ = layoutProp->GetIsCaretMode().value_or(true);

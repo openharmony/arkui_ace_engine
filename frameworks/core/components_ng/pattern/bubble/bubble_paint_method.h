@@ -189,6 +189,8 @@ private:
     // Get from theme
     Border border_;
     Edge padding_;
+    // top right bottom left
+    std::vector<float> arrowOffsetByClips_ = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 #ifndef USE_ROSEN_DRAWING
     RSPath path_;
