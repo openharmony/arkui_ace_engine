@@ -3611,7 +3611,11 @@ void RichEditorPattern::AddSpansByPaste(const std::list<RefPtr<NG::SpanItem>>& s
 TextSpanOptions RichEditorPattern::GetTextSpanOptions(const RefPtr<SpanItem>& spanItem)
 {
     CHECK_NULL_RETURN(spanItem, {});
-    TextStyle textStyle;
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, {});
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, {});
+    TextStyle textStyle = theme->GetTextStyle();
     UseSelfStyle(spanItem->fontStyle, spanItem->textLineStyle, textStyle);
     struct UpdateParagraphStyle paraStyle = {
         .textAlign = spanItem->textLineStyle->GetTextAlign(),
