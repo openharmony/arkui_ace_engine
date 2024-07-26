@@ -855,11 +855,6 @@ public:
     void HandleBlurEvent();
     void HandleFocusEvent();
     void ProcessFocusStyle();
-    void SetFocusStyle();
-    void ClearFocusStyle();
-    void AddIsFocusActiveUpdateEvent();
-    void RemoveIsFocusActiveUpdateEvent();
-    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     bool OnBackPressed() override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
@@ -998,7 +993,6 @@ public:
     void SetTextInputFlag(bool isTextInput)
     {
         isTextInput_ = isTextInput;
-        SetTextFadeoutCapacity(isTextInput_);
     }
 
     void SetSingleLineHeight(float height)
@@ -1300,15 +1294,6 @@ public:
     bool GetCustomKeyboardOption()
     {
         return keyboardAvoidance_;
-    }
-
-    void SetTextFadeoutCapacity(bool enabled)
-    {
-        haveTextFadeoutCapacity_ = enabled;
-    }
-    bool GetTextFadeoutCapacity()
-    {
-        return haveTextFadeoutCapacity_;
     }
 
     void SetShowKeyBoardOnFocus(bool value);
@@ -1760,7 +1745,6 @@ private:
     std::string lastAutoFillTextValue_;
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
-    std::function<void(bool)> isFocusActiveUpdateEvent_;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
     bool isTouchCaret_ = false;
     bool needSelectAll_ = false;
@@ -1785,11 +1769,6 @@ private:
     bool textAreaBlurOnSubmit_ = false;
     bool isDetachFromMainTree_ = false;
 
-    bool haveTextFadeoutCapacity_ = false;
-
-    bool isFocusBGColorSet_ = false;
-    bool isFocusTextColorSet_ = false;
-    bool isFocusPlaceholderColorSet_ = false;
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewText_ = false;
