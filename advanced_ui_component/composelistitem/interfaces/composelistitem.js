@@ -90,6 +90,9 @@ const FOCUSABLE = LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sy
 const RECOVERYSCALE = 1;
 const CLEARSHADOW = -1;
 const CLEARBLUR = 0;
+const OPERATEITEMRADIUS = 50;
+const OPERATEITEMBACKGROUNDCOLOR = '#33000000';
+const OPERATEITECOLOR = '#99000000';
 class ContentItemStruct extends ViewPU {
     constructor(r13, s13, t13, u13 = -1, v13 = undefined, w13) {
         super(r13, t13, u13, w13);
@@ -1229,6 +1232,11 @@ class OperateItemStruct extends ViewPU {
     createRadio(v6 = null) {
         this.observeComponentCreation2((x6, y6) => {
             Radio.create({ value: '', group: '' });
+            Radio.radioStyle({
+                uncheckedBorderColor: FOCUSABLE ? null : (this.isFocus && !this.radioState ? OPERATEITECOLOR : null)
+            });
+            Radio.backgroundColor(FOCUSABLE ? null : (this.isFocus && !this.radioState ? OPERATEITEMBACKGROUNDCOLOR : null));
+            Radio.borderRadius(FOCUSABLE ? null : OPERATEITEMRADIUS);
             Radio.margin({ end: LengthMetrics.vp(OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL1) });
             Radio.checked(this.radioState);
             Radio.onChange(this.radio?.onChange);
@@ -1267,6 +1275,9 @@ class OperateItemStruct extends ViewPU {
     createCheckBox(l6 = null) {
         this.observeComponentCreation2((n6, o6) => {
             Checkbox.create();
+            Checkbox.borderRadius(FOCUSABLE ? null : OPERATEITEMRADIUS);
+            Checkbox.unselectedColor(FOCUSABLE ? null : (this.isFocus && !this.checkBoxState ? OPERATEITECOLOR : null));
+            Checkbox.backgroundColor(FOCUSABLE ? null : (this.isFocus && !this.checkBoxState ? OPERATEITEMBACKGROUNDCOLOR : null));
             Checkbox.margin({ end: LengthMetrics.vp(OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL1) });
             Checkbox.select(this.checkBoxState);
             Checkbox.onChange(this.checkBox?.onChange);
@@ -1336,6 +1347,9 @@ class OperateItemStruct extends ViewPU {
         }, Row);
         this.observeComponentCreation2((b6, c6) => {
             Toggle.create({ type: ToggleType.Switch, isOn: this.switchState });
+            Toggle.borderRadius(FOCUSABLE ? null : OPERATEITEMRADIUS);
+            Toggle.backgroundColor(FOCUSABLE ? null : (this.isFocus && !this.switchState ? OPERATEITEMBACKGROUNDCOLOR : null));
+            Toggle.switchPointColor(FOCUSABLE ? null : (this.isFocus && !this.switchState ? OPERATEITECOLOR : null));
             Toggle.onChange(this.switch?.onChange);
             Toggle.onClick(() => {
                 this.switchState = !this.switchState;
@@ -2143,7 +2157,7 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((l1, m1) => {
                             if (m1) {
-                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1000, col: 11 });
+                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1014, col: 11 });
                                 ViewPU.create(n1);
                                 let o1 = () => {
                                     return {};
@@ -2188,7 +2202,7 @@ export class ComposeListItem extends ViewPU {
                                     itemDirection: this.contentItemDirection,
                                     isFocus: this.isFocus,
                                     itemHeight: this.itemHeight,
-                                }, undefined, a1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1003, col: 11 });
+                                }, undefined, a1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1017, col: 11 });
                                 ViewPU.create(c1);
                                 let d1 = () => {
                                     return {
@@ -2283,7 +2297,7 @@ export class ComposeListItem extends ViewPU {
                                     parentDirection: this.containerDirection,
                                     isFocus: this.__isFocus,
                                     isOnClick: this.isOnClick,
-                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1024, col: 11 });
+                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1038, col: 11 });
                                 ViewPU.create(n);
                                 let o = () => {
                                     return {
