@@ -76,8 +76,6 @@ public:
             theme->linearSplitChildMinSize_ = pattern->GetAttr<double>(LINEAR_SPLIT_CHILD_MIN_SIZE, childMinSize);
             theme->caretColor_ = pattern->GetAttr<Color>("caret_color", Color(0xff007dff));
             theme->selectedBackgroundColor_ = pattern->GetAttr<Color>("selected_background_color", Color(0xff007dff));
-            theme->isTextFadeout_ = pattern->GetAttr<std::string>("text_fadeout_enable", "") == "true";
-            theme->fadeoutWidth_ = pattern->GetAttr<Dimension>("text_fadeout_width", 16.0_vp);
             auto textShowHandle = pattern->GetAttr<std::string>("text_show_handle", "0");
             theme->isShowHandle_ = StringUtils::StringToInt(textShowHandle);
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>("default_text_color", DEFAULT_TEXT_COLOR));
@@ -117,16 +115,6 @@ public:
         return linearSplitChildMinSize_;
     }
 
-    bool GetIsTextFadeout() const
-    {
-        return isTextFadeout_;
-    }
-
-    const Dimension& GetFadeoutWidth() const
-    {
-        return fadeoutWidth_;
-    }
-
     bool IsShowHandle() const
     {
         return isShowHandle_;
@@ -148,8 +136,6 @@ private:
     double linearSplitChildMinSize_ = 20.0;
     Color caretColor_ = Color(0xff007dff);
     Color selectedBackgroundColor_ = Color(0xff007dff);
-    bool isTextFadeout_ = false;
-    Dimension fadeoutWidth_;
     bool isShowHandle_ = false;
 };
 

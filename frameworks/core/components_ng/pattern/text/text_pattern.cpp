@@ -61,7 +61,6 @@
 #include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
 constexpr double DIMENSION_VALUE = 16.0;
 constexpr const char COPY_ACTION[] = "复制";
@@ -70,18 +69,10 @@ constexpr const char SYMBOL_COLOR[] = "BLACK";
 constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
 constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
 constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
-constexpr float PERCENT_100 = 100.0f;
 const std::u16string SYMBOL_TRANS = u"\uF0001";
 const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 }; // namespace
-
-GradientColor CreateTextGradientColor(float percent, Color color)
-{
-    NG::GradientColor gredient = GradientColor(color);
-    gredient.SetDimension(CalcDimension(percent * PERCENT_100, DimensionUnit::PERCENT));
-    return gredient;
-}
 
 TextPattern::~TextPattern()
 {
@@ -1039,50 +1030,6 @@ void TextPattern::InitMouseEvent()
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent);
     mouseEventInitialized_ = true;
-}
-
-void TextPattern::InitFocusEvent()
-{
-    CHECK_NULL_VOID(!focusInitialized_);
-    auto host = GetHost();
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    auto focusTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->GetContentModifier()->SetIsFocused(true);
-    };
-    focusHub->SetOnFocusInternal(focusTask);
-
-    auto blurTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->GetContentModifier()->SetIsFocused(false);
-    };
-    focusHub->SetOnBlurInternal(blurTask);
-
-    focusInitialized_ = true;
-}
-
-void TextPattern::InitHoverEvent()
-{
-    CHECK_NULL_VOID(!hoverInitialized_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto inputHub = eventHub->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(inputHub);
-
-    auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->GetContentModifier()->SetIsHovered(isHover);
-    };
-    auto mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
-    inputHub->AddOnHoverEvent(mouseEvent_);
-
-    hoverInitialized_ = true;
 }
 
 void TextPattern::HandleMouseEvent(const MouseInfo& info)
@@ -2122,15 +2069,22 @@ void TextPattern::OnModifyDone()
             renderContext->UpdateClipEdge(true);
             renderContext->SetClipToFrame(true);
         }
-        if (textLayoutProperty->GetTextMarqueeStartPolicyValue(MarqueeStartPolicy::DEFAULT) ==
-            MarqueeStartPolicy::ON_FOCUS) {
-            InitFocusEvent();
-            InitHoverEvent();
-        }
+        CloseSelectOverlay();
+        ResetSelection();
+        copyOption_ = CopyOptions::None;
+    } else {
+        copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
     }
+    if (GetAllChildren().empty()) {
+        auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
+        bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+            [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+        if (ifHaveObscured && !isSpanStringMode_) {
+            CloseSelectOverlay();
+            ResetSelection();
+            copyOption_ = CopyOptions::None;
+        }
 
-    const auto& children = host->GetChildren();
-    if (children.empty()) {
         std::string textCache = textForDisplay_;
         if (!isSpanStringMode_) {
             textForDisplay_ = textLayoutProperty->GetContent().value_or("");
@@ -2152,45 +2106,12 @@ void TextPattern::OnModifyDone()
         }
     }
 
-    RecoverCopyOption();
-
+    const auto& children = host->GetChildren();
     if (children.empty() && CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
         dataDetectorAdapter_->textForAI_ = textForDisplay_;
         dataDetectorAdapter_->StartAITask();
     }
     RegisterMarqueeNodeChangeListener();
-}
-
-void TextPattern::RecoverCopyOption()
-{
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-
-    copyOption_ =
-        isMarqueeRunning_ ? CopyOptions::None : textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
-
-    if (childNodes_.empty()) {
-        auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
-        bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
-            [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
-        if (ifHaveObscured && !isSpanStringMode_) {
-            CloseSelectOverlay();
-            ResetSelection();
-            copyOption_ = CopyOptions::None;
-        }
-    }
-
-    InitCopyOption();
-}
-
-void TextPattern::InitCopyOption()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
 
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
@@ -3266,25 +3187,6 @@ void TextPattern::FireOnSelectionChange(int32_t start, int32_t end)
     auto eventHub = host->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnSelectionChange(start, end);
-}
-
-void TextPattern::FireOnMarqueeStateChange(const TextMarqueeState& state)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<TextEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->FireOnMarqueeStateChange(static_cast<int32_t>(state));
-
-    if (TextMarqueeState::START == state) {
-        CloseSelectOverlay();
-        ResetSelection();
-        isMarqueeRunning_ = true;
-    } else if (TextMarqueeState::FINISH == state) {
-        isMarqueeRunning_ = false;
-    }
-
-    RecoverCopyOption();
 }
 
 void TextPattern::OnSelectionMenuOptionsUpdate(

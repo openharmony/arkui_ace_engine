@@ -427,15 +427,11 @@ private:
     RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<EventParam> param);
     void SetAccessibilityAction();
 
-    bool IsTextFadeOut();
-    void UpdateTexOverflow(bool isSel, const RefPtr<TextLayoutProperty>& textLayoutProperty);
-
     void InitTextFontFamily();
     bool SpringCurveTailMoveProcess(bool useRebound, double& dragDelta);
     void SpringCurveTailEndProcess(bool useRebound, bool stopMove);
 
     bool isTossing_ = false;
-    bool isTextFadeOut_ = false;
     float localDownDistance_ = 0.0f;
     Color pressColor_;
     Color hoverColor_;
