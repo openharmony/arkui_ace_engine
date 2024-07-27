@@ -362,7 +362,7 @@ public:
         return loadingCtx_->GetImageSize();
     }
 
-    void OnVisibleAreaChange(bool visible);
+    void OnVisibleAreaChange(bool visible = true, double ratio = 0.0);
 
     bool GetDefaultAutoResize()
     {
@@ -430,7 +430,8 @@ private:
     void PrepareAnimation(const RefPtr<CanvasImage>& image);
     void SetRedrawCallback(const RefPtr<CanvasImage>& image);
     void SetOnFinishCallback(const RefPtr<CanvasImage>& image);
-    void RegisterVisibleAreaChange();
+    void RegisterVisibleAreaChange(bool isCalcClip = true);
+    void TriggerVisibleAreaChangeForChild(const RefPtr<UINode>& node, bool visible, double ratio);
 
     void InitCopy();
     void HandleCopy();

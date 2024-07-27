@@ -214,7 +214,7 @@ void ImagePattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
     });
 }
 
-void ImagePattern::RegisterVisibleAreaChange()
+void ImagePattern::RegisterVisibleAreaChange(bool isCalcClip)
 {
     auto pipeline = GetContext();
     // register to onVisibleAreaChange
@@ -222,13 +222,13 @@ void ImagePattern::RegisterVisibleAreaChange()
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
-        self->OnVisibleAreaChange(visible);
+        self->OnVisibleAreaChange(visible, ratio);
     };
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // add visibleAreaChangeNode(inner callback)
     std::vector<double> ratioList = {0.0};
-    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, isCalcClip);
 }
 
 void ImagePattern::CheckHandles(SelectHandleInfo& handleInfo)
@@ -1015,7 +1015,7 @@ void ImagePattern::OnVisibleChange(bool visible)
     }
 }
 
-void ImagePattern::OnVisibleAreaChange(bool visible)
+void ImagePattern::OnVisibleAreaChange(bool visible, double ratio)
 {
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_IMAGE, "OnVisibleAreaChange visible:%{public}d", (int)visible);
@@ -1037,6 +1037,14 @@ void ImagePattern::OnVisibleAreaChange(bool visible)
         image_->ControlAnimation(visible);
     } else if (altImage_) {
         altImage_->ControlAnimation(visible);
+    }
+
+    if (isEnableAnalyzer_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto overlayNode = host->GetOverlayNode();
+        CHECK_NULL_VOID(overlayNode);
+        TriggerVisibleAreaChangeForChild(overlayNode, visible, ratio);
     }
 }
 
@@ -1521,6 +1529,7 @@ void ImagePattern::EnableAnalyzer(bool value)
     if (!imageAnalyzerManager_) {
         imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::IMAGE);
     }
+    RegisterVisibleAreaChange(false);
 }
 
 // As an example
@@ -2120,5 +2129,22 @@ void ImagePattern::SetObscured()
     imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     host->GetRenderContext()->ResetObscured();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void ImagePattern::TriggerVisibleAreaChangeForChild(const RefPtr<UINode>& node, bool visible, double ratio)
+{
+    for (const auto& childNode : node->GetChildren()) {
+        if (AceType::InstanceOf<FrameNode>(childNode)) {
+            auto frame = AceType::DynamicCast<FrameNode>(childNode);
+            if (!frame || !frame->GetEventHub<EventHub>()) {
+                continue;
+            }
+            auto callback = frame->GetEventHub<EventHub>()->GetVisibleAreaCallback(true).callback;
+            if (callback) {
+                callback(visible, ratio);
+            }
+        }
+        TriggerVisibleAreaChangeForChild(childNode, visible, ratio);
+    }
 }
 } // namespace OHOS::Ace::NG
