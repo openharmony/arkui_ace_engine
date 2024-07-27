@@ -258,13 +258,13 @@ void ResSchedReport::HandleTouchPullMove(const TouchEvent& touchEvent)
 double ResSchedReport::GetUpVelocity(const TouchEvent& lastMoveInfo,
     const TouchEvent& upEventInfo)
 {
-    float distance = sqrt(pow(lastMoveInfo.x - upEventInfo.x, SQUARE) + pow(lastMoveInfo.y - upEventInfo.y, SQUARE));
+    double distance = sqrt(pow(lastMoveInfo.x - upEventInfo.x, SQUARE) + pow(lastMoveInfo.y - upEventInfo.y, SQUARE));
     int64_t time = std::abs(lastMoveInfo.GetTimeStamp().time_since_epoch().count() -
         upEventInfo.GetTimeStamp().time_since_epoch().count());
     if (time < MILL_SECOND_UNIT) {
         return 0.0f;
     }
-    return (double)distance * dpi_ / (double)(time / MILL_SECOND_UNIT); //unit: pixel/ms
+    return distance * dpi_ / static_cast<double>(time / MILL_SECOND_UNIT); //unit: pixel/ms
 }
 
 void ResSchedReport::LoadPageEvent(int32_t value)
