@@ -169,6 +169,8 @@ private:
     void ItemSelectedOutAnimation(RefPtr<FrameNode>& itemNode);
     void FireOnSelect(int32_t selectIndex, bool fromPress);
     void SetAccessibilityAction();
+    void SetActionSelect(RefPtr<FrameNode>& textNode, RefPtr<AccessibilityProperty>& accessibilityProperty);
+    void SetActionClearSelection(RefPtr<FrameNode>& textNode, RefPtr<AccessibilityProperty>& accessibilityProperty);
     void RemoveBubble();
     void UpdateBubbleBackgroundView();
     CalcSize CalcBubbleListSize(int32_t popupSize, int32_t maxItemsSize);
