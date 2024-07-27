@@ -1350,7 +1350,8 @@ void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node
         boundWidth = size.Width() - cardInfo_.borderWidth * DOUBLE;
         boundHeight = size.Height() - cardInfo_.borderWidth * DOUBLE;
     }
-    externalRenderContext->SetBounds(cardInfo_.borderWidth, cardInfo_.borderWidth, boundWidth, boundHeight);
+    externalRenderContext->SetBounds(round(cardInfo_.borderWidth), round(cardInfo_.borderWidth),
+        round(boundWidth), round(boundHeight));
 
     bool isRecover = want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, false);
     if (isRecover || formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
@@ -1429,8 +1430,8 @@ void FormPattern::FireFormSurfaceChangeCallback(float width, float height, float
 {
     auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalRenderContext);
-    externalRenderContext->SetBounds(borderWidth, borderWidth, width - borderWidth * DOUBLE,
-        height - borderWidth * DOUBLE);
+    externalRenderContext->SetBounds(round(borderWidth), round(borderWidth), round(width - borderWidth * DOUBLE),
+        round(height - borderWidth * DOUBLE));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
