@@ -27,7 +27,7 @@ class RSObjAbsGeometry;
 
 namespace OHOS::Ace::NG {
 struct TraverseResult {
-    int32_t zOrderCnt_ = 0;
+    uint32_t zOrderCnt_ = 0;
     std::unordered_map<int32_t, OHOS::Rosen::SessionUIParam> uiParams_;
     uint64_t screenId_ = -1;
 };
