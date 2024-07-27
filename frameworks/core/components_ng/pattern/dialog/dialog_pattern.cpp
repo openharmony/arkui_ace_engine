@@ -1391,14 +1391,13 @@ void DialogPattern::CheckScrollHeightIsNegative(
 void DialogPattern::UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation)
 {
     if (deviceOrientation_ != deviceOrientation) {
+        CHECK_NULL_VOID(buttonContainer_);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        UpdateTextFontScale();
+        OnFontConfigurationUpdate();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        CHECK_NULL_VOID(buttonContainer_);
-        buttonContainer_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         deviceOrientation_ = deviceOrientation;
     }
 }
@@ -1478,6 +1477,8 @@ void DialogPattern::UpdateTextFontScale()
                 textProp->UpdateMaxFontScale(dialogTheme_->GetDialogDefaultScale());
             } else {
                 textProp->UpdateMaxFontScale(scale);
+            }
+            if (isSuitableForElderly_) {
                 textProp->UpdateMargin(margin);
             }
         }
