@@ -1401,8 +1401,7 @@ void ImagePattern::DumpAdvanceInfo()
 void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
-    CHECK_NULL_VOID(loadingCtx_ && image_);
-    if (loadingCtx_->GetSourceInfo().IsPixmap()) {
+    if (loadingCtx_ && image_ && loadingCtx_->GetSourceInfo().IsPixmap()) {
         auto pixelMap = image_->GetPixelMap();
         CHECK_NULL_VOID(pixelMap);
         std::vector<uint8_t> data;
@@ -1412,7 +1411,7 @@ void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
         PixelMapRecordDetails details = { pixelMap->GetWidth(), pixelMap->GetHeight(), pixelMap->GetPixelFormat(),
             pixelMap->GetAlphaType() };
         UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data, details);
-    } else {
+    } else if (loadingCtx_) {
         UdmfClient::GetInstance()->AddImageRecord(unifiedData, loadingCtx_->GetSourceInfo().GetSrc());
     }
     event->SetData(unifiedData);
