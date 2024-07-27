@@ -20,6 +20,7 @@
 #include "ipc_skeleton.h"
 #include "root_scene.h"
 #include "screen_manager.h"
+#include "transaction/rs_transaction_proxy.h"
 #include "ui/rs_display_node.h"
 
 #include "base/utils/utils.h"
@@ -29,7 +30,6 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "transaction/rs_transaction_proxy.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -124,16 +124,13 @@ void ScreenPattern::UpdateRenderPivot(float pivotX, float pivotY)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
-    if (context != nullptr) {
-        context->SetRenderPivot(pivotX, pivotY);
-        auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-        if (transactionProxy != nullptr) {
-            transactionProxy->FlushImplicitTransaction();
-        } else {
-            LOGE("RSTransactionProxy transactionProxy is nullptr");
-        }
+    CHECK_NULL_VOID(context);
+    context->SetRenderPivot(pivotX, pivotY);
+    auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
     } else {
-        LOGE("RenderContext is nullptr");
+        LOGE("RSTransactionProxy transactionProxy is nullptr");
     }
 }
 
