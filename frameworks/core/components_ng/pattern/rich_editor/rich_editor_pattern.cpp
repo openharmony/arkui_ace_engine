@@ -532,9 +532,7 @@ void RichEditorPattern::BeforeCreateLayoutWrapper()
 
 bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (config.skipMeasure || dirty->SkipMeasureContent()) {
-        return false;
-    }
+    CHECK_NULL_RETURN(!config.skipMeasure && !dirty->SkipMeasureContent(), false);
     auto originHeight = frameRect_.Height();
     frameRect_ = dirty->GetGeometryNode()->GetFrameRect();
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
@@ -562,7 +560,9 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     }
     isShowMenu_ = true;
-    UpdateCaretInfoToController();
+    if (!isModifyingContent_) {
+        UpdateCaretInfoToController();
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ret);
     SupplementIdealSizeWidth(host);
@@ -3971,10 +3971,10 @@ void RichEditorPattern::UpdateCaretInfoToController()
     MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
         StringUtils::Str8ToStr16(text), start, end);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT,
-        "Caret update, pos=[%{public}.2f,%{public}.2f], size=[%{public}.2f,%{public}.2f], "
-        "caretPosition=%{public}d, textSelector=[%{public}d,%{public}d]",
-        cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height,
-        caretPosition_, textSelector_.GetStart(), textSelector_.GetEnd());
+        "CursorInfo: pos=[%{public}.2f,%{public}.2f], size=[%{public}.2f,%{public}.2f], caret=%{public}d;"
+        "OnSelectionChange: textLen=%{public}zu, range=[%{public}d,%{public}d]",
+        cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height, caretPosition_,
+        StringUtils::Str8ToStr16(text).length(), start, end);
 #else
     if (HasConnection()) {
         TextEditingValue editingValue;
@@ -4259,6 +4259,7 @@ void RichEditorPattern::InsertValue(const std::string& insertValue, bool isIME)
 // calledByImf: true means real input; false means preview input
 void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, bool isIME, bool calledByImf)
 {
+    CONTENT_MODIFY_LOCK(this);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
         "insertLen=%{public}zu, isIME=%{public}d, calledByImf=%{public}d, isSpanString=%{public}d",
         StringUtils::ToWstring(insertValue).length(), isIME, calledByImf, isSpanStringMode_);
