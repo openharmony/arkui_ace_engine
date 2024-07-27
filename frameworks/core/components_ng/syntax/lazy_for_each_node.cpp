@@ -312,6 +312,7 @@ void LazyForEachNode::OnDatasetChange(const std::list<V2::Operation>& DataOperat
     tempChildren_.clear();
     tempChildren_.swap(children_);
     NotifyDataCountChanged(initialChangedIndex);
+    ParseOperations(DataOperations);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -564,5 +565,39 @@ void LazyForEachNode::NotifyCountChange(int32_t index, int32_t count)
     auto pattern = parentNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->NotifyDataChange(index, count);
+}
+
+void LazyForEachNode::ParseOperations(const std::list<V2::Operation>& dataOperations)
+{
+    std::map<std::string, int32_t> operationTypeMap = { { "add", 1 }, { "delete", 2 }, { "change", 3 }, { "move", 4 },
+        { "exchange", 5 }, { "reload", 6 } };
+    constexpr int ADDOP = 1;
+    constexpr int DELETEOP = 2;
+    constexpr int CHANGEOP = 3;
+    constexpr int MOVEOP = 4;
+    constexpr int EXCHANGEOP = 5;
+    constexpr int RELOADOP = 6;
+    for (const auto& operation : dataOperations) {
+        switch (operationTypeMap[operation.type]) {
+            case ADDOP:
+                NotifyCountChange(operation.index, operation.count);
+                break;
+            case DELETEOP:
+                NotifyCountChange(operation.index, -operation.count);
+                break;
+            case CHANGEOP:
+                NotifyCountChange(operation.index + operation.count - 1, 0);
+                break;
+            case MOVEOP:
+                NotifyCountChange(std::max(operation.coupleIndex.first, operation.coupleIndex.second), 0);
+                break;
+            case EXCHANGEOP:
+                NotifyCountChange(operation.coupleIndex.second, 0);
+                break;
+            case RELOADOP:
+                NotifyCountChange(static_cast<int32_t>(FrameCount()), 0);
+                break;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
