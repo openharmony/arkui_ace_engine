@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
-
 #include <variant>
 
 #include "base/geometry/rect.h"
@@ -24,13 +23,83 @@
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
+constexpr float DEFAULT_LIGHT_HEIGHT = 600.0f;
+constexpr uint32_t DEFAULT_AMBIENT_COLOR = 0X0A000000;
+constexpr float DEFAULT_SHADOW_COLOR = 0x33000000;
+constexpr float DEFAULT_LIGHT_RADIUS = 800.0f;
+constexpr float DEFAULT_ELEVATION = 120.0f;
 namespace OHOS::Ace::NG {
 TextDragOverlayModifier::TextDragOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern) : pattern_(pattern)
 {
     backgroundOffset_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(TEXT_DRAG_OFFSET.ConvertToPx());
     selectedBackgroundOpacity_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
+    selectedColor_ = AceType::MakeRefPtr<PropertyInt>(0);
+    shadowOpacity_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
     AttachProperty(backgroundOffset_);
     AttachProperty(selectedBackgroundOpacity_);
+    AttachProperty(selectedColor_);
+    AttachProperty(shadowOpacity_);
+}
+
+Color TextDragOverlayModifier::GetDragBackgroundColor(const Color& defaultColor)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, defaultColor);
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, defaultColor);
+    return textTheme->GetDragBackgroundColor();
+}
+
+void TextDragOverlayModifier::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas)
+{
+    if (type_ == DragAnimType::DEFAULT) {
+        return;
+    }
+    RSRecordingPath rsPath;
+    rsPath.AddPath(path);
+    rsPath.Offset(shadow.GetOffset().GetX(), shadow.GetOffset().GetY());
+    Color color = shadow.GetColor();
+    color = color.BlendOpacity(shadowOpacity_->Get());
+    RSColor spotColor = ToRSColor(color);
+    RSPoint3 planeParams = { 0.0, 0.0, shadow.GetElevation() };
+    auto bounds = rsPath.GetBounds();
+    RSPoint3 lightPos = { bounds.GetLeft() + bounds.GetWidth() / 2.0, bounds.GetTop() + bounds.GetHeight() / 2.0,
+        DEFAULT_LIGHT_HEIGHT };
+    RSColor ambientColor = ToRSColor(Color(DEFAULT_AMBIENT_COLOR));
+    canvas.DrawShadowStyle(rsPath, planeParams, lightPos, DEFAULT_LIGHT_RADIUS, ambientColor, spotColor,
+        RSShadowFlags::TRANSPARENT_OCCLUDER, true);
+    canvas.Restore();
+}
+
+void TextDragOverlayModifier::PaintBackground(const RSPath& path, RSCanvas& canvas,
+    RefPtr<TextDragPattern> textDragPattern)
+{
+    auto shadow = Shadow(DEFAULT_ELEVATION, {0.0, 0.0}, Color(DEFAULT_SHADOW_COLOR), ShadowStyle::OuterFloatingSM);
+    PaintShadow(path, shadow, canvas);
+    Color color = GetDragBackgroundColor(Color::WHITE);
+    RSBrush brush;
+    brush.SetColor(ToRSColor(color));
+    brush.SetAntiAlias(true);
+    canvas.AttachBrush(brush);
+    canvas.DrawPath(path);
+    canvas.DetachBrush();
+    if (type_ == DragAnimType::DEFAULT) {
+        return;
+    }
+    canvas.Save();
+    canvas.ClipPath(path, RSClipOp::INTERSECT, true);
+    std::shared_ptr<RSPath> selPath = textDragPattern->GetSelBackgroundPath();
+    RSBrush selBrush;
+    Color selColor = Color::WHITE;
+    if (type_ == DragAnimType::FLOATING) {
+        selColor = selColor.BlendOpacity(selectedBackgroundOpacity_->Get());
+    }
+    selBrush.SetColor(ToRSColor(selColor));
+    selBrush.SetAntiAlias(true);
+    canvas.AttachBrush(selBrush);
+    canvas.DrawPath(*selPath);
+    canvas.DetachBrush();
+    canvas.Restore();
 }
 
 void TextDragOverlayModifier::onDraw(DrawingContext& context)
@@ -43,11 +112,13 @@ void TextDragOverlayModifier::onDraw(DrawingContext& context)
     brush.SetColor(ToRSColor(color));
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
+    std::shared_ptr<RSPath> path;
     if (!isAnimating_) {
         canvas.DrawPath(*pattern->GetBackgroundPath());
     } else {
-        canvas.DrawPath(*pattern->GenerateBackgroundPath(backgroundOffset_->Get()));
+        path = pattern->GenerateBackgroundPath(backgroundOffset_->Get(), 1 - selectedBackgroundOpacity_->Get());
     }
+    PaintBackground(*path, canvas, pattern);
     canvas.DetachBrush();
     canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
     auto paragraph = pattern->GetParagraph().Upgrade();
