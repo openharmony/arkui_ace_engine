@@ -182,8 +182,6 @@ HWTEST_F(RichEditorOverlayTestNg, InitSelection001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    richEditorPattern->paragraphs_.paragraphs_.push_front({ paragraph });
     richEditorPattern->textForDisplay_ = "test";
     richEditorPattern->InitSelection(Offset(0, 0));
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
@@ -200,8 +198,6 @@ HWTEST_F(RichEditorOverlayTestNg, InitSelection002, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    richEditorPattern->paragraphs_.paragraphs_.push_front({ paragraph });
     richEditorPattern->textForDisplay_ = "test";
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     richEditorPattern->spans_.front()->position = 3;

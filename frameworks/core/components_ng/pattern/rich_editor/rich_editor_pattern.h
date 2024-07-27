@@ -93,7 +93,7 @@ struct AutoScrollParam {
 enum class RecordType { DEL_FORWARD = 0, DEL_BACKWARD = 1, INSERT = 2, UNDO = 3, REDO = 4, DRAG = 5 };
 enum class SelectorAdjustPolicy { INCLUDE = 0, EXCLUDE };
 enum class HandleType { FIRST = 0, SECOND };
-enum class SelectType { NONE = 0, NOT_SELECT, SELECT_BACKWARD, SELECT_ABOVE_LINE };
+enum class SelectType { SELECT_FORWARD = 0, SELECT_BACKWARD, SELECT_NOTHING, SELECT_ABOVE_LINE };
 const std::map<std::pair<HandleType, SelectorAdjustPolicy>, MoveDirection> SELECTOR_ADJUST_DIR_MAP = {
     {{ HandleType::FIRST, SelectorAdjustPolicy::INCLUDE }, MoveDirection::BACKWARD },
     {{ HandleType::FIRST, SelectorAdjustPolicy::EXCLUDE }, MoveDirection::FORWARD },
@@ -1099,7 +1099,7 @@ private:
     void ProcessInsertValue(const std::string& insertValue, bool isIME = false, bool calledbyImf = false);
     void FinishTextPreviewInner();
     void TripleClickSection(GestureEvent& info, int32_t start, int32_t end, int32_t pos);
-    SelectType CheckResult(const Offset& pos, int32_t currentPosition);
+    SelectType JudgeSelectType(const PositionWithAffinity& positionWithAffinity);
     void RequestKeyboardToEdit();
     void HandleTasksOnLayoutSwap()
     {

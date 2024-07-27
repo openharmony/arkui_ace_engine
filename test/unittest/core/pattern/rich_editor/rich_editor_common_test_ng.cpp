@@ -82,6 +82,8 @@ void RichEditorCommonTestNg::AddParagraph(TestParagraphItem testParagraphItem)
         { .paragraph = paragraph, .start = testParagraphItem.start, .end = testParagraphItem.end });
     for (const auto& [index, offset] : testParagraphItem.indexOffsetMap) {
         EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(offset, _)).WillRepeatedly(Return(index));
+        PositionWithAffinity positionWithAffinity(index, TextAffinity::UPSTREAM);
+        EXPECT_CALL(*paragraph, GetGlyphPositionAtCoordinate(offset)).WillRepeatedly(Return(positionWithAffinity));
     }
     for (auto& cursorItem : testParagraphItem.testCursorItems) {
         EXPECT_CALL(*paragraph, ComputeOffsetForCaretDownstream(cursorItem.index, _, _))
