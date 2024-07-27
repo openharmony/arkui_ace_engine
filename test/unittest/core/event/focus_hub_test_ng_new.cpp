@@ -123,8 +123,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0046, TestSize.Level1)
      * @tc.steps: step1. Create frameNode.
      */
     auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
-        AceType::MakeRefPtr<Pattern>());
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
+        AceType::MakeRefPtr<Pattern>());    auto eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
     ASSERT_NE(focusHub, nullptr);
@@ -140,7 +139,10 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0046, TestSize.Level1)
     focusHub->onPaintFocusStateCallback_ = []() { return true; };
     focusHub->PaintAllFocusState();
     focusHub->TriggerFocusScroll();
-    EXPECT_TRUE(focusHub->isFocusUnit_);
+    focusHub->focusType_ = FocusType::DISABLE;
+    focusHub->isFocusUnit_ = false;
+    focusHub->TriggerFocusScroll();
+    EXPECT_FALSE(focusHub->isFocusUnit_);
 }
 
 /**
@@ -700,6 +702,8 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0065, TestSize.Level1)
     auto res = focusHub->AcceptFocusByRectOfLastFocusFlex(RectF(0, 0, -1, -1));
     ASSERT_FALSE(res);
     focusHub->AcceptFocusByRectOfLastFocusFlex(RectF());
+    focusHub->focusDepend_ = FocusDependence::SELF;
+    res = focusHub->AcceptFocusByRectOfLastFocusFlex(RectF(0, 0, -1, -1));
     ASSERT_FALSE(res);
 }
 
@@ -1885,12 +1889,12 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0107, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = FrameNodeOnTree::CreateFrameNode(V2::COLUMN_ETS_TAG, 117,
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    auto child = FrameNodeOnTree::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        118, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto child2 = FrameNodeOnTree::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        119, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto frameNode =
+        FrameNodeOnTree::CreateFrameNode(V2::COLUMN_ETS_TAG, 117, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto child = FrameNodeOnTree::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 118, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto child2 = FrameNodeOnTree::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 119, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     child->MountToParent(frameNode);
     child2->MountToParent(frameNode);
 
@@ -1901,6 +1905,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0107, TestSize.Level1)
     auto child2FocusHub = child2->GetOrCreateFocusHub();
     ASSERT_NE(child2FocusHub, nullptr);
     child2FocusHub->SetFocusScopePriority("scope5", 2000);
+    parentFocusHub->isFocusScope_ = true;
+    EXPECT_TRUE(parentFocusHub->RequestFocusByPriorityInScope());
+    parentFocusHub->isFocusScope_ = false;
     EXPECT_TRUE(parentFocusHub->RequestFocusByPriorityInScope());
     EXPECT_TRUE(child2FocusHub->IsCurrentFocus());
 
@@ -1913,7 +1920,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0107, TestSize.Level1)
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_TAB);
     EXPECT_FALSE(parentFocusHub->OnKeyEventScope(keyEvent));
 }
-
 
 /**
  * @tc.name: FocusHubTestNg0108
@@ -1959,5 +1965,38 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0108, TestSize.Level1)
      */
     focusHub->focusType_ = FocusType::SCOPE;
     ASSERT_FALSE(focusHub->HasFocusedChild());
+}
+
+/**
+ * @tc.name: GetRootFocusHub001
+ * @tc.desc: Test the function GetRootFocusHub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, GetRootFocusHub001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    ASSERT_NE(focusHub->GetRootFocusHub(), nullptr);
+}
+
+/**
+ * @tc.name: SetFocusable001
+ * @tc.desc: Test the function SetFocusable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, SetFocusable001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->focusType_ = FocusType::SCOPE;
+    focusHub->focusable_ = true;
+    focusHub->implicitFocusable_ = true;
+    focusHub->focusDepend_ = FocusDependence::AUTO;
+    focusHub->SetFocusable(true, true);
+    focusHub->focusDepend_ = FocusDependence::CHILD;
+    focusHub->SetFocusable(true, true);
+    ASSERT_NE(focusHub->focusDepend_, FocusDependence::CHILD);
 }
 } // namespace OHOS::Ace::NG
