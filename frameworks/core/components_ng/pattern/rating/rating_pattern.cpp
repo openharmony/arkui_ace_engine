@@ -24,7 +24,6 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/icon_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_paint_method.h"
@@ -302,7 +301,6 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(double eventPointX,
         reverse ? (content->GetRect().Right() - eventPointX) : (eventPointX - content->GetRect().Left());
 
     const int32_t starNum = ratingLayoutProperty->GetStarsValue(themeStarNum_);
-    LOGE("yyy RecalculatedRatingScore p111");
     // step1: calculate the number of star which the touch point falls on.
     double wholeStarNum = 0.0;
     wholeStarNum = floor(touchLocationX / singleStarWidth_);
@@ -322,22 +320,18 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(double eventPointX,
     const double oldDrawScore = fmin(Round(oldRatingScore / stepSize) * stepSize, static_cast<double>(starNum));
 
     CHECK_NULL_VOID(!NearEqual(newDrawScore, oldDrawScore));
-    LOGE("yyy p222 oldDrawScore: %{public}f, newDrawScore: %{public}f", oldDrawScore, newDrawScore);
 
     // step4: Update the ratingScore saved in renderProperty and update render.
     UpdateRatingScore(newDrawScore);
-    std::string oldScore = std::to_string(oldDrawScore);
-    std::string newScore = std::to_string(newDrawScore);
+    std::ostringstream oldScore;
+    std::ostringstream newScore;
+    oldScore << std::fixed << std::setprecision(1) << oldDrawScore;
+    newScore << std::fixed << std::setprecision(1) << newDrawScore;
     if (isDrag) {
+        host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, oldScore.str(), newScore.str());
         ratingRenderProperty->UpdateTouchStar(
             static_cast<int32_t>(reverse ? starNum - wholeStarNum - 1 : wholeStarNum));
-        LOGE("yyy p333 isDrag");
-        host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, oldScore, newScore);
-    } else {
-        LOGE("yyy p555 SELECTED");
-        host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
     }
-    LOGE("yyy RecalculatedRatingScore p666");
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -352,7 +346,6 @@ bool RatingPattern::IsIndicator()
 void RatingPattern::HandleDragUpdate(const GestureEvent& info)
 {
     CHECK_NULL_VOID(!IsIndicator());
-    LOGE("yyy InitPanEvent p111 HandleDragUpdate");
     RecalculatedRatingScoreBasedOnEventPoint(info.GetLocalLocation().GetX(), true);
 }
 
@@ -386,7 +379,9 @@ void RatingPattern::FireChangeEvent()
 void RatingPattern::HandleDragEnd()
 {
     CHECK_NULL_VOID(!IsIndicator());
-    LOGE("yyy InitPanEvent p111 HandleDragEnd");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
     FireChangeEvent();
 }
 
@@ -395,7 +390,6 @@ void RatingPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     CHECK_NULL_VOID(!panEvent_);
     PanDirection panDirection;
     panDirection.type = PanDirection::HORIZONTAL;
-    LOGE("yyy OnModifyDone p333 InitPanEvent 111");
 
     panEvent_ = MakeRefPtr<PanEvent>([weak = WeakClaim(this)](const GestureEvent& info) {},
         [weak = WeakClaim(this)](const GestureEvent& info) {
@@ -413,13 +407,11 @@ void RatingPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         },
         [weak = WeakClaim(this)]() {});
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
-    LOGE("yyy OnModifyDone p333 InitPanEvent 222");
 }
 
 void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     CHECK_NULL_VOID(!touchEvent_);
-    LOGE("yyy OnModifyDone p333 InitTouchEvent 111");
     touchEvent_ = MakeRefPtr<TouchEventImpl>([weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -441,7 +433,6 @@ void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
             TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "rating handle touch up");
         }
     });
-    LOGE("yyy OnModifyDone p333 InitTouchEvent 222");
     gestureHub->AddTouchAfterEvent(touchEvent_);
 }
 
@@ -474,19 +465,16 @@ void RatingPattern::HandleClick(const GestureEvent& info)
 {
     CHECK_NULL_VOID(!IsIndicator());
     auto eventPointX = info.GetLocalLocation().GetX();
-    LOGE("yyy HandleClick c111 PointX: %{public}f; PointY: %{public}f", eventPointX, info.GetLocalLocation().GetY());
     if (Negative(eventPointX)) {
         return;
     }
     RecalculatedRatingScoreBasedOnEventPoint(eventPointX, false);
-    LOGE("yyy HandleClick c222");
     FireChangeEvent();
 }
 
 void RatingPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     CHECK_NULL_VOID(!clickEvent_);
-    LOGE("yyy OnModifyDone p333 InitClickEvent");
     clickEvent_ = MakeRefPtr<ClickEvent>([weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -607,7 +595,6 @@ bool RatingPattern::OnKeyEvent(const KeyEvent& event)
 
 void RatingPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
-    LOGE("yyy OnModifyDone p555");
     focusHub->SetFocusType(IsIndicator() ? FocusType::DISABLE : FocusType::NODE);
     focusHub->SetOnKeyEventInternal([wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
@@ -638,7 +625,6 @@ void RatingPattern::OnBlurEvent()
 
 void RatingPattern::SetRatingScore(double ratingScore)
 {
-    LOGE("yyy SetRatingScore p111");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<EventHub>();
@@ -653,7 +639,6 @@ void RatingPattern::SetRatingScore(double ratingScore)
 
 void RatingPattern::UpdateRatingScore(double ratingScore)
 {
-    LOGE("yyy UpdateRatingScore p222");
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     ratingRenderProperty->UpdateRatingScore(ratingScore);
@@ -664,7 +649,6 @@ void RatingPattern::UpdateRatingScore(double ratingScore)
 void RatingPattern::InitMouseEvent()
 {
     CHECK_NULL_VOID(!(mouseEvent_ && hoverEvent_));
-    LOGE("yyy OnModifyDone p444");
     auto eventHub = GetHost()->GetEventHub<RatingEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     mouseEvent_ = MakeRefPtr<InputEvent>([weak = WeakClaim(this)](MouseInfo& info) {
@@ -805,7 +789,6 @@ void RatingPattern::LoadBackground(const RefPtr<RatingLayoutProperty>& layoutPro
 
 void RatingPattern::OnModifyDone()
 {
-    LOGE("yyy OnModifyDone p111");
     Pattern::OnModifyDone();
     FireBuilder();
     auto host = GetHost();
@@ -833,7 +816,6 @@ void RatingPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     bool isIndicator = IsIndicator();
     if (!isIndicator) {
-        LOGE("yyy OnModifyDone p222");
         InitTouchEvent(gestureHub);
         InitPanEvent(gestureHub);
         InitClickEvent(gestureHub);
@@ -843,7 +825,6 @@ void RatingPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
-    LOGE("yyy OnModifyDone p666");
 }
 
 // XTS inspector code
