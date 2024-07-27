@@ -101,11 +101,6 @@ public:
     std::string GetDotIndicatorStyle() const;
     std::string GetDigitIndicatorStyle() const;
 
-    virtual std::string GetArcDotIndicatorStyle() const
-    {
-        return "";
-    }
-
     int32_t GetCurrentShownIndex() const
     {
         return IsLoop() ? currentIndex_ : GetLoopIndex(currentIndex_);
@@ -269,8 +264,6 @@ public:
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
     }
 
-    virtual void SetSwiperArcDotParameters(const SwiperArcDotParameters& swiperArcDotParameters) {}
-
     void ShowNext();
     void ShowPrevious();
     void SwipeTo(int32_t index);
@@ -414,10 +407,6 @@ public:
     }
 
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
-    virtual std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const
-    {
-        return nullptr;
-    }
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
     void ArrowHover(bool hoverFlag);
@@ -546,8 +535,6 @@ public:
     {
         prevMarginIgnoreBlank_ = prevMarginIgnoreBlank;
     }
-
-    virtual void SaveCircleDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode) {}
 
     bool GetPrevMarginIgnoreBlank()
     {
