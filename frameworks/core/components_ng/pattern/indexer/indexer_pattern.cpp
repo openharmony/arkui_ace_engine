@@ -1929,49 +1929,69 @@ void IndexerPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(textNode);
         auto accessibilityProperty = textNode->GetAccessibilityProperty<AccessibilityProperty>();
         CHECK_NULL_VOID(accessibilityProperty);
-        accessibilityProperty->SetActionSelect(
-            [weakPtr = WeakClaim(this), node = WeakClaim(RawPtr(textNode)), childrenNode]() {
-                const auto& indexerPattern = weakPtr.Upgrade();
-                CHECK_NULL_VOID(indexerPattern);
-                const auto& frameNode = node.Upgrade();
-                CHECK_NULL_VOID(frameNode);
-                auto index = 0;
-                auto nodeId = frameNode->GetAccessibilityId();
-                for (auto& child : childrenNode) {
-                    if (child->GetAccessibilityId() == nodeId) {
-                        break;
-                    }
-                    index++;
-                }
-                indexerPattern->selected_ = index;
-                indexerPattern->ResetStatus();
-                indexerPattern->ApplyIndexChanged(true, true, true);
-                indexerPattern->OnSelect();
-            });
-
-        accessibilityProperty->SetActionClearSelection(
-            [weakPtr = WeakClaim(this), node = WeakClaim(RawPtr(textNode)), childrenNode] {
-                const auto& indexerPattern = weakPtr.Upgrade();
-                CHECK_NULL_VOID(indexerPattern);
-                const auto& frameNode = node.Upgrade();
-                CHECK_NULL_VOID(frameNode);
-                auto index = 0;
-                auto nodeId = frameNode->GetAccessibilityId();
-                for (auto& child : childrenNode) {
-                    if (child->GetAccessibilityId() == nodeId) {
-                        break;
-                    }
-                    index++;
-                }
-                if (indexerPattern->selected_ != index) {
-                    return;
-                }
-                indexerPattern->selected_ = 0;
-                indexerPattern->ResetStatus();
-                indexerPattern->ApplyIndexChanged(true, false);
-                indexerPattern->OnSelect();
-            });
+        SetActionSelect(textNode, accessibilityProperty);
+        SetActionClearSelection(textNode, accessibilityProperty);
     }
+}
+
+void IndexerPattern::SetActionSelect(RefPtr<FrameNode>& textNode, RefPtr<AccessibilityProperty>& accessibilityProperty)
+{
+    CHECK_NULL_VOID(textNode);
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionSelect(
+        [weakPtr = WeakClaim(this), node = WeakClaim(RawPtr(textNode))]() {
+            const auto& indexerPattern = weakPtr.Upgrade();
+            CHECK_NULL_VOID(indexerPattern);
+            auto host = indexerPattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto childrenNode = host->GetChildren();
+            const auto& frameNode = node.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto index = 0;
+            auto nodeId = frameNode->GetAccessibilityId();
+            for (auto& child : childrenNode) {
+                if (child->GetAccessibilityId() == nodeId) {
+                    break;
+                }
+                index++;
+            }
+            indexerPattern->selected_ = index;
+            indexerPattern->ResetStatus();
+            indexerPattern->ApplyIndexChanged(true, true, true);
+            indexerPattern->OnSelect();
+        });
+}
+
+void IndexerPattern::SetActionClearSelection(
+    RefPtr<FrameNode>& textNode, RefPtr<AccessibilityProperty>& accessibilityProperty)
+{
+    CHECK_NULL_VOID(textNode);
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionClearSelection(
+        [weakPtr = WeakClaim(this), node = WeakClaim(RawPtr(textNode))] {
+            const auto& indexerPattern = weakPtr.Upgrade();
+            CHECK_NULL_VOID(indexerPattern);
+            auto host = indexerPattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto childrenNode = host->GetChildren();
+            const auto& frameNode = node.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto index = 0;
+            auto nodeId = frameNode->GetAccessibilityId();
+            for (auto& child : childrenNode) {
+                if (child->GetAccessibilityId() == nodeId) {
+                    break;
+                }
+                index++;
+            }
+            if (indexerPattern->selected_ != index) {
+                return;
+            }
+            indexerPattern->selected_ = 0;
+            indexerPattern->ResetStatus();
+            indexerPattern->ApplyIndexChanged(true, false);
+            indexerPattern->OnSelect();
+        });
 }
 
 void IndexerPattern::RemoveBubble()
