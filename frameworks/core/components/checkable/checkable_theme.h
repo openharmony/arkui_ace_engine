@@ -186,26 +186,6 @@ public:
         return dotResourceId_;
     }
 
-    const Color& GetFocusedBgColor() const
-    {
-        return focusedBgColor_;
-    }
-
-    const Dimension& GetSizeFocusBg() const
-    {
-        return sizeFocusBg_;
-    }
-
-    const Color& GetFocusedRingUnchecked() const
-    {
-        return focusedRingUnchecked_;
-    }
-
-    const Color& GetFocusedBgUnchecked() const
-    {
-        return focusedBgUnchecked_;
-    }
-
 protected:
     CheckableTheme() = default;
 
@@ -215,15 +195,11 @@ protected:
     Color inactivePointColor_;
     Color focusColor_;
     Color hoverColor_;
-    Color focusedRingUnchecked_;
-    Color focusedBgUnchecked_;
     Color clickEffectColor_;
     Color shadowColor_;
     Color focusBoardColor_;
     Color borderFocusedColor_;
     Color focusedBGColorUnselected_;
-    Color focusedBgColor_;
-    Dimension sizeFocusBg_;
     Dimension width_;
     Dimension height_;
     Dimension hotZoneHorizontalPadding_;
@@ -473,7 +449,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            ParseNewPattern(themeConstants, theme);
             ParsePattern(themeConstants, theme);
             return theme;
         }
@@ -508,8 +483,6 @@ public:
             theme->shadowWidth_ = radioPattern->GetAttr<Dimension>("radio_shadow_width", 0.0_vp);
             theme->pointColor_ = radioPattern->GetAttr<Color>("fg_color_checked", Color::RED);
             theme->activeColor_ = radioPattern->GetAttr<Color>("bg_color_checked", Color::RED);
-            theme->focusedRingUnchecked_ = radioPattern->GetAttr<Color>("focused_ring_unchecked", Color::TRANSPARENT);
-            theme->focusedBgUnchecked_ = radioPattern->GetAttr<Color>("focused_bg_unchecked", Color::TRANSPARENT);
             theme->inactiveColor_ = radioPattern->GetAttr<Color>("bg_color_unchecked", Color::RED);
             theme->inactivePointColor_ = radioPattern->GetAttr<Color>("fg_color_unchecked", Color::RED);
             theme->focusColor_ = radioPattern->GetAttr<Color>("bg_focus_outline_color", Color::RED);
@@ -536,17 +509,6 @@ public:
                 theme->width_ = radioPattern->GetAttr<Dimension>("radio_size_api_twelve", 24.0_vp);
                 theme->height_ = theme->width_;
             }
-        }
-
-        void ParseNewPattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RadioTheme>& theme) const
-        {
-            RefPtr<ThemeStyle> radioPattern = themeConstants->GetPatternByName(THEME_PATTERN_RADIO);
-            if (!radioPattern) {
-                LOGW("find pattern of radio fail");
-                return;
-            }
-            theme->focusedBgColor_ = radioPattern->GetAttr<Color>("color_focused_bg", Color::RED);
-            theme->sizeFocusBg_ = radioPattern->GetAttr<Dimension>("size_focused_bg", 0.0_vp);
         }
     };
 };
