@@ -678,6 +678,7 @@ void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode, bool i
     CHECK_NULL_VOID(container);
 
     if (isBindSheet) {
+        // BindSheet does not use subwindowManage. If use subwindow for display based on the input instanceId, autosave is started in the main window.
         auto layoutProperty = ContainerNode->GetLayoutProperty<SheetPresentationProperty>();
         CHECK_NULL_VOID(layoutProperty);
         auto currentStyle = layoutProperty->GetSheetStyleValue();
