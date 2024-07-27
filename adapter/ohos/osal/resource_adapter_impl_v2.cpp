@@ -21,7 +21,6 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_convertor.h"
-#include "adapter/ohos/osal/resource_theme_style.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
@@ -54,6 +53,12 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_TEXT_OVERLAY,
     THEME_PATTERN_CONTAINER_MODAL
 };
+
+const char* PATTERN_PRELOAD_MAP[] = {
+    THEME_BLUR_STYLE_COMMON,
+    THEME_PATTERN_ICON
+};
+
 const std::string RESOURCE_TOKEN_PATTERN = "\\[.+?\\]\\.(\\S+?\\.\\S+)";
 
 bool IsDirExist(const std::string& path)
@@ -198,32 +203,55 @@ void ResourceAdapterImplV2::UpdateConfig(const ResourceConfiguration& config, bo
 RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
 {
     CheckThemeId(themeId);
-    auto theme = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
-    constexpr char OHFlag[] = "ohos_"; // fit with resource/base/theme.json and pattern.json
-    {
-        auto manager = GetResourceManager();
-        if (manager) {
-            auto ret = manager->GetThemeById(themeId, theme->rawAttrs_);
-            for (size_t i = 0; i < sizeof(PATTERN_MAP) / sizeof(PATTERN_MAP[0]); i++) {
-                ResourceThemeStyle::RawAttrMap attrMap;
-                std::string patternTag = PATTERN_MAP[i];
-                std::string patternName = std::string(OHFlag) + PATTERN_MAP[i];
-                ret = manager->GetPatternByName(patternName.c_str(), attrMap);
-                if (attrMap.empty()) {
-                    continue;
-                }
-                theme->patternAttrs_[patternTag] = attrMap;
-            }
+    auto manager = GetResourceManager();
+    auto theme = AceType::MakeRefPtr(AceType::Claim(this));
+    CHECK_NULL_RETURN(manager, theme);
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, theme);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, theme);
+
+    auto task = this, themeId, manager, themeStyle = WeakPtr(theme) -> void {
+        auto theme = themeStyle.Upgrade();
+        CHECK_NULL_VOID(theme);
+        auto length = sizeof(PATTERN_PRELOAD_MAP) / sizeof(PATTERN_PRELOAD_MAP[0]);
+        for (size_t i = 0; i < length; i++) {
+            std::string patternTag = PATTERN_PRELOAD_MAP[i];
+            theme->strResults.push_back(patternTag);
         }
-    }
-
-    if (theme->patternAttrs_.empty() && theme->rawAttrs_.empty()) {
-        return nullptr;
-    }
-
-    theme->ParseContent();
-    theme->patternAttrs_.clear();
+        LoadPattern(themeId, manager, PATTERN_PRELOAD_MAP, theme, sizeof(PATTERN_PRELOAD_MAP) / sizeof(PATTERN_PRELOAD_MAP[0]));
+        theme->SetPromiseValue();
+    };
+    taskExecutor->PostTask(task, TaskExecutor::TaskType::BACKGROUND, "ArkUILoadTheme");
+    LoadPattern(themeId, manager, PATTERN_MAP, theme, sizeof(PATTERN_MAP) / sizeof(PATTERN_MAP[0]));
     return theme;
+}
+
+void ResourceAdapterImplV2::LoadPattern(int32_t themeId, std::shared_ptrGlobal::Resource::ResourceManager manager,
+    const char* patternMap[], RefPtr theme, size_t size)
+{
+    char OHFlag[] = "ohos_"; // fit with resource/base/theme.json and pattern.json
+    auto ret = manager->GetThemeById(themeId, theme->rawAttrs_);
+    for (size_t i = 0; i < size; i++) {
+        ResourceThemeStyle::RawAttrMap attrMap;
+        std::string patternTag = patternMap[i];
+        std::string patternName = std::string(OHFlag) + patternMap[i];
+        ret = manager->GetPatternByName(patternName.c_str(), attrMap);
+        if (attrMap.empty()) {
+            continue;
+        }
+        theme->patternAttrs_[patternTag] = attrMap;
+    }
+    if (theme->patternAttrs_.empty() && theme->rawAttrs_.empty()) {
+        return ;
+    }
+    std::lock_guardstd::mutex lock(parseThemeContentMutex_);
+    if (parsePatternFinished_) {
+        theme->ParseContent();
+        theme->patternAttrs_.clear();
+        parsePatternFinished_ = false;
+    }
+    parsePatternFinished_ = true;
 }
 
 RefPtr<ThemeStyle> ResourceAdapterImplV2::GetPatternByName(const std::string& patternName)

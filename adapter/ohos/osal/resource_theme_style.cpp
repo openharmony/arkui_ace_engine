@@ -198,4 +198,15 @@ void ResourceThemeStyle::OnParseResourceMedia(const std::string& attrName, const
     }
     attributes_[attrName] = { .type = ThemeConstantsType::STRING, .value = mediaPath };
 }
+
+void ResourceThemeStyle::CheckThemeStyleLoaded(const std::string& patternName)
+{
+    auto it = std::find(checkThemeStyleVector.begin(), checkThemeStyleVector.end(), patternName.c_str());
+    if (it == checkThemeStyleVector.end()) {
+        return;
+    }
+    if (future_.valid()) {
+        future_.wait_until(std::chrono::system_clock::now() + std::chrono::milliseconds(WAIT_FOR_TIME));
+    }
+}
 } // namespace OHOS::Ace

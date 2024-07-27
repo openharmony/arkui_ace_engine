@@ -17,9 +17,10 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_ADAPTER_IMPL_V2_H
 
 #include <mutex>
+#include <future>
 
 #include "resource_manager.h"
-
+#include "adapter/ohos/osal/resource_theme_style.h"
 #include "base/image/pixel_map.h"
 #include "base/utils/device_config.h"
 #include "core/components/theme/resource_adapter.h"
@@ -98,6 +99,10 @@ private:
     bool appHasDarkRes_ = false;
     std::mutex updateResConfigMutex_;
     ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImplV2);
+    void LoadPattern(int32_t themeId, std::shared_ptrGlobal::Resource::ResourceManager manager,
+        const char* patternMap[], RefPtr theme, size_t size);
+    std::mutex parseThemeContentMutex_;
+    bool parsePatternFinished_ = false;
 };
 } // namespace OHOS::Ace
 
