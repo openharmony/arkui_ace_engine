@@ -18,6 +18,9 @@
 #include <regex>
 #include <set>
 #include <string>
+#include <future>
+#include <mutex>
+#include <shared_mutex>
 
 namespace OHOS::Ace {
 namespace {
@@ -39,7 +42,7 @@ constexpr char RES_HAP_PATH[] = "/data/storage/el1/bundle/ohos.global.systemres/
 #endif
 
 const std::string DIMENSION_PATTERN = R"(^([+-]?\d+(\.\d+)?)(px|fp|lpx|vp|%)?)";
-
+constexpr int32_t WAIT_FOR_TIME = 50;
 static const std::set<std::string> stringAttrs = {
     "attribute_text_font_family_regular",
     "attribute_text_font_family_medium",

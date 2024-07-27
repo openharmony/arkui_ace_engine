@@ -78,6 +78,9 @@ using ThemeConstantsMap = std::unordered_map<uint32_t, ResValueWrapper>;
 class ThemeStyle : public virtual AceType {
     DECLARE_ACE_TYPE(ThemeStyle, AceType);
 
+private:
+    mutable std::shared_mutex attributesMutex_;
+
 public:
     ThemeStyle() = default;
     ~ThemeStyle() override
@@ -109,17 +112,20 @@ public:
 
     bool HasAttr(const std::string& attr) const
     {
+        std::shared_lock<std::shared_mutex> lock(attributesMutex_);
         return attributes_.find(attr) != attributes_.end();
     }
 
     void SetAttr(const std::string& attr, const ResValueWrapper& value)
     {
+        std::unique_lock<std::shared_mutex> lock(attributesMutex_);
         attributes_[attr] = value;
     }
     virtual void CheckThemeStyleLoaded(const std::string& patternName) {}
     template<typename T>
     T GetAttr(const std::string& attr, const T& errorValue) const
     {
+        std::shared_lock<std::shared_mutex> lock(attributesMutex_);
         auto findIter = attributes_.find(attr);
         if (findIter == attributes_.end()) {
             TAG_LOGW(AceLogTag::ACE_THEME, "style %{public}s not contains %{public}s!", name_.c_str(), attr.c_str());
