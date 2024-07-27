@@ -733,10 +733,6 @@ void StartDragService(DragControllerAsyncCtx* asyncCtx)
     NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(asyncCtx->pointerId, asyncCtx->instanceId);
     int32_t ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(asyncCtx->env, &scope);
-    HandleSuccess(asyncCtx, DragNotifyMsg {}, DragStatus::STARTED);
-    napi_close_handle_scope(asyncCtx->env, scope);
     if (ret != 0) {
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(asyncCtx->env, &scope);
@@ -744,6 +740,10 @@ void StartDragService(DragControllerAsyncCtx* asyncCtx)
         napi_close_handle_scope(asyncCtx->env, scope);
         return;
     }
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(asyncCtx->env, &scope);
+    HandleSuccess(asyncCtx, DragNotifyMsg {}, DragStatus::STARTED);
+    napi_close_handle_scope(asyncCtx->env, scope);
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     SetIsDragging(container, true);
     TAG_LOGI(AceLogTag::ACE_DRAG, "msdp start drag successfully");
@@ -899,7 +899,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 }
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUIDragComplete");
+        TaskExecutor::TaskType::JS, "ArkUIDragComplete", PriorityType::VIP);
 }
 
 bool ParseTouchPoint(DragControllerAsyncCtx* asyncCtx, napi_valuetype& valueType)
