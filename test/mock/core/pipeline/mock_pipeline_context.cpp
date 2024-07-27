@@ -555,6 +555,7 @@ bool PipelineContext::IsEnableKeyBoardAvoidMode()
 {
     return false;
 }
+void PipelineContext::RequireSummary() {};
 void PipelineContext::SetIgnoreViewSafeArea(bool value) {};
 void PipelineContext::SetIsLayoutFullScreen(bool value) {};
 void PipelineContext::SetIsNeedAvoidWindow(bool value) {};

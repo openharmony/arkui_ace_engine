@@ -318,6 +318,9 @@ public:
     }
     void SetEnableKeyBoardAvoidMode(bool value) override;
     bool IsEnableKeyBoardAvoidMode() override;
+
+    void RequireSummary() override;
+
     const RefPtr<SafeAreaManager>& GetSafeAreaManager() const
     {
         return safeAreaManager_;
