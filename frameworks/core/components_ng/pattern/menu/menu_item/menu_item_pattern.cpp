@@ -337,6 +337,9 @@ void MenuItemPattern::ShowSubMenu()
     CHECK_NULL_VOID(subMenu);
     ShowSubMenuHelper(subMenu);
     menuPattern->SetShowedSubMenu(subMenu);
+    auto accessibilityProperty = menuNode->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityIsShow(true);
     host->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
         static_cast<int32_t>(AccessibilityEventType::PAGE_CHANGE));
@@ -354,9 +357,8 @@ void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
         props->UpdateExpandingMode(expandingMode_);
         if (expandingMode_ == SubMenuExpandingMode::STACK) {
             AddStackSubMenuHeader(frameNode);
-            pattern->BlockFurtherExpand();
+            pattern->SetIsStackSubmenu();
         } else if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
-            pattern->BlockFurtherExpand();
             pattern->SetIsEmbedded();
             return;
         }
@@ -1087,8 +1089,9 @@ void MenuItemPattern::AddExpandIcon(RefPtr<FrameNode>& row)
     auto menuPattern = menuNode ? menuNode->GetPattern<MenuPattern>() : nullptr;
     auto menuProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
     CHECK_NULL_VOID(menuProperty);
-    auto canExpand = (menuPattern ? menuPattern->CanExpand() : true) && GetSubBuilder() != nullptr &&
-        (expandingMode_ == SubMenuExpandingMode::EMBEDDED || expandingMode_ == SubMenuExpandingMode::STACK);
+    auto canExpand = GetSubBuilder() != nullptr && menuPattern
+        && !menuPattern->IsEmbedded() && !menuPattern->IsStackSubmenu()
+        && (expandingMode_ == SubMenuExpandingMode::EMBEDDED || expandingMode_ == SubMenuExpandingMode::STACK);
     if (!canExpand) {
         if (expandIcon_) {
             row->RemoveChild(expandIcon_);

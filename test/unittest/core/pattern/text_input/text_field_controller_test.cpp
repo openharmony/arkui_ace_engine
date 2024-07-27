@@ -507,7 +507,7 @@ HWTEST_F(TextFieldControllerTest, ContentController001, TestSize.Level1)
         "openharmony123_ *+%$",
         "openharmony123456*+&@huawei.com",
         "openharmony (new)#15612932075*.com",
-        "open_harmony@@huawei.com*+$helloworld",
+        "open_harmony@@harmony.com*+$helloworld",
         "open_harmony123 password*+#",
         "openharmony123456*+&@huawei.com",
         "o达瓦大屋顶pen_harmony456顶顶顶 password*+#得到",
@@ -517,7 +517,7 @@ HWTEST_F(TextFieldControllerTest, ContentController001, TestSize.Level1)
     testItems.emplace_back(TextInputType::NUMBER, "123456", "TextInputType::NUMBER");
     testItems.emplace_back(TextInputType::PHONE, " ()#15612932075*", "TextInputType::PHONE");
     testItems.emplace_back(
-        TextInputType::EMAIL_ADDRESS, "open_harmony@huawei.comhelloworld", "TextInputType::EMAIL_ADDRESS");
+        TextInputType::EMAIL_ADDRESS, "open_harmony@harmony.com*+$helloworld", "TextInputType::EMAIL_ADDRESS");
     testItems.emplace_back(
         TextInputType::VISIBLE_PASSWORD, "open_harmony123 password*+#", "TextInputType::VISIBLE_PASSWORD");
     testItems.emplace_back(TextInputType::NUMBER_PASSWORD, "123456", "TextInputType::NUMBER_PASSWORD");

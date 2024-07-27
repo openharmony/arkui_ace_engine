@@ -1405,6 +1405,8 @@ RefPtr<UINode> NavigationPattern::GenerateUINodeByIndex(int32_t index)
     if (navigationNode && navDestinationPattern) {
         navDestinationPattern->SetNavigationNode(navigationNode);
         navDestinationPattern->SetNavigationId(navigationNode->GetInspectorId().value_or(""));
+        navigationStack_->SetDestinationIdToJsStack(
+            index, std::to_string(navDestinationPattern->GetNavDestinationId()));
     }
     auto eventHub = navDestinationNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_RETURN(eventHub, node);

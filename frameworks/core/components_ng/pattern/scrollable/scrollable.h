@@ -80,6 +80,7 @@ public:
     ~Scrollable() override;
 
     static void SetVelocityScale(double sVelocityScale);
+    static double GetVelocityScale();
     static void SetFriction(double sFriction);
 
     void Initialize(const WeakPtr<PipelineBase>& context);

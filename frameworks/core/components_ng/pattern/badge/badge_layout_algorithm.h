@@ -36,6 +36,25 @@ public:
 
 private:
     void PerformMeasureSelf(LayoutWrapper* layoutWrapper);
+
+    inline double GetFontSizeInit(const std::optional<Dimension>& badgeFontSize)
+    {
+        if (badgeFontSize->Unit() == DimensionUnit::FP) {
+            return badgeFontSize->Value();
+        } else {
+            return badgeFontSize->ConvertToVp();
+        }
+    }
+
+    inline double GetBadgeSizeInit(const std::optional<Dimension>& badgeCircleSize)
+    {
+        if (badgeCircleSize->Unit() == DimensionUnit::FP) {
+            return badgeCircleSize->Value();
+        } else {
+            return badgeCircleSize->ConvertToVp();
+        }
+    }
+
     bool hasFontSize_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(BadgeLayoutAlgorithm);

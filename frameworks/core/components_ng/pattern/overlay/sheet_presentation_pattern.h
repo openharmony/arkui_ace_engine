@@ -674,6 +674,7 @@ private:
     SheetType sheetType_ = SheetType::SHEET_BOTTOM;
     bool windowChanged_ = false;
     bool isDirectionUp_ = true;
+    bool topSafeAreaChanged_ = false;
     ScrollSizeMode scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT;
 
     //record sheet sored detent index

@@ -1123,13 +1123,16 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
     } else {
         jumpIndex_ = index;
     }
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 void TabBarPattern::HandleBottomTabBarChange(int32_t index)
 {
     AnimationUtils::CloseImplicitAnimation();
     auto preIndex = GetImageColorOnIndex().value_or(indicator_);
-    SetImageColorOnIndex(index);
+    if (preIndex == index) {
+        return;
+    }
     UpdateImageColor(index);
     UpdateSymbolStats(index, preIndex);
     if (preIndex < 0 || preIndex >= static_cast<int32_t>(tabBarStyles_.size()) ||
@@ -1666,11 +1669,6 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
         tabBarPattern->ResetIndicatorAnimationState();
         auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
         CHECK_NULL_VOID(tabBarLayoutProperty);
-        auto preIndex = tabBarPattern->GetImageColorOnIndex().value_or(tabBarPattern->indicator_);
-        if (preIndex == index) {
-            tabBarPattern->SetMaskAnimationByCreate(false);
-            return;
-        }
         if (!tabBarPattern->IsMaskAnimationByCreate()) {
             tabBarPattern->HandleBottomTabBarChange(index);
         }
@@ -2080,19 +2078,6 @@ void TabBarPattern::StopTranslateAnimation()
 
 void TabBarPattern::TriggerTranslateAnimation(int32_t currentIndex, int32_t targetIndex)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto originalPaintRect = layoutProperty->GetIndicatorRect(currentIndex);
-    auto targetPaintRect = layoutProperty->GetIndicatorRect(targetIndex);
-    if (std::count(tabBarStyles_.begin(), tabBarStyles_.end(), TabBarStyle::SUBTABBATSTYLE) ==
-        static_cast<int32_t>(tabBarStyles_.size())) {
-        auto paintProperty = host->GetPaintProperty<TabBarPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-        paintProperty->UpdateIndicator(targetPaintRect);
-    }
-
     auto curve = DurationCubicCurve;
     StopTranslateAnimation();
     SetSwiperCurve(curve);
@@ -2108,16 +2093,26 @@ void TabBarPattern::TriggerTranslateAnimation(int32_t currentIndex, int32_t targ
     option.SetFillMode(FillMode::FORWARDS);
 
     auto targetOffset = 0.0f;
-    
     if (CanScroll()) {
         targetOffset = CalculateTargetOffset(targetIndex);
         PlayTabBarTranslateAnimation(option, targetOffset);
     }
 
-    if (!changeByClick_ ||
-        std::count(tabBarStyles_.begin(), tabBarStyles_.end(), TabBarStyle::SUBTABBATSTYLE) !=
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (std::count(tabBarStyles_.begin(), tabBarStyles_.end(), TabBarStyle::SUBTABBATSTYLE) !=
             static_cast<int32_t>(tabBarStyles_.size()) ||
         layoutProperty->GetAxisValue(Axis::HORIZONTAL) != Axis::HORIZONTAL) {
+        return;
+    }
+    auto originalPaintRect = layoutProperty->GetIndicatorRect(currentIndex);
+    auto targetPaintRect = layoutProperty->GetIndicatorRect(targetIndex);
+    auto paintProperty = host->GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateIndicator(targetPaintRect);
+    if (!changeByClick_) {
         return;
     }
     PlayIndicatorTranslateAnimation(option, originalPaintRect, targetPaintRect, targetOffset);

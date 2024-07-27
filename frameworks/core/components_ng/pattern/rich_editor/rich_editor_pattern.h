@@ -71,6 +71,7 @@ struct TextConfig;
             (targetNode)->AddPropertyInfo(propertyInfo);                            \
         }                                                                           \
     } while (false)
+#define CONTENT_MODIFY_LOCK(patternPtr) ContentModifyLock contentModifyLock(patternPtr)
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -162,6 +163,27 @@ public:
         {
             return !previewContent.empty() && isPreviewTextInputting && startOffset >= 0 && endOffset >= startOffset;
         }
+    };
+
+    class ContentModifyLock {
+    public:
+        ContentModifyLock();
+        ContentModifyLock(RichEditorPattern* pattern)
+        {
+            pattern->isModifyingContent_ = true;
+            pattern_ = WeakClaim(pattern);
+        }
+        ~ContentModifyLock()
+        {
+            auto pattern = pattern_.Upgrade();
+            if (!pattern) {
+                TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pattern is null, unlock failed");
+                return;
+            }
+            pattern->isModifyingContent_ = false;
+        }
+    private:
+        WeakPtr<RichEditorPattern> pattern_;
     };
 
     int32_t SetPreviewText(const std::string& previewTextValue, const PreviewRange range) override;
@@ -346,13 +368,15 @@ public:
     void NotifyKeyboardClosedByUser() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosedByUser");
+        CloseSelectOverlay();
+        ResetSelection();
         FocusHub::LostFocusToViewRoot();
     }
     void NotifyKeyboardClosed() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
-        if (!isCustomKeyboardAttached_ && HasFocus()) {
-            FocusHub::LostFocusToViewRoot();
+        if (!isCustomKeyboardAttached_ && caretTwinkling_) {
+            StopTwinkling();
         }
     }
     void ClearOperationRecords();
@@ -442,7 +466,7 @@ public:
     void UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style);
     void UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const struct UpdateParagraphStyle& style);
     std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
-    void SetTypingStyle(struct UpdateSpanStyle typingStyle, TextStyle textStyle);
+    void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle, std::optional<TextStyle> textStyle);
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool updateCaret = true);
     void DisableDrag(RefPtr<ImageSpanNode> imageNode);
@@ -816,6 +840,10 @@ public:
     {
         return isTouchCaret_;
     }
+
+    bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const override;
+
+    RectF ExpandDefaultResponseRegion(RectF& rect) override;
 
 protected:
     bool CanStartAITask() override;
@@ -1191,6 +1219,7 @@ private:
     bool editingLongPress_ = false;
     bool needMoveCaretToContentRect_ = false;
     std::queue<std::function<void()>> tasks_;
+    bool isModifyingContent_ = false;
 };
 } // namespace OHOS::Ace::NG
 

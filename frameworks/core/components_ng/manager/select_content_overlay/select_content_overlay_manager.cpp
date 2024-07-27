@@ -459,19 +459,23 @@ void SelectContentOverlayManager::MountNodeToRoot(const RefPtr<FrameNode>& overl
 {
     auto rootNode = GetSelectOverlayRoot();
     CHECK_NULL_VOID(rootNode);
-    // get keyboard index to put selet_overlay before keyboard node
-    int32_t slot = DEFAULT_NODE_SLOT;
-    int32_t index = 0;
-    for (const auto& it : rootNode->GetChildren()) {
-        if (it->GetTag() == V2::KEYBOARD_ETS_TAG) {
+    const auto& children = rootNode->GetChildren();
+    auto slotIt = FindSelectOverlaySlot(rootNode, children);
+    auto index = static_cast<int32_t>(std::distance(children.begin(), slotIt));
+    auto slot = (index > 0) ? index : DEFAULT_NODE_SLOT;
+    for (auto it = slotIt; it != children.end(); ++it) {
+        // get keyboard index to put selet_overlay before keyboard node
+        if ((*it)->GetTag() == V2::KEYBOARD_ETS_TAG) {
             slot = index;
             break;
         }
-        if (it->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
+        // keep handle node before menu node
+        if ((*it)->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
             slot = index;
             break;
         }
-        if (it->GetTag() == V2::TEXTINPUT_ETS_TAG) {
+        // keep handle and menu node before magnifier
+        if ((*it)->GetTag() == V2::TEXTINPUT_ETS_TAG) {
             slot = index;
             break;
         }
@@ -493,6 +497,32 @@ void SelectContentOverlayManager::MountNodeToRoot(const RefPtr<FrameNode>& overl
         CHECK_NULL_VOID(hostNode);
         hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
     });
+}
+
+std::list<RefPtr<UINode>>::const_iterator SelectContentOverlayManager::FindSelectOverlaySlot(
+    const RefPtr<FrameNode>& root, const std::list<RefPtr<UINode>>& children)
+{
+    auto begin = children.begin();
+    CHECK_NULL_RETURN(selectOverlayHolder_, begin);
+    auto callerNode = selectOverlayHolder_->GetOwner();
+    CHECK_NULL_RETURN(callerNode, begin);
+    RefPtr<UINode> prevNode = nullptr;
+    auto parent = callerNode->GetParent();
+    while (parent) {
+        if (parent == root) {
+            break;
+        }
+        prevNode = parent;
+        parent = parent->GetParent();
+    }
+    CHECK_NULL_RETURN(parent, begin);
+    CHECK_NULL_RETURN(prevNode, begin);
+    for (auto it = begin; it != children.end(); ++it) {
+        if (prevNode == *it) {
+            return ++it;
+        }
+    }
+    return begin;
 }
 
 void SelectContentOverlayManager::MountNodeToCaller(const RefPtr<FrameNode>& overlayNode, bool animation)
@@ -830,10 +860,10 @@ bool SelectContentOverlayManager::IsTouchInNormalSelectOverlayArea(const PointF&
     const auto& children = current->GetChildren();
     for (const auto& it : children) {
         auto child = DynamicCast<FrameNode>(it);
-        if (child == nullptr) {
+        if (child == nullptr || !child->GetGeometryNode()) {
             continue;
         }
-        auto frameRect = child->GetGeometryNode()->GetFrameRect();
+        auto frameRect = RectF(child->GetTransformRelativeOffset(), child->GetGeometryNode()->GetFrameSize());
         if (frameRect.IsInRegion(point)) {
             return true;
         }

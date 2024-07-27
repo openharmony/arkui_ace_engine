@@ -601,6 +601,42 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel016, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RichEditorModel017
+ * @tc.desc: test GetRichEditorController、SetCustomKeyboard、BindSelectionMenu、SetPlaceholder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel017, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create(true);
+    auto richEditorNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorController = richEditorModel.GetRichEditorController();
+    EXPECT_NE(richEditorController, nullptr);
+
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto func = []() {};
+    richEditorNode->pattern_ = nullptr;
+    richEditorModel.SetCustomKeyboard(func, true);
+    EXPECT_EQ(richEditorNode->GetPattern<RichEditorPattern>(), nullptr);
+
+    std::function<void()> buildFunc = []() {};
+    auto textSpanType = TextSpanType::TEXT;
+    auto textResponseType = TextResponseType::LONG_PRESS;
+    SelectMenuParam menuParam { .onAppear = [](int32_t, int32_t) {}, .onDisappear = []() {} };
+    richEditorModel.BindSelectionMenu(textSpanType, textResponseType, buildFunc, menuParam);
+    EXPECT_EQ(richEditorNode->GetPattern<RichEditorPattern>(), nullptr);
+
+    richEditorNode->pattern_ = pattern;
+
+    PlaceholderOptions options;
+    options.value = std::nullopt;
+    richEditorModel.SetPlaceholder(options);
+    EXPECT_FALSE(options.value.has_value());
+}
+
+/**
  * @tc.name: RichEditorController001
  * @tc.desc: test add image span
  * @tc.type: FUNC
@@ -2251,6 +2287,29 @@ HWTEST_F(RichEditorBaseTestNg, ParagraphManager010, TestSize.Level1)
     auto accessibilityProperty = richEditorPattern->CreateAccessibilityProperty();
     bool isEditable = accessibilityProperty->IsEditable();
     EXPECT_EQ(isEditable, true);
+}
+
+/**
+ * @tc.name: ParagraphManager011
+ * @tc.desc: Test the paragraph manager function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ParagraphManager011, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    bool clamp = true;
+    int32_t paragraphsIndex = richEditorPattern->paragraphs_.GetIndex(Offset(-1.0, -1.0), clamp);
+    EXPECT_EQ(paragraphsIndex, 0);
+
+    PositionWithAffinity finalResult = richEditorPattern->paragraphs_.GetGlyphPositionAtCoordinate(Offset(-1.0, -1.0));
+    EXPECT_EQ(finalResult.position_, 0);
 }
 
 /**

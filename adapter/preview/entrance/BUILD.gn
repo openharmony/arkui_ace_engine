@@ -52,6 +52,7 @@ ohos_source_set("preview_entrance_source") {
       "editing/text_input_impl.cpp",
       "event_dispatcher.cpp",
       "foldable_window_preview.cpp",
+      "html/html_to_span.cpp",
       "msdp/interaction_impl.cpp",
       "subwindow_preview.cpp",
       "timepicker/timepicker_haptic_factory.cpp",

@@ -197,12 +197,6 @@ private:
     bool CheckIsTouchBottom(const TouchLocationInfo& info);
     float HandleTouchClickMargin();
     int32_t GetCurrentIndex() const;
-    void InitFocusEvent();
-    void HandleFocusEvent();
-    void HandleBlurEvent();
-    void AddIsFocusActiveUpdateEvent();
-    void RemoveIsFocusActiveUpdateEvent();
-    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     RefPtr<OverlengthDotIndicatorPaintMethod> CreateOverlongDotIndicatorPaintMethod(
         RefPtr<SwiperPattern> swiperPattern);
     RefPtr<DotIndicatorPaintMethod> CreateDotIndicatorPaintMethod(RefPtr<SwiperPattern> swiperPattern);
@@ -222,10 +216,8 @@ private:
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
     bool isClicked_ = false;
     bool isRepeatClicked_ = false;
-    bool focusEventInitialized_ = false;
 
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
-    std::function<void(bool)> isFocusActiveUpdateEvent_;
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;
     RefPtr<OverlengthDotIndicatorModifier> overlongDotIndicatorModifier_;
     SwiperIndicatorType swiperIndicatorType_ = SwiperIndicatorType::DOT;

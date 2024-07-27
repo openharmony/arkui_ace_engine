@@ -30,6 +30,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
+constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
+constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
 } // namespace
 void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -64,25 +66,23 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         userSelectedItemWidth = theme->GetSize().ConvertToPx();
         userSelectedItemHeight = theme->GetSize().ConvertToPx();
     }
-    float scaleIndicator = theme->GetScaleSwiper();
+    auto indicatorPadding = INDICATOR_PADDING_HOVER;
     // To the size of the hover after the layout, in order to prevent the components after the hover draw boundaries
-    userItemWidth *= scaleIndicator;
-    userItemHeight *= scaleIndicator;
-    userSelectedItemWidth *= scaleIndicator;
-    userSelectedItemHeight *= scaleIndicator;
+    userItemWidth *= INDICATOR_ZOOM_IN_SCALE;
+    userItemHeight *= INDICATOR_ZOOM_IN_SCALE;
+    userSelectedItemWidth *= INDICATOR_ZOOM_IN_SCALE;
+    userSelectedItemHeight *= INDICATOR_ZOOM_IN_SCALE;
 
     // The width and height of the entire indicator.
-    Dimension indicatorHeightPadding = theme->GetIndicatorBgHeight();
     auto indicatorHeight = static_cast<float>(((userItemHeight > userSelectedItemHeight) ?
-        userItemHeight : userSelectedItemHeight) + indicatorHeightPadding.ConvertToPx() * 2);
+        userItemHeight : userSelectedItemHeight) + indicatorPadding.ConvertToPx() * 2);
     auto allPointDiameterSum = userItemWidth * (indicatorDisplayCount_ + 1);
     if (paintProperty->GetIsCustomSizeValue(false)) {
         allPointDiameterSum = userItemWidth * (indicatorDisplayCount_ - 1) + userSelectedItemWidth;
     }
     auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) * (indicatorDisplayCount_ - 1);
-    Dimension paddingSide = theme->GetIndicatorPaddingDot();
     auto indicatorWidth =
-        paddingSide.ConvertToPx() + allPointDiameterSum + allPointSpaceSum + paddingSide.ConvertToPx();
+        indicatorPadding.ConvertToPx() + allPointDiameterSum + allPointSpaceSum + indicatorPadding.ConvertToPx();
 
     if (direction == Axis::HORIZONTAL) {
         indicatorWidth_ = indicatorWidth;

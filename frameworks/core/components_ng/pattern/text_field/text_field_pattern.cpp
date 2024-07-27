@@ -75,6 +75,7 @@
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_select_overlay.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
@@ -109,6 +110,7 @@ const BorderRadiusProperty ZERO_BORDER_RADIUS_PROPERTY(0.0_vp);
 // need to be moved to TextFieldTheme
 constexpr Dimension BORDER_DEFAULT_WIDTH = 0.0_vp;
 constexpr Dimension TYPING_UNDERLINE_WIDTH = 2.0_px;
+constexpr Dimension ERROR_BORDER_WIDTH = 1.0_vp;
 constexpr Dimension OVER_COUNT_BORDER_WIDTH = 1.0_vp;
 constexpr Dimension INLINE_BORDER_WIDTH = 2.0_vp;
 constexpr Dimension ERROR_UNDERLINE_WIDTH = 2.0_px;
@@ -279,9 +281,8 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
     auto frameOffset = geometryNode->GetFrameOffset();
     auto frameSize = geometryNode->GetFrameSize();
     if (layoutProperty->GetShowErrorTextValue(false) && errorParagraph_) {
-        auto contentOffset = geometryNode->GetContentOffset();
-        auto errorTextWidth = errorParagraph_->GetLongestLine();
-        RectF boundsRect(contentOffset.GetX(), frameOffset.GetY(), errorTextWidth,
+        auto textWidth = std::max(errorParagraph_->GetLongestLine(), frameSize.Width());
+        RectF boundsRect(0.0f, 0.0f, textWidth,
             errorParagraph_->GetHeight() + ERROR_TEXT_TOP_MARGIN.ConvertToPx() +
                 ERROR_TEXT_BOTTOM_MARGIN.ConvertToPx() + frameSize.Height());
         textFieldOverlayModifier_->SetBoundsRect(boundsRect);
@@ -293,7 +294,7 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
         maxFrameOffsetY_ = LessOrEqual(frameOffset.GetY(), maxFrameOffsetY_) ? frameOffset.GetY()
                                                                              : maxFrameOffsetY_ - frameOffset.GetY();
         maxFrameHeight_ = LessOrEqual(frameSize.Height(), maxFrameHeight_) ? maxFrameHeight_ : frameSize.Height();
-        RectF boundsRect(frameOffset.GetX(), maxFrameOffsetY_, frameSize.Width(), maxFrameHeight_);
+        RectF boundsRect(0.0f, 0.0f, frameSize.Width(), maxFrameHeight_ + UNDERLINE_WIDTH.ConvertToPx());
         textFieldOverlayModifier_->SetBoundsRect(boundsRect);
     }
     return paint;
@@ -951,8 +952,6 @@ void TextFieldPattern::HandleFocusEvent()
         needSelectAll_ = true;
     }
     ProcessFocusStyle();
-    SetFocusStyle();
-    AddIsFocusActiveUpdateEvent();
     RequestKeyboardOnFocus();
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ?
         PROPERTY_UPDATE_MEASURE_SELF : PROPERTY_UPDATE_MEASURE);
@@ -981,102 +980,6 @@ void TextFieldPattern::ProcessFocusStyle()
         CHECK_NULL_VOID(textFieldTheme);
         underlineColor_ = userUnderlineColor_.typing.value_or(textFieldTheme->GetUnderlineTypingColor());
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
-    }
-}
-
-void TextFieldPattern::SetFocusStyle()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto textFieldTheme = GetTheme();
-    CHECK_NULL_VOID(textFieldTheme);
-
-    if (!paintProperty->HasBackgroundColor()) {
-        auto defaultBGColor = textFieldTheme->GetBgColor();
-        if (renderContext->GetBackgroundColorValue(defaultBGColor) == defaultBGColor) {
-            renderContext->UpdateBackgroundColor(textFieldTheme->GetFocusBgColor());
-            isFocusBGColorSet_ = true;
-        }
-    }
-    auto defaultTextColor = textFieldTheme->GetTextColor();
-    if (layoutProperty->GetTextColorValue(defaultTextColor) == defaultTextColor) {
-        layoutProperty->UpdateTextColor(textFieldTheme->GetFocusTextColor());
-        isFocusTextColorSet_ = true;
-    }
-    auto defaultPlaceholderColor = textFieldTheme->GetPlaceholderColor();
-    if (layoutProperty->GetPlaceholderTextColorValue(defaultPlaceholderColor) == defaultPlaceholderColor) {
-        layoutProperty->UpdatePlaceholderTextColor(textFieldTheme->GetFocusPlaceholderColor());
-        isFocusPlaceholderColorSet_ = true;
-    }
-
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void TextFieldPattern::ClearFocusStyle()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto textFieldTheme = GetTheme();
-    CHECK_NULL_VOID(textFieldTheme);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-
-    if (isOnHover_) {
-        RestoreDefaultMouseState();
-    }
-
-    if (isFocusBGColorSet_) {
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
-        isFocusBGColorSet_ = false;
-    }
-    if (isFocusTextColorSet_) {
-        layoutProperty->UpdateTextColor(textFieldTheme->GetTextColor());
-        isFocusTextColorSet_ = false;
-    }
-    if (isFocusPlaceholderColorSet_) {
-        layoutProperty->UpdatePlaceholderTextColor(textFieldTheme->GetPlaceholderColor());
-        isFocusPlaceholderColorSet_ = false;
-    }
-
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void TextFieldPattern::AddIsFocusActiveUpdateEvent()
-{
-    if (!isFocusActiveUpdateEvent_) {
-        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
-        };
-    }
-
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
-}
-
-void TextFieldPattern::RemoveIsFocusActiveUpdateEvent()
-{
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
-}
-
-void TextFieldPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
-{
-    if (isFocusAcitve) {
-        SetFocusStyle();
-    } else {
-        ClearFocusStyle();
     }
 }
 
@@ -1340,9 +1243,6 @@ void TextFieldPattern::HandleBlurEvent()
     ModifyInnerStateInBlurEvent();
     magnifierController_->UpdateShowMagnifier();
     CloseSelectOverlay(!isKeyboardClosedByUser_ && blurReason_ == BlurReason::FOCUS_SWITCH);
-    if (GetIsPreviewText()) {
-        FinishTextPreviewOperation();
-    }
     StopTwinkling();
     if (((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_)) {
         CloseKeyboard(true);
@@ -1360,8 +1260,9 @@ void TextFieldPattern::HandleBlurEvent()
         context->RemoveOnAreaChangeNode(host->GetId());
     }
     needToRequestKeyboardInner_ = false;
-    ClearFocusStyle();
-    RemoveIsFocusActiveUpdateEvent();
+    if (isOnHover_) {
+        RestoreDefaultMouseState();
+    }
     isCursorAlwaysDisplayed_ = false;
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     if (UiSessionManager::GetInstance().GetSearchEventRegistered()) {
@@ -1884,8 +1785,7 @@ void TextFieldPattern::InitDragEvent()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!IsInPasswordMode() && layoutProperty->GetCopyOptionsValue(CopyOptions::Local) != CopyOptions::None &&
-        host->IsDraggable()) {
+    if (host->IsDraggable()) {
         InitDragDropEvent();
     } else {
         ClearDragDropEvent();
@@ -1902,7 +1802,10 @@ std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);
         if (pattern->BetweenSelectedPosition(point)) {
-            pattern->dragNode_ = TextDragPattern::CreateDragNode(frameNode);
+            RichEditorDragInfo info;
+            info.firstHandle = pattern->textSelector_.firstHandle;
+            info.secondHandle = pattern->textSelector_.secondHandle;
+            pattern->dragNode_ = TextDragPattern::CreateDragNode(frameNode, info);
             FrameNode::ProcessOffscreenNode(pattern->dragNode_);
         }
         auto gestureHub = frameNode->GetOrCreateGestureEventHub();
@@ -2304,7 +2207,8 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
         RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex, lastCaretRect) && !firstGetFocus;
     bool isInlineSelectAllOrEmpty = inlineSelectAllFlag_ || contentController_->IsEmpty();
     do {
-        if (info.GetSourceDevice() == SourceType::MOUSE || (!isRepeatClickCaret && isInlineSelectAllOrEmpty)) {
+        if (info.GetSourceDevice() == SourceType::MOUSE || (!isRepeatClickCaret && isInlineSelectAllOrEmpty) ||
+            IsContentRectNonPositive()) {
             break;
         }
         if (GetNakedCharPosition() >= 0) {
@@ -2485,7 +2389,7 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
         StopTwinkling();
         SetIsSingleHandle(false);
     }
-    if (info.GetSourceDevice() != SourceType::MOUSE && !contentController_->IsEmpty()) {
+    if (info.GetSourceDevice() != SourceType::MOUSE && !contentController_->IsEmpty() && !IsContentRectNonPositive()) {
         ProcessOverlay({ .animation = true });
     }
     auto host = GetHost();
@@ -2510,7 +2414,7 @@ void TextFieldPattern::HandleTripleClickEvent(GestureEvent& info)
         StopTwinkling();
         SetIsSingleHandle(false);
     }
-    if (info.GetSourceDevice() != SourceType::MOUSE && !contentController_->IsEmpty()) {
+    if (info.GetSourceDevice() != SourceType::MOUSE && !contentController_->IsEmpty() && !IsContentRectNonPositive()) {
         ProcessOverlay({ .animation = true });
     }
     auto host = GetHost();
@@ -3111,16 +3015,23 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     } else if (CanChangeSelectState()) {
         selectController_->UpdateSelectByOffset(localOffset);
     }
+    ShowSelectOverlayForLongPress(shouldProcessOverlayAfterLayout);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextFieldPattern::ShowSelectOverlayForLongPress(bool shouldProcessOverlayAfterLayout)
+{
     if (IsSelected()) {
         StopTwinkling();
     }
     SetIsSingleHandle(!IsSelected());
-    if (shouldProcessOverlayAfterLayout) {
-        DelayProcessOverlay({ .menuIsShow = true, .animation = true,  });
-    } else {
-        ProcessOverlay({ .animation = true });
+    if (!IsContentRectNonPositive()) {
+        if (shouldProcessOverlayAfterLayout) {
+            DelayProcessOverlay({ .menuIsShow = true, .animation = true,  });
+        } else {
+            ProcessOverlay({ .animation = true });
+        }
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool TextFieldPattern::CanChangeSelectState()
@@ -3131,7 +3042,7 @@ bool TextFieldPattern::CanChangeSelectState()
     CHECK_NULL_RETURN(theme, false);
     Dimension fontSize = layoutProperty->GetFontSizeValue(theme->GetFontSize());
     // fontSize == 0 can not change
-    return !NearZero(fontSize.Value());
+    return !NearZero(fontSize.Value()) && !IsContentRectNonPositive();
 }
 
 bool TextFieldPattern::IsOnUnitByPosition(const Offset& globalOffset)
@@ -3234,17 +3145,16 @@ void TextFieldPattern::InitEditingValueText(std::string content)
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
-bool TextFieldPattern::InitValueText(const std::string& content)
+bool TextFieldPattern::InitValueText(std::string content)
 {
-    auto initContent = content;
     if (GetIsPreviewText()) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Init when has previewText");
-        initContent = contentController_->GetTextValue();
+        return false;
     }
     if (HasInputOperation() && content != "") {
         return false;
     }
-    contentController_->SetTextValueOnly(std::move(initContent));
+    contentController_->SetTextValueOnly(std::move(content));
     selectController_->UpdateCaretIndex(GetWideText().length());
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     return true;
@@ -3568,6 +3478,7 @@ void TextFieldPattern::UpdateTextFieldManager(const Offset& offset, float height
         offset.GetY() + selectController_->GetCaretRect().GetY() });
     textFieldManager->SetHeight(selectController_->GetCaretRect().Height());
     textFieldManager->SetOnFocusTextField(WeakClaim(this));
+    textFieldManager->SetIfFocusTextFieldIsInline(IsNormalInlineState());
 }
 
 TextInputAction TextFieldPattern::GetDefaultTextInputAction() const
@@ -3631,6 +3542,7 @@ void TextFieldPattern::KeyboardContentTypeToInputType()
 
 bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield ready to request keyboard");
     if (!showKeyBoardOnFocus_ || !HasFocus()) {
         return false;
     }
@@ -3787,6 +3699,16 @@ void TextFieldPattern::GetInlinePositionYAndHeight(double& positionY, double& he
         auto safeBoundary = theme->GetInlineBorderWidth().ConvertToPx() * 2;
         positionY += static_cast<double>(inlineMeasureItem_.inlineSizeHeight) + safeBoundary + topPadding;
         height = offset;
+
+        auto tmpHost = GetHost();
+        CHECK_NULL_VOID(tmpHost);
+        auto pipeline = tmpHost->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+        CHECK_NULL_VOID(textFieldManager);
+        TAG_LOGI(ACE_TEXT_FIELD, "SetInlineAvoidInfo positionY:%{public}f height:%{public}f sizeHeight:%{public}f",
+            positionY, height, inlineMeasureItem_.inlineSizeHeight);
+        textFieldManager->SetInlineTextFieldAvoidPositionYAndHeight(positionY, height);
     }
 }
 
@@ -4783,6 +4705,7 @@ void TextFieldPattern::RequestKeyboardOnFocus()
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
     textFieldManager->SetNeedToRequestKeyboard(true);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d add requestkeyboard task", host->GetId());
     pipeline->AddAfterLayoutTask([weak = WeakClaim(this), manager = WeakPtr<TextFieldManagerNG>(textFieldManager)]() {
         auto textField = weak.Upgrade();
         CHECK_NULL_VOID(textField);
@@ -5842,7 +5765,7 @@ void TextFieldPattern::SetShowError()
         } else if (passWordMode) {
             BorderWidthProperty borderWidth;
             BorderColorProperty borderColor;
-            borderWidth.SetBorderWidth(textFieldTheme->GetErrorTextInputBorderWidth());
+            borderWidth.SetBorderWidth(ERROR_BORDER_WIDTH);
             layoutProperty->UpdateBorderWidth(borderWidth);
             borderColor.SetColor(textFieldTheme->GetPasswordErrorBorderColor());
             renderContext->UpdateBorderColor(borderColor);
@@ -6948,10 +6871,7 @@ bool TextFieldPattern::IsShowPasswordIcon() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-
-    auto textfieldTheme = GetTheme();
-    bool isShowPasswordIcon = textfieldTheme->IsShowPasswordIcon();
-    return layoutProperty->GetShowPasswordIconValue(isShowPasswordIcon) && IsInPasswordMode();
+    return layoutProperty->GetShowPasswordIconValue(true) && IsInPasswordMode();
 }
 
 std::optional<bool> TextFieldPattern::IsShowPasswordText() const
@@ -7470,7 +7390,7 @@ void TextFieldPattern::SetThemeBorderAttr()
     CHECK_NULL_VOID(theme);
     if (!paintProperty->HasBorderColorFlagByUser()) {
         BorderColorProperty borderColor;
-        borderColor.SetColor(theme->GetTextInputColor());
+        borderColor.SetColor(Color::BLACK);
         renderContext->UpdateBorderColor(borderColor);
     } else {
         renderContext->UpdateBorderColor(paintProperty->GetBorderColorFlagByUserValue());
@@ -7487,7 +7407,7 @@ void TextFieldPattern::SetThemeBorderAttr()
 
     if (!paintProperty->HasBorderWidthFlagByUser()) {
         BorderWidthProperty borderWidth;
-        borderWidth.SetBorderWidth(theme->GetTextInputWidth());
+        borderWidth.SetBorderWidth(BORDER_DEFAULT_WIDTH);
         renderContext->UpdateBorderWidth(borderWidth);
         layoutProperty->UpdateBorderWidth(borderWidth);
     } else {
@@ -7510,8 +7430,7 @@ void TextFieldPattern::SetThemeAttr()
     CHECK_NULL_VOID(theme);
     SetThemeBorderAttr();
     if (!paintProperty->HasBackgroundColor()) {
-        auto backgroundColor = isFocusBGColorSet_ ? theme->GetFocusBgColor() : theme->GetBgColor();
-        backgroundColor = IsUnderlineMode() ? Color::TRANSPARENT : backgroundColor;
+        auto backgroundColor = IsUnderlineMode() ? Color::TRANSPARENT : theme->GetBgColor();
         renderContext->UpdateBackgroundColor(backgroundColor);
     } else {
         renderContext->UpdateBackgroundColor(paintProperty->GetBackgroundColorValue());
@@ -7538,8 +7457,7 @@ void TextFieldPattern::SetThemeAttr()
     }
 
     if (!paintProperty->HasTextColorFlagByUser()) {
-        auto textColor = isFocusTextColorSet_ ? theme->GetFocusTextColor() : theme->GetTextColor();
-        layoutProperty->UpdateTextColor(textColor);
+        layoutProperty->UpdateTextColor(theme->GetTextColor());
     } else {
         layoutProperty->UpdateTextColor(paintProperty->GetTextColorFlagByUserValue());
     }
@@ -7838,5 +7756,38 @@ bool TextFieldPattern::GetTouchInnerPreviewText(const Offset& offset) const
 {
     auto touchDownIndex = selectController_->ConvertTouchOffsetToPosition(offset);
     return GetPreviewTextStart() <= touchDownIndex && touchDownIndex <= GetPreviewTextEnd() && HasFocus();
+}
+
+bool TextFieldPattern::IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const
+{
+    if (touchEvent.sourceTool != SourceTool::PEN || touchEvent.type != TouchType::DOWN) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    if (!focusHub->IsFocusable() || !host->IsVisible()) {
+        return false;
+    }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto opacity = renderContext->GetOpacity();
+    // if opacity is 0.0f, no need to hit frameNode.
+    if (NearZero(opacity.value_or(1.0f))) {
+        return false;
+    }
+    return !IsInPasswordMode();
+}
+
+RectF TextFieldPattern::ExpandDefaultResponseRegion(RectF& rect)
+{
+    return rect + NG::SizeF(0, OHOS::Ace::HOT_AREA_ADJUST_SIZE.ConvertToPx() * OHOS::Ace::HOT_AREA_EXPAND_TIME) +
+           NG::OffsetF(0, -OHOS::Ace::HOT_AREA_ADJUST_SIZE.ConvertToPx());
+}
+
+bool TextFieldPattern::IsContentRectNonPositive()
+{
+    return NonPositive(contentRect_.Width());
 }
 } // namespace OHOS::Ace::NG

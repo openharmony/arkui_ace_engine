@@ -26,6 +26,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/gestures/velocity_tracker.h"
+#include "core/components_ng/manager/drag_drop/utils/internal_drag_action.h"
 
 namespace OHOS::Ace {
 class UnifiedData;
@@ -219,6 +220,11 @@ public:
         dragCursorStyleCore_ = dragCursorStyleCore;
     }
 
+    std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> GetDragAction()
+    {
+        return dragAction_;
+    }
+    
     RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
         std::vector<RefPtr<FrameNode>> hitFrameNodes, bool findDrop);
     
@@ -446,6 +452,11 @@ public:
     }
 
     bool IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode);
+    
+    void SetDragAction(const std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction>& dragAction)
+    {
+        dragAction_ = dragAction;
+    }
 
     void AddNewDragAnimation()
     {
@@ -561,6 +572,7 @@ private:
     OffsetF dragMovePosition_ = OffsetF(0.0f, 0.0f);
     OffsetF lastDragMovePosition_ = OffsetF(0.0f, 0.0f);
     OffsetF dragTotalMovePosition_ = OffsetF(0.0f, 0.0f);
+    std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

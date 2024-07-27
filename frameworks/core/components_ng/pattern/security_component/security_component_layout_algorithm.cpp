@@ -90,6 +90,14 @@ void SecurityComponentLayoutAlgorithm::MeasureButton(LayoutWrapper* layoutWrappe
     }
 
     buttonWrapper->Measure(std::optional<LayoutConstraintF>(buttonConstraint));
+    auto geometryNode = buttonWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetFrameSize(SizeF(componentWidth_, componentHeight_));
+    auto host = buttonWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(componentHeight_ / HALF)));
 }
 
 void SecurityComponentLayoutAlgorithm::InitPadding(RefPtr<SecurityComponentLayoutProperty>& property)

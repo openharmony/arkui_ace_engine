@@ -1155,9 +1155,7 @@ const ArkUI_AttributeItem* GetTranslate(ArkUI_NodeHandle node)
 int32_t SetScale(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto fullImpl = GetFullImpl();
-    if (!item) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
+
     if (item->size != NUM_5 && item->size != NUM_2) {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -2991,24 +2989,12 @@ int32_t SetConstraintSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
     ArkUI_Int32 units[ALLOW_SIZE_4] = { unit, unit, unit, unit };
 
-    if (item->size == 1) {
-        if (LessNotEqual(item->value[0].f32, 0.0f)) {
+    for (int i = 0; i < ALLOW_SIZE_4; ++i) {
+        if (LessNotEqual(item->value[i].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
+        } else {
+            constraintSize[i] = item->value[i].f32;
         }
-        constraintSize[NUM_0] = item->value[NUM_0].f32;
-        constraintSize[NUM_1] = item->value[NUM_0].f32;
-        constraintSize[NUM_2] = item->value[NUM_0].f32;
-        constraintSize[NUM_3] = item->value[NUM_0].f32;
-    } else if (item->size == ALLOW_SIZE_4) {
-        for (int i = 0; i < ALLOW_SIZE_4; ++i) {
-            if (LessNotEqual(item->value[i].f32, 0.0f)) {
-                return ERROR_CODE_PARAM_INVALID;
-            } else {
-                constraintSize[i] = item->value[i].f32;
-            }
-        }
-    } else {
-        return ERROR_CODE_PARAM_INVALID;
     }
 
     fullImpl->getNodeModifiers()->getCommonModifier()->setConstraintSize(node->uiNodeHandle, constraintSize, units);
@@ -3940,8 +3926,12 @@ int32_t SetTextInputPlaceholder(ArkUI_NodeHandle node, const ArkUI_AttributeItem
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
+    ArkUI_CharPtr itemString = item->string;
+    if (!itemString) {
+        itemString = "";
+    }
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputPlaceholderString(
-        node->uiNodeHandle, item->string);
+        node->uiNodeHandle, itemString);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -3963,7 +3953,12 @@ int32_t SetTextInputText(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputTextString(node->uiNodeHandle, item->string);
+    ArkUI_CharPtr itemString = item->string;
+    if (!itemString) {
+        itemString = "";
+    }
+    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputTextString(
+        node->uiNodeHandle, itemString);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -5851,7 +5846,12 @@ int32_t SetTextAreaPlaceholder(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaPlaceholderString(node->uiNodeHandle, item->string);
+    ArkUI_CharPtr itemString = item->string;
+    if (!itemString) {
+        itemString = "";
+    }
+    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaPlaceholderString(
+        node->uiNodeHandle, itemString);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -5873,7 +5873,12 @@ int32_t SetTextAreaText(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaTextString(node->uiNodeHandle, item->string);
+    ArkUI_CharPtr itemString = item->string;
+    if (!itemString) {
+        itemString = "";
+    }
+    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaTextString(
+        node->uiNodeHandle, itemString);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -6661,7 +6666,7 @@ int32_t SetSwiperLoop(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (item->value[0].i32 < NUM_0 || item->value[0].i32 > NUM_1) {
+    if (!InRegion(NUM_0, NUM_1, item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -6688,7 +6693,7 @@ int32_t SetSwiperAutoPlay(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (item->value[0].i32 < NUM_0 || item->value[0].i32 > NUM_1) {
+    if (!InRegion(NUM_0, NUM_1, item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -6714,7 +6719,7 @@ int32_t SetSwiperShowIndicator(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (item->value[0].i32 < NUM_0 || item->value[0].i32 > NUM_1) {
+    if (!InRegion(NUM_0, NUM_1, item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -6778,7 +6783,7 @@ int32_t SetSwiperVertical(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (item->value[0].i32 < NUM_0 || item->value[0].i32 > NUM_1) {
+    if (!InRegion(NUM_0, NUM_1, item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -6912,7 +6917,7 @@ int32_t SetSwiperDisplayCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (LessNotEqual(item->value[0].f32, 0.0f)) {
+    if (LessNotEqual(item->value[0].i32, NUM_0)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -6941,7 +6946,7 @@ int32_t SetSwiperDisableSwipe(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (item->value[0].i32 < NUM_0 || item->value[0].i32 > NUM_1) {
+    if (!InRegion(NUM_0, NUM_1, item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -7144,7 +7149,7 @@ int32_t SetSwiperPrevMargin(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
         return ERROR_CODE_PARAM_INVALID;
     }
     ArkUI_Bool ignoreBlank = DEFAULT_FALSE;
-    if (actualSize > NUM_1 && (item->value[1].i32 == DEFAULT_TRUE || item->value[1].i32 == DEFAULT_FALSE)) {
+    if (actualSize > NUM_1 && InRegion(DEFAULT_FALSE, DEFAULT_TRUE, item->value[1].i32)) {
         ignoreBlank = item->value[1].i32;
     }
     // already check in entry point.
@@ -7184,7 +7189,7 @@ int32_t SetSwiperNextMargin(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
         return ERROR_CODE_PARAM_INVALID;
     }
     ArkUI_Bool ignoreBlank = DEFAULT_FALSE;
-    if (actualSize > NUM_1 && (item->value[1].i32 == DEFAULT_TRUE || item->value[1].i32 == DEFAULT_FALSE)) {
+    if (actualSize > NUM_1 && InRegion(DEFAULT_FALSE, DEFAULT_TRUE, item->value[1].i32)) {
         ignoreBlank = item->value[1].i32;
     }
     // already check in entry point.
@@ -7434,7 +7439,7 @@ const ArkUI_AttributeItem* GetTextShadow(ArkUI_NodeHandle node)
 // ListItemGroup
 int32_t SetListItemGroupHeader(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (!item || !item->object) {
+    if (!item->object) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
@@ -9040,13 +9045,9 @@ int32_t SetOffset(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
     CalcDimension xDimension(0, static_cast<DimensionUnit>(unit));
-    if (NUM_0 < actualSize) {
-        xDimension.SetValue(item->value[NUM_0].f32);
-    }
+    xDimension.SetValue(item->value[NUM_0].f32);
     CalcDimension yDimension(0, static_cast<DimensionUnit>(unit));
-    if (NUM_1 < actualSize) {
-        yDimension.SetValue(item->value[NUM_1].f32);
-    }
+    yDimension.SetValue(item->value[NUM_1].f32);
     std::array<float, TWO> offsetValue = { xDimension.Value(), yDimension.Value() };
     std::array<int32_t, TWO> offsetUnit = { static_cast<int32_t>(xDimension.Unit()),
         static_cast<int32_t>(yDimension.Unit()) };
@@ -9063,13 +9064,9 @@ int32_t SetMarkAnchor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
     CalcDimension xDimension(0, static_cast<DimensionUnit>(unit));
-    if (NUM_0 < actualSize) {
-        xDimension.SetValue(item->value[NUM_0].f32);
-    }
+    xDimension.SetValue(item->value[NUM_0].f32);
     CalcDimension yDimension(0, static_cast<DimensionUnit>(unit));
-    if (NUM_1 < actualSize) {
-        yDimension.SetValue(item->value[NUM_1].f32);
-    }
+    yDimension.SetValue(item->value[NUM_1].f32);
     fullImpl->getNodeModifiers()->getCommonModifier()->setMarkAnchor(node->uiNodeHandle, xDimension.Value(),
         unit, yDimension.Value(), unit);
     return ERROR_CODE_NO_ERROR;
@@ -9201,6 +9198,7 @@ int32_t SetDecoration(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         case ARKUI_NODE_TEXT:
             fullImpl->getNodeModifiers()->getTextModifier()->setTextDecoration(
                 node->uiNodeHandle, decoration, decorationColor, decorationStyle);
+            break;
         default:
             break;
     }
@@ -9223,6 +9221,7 @@ int32_t SetTextCase(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             break;
         case ARKUI_NODE_TEXT:
             fullImpl->getNodeModifiers()->getTextModifier()->setTextCase(node->uiNodeHandle, item->value[0].i32);
+            break;
         default:
             break;
     }
@@ -9245,6 +9244,7 @@ int32_t SetLetterSpacing(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         case ARKUI_NODE_TEXT:
             fullImpl->getNodeModifiers()->getTextModifier()->setTextLetterSpacing(
                 node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+            break;
         default:
             break;
     }
@@ -11244,9 +11244,6 @@ int32_t SetSliderBlockStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
         GetFullImpl()->getNodeModifiers()->getSliderModifier()->setSliderBlockImage(
             node->uiNodeHandle, src.c_str(), bundle.c_str(), module.c_str());
     } else if (style == NUM_2) {
-        if (item->size == 0) {
-            return ERROR_CODE_PARAM_INVALID;
-        }
         auto* fullImpl = GetFullImpl();
         if (item->value[1].i32 == ArkUI_ClipType::ARKUI_CLIP_TYPE_PATH) {
             ArkUI_Float32 pathAttributes[NUM_2];
@@ -11872,7 +11869,7 @@ const ArkUI_AttributeItem* GetWaterFlowSectionOption(ArkUI_NodeHandle node)
 
 int32_t SetItemConstraintSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0 || item->size != ALLOW_SIZE_4) {
+    if (item->size != ALLOW_SIZE_4) {
         return ERROR_CODE_PARAM_INVALID;
     }
 
@@ -11881,28 +11878,12 @@ int32_t SetItemConstraintSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
     ArkUI_Int32 units[ALLOW_SIZE_4] = { unit, unit, unit, unit };
 
-    if (item->size == 1) {
-        if (LessNotEqual(item->value[0].f32, 0.0f)) {
+    for (int i = 0; i < ALLOW_SIZE_4; ++i) {
+        if (LessNotEqual(item->value[i].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
+        } else {
+            constraintSize[i] = item->value[i].f32;
         }
-        //ItemMinWidth
-        constraintSize[NUM_0] = item->value[NUM_0].f32;
-        //ItemMaxWidth
-        constraintSize[NUM_1] = item->value[NUM_0].f32;
-        //ItemMinHeight
-        constraintSize[NUM_2] = item->value[NUM_0].f32;
-        //ItemMaxHeight
-        constraintSize[NUM_3] = item->value[NUM_0].f32;
-    } else if (item->size == ALLOW_SIZE_4) {
-        for (int i = 0; i < ALLOW_SIZE_4; ++i) {
-            if (LessNotEqual(item->value[i].f32, 0.0f)) {
-                return ERROR_CODE_PARAM_INVALID;
-            } else {
-                constraintSize[i] = item->value[i].f32;
-            }
-        }
-    } else {
-        return ERROR_CODE_PARAM_INVALID;
     }
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->setItemMinWidth(
         node->uiNodeHandle, constraintSize[NUM_0], units[NUM_0], nullptr);

@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 
+#include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -38,6 +39,12 @@ private:
 
 class FullyMockedScrollable : public PartiallyMockedScrollable {
     DECLARE_ACE_TYPE(FullyMockedScrollable, PartiallyMockedScrollable);
+
+public:
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<ScrollableEventHub>();
+    }
 
 private:
     MOCK_METHOD(bool, HandleScrollVelocity, (float, const RefPtr<NestableScrollContainer>&), (override));

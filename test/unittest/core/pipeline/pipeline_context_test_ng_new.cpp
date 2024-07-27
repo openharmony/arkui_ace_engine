@@ -1795,12 +1795,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg098, TestSize.Level1)
      * @tc.steps1: AddChangedFrameNode
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", -1, AceType::MakeRefPtr<Pattern>(), false);
-    context_->AddChangedFrameNode(frameNode);
-    EXPECT_EQ(context_->changedNodes_.size(), 1);
-    context_->AddChangedFrameNode(frameNode);
-    EXPECT_EQ(context_->changedNodes_.size(), 1);
+    EXPECT_FALSE(context_->AddChangedFrameNode(frameNode));
     context_->CleanNodeChangeFlag();
-    EXPECT_EQ(context_->changedNodes_.size(), 0);
+    EXPECT_FALSE(context_->AddChangedFrameNode(frameNode));
 }
 
 /**
@@ -1821,7 +1818,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg099, TestSize.Level1)
     EXPECT_EQ(context_->changeInfoListeners_.size(), 1);
     context_->RemoveFrameNodeChangeListener(frameNode);
     context_->FlushNodeChangeFlag();
-    EXPECT_EQ(context_->changeInfoListeners_.size(), 0);
+    EXPECT_EQ(context_->changeInfoListeners_.size(), 1);
 }
 } // namespace NG
 } // namespace OHOS::Ace

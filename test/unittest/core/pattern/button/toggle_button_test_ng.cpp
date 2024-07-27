@@ -531,7 +531,6 @@ HWTEST_F(ToggleButtonTestNg, PreventDefault001, TestSize.Level1)
     pattern->clickListener_->operator()(clickInfo);
     EXPECT_FALSE(pattern->isTouchPreventDefault_);
     EXPECT_FALSE(pattern->isOn_);
-    EXPECT_FALSE(pattern->isFocus_);
 }
 
 /**

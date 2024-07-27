@@ -119,8 +119,8 @@ void PanRecognizer::OnAccepted()
     }
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Pan accepted, tag = %{public}s, id = %{public}s",
-        node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Pan accepted, tag = %{public}s",
+        node ? node->GetTag().c_str() : "null");
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onActionStart_);
     // only report the pan gesture starting for touch event
@@ -622,8 +622,8 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetDeviceId(deviceId_);
     info.SetFingerList(fingerList_);
     info.SetSourceDevice(deviceType_);
-    info.SetOffsetX(averageDistance_.GetX());
-    info.SetOffsetY(averageDistance_.GetY());
+    info.SetOffsetX((direction_.type & PanDirection::HORIZONTAL) == 0 ? 0.0 : averageDistance_.GetX());
+    info.SetOffsetY((direction_.type & PanDirection::VERTICAL) == 0 ? 0.0 : averageDistance_.GetY());
     info.SetDelta(delta_);
     info.SetVelocity(panVelocity_.GetVelocity());
     info.SetMainVelocity(panVelocity_.GetMainAxisVelocity());
@@ -690,8 +690,8 @@ GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
     info->SetFingerList(fingerList_);
     info->SetTimeStamp(time_);
     info->SetDeviceId(deviceId_);
-    info->SetOffsetX(averageDistance_.GetX());
-    info->SetOffsetY(averageDistance_.GetY());
+    info->SetOffsetX((direction_.type & PanDirection::HORIZONTAL) == 0 ? 0.0 : averageDistance_.GetX());
+    info->SetOffsetY((direction_.type & PanDirection::VERTICAL) == 0 ? 0.0 : averageDistance_.GetY());
     info->SetSourceDevice(deviceType_);
     if (inputEventType_ == InputEventType::AXIS) {
         info->SetVelocity(Velocity());
@@ -926,11 +926,6 @@ void PanRecognizer::UpdateTouchEventInfo(const TouchEvent& event, bool updateVel
         windowTouchPoint, GetAttachedNode(), false, isPostEventResult_, event.postEventNodeId);
     delta_ =
         (Offset(windowPoint.GetX(), windowPoint.GetY()) - Offset(windowTouchPoint.GetX(), windowTouchPoint.GetY()));
-    if ((direction_.type & PanDirection::VERTICAL) == 0) {
-        delta_.SetY(0.0);
-    } else if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
-        delta_.SetX(0.0);
-    }
 
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_GESTURE, "Delta is x %{public}f, y %{public}f ", delta_.GetX(), delta_.GetY());

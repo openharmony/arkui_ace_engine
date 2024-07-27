@@ -1511,6 +1511,14 @@ float PipelineContext::GetPageAvoidOffset()
     return safeAreaManager_->GetKeyboardOffset();
 }
 
+bool PipelineContext::CheckNeedAvoidInSubWindow()
+{
+    CHECK_NULL_RETURN(NearZero(GetPageAvoidOffset()), true);
+    CHECK_NULL_RETURN(safeAreaManager_->KeyboardSafeAreaEnabled(), false);
+    auto KeyboardInsetLength = safeAreaManager_->GetKeyboardInset().Length();
+    return GreatNotEqual(KeyboardInsetLength, 0.0f);
+}
+
 void PipelineContext::SyncSafeArea(SafeAreaSyncType syncType)
 {
     bool keyboardSafeArea =
@@ -1763,7 +1771,22 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         }
 
         SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
+
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+            "origin positionY: %{public}f, height %{public}f", positionY, height);
+
         float positionYWithOffset = positionY;
+        float currentPos = manager->GetClickPosition().GetY() - context->GetRootRect().GetOffset().GetY() +
+            context->GetCurrentWindowRect().Top() - context->GetSafeAreaManager()->GetKeyboardOffset();
+        if (manager->GetIfFocusTextFieldIsInline()) {
+            manager->GetInlineTextFieldAvoidPositionYAndHeight(positionY, height);
+            positionYWithOffset = positionY;
+        } else if (!NearEqual(positionY, currentPos) && !context->IsEnableKeyBoardAvoidMode()) {
+            positionY = currentPos;
+            positionYWithOffset = currentPos;
+            height = manager->GetHeight();
+        }
+
         if (rootSize.Height() - positionY - height < 0) {
             height = rootSize.Height() - positionY;
         }
@@ -2063,15 +2086,16 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
         touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
-        if (StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEvent(scalePoint)) {
-            return;
-        }
 
         eventManager_->TouchTest(scalePoint, node, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
         if (!touchRestrict.childTouchTestList.empty()) {
             scalePoint.childTouchTestList = touchRestrict.childTouchTestList;
         }
         touchTestResults_ = eventManager_->touchTestResults_;
+        if (StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEvent(scalePoint, touchTestResults_)) {
+            eventManager_->ClearTouchTestTargetForPenStylus(scalePoint);
+            return;
+        }
 
         HandleEtsCardTouchEvent(oriPoint, etsSerializedGesture);
 
@@ -2295,9 +2319,8 @@ bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<Vie
     }
     CHECK_NULL_RETURN(dumpNode, false);
     dumpNode->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer, needsRecordData);
-    auto nodeTag = node->GetTag();
-    if (nodeTag == V2::DIALOG_ETS_TAG) {
-        viewDataWrap->SetPageUrl(nodeTag);
+    if (node && node->GetTag() == V2::DIALOG_ETS_TAG) {
+        viewDataWrap->SetPageUrl(node->GetTag());
         return true;
     }
     CHECK_NULL_RETURN(pageNode, false);
@@ -3346,6 +3369,16 @@ void PipelineContext::FlushWindowSizeChangeCallback(int32_t width, int32_t heigh
             ++iter;
         }
     }
+}
+
+void PipelineContext::RequireSummary()
+{
+    auto manager = GetDragDropManager();
+    if (!manager) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "require summary, dragDropManager is null");
+        return;
+    }
+    manager->RequireSummary();
 }
 
 void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,

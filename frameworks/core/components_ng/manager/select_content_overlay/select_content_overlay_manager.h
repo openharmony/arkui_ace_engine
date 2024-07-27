@@ -116,6 +116,8 @@ private:
     void ClearAllStatus();
     bool IsEnableHandleLevel();
     void NotifySelectOverlayShow(bool isCreated);
+    std::list<RefPtr<UINode>>::const_iterator FindSelectOverlaySlot(
+        const RefPtr<FrameNode>& root, const std::list<RefPtr<UINode>>& children);
 
     RefPtr<SelectOverlayHolder> selectOverlayHolder_;
     WeakPtr<FrameNode> selectOverlayNode_;

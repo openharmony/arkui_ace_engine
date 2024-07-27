@@ -332,6 +332,11 @@ public:
         return eventHub_->GetFocusHub();
     }
 
+    RefPtr<AccessibilityProperty> GetVirtualAccessibilityProperty() override
+    {
+        return accessibilityProperty_;
+    }
+
     FocusType GetFocusType() const
     {
         FocusType type = FocusType::DISABLE;
@@ -496,7 +501,7 @@ public:
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
     void RemoveLastHotZoneRect() const;
 
-    virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType);
+    virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent);
 
     bool IsLayoutDirtyMarked() const
     {
@@ -1101,6 +1106,8 @@ private:
 
     void TriggerShouldParallelInnerWith(
         const TouchTestResult& currentRecognizers, const TouchTestResult& responseLinkRecognizers);
+
+    void TriggerRsProfilerNodeMountCallbackIfExist();
 
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
 

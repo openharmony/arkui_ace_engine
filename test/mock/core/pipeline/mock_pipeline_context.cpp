@@ -555,6 +555,7 @@ bool PipelineContext::IsEnableKeyBoardAvoidMode()
 {
     return false;
 }
+void PipelineContext::RequireSummary() {};
 void PipelineContext::SetIgnoreViewSafeArea(bool value) {};
 void PipelineContext::SetIsLayoutFullScreen(bool value) {};
 void PipelineContext::SetIsNeedAvoidWindow(bool value) {};
@@ -573,6 +574,11 @@ SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
 float PipelineContext::GetPageAvoidOffset()
 {
     return 0.0f;
+}
+
+bool PipelineContext::CheckNeedAvoidInSubWindow()
+{
+    return false;
 }
 
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node) {}

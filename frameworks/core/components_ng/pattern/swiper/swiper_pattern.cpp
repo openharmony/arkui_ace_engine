@@ -436,9 +436,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (host->GetChildrenUpdated() != -1) {
-        if (hasCachedCapture_) {
-            InitCapture();
-        }
+        InitCapture();
         if (NeedAutoPlay() && !translateTask_) {
             StartAutoPlay();
         }
@@ -2420,7 +2418,7 @@ void SwiperPattern::CalculateGestureState(float additionalOffset, float currentT
         }
     } else if (preFirstIndex == TotalCount() - 1 && currentFirstIndex == 0) {
         needTurn_ = true;
-        if (isTouchDown_ && GreatOrEqual(mainDeltaSum_, 0.0f)) {
+        if (isTouchDown_ && (GreatOrEqual(mainDeltaSum_, 0.0f) || currentIndex == 0)) {
             needTurn_ = false;
         }
     }
@@ -3145,8 +3143,8 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (GetDuration() == 0) {
-        //if the duration is 0, the animation will be end immediately, so the start event should be triggered 
-        //after Layout Task to ensure the timing of events.
+        // if the duration is 0, the animation will be end immediately, so the start event should be triggered
+        // after Layout Task to ensure the timing of events.
         pipeline->AddAfterLayoutTask([weak = WeakClaim(this), info, nextIndex = GetLoopIndex(nextIndex)]() {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
@@ -4945,7 +4943,9 @@ bool SwiperPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableSc
     if (IsDisableSwipe()) {
         return false;
     }
-
+    if (IsHorizontalAndRightToLeft()) {
+        velocity = -velocity;
+    }
     DestructSetter<bool> scope(childScrolling_, false);
     // haven't reached edge
     if (GetDistanceToEdge() > 0.0f || IsLoop()) {
@@ -4968,6 +4968,9 @@ bool SwiperPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableSc
 
 ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedState state, float velocity)
 {
+    if (IsHorizontalAndRightToLeft() && state != NestedState::GESTURE) {
+        offset = -offset;
+    }
     if (IsDisableSwipe()) {
         return { offset, true };
     }

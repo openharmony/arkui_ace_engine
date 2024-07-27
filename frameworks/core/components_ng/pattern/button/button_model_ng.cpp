@@ -404,6 +404,7 @@ void ButtonModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto buttonTheme = PipelineBase::GetCurrentContextSafely()->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
     auto textStyle = buttonTheme->GetTextStyle();
     textLayoutProperty->UpdateContent(label);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);

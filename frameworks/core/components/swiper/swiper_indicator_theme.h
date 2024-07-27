@@ -36,7 +36,6 @@ constexpr Dimension SWIPER_INDICATOR_DIGIT_VERTICAL_PADDING_DEFAULT = 8.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DIGIT_HEIGHT = 32.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DOT_PADDING_DEFAULT = 12.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DOT_ITEM_SPACE = 8.0_vp;
-constexpr double INDICATOR_ZOOM_IN_SCALE = 1.33;
 } // namespace
 
 enum class OverlongType {
@@ -107,7 +106,6 @@ public:
             theme->pressSize_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_press_size", 0.0_vp);
             theme->hoverSize_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_hover_size", 0.0_vp);
             theme->hotZoneSize_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_hotzone_size", 0.0_vp);
-            theme->indicatorPaddingDot_ = swiperPattern->GetAttr<Dimension>("indicator_padding_dot", 12.0_vp);
             theme->isIndicatorDisabled_ =
                 static_cast<bool>(swiperPattern->GetAttr<double>("swiper_indicator_disabled", 0.0));
             theme->animationCurve_ =
@@ -123,11 +121,6 @@ public:
             theme->digitalIndicatorTextStyle_.SetFontSize(
                 swiperPattern->GetAttr<Dimension>("indicator_text_font_size", 14.0_vp));
             theme->selectedColor_ = swiperPattern->GetAttr<Color>("indicator_color_selected", Color::TRANSPARENT);
-            theme->unSelectedColor_ = swiperPattern->GetAttr<Color>("color_focus_unselected", Color::TRANSPARENT);
-            theme->focusedBgColor_ = swiperPattern->GetAttr<Color>("color_focus_bg", Color::TRANSPARENT);
-            theme->indicatorBgHeight_ = swiperPattern->GetAttr<Dimension>("indicator_bg_height", 12.0_vp);
-            theme->focusedSelectedColor_ =
-                swiperPattern->GetAttr<Color>("indicator_color_focused_selected", Color::TRANSPARENT);
             theme->hoverColor_ = swiperPattern->GetAttr<Color>("indicator_color_hover", Color::TRANSPARENT);
             theme->pressedColor_ = swiperPattern->GetAttr<Color>("indicator_color_pressed", Color::TRANSPARENT);
             theme->focusedColor_ = swiperPattern->GetAttr<Color>("indicator_color_focused", Color::TRANSPARENT);
@@ -147,7 +140,6 @@ public:
                 swiperPattern->GetAttr<Color>(ARROW_COLOR_PRIMARY_CONTRARY, Color::TRANSPARENT);
             theme->arrowDisabledAlpha_ =
                 swiperPattern->GetAttr<double>(ARROW_DISABLED_ALPHA, SWIPER_ARROW_ALPHA_DISABLED);
-            theme->scaleSwiper_ = swiperPattern->GetAttr<double>("indicator_scale_swiper", INDICATOR_ZOOM_IN_SCALE);
             theme->arrowScale_ = SWIPER_ARROW_SCALE;
             theme->arrowHorizontalMargin_ =
                 swiperPattern->GetAttr<Dimension>(ARROW_HORIZONTAL_MARGIN, SWIPER_ARROW_HORIZONTAL_MARGIN_DEFAULT);
@@ -180,21 +172,6 @@ public:
     const Color& GetSelectedColor() const
     {
         return selectedColor_;
-    }
-
-    const Color& GetFocusedBgColor() const
-    {
-        return focusedBgColor_;
-    }
-
-    const Color& GetFocusUnSelectedColor() const
-    {
-        return unSelectedColor_;
-    }
-
-    const Color& GetFocusedSelectedColor() const
-    {
-        return focusedSelectedColor_;
     }
 
     const Color& GetHoverColor() const
@@ -369,11 +346,6 @@ public:
         return arrowDisabledAlpha_;
     }
 
-    double GetScaleSwiper() const
-    {
-        return scaleSwiper_;
-    }
-
     const Dimension& GetArrowScale() const
     {
         return arrowScale_;
@@ -414,16 +386,6 @@ public:
         return indicatorDotItemSpace_;
     }
 
-    const Dimension& GetIndicatorPaddingDot() const
-    {
-        return indicatorPaddingDot_;
-    }
-
-    const Dimension& GetIndicatorBgHeight() const
-    {
-        return indicatorBgHeight_;
-    }
-
     uint32_t GetLeftSymbolId() const
     {
         return leftSymbolId_;
@@ -450,14 +412,10 @@ protected:
 private:
     Color color_;
     Color selectedColor_;
-    Color unSelectedColor_;
-    Color focusedBgColor_;
-    Color focusedSelectedColor_;
     Color hoverColor_;
     Color pressedColor_;
     Color focusedColor_;
     Dimension focusedBorderWidth_;
-    Dimension indicatorBgHeight_;
     Dimension size_;
     Dimension selectedSize_;
     Dimension indicatorPointPadding_;
@@ -489,7 +447,6 @@ private:
     Color bigArrowBackgroundColor_;
     Color bigArrowColor_;
     double arrowDisabledAlpha_ = 0.4;
-    double scaleSwiper_ = INDICATOR_ZOOM_IN_SCALE;
     Dimension arrowScale_;
     Dimension arrowHorizontalMargin_;
     Dimension arrowVerticalMargin_;
@@ -498,7 +455,6 @@ private:
     Dimension indicatorDotPadding_;
     Dimension indicatorDigitHeight_;
     Dimension indicatorDotItemSpace_;
-    Dimension indicatorPaddingDot_;
     uint32_t leftSymbolId_ = 0;
     uint32_t rightSymbolId_ = 0;
     uint32_t upSymbolId_ = 0;

@@ -144,7 +144,7 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     dataDetectorAdapter_->aiDetectDelayTask_.Cancel();
     CloseSelectOverlay();
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
         pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
@@ -1790,10 +1790,17 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
                     imageChildren.emplace_back(node);
                 }
             }
+            auto host = pattern->GetHost();
             RichEditorDragInfo info;
-            info.firstHandle = pattern->textSelector_.firstHandle;
-            info.secondHandle = pattern->textSelector_.secondHandle;
-            pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(pattern->GetHost(), imageChildren, info);
+            auto firstHandleInfo = pattern->GetFirstHandleInfo();
+            if (firstHandleInfo.has_value() && firstHandleInfo.value().isShow) {
+                info.firstHandle = pattern->textSelector_.firstHandle;
+            }
+            auto secondHandleInfo = pattern->GetSecondHandleInfo();
+            if (secondHandleInfo.has_value() && secondHandleInfo.value().isShow) {
+                info.secondHandle = pattern->textSelector_.secondHandle;
+            }
+            pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(host, imageChildren, info);
             FrameNode::ProcessOffscreenNode(pattern->dragNode_);
         }
     };
@@ -2910,6 +2917,21 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
             case PropertyInfo::TEXTSHADOW:
                 if (textLayoutProp->HasTextShadow()) {
                     child->UpdateTextShadowWithoutFlushDirty(textLayoutProp->GetTextShadow().value());
+                }
+                break;
+            case PropertyInfo::HALFLEADING:
+                if (textLayoutProp->HasHalfLeading()) {
+                    child->UpdateHalfLeadingWithoutFlushDirty(textLayoutProp->GetHalfLeading().value());
+                }
+                break;
+            case PropertyInfo::MIN_FONT_SCALE:
+                if (textLayoutProp->HasMinFontScale()) {
+                    child->UpdateMinFontScaleWithoutFlushDirty(textLayoutProp->GetMinFontScale().value());
+                }
+                break;
+            case PropertyInfo::MAX_FONT_SCALE:
+                if (textLayoutProp->HasMaxFontScale()) {
+                    child->UpdateMaxFontScaleWithoutFlushDirty(textLayoutProp->GetMaxFontScale().value());
                 }
                 break;
             default:

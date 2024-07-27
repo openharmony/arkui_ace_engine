@@ -479,6 +479,11 @@ void WaterFlowLayoutInfoSW::PrepareSectionPos(int32_t idx, bool fillBack)
     if (prevSeg == curSeg) {
         return;
     }
+    if (std::all_of(
+            lanes_[prevSeg].begin(), lanes_[prevSeg].end(), [](const auto& lane) { return lane.items_.empty(); })) {
+        // previous section is invalid
+        return;
+    }
     // prepare sections below
     if (prevSeg < curSeg) {
         for (int32_t i = prevSeg + 1; i <= curSeg; ++i) {
@@ -626,7 +631,7 @@ void WaterFlowLayoutInfoSW::NotifyDataChange(int32_t index, int32_t count)
     if (!PrepareNewStartIndex()) {
         return;
     }
-    //更新的index是否在newStartIndex_上方、是否会影响newStartIndex_
+    // 更新的index是否在newStartIndex_上方、是否会影响newStartIndex_
     if (index >= newStartIndex_ || (count < 0 && newStartIndex_ <= index - count - 1)) {
         newStartIndex_ = INVALID_NEW_START_INDEX;
         return;

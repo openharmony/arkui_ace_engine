@@ -327,7 +327,9 @@ public:
 
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
-    void SetForceSplitEnable(bool isForceSplit) override;
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override;
+
+    void UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
 private:
     UIContentErrorCode InitializeInner(
@@ -342,6 +344,8 @@ private:
 
     void InitializeSafeArea(const RefPtr<Platform::AceContainer>& container);
     void InitializeDisplayAvailableRect(const RefPtr<Platform::AceContainer>& container);
+
+    void InitDragSummaryMap(const RefPtr<Platform::AceContainer>& container);
 
     RefPtr<PopupParam> CreateCustomPopupParam(bool isShow, const CustomPopupUIExtensionConfig& config);
     void OnPopupStateChange(const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId);

@@ -281,6 +281,91 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Order001
+ * @tc.desc: check fill order
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Order001, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(400.0f));
+        ViewAbstract::SetHeight(CalcLength(600.f));
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetRowsGap(Dimension(5.0f));
+        model.SetColumnsGap(Dimension(5.0f));
+        for (int i = 0; i < 30; ++i) {
+            CreateItemWithHeight(100.0f);
+        }
+    });
+    AddItemsAtSlot(5, 100.0f, 3);
+    frameNode_->ChildrenUpdatedFrom(3);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 3), (400.0f + 5.0f) / 2.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 4), 0.0f);
+}
+
+/**
+ * @tc.name: Update001
+ * @tc.desc: update section item count
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Update001, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            for (int i = 0; i < 35; ++i) {
+                CreateItemWithHeight(100.0f);
+            }
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_11);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 3), 325.0f);
+
+    /* Add 4 items at 3 */
+    AddItemsAtSlot(4, 100.0f, 3);
+    frameNode_->ChildrenUpdatedFrom(3);
+
+    auto section = SECTION_11[1];
+    section.itemsCount += 4;
+    section.crossCount = 3;
+    secObj->ChangeData(1, 1, { section });
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 5.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 3), 325.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 6), 430.0f);
+    UpdateCurrentOffset(-365.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 3), -40.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 6), 65.0f);
+
+    /* remove 4 items from 3 */
+    section.itemsCount -= 4;
+    section.crossCount = 2;
+    secObj->ChangeData(1, 1, { section });
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    for (int i = 0; i < 4; ++i) {
+        frameNode_->RemoveChildAtIndex(3);
+    }
+    frameNode_->ChildrenUpdatedFrom(3);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 3), -40.0f);
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 3), 320.0f);
+    EXPECT_EQ(info_->endIndex_, 6);
+}
+
+/**
  * @tc.name: OverScroll001
  * @tc.desc: Test overScroll past limits
  * @tc.type: FUNC

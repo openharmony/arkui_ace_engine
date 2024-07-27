@@ -1164,6 +1164,95 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AttrScrollSnapAlign008
+ * @tc.desc: Test FixPredictSnapOffsetAlignStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign008, TestSize.Level1)
+{
+    CreateSnapList(V2::ScrollSnapAlign::START);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+
+    // EdgeEffect::FADE
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::FADE, false);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+}
+
+/**
+ * @tc.name: AttrScrollSnapAlign009
+ * @tc.desc: Test FixPredictSnapOffsetAlignEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign009, TestSize.Level1)
+{
+    CreateSnapList(V2::ScrollSnapAlign::END);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+
+    // EdgeEffect::FADE
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::FADE, false);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+}
+
+/**
+ * @tc.name: AttrScrollSnapAlign010
+ * @tc.desc: Test FixPredictSnapOffsetAlignCenter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign010, TestSize.Level1)
+{
+    float defaultOffset = -(LIST_HEIGHT - DEVIATION_HEIGHT - ITEM_HEIGHT) / 2; // -140.f
+    CreateSnapList(V2::ScrollSnapAlign::CENTER);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+
+    // EdgeEffect::FADE
+    defaultOffset = -(LIST_HEIGHT - ITEM_HEIGHT) / 2;
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::FADE, false);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+    pattern_->OnScrollSnapCallback(1000, 0.0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+}
+
+/**
  * @tc.name: AttrSLECM001
  * @tc.desc: Test property about edgeEffect/chainAnimation/multiSelectable
  * @tc.type: FUNC
@@ -1576,81 +1665,6 @@ HWTEST_F(ListAttrTestNg, ChainAnimation003, TestSize.Level1)
     chainAnimation = pattern_->chainAnimation_;
     EXPECT_FLOAT_EQ(chainAnimation->conductivity_, conductivity);
     EXPECT_FLOAT_EQ(chainAnimation->intensity_, intensity);
-}
-
-/**
- * @tc.name: FadingEdge001
- * @tc.desc: Test SetFadingEdge
- * @tc.type: FUNC
- */
-HWTEST_F(ListAttrTestNg, FadingEdge001, TestSize.Level1)
-{
-    /**
-     * @tc.cases: SetFadingEdge false
-     * @tc.expected: FadingEdge false
-     */
-    ListModelNG model = CreateList();
-    model.SetFadingEdge(false);
-    CreateListItems(1);
-    CreateDone(frameNode_);
-    EXPECT_FALSE(layoutProperty_->GetFadingEdgeValue(true));
-
-    /**
-     * @tc.cases: SetFadingEdge true
-     * @tc.expected: FadingEdge true
-     */
-    model = CreateList();
-    model.SetFadingEdge(true);
-    CreateListItems(1);
-    CreateDone(frameNode_);
-    EXPECT_TRUE(layoutProperty_->GetFadingEdgeValue(false));
-    frameNode_->SetOverlayNode(nullptr);
-    FlushLayoutTask(frameNode_);
-}
-
-/**
- * @tc.name: FadingEdge002
- * @tc.desc: Test SetFadingEdge
- * @tc.type: FUNC
- */
-HWTEST_F(ListAttrTestNg, FadingEdge002, TestSize.Level1)
-{
-    /**
-     * @tc.cases: ContentStartOffset 50.f and Space 10.f
-     * @tc.expected: startMainPos_ >= 0 and endMainPos_ > contentMainSize_
-     */
-    ListModelNG model = CreateList();
-    model.SetFadingEdge(true);
-    model.SetContentStartOffset(50.f);
-    model.SetContentEndOffset(50.f);
-    model.SetSpace(Dimension(10.f));
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->GetTotalOffset(), -50);
-    EXPECT_EQ(pattern_->startMainPos_, 50.f);
-    EXPECT_EQ(pattern_->endMainPos_, 490.f);
-    EXPECT_EQ(pattern_->contentStartOffset_, 50.f);
-    EXPECT_EQ(pattern_->contentEndOffset_, 50.f);
-
-    /**
-     * @tc.cases: ScrollTo 0.f
-     * @tc.expected: startMainPos_ >= 0 and endMainPos_ > contentMainSize_
-     */
-    pattern_->ScrollTo(0);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->startMainPos_, 0.f);
-    EXPECT_EQ(pattern_->endMainPos_, 440.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-
-    /**
-     * @tc.cases: ScrollTo 50.f
-     * @tc.expected: startMainPos_ < 0
-     */
-    pattern_->ScrollTo(50);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->startMainPos_, -50.f);
-    EXPECT_EQ(pattern_->endMainPos_, 490.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 50.f);
 }
 
 /**

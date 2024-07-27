@@ -158,6 +158,7 @@ private:
     bool isKeyEventRegisted_ = false;
     bool hasLoadingText_ = false;
     bool isRemoveCustomBuilder_ = false;
+    bool isTextNodeChanged_ = false;
     RefPtr<FrameNode> progressChild_;
     RefPtr<FrameNode> loadingTextNode_;
     RefPtr<FrameNode> columnNode_;
