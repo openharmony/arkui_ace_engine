@@ -380,6 +380,9 @@ public:
 
     void SetIsEnableHaptic(bool value)
     {
+        if (isEnableHaptic_ != value) {
+            isHapticChanged_ = true;
+        }
         isEnableHaptic_ = value;
     }
 
@@ -560,6 +563,7 @@ private:
     void UpdateNodePositionForUg();
     void MountSecondNode(const RefPtr<FrameNode>& stackSecondNode);
     void RemoveSecondNode();
+    void ColumnPatternInitHapticController();
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
@@ -604,6 +608,7 @@ private:
     bool isForceUpdate_ = false;
     bool isDateTimeOptionUpdate_ = false;
     bool isEnableHaptic_ = true;
+    bool isHapticChanged_ = false;
     std::optional<std::string> firedTimeStr_;
     std::string language_;
     std::string amPmTimeOrder_;

@@ -94,13 +94,35 @@ void TimePickerRowPattern::SetButtonIdeaSize()
     }
 }
 
+void TimePickerRowPattern::ColumnPatternInitHapticController()
+{
+    if (!isHapticChanged_) {
+        return;
+    }
+
+    isHapticChanged_ = false;
+    for (auto iter = allChildNode_.begin(); iter != allChildNode_.end(); iter++) {
+        auto columnNode = iter->second.Upgrade();
+        if (!columnNode) {
+            continue;
+        }
+        auto pattern = columnNode->GetPattern<TimePickerColumnPattern>();
+        if (!pattern) {
+            continue;
+        }
+        pattern->InitHapticController(columnNode);
+    }
+}
+
 void TimePickerRowPattern::OnModifyDone()
 {
     if (isFiredTimeChange_ && !isForceUpdate_ && !isDateTimeOptionUpdate_) {
         isFiredTimeChange_ = false;
+        ColumnPatternInitHapticController();
         return;
     }
 
+    isHapticChanged_ = false;
     isForceUpdate_ = false;
     isDateTimeOptionUpdate_ = false;
     auto host = GetHost();
