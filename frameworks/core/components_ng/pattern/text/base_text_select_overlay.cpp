@@ -665,6 +665,7 @@ void BaseTextSelectOverlay::SwitchToOverlayMode()
 
 void BaseTextSelectOverlay::SwitchToEmbedMode()
 {
+    CHECK_NULL_VOID(!isHandleMoving_);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     handleLevelMode_ = HandleLevelMode::EMBED;

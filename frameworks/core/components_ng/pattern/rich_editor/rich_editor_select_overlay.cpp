@@ -210,6 +210,7 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
 
 void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
 {
+    isHandleMoving_ = false;
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "handleRect=%{public}s, isFirstHandle=%{public}d",
@@ -452,4 +453,17 @@ void RichEditorSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag
     }
     BaseTextSelectOverlay::OnAncestorNodeChanged(flag);
 }
+
+void RichEditorSelectOverlay::OnHandleMoveStart(bool isFirst)
+{
+    isHandleMoving_ = true;
+}
+
+void RichEditorSelectOverlay::UpdateHandleOffset()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE);
+}
+
 } // namespace OHOS::Ace::NG
