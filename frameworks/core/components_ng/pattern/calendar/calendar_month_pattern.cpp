@@ -132,7 +132,7 @@ void CalendarMonthPattern::SetVirtualNodeUserSelected(int32_t index)
     if (accessibilityPropertyVec_.size() < 1) {
         return;
     }
-    for (int i = 0; i < accessibilityPropertyVec_.size(); i++) {
+    for (int i = 0; i < static_cast<int>(accessibilityPropertyVec_.size()); i++) {
         if (i == index &&
             obtainedMonth_.days[i].month.month == obtainedMonth_.month &&
             obtainedMonth_.days[i].month.year == obtainedMonth_.year) {

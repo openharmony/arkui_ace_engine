@@ -286,7 +286,7 @@ void SliderPattern::UpdateStepPointsAccessibilityVirtualNodeSelected()
     if (pointAccessibilityNodeVec_.empty()) {
         return;
     }
-    int32_t pointCount = pointAccessibilityNodeVec_.size();
+    int32_t pointCount = static_cast<int32_t>(pointAccessibilityNodeVec_.size());
     int32_t currentStepIndex = GetCurrentStepIndex();
     for (int32_t i = 0; i < pointCount; i++) {
         RefPtr<FrameNode> pointNode = pointAccessibilityNodeVec_[i];
