@@ -191,6 +191,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         context->PrepareOpenImplicitAnimation();
     });
     pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), option.GetOnFinishEvent());
+    auto previousOption = pipelineContext->GetSyncAnimationOption();
     pipelineContext->SetSyncAnimationOption(option);
     // Execute the function.
     jsAnimateToFunc->Call(jsAnimateToFunc);
@@ -208,7 +209,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         context->PrepareCloseImplicitAnimation();
     });
     pipelineContext->CloseImplicitAnimation();
-    pipelineContext->SetSyncAnimationOption(AnimationOption());
+    pipelineContext->SetSyncAnimationOption(previousOption);
     pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
     if (immediately) {
         pipelineContext->FlushModifier();
@@ -234,11 +235,12 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
     NG::ScopedViewStackProcessor scopedProcessor;
     pipelineContext->FlushBuild();
     pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), option.GetOnFinishEvent());
+    auto previousOption = pipelineContext->GetSyncAnimationOption();
     pipelineContext->SetSyncAnimationOption(option);
     jsAnimateToFunc->Call(jsAnimateToFunc);
     pipelineContext->FlushBuild();
     pipelineContext->CloseImplicitAnimation();
-    pipelineContext->SetSyncAnimationOption(AnimationOption());
+    pipelineContext->SetSyncAnimationOption(previousOption);
     if (immediately) {
         pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();

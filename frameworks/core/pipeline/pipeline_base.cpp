@@ -930,6 +930,7 @@ void PipelineBase::Destroy()
     TAG_LOGI(AceLogTag::ACE_ANIMATION, "pipeline destroyed, has %{public}zu finish callbacks not executed",
         finishFunctions_.size());
     finishFunctions_.clear();
+    animationOption_ = {};
     {
         // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
         // thread.
