@@ -78,6 +78,7 @@ public:
                 theme->iconBoardDistance_ = pattern->GetAttr<double>("rating_icon_board_distance", 0.0);
                 theme->focusColor_ = pattern->GetAttr<Color>("rating_focus_bgcolor", Color());
                 theme->focusSpace_ = pattern->GetAttr<Dimension>("rating_focus_space", 0.0_vp);
+                theme->cancelAnimation_ = pattern->GetAttr<double>("rating_focus_blur_cancel_animation", 0.0);
             } else {
                 LOGW("find pattern of rating fail");
             }
@@ -177,6 +178,11 @@ public:
         return designedStarAspectRatio_;
     }
 
+    double GetFocusAndBlurCancleAnimation() const
+    {
+        return cancelAnimation_;
+    }
+
     const Dimension& GetFocusBorderWidth() const
     {
         return focusBorderWidth_;
@@ -261,6 +267,7 @@ private:
     Color focusColor_;
     Dimension focusBorderWidth_;
     Dimension borderRadius_;
+    double cancelAnimation_ = 0.0;
 };
 
 } // namespace OHOS::Ace

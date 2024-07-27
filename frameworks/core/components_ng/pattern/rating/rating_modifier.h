@@ -111,6 +111,13 @@ public:
         }
     }
 
+    void SetFocusOrBlurColor(const Color& color)
+    {
+        if (boardColor_) {
+            boardColor_->Set(LinearColor(color));
+        }
+    }
+
     void SetContentOffset(OffsetF contentOffset)
     {
         if (contentOffset_) {

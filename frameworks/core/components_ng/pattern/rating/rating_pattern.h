@@ -143,6 +143,8 @@ private:
 
     // Init touch event, update render when click.
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
 
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -176,6 +178,8 @@ private:
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> mouseEvent_;
+    RefPtr<PipelineContext> pipelineContext_;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     DataReadyNotifyTask CreateDataReadyCallback(int32_t imageFlag);
     LoadSuccessNotifyTask CreateLoadSuccessCallback(int32_t imageFlag);

@@ -594,23 +594,12 @@ void RatingPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetOnFocusInternal([wp = WeakClaim(this)]() {
         auto pattern = wp.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto pipline = pattern->GetContext();
-        CHECK_NULL_VOID(pipline);
-        pipline->AddIsFocusActiveUpdateEvent(pattern->GetHost(), [weak = wp](bool isFocusAcitve) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->SetModifierFocus(isFocusAcitve);
-        });
-
         pattern->OnFocusEvent();
     });
 
     focusHub->SetOnBlurInternal([wp = WeakClaim(this)]() {
         auto pattern = wp.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto pipline = pattern->GetContext();
-        CHECK_NULL_VOID(pipline);
-        pipline->RemoveIsFocusActiveUpdateEvent(pattern->GetHost());
         pattern->OnBlurEvent();
     });
 }
@@ -619,14 +608,16 @@ void RatingPattern::SetModifierFocus(bool isFocus)
 {
     isfocus_ = isFocus;
     if (isfocus_) {
-        auto pipline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipline);
-        if (!pipline->GetIsFocusActive()) {
-            return;
-        }
         state_ = RatingModifier::RatingAnimationType::FOCUS;
     } else {
         state_ = RatingModifier::RatingAnimationType::NONE;
+    }
+
+    CHECK_NULL_VOID(pipelineContext_);
+    auto ratingTheme = pipelineContext_->GetTheme<RatingTheme>();
+    CHECK_NULL_VOID(ratingTheme);
+    if (ratingTheme->GetFocusAndBlurCancleAnimation()) {
+        ratingModifier_->SetFocusOrBlurColor(isfocus_ ? ratingTheme->GetFocusColor() : Color::TRANSPARENT);
     }
     ratingModifier_->SetIsFocus(isFocus);
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -634,17 +625,44 @@ void RatingPattern::SetModifierFocus(bool isFocus)
 
 void RatingPattern::OnFocusEvent()
 {
-    SetModifierFocus(true);
+    CHECK_NULL_VOID(pipelineContext_);
+    if (pipelineContext_->GetIsFocusActive()) {
+        SetModifierFocus(true);
+    }
+    AddIsFocusActiveUpdateEvent();
 }
 
 void RatingPattern::OnBlurEvent()
 {
-    isfocus_ = false;
+    SetModifierFocus(false);
+    RemoveIsFocusActiveUpdateEvent();
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     focusRatingScore_ = ratingRenderProperty->GetRatingScoreValue();
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
+
+void RatingPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetModifierFocus(isFocusAcitve);
+        };
+    }
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void RatingPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
 
 void RatingPattern::SetRatingScore(double ratingScore)
 {
@@ -976,5 +994,6 @@ void RatingPattern::InitDefaultParams()
     themeStepSize_ = ratingTheme->GetStepSize();
     themeRatingScore_ = ratingTheme->GetRatingScore();
     themeBorderWidth_ = ratingTheme->GetFocusBorderWidth();
+    pipelineContext_ = host->GetContextRefPtr();
 }
 } // namespace OHOS::Ace::NG
