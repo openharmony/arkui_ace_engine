@@ -20,6 +20,9 @@
 #include <type_traits>
 #include <unordered_map>
 #include <variant>
+#include <future>
+#include <mutex>
+#include <shared_mutex>
 
 #include "base/geometry/dimension.h"
 #include "base/log/log.h"

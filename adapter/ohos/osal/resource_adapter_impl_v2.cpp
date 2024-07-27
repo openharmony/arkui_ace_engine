@@ -20,8 +20,8 @@
 #include "drawable_descriptor.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
-#include "adapter/ohos/osal/resource_theme_style.h"
 #include "adapter/ohos/osal/resource_convertor.h"
+#include "adapter/ohos/osal/resource_theme_style.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
@@ -201,7 +201,7 @@ void ResourceAdapterImplV2::UpdateConfig(const ResourceConfiguration& config, bo
     resConfig_ = resConfig;
 }
 
-RefPtr ResourceAdapterImplV2::GetTheme(int32_t themeId)
+RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
 {
     CheckThemeId(themeId);
     auto manager = GetResourceManager();
