@@ -925,4 +925,28 @@ HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle002, TestSize.Level1)
     layoutAlgorithm->CopySpanStyle(source, AceType::MakeRefPtr<SpanItem>());
     EXPECT_FALSE(source->textLineStyle->HasTextAlign());
 }
+
+/**
+ * @tc.name: CopySpanStyle003
+ * @tc.desc: test CopySpanStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto source = AceType::MakeRefPtr<SpanItem>();
+    auto target = AceType::MakeRefPtr<SpanItem>();
+
+    LeadingMargin leadingMargin;
+    source->textLineStyle->UpdateLeadingMargin(leadingMargin);
+    source->fontStyle->UpdateFontSize(FONT_SIZE_VALUE);
+    source->textLineStyle->UpdateLineHeight(LINE_HEIGHT_VALUE);
+
+    layoutAlgorithm->CopySpanStyle(source, target);
+    EXPECT_EQ(target->fontStyle->GetFontSize(), FONT_SIZE_VALUE);
+}
 } // namespace OHOS::Ace::NG

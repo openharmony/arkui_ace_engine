@@ -2460,4 +2460,126 @@ HWTEST_F(RichEditorBaseTestNg, AddSpanByPasteData001, TestSize.Level1)
     richEditorPattern->AddSpanByPasteData(spanString);
     EXPECT_EQ(richEditorPattern->spans_.size(), 2);
 }
+
+/**
+ * @tc.name: RichEditorLayoutAlgorithm001
+ * @tc.desc: test MeasureContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RichEditorLayoutAlgorithm001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto richEditorTheme = AceType::MakeRefPtr<RichEditorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(richEditorTheme));
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    parentLayoutConstraint.selfIdealSize.SetHeight(std::nullopt);
+    parentLayoutConstraint.selfIdealSize.SetWidth(1.0f);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+
+    auto paragraphManager = AceType::MakeRefPtr<ParagraphManager>();
+    layoutAlgorithm->paragraphManager_ = paragraphManager;
+
+    AddSpan(INIT_VALUE_1);
+    layoutAlgorithm->spans_.emplace_back(richEditorPattern->spans_);
+    layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+
+    layoutAlgorithm->spans_.clear();
+    auto size1 = layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(size1.value().Width(), 1.0f);
+
+    richEditorPattern->presetParagraph_ = paragraph;
+    auto size2 = layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(size2.value().Width(), 1.0f);
+
+    float textHeight = 1.0f;
+    SizeF res = SizeF(10.0f, 10.0f);
+    richEditorPattern->isShowPlaceholder_ = true;
+    layoutAlgorithm->UpdateRichTextRect(res, textHeight, AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutAlgorithm->richTextRect_.GetSize().Width(), 0.0f);
+}
+
+/**
+ * @tc.name: RichEditorLayoutAlgorithm002
+ * @tc.desc: test GetParagraphStyleSpanItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RichEditorLayoutAlgorithm002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    std::list<RefPtr<SpanItem>> spanGroup;
+    spanGroup.clear();
+    spanGroup.emplace_back(AceType::MakeRefPtr<PlaceholderSpanItem>());
+    auto span = layoutAlgorithm->GetParagraphStyleSpanItem(spanGroup);
+    EXPECT_EQ(*spanGroup.begin(), span);
+}
+
+/**
+ * @tc.name: RichEditorLayoutAlgorithm003
+ * @tc.desc: test Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RichEditorLayoutAlgorithm003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = SizeF(10.0f, 1000.0f);
+    layoutConstraint.minSize = CONTAINER_SIZE;
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    layoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), 720.0f);
+}
+
+/**
+ * @tc.name: RichEditorLayoutAlgorithm004
+ * @tc.desc: test RichEditorLayoutAlgorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RichEditorLayoutAlgorithm004, TestSize.Level1)
+{
+    std::list<RefPtr<SpanItem>> spans;
+    auto paragraphManager = AceType::MakeRefPtr<ParagraphManager>();
+    auto placeholderSpanItem = AceType::MakeRefPtr<PlaceholderSpanItem>();
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+
+    std::string str = "\n";
+    spanItem->content = str;
+    spans.emplace_back(spanItem);
+    auto layoutAlgorithm = AceType::MakeRefPtr<RichEditorLayoutAlgorithm>(spans, AceType::RawPtr(paragraphManager));
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    EXPECT_NE(*(layoutAlgorithm->allSpans_.begin()), nullptr);
+}
 } // namespace OHOS::Ace::NG
