@@ -176,6 +176,11 @@ public:
         return searchNode_;
     }
 
+    bool NeedFocusBox() const
+    {
+        return needFocusBox_;
+    }
+
     void ResetDragOption() override;
     void OnColorConfigurationUpdate() override;
 
@@ -304,7 +309,7 @@ private:
     bool isCancelButtonHover_ = false;
     bool isSearchButtonHover_ = false;
     bool isSearchButtonEnabled_ = false;
-    bool focusBoxGlow_ = false;
+    bool needFocusBox_ = false;
     bool isFocusPlaceholderColorSet_ = false;
     bool isFocusBgColorSet_ = false;
     bool isFocusIconColorSet_ = false;

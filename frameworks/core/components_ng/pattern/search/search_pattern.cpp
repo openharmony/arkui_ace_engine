@@ -941,7 +941,7 @@ void SearchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     float radiusBottomRight = 0.0f;
     float focusOffset = FOCUS_OFFSET.ConvertToPx();
     if (focusChoice_ == FocusChoice::SEARCH) {
-        if (!focusBoxGlow_) {
+        if (!needFocusBox_) {
             return;
         }
         originX = searchOffset_.GetX() - DOUBLE * focusOffset;
@@ -1179,13 +1179,12 @@ void SearchPattern::InitSearchTheme()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto appTheme = pipeline->GetTheme<AppTheme>();
-    focusBoxGlow_ = appTheme->IsFocusBoxGlow();
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     searchNormalColor_ = textFieldTheme->GetBgColor();
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
+    needFocusBox_ = searchTheme->NeedFocusBox();
     searchHoverColor_ = searchTheme->GetHoverColor();
     searchTouchColor_ = searchTheme->GetTouchColor();
     focusBgColor_ = searchTheme->GetFocusBgColor();
