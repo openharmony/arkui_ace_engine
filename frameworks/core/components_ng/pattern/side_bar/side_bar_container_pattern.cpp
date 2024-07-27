@@ -1189,7 +1189,7 @@ void SideBarContainerPattern::OnHover(bool isHover)
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     int32_t currentPointerStyle = 0;
     mouseStyle->GetPointerStyle(static_cast<int32_t>(windowId), currentPointerStyle);
-    if (currentPointerStyle != static_cast<int32_t>(format)) {
+    if (currentPointerStyle != static_cast<int32_t>(format) && sideBarStatus_ == SideBarStatus::SHOW) {
         mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), format);
     }
     isResizeMouseStyle_ = (format == MouseFormat::RESIZE_LEFT_RIGHT);
