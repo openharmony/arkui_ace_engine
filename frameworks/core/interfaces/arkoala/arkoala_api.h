@@ -1242,7 +1242,14 @@ struct ArkUIAnimator {
     void* animatorOption;
 };
 
+typedef struct {
+    ArkUIDragEvent* dragEvent;
+    ArkUI_Int32 status;
+} ArkUIDragAndDropInfo;
+
 typedef ArkUIAnimator* ArkUIAnimatorHandle;
+
+typedef void (*DragStatusCallback)(ArkUIDragAndDropInfo* dragAndDropInfo, void* userData);
 
 struct ArkUIImageFrameInfo {
     ArkUI_CharPtr src;
@@ -1339,6 +1346,20 @@ struct ArkUIDragPreViewAndInteractionOptions {
 
 struct ArkUI_DialogDismissEvent;
 typedef ArkUI_DialogDismissEvent* ArkUIDialogDismissEvent;
+
+struct ArkUIDragAction {
+    ArkUI_Int32 instanceId = -1;
+    ArkUI_Int32 pointerId = 0;
+    ArkUI_Float64 touchPointX = 0.0f;
+    ArkUI_Float64 touchPointY = 0.0f;
+    void** pixelmapArray;
+    ArkUI_Int32 size = -1;
+    ArkUIDragPreViewAndInteractionOptions dragPreviewOption;
+    void* userData;
+    DragStatusCallback listener;
+    void* unifiedData;
+    bool hasTouchPoint = false;
+};
 
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
@@ -4845,6 +4866,11 @@ typedef struct {
 } ArkUINodeAdapterAPI;
 
 typedef struct {
+    ArkUI_Int32 (*startDrag)(ArkUIDragAction* dragAction);
+    void (*registerStatusListener)(ArkUIDragAction* dragAction, void* userData, DragStatusCallback listener);
+    void (*unregisterStatusListener)(ArkUIDragAction* dragAction);
+    ArkUIDragAction* (*createDragActionWithNode)(ArkUINodeHandle node);
+    ArkUIDragAction* (*createDragActionWithContext)(ArkUIContext* context);
     void (*setDragPreview)(ArkUINodeHandle node, void* dragPreview);
     void (*setDragEventStrictReportingEnabledWithNode)(bool enabled);
     void (*setDragEventStrictReportingEnabledWithContext)(ArkUI_Int32 instanceId, bool enabled);
