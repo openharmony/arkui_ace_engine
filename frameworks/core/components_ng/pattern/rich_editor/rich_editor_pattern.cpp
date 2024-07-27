@@ -6779,34 +6779,28 @@ void RichEditorPattern::AdjustSelectionExcludeSymbol(int32_t& start, int32_t& en
 
 void RichEditorPattern::InitSelection(const Offset& pos)
 {
-    int32_t currentPosition = paragraphs_.GetIndex(pos);
-    currentPosition = std::min(currentPosition, GetTextContentLength());
-    if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED && !isEditing_) {
-        SelectType selectType = SelectType::NONE;
-        selectType = CheckResult(pos, currentPosition);
-        if (selectType == SelectType::NOT_SELECT) {
-            textSelector_.Update(-1, -1);
+    auto positionWithAffinity = paragraphs_.GetGlyphPositionAtCoordinate(pos);
+    int32_t currentPosition = positionWithAffinity.position_;
+    switch (JudgeSelectType(positionWithAffinity)) {
+        case SelectType::SELECT_NOTHING:
+            textSelector_.Update(currentPosition, currentPosition);
             return;
-        }
-        if (selectType == SelectType::SELECT_ABOVE_LINE) {
+        case SelectType::SELECT_ABOVE_LINE: {
             int32_t aboveLineEnd = std::max(0, currentPosition - 1);
             SetCaretPosition(aboveLineEnd);
             int32_t aboveLineBegin = CalcLineBeginPosition();
             textSelector_.Update(aboveLineBegin, aboveLineEnd);
             return;
         }
-        if (selectType == SelectType::SELECT_BACKWARD) {
+        case SelectType::SELECT_BACKWARD:
             currentPosition = std::max(0, currentPosition - 1);
-        }
-    } else {
-        bool currentPosEqualParagraphBegin = currentPosition == GetParagraphBeginPosition(currentPosition);
-        if (IsTouchBeforeCaret(currentPosition, pos) && !currentPosEqualParagraphBegin) {
-            currentPosition = std::max(0, currentPosition - 1);
-        }
+            break;
+        case SelectType::SELECT_FORWARD:
+            break;
+        default:
+            TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "exception select type");
     }
-
     int32_t nextPosition = std::min(currentPosition + 1, GetTextContentLength());
-    MouseDoubleClickParagraphEnd(currentPosition);
     AdjustSelectionExcludeSymbol(currentPosition, nextPosition);
     if (!IsCustomSpanInCaretPos(currentPosition, true)) {
         AdjustWordSelection(currentPosition, nextPosition);
@@ -6817,35 +6811,35 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     auto selectedRects = paragraphs_.GetRects(currentPosition, nextPosition);
     bool isSelectEmpty = selectedRects.empty() || (selectedRects.size() == 1 && NearZero((selectedRects[0].Width())));
     if (isSelectEmpty) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "select rect is empty, select nothing");
         textSelector_.Update(currentPosition, currentPosition);
     }
 }
 
-SelectType RichEditorPattern::CheckResult(const Offset& pos, int32_t currentPosition)
+SelectType RichEditorPattern::JudgeSelectType(const PositionWithAffinity& positionWithAffinity)
 {
-    SelectType selectType = SelectType::NONE;
-    if (GetTextContentLength() == 0) {
-        selectType = SelectType::NOT_SELECT;
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "result:empty content, not select");
-        return selectType;
+    CHECK_NULL_RETURN(GetTextContentLength() != 0, SelectType::SELECT_NOTHING);
+    int32_t currentPosition = positionWithAffinity.position_;
+    TextAffinity currentAffinity = positionWithAffinity.affinity_;
+    if (previewLongPress_) {
+        caretPosition_ = currentPosition;
+        int32_t lineBeginPosition = CalcLineBeginPosition();
+        int32_t lineEndPosition = CalcLineEndPosition();
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Line: begin|end=%{public}d|%{public}d, currentPosition=%{public}d",
+            lineBeginPosition, lineEndPosition, currentPosition);
+        bool touchAtEmptyLine = (lineBeginPosition == lineEndPosition) && (currentPosition == lineEndPosition);
+        CHECK_NULL_RETURN(!touchAtEmptyLine, SelectType::SELECT_ABOVE_LINE);
+    } else if (editingLongPress_) {
+        auto paragraphEndPos = GetParagraphEndPosition(currentPosition);
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "paragraphEndPos=%{public}d, currentPosition=%{public}d",
+            paragraphEndPos, currentPosition);
+        bool touchAtParagraphEnd = currentPosition == paragraphEndPos;
+        CHECK_NULL_RETURN(!touchAtParagraphEnd, SelectType::SELECT_NOTHING);
     }
-    AdjustCursorPosition(currentPosition);
-    caretPosition_ = currentPosition;
-    int32_t lineBeginPosition = CalcLineBeginPosition();
-    int32_t lineEndPosition = CalcLineEndPosition();
-    int32_t paragraphBegin = GetParagraphBeginPosition(currentPosition);
-    bool isTouchBeforeCaret = IsTouchBeforeCaret(currentPosition, pos);
-    bool currentPosEqualParagraphBegin = currentPosition == paragraphBegin;
-    bool touchAtLineEnd = currentPosition == lineEndPosition;
-    bool lineEmpty = lineBeginPosition == lineEndPosition;
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Line: begin|end=%{public}d|%{public}d, touch=%{public}d",
-                lineBeginPosition, lineEndPosition, currentPosition);
-    if ((isTouchBeforeCaret && !currentPosEqualParagraphBegin) || (touchAtLineEnd && !lineEmpty)) {
-        selectType = SelectType::SELECT_BACKWARD;
-    } else if (touchAtLineEnd && lineEmpty) {
-        selectType = SelectType::SELECT_ABOVE_LINE;
-    }
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "result:%{public}d(0:N/A,2:Select Backward,3:Select Above)", selectType);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "currentPosition=%{public}d, currentAffinity=%{public}d",
+        currentPosition, currentAffinity);
+    SelectType selectType =
+        (currentAffinity == TextAffinity::UPSTREAM) ? SelectType::SELECT_BACKWARD : SelectType::SELECT_FORWARD;
     return selectType;
 }
 
@@ -9541,9 +9535,6 @@ void RichEditorPattern::UpdateSelectionByTouchMove(const Offset& touchOffset)
     auto [initSelectStart, initSelectEnd] = initSelector_;
     int32_t start = std::min(initSelectStart, currentPosition);
     int32_t end = std::max(initSelectEnd, currentPosition);
-    if (isEditing_ && (start == end)) {
-        AdjustWordSelection(start, end);
-    }
     HandleSelectionChange(start, end);
     if (!isEditing_) {
         isShowMenu_ = false;

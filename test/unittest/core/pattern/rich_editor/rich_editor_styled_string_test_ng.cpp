@@ -859,8 +859,10 @@ HWTEST_F(RichEditorStyledStringTestNg, CustomSpan001, TestSize.Level1)
     richEditorPattern->textSelector_.Update(0, 1);
     richEditorPattern->CalculateHandleOffsetAndShowOverlay();
     SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), 50.f };
-    EXPECT_EQ(richEditorPattern->textSelector_.firstHandle, RectF(OffsetF(0, 0), handlePaintSize));
-    EXPECT_EQ(richEditorPattern->textSelector_.secondHandle, RectF(OffsetF(100.f, 0), handlePaintSize));
+    auto firstHandleOffset = OffsetF(0 - handlePaintSize.Width() / 2.0f, 0);
+    auto secondHandleOffset = OffsetF(100.f - handlePaintSize.Width() / 2.0f, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.firstHandle, RectF(firstHandleOffset, handlePaintSize));
+    EXPECT_EQ(richEditorPattern->textSelector_.secondHandle, RectF(secondHandleOffset, handlePaintSize));
 }
 
 /**
