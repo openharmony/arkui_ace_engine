@@ -1122,6 +1122,10 @@ void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::fun
     }
 
     auto engine = EngineHelper::GetEngine(aceContainer->GetInstanceId());
+    if (!engine) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get engine failed, containerId : %{public}d", aceContainer->GetInstanceId());
+        return;
+    }
     auto delegate = engine->GetFrontend();
     if (!delegate) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get frontend failed, child containerId : %{public}d", childContainerId_);
