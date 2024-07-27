@@ -1293,7 +1293,6 @@ public:
         auto node = node_.Upgrade();
         CHECK_NULL_VOID(node);
         auto rectf = node->GetRectWithRender();
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "frame rect:%{public}s", rectf.ToString().c_str());
         AbilityRuntime::AutoFill::PopupOffset offset;
         AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
         AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
@@ -1317,8 +1316,7 @@ public:
             offset.deltaX = rect_.left + rect_.width - ((rectf.Width() + size.width) / POPUP_CALCULATE_RATIO);
         }
 
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "popup offset.deltaX:%{public}f", offset.deltaX);
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "popup offset.deltaY:%{public}f", offset.deltaY);
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "PopupOffset x:%{public}f,y:%{public}f", offset.deltaX, offset.deltaY);
         config.targetOffset = offset;
     }
 

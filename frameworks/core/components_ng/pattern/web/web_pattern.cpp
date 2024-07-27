@@ -73,7 +73,7 @@ namespace {
 const std::string IMAGE_POINTER_CONTEXT_MENU_PATH = "etc/webview/ohos_nweb/context-menu.svg";
 const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
-constexpr int32_t AUTOFILL_DELAY_TIME = 100;
+constexpr int32_t AUTOFILL_DELAY_TIME = 200;
 constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
 constexpr int32_t TOUCH_EVENT_MAX_SIZE = 5;
 constexpr int32_t KEYEVENT_MAX_NUM = 1000;
@@ -3378,17 +3378,14 @@ void WebPattern::NotifyFillRequestFailed(int32_t errCode, const std::string& fil
 void WebPattern::ParseViewDataNumber(const std::string& key, int32_t value,
     RefPtr<PageNodeInfoWrap> node, RectT<float>& rect, float viewScale)
 {
-    CHECK_NULL_VOID(viewScale > 0);
+    CHECK_NULL_VOID(viewScale > FLT_EPSILON);
     CHECK_NULL_VOID(node);
-    std::optional<OffsetF> offset = GetCoordinatePoint();
     if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_FOCUS) {
         node->SetIsFocus(static_cast<bool>(value));
     } else if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_RECT_X) {
-        float x = value / viewScale;
-        rect.SetLeft(x + offset.value_or(OffsetF()).GetX());
+        rect.SetLeft(value / viewScale);
     } else if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_RECT_Y) {
-        float y = value / viewScale;
-        rect.SetTop(y + offset.value_or(OffsetF()).GetY());
+        rect.SetTop(value / viewScale);
     } else if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_RECT_W) {
         rect.SetWidth(value / viewScale);
     } else if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_RECT_H) {
@@ -3415,7 +3412,7 @@ void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     float viewScale = pipelineContext->GetViewScale();
-    CHECK_NULL_VOID(viewScale > 0);
+    CHECK_NULL_VOID(viewScale > FLT_EPSILON);
 
     RefPtr<PageNodeInfoWrap> node = PageNodeInfoWrap::CreatePageNodeInfoWrap();
     std::string attribute = child->GetKey();
@@ -3497,43 +3494,38 @@ AceAutoFillType WebPattern::GetFocusedType()
 
 void WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "called");
+    TAG_LOGI(AceLogTag::ACE_WEB, "AutoFillEvent");
     OHOS::NWeb::NWebAutofillEvent eventType = OHOS::NWeb::NWebAutofillEvent::UNKNOWN;
     ParseNWebViewDataJson(viewDataJson, pageNodeInfo_, eventType);
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-
-    auto task = [weak = WeakClaim(this), eventType]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (eventType == OHOS::NWeb::NWebAutofillEvent::SAVE) {
-            pattern->RequestAutoSave();
-        } else if (eventType == OHOS::NWeb::NWebAutofillEvent::FILL) {
-            pattern->RequestAutoFill(pattern->GetFocusedType());
-        } else if (eventType == OHOS::NWeb::NWebAutofillEvent::UPDATE) {
-            pattern->UpdateAutoFillPopup();
-        } else if (eventType == OHOS::NWeb::NWebAutofillEvent::CLOSE) {
-            pattern->CloseAutoFillPopup();
-        }
-    };
-
     if (eventType == OHOS::NWeb::NWebAutofillEvent::FILL) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostDelayedTask(
-            task, TaskExecutor::TaskType::UI, AUTOFILL_DELAY_TIME, "ArkUIWebHandleAutoFillEvent");
-    } else {
-        taskExecutor->PostTask(
-            task, TaskExecutor::TaskType::UI, "ArkUIWebHandleAutoFillEvent");
+            [weak = WeakClaim(this)] () {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->RequestAutoFill(pattern->GetFocusedType());
+            },
+            TaskExecutor::TaskType::UI, AUTOFILL_DELAY_TIME, "ArkUIWebHandleAutoFillEvent");
+    }
+
+    if (eventType == OHOS::NWeb::NWebAutofillEvent::SAVE) {
+        RequestAutoSave();
+    } else if (eventType == OHOS::NWeb::NWebAutofillEvent::UPDATE) {
+        UpdateAutoFillPopup();
+    } else if (eventType == OHOS::NWeb::NWebAutofillEvent::CLOSE) {
+        CloseAutoFillPopup();
     }
 }
 
 bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "called");
+    TAG_LOGI(AceLogTag::ACE_WEB, "RequestAutoFill");
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto container = Container::Current();
@@ -3541,13 +3533,14 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
         container = Container::GetActive();
     }
     CHECK_NULL_RETURN(container, false);
+    isAutoFillClosing_ = false;
     bool isPopup = false;
     return container->RequestAutoFill(host, autoFillType, false, isPopup, autoFillSessionId_, false);
 }
 
 bool WebPattern::RequestAutoSave()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "called");
+    TAG_LOGI(AceLogTag::ACE_WEB, "RequestAutoSave");
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto container = Container::Current();
@@ -3560,7 +3553,10 @@ bool WebPattern::RequestAutoSave()
 
 bool WebPattern::UpdateAutoFillPopup()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "called");
+    TAG_LOGI(AceLogTag::ACE_WEB, "UpdateAutoFillPopup");
+    if (isAutoFillClosing_) {
+        return false;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto container = Container::Current();
@@ -3573,12 +3569,13 @@ bool WebPattern::UpdateAutoFillPopup()
 
 bool WebPattern::CloseAutoFillPopup()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "called");
+    TAG_LOGI(AceLogTag::ACE_WEB, "CloseAutoFillPopup");
     auto container = Container::Current();
     if (container == nullptr) {
         container = Container::GetActive();
     }
     CHECK_NULL_RETURN(container, false);
+    isAutoFillClosing_ = true;
     return container->ClosePopupUIExtension(autoFillSessionId_);
 }
 
