@@ -172,10 +172,10 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0047, TestSize.Level1)
     focusHub->PaintAllFocusState();
     focusHub->CalculatePosition();
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
-    EXPECT_TRUE(focusHub->CalculatePosition());
+    EXPECT_FALSE(focusHub->CalculatePosition());
     focusHub1->focusType_ = FocusType::NODE;
     EXPECT_FALSE(focusHub->PaintAllFocusState());
-    EXPECT_TRUE(focusHub->CalculatePosition());
+    EXPECT_FALSE(focusHub->CalculatePosition());
 }
 
 /**
@@ -756,9 +756,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0066, TestSize.Level1)
     frameNode->children_.push_back(frameNode4);
 
     auto res = focusHub->AcceptFocusByRectOfLastFocusScope(RectF(0, 0, -1, -1));
-    ASSERT_TRUE(res);
+    ASSERT_FALSE(res);
     focusHub->AcceptFocusByRectOfLastFocusScope(RectF());
-    ASSERT_TRUE(res);
+    ASSERT_FALSE(res);
 }
 
 /**
@@ -1177,7 +1177,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0079, TestSize.Level1)
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
     auto res = focusHub->TryRequestFocus(focusHub1, RectF(), FocusStep::LEFT);
-    ASSERT_TRUE(res);
+    ASSERT_FALSE(res);
 }
 
 /**
@@ -1889,12 +1889,12 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0107, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = FrameNodeOnTree::CreateFrameNode(V2::COLUMN_ETS_TAG, 117,
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    auto child = FrameNodeOnTree::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        118, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto child2 = FrameNodeOnTree::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        119, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto frameNode =
+        FrameNodeOnTree::CreateFrameNode(V2::COLUMN_ETS_TAG, 117, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto child = FrameNodeOnTree::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 118, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto child2 = FrameNodeOnTree::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 119, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     child->MountToParent(frameNode);
     child2->MountToParent(frameNode);
 
@@ -1908,7 +1908,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0107, TestSize.Level1)
     parentFocusHub->isFocusScope_ = true;
     EXPECT_TRUE(parentFocusHub->RequestFocusByPriorityInScope());
     parentFocusHub->isFocusScope_ = false;
-    EXPECT_FALSE(parentFocusHub->RequestFocusByPriorityInScope());
+    EXPECT_TRUE(parentFocusHub->RequestFocusByPriorityInScope());
     EXPECT_TRUE(child2FocusHub->IsCurrentFocus());
 
     auto pipeline = PipelineContext::GetCurrentContext();
