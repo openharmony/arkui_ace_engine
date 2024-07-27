@@ -129,6 +129,9 @@ const FOCUSABLE: boolean = LengthMetrics.resource($r('sys.float.composeListItem_
 const RECOVERYSCALE = 1;
 const CLEARSHADOW: ShadowStyle = -1;
 const CLEARBLUR = 0;
+const OPERATEITEMRADIUS = 50;
+const OPERATEITEMBACKGROUNDCOLOR = '#33000000';
+const OPERATEITECOLOR = '#99000000';
 
 @Component
 struct ContentItemStruct {
@@ -544,6 +547,11 @@ struct OperateItemStruct {
   @Builder
   createRadio() {
     Radio({ value: '', group: '' })
+      .radioStyle({
+        uncheckedBorderColor: FOCUSABLE ? null : (this.isFocus && !this.radioState ? OPERATEITECOLOR : null)
+      })
+      .backgroundColor(FOCUSABLE ? null : (this.isFocus && !this.radioState ? OPERATEITEMBACKGROUNDCOLOR : null))
+      .borderRadius(FOCUSABLE ? null : OPERATEITEMRADIUS)
       .margin({ end: LengthMetrics.vp(OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL1) })
       .checked(this.radioState)
       .onChange(this.radio?.onChange)
@@ -582,6 +590,9 @@ struct OperateItemStruct {
   @Builder
   createCheckBox() {
     Checkbox()
+      .borderRadius(FOCUSABLE ? null : OPERATEITEMRADIUS)
+      .unselectedColor(FOCUSABLE ? null : (this.isFocus && !this.checkBoxState ? OPERATEITECOLOR : null))
+      .backgroundColor(FOCUSABLE ? null : (this.isFocus && !this.checkBoxState ? OPERATEITEMBACKGROUNDCOLOR : null))
       .margin({ end: LengthMetrics.vp(OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL1) })
       .select(this.checkBoxState)
       .onChange(this.checkBox?.onChange)
@@ -621,6 +632,9 @@ struct OperateItemStruct {
   createSwitch() {
     Row() {
       Toggle({ type: ToggleType.Switch, isOn: this.switchState })
+        .borderRadius(FOCUSABLE ? null : OPERATEITEMRADIUS)
+        .backgroundColor(FOCUSABLE ? null : (this.isFocus && !this.switchState ? OPERATEITEMBACKGROUNDCOLOR : null))
+        .switchPointColor(FOCUSABLE ? null : (this.isFocus && !this.switchState ? OPERATEITECOLOR : null))
         .onChange(this.switch?.onChange)
         .onClick(() => {
           this.switchState = !this.switchState
