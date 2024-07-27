@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -32,7 +33,6 @@ constexpr int32_t CALENDAR_WEEK_DAYS = 7;
 constexpr int32_t DAILY_FOUR_ROWSPACE = 4;
 constexpr int32_t DAILY_FIVE_ROWSPACE = 5;
 constexpr Dimension CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT = 4.0_vp;
-constexpr double DEVICE_HEIGHT_LIMIT = 640.0;
 } // namespace
 void CalendarMonthPattern::OnAttachToFrameNode()
 {
@@ -55,8 +55,7 @@ Dimension CalendarMonthPattern::GetDaySize(const RefPtr<CalendarTheme>& theme)
     auto pipeline = GetHost()->GetContext();
     CHECK_NULL_RETURN(pipeline, theme->GetCalendarPickerDayWidthOrHeight());
     auto fontSizeScale = pipeline->GetFontScale();
-    if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
-        Dimension(pipeline->GetRootHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange()) {
         return theme->GetCalendarPickerDayWidthOrHeight();
     } else {
         return theme->GetCalendarPickerDayLargeWidthOrHeight();
