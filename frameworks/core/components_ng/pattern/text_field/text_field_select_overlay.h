@@ -78,6 +78,8 @@ public:
         return lastSourceType_ == SourceType::TOUCH;
     }
 
+    void OnHandleLevelModeChanged(HandleLevelMode mode) override;
+
 private:
     std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);
     void UpdatePattern(const OverlayRequest& request);
