@@ -817,13 +817,17 @@ void RichEditorPattern::SetSelfAndChildDraggableFalse(const RefPtr<UINode>& cust
     }
 }
 
-int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPaste, int32_t index)
+int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, bool isPaste, int32_t index)
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "options=%{public}s", options.ToString().c_str());
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isPaste=%{public}d, index=%{public}d", isPaste, index);
     NotifyExitTextPreview();
     OperationRecord record;
-    record.beforeCaretPosition = options.offset.value_or(static_cast<int32_t>(GetTextContentLength()));
+    auto textContentLength = GetTextContentLength();
+    if (options.offset) {
+        options.offset = std::clamp(options.offset.value(), 0, textContentLength);
+    }
+    record.beforeCaretPosition = std::clamp(options.offset.value_or(textContentLength), 0, textContentLength);
     record.addText = options.value;
     RichEditorChangeValue changeValue;
     CHECK_NULL_RETURN(BeforeChangeText(changeValue, options), -1);
