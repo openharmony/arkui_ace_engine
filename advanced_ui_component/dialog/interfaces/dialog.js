@@ -28,10 +28,6 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
     });
 }
 
-if (PUV2ViewBase.contextStack === undefined) {
-    Reflect.set(PUV2ViewBase, 'contextStack', []);
-}
-
 class CustomThemeImpl {
     constructor(c31) {
         this.colors = c31;
@@ -273,7 +269,6 @@ export class TipsDialog extends ViewPU {
     }
 
     initialRender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.observeComponentCreation2((i30, j30) => {
             __Common__.create();
             __Common__.constraintSize({ maxHeight: '100%' });
@@ -314,14 +309,13 @@ export class TipsDialog extends ViewPU {
             }, { name: 'CustomDialogContentComponent' });
         }
         __Common__.pop();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 
     contentBuilder(g28 = null) {
         {
             this.observeComponentCreation2((i28, j28) => {
                 if (j28) {
-                    let k28 = new TipsDialogContentLayout(this, {
+                    let k28 = new TipsDialogContentLayout(g28 ? g28 : this, {
                         title: this.title,
                         content: this.content,
                         checkTips: this.checkTips,
@@ -336,7 +330,7 @@ export class TipsDialog extends ViewPU {
                                         If.create();
                                         if (n29 === this.imageIndex) {
                                             this.ifElseBranchUpdateFunction(0, () => {
-                                                this.imagePart.bind(this)();
+                                                this.imagePart.bind(this)(g28 ? g28 : this);
                                             });
                                         } else if (n29 === this.textIndex) {
                                             this.ifElseBranchUpdateFunction(1, () => {
@@ -352,7 +346,7 @@ export class TipsDialog extends ViewPU {
                                                         }
                                                     });
                                                 }, Column);
-                                                this.textPart.bind(this)();
+                                                this.textPart.bind(this)(g28 ? g28 : this);
                                                 Column.pop();
                                             });
                                         } else {
@@ -363,7 +357,7 @@ export class TipsDialog extends ViewPU {
                                                         colorMode: this.themeColorMode
                                                     });
                                                 }, WithTheme);
-                                                this.checkBoxPart.bind(this)();
+                                                this.checkBoxPart.bind(this)(g28 ? g28 : this);
                                                 WithTheme.pop();
                                             });
                                         }
@@ -394,7 +388,7 @@ export class TipsDialog extends ViewPU {
                                             If.create();
                                             if (u28 === this.imageIndex) {
                                                 this.ifElseBranchUpdateFunction(0, () => {
-                                                    this.imagePart.bind(this)();
+                                                    this.imagePart.bind(this)(g28 ? g28 : this);
                                                 });
                                             } else if (u28 === this.textIndex) {
                                                 this.ifElseBranchUpdateFunction(1, () => {
@@ -410,7 +404,7 @@ export class TipsDialog extends ViewPU {
                                                             }
                                                         });
                                                     }, Column);
-                                                    this.textPart.bind(this)();
+                                                    this.textPart.bind(this)(g28 ? g28 : this);
                                                     Column.pop();
                                                 });
                                             } else {
@@ -421,7 +415,7 @@ export class TipsDialog extends ViewPU {
                                                             colorMode: this.themeColorMode
                                                         });
                                                     }, WithTheme);
-                                                    this.checkBoxPart.bind(this)();
+                                                    this.checkBoxPart.bind(this)(g28 ? g28 : this);
                                                     WithTheme.pop();
                                                 });
                                             }
@@ -667,9 +661,7 @@ export class TipsDialog extends ViewPU {
     }
 
     rerender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
@@ -805,15 +797,11 @@ class TipsDialogContentLayout extends ViewPU {
     }
 
     initialRender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
-        this.dialogBuilder.bind(this)();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
+        this.dialogBuilder.bind(this)(this);
     }
 
     rerender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
@@ -1264,7 +1252,6 @@ export class SelectDialog extends ViewPU {
     }
 
     initialRender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.observeComponentCreation2((a21, b21) => {
             __Common__.create();
             __Common__.constraintSize({ maxHeight: '100%' });
@@ -1309,7 +1296,6 @@ export class SelectDialog extends ViewPU {
             }, { name: 'CustomDialogContentComponent' });
         }
         __Common__.pop();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 
     aboutToAppear() {
@@ -1400,9 +1386,7 @@ export class SelectDialog extends ViewPU {
     }
 
     rerender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
@@ -1500,15 +1484,11 @@ class ConfirmDialogContentLayout extends ViewPU {
     }
 
     initialRender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
-        this.dialogBuilder.bind(this)();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
+        this.dialogBuilder.bind(this)(this);
     }
 
     rerender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
@@ -1779,7 +1759,7 @@ export class ConfirmDialog extends ViewPU {
         {
             this.observeComponentCreation2((h16, i16) => {
                 if (i16) {
-                    let j16 = new ConfirmDialogContentLayout(this, {
+                    let j16 = new ConfirmDialogContentLayout(f16 ? f16 : this, {
                         minContentHeight: this.__minContentHeight, updateTextAlign: this.updateTextAlign,
                         dialogBuilder: () => {
                             this.observeComponentCreation2((e17, f17) => {
@@ -1790,7 +1770,7 @@ export class ConfirmDialog extends ViewPU {
                                         If.create();
                                         if (j17 === this.textIndex) {
                                             this.ifElseBranchUpdateFunction(0, () => {
-                                                this.textBuilder.bind(this)();
+                                                this.textBuilder.bind(this)(f16 ? f16 : this);
                                             });
                                         } else if (j17 === this.checkboxIndex) {
                                             this.ifElseBranchUpdateFunction(1, () => {
@@ -1800,7 +1780,7 @@ export class ConfirmDialog extends ViewPU {
                                                         colorMode: this.themeColorMode
                                                     });
                                                 }, WithTheme);
-                                                this.checkBoxBuilder.bind(this)();
+                                                this.checkBoxBuilder.bind(this)(f16 ? f16 : this);
                                                 WithTheme.pop();
                                             });
                                         } else {
@@ -1830,7 +1810,7 @@ export class ConfirmDialog extends ViewPU {
                                             If.create();
                                             if (t16 === this.textIndex) {
                                                 this.ifElseBranchUpdateFunction(0, () => {
-                                                    this.textBuilder.bind(this)();
+                                                    this.textBuilder.bind(this)(f16 ? f16 : this);
                                                 });
                                             } else if (t16 === this.checkboxIndex) {
                                                 this.ifElseBranchUpdateFunction(1, () => {
@@ -1840,7 +1820,7 @@ export class ConfirmDialog extends ViewPU {
                                                             colorMode: this.themeColorMode
                                                         });
                                                     }, WithTheme);
-                                                    this.checkBoxBuilder.bind(this)();
+                                                    this.checkBoxBuilder.bind(this)(f16 ? f16 : this);
                                                     WithTheme.pop();
                                                 });
                                             } else {
@@ -1865,7 +1845,6 @@ export class ConfirmDialog extends ViewPU {
     }
 
     initialRender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.observeComponentCreation2((d16, e16) => {
             __Common__.create();
             __Common__.constraintSize({ maxHeight: '100%' });
@@ -1908,7 +1887,6 @@ export class ConfirmDialog extends ViewPU {
             }, { name: 'CustomDialogContentComponent' });
         }
         __Common__.pop();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 
     aboutToAppear() {
@@ -1942,9 +1920,7 @@ export class ConfirmDialog extends ViewPU {
     }
 
     rerender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
@@ -2079,7 +2055,6 @@ export class AlertDialog extends ViewPU {
     }
 
     initialRender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.observeComponentCreation2((f15, g15) => {
             __Common__.create();
             __Common__.constraintSize({ maxHeight: '100%' });
@@ -2124,7 +2099,6 @@ export class AlertDialog extends ViewPU {
             }, { name: 'CustomDialogContentComponent' });
         }
         __Common__.pop();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 
     AlertDialogContentBuilder(i14 = null) {
@@ -2225,9 +2199,7 @@ export class AlertDialog extends ViewPU {
     }
 
     rerender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
@@ -2324,7 +2296,6 @@ export class CustomContentDialog extends ViewPU {
     }
 
     initialRender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.observeComponentCreation2((t13, u13) => {
             __Common__.create();
             __Common__.constraintSize({ maxHeight: '100%' });
@@ -2375,13 +2346,10 @@ export class CustomContentDialog extends ViewPU {
             }, { name: 'CustomDialogContentComponent' });
         }
         __Common__.pop();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 
     rerender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
@@ -2510,15 +2478,11 @@ class CustomDialogLayout extends ViewPU {
     }
 
     initialRender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
-        this.dialogBuilder.bind(this)();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
+        this.dialogBuilder.bind(this)(this);
     }
 
     rerender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
@@ -2876,7 +2840,6 @@ class CustomDialogContentComponent extends ViewPU {
     }
 
     initialRender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.observeComponentCreation2((z10, a11) => {
             WithTheme.create({ theme: this.theme, colorMode: this.themeColorMode });
         }, WithTheme);
@@ -2955,7 +2918,7 @@ class CustomDialogContentComponent extends ViewPU {
                                                         colorMode: this.themeColorMode
                                                     });
                                                 }, WithTheme);
-                                                this.titleBuilder.bind(this)();
+                                                this.titleBuilder.bind(this)(this);
                                                 WithTheme.pop();
                                             });
                                         } else if (c10 === this.contentIndex) {
@@ -2970,7 +2933,7 @@ class CustomDialogContentComponent extends ViewPU {
                                                         colorMode: this.themeColorMode
                                                     });
                                                 }, WithTheme);
-                                                this.contentBuilder.bind(this)();
+                                                this.contentBuilder.bind(this)(this);
                                                 WithTheme.pop();
                                                 Column.pop();
                                             });
@@ -2982,7 +2945,7 @@ class CustomDialogContentComponent extends ViewPU {
                                                         colorMode: this.themeColorMode
                                                     });
                                                 }, WithTheme);
-                                                this.ButtonBuilder.bind(this)();
+                                                this.ButtonBuilder.bind(this)(this);
                                                 WithTheme.pop();
                                             });
                                         }
@@ -3017,7 +2980,7 @@ class CustomDialogContentComponent extends ViewPU {
                                                             colorMode: this.themeColorMode
                                                         });
                                                     }, WithTheme);
-                                                    this.titleBuilder.bind(this)();
+                                                    this.titleBuilder.bind(this)(this);
                                                     WithTheme.pop();
                                                 });
                                             } else if (d9 === this.contentIndex) {
@@ -3032,7 +2995,7 @@ class CustomDialogContentComponent extends ViewPU {
                                                             colorMode: this.themeColorMode
                                                         });
                                                     }, WithTheme);
-                                                    this.contentBuilder.bind(this)();
+                                                    this.contentBuilder.bind(this)(this);
                                                     WithTheme.pop();
                                                     Column.pop();
                                                 });
@@ -3044,7 +3007,7 @@ class CustomDialogContentComponent extends ViewPU {
                                                             colorMode: this.themeColorMode
                                                         });
                                                     }, WithTheme);
-                                                    this.ButtonBuilder.bind(this)();
+                                                    this.ButtonBuilder.bind(this)(this);
                                                     WithTheme.pop();
                                                 });
                                             }
@@ -3067,7 +3030,6 @@ class CustomDialogContentComponent extends ViewPU {
         Column.pop();
         Scroll.pop();
         WithTheme.pop();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 
     onMeasureSize(d8, e8, f8) {
@@ -3438,11 +3400,11 @@ class CustomDialogContentComponent extends ViewPU {
                         If.create();
                         if (this.isButtonVertical) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.buildVerticalAlignButtons.bind(this)();
+                                this.buildVerticalAlignButtons.bind(this)(i6 ? i6 : this);
                             });
                         } else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.buildHorizontalAlignButtons.bind(this)();
+                                this.buildHorizontalAlignButtons.bind(this)(i6 ? i6 : this);
                             });
                         }
                     }, If);
@@ -3599,7 +3561,7 @@ class CustomDialogContentComponent extends ViewPU {
                     this.observeComponentCreation2((l5, m5) => {
                         Row.create();
                     }, Row);
-                    this.buildSingleButton.bind(this)(this.buttons[0]);
+                    this.buildSingleButton.bind(this)(this.buttons[0], w4 ? w4 : this);
                     this.observeComponentCreation2((e5, f5) => {
                         If.create();
                         if (this.buttons.length === HORIZON_BUTTON_MAX_COUNT) {
@@ -3639,7 +3601,8 @@ class CustomDialogContentComponent extends ViewPU {
                                         },
                                     });
                                 }, Divider);
-                                this.buildSingleButton.bind(this)(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1]);
+                                this.buildSingleButton.bind(this)(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1],
+                                    w4 ? w4 : this);
                             });
                         } else {
                             this.ifElseBranchUpdateFunction(1, () => {
@@ -3670,7 +3633,7 @@ class CustomDialogContentComponent extends ViewPU {
                         const n4 = (r4, s4) => {
                             const t4 = r4;
                             this.buildButtonWithDivider.bind(this)(this.buttons?.length === HORIZON_BUTTON_MAX_COUNT ?
-                                HORIZON_BUTTON_MAX_COUNT - s4 - 1 : s4);
+                                HORIZON_BUTTON_MAX_COUNT - s4 - 1 : s4, d4 ? d4 : this);
                         };
                         this.forEachUpdateFunction(l4, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), n4,
                             (q4) => q4.value.toString(), true, false);
@@ -3727,7 +3690,7 @@ class CustomDialogContentComponent extends ViewPU {
                     this.observeComponentCreation2((a4, b4) => {
                         Row.create();
                     }, Row);
-                    this.buildSingleButton.bind(this)(this.buttons[k3]);
+                    this.buildSingleButton.bind(this)(this.buttons[k3], l3 ? l3 : this);
                     Row.pop();
                     this.observeComponentCreation2((t3, u3) => {
                         If.create();
@@ -3788,9 +3751,7 @@ class CustomDialogContentComponent extends ViewPU {
     }
 
     rerender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
@@ -3999,7 +3960,6 @@ export class LoadingDialog extends ViewPU {
     }
 
     initialRender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.observeComponentCreation2((r1, s1) => {
             Column.create();
         }, Column);
@@ -4042,7 +4002,6 @@ export class LoadingDialog extends ViewPU {
         }
         __Common__.pop();
         Column.pop();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 
     contentBuilder(t = null) {
@@ -4102,9 +4061,7 @@ export class LoadingDialog extends ViewPU {
     }
 
     rerender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
@@ -4174,7 +4131,6 @@ export class PopupDialog extends ViewPU {
     }
 
     initialRender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.observeComponentCreation2((b, c) => {
             Column.create();
             Column.onClick(() => {
@@ -4221,15 +4177,12 @@ export class PopupDialog extends ViewPU {
                 onWillDismiss: this.popup?.onWillDismiss
             });
         }, Column);
-        this.targetBuilder.bind(this)();
+        this.targetBuilder.bind(this)(this);
         Column.pop();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 
     rerender() {
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
-        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 
