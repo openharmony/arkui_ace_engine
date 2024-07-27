@@ -29,6 +29,7 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "transaction/rs_transaction_proxy.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -69,6 +70,8 @@ ScreenPattern::ScreenPattern(const sptr<Rosen::ScreenSession>& screenSession)
     if (screenSession_ != nullptr) {
         screenSession_->SetUpdateToInputManagerCallback(std::bind(&ScreenPattern::UpdateToInputManager,
             this, std::placeholders::_1));
+        screenSession_->SetUpdateScreenPivotCallback(std::bind(
+            &ScreenPattern::UpdateRenderPivot, this, std::placeholders::_1, std::placeholders::_2));
     }
 }
 
@@ -114,6 +117,24 @@ void ScreenPattern::UpdateDisplayInfo()
     }
 
     UpdateToInputManager(displayNodeRotation);
+}
+
+void ScreenPattern::UpdateRenderPivot(float pivotX, float pivotY)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    if (context != nullptr) {
+        context->SetRenderPivot(pivotX, pivotY);
+        auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
+        if (transactionProxy != nullptr) {
+            transactionProxy->FlushImplicitTransaction();
+        } else {
+            LOGE("RSTransactionProxy transactionProxy is nullptr");
+        }
+    } else {
+        LOGE("RenderContext is nullptr");
+    }
 }
 
 void ScreenPattern::UpdateToInputManager(float rotation)
