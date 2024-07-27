@@ -992,7 +992,7 @@ struct ArkUIAPIEventGestureAsyncEvent {
     ArkUI_Float32 scale;
     ArkUI_Float32 pinchCenterX;
     ArkUI_Float32 pinchCenterY;
-    ArkUI_Int32 speed;
+    ArkUI_Float32 speed;
     ArkUI_Int32 timestamp;
     ArkUI_Int32 source;
     ArkUI_Int32 pressure;

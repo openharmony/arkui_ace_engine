@@ -121,7 +121,7 @@ float OH_ArkUI_SwipeGesture_GetAngle(const ArkUI_GestureEvent* event)
 
 float OH_ArkUI_SwipeGesture_GetVelocity(const ArkUI_GestureEvent* event)
 {
-    return event->eventData.velocity;
+    return event->eventData.speed;
 }
 
 float OH_ArkUI_RotationGesture_GetAngle(const ArkUI_GestureEvent* event)
