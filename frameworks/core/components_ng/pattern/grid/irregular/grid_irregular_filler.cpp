@@ -136,7 +136,6 @@ void GridIrregularFiller::FillOne(const int32_t idx)
     }
 
     info_->gridMatrix_[row][col] = idx;
-    SetItemInfo(idx, row, col, size);
 
     posY_ = row;
     posX_ = col;
@@ -206,7 +205,7 @@ void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t item
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     auto constraint = props->CreateChildConstraint();
 
-    auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx);
+    const auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx);
     // should cache child constraint result
     float crossLen = 0.0f;
     for (int32_t i = 0; i < itemSize.columns; ++i) {
@@ -224,6 +223,7 @@ void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t item
     }
 
     child->Measure(constraint);
+    SetItemInfo(itemIdx, row, col, itemSize);
 
     float childHeight = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
     // spread height to each row.
@@ -364,7 +364,7 @@ void GridIrregularFiller::SetItemInfo(int32_t idx, int32_t row, int32_t col, Gri
         std::swap(row, col);
         std::swap(size.rows, size.columns);
     }
-    auto item = wrapper_->GetOrCreateChildByIndex(idx);
+    auto item = wrapper_->GetChildByIndex(idx);
     CHECK_NULL_VOID(item);
     auto pattern = item->GetHostNode()->GetPattern<GridItemPattern>();
     CHECK_NULL_VOID(pattern);
