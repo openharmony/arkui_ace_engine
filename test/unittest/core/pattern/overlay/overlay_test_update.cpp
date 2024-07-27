@@ -230,7 +230,6 @@ DatePickerSettingData OverlayTestUpdate::GenDatePickerSettingData()
 void OverlayTestUpdate::TestUpdateAlign(
     RefPtr<OHOS::Ace::NG::LayoutAlgorithm> toastLayoutAlgorithm, LayoutWrapper* layoutWrapper, ToastInfo toastInfo)
 {
-    std::cout<<"TestUpdateAlign start"<<std::endl;
     ASSERT_NE(toastLayoutAlgorithm, nullptr);
     ASSERT_NE(layoutWrapper, nullptr);
 
@@ -1612,7 +1611,6 @@ HWTEST_F(OverlayTestUpdate, ToastTest028, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapperNode>(textNode, textNode->GetGeometryNode(), textNode->GetLayoutProperty());
     ASSERT_NE(textLayoutWrapper, nullptr);
     layoutWrapper->AppendChild(textLayoutWrapper);
-std::cout<<"TDD start"<<std::endl;
     /**
      * @tc.steps: step3. Test left to right alignment.
      */

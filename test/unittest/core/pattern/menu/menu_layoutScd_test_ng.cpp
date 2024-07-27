@@ -1251,10 +1251,6 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5700, TestSize.Level1)
 
     previewGeometryNode->SetFrameSize(SizeF(GREATER_WINDOW_PREVIEW_WIDTH_SECOND, PREVIEW_HEIGHT));
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
-    std::cout << previewGeometryNode->GetFrameOffset().ToString().c_str() << std::endl;
-    std::cout << previewGeometryNode->GetFrameSize().ToString().c_str() << std::endl;
-    std::cout << menuGeometryNode->GetFrameOffset().ToString().c_str() << std::endl;
-    std::cout << menuGeometryNode->GetFrameSize().ToString().c_str() << std::endl;
     EXPECT_EQ(previewGeometryNode->GetFrameOffset(), OffsetF(0.0, 0.0));
     EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(SCALE_PREVIEW_WIDTH_FORTH_SECOND, SCALE_PREVIEW_HEIGHT_FORTH));
     EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(0.0, SCALE_PREVIEW_HEIGHT_FORTH + PLACEMENT_MENU_SPACE));

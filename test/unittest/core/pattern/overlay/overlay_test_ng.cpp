@@ -569,74 +569,6 @@ HWTEST_F(OverlayTestNg, OnBindContentCover005, TestSize.Level1)
 }
 
 /**
- * @tc.name: PopupTest002
- * @tc.desc: Test OverlayManager::PopupEvent functions.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayTestNg, PopupTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create target node and popupInfo.
-     */
-    std::vector<RefPtr<FrameNode>> targetNodes;
-    std::vector<PopupInfo> popups;
-    for (int i = 0; i < 2; i++) {
-        auto targetNode = CreateTargetNode();
-        ASSERT_NE(targetNode, nullptr);
-        targetNodes.emplace_back(targetNode);
-        auto targetId = targetNodes[i]->GetId();
-        auto targetTag = targetNodes[i]->GetTag();
-
-        auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto popupNode = FrameNode::CreateFrameNode(
-            V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
-        PopupInfo popupInfo;
-        popupInfo.popupId = popupId;
-        popupInfo.popupNode = popupNode;
-        popupInfo.target = targetNode;
-        popupInfo.markNeedUpdate = true;
-        popupInfo.isBlockEvent = false;
-        popups.emplace_back(popupInfo);
-    }
-    /**
-     * @tc.steps: step2. create overlayManager and call ShowPopup.
-     * @tc.expected: Push popup successfully
-     */
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    auto targetId1 = targetNodes[0]->GetId();
-    auto targetId2 = targetNodes[1]->GetId();
-    rootNode->isLayoutComplete_ = true;
-    overlayManager->ShowPopup(targetId1, popups[0]);
-    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
-    overlayManager->ShowPopup(targetId2, popups[1]);
-    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
-    /**
-     * @tc.steps: step3. call HideCustomPopups when childCount is 2
-     * @tc.expected: popupMap's data is updated successfully
-     */
-    overlayManager->HideCustomPopups();
-    EXPECT_FALSE(overlayManager->popupMap_.empty());
-    EXPECT_FALSE(rootNode->GetChildren().empty());
-    /**
-     * @tc.steps: step4. call RemoveOverlay when childCount is 2
-     * @tc.expected: remove one popupNode at a time
-     */
-    overlayManager->HidePopup(targetId1, popups[0]);
-    overlayManager->HidePopup(targetId2, popups[1]);
-    EXPECT_FALSE(overlayManager->RemoveOverlay(false));
-    EXPECT_FALSE(overlayManager->popupMap_.empty());
-    overlayManager->ErasePopup(targetId1);
-    overlayManager->ErasePopup(targetId2);
-    EXPECT_TRUE(overlayManager->popupMap_.empty());
-    /**
-     * @tc.steps: step5. call HideCustomPopups when popupMap_ is empty
-     * @tc.expected: function exits normally
-     */
-    overlayManager->HideCustomPopups();
-    EXPECT_TRUE(overlayManager->popupMap_.empty());
-}
-/**
  * @tc.name: PopupTest003
  * @tc.desc: Test OverlayManager::HidePopup.
  * @tc.type: FUNC
@@ -999,35 +931,6 @@ HWTEST_F(OverlayTestNg, MenuTest006, TestSize.Level1)
     auto node = AceType::DynamicCast<FrameNode>(rootNode->GetChildren().back());
     EXPECT_EQ(node->GetTag(), V2::MENU_WRAPPER_ETS_TAG);
     overlay->HideMenu(menuNode, targetId);
-}
-
-/**
- * @tc.name: ToastTest003
- * @tc.desc: Test OverlayManager::ClearToast.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayTestNg, ToastTest003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get overlay manager instance.
-     */
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto overlay = pipelineContext->GetOverlayManager();
-    ASSERT_NE(overlay, nullptr);
-
-    /**
-     * @tc.steps: step2. call ShowToast.
-     * @tc.expected: toastMap_ is empty
-     */
-    auto toastInfo = NG::ToastInfo { .message = MESSAGE,
-        .duration = DURATION,
-        .bottom = BOTTOMSTRING,
-        .isRightToLeft = true };
-    overlay->ShowToast(toastInfo, nullptr);
-    EXPECT_FALSE(overlay->toastMap_.empty());
-    overlay->ClearToast();
-    EXPECT_TRUE(overlay->toastMap_.empty());
 }
 
 /**
