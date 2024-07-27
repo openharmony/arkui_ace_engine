@@ -214,13 +214,9 @@ void WaterFlowLayoutSW::ApplyDelta(float delta)
 
     if (Positive(delta)) {
         // positive offset is scrolling upwards
-        int32_t idx = info_->StartIndex() - 1;
-        info_->PrepareSectionPos(idx, false);
-        FillFront(0.0f, idx, 0);
+        FillFront(0.0f, info_->StartIndex() - 1, 0);
     } else {
-        int32_t idx = info_->EndIndex() + 1;
-        info_->PrepareSectionPos(idx, true);
-        FillBack(mainLen_, idx, itemCnt_ - 1);
+        FillBack(mainLen_, info_->EndIndex() + 1, itemCnt_ - 1);
     }
 }
 
@@ -281,6 +277,8 @@ void WaterFlowLayoutSW::FillBack(float viewportBound, int32_t idx, int32_t maxCh
 {
     idx = std::max(idx, 0);
     maxChildIdx = std::min(maxChildIdx, itemCnt_ - 1);
+
+    info_->PrepareSectionPos(idx, true);
     while (!FillBackSection(viewportBound, idx, maxChildIdx)) {
         if (idx > maxChildIdx) {
             break;
@@ -316,6 +314,8 @@ void WaterFlowLayoutSW::FillFront(float viewportBound, int32_t idx, int32_t minC
 {
     idx = std::min(itemCnt_ - 1, idx);
     minChildIdx = std::max(minChildIdx, 0);
+
+    info_->PrepareSectionPos(idx, false);
     while (!FillFrontSection(viewportBound, idx, minChildIdx)) {
         if (idx < minChildIdx) {
             break;
