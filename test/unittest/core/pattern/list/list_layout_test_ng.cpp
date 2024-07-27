@@ -504,7 +504,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset006, TestSize.Level1)
     ScrollSnap(-40, 0);
     EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), -100);
     ScrollSnap(-110, 0);
-    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), -100);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 50);
 }
 
 /**

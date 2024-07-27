@@ -168,6 +168,9 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
 
+    // In the secondary layout scenario, the previous contentMainSize_ is used as the next prevContentMainSize_.
+    prevContentMainSize_ = contentMainSize_;
+    
     auto crossSize = contentIdealSize.CrossSize(axis_);
     if (crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) {
         contentIdealSize.SetCrossSize(GetChildMaxCrossSize(layoutWrapper, axis_), axis_);
@@ -2106,7 +2109,7 @@ float ListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(uint32_t index
         predictSnapEndPos = totalOffset_ + itemPosition_[index].startPos + itemHeight / 2.0f - contentMainSize_ / 2.0f;
     } else if (scrollSnapAlign == V2::ScrollSnapAlign::END) {
         predictSnapEndPos = totalOffset_ + itemPosition_[index].endPos - contentMainSize_ + contentEndOffset_;
-        if (GetStartIndex() == 0 && LessNotEqual(predictSnapEndPos, contentStartOffset_)) {
+        if (GetStartIndex() == 0 && LessNotEqual(predictSnapEndPos, totalOffset_ + GetStartPosition())) {
             predictSnapEndPos = totalOffset_ + GetStartPosition() - contentStartOffset_;
         }
     }
