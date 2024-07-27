@@ -2420,7 +2420,7 @@ void SwiperPattern::CalculateGestureState(float additionalOffset, float currentT
         }
     } else if (preFirstIndex == TotalCount() - 1 && currentFirstIndex == 0) {
         needTurn_ = true;
-        if (isTouchDown_ && GreatOrEqual(mainDeltaSum_, 0.0f)) {
+        if (isTouchDown_ && (GreatOrEqual(mainDeltaSum_, 0.0f) || currentIndex == 0)) {
             needTurn_ = false;
         }
     }
