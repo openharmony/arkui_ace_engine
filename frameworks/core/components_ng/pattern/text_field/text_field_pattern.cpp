@@ -3539,6 +3539,7 @@ void TextFieldPattern::KeyboardContentTypeToInputType()
 
 bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield ready to request keyboard");
     if (!showKeyBoardOnFocus_ || !HasFocus()) {
         return false;
     }
@@ -4701,6 +4702,7 @@ void TextFieldPattern::RequestKeyboardOnFocus()
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
     textFieldManager->SetNeedToRequestKeyboard(true);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d add requestkeyboard task", host->GetId());
     pipeline->AddAfterLayoutTask([weak = WeakClaim(this), manager = WeakPtr<TextFieldManagerNG>(textFieldManager)]() {
         auto textField = weak.Upgrade();
         CHECK_NULL_VOID(textField);
