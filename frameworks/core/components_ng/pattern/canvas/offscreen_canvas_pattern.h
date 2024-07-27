@@ -117,6 +117,7 @@ public:
     bool IsSucceed();
     void Reset();
     RefPtr<PixelMap> TransferToImageBitmap();
+    void SetDensity(double density);
 
     size_t GetBitmapSize();
 private:

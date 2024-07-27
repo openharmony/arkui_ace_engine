@@ -104,6 +104,7 @@ public:
     void SetFilterParam(const std::string& filterStr)
     {
         filterParam_ = filterStr;
+        colorMatrix_ = RSColorMatrix();
     }
 
     void SetAntiAlias(bool isEnabled)
@@ -301,6 +302,10 @@ public:
     void DrawSvgImage(RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& canvasImage, const ImageFit& imageFit);
     void DrawImage(const Ace::CanvasImage& canvasImage, double width, double height);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
+    void SetDensity(double density)
+    {
+        density_ = density;
+    }
 
 protected:
     std::optional<double> CalcTextScale(double maxIntrinsicWidth, std::optional<double> maxWidth);
@@ -342,7 +347,7 @@ protected:
     void SetContrastFilter(const std::string& percent, RSPen* pen, RSBrush* brush);
     void SetBlurFilter(const std::string& percent, RSPen* pen, RSBrush* brush);
 
-    void SetColorFilter(float matrix[20], RSPen* pen, RSBrush* brush);
+    void SetColorFilter(RSPen* pen, RSBrush* brush);
 
     bool GetFilterType(std::vector<FilterProperty>& filters);
     bool IsPercentStr(std::string& percentStr);
@@ -404,6 +409,8 @@ protected:
     Ace::CanvasImage canvasImage_;
     std::string filterParam_ = "";
     std::unique_ptr<Shadow> imageShadow_;
+    RSColorMatrix colorMatrix_;
+    double density_;
 
 #ifndef ACE_UNITTEST
     sk_sp<SkSVGDOM> skiaDom_ = nullptr;
