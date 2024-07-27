@@ -158,7 +158,7 @@ export struct TipsDialog {
   checkBoxPart(): void {
     Row() {
       if (this.checkTips !== null) {
-        Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
+        Checkbox({ name: '', group: 'checkboxGroup' }).select(this.isChecked)
           .onChange((checked: boolean) => {
             this.isChecked = checked;
             if (this.checkAction) {
@@ -414,7 +414,7 @@ export struct SelectDialog {
               .textOverflow({ overflow: TextOverflow.Ellipsis })
           }.paddingContentStyle().width('100%')
         }
-        List({ space: 1 }) {
+        List() {
           ForEach(this.radioContent, (item: SheetInfo, index: number) => {
             ListItem() {
               Column() {
@@ -675,7 +675,7 @@ export struct ConfirmDialog {
   @Builder
   checkBoxBuilder(): void {
     Row() {
-      Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
+      Checkbox({ name: '', group: 'checkboxGroup' }).select(this.isChecked)
         .onChange((checked: boolean) => {
           this.isChecked = checked;
           if (this.onCheckedChange) {
