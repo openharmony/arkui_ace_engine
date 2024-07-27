@@ -366,20 +366,6 @@ class ListClipModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
-class ListFadingEdgeModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('fadingEdge');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().list.resetFadingEdge(node);
-    } else {
-      getUINativeModule().list.setFadingEdge(node, this.value!);
-    }
-  }
-}
-
 class ListChildrenMainSizeModifier extends ModifierWithKey<ChildrenMainSize> {
   constructor(value: ChildrenMainSize) {
     super(value);
@@ -612,10 +598,6 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
   }
   onScrollFrameBegin(event: (offset: number, state: ScrollState) => { offsetRemain: number; }): this {
     throw new Error('Method not implemented.');
-  }
-  fadingEdge(value: boolean): this {
-    modifierWithKey(this._modifiersWithKeys, ListFadingEdgeModifier.identity, ListFadingEdgeModifier, value);
-    return this;
   }
   childrenMainSize(value: ChildrenMainSize): this {
     modifierWithKey(this._modifiersWithKeys, ListChildrenMainSizeModifier.identity, ListChildrenMainSizeModifier, value);
