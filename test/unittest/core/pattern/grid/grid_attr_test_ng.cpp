@@ -1001,7 +1001,7 @@ HWTEST_F(GridAttrTestNg, GridSetFriction003, TestSize.Level1)
 
 /**
  * @tc.name: GridItemHoverEventTest001
- * @tc.desc: GirdItem hover event test.
+ * @tc.desc: GridItem hover event test.
  * @tc.type: FUNC
  */
 HWTEST_F(GridAttrTestNg, GridItemHoverEventTest001, TestSize.Level1)
@@ -1033,7 +1033,7 @@ HWTEST_F(GridAttrTestNg, GridItemHoverEventTest001, TestSize.Level1)
 
 /**
  * @tc.name: GridItemPressEventTest001
- * @tc.desc: GirdItem press event test.
+ * @tc.desc: GridItem press event test.
  * @tc.type: FUNC
  */
 HWTEST_F(GridAttrTestNg, GridItemPressEventTest001, TestSize.Level1)
@@ -1075,7 +1075,7 @@ HWTEST_F(GridAttrTestNg, GridItemPressEventTest001, TestSize.Level1)
 
 /**
  * @tc.name: GridItemSetSelectableTest001
- * @tc.desc: GirdItem setselectable test.
+ * @tc.desc: GridItem setselectable test.
  * @tc.type: FUNC
  */
 HWTEST_F(GridAttrTestNg, GridItemSetSelectableTest001, TestSize.Level1)
