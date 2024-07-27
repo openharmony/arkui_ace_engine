@@ -898,6 +898,9 @@ bool BaseTextSelectOverlay::HasUnsupportedTransform()
         if (parent->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
             return false;
         }
+        if (renderContext->HasMotionPath()) {
+            return true;
+        }
         auto rotateVector = renderContext->GetTransformRotate();
         if (rotateVector.has_value() && !NearZero(rotateVector->w) &&
             !(NearZero(rotateVector->x) && NearZero(rotateVector->y))) {
@@ -1013,6 +1016,10 @@ bool BaseTextSelectOverlay::CheckHasTransformAttr()
         CHECK_NULL_RETURN(renderContext, false);
         if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
             hasTransform = false;
+            break;
+        }
+        if (renderContext->HasMotionPath()) {
+            hasTransform = true;
             break;
         }
         // has rotate.
