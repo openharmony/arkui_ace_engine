@@ -55,7 +55,7 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_CONTAINER_MODAL
 };
 
-const char* PATTERN_PRELOAD_MAP[] = {
+const char* g_patternPreloadMap[] = {
     THEME_BLUR_STYLE_COMMON,
     THEME_PATTERN_ICON
 };
@@ -205,7 +205,7 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
 {
     CheckThemeId(themeId);
     auto manager = GetResourceManager();
-    auto theme = AceType::MakeRefPtr(AceType::Claim(this));
+    auto theme = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
     CHECK_NULL_RETURN(manager, theme);
     auto context = NG::PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, theme);
@@ -216,18 +216,14 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
         weak = WeakClaim(this)]() -> void {
         auto themeStyle = resourceThemeStyle.Upgrade();
         CHECK_NULL_VOID(themeStyle);
-        for (size_t i = 0; i < sizeof(PATTERN_PRELOAD_MAP) / sizeof(PATTERN_PRELOAD_MAP[0]); i++) {
-            std::string patternName = PATTERN_PRELOAD_MAP[i];
-            themeStyle->checkThemeStyleVector.push_back(patternName);
-        }
-        
+
         auto adapter = weak.Upgrade();
-        for (size_t i = 0; i < sizeof(PATTERN_PRELOAD_MAP) / sizeof(PATTERN_PRELOAD_MAP[0]); i++) {
-            std::string patternName = PATTERN_PRELOAD_MAP[i];
+        for (size_t i = 0; i < sizeof(g_patternPreloadMap) / sizeof(g_patternPreloadMap[0]); i++) {
+            std::string patternName = g_patternPreloadMap[i];
+            themeStyle->checkThemeStyleVector.push_back(patternName);
             auto style = adapter->GetPatternByName(patternName);
             if (style) {
-                ResValueWrapper value = { .type = ThemeConstantsType::PATTERN,
-                    .value = style };
+                ResValueWrapper value = { .type = ThemeConstantsType::PATTERN, .value = style };
                 themeStyle->SetAttr(patternName, value);
             }
         }
