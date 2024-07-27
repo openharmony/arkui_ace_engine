@@ -842,7 +842,7 @@ void UINode::GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList)
     }
 }
 
-PipelineContext* UINode::GetContext()
+PipelineContext* UINode::GetContext() const
 {
     PipelineContext* context = nullptr;
     if (context_) {
@@ -871,7 +871,7 @@ PipelineContext* UINode::GetContextWithCheck()
     return PipelineContext::GetCurrentContextPtrSafelyWithCheck();
 }
 
-RefPtr<PipelineContext> UINode::GetContextRefPtr()
+RefPtr<PipelineContext> UINode::GetContextRefPtr() const
 {
     auto* context = GetContext();
     return Claim(context);
