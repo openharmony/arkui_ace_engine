@@ -221,8 +221,8 @@ void SliderPattern::UpdateStepAccessibilityVirtualNode()
     uint32_t rangeToPointIndex = pointCount;
     if (sliderPaintProperty->GetValidSlideRange().has_value()) {
         auto range = sliderPaintProperty->GetValidSlideRange().value();
-        rangeFromPointIndex = range->GetToValue() / step;
-        rangeToPointIndex = range->GetFromValue() / step;
+        rangeFromPointIndex = range->GetFromValue() / step;
+        rangeToPointIndex = range->GetToValue() / step;
     }
 
     double min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
