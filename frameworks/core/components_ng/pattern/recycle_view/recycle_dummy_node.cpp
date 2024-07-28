@@ -41,10 +41,6 @@ RecycleDummyNode::RecycleDummyNode(int32_t nodeId) : UINode(V2::RECYCLE_VIEW_ETS
 
 RecycleDummyNode::~RecycleDummyNode()
 {
-    auto context = GetContext();
-    if (context && context->IsDestroyed()) {
-        return;
-    }
     auto childCount = TotalChildCount();
     if (childCount != 1) {
         return;
