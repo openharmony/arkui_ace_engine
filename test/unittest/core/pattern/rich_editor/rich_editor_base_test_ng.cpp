@@ -2582,4 +2582,327 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorLayoutAlgorithm004, TestSize.Level1)
     ASSERT_NE(layoutAlgorithm, nullptr);
     EXPECT_NE(*(layoutAlgorithm->allSpans_.begin()), nullptr);
 }
+
+/**
+ * @tc.name: IsSelectLineHeadAndUseLeadingMargin001
+ * @tc.desc: Test the paragraph manager IsSelectLineHeadAndUseLeadingMargin function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, IsSelectLineHeadAndUseLeadingMargin001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. add paragraph and Mock func.
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    ParagraphStyle testStyle = {};
+    EXPECT_CALL(*paragraph, GetParagraphStyle())
+        .WillRepeatedly(ReturnRef(testStyle));
+    /**
+     * @tc.steps: step2. test IsSelectLineHeadAndUseLeadingMargin fun
+    */
+    bool bRet = richEditorPattern->paragraphs_.IsSelectLineHeadAndUseLeadingMargin(paragraphItem.start);
+    EXPECT_EQ(bRet, false);
+}
+
+/**
+ * @tc.name: IsSelectLineHeadAndUseLeadingMargin002
+ * @tc.desc: Test the paragraph manager IsSelectLineHeadAndUseLeadingMargin function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, IsSelectLineHeadAndUseLeadingMargin002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. add paragraph and Mock func.
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    TestParagraphRect paragraphRectSec = { .start = 7, .end = 12, .rects = { { 200.0, 200.0, 400.0, 400.0 } } };
+    TestParagraphItem paragraphItemSec = { .start = 7, .end = 12, .testParagraphRects = { paragraphRectSec } };
+    AddParagraph(paragraphItemSec);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    ParagraphStyle testStyle = {};
+    testStyle.leadingMargin = LeadingMargin();
+    EXPECT_CALL(*paragraph, GetParagraphStyle())
+        .WillRepeatedly(ReturnRef(testStyle));
+    /**
+     * @tc.steps: step2. test IsSelectLineHeadAndUseLeadingMargin fun
+    */
+    int start = richEditorPattern->paragraphs_.paragraphs_.begin()->start;
+    bool bRet = richEditorPattern->paragraphs_.IsSelectLineHeadAndUseLeadingMargin(start);
+    EXPECT_EQ(bRet, true);
+}
+
+/**
+ * @tc.name: IsSelectLineHeadAndUseLeadingMargin003
+ * @tc.desc: Test the paragraph manager IsSelectLineHeadAndUseLeadingMargin function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, IsSelectLineHeadAndUseLeadingMargin003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. add paragraph and Mock func.
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    TestParagraphRect paragraphRectSec = { .start = 7, .end = 12, .rects = { { 200.0, 200.0, 400.0, 400.0 } } };
+    TestParagraphItem paragraphItemSec = { .start = 7, .end = 12, .testParagraphRects = { paragraphRectSec } };
+    AddParagraph(paragraphItemSec);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    ParagraphStyle testStyle = {};
+    testStyle.leadingMargin = LeadingMargin();
+    EXPECT_CALL(*paragraph, GetParagraphStyle())
+        .WillRepeatedly(ReturnRef(testStyle));
+    /**
+     * @tc.steps: step2. test IsSelectLineHeadAndUseLeadingMargin fun
+    */
+    bool bRet = richEditorPattern->paragraphs_.IsSelectLineHeadAndUseLeadingMargin(paragraphRect.end);
+    EXPECT_EQ(bRet, true);
+}
+
+/**
+ * @tc.name: GetIndex001
+ * @tc.desc: Test the paragraph manager function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, GetGetIndex001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(800.0f));
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(6));
+    PositionWithAffinity positionWithAffinity(2, TextAffinity::UPSTREAM);
+    EXPECT_CALL(*paragraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(positionWithAffinity));
+
+    bool clamp = true;
+    int32_t paragraphsIndex = richEditorPattern->paragraphs_.GetIndex(Offset(100.0, -10.0), clamp);
+    EXPECT_EQ(paragraphsIndex, 0);
+    paragraphsIndex = richEditorPattern->paragraphs_.GetIndex(Offset(100.0, 0.0), clamp);
+    EXPECT_EQ(paragraphsIndex, 6);
+    clamp = false;
+    TestParagraphRect paragraphRectSec = { .start = 7, .end = 12, .rects = { { 200.0, 200.0, 600.0, 600.0 } } };
+    TestParagraphItem paragraphItemSec = { .start = 7, .end = 12, .testParagraphRects = { paragraphRectSec } };
+    AddParagraph(paragraphItemSec);
+    paragraphsIndex = richEditorPattern->paragraphs_.GetIndex(Offset(100.0, 900.0), clamp);
+    EXPECT_EQ(paragraphsIndex, 13);
+}
+
+/**
+ * @tc.name: GetGlyphPositionAtCoordinate001
+ * @tc.desc: Test the paragraph manager function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, GetGlyphPositionAtCoordinate001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(800.0f));
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(6));
+    PositionWithAffinity positionWithAffinity(2, TextAffinity::UPSTREAM);
+    EXPECT_CALL(*paragraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(positionWithAffinity));
+    bool clamp = false;
+    int32_t paragraphsIndex = richEditorPattern->paragraphs_.GetIndex(Offset(100.0, 0.0), clamp);
+    EXPECT_EQ(paragraphsIndex, 6);
+
+    PositionWithAffinity finalResult = richEditorPattern->paragraphs_.GetGlyphPositionAtCoordinate(Offset(0.0, 0.0));
+    EXPECT_EQ(finalResult.position_, 2);
+    finalResult = richEditorPattern->paragraphs_.GetGlyphPositionAtCoordinate(Offset(0.0, -10.0));
+    EXPECT_EQ(finalResult.position_, 0);
+    finalResult = richEditorPattern->paragraphs_.GetGlyphPositionAtCoordinate(Offset(0.0, 900.0));
+    EXPECT_EQ(finalResult.position_, 2);
+}
+
+/**
+ * @tc.name: GetLineMetrics001
+ * @tc.desc: Test the paragraph manager function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, GetLineMetrics001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(1));
+    TextLineMetrics textLineMetrics;
+    textLineMetrics.lineNumber = 0;
+    EXPECT_CALL(*paragraph, GetLineMetrics(_)).WillRepeatedly(Return(textLineMetrics));
+
+    TextLineMetrics finalResult = richEditorPattern->paragraphs_.GetLineMetrics(0);
+    EXPECT_EQ(finalResult.lineNumber, 0);
+
+    finalResult = richEditorPattern->paragraphs_.GetLineMetrics(2);
+    EXPECT_EQ(finalResult.lineNumber, 0);
+
+    TestParagraphRect paragraphRectSec = { .start = 7, .end = 12, .rects = { { 200.0, 200.0, 600.0, 600.0 } } };
+    TestParagraphItem paragraphItemSec = { .start = 7, .end = 12, .testParagraphRects = { paragraphRectSec } };
+    AddParagraph(paragraphItemSec);
+    finalResult = richEditorPattern->paragraphs_.GetLineMetrics(1);
+    EXPECT_EQ(finalResult.lineNumber, 1);
+}
+
+/**
+ * @tc.name: GetGlyphIndexByCoordinate001
+ * @tc.desc: Test the paragraph manager function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, GetGlyphIndexByCoordinate001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step1. add paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(800.0f));
+    /**
+     * @tc.steps: step2. test get glyph index
+     */
+    int32_t glyphIndex = richEditorPattern->paragraphs_.GetGlyphIndexByCoordinate(Offset(0.0, 1000.00), true);
+    EXPECT_EQ(glyphIndex, 6);
+}
+
+/**
+ * @tc.name: GetWordBoundary001
+ * @tc.desc: Test the paragraph manager function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, GetWordBoundary001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step1. add paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    /**
+     * @tc.steps: step2. test get glyph index
+     */
+    int32_t glyphIndex = richEditorPattern->paragraphs_.GetWordBoundary(1000, paragraphItem.start, paragraphItem.end);
+    EXPECT_EQ(glyphIndex, 0);
+}
+
+/**
+ * @tc.name: GetLineMetricsByRectF001
+ * @tc.desc: Test the paragraph manager function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, GetLineMetricsByRectF001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step1. add paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    TestParagraphRect paragraphRectSec = { .start = 7, .end = 12, .rects = { { 200.0, 200.0, 400.0, 400.0 } } };
+    TestParagraphItem paragraphItemSec = { .start = 7, .end = 12, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItemSec);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(800.0f));
+
+    /**
+     * @tc.steps: step2. test get glyph index
+     */
+    LineMetrics testMetrics = richEditorPattern->paragraphs_.GetLineMetricsByRectF(RectF(0.0, 100.0, 200.0, 300.0), 1);
+    EXPECT_EQ(testMetrics.y, 800);
+}
+
+/**
+ * @tc.name: CalcCaretMetricsByPosition001
+ * @tc.desc: Test the paragraph manager function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, CalcCaretMetricsByPosition001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step1. add paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    TestParagraphRect paragraphRectSec = { .start = 7, .end = 12, .rects = { { 200.0, 200.0, 400.0, 400.0 } } };
+    TestParagraphItem paragraphItemSec = { .start = 7, .end = 12, .testParagraphRects = { paragraphRectSec } };
+    AddParagraph(paragraphItemSec);
+
+    TestParagraphRect paragraphRectThr = { .start = 13, .end = 20, .rects = { { 200.0, 200.0, 400.0, 400.0 } } };
+    TestParagraphItem paragraphItemThr = { .start = 13, .end = 20, .testParagraphRects = { paragraphRectThr } };
+    AddParagraph(paragraphItemThr);
+    /**
+     * @tc.steps: step5. test calc caret metrics
+     */
+    int32_t extent = 0;
+    CaretMetricsF caretCaretMetric;
+    TextAffinity textAffinity = TextAffinity::DOWNSTREAM;
+    bool caretMetrics = richEditorPattern->paragraphs_.CalcCaretMetricsByPosition(extent, caretCaretMetric,
+        textAffinity);
+    EXPECT_EQ(caretMetrics, false);
+}
 } // namespace OHOS::Ace::NG
