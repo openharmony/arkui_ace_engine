@@ -91,6 +91,7 @@ private:
     {
         return sysResourceManager_;
     }
+    RefPtr<TaskExecutor> GetTaskExecutor();
 
     std::shared_ptr<Global::Resource::ResourceManager> sysResourceManager_;
     std::string packagePathStr_;
