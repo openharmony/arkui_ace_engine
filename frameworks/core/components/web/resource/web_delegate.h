@@ -48,6 +48,7 @@
 #include "app_mgr_client.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "surface.h"
+#include "core/components_ng/render/adapter/rosen_render_surface.h"
 #endif
 #include "wm/window.h"
 #endif
@@ -912,6 +913,7 @@ public:
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
+    RefPtr<NG::RosenRenderSurface> renderSurface_ = nullptr;
 #endif
 #ifdef OHOS_STANDARD_SYSTEM
     void SetWebRendeGlobalPos(const Offset& pos)
