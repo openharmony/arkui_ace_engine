@@ -1016,6 +1016,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/tabs/tabs_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/base_text_select_overlay.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/image_span_view.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/multiple_click_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span/mutable_span_string.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span/span_object.cpp",

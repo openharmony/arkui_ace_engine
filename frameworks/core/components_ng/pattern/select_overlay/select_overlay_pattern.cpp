@@ -70,9 +70,7 @@ void SelectOverlayPattern::SetGestureEvent()
         CHECK_NULL_VOID(pattern);
         pattern->HandleOnClick(info);
     });
-    if (info_->isSingleHandle) {
-        gesture->AddClickEvent(clickEvent_);
-    }
+    gesture->AddClickEvent(clickEvent_);
     auto panStart = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -222,8 +220,11 @@ void SelectOverlayPattern::UpdateHandleHotZone()
     host->GetOrCreateGestureEventHub()->SetResponseRegion(responseRegion);
 }
 
-void SelectOverlayPattern::HandleOnClick(GestureEvent& /*info*/)
+void SelectOverlayPattern::HandleOnClick(GestureEvent& info)
 {
+    if (info_->onClick) {
+        info_->onClick(info, false);
+    }
     if (!info_->isSingleHandle || clickConsumeBySimulate_) {
         return;
     }

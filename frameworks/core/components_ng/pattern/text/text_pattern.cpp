@@ -67,8 +67,6 @@ constexpr const char COPY_ACTION[] = "复制";
 constexpr const char SELECT_ACTION[] = "选择文本";
 constexpr const char SYMBOL_COLOR[] = "BLACK";
 constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
-constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
-constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 const std::u16string SYMBOL_TRANS = u"\uF0001";
 const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
@@ -693,29 +691,22 @@ void TextPattern::OnHandleTouchUp()
 
 void TextPattern::HandleClickEvent(GestureEvent& info)
 {
-    if (selectOverlay_->IsClickAtHandle(info)) {
+    if (selectOverlay_->IsClickAtHandle(info) && !multipleClickRecognizer_->IsRunning()) {
         return;
     }
     if (dataDetectorAdapter_->hasClickedAISpan_) {
         dataDetectorAdapter_->hasClickedAISpan_ = false;
-    } else if (hasClicked_) {
-        hasClicked_ = false;
-        TimeStamp clickTimeStamp = info.GetTimeStamp();
-        std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout =
-            clickTimeStamp - lastClickTimeStamp_;
-        lastClickTimeStamp_ = info.GetTimeStamp();
-        if (timeout.count() < DOUBLECLICK_INTERVAL_MS) {
-            HandleDoubleClickEvent(info);
-            return;
-        }
     }
-    HandleSingleClickEvent(info);
+    multipleClickRecognizer_->Start(info);
+    if (multipleClickRecognizer_->IsDoubleClick()) {
+        HandleDoubleClickEvent(info);
+    } else {
+        HandleSingleClickEvent(info);
+    }
 }
 
 void TextPattern::HandleSingleClickEvent(GestureEvent& info)
 {
-    hasClicked_ = true;
-    lastClickTimeStamp_ = info.GetTimeStamp();
     if (selectOverlay_->SelectOverlayIsOn() && !selectOverlay_->IsUsingMouse() &&
         BetweenSelectedPosition(info.GetGlobalLocation())) {
         selectOverlay_->ShowMenu();

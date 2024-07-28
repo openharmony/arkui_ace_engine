@@ -79,6 +79,11 @@ public:
     }
 
     void OnHandleLevelModeChanged(HandleLevelMode mode) override;
+    void OnOverlayClick(const GestureEvent& event, bool isClickCaret) override;
+    bool IsRegisterTouchCallback() override
+    {
+        return true;
+    }
 
 private:
     std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);

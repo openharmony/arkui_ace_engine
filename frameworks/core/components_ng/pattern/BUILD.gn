@@ -473,6 +473,7 @@ build_component_ng("pattern_ng") {
     "tabs/tabs_pattern.cpp",
     "text/base_text_select_overlay.cpp",
     "text/image_span_view.cpp",
+    "text/multiple_click_recognizer.cpp",
     "text/multiple_paragraph_layout_algorithm.cpp",
     "text/span/mutable_span_string.cpp",
     "text/span/span_object.cpp",

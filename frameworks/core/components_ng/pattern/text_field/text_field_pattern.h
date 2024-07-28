@@ -49,6 +49,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/pattern/text/multiple_click_recognizer.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text_area/text_area_layout_algorithm.h"
@@ -1368,6 +1369,11 @@ public:
         parentGlobalOffset_ = GetPaintRectGlobalOffset();
     }
 
+    const RefPtr<MultipleClickRecognizer>& GetMultipleClickRecognizer() const
+    {
+        return multipleClickRecognizer_;
+    }
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override
@@ -1729,10 +1735,7 @@ private:
     RefPtr<UINode> customKeyboard_;
     RefPtr<OverlayManager> keyboardOverlay_;
     bool isCustomFont_ = false;
-    bool hasClicked_ = false;
-    bool isDoubleClick_ = false;
     TimeStamp lastClickTimeStamp_;
-    TimeStamp penultimateClickTimeStamp_;
     float paragraphWidth_ = 0.0f;
 
     std::queue<int32_t> deleteBackwardOperations_;
@@ -1756,7 +1759,6 @@ private:
     bool isModifyDone_ = false;
     bool initTextRect_ = false;
     bool colorModeChange_ = false;
-    Offset clickLocation_;
     bool isKeyboardClosedByUser_ = false;
     bool isFillRequestFinish_ = false;
     bool keyboardAvoidance_ = false;
@@ -1787,6 +1789,7 @@ private:
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;
     bool isTextChangedAtCreation_ = false;
+    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
 };
 } // namespace OHOS::Ace::NG
 
