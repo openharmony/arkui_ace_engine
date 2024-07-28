@@ -1475,6 +1475,7 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     }
     itemGroup->SetNeedAdjustRefPos(needAdjustRefPos);
     itemGroup->SetListLayoutProperty(layoutProperty);
+    itemGroup->SetNeedCheckOffset(isNeedCheckOffset_);
     if (!isSnapCenter_) {
         itemGroup->SetContentOffset(contentStartOffset_, contentEndOffset_);
     }
