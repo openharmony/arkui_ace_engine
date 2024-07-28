@@ -207,9 +207,7 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
     auto manager = GetResourceManager();
     auto theme = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
     CHECK_NULL_RETURN(manager, theme);
-    auto context = NG::PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(context, theme);
-    auto taskExecutor = context->GetTaskExecutor();
+    auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, theme);
 
     auto task = [themeId, manager, resourceThemeStyle = WeakPtr<ResourceThemeStyle>(theme),
@@ -218,7 +216,7 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
         CHECK_NULL_VOID(themeStyle);
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);
-        
+
         for (size_t i = 0; i < sizeof(g_patternPreloadMap) / sizeof(g_patternPreloadMap[0]); i++) {
             std::string patternName = g_patternPreloadMap[i];
             themeStyle->checkThemeStyleVector.push_back(patternName);
@@ -257,6 +255,13 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
     theme->ParseContent();
     theme->patternAttrs_.clear();
     return theme;
+}
+
+RefPtr<TaskExecutor> ResourceAdapterImplV2::GetTaskExecutor()
+{
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, nullptr);
+    return context->GetTaskExecutor();
 }
 
 RefPtr<ThemeStyle> ResourceAdapterImplV2::GetPatternByName(const std::string& patternName)
