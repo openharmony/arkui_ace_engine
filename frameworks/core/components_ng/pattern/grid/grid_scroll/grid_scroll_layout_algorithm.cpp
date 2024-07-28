@@ -2056,7 +2056,12 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 gridLayoutInfo_.endIndex_ = elem.second;
             }
         }
-        return gridLayoutInfo_.lineHeightMap_.find(currentLine)->second;
+        if (gridLayoutInfo_.lineHeightMap_.find(currentLine) != gridLayoutInfo_.lineHeightMap_.end()) {
+            return gridLayoutInfo_.lineHeightMap_.find(currentLine)->second;
+        } else {
+            gridLayoutInfo_.lineHeightMap_[currentLine] = cellAveLength_;
+            return cellAveLength_;
+        }
     }
 
     lastCross_ = 0;
