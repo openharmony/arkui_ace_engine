@@ -703,6 +703,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0065, TestSize.Level1)
     ASSERT_FALSE(res);
     focusHub->AcceptFocusByRectOfLastFocusFlex(RectF());
     focusHub->focusDepend_ = FocusDependence::SELF;
+    focusHub->focusType_ = FocusType::DISABLE;
     res = focusHub->AcceptFocusByRectOfLastFocusFlex(RectF(0, 0, -1, -1));
     ASSERT_FALSE(res);
 }
