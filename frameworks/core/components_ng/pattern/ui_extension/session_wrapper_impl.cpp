@@ -312,6 +312,7 @@ void SessionWrapperImpl::UpdateSessionConfig()
 void SessionWrapperImpl::DestroySession()
 {
     CHECK_NULL_VOID(session_);
+    UIEXT_LOGI("DestroySession, persistentid = %{public}d.", session_->GetPersistentId());
     session_->UnregisterLifecycleListener(lifecycleListener_);
     session_ = nullptr;
 }
@@ -442,6 +443,7 @@ void SessionWrapperImpl::NotifyForeground()
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto hostWindowId = pipeline->GetFocusWindowId();
+    UIEXT_LOGI("NotifyForeground, persistentid = %{public}d.", session_->GetPersistentId());
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
         session_, hostWindowId, std::move(foregroundCallback_));
 }
@@ -449,12 +451,14 @@ void SessionWrapperImpl::NotifyForeground()
 void SessionWrapperImpl::NotifyBackground()
 {
     CHECK_NULL_VOID(session_);
+    UIEXT_LOGI("NotifyBackground, persistentid = %{public}d.", session_->GetPersistentId());
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
         session_, std::move(backgroundCallback_));
 }
 void SessionWrapperImpl::NotifyDestroy()
 {
     CHECK_NULL_VOID(session_);
+    UIEXT_LOGI("NotifyDestroy, persistentid = %{public}d.", session_->GetPersistentId());
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(
         session_, std::move(destructionCallback_));
 }
@@ -465,10 +469,16 @@ void SessionWrapperImpl::NotifyConfigurationUpdate() {}
 /************************************************ Begin: The interface for responsing provider ************************/
 void SessionWrapperImpl::OnConnect()
 {
+    int32_t callSessionId = GetSessionId();
     taskExecutor_->PostTask(
-        [weak = hostPattern_, wrapperWeak = WeakClaim(this)]() {
+        [weak = hostPattern_, wrapperWeak = WeakClaim(this), callSessionId]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            if (callSessionId != pattern->GetSessionId()) {
+                TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "OnConnect: The callSessionId(%{public}d)"
+                        " is inconsistent with the curSession(%{public}d)",
+                    callSessionId, pattern->GetSessionId());
+            }
             pattern->OnConnect();
             auto wrapper = wrapperWeak.Upgrade();
             CHECK_NULL_VOID(wrapper && wrapper->session_);
@@ -492,7 +502,7 @@ void SessionWrapperImpl::OnDisconnect(bool isAbnormal)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (callSessionId != pattern->GetSessionId()) {
-                LOGW("[AceUiExtensionComponent]OnDisconnect: The callSessionId(%{public}d)"
+                TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "OnDisconnect: The callSessionId(%{public}d)"
                         " is inconsistent with the curSession(%{public}d)",
                     callSessionId, pattern->GetSessionId());
                 return;
@@ -514,10 +524,16 @@ void SessionWrapperImpl::OnDisconnect(bool isAbnormal)
 
 void SessionWrapperImpl::OnExtensionTimeout(int32_t /* errorCode */)
 {
+    int32_t callSessionId = GetSessionId();
     taskExecutor_->PostTask(
-        [weak = hostPattern_]() {
+        [weak = hostPattern_, callSessionId]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            if (callSessionId != pattern->GetSessionId()) {
+                TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "OnExtensionTimeout: The callSessionId(%{public}d)"
+                        " is inconsistent with the curSession(%{public}d)",
+                    callSessionId, pattern->GetSessionId());
+            }
             pattern->FireOnErrorCallback(
                 ERROR_CODE_UIEXTENSION_LIFECYCLE_TIMEOUT, LIFECYCLE_TIMEOUT_NAME, LIFECYCLE_TIMEOUT_MESSAGE);
         },
@@ -526,10 +542,16 @@ void SessionWrapperImpl::OnExtensionTimeout(int32_t /* errorCode */)
 
 void SessionWrapperImpl::OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset)
 {
+    int32_t callSessionId = GetSessionId();
     taskExecutor_->PostTask(
-        [weak = hostPattern_, info, offset]() {
+        [weak = hostPattern_, info, offset, callSessionId]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            if (callSessionId != pattern->GetSessionId()) {
+                TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "OnAccessibilityEvent: The callSessionId(%{public}d)"
+                        " is inconsistent with the curSession(%{public}d)",
+                    callSessionId, pattern->GetSessionId());
+            }
             pattern->OnAccessibilityEvent(info, offset);
         },
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionAccessibilityEvent");
@@ -632,8 +654,11 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaCh
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, false);
         auto curWindow = pipeline->GetCurrentWindowRect();
+        UIEXT_LOGD("keyboardHeight = %{public}d, CurWindow = %{public}s, displayArea_ = %{public}s.",
+            keyboardHeight, curWindow.ToString().c_str(), displayArea_.ToString().c_str());
         if (curWindow.Bottom() >= displayArea_.Bottom()) {
-            keyboardHeight = keyboardHeight - (curWindow.Bottom() - displayArea_.Bottom());
+            int32_t spaceWindow = std::max(curWindow.Bottom() - displayArea_.Bottom(), 0.0);
+            keyboardHeight = static_cast<int32_t>(std::max(keyboardHeight - spaceWindow, 0));
         } else {
             keyboardHeight = keyboardHeight + (displayArea_.Bottom() - curWindow.Bottom());
         }
