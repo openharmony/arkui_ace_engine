@@ -1312,7 +1312,8 @@ void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frame
 {
     CHECK_NULL_VOID(frameNode);
     auto frameTag = frameNode->GetTag();
-    if (!IsEditableTextComponent(frameTag)) {
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    if (!IsEditableTextComponent(frameTag) || !(eventHub && eventHub->IsEnabled())) {
         TAG_LOGD(AceLogTag::ACE_DRAG,
             "This frame node is not editable text component %{public}s", frameTag.c_str());
         return;
