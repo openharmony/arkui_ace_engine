@@ -216,8 +216,9 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
         weak = WeakClaim(this)]() -> void {
         auto themeStyle = resourceThemeStyle.Upgrade();
         CHECK_NULL_VOID(themeStyle);
-
         auto adapter = weak.Upgrade();
+        CHECK_NULL_VOID(adapter);
+        
         for (size_t i = 0; i < sizeof(g_patternPreloadMap) / sizeof(g_patternPreloadMap[0]); i++) {
             std::string patternName = g_patternPreloadMap[i];
             themeStyle->checkThemeStyleVector.push_back(patternName);
