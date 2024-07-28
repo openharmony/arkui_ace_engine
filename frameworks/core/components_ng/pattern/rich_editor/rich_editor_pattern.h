@@ -847,6 +847,13 @@ public:
 
 protected:
     bool CanStartAITask() override;
+    template<typename T>
+    RefPtr<T> GetTheme()
+    {
+        auto pipelineContext = GetContext();
+        CHECK_NULL_RETURN(pipelineContext, {});
+        return pipelineContext->GetTheme<T>();
+    }
 
 private:
     friend class RichEditorSelectOverlay;
@@ -885,6 +892,7 @@ private:
     void UpdateTextStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void UpdateSymbolStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void UpdateImageStyle(RefPtr<FrameNode>& imageNode, const ImageSpanAttribute& imageStyle);
+    void UpdateImageAttribute(RefPtr<FrameNode>& imageNode, const ImageSpanAttribute& imageStyle);
     void InitTouchEvent();
     bool SelectOverlayIsOn();
     void HandleLongPress(GestureEvent& info);
@@ -1075,9 +1083,10 @@ private:
     bool CheckTripClickEvent(GestureEvent& info);
     void HandleSelect(GestureEvent& info, int32_t selectStart, int32_t selectEnd);
     void SwitchState();
+    TextStyleResult GetTextStyleBySpanItem(const RefPtr<SpanItem>& spanItem);
+    ImageStyleResult GetImageStyleBySpanItem(const RefPtr<SpanItem>& spanItem);
     void SetSubSpans(RefPtr<SpanString>& spanString, int32_t start, int32_t end);
     void SetSubMap(RefPtr<SpanString>& spanString);
-    RefPtr<SpanString> FromStyledString(int32_t start, int32_t length);
     RefPtr<LineHeightSpan> ToLineHeightSpan(const RefPtr<SpanItem>& spanItem);
     RefPtr<ParagraphStyleSpan> ToParagraphStyleSpan(const RefPtr<SpanItem>& spanItem);
     RefPtr<ImageSpan> ToImageSpan(const RefPtr<SpanItem>& spanItem);
