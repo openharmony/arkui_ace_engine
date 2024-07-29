@@ -1297,8 +1297,7 @@ public:
         AbilityRuntime::AutoFill::PopupOffset offset;
         AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
         AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
-
-        if ((windowRect_.height_ - rectf.Height()) > size.height + POPUP_EDGE_INTERVAL) {
+        if ((windowRect_.height_ - rectf.Height()) > (size.height + POPUP_EDGE_INTERVAL)) {
             // popup will display at the bottom of the container
             offset.deltaY = rect_.top + rect_.height - rectf.Height();
         } else {

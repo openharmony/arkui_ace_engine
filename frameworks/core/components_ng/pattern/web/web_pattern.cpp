@@ -253,6 +253,7 @@ constexpr int32_t STATUS_ZOOMIN = 1;
 constexpr int32_t STATUS_ZOOMOUT = 2;
 constexpr int32_t ZOOM_ERROR_COUNT_MAX = 5;
 constexpr double ZOOMIN_SMOOTH_SCALE = 0.99;
+constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 
 constexpr char ACCESSIBILITY_GENERIC_CONTAINER[] = "genericContainer";
 constexpr char ACCESSIBILITY_IMAGE[] = "image";
@@ -3380,8 +3381,8 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
                 TouchEventInfo info("autofill");
                 TouchLocationInfo location("autofill", 0);
                 auto rectF = nodeInfo->GetPageNodeRect();
-                location.SetLocalLocation(Offset(rectF.GetX() + (rectF.Width() / 2),
-                    rectF.GetY() + (rectF.Height() / 2)));
+                location.SetLocalLocation(Offset(rectF.GetX() + (rectF.Width() / POPUP_CALCULATE_RATIO),
+                    rectF.GetY() + (rectF.Height() / POPUP_CALCULATE_RATIO)));
                 info.AddChangedTouchLocationInfo(std::move(location));
                 HandleTouchDown(info, false);
                 HandleTouchUp(info, false);
