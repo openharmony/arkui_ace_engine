@@ -566,6 +566,7 @@ void TextFieldPattern::OnDirectionConfigurationUpdate()
             textField->parentGlobalOffset_ = textField->GetPaintRectGlobalOffset();
             textField->UpdateTextFieldManager(Offset(textField->parentGlobalOffset_.GetX(),
                 textField->parentGlobalOffset_.GetY()), textField->frameRect_.Height());
+            textField->UpdateCaretInfoToController(true);
             TAG_LOGI(ACE_TEXT_FIELD, "onDirectionUpdate change parentGlobalOffset to: %{public}s",
                 textField->parentGlobalOffset_.ToString().c_str());
         },
@@ -681,7 +682,7 @@ bool TextFieldPattern::HasFocus() const
     return focusHub->IsCurrentFocus();
 }
 
-void TextFieldPattern::UpdateCaretInfoToController()
+void TextFieldPattern::UpdateCaretInfoToController(bool forceUpdate)
 {
     CHECK_NULL_VOID(HasFocus());
 #if defined(ENABLE_STANDARD_INPUT)
@@ -691,7 +692,7 @@ void TextFieldPattern::UpdateCaretInfoToController()
         miscTextConfig.value().range.start,
         miscTextConfig.value().range.end
     };
-    if (lastCursorRange_ == miscTextConfigRange) {
+    if (lastCursorRange_ == miscTextConfigRange && !forceUpdate) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "UpdateCaretInfoToController, same to update caretInfo");
         return;
     }
@@ -4759,13 +4760,13 @@ void TextFieldPattern::OnVisibleChange(bool isVisible)
 
 void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
 {
+    if (newWidth == prevWidth && newHeight == prevHeight) {
+        return;
+    }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
         "Textfield handleSurface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
         "height %{public}d",
         newWidth, newHeight, prevWidth, prevHeight);
-    if (newWidth == prevWidth && newHeight == prevHeight) {
-        return;
-    }
     if (SelectOverlayIsOn()) {
         if (selectOverlay_->IsShowMouseMenu()) {
             CloseSelectOverlay();
@@ -4776,7 +4777,7 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    UpdateCaretInfoToController();
+    UpdateCaretInfoToController(true);
 }
 
 void TextFieldPattern::HandleSurfacePositionChanged(int32_t posX, int32_t posY)
