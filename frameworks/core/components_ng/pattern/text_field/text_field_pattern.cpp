@@ -2099,6 +2099,12 @@ void TextFieldPattern::InitTouchEvent()
     gesture->AddTouchEvent(touchListener_);
 }
 
+bool TextFieldPattern::IsHandleDragging()
+{
+    CHECK_NULL_RETURN(selectOverlay_, false);
+    return selectOverlay_->GetIsHandleDragging();
+}
+
 void TextFieldPattern::InitClickEvent()
 {
     CHECK_NULL_VOID(!clickListener_);
@@ -2118,6 +2124,7 @@ void TextFieldPattern::InitClickEvent()
 void TextFieldPattern::HandleClickEvent(GestureEvent& info)
 {
     CHECK_NULL_VOID(!IsDragging());
+    CHECK_NULL_VOID(!IsHandleDragging());
     parentGlobalOffset_ = GetPaintRectGlobalOffset();
     if (selectOverlay_->IsClickAtHandle(info)) {
         return;
@@ -2987,6 +2994,7 @@ void TextFieldPattern::InitLongPressEvent()
 void TextFieldPattern::HandleLongPress(GestureEvent& info)
 {
     CHECK_NULL_VOID(!IsDragging());
+    CHECK_NULL_VOID(!IsHandleDragging());
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     if (!focusHub->IsFocusable() || IsOnUnitByPosition(info.GetGlobalLocation()) || GetIsPreviewText()) {

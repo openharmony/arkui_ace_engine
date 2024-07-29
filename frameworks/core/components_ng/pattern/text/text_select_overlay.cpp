@@ -230,6 +230,7 @@ void TextSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOffset, 
 
 void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
 {
+    BaseTextSelectOverlay::OnHandleMoveDone(rect, isFirst);
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetTextResponseType(TextResponseType::LONG_PRESS);

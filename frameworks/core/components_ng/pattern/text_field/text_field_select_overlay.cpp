@@ -480,6 +480,7 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
 
 void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
 {
+    BaseTextSelectOverlay::OnHandleMoveDone(rect, isFirst);
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();

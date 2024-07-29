@@ -208,6 +208,18 @@ public:
     }
     virtual void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag);
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info) override;
+    void OnHandleMoveStart(bool isFirst) override
+    {
+        isHandleDragging_ = true;
+    }
+    void OnHandleMoveDone(const RectF& rect, bool isFirst) override
+    {
+        isHandleDragging_ = false;
+    }
+    bool GetIsHandleDragging()
+    {
+        return isHandleDragging_;
+    }
     bool IsTouchAtHandle(const TouchEventInfo& info);
     bool IsClickAtHandle(const GestureEvent& info);
     bool HasUnsupportedTransform();
@@ -273,6 +285,7 @@ private:
     bool IsPointsInRegion(const std::vector<PointF>& points, const RectF& regionRect);
     bool CheckAndUpdateHostGlobalPaintRect();
     bool CheckHasTransformMatrix(const RefPtr<RenderContext>& context);
+    bool isHandleDragging_ = false;
     bool isSingleHandle_ = false;
     bool isShowPaste_ = false;
     bool isShowMenu_ = true;
