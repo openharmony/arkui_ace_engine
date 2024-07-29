@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+
 void GridColModelNG::Create()
 {
     RefPtr<V2::GridContainerSize> span = AceType::MakeRefPtr<V2::GridContainerSize>(1);
@@ -31,14 +32,14 @@ void GridColModelNG::Create()
     Create(span, offset, order);
 }
 
-void GridColModelNG::Create(const RefPtr<V2::GridContainerSize> &span, const RefPtr<V2::GridContainerSize> &offset,
-    const RefPtr<V2::GridContainerSize> &order)
+void GridColModelNG::Create(const RefPtr<V2::GridContainerSize>& span, const RefPtr<V2::GridContainerSize>& offset,
+    const RefPtr<V2::GridContainerSize>& order)
 {
-    auto *stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::GRID_COL_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::GRID_COL_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<GridColLayoutPattern>(); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::GRID_COL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridColLayoutPattern>(); });
     stack->Push(frameNode);
 
     ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Span, *span);
@@ -53,17 +54,17 @@ RefPtr<FrameNode> GridColModelNG::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
-void GridColModelNG::SetSpan(const RefPtr<V2::GridContainerSize> &span)
+void GridColModelNG::SetSpan(const RefPtr<V2::GridContainerSize>& span)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Span, *span);
 }
 
-void GridColModelNG::SetOffset(const RefPtr<V2::GridContainerSize> &offset)
+void GridColModelNG::SetOffset(const RefPtr<V2::GridContainerSize>& offset)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Offset, *offset);
 }
 
-void GridColModelNG::SetOrder(const RefPtr<V2::GridContainerSize> &order)
+void GridColModelNG::SetOrder(const RefPtr<V2::GridContainerSize>& order)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Order, *order);
 }
