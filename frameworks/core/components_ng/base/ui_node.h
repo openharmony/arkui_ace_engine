@@ -182,10 +182,10 @@ public:
     // Tree operation end.
 
     // performance.
-    PipelineContext* GetContext();
+    PipelineContext* GetContext() const;
     PipelineContext* GetContextWithCheck();
 
-    RefPtr<PipelineContext> GetContextRefPtr();
+    RefPtr<PipelineContext> GetContextRefPtr() const;
 
     // When FrameNode creates a layout task, the corresponding LayoutWrapper tree is created, and UINode needs to update
     // the corresponding LayoutWrapper tree node at this time like add self wrapper to wrapper tree.

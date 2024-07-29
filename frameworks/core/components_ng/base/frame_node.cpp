@@ -3290,7 +3290,7 @@ std::vector<FrameNode*> FrameNode::GetNodesPtrById(const std::unordered_set<int3
 double FrameNode::GetPreviewScaleVal() const
 {
     double scale = 1.0;
-    auto maxWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
+    auto maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(GetContextRefPtr());
     auto geometryNode = GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, scale);
     auto width = geometryNode->GetFrameRect().Width();
