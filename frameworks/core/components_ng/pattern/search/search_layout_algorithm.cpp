@@ -423,7 +423,7 @@ double SearchLayoutAlgorithm::CalcSearchHeight(
     } else {
         auto pattern = host->GetPattern<SearchPattern>();
         CHECK_NULL_RETURN(pattern, 0.0);
-        renderContext->SetClipToBounds(true && !pattern->NeedFocusBox());
+        renderContext->SetClipToBounds(!pattern->NeedFocusBox());
     }
 
     const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
