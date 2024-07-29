@@ -2116,15 +2116,10 @@ void WebDelegate::RegisterConfigObserver()
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
-            if (appMgrClient->ConnectAppMgrService()) {
-                return;
-            }
-            delegate->configChangeObserver_ =
-                sptr<AppExecFwk::IConfigurationObserver>(new (std::nothrow) WebConfigurationObserver(delegate));
-            if (appMgrClient->RegisterConfigurationObserver(delegate->configChangeObserver_)) {
-                return;
-            }
+            auto abilityContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
+            CHECK_NULL_VOID(abilityContext);
+            delegate->configChangeObserver_.reset(new (std::nothrow) WebConfigurationObserver(delegate));
+            abilityContext->RegisterEnvironmentCallback(delegate->configChangeObserver_);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebAddConfigObserver");
 }
@@ -2140,14 +2135,11 @@ void WebDelegate::UnRegisterConfigObserver()
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            if (delegate->configChangeObserver_) {
-                auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
-                if (appMgrClient->ConnectAppMgrService()) {
-                    return;
-                }
-                appMgrClient->UnregisterConfigurationObserver(delegate->configChangeObserver_);
-                delegate->configChangeObserver_ = nullptr;
-            }
+            CHECK_NULL_VOID(delegate->configChangeObserver_);
+            auto abilityContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
+            CHECK_NULL_VOID(abilityContext);
+            abilityContext->UnregisterEnvironmentCallback(delegate->configChangeObserver_);
+            delegate->configChangeObserver_.reset();
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebRemoveConfigObserver");
 }
@@ -3267,14 +3259,12 @@ void WebDelegate::UpdateDarkMode(const WebDarkMode& mode)
 
 void WebDelegate::UpdateDarkModeAuto(RefPtr<WebDelegate> delegate, std::shared_ptr<OHOS::NWeb::NWebPreference> setting)
 {
-    auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
-    if (appMgrClient->ConnectAppMgrService()) {
-        return;
-    }
-    auto systemConfig = OHOS::AppExecFwk::Configuration();
-    appMgrClient->GetConfiguration(systemConfig);
-    std::string colorMode = systemConfig.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     CHECK_NULL_VOID(setting);
+    auto abilityContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
+    CHECK_NULL_VOID(abilityContext);
+    auto appConfig = abilityContext->GetConfiguration();
+    CHECK_NULL_VOID(appConfig);
+    auto colorMode = appConfig->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     if (colorMode == "dark") {
         setting->PutDarkSchemeEnabled(true);
         if (delegate->GetForceDarkMode()) {

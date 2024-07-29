@@ -968,6 +968,7 @@ template("ace_core_ng_source_set") {
 
         external_deps += [
           "ability_runtime:abilitykit_native",
+          "ability_runtime:app_context",
           "ability_runtime:app_manager",
           "c_utils:utils",
           "init:libbegetutil",
