@@ -1232,4 +1232,141 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest031, TestSize
     result = paintMethod->GetEffectiveAlign(align, direction);
     EXPECT_EQ(result, RSTextAlign::JUSTIFY);
 }
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest036
+ * @tc.desc: Test the function 'SetPaintImage' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest036, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    RSColor color;
+    RSBrush brush(RSColor(0xffffffff));
+    RSPen pen;
+    paintMethod->state_.strokeState.SetLineDash({ { 1.0, 0.0 }, 1.0 });
+    paintMethod->state_.strokeState.SetLineDashOffset(1.0);
+    paintMethod->UpdateLineDash(pen);
+    float percentNum = 1.0f;
+    FilterProperty filter;
+    paintMethod->lastFilters_.clear();
+    filter.filterType_ = FilterType::INVERT;
+    paintMethod->lastFilters_.push_back(filter);
+    paintMethod->SetPaintImage(&pen, &brush);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    paintMethod->lastFilters_.clear();
+    filter.filterType_ = FilterType::OPACITY;
+    paintMethod->lastFilters_.push_back(filter);
+    paintMethod->SetPaintImage(&pen, &brush);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    paintMethod->lastFilters_.clear();
+    filter.filterType_ = FilterType::BRIGHTNESS;
+    paintMethod->lastFilters_.push_back(filter);
+    paintMethod->SetPaintImage(&pen, &brush);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    paintMethod->lastFilters_.clear();
+    filter.filterType_ = FilterType::BRIGHTNESS;
+    paintMethod->lastFilters_.push_back(filter);
+    paintMethod->SetPaintImage(&pen, &brush);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    paintMethod->lastFilters_.clear();
+    filter.filterType_ = FilterType::CONTRAST;
+    paintMethod->lastFilters_.push_back(filter);
+    paintMethod->SetPaintImage(&pen, &brush);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    paintMethod->lastFilters_.clear();
+    filter.filterType_ = FilterType::BLUR;
+    paintMethod->lastFilters_.push_back(filter);
+    paintMethod->SetPaintImage(&pen, &brush);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest037
+ * @tc.desc: Test the function 'SetHueRotateFilter' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest037, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+
+    RSColor color;
+    RSBrush brush(RSColor(0xffffffff));
+    RSPen pen;
+    paintMethod->state_.strokeState.SetLineDash({ { 1.0, 0.0 }, 1.0 });
+    paintMethod->state_.strokeState.SetLineDashOffset(1.0);
+    paintMethod->UpdateLineDash(pen);
+
+    paintMethod->SetFilterParam("none");
+    paintMethod->SetHueRotateFilter(paintMethod->filterParam_, &pen, &brush);
+    EXPECT_EQ(paintMethod->filterParam_, "none");
+
+    paintMethod->SetFilterParam("deg");
+    paintMethod->SetHueRotateFilter(paintMethod->filterParam_, &pen, &brush);
+    EXPECT_EQ(paintMethod->filterParam_, "deg");
+
+    paintMethod->SetFilterParam("turn");
+    paintMethod->SetHueRotateFilter(paintMethod->filterParam_, &pen, &brush);
+    EXPECT_EQ(paintMethod->filterParam_, "turn");
+    paintMethod->SetFilterParam("rad");
+    paintMethod->SetHueRotateFilter(paintMethod->filterParam_, &pen, &brush);
+    EXPECT_EQ(paintMethod->filterParam_, "rad");
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest038
+ * @tc.desc: Test the function 'SetPaintImage' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest038, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    RSColor color;
+    RSBrush brush(RSColor(0xffffffff));
+    RSPen pen;
+    paintMethod->state_.strokeState.SetLineDash({ { 1.0, 0.0 }, 1.0 });
+    paintMethod->state_.strokeState.SetLineDashOffset(1.0);
+    paintMethod->UpdateLineDash(pen);
+    FilterProperty filter;
+    filter.filterParam_ = "test";
+    filter.filterType_ = FilterType::NONE;
+    paintMethod->lastFilters_.push_back(filter);
+    paintMethod->SetPaintImage(&pen, &brush);
+    paintMethod->lastFilters_.clear();
+    filter.filterType_ = FilterType::GRAYSCALE;
+    paintMethod->lastFilters_.push_back(filter);
+    paintMethod->SetPaintImage(&pen, &brush);
+    float percentNum = 1.0f;
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    paintMethod->lastFilters_.clear();
+    filter.filterType_ = FilterType::SEPIA;
+    paintMethod->lastFilters_.push_back(filter);
+    paintMethod->SetPaintImage(&pen, &brush);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    paintMethod->lastFilters_.clear();
+    filter.filterType_ = FilterType::SATURATE;
+    paintMethod->lastFilters_.push_back(filter);
+    paintMethod->SetPaintImage(&pen, &brush);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    paintMethod->lastFilters_.clear();
+    filter.filterType_ = FilterType::HUE_ROTATE;
+    paintMethod->lastFilters_.push_back(filter);
+    paintMethod->SetPaintImage(&pen, &brush);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+}
 } // namespace OHOS::Ace::NG
