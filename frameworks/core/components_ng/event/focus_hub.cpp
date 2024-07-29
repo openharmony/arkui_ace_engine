@@ -459,7 +459,6 @@ void FocusHub::SetFocusable(bool focusable, bool isExplicit)
     if (isExplicit) {
         isFocusableExplicit_ = true;
     } else if (isFocusableExplicit_) {
-        LOGI("Current focusHub cannot be set to focusable implicitly.");
         return;
     } else {
         implicitFocusable_ = focusable;

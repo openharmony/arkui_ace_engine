@@ -897,7 +897,6 @@ void VideoPattern::RegisterRenderContextCallBack()
     renderSurfaceWeakPtr_ = renderSurface_;
     renderContextForMediaPlayerWeakPtr_ = renderContextForMediaPlayer_;
     auto OnAttachCallBack = [weak = WeakClaim(this)](int64_t textureId, bool isAttach) mutable {
-        LOGI("OnAttachCallBack.");
         auto videoPattern = weak.Upgrade();
         CHECK_NULL_VOID(videoPattern);
         if (auto renderSurface = videoPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface) {

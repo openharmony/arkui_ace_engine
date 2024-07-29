@@ -304,21 +304,18 @@ void ParseFontFeatureSetting(
     const std::string& fontFeatureSetting, FONT_FEATURES_LIST& fontFeatures)
 {
     if (fontFeatureSetting.empty()) {
-        LOGW("ParseFontFeatureSetting fontFeatureSetting is empty");
         return;
     }
 
     auto temp = fontFeatureSetting;
     StringUtils::TrimStrLeadingAndTrailing(temp);
     if (temp.empty()) {
-        LOGW("ParseFontFeatureSetting fontFeatureSetting is empty");
         return;
     }
 
     std::vector<std::string> value;
     StringUtils::StringSplitter(temp, ' ', value);
     if (value.empty() || value.size() > FONT_FEATURE_MAX_SIZE || value[0].size() != FONT_FEATURE_KEY_LENGTH) {
-        LOGW("ParseFontFeatureSetting param is invalid");
         return;
     }
 
@@ -330,7 +327,6 @@ void ParseFontFeatureSetting(
             fontFeatures.emplace_back(std::make_pair(value[0], ParseFontFeatureParameters(value[1])));
             break;
         default:
-            LOGW("ParseFontFeatureSetting format of font-feature-settings is invalid");
             break;
     }
 }
