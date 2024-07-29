@@ -538,6 +538,7 @@ template("ace_core_source_set") {
           "$ace_root/frameworks/core/components_ng/pattern/form:ace_core_components_form_pattern_ng_$platform",
         ]
         external_deps += [
+          "ability_base:base",
           "ability_base:want",
           "form_fwk:form_manager",
         ]
