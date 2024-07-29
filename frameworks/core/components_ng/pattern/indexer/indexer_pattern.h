@@ -154,7 +154,7 @@ private:
     void UpdatePopupVisibility(VisibleType visible);
     bool NeedShowPopupView();
     bool NeedShowBubble();
-    void ShowBubble();
+    void ShowBubble(bool fromTouchUp = false);
     bool IfSelectIndexValid();
     int32_t GetSelectChildIndex(const Offset& offset);
     void StartBubbleAppearAnimation();
@@ -217,7 +217,7 @@ private:
     int32_t lastPopupIndex_ = -1;
     uint32_t lastPopupSize_ = 0;
     int32_t currentPopupIndex_ = -1;
-    float itemSizeRender_ = 0.0f;
+    float itemHeight_ = 0.0f;
     int32_t popupClickedIndex_ = -1;
     int32_t lastFireSelectIndex_ = -1;
     float lastItemSize_ = -1.0f;
@@ -226,7 +226,7 @@ private:
     bool autoCollapse_ = true;
     bool lastAutoCollapse_ = true;
     bool enableHapticFeedback_ = true;
-    float actualIndexerHeight_ = 0.0f;
+    float maxFrameHeight_ = 0.0f;
     bool isNewHeightCalculated_ = false;
     bool selectedChangedForHaptic_ = false;
     IndexerCollapsingMode lastCollapsingMode_ = IndexerCollapsingMode::INVALID;

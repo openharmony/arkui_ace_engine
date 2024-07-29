@@ -31,14 +31,14 @@ class ACE_EXPORT IndexerLayoutAlgorithm : public LayoutAlgorithm {
 public:
     IndexerLayoutAlgorithm(int32_t itemCount_) : itemCount_(itemCount_) {}
 
-    float GetItemSizeRender() const
+    float GetItemHeight() const
     {
-        return itemSizeRender_;
+        return itemHeight_;
     }
 
-    float GetActualHeight() const
+    float GetMaxFrameHeight() const
     {
-        return actualHeight_;
+        return maxFrameHeight_;
     }
 
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -51,13 +51,12 @@ private:
     bool IsPopupAtLeft(const RefPtr<IndexerLayoutProperty>& layoutProperty, NG::AlignStyle alignment) const;
     float GetMaxItemWidth(LayoutWrapper* layoutWrapper);
     void MeasurePopup(LayoutWrapper* layoutWrapper, uint32_t childCount);
-    std::vector<std::string> arrayValue_;
     uint32_t popupSize_ = 0;
     int32_t itemCount_ = 0;
     float itemSize_ = 0.0f;
     float itemWidth_ = 0.0f;
-    float itemSizeRender_ = 0.0f;
-    float actualHeight_ = 0.0f;
+    float itemHeight_ = 0.0f;
+    float maxFrameHeight_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

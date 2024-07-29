@@ -184,10 +184,10 @@ bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto indexerLayoutAlgorithm = DynamicCast<IndexerLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(indexerLayoutAlgorithm, false);
-    itemSizeRender_ = indexerLayoutAlgorithm->GetItemSizeRender();
-    auto height = indexerLayoutAlgorithm->GetActualHeight();
-    if (actualIndexerHeight_ != height && lastAutoCollapse_) {
-        actualIndexerHeight_ = height;
+    itemHeight_ = indexerLayoutAlgorithm->GetItemHeight();
+    auto height = indexerLayoutAlgorithm->GetMaxFrameHeight();
+    if (maxFrameHeight_ != height && lastAutoCollapse_) {
+        maxFrameHeight_ = height;
         isNewHeightCalculated_ = true;
         auto hostNode = dirty->GetHostNode();
         StartCollapseDelayTask(hostNode, INDEXER_COLLAPSE_WAIT_DURATION);
@@ -245,7 +245,7 @@ void IndexerPattern::CollapseArrayValue()
     auto itemSize =
         layoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP)).ConvertToVp();
     int32_t maxItemsCount = 0;
-    auto height = Dimension(actualIndexerHeight_, DimensionUnit::PX).ConvertToVp();
+    auto height = Dimension(maxFrameHeight_, DimensionUnit::PX).ConvertToVp();
     if (height > 0 && itemSize > 0) {
         maxItemsCount = static_cast<int32_t>(height / itemSize);
     }
@@ -532,14 +532,14 @@ void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
 
 void IndexerPattern::MoveIndexByOffset(const Offset& offset)
 {
-    if (itemSizeRender_ <= 0) {
+    if (itemHeight_ <= 0) {
         return;
     }
     if (itemCount_ <= 0) {
         return;
     }
     auto nextSelectIndex = GetSelectChildIndex(offset);
-    if (nextSelectIndex == childPressIndex_) {
+    if (nextSelectIndex == childPressIndex_ || nextSelectIndex == -1) {
         return;
     }
     childPressIndex_ = nextSelectIndex;
@@ -569,15 +569,15 @@ int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset)
         CHECK_NULL_RETURN(geometryNode, -1);
         auto childOffset = geometryNode->GetFrameOffset();
         if (index == 0 && LessNotEqual(offset.GetY(), childOffset.GetY())) {
-            return 0;
+            return -1;
         }
         if (GreatOrEqual(offset.GetY(), childOffset.GetY()) &&
-            LessNotEqual(offset.GetY(), childOffset.GetY() + itemSizeRender_)) {
+            LessNotEqual(offset.GetY(), childOffset.GetY() + itemHeight_)) {
             break;
         }
         index++;
     }
-    return std::clamp(index, 0, itemCount_ - 1);
+    return index < itemCount_ ? index : -1;
 }
 
 bool IndexerPattern::KeyIndexByStep(int32_t step)
@@ -849,14 +849,14 @@ void IndexerPattern::ApplyIndexChanged(
         if (isTextNodeInTree) childNode->MarkDirtyNode();
     }
     if (selectChanged) {
-        ShowBubble();
+        ShowBubble(fromTouchUp);
         if (enableHapticFeedback_ && selectedChangedForHaptic_ && !fromTouchUp) {
             VibratorImpl::StartVibraFeedback();
         }
     }
 }
 
-void IndexerPattern::ShowBubble()
+void IndexerPattern::ShowBubble(bool fromTouchUp)
 {
     if (!NeedShowBubble() || itemCount_ < 1) {
         return;
@@ -878,7 +878,9 @@ void IndexerPattern::ShowBubble()
     }
     UpdateBubbleView();
     delayTask_.Cancel();
-    StartBubbleAppearAnimation();
+    if (!fromTouchUp) {
+        StartBubbleAppearAnimation();
+    }
     if (!isTouch_) {
         StartDelayTask(INDEXER_BUBBLE_ENTER_DURATION + INDEXER_BUBBLE_WAIT_DURATION);
     }
