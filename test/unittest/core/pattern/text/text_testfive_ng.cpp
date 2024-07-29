@@ -2238,4 +2238,134 @@ HWTEST_F(TextTestFiveNg, ToJsonValue001, TestSize.Level1)
     textPattern->ToJsonValue(thirdJson, filter);
     EXPECT_EQ(thirdJson->ToString(), "{}");
 }
+
+/**
+ * @tc.name: ModifyAdaptMinFontSizeInTextStyle001
+ * @tc.desc: test text_content_modifier.cpp ModifyAdaptMinFontSizeInTextStyle function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, ModifyAdaptMinFontSizeInTextStyle001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->CreateModifier();
+    auto textContentModifier = pattern->contentMod_;
+    ASSERT_NE(textContentModifier, nullptr);
+
+    TextStyle textStyle;
+
+    textContentModifier->adaptMinFontSize_ = Dimension(10);
+    textContentModifier->ModifyAdaptMinFontSizeInTextStyle(textStyle);
+    EXPECT_EQ(textStyle.GetAdaptMinFontSize().Value(), 0);
+
+    textContentModifier->adaptMinFontSizeFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(10);
+    textContentModifier->ModifyAdaptMinFontSizeInTextStyle(textStyle);
+    EXPECT_EQ(textStyle.GetAdaptMinFontSize().Value(), 10);
+}
+
+/**
+ * @tc.name: ModifyAdaptMaxFontSizeInTextStyle001
+ * @tc.desc: test text_content_modifier.cpp ModifyAdaptMaxFontSizeInTextStyle function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, ModifyAdaptMaxFontSizeInTextStyle001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->CreateModifier();
+    auto textContentModifier = pattern->contentMod_;
+    ASSERT_NE(textContentModifier, nullptr);
+
+    TextStyle textStyle;
+
+    textContentModifier->adaptMaxFontSize_ = Dimension(10);
+    textContentModifier->ModifyAdaptMaxFontSizeInTextStyle(textStyle);
+    EXPECT_EQ(textStyle.GetAdaptMaxFontSize().Value(), 0);
+
+    textContentModifier->adaptMaxFontSizeFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(10);
+    textContentModifier->ModifyAdaptMaxFontSizeInTextStyle(textStyle);
+    EXPECT_EQ(textStyle.GetAdaptMaxFontSize().Value(), 10);
+}
+
+/**
+ * @tc.name: UpdateAdaptMinFontSizeMeasureFlag001
+ * @tc.desc: test text_content_modifier.cpp UpdateAdaptMinFontSizeMeasureFlag function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateAdaptMinFontSizeMeasureFlag001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->CreateModifier();
+    auto textContentModifier = pattern->contentMod_;
+    ASSERT_NE(textContentModifier, nullptr);
+
+    PropertyChangeFlag flag = PROPERTY_UPDATE_NORMAL;
+
+    textContentModifier->adaptMinFontSize_ = Dimension(10);
+    textContentModifier->UpdateAdaptMinFontSizeMeasureFlag(flag);
+    EXPECT_EQ(flag, PROPERTY_UPDATE_NORMAL);
+
+    textContentModifier->adaptMinFontSizeFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(20);
+    textContentModifier->UpdateAdaptMinFontSizeMeasureFlag(flag);
+    EXPECT_EQ(flag, PROPERTY_UPDATE_MEASURE);
+}
+
+/**
+ * @tc.name: UpdateAdaptMaxFontSizeMeasureFlag001
+ * @tc.desc: test text_content_modifier.cpp UpdateAdaptMaxFontSizeMeasureFlag function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateAdaptMaxFontSizeMeasureFlag001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->CreateModifier();
+    auto textContentModifier = pattern->contentMod_;
+    ASSERT_NE(textContentModifier, nullptr);
+
+    PropertyChangeFlag flag = PROPERTY_UPDATE_NORMAL;
+
+    textContentModifier->adaptMaxFontSize_ = Dimension(10);
+    textContentModifier->UpdateAdaptMaxFontSizeMeasureFlag(flag);
+    EXPECT_EQ(flag, PROPERTY_UPDATE_NORMAL);
+
+    textContentModifier->adaptMaxFontSizeFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(20);
+    textContentModifier->UpdateAdaptMaxFontSizeMeasureFlag(flag);
+    EXPECT_EQ(flag, PROPERTY_UPDATE_MEASURE);
+}
+
+/**
+ * @tc.name: ResumeAnimation001
+ * @tc.desc: test text_content_modifier.cpp ResumeAnimation function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, ResumeAnimation001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->CreateModifier();
+    auto textContentModifier = pattern->contentMod_;
+    ASSERT_NE(textContentModifier, nullptr);
+
+    AnimationOption option = AnimationOption();
+    textContentModifier->raceAnimation_ = AnimationUtils::StartAnimation(option, [&]() {}, []() {});
+
+    textContentModifier->ResumeAnimation();
+    textContentModifier->ResumeAnimation();
+    EXPECT_EQ(textContentModifier->textRacing_, true);
+    textContentModifier->PauseAnimation();
+    textContentModifier->PauseAnimation();
+    EXPECT_EQ(textContentModifier->textRacing_, false);
+}
 } // namespace OHOS::Ace::NG
