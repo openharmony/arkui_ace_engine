@@ -44,9 +44,9 @@ export class ProgressButton extends ViewPU {
     this.__enable = new SynchedPropertySimpleOneWayPU(g1.enable, this, "enable");
     this.__progressColor = new ObservedPropertyObjectPU('#330A59F7', this, "progressColor");
     this.__containerBorderColor = new ObservedPropertyObjectPU('#330A59F7', this, "containerBorderColor");
-    this.__containerBackgroundColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001,
-      params: ['sys.color.ohos_id_color_foreground_contrary'],
-      "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "containerBackgroundColor");
+    this.__containerBackgroundColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, 
+    params: ['sys.color.ohos_id_color_foreground_contrary'],
+     "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "containerBackgroundColor");
     this.setInitiallyProvidedValue(g1);
     this.declareWatch("progress", this.getProgressContext);
     this.declareWatch("isLoading", this.getLoadingProgress);
@@ -261,7 +261,7 @@ export class ProgressButton extends ViewPU {
       ViewStackProcessor.StartGetAccessRecordingFor(i);
       Text.create(this.isLoading ? this.textProgress : this.content);
       Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'],
-        "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
       Text.fontWeight(FontWeight.Medium);
       Text.key(PROGRESS_BUTTON_PRIMARY_FONT_KEY);
       Text.maxLines(1);
