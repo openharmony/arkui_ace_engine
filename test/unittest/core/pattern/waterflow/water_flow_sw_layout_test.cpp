@@ -574,6 +574,49 @@ HWTEST_F(WaterFlowSWTest, Misaligned001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Misaligned002
+ * @tc.desc: Test misalignment with section
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Misaligned002, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) { CreateRandomItem(45); }, false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_10);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_FALSE(info_->IsMisaligned());
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    pattern_->ScrollToIndex(15, true, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, -575.0f);
+    UpdateCurrentOffset(550.0f);
+
+    EXPECT_EQ(GetChildY(frameNode_, 15), -25.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 15), 320.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 16), -62.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 16), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 17), -96.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 17), 160.0f);
+    EXPECT_EQ(info_->startIndex_, 15);
+    EXPECT_TRUE(info_->IsMisaligned());
+
+    UpdateCurrentOffset(100.0f);
+    EXPECT_EQ(info_->startIndex_, 13);
+    EXPECT_TRUE(info_->IsMisaligned());
+
+    pattern_->OnScrollEndCallback(); // check misalignment onScrollEnd
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 15), 4.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 15), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 16), 4.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 16), 160.0f);
+    EXPECT_FALSE(info_->IsMisaligned());
+}
+
+/**
  * @tc.name: PositionController100
  * @tc.desc: Test PositionController AnimateTo and ScrollTo, should be disabled
  * @tc.type: FUNC
