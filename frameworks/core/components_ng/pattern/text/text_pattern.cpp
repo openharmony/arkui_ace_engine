@@ -2331,11 +2331,6 @@ void TextPattern::PreCreateLayoutWrapper()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    // mark content dirty
-    if (contentMod_) {
-        contentMod_->ContentChange();
-    }
-
     auto paintProperty = GetPaintProperty<PaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto flag = paintProperty->GetPropertyChangeFlag();
@@ -2436,11 +2431,6 @@ void TextPattern::BeforeCreateLayoutWrapper()
 {
     if (!isSpanStringMode_) {
         PreCreateLayoutWrapper();
-    } else {
-        // mark content dirty
-        if (contentMod_) {
-            contentMod_->ContentChange();
-        }
     }
 }
 
@@ -3605,5 +3595,31 @@ void TextPattern::UnregisterNodeChangeListenerWithoutSelect()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->UnregisterNodeChangeListener();
+}
+
+void TextPattern::UpdateFontColor(const Color& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& children = host->GetChildren();
+    if (children.empty()) {
+        auto paragraphs = pManager_->GetParagraphs();
+        for (auto &&info : paragraphs) {
+            auto paragraph = info.paragraph;
+            CHECK_NULL_VOID(paragraph);
+            int32_t length = paragraph->GetParagraphText().length();
+            paragraph->UpdateColor(0, length, value);
+        }
+    } else {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void TextPattern::BeforeCreatePaintWrapper()
+{
+    // mark content dirty
+    if (contentMod_) {
+        contentMod_->ContentChange();
+    }
 }
 } // namespace OHOS::Ace::NG
