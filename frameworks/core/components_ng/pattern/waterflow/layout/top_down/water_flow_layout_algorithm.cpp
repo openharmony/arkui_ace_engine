@@ -131,6 +131,9 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureForAnimation(layoutWrapper);
     }
     if (layoutInfo_->jumpIndex_ != EMPTY_JUMP_INDEX) {
+        if (layoutInfo_->extraOffset_.has_value() && Positive(layoutInfo_->extraOffset_.value())) {
+            layoutInfo_->extraOffset_.reset();
+        }
         layoutInfo_->JumpTo({ footerMainStartPos_, footerMainSize_ });
     }
     if (matchChildren) {
@@ -162,12 +165,12 @@ void WaterFlowLayoutAlgorithm::MeasureForAnimation(LayoutWrapper* layoutWrapper)
             layoutInfo_->targetIndex_.reset();
             break;
         }
-        auto itemCrossPosition = itemsCrossPosition_.find(position.crossIndex);
-        if (itemCrossPosition == itemsCrossPosition_.end()) {
+        auto itemCrossSize = itemsCrossSize_.find(position.crossIndex);
+        if (itemCrossSize == itemsCrossSize_.end()) {
             break;
         }
         itemWrapper->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
-            { itemCrossPosition->second, mainSize_, axis_ }, layoutProperty, itemWrapper));
+            { itemCrossSize->second, mainSize_, axis_ }, layoutProperty, itemWrapper));
         auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
         auto itemHeight = GetMainAxisSize(itemSize, axis_);
         auto item = layoutInfo_->items_[0][position.crossIndex].find(currentIndex);
@@ -256,7 +259,7 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         layoutInfo_->NodeIdx(layoutInfo_->endIndex_), cachedCount, cachedCount);
     PreBuildItems(layoutWrapper, layoutInfo_,
         WaterFlowLayoutUtils::CreateChildConstraint(
-            { itemsCrossPosition_.find(0)->second, mainSize_, axis_ }, layoutProperty, nullptr),
+            { itemsCrossSize_.find(0)->second, mainSize_, axis_ }, layoutProperty, nullptr),
         cachedCount);
 
     LayoutFooter(layoutWrapper, childFrameOffset, layoutProperty->IsReverse());

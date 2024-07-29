@@ -179,6 +179,22 @@ enum {
 };
 
 /**
+ * @brief Defines an enum for modifier keys.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Ctrl. */
+    ARKUI_MODIFIER_KEY_CTRL = 1 << 0,
+    /** Shift. */
+    ARKUI_MODIFIER_KEY_SHIFT = 1 << 1,
+    /** Alt. */
+    ARKUI_MODIFIER_KEY_ALT = 1 << 2,
+    /** Fn. */
+    ARKUI_MODIFIER_KEY_FN = 1 << 3,
+} ArkUI_ModifierKeyName;
+
+/**
  * @brief Obtains the type of this UI input event.
  *
  * @param event Indicates the pointer to the current UI input event.

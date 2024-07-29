@@ -36,14 +36,20 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto indexerLayoutProperty = AceType::DynamicCast<IndexerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(indexerLayoutProperty);
-    auto adaptiveWidth = indexerLayoutProperty->GetAdaptiveWidthValue(false);
-    auto maxItemWidth = adaptiveWidth ? GetMaxItemWidth(layoutWrapper) : 0.0f;
+    auto childCount = layoutWrapper->GetTotalChildCount();
+    if (indexerLayoutProperty->GetIsPopupValue(false)) {
+        MeasurePopup(layoutWrapper, childCount);
+        childCount--;
+    }
+
     LayoutConstraintF layoutConstraint;
     if (indexerLayoutProperty->GetLayoutConstraint().has_value()) {
         layoutConstraint = indexerLayoutProperty->GetLayoutConstraint().value();
     }
-    auto itemSize = indexerLayoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP));
+    OptionalSize<float> selfIdealSize = layoutConstraint.selfIdealSize;
+    Dimension itemSize = indexerLayoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP));
     itemSize_ = ConvertToPx(itemSize, layoutConstraint.scaleProperty, layoutConstraint.maxSize.Height()).value();
+
     auto defaultHorizontalPadding = Dimension(INDEXER_PADDING_LEFT, DimensionUnit::VP).ConvertToPx();
     auto defaultVerticalPadding = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
                                       ? Dimension(INDEXER_PADDING_TOP_API_TWELVE, DimensionUnit::VP).ConvertToPx()
@@ -52,35 +58,34 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         static_cast<float>(defaultHorizontalPadding), static_cast<float>(defaultVerticalPadding), 0, 0);
     auto verticalPadding = (padding.top.value_or(0) + padding.bottom.value_or(0));
     auto horizontalPadding = padding.left.value_or(0.0f) + padding.right.value_or(0.0f);
+
+    auto adaptiveWidth = indexerLayoutProperty->GetAdaptiveWidthValue(false);
+    auto maxItemWidth = adaptiveWidth ? GetMaxItemWidth(layoutWrapper) : 0.0f;
     auto contentWidth =
         (adaptiveWidth ? (GreatOrEqual(maxItemWidth, itemSize_) ? maxItemWidth : itemSize_) : itemSize_) +
         horizontalPadding;
-    auto contentHeight = itemCount_ * itemSize_ + verticalPadding;
-    auto selfIdealSize = layoutConstraint.selfIdealSize;
-    auto actualWidth = selfIdealSize.Width().has_value()
+    auto frameWidth = selfIdealSize.Width().has_value()
                            ? selfIdealSize.Width().value()
                            : std::clamp(contentWidth, 0.0f, layoutConstraint.maxSize.Width());
-    actualHeight_ = selfIdealSize.Height().has_value()
-                            ? selfIdealSize.Height().value()
-                            : std::clamp(contentHeight, 0.0f, layoutConstraint.maxSize.Height());
-    contentHeight = GreatNotEqual(contentHeight, actualHeight_) ? actualHeight_ : contentHeight;
-    itemWidth_ = GreatOrEqual(actualWidth - horizontalPadding, 0.0f) ? actualWidth - horizontalPadding : 0.0f;
-    auto childCount = layoutWrapper->GetTotalChildCount();
-    if (indexerLayoutProperty->GetIsPopupValue(false)) {
-        MeasurePopup(layoutWrapper, childCount);
-        childCount--;
-    }
-    itemSizeRender_ = GreatOrEqual(contentHeight - verticalPadding, 0.0f) && childCount > 0
+    itemWidth_ = GreatOrEqual(frameWidth - horizontalPadding, 0.0f) ? frameWidth - horizontalPadding : 0.0f;
+
+    auto contentHeight = childCount * itemSize_ + verticalPadding;
+    maxFrameHeight_ = selfIdealSize.Height().has_value()
+                            ? selfIdealSize.Height().value() : layoutConstraint.maxSize.Height();
+    contentHeight = GreatNotEqual(contentHeight, maxFrameHeight_) ? maxFrameHeight_ : contentHeight;
+    itemHeight_ = GreatOrEqual(contentHeight - verticalPadding, 0.0f) && childCount > 0
                         ? (contentHeight - verticalPadding) / childCount : 0.0f;
+    float frameHeight = selfIdealSize.Height().has_value() ? selfIdealSize.Height().value() : contentHeight;
+
     auto childLayoutConstraint = indexerLayoutProperty->CreateChildConstraint();
     for (int32_t index = 0; index < childCount; index++) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         CHECK_NULL_VOID(childWrapper);
-        childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(itemWidth_, itemSizeRender_));
+        childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(itemWidth_, itemHeight_));
         childWrapper->Measure(childLayoutConstraint);
     }
 
-    layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(actualWidth, actualHeight_));
+    layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(frameWidth, frameHeight));
 }
 
 void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -104,7 +109,7 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (layoutProperty->GetPositionProperty()) {
         align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
     }
-    SizeF contentSize;
+    SizeF contentSize(itemWidth_, 0);
     auto childCount = layoutWrapper->GetTotalChildCount();
     if (layoutProperty->GetIsPopupValue(false)) {
         const auto& child = layoutWrapper->GetChildByIndex(childCount - 1);
@@ -116,13 +121,13 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     for (int32_t i = 0; i < childCount; i++) {
         const auto& child = layoutWrapper->GetChildByIndex(i);
         SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
-        contentSize += childSize;
+        contentSize.AddHeight(childSize.Height());
     }
+    auto translate = Alignment::GetAlignPosition(size, contentSize, align);
     for (int32_t i = 0; i < childCount; i++) {
         const auto& child = layoutWrapper->GetChildByIndex(i);
-        auto translate = Alignment::GetAlignPosition(size, contentSize, align);
         child->GetGeometryNode()->SetMarginFrameOffset(
-            translate + paddingOffset + OffsetF(0, itemSizeRender_ * i));
+            translate + paddingOffset + OffsetF(0, itemHeight_ * i));
         child->Layout();
     }
 }

@@ -39,6 +39,7 @@ RefPtr<RepeatNode> RepeatNode::GetOrCreateRepeatNode(int32_t nodeId)
 void RepeatNode::CreateTempItems()
 {
     std::swap(ids_, tempIds_);
+    TraversingCheck();
     std::swap(ModifyChildren(), tempChildren_);
 
     tempChildrenOfRepeat_ = std::vector<RefPtr<UINode>>(tempChildren_.begin(), tempChildren_.end());

@@ -310,6 +310,9 @@ enum class PropertyInfo {
     BASELINE_OFFSET,
     LINESPACING,
     SYMBOL_EFFECT_OPTIONS,
+    HALFLEADING,
+    MIN_FONT_SCALE,
+    MAX_FONT_SCALE,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
@@ -403,14 +406,19 @@ public:
         spanItem_->description = desc;
     }
 
+    void UpdateColorByResourceId()
+    {
+        spanItem_->fontStyle->UpdateColorByResourceId();
+    }
+
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, Color);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, DynamicColor);
     DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, TextDecoration);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, DynamicColor);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFeature, FONT_FEATURES_LIST);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextShadow, std::vector<Shadow>);
@@ -419,6 +427,8 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolRenderingStrategy, uint32_t);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectStrategy, uint32_t);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectOptions, SymbolEffectOptions);
+    DEFINE_SPAN_FONT_STYLE_ITEM(MinFontScale, float);
+    DEFINE_SPAN_FONT_STYLE_ITEM(MaxFontScale, float);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
@@ -426,6 +436,7 @@ public:
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineSpacing, Dimension);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(HalfLeading, bool);
 
     // Mount to the previous Span node or Text node.
     void MountToParagraph();
@@ -585,6 +596,7 @@ public:
     }
     ~CustomSpanItem() override = default;
     RefPtr<SpanItem> GetSameStyleSpanItem() const override;
+    ResultObject GetSpanResultObject(int32_t start, int32_t end) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     ACE_DISALLOW_COPY_AND_MOVE(CustomSpanItem);
     std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure;

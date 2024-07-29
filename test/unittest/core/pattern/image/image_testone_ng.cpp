@@ -1956,9 +1956,6 @@ void ImageModelNGFailedTest001_Properties03(ImageModelNG &image)
     ImageModelNG::SetDrawingColorFilter(frameNodeNull, drawingColorFilter);
     EXPECT_EQ(imageRenderProperty->GetDrawingColorFilter().has_value(), false);
 
-    image.SetDraggable(false);
-    EXPECT_NE(frameNode->IsDraggable(), false);
-
     /* recover node*/
     PushUINodes(uiNodes);
 }

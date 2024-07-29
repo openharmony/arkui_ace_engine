@@ -42,7 +42,6 @@
 #include "adapter/ohos/capability/html/span_to_html.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "core/components_ng/render/adapter/rosen_render_surface.h"
 #endif
 #include "core/common/ace_application_info.h"
 #include "core/event/ace_event_helper.h"
@@ -763,6 +762,7 @@ void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
 
 WebDelegate::~WebDelegate()
 {
+    SetAccessibilityState(false);
     OnNativeEmbedAllDestory();
     ReleasePlatformResource();
     if (IsDeviceTabletOr2in1() && GetWebOptimizationValue()) {
@@ -1709,6 +1709,9 @@ void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<
         }
         return;
     }
+    if (renderMode_ == static_cast<int32_t>(RenderMode::SYNC_RENDER)) {
+        renderSurface_ = rosenRenderSurface;
+    }
     SetSurface(rosenRenderSurface->GetSurface());
     InitOHOSWeb(context);
 #endif
@@ -2113,15 +2116,10 @@ void WebDelegate::RegisterConfigObserver()
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
-            if (appMgrClient->ConnectAppMgrService()) {
-                return;
-            }
-            delegate->configChangeObserver_ =
-                sptr<AppExecFwk::IConfigurationObserver>(new (std::nothrow) WebConfigurationObserver(delegate));
-            if (appMgrClient->RegisterConfigurationObserver(delegate->configChangeObserver_)) {
-                return;
-            }
+            auto abilityContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
+            CHECK_NULL_VOID(abilityContext);
+            delegate->configChangeObserver_.reset(new (std::nothrow) WebConfigurationObserver(delegate));
+            abilityContext->RegisterEnvironmentCallback(delegate->configChangeObserver_);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebAddConfigObserver");
 }
@@ -2137,14 +2135,11 @@ void WebDelegate::UnRegisterConfigObserver()
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            if (delegate->configChangeObserver_) {
-                auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
-                if (appMgrClient->ConnectAppMgrService()) {
-                    return;
-                }
-                appMgrClient->UnregisterConfigurationObserver(delegate->configChangeObserver_);
-                delegate->configChangeObserver_ = nullptr;
-            }
+            CHECK_NULL_VOID(delegate->configChangeObserver_);
+            auto abilityContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
+            CHECK_NULL_VOID(abilityContext);
+            abilityContext->UnregisterEnvironmentCallback(delegate->configChangeObserver_);
+            delegate->configChangeObserver_.reset();
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebRemoveConfigObserver");
 }
@@ -2734,8 +2729,9 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
     }
     auto ret = OHOS::Rosen::RSInterfaces::GetInstance().RegisterSurfaceOcclusionChangeCallback(
         surfaceNodeId_,
-        [weak = WeakClaim(this), weakContext = context_](float visibleRatio) {
+        [weak = WeakClaim(this)](float visibleRatio) {
             auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
             auto context = delegate->context_.Upgrade();
             CHECK_NULL_VOID(context);
             context->GetTaskExecutor()->PostTask(
@@ -3263,14 +3259,12 @@ void WebDelegate::UpdateDarkMode(const WebDarkMode& mode)
 
 void WebDelegate::UpdateDarkModeAuto(RefPtr<WebDelegate> delegate, std::shared_ptr<OHOS::NWeb::NWebPreference> setting)
 {
-    auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
-    if (appMgrClient->ConnectAppMgrService()) {
-        return;
-    }
-    auto systemConfig = OHOS::AppExecFwk::Configuration();
-    appMgrClient->GetConfiguration(systemConfig);
-    std::string colorMode = systemConfig.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     CHECK_NULL_VOID(setting);
+    auto abilityContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
+    CHECK_NULL_VOID(abilityContext);
+    auto appConfig = abilityContext->GetConfiguration();
+    CHECK_NULL_VOID(appConfig);
+    auto colorMode = appConfig->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     if (colorMode == "dark") {
         setting->PutDarkSchemeEnabled(true);
         if (delegate->GetForceDarkMode()) {
@@ -5721,6 +5715,13 @@ bool WebDelegate::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> 
 #endif
 }
 
+void WebDelegate::HideHandleAndQuickMenuIfNecessary(bool hide)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->HideHandleAndQuickMenuIfNecessary(hide);
+}
+
 void WebDelegate::OnQuickMenuDismissed()
 {
 #ifdef NG_BUILD
@@ -6571,25 +6572,17 @@ void WebDelegate::SetAccessibilityState(bool state)
     if (state == accessibilityState_) {
         return;
     }
+    CHECK_NULL_VOID(nweb_);
     accessibilityState_ = state;
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), state]() {
-            auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID(delegate);
-            CHECK_NULL_VOID(delegate->nweb_);
-            delegate->nweb_->SetAccessibilityState(state);
-            if (state) {
-                auto accessibilityEventListenerImpl =
-                    std::make_shared<AccessibilityEventListenerImpl>();
-                CHECK_NULL_VOID(accessibilityEventListenerImpl);
-                accessibilityEventListenerImpl->SetWebDelegate(weak);
-                delegate->nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
-                delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
-            }
-        },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetAccessibilityState");
+    nweb_->SetAccessibilityState(state);
+    if (state) {
+        auto accessibilityEventListenerImpl =
+            std::make_shared<AccessibilityEventListenerImpl>();
+        CHECK_NULL_VOID(accessibilityEventListenerImpl);
+        accessibilityEventListenerImpl->SetWebDelegate(WeakClaim(this));
+        nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
+        nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
+    }
 }
 
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAccessibilityNodeInfo(
@@ -7082,8 +7075,6 @@ NG::WebInfoType WebDelegate::GetWebInfoType()
 
 void WebDelegate::OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "OnAdsBlocked %{public}s", url.c_str());
-
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     context->GetTaskExecutor()->PostTask(

@@ -22,10 +22,13 @@
 #define private public
 #define protected public
 
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/event/touch_event.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/response_ctrl.h"
+#include "core/components_ng/event/touch_event.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -445,6 +448,7 @@ HWTEST_F(TouchEventTestNg, TriggerTouchCallBack001, TestSize.Level1)
     touchEventActuator->isFlushTouchEventsEnd_ = true;
     EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent_2));
 }
+
 /**
  * @tc.name: TouchEventTestAddClickEvent001
  * @tc.desc: test AddClickAfterEvent and ClearClickAfterEvent.
@@ -479,9 +483,121 @@ HWTEST_F(TouchEventTestNg, TouchEventTestAddClickEvent001, TestSize.Level1)
 HWTEST_F(TouchEventTestNg, SetPressedKeyCodesTest001, TestSize.Level1)
 {
     TouchEvent touchEvent;
-    touchEvent.SetPressedKeyCodes({KeyCode::KEY_DPAD_LEFT, KeyCode::KEY_DPAD_RIGHT});
+    touchEvent.SetPressedKeyCodes({ KeyCode::KEY_DPAD_LEFT, KeyCode::KEY_DPAD_RIGHT });
     EXPECT_EQ(touchEvent.pressedKeyCodes_.size(), 2);
     EXPECT_EQ(touchEvent.pressedKeyCodes_[0], KeyCode::KEY_DPAD_LEFT);
 }
 
+/**
+ * @tc.name: TouchEventTest001
+ * @tc.desc: HandleEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, TouchEventTest001, TestSize.Level1)
+{
+    TouchEvent touchEvent;
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+    auto context = PipelineContext::GetCurrentContext();
+
+    auto eventManager = context->GetEventManager();
+
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
+    touchEventActuator->AttachFrameNode(pageNode);
+    auto ctrl = eventManager->GetResponseCtrl();
+    ctrl->state_ = ResponseCtrl::MonopolizeState::ON;
+    ctrl->firstResponseNode_.Reset();
+    EXPECT_FALSE(touchEventActuator->HandleEvent(touchEvent));
+}
+
+/**
+ * @tc.name: TouchEventTest002
+ * @tc.desc: TriggerTouchCallBack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, TouchEventTest002, TestSize.Level1)
+{
+    TouchEvent touchEvent;
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.SetTiltX(TILT_X_VALUE).SetTiltY(TILT_Y_VALUE).SetPointers(POINTERS);
+    touchEventActuator->TriggerTouchCallBack(touchEvent);
+    touchEvent.type = TouchType::UP;
+    touchEventActuator->TriggerTouchCallBack(touchEvent);
+
+    EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
+}
+
+/**
+ * @tc.name: TouchEventTest003
+ * @tc.desc: TriggerTouchCallBack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, TouchEventTest003, TestSize.Level1)
+{
+    TouchEvent touchEvent;
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.SetTiltX(TILT_X_VALUE).SetTiltY(TILT_Y_VALUE).SetPointers(POINTERS);
+    SystemProperties::traceInputEventEnable_ = true;
+    touchEventActuator->TriggerTouchCallBack(touchEvent);
+    touchEvent.type = TouchType::UP;
+    touchEventActuator->TriggerTouchCallBack(touchEvent);
+
+    EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
+}
+
+/**
+ * @tc.name: TouchEventTest004
+ * @tc.desc: TriggerTouchCallBack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, TouchEventTest004, TestSize.Level1)
+{
+    TouchEvent touchEvent;
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.SetTiltX(TILT_X_VALUE).SetTiltY(TILT_Y_VALUE).SetPointers(POINTERS);
+    touchEventActuator->TriggerTouchCallBack(touchEvent);
+    touchEvent.type = TouchType::DOWN;
+
+    EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
+}
+
+/**
+ * @tc.name: TouchEventTest005
+ * @tc.desc: TriggerTouchCallBack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, TouchEventTest005, TestSize.Level1)
+{
+    TouchEvent touchEvent;
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+    touchEvent.type = TouchType::DOWN;
+    SystemProperties::traceInputEventEnable_ = false;
+    touchEvent.SetTiltX(TILT_X_VALUE).SetTiltY(TILT_Y_VALUE).SetPointers(POINTERS);
+    touchEventActuator->TriggerTouchCallBack(touchEvent);
+    touchEvent.type = TouchType::UP;
+    touchEventActuator->TriggerTouchCallBack(touchEvent);
+    touchEvent.type = TouchType::UP;
+    EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
+}
+
+/**
+ * @tc.name: TouchEventTest006
+ * @tc.desc: TriggerTouchCallBack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, TouchEventTest006, TestSize.Level1)
+{
+    TouchEvent touchEvent;
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+    std::string unknownType;
+    TouchEventFunc callback = [&unknownType](TouchEventInfo& info) { unknownType = info.GetType(); };
+    auto clickEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback));
+    touchEventActuator->AddTouchAfterEvent(clickEvent);
+    TouchEventFunc&& callback_1 = std::forward<TouchEventFunc>(callback);
+    touchEventActuator->commonTouchEventCallback_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback_1));
+    EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
+}
 } // namespace OHOS::Ace::NG

@@ -414,7 +414,11 @@ bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::
         CHECK_NULL_RETURN(pipeline, false);
         auto theme = pipeline->GetTheme<SecurityComponentTheme>();
         CHECK_NULL_RETURN(theme, false);
-        buttonInfo.fontSize_ = textProp->GetFontSize().value_or(theme->GetFontSize()).ConvertToVp();
+        if (textProp->GetFontSize().has_value()) {
+            buttonInfo.fontSize_ = textProp->GetFontSize()->Value();
+        } else {
+            buttonInfo.fontSize_ = theme->GetFontSize().Value();
+        }
         if (textProp->GetTextColor().has_value()) {
             buttonInfo.fontColor_.value = textProp->GetTextColor().value().GetValue();
         }
@@ -755,5 +759,10 @@ bool SecurityComponentHandler::IsSecurityComponentServiceExist()
 bool SecurityComponentHandler::LoadSecurityComponentService()
 {
     return SecCompKit::LoadService();
+}
+
+bool SecurityComponentHandler::IsSystemAppCalling()
+{
+    return SecCompKit::IsSystemAppCalling();
 }
 } // namespace OHOS::Ace::NG

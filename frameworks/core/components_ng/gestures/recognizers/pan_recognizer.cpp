@@ -34,6 +34,7 @@ namespace {
 constexpr int32_t MAX_PAN_FINGERS = 10;
 constexpr int32_t DEFAULT_PAN_FINGERS = 1;
 constexpr int32_t AXIS_PAN_FINGERS = 1;
+constexpr float MIN_SPEED_THRESHOLD = 500.0f;
 
 } // namespace
 
@@ -119,8 +120,8 @@ void PanRecognizer::OnAccepted()
     }
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Pan accepted, tag = %{public}s, id = %{public}s",
-        node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Pan accepted, tag = %{public}s",
+        node ? node->GetTag().c_str() : "null");
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onActionStart_);
     // only report the pan gesture starting for touch event
@@ -150,10 +151,17 @@ void PanRecognizer::OnRejected()
 void PanRecognizer::UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end)
 {
     PointF windowPoint(event.x, event.y);
+    TouchEvent transformEvent = event;
+    auto container = Container::Current();
+    if (container && container->IsUIExtensionWindow()) {
+        auto historyEvent = Platform::GetTouchEventOriginOffset(end ? lastTouchEvent_ : event);
+        windowPoint.SetX(historyEvent.GetX());
+        windowPoint.SetY(historyEvent.GetY());
+        transformEvent.time = Platform::GetTouchEventOriginTimeStamp(end ? lastTouchEvent_ : event);
+    }
     NGGestureRecognizer::Transform(windowPoint, GetAttachedNode(), false,
         isPostEventResult_, event.postEventNodeId);
 
-    TouchEvent transformEvent = event;
     transformEvent.x = windowPoint.GetX();
     transformEvent.y = windowPoint.GetY();
     panVelocity_.UpdateTouchPoint(event.id, transformEvent, end);
@@ -276,7 +284,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
     }
-    UpdateTouchEventInfo(event, false);
 
     if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
         UpdateTouchPointInVelocityTracker(event, true);
@@ -284,6 +291,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         panVelocity_.Reset(event.id);
         UpdateTouchPointInVelocityTracker(event, true);
     }
+    UpdateTouchEventInfo(event);
 
     if ((currentFingers_ <= fingers_) &&
         (refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
@@ -295,7 +303,12 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        if (currentFingers_  == fingers_) {
+        if (currentFingers_ == fingers_) {
+            auto velocityTrackerIter = panVelocity_.GetVelocityMap().find(event.id);
+            if (velocityTrackerIter != panVelocity_.GetVelocityMap().end() &&
+                std::abs(panVelocity_.GetMainAxisVelocity()) <= MIN_SPEED_THRESHOLD) {
+                velocityTrackerIter->second.DumpVelocityPoints();
+            }
             // last one to fire end.
             isStartTriggered_ = false;
             SendCallbackMsg(onActionEnd_);
@@ -360,7 +373,8 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         return;
     }
 
-    UpdateTouchEventInfo(event, true);
+    UpdateTouchEventInfo(event);
+    UpdateTouchPointInVelocityTracker(event.history.empty() ? event : event.history.back());
     if (refereeState_ == RefereeState::DETECTING) {
         auto result = IsPanGestureAccept();
         if (result == GestureAcceptResult::ACCEPT) {
@@ -622,8 +636,8 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetDeviceId(deviceId_);
     info.SetFingerList(fingerList_);
     info.SetSourceDevice(deviceType_);
-    info.SetOffsetX(averageDistance_.GetX());
-    info.SetOffsetY(averageDistance_.GetY());
+    info.SetOffsetX((direction_.type & PanDirection::HORIZONTAL) == 0 ? 0.0 : averageDistance_.GetX());
+    info.SetOffsetY((direction_.type & PanDirection::VERTICAL) == 0 ? 0.0 : averageDistance_.GetY());
     info.SetDelta(delta_);
     info.SetVelocity(panVelocity_.GetVelocity());
     info.SetMainVelocity(panVelocity_.GetMainAxisVelocity());
@@ -637,6 +651,9 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetRawGlobalLocation(GetRawGlobalLocation(touchPoint.postEventNodeId));
     info.SetPointerId(touchPoint.id);
     info.SetTargetDisplayId(touchPoint.targetDisplayId);
+    info.SetIsInterpolated(touchPoint.isInterpolated);
+    info.SetInputXDeltaSlope(touchPoint.inputXDeltaSlope);
+    info.SetInputYDeltaSlope(touchPoint.inputYDeltaSlope);
     info.SetMainDelta(mainDelta_ / static_cast<double>(touchPoints_.size()));
     if (inputEventType_ == InputEventType::AXIS) {
         info.SetScreenLocation(lastAxisEvent_.GetScreenOffset());
@@ -687,8 +704,8 @@ GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
     info->SetFingerList(fingerList_);
     info->SetTimeStamp(time_);
     info->SetDeviceId(deviceId_);
-    info->SetOffsetX(averageDistance_.GetX());
-    info->SetOffsetY(averageDistance_.GetY());
+    info->SetOffsetX((direction_.type & PanDirection::HORIZONTAL) == 0 ? 0.0 : averageDistance_.GetX());
+    info->SetOffsetY((direction_.type & PanDirection::VERTICAL) == 0 ? 0.0 : averageDistance_.GetY());
     info->SetSourceDevice(deviceType_);
     if (inputEventType_ == InputEventType::AXIS) {
         info->SetVelocity(Velocity());
@@ -912,7 +929,7 @@ void PanRecognizer::AddOverTimeTrace()
     firstInputTime_.reset();
 }
 
-void PanRecognizer::UpdateTouchEventInfo(const TouchEvent& event, bool updateVelocity)
+void PanRecognizer::UpdateTouchEventInfo(const TouchEvent& event)
 {
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
@@ -923,20 +940,11 @@ void PanRecognizer::UpdateTouchEventInfo(const TouchEvent& event, bool updateVel
         windowTouchPoint, GetAttachedNode(), false, isPostEventResult_, event.postEventNodeId);
     delta_ =
         (Offset(windowPoint.GetX(), windowPoint.GetY()) - Offset(windowTouchPoint.GetX(), windowTouchPoint.GetY()));
-    if ((direction_.type & PanDirection::VERTICAL) == 0) {
-        delta_.SetY(0.0);
-    } else if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
-        delta_.SetX(0.0);
-    }
 
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_GESTURE, "Delta is x %{public}f, y %{public}f ", delta_.GetX(), delta_.GetY());
     }
     mainDelta_ = GetMainAxisDelta();
-    // if call UpdateTouchEventInfo when receive UP event, velocity will not consider UP event position
-    if (updateVelocity) {
-        UpdateTouchPointInVelocityTracker(event.history.empty() ? event : event.history.back());
-    }
     averageDistance_ += delta_ / static_cast<double>(touchPoints_.size());
     touchPoints_[event.id] = event;
     touchPointsDistance_[event.id] += delta_;

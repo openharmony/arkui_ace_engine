@@ -35,8 +35,9 @@ const X_OFF_SET: string = '0vp'
 const Y_OFF_SET: string = '2.75vp'
 const Y_BOTTOM_OFF_SET: string = '-1.25vp'
 const Y_BASE_PLATE_OFF_SET: string = '1.5vp'
-const COLOR_IMAGE_EDIT: string = '#FFFFFF'
 const COLOR_IMAGE_ROW: string = '#00000000'
+const COLOR_IMAGE_EDIT: string = '#FFFFFF'
+const COLOR_SELECT: string = '#1A0A59F7'
 const SHADOW_COLOR: string = '#00001E'
 const GRAG_POP_UP_HEIGHT: string = '48'
 const FLOOR_MIN_WIDTH: string = '128vp'
@@ -757,11 +758,12 @@ export class TreeListener {
    */
   public emit(event: TreeListenType, argument: CallbackParam) {
     if (this._once_events[event]) {
-      let cbs_once: ((callbackParam: CallbackParam) => void)[] = Array.from<(callbackParam: CallbackParam) => void>(this._once_events[event]);
-      if (cbs_once) {
-        for (let i: number = 0, l: number = cbs_once.length; i < l; i++) {
+      let cbsOnce: ((callbackParam: CallbackParam) => void)[] =
+      Array.from<(callbackParam: CallbackParam) => void>(this._once_events[event]);
+      if (cbsOnce) {
+        for (let i: number = 0, l: number = cbsOnce.length; i < l; i++) {
           try {
-            cbs_once[i](argument);
+            cbsOnce[i](argument);
           } catch (e) {
             throw new Error('once function callbacks error.');
           }
@@ -769,11 +771,12 @@ export class TreeListener {
         this._once_events[event] = null;
       }
     } else if (this._events[event]) {
-      let cbs_on: ((callbackParam: CallbackParam) => void)[] = Array.from<(callbackParam: CallbackParam) => void>(this._events[event]);
-      if (cbs_on) {
-        for (let i: number = 0, l: number = cbs_on.length; i < l; i++) {
+      let cbsOn: ((callbackParam: CallbackParam) => void)[] =
+      Array.from<(callbackParam: CallbackParam) => void>(this._events[event]);
+      if (cbsOn) {
+        for (let i: number = 0, l: number = cbsOn.length; i < l; i++) {
           try {
-            cbs_on[i](argument);
+            cbsOn[i](argument);
           } catch (e) {
             throw new Error('on function callbacks error.');
           }
@@ -971,7 +974,8 @@ export struct TreeView {
         this.listNodeDataSource.getDragPopupPara().textConstraintSize.minWidth2,
         maxWidth: item.getNodeItem().imageNode ?
         this.listNodeDataSource.getDragPopupPara().textConstraintSize.maxWidth1 :
-        this.listNodeDataSource.getDragPopupPara().textConstraintSize.maxWidth2 })
+        this.listNodeDataSource.getDragPopupPara().textConstraintSize.maxWidth2,
+      })
     }
     .constraintSize({
       minWidth: this.listNodeDataSource.getDragPopupPara().floorConstraintSize.minWidth,
@@ -981,7 +985,8 @@ export struct TreeView {
     .backgroundColor(this.listNodeDataSource.getDragPopupPara().backgroundColor)
     .padding({
       start: LengthMetrics.resource(this.listNodeDataSource.getDragPopupPara().padding.left),
-      end: LengthMetrics.resource(this.listNodeDataSource.getDragPopupPara().padding.right) })
+      end: LengthMetrics.resource(this.listNodeDataSource.getDragPopupPara().padding.right),
+    })
     .shadow({
       radius: $r('sys.float.ohos_id_corner_radius_default_m'),
       color: SHADOW_COLOR,
@@ -2398,7 +2403,7 @@ class ListNodeDataSource extends BasicDataSource {
       }
       nodeInfo.setPopUpEnableArrow(false);
       nodeInfo.setPopUpColor($r('sys.color.ohos_id_color_background'));
-      nodeInfo.setPopUpTextColor($r('sys.color.ohos_id_color_text_secondary'));
+      nodeInfo.setPopUpTextColor(this.treeViewTheme.secondaryTitleFontColor);
     } else if (popUpType === PopUpType.WARNINGS) {
       if (nodeInfo.getNodeItem().inputText !== null) {
         if (inputError === InputError.INVALID_ERROR) {
@@ -3305,7 +3310,8 @@ export struct TreeViewInner {
               if (this.item.getNodeItem().imageCollapse) {
                 Row() {
                   Image(this.item.getNodeItem().imageCollapse?.collapseSource)
-                    .fillColor(this.item.getNodeItem().imageCollapse?.isCollapse ? this.treeViewTheme.arrowIconColor : COLOR_IMAGE_EDIT)
+                    .fillColor(this.item.getNodeItem().imageCollapse?.isCollapse ? this.treeViewTheme.arrowIconColor :
+                      COLOR_IMAGE_EDIT)
                     .align(Alignment.End)
                     .objectFit(ImageFit.Contain)
                     .height(this.item.getNodeItem().imageCollapse?.itemHeight)
@@ -3440,13 +3446,14 @@ export struct TreeViewInner {
             radius: $r('sys.float.ohos_id_corner_radius_clicked'),
             width: FLAG_NUMBER,
             color: this.treeViewTheme.borderFocusedColor,
-            style: BorderStyle.Solid
+            style: BorderStyle.Solid,
           })
         },
         normal: {
           .border({
             radius: $r('sys.float.ohos_id_corner_radius_clicked'),
-            width: 0 })
+            width: 0,
+          })
         }
       })
     }
@@ -3473,7 +3480,7 @@ export class NodeItem {
       inputText: new InputText(),
       mainTitleNode: new MainTitleNode(''),
       imageCollapse: undefined,
-      fontColor: undefined,
+      fontColor: '',
     };
     this.childNodeInfo = { isHasChildNode: false, childNum: 0, allChildNum: 0 };
     this.container = data.container as () => void;
@@ -4131,7 +4138,7 @@ export class ListNodeUtils {
    */
   dragTraverseNodeDF(callback: (node: NodeItem, listNode: NodeInfo[]) => boolean,
                      root: NodeItem = this._root, listNode: NodeInfo[]) {
-      let stack: NodeItem[] = [];
+    let stack: NodeItem[] = [];
     let found: boolean = false;
     stack.unshift(root);
     let currentNode: NodeItem = stack.shift() as NodeItem;

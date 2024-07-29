@@ -25,7 +25,12 @@ extern "C" {
 void FfiOHOSAceFrameworkEllipseCreate(double width, int32_t widthUnit, double height, int32_t heightUnit)
 {
     OHOS::Ace::EllipseModel::GetInstance()->Create();
-    FfiOHOSAceFrameworkShapeSetSize(width, widthUnit, height, heightUnit);
+    if (width > 0.0) {
+        FfiOHOSAceFrameworkShapeSetWidth(width, widthUnit);
+    }
+    if (height > 0.0) {
+        FfiOHOSAceFrameworkShapeSetHeight(height, heightUnit);
+    }
 }
 
 int64_t FfiOHOSAceFrameworkEllipseInsCreate(double width, int32_t widthUnit, double height, int32_t heightUnit)

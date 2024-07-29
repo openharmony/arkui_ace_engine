@@ -107,20 +107,22 @@ auto g_onGetTypes4Range = [](uint32_t from, uint32_t to) -> std::list<std::strin
 /**
  * Map needed by RepeatVirtualScrollCaches constructor
  */
-const std::map<std::string, uint32_t> cacheCountL24ttype = {
-    {"element1", 1},
-    {"element2", 2},
-    {"element3", 3},
-    {"element4", 4},
-    {"element5", 5}
+const std::map<std::string, std::pair<bool, uint32_t>> cacheCountL24ttype = {
+    // { template, { cachedCountSpecified, cacheCount } }
+    {"element1", { true, 1 }},
+    {"element2", { true, 2 } },
+    {"element3", { true, 3 }},
+    {"element4", { true, 4 }},
+    {"element5", { true, 5 }}
 };
 
 /**
  * Map needed by RepeatVirtualScrollNode constructor
  */
-const std::map<std::string, uint32_t> templateCachedCountMap = {
-    {"elmt1", 1},
-    {"elmt2", 2}
+const std::map<std::string, std::pair<bool, uint32_t>> templateCachedCountMap = {
+    // { template, { cachedCountSpecified, cacheCount } }
+    {"elmt1", { true, 1} },
+    {"elmt2", { true, 2} }
 };
 /**
  * @tc.name: RepeatNodeCacheTest001

@@ -282,6 +282,8 @@ public:
 
     void CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImmediately = false);
 
+    void ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent);
+
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(), float viewScale = 1.0f,

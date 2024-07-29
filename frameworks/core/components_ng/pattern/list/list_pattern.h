@@ -50,8 +50,6 @@ public:
     ListPattern() : ScrollablePattern(EdgeEffect::SPRING, false) {}
     ~ListPattern() override = default;
 
-    void CreateAnalyzerOverlay(const RefPtr<FrameNode> listNode);
-
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -360,17 +358,9 @@ private:
     void UpdateListDirectionInCardStyle();
     bool UpdateStartListItemIndex();
     bool UpdateEndListItemIndex();
-    float GetStartOverScrollOffset(float offset) const;
-    float GetEndOverScrollOffset(float offset) const;
+    float GetStartOverScrollOffset(float offset, float startMainPos) const;
+    float GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const;
     RefPtr<ListContentModifier> listContentModifier_;
-
-    void ReadThemeToFadingEdge();
-    void UpdateFadingEdge(const RefPtr<ListPaintMethod> paint);
-    void UpdateFadeInfo(bool isFadingTop, bool isFadingBottom, const RefPtr<ListPaintMethod> paint);
-    bool isFadingEdge_ = false;
-    bool isTopEdgeFading_ = false;
-    bool isLowerEdgeFading_ = false;
-    Axis fadingAxis_ = Axis::VERTICAL;
 
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;

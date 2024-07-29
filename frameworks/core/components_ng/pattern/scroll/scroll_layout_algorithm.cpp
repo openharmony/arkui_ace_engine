@@ -135,7 +135,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     viewPortLength_ = GetMainAxisSize(viewPort_, axis);
     auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, 0.0f);
     if (layoutDirection == TextDirection::RTL && axis == Axis::HORIZONTAL) {
-        currentOffset = OffsetF(size.Width() - childSize.Width() - currentOffset_, 0.0f);
+        currentOffset = OffsetF(std::min(size.Width() - childSize.Width(), 0.f) - currentOffset_, 0.0f);
     }
     auto scrollAlignment = Alignment::CENTER;
     if (layoutProperty->GetPositionProperty() && layoutProperty->GetPositionProperty()->HasAlignment()) {

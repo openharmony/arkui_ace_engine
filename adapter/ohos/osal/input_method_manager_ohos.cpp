@@ -175,6 +175,16 @@ void InputMethodManager::CloseKeyboard()
 #endif
 }
 
+void InputMethodManager::CloseKeyboardInPipelineDestroy()
+{
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Pipeline Destroyed, Ready to close SoftKeyboard.");
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (inputMethod) {
+        inputMethod->Close();
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Pipelinne Destroyed, Close SoftKeyboard Successfully.");
+    }
+}
+
 void InputMethodManager::CloseKeyboard(const RefPtr<NG::FrameNode>& focusNode)
 {
 #if defined(ENABLE_STANDARD_INPUT)
@@ -208,6 +218,7 @@ void InputMethodManager::HideKeyboardAcrossProcesses()
 void InputMethodManager::ProcessModalPageScene()
 {
     auto currentFocusNode = curFocusNode_.Upgrade();
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "ProcessModalPageScene");
     if (currentFocusNode && currentFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
         HideKeyboardAcrossProcesses();
     } else {

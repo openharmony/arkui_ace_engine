@@ -85,6 +85,10 @@ void MenuItemGroupPattern::AddHeader(const RefPtr<NG::UINode>& header)
     }
     auto frameNode = AceType::DynamicCast<FrameNode>(header);
     CHECK_NULL_VOID(frameNode);
+    if (headerContent_) {
+        headerContent_->MarkModifyDone();
+        headerContent_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void MenuItemGroupPattern::AddFooter(const RefPtr<NG::UINode>& footer)
@@ -100,6 +104,10 @@ void MenuItemGroupPattern::AddFooter(const RefPtr<NG::UINode>& footer)
     }
     auto frameNode = AceType::DynamicCast<FrameNode>(footer);
     CHECK_NULL_VOID(frameNode);
+    if (footerContent_) {
+        footerContent_->MarkModifyDone();
+        footerContent_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 RefPtr<FrameNode> MenuItemGroupPattern::GetMenu()

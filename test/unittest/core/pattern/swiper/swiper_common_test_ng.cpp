@@ -113,6 +113,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
     ShowNext();
     EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
     pattern_->springAnimationIsRunning_ = true;
+    pattern_->isTouchDownSpringAnimation_ = false;
     pattern_->childScrolling_ = true;
 
     /**
@@ -121,7 +122,8 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
      */
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::DOWN, Offset()));
     EXPECT_TRUE(pattern_->isTouchDown_);
-    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    EXPECT_TRUE(pattern_->isTouchDownSpringAnimation_);
     EXPECT_FALSE(pattern_->childScrolling_);
 
     /**
@@ -131,6 +133,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::UP, Offset()));
     EXPECT_FALSE(pattern_->isTouchDown_);
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    EXPECT_FALSE(pattern_->isTouchDownSpringAnimation_);
     EXPECT_TRUE(pattern_->moveDirection_);
 }
 

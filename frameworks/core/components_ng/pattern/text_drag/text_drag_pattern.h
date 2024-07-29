@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_DRAG_TEXT_DRAG_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
 #include "core/components_ng/pattern/text_drag/text_drag_paint_method.h"
@@ -84,9 +86,10 @@ class TextDragPattern : public Pattern {
 public:
     TextDragPattern() = default;
     ~TextDragPattern() override = default;
-
+    explicit TextDragPattern(const RefPtr<TextPattern>& hostPattern,
+        const std::shared_ptr<RichEditorDragInfo> info) : info_(info), hostPattern_(hostPattern) {};
+    static RefPtr<FrameNode> CreateDragNode(const RefPtr<FrameNode>& hostNode, const RichEditorDragInfo& info);
     static RefPtr<FrameNode> CreateDragNode(const RefPtr<FrameNode>& hostNode);
-
     void Initialize(const RefPtr<Paragraph>& paragraph, const TextDragData& data)
     {
         paragraph_ = paragraph;
@@ -230,10 +233,11 @@ protected:
 
 protected:
     RefPtr<TextDragOverlayModifier> overlayModifier_;
-
+    std::shared_ptr<RichEditorDragInfo> info_;
     TextDragData textDragData_;
 
 private:
+    WeakPtr<TextPattern> hostPattern_;
     float lastLineHeight_ = 0.0f;
     OffsetF contentOffset_;
     WeakPtr<Paragraph> paragraph_;

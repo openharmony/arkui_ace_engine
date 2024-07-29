@@ -39,7 +39,7 @@
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-
+constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
 CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, const RefPtr<FrameNode>& frameNode)
     : frameNode_(frameNode)
 {
@@ -48,6 +48,8 @@ CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, con
     imageShadow_ = std::make_unique<Shadow>();
     contentModifier_ = contentModifier;
     InitImageCallbacks();
+    // The initial value of the font size in canvas is 14px.
+    SetFontSize(DEFAULT_FONT_SIZE);
 }
 
 #ifndef USE_FAST_TASKPOOL
@@ -454,4 +456,19 @@ void CanvasPaintMethod::ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextS
     Constants::ConvertTxtStyle(textStyle, context_, txtStyle);
 }
 #endif
+
+std::string CanvasPaintMethod::GetDumpInfo()
+{
+    CHECK_NULL_RETURN(rsCanvas_, "Canvas is nullptr");
+    // translate
+    std::string trans = "TRANS: " + std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::TRANS_X)) + ", " +
+                        std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::TRANS_Y)) + "; ";
+    // scale
+    std::string scale = "SCALE: " + std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SCALE_X)) + ", " +
+                        std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SCALE_Y)) + "; ";
+    // rotate
+    std::string skew = "SKEW: " + std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SKEW_X)) + ", " +
+                       std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SKEW_Y)) + "; ";
+    return trans.append(scale).append(skew);
+}
 } // namespace OHOS::Ace::NG

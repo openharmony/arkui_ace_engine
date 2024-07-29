@@ -214,7 +214,7 @@ void ImagePattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
     });
 }
 
-void ImagePattern::RegisterVisibleAreaChange()
+void ImagePattern::RegisterVisibleAreaChange(bool isCalcClip)
 {
     auto pipeline = GetContext();
     // register to onVisibleAreaChange
@@ -222,13 +222,13 @@ void ImagePattern::RegisterVisibleAreaChange()
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
-        self->OnVisibleAreaChange(visible);
+        self->OnVisibleAreaChange(visible, ratio);
     };
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // add visibleAreaChangeNode(inner callback)
     std::vector<double> ratioList = {0.0};
-    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, isCalcClip);
 }
 
 void ImagePattern::CheckHandles(SelectHandleInfo& handleInfo)
@@ -590,10 +590,9 @@ void ImagePattern::LoadImage(
     const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag, VisibleType visibleType)
 {
     if (loadingCtx_) {
-        auto srcPixelMap = src.GetPixmap();
-        auto loadPixelMap = loadingCtx_->GetSourceInfo().GetPixmap();
-        isPixelMapChanged_ = !srcPixelMap || !loadPixelMap || srcPixelMap->GetRawPixelMapPtr() !=
-                                                              loadPixelMap->GetRawPixelMapPtr();
+        auto srcKey = src.GetKey();
+        auto loadKey = loadingCtx_->GetSourceInfo().GetKey();
+        isPixelMapChanged_ = srcKey != loadKey;
     }
     LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
     loadNotifier.onDataReadyComplete_ = CreateCompleteCallBackInDataReady();
@@ -696,6 +695,35 @@ void ImagePattern::OnModifyDone()
         default:
             break;
     }
+
+    InitOnKeyEvent();
+}
+
+void ImagePattern::InitOnKeyEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto focusHub = hub->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto onKeyEvent = [weak = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        pattern->OnKeyEvent();
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+void ImagePattern::OnKeyEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->PaintFocusState(true);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void ImagePattern::OnAnimatedModifyDone()
@@ -987,7 +1015,7 @@ void ImagePattern::OnVisibleChange(bool visible)
     }
 }
 
-void ImagePattern::OnVisibleAreaChange(bool visible)
+void ImagePattern::OnVisibleAreaChange(bool visible, double ratio)
 {
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_IMAGE, "OnVisibleAreaChange visible:%{public}d", (int)visible);
@@ -1009,6 +1037,14 @@ void ImagePattern::OnVisibleAreaChange(bool visible)
         image_->ControlAnimation(visible);
     } else if (altImage_) {
         altImage_->ControlAnimation(visible);
+    }
+
+    if (isEnableAnalyzer_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto overlayNode = host->GetOverlayNode();
+        CHECK_NULL_VOID(overlayNode);
+        TriggerVisibleAreaChangeForChild(overlayNode, visible, ratio);
     }
 }
 
@@ -1365,8 +1401,7 @@ void ImagePattern::DumpAdvanceInfo()
 void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
-    CHECK_NULL_VOID(loadingCtx_ && image_);
-    if (loadingCtx_->GetSourceInfo().IsPixmap()) {
+    if (loadingCtx_ && image_ && loadingCtx_->GetSourceInfo().IsPixmap()) {
         auto pixelMap = image_->GetPixelMap();
         CHECK_NULL_VOID(pixelMap);
         std::vector<uint8_t> data;
@@ -1376,7 +1411,7 @@ void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
         PixelMapRecordDetails details = { pixelMap->GetWidth(), pixelMap->GetHeight(), pixelMap->GetPixelFormat(),
             pixelMap->GetAlphaType() };
         UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data, details);
-    } else {
+    } else if (loadingCtx_) {
         UdmfClient::GetInstance()->AddImageRecord(unifiedData, loadingCtx_->GetSourceInfo().GetSrc());
     }
     event->SetData(unifiedData);
@@ -1493,6 +1528,7 @@ void ImagePattern::EnableAnalyzer(bool value)
     if (!imageAnalyzerManager_) {
         imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::IMAGE);
     }
+    RegisterVisibleAreaChange(false);
 }
 
 // As an example
@@ -2092,5 +2128,22 @@ void ImagePattern::SetObscured()
     imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     host->GetRenderContext()->ResetObscured();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void ImagePattern::TriggerVisibleAreaChangeForChild(const RefPtr<UINode>& node, bool visible, double ratio)
+{
+    for (const auto& childNode : node->GetChildren()) {
+        if (AceType::InstanceOf<FrameNode>(childNode)) {
+            auto frame = AceType::DynamicCast<FrameNode>(childNode);
+            if (!frame || !frame->GetEventHub<EventHub>()) {
+                continue;
+            }
+            auto callback = frame->GetEventHub<EventHub>()->GetVisibleAreaCallback(true).callback;
+            if (callback) {
+                callback(visible, ratio);
+            }
+        }
+        TriggerVisibleAreaChangeForChild(childNode, visible, ratio);
+    }
 }
 } // namespace OHOS::Ace::NG

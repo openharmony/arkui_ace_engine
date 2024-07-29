@@ -337,6 +337,16 @@ public:
     ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     std::string GetFontInJson() const;
 
+    std::optional<SelectHandleInfo> GetFirstHandleInfo() const
+    {
+        return selectOverlay_->GetFirstHandleInfo();
+    }
+
+    std::optional<SelectHandleInfo> GetSecondHandleInfo() const
+    {
+        return selectOverlay_->GetSecondHandleInfo();
+    }
+
     const std::vector<std::string>& GetDragContents() const
     {
         return dragContents_;
@@ -522,6 +532,7 @@ public:
     bool IsSelectAll();
     void HandleOnCopy();
     void HandleOnCopySpanString();
+    virtual CopyOptions HandleOnCopyOptions();
     virtual void HandleOnSelectAll();
     void SetTextSelectableMode(TextSelectableMode value);
 
@@ -619,6 +630,11 @@ public:
         parentGlobalOffset_ = GetParentGlobalOffset();
     }
 
+    void SetPrintInfo(const std::string& area, const OffsetF& paintOffset)
+    {
+        paintInfo_ = area + paintOffset.ToString();
+    }
+
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
     {
         isUserSetResponseRegion_ = isUserSetResponseRegion;
@@ -632,10 +648,6 @@ protected:
     void OnAfterModifyDone() override;
     virtual bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan);
     void InitMouseEvent();
-    void InitFocusEvent();
-    void InitHoverEvent();
-    void RecoverCopyOption();
-    void InitCopyOption();
     void RecoverSelection();
     virtual void HandleOnCameraInput() {};
     void InitSelection(const Offset& pos);
@@ -700,8 +712,6 @@ protected:
     bool panEventInitialized_ = false;
     bool clickEventInitialized_ = false;
     bool touchEventInitialized_ = false;
-    bool focusInitialized_ = false;
-    bool hoverInitialized_ = false;
     bool isSpanStringMode_ = false;
     RefPtr<MutableSpanString> styledString_ = MakeRefPtr<MutableSpanString>("");
     bool keyEventInitialized_ = false;
@@ -716,6 +726,7 @@ protected:
     CopyOptions copyOption_ = CopyOptions::None;
 
     std::string textForDisplay_;
+    std::string paintInfo_ = "NA";
     std::optional<TextStyle> textStyle_;
     std::list<RefPtr<SpanItem>> spans_;
     mutable std::list<RefPtr<UINode>> childNodes_;
@@ -734,8 +745,6 @@ protected:
     OffsetF parentGlobalOffset_;
     std::optional<TextResponseType> textResponseType_;
 
-    friend class TextContentModifier;
-
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleSpanLongPressEvent(GestureEvent& info);
@@ -753,7 +762,6 @@ private:
     RefPtr<RenderContext> GetRenderContext();
     void ProcessBoundRectByTextShadow(RectF& rect);
     void FireOnSelectionChange(int32_t start, int32_t end);
-    void FireOnMarqueeStateChange(const TextMarqueeState& state);
     void HandleMouseLeftButton(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseRightButton(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftPressAction(const MouseInfo& info, const Offset& textOffset);
@@ -808,10 +816,6 @@ private:
     bool isSensitive_ = false;
     int32_t clickedSpanPosition_ = -1;
     TimeStamp lastClickTimeStamp_;
-    bool leftFadeout_ = false;
-    bool rightFadeout_ = false;
-    float gradientPercent_ = 0.0;
-    bool isMarqueeRunning_ = false;
 
     RefPtr<ParagraphManager> pManager_;
     std::vector<int32_t> placeholderIndex_;

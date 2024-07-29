@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/utils/utils.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
@@ -93,21 +94,12 @@ RectF TextSelectOverlay::GetSecondHandleLocalPaintRect()
 
 bool TextSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto theme = pipeline->GetTheme<TextOverlayTheme>();
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, false);
     auto host = textPattern->GetHost();
     CHECK_NULL_RETURN(host, false);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    auto textStyle = textPattern->GetTextStyle();
-    auto handleRadius = pipeline->NormalizeToPx(theme->GetHandleDiameter());
-    // If the handle is incomplete at the top, not show.
-    if (LessNotEqual(paintRect.Top() - handleRadius, 0.0f) && handleLevelMode_ != HandleLevelMode::EMBED) {
-        return false;
-    }
     auto clip = false;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         clip = true;
@@ -119,6 +111,7 @@ bool TextSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
         auto contentRect = textPattern->GetTextContentRect();
         auto localPaintRect = paintRect;
         localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
+        localPaintRect.SetOffset(OffsetF(localPaintRect.GetX() + localPaintRect.Width() / 2.0f, localPaintRect.GetY()));
         auto visibleContentRect = contentRect.CombineRectT(localPaintRect);
         visibleContentRect.SetOffset(visibleContentRect.GetOffset() + textPattern->GetTextPaintOffset());
         visibleContentRect = GetVisibleRect(host, visibleContentRect);
@@ -134,8 +127,9 @@ bool TextSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
 
 bool TextSelectOverlay::CheckAndAdjustHandleWithContent(const RectF& visibleContentRect, RectF& paintRect)
 {
-    PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
-    PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
+    auto paintLeft = paintRect.GetX() + paintRect.Width() / 2.0f;
+    PointF bottomPoint = { paintLeft, paintRect.Bottom() - BOX_EPSILON };
+    PointF topPoint = { paintLeft, paintRect.Top() + BOX_EPSILON };
     bool bottomInRegion = visibleContentRect.IsInRegion(bottomPoint);
     bool topInRegion = visibleContentRect.IsInRegion(topPoint);
     if (!bottomInRegion && topInRegion) {
@@ -222,8 +216,14 @@ void TextSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOffset, 
     CHECK_NULL_VOID(textPattern);
     auto currentHandleIndex = textPattern->GetHandleIndex(Offset(handleOffset.GetX(), handleOffset.GetY()));
     if (isFirstHandle) {
+        if (textPattern->GetTextSelector().baseOffset != currentHandleIndex) {
+            VibratorUtils::StartVibraFeedback("slide");
+        }
         textPattern->HandleSelectionChange(currentHandleIndex, textPattern->GetTextSelector().destinationOffset);
     } else {
+        if (textPattern->GetTextSelector().destinationOffset != currentHandleIndex) {
+            VibratorUtils::StartVibraFeedback("slide");
+        }
         textPattern->HandleSelectionChange(textPattern->GetTextSelector().baseOffset, currentHandleIndex);
     }
 }

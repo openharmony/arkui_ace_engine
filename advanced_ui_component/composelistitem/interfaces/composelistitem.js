@@ -868,6 +868,7 @@ class OperateItemStruct extends ViewPU {
             Image.focusable(true);
             Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Image.draggable(false);
+            Image.matchTextDirection(true);
         }, Image);
         Button.pop();
     }
@@ -1054,6 +1055,7 @@ class OperateItemStruct extends ViewPU {
             Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Image.focusable(true);
             Image.draggable(false);
+            Image.matchTextDirection(true);
         }, Image);
         Row.pop();
         Button.pop();

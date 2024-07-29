@@ -569,74 +569,6 @@ HWTEST_F(OverlayTestNg, OnBindContentCover005, TestSize.Level1)
 }
 
 /**
- * @tc.name: PopupTest002
- * @tc.desc: Test OverlayManager::PopupEvent functions.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayTestNg, PopupTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create target node and popupInfo.
-     */
-    std::vector<RefPtr<FrameNode>> targetNodes;
-    std::vector<PopupInfo> popups;
-    for (int i = 0; i < 2; i++) {
-        auto targetNode = CreateTargetNode();
-        ASSERT_NE(targetNode, nullptr);
-        targetNodes.emplace_back(targetNode);
-        auto targetId = targetNodes[i]->GetId();
-        auto targetTag = targetNodes[i]->GetTag();
-
-        auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto popupNode = FrameNode::CreateFrameNode(
-            V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
-        PopupInfo popupInfo;
-        popupInfo.popupId = popupId;
-        popupInfo.popupNode = popupNode;
-        popupInfo.target = targetNode;
-        popupInfo.markNeedUpdate = true;
-        popupInfo.isBlockEvent = false;
-        popups.emplace_back(popupInfo);
-    }
-    /**
-     * @tc.steps: step2. create overlayManager and call ShowPopup.
-     * @tc.expected: Push popup successfully
-     */
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    auto targetId1 = targetNodes[0]->GetId();
-    auto targetId2 = targetNodes[1]->GetId();
-    rootNode->isLayoutComplete_ = true;
-    overlayManager->ShowPopup(targetId1, popups[0]);
-    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
-    overlayManager->ShowPopup(targetId2, popups[1]);
-    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
-    /**
-     * @tc.steps: step3. call HideCustomPopups when childCount is 2
-     * @tc.expected: popupMap's data is updated successfully
-     */
-    overlayManager->HideCustomPopups();
-    EXPECT_FALSE(overlayManager->popupMap_.empty());
-    EXPECT_FALSE(rootNode->GetChildren().empty());
-    /**
-     * @tc.steps: step4. call RemoveOverlay when childCount is 2
-     * @tc.expected: remove one popupNode at a time
-     */
-    overlayManager->HidePopup(targetId1, popups[0]);
-    overlayManager->HidePopup(targetId2, popups[1]);
-    EXPECT_FALSE(overlayManager->RemoveOverlay(false));
-    EXPECT_FALSE(overlayManager->popupMap_.empty());
-    overlayManager->ErasePopup(targetId1);
-    overlayManager->ErasePopup(targetId2);
-    EXPECT_TRUE(overlayManager->popupMap_.empty());
-    /**
-     * @tc.steps: step5. call HideCustomPopups when popupMap_ is empty
-     * @tc.expected: function exits normally
-     */
-    overlayManager->HideCustomPopups();
-    EXPECT_TRUE(overlayManager->popupMap_.empty());
-}
-/**
  * @tc.name: PopupTest003
  * @tc.desc: Test OverlayManager::HidePopup.
  * @tc.type: FUNC
@@ -1002,35 +934,6 @@ HWTEST_F(OverlayTestNg, MenuTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: ToastTest003
- * @tc.desc: Test OverlayManager::ClearToast.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayTestNg, ToastTest003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get overlay manager instance.
-     */
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto overlay = pipelineContext->GetOverlayManager();
-    ASSERT_NE(overlay, nullptr);
-
-    /**
-     * @tc.steps: step2. call ShowToast.
-     * @tc.expected: toastMap_ is empty
-     */
-    auto toastInfo = NG::ToastInfo { .message = MESSAGE,
-        .duration = DURATION,
-        .bottom = BOTTOMSTRING,
-        .isRightToLeft = true };
-    overlay->ShowToast(toastInfo, nullptr);
-    EXPECT_FALSE(overlay->toastMap_.empty());
-    overlay->ClearToast();
-    EXPECT_TRUE(overlay->toastMap_.empty());
-}
-
-/**
  * @tc.name: PopupTest004
  * @tc.desc: Test OverlayManager::HideAllPopups when useCustom is true.
  * @tc.type: FUNC
@@ -1270,6 +1173,56 @@ HWTEST_F(OverlayTestNg, RemoveOverlayTest002, TestSize.Level1)
     overlayManager->OnBindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr,
         nullptr, ContentCoverParam(), targetNode);
     EXPECT_TRUE(overlayManager->RemoveModalInOverlay());
+}
+
+/**
+ * @tc.name: RemoveOverlayTest003
+ * @tc.desc:  Test OverlayManager::RemoveOverlay from atomicService.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, RemoveOverlayTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create atomicservice node.
+     */
+    auto atom = FrameNode::CreateFrameNode(V2::ATOMIC_SERVICE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto menuBarRow = FrameNode::CreateFrameNode(V2::APP_BAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto stageNode = FrameNode::CreateFrameNode(
+    V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    ASSERT_NE(stageNode, nullptr);
+    atom->AddChild(stageNode);
+    atom->AddChild(menuBarRow);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->SetInstallationFree(1);
+    /**
+     * @tc.steps: step2. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    atom->MountToParent(rootNode);
+    /**
+     * @tc.steps: step3. showpopup node.
+     */
+    overlayManager->ShowPopup(targetId, popupInfo);
+    /**
+     * @tc.steps: step4. remove popupNode from atomicService.
+     */
+    auto res = overlayManager->RemoveOverlay(false);
+    EXPECT_FALSE(res);
+    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
 }
 
 /**
@@ -2039,6 +1992,54 @@ HWTEST_F(OverlayTestNg, DialogTest008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BuildAIEntityMenu
+ * @tc.desc: Test OverlayManager::BuildAIEntityMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, BuildAIEntityMenu, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and overlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step2. create menuOptions and call BuildAIEntityMenu.
+     * @tc.expected: build AI entity menu successful.
+     */
+    std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
+    menuOptions.push_back(std::make_pair(MENU_CONTENT, []() {}));
+    EXPECT_NE(overlayManager->BuildAIEntityMenu(menuOptions), nullptr);
+}
+
+/**
+ * @tc.name: CreateAIEntityMenu
+ * @tc.desc: Test OverlayManager::CreateAIEntityMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, CreateAIEntityMenu, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node, target node and overlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step2. create menuOptions and call CreateAIEntityMenu.
+     * @tc.expected: create AI entity menu successful.
+     */
+    std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
+    menuOptions.push_back(std::make_pair(MENU_CONTENT, []() {}));
+    EXPECT_NE(overlayManager->CreateAIEntityMenu(menuOptions, targetNode), nullptr);
+}
+
+/**
  * @tc.name: ShowAIEntityMenu
  * @tc.desc: Test OverlayManager::ShowAIEntityMenu.
  * @tc.type: FUNC
@@ -2046,28 +2047,22 @@ HWTEST_F(OverlayTestNg, DialogTest008, TestSize.Level1)
 HWTEST_F(OverlayTestNg, ShowAIEntityMenu, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create target node and toast node.
+     * @tc.steps: step1. create root node, target node and overlayManager.
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    auto baseFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-    auto uiExtId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto uiExtNode = FrameNode::CreateFrameNode(
-        V2::DIALOG_ETS_TAG, uiExtId, AceType::MakeRefPtr<DialogPattern>(AceType::MakeRefPtr<DialogTheme>(), nullptr));
-    ASSERT_NE(uiExtNode, nullptr);
-
-    std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
-    menuOptions.push_back(std::make_pair(MENU_CONTENT, []() {}));
-
-    /**
-     * @tc.steps: step2. create overlayManager and call ShowAIEntityMenu.
-     * @tc.expected: ShowAIEntityMenu return true.
-     */
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     ASSERT_NE(overlayManager, nullptr);
 
+    /**
+     * @tc.steps: step2. create menuOptions, handleRect and call CreateAIEntityMenu.
+     * @tc.expected: ShowAIEntityMenu return true.
+     */
+    std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
+    menuOptions.push_back(std::make_pair(MENU_CONTENT, []() {}));
     RectF handleRect(3.0, 3.0, 100.0f, 75.0f);
-    EXPECT_TRUE(overlayManager->ShowAIEntityMenu(menuOptions, handleRect, baseFrameNode));
+    EXPECT_TRUE(overlayManager->ShowAIEntityMenu(menuOptions, handleRect, targetNode));
 }
 
 /**

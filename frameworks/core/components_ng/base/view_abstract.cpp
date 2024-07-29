@@ -1297,6 +1297,17 @@ void ViewAbstract::AddDragFrameNodeToManager()
     dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 
+void ViewAbstract::AddDragFrameNodeToManager(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+
+    dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
+}
+
 void ViewAbstract::SetDraggable(bool draggable)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1332,9 +1343,63 @@ void ViewAbstract::SetOnDragStart(
     eventHub->SetOnDragStart(std::move(onDragStart));
 }
 
+void ViewAbstract::SetOnDragStart(FrameNode* frameNode,
+    std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->InitDragDropEvent();
+
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDragStart(std::move(onDragStart));
+}
+
+void ViewAbstract::SetOnDragEnter(FrameNode* frameNode,
+    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragEnter)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_ENTER, std::move(onDragEnter));
+
+    AddDragFrameNodeToManager(frameNode);
+}
+
+void ViewAbstract::SetOnDragMove(FrameNode* frameNode,
+    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragMove)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_MOVE, std::move(onDragMove));
+
+    AddDragFrameNodeToManager(frameNode);
+}
+
+void ViewAbstract::SetOnDragLeave(FrameNode* frameNode,
+    std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragLeave)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, std::move(onDragLeave));
+
+    AddDragFrameNodeToManager(frameNode);
+}
+
 void ViewAbstract::SetOnPreDrag(std::function<void(const PreDragStatus)>&& onPreDragFunc)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPreDrag(std::move(onPreDragFunc));
+}
+
+void ViewAbstract::SetOnPreDrag(FrameNode* frameNode, std::function<void(const PreDragStatus)>&& onPreDragFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPreDrag(std::move(onPreDragFunc));
 }
@@ -1385,6 +1450,29 @@ void ViewAbstract::SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragE
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, std::move(onDragEnd));
 
     AddDragFrameNodeToManager();
+}
+
+void ViewAbstract::SetOnDragEnd(
+    FrameNode* frameNode, std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, std::move(onDragEnd));
+
+    AddDragFrameNodeToManager(frameNode);
+}
+
+void ViewAbstract::SetOnDrop(
+    FrameNode* frameNode, std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDrop)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_DROP, std::move(onDrop));
+
+    AddDragFrameNodeToManager(frameNode);
 }
 
 void ViewAbstract::SetAlign(Alignment alignment)
@@ -2783,15 +2871,18 @@ void ViewAbstract::ClearWidthOrHeight(FrameNode *frameNode, bool isWidth)
     layoutProperty->ClearUserDefinedIdealSize(isWidth, !isWidth);
 }
 
-void ViewAbstract::SetPosition(FrameNode *frameNode, const OffsetT<Dimension>& value)
+void ViewAbstract::SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value)
 {
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, PositionEdges, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Position, value, frameNode);
 }
 
 void ViewAbstract::SetPositionEdges(FrameNode* frameNode, const EdgesParam& value)
 {
-    ACE_RESET_RENDER_CONTEXT(RenderContext, Position);
-    ACE_UPDATE_RENDER_CONTEXT(PositionEdges, value);
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Position, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(PositionEdges, value, frameNode);
 }
 
 void ViewAbstract::ResetPosition(FrameNode* frameNode)
@@ -3121,13 +3212,15 @@ void ViewAbstract::SetDisplayIndex(FrameNode* frameNode, int32_t value)
 void ViewAbstract::SetOffset(FrameNode* frameNode, const OffsetT<Dimension>& value)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, OffsetEdges, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Offset, value, frameNode);
 }
 
 void ViewAbstract::SetOffsetEdges(FrameNode* frameNode, const EdgesParam& value)
 {
-    ACE_RESET_RENDER_CONTEXT(RenderContext, Offset);
-    ACE_UPDATE_RENDER_CONTEXT(OffsetEdges, value);
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Offset, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OffsetEdges, value, frameNode);
 }
 
 void ViewAbstract::MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& value)
@@ -4522,9 +4615,26 @@ void ViewAbstract::SetOnSizeChanged(
     frameNode->SetOnSizeChangeCallback(std::move(onSizeChanged));
 }
 
+void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->GetFocusBox().SetStyle(style);
+}
+
 void ViewAbstract::SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetEventStrictReportingEnabled(dragEventStrictReportingEnabled);
+}
+
+void ViewAbstract::SetDragEventStrictReportingEnabled(int32_t instanceId, bool dragEventStrictReportingEnabled)
+{
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);

@@ -140,6 +140,7 @@ public:
         gridLayoutInfo_.endMainLineIndex_ = 0;
         gridLayoutInfo_.ResetPositionFlags();
         gridLayoutInfo_.irregularItemsPosition_.clear();
+        gridLayoutInfo_.clearStretch_ = true;
     }
 
     void SetIrregular(bool value)
@@ -300,6 +301,8 @@ private:
     double GetNearestDistanceFromChildToCurFocusItemInMainAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     void ResetAllDirectionsStep();
+
+    std::string GetIrregularIndexesString() const;
 
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;

@@ -1205,7 +1205,9 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
                 reinterpret_cast<NativeReference*>(ref), context);
         }
     }
-    UpdateFontScale(context->GetConfiguration());
+    if (context) {
+        UpdateFontScale(context->GetConfiguration());
+    }
     return UIContentErrorCode::NO_ERRORS;
 }
 
@@ -1751,6 +1753,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 
     InitializeSafeArea(container);
     InitializeDisplayAvailableRect(container);
+    InitDragSummaryMap(container);
 
     // set container temp dir
     if (abilityContext) {
@@ -1839,6 +1842,14 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
         if (ret == Rosen::DMError::DM_OK) {
             pipeline->UpdateDisplayAvailableRect(ConvertDMRect2Rect(availableArea));
         }
+    }
+}
+
+void UIContentImpl::InitDragSummaryMap(const RefPtr<Platform::AceContainer>& container)
+{
+    auto pipeline = container->GetPipelineContext();
+    if (pipeline && container->IsUIExtensionWindow()) {
+        pipeline->RequireSummary();
     }
 }
 
@@ -2119,6 +2130,13 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
     LOGI("[%{public}s][%{public}s][%{public}d]: UIContentImpl: UpdateConfiguration called", bundleName_.c_str(),
         moduleName_.c_str(), instanceId_);
     CHECK_NULL_VOID(config);
+
+    auto dialogContainer = Platform::DialogContainer::GetContainer(instanceId_);
+    if (dialogContainer) {
+        UpdateDialogContainerConfig(config);
+        return;
+    }
+
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
@@ -2207,7 +2225,9 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
         if (pipelineContext) {
+            // KeyboardInset and cutoutInset depend on rootHeight, need calculate again
             pipelineContext->CheckAndUpdateKeyboardInset();
+            pipelineContext->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
         }
         SubwindowManager::GetInstance()->OnWindowSizeChanged(container->GetInstanceId(),
             Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())),
@@ -2405,6 +2425,7 @@ void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& contain
         aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
         aceResCfg.SetColorMode(SystemProperties::GetColorMode());
         aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
+        aceResCfg.SetColorModeIsSetByApp(true);
         dialogContainer->SetResourceConfiguration(aceResCfg);
     }
 }
@@ -2872,7 +2893,7 @@ bool UIContentImpl::DumpViewData(AbilityBase::ViewData& viewData, AbilityBase::A
 }
 
 bool UIContentImpl::DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
-    bool skipSubAutoFillContainer)
+    bool skipSubAutoFillContainer, bool needsRecordData)
 {
     CHECK_NULL_RETURN(viewDataWrap, false);
     auto context = context_.lock();
@@ -2900,7 +2921,7 @@ bool UIContentImpl::DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewD
     CHECK_NULL_RETURN(container, false);
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_RETURN(pipelineContext, false);
-    return pipelineContext->DumpPageViewData(node, viewDataWrap, skipSubAutoFillContainer);
+    return pipelineContext->DumpPageViewData(node, viewDataWrap, skipSubAutoFillContainer, needsRecordData);
 }
 
 void UIContentImpl::SearchElementInfoByAccessibilityId(
@@ -3422,13 +3443,36 @@ void UIContentImpl::SetStatusBarItemColor(uint32_t color)
     appBar->SetStatusBarItemColor(IsDarkColor(color));
 }
 
-void UIContentImpl::SetForceSplitEnable(bool isForceSplit)
+void UIContentImpl::SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
 {
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(context);
-    context->SetForceSplitEnable(isForceSplit);
+    context->SetForceSplitEnable(isForceSplit, homePage);
+}
+
+void UIContentImpl::UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
+{
+    CHECK_NULL_VOID(config);
+    auto container = Platform::DialogContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [weakContainer = WeakPtr<Platform::DialogContainer>(container), config, instanceId = instanceId_,
+            bundleName = bundleName_, moduleName = moduleName_]() {
+            auto container = weakContainer.Upgrade();
+            CHECK_NULL_VOID(container);
+            Platform::ParsedConfig parsedConfig;
+            parsedConfig.colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+            container->UpdateConfiguration(parsedConfig);
+            TAG_LOGI(AceLogTag::ACE_DIALOG,
+                "[%{public}d][%{public}s][%{public}s] UIContentImpl: UpdateDialogContainerConfig called End, "
+                "name:%{public}s",
+                instanceId, bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());
+        },
+        TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfiguration");
 }
 } // namespace OHOS::Ace

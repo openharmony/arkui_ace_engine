@@ -49,6 +49,8 @@ constexpr double DOUBLENESS = 2.0;
 constexpr Dimension OUT_RANGE_SPACE = 40.0_vp;
 constexpr Dimension MIN_BUTTON_FONT_SIZE = 9.0_vp;
 constexpr int32_t BUTTON_MAX_LINE = 2;
+constexpr float AGE_FONT_MAX_SIZE_SCALE = 2.0;
+
 OffsetF GetDisplayWindowRectOffset()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -80,6 +82,23 @@ Dimension GetMaxWith()
     return maxWidth;
 }
 
+double GetAgeFontSizeScale()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, 0.0);
+    auto fontSizeScale = pipeline->GetFontScale();
+    return fontSizeScale;
+}
+
+Dimension GetAgeFontSize(const std::optional<Dimension>& originalFontSize)
+{
+    auto fontSizeScale = GetAgeFontSizeScale();
+    auto fontSize = Dimension(originalFontSize->Value(), originalFontSize->Unit());
+    auto fontScale = fontSizeScale > AGE_FONT_MAX_SIZE_SCALE ? AGE_FONT_MAX_SIZE_SCALE : fontSizeScale;
+    fontSize.SetValue((originalFontSize->Value()) * fontScale);
+    return fontSize;
+}
+
 void UpdateTextProperties(const RefPtr<PopupParam>& param, const RefPtr<TextLayoutProperty>& textLayoutProps)
 {
     auto textColor = param->GetTextColor();
@@ -88,7 +107,11 @@ void UpdateTextProperties(const RefPtr<PopupParam>& param, const RefPtr<TextLayo
     }
     auto fontSize = param->GetFontSize();
     if (fontSize.has_value()) {
-        textLayoutProps->UpdateFontSize(fontSize.value());
+        if (!param->IsUseCustom()) {
+            textLayoutProps->UpdateFontSize(GetAgeFontSize(fontSize));
+        } else {
+            textLayoutProps->UpdateFontSize(fontSize.value());
+        }
     }
     auto fontWeight = param->GetFontWeight();
     if (fontWeight.has_value()) {
@@ -612,7 +635,13 @@ RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message, bool IsU
     auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     layoutProperty->UpdateContent(message);
     auto popupTheme = GetPopupTheme();
-    layoutProperty->UpdateFontSize(popupTheme->GetFontSize());
+    CHECK_NULL_RETURN(popupTheme, nullptr);
+    if (!IsUseCustom) {
+        auto fontSize = popupTheme->GetFontSize();
+        layoutProperty->UpdateFontSize(GetAgeFontSize(fontSize));
+    } else {
+        layoutProperty->UpdateFontSize(popupTheme->GetFontSize());
+    }
     if (IsUseCustom) {
         layoutProperty->UpdateTextColor(Color::BLACK);
     } else {
@@ -733,6 +762,14 @@ RefPtr<FrameNode> BubbleView::CreateButtons(const RefPtr<PopupParam>& param, int
     return layoutNode;
 }
 
+void UpdateButtonFontSize(RefPtr<TextLayoutProperty>& textLayoutProps)
+{
+    auto popupTheme = GetPopupTheme();
+    CHECK_NULL_VOID(popupTheme);
+    auto fontSize = popupTheme->GetButtonFontSize();
+    textLayoutProps->UpdateFontSize(GetAgeFontSize(fontSize));
+}
+
 RefPtr<FrameNode> BubbleView::CreateButton(
     ButtonProperties& buttonParam, int32_t popupId, int32_t targetId, const RefPtr<PopupParam>& param)
 {
@@ -759,7 +796,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(
 
     auto buttonTextNode = BubbleView::CreateMessage(buttonParam.value, isUseCustom);
     auto textLayoutProperty = buttonTextNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateFontSize(popupTheme->GetButtonFontSize());
+    UpdateButtonFontSize(textLayoutProperty);
     textLayoutProperty->UpdateMaxLines(BUTTON_MAX_LINE);
     textLayoutProperty->UpdateAdaptMaxFontSize(popupTheme->GetButtonFontSize());
     textLayoutProperty->UpdateAdaptMinFontSize(MIN_BUTTON_FONT_SIZE);

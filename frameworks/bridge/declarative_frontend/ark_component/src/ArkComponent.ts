@@ -3023,6 +3023,21 @@ class FocusScopePriorityModifier extends ModifierWithKey<ArkFocusScopePriority> 
   }
 }
 
+class FocusBoxModifier extends ModifierWithKey<FocusBoxStyle> {
+  constructor(value: FocusBoxStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('focusBox');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetFocusBox(node);
+    } else {
+      getUINativeModule().common.setFocusBox(node, this.value?.margin,
+        this.value?.strokeWidth, this.value?.strokeColor);
+    }
+  }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType): boolean => typeof val === 'string';
@@ -3103,10 +3118,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       (this._modifiersWithKeys as ObservedMap).setFrameNode(true);
     } else if (classType === ModifierType.EXPOSE_MODIFIER || classType === ModifierType.STATE) {
       this._modifiersWithKeys = new ObservedMap();
+      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     } else {
       this._modifiersWithKeys = new Map();
+      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     }
-    this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     this._nativePtrChanged = false;
   }
 
@@ -3139,7 +3155,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     if (this.nativePtr !== instance.nativePtr) {
       this.nativePtr = instance.nativePtr;
       this._nativePtrChanged = true;
-      this._weakPtr = instance._weakPtr;
+      if (instance._weakPtr) {
+        this._weakPtr = instance._weakPtr;
+      } else {
+        this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(this.nativePtr);
+      }
     }
   }
 
@@ -4386,6 +4406,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
   pixelRound(value:PixelRoundPolicy):this {
     modifierWithKey(this._modifiersWithKeys, PixelRoundModifier.identity, PixelRoundModifier, value);
+  }
+  focusBox(value:FocusBoxStyle):this {
+    modifierWithKey(this._modifiersWithKeys, FocusBoxModifier.identity, FocusBoxModifier, value);
   }
 }
 

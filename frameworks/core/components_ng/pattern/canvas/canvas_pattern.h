@@ -157,6 +157,7 @@ public:
     void SetTextDirection(TextDirection direction);
     void SetFilterParam(const std::string& filterStr);
     TransformParam GetTransform() const;
+    void SetDensity(double density);
 
     void SaveLayer();
     void RestoreLayer();
@@ -165,8 +166,7 @@ public:
     void StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed);
     void StopImageAnalyzer();
     void Reset();
-
-    void DumpAdvanceInfo() override;
+    void DumpInfo() override;
 
 private:
     void OnAttachToFrameNode() override;

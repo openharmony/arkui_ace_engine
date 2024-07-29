@@ -194,6 +194,11 @@ private:
     RectF GetFirstPaintRect() const;
     RectF GetSecondPaintRect() const;
 
+    float GetDrawHandleRadius()
+    {
+        return handleRadius_->Get() + handleStrokeWidth_->Get() / 2.0f;
+    }
+
     RefPtr<PropertyBool> inShowArea_;
     RefPtr<PropertyBool> handleReverse_;
     RefPtr<PropertyBool> isSingleHandle_;

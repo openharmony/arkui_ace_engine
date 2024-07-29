@@ -48,8 +48,8 @@ const X_OFF_SET = '0vp';
 const Y_OFF_SET = '2.75vp';
 const Y_BOTTOM_OFF_SET = '-1.25vp';
 const Y_BASE_PLATE_OFF_SET = '1.5vp';
-const COLOR_IMAGE_EDIT = '#FFFFFF';
 const COLOR_IMAGE_ROW = '#00000000';
+const COLOR_IMAGE_EDIT = '#FFFFFF';
 const COLOR_SELECT = '#1A0A59F7';
 const SHADOW_COLOR = '#00001E';
 const GRAG_POP_UP_HEIGHT = '48';
@@ -2186,13 +2186,7 @@ class ListNodeDataSource extends BasicDataSource {
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__',
             });
-            f15.setPopUpTextColor({
-                'id': -1,
-                'type': 10001,
-                params: ['sys.color.ohos_id_color_text_secondary'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__',
-            });
+            f15.setPopUpTextColor(this.treeViewTheme.secondaryTitleFontColor);
         }
         else if (b15 === PopUpType.WARNINGS) {
             if (f15.getNodeItem().inputText !== null) {

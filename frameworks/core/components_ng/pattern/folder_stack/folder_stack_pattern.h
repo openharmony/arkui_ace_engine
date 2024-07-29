@@ -113,6 +113,11 @@ public:
         return lastTime_;
     }
 
+    bool HasFoldStatusDelayTask() const
+    {
+        return hasFoldStatusDelayTask_;
+    }
+
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     void RegisterFoldStatusListener();
@@ -138,6 +143,7 @@ private:
     FoldStatus lastFoldStatus_ = FoldStatus::UNKNOWN;
     CancelableCallback<void()> foldStatusDelayTask_;
     std::time_t lastTime_ = std::time(0);
+    bool hasFoldStatusDelayTask_ = false;
 };
 } // namespace OHOS::Ace::NG
 

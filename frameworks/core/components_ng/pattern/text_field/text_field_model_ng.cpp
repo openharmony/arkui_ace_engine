@@ -361,6 +361,7 @@ void TextFieldModelNG::SetMaxLength(uint32_t value)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    CHECK_NULL_VOID(pattern->HasFocus());
     pattern->UpdateShowCountBorderStyle();
 }
 
@@ -1044,6 +1045,7 @@ void TextFieldModelNG::SetMaxLength(FrameNode* frameNode, uint32_t value)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    CHECK_NULL_VOID(pattern->HasFocus());
     pattern->UpdateShowCountBorderStyle();
 }
 

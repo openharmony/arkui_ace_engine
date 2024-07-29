@@ -66,9 +66,9 @@ void NapiThrow(napi_env env, const std::string& message, int32_t errCode)
     napi_throw(env, error);
 }
 
-void ReplaceHolder(std::string& originStr, const std::vector<std::string>& params, int32_t containCount)
+void ReplaceHolder(std::string& originStr, const std::vector<std::string>& params, uint32_t containCount)
 {
-    auto size = static_cast<int32_t>(params.size());
+    auto size = static_cast<uint32_t>(params.size());
     if (containCount == size) {
         return;
     }
@@ -77,7 +77,7 @@ void ReplaceHolder(std::string& originStr, const std::vector<std::string>& param
     std::smatch matches;
     bool shortHolderType = false;
     bool firstMatch = true;
-    int searchTime = 0;
+    uint32_t searchTime = 0;
     while (std::regex_search(start, end, matches, RESOURCE_APP_STRING_PLACEHOLDER)) {
         std::string pos = matches[2];
         std::string type = matches[4];
@@ -92,14 +92,22 @@ void ReplaceHolder(std::string& originStr, const std::vector<std::string>& param
         }
 
         std::string replaceContentStr;
-        std::string::size_type index;
+        std::string::size_type index = 0;
         if (shortHolderType) {
-            index = static_cast<uint32_t>(searchTime + containCount);
+            index = static_cast<std::string::size_type>(searchTime + containCount);
         } else {
-            index = static_cast<uint32_t>(StringUtils::StringToInt(pos) - 1 + containCount);
+            int32_t indexTmp = StringUtils::StringToInt(pos) + static_cast<int32_t>(containCount) - 1;
+            if (indexTmp >= 0) {
+                index = static_cast<std::string::size_type>(indexTmp);
+            } else {
+                LOGE("indexTmp err:%{public}d", indexTmp);
+            }
         }
-        replaceContentStr = params[index];
-
+        if (static_cast<uint32_t>(index) < size) {
+            replaceContentStr = params[index];
+        } else {
+            LOGE("index = %{public}d size = %{public}d", static_cast<uint32_t>(index), size);
+        }
         originStr.replace(matches[0].first - originStr.begin(), matches[0].length(), replaceContentStr);
         start = originStr.begin() + matches.prefix().length() + replaceContentStr.length();
         end = originStr.end();

@@ -17,9 +17,11 @@
 
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/canvas/custom_paint_util.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
+constexpr size_t MAX_SIZE = 10;
 CanvasModifier::CanvasModifier()
 {
     needRender_ = AceType::MakeRefPtr<PropertyBool>(true);
@@ -41,24 +43,29 @@ void CanvasModifier::onDraw(DrawingContext& drawingContext)
     drawCmdSize_.SetHeight(drawCmdList->GetHeight());
     rsDrawCmdList->SetWidth(drawCmdList->GetWidth());
     rsDrawCmdList->SetHeight(drawCmdList->GetHeight());
+
+    // Dump recent ten records
+    CanvasModifierDump dumpInfo;
+    dumpInfo.timestamp = GetCurrentTimestamp();
+    dumpInfo.width = drawCmdList->GetWidth();
+    dumpInfo.height = drawCmdList->GetHeight();
+    dumpInfo.opItemSize = drawCmdList->GetOpItemSize();
+    if (dumpInfos_.size() < MAX_SIZE) {
+        dumpInfos_.push_back(dumpInfo);
+    } else {
+        dumpInfos_.erase(dumpInfos_.begin());
+        dumpInfos_.push_back(dumpInfo);
+    }
     if (SystemProperties::GetCanvasDebugMode() > 0) {
         TAG_LOGI(AceLogTag::ACE_CANVAS,
             "Canvas Size: [%{public}d, %{public}d]->[%{public}d, %{public}d]; Command Size: %{public}zu.",
-            rsDrawCmdList->GetHeight(), rsDrawCmdList->GetHeight(), drawCmdList->GetWidth(), drawCmdList->GetHeight(),
+            rsDrawCmdList->GetWidth(), rsDrawCmdList->GetHeight(), drawCmdList->GetWidth(), drawCmdList->GetHeight(),
             drawCmdList->GetOpItemSize());
     }
     ResetSurface();
     CHECK_EQUAL_VOID(drawCmdList->IsEmpty(), true);
     drawCmdList->Playback(recordingCanvas);
     rsRecordingCanvas_->Clear();
-}
-
-std::string CanvasModifier::GetDumpInfo()
-{
-    return std::string("recordingCanvas size: ")
-        .append(recordingCanvasDrawSize_.ToString())
-        .append(", rsRecordingCanvas size: ")
-        .append(drawCmdSize_.ToString());
 }
 
 void CanvasModifier::ResetSurface()
@@ -68,5 +75,17 @@ void CanvasModifier::ResetSurface()
     CHECK_NULL_VOID(renderContext);
     renderContext->ResetSurface(static_cast<int>(drawCmdSize_.Width()), static_cast<int>(drawCmdSize_.Height()));
     needResetSurface_ = false;
+}
+
+std::string CanvasModifier::GetDumpInfo()
+{
+    std::string ret;
+    for (CanvasModifierDump& dumpInfo : dumpInfos_) {
+        ret.append(ConvertTimestampToStr(dumpInfo.timestamp));
+        ret.append(" Canvas Size: [" + std::to_string(dumpInfo.width) + ", " + std::to_string(dumpInfo.height) +
+                   "], Command Size: " + std::to_string(dumpInfo.opItemSize) + "; ");
+    }
+    dumpInfos_.clear();
+    return ret;
 }
 } // namespace OHOS::Ace::NG

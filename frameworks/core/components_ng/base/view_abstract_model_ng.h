@@ -1025,6 +1025,20 @@ public:
         ViewAbstract::SetOnDragStart(std::move(dragStart));
     }
 
+    static void SetOnDragStart(FrameNode* frameNode, NG::OnDragStartFunc&& onDragStart)
+    {
+        auto dragStart = [dragStartFunc = std::move(onDragStart)](const RefPtr<OHOS::Ace::DragEvent>& event,
+                             const std::string& extraParams) -> DragDropInfo {
+            auto dragInfo = dragStartFunc(event, extraParams);
+            DragDropInfo info;
+            info.extraInfo = dragInfo.extraInfo;
+            info.pixelMap = dragInfo.pixelMap;
+            info.customNode = AceType::DynamicCast<UINode>(dragInfo.node);
+            return info;
+        };
+        ViewAbstract::SetOnDragStart(frameNode, std::move(dragStart));
+    }
+
     void SetOnPreDrag(NG::OnPreDragFunc&& onPreDrag) override
     {
         ViewAbstract::SetOnPreDrag(std::move(onPreDrag));

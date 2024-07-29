@@ -102,6 +102,12 @@ ArkUITransitionEffectOption* ConvertToEffectOption(ArkUI_TransitionEffect* effec
         toEffectOption->animation.duration = effectOption->animation->duration;
         toEffectOption->animation.tempo = effectOption->animation->tempo;
         toEffectOption->animation.curve = effectOption->animation->curve;
+        if (effectOption->animation->iCurve) {
+            toEffectOption->animation.iCurve = effectOption->animation->iCurve->curve;
+            toEffectOption->animation.curveType = effectOption->animation->iCurve->type;
+        } else {
+            toEffectOption->animation.iCurve = nullptr;
+        }
         toEffectOption->animation.delay = effectOption->animation->delay;
         toEffectOption->animation.iterations = effectOption->animation->iterations;
         toEffectOption->animation.playMode = effectOption->animation->playMode;

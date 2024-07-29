@@ -95,6 +95,9 @@ class BuilderNode {
     recycle() {
         this._JSBuilderNode.recycle();
     }
+    updateConfiguration() {
+        this._JSBuilderNode.updateConfiguration();
+    }
 }
 class JSBuilderNode extends BaseNode {
     constructor(uiContext, options) {
@@ -206,6 +209,12 @@ class JSBuilderNode extends BaseNode {
         Array.from(this.updateFuncByElmtId.keys()).sort((a, b) => {
             return (a < b) ? -1 : (a > b) ? 1 : 0;
         }).forEach(elmtId => this.UpdateElement(elmtId));
+        for (const child of this.childrenWeakrefMap_.values()) {
+            const childView = child.deref();
+            if (childView) {
+                childView.forceCompleteRerender(true);
+            }
+        }
         this.updateEnd();
         __JSScopeUtil__.restoreInstanceId();
     }
@@ -887,8 +896,8 @@ class FrameNode {
         __JSScopeUtil__.restoreInstanceId();
         this._childList.clear();
     }
-    getChild(index) {
-        const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index);
+    getChild(index, isExpanded) {
+        const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index, isExpanded);
         const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
@@ -899,8 +908,8 @@ class FrameNode {
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
-    getFirstChild() {
-        const result = getUINativeModule().frameNode.getFirst(this.getNodePtr());
+    getFirstChild(isExpanded) {
+        const result = getUINativeModule().frameNode.getFirst(this.getNodePtr(), isExpanded);
         const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
@@ -923,8 +932,8 @@ class FrameNode {
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
-    getNextSibling() {
-        const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr());
+    getNextSibling(isExpanded) {
+        const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr(), isExpanded);
         const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
@@ -947,8 +956,8 @@ class FrameNode {
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
-    getPreviousSibling() {
-        const result = getUINativeModule().frameNode.getPreviousSibling(this.getNodePtr());
+    getPreviousSibling(isExpanded) {
+        const result = getUINativeModule().frameNode.getPreviousSibling(this.getNodePtr(), isExpanded);
         const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
@@ -971,8 +980,8 @@ class FrameNode {
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
-    getChildrenCount() {
-        return getUINativeModule().frameNode.getChildrenCount(this.nodePtr_);
+    getChildrenCount(isExpanded) {
+        return getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
     }
     getPositionToParent() {
         const position = getUINativeModule().frameNode.getPositionToParent(this.getNodePtr());
@@ -2275,6 +2284,9 @@ class ComponentContent extends Content {
             return result;
         }
         return node;
+    }
+    updateConfiguration() {
+        this.builderNode_.updateConfiguration();
     }
 }
 /*

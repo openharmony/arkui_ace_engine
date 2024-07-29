@@ -662,7 +662,7 @@ void JSGrid::SetFriction(const JSCallbackInfo& info)
 
 void JSGrid::SetAlignItems(const JSCallbackInfo& info)
 {
-    if (info.Length() > 0) {
+    if (info.Length() < 1) {
         GridModel::GetInstance()->SetAlignItems(GridItemAlignment::DEFAULT);
         return;
     }

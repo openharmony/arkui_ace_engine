@@ -54,7 +54,13 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_TEXT_OVERLAY,
     THEME_PATTERN_CONTAINER_MODAL
 };
-const std::string RESOURCE_TOKEN_PATTERN = "\\[.+?\\]\\.(\\S+?\\.\\S+)";
+
+const char* PRELOAD_LIST[] = {
+    THEME_BLUR_STYLE_COMMON,
+    THEME_PATTERN_ICON
+};
+
+constexpr char RESOURCE_TOKEN_PATTERN[] = "\\[.+?\\]\\.(\\S+?\\.\\S+)";
 
 bool IsDirExist(const std::string& path)
 {
@@ -90,7 +96,7 @@ RefPtr<ResourceAdapter> ResourceAdapter::CreateV2()
 RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
     const std::string& bundleName, const std::string& moduleName)
 {
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, nullptr);
     auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
     CHECK_NULL_RETURN(aceContainer, nullptr);
@@ -198,7 +204,32 @@ void ResourceAdapterImplV2::UpdateConfig(const ResourceConfiguration& config, bo
 RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
 {
     CheckThemeId(themeId);
+    auto manager = GetResourceManager();
     auto theme = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
+    CHECK_NULL_RETURN(manager, theme);
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, theme);
+
+    auto task = [themeId, manager, resourceThemeStyle = WeakPtr<ResourceThemeStyle>(theme),
+        weak = WeakClaim(this)]() -> void {
+        auto themeStyle = resourceThemeStyle.Upgrade();
+        CHECK_NULL_VOID(themeStyle);
+        auto adapter = weak.Upgrade();
+        CHECK_NULL_VOID(adapter);
+
+        for (size_t i = 0; i < sizeof(PRELOAD_LIST) / sizeof(PRELOAD_LIST[0]); ++i) {
+            std::string patternName = PRELOAD_LIST[i];
+            themeStyle->checkThemeStyleVector.push_back(patternName);
+            auto style = adapter->GetPatternByName(patternName);
+            if (style) {
+                ResValueWrapper value = { .type = ThemeConstantsType::PATTERN, .value = style };
+                themeStyle->SetAttr(patternName, value);
+            }
+        }
+
+        themeStyle->SetPromiseValue();
+    };
+    taskExecutor->PostTask(task, TaskExecutor::TaskType::BACKGROUND, "ArkUILoadTheme");
     constexpr char OHFlag[] = "ohos_"; // fit with resource/base/theme.json and pattern.json
     {
         auto manager = GetResourceManager();
@@ -224,6 +255,13 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
     theme->ParseContent();
     theme->patternAttrs_.clear();
     return theme;
+}
+
+RefPtr<TaskExecutor> ResourceAdapterImplV2::GetTaskExecutor()
+{
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, nullptr);
+    return context->GetTaskExecutor();
 }
 
 RefPtr<ThemeStyle> ResourceAdapterImplV2::GetPatternByName(const std::string& patternName)

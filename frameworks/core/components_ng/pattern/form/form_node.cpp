@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/form/form_node.h"
 
+#include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/components/form/sub_container.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
@@ -46,6 +47,10 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
     const WeakPtr<FrameNode>& node)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    if (pointerEvent == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "pointerEvent is nullptr");
+        return nullptr;
+    }
 
     OHOS::MMI::PointerEvent::PointerItem item;
     PointF transformPoint(point.x, point.y);
@@ -248,11 +253,11 @@ RefPtr<FormNode> FormNode::GetOrCreateFormNode(
     return formNode;
 }
 
-void FormNode::OnDetachFromMainTree(bool recursive)
+void FormNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 {
     auto eventHub = GetEventHub<FormEventHub>();
     eventHub->FireOnCache();
-    FrameNode::OnDetachFromMainTree(recursive);
+    FrameNode::OnDetachFromMainTree(recursive, context);
 }
 
 void FormNode::InitializeFormAccessibility()

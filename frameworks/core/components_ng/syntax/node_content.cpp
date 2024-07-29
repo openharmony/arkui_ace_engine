@@ -24,11 +24,10 @@ void NodeContent::AttachToNode(UINode* node)
         DetachFromNode();
     }
     nodeSlot_ = WeakClaim(node);
-    auto temp = std::move(children_);
-    children_.clear();
-    for (const auto& child : temp) {
+    for (const auto& child : children_) {
         node->AddChild(child);
     }
+    node->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     if (node->IsOnMainTree()) {
         OnAttachToMainTree();
     }
@@ -54,7 +53,6 @@ void NodeContent::AddNode(UINode* node, int32_t position)
     if (slot) {
         slot->AddChild(child, position);
         slot->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-        return;
     }
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
@@ -73,7 +71,6 @@ void NodeContent::RemoveNode(UINode* node)
     if (slot) {
         slot->RemoveChild(nodeRef);
         slot->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-        return;
     }
     auto it = std::find(children_.begin(), children_.end(), nodeRef);
     if (it == children_.end()) {

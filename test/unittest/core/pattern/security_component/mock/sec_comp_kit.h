@@ -101,6 +101,11 @@ public:
     {
         return true;
     };
+
+    static bool IsSystemAppCalling()
+    {
+        return false;
+    };
 };
 }  // namespace SecurityComponent
 }  // namespace Security

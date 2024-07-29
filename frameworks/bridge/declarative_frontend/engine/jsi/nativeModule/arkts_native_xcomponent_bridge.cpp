@@ -116,7 +116,7 @@ ArkUINativeModuleValue XComponentBridge::SetXComponentInitialize(ArkUIRuntimeCal
         return panda::JSValueRef::Undefined(vm);
     }
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
-    Framework::JSRef<Framework::JSVal> args = info[5];
+    Framework::JSRef<Framework::JSVal> args = info[ARG_CONTROLLER];
     Framework::JSRef<Framework::JSObject> controllerObj;
     std::shared_ptr<InnerXComponentController> xcomponentController = nullptr;
     if (args->IsObject()) {

@@ -361,10 +361,7 @@ void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     for (int32_t i = info_->startIndex_; i < jumpIdx; ++i) {
         auto seg = info_->GetSegment(i);
-        if (sections_->GetSectionInfo()[seg].onGetItemMainSizeByIndex) {
-            MeasureItem(
-                props, i, info_->itemInfos_[i].crossIdx, WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, i));
-        }
+        MeasureItem(props, i, info_->itemInfos_[i].crossIdx, WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, i));
     }
 }
 

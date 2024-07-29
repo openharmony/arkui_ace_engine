@@ -585,7 +585,7 @@ public:
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::string content);
-    bool InitValueText(const std::string& content);
+    bool InitValueText(std::string content);
 
     void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);
@@ -597,6 +597,7 @@ public:
     }
     void NotifyKeyboardClosedByUser() override
     {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosedByUser");
         isKeyboardClosedByUser_ = true;
         FocusHub::LostFocusToViewRoot();
         isKeyboardClosedByUser_ = false;
@@ -606,6 +607,7 @@ public:
 
     void NotifyKeyboardClosed() override
     {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosed");
         if (HasFocus() && !(customKeyboard_ || customKeyboardBuilder_)) {
             FocusHub::LostFocusToViewRoot();
         }
@@ -853,11 +855,6 @@ public:
     void HandleBlurEvent();
     void HandleFocusEvent();
     void ProcessFocusStyle();
-    void SetFocusStyle();
-    void ClearFocusStyle();
-    void AddIsFocusActiveUpdateEvent();
-    void RemoveIsFocusActiveUpdateEvent();
-    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     bool OnBackPressed() override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
@@ -996,7 +993,6 @@ public:
     void SetTextInputFlag(bool isTextInput)
     {
         isTextInput_ = isTextInput;
-        SetTextFadeoutCapacity(isTextInput_);
     }
 
     void SetSingleLineHeight(float height)
@@ -1094,7 +1090,7 @@ public:
 
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
-    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
+    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) override;
@@ -1124,7 +1120,7 @@ public:
     }
 
     virtual RefPtr<FocusHub> GetFocusHub() const;
-    void UpdateCaretInfoToController();
+    void UpdateCaretInfoToController(bool forceUpdate = false);
     void OnObscuredChanged(bool isObscured);
     const RefPtr<TextInputResponseArea>& GetResponseArea()
     {
@@ -1300,15 +1296,6 @@ public:
         return keyboardAvoidance_;
     }
 
-    void SetTextFadeoutCapacity(bool enabled)
-    {
-        haveTextFadeoutCapacity_ = enabled;
-    }
-    bool GetTextFadeoutCapacity()
-    {
-        return haveTextFadeoutCapacity_;
-    }
-
     void SetShowKeyBoardOnFocus(bool value);
     bool GetShowKeyBoardOnFocus()
     {
@@ -1371,6 +1358,16 @@ public:
     {
         isTextChangedAtCreation_ = changed;
     }
+
+    bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const override;
+
+    RectF ExpandDefaultResponseRegion(RectF& rect) override;
+
+    void UpdateParentGlobalOffset()
+    {
+        parentGlobalOffset_ = GetPaintRectGlobalOffset();
+    }
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override
@@ -1437,6 +1434,7 @@ private:
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
+    void ShowSelectOverlayForLongPress(bool shouldProcessOverlayAfterLayout);
     bool CanChangeSelectState();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void CursorMoveOnClick(const Offset& offset);
@@ -1602,6 +1600,7 @@ private:
 
     bool GetTouchInnerPreviewText(const Offset& offset) const;
     bool IsShowMenu(const std::optional<SelectionOptions>& options);
+    bool IsContentRectNonPositive();
 
     RectF frameRect_;
     RectF textRect_;
@@ -1748,10 +1747,9 @@ private:
     RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
     RefPtr<TextInputResponseArea> cleanNodeResponseArea_;
-    std::string lastAutoFillPasswordTextValue_;
+    std::string lastAutoFillTextValue_;
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
-    std::function<void(bool)> isFocusActiveUpdateEvent_;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
     bool isTouchCaret_ = false;
     bool needSelectAll_ = false;
@@ -1776,11 +1774,6 @@ private:
     bool textAreaBlurOnSubmit_ = false;
     bool isDetachFromMainTree_ = false;
 
-    bool haveTextFadeoutCapacity_ = false;
-
-    bool isFocusBGColorSet_ = false;
-    bool isFocusTextColorSet_ = false;
-    bool isFocusPlaceholderColorSet_ = false;
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewText_ = false;

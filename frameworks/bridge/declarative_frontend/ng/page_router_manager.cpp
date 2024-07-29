@@ -627,7 +627,18 @@ int32_t PageRouterManager::GetCurrentPageIndex() const
         return static_cast<int32_t>(restorePageStack_.size()) + 1;
     } else {
         // Page has been inserted into top position of pageRouterStack_.
-        return static_cast<int32_t>(restorePageStack_.size() + pageRouterStack_.size());
+        auto index = static_cast<int32_t>(restorePageStack_.size() + pageRouterStack_.size());
+        if (isNewPageReplacing_) {
+            /**
+             * example:
+             *  stack bottom -> stack top
+             *  [1]PageA -> [2]PageB
+             *   call router.replace(PageC)
+             *   then we need keep index of PageC same with PageB, that is 2
+             */
+            index--;
+        }
+        return index;
     }
 }
 
@@ -1388,7 +1399,7 @@ void PageRouterManager::BackToIndexCheckAlert(int32_t index, const std::string& 
 }
 
 void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, bool needHideLast, bool needTransition,
-    bool isPush)
+    bool  /*isPush*/)
 {
     ACE_SCOPED_TRACE_COMMERCIAL("load page: %s(id:%d)", target.url.c_str(), pageId);
     CHECK_RUN_ON(JS);
@@ -1399,7 +1410,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     }
 
     pageRouterStack_.emplace_back(pageNode);
-    if (!OnPageReady(pageNode, needHideLast, needTransition, false, 0, isPush)) {
+    if (!OnPageReady(pageNode, needHideLast, needTransition)) {
         pageRouterStack_.pop_back();
         LOGW("LoadPage OnPageReady Failed");
         return;
@@ -1885,7 +1896,7 @@ void PageRouterManager::PopPageToIndex(int32_t index, const std::string& params,
 }
 
 bool PageRouterManager::OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition,
-    bool isCardRouter, int64_t cardId, bool isPush)
+    bool isCardRouter, int64_t cardId)
 {
     Recorder::NodeDataCache::Get().OnPageReady();
     auto container = Container::Current();
@@ -1903,7 +1914,7 @@ bool PageRouterManager::OnPageReady(const RefPtr<FrameNode>& pageNode, bool need
     auto context = DynamicCast<NG::PipelineContext>(pipeline);
     auto stageManager = context ? context->GetStageManager() : nullptr;
     if (stageManager) {
-        return stageManager->PushPage(pageNode, needHideLast, needTransition, isPush);
+        return stageManager->PushPage(pageNode, needHideLast, needTransition);
     }
     return false;
 }
@@ -2101,11 +2112,15 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
     pageRouterStack_.emplace_back(WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(popNode)));
     popNode->MovePosition(GetLastPageIndex());
     for (auto iter = lastIter; iter != pageRouterStack_.end(); ++iter, ++popIndex) {
-        auto pageNode = iter->Upgrade();
-        if (!pageNode) {
+        auto page = iter->Upgrade();
+        if (!page) {
             continue;
         }
-        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        if (page == popNode) {
+            // do not change index of page that will be replaced.
+            continue;
+        }
+        auto pagePattern = page->GetPattern<NG::PagePattern>();
         pagePattern->GetPageInfo()->SetPageIndex(popIndex + 1);
     }
 #if defined(ENABLE_SPLIT_MODE)

@@ -1215,8 +1215,10 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubNodeTest003, TestSize.Level1)
      * @tc.steps: step2. Create touchEventFunc and call SetOnTouchEvent.
      * @tc.expected: TouchEventActuator_ is nullptr.
      */
-    gestureEventHub->touchEventActuator_ = nullptr;
     TouchEventFunc touchEventFunc = [](TouchEventInfo& info) {};
+    gestureEventHub->touchEventActuator_ = AceType::MakeRefPtr<TouchEventActuator>();
+    gestureEventHub->SetOnTouchEvent(std::move(touchEventFunc));
+    gestureEventHub->touchEventActuator_ = nullptr;
     gestureEventHub->SetOnTouchEvent(std::move(touchEventFunc));
     gestureEventHub->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
     gestureEventHub->ClearJSFrameNodeOnTouch();

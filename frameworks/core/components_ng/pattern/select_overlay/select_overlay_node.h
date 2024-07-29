@@ -60,7 +60,7 @@ public:
 
     void UpdateToolBar(bool menuItemChanged, bool noAnimation = false);
 
-    void UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>& info);
+    void UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>& info, bool noAnimation = false);
 
     void SetSelectInfo(const std::string& selectInfo)
     {
@@ -74,7 +74,7 @@ public:
 
     void ChangeToolBar(bool isUseExtensionMenu);
 
-    void MoreOrBackAnimation(bool isMore);
+    void MoreOrBackAnimation(bool isMore, bool noAnimation = false);
 
     bool IsInSelectedOrSelectOverlayArea(const PointF& point);
 
@@ -93,6 +93,7 @@ public:
     void ShowSelectOverlay(bool animation);
 
     void HideSelectOverlay(const std::function<void()>& callback);
+    void HideOrShowCirclesAndBackArrow(FrameNodeType type, float value);
 
     void SwitchToOverlayMode();
 
@@ -125,8 +126,8 @@ private:
     void CreatExtensionMenu(std::vector<OptionParam>&& params);
     void GetDefaultButtonAndMenuWidth(float& maxWidth);
 
-    void MoreAnimation();
-    void BackAnimation();
+    void MoreAnimation(bool noAnimation);
+    void BackAnimation(bool noAnimation);
 
     void DispatchVisibleState(FrameNodeType type, FrameNodeTrigger trigger);
     void DispatchVisibleToGoneState(FrameNodeType type, FrameNodeTrigger trigger);

@@ -262,8 +262,8 @@ class FrameNode {
     __JSScopeUtil__.restoreInstanceId();
     this._childList.clear();
   }
-  getChild(index: number): FrameNode | null {
-    const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index);
+  getChild(index: number, isExpanded?: boolean): FrameNode | null {
+    const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index, isExpanded);
     const nodeId = result?.nodeId;
     if (nodeId === undefined || nodeId === -1) {
       return null;
@@ -275,8 +275,8 @@ class FrameNode {
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
   }
 
-  getFirstChild(): FrameNode | null {
-    const result = getUINativeModule().frameNode.getFirst(this.getNodePtr());
+  getFirstChild(isExpanded?: boolean): FrameNode | null {
+    const result = getUINativeModule().frameNode.getFirst(this.getNodePtr(), isExpanded);
     const nodeId = result?.nodeId;
     if (nodeId === undefined || nodeId === -1) {
       return null;
@@ -301,8 +301,8 @@ class FrameNode {
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
   }
 
-  getNextSibling(): FrameNode | null {
-    const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr());
+  getNextSibling(isExpanded?: boolean): FrameNode | null {
+    const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr(), isExpanded);
     const nodeId = result?.nodeId;
     if (nodeId === undefined || nodeId === -1) {
       return null;
@@ -327,8 +327,8 @@ class FrameNode {
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
   }
 
-  getPreviousSibling(): FrameNode | null {
-    const result = getUINativeModule().frameNode.getPreviousSibling(this.getNodePtr());
+  getPreviousSibling(isExpanded?: boolean): FrameNode | null {
+    const result = getUINativeModule().frameNode.getPreviousSibling(this.getNodePtr(), isExpanded);
     const nodeId = result?.nodeId;
     if (nodeId === undefined || nodeId === -1) {
       return null;
@@ -353,8 +353,8 @@ class FrameNode {
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
   }
 
-  getChildrenCount(): number {
-    return getUINativeModule().frameNode.getChildrenCount(this.nodePtr_);
+  getChildrenCount(isExpanded?: boolean): number {
+    return getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
   }
 
   getPositionToParent(): Position {

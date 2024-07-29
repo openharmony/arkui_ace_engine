@@ -48,6 +48,7 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/shadow_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -302,7 +303,11 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     auto renderContext = scroll->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(theme->GetMenuBorderRadius());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        borderRadius.SetRadius(theme->GetMenuDefaultRadius());
+    } else {
+        borderRadius.SetRadius(theme->GetMenuBorderRadius());
+    }
     renderContext->UpdateBorderRadius(borderRadius);
     return scroll;
 }
@@ -857,8 +862,23 @@ RefPtr<LayoutAlgorithm> MenuPattern::CreateLayoutAlgorithm()
         case MenuType::SELECT_OVERLAY_SUB_MENU:
             return MakeRefPtr<SubMenuLayoutAlgorithm>();
         default:
-            return MakeRefPtr<MenuLayoutAlgorithm>(targetId_, targetTag_);
+            return MakeRefPtr<MenuLayoutAlgorithm>(targetId_, targetTag_, lastPosition_);
     }
+}
+
+bool MenuPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
+{
+    auto colorMode = SystemProperties::GetColorMode();
+    if (shadowStyle == ShadowStyle::None) {
+        return true;
+    }
+    auto host = GetHost();
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, false);
+    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    return true;
 }
 
 void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktopMenu)
@@ -870,9 +890,15 @@ void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktop
 
     if (resetForDesktopMenu) {
         // DesktopMenu apply shadow on inner Menu node
-        renderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
+        Shadow shadow;
+        if (GetShadowFromTheme(ShadowStyle::None, shadow)) {
+            renderContext->UpdateBackShadow(shadow);
+        }
     } else {
-        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
+        Shadow shadow;
+        if (GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow)) {
+            renderContext->UpdateBackShadow(shadow);
+        }
     }
     // to enable inner menu shadow effect for desktopMenu, need to remove clipping from container
     bool clip = !resetForDesktopMenu;
@@ -907,7 +933,10 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
         auto bgColor = theme->GetBackgroundColor();
         renderContext->UpdateBackgroundColor(bgColor);
     }
-    renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
+    Shadow shadow;
+    if (GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow)) {
+        renderContext->UpdateBackShadow(shadow);
+    }
     // make menu round rect
     BorderRadiusProperty borderRadius;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -986,7 +1015,6 @@ Offset MenuPattern::GetTransformCenter() const
     auto placement = layoutAlgorithm->GetPlacement();
     switch (placement) {
         case Placement::BOTTOM_LEFT:
-            return Offset(size.Width(), 0.0f);
         case Placement::RIGHT_TOP:
             return Offset();
         case Placement::BOTTOM_RIGHT:
@@ -1369,7 +1397,8 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto menuProp = DynamicCast<MenuLayoutProperty>(dirty->GetLayoutProperty());
     CHECK_NULL_RETURN(menuProp, false);
     BorderRadiusProperty radius;
-    auto defaultRadius = theme->GetMenuBorderRadius();
+    auto defaultRadius = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ?
+        theme->GetMenuDefaultRadius() : theme->GetMenuBorderRadius();
     radius.SetRadius(defaultRadius);
     if (menuProp->GetBorderRadius().has_value()) {
         auto borderRadius = menuProp->GetBorderRadiusValue();
@@ -1390,7 +1419,8 @@ BorderRadiusProperty MenuPattern::CalcIdealBorderRadius(const BorderRadiusProper
     CHECK_NULL_RETURN(pipeline, radius);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, radius);
-    auto defaultRadius = theme->GetMenuBorderRadius();
+    auto defaultRadius = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ?
+        theme->GetMenuDefaultRadius() : theme->GetMenuBorderRadius();
     radius.SetRadius(defaultRadius);
     auto radiusTopLeft = borderRadius.radiusTopLeft.value_or(Dimension()).ConvertToPx();
     auto radiusTopRight = borderRadius.radiusTopRight.value_or(Dimension()).ConvertToPx();
@@ -1491,14 +1521,20 @@ void InnerMenuPattern::ApplyDesktopMenuTheme()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->UpdateBackShadow(ShadowConfig::DefaultShadowS);
+    Shadow shadow;
+    if (GetShadowFromTheme(ShadowStyle::OuterDefaultSM, shadow)) {
+        host->GetRenderContext()->UpdateBackShadow(shadow);
+    }
 }
 
 void InnerMenuPattern::ApplyMultiMenuTheme()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->UpdateBackShadow(ShadowConfig::NoneShadow);
+    Shadow shadow;
+    if (GetShadowFromTheme(ShadowStyle::None, shadow)) {
+        host->GetRenderContext()->UpdateBackShadow(shadow);
+    }
 }
 
 void MenuPattern::OnColorConfigurationUpdate()

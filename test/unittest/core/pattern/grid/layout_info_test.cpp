@@ -456,6 +456,14 @@ HWTEST_F(GridLayoutInfoTest, FindInMatrix003, TestSize.Level1)
 
     auto nullIt = info.FindInMatrix(11);
     EXPECT_EQ(nullIt, info.gridMatrix_.end());
+
+    info.gridMatrix_.clear();
+    EXPECT_EQ(info.FindInMatrix(0), info.gridMatrix_.end());
+    EXPECT_EQ(info.FindInMatrix(1), info.gridMatrix_.end());
+
+    info.gridMatrix_ = MATRIX_DEMO_12;
+    CheckEachIndex(info, 6);
+    EXPECT_EQ(info.FindInMatrix(7), info.gridMatrix_.end());
 }
 
 /**

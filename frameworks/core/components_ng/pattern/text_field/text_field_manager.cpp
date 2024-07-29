@@ -38,6 +38,7 @@ void TextFieldManagerNG::ClearOnFocusTextField(int32_t id)
 {
     if (onFocusTextFieldId == id) {
         onFocusTextField_ = nullptr;
+        focusFieldIsInline = false;
     }
 }
 

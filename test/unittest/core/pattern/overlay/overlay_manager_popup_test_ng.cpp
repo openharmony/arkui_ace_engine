@@ -25,6 +25,9 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t POPUP_NODE_2 = 2;
+const std::string MESSAGE = "hello world";
+const std::string BOTTOMSTRING = "test";
+constexpr int32_t DURATION = 2;
 } // namespace
 class OverlayManagerPopupTestNg : public testing::Test {
 public:
@@ -1759,5 +1762,101 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest034, TestSize.Level1)
     overlayManager->HidePopupAnimation(popupNode, nullptr);
     EXPECT_FALSE(popupNode->GetRenderContext()->HasDisappearTransition());
     EXPECT_EQ(popupPattern->transitionStatus_, TransitionStatus::INVISIABLE);
+}
+/**
+ * @tc.name: PopupTest035
+ * @tc.desc: Test OverlayManager::PopupEvent functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    for (int i = 0; i < 2; i++) {
+        auto targetNode = CreateTargetNode();
+        ASSERT_NE(targetNode, nullptr);
+        targetNodes.emplace_back(targetNode);
+        auto targetId = targetNodes[i]->GetId();
+        auto targetTag = targetNodes[i]->GetTag();
+
+        auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto popupNode = FrameNode::CreateFrameNode(
+            V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+        PopupInfo popupInfo;
+        popupInfo.popupId = popupId;
+        popupInfo.popupNode = popupNode;
+        popupInfo.target = targetNode;
+        popupInfo.markNeedUpdate = true;
+        popupInfo.isBlockEvent = false;
+        popups.emplace_back(popupInfo);
+    }
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
+    overlayManager->ShowPopup(targetId1, popups[0]);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    overlayManager->ShowPopup(targetId2, popups[1]);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    /**
+     * @tc.steps: step3. call HideCustomPopups when childCount is 2
+     * @tc.expected: popupMap's data is updated successfully
+     */
+    overlayManager->HideCustomPopups();
+    EXPECT_FALSE(overlayManager->popupMap_.empty());
+    EXPECT_FALSE(rootNode->GetChildren().empty());
+    /**
+     * @tc.steps: step4. call RemoveOverlay when childCount is 2
+     * @tc.expected: remove one popupNode at a time
+     */
+    overlayManager->HidePopup(targetId1, popups[0]);
+    overlayManager->HidePopup(targetId2, popups[1]);
+    EXPECT_FALSE(overlayManager->RemoveOverlay(false));
+    EXPECT_FALSE(overlayManager->popupMap_.empty());
+    overlayManager->ErasePopup(targetId1);
+    overlayManager->ErasePopup(targetId2);
+    EXPECT_TRUE(overlayManager->popupMap_.empty());
+    /**
+     * @tc.steps: step5. call HideCustomPopups when popupMap_ is empty
+     * @tc.expected: function exits normally
+     */
+    overlayManager->HideCustomPopups();
+    EXPECT_TRUE(overlayManager->popupMap_.empty());
+}
+/**
+ * @tc.name: ToastTest001
+ * @tc.desc: Test OverlayManager::ClearToast.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, ToastTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get overlay manager instance.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    /**
+     * @tc.steps: step2. call ShowToast.
+     * @tc.expected: toastMap_ is empty
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    overlayManager->ShowToast(toastInfo, nullptr);
+    EXPECT_FALSE(overlayManager->toastMap_.empty());
 }
 } // namespace OHOS::Ace::NG

@@ -95,6 +95,16 @@ public:
         needStretch_ = needStretch;
     }
 
+    bool GetStretchChild() const
+    {
+        return stretchChild_;
+    }
+
+    void SetStretchChild(bool stretchChild)
+    {
+        stretchChild_ = stretchChild;
+    }
+
     bool GetNeedStretch() const
     {
         return needStretch_;
@@ -116,6 +126,7 @@ private:
     void ResetGridLayoutInfoAndMeasure() const;
 
     bool needStretch_ = false;
+    bool stretchChild_ = false;
     Axis axis_ = Axis::NONE;
 };
 
