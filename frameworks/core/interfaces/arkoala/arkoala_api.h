@@ -2573,6 +2573,10 @@ struct ArkUIScrollModifier {
     void (*resetScrollOnScrollEdge)(ArkUINodeHandle node);
     void (*setScrollOnDidScrollCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetScrollOnDidScroll)(ArkUINodeHandle node);
+    void (*setScrollOnWillScrollCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetScrollOnWillScrollCallBack)(ArkUINodeHandle node);
+    void (*setOnScrollFrameBeginCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnScrollFrameBeginCallBack)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemModifier {

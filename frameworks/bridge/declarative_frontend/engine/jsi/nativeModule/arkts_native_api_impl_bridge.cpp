@@ -4311,6 +4311,14 @@ void ArkUINativeModule::RegisterScrollAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetScrollOnDidScroll));
     scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollOnDidScroll"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetScrollOnDidScroll));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollOnWillScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetScrollOnWillScroll));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollOnWillScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetScrollOnWillScroll));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollOnScrollFrameBegin"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetScrollOnScrollFrameBegin));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollOnScrollFrameBegin"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetScrollOnScrollFrameBegin));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "scroll"), scroll);
 }
 
