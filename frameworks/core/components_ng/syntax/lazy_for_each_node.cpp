@@ -100,7 +100,7 @@ void LazyForEachNode::PostIdleTask()
         node->needPredict_ = false;
         auto canRunLongPredictTask = node->requestLongPredict_ && canUseLongPredictTask;
         if (node->builder_) {
-            node->GetChildren();
+            node->GetChildren(false);
             auto preBuildResult = node->builder_->PreBuild(deadline, node->itemConstraint_, canRunLongPredictTask);
             if (!preBuildResult) {
                 node->PostIdleTask();
@@ -534,7 +534,7 @@ void LazyForEachNode::InitAllChilrenDragManager(bool init)
     if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
         return;
     }
-    const auto& children = GetChildren();
+    const auto& children = GetChildren(false);
     for (const auto& child : children) {
         if (!child) {
             continue;
