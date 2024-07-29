@@ -1449,13 +1449,13 @@ void SwiperLayoutAlgorithm::CheckCachedItem(int32_t startIndex, int32_t endIndex
         }
         if (startIndex >= 0) {
             if (activeItems_.find(startIndex) == activeItems_.end()
-                && layoutWrapper->GetChildByIndex(startIndex) == nullptr) {
+                && layoutWrapper->GetChildByIndex(startIndex, true) == nullptr) {
                 cachedItems_.insert(startIndex);
             }
         }
         if (endIndex < totalItemCount_) {
             if (activeItems_.find(endIndex) == activeItems_.end()
-                && layoutWrapper->GetChildByIndex(endIndex) == nullptr) {
+                && layoutWrapper->GetChildByIndex(endIndex, true) == nullptr) {
                 cachedItems_.insert(endIndex);
             }
         }
