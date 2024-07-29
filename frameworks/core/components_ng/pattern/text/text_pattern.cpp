@@ -553,9 +553,13 @@ void TextPattern::HandleOnCopy()
 
 void TextPattern::HandleOnCopySpanString()
 {
-    RefPtr<PasteDataMix> pasteData = clipboard_->CreatePasteDataMix();
     auto subSpanString = styledString_->GetSubSpanString(textSelector_.GetTextStart(),
         textSelector_.GetTextEnd() - textSelector_.GetTextStart());
+#if defined(PREVIEW)
+    clipboard_->SetData(subSpanString->GetString(), copyOption_);
+    return;
+#endif
+    RefPtr<PasteDataMix> pasteData = clipboard_->CreatePasteDataMix();
     std::vector<uint8_t> tlvData;
     subSpanString->EncodeTlv(tlvData);
     clipboard_->AddSpanStringRecord(pasteData, tlvData);
