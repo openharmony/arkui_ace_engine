@@ -335,6 +335,7 @@ public:
 	    bool isRedragStart = false);
     void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset);
+    bool GetMenuPreviewCenter(NG::OffsetF& offset);
 
     void ResetContextMenuDragHideFinished()
     {

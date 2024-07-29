@@ -629,6 +629,26 @@ void OverlayManager::UpdateContextMenuDisappearPosition(const NG::OffsetF& offse
     }
 }
 
+bool OverlayManager::GetMenuPreviewCenter(NG::OffsetF& offset)
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, false);
+    for (const auto& child : rootNode->GetChildren()) {
+        auto node = DynamicCast<FrameNode>(child);
+        if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            auto menuWarpperPattern = node->GetPattern<MenuWrapperPattern>();
+            CHECK_NULL_RETURN(menuWarpperPattern, false);
+            auto previewChild = menuWarpperPattern->GetPreview();
+            CHECK_NULL_RETURN(previewChild, false);
+            auto previewOffset = previewChild->GetPaintRectCenter();
+            offset.SetX(previewOffset.GetX());
+            offset.SetY(previewOffset.GetY());
+            return true;
+        }
+    }
+    return false;
+}
+
 void OverlayManager::ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
     const NG::OffsetF& offset)
 {
