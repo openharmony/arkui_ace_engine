@@ -47,6 +47,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -7202,6 +7203,8 @@ bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
         if (SelectOverlayIsOn()) {
             selectOverlay_->HideMenu(true);
         }
+        UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
+            AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
         return true;
     }
     if (IsReachedBoundary(offset)) {
@@ -7358,6 +7361,10 @@ void RichEditorPattern::OnScrollEndCallback()
     if (IsSelectAreaVisible()) {
         selectOverlay_->UpdateMenuOffset();
         selectOverlay_->ShowMenu();
+    }
+    if (AnimateStoped()) {
+        UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
+            AceType::WeakClaim(this), ScrollEventType::SCROLL_STOP);
     }
 }
 
