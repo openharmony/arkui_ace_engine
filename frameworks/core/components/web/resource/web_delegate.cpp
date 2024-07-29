@@ -42,7 +42,6 @@
 #include "adapter/ohos/capability/html/span_to_html.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "core/components_ng/render/adapter/rosen_render_surface.h"
 #endif
 #include "core/common/ace_application_info.h"
 #include "core/event/ace_event_helper.h"
@@ -1709,6 +1708,9 @@ void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<
             }
         }
         return;
+    }
+    if (renderMode_ == static_cast<int32_t>(RenderMode::SYNC_RENDER)) {
+        renderSurface_ = rosenRenderSurface;
     }
     SetSurface(rosenRenderSurface->GetSurface());
     InitOHOSWeb(context);
