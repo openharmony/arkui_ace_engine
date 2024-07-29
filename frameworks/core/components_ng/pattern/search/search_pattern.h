@@ -72,7 +72,11 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto paintMethod = MakeRefPtr<SearchPaintMethod>(buttonSize_, searchButton_, isSearchButtonEnabled_);
+        if (!searchOverlayModifier_) {
+            searchOverlayModifier_ = AceType::MakeRefPtr<SearchOverlayModifier>(WeakClaim(this), buttonSize_);
+        }
+        auto paintMethod =
+            MakeRefPtr<SearchPaintMethod>(searchOverlayModifier_, buttonSize_, searchButton_, isSearchButtonEnabled_);
         return paintMethod;
     }
 
@@ -175,6 +179,11 @@ public:
         return searchNode_;
     }
 
+    bool GetIsSearchButtonEnabled() const
+    {
+        return isSearchButtonEnabled_;
+    }
+
     void ResetDragOption() override;
     void OnColorConfigurationUpdate() override;
 
@@ -254,7 +263,7 @@ private:
     void HandleClickEvent(GestureEvent& info);
     void UpdateIconChangeEvent();
     bool IsEventEnabled(const std::string& textValue, int16_t style);
-	
+
     void CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool isFromModifier);
     void CreateOrUpdateImage(int32_t index, bool isCreateNode);
     void UpdateImageIconProperties(RefPtr<FrameNode>& frameNode, int32_t index);
@@ -309,6 +318,8 @@ private:
     RefPtr<FrameNode> searchIcon_;
     RefPtr<FrameNode> cancelIcon_;
     RefPtr<SearchNode> searchNode_;
+
+    RefPtr<SearchOverlayModifier> searchOverlayModifier_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -664,24 +664,6 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate009, TestSize.Level1)
      */
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    Testing::MockCanvas rsCanvas;
-    auto searchPaintMethod = AceType::MakeRefPtr<SearchPaintMethod>(SizeF(80, 20), std::string("search"), true);
-    auto canvasDrawFunction = searchPaintMethod->GetContentDrawFunction(paintWrapper);
-
-    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
-    EXPECT_CALL(rsCanvas, Restore()).Times(1);
-    canvasDrawFunction(rsCanvas);
-
     auto pattern = frameNode->GetPattern<SearchPattern>();
     ASSERT_NE(pattern, nullptr);
 
@@ -706,24 +688,6 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate010, TestSize.Level1)
      */
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    Testing::MockCanvas rsCanvas;
-    auto searchPaintMethod = AceType::MakeRefPtr<SearchPaintMethod>(SizeF(80, 20), std::string("search"), true);
-    auto canvasDrawFunction = searchPaintMethod->GetContentDrawFunction(paintWrapper);
-
-    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
-    EXPECT_CALL(rsCanvas, Restore()).Times(1);
-    canvasDrawFunction(rsCanvas);
-
     auto pattern = frameNode->GetPattern<SearchPattern>();
     ASSERT_NE(pattern, nullptr);
 
@@ -1375,122 +1339,6 @@ HWTEST_F(SearchTestNg, AddChildToGroup001, TestSize.Level1)
     auto tempFrameNode = AceType::MakeRefPtr<FrameNode>("TEMP", -1, AceType::MakeRefPtr<Pattern>());
     searchNode->AddChildToGroup(tempFrameNode, 1);
     searchNode->AddChildToGroup(tempFrameNode, 1);
-}
-
-/**
- * @tc.name: PaintMethodTest001
- * @tc.desc: GetContentDrawFunction, PaintSearch
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, PaintMethodTest001, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    Testing::MockCanvas rsCanvas;
-    auto searchPaintMethod = AceType::MakeRefPtr<SearchPaintMethod>(SizeF(80, 20), std::string("search"), true);
-    auto canvasDrawFunction = searchPaintMethod->GetContentDrawFunction(paintWrapper);
-
-    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
-    EXPECT_CALL(rsCanvas, Restore()).Times(1);
-    canvasDrawFunction(rsCanvas);
-}
-
-/**
- * @tc.name: PaintMethodTest002
- * @tc.desc: GetContentDrawFunction, PaintSearch
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, PaintMethodTest002, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    Testing::MockCanvas rsCanvas;
-    auto searchPaintMethod = AceType::MakeRefPtr<SearchPaintMethod>(SizeF(80, 20), std::string("search"), false);
-    auto canvasDrawFunction = searchPaintMethod->GetContentDrawFunction(paintWrapper);
-    canvasDrawFunction(rsCanvas);
-}
-
-/**
- * @tc.name: PaintMethodTest003
- * @tc.desc: GetContentDrawFunction, PaintSearch
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, PaintMethodTest003, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    geometryNode->UpdatePaddingWithBorder(PaddingPropertyF({ 0.0f, 0.0f, 10.0f, 0.0f }));
-    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    Testing::MockCanvas rsCanvas;
-    auto searchPaintMethod = AceType::MakeRefPtr<SearchPaintMethod>(SizeF(80, 20), std::string("search"), true);
-    auto canvasDrawFunction = searchPaintMethod->GetContentDrawFunction(paintWrapper);
-
-    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
-    EXPECT_CALL(rsCanvas, Restore()).Times(1);
-    canvasDrawFunction(rsCanvas);
-}
-
-/**
- * @tc.name: PaintMethodTest004
- * @tc.desc: GetContentDrawFunction, PaintSearch
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, PaintMethodTest004, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    geometryNode->UpdatePaddingWithBorder(PaddingPropertyF({ 0.0f, 0.0f, 0.0f, 20.0f }));
-    geometryNode->SetFrameSize(SizeF(200.0f, 60.0f));
-    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    Testing::MockCanvas rsCanvas;
-    auto searchPaintMethod = AceType::MakeRefPtr<SearchPaintMethod>(SizeF(80, 20), std::string("search"), true);
-    auto canvasDrawFunction = searchPaintMethod->GetContentDrawFunction(paintWrapper);
-    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(2);
-    EXPECT_CALL(rsCanvas, Restore()).Times(2);
-    canvasDrawFunction(rsCanvas);
-
-    paintWrapper->GetGeometryNode()->UpdatePaddingWithBorder(PaddingPropertyF({ 0.0f, 0.0f, 20.0f, 0.0f }));
-    auto canvasDrawFunction2 = searchPaintMethod->GetContentDrawFunction(paintWrapper);
-    canvasDrawFunction2(rsCanvas);
 }
 
 /**
