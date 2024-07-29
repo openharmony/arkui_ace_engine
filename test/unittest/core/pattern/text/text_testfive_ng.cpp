@@ -2238,4 +2238,431 @@ HWTEST_F(TextTestFiveNg, ToJsonValue001, TestSize.Level1)
     textPattern->ToJsonValue(thirdJson, filter);
     EXPECT_EQ(thirdJson->ToString(), "{}");
 }
+
+/**
+ * @tc.name: GetThumbnailCallback001
+ * @tc.desc: test text_pattern.cpp GetThumbnailCallback function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, GetThumbnailCallback001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    auto func = textPattern->GetThumbnailCallback();
+    ASSERT_NE(func, nullptr);
+
+    textPattern->dragNode_ = nullptr;
+    func(Offset(0, 1));
+    EXPECT_EQ(textPattern->dragNode_, nullptr);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+
+    textFrameNode->draggable_ = true;
+    textFrameNode->eventHub_->SetOnDragStart(
+        [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    textPattern->copyOption_ = CopyOptions::InApp;
+    textPattern->textSelector_.Update(0, 3);
+    textPattern->textForDisplay_ = TEXT_CONTENT;
+
+    func = textPattern->GetThumbnailCallback();
+    ASSERT_NE(func, nullptr);
+
+    textPattern->dragNode_ = nullptr;
+    func(Offset(0, 1));
+    EXPECT_NE(textPattern->dragNode_, nullptr);
+
+    auto childFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(childFrameNode, nullptr);
+    auto childPattern = childFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(childPattern, nullptr);
+    textPattern->childNodes_.emplace_back(childFrameNode);
+
+    func = textPattern->GetThumbnailCallback();
+    ASSERT_NE(func, nullptr);
+
+    auto children = textPattern->GetChildNodes();
+    EXPECT_EQ(children.size(), 1);
+
+    textPattern->dragNode_ = nullptr;
+    func(Offset(0, 1));
+    EXPECT_NE(textPattern->dragNode_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateContainerChildren001
+ * @tc.desc: test text_pattern.cpp UpdateContainerChildren function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateContainerChildren001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto parentNode = AceType::MakeRefPtr<ContainerSpanNode>(1);
+    ASSERT_NE(parentNode, nullptr);
+
+    auto textframeNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textframeNode, nullptr);
+    frameNode->AddChild(textframeNode);
+    textframeNode->SetParent(frameNode);
+    auto imageSpanNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imageSpanNode, nullptr);
+    frameNode->AddChild(imageSpanNode);
+    imageSpanNode->SetParent(frameNode);
+    auto spanNode = SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(spanNode, nullptr);
+    frameNode->AddChild(spanNode);
+    spanNode->SetParent(frameNode);
+
+    auto imageLayoutProperty = imageSpanNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    pattern->UpdateContainerChildren(parentNode, textframeNode);
+    pattern->UpdateContainerChildren(parentNode, imageSpanNode);
+    pattern->UpdateContainerChildren(parentNode, spanNode);
+    EXPECT_EQ(imageLayoutProperty->HasPlaceHolderStyle(), false);
+
+    spanNode->SetHasTextBackgroundStyle(true);
+    pattern->UpdateContainerChildren(parentNode, spanNode);
+
+    imageLayoutProperty->UpdateHasPlaceHolderStyle(true);
+    pattern->UpdateContainerChildren(parentNode, imageSpanNode);
+    EXPECT_EQ(imageLayoutProperty->HasPlaceHolderStyle(), false);
+    imageLayoutProperty->UpdateHasPlaceHolderStyle(false);
+
+    parentNode->SetTextBackgroundStyle(TextBackgroundStyle());
+    pattern->UpdateContainerChildren(parentNode, imageSpanNode);
+    EXPECT_EQ(imageLayoutProperty->HasPlaceHolderStyle(), true);
+}
+
+/**
+ * @tc.name: HandleSurfaceChanged001
+ * @tc.desc: test text_pattern.cpp HandleSurfaceChanged function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, HandleSurfaceChanged001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    pattern->selectOverlay_->OnBind(manager);
+    SelectOverlayInfo info;
+    manager->CreateSelectOverlay(info);
+    auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateMaxLines(0);
+
+    pattern->HandleSurfaceChanged(100, 100, 100, 100);
+    pattern->HandleSurfaceChanged(100, 100, 10, 100);
+    pattern->HandleSurfaceChanged(100, 100, 100, 10);
+    pattern->HandleSurfaceChanged(100, 100, 10, 10);
+
+    manager->shareOverlayInfo_->menuInfo.menuType = OptionMenuType::MOUSE_MENU;
+
+    pattern->HandleSurfaceChanged(100, 100, 10, 10);
+    EXPECT_EQ(pattern->textSelector_.GetStart(), -1);
+}
+
+/**
+ * @tc.name: MountImageNode001
+ * @tc.desc: test text_pattern.cpp MountImageNode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, MountImageNode001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto imageSpanItem = AceType::MakeRefPtr<NG::ImageSpanItem>();
+    ASSERT_NE(imageSpanItem, nullptr);
+
+    imageSpanItem->options.imageAttribute = ImageSpanAttribute();
+
+    pattern->MountImageNode(imageSpanItem);
+
+    auto imageNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
+        imageSpanItem->imageNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_EQ(imageLayoutProperty->HasImageFit(), false);
+
+    imageSpanItem->options.imageAttribute->size = ImageSpanSize();
+    imageSpanItem->options.imageAttribute->verticalAlign = VerticalAlign();
+    imageSpanItem->options.imageAttribute->objectFit = ImageFit();
+    imageSpanItem->options.imageAttribute->marginProp = OHOS::Ace::NG::MarginProperty();
+    imageSpanItem->options.imageAttribute->borderRadius = OHOS::Ace::NG::BorderRadiusProperty();
+    imageSpanItem->options.imageAttribute->paddingProp = OHOS::Ace::NG::PaddingProperty();
+
+    pattern->MountImageNode(imageSpanItem);
+
+    imageNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
+        imageSpanItem->imageNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+    imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    EXPECT_EQ(imageLayoutProperty->HasImageFit(), true);
+}
+
+/**
+ * @tc.name: HandleMarqueeWithIsVisible001
+ * @tc.desc: test text_pattern.cpp HandleMarqueeWithIsVisible function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, HandleMarqueeWithIsVisible001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->CreateModifier();
+    ASSERT_NE(pattern->contentMod_, nullptr);
+
+    pattern->HandleMarqueeWithIsVisible(FRAME_NODE_CHANGE_GEOMETRY_CHANGE);
+    EXPECT_EQ(pattern->contentMod_->textRacing_, false);
+
+    auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+
+    pattern->HandleMarqueeWithIsVisible(FRAME_NODE_CHANGE_GEOMETRY_CHANGE);
+    EXPECT_EQ(pattern->contentMod_->textRacing_, false);
+}
+
+/**
+ * @tc.name: PaintImage001
+ * @tc.desc: test text_content_modifier.cpp PaintImage function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, PaintImage001, TestSize.Level1)
+{
+    auto oldVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(13);
+
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->CreateModifier();
+    auto textContentModifier = pattern->contentMod_;
+    ASSERT_NE(textContentModifier, nullptr);
+
+    int32_t callOnDrawCount = 0;
+    std::vector<CustomSpanPlaceholderInfo> customSpanPlaceholder;
+    CustomSpanPlaceholderInfo customSpanPlaceholderInfo {
+        .customSpanIndex = 0,
+        .onDraw = [&callOnDrawCount](NG::DrawingContext&, CustomSpanOptions) { callOnDrawCount++; }
+    };
+    customSpanPlaceholder.emplace_back(customSpanPlaceholderInfo);
+    pattern->InitCustomSpanPlaceholderInfo(customSpanPlaceholder);
+
+    bool calledDrawRect = false;
+    std::vector<RefPtr<FrameNode>> imageNodeLocalList;
+    std::vector<WeakPtr<FrameNode>> imageNodeList;
+    for (int i = 0; i < 10; i++) {
+        auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+			ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        auto imagePattern = imageNode->GetPattern<ImagePattern>();
+        auto mockCanvasImage = AceType::MakeRefPtr<NG::MockCanvasImage>();
+        EXPECT_CALL(
+            *mockCanvasImage, DrawRect(_, _, _)).WillRepeatedly([&calledDrawRect]() { calledDrawRect = true; });
+        imagePattern->altImage_ = mockCanvasImage;
+        imageNodeList.emplace_back(AceType::WeakClaim(AceType::RawPtr(imageNode)));
+        if (i > 0) {
+            imageNodeLocalList.emplace_back(imageNode);
+        }
+    }
+    textContentModifier->SetImageSpanNodeList(imageNodeList);
+
+    RSCanvas canvas;
+
+    textContentModifier->PaintImage(canvas, 10, 10);
+    EXPECT_EQ(calledDrawRect, false);
+
+    std::vector<int32_t> placeholderIndex = { 0 };
+    std::vector<RectF> rectsForPlaceholders = { RectF(0, 0, 10, 10) };
+    pattern->InitSpanImageLayout(placeholderIndex, rectsForPlaceholders, OffsetF(0, 0));
+
+    calledDrawRect = false;
+    textContentModifier->PaintImage(canvas, 10, 10);
+    EXPECT_EQ(calledDrawRect, true);
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(oldVersion);
+}
+
+/**
+ * @tc.name: PaintImage002
+ * @tc.desc: test text_content_modifier.cpp PaintImage function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, PaintImage002, TestSize.Level1)
+{
+    auto oldVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(13);
+
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->CreateModifier();
+    auto textContentModifier = pattern->contentMod_;
+    ASSERT_NE(textContentModifier, nullptr);
+
+    int32_t callOnDrawCount = 0;
+    std::vector<CustomSpanPlaceholderInfo> customSpanPlaceholder;
+    CustomSpanPlaceholderInfo customSpanPlaceholderInfo {
+        .customSpanIndex = 0,
+        .onDraw = [&callOnDrawCount](NG::DrawingContext&, CustomSpanOptions) { callOnDrawCount++; }
+    };
+    customSpanPlaceholder.emplace_back(customSpanPlaceholderInfo);
+    pattern->InitCustomSpanPlaceholderInfo(customSpanPlaceholder);
+
+    bool calledDrawRect = false;
+    std::vector<RefPtr<FrameNode>> imageNodeLocalList;
+    std::vector<WeakPtr<FrameNode>> imageNodeList;
+    for (int i = 0; i < 10; i++) {
+        auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+			ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        auto imagePattern = imageNode->GetPattern<ImagePattern>();
+        auto mockCanvasImage = AceType::MakeRefPtr<NG::MockCanvasImage>();
+        EXPECT_CALL(
+            *mockCanvasImage, DrawRect(_, _, _)).WillRepeatedly([&calledDrawRect]() { calledDrawRect = true; });
+        imagePattern->altImage_ = mockCanvasImage;
+        imageNodeList.emplace_back(AceType::WeakClaim(AceType::RawPtr(imageNode)));
+        if (i > 0) {
+            imageNodeLocalList.emplace_back(imageNode);
+        }
+    }
+    textContentModifier->SetImageSpanNodeList(imageNodeList);
+
+    std::vector<int32_t> placeholderIndex = { -1 };
+    std::vector<RectF> rectsForPlaceholders = { RectF(0, 0, 10, 10) };
+    pattern->InitSpanImageLayout(placeholderIndex, rectsForPlaceholders, OffsetF(0, 0));
+
+    RSCanvas canvas;
+
+    textContentModifier->PaintImage(canvas, 10, 10);
+    EXPECT_EQ(calledDrawRect, false);
+
+    placeholderIndex[0] = 1;
+    pattern->InitSpanImageLayout(placeholderIndex, rectsForPlaceholders, OffsetF(0, 0));
+
+    textContentModifier->PaintImage(canvas, 10, 10);
+    EXPECT_EQ(calledDrawRect, false);
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(oldVersion);
+}
+
+/**
+ * @tc.name: PaintCustomSpan001
+ * @tc.desc: test text_content_modifier.cpp PaintCustomSpan function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, PaintCustomSpan001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->CreateModifier();
+    auto textContentModifier = pattern->contentMod_;
+    ASSERT_NE(textContentModifier, nullptr);
+
+    ParagraphStyle paragraphStyle;
+    auto paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    ASSERT_NE(paragraph, nullptr);
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 1 });
+
+    int32_t callOnDrawCount = 0;
+    std::vector<CustomSpanPlaceholderInfo> customSpanPlaceholder;
+    CustomSpanPlaceholderInfo customSpanPlaceholderInfo0;
+    CustomSpanPlaceholderInfo customSpanPlaceholderInfo1 {
+        .customSpanIndex = 0,
+        .onDraw = [&callOnDrawCount](NG::DrawingContext&, CustomSpanOptions) {
+            callOnDrawCount++;
+        }
+    };
+    CustomSpanPlaceholderInfo customSpanPlaceholderInfo2 {
+        .customSpanIndex = 1,
+        .onDraw = [&callOnDrawCount](NG::DrawingContext&, CustomSpanOptions) {
+            callOnDrawCount++;
+        }
+    };
+    customSpanPlaceholder.emplace_back(customSpanPlaceholderInfo0);
+    customSpanPlaceholder.emplace_back(customSpanPlaceholderInfo1);
+    customSpanPlaceholder.emplace_back(customSpanPlaceholderInfo2);
+    pattern->InitCustomSpanPlaceholderInfo(customSpanPlaceholder);
+    std::vector<int32_t> placeholderIndex = { 0 };
+    std::vector<RectF> rectsForPlaceholders = { RectF(0, 0, 10, 10) };
+    OffsetF contentOffset(0, 0);
+    pattern->InitSpanImageLayout(placeholderIndex, rectsForPlaceholders, contentOffset);
+
+    RSCanvas canvas;
+    DrawingContext drawingContext = { canvas, 10, 10 };
+
+    textContentModifier->PaintCustomSpan(drawingContext);
+    EXPECT_EQ(callOnDrawCount, 1);
+}
+
+/**
+ * @tc.name: onDraw001
+ * @tc.desc: test text_content_modifier.cpp onDraw function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, onDraw001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->CreateModifier();
+    auto textContentModifier = pattern->contentMod_;
+    ASSERT_NE(textContentModifier, nullptr);
+
+    ParagraphStyle paragraphStyle;
+    auto paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    ASSERT_NE(paragraph, nullptr);
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 1 });
+
+    bool calledClipRect = false;
+    bool calledAttachBrush = false;
+    Testing::TestingCanvas retCanvas;
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).WillRepeatedly([&calledClipRect]() { calledClipRect = true; });
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(
+        [&calledAttachBrush, &retCanvas](const Testing::TestingBrush& brush)->Testing::TestingCanvas& {
+            calledAttachBrush = true;
+            return retCanvas;
+            }
+        );
+    DrawingContext drawingContext = { canvas, 10, 10 };
+
+    textContentModifier->onDraw(drawingContext);
+    EXPECT_EQ(calledClipRect, true);
+
+    textContentModifier->animatableTextColor_ =
+        AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
+    textContentModifier->obscuredReasons_.emplace_back(ObscuredReasons::PLACEHOLDER);
+    textContentModifier->drawObscuredRects_.emplace_back(RectF(0, 0, 10, 10));
+
+    textContentModifier->onDraw(drawingContext);
+    EXPECT_EQ(calledAttachBrush, true);
+}
 } // namespace OHOS::Ace::NG
