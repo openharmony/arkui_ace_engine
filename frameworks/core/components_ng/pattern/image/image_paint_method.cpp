@@ -102,7 +102,6 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
         config.resizableSlice_ = renderProps->GetImageResizableSliceValue({});
         config.resizableLattice_ = renderProps->GetImageResizableLatticeValue(nullptr);
     }
-    auto pipelineCtx = PipelineBase::GetCurrentContext();
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     config.flipHorizontally_ = isRightToLeft && renderProps->GetMatchTextDirection().value_or(false);
     config.colorFilter_.Reset();
@@ -136,12 +135,7 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
     auto svgCanvas = DynamicCast<SvgCanvasImage>(canvasImage_);
     if (svgCanvas && InstanceOf<SvgCanvasImage>(canvasImage_)) {
         svgCanvas->SetFillColor(props->GetSvgFillColor());
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, nullptr);
-        auto theme = pipeline->GetTheme<ImageTheme>();
-        CHECK_NULL_RETURN(theme, nullptr);
-        auto smoothEdgeValue = std::max(theme->GetMinEdgeAntialiasing(), props->GetSmoothEdge().value_or(0.0f));
-        svgCanvas->SetSmoothEdge(smoothEdgeValue);
+        svgCanvas->SetSmoothEdge(props->GetSmoothEdgeValue(0.0f));
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             std::optional<ImageColorFilter> imageColorFilter = std::nullopt;
             if (paintConfig.colorFilter_.colorFilterMatrix_ || paintConfig.colorFilter_.colorFilterDrawing_) {

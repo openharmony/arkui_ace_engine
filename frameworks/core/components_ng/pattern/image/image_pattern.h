@@ -471,6 +471,8 @@ private:
     void ReleaseImageAnalyzer();
     bool IsSupportImageAnalyzerFeature();
     void InitDefaultValue();
+    void ClearAltData();
+    void UpdateSvgSmoothEdgeValue();
 
     //animation
     RefPtr<PictureAnimation<int32_t>> CreatePictureAnimation(int32_t size);
