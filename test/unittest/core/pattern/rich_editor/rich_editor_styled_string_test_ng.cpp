@@ -949,4 +949,28 @@ HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle003, TestSize.Level1)
     layoutAlgorithm->CopySpanStyle(source, target);
     EXPECT_EQ(target->fontStyle->GetFontSize(), FONT_SIZE_VALUE);
 }
+
+/**
+ * @tc.name: GetSelection001
+ * @tc.desc: test GetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, GetSelection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create styledString with text
+     */
+    auto mutableStr = CreateTextStyledString(INIT_STRING_1);
+
+    /**
+     * @tc.steps: step2. get richEditor styledString controller , set styledString and GetSelection
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto styledStringController = richEditorPattern->GetRichEditorStyledStringController();
+    ASSERT_NE(styledStringController, nullptr);
+    auto testRangeInfo = styledStringController->GetSelection();
+    ASSERT_EQ(testRangeInfo.start_, 0);
+}
 } // namespace OHOS::Ace::NG
