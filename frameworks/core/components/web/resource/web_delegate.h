@@ -19,6 +19,7 @@
 #include <list>
 #include <map>
 
+#include "ability_runtime/context/environment_callback.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/pipeline/pipeline_base.h"
@@ -1178,7 +1179,7 @@ private:
     WindowsSurfaceInfo surfaceInfo_ = { nullptr, EGL_NO_DISPLAY, nullptr, EGL_NO_CONTEXT };
     bool forceDarkMode_ = false;
     WebDarkMode current_dark_mode_ = WebDarkMode::Auto;
-    sptr<AppExecFwk::IConfigurationObserver> configChangeObserver_ = nullptr;
+    std::shared_ptr<OHOS::AbilityRuntime::EnvironmentCallback> configChangeObserver_ = nullptr;
     OHOS::NWeb::BlurReason blurReason_ = OHOS::NWeb::BlurReason::FOCUS_SWITCH;
     bool isPopup_ = false;
     int32_t parentNWebId_ = -1;
