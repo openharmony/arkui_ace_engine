@@ -1299,6 +1299,18 @@ void MenuItemPattern::UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>
         auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateImageSourceInfo(imageSourceInfo);
+        if (imageSourceInfo.IsSvg()) {
+            auto src = imageSourceInfo.GetSrc();
+            std::string magicStr = "resource:///";
+            auto srcId = src.substr(magicStr.size(), src.substr(0, src.rfind(".svg")).size - magicStr.size());
+            // 系统资源的id起始值是0x07800000
+            unsigned long magicNum = "0x07800000";
+            if (std::stoul(srcId) >= magicNum) {
+                UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), true);
+                return;
+            }
+        }
+        
         UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), false);
     }
 }
