@@ -641,6 +641,8 @@ public:
     }
 
     void UnregisterNodeChangeListenerWithoutSelect();
+    void UpdateFontColor(const Color& value);
+    void BeforeCreatePaintWrapper() override;
 
 protected:
     void OnAttachToFrameNode() override;

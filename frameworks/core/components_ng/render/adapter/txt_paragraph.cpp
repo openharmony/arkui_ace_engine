@@ -1043,4 +1043,13 @@ RSParagraph* TxtParagraph::GetParagraph()
     return externalParagraph_;
 }
 #endif
+
+void TxtParagraph::UpdateColor(size_t from, size_t to, const Color& color)
+{
+#ifndef USE_GRAPHIC_TEXT_GINE
+#else
+    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(GetParagraph());
+    paragraphTxt->UpdateColor(from, to, ToRSColor(color));
+#endif
+}
 } // namespace OHOS::Ace::NG

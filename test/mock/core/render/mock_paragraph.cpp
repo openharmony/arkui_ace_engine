@@ -45,4 +45,6 @@ void MockParagraph::TearDown()
         paragraph_ = nullptr;
     }
 }
+
+void MockParagraph::UpdateColor(size_t from, size_t to, const Color& color) {}
 } // namespace OHOS::Ace::NG

@@ -91,6 +91,8 @@ public:
         return true;
     }
 
+    void UpdateColor(size_t from, size_t to, const Color& color) override;
+
     static RefPtr<MockParagraph> GetOrCreateMockParagraph();
     static void TearDown();
 

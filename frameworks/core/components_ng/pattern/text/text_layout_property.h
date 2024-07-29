@@ -148,6 +148,16 @@ public:
     }
     std::string GetCopyOptionString() const;
 
+    void UpdateTextColorByRender(const Color &value)
+    {
+        auto& groupProperty = GetOrCreateFontStyle();
+        if (groupProperty->CheckTextColor(value)) {
+            return;
+        }
+        groupProperty->UpdateTextColor(value);
+        UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+    }
+
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
     {
