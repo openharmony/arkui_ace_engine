@@ -292,7 +292,9 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition, int32_t branchId)
 {
     bool needSyncRenderTree = false;
     int32_t index = 0;
-    for (const auto& child : children_) {
+
+    auto children = GetChildren();
+    for (const auto& child : children) {
         // traverse down the child subtree to mark removing and find needs to hold subtree, if found add it to pending
         if (!cleanDirectly && child->MarkRemoving()) {
             ElementRegister::GetInstance()->AddPendingRemoveNode(child);
