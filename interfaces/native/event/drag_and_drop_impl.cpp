@@ -178,14 +178,17 @@ int32_t OH_ArkUI_DragAction_SetPixelMaps(ArkUI_DragAction* dragAction, OH_Pixelm
     if (!dragActions) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    std::vector<std::shared_ptr<OHOS::Media::PixelMap>> pixelMapList;
+    int32_t count = 0;
     for (int32_t index = 0; index < size; index++) {
         if (!pixelmapArray[index]) {
             continue;
         }
-        pixelMapList.push_back(pixelmapArray[index]->GetInnerPixelmap());
+        count++;
     }
-    dragActions->pixelmapArray = reinterpret_cast<void**>(pixelMapList.data());
+    if (count < size || size < 0) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    dragActions->pixelmapArray = reinterpret_cast<void**>(pixelmapArray);
     dragActions->size = size;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -297,6 +300,15 @@ int32_t OH_ArkUI_StartDrag(ArkUI_DragAction* dragAction)
     if (!dragActions || !impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    std::vector<std::shared_ptr<OHOS::Media::PixelMap>> pixelMapList;
+    auto pixelmapArray = reinterpret_cast<OH_PixelmapNative**>(dragActions->pixelmapArray);
+    for (int32_t index = 0; index < dragActions->size; index++) {
+        if (!pixelmapArray[index]) {
+            continue;
+        }
+        pixelMapList.push_back(pixelmapArray[index]->GetInnerPixelmap());
+    }
+    dragActions->pixelmapArray = reinterpret_cast<void**>(pixelMapList.data());
     impl->getDragAdapterAPI()->startDrag(dragActions);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
