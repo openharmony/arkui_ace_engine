@@ -2095,8 +2095,12 @@ void OverlayManager::CleanPreviewInSubWindow()
                 auto frameNode = DynamicCast<FrameNode>(childNode);
                 if (frameNode &&
                     (frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || frameNode->GetTag() == V2::IMAGE_ETS_TAG)) {
-                    node->RemoveChild(frameNode);
-                    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+                    auto imagelayoutProperty = frameNode->GetLayoutProperty();
+                    if (imagelayoutProperty) {
+                        imagelayoutProperty->UpdateVisibility(VisibleType::GONE);
+                    } else {
+                        TAG_LOGW(AceLogTag::ACE_OVERLAY, "Preview image failed to set invisible.");
+                    }
                     break;
                 }
             }
