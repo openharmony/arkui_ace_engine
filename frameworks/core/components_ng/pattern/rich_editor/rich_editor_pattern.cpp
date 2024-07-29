@@ -5861,6 +5861,11 @@ void RichEditorPattern::HandleTouchDown(const Offset& offset)
     if (isTouchCaret_ && !selectOverlay_->IsSingleHandleShow()) {
         CreateAndShowSingleHandle(false);
     }
+    if (isTouchCaret_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        lastOffsetInScreenByTouchCaret_ = host->GetOffsetInScreen();
+    }
 }
 
 void RichEditorPattern::HandleTouchUp()
@@ -5901,7 +5906,13 @@ void RichEditorPattern::HandleTouchMove(const Offset& offset)
         return;
     }
     CHECK_NULL_VOID(isTouchCaret_);
-    Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto caretMoveOffset = offset;
+    if (isTouchCaret_) {
+        caretMoveOffset = offset - Offset(0, host->GetOffsetInScreen().GetY() - lastOffsetInScreenByTouchCaret_.GetY());
+    }
+    Offset textOffset = ConvertTouchOffsetToTextOffset(caretMoveOffset);
     auto position = paragraphs_.GetIndex(textOffset);
     SetCaretPosition(position);
     CalcAndRecordLastClickCaretInfo(textOffset);
@@ -5911,8 +5922,6 @@ void RichEditorPattern::HandleTouchMove(const Offset& offset)
         selectOverlay_->HideMenu();
         selectOverlay_->UpdateSecondHandleOffset();
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
