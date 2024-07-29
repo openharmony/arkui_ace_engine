@@ -147,15 +147,14 @@ void MarqueePattern::OnModifyDone()
     textChild->MarkModifyDone();
     childRenderContext->UpdateClipEdge(true);
     childRenderContext->SetClipToFrame(true);
-    auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
     if (CheckMeasureFlag(layoutProperty->GetPropertyChangeFlag()) ||
-        CheckMeasureFlag(paintProperty->GetPropertyChangeFlag()) ||
         CheckLayoutFlag(layoutProperty->GetPropertyChangeFlag())) {
         measureChanged_ = true;
     } else if (OnlyPlayStatusChange()) {
         ChangeAnimationPlayStatus();
     } else {
+        auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
         auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
         StopMarqueeAnimation(playStatus);
     }
