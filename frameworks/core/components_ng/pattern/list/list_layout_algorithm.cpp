@@ -795,12 +795,12 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         }
         needEstimateOffset_ = true;
     } else if (targetIndex_.has_value()) {
-        if (LessOrEqual(startIndex, targetIndex_.value())) {
+        if (startIndex < targetIndex_.value()) {
             LayoutForward(layoutWrapper, startIndex, startPos);
             if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
                 LayoutBackward(layoutWrapper, GetStartIndex() - 1, GetStartPosition());
             }
-        } else if (GreatNotEqual(startIndex, targetIndex_.value())) {
+        } else if (startIndex >= targetIndex_.value()) {
             LayoutBackward(layoutWrapper, endIndex, endPos);
             if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
                 LayoutForward(layoutWrapper, GetEndIndex() + 1, GetEndPosition());
@@ -972,8 +972,8 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
         // reach the valid target index
         if (forwardFeature_ && targetIndex_ && GreatNotEqual(currentIndex, targetIndex_.value())) {
-            endMainPos = GetEndPosition() + contentMainSize_;
-            targetIndex_.reset();
+            endMainPos = layoutEndMainPos_.value_or(endMainPos_);
+            forwardFeature_ = false;
         }
     } while (LessNotEqual(currentEndPos + chainOffset, endMainPos));
     currentEndPos += chainOffset;
@@ -1046,8 +1046,8 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
         // reach the valid target index
         if (backwardFeature_ && targetIndex_ && LessOrEqual(currentIndex, targetIndex_.value())) {
-            startMainPos = GetStartPosition() - contentMainSize_;
-            targetIndex_.reset();
+            startMainPos = layoutStartMainPos_.value_or(startMainPos_);
+            backwardFeature_ = false;
         }
     } while (GreatNotEqual(currentStartPos + chainOffset, startMainPos));
 
@@ -1097,7 +1097,7 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
 
 void ListLayoutAlgorithm::ReMeasureListItemGroup(LayoutWrapper* layoutWrapper, bool forwardLayout)
 {
-    if (targetIndex_) {
+    if (forwardFeature_ || backwardFeature_) {
         return;
     }
     if (forwardLayout) {
@@ -1499,7 +1499,7 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
 
     if (groupNeedAllLayout || (targetIndex_ && targetIndex_.value() == index) || (isSnapCenter_ && !childrenSize_)) {
         itemGroup->SetNeedAllLayout();
-    } else if (targetIndex_) {
+    } else if (forwardFeature_ || backwardFeature_) {
         itemGroup->CheckNeedAllLayout(layoutWrapper, forwardLayout);
     }
     layoutWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1543,7 +1543,7 @@ void ListLayoutAlgorithm::SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWr
 void ListLayoutAlgorithm::CheckListItemGroupRecycle(LayoutWrapper* layoutWrapper, int32_t index,
     float referencePos, bool forwardLayout) const
 {
-    if (targetIndex_.has_value()) {
+    if (forwardFeature_ || backwardFeature_) {
         return;
     }
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
@@ -1587,12 +1587,12 @@ void ListLayoutAlgorithm::AdjustPostionForListItemGroup(LayoutWrapper* layoutWra
 
 void ListLayoutAlgorithm::OffScreenLayoutDirection()
 {
-    if (!targetIndex_ || itemPosition_.empty() || (itemPosition_.find(targetIndex_.value()) != itemPosition_.end())) {
+    if (!targetIndex_ || itemPosition_.empty()) {
         forwardFeature_ = false;
         backwardFeature_ = false;
         return;
     }
-    if (GreatNotEqual(targetIndex_.value(), GetEndIndex())) {
+    if (targetIndex_.value() > GetStartIndex()) {
         forwardFeature_ = true;
         backwardFeature_ = false;
     } else {
