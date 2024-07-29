@@ -55,12 +55,12 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_CONTAINER_MODAL
 };
 
-const char* g_patternPreloadMap[] = {
+const char* PRELOAD_LIST[] = {
     THEME_BLUR_STYLE_COMMON,
     THEME_PATTERN_ICON
 };
 
-const std::string RESOURCE_TOKEN_PATTERN = "\\[.+?\\]\\.(\\S+?\\.\\S+)";
+constexpr char RESOURCE_TOKEN_PATTERN[] = "\\[.+?\\]\\.(\\S+?\\.\\S+)";
 
 bool IsDirExist(const std::string& path)
 {
@@ -217,8 +217,8 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);
 
-        for (size_t i = 0; i < sizeof(g_patternPreloadMap) / sizeof(g_patternPreloadMap[0]); i++) {
-            std::string patternName = g_patternPreloadMap[i];
+        for (size_t i = 0; i < sizeof(PRELOAD_LIST) / sizeof(PRELOAD_LIST[0]); ++i) {
+            std::string patternName = PRELOAD_LIST[i];
             themeStyle->checkThemeStyleVector.push_back(patternName);
             auto style = adapter->GetPatternByName(patternName);
             if (style) {
