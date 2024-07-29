@@ -3406,6 +3406,7 @@ void UIContentImpl::SetContentNodeGrayScale(float grayscale)
 
 void UIContentImpl::PreLayout()
 {
+    TAG_LOGI(AceLogTag::ACE_WINDOW, "UIContentImpl PreLayout: called begin");
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
@@ -3421,6 +3422,7 @@ void UIContentImpl::PreLayout()
     auto paintRectf = renderContext->GetPaintRectWithoutTransform();
     if (LessOrEqual(static_cast<uint32_t>(paintRectf.Width()), 0) ||
         LessOrEqual(static_cast<uint32_t>(paintRectf.Height()), 0)) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "UIContentImpl PreLayout: width or hight is 0");
         return ;
     }
 
@@ -3429,9 +3431,9 @@ void UIContentImpl::PreLayout()
     taskExecutor->PostSyncTask(
         [pipelineContext] {
             pipelineContext->PreLayout(pipelineContext->GetTimeFromExternalTimer(), 0);
-            TAG_LOGI(AceLogTag::ACE_WINDOW, "UIContentImpl: PreLayout called End");
         },
         TaskExecutor::TaskType::UI, "ArkUIPreLayout");
+    TAG_LOGI(AceLogTag::ACE_WINDOW, "UIContentImpl PreLayout: called end");
 }
 
 void UIContentImpl::SetStatusBarItemColor(uint32_t color)
