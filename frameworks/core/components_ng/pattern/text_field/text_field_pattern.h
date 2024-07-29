@@ -606,7 +606,7 @@ public:
 
     void NotifyKeyboardClosed() override
     {
-        if (HasFocus()) {
+        if (HasFocus() && !(customKeyboard_ || customKeyboardBuilder_)) {
             FocusHub::LostFocusToViewRoot();
         }
     }
