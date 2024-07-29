@@ -1548,7 +1548,7 @@ void WebPattern::HandleFocusEvent()
 void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
 {
     TAG_LOGD(AceLogTag::ACE_WEB,
-        "WebPattern::HandleBlurEvent selectPopupMenuShowing: %{public}d, isReceivedArkDrag: %{public}d.",
+        "HandleBlurEvent selectPopupMenuShowing: %{public}d, isReceivedArkDrag: %{public}d.",
         selectPopupMenuShowing_, isReceivedArkDrag_);
     CHECK_NULL_VOID(delegate_);
     isFocus_ = false;
@@ -3184,13 +3184,21 @@ void WebPattern::HideHandleAndQuickMenuIfNecessary(bool hide)
         }
     } else {
         if (!selectOverlayProxy_ || selectOverlayProxy_->IsMenuShow()) {
-            TAG_LOGI(AceLogTag::ACE_WEB, "select menu is closed or displayed");
             return;
         }
         firstInfo.isShow = IsTouchHandleShow(startSelectionHandle_);
         firstInfo.paintRect = ComputeTouchHandleRect(startSelectionHandle_);
         secondInfo.isShow = IsTouchHandleShow(endSelectionHandle_);
         secondInfo.paintRect = ComputeTouchHandleRect(endSelectionHandle_);
+        if (firstInfo.isShow || secondInfo.isShow) {
+            selectOverlayProxy_->SetIsNewAvoid(false);
+        } else if (dropParams_) {
+            bool isNewAvoid = false;
+            auto selectArea = ComputeClippedSelectionBounds(
+                dropParams_, startSelectionHandle_, endSelectionHandle_, isNewAvoid);
+            selectOverlayProxy_->SetIsNewAvoid(isNewAvoid);
+            selectOverlayProxy_->UpdateSelectArea(selectArea);
+        }
         selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstInfo, secondInfo);
         selectOverlayProxy_->ShowOrHiddenMenu(false);
     }
