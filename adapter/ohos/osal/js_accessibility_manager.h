@@ -321,11 +321,6 @@ private:
         const RefPtr<NG::UINode>& uiVirtualNode, const CommonProperty& commonProperty,
         const RefPtr<NG::PipelineContext>& ngPipeline);
 
-    void CheckAndUpdateVNInfo(std::list<Accessibility::AccessibilityElementInfo>& infos,
-        Accessibility::AccessibilityElementInfo& nodeInfo,
-        const RefPtr<NG::UINode>& uiVirtualNode, const CommonProperty& commonProperty,
-        const RefPtr<NG::PipelineContext>& ngPipeline);
-
     void UpdateVirtualNodeChildAccessibilityElementInfo(
         const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
         Accessibility::AccessibilityElementInfo& nodeParentInfo, Accessibility::AccessibilityElementInfo& nodeInfo,

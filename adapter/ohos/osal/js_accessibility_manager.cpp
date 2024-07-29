@@ -1714,15 +1714,6 @@ bool IsNodeInRoot(const RefPtr<NG::FrameNode>& node, const RefPtr<NG::PipelineCo
 }
 }
 
-void JsAccessibilityManager::CheckAndUpdateVirtualNodeInfo(std::list<AccessibilityElementInfo>& infos,
-    AccessibilityElementInfo& nodeInfo, const RefPtr<NG::UINode>& uiVirtualNode, const CommonProperty& commonProperty,
-    const RefPtr<NG::PipelineContext>& ngPipeline)
-{
-    if (!uiVirtualNode->GetChildren(true).empty()) {
-        UpdateVirtualNodeInfo(infos, virtualInfo, uiVirtualNode, commonProperty, ngPipeline);
-    }
-}
-
 void JsAccessibilityManager::UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos,
     const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
     const RefPtr<NG::PipelineContext>& ngPipeline, const SearchParameter& searchParam)
@@ -1763,7 +1754,9 @@ void JsAccessibilityManager::UpdateCacheInfoNG(std::list<AccessibilityElementInf
                 }
                 nodeInfo.AddChild(virtualNode->GetAccessibilityId());
                 auto uiParentNode = AceType::DynamicCast<NG::UINode>(frameNodeParent);
-                CheckAndUpdateVirtualNodeInfo(infos, virtualInfo, uiVirtualNode, commonProperty, ngPipeline)
+                if (!uiVirtualNode->GetChildren(true).empty()) {
+                    UpdateVirtualNodeInfo(infos, virtualInfo, uiVirtualNode, commonProperty, ngPipeline);
+                }
                 infos.push_back(virtualInfo);
                 infos.push_back(nodeInfo);
                 continue;
