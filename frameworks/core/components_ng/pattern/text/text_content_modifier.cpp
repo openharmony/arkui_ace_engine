@@ -367,7 +367,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
                 contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
             canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         }
-        if (!textRacing_) {
+        if (!CheckMarqueeState(MarqueeState::RUNNING)) {
             auto paintOffsetY = paintOffset_.GetY();
             auto paragraphs = pManager->GetParagraphs();
             for (auto&& info : paragraphs) {
@@ -772,11 +772,10 @@ void TextContentModifier::SetContentSize(SizeF& value)
 
 void TextContentModifier::StartTextRace()
 {
-    if (textRacing_) {
+    if (!CheckMarqueeState(MarqueeState::IDLE) && !CheckMarqueeState(MarqueeState::STOPPED)) {
         return;
     }
 
-    textRacing_ = true;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         UpdateImageNodeVisible(VisibleType::VISIBLE);
     }
@@ -794,14 +793,14 @@ void TextContentModifier::StartTextRace()
     option.SetIteration(-1);
     option.SetTempo(RACE_TEMPO);
     raceAnimation_ = AnimationUtils::StartAnimation(option, [&]() { racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX); });
+    SetMarqueeState(MarqueeState::RUNNING);
 }
 
 void TextContentModifier::StopTextRace()
 {
-    if (!textRacing_) {
+    if (!CheckMarqueeState(MarqueeState::RUNNING) && !CheckMarqueeState(MarqueeState::PAUSED)) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_TEXT, "StartTextRace:%{public}d", textRacing_);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         UpdateImageNodeVisible(VisibleType::VISIBLE);
     }
@@ -809,28 +808,28 @@ void TextContentModifier::StopTextRace()
         AnimationUtils::StopAnimation(raceAnimation_);
     }
 
-    textRacing_ = false;
+    SetMarqueeState(MarqueeState::STOPPED);
     racePercentFloat_->Set(RACE_MOVE_PERCENT_MIN);
 }
 
 void TextContentModifier::ResumeAnimation()
 {
     CHECK_NULL_VOID(raceAnimation_);
-    if (textRacing_) {
+    if (!CheckMarqueeState(MarqueeState::PAUSED)) {
         return;
     }
     AnimationUtils::ResumeAnimation(raceAnimation_);
-    textRacing_ = true;
+    SetMarqueeState(MarqueeState::RUNNING);
 }
 
 void TextContentModifier::PauseAnimation()
 {
     CHECK_NULL_VOID(raceAnimation_);
-    if (!textRacing_) {
+    if (!CheckMarqueeState(MarqueeState::RUNNING)) {
         return;
     }
     AnimationUtils::PauseAnimation(raceAnimation_);
-    textRacing_ = false;
+    SetMarqueeState(MarqueeState::PAUSED);
 }
 
 float TextContentModifier::GetTextRacePercent()
@@ -861,5 +860,17 @@ void TextContentModifier::AddDefaultShadow()
     AttachProperty(offsetX);
     AttachProperty(offsetY);
     AttachProperty(color);
+}
+
+void TextContentModifier::SetMarqueeState(MarqueeState state)
+{
+    auto prevState = marqueeState_;
+    marqueeState_ = state;
+    auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    TAG_LOGI(AceLogTag::ACE_TEXT, "SetMarqueeState: id %{public}d, from state %{public}d to state %{public}d",
+        host->GetId(), prevState, state);
 }
 } // namespace OHOS::Ace::NG

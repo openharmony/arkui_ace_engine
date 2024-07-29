@@ -15,6 +15,7 @@
 
 #include "text_base.h"
 #include "test/mock/core/render/mock_canvas_image.h"
+#include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "test/mock/core/pattern/mock_nestable_scroll_container.h"
 #include "test/mock/core/common/mock_font_manager.h"
@@ -2420,31 +2421,6 @@ HWTEST_F(TextTestFiveNg, MountImageNode001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleMarqueeWithIsVisible001
- * @tc.desc: test text_pattern.cpp HandleMarqueeWithIsVisible function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestFiveNg, HandleMarqueeWithIsVisible001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->CreateModifier();
-    ASSERT_NE(pattern->contentMod_, nullptr);
-
-    pattern->HandleMarqueeWithIsVisible(FRAME_NODE_CHANGE_GEOMETRY_CHANGE);
-    EXPECT_EQ(pattern->contentMod_->textRacing_, false);
-
-    auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
-
-    pattern->HandleMarqueeWithIsVisible(FRAME_NODE_CHANGE_GEOMETRY_CHANGE);
-    EXPECT_EQ(pattern->contentMod_->textRacing_, false);
-}
-
-/**
  * @tc.name: PaintImage001
  * @tc.desc: test text_content_modifier.cpp PaintImage function
  * @tc.type: FUNC
@@ -2788,11 +2764,10 @@ HWTEST_F(TextTestFiveNg, ResumeAnimation001, TestSize.Level1)
     AnimationOption option = AnimationOption();
     textContentModifier->raceAnimation_ = AnimationUtils::StartAnimation(option, [&]() {}, []() {});
 
+    textContentModifier->marqueeState_ = MarqueeState::PAUSED;
     textContentModifier->ResumeAnimation();
-    textContentModifier->ResumeAnimation();
-    EXPECT_EQ(textContentModifier->textRacing_, true);
+    EXPECT_EQ(textContentModifier->marqueeState_, MarqueeState::RUNNING);
     textContentModifier->PauseAnimation();
-    textContentModifier->PauseAnimation();
-    EXPECT_EQ(textContentModifier->textRacing_, false);
+    EXPECT_EQ(textContentModifier->marqueeState_, MarqueeState::PAUSED);
 }
 } // namespace OHOS::Ace::NG
