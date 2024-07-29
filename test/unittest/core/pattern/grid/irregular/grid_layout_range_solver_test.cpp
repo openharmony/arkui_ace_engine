@@ -373,6 +373,34 @@ HWTEST_F(GridLayoutRangeTest, ChangeTemplate001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MeasureToTarget001
+ * @tc.desc: Test measure to target
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, MeasureToTarget001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo14());
+    model.SetColumnsGap(Dimension { 10.0f });
+    model.SetRowsGap(Dimension { 20.0f });
+    constexpr float itemHeight = 790.0f;
+    CreateFixedHeightItems(22, itemHeight);
+    CreateFixedHeightItems(1, (itemHeight + 20.0f) * 6);
+    CreateFixedHeightItems(77, itemHeight);
+    CreateDone(frameNode_);
+    pattern_->ScrollToIndex(23, true);
+    EXPECT_EQ(pattern_->targetIndex_, 23);
+    FlushLayoutTask(frameNode_);
+    const auto& info = pattern_->gridLayoutInfo_;
+    for (int i = 0; i < 24; ++i) {
+        auto it = info.FindInMatrix(i);
+        EXPECT_NE(it, info.gridMatrix_.end());
+    }
+    EXPECT_FLOAT_EQ(info.GetAnimatePosIrregular(23, GRID_HEIGHT, ScrollAlign::AUTO, 20.0f), 11350.0f);
+}
+
+/**
  * @tc.name: Cache001
  * @tc.desc: Test Grid preload items
  * @tc.type: FUNC
