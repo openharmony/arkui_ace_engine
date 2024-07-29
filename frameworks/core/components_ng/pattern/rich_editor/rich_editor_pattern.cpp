@@ -2737,6 +2737,7 @@ void RichEditorPattern::HandleBlurEvent()
     }
 
     CloseSelectOverlay();
+    ResetSelection();
 
     if (reason != BlurReason::WINDOW_BLUR) {
         lastSelectionRange_.reset();

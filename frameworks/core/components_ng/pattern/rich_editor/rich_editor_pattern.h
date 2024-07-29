@@ -368,15 +368,20 @@ public:
     void NotifyKeyboardClosedByUser() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosedByUser");
-        CloseSelectOverlay();
-        ResetSelection();
         FocusHub::LostFocusToViewRoot();
     }
     void NotifyKeyboardClosed() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
-        if (!isCustomKeyboardAttached_ && caretTwinkling_) {
-            StopTwinkling();
+        CHECK_NULL_VOID(HasFocus());
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto windowManager = pipelineContext->GetWindowManager();
+        CHECK_NULL_VOID(windowManager);
+
+        // lost focus in floating window mode
+        if (windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+            FocusHub::LostFocusToViewRoot();
         }
     }
     void ClearOperationRecords();
