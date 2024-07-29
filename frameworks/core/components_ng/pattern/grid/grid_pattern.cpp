@@ -42,6 +42,8 @@ namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 
+const int32_t MAX_NUM_SIZE = 4;
+
 double CalcCoordinatesDistance(double curFocusMain, double curFocusCross, double childMain, double childCross)
 {
     return std::sqrt(std::pow((curFocusMain - childMain), 2) + std::pow((curFocusCross - childCross), 2));
@@ -1670,6 +1672,12 @@ void GridPattern::DumpAdvanceInfo()
     auto property = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(property);
     ScrollablePattern::DumpAdvanceInfo();
+    if (!property->HasLayoutOptions()) {
+        DumpLog::GetInstance().AddDesc("GridLayoutOptions:null");
+    } else {
+        DumpLog::GetInstance().AddDesc("GridLayoutOptions:true");
+        DumpLog::GetInstance().AddDesc(GetIrregularIndexesString());
+    }
     supportAnimation_ ? DumpLog::GetInstance().AddDesc("supportAnimation:true")
                       : DumpLog::GetInstance().AddDesc("supportAnimation:false");
     isConfigScrollable_ ? DumpLog::GetInstance().AddDesc("isConfigScrollable:true")
@@ -1788,6 +1796,33 @@ void GridPattern::DumpAdvanceInfo()
         }
         DumpLog::GetInstance().AddDesc("-----------end print irregularItemsPosition_------------");
     }
+}
+
+std::string GridPattern::GetIrregularIndexesString() const
+{
+    auto property = GetLayoutProperty<GridLayoutProperty>();
+    if (!property || !property->HasLayoutOptions()) {
+        return std::string("");
+    }
+    const auto& options = *property->GetLayoutOptions();
+    if (options.irregularIndexes.empty()) {
+        return std::string("");
+    }
+    std::string irregularIndexes = std::string("IrregularIndexes: [");
+    int count = 0;
+    for (const auto& index : options.irregularIndexes) {
+        if (count > 0) {
+            irregularIndexes.append(", ");
+        }
+        irregularIndexes.append(std::to_string(index));
+        count++;
+        if (count == MAX_NUM_SIZE) {
+            irregularIndexes.append("...");
+            break;
+        }
+    }
+    irregularIndexes.append("]");
+    return irregularIndexes;
 }
 
 std::string GridPattern::ProvideRestoreInfo()
