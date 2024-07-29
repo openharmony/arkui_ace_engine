@@ -2766,7 +2766,10 @@ void RichEditorPattern::HandleFocusEvent()
         lastFontScale_ = currentFontScale;
     }
     if (isCaretInContentArea_ && isFontScaleChanged) {
-        MoveCaretToContentRect(CARET_BOTTOM_DISTANCE.ConvertToPx(), SCROLL_FROM_NONE);
+        auto host = GetHost();
+        if (host) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
     }
     if (!usingMouseRightButton_ && !isLongPress_ && !isDragging_ && !dataDetectorAdapter_->hasClickedMenuOption_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Handle Focus Event, Request keyboard.");
