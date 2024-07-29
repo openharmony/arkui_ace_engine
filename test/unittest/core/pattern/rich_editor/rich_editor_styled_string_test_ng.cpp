@@ -188,7 +188,7 @@ HWTEST_F(RichEditorStyledStringTestNg, RichEditorModel001, TestSize.Level1)
      */
     EXPECT_FALSE(eventHub->onSelect_);
     EXPECT_FALSE(eventHub->aboutToIMEInput_);
-    EXPECT_FALSE(eventHub->onIMEIputComplete_);
+    EXPECT_FALSE(eventHub->onIMEInputComplete_);
     EXPECT_FALSE(eventHub->aboutToDelete_);
     EXPECT_FALSE(eventHub->onDeleteComplete_);
     EXPECT_FALSE(eventHub->onWillChange_);
