@@ -1601,6 +1601,7 @@ private:
     bool GetTouchInnerPreviewText(const Offset& offset) const;
     bool IsShowMenu(const std::optional<SelectionOptions>& options);
     bool IsContentRectNonPositive();
+    bool IsHandleDragging();
 
     RectF frameRect_;
     RectF textRect_;
