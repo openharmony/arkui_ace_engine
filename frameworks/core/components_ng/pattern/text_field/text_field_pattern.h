@@ -608,7 +608,7 @@ public:
     void NotifyKeyboardClosed() override
     {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosed");
-        if (HasFocus()) {
+        if (HasFocus() && !(customKeyboard_ || customKeyboardBuilder_)) {
             FocusHub::LostFocusToViewRoot();
         }
     }
