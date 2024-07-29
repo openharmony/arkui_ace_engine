@@ -94,6 +94,7 @@ void AnimateToInner(ArkUIContext* context, AnimationOption& option, const std::f
         context->PrepareOpenImplicitAnimation();
     });
     pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishFunc);
+    auto previousOption = pipelineContext->GetSyncAnimationOption();
     pipelineContext->SetSyncAnimationOption(option);
     // Execute the function.
     animateToFunc();
@@ -118,7 +119,7 @@ void AnimateToInner(ArkUIContext* context, AnimationOption& option, const std::f
         context->PrepareCloseImplicitAnimation();
     });
     pipelineContext->CloseImplicitAnimation();
-    pipelineContext->SetSyncAnimationOption(AnimationOption());
+    pipelineContext->SetSyncAnimationOption(previousOption);
     if (immediately) {
         pipelineContext->FlushMessages();
     } else {
