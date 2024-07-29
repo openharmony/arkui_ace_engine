@@ -1904,8 +1904,6 @@ void SwiperPattern::InitIndicator()
     CHECK_NULL_VOID(props);
     if (props->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DOT) {
         SwiperHelper::SaveDotIndicatorProperty(indicatorNode, *this);
-    } else if (props->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::ARC_DOT) {
-        SaveCircleDotIndicatorProperty(indicatorNode);
     } else {
         SwiperHelper::SaveDigitIndicatorProperty(indicatorNode, *this);
     }
@@ -5178,10 +5176,6 @@ void SwiperPattern::DumpAdvanceInfo()
                 DumpLog::GetInstance().AddDesc("SwiperIndicatorType:DIGIT");
                 break;
             }
-            case SwiperIndicatorType::ARC_DOT: {
-                DumpLog::GetInstance().AddDesc("SwiperIndicatorType:ARC_DOT");
-                break;
-            }
             default: {
                 break;
             }
@@ -5771,8 +5765,6 @@ void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     const char* indicator = "indicator";
     if (indicatorType == SwiperIndicatorType::DOT) {
         json->PutExtAttr(indicator, GetDotIndicatorStyle().c_str(), filter);
-    } else if (indicatorType == SwiperIndicatorType::ARC_DOT) {
-        json->PutExtAttr(indicator, GetArcDotIndicatorStyle().c_str(), filter);
     } else {
         json->PutExtAttr(indicator, GetDigitIndicatorStyle().c_str(), filter);
     }
