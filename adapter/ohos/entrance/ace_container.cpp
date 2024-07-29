@@ -31,6 +31,8 @@
 #include "ui_extension_context.h"
 #include "window_manager.h"
 #include "wm/wm_common.h"
+#include "root_scene.h"
+#include "ws_common.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
@@ -1166,15 +1168,9 @@ UIContentErrorCode AceContainer::RunPage(
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
 
-    if (front->GetType() != FrontendType::DECLARATIVE_CJ && !isFormRender && isStageModel) {
-        if (isNamedRouter) {
-            RefPtr<OHOS::Ace::DeclarativeFrontend> declarativeFront = AceType::DynamicCast<DeclarativeFrontend>(front);
-            CHECK_NULL_RETURN(declarativeFront, UIContentErrorCode::NULL_POINTER);
-            std::string name = declarativeFront->GetJsEngine()->SearchRouterRegisterMap(content);
-            CHECK_NULL_RETURN(name.size(), UIContentErrorCode::INVALID_URL);
-        } else {
-            CHECK_NULL_RETURN(CheckUrlValid(content, container->GetHapPath()), UIContentErrorCode::INVALID_URL);
-        }
+    if (front->GetType() != FrontendType::DECLARATIVE_CJ && !isFormRender && !isNamedRouter &&
+        isStageModel && !CheckUrlValid(content, container->GetHapPath())) {
+        return UIContentErrorCode::INVALID_URL;
     }
     
     if (isNamedRouter) {
@@ -2264,6 +2260,28 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaTyp
         return safeAreaInsets;
     }
     return {};
+}
+
+Rect AceContainer::GetSessionAvoidAreaByType(uint32_t safeAreaType)
+{
+    Rosen::WSRect avoidArea;
+    Rect sessionAvoidArea;
+    if (safeAreaType == NG::SAFE_AREA_TYPE_SYSTEM) {
+        auto ret =
+            Rosen::RootScene::staticRootScene_->GetSessionRectByType(Rosen::AvoidAreaType::TYPE_SYSTEM, avoidArea);
+        if (ret == Rosen::WMError::WM_OK) {
+            sessionAvoidArea.SetRect(avoidArea.posX_, avoidArea.posY_, avoidArea.width_, avoidArea.height_);
+        }
+    } else if (safeAreaType == NG::SAFE_AREA_TYPE_KEYBOARD) {
+        auto ret =
+            Rosen::RootScene::staticRootScene_->GetSessionRectByType(Rosen::AvoidAreaType::TYPE_KEYBOARD, avoidArea);
+        if (ret == Rosen::WMError::WM_OK) {
+            sessionAvoidArea.SetRect(avoidArea.posX_, avoidArea.posY_, avoidArea.width_, avoidArea.height_);
+        }
+    }
+    LOGI("GetSessionAvoidAreaByType safeAreaType: %{public}u, sessionAvoidArea; %{public}s", safeAreaType,
+        sessionAvoidArea.ToString().c_str());
+    return sessionAvoidArea;
 }
 
 NG::SafeAreaInsets AceContainer::GetKeyboardSafeArea()

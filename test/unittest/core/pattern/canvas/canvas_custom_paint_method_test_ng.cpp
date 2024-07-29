@@ -1234,6 +1234,112 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest031, TestSize
 }
 
 /**
+ * @tc.name: CanvasCustomPaintMethodTest032
+ * @tc.desc: Test the function 'Ellipse' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest032, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    EllipseParam param;
+    Testing::MockPath path;
+    Testing::MockMatrix matrix;
+    /**
+     * @tc.steps2: Call the function Ellipse.
+     * @tc.expected: return value are as expected.
+     */
+    param.x = 1.0;
+    param.y = 1.0;
+    param.startAngle = 5.0;
+    param.endAngle = 5.0;
+    param.rotation = 1.0;
+    param.anticlockwise = true;
+
+    EXPECT_CALL(matrix, Rotate(_, _, _)).WillRepeatedly(Return());
+    EXPECT_CALL(path, Transform(_)).WillRepeatedly(Return());
+    paintMethod->Ellipse(param);
+    param.endAngle = M_PI * MAX_WIDTH;
+    EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest033
+ * @tc.desc: Test the function 'RestoreMatrix' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    paintMethod->SaveMatrix();
+    paintMethod->RestoreMatrix();
+    paintMethod->RestoreMatrix();
+    EXPECT_TRUE(paintMethod->matrixStates_.empty());
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest034
+ * @tc.desc: Test the function 'PutImageData' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest034, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    Ace::ImageData imageData1;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    imageData1.pixelMap = pixelMap;
+    paintMethod->PutImageData(imageData1);
+    EXPECT_TRUE(imageData1.data.empty());
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest035
+ * @tc.desc: Test the function 'TranslateMatrix' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest035, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+
+    /**
+     * @tc.steps2: Call the function TranslateMatrix.
+     */
+    double tx = .0;
+    double ty = .0;
+    paintMethod->TranslateMatrix(tx, ty);
+    ty = 1.0;
+    paintMethod->TranslateMatrix(tx, ty);
+    tx = 1.0;
+    ty = .0;
+    paintMethod->TranslateMatrix(tx, ty);
+    ty = 1.0;
+    paintMethod->TranslateMatrix(tx, ty);
+    EXPECT_STREQ(paintMethod->filterParam_.c_str(), "");
+}
+
+/**
  * @tc.name: CanvasCustomPaintMethodTest036
  * @tc.desc: Test the function 'SetPaintImage' of the class 'CustomPaintPaintMethod'.
  * @tc.type: FUNC

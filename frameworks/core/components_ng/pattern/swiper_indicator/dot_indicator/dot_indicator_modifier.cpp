@@ -327,6 +327,7 @@ void DotIndicatorModifier::UpdateShrinkPaintProperty(
 {
     indicatorMargin_->Set(margin);
     indicatorPadding_->Set(static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx()));
+
     if (longPointLeftAnimEnd_ && longPointRightAnimEnd_) {
         vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
         longPointLeftCenterX_->Set(longPointCenterX.first);
@@ -347,6 +348,7 @@ void DotIndicatorModifier::UpdateDilatePaintProperty(
 {
     indicatorMargin_->Set({ 0, 0 });
     indicatorPadding_->Set(static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()));
+
     vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
     if (longPointLeftAnimEnd_ && longPointRightAnimEnd_) {
         longPointLeftCenterX_->Set(longPointCenterX.first);

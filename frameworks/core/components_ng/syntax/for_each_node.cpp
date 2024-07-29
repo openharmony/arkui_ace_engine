@@ -60,6 +60,7 @@ RefPtr<ForEachNode> ForEachNode::GetOrCreateRepeatNode(int32_t nodeId)
 void ForEachNode::CreateTempItems()
 {
     std::swap(ids_, tempIds_);
+    TraversingCheck();
     std::swap(ModifyChildren(), tempChildren_);
 
     // RepeatNode only
@@ -95,6 +96,7 @@ void ForEachNode::CompareAndUpdateChildren()
     std::map<std::string, RefPtr<UINode>> oldNodeByIdMap;
     MakeNodeMapById(tempChildren_, tempIds_, oldNodeByIdMap);
     // swap new children to tempChildren, old children back to children
+    TraversingCheck();
     std::swap(children, tempChildren_);
 
     for (const auto& newId : ids_) {
@@ -270,6 +272,7 @@ void ForEachNode::MoveData(int32_t from, int32_t to)
     auto fromIter = children.begin();
     std::advance(fromIter, from);
     auto child = *fromIter;
+    TraversingCheck(child);
     children.erase(fromIter);
     auto toIter = children.begin();
     std::advance(toIter, to);
