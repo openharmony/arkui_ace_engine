@@ -233,10 +233,11 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         int32_t startIndex = std::min(GetLoopIndex(itemPositionInAnimation_.begin()->first), realTotalCount_ - 1);
         int32_t endIndex = std::min(GetLoopIndex(itemPositionInAnimation_.rbegin()->first), realTotalCount_ - 1);
         while (startIndex + 1 < realTotalCount_ &&
-               itemPositionInAnimation_.find(startIndex + 1) != itemPositionInAnimation_.end()) {
+            itemPositionInAnimation_.find(startIndex + 1) != itemPositionInAnimation_.end()) {
             startIndex++;
         }
-        while (endIndex - 1 >= 0 && itemPositionInAnimation_.find(endIndex - 1) != itemPositionInAnimation_.end()) {
+        while (endIndex - 1 >= 0 &&
+            itemPositionInAnimation_.find(endIndex - 1) != itemPositionInAnimation_.end()) {
             endIndex--;
         }
         CheckCachedItem(endIndex, startIndex, layoutWrapper);
@@ -354,8 +355,8 @@ void SwiperLayoutAlgorithm::MeasureTabsCustomAnimation(LayoutWrapper* layoutWrap
     }
 }
 
-void SwiperLayoutAlgorithm::MeasureSwiperCustomAnimation(
-    LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
+void SwiperLayoutAlgorithm::MeasureSwiperCustomAnimation(LayoutWrapper* layoutWrapper,
+    const LayoutConstraintF& layoutConstraint)
 {
     std::set<int32_t> measureIndexSet;
     for (const auto& pos : itemPosition_) {
@@ -971,8 +972,8 @@ void SwiperLayoutAlgorithm::LayoutSwiperIndicator(
     }
 }
 
-void SwiperLayoutAlgorithm::LayoutItem(
-    LayoutWrapper* layoutWrapper, Axis axis, OffsetF offset, std::pair<int32_t, SwiperItemInfo> pos)
+void SwiperLayoutAlgorithm::LayoutItem(LayoutWrapper* layoutWrapper, Axis axis, OffsetF offset,
+    std::pair<int32_t, SwiperItemInfo> pos)
 {
     auto layoutIndex = GetLoopIndex(pos.first);
     if (swipeByGroup_ && layoutIndex >= realTotalCount_) {

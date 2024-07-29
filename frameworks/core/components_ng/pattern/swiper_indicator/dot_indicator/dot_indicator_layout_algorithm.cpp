@@ -30,8 +30,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
-constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
 constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
+constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
 } // namespace
 void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -67,6 +67,7 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         userSelectedItemHeight = theme->GetSize().ConvertToPx();
     }
     auto indicatorPadding = INDICATOR_PADDING_HOVER;
+
     // To the size of the hover after the layout, in order to prevent the components after the hover draw boundaries
     userItemWidth *= INDICATOR_ZOOM_IN_SCALE;
     userItemHeight *= INDICATOR_ZOOM_IN_SCALE;
