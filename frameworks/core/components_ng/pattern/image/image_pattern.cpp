@@ -331,6 +331,14 @@ RectF ImagePattern::CalcImageContentPaintSize(const RefPtr<GeometryNode>& geomet
     return paintSize;
 }
 
+void ImagePattern::ClearAltData()
+{
+    altLoadingCtx_ = nullptr;
+    altImage_ = nullptr;
+    altDstRect_.reset();
+    altSrcRect_.reset();
+}
+
 void ImagePattern::OnImageLoadSuccess()
 {
     CHECK_NULL_VOID(loadingCtx_);
@@ -354,15 +362,12 @@ void ImagePattern::OnImageLoadSuccess()
     }
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo(), loadingCtx_->GetFrameCount());
+    UpdateSvgSmoothEdgeValue();
     PrepareAnimation(image_);
     if (host->IsDraggable()) {
         EnableDrag();
     }
-    // clear alt data
-    altLoadingCtx_ = nullptr;
-    altImage_ = nullptr;
-    altDstRect_.reset();
-    altSrcRect_.reset();
+    ClearAltData();
 
     if (IsSupportImageAnalyzerFeature()) {
         if (isPixelMapChanged_) {
@@ -468,6 +473,19 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     if (altLoadingCtx_) {
         altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
     }
+}
+
+void ImagePattern::UpdateSvgSmoothEdgeValue()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID(theme);
+    auto renderProp = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(renderProp);
+    renderProp->UpdateSmoothEdge(std::max(theme->GetMinEdgeAntialiasing(), renderProp->GetSmoothEdge().value_or(0.0f)));
 }
 
 void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect,
