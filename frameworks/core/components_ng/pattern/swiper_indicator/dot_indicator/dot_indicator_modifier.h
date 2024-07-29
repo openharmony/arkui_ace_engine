@@ -22,6 +22,7 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+
 namespace OHOS::Ace::NG {
 constexpr int32_t ITEM_SIZE = 4;
 constexpr float INIT_SIZE_RATE = 1.0f;
@@ -275,15 +276,6 @@ public:
     {
         animationDuration_ = duration;
     }
-    void PlayIndicatorAnimation(const LinearVector<float>& vectorBlackPointCenterX,
-        const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState,
-        TouchBottomTypeLoop touchBottomTypeLoop);
-    virtual void StopAnimation(bool ifImmediately = false);
-    void SetLongPointHeadCurve(RefPtr<Curve> curve, float motionVelocity)
-    {
-        headCurve_ = curve;
-        motionVelocity_ = motionVelocity;
-    }
 
     inline void UpdateVectorBlackPointCenterX(const LinearVector<float>& value)
     {
@@ -293,6 +285,16 @@ public:
     std::pair<float, float> GetLongPointCenterX()
     {
         return { longPointLeftCenterX_->Get(), longPointRightCenterX_->Get() };
+    }
+
+    void PlayIndicatorAnimation(const LinearVector<float>& vectorBlackPointCenterX,
+        const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState,
+        TouchBottomTypeLoop touchBottomTypeLoop);
+    virtual void StopAnimation(bool ifImmediately = false);
+    void SetLongPointHeadCurve(RefPtr<Curve> curve, float motionVelocity)
+    {
+        headCurve_ = curve;
+        motionVelocity_ = motionVelocity;
     }
 
     void SetIsOverlong(bool isOverlong)

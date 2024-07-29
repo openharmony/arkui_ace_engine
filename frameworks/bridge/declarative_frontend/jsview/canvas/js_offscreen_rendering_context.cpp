@@ -154,8 +154,8 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
 
     double width = 0.0;
     double height = 0.0;
+    double density = jsRenderContext->GetDensity();
     if (args.GetDoubleArg(0, width) && args.GetDoubleArg(1, height)) {
-        double density = jsRenderContext->GetDensity();
         width *= density;
         height *= density;
         jsRenderContext->SetWidth(width);
@@ -172,15 +172,17 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
         offscreenPatternMap_[offscreenPatternCount_++] = offscreenPattern;
     }
     auto* jsContextSetting = args.UnwrapArg<JSRenderingContextSettings>(2);
-    CHECK_NULL_VOID(jsContextSetting);
-    bool anti = jsContextSetting->GetAntialias();
-    jsRenderContext->SetAnti(anti);
-    jsRenderContext->SetAntiAlias();
+    if (jsContextSetting) {
+        bool anti = jsContextSetting->GetAntialias();
+        jsRenderContext->SetAnti(anti);
+        jsRenderContext->SetAntiAlias();
 
-    int32_t unit = 0;
-    if (args.GetInt32Arg(3, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) { // 3: index of parameter
-        jsRenderContext->SetUnit(CanvasUnit::PX);
+        int32_t unit = 0;
+        if (args.GetInt32Arg(3, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) { // 3: index of parameter
+            jsRenderContext->SetUnit(CanvasUnit::PX);
+        }
     }
+    jsRenderContext->SetCanvasDensity(density);
 }
 
 void JSOffscreenRenderingContext::Destructor(JSOffscreenRenderingContext* context)

@@ -70,7 +70,6 @@ public:
             auto maxDisplayCount = swiperPattern->GetMaxDisplayCount();
             maxDisplayCount > 0 ? indicatorLayoutAlgorithm->SetIndicatorDisplayCount(maxDisplayCount)
                                 : indicatorLayoutAlgorithm->SetIndicatorDisplayCount(swiperPattern->TotalCount());
-
             return indicatorLayoutAlgorithm;
         } else {
             auto indicatorLayoutAlgorithm = MakeRefPtr<DigitIndicatorLayoutAlgorithm>();

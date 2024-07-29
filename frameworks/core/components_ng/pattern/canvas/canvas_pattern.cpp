@@ -1201,4 +1201,9 @@ void CanvasPattern::UpdateTextDefaultDirection()
     }
     SetTextDirection(TextDirection::INHERIT);
 }
+
+void CanvasPattern::SetDensity(double density)
+{
+    paintMethod_->SetDensity(density);
+}
 } // namespace OHOS::Ace::NG

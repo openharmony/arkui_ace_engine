@@ -384,6 +384,9 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     BaseTextSelectOverlay::OnCloseOverlay(menuType, reason, info);
+    if (pattern->GetTextDetectEnable() && !pattern->HasFocus()) {
+        pattern->ResetSelection();
+    }
     if (reason == CloseReason::CLOSE_REASON_BACK_PRESSED) {
         pattern->ResetSelection();
         if (pattern->IsEditing()) {

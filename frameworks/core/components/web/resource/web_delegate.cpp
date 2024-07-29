@@ -5725,6 +5725,13 @@ bool WebDelegate::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> 
 #endif
 }
 
+void WebDelegate::HideHandleAndQuickMenuIfNecessary(bool hide)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->HideHandleAndQuickMenuIfNecessary(hide);
+}
+
 void WebDelegate::OnQuickMenuDismissed()
 {
 #ifdef NG_BUILD

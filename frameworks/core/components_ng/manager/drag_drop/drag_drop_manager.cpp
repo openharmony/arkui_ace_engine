@@ -14,14 +14,17 @@
  */
 
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "drag_drop_manager.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/point.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/common/layout/grid_column_info.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -54,6 +57,7 @@ constexpr float MAX_DISTANCE_TO_PRE_POINTER = 3.0f;
 constexpr float DEFAULT_SPRING_RESPONSE = 0.347f;
 constexpr float MIN_SPRING_RESPONSE = 0.002f;
 constexpr float DEL_SPRING_RESPONSE = 0.005f;
+constexpr int64_t DEVICEID_MASK = 0xFFFFFFFF;
 } // namespace
 
 RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
@@ -1507,7 +1511,7 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
     if (badgeNode) {
         dragPreviewInfo.textNode = badgeNode;
     }
-    double maxWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
+    double maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(imageNode->GetContextRefPtr());
     auto width = imageNode->GetGeometryNode()->GetFrameRect().Width();
     dragPreviewInfo.scale = static_cast<float>(imageNode->GetPreviewScaleVal());
     if (!isMouseDragged_ && dragPreviewInfo.scale == 1.0f) {
@@ -1681,8 +1685,8 @@ void DragDropManager::DoDragStartAnimation(
     const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event, bool isSubwindowOverlay)
 {
     auto containerId = Container::CurrentId();
-    auto deviceId = event.GetDeviceId();
-    if (deviceId == 0xFFFFFFFF) {
+    auto deviceId = event.GetDeviceId() & DEVICEID_MASK;
+    if (deviceId == 0xAAAAAAFF) {
         isDragFwkShow_ = false;
         TransDragWindowToDragFwk(containerId);
         return;
@@ -2012,4 +2016,34 @@ bool DragDropManager::IsUIExtensionComponent(const RefPtr<NG::UINode>& node)
     return (V2::UI_EXTENSION_COMPONENT_ETS_TAG == node->GetTag() || V2::EMBEDDED_COMPONENT_ETS_TAG == node->GetTag()) &&
            (!IsUIExtensionShowPlaceholder(node));
 }
+
+double DragDropManager::GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& pipeline)
+{
+    auto context = DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(context, -1.0f);
+    auto dragDropMgr = context->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropMgr, -1.0f);
+    auto& columnInfo = dragDropMgr->columnInfo_;
+    if (!columnInfo) {
+        columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::DRAG_PANEL);
+        auto gridContainer = columnInfo->GetParent();
+        if (gridContainer) {
+            // cannot handle multi-screen
+            gridContainer->BuildColumnWidth(context->GetRootWidth());
+        }
+        dragDropMgr->columnInfo_ = columnInfo;
+    }
+
+    auto gridSizeType = GridSystemManager::GetInstance().GetCurrentSize();
+    if (gridSizeType > GridSizeType::LG) {
+        gridSizeType = GridSizeType::LG;
+    }
+    if (gridSizeType < GridSizeType::SM) {
+        gridSizeType = GridSizeType::SM;
+    }
+    auto columns = columnInfo->GetColumns(gridSizeType);
+    double maxWidth = columnInfo->GetWidth(columns);
+    return maxWidth;
+}
+
 } // namespace OHOS::Ace::NG

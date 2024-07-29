@@ -59,7 +59,7 @@ static bool CheckInternalDragging(const RefPtr<Container>& container)
 void GetShadowInfoArray(
     std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction, std::vector<ShadowInfoCore>& shadowInfos)
 {
-    auto minScaleWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
+    auto minScaleWidth = NG::DragDropFuncWrapper::GetScaleWidth(dragAction->instanceId);
     for (auto& pixelMap : dragAction->pixelMapList) {
         double scale = 1.0;
         if (pixelMap.GetRawPtr()) {
@@ -472,6 +472,13 @@ std::optional<EffectOption> DragDropFuncWrapper::BrulStyleToEffection(
     EffectOption bgEffection = {dimen, saturation, brightness, maskColor,
         blurStyleOp->adaptiveColor, blurStyleOp->blurOption};
     return std::optional<EffectOption>(bgEffection);
+}
+
+[[maybe_unused]] double DragDropFuncWrapper::GetScaleWidth(int32_t containerId)
+{
+    auto pipeline = Container::GetContainer(containerId)->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, -1.0f);
+    return DragDropManager::GetMaxWidthBaseOnGridSystem(pipeline);
 }
 
 } // namespace OHOS::Ace

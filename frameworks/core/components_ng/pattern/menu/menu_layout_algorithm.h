@@ -69,6 +69,7 @@ public:
 
     bool hierarchicalParameters_ = false;
     void InitHierarchicalParameters(bool isShowInSubWindow, const RefPtr<MenuPattern>& menuPattern);
+    bool CheckIsEmbeddedMode(LayoutWrapper* layoutWrapper);
 
 protected:
     float VerticalLayout(const SizeF& size, float clickPosition, bool IsContextMenu = false);

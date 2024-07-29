@@ -136,6 +136,7 @@ private:
     void PaintImage(RSCanvas& canvas, float x, float y);
     bool DrawImage(const RefPtr<FrameNode>& imageNode, RSCanvas& canvas, float x, float y, const RectF& rect);
     void PaintCustomSpan(DrawingContext& drawingContext);
+    void DrawTextRacing(DrawingContext& drawingContext);
 
     std::optional<Dimension> fontSize_;
     RefPtr<AnimatablePropertyFloat> fontSizeFloat_;

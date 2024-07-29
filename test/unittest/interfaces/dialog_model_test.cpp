@@ -492,3 +492,74 @@ HWTEST_F(DialogModelTest, DialogModelTest033, TestSize.Level1)
     Dispose(nativeDialogHandle);
     nativeDialogHandle = nullptr;
 }
+
+/**
+ * @tc.name: DialogModelTest034
+ * @tc.desc: Test RegisterOnWillDismissWithUserData function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest034, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    ArkUI_DialogDismissEvent nEvent;
+    int32_t ret =
+        RegisterOnWillDismissWithUserData(nativeDialogHandle, nEvent.userData, [](ArkUI_DialogDismissEvent* event) {});
+    ASSERT_EQ(ret, 0);
+    ret = RegisterOnWillDismissWithUserData(nullptr, nullptr, nullptr);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest035
+ * @tc.desc: Test ArkUI_DialogDismissEvent_SetShouldBlockDismiss function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest035, TestSize.Level1)
+{
+    ArkUI_DialogDismissEvent* nEvent = new ArkUI_DialogDismissEvent({ nullptr, 0, false });
+    OH_ArkUI_DialogDismissEvent_SetShouldBlockDismiss(nEvent, true);
+    ASSERT_TRUE(nEvent->BlockDismiss);
+    nEvent = nullptr;
+    OH_ArkUI_DialogDismissEvent_SetShouldBlockDismiss(nEvent, true);
+    ASSERT_TRUE(nEvent == nullptr);
+}
+
+/**
+ * @tc.name: DialogModelTest036
+ * @tc.desc: Test ArkUI_DialogDismissEvent_GetUserData function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest036, TestSize.Level1)
+{
+    struct ArkUICustomData {
+        float id;
+        int index;
+    };
+    auto customData = new ArkUICustomData { 12, 1 };
+    ArkUI_DialogDismissEvent* nEvent = new ArkUI_DialogDismissEvent({ nullptr, 0, false });
+    nEvent->userData = customData;
+    void* ret = OH_ArkUI_DialogDismissEvent_GetUserData(nEvent);
+    ASSERT_EQ(ret, nEvent->userData);
+    nEvent = nullptr;
+    ret = OH_ArkUI_DialogDismissEvent_GetUserData(nEvent);
+    ASSERT_TRUE(ret == nullptr);
+}
+
+/**
+ * @tc.name: DialogModelTest037
+ * @tc.desc: Test ArkUI_DialogDismissEvent_GetUserData function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest037, TestSize.Level1)
+{
+    ArkUI_DialogDismissEvent* nEvent = new ArkUI_DialogDismissEvent({ nullptr, 0, false });
+    int32_t ret = OH_ArkUI_DialogDismissEvent_GetDismissReason(nEvent);
+    ASSERT_EQ(ret, nEvent->reason);
+    nEvent = nullptr;
+    ret = OH_ArkUI_DialogDismissEvent_GetDismissReason(nEvent);
+    ASSERT_EQ(ret, -1);
+}
