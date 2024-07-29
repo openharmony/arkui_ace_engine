@@ -296,6 +296,15 @@ void SubwindowManager::UpdatePreviewPosition()
     }
 }
 
+bool SubwindowManager::GetMenuPreviewCenter(NG::OffsetF& offset)
+{
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        return subwindow->GetMenuPreviewCenter(offset);
+    }
+    return false;
+}
+
 void SubwindowManager::ClearMenuNG(int32_t instanceId, int32_t targetId, bool inWindow, bool showAnimation)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menu ng enter");

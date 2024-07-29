@@ -666,6 +666,16 @@ void SubwindowOhos::UpdatePreviewPosition()
     overlay->UpdatePixelMapPosition(true);
 }
 
+bool SubwindowOhos::GetMenuPreviewCenter(NG::OffsetF& offset)
+{
+    ContainerScope scope(childContainerId_);
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto overlay = pipelineContext->GetOverlayManager();
+    CHECK_NULL_RETURN(overlay, false);
+    return overlay->GetMenuPreviewCenter(offset);
+}
+
 void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float menuScale, bool isRedragStart)
 {
     ContainerScope scope(childContainerId_);
