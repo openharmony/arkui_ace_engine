@@ -206,6 +206,11 @@ public:
         return {};
     }
 
+    virtual Rect GetSessionAvoidAreaByType(uint32_t safeAreaType)
+    {
+        return {};
+    }
+
     virtual std::string GetHapPath() const
     {
         return {};
