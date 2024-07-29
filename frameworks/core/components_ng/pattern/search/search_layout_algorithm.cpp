@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -420,7 +421,9 @@ double SearchLayoutAlgorithm::CalcSearchHeight(
         searchHeightAdapt = std::max(searchHeightAdapt, CalcSearchAdaptHeight(layoutWrapper));
         renderContext->SetClipToBounds(false);
     } else {
-        renderContext->SetClipToBounds(true);
+        auto pattern = host->GetPattern<SearchPattern>();
+        CHECK_NULL_RETURN(pattern, 0.0);
+        renderContext->SetClipToBounds(!pattern->NeedFocusBox());
     }
 
     const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
