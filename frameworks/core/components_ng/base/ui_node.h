@@ -811,6 +811,8 @@ protected:
 
     virtual void PaintDebugBoundary(bool flag) {}
 
+    void TraversingCheck(RefPtr<UINode> node = nullptr, bool withAbort = false);
+
     PipelineContext* context_ = nullptr;
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,

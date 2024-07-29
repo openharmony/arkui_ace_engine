@@ -190,6 +190,24 @@ void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& s
     DoAddChild(it, child, false);
 }
 
+void UINode::TraversingCheck(RefPtr<UINode> node, bool withAbort)
+{
+    if (isTraversing_) {
+        if (node) {
+            LOGF("Try to remove the child([%{public}s][%{public}d]) of node [%{public}s][%{public}d] when its children "
+                "is traversing", node->GetTag().c_str(), node->GetId(), GetTag().c_str(), GetId());
+        } else {
+            LOGF("Try to remove all the children of node [%{public}s][%{public}d] when its children is traversing",
+                GetTag().c_str(), GetId());
+        }
+        OHOS::Ace::LogBacktrace();
+        
+        if (withAbort) {
+            abort();
+        }
+    }
+}
+
 std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child, bool allowTransition)
 {
     CHECK_NULL_RETURN(child, children_.end());
@@ -209,11 +227,7 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
         AddDisappearingChild(child, std::distance(children_.begin(), iter));
     }
     MarkNeedSyncRenderTree(true);
-    if (isTraversing_) {
-        LOGF("Try to remove the child([%{public}s][%{public}d]) of node [%{public}s][%{public}d] when its children "
-            "is traversing", (*iter)->GetTag().c_str(), (*iter)->GetId(), GetTag().c_str(), GetId());
-        abort();
-    }
+    TraversingCheck(*iter, true);
     auto result = children_.erase(iter);
     return result;
 }
@@ -397,6 +411,7 @@ void UINode::RemoveFromParentCleanly(const RefPtr<UINode>& child, const RefPtr<U
         auto& children = parent->ModifyChildren();
         auto iter = std::find(children.begin(), children.end(), child);
         if (iter != children.end()) {
+            parent->TraversingCheck(*iter);
             children.erase(iter);
         }
     }
@@ -567,7 +582,8 @@ void UINode::DetachFromMainTree(bool recursive)
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     isTraversing_ = true;
-    for (const auto& child : GetChildren()) {
+    std::list<RefPtr<UINode>> children = GetChildren();
+    for (const auto& child : children) {
         child->DetachFromMainTree(isRecursive);
     }
     isTraversing_ = false;
@@ -605,12 +621,15 @@ void UINode::MovePosition(int32_t slot)
 
         auto itSelf = std::find(it, children.end(), self);
         if (itSelf != children.end()) {
+            parentNode->TraversingCheck(*itSelf);
             children.erase(itSelf);
         } else {
+            parentNode->TraversingCheck(self);
             children.remove(self);
             ++it;
         }
     } else {
+        parentNode->TraversingCheck(self);
         children.remove(self);
     }
     children.insert(it, self);
