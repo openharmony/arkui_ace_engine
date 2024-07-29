@@ -1735,11 +1735,21 @@ void RichEditorPattern::UpdateImageStyle(RefPtr<FrameNode>& imageNode, const Ima
     if (updateSpanStyle_.marginProp.has_value()) {
         imageLayoutProperty->UpdateMargin(imageStyle.marginProp.value());
     }
-
+    UpdateImageAttribute(imageNode, imageStyle);
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
+}
+
+void RichEditorPattern::UpdateImageAttribute(RefPtr<FrameNode>& imageNode, const ImageSpanAttribute& imageStyle)
+{
+    CHECK_NULL_VOID(imageNode);
+    auto node = DynamicCast<ImageSpanNode>(imageNode);
+    CHECK_NULL_VOID(node);
+    auto imageSpanItem = DynamicCast<ImageSpanItem>(node->GetSpanItem());
+    CHECK_NULL_VOID(imageSpanItem);
+    imageSpanItem->options.imageAttribute = imageStyle;
 }
 
 bool RichEditorPattern::SymbolSpanUpdateStyle(
@@ -3404,14 +3414,22 @@ SelectionInfo RichEditorPattern::FromStyledString(const RefPtr<SpanString>& span
     if (spanString && !spanString->GetSpanItems().empty()) {
         auto spans = spanString->GetSpanItems();
         int32_t index = 0;
-        std::for_each(spans.begin(), spans.end(), [&index, &resultObjects](RefPtr<SpanItem>& item) {
-            CHECK_NULL_VOID(item);
-            auto obj = item->GetSpanResultObject(item->interval.first, item->interval.second);
-            obj.spanPosition.spanIndex = index;
-            ++index;
-            if (obj.isInit) {
-                resultObjects.emplace_back(obj);
-            }
+        std::for_each(spans.begin(), spans.end(),
+            [&index, &resultObjects, weak = WeakClaim(this)](RefPtr<SpanItem>& item) {
+                CHECK_NULL_VOID(item);
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto obj = item->GetSpanResultObject(item->interval.first, item->interval.second);
+                if (AceType::InstanceOf<ImageSpanItem>(item)) {
+                    obj.imageStyle = pattern->GetImageStyleBySpanItem(item);
+                } else if (!AceType::InstanceOf<CustomSpanItem>(item)) {
+                    obj.textStyle = pattern->GetTextStyleBySpanItem(item);
+                }
+                obj.spanPosition.spanIndex = index;
+                ++index;
+                if (obj.isInit) {
+                    resultObjects.emplace_back(obj);
+                }
         });
         if (spans.back()) {
             end = spans.back()->interval.second;
@@ -3425,6 +3443,81 @@ SelectionInfo RichEditorPattern::FromStyledString(const RefPtr<SpanString>& span
     selection.SetSelectionStart(start);
     selection.SetResultObjectList(resultObjects);
     return selection;
+}
+
+TextStyleResult RichEditorPattern::GetTextStyleBySpanItem(const RefPtr<SpanItem>& spanItem)
+{
+    TextStyleResult textStyle;
+    CHECK_NULL_RETURN(spanItem, textStyle);
+    auto theme = GetTheme<RichEditorTheme>();
+    TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
+    if (spanItem->fontStyle) {
+        textStyle.fontColor = spanItem->fontStyle->GetTextColor().value_or(style.GetTextColor()).ColorToString();
+        textStyle.fontSize =
+            spanItem->fontStyle->GetFontSize().value_or(Dimension(16.0f, DimensionUnit::VP)).ConvertToFp();
+        textStyle.fontStyle =
+            static_cast<int32_t>(spanItem->fontStyle->GetItalicFontStyle().value_or(OHOS::Ace::FontStyle::NORMAL));
+        textStyle.fontWeight = static_cast<int32_t>(spanItem->fontStyle->GetFontWeight().value_or(FontWeight::NORMAL));
+        std::string fontFamilyValue;
+        const std::vector<std::string> defaultFontFamily = { "HarmonyOS Sans" };
+        auto fontFamily = spanItem->fontStyle->GetFontFamily().value_or(defaultFontFamily);
+        for (const auto& str : fontFamily) {
+            fontFamilyValue += str;
+            fontFamilyValue += ",";
+        }
+        fontFamilyValue = fontFamilyValue.substr(0, fontFamilyValue.size() ? fontFamilyValue.size() - 1 : 0);
+        textStyle.fontFamily = !fontFamilyValue.empty() ? fontFamilyValue : defaultFontFamily.front();
+        textStyle.decorationType =
+            static_cast<int32_t>(spanItem->fontStyle->GetTextDecoration().value_or(TextDecoration::NONE));
+        textStyle.decorationColor =
+            spanItem->fontStyle->GetTextDecorationColor().value_or(style.GetTextDecorationColor()).ColorToString();
+        textStyle.decorationStyle =
+            static_cast<int32_t>(spanItem->fontStyle->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
+        textStyle.fontFeature = spanItem->fontStyle->GetFontFeature().value_or(ParseFontFeatureSettings("\"pnum\" 1"));
+        textStyle.letterSpacing = spanItem->fontStyle->GetLetterSpacing().value_or(Dimension()).ConvertToFp();
+    }
+    if (spanItem->textLineStyle) {
+        textStyle.lineHeight = spanItem->textLineStyle->GetLineHeight().value_or(Dimension()).ConvertToFp();
+        textStyle.lineSpacing = spanItem->textLineStyle->GetLineSpacing().value_or(Dimension()).ConvertToFp();
+        textStyle.textAlign = static_cast<int32_t>(spanItem->textLineStyle->GetTextAlign().value_or(TextAlign::START));
+        auto lm = spanItem->textLineStyle->GetLeadingMargin();
+        if (lm.has_value()) {
+            textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_START] = lm.value().size.Width().ToString();
+            textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_END] = lm.value().size.Height().ToString();
+        }
+        textStyle.wordBreak =
+            static_cast<int32_t>(spanItem->textLineStyle->GetWordBreak().value_or(WordBreak::BREAK_WORD));
+        textStyle.lineBreakStrategy =
+            static_cast<int32_t>(spanItem->textLineStyle->GetLineBreakStrategy().value_or(LineBreakStrategy::GREEDY));
+    }
+    return textStyle;
+}
+
+ImageStyleResult RichEditorPattern::GetImageStyleBySpanItem(const RefPtr<SpanItem>& spanItem)
+{
+    ImageStyleResult imageStyle;
+    auto imageSpanItem = DynamicCast<ImageSpanItem>(spanItem);
+    CHECK_NULL_RETURN(imageSpanItem, imageStyle);
+    auto imageAttributeOp = imageSpanItem->options.imageAttribute;
+    CHECK_NULL_RETURN(imageAttributeOp.has_value(), imageStyle);
+    auto imageSizeOp = imageAttributeOp->size;
+    if (imageSizeOp.has_value() && imageSizeOp->width.has_value() && imageSizeOp->height.has_value()) {
+        imageStyle.size[RichEditorImageSize::SIZEWIDTH] = imageSizeOp->width->ConvertToPx();
+        imageStyle.size[RichEditorImageSize::SIZEHEIGHT] = imageSizeOp->height->ConvertToPx();
+    }
+    if (imageAttributeOp->verticalAlign.has_value()) {
+        imageStyle.verticalAlign = static_cast<int32_t>(imageAttributeOp->verticalAlign.value());
+    }
+    if (imageAttributeOp->objectFit.has_value()) {
+        imageStyle.objectFit = static_cast<int32_t>(imageAttributeOp->objectFit.value());
+    }
+    if (imageAttributeOp->marginProp.has_value()) {
+        imageStyle.margin = imageAttributeOp->marginProp->ToString();
+    }
+    if (imageAttributeOp->borderRadius.has_value()) {
+        imageStyle.borderRadius = imageAttributeOp->borderRadius->ToString();
+    }
+    return imageStyle;
 }
 
 void RichEditorPattern::SetSubSpans(RefPtr<SpanString>& spanString, int32_t start, int32_t end)
@@ -3967,7 +4060,7 @@ void RichEditorPattern::OnColorConfigurationUpdate()
             spanNode->UpdateColorByResourceId();
         }
     }
-    auto scrollbarTheme = context->GetTheme<ScrollBarTheme>();
+    auto scrollbarTheme = GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(scrollbarTheme);
     auto scrollBar = GetScrollBar();
     CHECK_NULL_VOID(scrollBar);
