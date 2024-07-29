@@ -263,7 +263,8 @@ void SelectContentOverlayManager::UpdateExistOverlay(const SelectOverlayInfo& in
         handlePattern->UpdateIsSingleHandle(info.isSingleHandle);
         handlePattern->UpdateIsShowHandleLine(info.isHandleLineShow);
         handlePattern->UpdateFirstAndSecondHandleInfo(info.firstHandle, info.secondHandle);
-        LOGI("SelectOverlay: Update first %{public}s isShow %{public}d, second %{public}s isShow %{public}d",
+        TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY,
+            "Update first %{public}s isShow %{public}d, second %{public}s isShow %{public}d",
             info.firstHandle.paintRect.ToString().c_str(), info.firstHandle.isShow,
             info.secondHandle.paintRect.ToString().c_str(), info.secondHandle.isShow);
         if (info.isSingleHandle) {
@@ -290,7 +291,7 @@ void SelectContentOverlayManager::SwitchToHandleMode(HandleLevelMode mode, bool 
         }
         selectOverlayHolder_->GetCallback()->OnHandleLevelModeChanged(mode);
     }
-    LOGI("SelectOverlay: Set handle node to mode: %{public}d", mode);
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Set handle mode: %{public}d", mode);
     shareOverlayInfo_->handleLevelMode = mode;
     auto handleNode = handleNode_.Upgrade();
     CHECK_NULL_VOID(handleNode);
@@ -425,7 +426,8 @@ void SelectContentOverlayManager::CreateNormalSelectOverlay(SelectOverlayInfo& i
 void SelectContentOverlayManager::CreateHandleLevelSelectOverlay(
     SelectOverlayInfo& info, bool animation, HandleLevelMode mode)
 {
-    LOGI("Show SelectOverlay, first %{public}s isShow %{public}d, second %{public}s isShow %{public}d",
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY,
+        "Show SelectOverlay, first %{public}s isShow %{public}d, second %{public}s isShow %{public}d",
         info.firstHandle.paintRect.ToString().c_str(), info.firstHandle.isShow,
         info.secondHandle.paintRect.ToString().c_str(), info.secondHandle.isShow);
     shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(info);
@@ -530,8 +532,9 @@ void SelectContentOverlayManager::MountNodeToCaller(const RefPtr<FrameNode>& ove
     CHECK_NULL_VOID(selectOverlayHolder_);
     auto ownerFrameNode = selectOverlayHolder_->GetOwner();
     CHECK_NULL_VOID(ownerFrameNode);
-    LOGI("SelectOverlay: Mount SelectOverlay node to tag: %{public}s, id: %{public}d",
-        ownerFrameNode->GetTag().c_str(), ownerFrameNode->GetId());
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY,
+        "Mount SelectOverlay node: %{public}s, id: %{public}d", ownerFrameNode->GetTag().c_str(),
+        ownerFrameNode->GetId());
     ownerFrameNode->SetOverlayNode(overlayNode);
     overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(ownerFrameNode)));
     overlayNode->SetActive(true);
@@ -598,7 +601,8 @@ bool SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
     CHECK_NULL_RETURN(selectOverlayHolder_, false);
     CHECK_NULL_RETURN(selectOverlayHolder_->GetOwnerId() == id, false);
     CHECK_NULL_RETURN(shareOverlayInfo_, false);
-    LOGI("SelectOverlay: Close selectoverlay by id %{public}d, reason %{public}d", id, reason);
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Close selectoverlay, id:%{public}d, reason %{public}d",
+        id, reason);
     auto callback = selectOverlayHolder_->GetCallback();
     auto menuType = shareOverlayInfo_->menuInfo.menuType;
     auto pattern = GetSelectHandlePattern(WeakClaim(this));
@@ -654,7 +658,8 @@ void SelectContentOverlayManager::DestroySelectOverlayNode(const RefPtr<FrameNod
             overlay->SetParent(nullptr);
         }
     }
-    LOGI("SelectOverlay: Remove node [%{public}s, %{public}d] from [%{public}s, %{public}d]", overlay->GetTag().c_str(),
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY,
+        "Remove node [%{public}s, %{public}d] from [%{public}s, %{public}d]", overlay->GetTag().c_str(),
         overlay->GetId(), parentNode->GetTag().c_str(), parentNode->GetId());
     parentNode->RemoveChild(overlay);
     parentNode->MarkNeedSyncRenderTree();

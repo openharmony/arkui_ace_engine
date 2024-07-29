@@ -653,11 +653,9 @@ void MenuItemPattern::OnClick()
     auto selectedChangeEvent = hub->GetSelectedChangeEvent();
     SetChange();
     if (selectedChangeEvent) {
-        LOGI("trigger onChangeEvent");
         selectedChangeEvent(IsSelected());
     }
     if (onChange) {
-        LOGI("trigger onChange");
         onChange(IsSelected());
         RecordChangeEvent();
     }
@@ -926,8 +924,6 @@ void MenuItemPattern::AddHoverRegions(const OffsetF& topLeftPoint, const OffsetF
     TouchRegion hoverRegion = TouchRegion(
         Offset(topLeftPoint.GetX(), topLeftPoint.GetY()), Offset(bottomRightPoint.GetX(), bottomRightPoint.GetY()));
     hoverRegions_.emplace_back(hoverRegion);
-    LOGI("MenuItemPattern::AddHoverRegions hoverRegion is %{public}s to %{public}s", topLeftPoint.ToString().c_str(),
-        bottomRightPoint.ToString().c_str());
 }
 
 bool MenuItemPattern::IsInHoverRegions(double x, double y)

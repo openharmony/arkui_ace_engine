@@ -128,7 +128,6 @@ void CalendarPattern::OnModifyDone()
     CHECK_NULL_VOID(swiperPattern);
     auto currentIndex = swiperPattern->GetCurrentIndex();
     currentMonthIndex_ = currentIndex;
-    LOGI("The current index is %{public}d", currentIndex);
 
     // Set calendat data according to the index.
     switch (currentIndex) {
@@ -263,7 +262,6 @@ void CalendarPattern::FireRequestData(MonthState monthState)
 
 void CalendarPattern::FireGoToRequestData(int32_t year, int32_t month, int32_t day)
 {
-    LOGI("Jump to date %{public}d-%{public}d-%{public}d.", year, month, day);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = GetEventHub<CalendarEventHub>();

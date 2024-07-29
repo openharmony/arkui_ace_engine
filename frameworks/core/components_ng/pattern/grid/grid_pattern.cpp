@@ -624,9 +624,9 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         TAG_LOGW(AceLogTag::ACE_GRID, "Can not find current main index: %{public}d", curMainIndex);
         return nullptr;
     }
-    LOGI("GetNextFocusNode: Current focused item is (%{public}d,%{public}d)-[%{public}d,%{public}d]. Focus step is "
-         "%{public}d",
-        curMainIndex, curCrossIndex, curMainSpan, curCrossSpan, step);
+    TAG_LOGI(AceLogTag::ACE_GRID,
+        "GetNextFocusNode: Current:(%{public}d,%{public}d)-[%{public}d,%{public}d]. Focus: %{public}d", curMainIndex,
+        curCrossIndex, curMainSpan, curCrossSpan, step);
     auto focusSteps = GetFocusSteps(curMainIndex, curCrossIndex, step);
     if (focusSteps.first != FocusStep::NONE && focusSteps.second != FocusStep::NONE) {
         auto firstStepRes = GetNextFocusNode(focusSteps.first, currentFocusNode);
@@ -667,8 +667,6 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
 std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
     int32_t curMainIndex, int32_t curCrossIndex, int32_t curMainSpan, int32_t curCrossSpan, FocusStep step)
 {
-    LOGI("Current item: (%{public}d,%{public}d)-[%{public}d,%{public}d]. Grid axis: %{public}d, step: %{public}d",
-        curMainIndex, curCrossIndex, curMainSpan, curCrossSpan, gridLayoutInfo_.axis_, step);
     auto curMainStart = gridLayoutInfo_.startMainLineIndex_;
     auto curMainEnd = gridLayoutInfo_.endMainLineIndex_;
     auto curChildStartIndex = gridLayoutInfo_.startIndex_;
@@ -679,6 +677,9 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
         TAG_LOGW(AceLogTag::ACE_GRID, "Can not find current main index: %{public}d", curMainIndex);
         return { -1, -1 };
     }
+    TAG_LOGI(AceLogTag::ACE_GRID,
+        "Current: (%{public}d,%{public}d)-[%{public}d,%{public}d]. axis: %{public}d, step: %{public}d",
+        curMainIndex, curCrossIndex, curMainSpan, curCrossSpan, gridLayoutInfo_.axis_, step);
     auto curMaxCrossCount = GetCrossCount();
     auto nextMainIndex = curMainIndex;
     auto nextCrossIndex = curCrossIndex;
