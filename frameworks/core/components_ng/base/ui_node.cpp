@@ -483,7 +483,7 @@ void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const
 
 void UINode::GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
 {
-    for (const auto& uiChild : GetChildren()) {
+    for (const auto& uiChild : GetChildren(true)) {
         if (uiChild && !uiChild->IsOnMainTree()) {
             continue;
         }
@@ -561,8 +561,9 @@ void UINode::DetachFromMainTree(bool recursive)
         nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
     }
     isRemoving_ = true;
+    auto context = context_;
     DetachContext(false);
-    OnDetachFromMainTree(recursive);
+    OnDetachFromMainTree(recursive, context);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     isTraversing_ = true;
@@ -660,7 +661,7 @@ void UINode::RebuildRenderContextTree()
         parent->RebuildRenderContextTree();
     }
 }
-void UINode::OnDetachFromMainTree(bool) {}
+void UINode::OnDetachFromMainTree(bool, PipelineContext*) {}
 
 void UINode::OnAttachToMainTree(bool)
 {
@@ -1003,7 +1004,12 @@ void UINode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
     ACE_LAYOUT_TRACE_BEGIN("Build[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
         GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
+    std::vector<RefPtr<UINode>> children;
+    children.reserve(GetChildren().size());
     for (const auto& child : GetChildren()) {
+        children.push_back(child);
+    }
+    for (const auto& child : children) {
         if (InstanceOf<CustomNode>(child)) {
             auto custom = DynamicCast<CustomNode>(child);
             if (custom->HasExtraInfo()) {

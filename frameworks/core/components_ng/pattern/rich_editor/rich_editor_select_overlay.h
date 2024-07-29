@@ -55,6 +55,8 @@ public:
     void UpdateMenuOffset();
     bool IsBothHandlesShow();
     bool IsHandleShow();
+    void OnHandleMoveStart(bool isFirst) override;
+    void UpdateHandleOffset();
 
 private:
     void RemoveAreaChangeInner();

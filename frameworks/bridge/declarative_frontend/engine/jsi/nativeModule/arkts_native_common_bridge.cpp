@@ -7379,7 +7379,7 @@ ArkUINativeModuleValue CommonBridge::SetFocusBox(ArkUIRuntimeCallInfo* runtimeCa
     auto marginArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto widthArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto colorArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    int32_t hasValue = 0;
+    ArkUI_Uint32 hasValue = 0;
     CalcDimension margin;
     if (!marginArg->IsUndefined() && !marginArg->IsNull()) {
         if (ArkTSUtils::ParseJsDimensionFpNG(vm, marginArg, margin, false)) {

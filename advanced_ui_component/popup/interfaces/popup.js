@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+if (!("finalizeConstruction" in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+}
+
 const display = requireNapi('display');
 const mediaquery = requireNapi('mediaquery');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;

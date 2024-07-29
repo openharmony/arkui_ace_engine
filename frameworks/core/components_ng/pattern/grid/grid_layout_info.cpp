@@ -401,7 +401,7 @@ float GridLayoutInfo::GetIrregularHeight(float mainGap) const
 
 void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, float mainGap)
 {
-    auto targetContent = currentHeight_ - (currentOffset_ - prevOffset_);
+    float targetContent = currentHeight_ - (currentOffset_ - prevOffset_);
     if (LessOrEqual(targetContent, 0.0)) {
         currentOffset_ = 0.0f;
         startIndex_ = 0;
@@ -422,12 +422,12 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
         lastRegularMainSize_ = regularHeight;
     }
 
-    auto firstIrregularIndex = *(options.irregularIndexes.begin());
+    int32_t firstIrregularIndex = *(options.irregularIndexes.begin());
     float totalHeight = AddLinesInBetween(-1, firstIrregularIndex, crossCount_, regularHeight);
-    auto lastIndex = firstIrregularIndex;
-    auto lastHeight = 0.0f;
+    int32_t lastIndex = GreatNotEqual(totalHeight, targetContent) ? 0 : firstIrregularIndex;
+    float lastHeight = 0.0f;
 
-    for (auto idx : options.irregularIndexes) {
+    for (int32_t idx : options.irregularIndexes) {
         if (GreatOrEqual(totalHeight, targetContent)) {
             break;
         }
@@ -436,9 +436,9 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
         totalHeight += AddLinesInBetween(lastIndex, idx, crossCount_, regularHeight);
         lastIndex = idx;
     }
-    auto lines = static_cast<int32_t>(std::floor((targetContent - lastHeight) / regularHeight));
+    int32_t lines = static_cast<int32_t>(std::floor((targetContent - lastHeight) / regularHeight));
     currentOffset_ = lastHeight + lines * regularHeight - targetContent;
-    auto startIdx = lines * crossCount_ + lastIndex;
+    int32_t startIdx = lines * crossCount_ + lastIndex;
     startIndex_ = std::min(startIdx, childrenCount_ - 1);
 }
 

@@ -640,6 +640,24 @@ bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
         gridLayoutInfo_.reachStart_ = true;
         break;
     }
+    if (gridLayoutInfo_.gridMatrix_[gridLayoutInfo_.startMainLineIndex_].size() < crossCount_ &&
+        gridLayoutInfo_.startIndex_ > 0) {
+        auto tempStartIndex = gridLayoutInfo_.startIndex_;
+        auto tempStartMainLineIndex = gridLayoutInfo_.startMainLineIndex_;
+        auto tempCurrentMainLineIndex = currentMainLineIndex_;
+        auto tempReachStart = gridLayoutInfo_.reachStart_;
+
+        float lineHeight = FillNewLineForward(crossSize, mainSize, layoutWrapper);
+        if (GreatOrEqual(lineHeight, 0.0)) {
+            gridLayoutInfo_.lineHeightMap_[gridLayoutInfo_.startMainLineIndex_] = lineHeight;
+        }
+
+        gridLayoutInfo_.startIndex_ = tempStartIndex;
+        gridLayoutInfo_.startMainLineIndex_ = tempStartMainLineIndex;
+        currentMainLineIndex_ = tempCurrentMainLineIndex;
+        gridLayoutInfo_.reachStart_ = tempReachStart;
+    }
+
     gridLayoutInfo_.currentOffset_ = blankAtStart;
     gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
     return fillNewLine;
@@ -1440,6 +1458,8 @@ void GridScrollLayoutAlgorithm::AddForwardLines(
             }
             gridMatrix.swap(gridLayoutInfo_.gridMatrix_);
             gridLineHeightMap.swap(gridLayoutInfo_.lineHeightMap_);
+
+            MergeRemainingLines(gridMatrix, forwardLines);
         } else {
             for (auto i = gridLayoutInfo_.startMainLineIndex_ + 1; i <= gridMatrix.rbegin()->first; i++) {
                 gridLayoutInfo_.gridMatrix_.emplace(forwardLines + i, std::move(gridMatrix[i]));
@@ -2056,7 +2076,12 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 gridLayoutInfo_.endIndex_ = elem.second;
             }
         }
-        return gridLayoutInfo_.lineHeightMap_.find(currentLine)->second;
+        if (gridLayoutInfo_.lineHeightMap_.find(currentLine) != gridLayoutInfo_.lineHeightMap_.end()) {
+            return gridLayoutInfo_.lineHeightMap_.find(currentLine)->second;
+        } else {
+            gridLayoutInfo_.lineHeightMap_[currentLine] = cellAveLength_;
+            return cellAveLength_;
+        }
     }
 
     lastCross_ = 0;
@@ -2315,6 +2340,19 @@ void GridScrollLayoutAlgorithm::ResetOffsetWhenHeightChanged()
 {
     if (scrollSource_ == SCROLL_FROM_NONE) {
         gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+    }
+}
+
+void GridScrollLayoutAlgorithm::MergeRemainingLines(
+    std::map<int32_t, std::map<int32_t, int32_t>> matrix, int32_t forwardLines)
+{
+    for (const auto& line : matrix) {
+        if (line.second.empty()) {
+            continue;
+        }
+        for (const auto& [crossIndex, index] : line.second) {
+            gridLayoutInfo_.gridMatrix_[line.first - forwardLines][crossIndex] = index;
+        }
     }
 }
 } // namespace OHOS::Ace::NG

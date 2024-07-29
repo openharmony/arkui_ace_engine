@@ -859,8 +859,10 @@ HWTEST_F(RichEditorStyledStringTestNg, CustomSpan001, TestSize.Level1)
     richEditorPattern->textSelector_.Update(0, 1);
     richEditorPattern->CalculateHandleOffsetAndShowOverlay();
     SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), 50.f };
-    EXPECT_EQ(richEditorPattern->textSelector_.firstHandle, RectF(OffsetF(0, 0), handlePaintSize));
-    EXPECT_EQ(richEditorPattern->textSelector_.secondHandle, RectF(OffsetF(100.f, 0), handlePaintSize));
+    auto firstHandleOffset = OffsetF(0 - handlePaintSize.Width() / 2.0f, 0);
+    auto secondHandleOffset = OffsetF(100.f - handlePaintSize.Width() / 2.0f, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.firstHandle, RectF(firstHandleOffset, handlePaintSize));
+    EXPECT_EQ(richEditorPattern->textSelector_.secondHandle, RectF(secondHandleOffset, handlePaintSize));
 }
 
 /**
@@ -922,5 +924,29 @@ HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle002, TestSize.Level1)
     RefPtr<SpanItem> source = AceType::MakeRefPtr<SpanItem>();
     layoutAlgorithm->CopySpanStyle(source, AceType::MakeRefPtr<SpanItem>());
     EXPECT_FALSE(source->textLineStyle->HasTextAlign());
+}
+
+/**
+ * @tc.name: CopySpanStyle003
+ * @tc.desc: test CopySpanStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto source = AceType::MakeRefPtr<SpanItem>();
+    auto target = AceType::MakeRefPtr<SpanItem>();
+
+    LeadingMargin leadingMargin;
+    source->textLineStyle->UpdateLeadingMargin(leadingMargin);
+    source->fontStyle->UpdateFontSize(FONT_SIZE_VALUE);
+    source->textLineStyle->UpdateLineHeight(LINE_HEIGHT_VALUE);
+
+    layoutAlgorithm->CopySpanStyle(source, target);
+    EXPECT_EQ(target->fontStyle->GetFontSize(), FONT_SIZE_VALUE);
 }
 } // namespace OHOS::Ace::NG

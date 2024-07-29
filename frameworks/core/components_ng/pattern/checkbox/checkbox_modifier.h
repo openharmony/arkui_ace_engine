@@ -97,7 +97,6 @@ public:
 
     void InitializeParam();
     void PaintCheckBox(RSCanvas& canvas, const OffsetF& paintOffset, const SizeF& paintSize) const;
-    void DrawFocusBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
     void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
 
     void DrawBorder(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
@@ -133,13 +132,6 @@ public:
     {
         if (isSelect_) {
             isSelect_->Set(isSelect);
-        }
-    }
-
-    void SetIsFocused(bool isFocused)
-    {
-        if (isFocused_) {
-            isFocused_->Set(isFocused);
         }
     }
 
@@ -212,14 +204,6 @@ public:
         }
     }
 
-    void SetHasUnselectedColor(bool hasUnselectedColor)
-    {
-        hasUnselectedColor_ = hasUnselectedColor;
-    }
-
-private:
-    void DrawRectOrCircle(RSCanvas& canvas, const RSRoundRect& rrect) const;
-
 private:
     float borderWidth_ = 0.0f;
     float borderRadius_ = 0.0f;
@@ -231,20 +215,15 @@ private:
     Color hoverColor_;
     Color inactivePointColor_;
     Color userActiveColor_;
-    Color focusBoardColor_;
-    Color borderFocusedColor_;
-    Color focusedBGColorUnselected_;
     Dimension hoverRadius_;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
     Dimension defaultPaddingSize_;
     Dimension shadowWidth_;
-    Dimension focusBoardSize_;
     float hoverDuration_ = 0.0f;
     float hoverToTouchDuration_ = 0.0f;
     float touchDuration_ = 0.0f;
     float colorAnimationDuration_ = 0.0f;
-    bool hasUnselectedColor_ = false;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
@@ -263,7 +242,6 @@ private:
     RefPtr<AnimatablePropertyFloat> checkStroke_;
     RefPtr<AnimatablePropertyFloat> strokeSize_;
     RefPtr<PropertyBool> isSelect_;
-    RefPtr<PropertyBool> isFocused_;
     RefPtr<AnimatablePropertyOffsetF> offset_;
     RefPtr<AnimatablePropertySizeF> size_;
 

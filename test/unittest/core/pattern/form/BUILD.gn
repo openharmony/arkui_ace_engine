@@ -46,6 +46,7 @@ ace_unittest("form_test_ng") {
       "graphic_2d:librender_service_client",
       "i18n:intl_util",
       "input:libmmi-client",
+      "resource_management:global_resmgr",
     ]
   }
 }
@@ -84,6 +85,7 @@ ace_unittest("form_node_test") {
       "graphic_2d:librender_service_client",
       "i18n:intl_util",
       "input:libmmi-client",
+      "resource_management:global_resmgr",
     ]
   }
 }
@@ -122,6 +124,7 @@ ace_unittest("form_pattern_test") {
       "graphic_2d:librender_service_client",
       "i18n:intl_util",
       "input:libmmi-client",
+      "resource_management:global_resmgr",
     ]
   }
 }

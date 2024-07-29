@@ -873,6 +873,29 @@ RefPtr<NG::FrameNode> GetWebCoreNodeById(const NG::FrameNode* frameNode, int64_t
 }
 #endif
 
+bool FindFrameNodeByAccessibilityId(int64_t id, const std::list<RefPtr<NG::UINode>>& children,
+    std::queue<NG::UINode*>& nodes, RefPtr<NG::FrameNode>& result)
+{
+    NG::FrameNode* frameNode = nullptr;
+    for (const auto& child : children) {
+        frameNode = AceType::DynamicCast<NG::FrameNode>(Referenced::RawPtr(child));
+        if (frameNode != nullptr && !frameNode->CheckAccessibilityLevelNo()) {
+            if (frameNode->GetAccessibilityId() == id) {
+                result = AceType::DynamicCast<NG::FrameNode>(child);
+                return true;
+            }
+#ifdef WEB_SUPPORTED
+            result = GetWebCoreNodeById(frameNode, id);
+            if (result) {
+                return true;
+            }
+#endif
+        }
+        nodes.push(Referenced::RawPtr(child));
+    }
+    return false;
+}
+
 RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>& root, int64_t id)
 {
     CHECK_NULL_RETURN(root, nullptr);
@@ -887,37 +910,27 @@ RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>&
 #endif
     std::queue<NG::UINode*> nodes;
     nodes.push(Referenced::RawPtr(root));
-    NG::FrameNode* frameNode = nullptr;
+    NG::UINode* virtualNode = nullptr;
+    RefPtr<NG::FrameNode> frameNodeResult = nullptr;
 
     while (!nodes.empty()) {
         auto current = nodes.front();
         nodes.pop();
-        std::list<RefPtr<NG::UINode>> children = current->GetChildren();
-
-        auto fnode = AceType::DynamicCast<NG::FrameNode>(current);
+        virtualNode = nullptr;
+        auto fnode = current->GetVirtualAccessibilityProperty();
         if (fnode != nullptr) {
-            auto property = fnode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-            auto virtualNode = property->GetAccessibilityVirtualNode();
-            if (virtualNode) {
-                children.clear();
-                children.push_back(virtualNode);
-            }
+            virtualNode = fnode->GetAccessibilityVirtualNodePtr();
         }
-        for (const auto& child : children) {
-            frameNode = AceType::DynamicCast<NG::FrameNode>(Referenced::RawPtr(child));
-            if (frameNode != nullptr && !frameNode->CheckAccessibilityLevelNo()) {
-                if (frameNode->GetAccessibilityId() == id) {
-                    return AceType::DynamicCast<NG::FrameNode>(child);
-                }
-#ifdef WEB_SUPPORTED
-                auto result = GetWebCoreNodeById(frameNode, id);
-                if (result) {
-                    return result;
-                }
-#endif
+        if (virtualNode) {
+            const auto& children = std::list<RefPtr<NG::UINode>> { fnode->GetAccessibilityVirtualNode() };
+            if (FindFrameNodeByAccessibilityId(id, children, nodes, frameNodeResult)) {
+                return frameNodeResult;
             }
-
-            nodes.push(Referenced::RawPtr(child));
+        } else {
+            const auto& children = current->GetChildren();
+            if (FindFrameNodeByAccessibilityId(id, children, nodes, frameNodeResult)) {
+                return frameNodeResult;
+            }
         }
     }
     return nullptr;
@@ -2050,15 +2063,15 @@ static void DumpAccessibilityPropertyNG(const AccessibilityElementInfo& nodeInfo
     DumpLog::GetInstance().AddDesc("min value: ", nodeInfo.GetRange().GetMin());
     DumpLog::GetInstance().AddDesc("max value: ", nodeInfo.GetRange().GetMax());
     DumpLog::GetInstance().AddDesc("current value: ", nodeInfo.GetRange().GetCurrent());
-    DumpLog::GetInstance().AddDesc("gird info rows: ", nodeInfo.GetGrid().GetRowCount());
-    DumpLog::GetInstance().AddDesc("gird info columns: ", nodeInfo.GetGrid().GetColumnCount());
-    DumpLog::GetInstance().AddDesc("gird info select mode: ", nodeInfo.GetGrid().GetSelectionMode());
-    DumpLog::GetInstance().AddDesc("gird item info, row: ", nodeInfo.GetGridItem().GetRowIndex());
-    DumpLog::GetInstance().AddDesc("gird item info, column: ", nodeInfo.GetGridItem().GetColumnIndex());
-    DumpLog::GetInstance().AddDesc("gird item info, rowSpan: ", nodeInfo.GetGridItem().GetRowSpan());
-    DumpLog::GetInstance().AddDesc("gird item info, columnSpan: ", nodeInfo.GetGridItem().GetColumnSpan());
-    DumpLog::GetInstance().AddDesc("gird item info, is heading: ", nodeInfo.GetGridItem().IsHeading());
-    DumpLog::GetInstance().AddDesc("gird item info, selected: ", nodeInfo.GetGridItem().IsSelected());
+    DumpLog::GetInstance().AddDesc("grid info rows: ", nodeInfo.GetGrid().GetRowCount());
+    DumpLog::GetInstance().AddDesc("grid info columns: ", nodeInfo.GetGrid().GetColumnCount());
+    DumpLog::GetInstance().AddDesc("grid info select mode: ", nodeInfo.GetGrid().GetSelectionMode());
+    DumpLog::GetInstance().AddDesc("grid item info, row: ", nodeInfo.GetGridItem().GetRowIndex());
+    DumpLog::GetInstance().AddDesc("grid item info, column: ", nodeInfo.GetGridItem().GetColumnIndex());
+    DumpLog::GetInstance().AddDesc("grid item info, rowSpan: ", nodeInfo.GetGridItem().GetRowSpan());
+    DumpLog::GetInstance().AddDesc("grid item info, columnSpan: ", nodeInfo.GetGridItem().GetColumnSpan());
+    DumpLog::GetInstance().AddDesc("grid item info, is heading: ", nodeInfo.GetGridItem().IsHeading());
+    DumpLog::GetInstance().AddDesc("grid item info, selected: ", nodeInfo.GetGridItem().IsSelected());
     DumpLog::GetInstance().AddDesc("current index: ", nodeInfo.GetCurrentIndex());
     DumpLog::GetInstance().AddDesc("begin index: ", nodeInfo.GetBeginIndex());
     DumpLog::GetInstance().AddDesc("end index: ", nodeInfo.GetEndIndex());
@@ -2411,7 +2424,7 @@ void JsAccessibilityManager::SendEventToAccessibilityWithNode(
         eventInfo.SetWindowId(accessibilityEvent.windowId);
     }
     FillEventInfoWithNode(frameNode, eventInfo, ngPipeline, accessibilityEvent.nodeId);
-    if (ngPipeline->IsFormRender()) {
+    if ((ngPipeline != nullptr) && (ngPipeline->IsFormRender())) {
         eventInfo.SetWindowId(static_cast<int32_t>(GetWindowId()));
     }
     GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo);
@@ -2460,7 +2473,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
     if (accessibilityEvent.type == AccessibilityEventType::PAGE_CHANGE && accessibilityEvent.windowId != 0) {
         eventInfo.SetWindowId(accessibilityEvent.windowId);
     }
-    if (ngPipeline->IsFormRender()) {
+    if ((ngPipeline != nullptr) && (ngPipeline->IsFormRender())) {
         eventInfo.SetWindowId(static_cast<int32_t>(GetWindowId()));
     }
 
@@ -4063,12 +4076,13 @@ void JsAccessibilityManager::JsInteractionOperation::GetCursorPosition(const int
     CHECK_NULL_VOID(jsAccessibilityManager);
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
     CHECK_NULL_VOID(context);
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    RefPtr<NG::FrameNode> node;
+    auto ngPipeline = jsAccessibilityManager->FindPipelineByElementId(splitElementId, node);
     CHECK_NULL_VOID(ngPipeline);
 #ifdef WINDOW_SCENE_SUPPORTED
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
-    if (uiExtensionManager->IsWrapExtensionAbilityId(elementId)) {
+    if (uiExtensionManager->IsWrapExtensionAbilityId(splitElementId)) {
         auto unWrapIdPair = uiExtensionManager->UnWrapExtensionAbilityId(NG::UI_EXTENSION_OFFSET_MAX, elementId);
         int64_t uiExtensionId = unWrapIdPair.first;
         auto rootNode = ngPipeline->GetRootElement();

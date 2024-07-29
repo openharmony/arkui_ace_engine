@@ -81,7 +81,6 @@ void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     } else {
         json->PutExtAttr("sticky", "StickyStyle.None", filter);
     }
-    json->PutExtAttr("fadingEdge", propFadingEdge_.value_or(false), filter);
     ScrollSnapPropToJsonValue(json, filter);
 }
 

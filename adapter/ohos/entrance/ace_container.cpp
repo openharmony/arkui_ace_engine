@@ -1166,11 +1166,17 @@ UIContentErrorCode AceContainer::RunPage(
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
 
-    if (front->GetType() != FrontendType::DECLARATIVE_CJ && !isFormRender && !isNamedRouter &&
-        isStageModel && !CheckUrlValid(content, container->GetHapPath())) {
-        return UIContentErrorCode::INVALID_URL;
+    if (front->GetType() != FrontendType::DECLARATIVE_CJ && !isFormRender && isStageModel) {
+        if (isNamedRouter) {
+            RefPtr<OHOS::Ace::DeclarativeFrontend> declarativeFront = AceType::DynamicCast<DeclarativeFrontend>(front);
+            CHECK_NULL_RETURN(declarativeFront, UIContentErrorCode::NULL_POINTER);
+            std::string name = declarativeFront->GetJsEngine()->SearchRouterRegisterMap(content);
+            CHECK_NULL_RETURN(name.size(), UIContentErrorCode::INVALID_URL);
+        } else {
+            CHECK_NULL_RETURN(CheckUrlValid(content, container->GetHapPath()), UIContentErrorCode::INVALID_URL);
+        }
     }
-
+    
     if (isNamedRouter) {
         return front->RunPageByNamedRouter(content, params);
     }
@@ -1287,7 +1293,6 @@ public:
         auto node = node_.Upgrade();
         CHECK_NULL_VOID(node);
         auto rectf = node->GetRectWithRender();
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "frame rect:%{public}s", rectf.ToString().c_str());
         AbilityRuntime::AutoFill::PopupOffset offset;
         AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
         AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
@@ -1311,8 +1316,7 @@ public:
             offset.deltaX = rect_.left + rect_.width - ((rectf.Width() + size.width) / POPUP_CALCULATE_RATIO);
         }
 
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "popup offset.deltaX:%{public}f", offset.deltaX);
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "popup offset.deltaY:%{public}f", offset.deltaY);
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "PopupOffset x:%{public}f,y:%{public}f", offset.deltaX, offset.deltaY);
         config.targetOffset = offset;
     }
 
@@ -2867,7 +2871,15 @@ bool AceContainer::IsSceneBoardEnabled()
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
+    CHECK_NULL_VOID(currentEvent);
     currentPointerEvent_ = currentEvent;
+    auto pointerAction = currentEvent->GetPointerAction();
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
+        return;
+    }
     MMI::PointerEvent::PointerItem pointerItem;
     currentEvent->GetPointerItem(currentEvent->GetPointerId(), pointerItem);
     int32_t originId = pointerItem.GetOriginPointerId();

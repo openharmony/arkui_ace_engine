@@ -38,6 +38,7 @@ public:
     MOCK_METHOD0(GetMaxIntrinsicWidth, float());
     MOCK_METHOD0(DidExceedMaxLines, bool());
     MOCK_METHOD0(GetLongestLine, float());
+    MOCK_METHOD0(GetLongestLineWithIndent, float());
     MOCK_METHOD0(GetMaxWidth, float());
     MOCK_METHOD0(GetAlphabeticBaseline, float());
     MOCK_METHOD0(GetParagraphText, std::u16string());

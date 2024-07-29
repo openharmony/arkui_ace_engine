@@ -475,6 +475,32 @@ void WindowScene::OnConnect()
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneConnect", TaskExecutor::TaskType::UI);
 }
 
+void WindowScene::OnForeground()
+{
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        ACE_SCOPED_TRACE("WindowScene::OnForeground");
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        CHECK_NULL_VOID(self->session_);
+        if (self->session_->IsAnco()) {
+            return;
+        }
+        CHECK_NULL_VOID(self->snapshotWindow_);
+        auto surfaceNode = self->session_->GetSurfaceNode();
+        CHECK_NULL_VOID(surfaceNode);
+        surfaceNode->SetIsNotifyUIBufferAvailable(false);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneOnForeground", TaskExecutor::TaskType::UI);
+}
+
 void WindowScene::OnBackground()
 {
     CHECK_NULL_VOID(session_);

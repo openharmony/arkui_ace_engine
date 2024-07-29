@@ -122,7 +122,8 @@ RefPtr<FrameNode> MenuWrapperPattern::FindTouchedMenuItem(const RefPtr<UINode>& 
 
 void MenuWrapperPattern::HandleInteraction(const TouchEventInfo& info)
 {
-    auto touch = info.GetTouches().front();
+    CHECK_NULL_VOID(!info.GetChangedTouches().empty());
+    auto touch = info.GetChangedTouches().front();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto position = OffsetF(
@@ -376,8 +377,8 @@ void MenuWrapperPattern::RegisterOnTouch()
 
 void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
 {
-    CHECK_NULL_VOID(!info.GetTouches().empty());
-    auto touch = info.GetTouches().front();
+    CHECK_NULL_VOID(!info.GetChangedTouches().empty());
+    auto touch = info.GetChangedTouches().front();
     // filter out other touch types
     if (touch.GetTouchType() != TouchType::DOWN &&
         Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {

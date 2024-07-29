@@ -1814,7 +1814,7 @@ HWTEST_F(TextTestFiveNg, SetAiSpanTextStyle001, TestSize.Level1)
 }
 
 /**
- * @tc.name: FontRegisterCallback001
+ * @tc.name: FontRegisterCallback002
  * @tc.desc: test span_node.cpp FontRegisterCallback function
  * @tc.type: FUNC
  */
@@ -1848,5 +1848,394 @@ HWTEST_F(TextTestFiveNg, FontRegisterCallback002, TestSize.Level1)
     EXPECT_EQ(pattern->GetIsCustomFont(), false);
 
     pipeline->fontManager_ = oldFontManager;
+}
+
+/**
+ * @tc.name: UpdateTextStyle001
+ * @tc.desc: test span_node.cpp UpdateTextStyle function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateTextStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize spanNode and paragraph.
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    pattern->SetTextDetectEnable(true);
+    auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
+    spanNode->SetParent(node);
+    spanNode->MountToParagraph();
+    ASSERT_NE(spanNode->GetParent(), nullptr);
+    spanNode->spanItem_->fontStyle = nullptr;
+    spanNode->spanItem_->position = StringUtils::ToWstring(CREATE_VALUE).length();
+    TextStyle textStyle;
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, PushStyle).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, AddText).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, PopStyle).Times(AnyNumber());
+    /**
+     * @tc.steps: step2. call StartDrag
+     * @tc.expected: IsDragging() return ture
+     */
+    spanNode->spanItem_->StartDrag(1, 2);
+    EXPECT_TRUE(spanNode->spanItem_->IsDragging());
+    /**
+     * @tc.steps: step3. call UpdateTextStyle
+     * @tc.expected: cover branch content is empty.
+     */
+    std::string spanContent;
+    EXPECT_TRUE(spanNode->spanItem_->IsDragging());
+    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 1, 2);
+    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
+    /**
+     * @tc.steps: step4. call UpdateTextStyle
+     * @tc.expected: cover branch selStart > 0, selEnd < contentLength.
+     */
+    spanContent = CREATE_VALUE;
+    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 1, 2);
+    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
+    /**
+     * @tc.steps: step5. call UpdateTextStyle
+     * @tc.expected: cover branch selStart < 0, selEnd < 0.
+     */
+    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, -1, -1);
+    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
+    /**
+     * @tc.steps: step6. call UpdateTextStyle
+     * @tc.expected: cover branch selStart > contentLength, selEnd > contentLength.
+     */
+    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 20, 20);
+    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
+    MockParagraph::TearDown();
+}
+
+/**
+ * @tc.name: EncodeTlv002
+ * @tc.desc: test span_node.cpp EncodeTlv function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, EncodeTlv002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+
+    std::vector<uint8_t> buff;
+    int32_t cursor = 1;
+
+    EXPECT_EQ(spanItem->EncodeTlv(buff), true);
+    EXPECT_EQ(spanItem->DecodeTlv(buff, cursor)->fontStyle->HasFontSize(), false);
+
+    cursor = 0;
+    EXPECT_EQ(spanItem->DecodeTlv(buff, cursor)->fontStyle->HasFontSize(), false);
+
+    cursor = 0;
+    buff.clear();
+
+    spanItem->fontStyle->UpdateFontSize(Dimension(10.0, DimensionUnit::PX));
+    spanItem->fontStyle->UpdateTextColor(Color::WHITE);
+    Shadow textShadow;
+    textShadow.SetBlurRadius(BLURRADIUS_VALUE);
+    textShadow.SetColor(TEXT_COLOR_VALUE);
+    textShadow.SetSpreadRadius(SPREADRADIUS_VALUE);
+    textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
+    textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
+    spanItem->fontStyle->UpdateTextShadow({ textShadow });
+    spanItem->fontStyle->UpdateItalicFontStyle(Ace::FontStyle::ITALIC);
+    spanItem->fontStyle->UpdateFontWeight(Ace::FontWeight::W200);
+    std::vector<std::string> fontFamilies;
+    fontFamilies.emplace_back("Arial");
+    fontFamilies.emplace_back("Calibri");
+    spanItem->fontStyle->UpdateFontFamily(fontFamilies);
+    spanItem->fontStyle->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
+    spanItem->fontStyle->UpdateTextDecoration(TextDecoration::OVERLINE);
+    spanItem->fontStyle->UpdateTextDecorationColor(Color::WHITE);
+    spanItem->fontStyle->UpdateTextDecorationStyle(TextDecorationStyle::SOLID);
+    spanItem->fontStyle->UpdateTextCase(TextCase::LOWERCASE);
+    spanItem->fontStyle->UpdateAdaptMinFontSize(12.0_fp);
+    spanItem->fontStyle->UpdateAdaptMaxFontSize(10.0_fp);
+    spanItem->fontStyle->UpdateLetterSpacing(Dimension(10.0, DimensionUnit::PX));
+    spanItem->backgroundStyle = TextBackgroundStyle();
+
+    EXPECT_EQ(spanItem->EncodeTlv(buff), true);
+    EXPECT_EQ(spanItem->DecodeTlv(buff, cursor)->fontStyle->HasFontSize(), true);
+}
+
+/**
+ * @tc.name: EncodeTlv003
+ * @tc.desc: test span_node.cpp EncodeTlv function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, EncodeTlv003, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+
+    std::vector<uint8_t> buff;
+    int32_t cursor = 0;
+
+    spanItem->textLineStyle->UpdateLineHeight(Dimension(10.0, DimensionUnit::PX));
+    spanItem->textLineStyle->UpdateLineSpacing(Dimension(1.0, DimensionUnit::PX));
+    spanItem->textLineStyle->UpdateTextBaseline(TextBaseline::MIDDLE);
+    spanItem->textLineStyle->UpdateBaselineOffset(Dimension(20.0, DimensionUnit::PX));
+    spanItem->textLineStyle->UpdateTextOverflow(TextOverflow::DEFAULT);
+    spanItem->textLineStyle->UpdateTextAlign(TextAlign::LEFT);
+    spanItem->textLineStyle->UpdateMaxLength(1024);
+    spanItem->textLineStyle->UpdateMaxLines(1024);
+    spanItem->textLineStyle->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    spanItem->textLineStyle->UpdateTextIndent(Dimension(40, DimensionUnit::PX));
+    spanItem->textLineStyle->UpdateLeadingMargin(LeadingMargin());
+    spanItem->textLineStyle->UpdateWordBreak(WordBreak::NORMAL);
+    spanItem->textLineStyle->UpdateLineBreakStrategy(LineBreakStrategy::GREEDY);
+    spanItem->textLineStyle->UpdateEllipsisMode(EllipsisMode::HEAD);
+
+    TextBackgroundStyle textBackgroundStyle;
+    textBackgroundStyle.backgroundColor = Color::BLACK;
+    textBackgroundStyle.backgroundRadius = NG::BorderRadiusProperty();
+    spanItem->backgroundStyle = textBackgroundStyle;
+
+    EXPECT_EQ(spanItem->EncodeTlv(buff), true);
+    EXPECT_EQ(spanItem->DecodeTlv(buff, cursor)->textLineStyle->HasLineHeight(), true);
+}
+
+/**
+ * @tc.name: SymbolColorToString001
+ * @tc.desc: test span_node.cpp SymbolColorToString function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, SymbolColorToString001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+
+    std::vector<Color> colorList;
+    colorList.emplace_back(Color::WHITE);
+    colorList.emplace_back(Color::BLACK);
+    spanItem->fontStyle->UpdateSymbolColorList(colorList);
+
+    EXPECT_EQ(spanItem->SymbolColorToString(), "[#FFFFFFFF,#FF000000,]");
+}
+
+/**
+ * @tc.name: GetSpanResultObject001
+ * @tc.desc: test span_node.cpp GetSpanResultObject function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, GetSpanResultObject001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize spanNode.
+     */
+    RefPtr<ImageSpanItem> spanItem = AceType::MakeRefPtr<ImageSpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    spanItem->interval = {0, 10};
+    auto obj = spanItem->GetSpanResultObject(1, 10);
+    EXPECT_FALSE(obj.isInit);
+    obj = spanItem->GetSpanResultObject(0, 9);
+    EXPECT_FALSE(obj.isInit);
+    /**
+     * @tc.steps: step2. call GetSpanResultObject
+     * @tc.expected: cover branch imagePixelMap and image don't have value.
+     */
+    std::optional<std::string> image;
+    std::optional<RefPtr<PixelMap>> pixelMap;
+    ImageSpanOptions options1 = { .image = image, .imagePixelMap = pixelMap };
+    spanItem->SetImageSpanOptions(options1);
+    obj = spanItem->GetSpanResultObject(0, 10);
+    EXPECT_TRUE(obj.isInit);
+    /**
+     * @tc.steps: step3. call GetSpanResultObject
+     * @tc.expected: cover branch imagePixelMap and image have value.
+     */
+    image = std::make_optional("app.media.icon");
+    pixelMap = PixelMap::CreatePixelMap(nullptr);
+    ImageSpanOptions options2 = { .image = image, .imagePixelMap = pixelMap };
+    spanItem->SetImageSpanOptions(options2);
+    obj = spanItem->GetSpanResultObject(0, 10);
+    EXPECT_TRUE(obj.isInit);
+    EXPECT_EQ(obj.valueString, image);
+    EXPECT_EQ(obj.valuePixelMap, pixelMap.value());
+}
+
+/**
+ * @tc.name: GetFontInJson001
+ * @tc.desc: test text_pattern.cpp GetFontInJson function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, GetFontInJson001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    textPattern->textStyle_ = TextStyle();
+
+    EXPECT_GT(textPattern->GetFontInJson().size(), 0);
+
+    textPattern->textStyle_->SetAdaptTextSize(Dimension(100), Dimension(10), Dimension(10));
+
+    EXPECT_GT(textPattern->GetFontInJson().size(), 0);
+}
+
+/**
+ * @tc.name: InitClickEvent001
+ * @tc.desc: test text_pattern.cpp InitClickEvent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, InitClickEvent001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    eventHub->AttachHost(textFrameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+
+    textPattern->InitClickEvent(gestureEventHub);
+
+    KeyEvent event;
+    event.code = KeyCode::KEY_TAB;
+    event.action = KeyAction::DOWN;
+
+    EXPECT_EQ(gestureEventHub->KeyBoardShortCutClick(event, textFrameNode), true);
+
+    auto sysJudgeFunc = gestureEventHub->clickEventActuator_->GetSysJudgeFunc();
+    ASSERT_NE(sysJudgeFunc.has_value(), false);
+
+    auto gestureInfo = AceType::MakeRefPtr<GestureInfo>();
+    ASSERT_NE(gestureInfo, nullptr);
+    auto info = std::make_shared<BaseGestureEvent>();
+    ASSERT_NE(info, nullptr);
+
+    EXPECT_EQ(sysJudgeFunc.value()(gestureInfo, info), GestureJudgeResult::CONTINUE);
+
+    std::list<FingerInfo> fingerList;
+    fingerList.emplace_back(FingerInfo());
+    info->SetFingerList(fingerList);
+
+    EXPECT_EQ(sysJudgeFunc.value()(gestureInfo, info), GestureJudgeResult::REJECT);
+
+    textPattern->textDetectEnable_ = true;
+    textPattern->copyOption_ = CopyOptions::InApp;
+    textPattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(0, AISpan()));
+
+    EXPECT_EQ(sysJudgeFunc.value()(gestureInfo, info), GestureJudgeResult::CONTINUE);
+}
+
+/**
+ * @tc.name: SetOnClickMenu001
+ * @tc.desc: test text_pattern.cpp SetOnClickMenu function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, SetOnClickMenu001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    bool calledCalculateHandleFunc = false;
+    bool calledShowSelectOverlayFunc = false;
+
+    AISpan aiSpan;
+    CalculateHandleFunc calculateHandleFunc = [&calledCalculateHandleFunc]() {
+        calledCalculateHandleFunc = true;
+    };
+    ShowSelectOverlayFunc showSelectOverlayFunc = [&calledShowSelectOverlayFunc](const RectF&, const RectF&) {
+        calledShowSelectOverlayFunc = true;
+    };
+
+    textPattern->SetOnClickMenu(aiSpan, calculateHandleFunc, showSelectOverlayFunc);
+
+    auto func = textPattern->dataDetectorAdapter_->onClickMenu_;
+    ASSERT_NE(func, nullptr);
+
+    func("复制");
+    EXPECT_EQ(calledCalculateHandleFunc, false);
+    EXPECT_EQ(calledShowSelectOverlayFunc, false);
+
+    textPattern->copyOption_ = CopyOptions::InApp;
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateTextSelectableMode(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+
+    func("");
+    func("复制");
+    func("选择文本");
+    EXPECT_EQ(calledCalculateHandleFunc, true);
+    EXPECT_EQ(calledShowSelectOverlayFunc, true);
+
+    calledCalculateHandleFunc = false;
+    calledShowSelectOverlayFunc = false;
+
+    textPattern->SetOnClickMenu(aiSpan, nullptr, showSelectOverlayFunc);
+    func = textPattern->dataDetectorAdapter_->onClickMenu_;
+    ASSERT_NE(func, nullptr);
+
+    func("选择文本");
+    EXPECT_EQ(calledCalculateHandleFunc, false);
+    EXPECT_EQ(calledShowSelectOverlayFunc, true);
+}
+
+/**
+ * @tc.name: ToJsonValue001
+ * @tc.desc: test text_pattern.cpp ToJsonValue function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, ToJsonValue001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    InspectorFilter filter;
+
+    auto firstJson = JsonUtil::Create(true);
+    ASSERT_NE(firstJson, nullptr);
+    textPattern->textStyle_ = TextStyle();
+
+    textPattern->ToJsonValue(firstJson, filter);
+    EXPECT_NE(firstJson->ToString(), "{}");
+
+    auto secondJson = JsonUtil::Create(true);
+    ASSERT_NE(secondJson, nullptr);
+    textPattern->textStyle_->SetAdaptTextSize(Dimension(100), Dimension(10), Dimension(10));
+
+    textPattern->ToJsonValue(secondJson, filter);
+    EXPECT_NE(secondJson->ToString(), "{}");
+
+    filter.AddFilterAttr("id");
+
+    auto thirdJson = JsonUtil::Create(true);
+    ASSERT_NE(thirdJson, nullptr);
+
+    textPattern->ToJsonValue(thirdJson, filter);
+    EXPECT_EQ(thirdJson->ToString(), "{}");
 }
 } // namespace OHOS::Ace::NG

@@ -294,7 +294,7 @@ bool SubwindowOhos::CancelPopup(const std::string& id)
 void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo,
     const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show popup ng enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show popup ng enter, subwindowId: %{public}d", window_->GetWindowId());
     popupTargetId_ = targetId;
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
@@ -313,7 +313,9 @@ void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo
 
 void SubwindowOhos::HidePopupNG(int32_t targetId)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide popup ng enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+        "hide popup ng enter, subwindowId: %{public}d, subwindowName: %{public}s",
+        window_->GetWindowId(), window_->GetWindowName().c_str());
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -369,13 +371,13 @@ void SubwindowOhos::ShowWindow(bool needFocus)
     window_->SetNeedDefaultAnimation(false);
     auto ret = window_->SetFocusable(needFocus);
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW,
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW,
             "subwindow id:%{public}u set focusable %{public}d failed with WMError: %{public}d", window_->GetWindowId(),
             needFocus, static_cast<int32_t>(ret));
     }
     ret = window_->Show();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Show subwindow id:%{public}u failed with WMError: %{public}d",
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Show subwindow id:%{public}u failed with WMError: %{public}d",
             window_->GetWindowId(), static_cast<int32_t>(ret));
         return;
     }
@@ -435,6 +437,8 @@ void SubwindowOhos::HideWindow()
         CHECK_NULL_VOID(rootNode);
         if (!rootNode->GetChildren().empty() &&
             !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
+            TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Subwindow has other node, the last child is %{public}s",
+                rootNode->GetLastChild()->GetTag().c_str());
             return;
         }
         auto focusHub = rootNode->GetFocusHub();
@@ -460,7 +464,7 @@ void SubwindowOhos::HideWindow()
     }
 
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Hide window failed with errCode: %{public}d", static_cast<int32_t>(ret));
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Hide window failed with errCode: %{public}d", static_cast<int32_t>(ret));
         return;
     }
     isShowed_ = false;
@@ -1113,14 +1117,19 @@ void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::fun
         toastInfo.showMode == NG::ToastShowMode::TOP_MOST || toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     if (!aceContainer) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get container failed, child containerId : %{public}d", childContainerId_);
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get container failed, child containerId : %{public}d", childContainerId_);
         return;
     }
 
     auto engine = EngineHelper::GetEngine(aceContainer->GetInstanceId());
+    if (!engine) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get engine failed, containerId : %{public}d",
+            aceContainer->GetInstanceId());
+        return;
+    }
     auto delegate = engine->GetFrontend();
     if (!delegate) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get frontend failed, child containerId : %{public}d", childContainerId_);
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get frontend failed, child containerId : %{public}d", childContainerId_);
         return;
     }
     ContainerScope scope(childContainerId_);

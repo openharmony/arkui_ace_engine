@@ -1051,6 +1051,7 @@ private:
     WebComponentClickCallback webComponentClickCallback_ = nullptr;
     uint32_t autoFillSessionId_ = 0;
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
+    bool isAutoFillClosing_ = true;
 };
 } // namespace OHOS::Ace::NG
 

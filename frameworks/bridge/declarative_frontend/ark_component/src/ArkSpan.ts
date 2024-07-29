@@ -331,7 +331,11 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     if (this.nativePtr !== instance.nativePtr) {
       this.nativePtr = instance.nativePtr;
       this._nativePtrChanged = true;
-      this._weakPtr = instance._weakPtr;
+      if (instance._weakPtr) {
+        this._weakPtr = instance._weakPtr;
+      } else {
+        this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(this.nativePtr);
+      }
     }
   }
 

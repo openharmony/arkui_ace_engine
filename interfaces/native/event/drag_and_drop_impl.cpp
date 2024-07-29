@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <cstdint>
+
 #include "interfaces/native/drag_and_drop.h"
 #include "interfaces/native/node/event_converter.h"
 #include "interfaces/native/node/node_model.h"
@@ -23,6 +25,7 @@
 
 #include "base/error/error_code.h"
 #include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/core/common/ace_engine.h"
@@ -32,6 +35,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+namespace {
+constexpr int32_t MAX_POINTID = 9;
+constexpr int32_t MIN_POINTID = 0;
+} // namespace
 
 int32_t OH_ArkUI_DragEvent_GetModifierKeyStates(ArkUI_DragEvent* event, int64_t* keys)
 {
@@ -106,6 +114,185 @@ int32_t OH_ArkUI_DragEvent_GetDataTypes(
             eventTypeArray[i][0] = '\0';
         }
     }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_DragAction* OH_ArkUI_CreateDragActionWithNode(ArkUI_NodeHandle node)
+{
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !node) {
+        return nullptr;
+    }
+    auto dragActions = impl->getDragAdapterAPI()->createDragActionWithNode(node->uiNodeHandle);
+    return reinterpret_cast<ArkUI_DragAction*>(dragActions);
+}
+
+ArkUI_DragAction* OH_ArkUI_CreateDragActionWithContext(ArkUI_ContextHandle uiContext)
+{
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !uiContext) {
+        return nullptr;
+    }
+    auto* context = reinterpret_cast<ArkUIContext*>(uiContext);
+    auto dragActions = impl->getDragAdapterAPI()->createDragActionWithContext(context);
+    return reinterpret_cast<ArkUI_DragAction*>(dragActions);
+}
+
+void OH_ArkUI_DragAction_Dispose(ArkUI_DragAction* dragAction)
+{
+    if (!dragAction) {
+        return;
+    }
+    delete reinterpret_cast<ArkUIDragAction*>(dragAction);
+    dragAction = nullptr;
+}
+
+int32_t OH_ArkUI_DragAction_SetPointerId(ArkUI_DragAction* dragAction, int32_t pointer)
+{
+    if (!dragAction) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
+    if (!dragActions) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (pointer > MAX_POINTID || pointer < MIN_POINTID) {
+        dragActions->pointerId = -1;
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    dragActions->pointerId = pointer;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_DragAction_SetPixelMaps(ArkUI_DragAction* dragAction, OH_PixelmapNative* pixelmapArray[], int32_t size)
+{
+    if (!dragAction) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
+    if (!dragActions) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    std::vector<std::shared_ptr<OHOS::Media::PixelMap>> pixelMapList;
+    for (int32_t index = 0; index < size; index++) {
+        if (!pixelmapArray[index]) {
+            continue;
+        }
+        pixelMapList.push_back(pixelmapArray[index]->GetInnerPixelmap());
+    }
+    dragActions->pixelmapArray = reinterpret_cast<void**>(pixelMapList.data());
+    dragActions->size = size;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_DragAction_SetTouchPointX(ArkUI_DragAction* dragAction, float x)
+{
+    if (!dragAction) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
+    if (!dragActions) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    dragActions->touchPointX = x;
+    dragActions->hasTouchPoint = true;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_DragAction_SetTouchPointY(ArkUI_DragAction* dragAction, float y)
+{
+    if (!dragAction) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
+    if (!dragActions) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    dragActions->touchPointY = y;
+    dragActions->hasTouchPoint = true;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_DragAction_SetData(ArkUI_DragAction* dragAction, OH_UdmfData* data)
+{
+    if (!dragAction || !data) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
+    dragActions->unifiedData = data;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_DragAction_SetDragPreviewOption(ArkUI_DragAction* dragAction, ArkUI_DragPreviewOption* option)
+{
+    if (!dragAction || !option) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
+    auto* options = reinterpret_cast<ArkUIDragPreViewAndInteractionOptions*>(option);
+    if (!dragActions || !options) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    dragActions->dragPreviewOption = *options;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_DragAction_RegisterStatusListener(ArkUI_DragAction* dragAction, void* userData,
+    void (*listener)(ArkUI_DragAndDropInfo* dragAndDropInfo, void* userData))
+{
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !dragAction) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    impl->getDragAdapterAPI()->registerStatusListener(
+        reinterpret_cast<ArkUIDragAction*>(dragAction), userData, (reinterpret_cast<DragStatusCallback>(listener)));
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+void OH_ArkUI_DragAction_UnregisterStatusListener(ArkUI_DragAction* dragAction)
+{
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !dragAction) {
+        return;
+    }
+    impl->getDragAdapterAPI()->unregisterStatusListener(reinterpret_cast<ArkUIDragAction*>(dragAction));
+}
+
+ArkUI_DragStatus OH_ArkUI_DragAndDropInfo_GetDragStatus(ArkUI_DragAndDropInfo* dragAndDropInfo)
+{
+    if (!dragAndDropInfo) {
+        return ArkUI_DragStatus::ARKUI_DRAG_STATUS_UNKNOWN;
+    }
+    auto* dragAndDropInfos = reinterpret_cast<ArkUIDragAndDropInfo*>(dragAndDropInfo);
+    if (!dragAndDropInfos) {
+        return ArkUI_DragStatus::ARKUI_DRAG_STATUS_UNKNOWN;
+    }
+    return static_cast<ArkUI_DragStatus>(dragAndDropInfos->status);
+}
+
+ArkUI_DragEvent* OH_ArkUI_DragAndDropInfo_GetDragEvent(ArkUI_DragAndDropInfo* dragAndDropInfo)
+{
+    if (!dragAndDropInfo) {
+        return nullptr;
+    }
+    auto* dragAndDropInfos = reinterpret_cast<ArkUIDragAndDropInfo*>(dragAndDropInfo);
+    if (!dragAndDropInfos) {
+        return nullptr;
+    }
+    return reinterpret_cast<ArkUI_DragEvent*>(dragAndDropInfos->dragEvent);
+}
+
+int32_t OH_ArkUI_StartDrag(ArkUI_DragAction* dragAction)
+{
+    if (!dragAction) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!dragActions || !impl) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    impl->getDragAdapterAPI()->startDrag(dragActions);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 

@@ -272,7 +272,7 @@ protected:
     virtual void ReplacePageInNewLifecycle(const RouterPageInfo& target);
 
     static bool OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition,
-        bool isCardRouter = false, int64_t cardId = 0, bool isPush = false);
+        bool isCardRouter = false, int64_t cardId = 0);
     static bool OnPopPage(bool needShowNext, bool needTransition);
     static bool OnPopPageToIndex(int32_t index, bool needShowNext, bool needTransition);
     static bool OnCleanPageStack();

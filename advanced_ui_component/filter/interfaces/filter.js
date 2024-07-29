@@ -240,6 +240,7 @@ class ListFilterRow extends ViewPU {
     this.observeComponentCreation((j17, k17) => {
       ViewStackProcessor.StartGetAccessRecordingFor(j17);
       Stack.create({ alignContent: Alignment.End });
+      Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
       if (!k17) {
         Stack.pop();
       }

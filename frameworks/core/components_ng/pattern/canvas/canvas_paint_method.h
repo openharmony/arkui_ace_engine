@@ -104,7 +104,7 @@ public:
     void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth);
     void StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth);
     void Reset();
-
+    std::string GetDumpInfo();
 private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;

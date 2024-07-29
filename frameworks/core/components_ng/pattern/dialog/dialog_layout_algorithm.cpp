@@ -47,6 +47,7 @@ namespace OHOS::Ace::NG {
 namespace {
 
 // Using UX spec: Constrain max height within 4/5 of screen height.
+constexpr double DIALOG_HEIGHT_RATIO = 0.8;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE = 0.9;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_CAR = 0.95;
 constexpr double DIALOG_MAX_HEIGHT_RATIO = 0.9;
@@ -59,10 +60,6 @@ constexpr Dimension AVOID_LIMIT_PADDING = 8.0_vp;
 constexpr double EXPAND_DISPLAY_WINDOW_HEIGHT_RATIO = 0.67;
 constexpr double EXPAND_DISPLAY_DIALOG_HEIGHT_RATIO = 0.9;
 constexpr double HALF = 2.0;
-constexpr int32_t TEXT_ALIGN_CONTENT_CENTER = 1;
-constexpr int32_t DIALOG_DEVICE_COLUMN_TWO = 2;
-constexpr int32_t DIALOG_DEVICE_COLUMN_THREE = 3;
-constexpr int32_t DIALOG_DEVICE_COLUMN_FOUR = 4;
 constexpr double LANDSCAPE_DIALOG_WIDTH_RATIO = 0.75;
 constexpr Dimension SCROLL_MIN_HEIGHT_SUITOLD = 100.0_vp;
 } // namespace
@@ -224,30 +221,17 @@ void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_VOID(textLayoutAlgorithm);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
     auto scrollPropery = scroll->GetLayoutProperty();
     CHECK_NULL_VOID(scrollPropery);
-    if (dialogTheme->GetTextAlignContent() == TEXT_ALIGN_CONTENT_CENTER) {
+    if (dialogPattern->GetTitle().empty() && dialogPattern->GetSubtitle().empty()) {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
             GreatNotEqual(textLayoutAlgorithm->GetLineCount(), 1)) {
-            scrollPropery->UpdateAlignment(Alignment::CENTER_LEFT);
+            scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER_LEFT);
         } else {
-            scrollPropery->UpdateAlignment(Alignment::CENTER);
+            scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
         }
     } else {
-        if (dialogPattern->GetTitle().empty() && dialogPattern->GetSubtitle().empty()) {
-            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-                GreatNotEqual(textLayoutAlgorithm->GetLineCount(), 1)) {
-                scrollPropery->UpdateAlignment(Alignment::CENTER_LEFT);
-            } else {
-                scrollPropery->UpdateAlignment(Alignment::CENTER);
-            }
-        } else {
-            scrollPropery->UpdateAlignment(Alignment::CENTER_LEFT);
-        }
+        scrollPropery->UpdateAlignment(Alignment::CENTER_LEFT);
     }
 }
 
@@ -380,9 +364,6 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
     columnInfo->GetParent()->BuildColumnWidth(maxSize.Width());
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
-    double ratioHeight = dialogTheme->GetDialogRatioHeight();
     auto width = GetMaxWidthBasedOnGridType(columnInfo, gridSizeType, SystemProperties::GetDeviceType());
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         width =
@@ -397,14 +378,14 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
             innerLayout.maxSize = SizeF(width, maxSize.Height() * DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE);
         } else {
             innerLayout.minSize = SizeF(width, 0.0);
-            innerLayout.maxSize = SizeF(width, maxSize.Height() * ratioHeight);
+            innerLayout.maxSize = SizeF(width, maxSize.Height() * DIALOG_HEIGHT_RATIO);
         }
     } else if (SystemProperties::GetDeviceType() == DeviceType::CAR) {
         innerLayout.minSize = SizeF(width, 0.0);
         innerLayout.maxSize = SizeF(width, maxSize.Height() * DIALOG_HEIGHT_RATIO_FOR_CAR);
     } else {
         innerLayout.minSize = SizeF(width, 0.0);
-        innerLayout.maxSize = SizeF(width, maxSize.Height() * ratioHeight);
+        innerLayout.maxSize = SizeF(width, maxSize.Height() * DIALOG_HEIGHT_RATIO);
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && expandDisplay_) {
         auto maxHeight = SystemProperties::GetDevicePhysicalHeight() * EXPAND_DISPLAY_WINDOW_HEIGHT_RATIO *
@@ -464,30 +445,15 @@ int32_t DialogLayoutAlgorithm::GetDeviceColumns(GridSizeType type, DeviceType de
                Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         deviceColumns = 5; // 5: the number of deviceColumns
     } else {
-        deviceColumns = GetDeviceColumn(type);
-    }
-    return deviceColumns;
-}
-int32_t DialogLayoutAlgorithm::GetDeviceColumn(GridSizeType type)
-{
-    int32_t columnNum;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, 0);
-    auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
-    CHECK_NULL_RETURN(dialogTheme, 0);
-    int32_t deviceColumn = dialogTheme->GetDeviceColumns();
-    if (deviceColumn > 0) {
-        columnNum = deviceColumn;
-    } else {
         if (type == GridSizeType::SM) {
-            columnNum = DIALOG_DEVICE_COLUMN_TWO;
+            deviceColumns = 2;
         } else if (type == GridSizeType::MD) {
-            columnNum = DIALOG_DEVICE_COLUMN_THREE;
+            deviceColumns = 3;
         } else {
-            columnNum = DIALOG_DEVICE_COLUMN_FOUR;
+            deviceColumns = 4;
         }
     }
-    return columnNum;
+    return deviceColumns;
 }
 
 void DialogLayoutAlgorithm::ProcessMaskRect(

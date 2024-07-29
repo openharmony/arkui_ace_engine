@@ -126,11 +126,32 @@ public:
         return needToRequestKeyboard_;
     }
 
+    bool GetIfFocusTextFieldIsInline() {
+        return focusFieldIsInline;
+    }
+
+    void SetIfFocusTextFieldIsInline(bool isinline) {
+        focusFieldIsInline = isinline;
+    }
+
+    void GetInlineTextFieldAvoidPositionYAndHeight(double& positionY, double& height) {
+        positionY = inlinePositionY_;
+        height = inlineHeight_;
+    }
+
+    void SetInlineTextFieldAvoidPositionYAndHeight(double positionY, double height) {
+        inlinePositionY_ = positionY;
+        inlineHeight_ = height;
+    }
+
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
     RefPtr<FrameNode> FindNavNode(const RefPtr<FrameNode>& textField);
 
+    bool focusFieldIsInline = false;
+    double inlinePositionY_ = 0.0f;
+    double inlineHeight_ = 0.0f;
     bool hasMove_ = false;
     bool imeShow_ = false;
     bool uiExtensionImeShow_ = false;

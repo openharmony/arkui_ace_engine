@@ -243,8 +243,12 @@ uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
 }
 } // namespace
 
-MenuLayoutAlgorithm::MenuLayoutAlgorithm(int32_t id, const std::string& tag) : targetNodeId_(id), targetTag_(tag)
+MenuLayoutAlgorithm::MenuLayoutAlgorithm(int32_t id, const std::string& tag,
+    const std::optional<OffsetF>& lastPosition) : targetNodeId_(id), targetTag_(tag)
 {
+    if (lastPosition.has_value()) {
+        lastPosition_ = lastPosition;
+    }
     placementFuncMap_[Placement::TOP] = &MenuLayoutAlgorithm::GetPositionWithPlacementTop;
     placementFuncMap_[Placement::TOP_LEFT] = &MenuLayoutAlgorithm::GetPositionWithPlacementTopLeft;
     placementFuncMap_[Placement::TOP_RIGHT] = &MenuLayoutAlgorithm::GetPositionWithPlacementTopRight;
@@ -1227,6 +1231,7 @@ void MenuLayoutAlgorithm::UpdatePreviewPositionAndOffset(
     CHECK_NULL_VOID(menuPattern);
     menuPattern->SetPreviewOriginOffset(previewOriginOffset_);
 }
+
 OffsetF MenuLayoutAlgorithm::FixMenuOriginOffset(float beforeAnimationScale, float afterAnimationScale)
 {
     auto beforeRate = (1.0f - beforeAnimationScale) / 2;
@@ -1307,7 +1312,10 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             auto offset = ComputeMenuPositionByOffset(menuProp, geometryNode);
             position_ += offset;
         }
-        auto menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow);
+        auto menuPosition = !menuPattern->IsContextMenu() && lastPosition_.has_value()
+            ? lastPosition_.value()
+            : MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow);
+        menuPattern->UpdateLastPosition(menuPosition);
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdatePosition(
@@ -1350,6 +1358,11 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         wrapperPattern->SetDumpInfo(dumpInfo_);
     }
 
+    TranslateOptions(layoutWrapper);
+}
+
+void MenuLayoutAlgorithm::TranslateOptions(LayoutWrapper* layoutWrapper)
+{
     // translate each option by the height of previous options
     OffsetF translate;
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -1722,6 +1735,10 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
 
     float maxAvailableHeight = wrapperRect_.Height();
     float maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
+    if (!menuPattern->IsContextMenu() && lastPosition_.has_value()) {
+        auto spaceToBottom = static_cast<float>(wrapperRect_.Bottom()) - lastPosition_.value().GetY();
+        maxSpaceHeight = std::min(maxSpaceHeight, spaceToBottom);
+    }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (menuPattern->IsHeightModifiedBySelect()) {
             auto menuLayoutProps = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());

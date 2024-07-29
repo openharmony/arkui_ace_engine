@@ -193,6 +193,17 @@ void WaterFlowTestNg::AddItems(int32_t number)
     }
 }
 
+void WaterFlowTestNg::AddItemsAtSlot(int32_t cnt, float height, int32_t slotIdx)
+{
+    for (int i = 0; i < cnt; ++i) {
+        auto child = WaterFlowItemNode::GetOrCreateFlowItem(
+            V2::FLOW_ITEM_ETS_TAG, -1, []() { return AceType::MakeRefPtr<WaterFlowItemPattern>(); });
+        child->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(FILL_LENGTH), CalcLength(Dimension(height))));
+        frameNode_->AddChild(child, slotIdx);
+    }
+}
+
 void WaterFlowTestNg::CreateItemWithHeight(float height)
 {
     WaterFlowItemModelNG waterFlowItemModel;

@@ -486,8 +486,6 @@ HWTEST_F(RichEditorClickTestNg, MouseRightFocus001, TestSize.Level1)
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
     richEditorPattern->moveLength_ = 0;
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    richEditorPattern->paragraphs_.paragraphs_.push_front({ paragraph });
     MouseInfo info;
     richEditorPattern->textSelector_.baseOffset = 0;
     richEditorPattern->textSelector_.destinationOffset = 0;

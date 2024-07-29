@@ -136,7 +136,6 @@ void GridIrregularFiller::FillOne(const int32_t idx)
     }
 
     info_->gridMatrix_[row][col] = idx;
-    SetItemInfo(idx, row, col, size);
 
     posY_ = row;
     posX_ = col;
@@ -206,7 +205,7 @@ void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t item
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     auto constraint = props->CreateChildConstraint();
 
-    auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx);
+    const auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx);
     // should cache child constraint result
     float crossLen = 0.0f;
     for (int32_t i = 0; i < itemSize.columns; ++i) {
@@ -224,6 +223,7 @@ void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t item
     }
 
     child->Measure(constraint);
+    SetItemInfo(itemIdx, row, col, itemSize);
 
     float childHeight = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
     // spread height to each row.
@@ -358,38 +358,30 @@ int32_t GridIrregularFiller::FindItemTopRow(int32_t row, int32_t col) const
     return row;
 }
 
-void GridIrregularFiller::SetItemInfo(int32_t idx, int32_t row, int32_t col, const GridItemSize& size)
+void GridIrregularFiller::SetItemInfo(int32_t idx, int32_t row, int32_t col, GridItemSize size)
 {
-    if (size.rows == 1 && size.columns == 1) {
-        return;
+    if (info_->axis_ == Axis::HORIZONTAL) {
+        std::swap(row, col);
+        std::swap(size.rows, size.columns);
     }
-    auto item = wrapper_->GetOrCreateChildByIndex(idx);
+    auto item = wrapper_->GetChildByIndex(idx);
     CHECK_NULL_VOID(item);
     auto pattern = item->GetHostNode()->GetPattern<GridItemPattern>();
     CHECK_NULL_VOID(pattern);
     auto props = pattern->GetLayoutProperty<GridItemLayoutProperty>();
-    if (info_->axis_ == Axis::VERTICAL) {
-        pattern->SetIrregularItemInfo({ .mainIndex = row,
-            .crossIndex = col,
-            .mainSpan = size.rows,
-            .crossSpan = size.columns,
-            .mainStart = row,
-            .mainEnd = row + size.rows - 1,
-            .crossStart = col,
-            .crossEnd = col + size.columns - 1 });
-        props->UpdateMainIndex(row);
-        props->UpdateCrossIndex(col);
-    } else {
-        pattern->SetIrregularItemInfo({ .mainIndex = col,
-            .crossIndex = row,
-            .mainSpan = size.columns,
-            .crossSpan = size.rows,
-            .mainStart = col,
-            .mainEnd = col + size.columns - 1,
-            .crossStart = row,
-            .crossEnd = row + size.rows - 1 });
-        props->UpdateMainIndex(col);
-        props->UpdateCrossIndex(row);
+    props->UpdateMainIndex(row);
+    props->UpdateCrossIndex(col);
+
+    if (size.rows == 1 && size.columns == 1) {
+        return;
     }
+    pattern->SetIrregularItemInfo({ .mainIndex = row,
+        .crossIndex = col,
+        .mainSpan = size.rows,
+        .crossSpan = size.columns,
+        .mainStart = row,
+        .mainEnd = row + size.rows - 1,
+        .crossStart = col,
+        .crossEnd = col + size.columns - 1 });
 }
 } // namespace OHOS::Ace::NG

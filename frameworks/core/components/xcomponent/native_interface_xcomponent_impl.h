@@ -430,7 +430,7 @@ private:
     int height_ = 0;
     double x_ = 0.0;
     double y_ = 0.0;
-    OH_NativeXComponent_TouchEvent touchEvent_;
+    OH_NativeXComponent_TouchEvent touchEvent_ {};
     OH_NativeXComponent_MouseEvent mouseEvent_ { .x = 0, .y = 0 };
     OH_NativeXComponent_KeyEvent keyEvent_;
     OH_NativeXComponent_Callback* callback_ = nullptr;

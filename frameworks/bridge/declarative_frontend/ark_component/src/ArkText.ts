@@ -759,6 +759,23 @@ class TextEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> {
   }
 }
 
+class TextHalfLeadingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textHalfLeading');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetHalfLeading(node);
+    } else {
+      getUINativeModule().text.setHalfLeading(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -938,6 +955,11 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   editMenuOptions(value: EditMenuOptions): this {
     modifierWithKey(this._modifiersWithKeys, TextEditMenuOptionsModifier.identity,
       TextEditMenuOptionsModifier, value);
+    return this;
+  }
+  halfLeading(value: boolean): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextHalfLeadingModifier.identity,
+      TextHalfLeadingModifier, value);
     return this;
   }
 }

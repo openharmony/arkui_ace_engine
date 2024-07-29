@@ -513,4 +513,16 @@ void TextFieldSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
     }
     BaseTextSelectOverlay::OnAncestorNodeChanged(flag);
 }
+
+void TextFieldSelectOverlay::OnHandleLevelModeChanged(HandleLevelMode mode)
+{
+    if (handleLevelMode_ != mode && mode == HandleLevelMode::OVERLAY) {
+        auto pattern = GetPattern<TextFieldPattern>();
+        if (pattern) {
+            pattern->UpdateParentGlobalOffset();
+            pattern->GetTextSelectController()->CalculateHandleOffset();
+        }
+    }
+    BaseTextSelectOverlay::OnHandleLevelModeChanged(mode);
+}
 } // namespace OHOS::Ace::NG

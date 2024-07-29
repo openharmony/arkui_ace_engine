@@ -736,7 +736,6 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     pattern->InitSurfaceChangedCallback();
     pattern->InitSurfacePositionChangedCallback();
-    pattern->SetTextFadeoutCapacity(true);
     if (pipeline->GetHasPreviewTextOption()) {
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     }
@@ -767,6 +766,8 @@ void SearchModelNG::TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode)
     textFieldPaintProperty->UpdateCursorWidth(textFieldTheme->GetCursorWidth());
     PaddingProperty padding({ CalcLength(0.0), CalcLength(0.0), CalcLength(0.0), CalcLength(0.0) });
     textFieldLayoutProperty->UpdatePadding(padding);
+    BorderRadiusProperty borderRadius;
+    textFieldPaintProperty->UpdateBorderRadiusFlagByUser(borderRadius);
     pattern->SetEnableTouchAndHoverEffect(true);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
 

@@ -1012,4 +1012,29 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest030, TestSize.Lev
     result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
     EXPECT_EQ(result, std::make_tuple(false, false, false));
 }
+
+/**
+ * @tc.name: AccessibilityPropertyTest031
+ * @tc.desc: GetSearchStrategy
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest032, TestSize.Level1)
+{
+    bool ancestorGroupFlag = false;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 14, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto vNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto vChildNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    vNode->AddChild(vChildNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityLevel("yes");
+    accessibilityProperty->SetAccessibilityGroup(false);
+    accessibilityProperty->SaveAccessibilityVirtualNode(vNode);
+
+    auto result = accessibilityProperty->GetSearchStrategy(frameNode, ancestorGroupFlag);
+    EXPECT_EQ(accessibilityProperty->HasAccessibilityVirtualNode(), true);
+    EXPECT_EQ(result, std::make_tuple(true, true, true));
+}
 } // namespace OHOS::Ace::NG

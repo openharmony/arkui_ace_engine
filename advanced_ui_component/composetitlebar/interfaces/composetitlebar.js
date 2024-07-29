@@ -14,7 +14,7 @@
  */
 
 const KeyCode = requireNapi("multimodalInput.keyCode").KeyCode;
-const PUBLIC_MORE = { "id": -1, "type": 20000, params: ['sys.media.ohos_ic_public_more'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+const PUBLIC_MORE = { "id": -1, "type": 20000, params: ['sys.media.ohos_ic_public_more'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
 const PUBLIC_BACK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY' +
   'AAABS3GwHAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAA' +
   'XNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAA8VJREFUeNrt3LFLlHEYwPFXz0G' +
@@ -35,7 +35,7 @@ const PUBLIC_BACK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY' 
 class ComposeTitleBar extends ViewPU {
   constructor(k, j, l, b = -1, m = undefined, n) {
     super(k, l, b, n);
-    if (typeof m === "function") {
+    if (typeof m === 'function') {
       this.paramsGenerator_ = m;
     }
     this.item = undefined;
@@ -43,7 +43,7 @@ class ComposeTitleBar extends ViewPU {
     this.subtitle = '';
     this.menuItems = undefined;
     this.__titleMaxWidth = new ObservedPropertySimplePU(0, this, "titleMaxWidth");
-    this.__backActive = new ObservedPropertySimplePU(false, this, "backActive");
+    this.__backActive = new ObservedPropertySimplePU(false, this, 'backActive');
     this.setInitiallyProvidedValue(j);
   }
   setInitiallyProvidedValue(j) {
@@ -99,7 +99,8 @@ class ComposeTitleBar extends ViewPU {
       });
       Flex.width('100%');
       Flex.height(ComposeTitleBar.totalHeight);
-      Flex.backgroundColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background'], "bundleName": "", "moduleName": "" });
+      Flex.backgroundColor({ 'id': -1, 'type': 10001,
+        params: ['sys.color.ohos_id_color_background'], 'bundleName': '', 'moduleName': '' });
       Flex.onAreaChange((t, h) => {
         let u = Number(h.width);
         if (this.menuItems !== undefined) {
@@ -129,7 +130,8 @@ class ComposeTitleBar extends ViewPU {
     this.observeComponentCreation((b, c) => {
       ViewStackProcessor.StartGetAccessRecordingFor(b);
       Row.create();
-      Row.margin({ left: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_default_padding_start'], "bundleName": "", "moduleName": "" } });
+      Row.margin({ left: { 'id': -1, 'type': 10002,
+        params: ['sys.float.ohos_id_default_padding_start'], 'bundleName': '', 'moduleName': '' } });
       if (!c) {
         Row.pop();
       }
@@ -152,7 +154,7 @@ class ComposeTitleBar extends ViewPU {
           let m = () => {
             return {
               item: {
-                value: { "id": -1, "type": 20000, params: ['sys.media.ohos_ic_back'], "bundleName": "", "moduleName": "" },
+                value: { 'id': -1, 'type': 20000, params: ['sys.media.ohos_ic_back'], 'bundleName': '', 'moduleName': '' },
                 isEnabled: true,
                 action: () => this.backActive = true
               },
@@ -160,10 +162,10 @@ class ComposeTitleBar extends ViewPU {
             };
           };
           ViewPU.create(new ImageMenuItem(this, { item: {
-            value: { "id": -1, "type": 20000, params: ['sys.media.ohos_ic_back'], "bundleName": "", "moduleName": "" },
+            value: { 'id': -1, 'type': 20000, params: ['sys.media.ohos_ic_back'], 'bundleName': '', 'moduleName': '' },
             isEnabled: true,
             action: () => this.backActive = true
-          }, index: -1 }, undefined, b, m, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 89 }));
+          }, index: -1 }, undefined, b, m, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 89 }));
         }
         else {
           this.updateStateVarsOfChildByElmtId(b, {});
@@ -177,13 +179,14 @@ class ComposeTitleBar extends ViewPU {
       if (this.item !== undefined) {
         this.ifElseBranchUpdateFunction(0, () => {
           this.observeComponentCreation((b, c) => {
+            let d;
             ViewStackProcessor.StartGetAccessRecordingFor(b);
             Image.create(this.item.value);
             Image.width(ComposeTitleBar.portraitImageSize);
             Image.height(ComposeTitleBar.portraitImageSize);
             Image.margin({
-              left: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_paragraph_margin_xs'], "bundleName": "", "moduleName": "" },
-              right: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_paragraph_margin_m'], "bundleName": "", "moduleName": "" }
+              left: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_paragraph_margin_xs'], 'bundleName': '', 'moduleName': '' },
+              right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_paragraph_margin_m'], 'bundleName': '', 'moduleName': '' }
             });
             Image.focusable(false);
             Image.borderRadius(ImageMenuItem.buttonBorderRadius);
@@ -233,8 +236,10 @@ class ComposeTitleBar extends ViewPU {
             ViewStackProcessor.StartGetAccessRecordingFor(b);
             Text.create(this.title);
             Text.fontWeight(FontWeight.Medium);
-            Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_headline8'], "bundleName": "", "moduleName": "" });
-            Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_text'], "bundleName": "", "moduleName": "" });
+            Text.fontSize({ 'id': -1, 'type': 10002,
+              params: ['sys.float.ohos_id_text_size_headline8'], 'bundleName': '', 'moduleName': '' });
+            Text.fontColor({ 'id': -1, 'type': 10001,
+              params: ['sys.color.ohos_id_color_titlebar_text'], 'bundleName': '', 'moduleName': '' });
             Text.maxLines(this.subtitle !== undefined ? 1 : 2);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.constraintSize({ maxWidth: this.titleMaxWidth });
@@ -274,8 +279,10 @@ class ComposeTitleBar extends ViewPU {
           this.observeComponentCreation((b, c) => {
             ViewStackProcessor.StartGetAccessRecordingFor(b);
             Text.create(this.subtitle);
-            Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_over_line'], "bundleName": "", "moduleName": "" });
-            Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_subtitle_text'], "bundleName": "", "moduleName": "" });
+            Text.fontSize({ 'id': -1, 'type': 10002,
+              params: ['sys.float.ohos_id_text_size_over_line'], 'bundleName': '', 'moduleName': '' });
+            Text.fontColor({ 'id': -1, 'type': 10001,
+              params: ['sys.color.ohos_id_color_titlebar_subtitle_text'], 'bundleName': '', 'moduleName': '' });
             Text.maxLines(1);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.constraintSize({ maxWidth: this.titleMaxWidth });
@@ -315,7 +322,8 @@ class ComposeTitleBar extends ViewPU {
                     index: 1 + ComposeTitleBar.instanceCount++
                   };
                 };
-                ViewPU.create(new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + ComposeTitleBar.instanceCount++ }, undefined, b, m, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 139 }));
+                ViewPU.create(new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + ComposeTitleBar.instanceCount++ },
+                  undefined, b, m, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 139 }));
               }
               else {
                 this.updateStateVarsOfChildByElmtId(b, {});
@@ -351,16 +359,16 @@ ComposeTitleBar.instanceCount = 0;
 class CollapsibleMenuSection extends ViewPU {
   constructor(k, j, l, b = -1, m = undefined, n) {
     super(k, l, b, n);
-    if (typeof m === "function") {
+    if (typeof m === 'function') {
       this.paramsGenerator_ = m;
     }
     this.menuItems = undefined;
     this.index = 0;
     this.firstFocusableIndex = -1;
-    this.__isPopupShown = new ObservedPropertySimplePU(false, this, "isPopupShown");
-    this.__isMoreIconOnFocus = new ObservedPropertySimplePU(false, this, "isMoreIconOnFocus");
-    this.__isMoreIconOnHover = new ObservedPropertySimplePU(false, this, "isMoreIconOnHover");
-    this.__isMoreIconOnClick = new ObservedPropertySimplePU(false, this, "isMoreIconOnClick");
+    this.__isPopupShown = new ObservedPropertySimplePU(false, this, 'isPopupShown');
+    this.__isMoreIconOnFocus = new ObservedPropertySimplePU(false, this, 'isMoreIconOnFocus');
+    this.__isMoreIconOnHover = new ObservedPropertySimplePU(false, this, 'isMoreIconOnHover');
+    this.__isMoreIconOnClick = new ObservedPropertySimplePU(false, this, 'isMoreIconOnClick');
     this.setInitiallyProvidedValue(j);
   }
   setInitiallyProvidedValue(j) {
@@ -427,15 +435,16 @@ class CollapsibleMenuSection extends ViewPU {
     this.__isMoreIconOnClick.set(h);
   }
   getMoreIconFgColor() {
-    return this.isMoreIconOnClick
-      ? { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], "bundleName": "", "moduleName": "" } : { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], "bundleName": "", "moduleName": "" };
+    return this.isMoreIconOnClick ?
+      { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], 'bundleName': '', 'moduleName': '' } :
+      { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], 'bundleName': '', 'moduleName': '' };
   }
   getMoreIconBgColor() {
     if (this.isMoreIconOnClick) {
-      return { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_click_effect'], "bundleName": "", "moduleName": "" };
+      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'], 'bundleName': '', 'moduleName': '' };
     }
     else if (this.isMoreIconOnHover) {
-      return { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "", "moduleName": "" };
+      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'], 'bundleName': '', 'moduleName': '' };
     }
     else {
       return Color.Transparent;
@@ -444,7 +453,8 @@ class CollapsibleMenuSection extends ViewPU {
   aboutToAppear() {
     if (this.menuItems) {
       this.menuItems.forEach((r, q) => {
-        if (r.isEnabled && this.firstFocusableIndex == -1 && q > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+        if (r.isEnabled && this.firstFocusableIndex == -1 &&
+          q > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
           this.firstFocusableIndex = this.index * 1000 + q + 1;
         }
       });
@@ -455,7 +465,8 @@ class CollapsibleMenuSection extends ViewPU {
       ViewStackProcessor.StartGetAccessRecordingFor(b);
       Column.create();
       Column.height('100%');
-      Column.margin({ right: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_default_padding_end'], "bundleName": "", "moduleName": "" } });
+      Column.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_default_padding_end'],
+        'bundleName': '', 'moduleName': '' } });
       Column.justifyContent(FlexAlign.Center);
       if (!c) {
         Column.pop();
@@ -495,7 +506,8 @@ class CollapsibleMenuSection extends ViewPU {
                               index: this.index * 1000 + q + 1
                             };
                           };
-                          ViewPU.create(new ImageMenuItem(this, { item: r, index: this.index * 1000 + q + 1 }, undefined, b, m, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 216 }));
+                          ViewPU.create(new ImageMenuItem(this, { item: r, index: this.index * 1000 + q + 1 }, undefined, b, m,
+                            { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 216 }));
                         }
                         else {
                           this.updateStateVarsOfChildByElmtId(b, {});
@@ -530,7 +542,8 @@ class CollapsibleMenuSection extends ViewPU {
                               index: this.index * 1000 + q + 1
                             };
                           };
-                          ViewPU.create(new ImageMenuItem(this, { item: r, index: this.index * 1000 + q + 1 }, undefined, b, m, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 220 }));
+                          ViewPU.create(new ImageMenuItem(this, { item: r, index: this.index * 1000 + q + 1 }, undefined, b, m,
+                            { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 220 }));
                         }
                         else {
                           this.updateStateVarsOfChildByElmtId(b, {});
@@ -539,7 +552,8 @@ class CollapsibleMenuSection extends ViewPU {
                       });
                     }
                   };
-                  this.forEachUpdateFunction(b, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), o, undefined, true, false);
+                  this.forEachUpdateFunction(b, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
+                    o, undefined, true, false);
                   if (!c) {
                     ForEach.pop();
                   }
@@ -557,14 +571,14 @@ class CollapsibleMenuSection extends ViewPU {
                   Row.justifyContent(FlexAlign.Center);
                   ViewStackProcessor.visualState("focused");
                   Row.border({
-                    radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "", "moduleName": "" },
+                    radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '', 'moduleName': '' },
                     width: ImageMenuItem.focusBorderWidth,
-                    color: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "", "moduleName": "" },
+                    color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '', "moduleName": '' },
                     style: BorderStyle.Solid
                   });
                   ViewStackProcessor.visualState("normal");
                   Row.border({
-                    radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "", "moduleName": "" },
+                    radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '', 'moduleName': '' },
                     width: 0
                   });
                   ViewStackProcessor.visualState();
@@ -654,7 +668,8 @@ class CollapsibleMenuSection extends ViewPU {
     this.observeComponentCreation((b, c) => {
       ViewStackProcessor.StartGetAccessRecordingFor(b);
       Column.create();
-      Column.width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum);
+      Column.width(ImageMenuItem.imageHotZoneWidth +
+        CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum);
       Column.margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding });
       Column.onAppear(() => {
         focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex);
@@ -684,7 +699,8 @@ class CollapsibleMenuSection extends ViewPU {
                         index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + q
                       };
                     };
-                    ViewPU.create(new ImageMenuItem(this, { item: r, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + q }, undefined, b, m, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 300 }));
+                    ViewPU.create(new ImageMenuItem(this, { item: r, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + q },
+                      undefined, b, m, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 300 }));
                   }
                   else {
                     this.updateStateVarsOfChildByElmtId(b, {});
@@ -693,7 +709,8 @@ class CollapsibleMenuSection extends ViewPU {
                 });
               }
             };
-            this.forEachUpdateFunction(b, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), o, undefined, true, false);
+            this.forEachUpdateFunction(b, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1,
+              this.menuItems.length), o, undefined, true, false);
             if (!c) {
               ForEach.pop();
             }
@@ -724,14 +741,14 @@ CollapsibleMenuSection.marginsNum = 2;
 class ImageMenuItem extends ViewPU {
   constructor(k, j, l, b = -1, m = undefined, n) {
     super(k, l, b, n);
-    if (typeof m === "function") {
+    if (typeof m === 'function') {
       this.paramsGenerator_ = m;
     }
     this.item = undefined;
     this.index = 0;
-    this.__isOnFocus = new ObservedPropertySimplePU(false, this, "isOnFocus");
-    this.__isOnHover = new ObservedPropertySimplePU(false, this, "isOnHover");
-    this.__isOnClick = new ObservedPropertySimplePU(false, this, "isOnClick");
+    this.__isOnFocus = new ObservedPropertySimplePU(false, this, 'isOnFocus');
+    this.__isOnHover = new ObservedPropertySimplePU(false, this, 'isOnHover');
+    this.__isOnClick = new ObservedPropertySimplePU(false, this, 'isOnClick');
     this.setInitiallyProvidedValue(j);
   }
   setInitiallyProvidedValue(j) {
@@ -784,15 +801,18 @@ class ImageMenuItem extends ViewPU {
     this.__isOnClick.set(h);
   }
   getFgColor() {
-    return this.isOnClick
-      ? { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], "bundleName": "", "moduleName": "" } : { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], "bundleName": "", "moduleName": "" };
+    return this.isOnClick ?
+      { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], 'bundleName': '', 'moduleName': '' } :
+      { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], 'bundleName': '', 'moduleName': '' };
   }
   getBgColor() {
     if (this.isOnClick) {
-      return { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_click_effect'], "bundleName": "", "moduleName": "" };
+      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'],
+        'bundleName': '', 'moduleName': '' };
     }
     else if (this.isOnHover) {
-      return { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "", "moduleName": "" };
+      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'],
+        'bundleName': '', 'moduleName': '' };
     }
     else {
       return Color.Transparent;
@@ -800,7 +820,7 @@ class ImageMenuItem extends ViewPU {
   }
   initialRender() {
     this.observeComponentCreation((b, c) => {
-      var d;
+      let d;
       ViewStackProcessor.StartGetAccessRecordingFor(b);
       Row.create();
       Row.width(ImageMenuItem.imageHotZoneWidth);
@@ -809,22 +829,23 @@ class ImageMenuItem extends ViewPU {
       Row.foregroundColor(this.getFgColor());
       Row.backgroundColor(this.getBgColor());
       Row.justifyContent(FlexAlign.Center);
-      Row.opacity(((d = this.item) === null || d === void 0 ? void 0 : d.isEnabled) ? 1 : ImageMenuItem.disabledImageOpacity);
+      Row.opacity(((d = this.item) === null || d === void 0 ? void 0 : d.isEnabled) ?
+        1 : ImageMenuItem.disabledImageOpacity);
       ViewStackProcessor.visualState("focused");
       Row.border({
-        radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "", "moduleName": "" },
+        radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '', 'moduleName': '' },
         width: ImageMenuItem.focusBorderWidth,
-        color: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "", "moduleName": "" },
+        color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '', 'moduleName': '' },
         style: BorderStyle.Solid
       });
       ViewStackProcessor.visualState("normal");
       Row.border({
-        radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "", "moduleName": "" },
+        radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '', 'moduleName': '' },
         width: 0
       });
       ViewStackProcessor.visualState();
       Row.onFocus(() => {
-        var d;
+        let d;
         if (!((d = this.item) === null || d === void 0 ? void 0 : d.isEnabled)) {
           return;
         }
@@ -832,14 +853,14 @@ class ImageMenuItem extends ViewPU {
       });
       Row.onBlur(() => this.isOnFocus = false);
       Row.onHover((g) => {
-        var d;
+        let d;
         if (!((d = this.item) === null || d === void 0 ? void 0 : d.isEnabled)) {
           return;
         }
         this.isOnHover = g;
       });
       Row.onKeyEvent((f) => {
-        var d;
+        let d;
         if (!((d = this.item) === null || d === void 0 ? void 0 : d.isEnabled)) {
           return;
         }
@@ -854,7 +875,7 @@ class ImageMenuItem extends ViewPU {
         }
       });
       Row.onTouch((f) => {
-        var d;
+        let d;
         if (!((d = this.item) === null || d === void 0 ? void 0 : d.isEnabled)) {
           return;
         }
@@ -866,7 +887,8 @@ class ImageMenuItem extends ViewPU {
         }
       });
       Row.onClick(() => {
-        var d, e;
+        let d;
+        let e;
         if (this.item) {
           return this.item.isEnabled && ((e = (d = this.item).action) === null || e === void 0 ? void 0 : e.call(d));
         }
@@ -877,14 +899,16 @@ class ImageMenuItem extends ViewPU {
       ViewStackProcessor.StopGetAccessRecording();
     });
     this.observeComponentCreation((b, c) => {
-      var d, e;
+      let d;
+      let e;
       ViewStackProcessor.StartGetAccessRecordingFor(b);
       Image.create((d = this.item) === null || d === void 0 ? void 0 : d.value);
       Image.width(ImageMenuItem.imageSize);
       Image.height(ImageMenuItem.imageSize);
       Image.focusable((e = this.item) === null || e === void 0 ? void 0 : e.isEnabled);
       Image.key(ImageMenuItem.focusablePrefix + this.index);
-      Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "", "moduleName": "" });
+      Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'],
+        'bundleName': '', 'moduleName': '' });
       if (!c) {
         Image.pop();
       }

@@ -29,8 +29,19 @@ void SymbolModelNG::Create(const std::uint32_t& unicode)
         V2::SYMBOL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
 
     stack->Push(symbolNode);
-    
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo, SymbolSourceInfo{unicode});
+
+    auto property = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    auto symbolInfo = property->GetSymbolSourceInfo();
+    if (symbolInfo.has_value()) {
+        auto lastSymbolEffectOptions = property->GetSymbolEffectOptions();
+        if (lastSymbolEffectOptions.has_value()) {
+            if (lastSymbolEffectOptions->GetEffectType() == SymbolEffectType::REPLACE) {
+                lastSymbolEffectOptions->updateReplaceUnicode(symbolInfo.value().GetUnicode(), unicode);
+            }
+        }
+    }
+
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo, SymbolSourceInfo { unicode });
 }
 
 void SymbolModelNG::SetFontWeight(const Ace::FontWeight& value)
@@ -72,7 +83,19 @@ void SymbolModelNG::SetSymbolEffectOptions(SymbolEffectOptions& symbolEffectOpti
     auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
     auto lastSymbolEffectOptions = property->GetSymbolEffectOptionsValue(SymbolEffectOptions());
     symbolEffectOptions.UpdateFlags(lastSymbolEffectOptions);
+    if (CheckIfIdenticalReplace(lastSymbolEffectOptions, symbolEffectOptions)) {
+        return;
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectOptions, symbolEffectOptions);
+}
+
+bool SymbolModelNG::CheckIfIdenticalReplace(
+    NG::SymbolEffectOptions& lastSymbolEffectOptions, NG::SymbolEffectOptions& symbolEffectOptions)
+{
+    return lastSymbolEffectOptions.GetEffectType() == SymbolEffectType::REPLACE &&
+           symbolEffectOptions.GetEffectType() == SymbolEffectType::REPLACE &&
+           lastSymbolEffectOptions.GetIsTxtActive() && symbolEffectOptions.GetIsTxtActive() &&
+           symbolEffectOptions.GetCurReplaceUnicode() == symbolEffectOptions.GetLastReplaceUnicode();
 }
 
 void SymbolModelNG::SetFontColor(FrameNode* frameNode, const std::vector<Color>& symbolColor)
@@ -106,6 +129,16 @@ void SymbolModelNG::SetSymbolEffect(FrameNode* frameNode, const std::uint32_t ef
 
 void SymbolModelNG::InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode)
 {
+    auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    auto lstSymbolInfo = property->GetSymbolSourceInfo();
+    if (lstSymbolInfo.has_value()) {
+        auto lastSymbolEffectOptions = property->GetSymbolEffectOptions();
+        if (lastSymbolEffectOptions.has_value()) {
+            if (lastSymbolEffectOptions->GetEffectType() == SymbolEffectType::REPLACE) {
+                lastSymbolEffectOptions->updateReplaceUnicode(lstSymbolInfo.value().GetUnicode(), unicode);
+            }
+        }
+    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo, SymbolSourceInfo{unicode}, frameNode);
 }
 
@@ -114,6 +147,18 @@ void SymbolModelNG::SetSymbolEffectOptions(FrameNode* frameNode, SymbolEffectOpt
     auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
     auto lastSymbolEffectOptions = property->GetSymbolEffectOptionsValue(SymbolEffectOptions());
     symbolEffectOptions.UpdateFlags(lastSymbolEffectOptions);
+    if (CheckIfIdenticalReplace(frameNode, lastSymbolEffectOptions, symbolEffectOptions)) {
+        return;
+    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectOptions, symbolEffectOptions, frameNode);
+}
+
+bool SymbolModelNG::CheckIfIdenticalReplace(FrameNode* frameNode, NG::SymbolEffectOptions& lastSymbolEffectOptions,
+    NG::SymbolEffectOptions& symbolEffectOptions)
+{
+    return symbolEffectOptions.GetEffectType() == SymbolEffectType::REPLACE &&
+           lastSymbolEffectOptions.GetEffectType() == SymbolEffectType::REPLACE &&
+           lastSymbolEffectOptions.GetIsTxtActive() && symbolEffectOptions.GetIsTxtActive() &&
+           symbolEffectOptions.GetCurReplaceUnicode() == symbolEffectOptions.GetLastReplaceUnicode();
 }
 } // namespace OHOS::Ace::NG

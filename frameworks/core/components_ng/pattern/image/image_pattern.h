@@ -89,7 +89,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, false };
+        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
     }
 
     const RefPtr<CanvasImage>& GetCanvasImage()
@@ -362,7 +362,7 @@ public:
         return loadingCtx_->GetImageSize();
     }
 
-    void OnVisibleAreaChange(bool visible);
+    void OnVisibleAreaChange(bool visible = true, double ratio = 0.0);
 
     bool GetDefaultAutoResize()
     {
@@ -374,6 +374,7 @@ public:
         InitDefaultValue();
         return interpolationDefault_;
     }
+    void InitOnKeyEvent();
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
@@ -429,7 +430,8 @@ private:
     void PrepareAnimation(const RefPtr<CanvasImage>& image);
     void SetRedrawCallback(const RefPtr<CanvasImage>& image);
     void SetOnFinishCallback(const RefPtr<CanvasImage>& image);
-    void RegisterVisibleAreaChange();
+    void RegisterVisibleAreaChange(bool isCalcClip = true);
+    void TriggerVisibleAreaChangeForChild(const RefPtr<UINode>& node, bool visible, double ratio);
 
     void InitCopy();
     void HandleCopy();
@@ -491,6 +493,7 @@ private:
     void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
     void ControlAnimation(int32_t index);
     void SetObscured();
+    void OnKeyEvent();
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
