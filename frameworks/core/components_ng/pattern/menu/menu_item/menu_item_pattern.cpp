@@ -1330,7 +1330,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
     CHECK_NULL_VOID(theme);
     UpdateTexOverflow(textProperty);
-    auto layoutDirection = textProperty->GetNonAutoLayoutDirection();
+    auto layoutDirection = itemProperty->GetNonAutoLayoutDirection();
     TextAlign textAlign = static_cast<TextAlign>(theme->GetMenuItemContentAlign());
     if (layoutDirection == TextDirection::RTL) {
         if (textAlign == TextAlign::LEFT) {
