@@ -1947,7 +1947,6 @@ void CustomPaintPaintMethod::RestoreLayer()
 
 void CustomPaintPaintMethod::ResetStates()
 {
-    antiAlias_ = false;
     smoothingEnabled_ = true;
     smoothingQuality_ = "low";
     filterParam_ = "";
