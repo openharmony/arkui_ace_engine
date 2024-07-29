@@ -2402,16 +2402,27 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
     HandleSingleClickEvent(info);
 }
 
+bool RichEditorPattern::HandleClickSelection(const OHOS::Ace::GestureEvent& info)
+{
+    if (info.GetSourceDevice() == SourceType::MOUSE || !BetweenSelection(info.GetGlobalLocation())) {
+        return false;
+    }
+
+    if (SelectOverlayIsOn()) {
+        selectOverlay_->ToggleMenu();
+    } else {
+        CalculateHandleOffsetAndShowOverlay();
+        selectOverlay_->ProcessOverlay({.animation = true, .requestCode = REQUEST_RECREATE});
+    }
+    return true;
+}
+
 void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "handleSingleClick");
     hasClicked_ = true;
     lastClickTimeStamp_ = info.GetTimeStamp();
-    if (info.GetSourceDevice() != SourceType::MOUSE && BetweenSelection(info.GetGlobalLocation())) {
-        CalculateHandleOffsetAndShowOverlay();
-        selectOverlay_->ProcessOverlay({.animation = true, .requestCode = REQUEST_RECREATE});
-        return;
-    }
+    CHECK_NULL_VOID(!HandleClickSelection(info));
 
     Offset textOffset = ConvertTouchOffsetToTextOffset(info.GetLocalLocation());
     if (!isMousePressed_) {
