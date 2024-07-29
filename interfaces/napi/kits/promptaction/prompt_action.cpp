@@ -367,6 +367,40 @@ void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& 
     shadow = shadowProps;
 }
 
+void GetToastEnableHoverMode(napi_env env, napi_value enableHoverModeNApi, bool& enableHoverMode)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, enableHoverModeNApi, &valueType);
+    if (valueType == napi_boolean) {
+        napi_get_value_bool(env, enableHoverModeNApi, &enableHoverMode);
+    }
+}
+
+void GetToastHoverModeArea(napi_env env, napi_value hoverModeAreaNApi, HoverModeAreaType& hoverModeArea)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, hoverModeAreaNApi, &valueType);
+    if (valueType == napi_number) {
+        int32_t num = -1;
+        napi_get_value_int32(env, hoverModeAreaNApi, &num);
+        if (num >= 0 && num <= static_cast<int32_t>(HoverModeAreaType::BOTTOM_SCREEN)) {
+            hoverModeArea = static_cast<HoverModeAreaType>(num);
+        }
+    }
+}
+
+void GetToastHoverModeParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
+{
+    napi_value enableHoverModeNApi = nullptr;
+    napi_value hoverModeAreaNApi = nullptr;
+
+    napi_get_named_property(env, argv, "enableHoverMode", &enableHoverModeNApi);
+    napi_get_named_property(env, argv, "hoverModeArea", &hoverModeAreaNApi);
+
+    GetToastEnableHoverMode(env, enableHoverModeNApi, toastInfo.enableHoverMode);
+    GetToastHoverModeArea(env, hoverModeAreaNApi, toastInfo.hoverModeArea);
+}
+
 bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
 {
     napi_value messageNApi = nullptr;
@@ -410,6 +444,7 @@ bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
         !GetToastOffset(env, offsetApi, toastInfo.offset)) {
         return false;
     }
+    GetToastHoverModeParams(env, argv, toastInfo);
     GetToastBackgroundColor(env, backgroundColorNApi, toastInfo.backgroundColor);
     GetToastTextColor(env, textColorNApi, toastInfo.textColor);
     GetToastBackgroundBlurStyle(env, backgroundBlurStyleNApi, toastInfo.backgroundBlurStyle);

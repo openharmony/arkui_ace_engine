@@ -27,6 +27,7 @@ enum class ToastShowMode {
     TOP_MOST = 1,
     SYSTEM_TOP_MOST = 2,
 };
+
 struct ToastInfo {
     std::string message;
     int32_t duration = 0;
@@ -40,6 +41,8 @@ struct ToastInfo {
     std::optional<int32_t> backgroundBlurStyle;
     std::optional<Shadow> shadow;
     bool isTypeStyleShadow = true;
+    bool enableHoverMode = false;
+    HoverModeAreaType hoverModeArea = HoverModeAreaType::BOTTOM_SCREEN;
 };
 class ACE_EXPORT ToastLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ToastLayoutProperty, LayoutProperty);
@@ -54,6 +57,8 @@ public:
         props->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         props->propBottom_ = CloneBottom();
         props->propShowMode_ = CloneShowMode();
+        props->propEnableHoverMode_ = CloneEnableHoverMode();
+        props->propHoverModeArea_ = CloneHoverModeArea();
         return props;
     }
 
@@ -62,6 +67,8 @@ public:
         LayoutProperty::Reset();
         ResetBottom();
         ResetShowMode();
+        ResetEnableHoverMode();
+        ResetHoverModeArea();
     }
 
     enum class SelectStatus {
@@ -84,6 +91,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ToastOffset, DimensionOffset, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Bottom, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowMode, ToastShowMode, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableHoverMode, bool, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HoverModeArea, HoverModeAreaType, PROPERTY_UPDATE_LAYOUT);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
@@ -103,6 +112,10 @@ public:
         offsetValue->Put("dX", propToastOffset_.value_or(DimensionOffset()).GetX().ConvertToVp());
         offsetValue->Put("dY", propToastOffset_.value_or(DimensionOffset()).GetY().ConvertToVp());
         json->PutExtAttr("offset", offsetValue, filter);
+        json->PutExtAttr("EnableHoverMode", propEnableHoverMode_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("HoverModeAreaType",
+            GetHoverModeAreaValue(HoverModeAreaType::BOTTOM_SCREEN) ==
+                HoverModeAreaType::BOTTOM_SCREEN ? "BOTTOM_SCREEN" : "TOP_SCREEN", filter);
     }
 
 private:
