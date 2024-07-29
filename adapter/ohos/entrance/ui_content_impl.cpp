@@ -3429,6 +3429,7 @@ void UIContentImpl::PreLayout()
     taskExecutor->PostSyncTask(
         [pipelineContext] {
             pipelineContext->PreLayout(pipelineContext->GetTimeFromExternalTimer(), 0);
+            TAG_LOGI(AceLogTag::ACE_WINDOW, "UIContentImpl: PreLayout called End");
         },
         TaskExecutor::TaskType::UI, "ArkUIPreLayout");
 }
