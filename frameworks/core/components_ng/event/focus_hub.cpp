@@ -289,7 +289,7 @@ void FocusHub::LostFocusToViewRoot()
     CHECK_NULL_VOID(curFocusView);
     auto viewRootScope = curFocusView->GetViewRootScope();
     CHECK_NULL_VOID(viewRootScope);
-    TAG_LOGD(AceLogTag::ACE_FOCUS, "Lost focus to view root: %{public}s/%{public}d",
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "Lost focus to view root: %{public}s/%{public}d",
         viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId());
     if (!viewRootScope->IsCurrentFocus()) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "View root: %{public}s/%{public}d is not on focusing.",
@@ -472,6 +472,8 @@ void FocusHub::SetFocusable(bool focusable, bool isExplicit)
     }
     focusable_ = focusable;
     if (!focusable) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Set node %{public}s/%{public}d to be unfocusable",
+            GetFrameName().c_str(), GetFrameId());
         RemoveSelf(BlurReason::FOCUS_SWITCH);
     }
 }
@@ -485,6 +487,8 @@ bool FocusHub::IsEnabled() const
 void FocusHub::SetEnabled(bool enabled)
 {
     if (!enabled) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Set node %{public}s/%{public}d to be disabled",
+            GetFrameName().c_str(), GetFrameId());
         RemoveSelf(BlurReason::FOCUS_SWITCH);
     }
 }
@@ -504,6 +508,8 @@ bool FocusHub::IsShow() const
 void FocusHub::SetShow(bool show)
 {
     if (!show) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Set node %{public}s/%{public}d to be unShown",
+            GetFrameName().c_str(), GetFrameId());
         RemoveSelf(BlurReason::FOCUS_SWITCH);
     }
 }
@@ -568,39 +574,14 @@ void FocusHub::SetIsFocusOnTouch(bool isFocusOnTouch)
         auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
             auto focusHub = weak.Upgrade();
             if (focusHub && info.GetTouches().front().GetTouchType() == TouchType::UP) {
+                TAG_LOGI(AceLogTag::ACE_FOCUS, "node %{public}s/%{public}d touch to be focused",
+                    focusHub->GetFrameName().c_str(), focusHub->GetFrameId());
                 focusHub->RequestFocusImmediately();
             }
         };
         focusOnTouchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     }
     gesture->AddTouchEvent(focusOnTouchListener_);
-}
-
-void FocusHub::RefreshFocus()
-{
-    if (!IsCurrentFocus()) {
-        return;
-    }
-
-    // lost current focus and request another focus
-    auto parent = GetParentFocusHub();
-    // current node is root node
-    if (!parent) {
-        LostFocus();
-        return;
-    }
-    while (!parent->IsFocusable()) {
-        // parent node is root node
-        if (!parent->GetParentFocusHub()) {
-            parent->LostFocus();
-            return;
-        }
-        parent = parent->GetParentFocusHub();
-    }
-
-    FocusManager::FocusGuard guard(parent->GetParentFocusHub(), SwitchingStartReason::DEFAULT);
-    parent->LostFocus();
-    parent->RequestFocusImmediately();
 }
 
 bool FocusHub::OnKeyEvent(const KeyEvent& keyEvent)
@@ -1583,41 +1564,6 @@ bool FocusHub::AcceptFocusByRectOfLastFocus(const RectF& rect)
 bool FocusHub::AcceptFocusByRectOfLastFocusNode(const RectF& rect)
 {
     return IsFocusableWholePath();
-}
-
-bool FocusHub::AcceptFocusByRectOfLastFocusScope(const RectF& rect)
-{
-    std::list<RefPtr<FocusHub>> focusNodes;
-    auto itLastFocusNode = FlushChildrenFocusHub(focusNodes);
-    if (focusNodes.empty()) {
-        return false;
-    }
-    auto itFocusNode = itLastFocusNode;
-    do {
-        if (itLastFocusNode == focusNodes.end()) {
-            itLastFocusNode = focusNodes.begin();
-            lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(*itLastFocusNode));
-            if (itLastFocusNode == itFocusNode) {
-                break;
-            }
-        }
-        RectF childRect;
-        if (!CalculateRect(*itLastFocusNode, childRect)) {
-            continue;
-        }
-
-        if ((*itLastFocusNode)->AcceptFocusByRectOfLastFocus(rect - childRect.GetOffset())) {
-            lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(*itLastFocusNode));
-            return true;
-        }
-    } while ((++itLastFocusNode) != itFocusNode);
-    if (itLastFocusNode == focusNodes.end()) {
-        lastWeakFocusNode_ = nullptr;
-    } else {
-        lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(*itLastFocusNode));
-    }
-
-    return false;
 }
 
 bool FocusHub::AcceptFocusByRectOfLastFocusFlex(const RectF& rect)

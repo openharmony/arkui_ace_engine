@@ -125,6 +125,7 @@ void FrontendDelegate::GetRectangleById(const std::string& key, NG::Rectangle& r
 
 void FrontendDelegate::ResetFocus()
 {
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "Lost focus to view root scope by user");
     NG::FocusHub::LostFocusToViewRoot();
 }
 

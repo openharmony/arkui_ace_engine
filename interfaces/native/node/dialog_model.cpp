@@ -189,7 +189,7 @@ int32_t RegisterOnWillDismissWithUserData(
     ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event))
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !handle || !callback) {
+    if (!impl || !handle) {
         return ERROR_CODE_PARAM_INVALID;
     }
     int result = impl->getDialogAPI()->registerOnWillDismissWithUserData(handle->controller, userData, callback);

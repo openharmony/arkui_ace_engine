@@ -47,6 +47,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -2737,6 +2738,7 @@ void RichEditorPattern::HandleBlurEvent()
     }
 
     CloseSelectOverlay();
+    ResetSelection();
 
     if (reason != BlurReason::WINDOW_BLUR) {
         lastSelectionRange_.reset();
@@ -5861,6 +5863,11 @@ void RichEditorPattern::HandleTouchDown(const Offset& offset)
     if (isTouchCaret_ && !selectOverlay_->IsSingleHandleShow()) {
         CreateAndShowSingleHandle(false);
     }
+    if (isTouchCaret_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        lastOffsetInScreenByTouchCaret_ = host->GetOffsetInScreen();
+    }
 }
 
 void RichEditorPattern::HandleTouchUp()
@@ -5901,7 +5908,13 @@ void RichEditorPattern::HandleTouchMove(const Offset& offset)
         return;
     }
     CHECK_NULL_VOID(isTouchCaret_);
-    Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto caretMoveOffset = offset;
+    if (isTouchCaret_) {
+        caretMoveOffset = offset - Offset(0, host->GetOffsetInScreen().GetY() - lastOffsetInScreenByTouchCaret_.GetY());
+    }
+    Offset textOffset = ConvertTouchOffsetToTextOffset(caretMoveOffset);
     auto position = paragraphs_.GetIndex(textOffset);
     SetCaretPosition(position);
     CalcAndRecordLastClickCaretInfo(textOffset);
@@ -5911,8 +5924,6 @@ void RichEditorPattern::HandleTouchMove(const Offset& offset)
         selectOverlay_->HideMenu();
         selectOverlay_->UpdateSecondHandleOffset();
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -7192,6 +7203,8 @@ bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
         if (SelectOverlayIsOn()) {
             selectOverlay_->HideMenu(true);
         }
+        UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
+            AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
         return true;
     }
     if (IsReachedBoundary(offset)) {
@@ -7348,6 +7361,10 @@ void RichEditorPattern::OnScrollEndCallback()
     if (IsSelectAreaVisible()) {
         selectOverlay_->UpdateMenuOffset();
         selectOverlay_->ShowMenu();
+    }
+    if (AnimateStoped()) {
+        UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
+            AceType::WeakClaim(this), ScrollEventType::SCROLL_STOP);
     }
 }
 

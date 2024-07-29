@@ -3024,12 +3024,16 @@ class stateMgmtDFX {
     static dumpObjectProperty(value) {
         let tempObj = {};
         try {
-            Object.getOwnPropertyNames(value)
-                .slice(0, 50)
+            let properties = Object.getOwnPropertyNames(value);
+            properties
+                .slice(0, stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT)
                 .forEach((varName) => {
                 const propertyValue = Reflect.get(value, varName);
                 tempObj[varName] = typeof propertyValue === 'object' ? this.getType(propertyValue) : propertyValue;
             });
+            if (properties.length > stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT) {
+                tempObj['...'] = '...';
+            }
         }
         catch (e) {
             stateMgmtConsole.warn(`can not dump Obj, error msg ${e.message}`);
@@ -3082,6 +3086,7 @@ class stateMgmtDFX {
 // enable profile
 stateMgmtDFX.enableProfiler = false;
 stateMgmtDFX.inRenderingElementId = new Array();
+stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT = 50;
 stateMgmtDFX.DUMP_MAX_LENGTH = 10;
 stateMgmtDFX.DUMP_LAST_LENGTH = 3;
 function setProfilerStatus(profilerStatus) {

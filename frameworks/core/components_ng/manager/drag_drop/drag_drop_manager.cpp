@@ -54,6 +54,7 @@ constexpr float MAX_DISTANCE_TO_PRE_POINTER = 3.0f;
 constexpr float DEFAULT_SPRING_RESPONSE = 0.347f;
 constexpr float MIN_SPRING_RESPONSE = 0.002f;
 constexpr float DEL_SPRING_RESPONSE = 0.005f;
+constexpr int64_t DEVICEID_MASK = 0xFFFFFFFF;
 } // namespace
 
 RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
@@ -1681,8 +1682,8 @@ void DragDropManager::DoDragStartAnimation(
     const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event, bool isSubwindowOverlay)
 {
     auto containerId = Container::CurrentId();
-    auto deviceId = event.GetDeviceId();
-    if (deviceId == 0xFFFFFFFF) {
+    auto deviceId = event.GetDeviceId() & DEVICEID_MASK;
+    if (deviceId == 0xAAAAAAFF) {
         isDragFwkShow_ = false;
         TransDragWindowToDragFwk(containerId);
         return;

@@ -1312,9 +1312,10 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             auto offset = ComputeMenuPositionByOffset(menuProp, geometryNode);
             position_ += offset;
         }
-        auto menuPosition = !menuPattern->IsContextMenu() && lastPosition_.has_value()
-            ? lastPosition_.value()
-            : MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow);
+        auto menuPosition =
+            !menuPattern->IsContextMenu() && lastPosition_.has_value() && CheckIsEmbeddedMode(layoutWrapper)
+                ? lastPosition_.value()
+                : MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow);
         menuPattern->UpdateLastPosition(menuPosition);
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
@@ -1735,7 +1736,7 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
 
     float maxAvailableHeight = wrapperRect_.Height();
     float maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
-    if (!menuPattern->IsContextMenu() && lastPosition_.has_value()) {
+    if (!menuPattern->IsContextMenu() && lastPosition_.has_value() && CheckIsEmbeddedMode(layoutWrapper)) {
         auto spaceToBottom = static_cast<float>(wrapperRect_.Bottom()) - lastPosition_.value().GetY();
         maxSpaceHeight = std::min(maxSpaceHeight, spaceToBottom);
     }
@@ -2482,6 +2483,25 @@ void MenuLayoutAlgorithm::InitHierarchicalParameters(bool isShowInSubWindow, con
             hierarchicalParameters_ = true;
         }
     }
+}
+
+bool MenuLayoutAlgorithm::CheckIsEmbeddedMode(LayoutWrapper* layoutWrapper)
+{
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(menuNode, false);
+    auto menuNodePattern = AceType::DynamicCast<MenuPattern>(menuNode->GetPattern());
+    CHECK_NULL_RETURN(menuNodePattern, false);
+    auto menuWrapper = menuNodePattern->GetMenuWrapper();
+    CHECK_NULL_RETURN(menuWrapper, false);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, false);
+    auto innerMenu = menuWrapperPattern->GetMenuChild(menuNode);
+    CHECK_NULL_RETURN(innerMenu, false);
+    auto innerMenuPattern = AceType::DynamicCast<MenuPattern>(innerMenu->GetPattern());
+    CHECK_NULL_RETURN(innerMenuPattern, false);
+    auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProps, false);
+    return layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE) == SubMenuExpandingMode::EMBEDDED;
 }
 
 } // namespace OHOS::Ace::NG
