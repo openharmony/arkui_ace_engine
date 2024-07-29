@@ -4186,6 +4186,7 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
     } else {
         instance->DeregisterElementOperator(windowId, treeId_);
         parentElementId_ = INVALID_PARENT_ID;
+        parentTreeId_ = 0;
         parentWindowId_ = 0;
     }
 
@@ -4283,10 +4284,24 @@ bool JsAccessibilityManager::CheckIsChildElement(
     return false;
 }
 
+bool JsAccessibilityManager::NeedRegisterChildTree(
+    uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId)
+{
+    if (!IsRegister()) {
+        return true;
+    }
+
+    if (parentWindowId_ == parentWindowId && parentTreeId_ == parentTreeId && parentElementId_ == parentElementId) {
+        return false;
+    }
+    DeregisterInteractionOperationAsChildTree();
+    return true;
+}
+
 void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId)
 {
-    if (IsRegister()) {
+    if (!NeedRegisterChildTree(parentWindowId, parentTreeId, parentElementId)) {
         return;
     }
 
@@ -4319,6 +4334,7 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     Register(retReg == RET_OK);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(retReg == RET_OK);
     parentElementId_ = parentElementId;
+    parentTreeId_ = parentTreeId;
     parentWindowId_ = parentWindowId;
 }
 
@@ -4342,6 +4358,7 @@ void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
     instance->DeregisterElementOperator(windowId, treeId_);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(false);
     parentElementId_ = INVALID_PARENT_ID;
+    parentTreeId_ = 0;
     parentWindowId_ = 0;
 }
 
