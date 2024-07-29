@@ -1292,7 +1292,7 @@ HWTEST_F(IndexerTestNg, OnModifyDone003, TestSize.Level1)
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
     indexerLayoutAlgorithm->itemHeight_ = 24.f;
-    indexerLayoutAlgorithm->maxFrameHeight_ = 95.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 95.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -1340,7 +1340,7 @@ HWTEST_F(IndexerTestNg, OnModifyDone004, TestSize.Level1)
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
     indexerLayoutAlgorithm->itemHeight_ = 24.f;
-    indexerLayoutAlgorithm->maxFrameHeight_ = 95.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 95.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -1443,7 +1443,7 @@ HWTEST_F(IndexerTestNg, OnModifyDone007, TestSize.Level1)
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
     indexerLayoutAlgorithm->itemHeight_ = 24.f;
-    indexerLayoutAlgorithm->maxFrameHeight_ = 150.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 150.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -1480,7 +1480,7 @@ HWTEST_F(IndexerTestNg, OnModifyDone008, TestSize.Level1)
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
     indexerLayoutAlgorithm->itemHeight_ = 24.f;
-    indexerLayoutAlgorithm->maxFrameHeight_ = 100.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 100.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;

@@ -226,7 +226,7 @@ private:
     bool autoCollapse_ = true;
     bool lastAutoCollapse_ = true;
     bool enableHapticFeedback_ = true;
-    float maxFrameHeight_ = 0.0f;
+    float maxContentHeight_ = 0.0f;
     bool isNewHeightCalculated_ = false;
     bool selectedChangedForHaptic_ = false;
     IndexerCollapsingMode lastCollapsingMode_ = IndexerCollapsingMode::INVALID;

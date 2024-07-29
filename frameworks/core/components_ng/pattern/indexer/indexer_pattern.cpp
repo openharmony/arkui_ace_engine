@@ -185,9 +185,9 @@ bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     auto indexerLayoutAlgorithm = DynamicCast<IndexerLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(indexerLayoutAlgorithm, false);
     itemHeight_ = indexerLayoutAlgorithm->GetItemHeight();
-    auto height = indexerLayoutAlgorithm->GetMaxFrameHeight();
-    if (maxFrameHeight_ != height && lastAutoCollapse_) {
-        maxFrameHeight_ = height;
+    auto height = indexerLayoutAlgorithm->GetMaxContentHeight();
+    if (maxContentHeight_ != height && lastAutoCollapse_) {
+        maxContentHeight_ = height;
         isNewHeightCalculated_ = true;
         auto hostNode = dirty->GetHostNode();
         StartCollapseDelayTask(hostNode, INDEXER_COLLAPSE_WAIT_DURATION);
@@ -245,7 +245,7 @@ void IndexerPattern::CollapseArrayValue()
     auto itemSize =
         layoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP)).ConvertToVp();
     int32_t maxItemsCount = 0;
-    auto height = Dimension(maxFrameHeight_, DimensionUnit::PX).ConvertToVp();
+    auto height = Dimension(maxContentHeight_, DimensionUnit::PX).ConvertToVp();
     if (height > 0 && itemSize > 0) {
         maxItemsCount = static_cast<int32_t>(height / itemSize);
     }
