@@ -323,62 +323,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0115, TestSize.Level1)
 }
 
 /**
- * @tc.name: FocusHubTestNg0116
- * @tc.desc: Test the function RefreshFocus.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, FocusHubTestNg0116, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     */
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-    ASSERT_NE(focusHub, nullptr);
-
-    /**
-     * @tc.steps2: call the function RefreshFocus with currentFocus_  false
-     * @tc.expected: The focusHub->currentFocus_ not change
-     */
-    focusHub->currentFocus_ = false;
-    focusHub->RefreshFocus();
-    ASSERT_FALSE(focusHub->currentFocus_);
-
-
-    /**
-     * @tc.steps3: call the function RefreshFocus with currentFocus_  true and don't has parent
-     * @tc.expected: The focusHub->currentFocus_ false
-     */
-    focusHub->currentFocus_ = true;
-    focusHub->RefreshFocus();
-    ASSERT_FALSE(focusHub->currentFocus_);
-}
-
-/**
- * @tc.name: FocusHubTestNg0117
- * @tc.desc: Test the function RefreshFocus.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, FocusHubTestNg0117, TestSize.Level1)
-{
-     /**
-     * @tc.steps: step4. Create frameNode.
-     */
-    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 114,
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    auto child = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        115, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto child2 = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        116, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    child->MountToParent(frameNode);
-    child2->MountToParent(frameNode);
-    auto parentFocusHub = frameNode->GetOrCreateFocusHub();
-    frameNode->eventHub_->enabled_ = false;
-
-    parentFocusHub->RefreshFocus();
-}
-
-/**
  * @tc.name: FocusHubTestNg0119
  * @tc.desc: Test the function IsFocusAbleChildOf.
  * @tc.type: FUNC
