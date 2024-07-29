@@ -1631,7 +1631,7 @@ HWTEST_F(GridIrregularLayoutTest, Horizontal001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     // print all content of gridMatrix_
     auto& info = pattern_->gridLayoutInfo_;
-    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_14);
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_14_HORIZONTAL);
     for (int i = 0; i < 200; ++i) {
         UpdateCurrentOffset(50.0f);
     }

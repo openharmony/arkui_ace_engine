@@ -653,7 +653,7 @@ MatIter SearchInReverse(const decltype(GridLayoutInfo::gridMatrix_)& mat, int32_
     for (auto it = mat.rbegin(); it != mat.rend(); ++it) {
         int32_t maxV = -1;
         if (CheckRow(maxV, it->second, target)) {
-            return it.base();
+            return (++it).base();
         }
         if (static_cast<int32_t>(it->second.size()) == crossCnt && maxV < target) {
             break;

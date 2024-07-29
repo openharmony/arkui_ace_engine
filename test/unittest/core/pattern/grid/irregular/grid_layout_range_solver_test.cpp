@@ -396,6 +396,14 @@ HWTEST_F(GridLayoutRangeTest, MeasureToTarget001, TestSize.Level1)
     for (int i = 0; i < 24; ++i) {
         auto it = info.FindInMatrix(i);
         EXPECT_NE(it, info.gridMatrix_.end());
+        bool found = false;
+        for (auto item : it->second) {
+            if (item.second == i) {
+                found = true;
+                break;
+            }
+        }
+        EXPECT_TRUE(found);
     }
     EXPECT_FLOAT_EQ(info.GetAnimatePosIrregular(23, GRID_HEIGHT, ScrollAlign::AUTO, 20.0f), 11350.0f);
 }
