@@ -550,6 +550,12 @@ void CanvasRenderingContext2DModelNG::GetHeight(RefPtr<AceType>& canvasPattern, 
     height = pattern_->GetHeight();
 }
 
+void CanvasRenderingContext2DModelNG::SetDensity(double density)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->SetDensity(density);
+}
+
 #ifdef PIXEL_MAP_SUPPORTED
 void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(
     RefPtr<AceType>& canvasPattern, const RefPtr<AceType>& pixelMap)

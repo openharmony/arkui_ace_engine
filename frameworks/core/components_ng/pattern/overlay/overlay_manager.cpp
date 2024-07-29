@@ -4225,6 +4225,10 @@ void OverlayManager::UpdateSheetProperty(const RefPtr<FrameNode>& sheetNode,
     auto pipeline = sheetNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     UpdateSheetRender(sheetNode, currentStyle, isPartialUpdate);
+    auto maskNode = GetSheetMask(sheetNode);
+    if (maskNode) {
+        UpdateSheetMask(maskNode, sheetNode, currentStyle, isPartialUpdate);
+    }
     sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     pipeline->FlushUITasks();
     ComputeSheetOffset(currentStyle, sheetNode);
@@ -4243,10 +4247,6 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::She
     if (sheetNode->GetTag() != V2::SHEET_PAGE_TAG ||
         sheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId() != targetId) {
         return;
-    }
-    auto maskNode = GetSheetMask(sheetNode);
-    if (maskNode) {
-        UpdateSheetMask(maskNode, sheetNode, sheetStyle, isPartialUpdate);
     }
     auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetNodePattern);

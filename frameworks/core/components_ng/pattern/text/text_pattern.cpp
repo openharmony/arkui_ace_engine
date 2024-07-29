@@ -36,6 +36,7 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/udmf/udmf_client.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -349,6 +350,12 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     if (selectOverlay_->HasRenderTransform()) {
         localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
     }
+
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    if ((textLayoutProperty && textLayoutProperty->GetMaxLines() != 0) && GetWideText().length() != 0) {
+        VibratorUtils::StartVibraFeedback("longPress.light");
+    }
+
     if (IsDraggable(localOffset)) {
         dragBoxes_ = GetTextBoxes();
         // prevent long press event from being triggered when dragging
@@ -2682,12 +2689,8 @@ void TextPattern::AddImageToSpanItem(const RefPtr<UINode>& child)
 
 void TextPattern::DumpAdvanceInfo()
 {
+    DumpLog::GetInstance().AddDesc(std::string("-----DumpAdvanceInfo-----"));
     DumpLog::GetInstance().AddDesc(std::string("contentRect :").append(contentRect_.ToString()));
-    DumpLog::GetInstance().AddDesc(
-        std::string("FontSize: ")
-            .append(
-            (textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(
-                DIMENSION_VALUE, DimensionUnit::FP)).ToString()));
     if (SystemProperties::GetDebugEnabled() && pManager_) {
         DumpLog::GetInstance().AddDesc(std::string("from TextEngine paragraphs_ info :"));
         DumpLog::GetInstance().AddDesc(
@@ -2715,6 +2718,18 @@ void TextPattern::DumpAdvanceInfo()
     auto fontWeightScale = pipeline->GetFontWeightScale();
     DumpLog::GetInstance().AddDesc(std::string("fontScale: ").append(std::to_string(fontScale)));
     DumpLog::GetInstance().AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->HasForegroundColor()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("ForegroundColor: ").append(renderContext->GetForegroundColorValue().ColorToString()));
+    }
+    if (renderContext->GetForegroundColorStrategy().has_value()) {
+        auto strategy = static_cast<int32_t>(renderContext->GetForegroundColorStrategyValue());
+        DumpLog::GetInstance().AddDesc(std::string("ForegroundColorStrategy: ").append(std::to_string(strategy)));
+    }
 }
 
 void TextPattern::DumpInfo()
@@ -2732,6 +2747,8 @@ void TextPattern::DumpInfo()
             .append((textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(DIMENSION_VALUE, DimensionUnit::FP))
                         .ToString()));
     if (textStyle_.has_value()) {
+        dumpLog.AddDesc(std::string("MaxFontSize: ").append(textStyle_->GetAdaptMaxFontSize().ToString()));
+        dumpLog.AddDesc(std::string("MinFontSize: ").append(textStyle_->GetAdaptMinFontSize().ToString()));
         dumpLog.AddDesc(std::string("FontWeight: ").append(StringUtils::ToString(textStyle_->GetFontWeight())));
         dumpLog.AddDesc(std::string("FontStyle: ").append(StringUtils::ToString(textStyle_->GetFontStyle())));
         dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle_->GetLineHeight().ToString()));
@@ -2747,17 +2764,17 @@ void TextPattern::DumpInfo()
         dumpLog.AddDesc(
             std::string("LineBreakStrategy: ").append(GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy())));
     }
+    dumpLog.AddDesc(
+        std::string("HeightAdaptivePolicy: ")
+            .append(V2::ConvertWrapTextHeightAdaptivePolicyToString(
+                textLayoutProp->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))));
     dumpLog.AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (renderContext->HasForegroundColor()) {
-        dumpLog.AddDesc(
-            std::string("ForegroundColor: ").append(renderContext->GetForegroundColorValue().ColorToString()));
+    if (pManager_ && !pManager_->GetParagraphs().empty()) {
+        auto num = static_cast<int32_t>(pManager_->GetParagraphs().size());
+        dumpLog.AddDesc(std::string("Paragraphs num: ").append(std::to_string(num)));
+        dumpLog.AddDesc(std::string("PaintInfo: ").append(paintInfo_));
     }
     if (SystemProperties::GetDebugEnabled()) {
-        dumpLog.AddDesc(std::string("-----DumpAdvanceInfo-----"));
         DumpAdvanceInfo();
     }
 }

@@ -48,6 +48,7 @@ public:
 
     static RefPtr<CanvasPath2D> JsMakePath2D(const JSCallbackInfo& info);
     void SetAntiAlias();
+    void TransferCanvasDensity();
 
     void ParseImageData(const JSCallbackInfo& info, ImageData& imageData);
     void JsCloseImageBitmap(const std::string& src);
@@ -186,6 +187,11 @@ public:
         instanceId_ = id;
     }
 
+    void SetCanvasDensity(double density)
+    {
+        canvasDensity_ = density;
+    }
+
     void SetTransform(unsigned int id, const TransformParam&);
 
     ACE_DISALLOW_COPY_AND_MOVE(JSCanvasRenderer);
@@ -226,6 +232,7 @@ private:
     Dimension GetDimensionValue(const std::string& str);
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
     double density_ = 1.0;
+    double canvasDensity_ = 1.0;
     int32_t densityCallbackId_ = 0;
 };
 

@@ -30,6 +30,7 @@
 
 namespace OHOS::Ace {
 class UnifiedData;
+class GridColumnInfo;
 }
 namespace OHOS::Ace::NG {
 enum class DragDropMgrState : int32_t {
@@ -481,6 +482,7 @@ public:
     {
         dampingOverflowCount_++;
     }
+    static double GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& pipeline);
 
 private:
     double CalcDragPreviewDistanceWithPoint(
@@ -584,7 +586,7 @@ private:
     OffsetF dragTotalMovePosition_ = OffsetF(0.0f, 0.0f);
     uint32_t dampingOverflowCount_ = 0;
     std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction_;
-
+    RefPtr<GridColumnInfo> columnInfo_;
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };
 } // namespace OHOS::Ace::NG

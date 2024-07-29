@@ -1120,7 +1120,7 @@ public:
     }
 
     virtual RefPtr<FocusHub> GetFocusHub() const;
-    void UpdateCaretInfoToController();
+    void UpdateCaretInfoToController(bool forceUpdate = false);
     void OnObscuredChanged(bool isObscured);
     const RefPtr<TextInputResponseArea>& GetResponseArea()
     {

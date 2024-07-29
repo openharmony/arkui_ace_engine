@@ -933,7 +933,7 @@ void DragEventActuator::UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, co
     }
     auto optionsFromModifier = frameNode->GetDragPreviewOption().options;
     if (optionsFromModifier.blurbgEffect.backGroundEffect.radius.IsValid()) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundEffect, optionsFromModifier.blurbgEffect.backGroundEffect, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundEffect, optionsFromModifier.blurbgEffect.backGroundEffect, imageNode);
     }
 }
 

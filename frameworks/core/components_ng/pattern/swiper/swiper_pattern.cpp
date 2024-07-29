@@ -1392,6 +1392,9 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     StopSpringAnimationImmediately();
     StopIndicatorAnimation(true);
     jumpIndex_ = index;
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateIndexWithoutMeasure(jumpIndex_.value());
     AceAsyncTraceBeginCommercial(0, hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
     uiCastJumpIndex_ = index;
     MarkDirtyNodeSelf();
@@ -1659,7 +1662,7 @@ void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
             SetIndicatorChangeIndexStatus(false);
         }
 
-        SwipeToWithoutAnimation(targetIndex);
+        SwipeToWithoutAnimation(GetLoopIndex(targetIndex));
     }
 }
 
@@ -1904,8 +1907,6 @@ void SwiperPattern::InitIndicator()
     CHECK_NULL_VOID(props);
     if (props->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DOT) {
         SwiperHelper::SaveDotIndicatorProperty(indicatorNode, *this);
-    } else if (props->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::ARC_DOT) {
-        SaveCircleDotIndicatorProperty(indicatorNode);
     } else {
         SwiperHelper::SaveDigitIndicatorProperty(indicatorNode, *this);
     }
@@ -5178,10 +5179,6 @@ void SwiperPattern::DumpAdvanceInfo()
                 DumpLog::GetInstance().AddDesc("SwiperIndicatorType:DIGIT");
                 break;
             }
-            case SwiperIndicatorType::ARC_DOT: {
-                DumpLog::GetInstance().AddDesc("SwiperIndicatorType:ARC_DOT");
-                break;
-            }
             default: {
                 break;
             }
@@ -5771,8 +5768,6 @@ void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     const char* indicator = "indicator";
     if (indicatorType == SwiperIndicatorType::DOT) {
         json->PutExtAttr(indicator, GetDotIndicatorStyle().c_str(), filter);
-    } else if (indicatorType == SwiperIndicatorType::ARC_DOT) {
-        json->PutExtAttr(indicator, GetArcDotIndicatorStyle().c_str(), filter);
     } else {
         json->PutExtAttr(indicator, GetDigitIndicatorStyle().c_str(), filter);
     }

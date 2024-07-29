@@ -539,6 +539,12 @@ void OffscreenCanvasRenderingContext2DModelNG::Reset()
     pattern_->Reset();
 }
 
+void OffscreenCanvasRenderingContext2DModelNG::SetDensity(double density)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->SetDensity(density);
+}
+
 // All interfaces that only the 'OffscreenCanvasRenderingContext2D' has.
 RefPtr<AceType> OffscreenCanvasRenderingContext2DModelNG::CreateOffscreenPattern(int width, int height)
 {

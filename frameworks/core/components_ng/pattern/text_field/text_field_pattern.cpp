@@ -48,6 +48,7 @@
 #include "core/common/ime/text_selection.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
@@ -565,6 +566,7 @@ void TextFieldPattern::OnDirectionConfigurationUpdate()
             textField->parentGlobalOffset_ = textField->GetPaintRectGlobalOffset();
             textField->UpdateTextFieldManager(Offset(textField->parentGlobalOffset_.GetX(),
                 textField->parentGlobalOffset_.GetY()), textField->frameRect_.Height());
+            textField->UpdateCaretInfoToController(true);
             TAG_LOGI(ACE_TEXT_FIELD, "onDirectionUpdate change parentGlobalOffset to: %{public}s",
                 textField->parentGlobalOffset_.ToString().c_str());
         },
@@ -680,7 +682,7 @@ bool TextFieldPattern::HasFocus() const
     return focusHub->IsCurrentFocus();
 }
 
-void TextFieldPattern::UpdateCaretInfoToController()
+void TextFieldPattern::UpdateCaretInfoToController(bool forceUpdate)
 {
     CHECK_NULL_VOID(HasFocus());
 #if defined(ENABLE_STANDARD_INPUT)
@@ -690,7 +692,7 @@ void TextFieldPattern::UpdateCaretInfoToController()
         miscTextConfig.value().range.start,
         miscTextConfig.value().range.end
     };
-    if (lastCursorRange_ == miscTextConfigRange) {
+    if (lastCursorRange_ == miscTextConfigRange && !forceUpdate) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "UpdateCaretInfoToController, same to update caretInfo");
         return;
     }
@@ -1750,6 +1752,7 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
     SetScrollEnabled(scrollable_);
     // limit move when preview text is shown
     auto touchOffset = info.GetTouches().front().GetLocalLocation();
+    int32_t preCaretIndex = selectController_->GetCaretIndex();
     if (GetIsPreviewText()) {
         TAG_LOGI(ACE_TEXT_FIELD, "UpdateCaretByTouchMove when has previewText");
         float offsetY = IsTextArea() ? GetTextRect().GetY() : contentRect_.GetY();
@@ -1773,6 +1776,11 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
     } else {
         selectController_->UpdateCaretInfoByOffset(touchOffset);
     }
+
+    if (selectController_->GetCaretIndex() != preCaretIndex) {
+        VibratorUtils::StartVibraFeedback("slide");
+    }
+
     UpdateCaretInfoToController();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -3000,6 +3008,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    VibratorUtils::StartVibraFeedback("longPress.light");
     if (BetweenSelectedPosition(info.GetGlobalLocation())) {
         gestureHub->SetIsTextDraggable(true);
         return;
@@ -4571,7 +4580,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     if (!ProcessFocusIndexAction()) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "PerformAction  %{public}d", static_cast<int32_t>(action));
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField PerformAction  %{public}d", static_cast<int32_t>(action));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // If the parent node is a Search, the Search callback is executed.
@@ -4751,13 +4760,13 @@ void TextFieldPattern::OnVisibleChange(bool isVisible)
 
 void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
 {
+    if (newWidth == prevWidth && newHeight == prevHeight) {
+        return;
+    }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
         "Textfield handleSurface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
         "height %{public}d",
         newWidth, newHeight, prevWidth, prevHeight);
-    if (newWidth == prevWidth && newHeight == prevHeight) {
-        return;
-    }
     if (SelectOverlayIsOn()) {
         if (selectOverlay_->IsShowMouseMenu()) {
             CloseSelectOverlay();
@@ -4768,7 +4777,7 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    UpdateCaretInfoToController();
+    UpdateCaretInfoToController(true);
 }
 
 void TextFieldPattern::HandleSurfacePositionChanged(int32_t posX, int32_t posY)
@@ -6373,6 +6382,7 @@ void TextFieldPattern::DumpInfo()
     CHECK_NULL_VOID(layoutProperty);
     auto& dumpLog = DumpLog::GetInstance();
     dumpLog.AddDesc(std::string("Content:").append(GetTextValue()));
+    dumpLog.AddDesc(std::string("autoWidth: ").append(std::to_string(layoutProperty->GetWidthAutoValue(false))));
     dumpLog.AddDesc(std::string("MaxLength:").append(std::to_string(GetMaxLength())));
     dumpLog.AddDesc(std::string("fontSize:").append(GetFontSize()));
     dumpLog.AddDesc(std::string("fontWeight:").append(V2::ConvertWrapFontWeightToStirng(GetFontWeight())));
@@ -6399,21 +6409,19 @@ void TextFieldPattern::DumpInfo()
     dumpLog.AddDesc(std::string("PreviewTextStart:").append(std::to_string(GetPreviewTextStart())));
     dumpLog.AddDesc(std::string("PreviewTextEnd:").append(std::to_string(GetPreviewTextEnd())));
     dumpLog.AddDesc(std::string("PreTextValue:").append(GetPreviewTextValue()));
-#if defined(ENABLE_STANDARD_INPUT)
-    auto miscTextConfig = GetMiscTextConfig();
-    CHECK_NULL_VOID(miscTextConfig.has_value());
-    MiscServices::TextConfig textConfig = miscTextConfig.value();
-    dumpLog.AddDesc(std::string("RequestKeyboard calling window :")
-                                       .append(std::to_string(textConfig.windowId)));
-#endif
     dumpLog.AddDesc(textSelector_.ToString());
-    if (customKeyboard_ || customKeyboardBuilder_) {
-        dumpLog.AddDesc(std::string("CustomKeyboard: true")
-                                           .append(", Attached: ")
-                                           .append(std::to_string(isCustomKeyboardAttached_)));
-    }
     dumpLog.AddDesc(std::string("wordBreak:")
             .append(V2::ConvertWrapWordBreakToString(layoutProperty->GetWordBreak().value_or(WordBreak::BREAK_WORD))));
+    dumpLog.AddDesc(
+        std::string("HeightAdaptivePolicy: ")
+            .append(V2::ConvertWrapTextHeightAdaptivePolicyToString(
+                layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))));
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto fontScale = pipeline->GetFontScale();
+    auto fontWeightScale = pipeline->GetFontWeightScale();
+    dumpLog.AddDesc(std::string("fontScale: ").append(std::to_string(fontScale)));
+    dumpLog.AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
 }
 
 void TextFieldPattern::DumpAdvanceInfo()
@@ -6427,8 +6435,6 @@ void TextFieldPattern::DumpAdvanceInfo()
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     DumpLog::GetInstance().AddDesc(std::string("FontColor: ").append(GetTextColor()));
-    DumpLog::GetInstance().AddDesc(
-        std::string("autoWidth: ").append(std::to_string(layoutProperty->GetWidthAutoValue(false))));
     DumpLog::GetInstance().AddDesc(std::string("MinFontSize:").append(GetMinFontSize()));
     DumpLog::GetInstance().AddDesc(std::string("MaxFontSize:").append(GetMaxFontSize()));
     DumpLog::GetInstance().AddDesc(std::string("from TextEngine paragraphs_ info :"));
@@ -6447,6 +6453,9 @@ void TextFieldPattern::DumpAdvanceInfo()
 #if defined(ENABLE_STANDARD_INPUT)
     auto miscTextConfig = GetMiscTextConfig();
     CHECK_NULL_VOID(miscTextConfig.has_value());
+    MiscServices::TextConfig textConfig = miscTextConfig.value();
+    DumpLog::GetInstance().AddDesc(
+        std::string("RequestKeyboard calling window :").append(std::to_string(textConfig.windowId)));
     MiscServices::CursorInfo cursorInfo = miscTextConfig.value().cursorInfo;
     DumpLog::GetInstance().AddDesc(std::string("cursorInfo, left:")
                                        .append(std::to_string(cursorInfo.left))
@@ -6460,12 +6469,6 @@ void TextFieldPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc(std::string("textRect: ").append(contentRect_.ToString()));
     DumpLog::GetInstance().AddDesc(std::string("contentRect: ").append(contentRect_.ToString()));
     DumpLog::GetInstance().AddDesc(textSelector_.ToString());
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto fontScale = pipeline->GetFontScale();
-    auto fontWeightScale = pipeline->GetFontWeightScale();
-    DumpLog::GetInstance().AddDesc(std::string("fontScale: ").append(std::to_string(fontScale)));
-    DumpLog::GetInstance().AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
 }
 
 void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData)

@@ -368,15 +368,20 @@ public:
     void NotifyKeyboardClosedByUser() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosedByUser");
-        CloseSelectOverlay();
-        ResetSelection();
         FocusHub::LostFocusToViewRoot();
     }
     void NotifyKeyboardClosed() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
-        if (!isCustomKeyboardAttached_ && caretTwinkling_) {
-            StopTwinkling();
+        CHECK_NULL_VOID(HasFocus());
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto windowManager = pipelineContext->GetWindowManager();
+        CHECK_NULL_VOID(windowManager);
+
+        // lost focus in floating window mode
+        if (windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+            FocusHub::LostFocusToViewRoot();
         }
     }
     void ClearOperationRecords();
@@ -861,6 +866,7 @@ private:
     void HandleFocusEvent();
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
+    bool HandleClickSelection(const OHOS::Ace::GestureEvent& info);
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
     bool RepeatClickCaret(const Offset& offset, int32_t lastCaretPosition, const RectF& lastCaretRect);
     void CreateAndShowSingleHandle(bool isShowMenu = true);
@@ -1150,6 +1156,7 @@ private:
     OffsetF selectionMenuOffsetByMouse_;
     OffsetF selectionMenuOffsetClick_;
     OffsetF lastClickOffset_;
+    OffsetF lastOffsetInScreenByTouchCaret_;
     std::string pasteStr_;
 
     // still in progress

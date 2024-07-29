@@ -378,25 +378,34 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
             }
         } else {
             // Racing
-            auto paragraph = pManager->GetParagraphs().front().paragraph;
-            float textRacePercent = GetTextRacePercent();
-            float paragraph1Offset =
-                (paragraph->GetTextWidth() + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
-            if ((paintOffset_.GetX() + paragraph1Offset + paragraph->GetTextWidth()) > 0) {
-                paragraph->Paint(drawingContext.canvas, paintOffset_.GetX() + paragraph1Offset, paintOffset_.GetY());
-                PaintImage(drawingContext.canvas, paintOffset_.GetX() + paragraph1Offset, paintOffset_.GetY());
-            }
-            float paragraph2Offset = paragraph1Offset + paragraph->GetTextWidth() + textRaceSpaceWidth_;
-            if ((paintOffset_.GetX() + paragraph2Offset) < drawingContext.width) {
-                paragraph->Paint(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
-                PaintImage(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
-            }
+            DrawTextRacing(drawingContext);
         }
         canvas.Restore();
     } else {
         DrawObscuration(drawingContext);
     }
     PaintCustomSpan(drawingContext);
+}
+
+void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext)
+{
+    auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    auto pManager = pattern->GetParagraphManager();
+    CHECK_NULL_VOID(pManager);
+    auto paragraph = pManager->GetParagraphs().front().paragraph;
+    float textRacePercent = GetTextRacePercent();
+    float paragraph1Offset =
+        (paragraph->GetTextWidth() + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
+    if ((paintOffset_.GetX() + paragraph1Offset + paragraph->GetTextWidth()) > 0) {
+        paragraph->Paint(drawingContext.canvas, paintOffset_.GetX() + paragraph1Offset, paintOffset_.GetY());
+        PaintImage(drawingContext.canvas, paintOffset_.GetX() + paragraph1Offset, paintOffset_.GetY());
+    }
+    float paragraph2Offset = paragraph1Offset + paragraph->GetTextWidth() + textRaceSpaceWidth_;
+    if ((paintOffset_.GetX() + paragraph2Offset) < drawingContext.width) {
+        paragraph->Paint(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
+        PaintImage(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
+    }
 }
 
 void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)

@@ -167,8 +167,6 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
             controllerHandler->onWillDismissCallByNDK(&event);
             return event.BlockDismiss;
         };
-    } else {
-        dialogProperties.onWillDismissCallByNDK  = nullptr;
     }
 
     if (controllerHandler->enableCustomAnimation && !dialogProperties.openAnimation.has_value()) {

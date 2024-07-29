@@ -157,6 +157,7 @@ public:
     void SetTextDirection(TextDirection direction);
     void SetFilterParam(const std::string& filterStr);
     TransformParam GetTransform() const;
+    void SetDensity(double density);
 
     void SaveLayer();
     void RestoreLayer();

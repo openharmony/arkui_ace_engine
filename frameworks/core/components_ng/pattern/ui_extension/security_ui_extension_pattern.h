@@ -63,7 +63,6 @@ public:
     int32_t GetNodeId();
     int32_t GetInstanceId();
 
-    void OnAreaChangedInner() override;
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
     void OnWindowShow() override;
     void OnWindowHide() override;

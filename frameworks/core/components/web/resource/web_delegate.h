@@ -48,6 +48,7 @@
 #include "app_mgr_client.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "surface.h"
+#include "core/components_ng/render/adapter/rosen_render_surface.h"
 #endif
 #include "wm/window.h"
 #endif
@@ -762,6 +763,7 @@ public:
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void OnQuickMenuDismissed();
+    void HideHandleAndQuickMenuIfNecessary(bool hide);
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
@@ -912,6 +914,7 @@ public:
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
+    RefPtr<NG::RosenRenderSurface> renderSurface_ = nullptr;
 #endif
 #ifdef OHOS_STANDARD_SYSTEM
     void SetWebRendeGlobalPos(const Offset& pos)

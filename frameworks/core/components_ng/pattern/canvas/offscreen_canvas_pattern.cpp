@@ -444,4 +444,9 @@ RefPtr<PixelMap> OffscreenCanvasPattern::TransferToImageBitmap()
 {
     return offscreenPaintMethod_->TransferToImageBitmap();
 }
+
+void OffscreenCanvasPattern::SetDensity(double density)
+{
+    offscreenPaintMethod_->SetDensity(density);
+}
 } // namespace OHOS::Ace::NG
