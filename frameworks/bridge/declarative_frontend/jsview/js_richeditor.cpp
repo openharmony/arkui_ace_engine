@@ -492,6 +492,23 @@ void JSRichEditor::SetOnIMEInputComplete(const JSCallbackInfo& args)
     };
     RichEditorModel::GetInstance()->SetOnIMEInputComplete(std::move(callback));
 }
+
+void JSRichEditor::SetOnDidIMEInput(const JSCallbackInfo& args)
+{
+    CHECK_NULL_VOID(args[0]->IsFunction());
+    auto jsOnDidIMEInputFunc =
+        AceType::MakeRefPtr<JsEventFunction<TextRange, 1>>(JSRef<JSFunc>::Cast(args[0]), CreateJsOnDidIMEInput);
+    auto callback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnDidIMEInputFunc)](
+                        const TextRange& textRange) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->Execute(textRange);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onDidIMEInput");
+#endif
+    };
+    RichEditorModel::GetInstance()->SetOnDidIMEInput(std::move(callback));
+}
+
 void JSRichEditor::SetAboutToDelete(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
@@ -673,6 +690,14 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
     onIMEInputCompleteObj->SetPropertyObject("offsetInSpan", offsetInSpan);
     onIMEInputCompleteObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(textSpanResult.GetTextStyle()));
     return JSRef<JSVal>::Cast(onIMEInputCompleteObj);
+}
+
+JSRef<JSVal> JSRichEditor::CreateJsOnDidIMEInput(const TextRange& range)
+{
+    JSRef<JSObject> rangeObj = JSRef<JSObject>::New();
+    rangeObj->SetPropertyObject("start", JSRef<JSVal>::Make(ToJSValue(range.start)));
+    rangeObj->SetPropertyObject("end", JSRef<JSVal>::Make(ToJSValue(range.end)));
+    return JSRef<JSVal>::Cast(rangeObj);
 }
 
 JSRef<JSVal> JSRichEditor::CreateJsAboutToDelet(const NG::RichEditorDeleteValue& deleteValue)
@@ -1263,6 +1288,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("onSelectionChange", &JSRichEditor::SetOnSelectionChange);
     JSClass<JSRichEditor>::StaticMethod("aboutToIMEInput", &JSRichEditor::SetAboutToIMEInput);
     JSClass<JSRichEditor>::StaticMethod("onIMEInputComplete", &JSRichEditor::SetOnIMEInputComplete);
+    JSClass<JSRichEditor>::StaticMethod("onDidIMEInput", &JSRichEditor::SetOnDidIMEInput);
     JSClass<JSRichEditor>::StaticMethod("aboutToDelete", &JSRichEditor::SetAboutToDelete);
     JSClass<JSRichEditor>::StaticMethod("onDeleteComplete", &JSRichEditor::SetOnDeleteComplete);
     JSClass<JSRichEditor>::StaticMethod("customKeyboard", &JSRichEditor::SetCustomKeyboard);

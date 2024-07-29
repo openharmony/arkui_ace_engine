@@ -31,11 +31,13 @@ public:
     static void SetOnSelectionChange(const JSCallbackInfo& args);
     static void SetAboutToIMEInput(const JSCallbackInfo& args);
     static void SetOnIMEInputComplete(const JSCallbackInfo& args);
+    static void SetOnDidIMEInput(const JSCallbackInfo& args);
     static void SetAboutToDelete(const JSCallbackInfo& args);
     static void SetOnDeleteComplete(const JSCallbackInfo& args);
     static void SetCustomKeyboard(const JSCallbackInfo& args);
     static JSRef<JSVal> CreateJsAboutToIMEInputObj(const NG::RichEditorInsertValue& insertValue);
     static JSRef<JSVal> CreateJsOnIMEInputComplete(const NG::RichEditorAbstractSpanResult& textSpanResult);
+    static JSRef<JSVal> CreateJsOnDidIMEInput(const TextRange& textRange);
     static JSRef<JSVal> CreateJsAboutToDelet(const NG::RichEditorDeleteValue& deleteValue);
     static void SetChangeTextSpans(
         JSRef<JSArray>& jsArray, const std::vector<NG::RichEditorAbstractSpanResult>& spanList);

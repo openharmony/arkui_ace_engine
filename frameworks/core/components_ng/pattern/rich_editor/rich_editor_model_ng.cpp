@@ -141,6 +141,14 @@ void RichEditorModelNG::SetOnIMEInputComplete(std::function<void(const RichEdito
     eventHub->SetOnIMEInputComplete(std::move(func));
 }
 
+void RichEditorModelNG::SetOnDidIMEInput(std::function<void(const TextRange&)>&& func)
+{
+    CHECK_NULL_VOID(!isStyledStringMode_);
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidIMEInput(std::move(func));
+}
+
 void RichEditorModelNG::SetOnIMEInputComplete(FrameNode* frameNode,
     std::function<void(const RichEditorAbstractSpanResult&)>&& callback)
 {
@@ -148,6 +156,14 @@ void RichEditorModelNG::SetOnIMEInputComplete(FrameNode* frameNode,
     auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnIMEInputComplete(std::move(callback));
+}
+
+void RichEditorModelNG::SetOnDidIMEInput(FrameNode* frameNode, std::function<void(const TextRange&)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidIMEInput(std::move(callback));
 }
 
 void RichEditorModelNG::SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func)
