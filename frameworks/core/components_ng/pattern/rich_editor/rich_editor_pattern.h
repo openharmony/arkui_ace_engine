@@ -450,7 +450,7 @@ public:
     void CloseSelectionMenu();
     bool SetCaretOffset(int32_t caretPosition);
     void ResetFirstNodeStyle();
-    void FireOnDeleteComplete(const RichEditorDeleteValue& info);
+    void DoDeleteActions(const RichEditorDeleteValue& info);
 
     void UpdateSpanStyle(int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle);
     std::string GetContentBySpans();
@@ -1002,7 +1002,7 @@ private:
     void SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo, const TextStyle& textStyle);
     void CalcInsertValueObj(TextInsertValueInfo& info, int textIndex, bool isCreate = false);
     void GetDeletedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, int32_t length,
-        RichEditorDeleteDirection direction = RichEditorDeleteDirection::FORWARD);
+        RichEditorDeleteDirection direction = RichEditorDeleteDirection::FORWARD, bool isResetSelection = true);
     RefPtr<SpanItem> GetDelPartiallySpanItem(
         RichEditorChangeValue& changeValue, std::string& originalStr, int32_t& originalPos);
     void FixMoveDownChange(RichEditorChangeValue& changeValue, int32_t delLength);
