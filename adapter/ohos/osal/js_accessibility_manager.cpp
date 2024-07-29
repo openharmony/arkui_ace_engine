@@ -4325,6 +4325,7 @@ void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
     parentElementId_ = INVALID_PARENT_ID;
     parentTreeId_ = 0;
     parentWindowId_ = 0;
+    NotifyChildTreeOnDeregister();
 }
 
 void JsAccessibilityManager::JsInteractionOperation::SetChildTreeIdAndWinId(
