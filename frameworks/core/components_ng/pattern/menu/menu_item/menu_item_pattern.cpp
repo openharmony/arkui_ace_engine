@@ -1167,8 +1167,8 @@ void MenuItemPattern::AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode)
     MenuItemProperties menuItemProps;
     menuItemProps.content = content;
     menuItemProps.endIcon = imageSourceInfo;
-    auto model = new NG::MenuItemModelNG();
-    model->Create(menuItemProps);
+    MenuItemModelNG menuItemModel;
+    menuItemModel.Create(menuItemProps);
     auto stack = ViewStackProcessor::GetInstance();
 
     auto titleItem = AceType::DynamicCast<FrameNode>(stack->Finish());
