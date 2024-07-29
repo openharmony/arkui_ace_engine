@@ -31,6 +31,7 @@ constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
 constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
 constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
+
 constexpr float BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY = 0.4f;
 constexpr float LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY = 0.2f;
 constexpr float LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY = 1.0f;
@@ -68,8 +69,8 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     IsCustomSizeValue_ = paintProperty->GetIsCustomSizeValue(false);
     dotIndicatorModifier_->SetAxis(axis_);
     dotIndicatorModifier_->SetCurrentIndex(currentIndex_);
-    dotIndicatorModifier_->SetSelectedColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor()));
     dotIndicatorModifier_->SetUnselectedColor(paintProperty->GetColorValue(swiperTheme->GetColor()));
+    dotIndicatorModifier_->SetSelectedColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor()));
     dotIndicatorModifier_->SetIndicatorMask(paintProperty->GetIndicatorMaskValue(false));
     dotIndicatorModifier_->SetIsIndicatorCustomSize(IsCustomSizeValue_);
     dotIndicatorModifier_->SetOffset(geometryNode->GetContentOffset());
@@ -130,6 +131,7 @@ void DotIndicatorPaintMethod::PaintNormalIndicator(const PaintWrapper* paintWrap
 {
     auto [longPointCenterX, itemHalfSizes] = CalculateLongPointCenterX(paintWrapper);
     longPointCenterX_ = longPointCenterX;
+
     if (dotIndicatorModifier_->GetIsHover()) {
         dotIndicatorModifier_->UpdateHoverToNormalPaintProperty(
             normalMargin_, itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
@@ -185,6 +187,7 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapp
         dotIndicatorModifier_->SetNormalToHoverIndex(hoverIndex_);
         dotIndicatorModifier_->UpdateNormalToHoverPointDilateRatio();
     }
+
     PaintHoverIndicator(itemHalfSizes, INDICATOR_PADDING_HOVER);
 }
 void DotIndicatorPaintMethod::PaintHoverIndicator(LinearVector<float>& itemHalfSizes, const Dimension paddingSide)
@@ -193,7 +196,6 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(LinearVector<float>& itemHalfS
         if (currentIndex_ == itemCount_ - displayCount_ && !isLoop_ && mouseClickIndex_ > currentIndex_ &&
             mouseClickIndex_ < itemCount_) {
             longPointCenterX_ = CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
-
                 static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
         } else {
             auto mouseClickIndex = mouseClickIndex_.value();
@@ -201,7 +203,6 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(LinearVector<float>& itemHalfS
                 mouseClickIndex = itemCount_ - 1 - mouseClickIndex_.value();
             }
             longPointCenterX_ = CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
-
                 static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), mouseClickIndex);
         }
         dotIndicatorModifier_->UpdateAllPointCenterXAnimation(
@@ -213,6 +214,7 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(LinearVector<float>& itemHalfS
         dotIndicatorModifier_->UpdateLongPointDilateRatio();
     }
 }
+
 void DotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
@@ -227,7 +229,6 @@ void DotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* paintWrapp
         static_cast<float>(paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
     auto selectedItemHeight =
         static_cast<float>(paintProperty->GetSelectedItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
-
     // use radius calculation
     auto itemHalfWidth = itemWidth * 0.5 * INDICATOR_ZOOM_IN_SCALE;
     auto itemHalfHeight = itemHeight * 0.5 * INDICATOR_ZOOM_IN_SCALE;
@@ -240,7 +241,6 @@ void DotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* paintWrapp
     itemHalfSizes.emplace_back(selectedItemHalfHeight);
     longPointCenterX_ =
         CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()),
-
             static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
     if (dotIndicatorModifier_->GetIsPressed()) {
         dotIndicatorModifier_->UpdatePressPaintProperty(itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
@@ -637,7 +637,6 @@ std::pair<float, float> DotIndicatorPaintMethod::ForwardCalculation(
         startCenterX += space;
         endCenterX += space;
     }
-
     AdjustPointCenterXForTouchBottom(
         pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex, selectedItemWidth, index);
     return CalculatePointCenterX(pointCenter, startVectorBlackPointCenterX, endVectorBlackPointCenterX);
