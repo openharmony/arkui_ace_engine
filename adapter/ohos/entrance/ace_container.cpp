@@ -102,6 +102,7 @@ constexpr uint32_t POPUPSIZE_HEIGHT = 0;
 constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
+constexpr int32_t POPUP_EDGE_INTERVAL = 48;
 
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
@@ -1176,7 +1177,7 @@ UIContentErrorCode AceContainer::RunPage(
             CHECK_NULL_RETURN(CheckUrlValid(content, container->GetHapPath()), UIContentErrorCode::INVALID_URL);
         }
     }
-    
+
     if (isNamedRouter) {
         return front->RunPageByNamedRouter(content, params);
     }
@@ -1285,7 +1286,7 @@ public:
 
     void onPopupConfigWillUpdate(AbilityRuntime::AutoFill::AutoFillCustomConfig& config) override
     {
-        // Non-native component like web/xcomponent, popup always displayed in the center of the hap
+        // Non-native component like web/xcomponent
         // The offset needs to be calculated based on the placement
         if (isNative_ || !config.targetSize.has_value() || !config.placement.has_value()) {
             return;
@@ -1296,14 +1297,20 @@ public:
         AbilityRuntime::AutoFill::PopupOffset offset;
         AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
         AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
-        // only support BOTTOM_XXX AND TOP_XXX
-        if (placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
-            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
-            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
-            offset.deltaY = rect_.top + rect_.height -
-                ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO);
+
+        if ((windowRect_.height_ - rectf.Height()) > size.height + POPUP_EDGE_INTERVAL) {
+            // popup will display at the bottom of the container
+            offset.deltaY = rect_.top + rect_.height - rectf.Height();
         } else {
-            offset.deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO);
+            // popup will display in the middle of the container
+            if (placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
+                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
+                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
+                offset.deltaY = rect_.top + rect_.height -
+                    ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO);
+            } else {
+                offset.deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO);
+            }
         }
 
         if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_LEFT ||
@@ -1318,11 +1325,17 @@ public:
 
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "PopupOffset x:%{public}f,y:%{public}f", offset.deltaX, offset.deltaY);
         config.targetOffset = offset;
+        config.placement = AbilityRuntime::AutoFill::PopupPlacement::BOTTOM;
     }
 
     void SetFocusedRect(AbilityBase::Rect rect)
     {
         rect_ = rect;
+    }
+
+    void SetWindowRect(Rosen::Rect rect)
+    {
+        windowRect_ = rect;
     }
 private:
     WeakPtr<NG::PipelineContext> pipelineContext_ = nullptr;
@@ -1330,6 +1343,7 @@ private:
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
     bool isNative_ = true;
     AbilityBase::Rect rect_;
+    Rosen::Rect windowRect_;
 };
 
 bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
@@ -1504,6 +1518,7 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
         AbilityBase::Rect rect;
         GetFocusedElementRect(viewData, rect);
         callback->SetFocusedRect(rect);
+        callback->SetWindowRect(uiWindow_->GetRect());
     }
     AbilityRuntime::AutoFill::AutoFillCustomConfig customConfig;
     FillAutoFillCustomConfig(node, customConfig);

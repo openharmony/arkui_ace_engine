@@ -3356,6 +3356,7 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
     CHECK_NULL_VOID(viewDataWrap);
     auto nodeInfoWraps = viewDataWrap->GetPageNodeInfoWraps();
     auto jsonNode = JsonUtil::Create(true);
+    AceAutoFillType focusType = AceAutoFillType::ACE_UNSPECIFIED;
     for (const auto& nodeInfoWrap : nodeInfoWraps) {
         if (nodeInfoWrap == nullptr) {
             continue;
@@ -3366,8 +3367,28 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
             std::string key = ACE_AUTOFILL_TYPE_TO_NWEB.at(type);
             jsonNode->Put(key.c_str(), nodeInfoWrap->GetValue().c_str());
         }
+        if (nodeInfoWrap->GetIsFocus()) {
+            focusType = type;
+        }
     }
     delegate_->NotifyAutoFillViewData(jsonNode->ToString());
+
+    // shift focus after autofill
+    if (focusType != AceAutoFillType::ACE_UNSPECIFIED) {
+        for (const auto& nodeInfo : pageNodeInfo_) {
+            if (nodeInfo && nodeInfo->GetAutoFillType() == focusType) {
+                TouchEventInfo info("autofill");
+                TouchLocationInfo location("autofill", 0);
+                auto rectF = nodeInfo->GetPageNodeRect();
+                location.SetLocalLocation(Offset(rectF.GetX() + (rectF.Width() / 2),
+                    rectF.GetY() + (rectF.Height() / 2)));
+                info.AddChangedTouchLocationInfo(std::move(location));
+                HandleTouchDown(info, false);
+                HandleTouchUp(info, false);
+                break;
+            }
+        }
+    }
 }
 
 void WebPattern::NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent, bool isPopup)
