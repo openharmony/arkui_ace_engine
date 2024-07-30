@@ -1075,6 +1075,13 @@ void ResetTextHalfLeading(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetHalfLeading(frameNode, false);
 }
+
+ArkUI_Int32 GetTextHalfLeading(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetHalfLeading(frameNode));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1194,7 +1201,8 @@ const ArkUITextModifier* GetTextModifier()
         SetTextSelectionMenuOptions,
         ResetTextSelectionMenuOptions,
         SetTextHalfLeading,
-        ResetTextHalfLeading
+        ResetTextHalfLeading,
+        GetTextHalfLeading
     };
 
     return &modifier;
