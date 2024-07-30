@@ -3824,6 +3824,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         layoutAlgorithm_->SetSkipMeasure();
         layoutAlgorithm_->SetSkipLayout();
         geometryNode_->SetFrameSize(SizeF());
+        geometryNode_->UpdateMargin(MarginPropertyF());
         isLayoutDirtyMarked_ = false;
         ACE_LAYOUT_TRACE_END()
         return;
