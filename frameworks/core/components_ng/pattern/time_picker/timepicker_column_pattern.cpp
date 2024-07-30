@@ -153,7 +153,13 @@ void TimePickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host
     if (timePickerRowPattern->GetIsEnableHaptic()) {
         isEnableHaptic_ = true;
         if (!hapticController_) {
-            hapticController_ = TimepickerAudioHapticFactory::GetInstance();
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->hapticController_ = TimepickerAudioHapticFactory::GetInstance();
+            });
         }
     } else {
         isEnableHaptic_ = false;
