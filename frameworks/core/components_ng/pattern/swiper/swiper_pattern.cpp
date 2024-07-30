@@ -3514,15 +3514,15 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
             CHECK_NULL_VOID(swiperPattern);
             ACE_SCOPED_TRACE_COMMERCIAL("%s start spring animation",
                 swiperPattern->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG);
-            swiperPattern->OnSpringAnimationStart(static_cast<float>(dragVelocity));
             host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, delta);
-            swiperPattern->springAnimationIsRunning_ = true;
         },
         [weak = AceType::WeakClaim(this)]() {
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             swiperPattern->OnSpringAnimationFinish();
         });
+    OnSpringAnimationStart(static_cast<float>(dragVelocity));
+    springAnimationIsRunning_ = true;
 }
 
 bool SwiperPattern::IsOutOfBoundary(float mainOffset) const
