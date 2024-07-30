@@ -1173,7 +1173,9 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     if (!manifestParser_) {
         return;
     }
-    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE && !context->GetForceSplitEnable()) {
         LOGW("Router stack size is larger than max size 32.");
         if (target.errorCallback != nullptr) {
             target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
