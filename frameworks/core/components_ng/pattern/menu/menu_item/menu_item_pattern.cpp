@@ -55,6 +55,9 @@ constexpr double STIFFNESS = 328.0f;
 constexpr double DAMPING = 33.0f;
 constexpr double SEMI_CIRCLE_ANGEL = 180.0f;
 constexpr float OPACITY_EFFECT = 0.99;
+constexpr std::string SYSTEM_RESOURCE_PREFIX = "resource:///";
+// 系统资源的id起始值是0x07800000
+constexpr unsigned long MIN_SYSTEM_RESOURCE_ID = 0x07800000;
 
 void UpdateFontSize(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
     const std::optional<Dimension>& fontSize, const Dimension& defaultFontSize)
@@ -1268,7 +1271,18 @@ void MenuItemPattern::UpdateImageIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
         auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateImageSourceInfo(imageSourceInfo);
-        UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), false);
+        bool useDefaultThemeIcon = false;
+        if (imageSourceInfo.IsSvg()) {
+            auto src = imageSourceInfo.GetSrc();
+            auto srcId = src.substr(SYSTEM_RESOURCE_PREFIX.size(), src.substr(0, src.rfind(".svg")).size() - SYSTEM_RESOURCE_PREFIX.size());
+            auto isSystemIcon = (srcId.find("ohos_") != std::string::npos) || (std::stoul(srcId) >= MIN_SYSTEM_RESOURCE_ID);
+            if (isSystemIcon) {
+                useDefaultThemeIcon = true;
+            }
+        }
+        
+        UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), useDefaultThemeIcon);
+        
     }
 }
 
@@ -1299,21 +1313,7 @@ void MenuItemPattern::UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>
         auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateImageSourceInfo(imageSourceInfo);
-        bool useDefaultThemeIcon = false;
-        if (imageSourceInfo.IsSvg()) {
-            auto src = imageSourceInfo.GetSrc();
-            std::string magicStr = "resource:///";
-            auto srcId = src.substr(magicStr.size(), src.substr(0, src.rfind(".svg")).size() - magicStr.size());
-
-            // 系统资源的id起始值是0x07800000
-            unsigned long magicNum = 0x07800000;
-            auto isSystemIcon = (srcId.find("ohos_") != std::string::npos) || (std::stoul(srcId) >= magicNum);
-            if (isSystemIcon) {
-                useDefaultThemeIcon = true;
-            }
-        }
-        
-        UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), useDefaultThemeIcon);
+        UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), false);
     }
 }
 
