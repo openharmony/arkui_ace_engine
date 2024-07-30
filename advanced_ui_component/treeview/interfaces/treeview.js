@@ -59,6 +59,8 @@ const MIN_WIDTH = '112vp';
 const MAX_WIDTH = '192vp';
 const TRANS_COLOR = '#00FFFFFF';
 const DELAY_TIME = 100;
+const LEVEL_MARGIN = 12;
+const MARGIN_OFFSET = 8;
 const ARROW_DOWN = {
   id: -1,
   type: 20000,
@@ -120,18 +122,61 @@ var Flag;
 })(Flag || (Flag = {}));
 export var NodeStatus;
 (function (u26) {
-    u26[u26['Expand'] = 0] = 'Expand';
-    u26[u26['Collapse'] = 1] = 'Collapse';
+    u26[u26['EXPAND'] = 0] = 'EXPAND';
+    u26[u26['COLLAPSE'] = 1] = 'COLLAPSE';
 })(NodeStatus || (NodeStatus = {}));
 export var InteractionStatus;
 (function (t26) {
-    t26[t26['Normal'] = 0] = 'Normal';
-    t26[t26['Selected'] = 1] = 'Selected';
-    t26[t26['Edit'] = 2] = 'Edit';
-    t26[t26['FinishEdit'] = 3] = 'FinishEdit';
-    t26[t26['DragInsert'] = 4] = 'DragInsert';
-    t26[t26['FinishDragInsert'] = 5] = 'FinishDragInsert';
+    t26[t26['NORMAL'] = 0] = 'NORMAL';
+    t26[t26['SELECTED'] = 1] = 'SELECTED';
+    t26[t26['EDIT'] = 2] = 'EDIT';
+    t26[t26['FINISH_EDIT'] = 3] = 'FINISH_EDIT';
+    t26[t26['DRAG_INSERT'] = 4] = 'DRAG_INSERT';
+    t26[t26['FINISH_DRAG_INSERT'] = 5] = 'FINISH_DRAG_INSERT';
 })(InteractionStatus || (InteractionStatus = {}));
+var CollapseImageType;
+(function (y22) {
+    y22[y22['ARROW_DOWN'] = 0] = 'ARROW_DOWN';
+    y22[y22['ARROW_RIGHT'] = 1] = 'ARROW_RIGHT';
+    y22[y22['ARROW_DOWN_WHITE'] = 2] = 'ARROW_DOWN_WHITE';
+    y22[y22['ARROW_RIGHT_WHITE'] = 3] = 'ARROW_RIGHT_WHITE';
+})(CollapseImageType || (CollapseImageType = {}));
+class TreeViewNodeItemFactory {
+    constructor() {
+    }
+    static getInstance() {
+        if (!TreeViewNodeItemFactory.instance) {
+            TreeViewNodeItemFactory.instance = new TreeViewNodeItemFactory();
+        }
+        return TreeViewNodeItemFactory.instance;
+    }
+    createNode() {
+        return {
+            imageNode: undefined,
+            inputText: new InputText(),
+            mainTitleNode: new MainTitleNode(''),
+            imageCollapse: undefined,
+            fontColor: undefined,
+        };
+    }
+    createNodeByNodeParam(k21) {
+        let x22 = this.createNode();
+        if (k21.icon) {
+            x22.imageNode = new ImageNode(k21.icon, {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_alpha_content_fourth'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            }, IMAGE_NODE_HEIGHT, IMAGE_NODE_WIDTH, k21.selectedIcon, k21.editIcon);
+        }
+        if (k21.primaryTitle) {
+            x22.mainTitleNode = new MainTitleNode(k21.primaryTitle);
+        }
+        return x22;
+    }
+}
+TreeViewNodeItemFactory.instance = new TreeViewNodeItemFactory();
 let emptyNodeInfo = {
     isFolder: true,
     icon: '',
@@ -211,7 +256,14 @@ class TreeViewTheme {
       moduleName: '__harDefaultModuleName__',
     };
   }
+  static getInstance() {
+      if (!TreeViewTheme.instance) {
+          TreeViewTheme.instance = new TreeViewTheme();
+      }
+      return TreeViewTheme.instance;
+  }
 }
+TreeViewTheme.instance = new TreeViewTheme();
 let NodeInfo = class NodeInfo {
     constructor(r26, s26) {
         this.imageSource = '';
@@ -221,36 +273,11 @@ let NodeInfo = class NodeInfo {
         this.canShowBottomFlagLine = false;
         this.isHighLight = false;
         this.isModify = false;
-        this.treeViewTheme = new TreeViewTheme();
+        this.treeViewTheme = TreeViewTheme.getInstance();
         this.fontColor = '';
         this.node = r26;
-        this.nodeItem = {
-            imageNode: undefined,
-            inputText: new InputText(),
-            mainTitleNode: new MainTitleNode(''),
-            imageCollapse: undefined,
-            fontColor: undefined,
-        };
         this.nodeParam = s26;
-        if (s26.icon) {
-          this.nodeItem.imageNode = new ImageNode(
-            s26.icon,
-            {
-              id: -1,
-              type: 10002,
-              params: ['sys.float.ohos_id_alpha_content_fourth'],
-              bundleName: '__harDefaultBundleName__',
-              moduleName: '__harDefaultModuleName__',
-            },
-            IMAGE_NODE_HEIGHT,
-            IMAGE_NODE_WIDTH,
-            s26.selectedIcon,
-            s26.editIcon
-          );
-        }
-        if (s26.primaryTitle) {
-          this.nodeItem.mainTitleNode = new MainTitleNode(s26.primaryTitle);
-        }
+        this.nodeItemView = TreeViewNodeItemFactory.getInstance().createNodeByNodeParam(s26);
         this.popUpInfo = {
             popUpIsShow: false,
             popUpEnableArrow: false,
@@ -259,7 +286,7 @@ let NodeInfo = class NodeInfo {
             popUpTextColor: undefined,
         };
         this.nodeHeight = NODE_HEIGHT;
-        this.nodeLeftPadding = r26.nodeLevel * 12 + 8;
+        this.nodeLeftPadding = r26.nodeLevel * LEVEL_MARGIN + MARGIN_OFFSET;
         this.nodeColor = {
           id: -1,
           type: 10001,
@@ -302,34 +329,15 @@ let NodeInfo = class NodeInfo {
             moduleName: '__harDefaultModuleName__',
           },
         };
-        this.flagLineLeftMargin = r26.nodeLevel * 12 + 8;
+        this.flagLineLeftMargin = r26.nodeLevel * LEVEL_MARGIN + MARGIN_OFFSET;
     }
     addImageCollapse(q26) {
         if (q26) {
-          this.nodeItem.imageCollapse = new ImageNode(
-            ARROW_RIGHT,
-            {
-              id: -1,
-              type: 10002,
-              params: ['sys.float.ohos_id_alpha_content_tertiary'],
-              bundleName: '__harDefaultBundleName__',
-              moduleName: '__harDefaultModuleName__',
-            },
-            IMAGE_NODE_HEIGHT,
-            IMAGE_NODE_WIDTH,
-            undefined,
-            undefined
-          );
-          this.nodeItem.imageCollapse.itemRightMargin = {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_paragraph_margin_xs'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          };
+            this.nodeItemView.imageCollapse =
+                CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_RIGHT);
         }
         else {
-            this.nodeItem.imageCollapse = undefined;
+            this.nodeItemView.imageCollapse = undefined;
         }
     }
     setFontColor(p26) {
@@ -374,30 +382,11 @@ let NodeInfo = class NodeInfo {
     }
     handleImageCollapseAfterAddNode(i26) {
         if (i26) {
-          this.nodeItem.imageCollapse = new ImageNode(
-            ARROW_DOWN,
-            {
-              id: -1,
-              type: 10002,
-              params: ['sys.float.ohos_id_alpha_content_tertiary'],
-              bundleName: '__harDefaultBundleName__',
-              moduleName: '__harDefaultModuleName__',
-            },
-            IMAGE_NODE_HEIGHT,
-            IMAGE_NODE_WIDTH,
-            undefined,
-            undefined
-          );
-          this.nodeItem.imageCollapse.itemRightMargin = {
-            id: -1,
-            type: 10002,
-            params: ['sys.float.ohos_id_text_paragraph_margin_xs'],
-            bundleName: '__harDefaultBundleName__',
-            moduleName: '__harDefaultModuleName__',
-          };
+            this.nodeItemView.imageCollapse =
+                CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_DOWN);
         }
         else {
-            this.nodeItem.imageCollapse = undefined;
+            this.nodeItemView.imageCollapse = undefined;
         }
     }
     setNodeColor(h26) {
@@ -434,7 +423,7 @@ let NodeInfo = class NodeInfo {
         return this.nodeIsShow;
     }
     getNodeItem() {
-        return this.nodeItem;
+        return this.nodeItemView;
     }
     getNodeStatus() {
         return this.status;
@@ -476,7 +465,7 @@ let NodeInfo = class NodeInfo {
         if (b26 === undefined) {
             return;
         }
-        this.flagLineLeftMargin = b26 * 12 + 8;
+        this.flagLineLeftMargin = b26 * LEVEL_MARGIN + MARGIN_OFFSET;
     }
     getFlagLineLeftMargin() {
         return this.flagLineLeftMargin;
@@ -647,7 +636,7 @@ export class TreeView extends ViewPU {
           'listItemBgColor'
         );
         this.__treeViewTheme = new ObservedPropertyObjectPU(
-          new TreeViewTheme(),
+          TreeViewTheme.getInstance(),
           this,
           'treeViewTheme'
         );
@@ -1024,7 +1013,7 @@ export class TreeView extends ViewPU {
         if (this.viewLastIndex === -1 || this.viewLastIndex >= this.nodeList.length) {
             return;
         }
-        this.setImageSources(this.viewLastIndex, InteractionStatus.Normal);
+        this.setImageSources(this.viewLastIndex, InteractionStatus.NORMAL);
         this.nodeList[this.viewLastIndex].setNodeColor({
           id: -1,
           type: 10001,
@@ -1044,16 +1033,16 @@ export class TreeView extends ViewPU {
         this.listNodeDataSource.listNode[this.viewLastIndex].fontColor =
           this.treeViewTheme.primaryTitleFontColor;
         this.listNodeDataSource.listNode[this.viewLastIndex].setIsSelected(false);
-        this.listNodeDataSource.setImageSource(this.viewLastIndex, InteractionStatus.Normal);
+        this.listNodeDataSource.setImageSource(this.viewLastIndex, InteractionStatus.NORMAL);
     }
     setImageSources(s22, t22) {
         let u22 = this.nodeList[s22];
-        u22.setIsSelected(t22 === InteractionStatus.Selected ||
-            t22 === InteractionStatus.Edit || t22 === InteractionStatus.FinishEdit);
-        if (u22.getNodeItem().mainTitleNode !== null && t22 !== InteractionStatus.DragInsert &&
-            t22 !== InteractionStatus.FinishDragInsert) {
-            u22.getNodeItem().mainTitleNode?.setMainTitleSelected(t22 === InteractionStatus.Selected ||
-                t22 === InteractionStatus.FinishEdit);
+        u22.setIsSelected(t22 === InteractionStatus.SELECTED ||
+            t22 === InteractionStatus.EDIT || t22 === InteractionStatus.FINISH_EDIT);
+        if (u22.getNodeItem().mainTitleNode !== null && t22 !== InteractionStatus.DRAG_INSERT &&
+            t22 !== InteractionStatus.FINISH_DRAG_INSERT) {
+            u22.getNodeItem().mainTitleNode?.setMainTitleSelected(t22 === InteractionStatus.SELECTED ||
+                t22 === InteractionStatus.FINISH_EDIT);
         }
         if (u22.getNodeItem().imageNode !== null) {
             u22.getNodeItem().imageNode?.setImageSource(t22);
@@ -1163,11 +1152,11 @@ export class TreeView extends ViewPU {
                     this.listNodeDataSource.handleEvent(Event.DRAG, c22);
                     return;
                 }
-                if (this.listNodeDataSource.getExpandAndCollapseInfo(v21) === NodeStatus.Expand) {
+                if (this.listNodeDataSource.getExpandAndCollapseInfo(v21) === NodeStatus.EXPAND) {
                     this.listNodeDataSource.expandAndCollapseNode(this.listNodeDataSource.findIndex(v21));
                 }
                 let y21 = false;
-                if (this.listNodeDataSource.getExpandAndCollapseInfo(s21) === NodeStatus.Collapse) {
+                if (this.listNodeDataSource.getExpandAndCollapseInfo(s21) === NodeStatus.COLLAPSE) {
                     let b22 = this.listNodeDataSource.findIndex(s21);
                     if (this.listNodeDataSource.listNode[b22].getIsHighLight()) {
                         this.listNodeDataSource.expandAndCollapseNode(b22);
@@ -1209,7 +1198,7 @@ export class TreeView extends ViewPU {
                     if (this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
                         .imageNode !== null) {
                         this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
-                            .imageNode?.setImageSource(InteractionStatus.Normal);
+                            .imageNode?.setImageSource(InteractionStatus.NORMAL);
                         this.listNodeDataSource.listNode[this.viewLastIndex].imageSource =
                             this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
                                 .imageNode?.source;
@@ -1291,7 +1280,7 @@ export class TreeView extends ViewPU {
                                 }
                                 if (u20.type === TouchType.Up) {
                                     this.listNodeDataSource.listNode[v20].setIsSelected(true);
-                                    this.listNodeDataSource.setImageSource(v20, InteractionStatus.Selected);
+                                    this.listNodeDataSource.setImageSource(v20, InteractionStatus.SELECTED);
                                     if (this.listNodeDataSource.listNode[v20].getNodeItem().imageNode !== null) {
                                         this.listNodeDataSource.listNode[v20].imageSource = this.listNodeDataSource.listNode[v20]
                                             .getNodeItem().imageNode?.source;
@@ -1358,7 +1347,7 @@ export class TreeController {
         this.nodeIdList = [];
         this.listNodeDataSource = new ListNodeDataSource();
         this.initBuild = true;
-        this.treeViewTheme = new TreeViewTheme();
+        this.treeViewTheme = TreeViewTheme.getInstance();
     }
     getListNodeDataSource() {
         return this.listNodeDataSource;
@@ -1579,7 +1568,7 @@ class ListNodeDataSource extends BasicDataSource {
         this.currentFocusNodeId = this.INITIAL_INVALID_VALUE;
         this.lastFocusNodeId = this.INITIAL_INVALID_VALUE;
         this.addFocusNodeId = this.INITIAL_INVALID_VALUE;
-        this.treeViewTheme = new TreeViewTheme();
+        this.treeViewTheme = TreeViewTheme.getInstance();
         this.updateNodeIdList = [];
         this.FLAG_LINE = {
           flagLineHeight: FLAG_LINE_HEIGHT,
@@ -1712,12 +1701,12 @@ class ListNodeDataSource extends BasicDataSource {
     }
     setImageSource(s17, t17) {
         let u17 = this.listNode[s17];
-        u17.setIsSelected(t17 === InteractionStatus.Selected ||
-            t17 === InteractionStatus.Edit || t17 === InteractionStatus.FinishEdit);
-        if (u17.getNodeItem().mainTitleNode !== null && t17 !== InteractionStatus.DragInsert &&
-            t17 !== InteractionStatus.FinishDragInsert) {
-            u17.getNodeItem().mainTitleNode?.setMainTitleSelected(t17 === InteractionStatus.Selected ||
-                t17 === InteractionStatus.FinishEdit);
+        u17.setIsSelected(t17 === InteractionStatus.SELECTED ||
+            t17 === InteractionStatus.EDIT || t17 === InteractionStatus.FINISH_EDIT);
+        if (u17.getNodeItem().mainTitleNode !== null && t17 !== InteractionStatus.DRAG_INSERT &&
+            t17 !== InteractionStatus.FINISH_DRAG_INSERT) {
+            u17.getNodeItem().mainTitleNode?.setMainTitleSelected(t17 === InteractionStatus.SELECTED ||
+                t17 === InteractionStatus.FINISH_EDIT);
         }
         if (u17.getNodeItem().imageNode !== null) {
             u17.getNodeItem().imageNode?.setImageSource(t17);
@@ -1726,19 +1715,15 @@ class ListNodeDataSource extends BasicDataSource {
     setImageCollapseSource(p17, q17) {
         let r17 = this.listNode[p17];
         if (r17.getNodeItem().imageCollapse !== undefined) {
-            r17
-              .getNodeItem()
-              .imageCollapse?.setImageCollapseSource(
-                q17,
-                this.expandAndCollapseInfo.get(r17.getNodeCurrentNodeId())
-              );
+            r17.getNodeItem().imageCollapse = CollapseImageNodeFlyweightFactory.getCollapseImageNode(q17,
+                this.expandAndCollapseInfo.get(r17.getNodeCurrentNodeId()), r17.getNodeItem().imageCollapse.type);
         }
     }
     clearLastIndexStatus() {
         if (this.lastIndex === -1 || this.lastIndex >= this.listNode.length) {
             return;
         }
-        this.setImageSource(this.lastIndex, InteractionStatus.Normal);
+        this.setImageSource(this.lastIndex, InteractionStatus.NORMAL);
         this.changeNodeColor(this.lastIndex, this.listNode[this.lastIndex].getNodeStatus().normal);
         this.handleFocusEffect(this.lastIndex, false);
         this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(this.listNode[this.lastIndex].getNodeCurrentNodeId()));
@@ -1762,13 +1747,16 @@ class ListNodeDataSource extends BasicDataSource {
         }
         let l17 = k17;
         let m17 = this.listNode[k17].getNodeCurrentNodeId();
-        if (this.expandAndCollapseInfo.get(m17) === NodeStatus.Expand) {
-            this.expandAndCollapseInfo.set(m17, NodeStatus.Collapse);
-            this.listNode[l17].getNodeItem().imageCollapse?.changeImageCollapseSource(NodeStatus.Collapse);
-        }
-        else if (this.expandAndCollapseInfo.get(m17) === NodeStatus.Collapse) {
-            this.expandAndCollapseInfo.set(m17, NodeStatus.Expand);
-            this.listNode[l17].getNodeItem().imageCollapse?.changeImageCollapseSource(NodeStatus.Expand);
+        if (this.expandAndCollapseInfo.get(m17) === NodeStatus.EXPAND) {
+            this.expandAndCollapseInfo.set(m17, NodeStatus.COLLAPSE);
+            this.listNode[l17].getNodeItem().imageCollapse = this.listNode[l17].getNodeItem().imageCollapse ?
+            CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.COLLAPSE,
+                this.listNode[l17].getNodeItem().imageCollapse.isCollapse) : undefined;
+        } else if (this.expandAndCollapseInfo.get(m17) === NodeStatus.COLLAPSE) {
+            this.expandAndCollapseInfo.set(m17, NodeStatus.EXPAND);
+            this.listNode[l17].getNodeItem().imageCollapse = this.listNode[l17].getNodeItem().imageCollapse ?
+            CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.EXPAND,
+                this.listNode[l17].getNodeItem().imageCollapse.isCollapse) : undefined;
         }
     }
     handleExpandAndCollapse(a17, b17) {
@@ -1781,7 +1769,7 @@ class ListNodeDataSource extends BasicDataSource {
             return;
         }
         let e17 = this.expandAndCollapseInfo.get(d17);
-        if (this.listNode[c17].getChildNodeInfo().isHasChildNode && e17 === NodeStatus.Collapse) {
+        if (this.listNode[c17].getChildNodeInfo().isHasChildNode && e17 === NodeStatus.COLLAPSE) {
             for (let j17 = 0; j17 < this.listNode[c17].getChildNodeInfo().allChildNum; j17++) {
                 this.listNode[c17 + 1 + j17].setNodeIsShow(false);
                 this.listNode[c17 + 1 + j17].setListItemHeight(LIST_ITEM_HEIGHT_NONE);
@@ -1797,12 +1785,12 @@ class ListNodeDataSource extends BasicDataSource {
             f17[g17] = f17[g17 - 1] + this.listNode[f17[g17 - 1]].getChildNodeInfo().allChildNum + 1;
             g17++;
         }
-        if (e17 === NodeStatus.Expand) {
+        if (e17 === NodeStatus.EXPAND) {
             for (let h17 = 0; h17 < f17.length; h17++) {
                 this.listNode[f17[h17]].setNodeIsShow(true);
                 this.listNode[f17[h17]].setListItemHeight(LIST_ITEM_HEIGHT);
                 let i17 = this.listNode[f17[h17]].getNodeCurrentNodeId();
-                if (this.expandAndCollapseInfo.get(i17) === NodeStatus.Expand) {
+                if (this.expandAndCollapseInfo.get(i17) === NodeStatus.EXPAND) {
                     this.handleExpandAndCollapse(f17[h17], false);
                 }
             }
@@ -1834,7 +1822,7 @@ class ListNodeDataSource extends BasicDataSource {
                 q16.push(x16);
                 this.nodeIdAndNodeIndexMap.set(x16.getNodeCurrentNodeId(), u16++);
                 if (x16.getChildNodeInfo().isHasChildNode) {
-                    this.expandAndCollapseInfo.set(x16.getNodeCurrentNodeId(), NodeStatus.Collapse);
+                    this.expandAndCollapseInfo.set(x16.getNodeCurrentNodeId(), NodeStatus.COLLAPSE);
                 }
                 if (x16.getNodeIsShow()) {
                     this.loadedNodeIdAndIndexMap.set(x16.getNodeCurrentNodeId(), t16++);
@@ -1921,7 +1909,7 @@ class ListNodeDataSource extends BasicDataSource {
                     this.listNode[a16].handleImageCollapseAfterAddNode(true);
                     this.notifyDataChange(z15);
                 }
-                else if (this.expandAndCollapseInfo.get(this.listNode[a16].getNodeCurrentNodeId()) === NodeStatus.Collapse) {
+                else if (this.expandAndCollapseInfo.get(this.listNode[a16].getNodeCurrentNodeId()) === NodeStatus.COLLAPSE) {
                     this.changeNodeStatus(z15);
                 }
                 this.listNode.splice(a16 + 1, 0, y15);
@@ -1929,7 +1917,7 @@ class ListNodeDataSource extends BasicDataSource {
                 this.listNode[a16 + 1].setNodeIsShow(true);
                 this.listNode[a16 + 1].setListItemHeight(LIST_ITEM_HEIGHT);
                 this.nodeIdAndNodeIndexMap.set(x15[0], a16 + 1);
-                this.setImageSource(a16 + 1, InteractionStatus.Edit);
+                this.setImageSource(a16 + 1, InteractionStatus.EDIT);
                 this.currentOperation = MenuOperation.ADD_NODE;
                 this.notifyDataAdd(a16 + 1);
                 this.notificationNodeInfo(a16 + 1, this.currentOperation);
@@ -1939,7 +1927,7 @@ class ListNodeDataSource extends BasicDataSource {
         this.modifyNodeIndex = z15 + 1;
         this.setClickIndex(z15);
         this.lastIndex = z15;
-        this.expandAndCollapseInfo.set(y15.getNodeParentNodeId(), NodeStatus.Expand);
+        this.expandAndCollapseInfo.set(y15.getNodeParentNodeId(), NodeStatus.EXPAND);
         this.handleExpandAndCollapse(z15, true);
     }
     refreshData(s15, t15, u15) {
@@ -1988,7 +1976,7 @@ class ListNodeDataSource extends BasicDataSource {
         return p15;
     }
     handleEventDrag(n15) {
-        this.setImageSource(n15, InteractionStatus.Normal);
+        this.setImageSource(n15, InteractionStatus.NORMAL);
         this.changeNodeColor(n15, this.listNode[n15].getNodeStatus().normal);
         this.handleFocusEffect(n15, false);
         this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(this.listNode[n15].getNodeCurrentNodeId()));
@@ -2002,61 +1990,67 @@ class ListNodeDataSource extends BasicDataSource {
                 this.clearLastIndexStatus();
             }
         }
-        let k15 = this.loadedNodeIdAndIndexMap.get(this.listNode[j15].getNodeCurrentNodeId());
-        switch (i15) {
+        this.eventHandler(j15, i15);
+    }
+    eventHandler(j12, y19) {
+        let z19 = this.loadedNodeIdAndIndexMap.get(this.listNode[j12].getNodeCurrentNodeId());
+        switch (y19) {
             case Event.TOUCH_DOWN:
                 this.isTouchDown = true;
-                this.changeNodeColor(j15, this.listNode[j15].getNodeStatus().press);
-                this.notifyDataChange(k15);
+                this.changeNodeColor(j12, this.listNode[j12].getNodeStatus().press);
+                this.notifyDataChange(z19);
                 break;
             case Event.TOUCH_UP: {
-                if (this.isInnerDrag) {
-                    this.isInnerDrag = false;
-                }
-                this.isTouchDown = false;
-                let m15 = this.listNode[j15];
-                this.setImageSource(j15, InteractionStatus.Selected);
-                m15.setFontColor(this.treeViewTheme.primaryTitleFontColor);
-                this.lastIndex = j15;
-                this.changeNodeColor(j15, m15.getNodeStatus().selected);
-                this.notifyDataChange(k15);
+                this.touchUpHandler(j12, z19);
                 break;
             }
             case Event.HOVER:
-                if (this.getNodeColor(j15) !== this.listNode[j15].getNodeStatus().selected) {
-                    this.changeNodeColor(j15, this.listNode[j15].getNodeStatus().hover);
-                    this.notifyDataChange(k15);
+                if (this.getNodeColor(j12) !== this.listNode[j12].getNodeStatus().selected) {
+                    this.changeNodeColor(j12, this.listNode[j12].getNodeStatus().hover);
+                    this.notifyDataChange(z19);
                 }
                 break;
             case Event.HOVER_OVER:
-                if (this.getNodeColor(j15) !== this.listNode[j15].getNodeStatus().selected) {
-                    this.changeNodeColor(j15, this.listNode[j15].getNodeStatus().normal);
-                    this.notifyDataChange(k15);
+                if (this.getNodeColor(j12) !== this.listNode[j12].getNodeStatus().selected) {
+                    this.changeNodeColor(j12, this.listNode[j12].getNodeStatus().normal);
+                    this.notifyDataChange(z19);
                 }
                 break;
             case Event.FOCUS:
-                this.handleFocusEffect(j15, true);
-                this.notifyDataChange(k15);
+                this.handleFocusEffect(j12, true);
+                this.notifyDataChange(z19);
                 break;
             case Event.BLUR:
-                this.handleFocusEffect(j15, false);
-                this.notifyDataChange(k15);
+                this.handleFocusEffect(j12, false);
+                this.notifyDataChange(z19);
                 break;
             case Event.MOUSE_BUTTON_RIGHT:
-                this.lastIndex = j15;
+                this.lastIndex = j12;
                 this.finishEditing();
                 break;
             case Event.DRAG:
                 this.isTouchDown = false;
-                let l15 = this.listNode[j15];
-                this.setImageSource(j15, InteractionStatus.Selected);
-                this.lastIndex = j15;
-                this.changeNodeColor(j15, l15.getNodeStatus().selected);
-                this.notifyDataChange(k15);
+                let a20 = this.listNode[j12];
+                this.setImageSource(j12, InteractionStatus.SELECTED);
+                this.lastIndex = j12;
+                this.changeNodeColor(j12, a20.getNodeStatus().selected);
+                this.notifyDataChange(z19);
                 break;
             default:
                 break;
         }
+    }
+    touchUpHandler(i4, f5) {
+        if (this.isInnerDrag) {
+            this.isInnerDrag = false;
+        }
+        this.isTouchDown = false;
+        let e8 = this.listNode[i4];
+        this.setImageSource(i4, InteractionStatus.SELECTED);
+        e8.setFontColor(this.treeViewTheme.primaryTitleFontColor);
+        this.lastIndex = i4;
+        this.changeNodeColor(i4, e8.getNodeStatus().selected);
+        this.notifyDataChange(f5);
     }
     notificationNodeInfo(z14, a15) {
         if (a15 === MenuOperation.MODIFY_NODE) {
@@ -2087,8 +2081,8 @@ class ListNodeDataSource extends BasicDataSource {
     }
     finishEditing() {
         if (this.modifyNodeIndex !== -1) {
-            this.setImageSource(this.modifyNodeIndex, InteractionStatus.FinishEdit);
-            this.setImageCollapseSource(this.modifyNodeIndex, InteractionStatus.FinishEdit);
+            this.setImageSource(this.modifyNodeIndex, InteractionStatus.FINISH_EDIT);
+            this.setImageCollapseSource(this.modifyNodeIndex, InteractionStatus.FINISH_EDIT);
             this.listNode[this.modifyNodeIndex].setIsModify(false);
             this.listNode[this.modifyNodeIndex].setTitleAndInputTextStatus(false);
             this.notificationNodeInfo(this.modifyNodeIndex, this.currentOperation);
@@ -2117,8 +2111,8 @@ class ListNodeDataSource extends BasicDataSource {
             }
             this.currentOperation = MenuOperation.MODIFY_NODE;
             x14.setTitleAndInputTextStatus(true);
-            this.setImageSource(v14, InteractionStatus.Edit);
-            this.setImageCollapseSource(v14, InteractionStatus.Edit);
+            this.setImageSource(v14, InteractionStatus.EDIT);
+            this.setImageCollapseSource(v14, InteractionStatus.EDIT);
             this.modifyNodeIndex = v14;
             if (x14.getNodeItem().inputText) {
                 if (x14.getNodeItem().imageCollapse !== null) {
@@ -2149,8 +2143,8 @@ class ListNodeDataSource extends BasicDataSource {
             }
             w14.setTitleAndInputTextStatus(false);
             w14.setIsModify(false);
-            this.setImageSource(v14, InteractionStatus.FinishEdit);
-            this.setImageCollapseSource(v14, InteractionStatus.FinishEdit);
+            this.setImageSource(v14, InteractionStatus.FINISH_EDIT);
+            this.setImageCollapseSource(v14, InteractionStatus.FINISH_EDIT);
             this.notificationNodeInfo(this.modifyNodeIndex, this.currentOperation);
             this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(w14.getNodeCurrentNodeId()));
         }
@@ -2362,8 +2356,8 @@ class ListNodeDataSource extends BasicDataSource {
     clearHighLight(m13) {
         this.changeNodeColor(m13, this.listNode[m13].getNodeStatus().normal);
         this.changeNodeHighLightColor(m13, false);
-        this.setImageSource(m13, InteractionStatus.FinishDragInsert);
-        this.setImageCollapseSource(m13, InteractionStatus.FinishDragInsert);
+        this.setImageSource(m13, InteractionStatus.FINISH_DRAG_INSERT);
+        this.setImageCollapseSource(m13, InteractionStatus.FINISH_DRAG_INSERT);
         this.listNode[m13].setIsHighLight(false);
     }
     changeNodeHighLightColor(k13, l13) {
@@ -2379,7 +2373,7 @@ class ListNodeDataSource extends BasicDataSource {
             let f13 = this.getData(c13)?.getNodeCurrentNodeId();
             let g13 = this.getData(c13)?.getNodeLevel();
             if (f13 !== undefined) {
-                g13 = (this.expandAndCollapseInfo.get(f13) === NodeStatus.Expand &&
+                g13 = (this.expandAndCollapseInfo.get(f13) === NodeStatus.EXPAND &&
                     this.flag === Flag.DOWN_FLAG) ? (g13 ? g13 + 1 : undefined) : g13;
                 if (this.lastPassId !== this.INITIAL_INVALID_VALUE && this.loadedNodeIdAndIndexMap.has(this.lastPassId)) {
                     let h13 = this.loadedNodeIdAndIndexMap.get(this.lastPassId);
@@ -2435,7 +2429,7 @@ class ListNodeDataSource extends BasicDataSource {
         }
         if (u12 || t12) {
             let v12 = !u12 && (!this.isInnerDrag ||
-                (this.expandAndCollapseInfo.get(r12) === NodeStatus.Collapse && this.isInnerDrag) ||
+                (this.expandAndCollapseInfo.get(r12) === NodeStatus.COLLAPSE && this.isInnerDrag) ||
                 (!this.expandAndCollapseInfo.has(r12) && this.listNode[q12].getIsFolder()));
             if (v12) {
                 this.changeNodeColor(q12, this.listNode[q12].getNodeStatus().hover);
@@ -2456,7 +2450,7 @@ class ListNodeDataSource extends BasicDataSource {
             }
             this.lastTimeoutHighLightId = this.timeoutHighLightId;
             this.lastDelayHighLightIndex = q12;
-            if (!u12 && this.expandAndCollapseInfo.get(r12) === NodeStatus.Collapse) {
+            if (!u12 && this.expandAndCollapseInfo.get(r12) === NodeStatus.COLLAPSE) {
                 let w12 = this.getData(s12)?.getNodeInfoNode().children[0]?.currentNodeId;
                 let x12 = 2000;
                 this.timeoutExpandId = setTimeout(() => {
@@ -2485,8 +2479,8 @@ class ListNodeDataSource extends BasicDataSource {
         this.changeNodeColor(n12, this.listNode[n12].getNodeStatus().highLight);
         this.listNode[n12].setIsHighLight(true);
         this.changeNodeHighLightColor(n12, true);
-        this.setImageSource(n12, InteractionStatus.DragInsert);
-        this.setImageCollapseSource(n12, InteractionStatus.DragInsert);
+        this.setImageSource(n12, InteractionStatus.DRAG_INSERT);
+        this.setImageCollapseSource(n12, InteractionStatus.DRAG_INSERT);
         this.notifyDataReload();
     }
     alterFlagLineAndExpandNode(h12, i12) {
@@ -2616,12 +2610,12 @@ class ListNodeDataSource extends BasicDataSource {
         for (let r11 = 0; r11 < this.listNode.length; r11++) {
             if (this.listNode[r11].getNodeCurrentNodeId() === p10) {
                 z10 = this.listNode[r11].getIsHighLight();
-                if (this.flag === Flag.DOWN_FLAG && this.expandAndCollapseInfo.get(p10) === NodeStatus.Expand) {
+                if (this.flag === Flag.DOWN_FLAG && this.expandAndCollapseInfo.get(p10) === NodeStatus.EXPAND) {
                     u10 = p10;
                     a11 = 0;
                 }
                 else if (this.flag === Flag.UP_FLAG && this.expandAndCollapseInfo.get(p10) ===
-                    NodeStatus.Expand &&
+                    NodeStatus.EXPAND &&
                     this.listNode[r11].getCanShowFlagLine() === false) {
                     u10 = p10;
                     a11 = 0;
@@ -2665,7 +2659,7 @@ class ListNodeDataSource extends BasicDataSource {
         this.removeNode(r10, q10);
         let f11 = p10;
         let g11 = c11;
-        if (this.expandAndCollapseInfo.get(p10) === NodeStatus.Expand) {
+        if (this.expandAndCollapseInfo.get(p10) === NodeStatus.EXPAND) {
             g11 = false;
             this.listNode.forEach((m11) => {
                 if (m11.getNodeCurrentNodeId() === p10 && m11.getCanShowFlagLine() === false) {
@@ -2679,7 +2673,7 @@ class ListNodeDataSource extends BasicDataSource {
             });
         }
         else if (!this.expandAndCollapseInfo.get(p10) && z10) {
-            this.expandAndCollapseInfo.set(p10, NodeStatus.Expand);
+            this.expandAndCollapseInfo.set(p10, NodeStatus.EXPAND);
         }
         this.addDragNode(t10[0].parentId, t10[0].currentId, f11, g11, t10[0].data);
         for (let k11 = 1; k11 < t10.length; k11++) {
@@ -2711,11 +2705,14 @@ class ListNodeDataSource extends BasicDataSource {
                     m10.addImageCollapse(k10.getChildNodeInfo().isHasChildNode);
                     this.listNode.push(m10);
                     this.nodeIdAndNodeIndexMap.set(m10.getNodeCurrentNodeId(), i10++);
-                    if (this.expandAndCollapseInfo.get(l10) === NodeStatus.Expand) {
-                        m10.getNodeItem().imageCollapse?.changeImageCollapseSource(NodeStatus.Expand);
-                    }
-                    else if (this.expandAndCollapseInfo.get(l10) === NodeStatus.Collapse) {
-                        m10.getNodeItem().imageCollapse?.changeImageCollapseSource(NodeStatus.Collapse);
+                    if (this.expandAndCollapseInfo.get(l10) === NodeStatus.EXPAND) {
+                        m10.getNodeItem().imageCollapse = m10.getNodeItem().imageCollapse ?
+                        CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.EXPAND,
+                            m10.getNodeItem().imageCollapse.isCollapse) : undefined;
+                    } else if (this.expandAndCollapseInfo.get(l10) === NodeStatus.COLLAPSE) {
+                        m10.getNodeItem().imageCollapse = m10.getNodeItem().imageCollapse ?
+                        CollapseImageNodeFlyweightFactory.changeImageCollapseSource(NodeStatus.COLLAPSE,
+                            m10.getNodeItem().imageCollapse.isCollapse) : undefined;
                     }
                     for (let n10 = 0; n10 < g10.length; n10++) {
                         if (g10[n10].getNodeCurrentNodeId() === m10.getNodeCurrentNodeId()) {
@@ -3502,8 +3499,8 @@ export class TreeViewInner extends ViewPU {
                                     this.item.setNodeColor(this.treeViewTheme.itemSelectedBgColor);
                                 }
                                 if (this.item.getNodeItem().imageNode !== null) {
-                                    this.item.getNodeItem().imageNode?.setImageSource(InteractionStatus.Selected);
-                                    this.listNodeDataSource.setImageSource(this.index, InteractionStatus.Selected);
+                                    this.item.getNodeItem().imageNode?.setImageSource(InteractionStatus.SELECTED);
+                                    this.listNodeDataSource.setImageSource(this.index, InteractionStatus.SELECTED);
                                     this.item.imageSource = this.item.getNodeItem().imageNode?.source;
                                 }
                                 this.item.getNodeItem().mainTitleNode?.setMainTitleSelected(true);
@@ -3914,6 +3911,142 @@ class NodeBaseInfo {
         return this.rightMargin;
     }
 }
+export class CollapseImageNode extends NodeBaseInfo {
+    constructor(p1, b2, n2, r2, q3, g4, h4) {
+        super();
+        this.rightMargin = {
+            'id': -1,
+            'type': 10002,
+            params: ['sys.float.ohos_id_elements_margin_horizontal_m'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        };
+        this.imageSource = p1;
+        this.rightMargin = q3;
+        this.imageOpacity = b2;
+        this.itemWidth = n2;
+        this.itemHeight = r2;
+        this.imageCollapseSource = p1;
+        this.isImageCollapse = g4;
+        this.collapseImageType = h4;
+    }
+
+    get source() {
+        return this.imageSource;
+    }
+    get opacity() {
+        return this.imageOpacity;
+    }
+    get noOpacity() {
+        return 1;
+    }
+    get collapseSource() {
+        return this.imageCollapseSource;
+    }
+    get isCollapse() {
+        return this.isImageCollapse;
+    }
+    get type() {
+        return this.collapseImageType;
+    }
+}
+class CollapseImageNodeFactory {
+    constructor() {
+    }
+    static getInstance() {
+        if (!CollapseImageNodeFactory.instance) {
+            CollapseImageNodeFactory.instance = new CollapseImageNodeFactory();
+        }
+        return CollapseImageNodeFactory.instance;
+    }
+    createCollapseImageNodeByType(i1) {
+        let j1;
+        switch (i1) {
+            case CollapseImageType.ARROW_RIGHT_WHITE:
+                j1 = ARROW_RIGHT_WITHE;
+                break;
+            case CollapseImageType.ARROW_RIGHT:
+                j1 = ARROW_RIGHT;
+                break;
+            case CollapseImageType.ARROW_DOWN_WHITE:
+                j1 = ARROW_DOWN_WITHE;
+                break;
+            default:
+                j1 = ARROW_DOWN;
+        }
+        return new CollapseImageNode(j1, {
+            'id': -1,
+            'type': 10002,
+            params: ['sys.float.ohos_id_alpha_content_tertiary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, IMAGE_NODE_HEIGHT, IMAGE_NODE_WIDTH, {
+            'id': -1,
+            'type': 10002,
+            params: ['sys.float.ohos_id_text_paragraph_margin_xs'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, (i1 === CollapseImageType.ARROW_RIGHT_WHITE || i1 === CollapseImageType.ARROW_DOWN_WHITE) ? false : true,
+            i1);
+    }
+}
+
+CollapseImageNodeFactory.instance = new CollapseImageNodeFactory();
+
+class CollapseImageNodeFlyweightFactory {
+    static getCollapseImageNodeByType(g1) {
+        let h1 = CollapseImageNodeFlyweightFactory.nodeMap.get(g1);
+        if (h1 === undefined) {
+            h1 = CollapseImageNodeFactory.getInstance().createCollapseImageNodeByType(g1);
+            CollapseImageNodeFlyweightFactory.nodeMap.set(g1, h1);
+        }
+        return h1;
+    }
+    static getCollapseImageNode(c1, d1, e1) {
+        let f1 = e1;
+        if (c1 == InteractionStatus.EDIT ||
+            c1 === InteractionStatus.DRAG_INSERT) {
+            if (d1 === NodeStatus.COLLAPSE) {
+                f1 = CollapseImageType.ARROW_RIGHT_WHITE;
+            }
+            else {
+                f1 = CollapseImageType.ARROW_DOWN_WHITE;
+            }
+        }
+        else if (c1 === InteractionStatus.FINISH_EDIT ||
+            c1 === InteractionStatus.FINISH_DRAG_INSERT) {
+            if (d1 === NodeStatus.COLLAPSE) {
+                f1 = CollapseImageType.ARROW_RIGHT;
+            }
+            else {
+                f1 = CollapseImageType.ARROW_DOWN;
+            }
+        }
+        return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(f1);
+    }
+    static changeImageCollapseSource(z, a1) {
+        let b1;
+        if (!a1) {
+            if (z === NodeStatus.COLLAPSE) {
+                b1 = CollapseImageType.ARROW_RIGHT_WHITE;
+            }
+            else {
+                b1 = CollapseImageType.ARROW_DOWN_WHITE;
+            }
+        }
+        else {
+            if (z === NodeStatus.COLLAPSE) {
+                b1 = CollapseImageType.ARROW_RIGHT;
+            }
+            else {
+                b1 = CollapseImageType.ARROW_DOWN;
+            }
+        }
+        return CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(b1);
+    }
+}
+CollapseImageNodeFlyweightFactory.nodeMap = new Map();
+
 export class ImageNode extends NodeBaseInfo {
     constructor(k, l, m, n, o, p) {
         super();
@@ -3945,7 +4078,7 @@ export class ImageNode extends NodeBaseInfo {
         this.imageCollapseDownSource = ARROW_DOWN;
         this.imageCollapseRightSource = ARROW_RIGHT;
         this.isImageCollapse = true;
-        this.currentInteractionStatus = InteractionStatus.Normal;
+        this.currentInteractionStatus = InteractionStatus.NORMAL;
     }
     get source() {
         return this.imageSource;
@@ -3972,53 +4105,53 @@ export class ImageNode extends NodeBaseInfo {
         return this.isImageCollapse;
     }
     changeImageCollapseSource(j) {
-        if (j === NodeStatus.Expand) {
+        if (j === NodeStatus.EXPAND) {
             this.imageCollapseSource = this.imageCollapseDownSource;
         }
-        else if (j === NodeStatus.Collapse) {
+        else if (j === NodeStatus.COLLAPSE) {
             this.imageCollapseSource = this.imageCollapseRightSource;
         }
     }
     setImageCollapseSource(h, i) {
-        if (h === InteractionStatus.Edit || h === InteractionStatus.DragInsert) {
+        if (h === InteractionStatus.EDIT || h === InteractionStatus.DRAG_INSERT) {
             this.imageCollapseDownSource = ARROW_DOWN_WITHE;
             this.imageCollapseRightSource = ARROW_RIGHT_WITHE;
             this.isImageCollapse = false;
         }
-        else if (h === InteractionStatus.FinishEdit ||
-            h === InteractionStatus.FinishDragInsert) {
+        else if (h === InteractionStatus.FINISH_EDIT ||
+            h === InteractionStatus.FINISH_DRAG_INSERT) {
             this.imageCollapseDownSource = ARROW_DOWN;
             this.imageCollapseRightSource = ARROW_RIGHT;
             this.isImageCollapse = true;
         }
-        this.imageCollapseSource = (i === NodeStatus.Collapse) ?
+        this.imageCollapseSource = (i === NodeStatus.COLLAPSE) ?
             this.imageCollapseRightSource : this.imageCollapseDownSource;
     }
     setImageSource(g) {
         switch (g) {
-            case InteractionStatus.Normal:
+            case InteractionStatus.NORMAL:
                 this.imageSource = this.imageNormalSource;
                 this.currentInteractionStatus = g;
                 break;
-            case InteractionStatus.Selected:
-                if (this.currentInteractionStatus !== InteractionStatus.Edit) {
+            case InteractionStatus.SELECTED:
+                if (this.currentInteractionStatus !== InteractionStatus.EDIT) {
                     this.imageSource = this.imageSelectedSource;
                     this.currentInteractionStatus = g;
                 }
                 break;
-            case InteractionStatus.Edit:
+            case InteractionStatus.EDIT:
                 this.imageSource = this.imageEditSource;
                 this.currentInteractionStatus = g;
                 break;
-            case InteractionStatus.FinishEdit:
+            case InteractionStatus.FINISH_EDIT:
                 this.imageSource = this.imageSelectedSource;
                 this.currentInteractionStatus = g;
                 break;
-            case InteractionStatus.DragInsert:
+            case InteractionStatus.DRAG_INSERT:
                 this.imageSource = this.imageEditSource;
                 this.currentInteractionStatus = g;
                 break;
-            case InteractionStatus.FinishDragInsert:
+            case InteractionStatus.FINISH_DRAG_INSERT:
                 this.imageSource = this.imageNormalSource;
                 this.currentInteractionStatus = g;
                 break;
@@ -4030,7 +4163,7 @@ export class ImageNode extends NodeBaseInfo {
 class MainTitleNode extends NodeBaseInfo {
   constructor(f) {
     super();
-    this.treeViewTheme = new TreeViewTheme();
+    this.treeViewTheme = TreeViewTheme.getInstance();
     this.mainTitleName = f;
     this.itemWidth = ITEM_WIDTH;
     this.itemHeight = ITEM_HEIGHT;
@@ -4155,7 +4288,7 @@ export class InputText extends NodeBaseInfo {
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         };
-        this.treeViewTheme = new TreeViewTheme();
+        this.treeViewTheme = TreeViewTheme.getInstance();
         this.itemWidth = ITEM_WIDTH;
         this.itemHeight = ITEM_HEIGHT_INPUT;
         this.rightMargin = {
