@@ -74,6 +74,8 @@ void BorderWidthPropertyT<Dimension>::ToJsonValue(std::unique_ptr<JsonValue>& js
         auto res = JsonUtil::Create(true);
         res->Put("left", leftDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
         res->Put("top", topDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
+        res->Put("start", startDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
+        res->Put("end", endDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
         res->Put("right", rightDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
         res->Put("bottom", bottomDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
 
@@ -97,6 +99,8 @@ void BorderWidthPropertyT<Dimension>::ToDashJsonValue(std::unique_ptr<JsonValue>
         auto res = JsonUtil::Create(true);
         res->Put("left", leftDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
         res->Put("top", topDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
+        res->Put("start", startDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
+        res->Put("end", endDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
         res->Put("right", rightDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
         res->Put("bottom", bottomDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
 
