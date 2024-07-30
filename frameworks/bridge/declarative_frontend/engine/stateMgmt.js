@@ -6143,6 +6143,7 @@ class ViewPU extends PUV2ViewBase {
         this.watchedProps = new Map();
         this.recycleManager_ = undefined;
         this.hasBeenRecycled_ = false;
+        this.preventRecursiveRecycle_ = false;
         this.delayRecycleNodeRerender = false;
         this.delayRecycleNodeRerenderDeep = false;
         // @Provide'd variables by this class and its ancestors
@@ -6857,11 +6858,18 @@ class ViewPU extends PUV2ViewBase {
         });
         this.runReuse_ = false;
     }
+    stopRecursiveRecycle() {
+        this.preventRecursiveRecycle_ = true;
+    }
     aboutToRecycleInternal() {
         this.runReuse_ = true;
         stateMgmtTrace.scopedTrace(() => {
             this.aboutToRecycle();
         }, 'aboutToRecycle', this.constructor.name);
+        if (this.preventRecursiveRecycle_) {
+            this.preventRecursiveRecycle_ = false;
+            return;
+        }
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
             if (child) {

@@ -39,6 +39,8 @@ abstract class ViewPU extends PUV2ViewBase
 
   private hasBeenRecycled_: boolean = false;
 
+  private preventRecursiveRecycle_: boolean = false;
+
   private delayRecycleNodeRerender: boolean = false;
 
   private delayRecycleNodeRerenderDeep: boolean = false;
@@ -849,11 +851,19 @@ abstract class ViewPU extends PUV2ViewBase
     this.runReuse_ = false;
   }
 
+  stopRecursiveRecycle() {
+    this.preventRecursiveRecycle_ = true;
+  }
+
   aboutToRecycleInternal() {
     this.runReuse_ = true;
     stateMgmtTrace.scopedTrace(() => {
       this.aboutToRecycle();
     }, 'aboutToRecycle', this.constructor.name);
+    if (this.preventRecursiveRecycle_) {
+      this.preventRecursiveRecycle_ = false;
+      return;
+    }
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
       if (child) {
