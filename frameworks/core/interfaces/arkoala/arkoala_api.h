@@ -2281,6 +2281,7 @@ struct ArkUISwiperControllerModifier {
     ArkUINodeHandle (*getSwiperController)(ArkUINodeHandle node);
     void (*showNext)(ArkUINodeHandle node);
     void (*showPrevious)(ArkUINodeHandle node);
+    void (*changeIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Bool useAnimation);
 };
 
 struct ArkUIStackModifier {
