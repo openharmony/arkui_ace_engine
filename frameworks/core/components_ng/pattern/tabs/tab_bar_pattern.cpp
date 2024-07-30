@@ -653,7 +653,7 @@ void TabBarPattern::FocusIndexChange(int32_t index)
     if (tabsPattern->GetIsCustomAnimation()) {
         OnCustomContentTransition(indicator_, index);
         tabBarLayoutProperty->UpdateIndicator(index);
-        PaintFocusState(false);
+        PaintFocusState();
     } else {
         UpdateAnimationDuration();
         if (GetAnimationDuration().has_value()
