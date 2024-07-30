@@ -473,6 +473,15 @@ public:
 
     float GetCurrentDistance(float x, float y);
 
+    uint32_t GetDampingOverflowCount() const
+    {
+        return dampingOverflowCount_ ;
+    }
+
+    void SetDampingOverflowCount()
+    {
+        dampingOverflowCount_++;
+    }
     static double GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& pipeline);
 
 private:
@@ -573,6 +582,7 @@ private:
     OffsetF dragMovePosition_ = OffsetF(0.0f, 0.0f);
     OffsetF lastDragMovePosition_ = OffsetF(0.0f, 0.0f);
     OffsetF dragTotalMovePosition_ = OffsetF(0.0f, 0.0f);
+    uint32_t dampingOverflowCount_ = 0;
     std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction_;
     RefPtr<GridColumnInfo> columnInfo_;
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);

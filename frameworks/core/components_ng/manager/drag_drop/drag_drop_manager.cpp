@@ -513,6 +513,7 @@ void DragDropManager::TransDragWindowToDragFwk(int32_t windowContainerId)
     overlayManager->RemoveGatherNode();
     SubwindowManager::GetInstance()->HideDragPreviewWindowNG();
     info_.scale = -1.0;
+    dampingOverflowCount_ = 0;
 }
 
 void DragDropManager::OnDragMoveOut(const PointerEvent& pointerEvent)
@@ -671,6 +672,7 @@ void DragDropManager::DoDragReset()
     hasNotifiedTransformation_ = false;
     badgeNumber_ = -1;
     isDragWithContextMenu_ = false;
+    dampingOverflowCount_ = 0;
 }
 
 void DragDropManager::HandleOnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo,
