@@ -330,7 +330,6 @@ struct OperateItemStruct {
   @Link @Watch('onFocusChange') isFocus: boolean;
   @State secondaryTextSize: Length = $r('sys.float.composeListItem_normal_right_text_size');
   @State secondaryTextColors: ResourceColor = $r('sys.color.composeListItem_normal_right_text_color');
-  @State iconSize: Length = $r('sys.float.composeListItem_normal_right_icon_size');
   @State iconColor: ResourceColor = $r('sys.color.composeListItem_normal_right_icon_color');
   @Prop @Watch('onPropChange') isOnClick: boolean = false;
 
@@ -502,7 +501,7 @@ struct OperateItemStruct {
         .height(OPERATEITEM_ICONLIKE_SIZE)
         .width(OPERATEITEM_ARROW_WIDTH)
         .focusable(true)
-        .fillColor($r('sys.color.icon_fourth'))
+        .fillColor(FOCUSABLE ? $r('sys.color.icon_fourth') : this.iconColor)
         .draggable(false)
     }
     .shadow(CLEARSHADOW)
@@ -550,7 +549,7 @@ struct OperateItemStruct {
       .radioStyle({
         uncheckedBorderColor: FOCUSABLE ? null : (this.isFocus && !this.radioState ? OPERATEITECOLOR : null)
       })
-      .backgroundColor(FOCUSABLE ? null : (this.isFocus && !this.radioState ? OPERATEITEMBACKGROUNDCOLOR : null))
+      .backgroundColor(FOCUSABLE ? null : (this.isFocus ? OPERATEITEMBACKGROUNDCOLOR : null))
       .borderRadius(FOCUSABLE ? null : OPERATEITEMRADIUS)
       .margin({ end: LengthMetrics.vp(OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL1) })
       .checked(this.radioState)
@@ -685,7 +684,7 @@ struct OperateItemStruct {
         Image(this.arrow?.value)
           .height(OPERATEITEM_ICONLIKE_SIZE)
           .width(OPERATEITEM_ARROW_WIDTH)
-          .fillColor($r('sys.color.icon_fourth'))
+          .fillColor(FOCUSABLE ? $r('sys.color.icon_fourth') : this.iconColor)
           .focusable(true)
           .draggable(false)
       }
@@ -1104,9 +1103,8 @@ export struct ComposeListItem {
         focused: {
           .border({
             radius: $r('sys.float.composeListItem_focused_circular_bead') || $r('sys.float.corner_radius_level8'),
-            width: (LengthMetrics.resource($r('sys.float.composeListItem_focused_border')).value || ITEM_BORDER_SHOWN) * LengthMetrics.resource($r('sys.float.composeListItem_focused_magnification'))
-              .value,
-            color: $r('sys.color.composeListItem_color_border_focused') || this.focusOutlineColor,
+            width: ITEM_BORDER_SHOWN,
+            color: this.focusOutlineColor,
             style: BorderStyle.Solid
           })
         },
@@ -1150,7 +1148,6 @@ export struct ComposeListItem {
       x: this.isFocus ? LengthMetrics.resource($r('sys.float.composeListItem_focused_magnification')).value : RECOVERYSCALE,
       y: this.isFocus ? LengthMetrics.resource($r('sys.float.composeListItem_focused_magnification')).value : RECOVERYSCALE
     })
-    .blur(this.isFocus ? CLEARBLUR : LengthMetrics.resource($r('sys.float.composeListItem_normal_fuzzy_value')).value)
     .shadow(this.isFocus ? LengthMetrics.resource($r('sys.float.composeListItem_focused_shadow_attribute')).value as ShadowStyle : LengthMetrics.resource($r('sys.float.composeListItem_normal_shadow_attribute')).value as ShadowStyle)
     .margin({
       start: this.getComposeItemLeftPadding(),
