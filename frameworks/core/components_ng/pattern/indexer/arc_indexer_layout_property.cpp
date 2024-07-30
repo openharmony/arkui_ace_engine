@@ -63,10 +63,10 @@ void ArcIndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, con
 std::unique_ptr<JsonValue> ArcIndexerLayoutProperty::ToJsonObjectValue(const TextStyle& textStyle)
 {
     auto fontJsonObject = JsonUtil::Create(true);
-    fontJsonObject->Put("fontSize", textStyle.GetFontSize().ToString().c_str());
+    fontJsonObject->Put("size", textStyle.GetFontSize().ToString().c_str());
     fontJsonObject->Put(
-        "fontStyle", textStyle.GetFontStyle() == FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic");
-    fontJsonObject->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(textStyle.GetFontWeight()).c_str());
+        "style", textStyle.GetFontStyle() == FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic");
+    fontJsonObject->Put("weight", V2::ConvertWrapFontWeightToStirng(textStyle.GetFontWeight()).c_str());
     auto fontFamilyVector = textStyle.GetFontFamilies();
     std::string fontFamily;
     for (uint32_t i = 0; i < fontFamilyVector.size(); i++) {
@@ -76,7 +76,7 @@ std::unique_ptr<JsonValue> ArcIndexerLayoutProperty::ToJsonObjectValue(const Tex
         }
         fontFamily += fontFamilyVector.at(i) + ",";
     }
-    fontJsonObject->Put("fontFamily", fontFamily.c_str());
+    fontJsonObject->Put("family", fontFamily.c_str());
     return fontJsonObject;
 }
 } // namespace OHOS::Ace::NG
