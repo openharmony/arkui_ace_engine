@@ -100,12 +100,7 @@ public:
     void Translate(double x, double y);
     void SaveLayer();
     void RestoreLayer();
-
-    void SetFilterParam(const std::string& filterStr)
-    {
-        filterParam_ = filterStr;
-        colorMatrix_ = RSColorMatrix();
-    }
+    void SetFilterParam(const std::string& filterStr);
 
     void SetAntiAlias(bool isEnabled)
     {
@@ -337,19 +332,17 @@ protected:
     void Path2DSetTransform(const PathArgs& args);
     RSMatrix GetMatrixFromPattern(const Ace::Pattern& pattern);
 
-    void SetGrayFilter(const std::string& percent, RSPen* pen, RSBrush* brush);
-    void SetSepiaFilter(const std::string& percent, RSPen* pen, RSBrush* brush);
-    void SetSaturateFilter(const std::string& percent, RSPen* pen, RSBrush* brush);
-    void SetHueRotateFilter(const std::string& percent, RSPen* pen, RSBrush* brush);
-    void SetInvertFilter(const std::string& percent, RSPen* pen, RSBrush* brush);
-    void SetOpacityFilter(const std::string& percent, RSPen* pen, RSBrush* brush);
-    void SetBrightnessFilter(const std::string& percent, RSPen* pen, RSBrush* brush);
-    void SetContrastFilter(const std::string& percent, RSPen* pen, RSBrush* brush);
-    void SetBlurFilter(const std::string& percent, RSPen* pen, RSBrush* brush);
+    void SetGrayFilter(const std::string& percent);
+    void SetSepiaFilter(const std::string& percent);
+    void SetSaturateFilter(const std::string& percent);
+    void SetHueRotateFilter(const std::string& percent);
+    void SetInvertFilter(const std::string& percent);
+    void SetOpacityFilter(const std::string& percent);
+    void SetBrightnessFilter(const std::string& percent);
+    void SetContrastFilter(const std::string& percent);
+    void SetBlurFilter(const std::string& percent);
 
-    void SetColorFilter(RSPen* pen, RSBrush* brush);
-
-    bool GetFilterType(std::vector<FilterProperty>& filters);
+    bool GetFilterType(const std::string& filterStr, std::vector<FilterProperty>& filters);
     bool IsPercentStr(std::string& percentStr);
     double PxStrToDouble(const std::string& str);
     double BlurStrToDouble(const std::string& str);
@@ -407,7 +400,6 @@ protected:
     std::shared_ptr<RSCanvas> rsCanvas_;
 
     Ace::CanvasImage canvasImage_;
-    std::string filterParam_ = "";
     std::unique_ptr<Shadow> imageShadow_;
     RSColorMatrix colorMatrix_;
     double density_;
@@ -433,8 +425,11 @@ protected:
     };
     static const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShaderEffect>&, RSMatrix&)>
         staticPattern[];
-    std::vector<FilterProperty> lastFilters_;
     const float defaultOpacity = 1.0f;
+    std::shared_ptr<RSColorFilter> colorFilter_;
+    std::shared_ptr<RSImageFilter> blurFilter_;
+    std::vector<std::shared_ptr<RSColorFilter>> saveColorFilter_;
+    std::vector<std::shared_ptr<RSImageFilter>> saveBlurFilter_;
 };
 } // namespace OHOS::Ace::NG
 
