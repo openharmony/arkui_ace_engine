@@ -580,7 +580,16 @@ HWTEST_F(WaterFlowSWTest, Misaligned001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, Misaligned002, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) { CreateRandomItem(45); }, false);
+    Create(
+        [](WaterFlowModelNG model) {
+            const std::vector<float> randomHeights = { 249, 228, 232, 171, 184, 168, 236, 167, 156, 163, 212, 50, 130,
+                225, 63, 106, 156, 213, 102, 93, 73, 184, 89, 156, 178, 163, 176, 187, 191, 118, 218, 212, 196, 52, 103,
+                57, 189, 55, 127, 230, 51, 167, 166, 118, 107 };
+            for (const float& f : randomHeights) {
+                CreateItemWithHeight(f);
+            }
+        },
+        false);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_10);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
