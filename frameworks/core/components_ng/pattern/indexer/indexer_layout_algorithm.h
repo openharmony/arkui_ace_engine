@@ -36,9 +36,9 @@ public:
         return itemHeight_;
     }
 
-    float GetMaxFrameHeight() const
+    float GetMaxContentHeight() const
     {
-        return maxFrameHeight_;
+        return maxContentHeight_;
     }
 
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -56,7 +56,7 @@ private:
     float itemSize_ = 0.0f;
     float itemWidth_ = 0.0f;
     float itemHeight_ = 0.0f;
-    float maxFrameHeight_ = 0.0f;
+    float maxContentHeight_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

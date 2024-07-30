@@ -61,21 +61,21 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto adaptiveWidth = indexerLayoutProperty->GetAdaptiveWidthValue(false);
     auto maxItemWidth = adaptiveWidth ? GetMaxItemWidth(layoutWrapper) : 0.0f;
-    auto contentWidth =
-        (adaptiveWidth ? (GreatOrEqual(maxItemWidth, itemSize_) ? maxItemWidth : itemSize_) : itemSize_) +
-        horizontalPadding;
+    auto contentWidth = adaptiveWidth ? (GreatOrEqual(maxItemWidth, itemSize_) ? maxItemWidth : itemSize_) : itemSize_;
     auto frameWidth = selfIdealSize.Width().has_value()
                            ? selfIdealSize.Width().value()
-                           : std::clamp(contentWidth, 0.0f, layoutConstraint.maxSize.Width());
-    itemWidth_ = GreatOrEqual(frameWidth - horizontalPadding, 0.0f) ? frameWidth - horizontalPadding : 0.0f;
+                           : std::clamp(contentWidth + horizontalPadding, 0.0f, layoutConstraint.maxSize.Width());
+    itemWidth_ = GreatNotEqual(frameWidth - horizontalPadding, 0.0f) ? frameWidth - horizontalPadding : 0.0f;
 
-    auto contentHeight = childCount * itemSize_ + verticalPadding;
-    maxFrameHeight_ = selfIdealSize.Height().has_value()
-                            ? selfIdealSize.Height().value() : layoutConstraint.maxSize.Height();
-    contentHeight = GreatNotEqual(contentHeight, maxFrameHeight_) ? maxFrameHeight_ : contentHeight;
-    itemHeight_ = GreatOrEqual(contentHeight - verticalPadding, 0.0f) && childCount > 0
-                        ? (contentHeight - verticalPadding) / childCount : 0.0f;
-    float frameHeight = selfIdealSize.Height().has_value() ? selfIdealSize.Height().value() : contentHeight;
+    auto contentHeight = childCount * itemSize_;
+    float maxFrameHeight =
+        selfIdealSize.Height().has_value() ? selfIdealSize.Height().value() : layoutConstraint.maxSize.Height();
+    maxContentHeight_ = GreatNotEqual(maxFrameHeight - verticalPadding, 0.0f) ? maxFrameHeight - verticalPadding : 0.0f;
+    contentHeight = GreatNotEqual(contentHeight, maxContentHeight_) ? maxContentHeight_ : contentHeight;
+    itemHeight_ = GreatNotEqual(contentHeight, 0.0f) && childCount > 0 ? contentHeight / childCount : 0.0f;
+    float frameHeight = selfIdealSize.Height().has_value()
+                            ? selfIdealSize.Height().value()
+                            : std::clamp(contentHeight + verticalPadding, 0.0f, layoutConstraint.maxSize.Height());
 
     auto childLayoutConstraint = indexerLayoutProperty->CreateChildConstraint();
     for (int32_t index = 0; index < childCount; index++) {
