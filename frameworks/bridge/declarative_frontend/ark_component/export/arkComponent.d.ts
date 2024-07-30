@@ -307,6 +307,7 @@ declare class ArkGridComponent extends ArkComponent implements GridAttribute {
     }): this;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     flingSpeedLimit(value: number): this;
+    alignItems(value: GridItemAlignment): this;
 }
 declare class ArkGridColComponent extends ArkComponent implements GridColAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
