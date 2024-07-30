@@ -1561,7 +1561,6 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
         delegate_->OnBlur();
     }
     OnQuickMenuDismissed();
-    SelectCancel();
     CloseContextSelectionMenu();
 }
 
