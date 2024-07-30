@@ -168,6 +168,7 @@ void WaterFlowTestNg::CreateFocusableItem(int32_t number)
 
 void WaterFlowTestNg::CreateRandomItem(int32_t number)
 {
+    std::srand(0);
     for (int32_t i = 0; i < number; i++) {
         WaterFlowItemModelNG waterFlowItemModel;
         waterFlowItemModel.Create();
