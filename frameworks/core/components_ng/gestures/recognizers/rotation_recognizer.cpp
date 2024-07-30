@@ -388,6 +388,7 @@ GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
         touchPoint = touchPoints_.begin()->second;
     }
     info->SetForce(touchPoint.force);
+    gestureInfo_->SetInputEventType(inputEventType_);
     if (touchPoint.tiltX.has_value()) {
         info->SetTiltX(touchPoint.tiltX.value());
     }
