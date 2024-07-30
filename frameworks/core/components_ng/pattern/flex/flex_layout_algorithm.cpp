@@ -458,6 +458,10 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
             auto childList = iter->second;
             if (outOfDisplay) {
                 for (auto& child : childList) {
+                    const auto& childLayoutWrapper = child.layoutWrapper;
+                    auto childLayoutConstraint = child.layoutConstraint;
+                    UpdateChildLayoutConstrainByFlexBasis(direction_, childLayoutWrapper, childLayoutConstraint);
+                    child.layoutWrapper->ApplyConstraintWithoutMeasure(childLayoutConstraint);
                     child.layoutWrapper->SetActive(false);
                     child.layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
                 }
