@@ -171,7 +171,7 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
     uiParam.scaleY_ = matrix.Get(Rosen::Drawing::Matrix::SCALE_Y);
     uiParam.pivotX_ = globalGeometry->GetPivotX();
     uiParam.pivotY_ = globalGeometry->GetPivotY();
-    uiParam.zOrder_ = res.zOrderCnt_;
+    uiParam.zOrder_ = static_cast<uint32_t>(res.zOrderCnt_);
     auto windowId = GetWindowId(node);
     uiParam.sessionName_ = GetWindowName(node);
     if (isAncestorRecent) {
