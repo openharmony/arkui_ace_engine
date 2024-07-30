@@ -1299,6 +1299,7 @@ void MenuItemPattern::UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>
         auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateImageSourceInfo(imageSourceInfo);
+        bool useDefaultThemeIcon = false;
         if (imageSourceInfo.IsSvg()) {
             auto src = imageSourceInfo.GetSrc();
             std::string magicStr = "resource:///";
@@ -1309,12 +1310,11 @@ void MenuItemPattern::UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>
             auto isSystemIcon = (srcId.find("ohos_") != std::string::npos) || (std::stoul(srcId) >= magicNum);
             
             if (isSystemIcon) {
-                UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), true);
-                return;
+                useDefaultThemeIcon = true;
             }
         }
         
-        UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), false);
+        UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), useDefaultThemeIcon);
     }
 }
 
