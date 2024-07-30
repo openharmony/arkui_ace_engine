@@ -273,11 +273,6 @@ void SecurityUIExtensionPattern::OnDisconnect(bool isAbnormal)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SecurityUIExtensionPattern::OnAreaChangedInner()
-{
-    DispatchDisplayArea();
-}
-
 void SecurityUIExtensionPattern::FireBindModalCallback()
 {}
 
@@ -347,7 +342,18 @@ void SecurityUIExtensionPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    OnAreaChangedFunc onAreaChangedFunc = [weak = WeakClaim(this)](
+        const RectF& oldRect,
+        const OffsetF& oldOrigin,
+        const RectF& rect,
+        const OffsetF& origin) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->DispatchDisplayArea();
+    };
+    eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
     pipeline->AddOnAreaChangeNode(host->GetId());
     callbackId_ = pipeline->RegisterSurfacePositionChangedCallback(
         [weak = WeakClaim(this)](int32_t, int32_t) {
@@ -356,6 +362,7 @@ void SecurityUIExtensionPattern::OnAttachToFrameNode()
                 pattern->DispatchDisplayArea(true);
             }
         });
+    PLATFORM_LOGI("OnAttachToFrameNode");
 }
 
 void SecurityUIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -473,21 +480,24 @@ void SecurityUIExtensionPattern::FireOnTerminatedCallback(
         return;
     }
 
+    state_ = AbilityState::DESTRUCTION;
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        PLATFORM_LOGI("DestroySession.");
+        sessionWrapper_->DestroySession();
+    }
+
     ContainerScope scope(instanceId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<UIExtensionHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnTerminatedCallback(code, wantWrap);
-    state_ = AbilityState::DESTRUCTION;
-    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
-        sessionWrapper_->DestroySession();
-    }
 }
 
 void SecurityUIExtensionPattern::FireOnErrorCallback(
     int32_t code, const std::string& name, const std::string& message)
 {
+    state_ = AbilityState::NONE;
     PlatformPattern::FireOnErrorCallback(code, name, message);
     if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
         sessionWrapper_->DestroySession();
@@ -584,7 +594,7 @@ void SecurityUIExtensionPattern::OnMountToParentDone()
         return;
     }
 
-    PLATFORM_LOGI("OnMountToParentDone");
+    PLATFORM_LOGI("OnMountToParentDone.");
     auto wantWrap = GetWantWrap();
     CHECK_NULL_VOID(wantWrap);
     UpdateWant(wantWrap);

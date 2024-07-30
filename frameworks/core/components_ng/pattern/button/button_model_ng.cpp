@@ -251,7 +251,9 @@ void ButtonModelNG::SetLabel(FrameNode* frameNode, const char* label)
     if (layoutProperty->GetPaddingProperty()) {
         return;
     }
-    auto buttonTheme = PipelineBase::GetCurrentContextSafely()->GetTheme<ButtonTheme>();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto buttonTheme = context->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     auto padding = buttonTheme->GetPadding();
     PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
@@ -403,7 +405,10 @@ void ButtonModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto buttonTheme = PipelineBase::GetCurrentContextSafely()->GetTheme<ButtonTheme>();
+    auto context = textNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto buttonTheme = context->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
     auto textStyle = buttonTheme->GetTextStyle();
     textLayoutProperty->UpdateContent(label);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);

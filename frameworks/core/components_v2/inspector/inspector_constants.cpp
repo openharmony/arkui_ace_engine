@@ -606,4 +606,7 @@ const char MOVING_PHOTO_ETS_TAG[] = "MovingPhoto";
 // LinearIndicator
 const char LINEARINDICATOR_COMPONENT_TAG[] = "LinearIndicatorComponent";
 const char LINEARINDICATOR_ETS_TAG[] = "LinearIndicator";
+
+// CustomSpanNode
+const char CUSTOM_SPAN_NODE_ETS_TAG[] = "CustomSpanNode";
 } // namespace OHOS::Ace::V2

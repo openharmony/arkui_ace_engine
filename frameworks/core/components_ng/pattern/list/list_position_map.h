@@ -398,7 +398,7 @@ public:
     std::pair<int32_t, float> GetStartIndexAndPos() const
     {
         if (posMap_.empty()) {
-            return { 0, 0.0f };
+            return { -1, 0.0f };
         }
         const auto& start = posMap_.begin();
         return { start->first, start->second.mainPos };
@@ -407,7 +407,7 @@ public:
     std::pair<int32_t, float> GetEndIndexAndPos() const
     {
         if (posMap_.empty()) {
-            return { 0, 0.0f };
+            return { -1, 0.0f };
         }
         const auto& end = posMap_.rbegin();
         return { end->first, end->second.mainPos + end->second.mainSize };

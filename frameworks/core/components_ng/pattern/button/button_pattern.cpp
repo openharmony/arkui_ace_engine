@@ -82,7 +82,8 @@ bool ButtonPattern::NeedAgingUpdateText(RefPtr<ButtonLayoutProperty>& layoutProp
         return false;
     }
     const auto& calcConstraint = layoutProperty->GetCalcLayoutConstraint();
-    if (calcConstraint && calcConstraint->selfIdealSize.has_value()) {
+    if (calcConstraint && calcConstraint->selfIdealSize->Height().has_value() &&
+        calcConstraint->selfIdealSize->Width().has_value()) {
         return false;
     }
     if (!(NearEqual(fontScale, buttonTheme->GetBigFontSizeScale()) ||
@@ -402,7 +403,6 @@ void ButtonPattern::HandleEnabled()
     auto alpha = theme->GetBgDisabledAlpha();
     auto originalOpacity = renderContext->GetOpacityValue(1.0);
     renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
-    renderContext->UpdateLightIlluminated(theme->GetDefaultLightIlliminated());
 }
 
 void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo,

@@ -152,6 +152,11 @@ public:
         return predictSnapEndPos_;
     }
 
+    void SetScrollSnapVelocity(float velocity)
+    {
+        scrollSnapVelocity_ = velocity;
+    }
+
     void SetIndexInGroup(int32_t index)
     {
         jumpIndexInGroup_ = index;
@@ -467,7 +472,10 @@ private:
     static void PostIdleTaskV2(RefPtr<FrameNode> frameNode, const ListPredictLayoutParamV2& param);
     static void PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t deadline);
 
-    float GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign);
+    float GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign) const;
+    void FindPredictSnapIndexInItemPositionsStart(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
+    void FindPredictSnapIndexInItemPositionsCenter(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
+    void FindPredictSnapIndexInItemPositionsEnd(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
     int32_t FindPredictSnapEndIndexInItemPositions(float predictEndPos, V2::ScrollSnapAlign scrollSnapAlign);
     bool IsUniformHeightProbably();
     float CalculatePredictSnapEndPositionByIndex(uint32_t index, V2::ScrollSnapAlign scrollSnapAlign);
@@ -481,6 +489,7 @@ private:
     std::optional<int32_t> targetIndexStaged_;
     std::optional<float> predictSnapOffset_;
     std::optional<float> predictSnapEndPos_;
+    std::optional<float> scrollSnapVelocity_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
     ScrollAutoType scrollAutoType_ = ScrollAutoType::NOT_CHANGE;
 

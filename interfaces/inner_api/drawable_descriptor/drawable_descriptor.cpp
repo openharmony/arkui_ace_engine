@@ -154,10 +154,10 @@ void LayeredDrawableDescriptor::InitialResource(const std::shared_ptr<Global::Re
     InitialMask(resourceMgr);
     // preprocess get background and foreground
     if (!PreGetPixelMapFromJsonBuf(resourceMgr, true)) {
-        HILOGE("Create background Item imageSource from json buffer failed");
+        HILOGD("Create background Item imageSource from json buffer failed");
     }
     if (!PreGetPixelMapFromJsonBuf(resourceMgr, false)) {
-        HILOGE("Create foreground Item imageSource from json buffer failed");
+        HILOGD("Create foreground Item imageSource from json buffer failed");
     }
 }
 

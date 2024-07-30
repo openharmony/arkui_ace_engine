@@ -1958,12 +1958,6 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg044, TestSize.Level1)
 
     MneuModelInstance.ResetFontFamily();
     MneuModelInstance.ResetBorderRadius();
-    MneuModelInstance.CalculateBoundedWidth(Dimension(10));
-    MneuModelInstance.CalculateBoundedWidthForPC(Dimension(10));
-    MneuModelInstance.CalculateBoundedWidthForPC(Dimension(500));
-    MneuModelInstance.CalculateBoundedWidthForPC(Dimension(200));
-    MneuModelInstance.CalculateBoundedWidthForMobile(Dimension(10));
-    MneuModelInstance.CalculateBoundedWidthForMobile(Dimension(70));
 
     ASSERT_TRUE(layoutProperty->GetFontSize().has_value());
     EXPECT_EQ(layoutProperty->GetFontSize().value(), Dimension(25.0));

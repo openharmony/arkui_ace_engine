@@ -143,7 +143,7 @@ interface __RepeatConfig<T> {
     typeGenFunc?: RepeatTypeGenFunc<T>;
     totalCountSpecified?: boolean;
     totalCount?: number;
-    templateOptions?: { [type: string]: RepeatTemplateOptions };
+    templateOptions?: { [type: string]: RepeatTemplateImplOptions };
     mkRepeatItem?: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
     onMoveHandler?: OnMoveHandler;
 };
@@ -156,12 +156,12 @@ class __Repeat<T> implements RepeatAPI<T> {
     private isVirtualScroll = false;
 
     constructor(owningView: ViewV2 | ViewPU, arr: Array<T>) {
-        this.config.owningView_= owningView instanceof ViewV2 ? owningView : undefined;
+        this.config.owningView_ = owningView instanceof ViewV2 ? owningView : undefined;
         this.config.arr = arr ?? [];
         this.config.itemGenFuncs = {};
         this.config.keyGenFunc = __RepeatDefaultKeyGen.funcWithIndex;
-        this.config.typeGenFunc= (() => '');
-        this.config.totalCountSpecified= false;
+        this.config.typeGenFunc = (() => '');
+        this.config.totalCountSpecified = false;
         this.config.totalCount = this.config.arr.length;
         this.config.templateOptions = {};
 
@@ -191,9 +191,9 @@ class __Repeat<T> implements RepeatAPI<T> {
     public virtualScroll(options? : { totalCount?: number }): RepeatAPI<T> {
         if (options && options.totalCount && Number.isInteger(options.totalCount)) {
             this.config.totalCount = options.totalCount;
-            this.config.totalCountSpecified= true;
+            this.config.totalCountSpecified = true;
         } else {
-            this.config.totalCountSpecified= false;
+            this.config.totalCountSpecified = false;
         }
         this.isVirtualScroll = true;
         return this;
@@ -241,13 +241,15 @@ class __Repeat<T> implements RepeatAPI<T> {
     }
 
     // normalize template options
-    private normTemplateOptions(options: RepeatTemplateOptions): RepeatTemplateOptions {
-        if (options) {
-            const cachedCount: number = options.cachedCount;
-            if (Number.isInteger(cachedCount) && cachedCount >= 0) {
-                return options;
+    private normTemplateOptions(options: RepeatTemplateOptions): RepeatTemplateImplOptions {
+        const value = (options && Number.isInteger(options.cachedCount) && options.cachedCount >= 0)
+            ? {
+                cachedCount: Math.max(0, options.cachedCount),
+                cachedCountSpecified: true
             }
-        }
-        return { cachedCount: 1 };
+            : {
+                cachedCountSpecified: false
+            };
+            return value;
     }
 }; // __Repeat<T>

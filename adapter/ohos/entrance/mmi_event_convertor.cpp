@@ -115,6 +115,17 @@ Offset GetTouchEventOriginOffset(const TouchEvent& event)
     }
 }
 
+TimeStamp GetTouchEventOriginTimeStamp(const TouchEvent& event)
+{
+    auto pointerEvent = event.pointerEvent;
+    if (!pointerEvent) {
+        return event.time;
+    }
+    std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
+    TimeStamp time(microseconds);
+    return time;
+}
+
 void UpdateMouseEventForPen(const MMI::PointerEvent::PointerItem& pointerItem, MouseEvent& mouseEvent)
 {
     if (mouseEvent.sourceType != SourceType::TOUCH || mouseEvent.sourceTool != SourceTool::PEN) {
@@ -528,7 +539,7 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_
         }
     }
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("point source: %{public}d", pointerEvent->GetSourceType());
+        LOGD("point source: %{public}d", pointerEvent->GetSourceType());
         auto actionId = pointerEvent->GetPointerId();
         MMI::PointerEvent::PointerItem item;
         if (pointerEvent->GetPointerItem(actionId, item)) {

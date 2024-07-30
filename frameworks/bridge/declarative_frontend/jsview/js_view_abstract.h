@@ -520,7 +520,6 @@ public:
         }
 
         if (!jsValue->IsObject()) {
-            LOGE("arg is not number or Object.");
             return false;
         }
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
@@ -531,7 +530,6 @@ public:
 
         JSRef<JSVal> resId = jsObj->GetProperty("id");
         if (!resId->IsNumber()) {
-            LOGW("resId is not number");
             return false;
         }
 

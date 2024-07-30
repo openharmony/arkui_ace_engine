@@ -152,7 +152,7 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
                                            : GetGlobalGeometry(node);
     auto localGeometry = GetLocalGeometry(node);
     if (!globalGeometry || !localGeometry) {
-        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "name:%{public}s globalGeo is null:%{public}d localGeo:%{public}d",
+        TAG_LOGD(AceLogTag::ACE_WINDOW_PIPELINE, "name:%{public}s globalGeo is null:%{public}d localGeo:%{public}d",
             GetWindowName(node).c_str(), globalGeometry == nullptr, localGeometry == nullptr);
         return;
     }
@@ -171,7 +171,7 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
     uiParam.scaleY_ = matrix.Get(Rosen::Drawing::Matrix::SCALE_Y);
     uiParam.pivotX_ = globalGeometry->GetPivotX();
     uiParam.pivotY_ = globalGeometry->GetPivotY();
-    uiParam.zOrder_ = res.zOrderCnt_;
+    uiParam.zOrder_ = static_cast<uint32_t>(res.zOrderCnt_);
     auto windowId = GetWindowId(node);
     uiParam.sessionName_ = GetWindowName(node);
     if (isAncestorRecent) {

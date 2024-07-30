@@ -137,7 +137,6 @@ private:
     WeakPtr<UIExtensionPattern> weakPattern_;
 };
 }
-
 UIExtensionPattern::UIExtensionPattern(
     bool isTransferringCaller, bool isModal, bool isAsyncModalBinding, SessionType sessionType)
     : isTransferringCaller_(isTransferringCaller), isModal_(isModal),
@@ -149,7 +148,7 @@ UIExtensionPattern::UIExtensionPattern(
     CHECK_NULL_VOID(uiExtensionManager);
     uiExtensionId_ = uiExtensionManager->ApplyExtensionId();
     sessionWrapper_ = SessionWrapperFactory::CreateSessionWrapper(
-        sessionType, WeakClaim(this), instanceId_, isTransferringCaller_);
+        sessionType, AceType::WeakClaim(this), instanceId_, isTransferringCaller_);
     accessibilitySessionAdapter_ =
         AceType::MakeRefPtr<AccessibilitySessionAdapterUIExtension>(sessionWrapper_);
     UIEXT_LOGI("The %{public}smodal UIExtension is created.", isModal_ ? "" : "non");
@@ -613,10 +612,19 @@ bool UIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
 void UIExtensionPattern::HandleFocusEvent()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline->GetIsFocusActive()) {
-        DispatchFocusActiveEvent(true);
+    CHECK_NULL_VOID(pipeline);
+    if (canFocusSendToUIExtension_) {
+        if (pipeline->GetIsFocusActive()) {
+            DispatchFocusActiveEvent(true);
+        }
+
+        DispatchFocusState(true);
+        needReSendFocusToUIExtension_ = false;
+    } else {
+        needReSendFocusToUIExtension_ = true;
     }
-    DispatchFocusState(true);
+
+    canFocusSendToUIExtension_ = true;
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
 }
@@ -662,10 +670,21 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     AceExtraInputData::InsertInterpolatePoints(info);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    if (pipeline->IsWindowFocused()) {
-        focusHub->RequestFocusImmediately();
+    bool ret = true;
+    if (pipeline->IsWindowFocused() && !focusHub->IsCurrentFocus()) {
+        canFocusSendToUIExtension_ = false;
+        ret = focusHub->RequestFocusImmediately();
+        if (!ret) {
+            canFocusSendToUIExtension_ = true;
+            UIEXT_LOGW("RequestFocusImmediately failed when HandleTouchEvent.");
+        }
     }
     DispatchPointerEvent(pointerEvent);
+    if (pipeline->IsWindowFocused() && needReSendFocusToUIExtension_ &&
+        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
+        HandleFocusEvent();
+        needReSendFocusToUIExtension_ = false;
+    }
 }
 
 void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
@@ -873,7 +892,7 @@ void UIExtensionPattern::SetOnResultCallback(const std::function<void(int32_t, c
 
 void UIExtensionPattern::FireOnResultCallback(int32_t code, const AAFwk::Want& want)
 {
-    UIEXT_LOGI("OnResult tThe state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
+    UIEXT_LOGI("OnResult the state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
     if (onResultCallback_ && (state_ != AbilityState::DESTRUCTION)) {
         ContainerScope scope(instanceId_);
         onResultCallback_(code, want);

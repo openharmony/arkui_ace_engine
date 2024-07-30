@@ -15,18 +15,18 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_CONFIGURATION_OBSERVER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_CONFIGURATION_OBSERVER_H
 
-#include "app_mgr_client.h"
-#include "configuration_observer_stub.h"
 #include "nweb_helper.h"
 #include "web_delegate.h"
 
 namespace OHOS::Ace {
-class WebConfigurationObserver : public OHOS::AppExecFwk::ConfigurationObserverStub {
+class WebConfigurationObserver : public OHOS::AbilityRuntime::EnvironmentCallback {
 public:
     explicit WebConfigurationObserver(WeakPtr<WebDelegate> delegate) : delegate_(delegate) {}
     ~WebConfigurationObserver() override = default;
 
     void OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& configuration) override;
+
+    void OnMemoryLevel(const int level) override {}
 
 private:
     WeakPtr<WebDelegate> delegate_ = nullptr;

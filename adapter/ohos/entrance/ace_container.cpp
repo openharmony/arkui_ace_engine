@@ -31,6 +31,8 @@
 #include "ui_extension_context.h"
 #include "window_manager.h"
 #include "wm/wm_common.h"
+#include "root_scene.h"
+#include "ws_common.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
@@ -1170,7 +1172,7 @@ UIContentErrorCode AceContainer::RunPage(
         isStageModel && !CheckUrlValid(content, container->GetHapPath())) {
         return UIContentErrorCode::INVALID_URL;
     }
-
+    
     if (isNamedRouter) {
         return front->RunPageByNamedRouter(content, params);
     }
@@ -1287,7 +1289,6 @@ public:
         auto node = node_.Upgrade();
         CHECK_NULL_VOID(node);
         auto rectf = node->GetRectWithRender();
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "frame rect:%{public}s", rectf.ToString().c_str());
         AbilityRuntime::AutoFill::PopupOffset offset;
         AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
         AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
@@ -1311,8 +1312,7 @@ public:
             offset.deltaX = rect_.left + rect_.width - ((rectf.Width() + size.width) / POPUP_CALCULATE_RATIO);
         }
 
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "popup offset.deltaX:%{public}f", offset.deltaX);
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "popup offset.deltaY:%{public}f", offset.deltaY);
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "PopupOffset x:%{public}f,y:%{public}f", offset.deltaX, offset.deltaY);
         config.targetOffset = offset;
     }
 
@@ -2262,6 +2262,28 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaTyp
     return {};
 }
 
+Rect AceContainer::GetSessionAvoidAreaByType(uint32_t safeAreaType)
+{
+    Rosen::WSRect avoidArea;
+    Rect sessionAvoidArea;
+    if (safeAreaType == NG::SAFE_AREA_TYPE_SYSTEM) {
+        auto ret =
+            Rosen::RootScene::staticRootScene_->GetSessionRectByType(Rosen::AvoidAreaType::TYPE_SYSTEM, avoidArea);
+        if (ret == Rosen::WMError::WM_OK) {
+            sessionAvoidArea.SetRect(avoidArea.posX_, avoidArea.posY_, avoidArea.width_, avoidArea.height_);
+        }
+    } else if (safeAreaType == NG::SAFE_AREA_TYPE_KEYBOARD) {
+        auto ret =
+            Rosen::RootScene::staticRootScene_->GetSessionRectByType(Rosen::AvoidAreaType::TYPE_KEYBOARD, avoidArea);
+        if (ret == Rosen::WMError::WM_OK) {
+            sessionAvoidArea.SetRect(avoidArea.posX_, avoidArea.posY_, avoidArea.width_, avoidArea.height_);
+        }
+    }
+    LOGI("GetSessionAvoidAreaByType safeAreaType: %{public}u, sessionAvoidArea; %{public}s", safeAreaType,
+        sessionAvoidArea.ToString().c_str());
+    return sessionAvoidArea;
+}
+
 NG::SafeAreaInsets AceContainer::GetKeyboardSafeArea()
 {
     CHECK_NULL_RETURN(uiWindow_, {});
@@ -2867,7 +2889,15 @@ bool AceContainer::IsSceneBoardEnabled()
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
+    CHECK_NULL_VOID(currentEvent);
     currentPointerEvent_ = currentEvent;
+    auto pointerAction = currentEvent->GetPointerAction();
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
+        return;
+    }
     MMI::PointerEvent::PointerItem pointerItem;
     currentEvent->GetPointerItem(currentEvent->GetPointerId(), pointerItem);
     int32_t originId = pointerItem.GetOriginPointerId();

@@ -107,6 +107,12 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     Dimension offsetY;
     auto safeAreaManager = context->GetSafeAreaManager();
     auto safeAreaOffset = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length() : 0;
+    auto showMode = toastProp->GetShowModeValue(ToastShowMode::DEFAULT);
+    if (showMode == ToastShowMode::DEFAULT) {
+        auto keyboardInset = safeAreaManager ? safeAreaManager->GetKeyboardInset().Length() : 0;
+        auto keyboardOffset = GreatNotEqual(keyboardInset, 0) ? keyboardInset : 0;
+        safeAreaOffset = safeAreaOffset + keyboardOffset;
+    }
     if (!toastProp->HasToastAlignment()) {
         auto toastBottom = GetBottomValue(layoutWrapper);
         toastBottom_ = toastBottom;

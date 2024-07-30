@@ -112,8 +112,8 @@ void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::A
     if (rsSurfaceNode == nullptr) {
         return;
     }
-    rsSurfaceNode->SetBounds(borderWidth_, borderWidth_, width_ - borderWidth_ * DOUBLE,
-        height_ - borderWidth_ * DOUBLE);
+    rsSurfaceNode->SetBounds(round(borderWidth_), round(borderWidth_), round(width_ - borderWidth_ * DOUBLE),
+        round(height_ - borderWidth_ * DOUBLE));
     if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR) {
         HILOG_INFO("InitUIContent SetFormBackgroundColor #00FFFFFF");
         uiContent_->SetFormBackgroundColor(TRANSPARENT_COLOR);

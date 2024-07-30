@@ -188,7 +188,7 @@ HWTEST_F(RichEditorStyledStringTestNg, RichEditorModel001, TestSize.Level1)
      */
     EXPECT_FALSE(eventHub->onSelect_);
     EXPECT_FALSE(eventHub->aboutToIMEInput_);
-    EXPECT_FALSE(eventHub->onIMEIputComplete_);
+    EXPECT_FALSE(eventHub->onIMEInputComplete_);
     EXPECT_FALSE(eventHub->aboutToDelete_);
     EXPECT_FALSE(eventHub->onDeleteComplete_);
     EXPECT_FALSE(eventHub->onWillChange_);
@@ -859,8 +859,10 @@ HWTEST_F(RichEditorStyledStringTestNg, CustomSpan001, TestSize.Level1)
     richEditorPattern->textSelector_.Update(0, 1);
     richEditorPattern->CalculateHandleOffsetAndShowOverlay();
     SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), 50.f };
-    EXPECT_EQ(richEditorPattern->textSelector_.firstHandle, RectF(OffsetF(0, 0), handlePaintSize));
-    EXPECT_EQ(richEditorPattern->textSelector_.secondHandle, RectF(OffsetF(100.f, 0), handlePaintSize));
+    auto firstHandleOffset = OffsetF(0 - handlePaintSize.Width() / 2.0f, 0);
+    auto secondHandleOffset = OffsetF(100.f - handlePaintSize.Width() / 2.0f, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.firstHandle, RectF(firstHandleOffset, handlePaintSize));
+    EXPECT_EQ(richEditorPattern->textSelector_.secondHandle, RectF(secondHandleOffset, handlePaintSize));
 }
 
 /**
@@ -922,5 +924,53 @@ HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle002, TestSize.Level1)
     RefPtr<SpanItem> source = AceType::MakeRefPtr<SpanItem>();
     layoutAlgorithm->CopySpanStyle(source, AceType::MakeRefPtr<SpanItem>());
     EXPECT_FALSE(source->textLineStyle->HasTextAlign());
+}
+
+/**
+ * @tc.name: CopySpanStyle003
+ * @tc.desc: test CopySpanStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto source = AceType::MakeRefPtr<SpanItem>();
+    auto target = AceType::MakeRefPtr<SpanItem>();
+
+    LeadingMargin leadingMargin;
+    source->textLineStyle->UpdateLeadingMargin(leadingMargin);
+    source->fontStyle->UpdateFontSize(FONT_SIZE_VALUE);
+    source->textLineStyle->UpdateLineHeight(LINE_HEIGHT_VALUE);
+
+    layoutAlgorithm->CopySpanStyle(source, target);
+    EXPECT_EQ(target->fontStyle->GetFontSize(), FONT_SIZE_VALUE);
+}
+
+/**
+ * @tc.name: GetSelection001
+ * @tc.desc: test GetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, GetSelection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create styledString with text
+     */
+    auto mutableStr = CreateTextStyledString(INIT_STRING_1);
+
+    /**
+     * @tc.steps: step2. get richEditor styledString controller , set styledString and GetSelection
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto styledStringController = richEditorPattern->GetRichEditorStyledStringController();
+    ASSERT_NE(styledStringController, nullptr);
+    auto testRangeInfo = styledStringController->GetSelection();
+    ASSERT_EQ(testRangeInfo.start_, 0);
 }
 } // namespace OHOS::Ace::NG

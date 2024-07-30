@@ -43,6 +43,7 @@
 #include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
 #include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
@@ -429,7 +430,7 @@ bool GestureEventHub::IsPixelMapNeedScale() const
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
     auto width = pixelMap_->GetWidth();
-    auto maxWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
+    auto maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(frameNode->GetContextRefPtr());
     if (!frameNode->GetDragPreviewOption().isScaleEnabled || width == 0 || width < maxWidth) {
         return false;
     }
@@ -946,10 +947,17 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         auto originPoint = imageNode->GetPositionToScreen();
         if (hasContextMenu || isMenuShow) {
             auto previewDragMovePosition = dragDropManager->GetUpdateDragMovePosition();
-            DragEventActuator::UpdatePreviewPositionAndScale(imageNode, previewDragMovePosition + originPoint);
+            OffsetF previewOffset;
+            if (SubwindowManager::GetInstance()->GetMenuPreviewCenter(previewOffset)) {
+                previewOffset -= OffsetF(pixelMap->GetWidth() / 2.0f, pixelMap->GetHeight() / 2.0f);
+                DragEventActuator::UpdatePreviewPositionAndScale(imageNode, previewDragMovePosition + previewOffset);
+            } else {
+                DragEventActuator::UpdatePreviewPositionAndScale(imageNode, previewDragMovePosition + originPoint);
+            }
+
             dragDropManager ->ResetContextMenuDragPosition();
         }
-        
+
         auto frameTag = frameNode->GetTag();
         if (IsPixelMapNeedScale() && GetTextDraggable() && IsTextCategoryComponent(frameTag)) {
             auto textDragPattern = frameNode->GetPattern<TextDragBase>();

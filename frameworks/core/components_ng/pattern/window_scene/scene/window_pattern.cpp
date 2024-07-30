@@ -605,7 +605,9 @@ void WindowPattern::FilterInvalidPointerItem(const std::shared_ptr<MMI::PointerE
             continue;
         }
         const NG::PointF point { static_cast<float>(item.GetDisplayX()), static_cast<float>(item.GetDisplayY()) };
-        if (host->IsOutOfTouchTestRegion(point, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN)) {
+        OHOS::Ace::TouchEvent touchEvent;
+        touchEvent.sourceType = static_cast<SourceType>(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+        if (host->IsOutOfTouchTestRegion(point, touchEvent)) {
             pointerEvent->RemovePointerItem(id);
         }
     }

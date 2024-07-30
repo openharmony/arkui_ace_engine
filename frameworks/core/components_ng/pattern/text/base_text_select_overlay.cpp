@@ -244,7 +244,7 @@ void BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlay
 RectF BaseTextSelectOverlay::GetVisibleRect(const RefPtr<FrameNode>& node, const RectF& visibleRect)
 {
     CHECK_NULL_RETURN(node, visibleRect);
-    auto parentNode = node->GetAncestorNodeOfFrame();
+    auto parentNode = node->GetAncestorNodeOfFrame(true);
     CHECK_NULL_RETURN(parentNode, visibleRect);
     if (parentNode->GetTag() == V2::PAGE_ETS_TAG) {
         return visibleRect;
@@ -436,6 +436,9 @@ void BaseTextSelectOverlay::GetGlobalPointsWithTransform(std::vector<OffsetF>& p
     auto pointConverter = [](const OffsetF& offset) { return PointF(offset.GetX(), offset.GetY()); };
     std::transform(points.begin(), points.end(), std::back_inserter(convertPoints), pointConverter);
     while (parent) {
+        if (parent->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+            break;
+        }
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         auto paintOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
@@ -443,7 +446,7 @@ void BaseTextSelectOverlay::GetGlobalPointsWithTransform(std::vector<OffsetF>& p
             pointElement = pointElement + paintOffset;
             renderContext->GetPointTransform(pointElement);
         }
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     points.clear();
     auto offsetConverter = [](const PointF& point) { return OffsetF(point.GetX(), point.GetY()); };
@@ -550,7 +553,7 @@ void BaseTextSelectOverlay::RevertLocalPointWithTransform(OffsetF& point)
     std::stack<RefPtr<FrameNode>> nodeStack;
     while (parent) {
         nodeStack.push(parent);
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     CHECK_NULL_VOID(!nodeStack.empty());
     PointF localPoint(point.GetX(), point.GetY());
@@ -592,7 +595,7 @@ OffsetF BaseTextSelectOverlay::GetPaintOffsetWithoutTransform()
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
         offset += renderContext->GetPaintRectWithoutTransform().GetOffset();
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     return offset;
 }
@@ -608,7 +611,6 @@ void BaseTextSelectOverlay::UpdateTransformFlag()
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
-            hasTransform = false;
             break;
         }
         if (!hasTransform) {
@@ -663,6 +665,7 @@ void BaseTextSelectOverlay::SwitchToOverlayMode()
 
 void BaseTextSelectOverlay::SwitchToEmbedMode()
 {
+    CHECK_NULL_VOID(!isHandleMoving_);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     handleLevelMode_ = HandleLevelMode::EMBED;
@@ -698,6 +701,7 @@ VectorF BaseTextSelectOverlay::GetHostScale()
 
 void BaseTextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
+    isHandleDragging_ = false;
     if (enableHandleLevel_) {
         auto host = GetOwner();
         CHECK_NULL_VOID(host);
@@ -898,6 +902,9 @@ bool BaseTextSelectOverlay::HasUnsupportedTransform()
         if (parent->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
             return false;
         }
+        if (renderContext->HasMotionPath()) {
+            return true;
+        }
         auto rotateVector = renderContext->GetTransformRotate();
         if (rotateVector.has_value() && !NearZero(rotateVector->w) &&
             !(NearZero(rotateVector->x) && NearZero(rotateVector->y))) {
@@ -1012,7 +1019,10 @@ bool BaseTextSelectOverlay::CheckHasTransformAttr()
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
-            hasTransform = false;
+            break;
+        }
+        if (renderContext->HasMotionPath()) {
+            hasTransform = true;
             break;
         }
         // has rotate.

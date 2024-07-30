@@ -76,6 +76,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         context->PrepareOpenImplicitAnimation();
     });
     pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
+    auto previousOption = pipelineContext->GetSyncAnimationOption();
     pipelineContext->SetSyncAnimationOption(option);
     // Execute the function.
     auto ffiCallback = CJLambda::Create(callback);
@@ -98,7 +99,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         context->PrepareCloseImplicitAnimation();
     });
     pipelineContext->CloseImplicitAnimation();
-    pipelineContext->SetSyncAnimationOption(AnimationOption());
+    pipelineContext->SetSyncAnimationOption(previousOption);
     if (immediately) {
         pipelineContext->FlushMessages();
     } else {

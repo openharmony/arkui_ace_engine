@@ -134,6 +134,14 @@ Offset GetTouchEventOriginOffset(const TouchEvent& event)
     return Offset();
 }
 
+TimeStamp GetTouchEventOriginTimeStamp(const TouchEvent& event)
+{
+    if (event.pointerEvent) {
+        return event.pointerEvent->time;
+    }
+    return event.time;
+}
+
 EventDispatcher::EventDispatcher() {}
 
 EventDispatcher::~EventDispatcher() = default;

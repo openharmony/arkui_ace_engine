@@ -54,6 +54,7 @@
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/pattern/video/video_node.h"
+#include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -248,6 +249,19 @@ RectF AdjustPaintRect(float positionX, float positionY, float width, float heigh
     rect.SetWidth(nodeWidthI);
     rect.SetHeight(nodeHeightI);
     return rect;
+}
+Gradient ConvertToGradient(Color color) {
+    Gradient gradient;
+    GradientColor gradientColorBegin;
+    gradientColorBegin.SetLinearColor(LinearColor(color));
+    gradientColorBegin.SetDimension(Dimension(0.0f));
+    gradient.AddColor(gradientColorBegin);
+    OHOS::Ace::NG::GradientColor gradientColorEnd;
+    gradientColorEnd.SetLinearColor(LinearColor(color));
+    gradientColorEnd.SetDimension(Dimension(1.0f));
+    gradient.AddColor(gradientColorEnd);
+
+    return gradient;
 }
 } // namespace
 
@@ -897,7 +911,6 @@ void VideoPattern::RegisterRenderContextCallBack()
     renderSurfaceWeakPtr_ = renderSurface_;
     renderContextForMediaPlayerWeakPtr_ = renderContextForMediaPlayer_;
     auto OnAttachCallBack = [weak = WeakClaim(this)](int64_t textureId, bool isAttach) mutable {
-        LOGI("OnAttachCallBack.");
         auto videoPattern = weak.Upgrade();
         CHECK_NULL_VOID(videoPattern);
         if (auto renderSurface = videoPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface) {
@@ -1320,7 +1333,9 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
     auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_RETURN(sliderPaintProperty, nullptr);
     sliderPaintProperty->UpdateMax(static_cast<float>(duration_));
-    sliderPaintProperty->UpdateSelectColor(Color::BLACK);
+    sliderPaintProperty->UpdateSelectColor(videoTheme->GetSelectColor());
+    sliderPaintProperty->UpdateTrackBackgroundColor(ConvertToGradient(videoTheme->GetTrackBgColor()));
+    sliderPaintProperty->UpdateTrackBackgroundIsResourceColor(true);
     sliderPaintProperty->UpdateValue(static_cast<float>(currentPos_));
     sliderNode->MarkModifyDone();
     return sliderNode;
@@ -1359,13 +1374,19 @@ RefPtr<FrameNode> VideoPattern::CreateText(uint32_t time)
 
 RefPtr<FrameNode> VideoPattern::CreateSVG()
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = GetHost()->GetContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
 
     auto svgNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(svgNode, nullptr);
+
+    auto imageRenderProperty = svgNode->GetPaintPropertyPtr<ImageRenderProperty>();
+    imageRenderProperty->UpdateSvgFillColor(videoTheme->GetIconColor());
+    auto renderContext = svgNode->GetRenderContext();
+    renderContext->UpdateForegroundColor(videoTheme->GetIconColor());
+
     auto svgLayoutProperty = svgNode->GetLayoutProperty<ImageLayoutProperty>();
 
     auto btnEdge = videoTheme->GetBtnEdge();

@@ -136,6 +136,7 @@ struct TextStyleResult {
     int32_t wordBreak = static_cast<int32_t>(WordBreak::BREAK_WORD);
     int32_t lineBreakStrategy = static_cast<int32_t>(LineBreakStrategy::GREEDY);
     std::string leadingMarginSize[2] = { "0.00px", "0.00px" };
+    std::vector<Shadow> textShadows;
 };
 
 struct ImageStyleResult {

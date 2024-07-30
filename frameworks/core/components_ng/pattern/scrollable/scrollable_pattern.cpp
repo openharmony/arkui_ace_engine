@@ -817,6 +817,7 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
             scrollBarOverlayModifier_->SetOpacity(UINT8_MAX);
         }
         scrollBar_->ScheduleDisappearDelayTask();
+        UpdateScrollBarOffset();
     }
     UpdateBorderRadius();
 }
@@ -1825,7 +1826,7 @@ ScrollResult ScrollablePattern::HandleScrollParentFirst(float& offset, int32_t s
         return { 0, true };
     }
     auto result = parent->HandleScroll(offset, source, NestedState::CHILD_SCROLL, GetVelocity());
-    offset = result.remain;
+    offset = IsReverse() ? -result.remain : result.remain;
     if (NearZero(offset)) {
         SetCanOverScroll(!InstanceOf<ScrollablePattern>(parent));
         return { 0, false };

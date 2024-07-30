@@ -70,7 +70,6 @@ public:
         auto geometryNode = host->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         paintRect_ = geometryNode->GetFrameRect();
-        geometryNode->SetPixelGridRoundOffset(paintRect_.GetOffset());
     }
 
     RectF GetPaintRectWithTransform() override

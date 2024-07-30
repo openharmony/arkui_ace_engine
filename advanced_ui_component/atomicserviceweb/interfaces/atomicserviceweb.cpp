@@ -62,7 +62,7 @@ namespace HMS::AtomicServiceWeb {
         napi_get_value_string_utf8(env, args[indexTwo], urlValue, maxValueLen, &urlLength);
         std::string url = urlValue;
 
-        auto apiPolicyAdapter = new ApiPolicyAdapter();
+        std::shared_ptr<ApiPolicyAdapter> apiPolicyAdapter = std::make_shared<ApiPolicyAdapter>();
         int32_t res = apiPolicyAdapter->CheckUrl(bundleName, domainType, url);
         
         napi_value result;

@@ -311,6 +311,7 @@ void ButtonLayoutAlgorithm::MarkNeedFlushMouseEvent(LayoutWrapper* layoutWrapper
     if (frameSize != pattern->GetPreFrameSize()) {
         pattern->SetPreFrameSize(frameSize);
         auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
         context->MarkNeedFlushMouseEvent();
     }
 }
@@ -364,7 +365,8 @@ bool ButtonLayoutAlgorithm::IsAging(LayoutWrapper* layoutWrapper)
         return false;
     }
     const auto& calcConstraint = buttonLayoutProperty->GetCalcLayoutConstraint();
-    if (calcConstraint && calcConstraint->selfIdealSize.has_value()) {
+    if (calcConstraint && calcConstraint->selfIdealSize->Height().has_value() &&
+        calcConstraint->selfIdealSize->Width().has_value()) {
         return false;
     }
     auto pipeline = NG::PipelineContext::GetCurrentContextSafely();

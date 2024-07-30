@@ -77,7 +77,7 @@ void ReplaceHolder(std::string& originStr, const std::vector<std::string>& param
     std::smatch matches;
     bool shortHolderType = false;
     bool firstMatch = true;
-    int searchTime = 0;
+    uint32_t searchTime = 0;
     while (std::regex_search(start, end, matches, RESOURCE_APP_STRING_PLACEHOLDER)) {
         std::string pos = matches[2];
         std::string type = matches[4];
@@ -92,16 +92,21 @@ void ReplaceHolder(std::string& originStr, const std::vector<std::string>& param
         }
 
         std::string replaceContentStr;
-        std::string::size_type index;
+        std::string::size_type index = 0;
         if (shortHolderType) {
             index = static_cast<std::string::size_type>(searchTime + containCount);
         } else {
-            index = static_cast<std::string::size_type>(StringUtils::StringToInt(pos) - 1 + containCount);
+            int32_t indexTmp = StringUtils::StringToInt(pos) + static_cast<int32_t>(containCount) - 1;
+            if (indexTmp >= 0) {
+                index = static_cast<std::string::size_type>(indexTmp);
+            } else {
+                LOGE("indexTmp err:%{public}d", indexTmp);
+            }
         }
         if (static_cast<uint32_t>(index) < size) {
             replaceContentStr = params[index];
         } else {
-            LOGE("str size is error index = %{public}d size = %{public}d", static_cast<uint32_t>(index), size);
+            LOGE("index = %{public}d size = %{public}d", static_cast<uint32_t>(index), size);
         }
         originStr.replace(matches[0].first - originStr.begin(), matches[0].length(), replaceContentStr);
         start = originStr.begin() + matches.prefix().length() + replaceContentStr.length();
@@ -479,9 +484,7 @@ napi_value ParseCurve(napi_env env, napi_value value, std::string& curveTypeStri
         curve = Framework::CreateCurve(params);
     }
     std::string curveString = curve->ToString();
-    LOGI("curveString %{public}s", curveString.c_str());
     ParseCurveInfo(curveString, curveTypeString, curveValue);
-    LOGI("curveTypeString %{public}s", curveTypeString.c_str());
     return nullptr;
 }
 

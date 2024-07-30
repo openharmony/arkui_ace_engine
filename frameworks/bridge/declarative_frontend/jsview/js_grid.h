@@ -18,6 +18,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_scrollable_base.h"
 #include "frameworks/core/components/grid_layout/grid_layout_component.h"
+#include "core/components_ng/pattern/grid/grid_model_ng.h"
 
 namespace OHOS::Ace::Framework {
 

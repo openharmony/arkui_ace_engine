@@ -19,6 +19,7 @@
 #include <memory>
 #include <mutex>
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "base/resource/asset_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
@@ -189,6 +190,7 @@ public:
     static bool OnBackPressed(int32_t instanceId);
 
     void SetFontScaleAndWeightScale(int32_t instanceId);
+    void UpdateConfiguration(const ParsedConfig& parsedConfig);
 
 private:
     void InitPipelineContext(std::shared_ptr<Window> window, int32_t instanceId, double density, int32_t width,

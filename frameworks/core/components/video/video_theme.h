@@ -74,11 +74,17 @@ public:
                 videoPattern->GetAttr<Dimension>("control_bar_progress_padding_right", 0.0_vp).Value(),
                 videoPattern->GetAttr<Dimension>("control_bar_progress_padding_bottom", 0.0_vp).Value());
             theme->timeTextStyle_.SetFontSize(videoPattern->GetAttr<Dimension>("control_bar_text_font_size", 15.0_vp));
-            theme->timeTextStyle_.SetTextColor(videoPattern->GetAttr<Color>("control_bar_text_color", Color::BLACK));
+            Color timeText = themeConstants->GetColorByName("sys.color.ohos_id_color_foreground_contrary").
+                BlendOpacity(themeConstants->GetDoubleByName("sys.color.ohos_id_alpha_content_secondary"));
+            theme->timeTextStyle_.SetTextColor(timeText);
             theme->errorTextStyle_.SetFontSize(videoPattern->GetAttr<Dimension>("control_bar_text_font_size", 15.0_vp));
             theme->errorTextStyle_.SetTextColor(videoPattern->GetAttr<Color>("control_bar_error_text_color",
                 Color::GRAY));
-            theme->bkgColor_ = videoPattern->GetAttr<Color>("control_bar_background_color", Color(0x64c8c8c8));
+            theme->selectColor_ = themeConstants->GetColorByName("sys.color.ohos_id_color_foreground_contrary");
+            theme->trackBgColor_ = themeConstants->GetColorByName("sys.color.ohos_id_color_foreground_contrary").
+                BlendOpacity(themeConstants->GetDoubleByName("sys.color.ohos_id_alpha_normal_bg"));
+            theme->btnIconColor_ = themeConstants->GetColorByName("sys.color.ohos_id_color_foreground_contrary");
+            theme->bkgColor_ = Color(0x00ffffff);
         }
     };
 
@@ -119,6 +125,21 @@ public:
         return bkgColor_;
     }
 
+    const Color& GetSelectColor() const
+    {
+        return selectColor_;
+    }
+
+    const Color& GetTrackBgColor() const
+    {
+        return trackBgColor_;
+    }
+
+    const Color& GetIconColor() const
+    {
+        return btnIconColor_;
+    }
+
 protected:
     VideoTheme() = default;
 
@@ -130,6 +151,9 @@ private:
     TextStyle timeTextStyle_;
     TextStyle errorTextStyle_;
     Color bkgColor_;
+    Color selectColor_;
+    Color trackBgColor_;
+    Color btnIconColor_;
 };
 
 } // namespace OHOS::Ace

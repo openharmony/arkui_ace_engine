@@ -27,6 +27,7 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t HANDLE_RING_DEGREE = 360;
@@ -50,10 +51,8 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
     auto hostPattern = hostPattern_.Upgrade();
     auto richEditor = DynamicCast<RichEditorPattern>(hostPattern);
     std::shared_ptr<RSPath> path;
-    if (richEditor && isAnimating_) {
+    if (isAnimating_) {
         path = textDragPattern->GenerateBackgroundPath(backgroundOffset_->Get(), 1 - selectedBackgroundOpacity_->Get());
-    } else if (isAnimating_) {
-        path = textDragPattern->GenerateBackgroundPath(backgroundOffset_->Get());
     } else {
         path = textDragPattern->GetBackgroundPath();
     }
@@ -203,7 +202,6 @@ void RichEditorDragOverlayModifier::PaintBackground(const RSPath& path, RSCanvas
 void RichEditorDragOverlayModifier::PaintSelBackground(RSCanvas& canvas, RefPtr<TextDragPattern> textDragPattern,
     RefPtr<RichEditorPattern> richEditorPattern)
 {
-    CHECK_NULL_VOID(richEditorPattern);
     if (type_ == DragAnimType::DEFAULT || NearZero(selectedBackgroundOpacity_->Get())) {
         return;
     }
@@ -323,17 +321,8 @@ void RichEditorDragOverlayModifier::PaintShadow(const RSPath& path, const Shadow
 
 void RichEditorDragOverlayModifier::StartFloatingAnimate()
 {
-    auto pattern = DynamicCast<RichEditorPattern>(hostPattern_.Upgrade());
-    if (!pattern) {
-        type_ = DragAnimType::DEFAULT;
-        SetSelectedBackgroundOpacity(0.0);
-        SetHandleOpacity(0.0);
-        TextDragOverlayModifier::StartFloatingAnimate();
-        return;
-    }
     type_ = DragAnimType::FLOATING;
     isAnimating_ = true;
-
     SetHandleOpacity(IsHandlesShow() ? 1.0 : 0.0);
     AnimationOption handleOption;
     handleOption.SetDuration(FLOATING_ANIMATE_HANDLE_OPACITY_DURATION);

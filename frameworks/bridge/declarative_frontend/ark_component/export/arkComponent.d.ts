@@ -307,6 +307,7 @@ declare class ArkGridComponent extends ArkComponent implements GridAttribute {
     }): this;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     flingSpeedLimit(value: number): this;
+    alignItems(value: GridItemAlignment): this;
 }
 declare class ArkGridColComponent extends ArkComponent implements GridColAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1783,7 +1784,6 @@ declare class ArkListComponent extends ArkComponent implements ListAttribute {
     onScrollFrameBegin(event: (offset: number, state: ScrollState) => {
         offsetRemain: number;
     }): this;
-    fadingEdge(value: boolean): this;
     childrenMainSize(value: ChildrenMainSize): this;
 }
 declare class ArkListItemComponent extends ArkComponent implements ListItemAttribute {

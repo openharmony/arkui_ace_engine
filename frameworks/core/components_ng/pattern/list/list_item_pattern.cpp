@@ -1202,5 +1202,14 @@ bool ListItemPattern::ClickJudge(const PointF& localPoint)
     }
     return true;
 }
+
+void ListItemPattern::OnDetachFromMainTree()
+{
+    auto frameNode = GetListFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto listPattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(listPattern);
+    listPattern->SetSwiperItemEnd(AceType::WeakClaim(this));
+}
 } // namespace OHOS::Ace::NG
 

@@ -35,7 +35,6 @@
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#include "core/components/text/text_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -387,24 +386,6 @@ void TextPickerColumnPattern::ResetOptionPropertyHeight()
     }
 }
 
-bool TextPickerColumnPattern::IsTextFadeOut()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto textTheme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_RETURN(textTheme, false);
-    return textTheme->GetIsTextFadeout();
-}
-
-void TextPickerColumnPattern::UpdateTexOverflow(bool isSel, const RefPtr<TextLayoutProperty>& textLayoutProperty)
-{
-    if (isTextFadeOut_) {
-        textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
-        textLayoutProperty->UpdateTextMarqueeFadeout(true);
-        textLayoutProperty->UpdateTextMarqueeStart(isSel && !isTossing_);
-    }
-}
-
 void TextPickerColumnPattern::InitTextFontFamily()
 {
     auto host = GetHost();
@@ -456,7 +437,6 @@ void TextPickerColumnPattern::FlushCurrentOptions(
     CHECK_NULL_VOID(parentNode);
     auto textPickerLayoutProperty = parentNode->GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(textPickerLayoutProperty);
-    isTextFadeOut_ = IsTextFadeOut();
 
     InitTextFontFamily();
 
@@ -529,7 +509,6 @@ void TextPickerColumnPattern::FlushCurrentTextOptions(
         CHECK_NULL_VOID(textPattern);
         auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        UpdateTexOverflow(index == middleIndex, textLayoutProperty);
         if (!isUpateTextContentOnly) {
             UpdatePickerTextProperties(textLayoutProperty, textPickerLayoutProperty, index, middleIndex, showCount);
         }
@@ -652,7 +631,6 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
         CHECK_NULL_VOID(textPattern);
         auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        UpdateTexOverflow(index == middleIndex, textLayoutProperty);
         if (!isUpateTextContentOnly) {
             UpdatePickerTextProperties(textLayoutProperty, textPickerLayoutProperty, index, middleIndex, showCount);
         }
@@ -950,7 +928,6 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
     CHECK_NULL_VOID(host);
     uint32_t showCount = GetShowOptionCount();
     auto child = host->GetChildren();
-    auto middleIndex = showCount / 2;
     auto iter = child.begin();
     if (child.size() != showCount) {
         return;
@@ -964,11 +941,7 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
             CHECK_NULL_VOID(textPattern);
             textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
-            if (!isTossing_) {
-                UpdateTexOverflow(index == middleIndex, textLayoutProperty);
-            } else {
-                TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
-            }
+            TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
         } else if (columnkind_ == MIXTURE) {
             auto children = rangeNode->GetChildren();
             if (children.size() != MIXTURE_CHILD_COUNT) {
@@ -978,11 +951,7 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
             auto textPattern = textNode->GetPattern<TextPattern>();
             textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
-            if (!isTossing_) {
-                UpdateTexOverflow(index == middleIndex, textLayoutProperty);
-            } else {
-                TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
-            }
+            TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
             textNode->MarkModifyDone();
             textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }

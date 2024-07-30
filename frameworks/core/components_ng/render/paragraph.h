@@ -228,6 +228,7 @@ public:
     virtual float GetMaxIntrinsicWidth() = 0;
     virtual bool DidExceedMaxLines() = 0;
     virtual float GetLongestLine() = 0;
+    virtual float GetLongestLineWithIndent() = 0;
     virtual float GetMaxWidth() = 0;
     virtual float GetAlphabeticBaseline() = 0;
     virtual float GetCharacterWidth(int32_t index) = 0;
@@ -262,6 +263,7 @@ public:
     virtual LineMetrics GetLineMetricsByRectF(RectF& rect) = 0;
     virtual TextLineMetrics GetLineMetrics(size_t lineNumber) = 0;
     virtual bool GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics) = 0;
+    virtual void UpdateColor(size_t from, size_t to, const Color& color) = 0;
 };
 } // namespace OHOS::Ace::NG
 

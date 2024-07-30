@@ -65,6 +65,8 @@ private:
     void InsertStringAroundSpecialNode(int32_t start, const std::string& str, AroundSpecialNode aroundMode);
     void RemoveSpecialpanText();
     void RemoveSpecialSpans(int32_t start, int32_t length);
+    void ProcessSpanBaseList(std::list<RefPtr<SpanBase>>& spans, int32_t start,
+        int32_t end, const std::string& other, SpanStringOperation op, SpanType spanType);
 };
 } // namespace OHOS::Ace
 

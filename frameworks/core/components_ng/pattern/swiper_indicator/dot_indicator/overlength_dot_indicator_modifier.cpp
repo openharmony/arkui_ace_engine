@@ -63,7 +63,6 @@ void OverlengthDotIndicatorModifier::onDraw(DrawingContext& context)
     contentProperty.firstPointOpacity = firstPointOpacity_->Get();
     contentProperty.newPointOpacity = newPointOpacity_->Get();
 
-    SetFocusedAndSelectedColor(contentProperty);
     PaintBackground(context, contentProperty);
     PaintContent(context, contentProperty);
 }
@@ -394,7 +393,6 @@ float OverlengthDotIndicatorModifier::GetMoveRateOnAllMove() const
     float blackPointCenterMoveRate = CubicCurve(BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY, CENTER_BEZIER_CURVE_MASS,
         CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING)
                                          .MoveInternal(std::abs(turnPageRate_));
-
     if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT ||
         gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
         blackPointCenterMoveRate = 1.0f;

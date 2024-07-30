@@ -337,6 +337,9 @@ void MenuItemPattern::ShowSubMenu()
     CHECK_NULL_VOID(subMenu);
     ShowSubMenuHelper(subMenu);
     menuPattern->SetShowedSubMenu(subMenu);
+    auto accessibilityProperty = menuNode->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityIsShow(true);
     host->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
         static_cast<int32_t>(AccessibilityEventType::PAGE_CHANGE));
@@ -354,9 +357,8 @@ void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
         props->UpdateExpandingMode(expandingMode_);
         if (expandingMode_ == SubMenuExpandingMode::STACK) {
             AddStackSubMenuHeader(frameNode);
-            pattern->BlockFurtherExpand();
+            pattern->SetIsStackSubmenu();
         } else if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
-            pattern->BlockFurtherExpand();
             pattern->SetIsEmbedded();
             return;
         }
@@ -651,11 +653,9 @@ void MenuItemPattern::OnClick()
     auto selectedChangeEvent = hub->GetSelectedChangeEvent();
     SetChange();
     if (selectedChangeEvent) {
-        LOGI("trigger onChangeEvent");
         selectedChangeEvent(IsSelected());
     }
     if (onChange) {
-        LOGI("trigger onChange");
         onChange(IsSelected());
         RecordChangeEvent();
     }
@@ -924,8 +924,6 @@ void MenuItemPattern::AddHoverRegions(const OffsetF& topLeftPoint, const OffsetF
     TouchRegion hoverRegion = TouchRegion(
         Offset(topLeftPoint.GetX(), topLeftPoint.GetY()), Offset(bottomRightPoint.GetX(), bottomRightPoint.GetY()));
     hoverRegions_.emplace_back(hoverRegion);
-    LOGI("MenuItemPattern::AddHoverRegions hoverRegion is %{public}s to %{public}s", topLeftPoint.ToString().c_str(),
-        bottomRightPoint.ToString().c_str());
 }
 
 bool MenuItemPattern::IsInHoverRegions(double x, double y)
@@ -1087,8 +1085,9 @@ void MenuItemPattern::AddExpandIcon(RefPtr<FrameNode>& row)
     auto menuPattern = menuNode ? menuNode->GetPattern<MenuPattern>() : nullptr;
     auto menuProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
     CHECK_NULL_VOID(menuProperty);
-    auto canExpand = (menuPattern ? menuPattern->CanExpand() : true) && GetSubBuilder() != nullptr &&
-        (expandingMode_ == SubMenuExpandingMode::EMBEDDED || expandingMode_ == SubMenuExpandingMode::STACK);
+    auto canExpand = GetSubBuilder() != nullptr && menuPattern
+        && !menuPattern->IsEmbedded() && !menuPattern->IsStackSubmenu()
+        && (expandingMode_ == SubMenuExpandingMode::EMBEDDED || expandingMode_ == SubMenuExpandingMode::STACK);
     if (!canExpand) {
         if (expandIcon_) {
             row->RemoveChild(expandIcon_);
@@ -1331,7 +1330,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
     CHECK_NULL_VOID(theme);
     UpdateTexOverflow(textProperty);
-    auto layoutDirection = textProperty->GetNonAutoLayoutDirection();
+    auto layoutDirection = itemProperty->GetNonAutoLayoutDirection();
     TextAlign textAlign = static_cast<TextAlign>(theme->GetMenuItemContentAlign());
     if (layoutDirection == TextDirection::RTL) {
         if (textAlign == TextAlign::LEFT) {

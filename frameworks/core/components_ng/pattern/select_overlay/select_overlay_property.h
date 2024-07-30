@@ -271,6 +271,7 @@ struct SelectOverlayInfo {
     std::function<void(const TouchEventInfo&)> onTouchDown;
     std::function<void(const TouchEventInfo&)> onTouchUp;
     std::function<void(const TouchEventInfo&)> onTouchMove;
+    std::function<void(const GestureEvent&, bool isClickCaret)> onClick;
 
     // handle move callback.
     std::function<void(bool isFirst)> onHandleMoveStart;

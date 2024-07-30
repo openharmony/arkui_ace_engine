@@ -3118,10 +3118,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       (this._modifiersWithKeys as ObservedMap).setFrameNode(true);
     } else if (classType === ModifierType.EXPOSE_MODIFIER || classType === ModifierType.STATE) {
       this._modifiersWithKeys = new ObservedMap();
+      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     } else {
       this._modifiersWithKeys = new Map();
+      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     }
-    this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     this._nativePtrChanged = false;
   }
 
@@ -3154,7 +3155,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     if (this.nativePtr !== instance.nativePtr) {
       this.nativePtr = instance.nativePtr;
       this._nativePtrChanged = true;
-      this._weakPtr = instance._weakPtr;
+      if (instance._weakPtr) {
+        this._weakPtr = instance._weakPtr;
+      } else {
+        this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(this.nativePtr);
+      }
     }
   }
 

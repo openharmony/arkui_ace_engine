@@ -155,6 +155,9 @@ bool CustomPaintPaintMethod::ParseFilter(std::string& filter, std::vector<Filter
         return false;
     }
     FilterType filterType = FilterStrToFilterType(filter.substr(0, index));
+    if (filterType == FilterType::NONE) {
+        return false;
+    }
     std::string filterParam = filter.substr(index + 1);
     filterParam.erase(0, filterParam.find_first_not_of(' '));
     filterParam.erase(filterParam.find_last_not_of(' ') + 1);
@@ -1405,11 +1408,8 @@ RSTextAlign CustomPaintPaintMethod::GetEffectiveAlign(RSTextAlign align, RSTextD
 
 void CustomPaintPaintMethod::ClearPaintImage(RSPen* pen, RSBrush* brush)
 {
-    float matrix[20] = { 0.0f };
-    matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
     RSFilter filter;
     RSColorMatrix colorMatrix;
-    colorMatrix.SetArray(matrix);
     filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(colorMatrix));
     filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, 0));
     filter.SetImageFilter(RSImageFilter::CreateBlurImageFilter(0, 0, RSTileMode::DECAL, nullptr));
@@ -1466,6 +1466,7 @@ void CustomPaintPaintMethod::SetPaintImage(RSPen* pen, RSBrush* brush)
                 break;
         }
     }
+    SetColorFilter(pen, brush);
 }
 
 // https://drafts.fxtf.org/filter-effects/#grayscaleEquivalent
@@ -1492,7 +1493,9 @@ void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent, RSPen* pe
     matrix[12] = LUMB + (1 - LUMB) * value;
 
     matrix[18] = 1.0f;
-    SetColorFilter(matrix, pen, brush);
+    RSColorMatrix colorMatrix;
+    colorMatrix.SetArray(matrix);
+    colorMatrix_.PreConcat(colorMatrix);
 }
 
 // https://drafts.fxtf.org/filter-effects/#sepiaEquivalent
@@ -1516,7 +1519,9 @@ void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent, RSPen* p
     matrix[12] = 1.0f - percentNum * 0.869f;
 
     matrix[18] = 1.0f;
-    SetColorFilter(matrix, pen, brush);
+    RSColorMatrix colorMatrix;
+    colorMatrix.SetArray(matrix);
+    colorMatrix_.PreConcat(colorMatrix);
 }
 
 // https://drafts.fxtf.org/filter-effects/#saturateEquivalent
@@ -1541,7 +1546,9 @@ void CustomPaintPaintMethod::SetSaturateFilter(const std::string& percent, RSPen
     matrix[12] = LUMB + (1 - LUMB) * percentNum;
 
     matrix[18] = 1.0f;
-    SetColorFilter(matrix, pen, brush);
+    RSColorMatrix colorMatrix;
+    colorMatrix.SetArray(matrix);
+    colorMatrix_.PreConcat(colorMatrix);
 }
 
 // https://drafts.fxtf.org/filter-effects/#huerotateEquivalent
@@ -1580,7 +1587,9 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam, 
     matrix[12] = LUMB + cosValue * (1 - LUMB) + sinValue * LUMB;
 
     matrix[18] = 1.0f;
-    SetColorFilter(matrix, pen, brush);
+    RSColorMatrix colorMatrix;
+    colorMatrix.SetArray(matrix);
+    colorMatrix_.PreConcat(colorMatrix);
 }
 
 /*
@@ -1603,7 +1612,9 @@ void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent, RSPen* 
     matrix[0] = matrix[6] = matrix[12] = 1.0 - 2.0 * percentNum;
     matrix[4] = matrix[9] = matrix[14] = percentNum;
     matrix[18] = 1.0f;
-    SetColorFilter(matrix, pen, brush);
+    RSColorMatrix colorMatrix;
+    colorMatrix.SetArray(matrix);
+    colorMatrix_.PreConcat(colorMatrix);
 }
 
 /*
@@ -1624,7 +1635,9 @@ void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent, RSPen*
     float matrix[20] = { 0.0f };
     matrix[0] = matrix[6] = matrix[12] = 1.0f;
     matrix[18] = percentNum;
-    SetColorFilter(matrix, pen, brush);
+    RSColorMatrix colorMatrix;
+    colorMatrix.SetArray(matrix);
+    colorMatrix_.PreConcat(colorMatrix);
 }
 
 /*
@@ -1642,7 +1655,9 @@ void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent, RSP
     float matrix[20] = { 0.0f };
     matrix[0] = matrix[6] = matrix[12] = percentNum;
     matrix[18] = 1.0f;
-    SetColorFilter(matrix, pen, brush);
+    RSColorMatrix colorMatrix;
+    colorMatrix.SetArray(matrix);
+    colorMatrix_.PreConcat(colorMatrix);
 }
 
 /*
@@ -1661,7 +1676,9 @@ void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent, RSPen
     matrix[0] = matrix[6] = matrix[12] = percentNum;
     matrix[4] = matrix[9] = matrix[14] = 0.5f * (1 - percentNum);
     matrix[18] = 1;
-    SetColorFilter(matrix, pen, brush);
+    RSColorMatrix colorMatrix;
+    colorMatrix.SetArray(matrix);
+    colorMatrix_.PreConcat(colorMatrix);
 }
 
 // https://drafts.fxtf.org/filter-effects/#blurEquivalent
@@ -1672,7 +1689,8 @@ void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent, RSPen* pe
     if (Negative(blurNum)) {
         return;
     }
-    auto imageFilter = RSImageFilter::CreateBlurImageFilter(blurNum, blurNum, RSTileMode::DECAL, nullptr);
+    auto imageFilter =
+        RSImageFilter::CreateBlurImageFilter(blurNum * density_, blurNum * density_, RSTileMode::DECAL, nullptr);
     if (pen) {
         auto filter = pen->GetFilter();
         filter.SetImageFilter(imageFilter);
@@ -1685,11 +1703,9 @@ void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent, RSPen* pe
     }
 }
 
-void CustomPaintPaintMethod::SetColorFilter(float matrix[20], RSPen* pen, RSBrush* brush)
+void CustomPaintPaintMethod::SetColorFilter(RSPen* pen, RSBrush* brush)
 {
-    RSColorMatrix colorMatrix;
-    colorMatrix.SetArray(matrix);
-    auto colorFilter = RSColorFilter::CreateMatrixColorFilter(colorMatrix);
+    auto colorFilter = RSColorFilter::CreateMatrixColorFilter(colorMatrix_);
     if (pen) {
         auto filter = pen->GetFilter();
         filter.SetColorFilter(colorFilter);
@@ -1931,7 +1947,6 @@ void CustomPaintPaintMethod::RestoreLayer()
 
 void CustomPaintPaintMethod::ResetStates()
 {
-    antiAlias_ = false;
     smoothingEnabled_ = true;
     smoothingQuality_ = "low";
     filterParam_ = "";
@@ -1947,6 +1962,7 @@ void CustomPaintPaintMethod::ResetStates()
     rsPath2d_.Reset();
     std::vector<PaintHolder>().swap(saveStates_);
     std::vector<RSMatrix>().swap(matrixStates_);
+    colorMatrix_ = RSColorMatrix();
 }
 
 void CustomPaintPaintMethod::PaintShadow(

@@ -1982,5 +1982,69 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_DialogDismissEvent_GetDismissReason"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeCustomEvent_GetCustomSpanMeasureInfo"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeCustomEvent_SetCustomSpanMetrics"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeCustomEvent_GetCustomSpanDrawInfo"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanMeasureInfo_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanMeasureInfo_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanMeasureInfo_GetFontSize"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanMetrics_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanMetrics_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanMetrics_SetWidth"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanMetrics_SetHeight"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanDrawInfo_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanDrawInfo_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanDrawInfo_GetXOffset"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanDrawInfo_GetLineTop"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanDrawInfo_GetLineBottom"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CustomSpanDrawInfo_GetBaseLine"
     }
 ]

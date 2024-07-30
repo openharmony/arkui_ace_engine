@@ -81,7 +81,7 @@ public:
 
     void FireDisappearCallback()
     {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle chang to disappear state.", name_.c_str());
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onDisappear state.", name_.c_str());
         EventHub::FireOnDisappear();
     }
 

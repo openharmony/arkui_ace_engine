@@ -265,11 +265,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 if (gestureHub->GetTextDraggable()) {
                     HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 } else {
-                    pipeline->AddAfterRenderTask([weak, info]() {
-                        auto actuator = weak.Upgrade();
-                        CHECK_NULL_VOID(actuator);
-                        actuator->HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
-                    });
                     HideFilter();
                     HideMenu(frameNode->GetId());
                     SubwindowManager::GetInstance()->HideMenuNG(false, true);
@@ -925,6 +920,7 @@ void DragEventActuator::UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, co
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    imageContext->UpdateOpacity(dragPreviewOption.options.opacity);
     if (dragPreviewOption.options.shadow.has_value()) {
         imageContext->UpdateBackShadow(dragPreviewOption.options.shadow.value());
     }
@@ -934,7 +930,7 @@ void DragEventActuator::UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, co
     }
     auto optionsFromModifier = frameNode->GetDragPreviewOption().options;
     if (optionsFromModifier.blurbgEffect.backGroundEffect.radius.IsValid()) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundEffect, optionsFromModifier.blurbgEffect.backGroundEffect, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundEffect, optionsFromModifier.blurbgEffect.backGroundEffect, imageNode);
     }
 }
 

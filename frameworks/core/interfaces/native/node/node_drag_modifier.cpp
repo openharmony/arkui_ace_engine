@@ -59,7 +59,7 @@ namespace OHOS::Ace::NG {
 namespace NodeModifier {
 int64_t CalculateModifierKeyState(const std::vector<OHOS::Ace::KeyCode>& status)
 {
-    int64_t modifierKeysState = 0;
+    uint64_t modifierKeysState = 0;
     // check ctrl
     if ((std::find(status.begin(), status.end(), OHOS::Ace::KeyCode::KEY_CTRL_LEFT) != std::end(status)) ||
         (std::find(status.begin(), status.end(), OHOS::Ace::KeyCode::KEY_CTRL_RIGHT) != std::end(status))) {
@@ -80,7 +80,7 @@ int64_t CalculateModifierKeyState(const std::vector<OHOS::Ace::KeyCode>& status)
         modifierKeysState |= ARKUI_MODIFIER_KEY_FN;
     }
 
-    return modifierKeysState;
+    return static_cast<int64_t>(modifierKeysState);
 }
 
 void SetDragEventProperty(const RefPtr<OHOS::Ace::DragEvent>& info, ArkUINodeEvent& event)
@@ -102,14 +102,14 @@ void SetDragEventProperty(const RefPtr<OHOS::Ace::DragEvent>& info, ArkUINodeEve
     event.dragEvent.velocity = info->GetVelocity().GetVelocityValue();
     event.dragEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info->GetPressedKeyCodes());
     auto summary = info->GetSummary();
-    event.dragEvent.dataTypesCount = summary.size();
+    event.dragEvent.dataTypesCount = static_cast<int32_t>(summary.size());
 
     int32_t index = 0;
     int32_t maxLength = 0;
     std::vector<const char*> strList;
     std::vector<std::string> keepStr(summary.size());
     for (auto it = summary.begin(); it != summary.end(); it++) {
-        int32_t keyLength = it->first.length();
+        int32_t keyLength = static_cast<int32_t>(it->first.length());
         maxLength = std::max(maxLength, keyLength);
         keepStr[index] = it->first;
         strList.push_back(keepStr[index].c_str());
@@ -258,14 +258,14 @@ void SetOnDragEnd(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.dragEvent.subKind = ON_DRAG_END;
         auto summary = info->GetSummary();
-        event.dragEvent.dataTypesCount = summary.size();
+        event.dragEvent.dataTypesCount = static_cast<int32_t>(summary.size());
 
         int32_t index = 0;
         int32_t maxLength = 0;
         std::vector<const char*> strList;
         std::vector<std::string> keepStr(summary.size());
         for (auto it = summary.begin(); it != summary.end(); it++) {
-            int32_t keyLength = it->first.length();
+            int32_t keyLength = static_cast<int32_t>(it->first.length());
             maxLength = std::max(maxLength, keyLength);
             keepStr[index] = it->first;
             strList.push_back(keepStr[index].c_str());
