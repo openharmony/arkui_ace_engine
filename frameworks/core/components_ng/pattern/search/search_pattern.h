@@ -193,6 +193,7 @@ public:
     void InitCancelIconColorSize();
     void CreateSearchIcon(const std::string& src);
     void CreateCancelIcon();
+    const Dimension ConvertImageIconSizeValue(const Dimension& fontSizeValue);
 
 private:
     void OnModifyDone() override;
@@ -272,6 +273,7 @@ private:
     void UpdateIconSrc(int32_t index, const std::string& src);
     void UpdateIconColor(int32_t index, const Color& color);
     void UpdateIconSize(int32_t index, const Dimension& value);
+    const Dimension ConvertImageIconScaleLimit(const Dimension& fontSizeValue);
 
     uint32_t GetMaxLength() const;
     std::string SearchTypeToString() const;
