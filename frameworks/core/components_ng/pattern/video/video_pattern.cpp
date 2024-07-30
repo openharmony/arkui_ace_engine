@@ -813,56 +813,6 @@ void VideoPattern::OnDetachFromMainTree()
     }
 }
 
-void VideoPattern::RegisterRenderContextCallBack()
-{
-#ifndef RENDER_EXTRACT_SUPPORTED
-    auto isFullScreen = IsFullScreen();
-    if (!isFullScreen) {
-        auto OnAreaChangedCallBack = [weak = WeakClaim(this)](float x, float y, float w, float h) mutable {
-            auto videoPattern = weak.Upgrade();
-            CHECK_NULL_VOID(videoPattern);
-            auto host = videoPattern->GetHost();
-            CHECK_NULL_VOID(host);
-            auto geometryNode = host->GetGeometryNode();
-            CHECK_NULL_VOID(geometryNode);
-            auto videoNodeSize = geometryNode->GetContentSize();
-            auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
-            CHECK_NULL_VOID(layoutProperty);
-            auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
-            Rect rect = Rect(x + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
-                y + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
-                videoFrameSize.Height());
-            if (videoPattern->renderSurface_) {
-                if (videoPattern->renderSurface_->SetExtSurfaceBoundsSync(
-                        rect.Left(), rect.Top(), rect.Width(), rect.Height())) {
-                    videoPattern->lastBoundsRect_ = rect;
-                }
-            }
-        };
-        renderContextForMediaPlayer_->SetSurfaceChangedCallBack(OnAreaChangedCallBack);
-    }
-#else
-    renderSurfaceWeakPtr_ = renderSurface_;
-    renderContextForMediaPlayerWeakPtr_ = renderContextForMediaPlayer_;
-    auto OnAttachCallBack = [weak = WeakClaim(this)](int64_t textureId, bool isAttach) mutable {
-        auto videoPattern = weak.Upgrade();
-        CHECK_NULL_VOID(videoPattern);
-        if (auto renderSurface = videoPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface) {
-            renderSurface->AttachToGLContext(textureId, isAttach);
-        }
-    };
-    renderContextForMediaPlayer_->AddAttachCallBack(OnAttachCallBack);
-    auto OnUpdateCallBack = [weak = WeakClaim(this)](std::vector<float>& matrix) mutable {
-        auto videoPattern = weak.Upgrade();
-        CHECK_NULL_VOID(videoPattern);
-        if (auto renderSurface = videoPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface) {
-            renderSurface->UpdateTextureImage(matrix);
-        }
-    };
-    renderContextForMediaPlayer_->AddUpdateCallBack(OnUpdateCallBack);
-#endif
-}
-
 void VideoPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
