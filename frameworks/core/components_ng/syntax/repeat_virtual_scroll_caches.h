@@ -156,6 +156,7 @@ public:
      * memorize last active range(s)
      */
     void SetLastActiveRange(uint32_t from, uint32_t to);
+    std::pair<uint32_t, uint32_t> GetLastActiveRange() { return lastActiveRanges_[0]; };
 
     // formatting internal structures to string for debug output
     // and possibly in modified form for DFX in the future

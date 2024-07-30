@@ -96,6 +96,12 @@ auto g_onGetTypes4Range = [](uint32_t from, uint32_t to) -> std::list<std::strin
 };
 
 /**
+ * Function needed by RepeatVirtualScrollNode constructor
+ */
+auto g_onSetActiveRange = [](uint32_t from, uint32_t to) {
+};
+
+/**
  * Map needed by RepeatVirtualScrollCaches constructor
  */
 const std::map<std::string, std::pair<bool, uint32_t>> cacheCountL24ttype = {
@@ -227,7 +233,8 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest005, TestSize.Level1)
                           g_onCreateNode,
                           g_onUpdateNode,
                           g_onGetKeys4Range,
-                          g_onGetTypes4Range
+                          g_onGetTypes4Range,
+                          g_onSetActiveRange
                     );
     stack->Push(repeatNode);
     stack->PopContainer();
@@ -252,7 +259,8 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest006, TestSize.Level1)
                           g_onCreateNode,
                           g_onUpdateNode,
                           g_onGetKeys4Range,
-                          g_onGetTypes4Range
+                          g_onGetTypes4Range,
+                          g_onSetActiveRange
                     );
 
     /**
@@ -287,7 +295,8 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest007, TestSize.Level1)
                           g_onCreateNode,
                           g_onUpdateNode,
                           g_onGetKeys4Range,
-                          g_onGetTypes4Range
+                          g_onGetTypes4Range,
+                          g_onSetActiveRange
                     );
 
     /**
@@ -316,7 +325,8 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest008, TestSize.Level1)
                           g_onCreateNode,
                           g_onUpdateNode,
                           g_onGetKeys4Range,
-                          g_onGetTypes4Range
+                          g_onGetTypes4Range,
+                          g_onSetActiveRange
                     );
 
 
@@ -336,7 +346,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest008, TestSize.Level1)
     repeatNode->DoSetActiveChildRange(1, 2, 1, 1);
     repeatNode->DoSetActiveChildRange(activeItems, cachedItems, 1);
     repeatNode->DropFromL1("Key1");
-    repeatNode->InvalidateKeyCache();
+    repeatNode->UpdateRenderState(true);
     repeatNode->RecycleItems(0, 100);
     repeatNode->MoveData(0, 100);
 
@@ -367,7 +377,8 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest009, TestSize.Level1)
                           g_onCreateNode,
                           g_onUpdateNode,
                           g_onGetKeys4Range,
-                          g_onGetTypes4Range
+                          g_onGetTypes4Range,
+                          g_onSetActiveRange
                     );
 
     /**
@@ -648,7 +659,8 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest021, TestSize.Level1)
                           g_onCreateNode,
                           g_onUpdateNode,
                           g_onGetKeys4Range,
-                          g_onGetTypes4Range
+                          g_onGetTypes4Range,
+                          g_onSetActiveRange
                     );
 
     ConfigurationChange cfgChange;
