@@ -350,7 +350,7 @@ void GridScrollLayoutAlgorithm::LayoutBackwardCachedLine(LayoutWrapper* layoutWr
                 offset.SetY(crossOffset);
             }
             auto wrapper = layoutWrapper->GetChildByIndex(itemIdex, true);
-            if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
+            if (!wrapper) {
                 continue;
             }
             auto frSize = itemsCrossSize_.at(iter.first);
@@ -421,7 +421,7 @@ void GridScrollLayoutAlgorithm::LayoutForwardCachedLine(LayoutWrapper* layoutWra
                 offset.SetY(crossOffset);
             }
             auto wrapper = layoutWrapper->GetChildByIndex(itemIdex, true);
-            if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
+            if (!wrapper) {
                 continue;
             }
             auto frSize = itemsCrossSize_.at(iter.first);
