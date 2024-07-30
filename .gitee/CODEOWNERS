@@ -512,7 +512,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkListItem.ts @arkuisc
 frameworks/bridge/declarative_frontend/ark_component/src/ArkList.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLoadingProgress.ts @arkui_image
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLog.ts @arkuievent
-frameworks/bridge/declarative_frontend/ark_component/src/ArkMarquee.ts @arkui_image
+frameworks/bridge/declarative_frontend/ark_component/src/ArkMarquee.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkMenuItemGroup.ts @arkuipopupwindow
 frameworks/bridge/declarative_frontend/ark_component/src/ArkMenuItem.ts @arkuipopupwindow
 frameworks/bridge/declarative_frontend/ark_component/src/ArkMenu.ts @arkuipopupwindow
@@ -603,7 +603,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/list_item_group_modifier
 frameworks/bridge/declarative_frontend/ark_modifier/src/list_item_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/list_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/loading_progress_modifier.ts
-frameworks/bridge/declarative_frontend/ark_modifier/src/marquee_modifier.ts @arkui_image
+frameworks/bridge/declarative_frontend/ark_modifier/src/marquee_modifier.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_modifier/src/menu_item_modifier.ts @arkuipopupwindow
 frameworks/bridge/declarative_frontend/ark_modifier/src/menu_modifier.ts @arkuipopupwindow
 frameworks/bridge/declarative_frontend/ark_modifier/src/modifier_utilities.ts @arkuievent
@@ -836,8 +836,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_group_bridge.h @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_loading_progress_bridge.cpp @arkui_image
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_loading_progress_bridge.h @arkui_image
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_marquee_bridge.cpp @arkui_image
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_marquee_bridge.h @arkui_image
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_marquee_bridge.cpp @huawei_g_five
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_marquee_bridge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_bridge.cpp @arkuipopupwindow
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_bridge.h @arkuipopupwindow
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_item_bridge.cpp @arkuipopupwindow
@@ -1115,8 +1115,8 @@ frameworks/bridge/declarative_frontend/jsview/js_local_storage.cpp @arkuistatemg
 frameworks/bridge/declarative_frontend/jsview/js_local_storage.h @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_location_button.cpp
 frameworks/bridge/declarative_frontend/jsview/js_location_button.h
-frameworks/bridge/declarative_frontend/jsview/js_marquee.cpp @arkui_image
-frameworks/bridge/declarative_frontend/jsview/js_marquee.h @arkui_image
+frameworks/bridge/declarative_frontend/jsview/js_marquee.cpp @huawei_g_five
+frameworks/bridge/declarative_frontend/jsview/js_marquee.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_menu.cpp @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/js_menu.h @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/js_menu_item.cpp @arkuipopupwindow
@@ -1398,8 +1398,8 @@ frameworks/bridge/declarative_frontend/jsview/models/list_model_impl.cpp @arkuis
 frameworks/bridge/declarative_frontend/jsview/models/list_model_impl.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/models/loading_progress_model_impl.cpp @arkui_image
 frameworks/bridge/declarative_frontend/jsview/models/loading_progress_model_impl.h @arkui_image
-frameworks/bridge/declarative_frontend/jsview/models/marquee_model_impl.cpp @arkui_image
-frameworks/bridge/declarative_frontend/jsview/models/marquee_model_impl.h @arkui_image
+frameworks/bridge/declarative_frontend/jsview/models/marquee_model_impl.cpp @huawei_g_five
+frameworks/bridge/declarative_frontend/jsview/models/marquee_model_impl.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/models/menu_item_model_impl.cpp @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/models/menu_item_model_impl.h @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/models/menu_model_impl.cpp @arkuipopupwindow
@@ -1644,8 +1644,8 @@ frameworks/core/accessibility/js_inspector/inspect_list_item.cpp @arkuiscroll
 frameworks/core/accessibility/js_inspector/inspect_list_item_group.cpp @arkuiscroll
 frameworks/core/accessibility/js_inspector/inspect_list_item_group.h @arkuiscroll
 frameworks/core/accessibility/js_inspector/inspect_list_item.h @arkuiscroll
-frameworks/core/accessibility/js_inspector/inspect_marquee.cpp @arkui_image
-frameworks/core/accessibility/js_inspector/inspect_marquee.h @arkui_image
+frameworks/core/accessibility/js_inspector/inspect_marquee.cpp @huawei_g_five
+frameworks/core/accessibility/js_inspector/inspect_marquee.h @huawei_g_five
 frameworks/core/accessibility/js_inspector/inspect_menu.cpp @arkuipopupwindow
 frameworks/core/accessibility/js_inspector/inspect_menu.h @arkuipopupwindow
 frameworks/core/accessibility/js_inspector/inspect_navigation_bar.cpp @arkui_superman
@@ -1970,7 +1970,7 @@ frameworks/core/components/ifelse/ @arkuistatemgmt
 frameworks/core/components/image/ @arkui_image
 frameworks/core/components/indexer/ @arkuiscroll
 frameworks/core/components/list/ @arkuiscroll
-frameworks/core/components/marquee/ @arkui_image
+frameworks/core/components/marquee/ @huawei_g_five
 frameworks/core/components/menu/ @arkuipopupwindow
 frameworks/core/components/mouse_listener/ @arkuievent
 frameworks/core/components/multimodal/ @arkuievent
@@ -2128,8 +2128,8 @@ frameworks/core/components_v2/inspector/list_item_group_composed_element.cpp @ar
 frameworks/core/components_v2/inspector/list_item_group_composed_element.h @arkuiscroll
 frameworks/core/components_v2/inspector/loading_progress_composed_element.cpp @arkui_image
 frameworks/core/components_v2/inspector/loading_progress_composed_element.h @arkui_image
-frameworks/core/components_v2/inspector/marquee_composed_element.cpp @arkui_image
-frameworks/core/components_v2/inspector/marquee_composed_element.h @arkui_image
+frameworks/core/components_v2/inspector/marquee_composed_element.cpp @huawei_g_five
+frameworks/core/components_v2/inspector/marquee_composed_element.h @huawei_g_five
 frameworks/core/components_v2/inspector/menu_composed_element.cpp @arkuipopupwindow
 frameworks/core/components_v2/inspector/menu_composed_element.h @arkuipopupwindow
 frameworks/core/components_v2/inspector/navigation_composed_element.cpp @arkui_superman
@@ -2347,7 +2347,7 @@ frameworks/core/components_ng/pattern/linear_layout/ @arkuilayout
 frameworks/core/components_ng/pattern/linear_split/ @arkuilayout
 frameworks/core/components_ng/pattern/list/ @arkuiscroll
 frameworks/core/components_ng/pattern/loading_progress/ @arkui_image
-frameworks/core/components_ng/pattern/marquee/ @arkui_image
+frameworks/core/components_ng/pattern/marquee/ @huawei_g_five
 frameworks/core/components_ng/pattern/menu/ @arkuipopupwindow
 frameworks/core/components_ng/pattern/model/ 
 frameworks/core/components_ng/pattern/navigation/ @arkui_superman
@@ -2667,8 +2667,8 @@ frameworks/core/interfaces/native/node/image_animator_modifier.cpp @arkui_image
 frameworks/core/interfaces/native/node/image_animator_modifier.h @arkui_image
 frameworks/core/interfaces/native/node/line_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/line_modifier.h @arkuilayout
-frameworks/core/interfaces/native/node/marquee_modifier.cpp @arkui_image
-frameworks/core/interfaces/native/node/marquee_modifier.h @arkui_image
+frameworks/core/interfaces/native/node/marquee_modifier.cpp @huawei_g_five
+frameworks/core/interfaces/native/node/marquee_modifier.h @huawei_g_five
 frameworks/core/interfaces/native/node/menu_item_modifier.cpp @arkuipopupwindow
 frameworks/core/interfaces/native/node/menu_item_modifier.h @arkuipopupwindow
 frameworks/core/interfaces/native/node/menu_modifier.cpp @arkuipopupwindow
