@@ -990,7 +990,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         if (childSize > 1) {
             recordsSize = childSize;
         }
-        textNode = DragEventActuator::CreateBadgeTextNode(frameNode, childSize, previewScale, false);
+        textNode = DragEventActuator::CreateBadgeTextNode(frameNode, childSize, previewScale, true);
         if (window) {
             isSwitchToSubWindow = true;
             overlayManager->RemovePixelMap();
