@@ -685,6 +685,8 @@ private:
     void OnVisibleAreaChange(bool isVisible);
     void OnAreaChangedInner() override;
     void OnNotifyMemoryLevel(int32_t level) override;
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
 
     void OnWebSrcUpdate();
     void OnWebDataUpdate();

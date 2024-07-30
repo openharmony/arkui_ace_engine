@@ -345,6 +345,18 @@ bool WebPattern::NeedSoftKeyboard() const
     return false;
 }
 
+void WebPattern::OnAttachToMainTree()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern OnAttachToMainTree");
+    delegate_->OnRenderToForeground();
+}
+
+void WebPattern::OnDetachFromMainTree()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern OnDetachFromMainTree");
+    delegate_->OnRenderToBackground();
+}
+
 void WebPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
