@@ -41,6 +41,8 @@ public:
     void HasUserDefinedSelectedFontFamily(bool isUserDefined) override;
     void SetBackgroundColor(const Color& color) override;
     void SetChangeEvent(TimeChangeEvent&& onChange) override;
+    static void SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onChange);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 
     static void SetSelectedTime(FrameNode* frameNode, const PickerTime& value);
     static void SetDisappearTextStyle(
@@ -51,10 +53,8 @@ public:
         FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetHour24(FrameNode* frameNode, bool isUseMilitaryTime);
-    static void SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onChange);
     static void SetDateTimeOptions(FrameNode* frameNode, ZeroPrefixType& hourType,
         ZeroPrefixType& minuteType, ZeroPrefixType& secondType);
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetIsEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
     static PickerTextStyle getSelectedTextStyle(FrameNode* frameNode);
     static PickerTextStyle getNormalTextStyle(FrameNode* frameNode);

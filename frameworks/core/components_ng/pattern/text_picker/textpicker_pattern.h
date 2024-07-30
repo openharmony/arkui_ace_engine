@@ -417,7 +417,7 @@ public:
         closeDialogEvent_ = closeDialogEvent;
     }
 
-        void SetTextProperties(const PickerTextProperties& properties)
+    void SetTextProperties(const PickerTextProperties& properties)
     {
         if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
             isUserSetGradientFont_ = true;
@@ -541,6 +541,7 @@ private:
     bool isPicker_ = true;
     bool isFiredSelectsChange_ = false;
     std::optional<std::string> firedSelectsStr_;
+    
     ItemDivider divider_;
     bool customDividerFlag_ = false;
     Dimension value_;

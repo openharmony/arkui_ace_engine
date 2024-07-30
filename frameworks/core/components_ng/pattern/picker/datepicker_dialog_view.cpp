@@ -154,6 +154,25 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     return dialogNode;
 }
 
+RefPtr<FrameNode> DatePickerDialogView::CreateLunarSwitchTextNode()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, nullptr);
+
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("datepicker.lunarSwitch"));
+    textLayoutProperty->UpdateFontSize(ConvertFontScaleValue(pickerTheme->GetLunarSwitchTextSize()));
+    textLayoutProperty->UpdateTextColor(pickerTheme->GetLunarSwitchTextColor());
+    textNode->MarkModifyDone();
+    return textNode;
+}
+
 void DatePickerDialogView::SetTimeNodeColumnWeight(
     const RefPtr<FrameNode>& timeNode, const DatePickerSettingData& settingData)
 {
@@ -204,25 +223,6 @@ void DatePickerDialogView::SetTimeNodeColumnWeight(
                 DimensionUnit::PERCENT)),
             std::nullopt));
     }
-}
-
-RefPtr<FrameNode> DatePickerDialogView::CreateLunarSwitchTextNode()
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-    CHECK_NULL_RETURN(pickerTheme, nullptr);
-
-    auto textNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    CHECK_NULL_RETURN(textNode, nullptr);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("datepicker.lunarSwitch"));
-    textLayoutProperty->UpdateFontSize(ConvertFontScaleValue(pickerTheme->GetLunarSwitchTextSize()));
-    textLayoutProperty->UpdateTextColor(pickerTheme->GetLunarSwitchTextColor());
-    textNode->MarkModifyDone();
-    return textNode;
 }
 
 RefPtr<FrameNode> DatePickerDialogView::CreateStackNode()
