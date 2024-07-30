@@ -43,13 +43,18 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(rowWrapper);
     auto rowProps = DynamicCast<FlexLayoutProperty>(rowWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(rowProps);
+    auto space = static_cast<float>(rowProps->GetSpaceValue(Dimension()).ConvertToPx());
+    auto minSpace = Dimension(MIN_SPACE, DimensionUnit::VP);
+    if (space < minSpace.ConvertToPx()) {
+        space = minSpace.ConvertToPx();
+        rowProps->UpdateSpace(minSpace);
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     UpdateMargin(layoutWrapper, theme);
     auto spinnerSize = MeasureAndGetSize(rowWrapper->GetOrCreateChildByIndex(1), childConstraint);
-    auto space = static_cast<float>(rowProps->GetSpaceValue(Dimension()).ConvertToPx());
     childConstraint.maxSize.MinusWidth(spinnerSize.Width() + space);
     auto textWrapper = rowWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(textWrapper);
@@ -75,11 +80,6 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto rowGeometry = rowWrapper->GetGeometryNode();
     CHECK_NULL_VOID(rowGeometry);
-    auto minSpace = Dimension(MIN_SPACE, DimensionUnit::VP);
-    if (space < minSpace.ConvertToPx()) {
-        space = minSpace.ConvertToPx();
-        rowProps->UpdateSpace(minSpace);
-    }
 
     auto rowWidth = textSize.Width() + space + spinnerSize.Width();
     auto rowHeight = std::max(textSize.Height(), spinnerSize.Height());
