@@ -1308,7 +1308,6 @@ void MenuItemPattern::UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>
             // 系统资源的id起始值是0x07800000
             unsigned long magicNum = 0x07800000;
             auto isSystemIcon = (srcId.find("ohos_") != std::string::npos) || (std::stoul(srcId) >= magicNum);
-            
             if (isSystemIcon) {
                 useDefaultThemeIcon = true;
             }
