@@ -1823,6 +1823,65 @@ const ArkUITextInputModifier* GetTextInputModifier()
     return &modifier;
 }
 
+const CJUITextInputModifier* GetCJUITextInputModifier()
+{
+    static const CJUITextInputModifier modifier = { SetTextInputCaretColor, ResetTextInputCaretColor, SetTextInputType,
+        ResetTextInputType, SetTextInputMaxLines, ResetTextInputMaxLines, SetTextInputPlaceholderColor,
+        ResetTextInputPlaceholderColor, SetTextInputCaretPosition, ResetTextInputCaretPosition, SetTextInputCopyOption,
+        ResetTextInputCopyOption, SetTextInputShowPasswordIcon, ResetTextInputShowPasswordIcon,
+        SetTextInputPasswordIcon, ResetTextInputPasswordIcon, SetTextInputTextAlign, ResetTextInputTextAlign,
+        SetTextInputStyle, ResetTextInputStyle, SetTextInputSelectionMenuHidden, ResetTextInputSelectionMenuHidden,
+        SetTextInputShowUnderline, ResetTextInputShowUnderline, SetTextInputCaretStyle, ResetTextInputCaretStyle,
+        SetTextInputEnableKeyboardOnFocus, ResetTextInputEnableKeyboardOnFocus, SetTextInputBarState,
+        ResetTextInputBarState, SetTextInputEnterKeyType, ResetTextInputEnterKeyType, SetTextInputFontWeight,
+        ResetTextInputFontWeight, SetTextInputFontSize, ResetTextInputFontSize, SetTextInputMaxLength,
+        ResetTextInputMaxLength, SetTextInputSelectedBackgroundColor, ResetTextInputSelectedBackgroundColor,
+        SetTextInputShowError, ResetTextInputShowError, SetTextInputPlaceholderFont, ResetTextInputPlaceholderFont,
+        SetTextInputFontColor, ResetTextInputFontColor, SetTextInputFontStyle, ResetTextInputFontStyle,
+        SetTextInputFontFamily, ResetTextInputFontFamily, SetTextInputPlaceholderString, SetTextInputTextString,
+        SetTextInputFontWeightStr, StopTextInputTextEditing, SetTextInputCancelButton, resetTextInputCancelButton,
+        GetTextInputPlaceholder, GetTextInputText, GetTextInputCaretColor, GetTextInputCaretStyle,
+        GetTextInputShowUnderline, GetTextInputMaxLength, GetTextInputEnterKeyType, GetTextInputPlaceholderColor,
+        GetTextInputPlaceholderFont, GetTextInputRequestKeyboardOnFocus, GetTextInputType,
+        GetTextInputSelectedBackgroundColor, GetTextInputShowPasswordIcon, GetTextInputEditing,
+        GetTextInputShowCancelButton, GetTextInputCancelIconSize, getTextInputTextCancelIconSrc,
+        getTextInputTextCancelIconColor, GetTextInputTextAlign, GetTextInputFontColor, GetTextInputFontStyle,
+        GetTextInputFontWeight, GetTextInputFontSize, GetTextInputCancelButtonStyle, SetTextInputBackgroundColor,
+        ResetTextInputBackgroundColor, SetTextInputTextSelection, GetTextInputTextSelectionIndex,
+        SetTextInputPasswordRules, ResetTextInputPasswordRules, SetTextInputEnableAutoFill,
+        ResetTextInputEnableAutoFill, SetTextInputPadding, ResetTextInputPadding,
+        SetTextInputFontFeature, ResetTextInputFontFeature,
+        SetTextInputDecoration, ResetTextInputDecoration, SetTextInputLetterSpacing, ResetTextInputLetterSpacing,
+        SetTextInputLineHeight, ResetTextInputLineHeight,
+        SetTextInputNormalUnderlineColor, SetTextInputUserUnderlineColor, ResetTextInputUserUnderlineColor,
+        SetTextInputWordBreak, ResetTextInputWordBreak, SetTextInputPlaceholderFontEnum,
+        SetTextInputAdaptMinFontSize, ResetTextInputAdaptMinFontSize, SetTextInputAdaptMaxFontSize,
+        ResetTextInputAdaptMaxFontSize, SetTextInputHeightAdaptivePolicy, ResetTextInputHeightAdaptivePolicy,
+        SetTextInputTextOverflow, ResetTextInputTextOverflow, SetTextInputTextIndent, ResetTextInputTextIndent,
+        GetTextInputSelectionMenuHidden, GetTextInputWordBreak, GetTextInputEnableAutoFill,
+        SetTextInputContentType, ResetTextInputContentType, GetTextInputContentType,
+        GetTextInputUserUnderlineColor, GetTextInputPasswordRules, GetTextInputSelectAll,
+        SetTextInputInputFilter, GetTextInputInputFilter, ResetTextInputInputFilter, GetTextInputCaretIndex,
+        GetTextInputCaretOffset, GetTextInputStyle, GetTextInputContentRect, GetTextInputContentLinesNum,
+        SetBlurOnSubmit, GetBlurOnSubmit, GetTextInputAdaptMinFontSize, GetTextInputAdaptMaxFontSize,
+        GetTextInputLineHeight, GetTextInputMaxLines, GetTextInputFontFeature,
+        SetTextInputCustomKeyboard, GetTextInputCustomKeyboard, GetTextInputCustomKeyboardOption,
+        ResetTextInputCustomKeyboard, SetTextInputSelectAll, ResetTextInputSelectAll, SetTextInputShowCounter,
+        ResetTextInputShowCounter, SetTextInputOnEditChange, ResetTextInputOnEditChange, SetTextInputFilter,
+        ResetTextInputFilter, SetTextInputOnSubmitWithEvent, ResetTextInputOnSubmitWithEvent, SetTextInputOnChange,
+        ResetTextInputOnChange, SetTextInputOnTextSelectionChange, ResetTextInputOnTextSelectionChange,
+        SetTextInputOnContentScroll, ResetTextInputOnContentScroll, SetTextInputOnCopy, ResetTextInputOnCopy,
+        SetTextInputOnCut, ResetTextInputOnCut, SetTextInputOnPaste, ResetTextInputOnPaste,
+        SetTextInputShowKeyBoardOnFocus, GetTextInputShowKeyBoardOnFocus, ResetTextInputShowKeyBoardOnFocus,
+        SetTextInputNumberOfLines, GetTextInputNumberOfLines, ResetTextInputNumberOfLines,
+        SetTextInputShowPassword, ResetTextInputShowPassword, GetTextInputShowPassword, SetTextInputLineBreakStrategy,
+        ResetTextInputLineBreakStrategy, SetTextInputMargin, ResetTextInputMargin,
+        GetTextInputMargin, SetTextInputCaret, GetTextInputController,
+        SetTextInputEnablePreviewText, ResetTextInputEnablePreviewText };
+
+    return &modifier;
+}
+
 void SetOnTextInputChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

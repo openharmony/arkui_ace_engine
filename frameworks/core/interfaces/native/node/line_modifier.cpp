@@ -69,5 +69,11 @@ const ArkUILineModifier* GetLineModifier()
     static const ArkUILineModifier modifier = {SetStartPoint, ResetStartPoint, SetEndPoint, ResetEndPoint};
     return &modifier;
 }
+
+const CJUILineModifier* GetCJUILineModifier()
+{
+    static const CJUILineModifier modifier = {SetStartPoint, ResetStartPoint, SetEndPoint, ResetEndPoint};
+    return &modifier;
+}
 }
 }

@@ -65,5 +65,15 @@ const ArkUIComponent3DModifier* GetComponent3DModifier()
 
     return &modifier;
 }
+
+const CJUIComponent3DModifier* GetCJUIComponent3DModifier()
+{
+    static const CJUIComponent3DModifier modifier = {
+        SetShaderInputBuffer,
+        ResetShaderInputBuffer,
+    };
+
+    return &modifier;
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

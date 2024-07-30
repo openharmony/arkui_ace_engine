@@ -157,5 +157,25 @@ const ArkUISymbolSpanModifier* GetSymbolSpanModifier()
 
     return &modifier;
 }
+
+const CJUISymbolSpanModifier* GetCJUISymbolSpanModifier()
+{
+    static const CJUISymbolSpanModifier modifier = {
+        SetSymbolSpanFontColor,
+        ResetSymbolSpanFontColor,
+        SetSymbolSpanFontSize,
+        ResetSymbolSpanFontSize,
+        SetSymbolSpanFontWeightStr,
+        SetSymbolSpanFontWeight,
+        ResetSymbolSpanFontWeight,
+        SetSymbolSpanRenderingStrategy,
+        ResetSymbolSpanRenderingStrategy,
+        SetSymbolSpanEffectStrategy,
+        ResetSymbolSpanEffectStrategy,
+        SetSymbolSpanId
+    };
+
+    return &modifier;
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

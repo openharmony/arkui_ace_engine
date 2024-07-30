@@ -20,5 +20,6 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
     const ArkUIGestureModifier* GetGestureModifier();
+    const CJUIGestureModifier* GetCJUIGestureModifier();
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif

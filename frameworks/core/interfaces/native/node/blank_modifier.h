@@ -19,5 +19,6 @@
 #include "core/interfaces/native/node/node_api.h"
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIBlankModifier* GetBlankModifier();
+const CJUIBlankModifier* GetCJUIBlankModifier();
 }
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_BLANK_MODIFIER_H

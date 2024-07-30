@@ -246,5 +246,16 @@ const ArkUISideBarContainerModifier* GetSideBarContainerModifier()
         ResetSideBarContainerDivider };
     return &modifier;
 }
+
+const CJUISideBarContainerModifier* GetCJUISideBarContainerModifier()
+{
+    static const CJUISideBarContainerModifier modifier = { SetSideBarWidth, ResetSideBarWidth, SetMinSideBarWidth,
+        ResetMinSideBarWidth, SetControlButton, ResetControlButton, SetShowControlButton, ResetShowControlButton,
+        SetAutoHide, ResetAutoHide, SetSideBarContainerMaxSideBarWidth, ResetSideBarContainerMaxSideBarWidth,
+        SetSideBarContainerMinContentWidth, ResetSideBarContainerMinContentWidth, SetSideBarPosition,
+        ResetSideBarPosition, SetShowSideBar, ResetShowSideBar, SetSideBarContainerDivider,
+        ResetSideBarContainerDivider };
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

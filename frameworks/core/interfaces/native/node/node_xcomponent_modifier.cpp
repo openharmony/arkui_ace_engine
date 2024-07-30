@@ -173,5 +173,31 @@ const ArkUIXComponentModifier* GetXComponentModifier()
 
     return &modifier;
 }
+
+const CJUIXComponentModifier* GetCJUIXComponentModifier()
+{
+    static const CJUIXComponentModifier modifier = {
+        nullptr, // loadXComponent
+        nullptr, // setXComponentOptions
+        nullptr, // getXComponentSurfaceId
+        nullptr, // getXComponentController
+        SetXComponentBackgroundColor,
+        ResetXComponentBackgroundColor,
+        SetXComponentOpacity,
+        ResetXComponentOpacity,
+        SetXComponentId,
+        SetXComponentType,
+        SetXComponentSurfaceSize,
+        GetXComponentId,
+        GetXComponentType,
+        GetXComponentSurfaceWidth,
+        GetXComponentSurfaceHeight,
+        GetNativeXComponent,
+        SetXComponentLibraryname,
+        SetImageAIOptions,
+    };
+
+    return &modifier;
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

@@ -54,5 +54,12 @@ const ArkUIPolylineModifier* GetPolylineModifier()
 
     return &modifier;
 }
+
+const CJUIPolylineModifier* GetCJUIPolylineModifier()
+{
+    static const CJUIPolylineModifier modifier = {SetPoints, ResetPoints};
+
+    return &modifier;
+}
 }
 }

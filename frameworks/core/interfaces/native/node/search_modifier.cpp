@@ -861,6 +861,37 @@ const ArkUISearchModifier* GetSearchModifier()
     return &modifier;
 }
 
+const CJUISearchModifier* GetCJUISearchModifier()
+{
+    static const CJUISearchModifier modifier = { SetSearchPlaceholderColor, ResetSearchPlaceholderColor,
+        SetSearchTextFont, ResetSearchTextFont, SetSearchSelectionMenuHidden, ResetSearchSelectionMenuHidden,
+        SetSearchCaretStyle, ResetSearchCaretStyle, SetSearchTextAlign, ResetSearchTextAlign, SetSearchCancelButton,
+        ResetSearchCancelButton, SetSearchEnableKeyboardOnFocus, ResetSearchEnableKeyboardOnFocus,
+        SetSearchPlaceholderFont, ResetSearchPlaceholderFont, SetSearchSearchIcon, ResetSearchSearchIcon,
+        SetSearchSearchButton, ResetSearchSearchButton, SetSearchFontColor, ResetSearchFontColor, SetSearchCopyOption,
+        ResetSearchCopyOption, SetSearchEnterKeyType, ResetSearchEnterKeyType, SetSearchHeight, ResetSearchHeight,
+        SetSearchFontFeature, ResetSearchFontFeature, SetSearchDecoration, ResetSearchDecoration,
+        SetSearchLetterSpacing, ResetSearchLetterSpacing, SetSearchLineHeight, ResetSearchLineHeight,
+        SetSearchAdaptMinFontSize, ResetSearchAdaptMinFontSize,
+        SetSearchAdaptMaxFontSize, ResetSearchAdaptMaxFontSize,
+        SetSearchSelectedBackgroundColor, ResetSearchSelectedBackgroundColor, SetSearchTextIndent,
+        ResetSearchTextIndent,
+        SetSearchMaxLength, ResetSearchMaxLength, SetSearchType, ResetSearchType,
+        SetSearchOnEditChange, ResetSearchOnEditChange, SetSearchOnSubmitWithEvent, ResetSearchOnSubmitWithEvent,
+        SetSearchOnCopy, ResetSearchOnCopy, SetSearchOnCut, ResetSearchOnCut,
+        SetSearchOnPaste, ResetSearchOnPaste, SetSearchOnChange, ResetSearchOnChange,
+        SetSearchOnTextSelectionChange, ResetSearchOnTextSelectionChange,
+        SetSearchOnContentScroll, ResetSearchOnContentScroll,
+        SetSearchShowCounterOptions, ResetSearchShowCounterOptions, GetSearchController, SetSearchValue,
+        ResetSearchValue, SetSearchPlaceholder, ResetSearchPlaceholder, SetSearchIcon, ResetSearchIcon,
+        SetSearchOnWillInsert, ResetSearchOnWillInsert,
+        SetSearchOnDidInsert, ResetSearchOnDidInsert,
+        SetSearchOnWillDelete, ResetSearchOnWillDelete,
+        SetSearchOnDidDelete, ResetSearchOnDidDelete, SetSearchEnablePreviewText, ResetSearchEnablePreviewText,
+        SetSearchCaretPosition, ResetSearchCaretPosition };
+    return &modifier;
+}
+
 void SetOnSearchSubmit(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

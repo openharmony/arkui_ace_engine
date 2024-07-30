@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIPolylineModifier* GetPolylineModifier();
+const CJUIPolylineModifier* GetCJUIPolylineModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_POLYLINE_MODIFIER_H
