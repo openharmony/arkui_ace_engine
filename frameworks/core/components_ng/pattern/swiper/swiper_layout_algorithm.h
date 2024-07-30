@@ -304,6 +304,11 @@ public:
         nextMarginIgnoreBlank_ = nextMarginIgnoreBlank;
     }
 
+    void SetIgnoreBlankOffset(float ignoreBlankOffset)
+    {
+        ignoreBlankOffset_ = ignoreBlankOffset;
+    }
+
 private:
     void LayoutSwiperIndicator(
         LayoutWrapper* layoutWrapper, const RefPtr<SwiperLayoutProperty>& swiperLayoutProperty,
@@ -388,6 +393,7 @@ private:
     bool isMeasureOneMoreItem_ = false;
     bool isFrameAnimation_ = false;
     bool nextMarginIgnoreBlank_ = false;
+    float ignoreBlankOffset_ = 0.0f;
     std::set<int32_t> measuredItems_;
     std::set<int32_t> activeItems_;
     std::set<int32_t> cachedItems_;

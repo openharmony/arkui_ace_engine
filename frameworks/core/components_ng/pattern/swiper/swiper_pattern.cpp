@@ -183,6 +183,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     algo->SetIsCaptureReverse(isCaptureReverse_);
     algo->SetCachedCount(GetCachedCount());
     algo->SetNextMarginIgnoreBlank(nextMarginIgnoreBlank_);
+    algo->SetIgnoreBlankOffset(ignoreBlankOffset_);
     return algo;
 }
 
@@ -513,6 +514,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         currentIndex_ = GetLoopIndex(currentIndex_);
         props->UpdateIndexWithoutMeasure(currentIndex_);
     }
+    UpdateIgnoreBlankOffsetWithIndex();
 }
 
 void SwiperPattern::UpdateTargetCapture(bool forceUpdate)
@@ -929,10 +931,6 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         UpdateTargetCapture(algo->GetIsNeedUpdateCapture());
     }
 
-    if (jumpIndex_) {
-        ignoreBlankSpringOffset_ = IgnoreBlankOffset(true);
-    }
-
     if (!targetIndex_) {
         if (isUserFinish_) {
             SetIndicatorJumpIndex(jumpIndex_);
@@ -981,8 +979,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         auto targetIndexValue = IsLoop() ? targetIndex_.value() : GetLoopIndex(targetIndex_.value());
         auto iter = itemPosition_.find(targetIndexValue);
         if (iter != itemPosition_.end()) {
-            ignoreBlankSpringOffset_ = IgnoreBlankOffset(false);
-            float targetPos = iter->second.startPos + IgnoreBlankOffset(false);
+            float targetPos = iter->second.startPos;
             auto context = GetContext();
             auto props = GetLayoutProperty<SwiperLayoutProperty>();
             bool isNeedForwardTranslate = false;
@@ -1053,34 +1050,71 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;
 }
 
-float SwiperPattern::IgnoreBlankOffset(bool isJump)
+float SwiperPattern::AdjustIgnoreBlankOverScrollOffSet(bool isStartOverScroll) const
 {
-    float result = 0.0f;
-    if (!isJump && targetIndex_) {
-        auto targetIndexValue = IsLoop() ? targetIndex_.value() : GetLoopIndex(targetIndex_.value());
-        if (!IsLoop()) {
-            if (targetIndexValue == 0 && prevMarginIgnoreBlank_) {
-                result += GetPrevMargin() + GetItemSpace();
-            }
-            if (targetIndexValue >= (TotalCount() - GetDisplayCount()) && nextMarginIgnoreBlank_) {
-                result -= GetNextMargin() + GetItemSpace();
-            }
+    if (isStartOverScroll && NonNegative(ignoreBlankOffset_)) {
+        return prevMarginIgnoreBlank_ ? GetPrevMargin() + ignoreBlankOffset_ : ignoreBlankOffset_;
+    }
+    if (!isStartOverScroll && NonPositive(ignoreBlankOffset_)) {
+        return nextMarginIgnoreBlank_ ? -GetNextMargin() + ignoreBlankOffset_ : ignoreBlankOffset_;
+    }
+    return 0.0f;
+}
+
+void SwiperPattern::UpdateIgnoreBlankOffsetWithIndex()
+{
+    if (IsLoop() || !(prevMarginIgnoreBlank_ || nextMarginIgnoreBlank_)) {
+        return;
+    }
+    if (jumpIndex_.has_value()) {
+        if (prevMarginIgnoreBlank_ && jumpIndex_.value() == 0) {
+            ignoreBlankOffset_ = -GetPrevMargin();
+        } else if (nextMarginIgnoreBlank_ && jumpIndex_.value() >= (TotalCount() - GetDisplayCount())) {
+            ignoreBlankOffset_ = GetNextMargin();
+        } else {
+            ignoreBlankOffset_ = 0.0f;
+        }
+        return;
+    }
+    if (targetIndex_.has_value()) {
+        float ignoreBlankOffset = ignoreBlankOffset_;
+        if (prevMarginIgnoreBlank_ && targetIndex_.value() == 0) {
+            ignoreBlankOffset_ = -GetPrevMargin();
+        } else if (nextMarginIgnoreBlank_ && targetIndex_.value() >= (TotalCount() - GetDisplayCount())) {
+            ignoreBlankOffset_ = GetNextMargin();
+        } else {
+            ignoreBlankOffset_ = 0.0f;
+        }
+        if (NearEqual(ignoreBlankOffset_, ignoreBlankOffset)) {
+            return;
+        }
+        float adjustOffset = ignoreBlankOffset_ - ignoreBlankOffset;
+        for (auto& item : itemPosition_) {
+            item.second.startPos -= adjustOffset;
+            item.second.endPos -= adjustOffset;
         }
     }
+}
 
-    if (jumpIndex_) {
-        auto targetIndexValue = IsLoop() ? jumpIndex_.value() : GetLoopIndex(jumpIndex_.value());
-        if (!IsLoop()) {
-            if (targetIndexValue == 0 && prevMarginIgnoreBlank_) {
-                result += GetPrevMargin() + GetItemSpace();
-            }
-            if (targetIndexValue >= (TotalCount() - GetDisplayCount()) && nextMarginIgnoreBlank_) {
-                result -= GetNextMargin() + GetItemSpace();
-            }
-        }
+void SwiperPattern::UpdateIgnoreBlankOffsetWithDrag(bool overScrollDirection)
+{
+    if (IsLoop() || !(prevMarginIgnoreBlank_ || nextMarginIgnoreBlank_)) {
+        return;
     }
-
-    return result;
+    float ignoreBlankOffset = ignoreBlankOffset_;
+    if (prevMarginIgnoreBlank_ && overScrollDirection) {
+        ignoreBlankOffset_ = -GetPrevMargin();
+    } else if (nextMarginIgnoreBlank_ && !overScrollDirection) {
+        ignoreBlankOffset_ = GetNextMargin();
+    }
+    if (NearEqual(ignoreBlankOffset_, ignoreBlankOffset)) {
+        return;
+    }
+    float adjustOffset = ignoreBlankOffset_ - ignoreBlankOffset;
+    for (auto& item : itemPosition_) {
+        item.second.startPos -= adjustOffset;
+        item.second.endPos -= adjustOffset;
+    }
 }
 
 bool SwiperPattern::IsAutoLinear() const
@@ -2324,20 +2358,17 @@ bool SwiperPattern::FadeOverScroll(float offset)
         return false;
     }
     if (IsOutOfBoundary(fadeOffset_ + offset)) {
-        auto onlyUpdateFadeOffset = (itemPosition_.begin()->first == 0 && offset < 0.0f) ||
-                                    (itemPosition_.rbegin()->first == TotalCount() - 1 && offset > 0.0f);
-        if (!IsVisibleChildrenSizeLessThanSwiper() && !onlyUpdateFadeOffset) {
+        if (!IsVisibleChildrenSizeLessThanSwiper() && NearZero(fadeOffset_)) {
+            UpdateIgnoreBlankOffsetWithDrag(IsOutOfStart(offset));
             auto realOffset = IsOutOfStart(offset) ? -itemPosition_.begin()->second.startPos
                                                    : CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
-            currentDelta_ = currentDelta_ - realOffset;
+            currentDelta_ -= realOffset;
+            offset -= realOffset;
             HandleSwiperCustomAnimation(realOffset);
         }
+        fadeOffset_ += offset;
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
-        if (itemPosition_.begin()->first == 0 || itemPosition_.rbegin()->first == TotalCount() - 1) {
-            auto remainOffset = GetDistanceToEdge();
-            fadeOffset_ += (offset - remainOffset);
-        }
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         MarkDirtyNodeSelf();
         return true;
@@ -2376,7 +2407,6 @@ void SwiperPattern::UpdateNextValidIndex()
 
 void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset, std::optional<int32_t> nextIndex)
 {
-    additionalOffset += ignoreBlankSpringOffset_;
     additionalOffset = IsHorizontalAndRightToLeft() ? -additionalOffset : additionalOffset;
     if (!indicatorId_.has_value()) {
         return;
@@ -2399,7 +2429,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset,
     currentFirstIndex_ = nextIndex.value_or(currentFirstIndex_);
     UpdateNextValidIndex();
     currentFirstIndex_ = GetLoopIndex(currentFirstIndex_);
-    CalculateGestureState(additionalOffset - ignoreBlankSpringOffset_, currentTurnPageRate, preFirstIndex);
+    CalculateGestureState(additionalOffset, currentTurnPageRate, preFirstIndex);
     turnPageRate_ = (currentTurnPageRate == FLT_MAX ? turnPageRate_ : currentTurnPageRate);
     touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     CheckMarkForIndicatorBoundary();
@@ -3449,6 +3479,7 @@ void SwiperPattern::CreateSpringProperty()
 
 void SwiperPattern::PlaySpringAnimation(double dragVelocity)
 {
+    UpdateIgnoreBlankOffsetWithDrag(IsOutOfStart());
     if (springAnimationIsRunning_) {
         return;
     }
@@ -3467,11 +3498,6 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     auto delta = currentIndexOffset_ < 0.0f ? extentPair.Leading() : extentPair.Trailing();
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         delta = extentPair.Trailing();
-    }
-    if (LessNotEqual(currentIndexOffset_, 0.0f) && nextMarginIgnoreBlank_) {
-        delta += GetNextMargin() + GetItemSpace();
-    } else if (GreatNotEqual(currentIndexOffset_, 0.0f) && prevMarginIgnoreBlank_) {
-        delta -= GetPrevMargin() + GetItemSpace();
     }
     // spring curve: (velocity: 0.0, mass: 1.0, stiffness: 228.0, damping: 30.0)
     auto springCurve = MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f);
@@ -3517,11 +3543,11 @@ bool SwiperPattern::IsOutOfBoundary(float mainOffset) const
 
         return isOutOfStart || isOutOfEnd;
     } else {
-        auto startPos = itemPosition_.begin()->second.startPos;
+        auto startPos = itemPosition_.begin()->second.startPos + AdjustIgnoreBlankOverScrollOffSet(true);
         startPos = NearZero(startPos, PX_EPSILON) ? 0.0 : startPos;
         auto isOutOfStart = itemPosition_.begin()->first == 0 && GreatNotEqual(startPos + mainOffset, 0.0);
         auto visibleWindowSize = CalculateVisibleSize();
-        auto endPos = itemPosition_.rbegin()->second.endPos + mainOffset;
+        auto endPos = itemPosition_.rbegin()->second.endPos + mainOffset + AdjustIgnoreBlankOverScrollOffSet(false);
         endPos = NearEqual(endPos, visibleWindowSize, PX_EPSILON) ? visibleWindowSize : endPos;
         auto isOutOfEnd = itemPosition_.rbegin()->first == TotalCount() - 1 && LessNotEqual(endPos, visibleWindowSize);
 
@@ -3535,7 +3561,7 @@ bool SwiperPattern::IsOutOfStart(float mainOffset) const
         return false;
     }
 
-    auto startPos = itemPosition_.begin()->second.startPos;
+    auto startPos = itemPosition_.begin()->second.startPos + AdjustIgnoreBlankOverScrollOffSet(true);
     startPos = NearZero(startPos, PX_EPSILON) ? 0.f : startPos;
     return itemPosition_.begin()->first == 0 && GreatNotEqual(startPos + mainOffset, 0.f);
 }
@@ -3547,7 +3573,7 @@ bool SwiperPattern::IsOutOfEnd(float mainOffset) const
     }
 
     auto visibleWindowSize = CalculateVisibleSize();
-    auto endPos = itemPosition_.rbegin()->second.endPos + mainOffset;
+    auto endPos = itemPosition_.rbegin()->second.endPos + mainOffset + AdjustIgnoreBlankOverScrollOffSet(false);
     endPos = NearEqual(endPos, visibleWindowSize, PX_EPSILON) ? visibleWindowSize : endPos;
     return itemPosition_.rbegin()->first == TotalCount() - 1 && LessNotEqual(endPos, visibleWindowSize);
 }

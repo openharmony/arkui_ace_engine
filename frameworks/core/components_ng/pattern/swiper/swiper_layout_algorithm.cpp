@@ -915,18 +915,13 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto paddingOffset = padding.Offset();
-    auto hostNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(hostNode);
-    auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto ignoreBlankOffset = swiperPattern->IgnoreBlankOffset(true);
 
     // layout items.
     std::set<int32_t> layoutIndexSet;
     for (auto& pos : itemPosition_) {
         layoutIndexSet.insert(GetLoopIndex(pos.first));
-        pos.second.startPos -= currentOffset_ + ignoreBlankOffset;
-        pos.second.endPos -= currentOffset_ + ignoreBlankOffset;
+        pos.second.startPos -= currentOffset_;
+        pos.second.endPos -= currentOffset_;
         LayoutItem(layoutWrapper, axis, paddingOffset, pos);
     }
     for (auto& pos : itemPositionInAnimation_) {
@@ -975,6 +970,9 @@ void SwiperLayoutAlgorithm::LayoutSwiperIndicator(
 void SwiperLayoutAlgorithm::LayoutItem(LayoutWrapper* layoutWrapper, Axis axis, OffsetF offset,
     std::pair<int32_t, SwiperItemInfo> pos)
 {
+    pos.second.startPos += ignoreBlankOffset_;
+    pos.second.endPos += ignoreBlankOffset_;
+
     auto layoutIndex = GetLoopIndex(pos.first);
     if (swipeByGroup_ && layoutIndex >= realTotalCount_) {
         return;
