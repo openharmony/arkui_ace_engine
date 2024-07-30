@@ -431,7 +431,6 @@ public:
     void OnCustomContentTransition(int32_t toIndex);
     void OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, bool hasOnChanged);
     void OnSwiperCustomAnimationFinish(std::pair<int32_t, SwiperItemInfo> item);
-    float IgnoreBlankOffset(bool isJump);
 
     void SetCustomAnimationToIndex(int32_t toIndex)
     {
@@ -898,6 +897,11 @@ private:
 
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
 
+    float AdjustIgnoreBlankOverScrollOffSet(bool isStartOverScroll) const;
+    void UpdateIgnoreBlankOffsetWithIndex();
+    // overSrollDirection is true means over start boundary, false means over end boundary.
+    void UpdateIgnoreBlankOffsetWithDrag(bool overSrollDirection);
+
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -996,7 +1000,6 @@ private:
     float contentMainSize_ = 0.0f;
     float contentCrossSize_ = 0.0f;
     bool crossMatchChild_ = false;
-    float ignoreBlankSpringOffset_ = 0.0f;
 
     std::optional<int32_t> uiCastJumpIndex_;
     std::optional<int32_t> jumpIndex_;
@@ -1029,6 +1032,7 @@ private:
     bool isIndicatorInteractive_ = true;
     bool nextMarginIgnoreBlank_ = false;
     bool prevMarginIgnoreBlank_ = false;
+    float ignoreBlankOffset_ = 0.0f;
 
     std::optional<int32_t> cachedCount_;
 
