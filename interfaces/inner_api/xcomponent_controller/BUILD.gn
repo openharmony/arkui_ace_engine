@@ -22,6 +22,7 @@ config("xcomponent_controller_config") {
   ]
   defines = [ "USE_ARK_ENGINE" ]
   if (use_hilog) {
+    include_dirs += [ "$hilog_root/interfaces/native/innerkits/include" ]
     defines += [ "USE_HILOG" ]
   }
   cflags = []
@@ -58,7 +59,6 @@ ohos_shared_library("ace_xcomponent_controller") {
     "napi:ace_napi",
   ]
   public_external_deps = [ "hilog:libhilog" ]
-
   subsystem_name = ace_engine_subsystem
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = ace_engine_part

@@ -92,6 +92,30 @@ std::string RenderSurfaceImpl::GetUniqueId() const
     return std::to_string(surfaceId_);
 }
 
+bool RenderSurfaceImpl::SetExtSurfaceBoundsSync(int32_t left, int32_t top, int32_t width, int32_t height)
+{
+    if (extSurface_) {
+        Rect rect;
+        if (isSetConfigSurface_) {
+            double x = (width - lastRect_.Width()) / 2 + left;
+            double y = (height - lastRect_.Height()) / 2 + top;
+
+            rect.SetLeft(x);
+            rect.SetTop(y);
+            rect.SetSize(lastRect_.GetSize());
+        } else {
+            rect.SetLeft(left);
+            rect.SetTop(top);
+            rect.SetWidth(width);
+            rect.SetHeight(height);
+        }
+        extSurface_->SetBounds(surfaceId_, rect.Left(), rect.Top(), rect.Width(), rect.Height());
+        lastRect_ = rect;
+        return true;
+    }
+    return false;
+}
+
 void RenderSurfaceImpl::SetExtSurfaceBounds(int32_t left, int32_t top, int32_t width, int32_t height)
 {
     LOGI("RenderSurfaceImpl::SetExtSurfaceBounds (%{public}d, %{public}d) - (%{public}d x %{public}d)", left, top,
