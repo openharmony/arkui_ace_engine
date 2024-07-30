@@ -158,7 +158,8 @@ namespace {
 using Lane = WaterFlowLayoutInfoSW::Lane;
 inline bool SectionEmpty(const std::vector<WaterFlowLayoutInfoSW::Lane>& section)
 {
-    return std::all_of(section.begin(), section.end(), [](const auto& lane) { return lane.items_.empty(); });
+    return section.empty() ||
+           std::all_of(section.begin(), section.end(), [](const auto& lane) { return lane.items_.empty(); });
 }
 inline float SectionEndPos(const std::vector<WaterFlowLayoutInfoSW::Lane>& section)
 {
@@ -464,6 +465,10 @@ bool WaterFlowLayoutInfoSW::IsMisaligned() const
         const float startPos = SectionStartPos(lanes_[i]);
         if (std::any_of(lanes_[i].begin(), lanes_[i].end(),
                 [&startPos](const auto& lane) { return !NearEqual(lane.startPos, startPos); })) {
+            return true;
+        }
+        const int32_t sectionStart = (i == 0) ? 0 : segmentTails_[i - 1] + 1;
+        if (sectionStart != lanes_[i][0].items_.front().idx) {
             return true;
         }
     }
