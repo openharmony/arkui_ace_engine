@@ -246,6 +246,7 @@ private:
     // Whether to send the focus to the UIExtension
     // No multi-threading problem due to run js thread
     bool canFocusSendToUIExtension_ = true;
+    bool needReSendFocusToUIExtension_ = false;
     int32_t callbackId_ = 0;
     RectF displayArea_;
     bool isKeyAsync_ = false;

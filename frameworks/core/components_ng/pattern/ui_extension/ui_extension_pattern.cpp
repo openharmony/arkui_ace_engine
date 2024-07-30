@@ -619,6 +619,9 @@ void UIExtensionPattern::HandleFocusEvent()
         }
 
         DispatchFocusState(true);
+        needReSendFocusToUIExtension_ = false;
+    } else {
+        needReSendFocusToUIExtension_ = true;
     }
 
     canFocusSendToUIExtension_ = true;
@@ -677,9 +680,10 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
         }
     }
     DispatchPointerEvent(pointerEvent);
-    if (pipeline->IsWindowFocused() && ret &&
+    if (pipeline->IsWindowFocused() && needReSendFocusToUIExtension_ &&
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
         HandleFocusEvent();
+        needReSendFocusToUIExtension_ = false;
     }
 }
 
