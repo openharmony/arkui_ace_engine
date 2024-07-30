@@ -26,7 +26,6 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
-#include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/font_collection.h"
@@ -436,9 +435,8 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
         if (paraStyleSpanItem) {
             GetSpanParagraphStyle(paraStyleSpanItem->textLineStyle, spanParagraphStyle);
             if (paraStyleSpanItem->fontStyle->HasFontSize()) {
-                auto fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue();
-                spanParagraphStyle.fontSize =
-                    fontSize.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+                spanParagraphStyle.fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue().
+                    ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
             }
         }
         if (paraStyle.maxLines != UINT32_MAX && !spanStringHasMaxLines_ && isSpanStringMode_) {
