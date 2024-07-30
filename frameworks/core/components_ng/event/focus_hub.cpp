@@ -1265,7 +1265,7 @@ void FocusHub::OnBlurScope()
     }
 }
 
-bool FocusHub::PaintFocusState(bool isNeedStateStyles)
+bool FocusHub::PaintFocusState()
 {
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, false);
@@ -1273,19 +1273,18 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
     CHECK_NULL_RETURN(frameNode, false);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    if (!context->GetIsFocusActive() || !IsNeedPaintFocusState()) {
+    if (!IsNeedPaintFocusState()) {
         return false;
     }
 
     if (HasFocusStateStyle()) {
-        if (isNeedStateStyles) {
-            // do focus state style.
-            CheckFocusStateStyle(true);
-        }
+        // do focus state style.
+        CheckFocusStateStyle(true);
         return true;
     }
 
-    if (focusStyleType_ == FocusStyleType::NONE && !box_.HasCustomStyle()) {
+    if (!context->GetIsFocusActive() ||
+        (focusStyleType_ == FocusStyleType::NONE && !box_.HasCustomStyle())) {
         return false;
     }
 
@@ -1437,12 +1436,9 @@ bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate
     return true;
 }
 
-void FocusHub::ClearFocusState(bool isNeedStateStyles)
+void FocusHub::ClearFocusState()
 {
-    if (isNeedStateStyles) {
-        // check focus state style.
-        CheckFocusStateStyle(false);
-    }
+    CheckFocusStateStyle(false);
     if (onClearFocusStateCallback_) {
         onClearFocusStateCallback_();
     }
