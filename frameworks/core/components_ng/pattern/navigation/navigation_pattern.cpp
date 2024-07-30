@@ -297,7 +297,7 @@ void NavigationPattern::InitFoldState()
     CHECK_NULL_VOID(container);
     container->InitIsFoldable();
     if (container->IsFoldable()) {
-        currentfoldStatus_ = container->GetCurrentFoldStatus();
+        currentFoldStatus_ = container->GetCurrentFoldStatus();
     }
 }
 
@@ -335,8 +335,10 @@ bool NavigationPattern::JudgeFoldStateChangeAndUpdateState()
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto foldStatus = container->GetCurrentFoldStatus();
-    if (foldStatus != currentfoldStatus_) {
-        currentfoldStatus_ = foldStatus;
+    TAG_LOGI(AceLogTag::ACE_SHEET, "newFoldStatus: %{public}d, currentFoldStatus: %{public}d.",
+        static_cast<int32_t>(foldStatus), static_cast<int32_t>(currentFoldStatus_));
+    if (foldStatus != currentFoldStatus_) {
+        currentFoldStatus_ = foldStatus;
         return true;
     }
     return false;
