@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/components_ng/event/focus_hub.h"

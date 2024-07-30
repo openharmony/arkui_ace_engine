@@ -45,7 +45,6 @@ public:
     {
         return false;
     }
-
     // search pattern needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
     {
@@ -209,9 +208,9 @@ private:
     void OnClickCancelButton();
     void OnClickTextField();
     void HandleCaretPosition(int32_t caretPosition);
+    void HandleTextContentRect(Rect& rect);
     int32_t HandleGetCaretIndex();
     NG::OffsetF HandleGetCaretPosition();
-    void HandleTextContentRect(Rect& rect);
     int32_t HandleTextContentLines();
     void StopEditing();
     // Init key event

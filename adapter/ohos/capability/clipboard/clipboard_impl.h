@@ -69,7 +69,7 @@ private:
     void GetSpanStringDataHelper(
         const std::function<void(std::vector<uint8_t>&, const std::string&)>& callback, bool syncMode = false);
     void ProcessSpanStringData(
-        std::vector<uint8_t>& arr, const OHOS::MiscServices::PasteData& pasteData, std::string& resText);
+        std::vector<uint8_t>& arr, const OHOS::MiscServices::PasteData& pasteData, std::string& text);
 #endif
 };
 
