@@ -3422,7 +3422,7 @@ void UIContentImpl::PreLayout()
     auto paintRectf = renderContext->GetPaintRectWithoutTransform();
     if (LessOrEqual(static_cast<uint32_t>(paintRectf.Width()), 0) ||
         LessOrEqual(static_cast<uint32_t>(paintRectf.Height()), 0)) {
-        TAG_LOGW(AceLogTag::ACE_WINDOW, "width:%{public}d, height:%{public}d", paintRectf.Width(), 
+        TAG_LOGW(AceLogTag::ACE_WINDOW, "width:%{public}f, height:%{public}f", paintRectf.Width(), 
             paintRectf.Height());
         return ;
     }
