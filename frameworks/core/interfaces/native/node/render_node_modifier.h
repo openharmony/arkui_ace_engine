@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIRenderNodeModifier* GetRenderNodeModifier();
+const CJUIRenderNodeModifier* GetCJUIRenderNodeModifier();
 } // namespace OHOS::Ace::NG
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_RENDER_NODE_MODIFIER_H

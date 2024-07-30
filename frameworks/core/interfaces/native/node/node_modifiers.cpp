@@ -260,4 +260,137 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
 {
     return &OHOS::Ace::NG::impl;
 }
+
+const CJUINodeModifiers* GetCJUINodeModifiers()
+{
+    static CJUINodeModifiers modifiers {
+    ARKUI_NODE_MODIFIERS_API_VERSION,
+    OHOS::Ace::NG::NodeModifier::GetCJUICommonModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUICheckboxGroupModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUICounterModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIRowModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIRowSplitModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUITextModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIButtonModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIToggleModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIImageSpanModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIBlankModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUISearchModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUISelectModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIRadioModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUICheckboxModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUITimepickerModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUITextPickerModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIRatingModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUISliderModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIDividerModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIStackModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIFolderStackModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUINavDestinationModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIGridModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIGridColModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIGridRowModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIPanelModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUITextAreaModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUINavigationModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIColumnModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIRichEditorModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIImageModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIVideoModifier,
+    nullptr,
+    nullptr,
+    OHOS::Ace::NG::NodeModifier::GetCJUINavRouterModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUINodeContainerModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIPatternLockModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIColumnSplitModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUILineModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIPathModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIPolygonModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIPolylineModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUISpanModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIImageAnimatorModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUISideBarContainerModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUICalendarPickerModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUITextInputModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUITabsModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIStepperItemModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIHyperlinkModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIMarqueeModifier,
+    nullptr,
+    OHOS::Ace::NG::NodeModifier::GetCJUIMenuModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIDatePickerModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIWaterFlowModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIAlphabetIndexerModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIDataPanelModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIGaugeModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIScrollModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIGridItemModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIProgressModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUICommonShapeModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIShapeModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIRectModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUISwiperModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIListItemModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIListModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIListItemGroupModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIQRCodeModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUILoadingProgressModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUITextClockModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUITextTimerModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIRenderNodeModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIFrameNodeModifier,
+
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+    OHOS::Ace::NG::NodeModifier::GetCJUIPluginModifier,
+#else
+    nullptr,
+#endif
+
+#ifdef XCOMPONENT_SUPPORTED
+    OHOS::Ace::NG::NodeModifier::GetCJUIXComponentModifier,
+#else
+    nullptr,
+#endif
+
+    OHOS::Ace::NG::NodeModifier::GetCJUIStateModifier,
+
+#ifdef FORM_SUPPORTED
+    OHOS::Ace::NG::NodeModifier::GetCJUIFormComponentModifier,
+#else
+    nullptr,
+#endif
+    OHOS::Ace::NG::NodeModifier::GetCJUIFlexModifier, // FlexModifier
+    nullptr, // ScrollBarModifier
+    OHOS::Ace::NG::NodeModifier::GetCJUIScrollerModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUITabContentModifier,
+    nullptr, // TabsControllerModifier
+    OHOS::Ace::NG::NodeModifier::GetCJUISwiperControllerModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIGestureModifier, // GestureModifier
+    nullptr, // BadgeModifier
+    nullptr, // WebModifier
+    OHOS::Ace::NG::NodeModifier::GetCJUIRefreshModifier, // RefreshModifier
+    nullptr, // MenuItemGroupModifier
+    nullptr, // SearchControllerModifier
+    nullptr, // SideBarModifier
+    nullptr, // PatternLockControllerModifier
+    nullptr, // TextTimerControllerModifier
+    nullptr, // TextClockControllerModifier
+    nullptr, // RichEditorControllerModifier
+    nullptr, // TextAreaControllerModifier
+    OHOS::Ace::NG::NodeModifier::GetCJUIRelativeContainerModifier, // RelativeContainerModifier
+    OHOS::Ace::NG::NodeModifier::GetCJUINodeContentModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUIParticleModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUISymbolGlyphModifier,
+    OHOS::Ace::NG::NodeModifier::GetCJUISymbolSpanModifier,
+
+#ifdef MODEL_COMPONENT_SUPPORTED
+    OHOS::Ace::NG::NodeModifier::GetCJUIComponent3DModifier,
+#else
+    nullptr,
+#endif
+
+    OHOS::Ace::NG::NodeModifier::GetCJUIContainerSpanModifier,
+    };
+    return &modifiers;
+}
 }

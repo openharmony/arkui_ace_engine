@@ -116,5 +116,14 @@ const ArkUIGridItemModifier* GetGridItemModifier()
         SetGridItemColumnEnd, ResetGridItemColumnEnd };
     return &modifier;
 }
+
+const CJUIGridItemModifier* GetCJUIGridItemModifier()
+{
+    static const CJUIGridItemModifier modifier = { SetGridItemSelectable, ResetGridItemSelectable,
+        SetGridItemSelected, ResetGridItemSelected, SetGridItemRowStart, ResetGridItemRowStart,
+        SetGridItemRowEnd, ResetGridItemRowEnd, SetGridItemColumnStart, ResetGridItemColumnStart,
+        SetGridItemColumnEnd, ResetGridItemColumnEnd };
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

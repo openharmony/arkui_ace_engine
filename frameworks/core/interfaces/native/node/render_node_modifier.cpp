@@ -551,5 +551,16 @@ const ArkUIRenderNodeModifier* GetRenderNodeModifier()
 
     return &modifier;
 }
+
+const CJUIRenderNodeModifier* GetCJUIRenderNodeModifier()
+{
+    static const CJUIRenderNodeModifier modifier = { AppendChild, InsertChildAfter, RemoveChild, ClearChildren,
+        SetClipToFrame, SetRotation, SetShadowColor, SetShadowOffset, SetShadowAlpha, SetShadowElevation,
+        SetShadowRadius, Invalidate, SetScale, SetRenderNodeBackgroundColor, SetPivot, SetFrame, SetSize, SetOpacity,
+        SetTranslate, SetBorderStyle, SetBorderWidth, SetBorderColor, SetBorderRadius, SetRectMask, SetCircleMask,
+        SetRoundRectMask, SetOvalMask, SetCommandPathMask, SetPosition, SetMarkNodeGroup };
+
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

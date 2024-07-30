@@ -19,6 +19,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIGridItemModifier* GetGridItemModifier();
+const CJUIGridItemModifier* GetCJUIGridItemModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_GRID_ITEM_MODIFIER_H

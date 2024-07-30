@@ -234,5 +234,15 @@ const ArkUIMenuItemModifier* GetMenuItemModifier()
 
     return &modifier;
 }
+
+const CJUIMenuItemModifier* GetCJUIMenuItemModifier()
+{
+    static const CJUIMenuItemModifier modifier = { SetMenuItemSelected, ResetMenuItemSelected, SetLabelFontColor,
+        ResetLabelFontColor, SetContentFontColor, ResetContentFontColor, SetLabelFont, ResetLabelFont, SetContentFont,
+        ResetContentFont, SetSelectIcon, ResetSelectIcon, SetSelectIconSrc, ResetSelectIconSrc, SetSelectIconSymbol,
+        ResetSelectIconSymbol };
+
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

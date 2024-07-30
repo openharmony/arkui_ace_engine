@@ -300,5 +300,39 @@ const ArkUINavigationModifier* GetNavigationModifier()
 
     return &modifier;
 }
+
+const CJUINavigationModifier* GetCJUINavigationModifier()
+{
+    static const CJUINavigationModifier modifier = {
+        SetHideToolBar,
+        ResetHideToolBar,
+        SetHideNavBar,
+        ResetHideNavBar,
+        SetTitleMode,
+        ResetTitleMode,
+        SetHideBackButton,
+        ResetHideBackButton,
+        SetSubtitle,
+        ResetSubtitle,
+        ResetUsrNavigationMode,
+        SetUsrNavigationMode,
+        SetNavHideTitleBar,
+        ResetNavHideTitleBar,
+        SetNavBarPosition,
+        ResetNavBarPosition,
+        SetMinContentWidth,
+        ResetMinContentWidth,
+        SetMaxNavBarWidth,
+        ResetMaxNavBarWidth,
+        SetMinNavBarWidth,
+        ResetMinNavBarWidth,
+        SetNavBarWidth,
+        ResetNavBarWidth,
+        SetNavIgnoreLayoutSafeArea,
+        ResetNavIgnoreLayoutSafeArea
+    };
+
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

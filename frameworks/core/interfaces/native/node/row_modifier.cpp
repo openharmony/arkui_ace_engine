@@ -91,5 +91,15 @@ const ArkUIRowModifier* GetRowModifier()
     };
     return &modifier;
 }
+
+const CJUIRowModifier* GetCJUIRowModifier()
+{
+    static const CJUIRowModifier modifier = {
+        SetRowJustifyContent, ResetRowJustifyContent, SetRowAlignItems,
+        ResetRowAlignItems, GetRowJustifyContent, GetRowAlignItems,
+        SetRowSpace, ResetRowSpace,
+    };
+    return &modifier;
+}
 }
 }

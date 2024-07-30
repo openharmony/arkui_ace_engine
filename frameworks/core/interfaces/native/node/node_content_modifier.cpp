@@ -95,5 +95,12 @@ const ArkUINodeContentModifier* GetNodeContentModifier()
         GetUserData };
     return &modifier;
 }
+
+const CJUINodeContentModifier* GetCJUINodeContentModifier()
+{
+    static const CJUINodeContentModifier modifier = { AddChild, InsertChild, RemoveChild, RegisterEvent, SetUserData,
+        GetUserData };
+    return &modifier;
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

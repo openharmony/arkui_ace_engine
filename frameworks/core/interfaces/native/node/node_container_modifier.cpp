@@ -44,5 +44,11 @@ const ArkUINodeContainerModifier* GetNodeContainerModifier()
     static const ArkUINodeContainerModifier modifier = { Rebuild, Clean };
     return &modifier;
 }
+
+const CJUINodeContainerModifier* GetCJUINodeContainerModifier()
+{
+    static const CJUINodeContainerModifier modifier = { Rebuild, Clean };
+    return &modifier;
+}
 }
 }

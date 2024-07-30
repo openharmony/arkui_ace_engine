@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIRefreshModifier* GetRefreshModifier();
+const CJUIRefreshModifier* GetCJUIRefreshModifier();
 void SetRefreshOnStateChange(ArkUINodeHandle node, void* extraParam);
 void SetOnRefreshing(ArkUINodeHandle node, void* extraParam);
 void SetRefreshOnOffsetChange(ArkUINodeHandle node, void* extraParam);

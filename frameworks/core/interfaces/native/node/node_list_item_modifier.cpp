@@ -128,6 +128,13 @@ const ArkUIListItemModifier* GetListItemModifier()
     return &modifier;
 }
 
+const CJUIListItemModifier* GetCJUIListItemModifier()
+{
+    static const CJUIListItemModifier modifier = { SetListItemSelected, ResetListItemSelected, SetSelectable,
+        ResetSelectable, SetListItemSwiperAction, ResetListItemSwiperAction };
+    return &modifier;
+}
+
 void SetListItemOnSelect(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

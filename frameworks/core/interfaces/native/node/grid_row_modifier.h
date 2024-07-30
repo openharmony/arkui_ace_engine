@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIGridRowModifier* GetGridRowModifier();
+const CJUIGridRowModifier* GetCJUIGridRowModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_GRID_ROW_MODIFIER_H

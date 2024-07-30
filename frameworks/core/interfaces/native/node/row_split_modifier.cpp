@@ -40,5 +40,11 @@ const ArkUIRowSplitModifier* GetRowSplitModifier()
     static const ArkUIRowSplitModifier modifier = { SetRowSplitResizable, ResetRowSplitResizable };
     return &modifier;
 }
+
+const CJUIRowSplitModifier* GetCJUIRowSplitModifier()
+{
+    static const CJUIRowSplitModifier modifier = { SetRowSplitResizable, ResetRowSplitResizable };
+    return &modifier;
+}
 }
 }
