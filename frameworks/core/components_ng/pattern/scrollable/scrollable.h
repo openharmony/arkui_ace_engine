@@ -213,6 +213,11 @@ public:
         notifyScrollOverCallback_ = scrollOverCallback;
     }
 
+    void SetCurrentPositionCallback(const std::function<double()>& currentPositionCallback)
+    {
+        currentPositionCallback_ = currentPositionCallback;
+    }
+
     void SetOutBoundaryCallback(const OutBoundaryCallback& outBoundaryCallback)
     {
         outBoundaryCallback_ = outBoundaryCallback;
@@ -489,6 +494,7 @@ private:
     ScrollOverCallback scrollOverCallback_;       // scroll motion controller when edge set to spring
     ScrollOverCallback notifyScrollOverCallback_; // scroll motion controller when edge set to spring
     OutBoundaryCallback outBoundaryCallback_;     // whether out of boundary check when edge set to spring
+    std::function<double()> currentPositionCallback_;
     IsReverseCallback isReverseCallback_;
 
     WatchFixCallback watchFixCallback_;
