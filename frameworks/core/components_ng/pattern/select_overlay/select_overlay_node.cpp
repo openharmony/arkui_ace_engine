@@ -129,7 +129,7 @@ float MeasureTextWidth(const TextStyle& textStyle, const std::string& text)
     content.fontWeight = fontweight;
     content.isReturnActualWidth = true;
     content.maxlines = 1;
-    return static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Width());
+    return std::max(static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Width()), 0.0f);
 #else
     return 0.0f;
 #endif
