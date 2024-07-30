@@ -947,10 +947,17 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         auto originPoint = imageNode->GetPositionToScreen();
         if (hasContextMenu || isMenuShow) {
             auto previewDragMovePosition = dragDropManager->GetUpdateDragMovePosition();
-            DragEventActuator::UpdatePreviewPositionAndScale(imageNode, previewDragMovePosition + originPoint);
+            OffsetF previewOffset;
+            if (SubwindowManager::GetInstance()->GetMenuPreviewCenter(previewOffset)) {
+                previewOffset -= OffsetF(pixelMap->GetWidth() / 2.0f, pixelMap->GetHeight() / 2.0f);
+                DragEventActuator::UpdatePreviewPositionAndScale(imageNode, previewDragMovePosition + previewOffset);
+            } else {
+                DragEventActuator::UpdatePreviewPositionAndScale(imageNode, previewDragMovePosition + originPoint);
+            }
+
             dragDropManager ->ResetContextMenuDragPosition();
         }
-        
+
         auto frameTag = frameNode->GetTag();
         if (IsPixelMapNeedScale() && GetTextDraggable() && IsTextCategoryComponent(frameTag)) {
             auto textDragPattern = frameNode->GetPattern<TextDragBase>();
