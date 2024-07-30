@@ -29,8 +29,6 @@ constexpr int32_t AI_TEXT_MAX_LENGTH = 500;
 constexpr int32_t AI_TEXT_GAP = 100;
 constexpr int32_t AI_DELAY_TIME = 100;
 constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
-constexpr const char COPY_ACTION[] = "复制";
-constexpr const char SELECT_ACTION[] = "选择文本";
 
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
@@ -57,8 +55,8 @@ void DataDetectorAdapter::GetAIEntityMenu()
         "ArkUITextInitDataDetect");
 }
 
-bool DataDetectorAdapter::ShowAIEntityMenu(
-    const AISpan& aiSpan, const NG::RectF& aiRect, const RefPtr<NG::FrameNode>& targetNode, bool isShowSelectText)
+bool DataDetectorAdapter::ShowAIEntityMenu(const AISpan& aiSpan, const NG::RectF& aiRect,
+    const RefPtr<NG::FrameNode>& targetNode, bool isShowCopy, bool isShowSelectText)
 {
     if (textDetectResult_.menuOptionAndAction.empty()) {
         TAG_LOGW(AceLogTag::ACE_TEXT, "menu option is empty, please try again");
@@ -68,7 +66,20 @@ bool DataDetectorAdapter::ShowAIEntityMenu(
 
     mainContainerId_ = Container::CurrentId();
     std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
-    for (auto menuOption : textDetectResult_.menuOptionAndAction[TEXT_DETECT_MAP.at(aiSpan.type)]) {
+    auto menuOptionAndAction = textDetectResult_.menuOptionAndAction[TEXT_DETECT_MAP.at(aiSpan.type)];
+    if (menuOptionAndAction.empty()) {
+        return false;
+    }
+    if (!isShowSelectText) {
+        // delete the last option: selectText.
+        menuOptionAndAction.pop_back();
+        if (!isShowCopy) {
+        // delete the last option: copy.
+            menuOptionAndAction.pop_back();
+        }
+    }
+
+    for (auto menuOption : menuOptionAndAction) {
         std::function<void()> onClickEvent = [aiSpan, menuOption, weak = AceType::WeakClaim(this),
                                                  targetNodeWeak = AceType::WeakClaim(AceType::RawPtr(targetNode))]() {
             auto dataDetectorAdapter = weak.Upgrade();
@@ -77,9 +88,7 @@ bool DataDetectorAdapter::ShowAIEntityMenu(
             CHECK_NULL_VOID(targetNode);
             dataDetectorAdapter->OnClickAIMenuOption(aiSpan, menuOption, targetNode);
         };
-        if (isShowSelectText || !(menuOption.first == std::string(SELECT_ACTION))) {
-            menuOptions.push_back(std::make_pair(menuOption.first, onClickEvent));
-        }
+        menuOptions.push_back(std::make_pair(menuOption.first, onClickEvent));
     }
     auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
@@ -107,10 +116,8 @@ void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
     auto bundleName = runtimeContext->GetBundleName();
 
     hasClickedMenuOption_ = true;
-    if (onClickMenu_ && menuOption.first == std::string(COPY_ACTION)) {
-        onClickMenu_(std::string(COPY_ACTION));
-    } else if (onClickMenu_ && menuOption.first == std::string(SELECT_ACTION)) {
-        onClickMenu_(std::string(SELECT_ACTION));
+    if (onClickMenu_ && std::holds_alternative<std::function<std::string()>>(menuOption.second)) {
+        onClickMenu_(std::get<std::function<std::string()>>(menuOption.second)());
     } else if (std::holds_alternative<std::function<void(sptr<IRemoteObject>, std::string)>>(menuOption.second)) {
         std::get<std::function<void(sptr<IRemoteObject>, std::string)>>(menuOption.second)(token, aiSpan.content);
     } else if (std::holds_alternative<std::function<void(int32_t, std::string)>>(menuOption.second)) {
