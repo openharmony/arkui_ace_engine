@@ -849,6 +849,10 @@ public:
     bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const override;
 
     RectF ExpandDefaultResponseRegion(RectF& rect) override;
+    bool ConsumeChildrenAdjustment(const OffsetF& /* offset */) override
+    {
+        return true;
+    }
 
 protected:
     bool CanStartAITask() override;
