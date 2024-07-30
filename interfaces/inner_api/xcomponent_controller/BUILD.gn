@@ -22,7 +22,6 @@ config("xcomponent_controller_config") {
   ]
   defines = [ "USE_ARK_ENGINE" ]
   if (use_hilog) {
-    include_dirs += [ "$hilog_root/interfaces/native/innerkits/include" ]
     defines += [ "USE_HILOG" ]
   }
   cflags = []
