@@ -227,7 +227,7 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
         AddDisappearingChild(child, std::distance(children_.begin(), iter));
     }
     MarkNeedSyncRenderTree(true);
-    TraversingCheck(*iter, true);
+    TraversingCheck(*iter);
     auto result = children_.erase(iter);
     return result;
 }
