@@ -92,17 +92,10 @@ void TextPattern::OnWindowHide()
 void TextPattern::OnWindowShow()
 {
     CHECK_NULL_VOID(contentMod_);
+    contentMod_->ResumeAnimation();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    RectF frameRect;
-    RectF visibleRect;
-    host->GetVisibleRect(visibleRect, frameRect);
-    if (visibleRect.IsEmpty()) {
-        return;
-    }
-    TAG_LOGD(AceLogTag::ACE_TEXT, "OnWindowShow [%{public}d], [Rect:%{public}s]", host->GetId(),
-        visibleRect.ToString().c_str());
-    contentMod_->ResumeAnimation();
+    TAG_LOGD(AceLogTag::ACE_TEXT, "OnWindowShow [%{public}d]", host->GetId());
 }
 
 void TextPattern::OnAttachToFrameNode()
@@ -151,7 +144,7 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
     }
     pipeline->RemoveOnAreaChangeNode(node->GetId());
     pipeline->RemoveWindowStateChangedCallback(node->GetId());
-    UnregisterMarqueeNodeChangeListener();
+    pipeline->RemoveVisibleAreaChangeNode(node->GetId());
 }
 
 void TextPattern::CloseSelectOverlay()
@@ -2114,7 +2107,7 @@ void TextPattern::OnModifyDone()
         dataDetectorAdapter_->textForAI_ = textForDisplay_;
         dataDetectorAdapter_->StartAITask();
     }
-    RegisterMarqueeNodeChangeListener();
+    ProcessMarqueeVisibleAreaCallback();
 
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
@@ -3558,66 +3551,62 @@ PositionWithAffinity TextPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_
     return pManager_->GetGlyphPositionAtCoordinate(ConvertLocalOffsetToParagraphOffset(offset));
 }
 
-void TextPattern::RegisterMarqueeNodeChangeListener()
+void TextPattern::ProcessMarqueeVisibleAreaCallback()
 {
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE) {
+    if (!IsMarqueeOverflow()) {
         return;
     }
-    host->RegisterNodeChangeListener();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->contentMod_);
+        if (!pattern->IsMarqueeOverflow()) {
+            return;
+        }
+        if (visible && Positive(ratio)) {
+            pattern->contentMod_->ResumeAnimation();
+        }
+        if (!visible && NonPositive(ratio)) {
+            pattern->contentMod_->PauseAnimation();
+        }
+    };
+    std::vector<double> ratioList = { 0.0 };
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
 }
 
-void TextPattern::UnregisterMarqueeNodeChangeListener()
+void TextPattern::OnTextOverflowChanged()
 {
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE) {
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto eventHub = host->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto hasInnerCallabck = eventHub->HasVisibleAreaCallback(false);
+    if (!hasInnerCallabck) {
         return;
     }
-    host->UnregisterNodeChangeListener();
+    auto hasUserCallback = eventHub->HasVisibleAreaCallback(true);
+    if (!hasUserCallback) {
+        pipeline->RemoveVisibleAreaChangeNode(host->GetId());
+    }
+    eventHub->CleanVisibleAreaCallback(false);
 }
 
 void TextPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
 {
     selectOverlay_->OnAncestorNodeChanged(flag);
-    HandleMarqueeWithIsVisible(flag);
 }
 
-void TextPattern::HandleMarqueeWithIsVisible(FrameNodeChangeInfoFlag flag)
+bool TextPattern::IsMarqueeOverflow() const
 {
-    if ((flag & FRAME_NODE_CHANGE_GEOMETRY_CHANGE) != FRAME_NODE_CHANGE_GEOMETRY_CHANGE) {
-        return;
-    }
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE) {
-        return;
-    }
-    RectF frameRect;
-    RectF visibleRect;
-    host->GetVisibleRect(visibleRect, frameRect);
-    if (visibleRect.IsEmpty()) {
-        OnWindowHide();
-    } else {
-        OnWindowShow();
-    }
-}
-
-void TextPattern::UnregisterNodeChangeListenerWithoutSelect()
-{
-    if (selectOverlay_ && selectOverlay_->SelectOverlayIsOn()) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->UnregisterNodeChangeListener();
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    return textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE;
 }
 
 void TextPattern::UpdateFontColor(const Color& value)

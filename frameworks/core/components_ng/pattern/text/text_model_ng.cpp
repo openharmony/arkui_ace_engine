@@ -246,7 +246,7 @@ void TextModelNG::SetTextOverflow(Ace::TextOverflow value)
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->UnregisterNodeChangeListenerWithoutSelect();
+    textPattern->OnTextOverflowChanged();
 }
 
 void TextModelNG::SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow value)
@@ -255,7 +255,7 @@ void TextModelNG::SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow value)
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->UnregisterNodeChangeListenerWithoutSelect();
+    textPattern->OnTextOverflowChanged();
 }
 
 void TextModelNG::SetMaxLines(uint32_t value)

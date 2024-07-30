@@ -641,9 +641,10 @@ public:
         isUserSetResponseRegion_ = isUserSetResponseRegion;
     }
 
-    void UnregisterNodeChangeListenerWithoutSelect();
     void UpdateFontColor(const Color& value);
     void BeforeCreatePaintWrapper() override;
+
+    void OnTextOverflowChanged();
 
 protected:
     void OnAttachToFrameNode() override;
@@ -803,10 +804,9 @@ private:
     void ProcessOverlayAfterLayout();
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     Offset ConvertLocalOffsetToParagraphOffset(const Offset& offset);
-    void RegisterMarqueeNodeChangeListener();
-    void UnregisterMarqueeNodeChangeListener();
-    void HandleMarqueeWithIsVisible(FrameNodeChangeInfoFlag flag);
+    void ProcessMarqueeVisibleAreaCallback();
     void ParseOriText(const std::string& currentText);
+    bool IsMarqueeOverflow() const;
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
