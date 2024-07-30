@@ -254,6 +254,23 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
     return nullptr;
 }
 
+bool DragDropManager::CheckFrameNodeCanDrop(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto eventHub = node->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    if ((eventHub->HasOnDrop()) || (eventHub->HasOnItemDrop()) || (eventHub->HasCustomerOnDrop())) {
+        return true;
+    }
+    if ((V2::UI_EXTENSION_COMPONENT_ETS_TAG == node->GetTag() ||
+        V2::EMBEDDED_COMPONENT_ETS_TAG == node->GetTag()) &&
+        (!IsUIExtensionShowPlaceholder(node))) {
+        return true;
+    }
+
+    return false;
+}
+
 RefPtr<FrameNode> DragDropManager::FindTargetDropNode(const RefPtr<UINode> parentNode, PointF localPoint)
 {
     CHECK_NULL_RETURN(parentNode, nullptr);
@@ -282,14 +299,10 @@ RefPtr<FrameNode> DragDropManager::FindTargetDropNode(const RefPtr<UINode> paren
     }
 
     if (paintRect.IsInRegion(localPoint)) {
-        auto eventHub = parentFrameNode->GetEventHub<EventHub>();
-        CHECK_NULL_RETURN(eventHub, nullptr);
-        if ((eventHub->HasOnDrop()) || (eventHub->HasOnItemDrop()) || (eventHub->HasCustomerOnDrop())) {
+        if (parentFrameNode->GetDragHitTestBlock()) {
             return parentFrameNode;
         }
-        if ((V2::UI_EXTENSION_COMPONENT_ETS_TAG == parentFrameNode->GetTag() ||
-            V2::EMBEDDED_COMPONENT_ETS_TAG == parentFrameNode->GetTag()) &&
-            (!IsUIExtensionShowPlaceholder(parentFrameNode))) {
+        if (CheckFrameNodeCanDrop(parentFrameNode)) {
             return parentFrameNode;
         }
     }
@@ -308,7 +321,9 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, fl
 
     auto result = FindTargetDropNode(rootNode, {globalX, globalY});
     if (result) {
-        return result;
+        if (CheckFrameNodeCanDrop(result)) {
+            return result;
+        }
     }
     return nullptr;
 }

@@ -1008,6 +1008,16 @@ public:
         layoutAlgorithm_.Reset();
     }
 
+    bool GetDragHitTestBlock() const
+    {
+        return dragHitTestBlock_;
+    }
+
+    void SetDragHitTestBlock(bool dragHitTestBlock)
+    {
+        dragHitTestBlock_ = dragHitTestBlock;
+    }
+
 protected:
     void DumpInfo() override;
 
@@ -1206,6 +1216,7 @@ private:
     bool isGeometryTransitionIn_ = false;
     bool isLayoutNode_ = false;
     bool isCalculateInnerVisibleRectClip_ = false;
+    bool dragHitTestBlock_ = false;
 
     bool isUseTransitionAnimator_ = false;
 
