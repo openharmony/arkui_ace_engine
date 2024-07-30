@@ -1217,11 +1217,15 @@ void UIContentImpl::UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Conf
     auto followSystem = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
     auto context = NG::PipelineContext::GetContextByContainerId(instanceId_);
     CHECK_NULL_VOID(context);
+    auto isFollowSystem = followSystem == "followSystem";
     if (!followSystem.empty()) {
-        context->SetFollowSystem(followSystem == "followSystem");
+        context->SetFollowSystem(isFollowSystem);
     }
     if (!maxAppFontScale.empty()) {
         context->SetMaxAppFontScale(std::stof(maxAppFontScale));
+    }
+    if (!isFollowSystem) {
+        context->SetFontScale(1.0f);
     }
 }
 
