@@ -1776,8 +1776,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             "origin positionY: %{public}f, height %{public}f", positionY, height);
 
         float positionYWithOffset = positionY;
-        float currentPos = manager->GetClickPosition().GetY() - context->GetRootRect().GetOffset().GetY() +
-            context->GetCurrentWindowRect().Top() - context->GetSafeAreaManager()->GetKeyboardOffset();
+        float currentPos = manager->GetClickPosition().GetY() - context->GetRootRect().GetOffset().GetY() -
+            context->GetSafeAreaManager()->GetKeyboardOffset();
         if (manager->GetIfFocusTextFieldIsInline()) {
             manager->GetInlineTextFieldAvoidPositionYAndHeight(positionY, height);
             positionYWithOffset = positionY;
