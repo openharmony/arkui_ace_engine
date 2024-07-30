@@ -1652,7 +1652,7 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
     const std::shared_ptr<SelectOverlayInfo>& info)
 {
     std::vector<MenuItemParam> systemItemParams;
-    if (info->menuInfo.showCopy) {
+    if (info->menuInfo.showCopy || info->isUsingMouse) {
         MenuItemParam param;
         MenuOptionsParam menuOptionsParam;
         menuOptionsParam.id = OH_DEFAULT_COPY;
@@ -1661,7 +1661,7 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
         systemItemParams.emplace_back(param);
     }
 
-    if (info->menuInfo.showPaste) {
+    if (info->menuInfo.showPaste || info->isUsingMouse) {
         MenuItemParam param;
         MenuOptionsParam menuOptionsParam;
         menuOptionsParam.id = OH_DEFAULT_PASTE;
@@ -1670,7 +1670,7 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
         systemItemParams.emplace_back(param);
     }
 
-    if (info->menuInfo.showCut) {
+    if (info->menuInfo.showCut || info->isUsingMouse) {
         MenuItemParam param;
         MenuOptionsParam menuOptionsParam;
         menuOptionsParam.id = OH_DEFAULT_CUT;
@@ -1679,7 +1679,7 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
         systemItemParams.emplace_back(param);
     }
 
-    if (info->menuInfo.showCopyAll) {
+    if (info->menuInfo.showCopyAll || info->isUsingMouse) {
         MenuItemParam param;
         MenuOptionsParam menuOptionsParam;
         menuOptionsParam.id = OH_DEFAULT_SELECT_ALL;
