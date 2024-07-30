@@ -375,6 +375,11 @@ public:
         return interpolationDefault_;
     }
     void InitOnKeyEvent();
+
+    void SetIsComponentSnapshotNode(bool isComponentSnapshotNode = true)
+    {
+        isComponentSnapshotNode_ = isComponentSnapshotNode;
+    }
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
@@ -555,6 +560,7 @@ private:
     bool hasSizeChanged = false;
     bool isPixelMapChanged_ = false;
     bool isSrcUndefined_ = false;
+    bool isComponentSnapshotNode_ = false;
 
     std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };

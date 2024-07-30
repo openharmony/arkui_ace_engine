@@ -94,6 +94,7 @@ void ProcessImageNode(const RefPtr<UINode>& node)
         auto imageNode = AceType::DynamicCast<FrameNode>(node);
         if (imageNode && AceType::DynamicCast<ImagePattern>(imageNode->GetPattern())) {
             auto imagePattern  = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
+            imagePattern->SetIsComponentSnapshotNode();
             imagePattern->OnVisibleAreaChange(true);
         }
     }
