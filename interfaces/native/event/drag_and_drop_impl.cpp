@@ -67,7 +67,12 @@ int32_t OH_ArkUI_DragEvent_GetUdmfData(ArkUI_DragEvent* event, OH_UdmfData* data
 {
     auto dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
 
-    if (!event || !(dragEvent->unifiedData) || !data) {
+    if (!event || !dragEvent || (dragEvent->unifiedData == nullptr) || !data) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto rawData = reinterpret_cast<OH_UdmfData*>(dragEvent->unifiedData);
+    auto raw = dynamic_cast<OH_UdmfData*>(rawData);
+    if (raw) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto unifiedData =
@@ -166,7 +171,7 @@ int32_t OH_ArkUI_DragAction_SetPointerId(ArkUI_DragAction* dragAction, int32_t p
 
 int32_t OH_ArkUI_DragAction_SetPixelMaps(ArkUI_DragAction* dragAction, OH_PixelmapNative* pixelmapArray[], int32_t size)
 {
-    if (!dragAction) {
+    if (!dragAction || !pixelmapArray) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
