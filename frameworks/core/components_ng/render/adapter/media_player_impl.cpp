@@ -21,14 +21,13 @@
 #include "core/common/container.h"
 #include "core/components/video/video_utils.h"
 #include "core/components_ng/render/adapter/render_surface_impl.h"
-#ifdef RENDER_EXTRACT_SUPPORTED
-#include "core/components_ng/render/adapter/render_texture_impl.h"
-#endif
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+
 constexpr int32_t SECONDS_TO_MILLISECONDS = 1000;
+
 } // namespace
 
 MediaPlayerImpl::~MediaPlayerImpl()
@@ -93,11 +92,6 @@ void MediaPlayerImpl::InitListener()
                 if (player->stateChangeCallback_) {
                     player->stateChangeCallback_(isPlaying ? PlaybackStatus::STARTED : PlaybackStatus::PAUSED);
                 }
-#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
-                if (player->startRenderFrameCallback_ && isPlaying) {
-                    player->startRenderFrameCallback_();
-                }
-#endif
             }, "ArkUIVideoPlayerStatusChanged");
     };
 
@@ -150,18 +144,8 @@ bool MediaPlayerImpl::SetSource(const std::string& src)
 void MediaPlayerImpl::SetRenderSurface(const RefPtr<RenderSurface>& renderSurface)
 {
     renderSurface_ = renderSurface;
-#ifdef RENDER_EXTRACT_SUPPORTED
-    if (renderSurface ->IsTexture()) {
-        auto surfaceImpl = AceType::DynamicCast<RenderTextureImpl>(renderSurface);
-        surfaceImpl->SetExtSurfaceCallback(AceType::Claim(this));
-    } else {
-        auto surfaceImpl = AceType::DynamicCast<RenderSurfaceImpl>(renderSurface);
-        surfaceImpl->SetExtSurfaceCallback(AceType::Claim(this));
-    }
-#else
     auto surfaceImpl = AceType::DynamicCast<RenderSurfaceImpl>(renderSurface);
     surfaceImpl->SetExtSurfaceCallback(AceType::Claim(this));
-#endif
 }
 
 void MediaPlayerImpl::RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent,
@@ -173,11 +157,6 @@ void MediaPlayerImpl::RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUp
     errorCallback_ = errorEvent;
     resolutionChangeCallback_ = resolutionChangeEvent;
     startRenderFrameCallback_ = startRenderFrameEvent;
-}
-
-void MediaPlayerImpl::RegisterTextureEvent(TextureRefreshEnVent&& textureRefreshEvent)
-{
-    textureRefreshCallback_ = textureRefreshEvent;
 }
 
 int32_t MediaPlayerImpl::GetDuration(int32_t& duration)
@@ -216,23 +195,9 @@ int32_t MediaPlayerImpl::SetPlaybackSpeed(float speed)
 int32_t MediaPlayerImpl::SetSurface()
 {
     CHECK_NULL_RETURN(player_, -1);
-    auto renderSurface = renderSurface_.Upgrade();
-    CHECK_NULL_RETURN(renderSurface, -1);
-#ifdef RENDER_EXTRACT_SUPPORTED
-    if (renderSurface ->IsTexture()) {
-        auto textureImpl = AceType::DynamicCast<RenderTextureImpl>(renderSurface);
-        CHECK_NULL_RETURN(textureImpl, -1);
-        player_->SetSurfaceId(textureImpl->GetTextureId(), true);
-    } else {
-        auto surfaceImpl = AceType::DynamicCast<RenderSurfaceImpl>(renderSurface);
-        CHECK_NULL_RETURN(surfaceImpl, -1);
-        player_->SetSurfaceId(surfaceImpl->GetSurfaceId(), false);
-    }
-#else
-    auto surfaceImpl = AceType::DynamicCast<RenderSurfaceImpl>(renderSurface);
+    auto surfaceImpl = AceType::DynamicCast<RenderSurfaceImpl>(renderSurface_.Upgrade());
     CHECK_NULL_RETURN(surfaceImpl, -1);
-    player_->SetSurfaceId(surfaceImpl->GetSurfaceId(), false);
-#endif
+    player_->SetSurfaceId(surfaceImpl->GetSurfaceId());
     return 0;
 }
 
@@ -298,13 +263,6 @@ void MediaPlayerImpl::ProcessSurfaceChange(int32_t width, int32_t height)
     LOGI("Media player ProcessSurfaceChange (%{public}d, %{public}d)", width, height);
     if (resolutionChangeCallback_) {
         resolutionChangeCallback_();
-    }
-}
-
-void MediaPlayerImpl::ProcessTextureRefresh(int32_t instanceId, int64_t textureId)
-{
-    if (textureRefreshCallback_) {
-        textureRefreshCallback_(instanceId, textureId);
     }
 }
 

@@ -62,8 +62,6 @@ public:
 
     void SetExtSurfaceBounds(int32_t left, int32_t top, int32_t width, int32_t height) override;
 
-    bool SetExtSurfaceBoundsSync(int32_t left, int32_t top, int32_t width, int32_t height) override;
-
     void SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback) override;
 
     void SetIsFullScreen(bool isFullScreen) override;
@@ -73,9 +71,6 @@ private:
     RefPtr<ExtSurface> extSurface_;
     RefPtr<ExtSurfaceCallbackInterface> extSurfaceCallback_;
     int64_t surfaceId_ = -1;
-    void* nativeWindow_ = nullptr;
-    bool isSetConfigSurface_ = false;
-    Rect lastRect_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurfaceImpl);
 };

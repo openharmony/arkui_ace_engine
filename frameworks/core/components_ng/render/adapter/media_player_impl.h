@@ -37,7 +37,6 @@ public:
     void SetRenderSurface(const RefPtr<RenderSurface>& renderSurface) override;
     void RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent, StateChangedEvent&& stateChangedEvent,
         CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent, CommonEvent&& startRenderFrameEvent) override;
-    void RegisterTextureEvent(TextureRefreshEnVent&& textureRefreshEvent) override;
     int32_t GetDuration(int32_t& duration) override;
     int32_t GetVideoWidth() override;
     int32_t GetVideoHeight() override;
@@ -55,7 +54,6 @@ public:
     void ProcessSurfaceCreate() override;
     void ProcessSurfaceChange(int32_t width, int32_t height) override;
     void ProcessSurfaceDestroy() override {}
-    void ProcessTextureRefresh(int32_t instanceId, int64_t textureId) override;
 
 private:
     void InitListener();
@@ -67,7 +65,6 @@ private:
     CommonEvent errorCallback_;
     CommonEvent resolutionChangeCallback_;
     CommonEvent startRenderFrameCallback_;
-    TextureRefreshEnVent textureRefreshCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MediaPlayerImpl);
 };
