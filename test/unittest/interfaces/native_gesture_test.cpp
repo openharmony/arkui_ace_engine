@@ -43,12 +43,14 @@ HWTEST_F(NativeGestureTest, NativeGestureTest001, TestSize.Level1)
     auto gestureNode = nodeAPI->createNode(ARKUI_NODE_STACK);
     auto group = gestureAPI->createGroupGesture(EXCLUSIVE_GROUP);
     auto tapGesture = gestureAPI->createTapGesture(1, 1);
+    auto tapGesture1 = gestureAPI->createTapGesture(0, 11);
     auto longPressGesture = gestureAPI->createLongPressGesture(1, true, 500);
     auto panGesture = gestureAPI->createPanGesture(1, GESTURE_DIRECTION_DOWN, 5);
     auto swipeGesture = gestureAPI->createSwipeGesture(1, 1, 5);
     auto pinchGesture = gestureAPI->createPinchGesture(2, 20);
     auto rotateGesture = gestureAPI->createRotationGesture(2, 90);
     gestureAPI->addChildGesture(group, tapGesture);
+    gestureAPI->addChildGesture(group, tapGesture1);
     gestureAPI->addChildGesture(group, longPressGesture);
     auto onActionCallBack = [](ArkUI_GestureEvent *event, void *extraParam) {};
     gestureAPI->setGestureEventTarget(
@@ -62,6 +64,7 @@ HWTEST_F(NativeGestureTest, NativeGestureTest001, TestSize.Level1)
     EXPECT_EQ(ret, 0);
     gestureAPI->removeGestureFromNode(gestureNode, group);
     gestureAPI->removeChildGesture(group, tapGesture);
+    gestureAPI->removeChildGesture(group, tapGesture1);
     gestureAPI->removeChildGesture(group, longPressGesture);
     gestureAPI->dispose(tapGesture);
     gestureAPI->dispose(longPressGesture);
