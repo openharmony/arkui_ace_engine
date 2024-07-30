@@ -275,22 +275,6 @@ public:
         state_.strokeState.SetFontFamilies(fontFamilies);
     }
 
-    void FlushPipelineImmediately()
-    {
-        auto context = context_.Upgrade();
-        if (context) {
-            context->FlushPipelineImmediately();
-        }
-    }
-
-    void FlushUITasks()
-    {
-        auto context = context_.Upgrade();
-        if (context) {
-            context->FlushUITasks();
-        }
-    }
-
     void SaveMatrix();
     void RestoreMatrix();
     void ResetTransformMatrix();
@@ -301,6 +285,8 @@ public:
     void TranslateMatrix(double tx, double ty);
     void DrawSvgImage(RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& canvasImage, const ImageFit& imageFit);
     void DrawImage(const Ace::CanvasImage& canvasImage, double width, double height);
+    void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth);
+    void StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
     void SetDensity(double density)
     {
@@ -315,7 +301,8 @@ protected:
     void UpdatePaintShader(RSPen* pen, RSBrush* brush, const Ace::Gradient& gradient);
     void UpdatePaintShader(const Ace::Pattern& pattern, RSPen* pen, RSBrush* brush);
     bool UpdateParagraph(const std::string& text, bool isStroke, bool hasShadow = false);
-    void UpdateTextStyleForeground(bool isStroke, RSTextStyle& txtStyle, bool hasShadow);
+    void UpdateStrokeTextStyleForeground(RSTextStyle& txtStyle, bool hasShadow);
+    void UpdateFillTextStyleForeground(RSTextStyle& txtStyle, bool hasShadow);
     void InitPaintBlend(RSBrush& brush);
     void InitPaintBlend(RSPen& pen);
     std::shared_ptr<RSShaderEffect> MakeConicGradient(RSBrush* brush, const Ace::Gradient& gradient);
