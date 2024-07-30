@@ -409,6 +409,48 @@ HWTEST_F(GridLayoutRangeTest, MeasureToTarget001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MeasureToTarget002
+ * @tc.desc: Test measure to target
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, MeasureToTarget002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo14());
+    model.SetColumnsGap(Dimension { 10.0f });
+    model.SetRowsGap(Dimension { 20.0f });
+    constexpr float itemHeight = 300.0f;
+    CreateFixedHeightItems(22, itemHeight);
+    CreateFixedHeightItems(1, (itemHeight + 20.0f) * 6);
+    CreateFixedHeightItems(77, itemHeight);
+    CreateDone(frameNode_);
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    const auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.startIndex_, 91);
+
+    layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr");
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+
+    pattern_->ScrollToIndex(22, true, ScrollAlign::AUTO);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(pattern_->AnimateToTargetImpl(ScrollAlign::AUTO, nullptr));
+    const float offset = info.GetAnimatePosIrregular(22, GRID_HEIGHT, ScrollAlign::AUTO, 20.0f);
+    UpdateCurrentOffset(pattern_->GetTotalOffset() - offset);
+
+    EXPECT_TRUE(NearEqual(GetChildY(frameNode_, 22), 0.0f));
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 22)->IsActive());
+
+    pattern_->ScrollToIndex(22, true, ScrollAlign::AUTO);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.GetAnimatePosIrregular(22, GRID_HEIGHT, ScrollAlign::AUTO, 20.0f), -1.0f);
+    pattern_->extraOffset_ = 0.0f;
+    EXPECT_FALSE(pattern_->AnimateToTargetImpl(ScrollAlign::AUTO, nullptr));
+}
+
+/**
  * @tc.name: Cache001
  * @tc.desc: Test Grid preload items
  * @tc.type: FUNC
