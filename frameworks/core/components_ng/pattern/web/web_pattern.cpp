@@ -253,6 +253,7 @@ constexpr int32_t STATUS_ZOOMIN = 1;
 constexpr int32_t STATUS_ZOOMOUT = 2;
 constexpr int32_t ZOOM_ERROR_COUNT_MAX = 5;
 constexpr double ZOOMIN_SMOOTH_SCALE = 0.99;
+constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 
 constexpr char ACCESSIBILITY_GENERIC_CONTAINER[] = "genericContainer";
 constexpr char ACCESSIBILITY_IMAGE[] = "image";
@@ -3397,6 +3398,7 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
     CHECK_NULL_VOID(viewDataWrap);
     auto nodeInfoWraps = viewDataWrap->GetPageNodeInfoWraps();
     auto jsonNode = JsonUtil::Create(true);
+    AceAutoFillType focusType = AceAutoFillType::ACE_UNSPECIFIED;
     for (const auto& nodeInfoWrap : nodeInfoWraps) {
         if (nodeInfoWrap == nullptr) {
             continue;
@@ -3407,8 +3409,28 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
             std::string key = ACE_AUTOFILL_TYPE_TO_NWEB.at(type);
             jsonNode->Put(key.c_str(), nodeInfoWrap->GetValue().c_str());
         }
+        if (nodeInfoWrap->GetIsFocus()) {
+            focusType = type;
+        }
     }
     delegate_->NotifyAutoFillViewData(jsonNode->ToString());
+
+    // shift focus after autofill
+    if (focusType != AceAutoFillType::ACE_UNSPECIFIED) {
+        for (const auto& nodeInfo : pageNodeInfo_) {
+            if (nodeInfo && nodeInfo->GetAutoFillType() == focusType) {
+                TouchEventInfo info("autofill");
+                TouchLocationInfo location("autofill", 0);
+                auto rectF = nodeInfo->GetPageNodeRect();
+                location.SetLocalLocation(Offset(rectF.GetX() + (rectF.Width() / POPUP_CALCULATE_RATIO),
+                    rectF.GetY() + (rectF.Height() / POPUP_CALCULATE_RATIO)));
+                info.AddChangedTouchLocationInfo(std::move(location));
+                HandleTouchDown(info, false);
+                HandleTouchUp(info, false);
+                break;
+            }
+        }
+    }
 }
 
 void WebPattern::NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent, bool isPopup)
