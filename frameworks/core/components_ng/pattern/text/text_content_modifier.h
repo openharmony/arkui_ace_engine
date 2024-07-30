@@ -154,6 +154,7 @@ private:
     void DrawNormal(DrawingContext& drawingContext);
     void DrawFadeout(DrawingContext& drawingContext, const FadeoutInfo& info, const bool& isDrawNormal);
     FadeoutInfo GetFadeoutInfo(DrawingContext& drawingContext);
+    float GetFadeoutPercent();
 
     void ResetImageNodeList();
     void DrawImageNodeList(const float drawingContextWidth, const float paragraph1Offset, const float paragraph2Offset);
