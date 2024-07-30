@@ -949,43 +949,39 @@ void Scrollable::ProcessSpringMotion(double position)
         currentVelocity_ = (position - currentPos_) / diff * MILLOS_PER_NANO_SECONDS;
     }
     lastVsyncTime_ = currentVsync;
-    if (NearEqual(currentPos_, position)) {
+    if (LessOrEqual(std::abs(currentPos_ - position), 1)) {
         // trace stop at OnScrollStop
         if (!isFadingAway_) {
             AceAsyncTraceBegin(0, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") + nodeTag_).c_str());
+        }
+    }
+    auto distance = currentPos_ - finalPosition_;
+    auto nextDistance = position - finalPosition_;
+    isFadingAway_ = GreatNotEqual(std::abs(nextDistance), std::abs(distance));
+    auto delta = position - currentPos_;
+    if (distance * nextDistance < 0) {
+        double currentVelocity = currentVelocity_;
+        scrollPause_ = true;
+        MarkNeedFlushAnimationStartTime();
+        StopSpringAnimation();
+        ACE_SCOPED_TRACE("change direction in spring animation and start fling animation, distance:%f, "
+                            "nextDistance:%f, nodeId:%d, tag:%s",
+            distance, nextDistance, nodeId_, nodeTag_.c_str());
+        if (remainVelocityCallback_ && remainVelocityCallback_(currentVelocity)) {
+            // pass the velocity to the child component to avoid dealing with additional offsets
+            delta = finalPosition_ - currentPos_;
         } else {
-            ACE_SCOPED_TRACE("Spring to same position");
+            StartScrollAnimation(position, currentVelocity);
         }
-        UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
-    } else {
-        auto distance = currentPos_ - finalPosition_;
-        auto nextDistance = position - finalPosition_;
-        isFadingAway_ = GreatNotEqual(std::abs(nextDistance), std::abs(distance));
-        auto delta = position - currentPos_;
-        if (distance * nextDistance < 0) {
-            double currentVelocity = currentVelocity_;
-            scrollPause_ = true;
-            MarkNeedFlushAnimationStartTime();
-            StopSpringAnimation();
-            ACE_SCOPED_TRACE("change direction in spring animation and start fling animation, distance:%f, "
-                             "nextDistance:%f, nodeId:%d, tag:%s",
-                distance, nextDistance, nodeId_, nodeTag_.c_str());
-            if (remainVelocityCallback_ && remainVelocityCallback_(currentVelocity)) {
-                // pass the velocity to the child component to avoid dealing with additional offsets
-                delta = finalPosition_ - currentPos_;
-            } else {
-                StartScrollAnimation(position, currentVelocity);
-            }
+    }
+    moved_ = UpdateScrollPosition(delta, SCROLL_FROM_ANIMATION_SPRING);
+    if (!moved_) {
+        StopSpringAnimation();
+    } else if (!touchUp_) {
+        if (scrollTouchUpCallback_) {
+            scrollTouchUpCallback_();
         }
-        moved_ = UpdateScrollPosition(delta, SCROLL_FROM_ANIMATION_SPRING);
-        if (!moved_) {
-            StopSpringAnimation();
-        } else if (!touchUp_) {
-            if (scrollTouchUpCallback_) {
-                scrollTouchUpCallback_();
-            }
-            touchUp_ = true;
-        }
+        touchUp_ = true;
     }
     currentPos_ = position;
 }
@@ -999,22 +995,20 @@ void Scrollable::ProcessScrollMotion(double position)
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}f, currentVelocity_ is %{public}f, "
         "needScrollSnapChange_ is %{public}u",
         position, currentVelocity_, needScrollSnapChange_);
-    if ((NearEqual(currentPos_, position))) {
+    if (LessOrEqual(std::abs(currentPos_ - position), 1)) {
         // trace stop at OnScrollStop
         AceAsyncTraceBegin(0, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") + nodeTag_).c_str());
-        UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION);
-    } else {
-        // UpdateScrollPosition return false, means reach to scroll limit.
-        auto mainDelta = position - currentPos_;
-        HandleScroll(mainDelta, SCROLL_FROM_ANIMATION, NestedState::GESTURE);
-        if (!moved_) {
-            StopFrictionAnimation();
-        } else if (!touchUp_) {
-            if (scrollTouchUpCallback_) {
-                scrollTouchUpCallback_();
-            }
-            touchUp_ = true;
+    }
+    // UpdateScrollPosition return false, means reach to scroll limit.
+    auto mainDelta = position - currentPos_;
+    HandleScroll(mainDelta, SCROLL_FROM_ANIMATION, NestedState::GESTURE);
+    if (!moved_) {
+        StopFrictionAnimation();
+    } else if (!touchUp_) {
+        if (scrollTouchUpCallback_) {
+            scrollTouchUpCallback_();
         }
+        touchUp_ = true;
     }
     currentPos_ = position;
 
