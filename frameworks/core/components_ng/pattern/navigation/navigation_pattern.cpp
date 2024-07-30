@@ -663,6 +663,14 @@ void NavigationPattern::RefreshNavDestination()
     std::string navDestinationName = "";
     CheckTopNavPathChange(preTopNavPath, newTopNavPath);
 
+    // close keyboard
+#if defined(ENABLE_STANDARD_INPUT)
+    auto focusHub = hostNode->GetFocusHub();
+    if (isChanged_ && focusHub->IsFocusableWholePath()) {
+        InputMethodManager::GetInstance()->CloseKeyboard();
+    }
+#endif
+
 #if defined(ENABLE_NAV_SPLIT_MODE)
     navigationStack_->SetLastNavPathList(navPathList);
 #endif
@@ -724,11 +732,6 @@ void NavigationPattern::CheckTopNavPathChange(
         return;
     }
 
-    // close keyboard
-#if defined(ENABLE_STANDARD_INPUT)
-    InputMethodManager::GetInstance()->CloseKeyboard();
-#endif
-
     isChanged_ = true;
     UpdateIsAnimation(preTopNavPath);
     isReplace_ = replaceValue != 0;
@@ -763,7 +766,14 @@ void NavigationPattern::CheckTopNavPathChange(
     if (newTopNavPath.has_value()) {
         newTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(newTopNavPath->second));
-        if (newTopNavDestination) {
+        do {
+            if (!newTopNavDestination) {
+                break;
+            }
+            auto focusHub = newTopNavDestination->GetFocusHub();
+            if (!focusHub || !focusHub->IsFocusableWholePath()) {
+                break;
+            }
             auto navDestinationPattern = newTopNavDestination->GetPattern<NavDestinationPattern>();
             auto navDestinationFocusView = AceType::DynamicCast<FocusView>(navDestinationPattern);
             CHECK_NULL_VOID(navDestinationFocusView);
@@ -771,7 +781,7 @@ void NavigationPattern::CheckTopNavPathChange(
                 navDestinationFocusView->SetIsViewRootScopeFocused(false);
             }
             navDestinationFocusView->FocusViewShow();
-        }
+        } while (0);
     } else {
         // back to navBar case
         auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
@@ -791,12 +801,15 @@ void NavigationPattern::CheckTopNavPathChange(
             NotifyPageShow(pageInfo->GetPageUrl());
         }
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
-        auto navBarFocusView = navBarNode->GetPattern<FocusView>();
-        CHECK_NULL_VOID(navBarFocusView);
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            navBarFocusView->SetIsViewRootScopeFocused(false);
+        auto focusHub = navBarNode->GetFocusHub();
+        if (focusHub && focusHub->IsFocusableWholePath()) {
+            auto navBarFocusView = navBarNode->GetPattern<FocusView>();
+            CHECK_NULL_VOID(navBarFocusView);
+            if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                navBarFocusView->SetIsViewRootScopeFocused(false);
+            }
+            navBarFocusView->FocusViewShow();
         }
-        navBarFocusView->FocusViewShow();
     }
     bool isShow = false;
     bool isDialog =
@@ -2337,17 +2350,23 @@ void NavigationPattern::NotifyPerfMonitorPageMsg(const std::string& pageName)
 void NavigationPattern::RefreshFocusToDestination()
 {
     auto newTopNavPath = navigationStack_->GetTopNavPath();
-    if (newTopNavPath.has_value()) {
-        auto newTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
-            NavigationGroupNode::GetNavDestinationNode(newTopNavPath->second));
-        CHECK_NULL_VOID(newTopNavDestination);
-        auto navDestinationFocusView = newTopNavDestination->GetPattern<FocusView>();
-        CHECK_NULL_VOID(navDestinationFocusView);
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            navDestinationFocusView->SetIsViewRootScopeFocused(false);
-        }
-        navDestinationFocusView->FocusViewShow();
+    if (!newTopNavPath.has_value()) {
+        return;
     }
+    auto newTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(newTopNavPath->second));
+    CHECK_NULL_VOID(newTopNavDestination);
+    auto focusHub = newTopNavDestination->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (!focusHub->IsFocusableWholePath()) {
+        return;
+    }
+    auto navDestinationFocusView = newTopNavDestination->GetPattern<FocusView>();
+    CHECK_NULL_VOID(navDestinationFocusView);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        navDestinationFocusView->SetIsViewRootScopeFocused(false);
+    }
+    navDestinationFocusView->FocusViewShow();
 }
 
 void NavigationPattern::RecoveryToLastStack(
