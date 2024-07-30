@@ -441,7 +441,7 @@ public:
         extraOffset_ = extraOffset;
     }
 
-    std::optional<float> GetExtraOffset() const
+    const std::optional<float>& GetExtraOffset() const
     {
         return extraOffset_;
     }
