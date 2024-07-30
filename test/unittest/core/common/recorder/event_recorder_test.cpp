@@ -85,6 +85,48 @@ void GetConfigDisable(std::string& config)
         "\"duration\":5000},{\"id\":\"scroll_item_12\",\"ratio\":0.4,\"duration\":3000}]}]}";
 }
 
+void GetConfigTest(std::string& config)
+{
+    config =
+        "{\"enable\":false,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true},\"x\":[{\"pageUrl\":"
+        "\"pages/"
+        "Index\",\"shareNode\":[\"hahaha\",\"btn_TitleExpand\",\"btn_OpenSelf\",\"btn_Screenshot\",\"btn_inspect\","
+        "\"btn_xxx\",\"\"],\"exposureCfg\":[{\"id\":\"btn_Grid\",\"ratio\":0.75,\"duration\":5000},{\"id\":\"btn_"
+        "TitleExpand\",\"ratio\":0.9,\"duration\":1000}]},{\"pageUrl\":\"pages/"
+        "ScrollPage\",\"shareNode\":[\"scroll_item_1\"],\"exposureCfg\":[{\"id\":\"scroll_item_2\",\"ratio\":0.85,"
+        "\"duration\":5000},{\"id\":\"scroll_item_12\",\"ratio\":0.4,\"duration\":3000}]}]}";
+}
+
+void GetConfigTest2(std::string& config)
+{
+    config =
+            "{\"enable\":true,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true},\"config\":[{\"shareNode\":[\"hahaha\",\"btn_TitleExpand\",\"btn_OpenSelf\",\"btn_Screenshot\",\"btn_inspect\","
+        "\"btn_xxx\",\"\"],\"exposureCfg\":[{\"id\":\"btn_Grid\",\"ratio\":0.75,\"duration\":5000},{\"id\":\"btn_"
+        "TitleExpand\",\"ratio\":0.9,\"duration\":1000}]},{\"shareNode\":[\"scroll_item_1\"],\"exposureCfg\":[{\"id\":\"scroll_item_2\",\"ratio\":0.85,"
+        "\"duration\":5000},{\"id\":\"scroll_item_12\",\"ratio\":0.4,\"duration\":3000}]}]}";
+}
+
+void GetConfigTest3(std::string& config)
+{
+    config =
+        "{\"enable\":true,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true},\"config\":[{\"pageUrl\":"
+        "\"pages/"
+        "Index\"},{\"pageUrl\":\"pages/"
+        "ScrollPage\"}]}";
+}
+
+void GetConfigTest4(std::string& config)
+{
+    config =
+        "{\"enable\":true,\"globalSwitch\":{\"page\":true,\"component\":true,\"exposure\":true},\"config\":[{\"pageUrl\":"
+        "\"pages/"
+        "Index\",\"shareNode\":[\"hahaha\",\"btn_TitleExpand\",\"btn_OpenSelf\",\"btn_Screenshot\",\"btn_inspect\","
+        "\"btn_xxx\",\"\"],\"exposureCfg\":[{\"id\":\"btn_Grid\",\"ratio\":0.75,\"duration\":5000},{\"id\":\"btn_"
+        "TitleExpand\",\"ratio\":0.9,\"duration\":1000}]},{\"pageUrl\":\"pages/"
+        "ScrollPage\",\"shareNode\":[\"scroll_item_1\"],\"exposureCfg\":[{\"id\":\"scroll_item_2\",\"ratio\":0.85,"
+        "\"duration\":5000},{\"id\":\"scroll_item_12\",\"ratio\":0.4,\"duration\":3000}]}]}";
+}
+
 RefPtr<NG::FrameNode> CreatePageNode(const std::string pageUrl)
 {
     auto pageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -671,8 +713,66 @@ HWTEST_F(EventRecorderTest, SetFocusContainerInfo002, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, Init001, TestSize.Level1)
 {
+    std::string str = "";
     Recorder::EventConfig* config = new Recorder::EventConfig();
-    config->Init("");
+    config->Init(str);
+    EXPECT_EQ(str, "");
+}
+
+/**
+ * @tc.name: Init002
+ * @tc.desc: Test Init.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, Init002, TestSize.Level1)
+{
+    std::string str;
+    GetConfigTest(str);
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    config->Init(str);
+    EXPECT_NE(str, "");
+}
+
+/**
+ * @tc.name: Init003
+ * @tc.desc: Test Init.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, Init003, TestSize.Level1)
+{
+    std::string str;
+    GetConfigTest2(str);
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    config->Init(str);
+    EXPECT_NE(str, "");
+}
+
+/**
+ * @tc.name: Init004
+ * @tc.desc: Test Init.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, Init004, TestSize.Level1)
+{
+    std::string str;
+    GetConfigTest3(str);
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    config->Init(str);
+    EXPECT_NE(str, "");
+}
+
+/**
+ * @tc.name: Init005
+ * @tc.desc: Test Init.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, Init005, TestSize.Level1)
+{
+    std::string str;
+    GetConfigTest4(str);
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    config->Init(str);
+    EXPECT_NE(str, "");
 }
 
 /**
@@ -1100,5 +1200,67 @@ HWTEST_F(EventRecorderTest, GetPageUrl001, TestSize.Level1)
     Recorder::EventRecorder::Get().isFocusContainerChanged_ = false;
     std::string url = Recorder::EventRecorder::Get().GetPageUrl();
     EXPECT_NE(url, "");
+}
+
+/**
+ * @tc.name: PutString005
+ * @tc.desc: Test PutString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, PutString005, TestSize.Level1)
+{
+    Recorder::ExposureCfg cfg;
+    Recorder::NodeDataCache::Get().Clear("");
+    auto node = CreatePageNode("pages/Index");
+    std::string id = "";
+    std::string value = "";
+    bool result = Recorder::NodeDataCache::Get().PutString(node, id, value);
+    EXPECT_FALSE(result);
+
+    id = "";
+    value = "test";
+    result = Recorder::NodeDataCache::Get().PutString(node, id, value);
+    EXPECT_FALSE(result);
+
+    id = "test";
+    value = "";
+    result = Recorder::NodeDataCache::Get().PutString(node, id, value);
+    EXPECT_FALSE(result);
+
+    id = "test";
+    value = "ROMYWBdsOgXB07y1XB1iVzym8n6QR5ZWaTDbjsCDe5PFbZKrPflxEEGpGPNbuNnHM1k1m9uveVLruC2KUkKOKGIxDo91RpTN1e7Etest";
+    result = Recorder::NodeDataCache::Get().PutString(node, id, value);
+    EXPECT_FALSE(result);
+
+    id = "";
+    value = "ROMYWBdsOgXB07y1XB1iVzym8n6QR5ZWaTDbjsCDe5PFbZKrPflxEEGpGPNbuNnHM1k1m9uveVLruC2KUkKOKGIxDo91RpTN1e7Etest";
+    result = Recorder::NodeDataCache::Get().PutString(node, id, value);
+    EXPECT_FALSE(result);
+
+    id = "test";
+    value = "test";
+    Recorder::NodeDataCache::Get().shouldCollectFull_ = false;
+    result = Recorder::NodeDataCache::Get().PutString(node, id, value);
+
+    Recorder::NodeDataCache::Get().shouldCollectFull_ = true;
+    result = Recorder::NodeDataCache::Get().PutString(node, id, value);
+
+    auto pageNode = node->GetPageNode();
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    pagePattern->pageInfo_->url_ = "";
+    Recorder::NodeDataCache::Get().shouldCollectFull_ = true;
+    result = Recorder::NodeDataCache::Get().PutString(node, id, value);
+   
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: OnPageReady001
+ * @tc.desc: Test OnPageReady.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, OnPageReady001, TestSize.Level1)
+{
+    Recorder::NodeDataCache::Get().OnPageReady();
 }
 } // namespace OHOS::Ace
