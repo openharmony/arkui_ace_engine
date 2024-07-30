@@ -1147,14 +1147,25 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSpringProperty()
     auto propertyCallback = [weak = AceType::WeakClaim(this)](float position) {
         auto scroll = weak.Upgrade();
         CHECK_NULL_VOID(scroll);
-        if (!scroll->isSpringAnimationStop_) {
-            if (NearEqual(scroll->finalPosition_, position, SPRING_ACCURACY)) {
-                scroll->ProcessSpringMotion(scroll->finalPosition_);
-                scroll->StopSpringAnimation();
-            } else {
-                scroll->ProcessSpringMotion(position);
+        if (scroll->isSpringAnimationStop_) {
+            return;
+        }
+        if (!NearEqual(scroll->finalPosition_, position, SPRING_ACCURACY)) {
+            scroll->ProcessSpringMotion(position);
+            return;
+        }
+        /*
+         * In order to prevent accumulation errors, the current position is re obtained to ensure that
+         * the last frame can accurately stop at the top and bottom positions.
+         */
+        if (scroll->currentPositionCallback_) {
+            double currPos = scroll->currentPositionCallback_();
+            if (NearEqual(currPos, scroll->currentPos_, 0.5)) {
+                scroll->currentPos_ = currPos;
             }
         }
+        scroll->ProcessSpringMotion(scroll->finalPosition_);
+        scroll->StopSpringAnimation();
     };
     springOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     return springOffsetProperty_;
