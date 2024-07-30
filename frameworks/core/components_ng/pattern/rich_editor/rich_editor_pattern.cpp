@@ -2767,7 +2767,6 @@ void RichEditorPattern::HandleBlurEvent()
     isCaretInContentArea_ = reason == BlurReason::WINDOW_BLUR && IsCaretInContentArea();
     HandleOnEditChanged(false);
     isMoveCaretAnywhere_ = false;
-    FinishTextPreview();
 }
 
 void RichEditorPattern::HandleFocusEvent()
