@@ -2473,6 +2473,10 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
         if (tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
             continue;
         }
+        if (tag == V2::CUSTOM_SPAN_NODE_ETS_TAG) {
+            AddChildSpanItem(current.node);
+            childNodes_.emplace_back(current.node);
+        }
         const auto& nextChildren = current.node->GetChildren();
         if (nextChildren.empty()) {
             continue;
@@ -2626,6 +2630,13 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
             auto placeholderSpan = placeholderSpanNode->GetSpanItem();
             placeholderSpan->placeholderSpanNodeId = placeholderSpanNode->GetId();
             spans_.emplace_back(placeholderSpan);
+        }
+    } else if (child->GetTag() == V2::CUSTOM_SPAN_NODE_ETS_TAG) {
+        auto customSpanNode = DynamicCast<CustomSpanNode>(child);
+        if (customSpanNode) {
+            auto customSpan = customSpanNode->GetSpanItem();
+            customSpan->placeholderSpanNodeId = customSpanNode->GetId();
+            spans_.emplace_back(customSpan);
         }
     }
 }

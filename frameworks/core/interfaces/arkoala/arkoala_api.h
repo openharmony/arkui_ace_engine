@@ -685,7 +685,8 @@ enum ArkUINodeType {
     ARKUI_IMAGE_ANIMATOR,
     ARKUI_CIRCLE,
     ARKUI_TAB_CONTENT,
-    ARKUI_NAVIGATION
+    ARKUI_NAVIGATION,
+    ARKUI_CUSTOM_SPAN,
 };
 
 enum ArkUIEventCategory {
@@ -1092,6 +1093,8 @@ struct ArkUICustomNodeEvent {
     ArkUI_Int64 extraParam;
     ArkUI_Int64 canvas;
     ArkUI_Int32 data[8];
+    ArkUIEventCallbackArg numberData[ARKUI_ASYNC_EVENT_ARGS_COUNT];
+    ArkUIEventCallbackArg numberReturnData[ARKUI_ASYNC_EVENT_ARGS_COUNT];
 };
 
 struct ArkUIExpectedFrameRateRange {
@@ -4778,6 +4781,7 @@ struct ArkUIExtendedNodeAPI {
     ArkUI_Int32 (*getCustomMethodFlag)(ArkUINodeHandle node);
 
     void (*registerCustomNodeAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 kind, void* extraParam);
+    void (*registerCustomSpanAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 kind, void* extraParam);
     ArkUI_Int32 (*unregisterCustomNodeAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 kind);
     void (*registerCustomNodeAsyncEventReceiver)(void (*eventReceiver)(ArkUICustomNodeEvent* event));
 

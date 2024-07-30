@@ -19,6 +19,8 @@
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
-const ArkUISpanModifier* GetSpanModifier();
+    const ArkUISpanModifier* GetSpanModifier();
+    void SetCustomSpanOnMeasure(ArkUINodeHandle node, void* extraParam);
+    void SetCustomSpanOnDraw(ArkUINodeHandle node, void* extraParam);
 }
 #endif

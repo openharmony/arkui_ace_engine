@@ -273,6 +273,7 @@ std::unordered_map<uint32_t, std::string> ACCESSIBILITY_ROLE_CONVERT_PROPERTY_MA
     { static_cast<uint32_t>(ARKUI_NODE_RELATIVE_CONTAINER), "RelativeContainer" },
     { static_cast<uint32_t>(ARKUI_NODE_GRID), "Grid" },
     { static_cast<uint32_t>(ARKUI_NODE_GRID_ITEM), "GridItem" },
+    { static_cast<uint32_t>(ARKUI_NODE_CUSTOM_SPAN), "CustomSpan" },
 };
 
 std::unordered_map<std::string, uint32_t> ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP = {
@@ -310,6 +311,7 @@ std::unordered_map<std::string, uint32_t> ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP 
     { "RelativeContainer", static_cast<uint32_t>(ARKUI_NODE_RELATIVE_CONTAINER) },
     { "Grid", static_cast<uint32_t>(ARKUI_NODE_GRID) },
     { "GridItem", static_cast<uint32_t>(ARKUI_NODE_GRID_ITEM) },
+    { "CustomSpan", static_cast<uint32_t>(ARKUI_NODE_CUSTOM_SPAN) },
 };
 
 void ResetAttributeItem()
@@ -12524,6 +12526,9 @@ bool CheckIfAttributeLegal(ArkUI_NodeHandle node, int32_t type)
     if (node->type == ARKUI_NODE_SPAN) {
         auto it = SPAN_ATTRIBUTES_MAP.find(type);
         return it != SPAN_ATTRIBUTES_MAP.end();
+    }
+    if (node->type == ARKUI_NODE_CUSTOM_SPAN) {
+        return false;
     }
     return true;
 }
