@@ -5753,6 +5753,12 @@ void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     if (filter.IsFastFilter()) {
         return;
     }
+
+    auto nestedScroll = GetNestedScroll().forward;
+    json->PutExtAttr("nestedScroll",
+        nestedScroll == NestedScrollMode::SELF_ONLY ? "SwiperNestedScrollMode.SELF_ONLY"
+                                                    : "SwiperNestedScrollMode.SELF_FIRST",
+        filter);
     json->PutExtAttr("currentIndex", currentIndex_, filter);
     json->PutExtAttr("currentOffset", currentOffset_, filter);
     json->PutExtAttr("uiCastJumpIndex", uiCastJumpIndex_.value_or(-1), filter);
@@ -5802,7 +5808,7 @@ std::string SwiperPattern::GetDotIndicatorStyle() const
         swiperParameters_->selectedColorVal.value_or(Color::FromString("#ff007dff")).ColorToString().c_str());
     jsonValue->Put(
         "color", swiperParameters_->colorVal.value_or(Color::FromString("#19182431")).ColorToString().c_str());
-    jsonValue->Put("mask", swiperParameters_->maskValue ? "true" : "false");
+    jsonValue->Put("mask", swiperParameters_->maskValue.value_or(false) ? "true" : "false");
     jsonValue->Put("maxDisplayCount",
         (swiperParameters_->maxDisplayCountVal.has_value()) ? swiperParameters_->maxDisplayCountVal.value() : 0);
     return jsonValue->ToString();
