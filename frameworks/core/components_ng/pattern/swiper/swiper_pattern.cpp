@@ -1060,10 +1060,10 @@ float SwiperPattern::IgnoreBlankOffset(bool isJump)
         auto targetIndexValue = IsLoop() ? targetIndex_.value() : GetLoopIndex(targetIndex_.value());
         if (!IsLoop()) {
             if (targetIndexValue == 0 && prevMarginIgnoreBlank_) {
-                result += GetPrevMargin();
+                result += GetPrevMargin() + GetItemSpace();
             }
             if (targetIndexValue >= (TotalCount() - GetDisplayCount()) && nextMarginIgnoreBlank_) {
-                result -= GetNextMargin();
+                result -= GetNextMargin() + GetItemSpace();
             }
         }
     }
@@ -1072,10 +1072,10 @@ float SwiperPattern::IgnoreBlankOffset(bool isJump)
         auto targetIndexValue = IsLoop() ? jumpIndex_.value() : GetLoopIndex(jumpIndex_.value());
         if (!IsLoop()) {
             if (targetIndexValue == 0 && prevMarginIgnoreBlank_) {
-                result += GetPrevMargin();
+                result += GetPrevMargin() + GetItemSpace();
             }
             if (targetIndexValue >= (TotalCount() - GetDisplayCount()) && nextMarginIgnoreBlank_) {
-                result -= GetNextMargin();
+                result -= GetNextMargin() + GetItemSpace();
             }
         }
     }
@@ -3469,9 +3469,9 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
         delta = extentPair.Trailing();
     }
     if (LessNotEqual(currentIndexOffset_, 0.0f) && nextMarginIgnoreBlank_) {
-        delta += GetNextMargin();
+        delta += GetNextMargin() + GetItemSpace();
     } else if (GreatNotEqual(currentIndexOffset_, 0.0f) && prevMarginIgnoreBlank_) {
-        delta -= GetPrevMargin();
+        delta -= GetPrevMargin() + GetItemSpace();
     }
     // spring curve: (velocity: 0.0, mass: 1.0, stiffness: 228.0, damping: 30.0)
     auto springCurve = MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f);
