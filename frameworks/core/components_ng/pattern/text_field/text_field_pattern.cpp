@@ -125,16 +125,12 @@ constexpr Dimension DEFAULT_FONT = Dimension(16, DimensionUnit::FP);
 constexpr Dimension COUNTER_BOTTOM = 22.0_vp;
 constexpr double BOTTOM_MARGIN = 22.0;
 constexpr int32_t ILLEGAL_VALUE = 0;
-constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
-constexpr float DOUBLECLICK_MIN_INTERVAL_MS = 0.0f;
 constexpr float ERROR_TEXT_MAX_FONT_SCALE = 2.0f;
-constexpr Dimension DOUBLECLICK_DISTANCE = 15.0_vp;
 constexpr double VELOCITY = -1000;
 constexpr double MASS = 1.0;
 constexpr double STIFFNESS = 428.0;
 constexpr double DAMPING = 10.0;
 constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
-constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
 constexpr uint32_t OBSCURE_SHOW_TICKS = 1;
 constexpr Dimension ERROR_TEXT_TOP_MARGIN = 8.0_vp;
@@ -166,9 +162,6 @@ constexpr int32_t PREVIEW_NO_ERROR = 0;
 constexpr int32_t PREVIEW_NULL_POINTER = 1;
 constexpr int32_t PREVIEW_BAD_PARAMETERS = -1;
 constexpr double MINIMAL_OFFSET = 0.01f;
-
-constexpr int32_t CLICK_DOUBLE = 2;
-constexpr int32_t CLICK_TRIPLE = 3;
 
 static std::unordered_map<TextContentType, std::pair<AceAutoFillType, std::string>> contentTypeMap_ = {
     {TextContentType::VISIBLE_PASSWORD,
@@ -2126,7 +2119,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     CHECK_NULL_VOID(!IsDragging());
     CHECK_NULL_VOID(!IsHandleDragging());
     parentGlobalOffset_ = GetPaintRectGlobalOffset();
-    if (selectOverlay_->IsClickAtHandle(info)) {
+    if (selectOverlay_->IsClickAtHandle(info) && !multipleClickRecognizer_->IsRunning()) {
         return;
     }
     auto focusHub = GetFocusHub();
@@ -2155,10 +2148,11 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     }
     selectOverlay_->SetLastSourceType(info.GetSourceDevice());
     selectOverlay_->SetUsingMouse(info.GetSourceDevice() == SourceType::MOUSE);
-    auto clickTimes = CheckClickLocation(info);
-    if (clickTimes == CLICK_TRIPLE) {
+    lastClickTimeStamp_ = info.GetTimeStamp();
+    multipleClickRecognizer_->Start(info);
+    if (multipleClickRecognizer_->IsTripleClick()) {
         HandleTripleClickEvent(info);  // triple click event
-    } else if (clickTimes == CLICK_DOUBLE) {
+    } else if (multipleClickRecognizer_->IsDoubleClick()) {
         HandleDoubleClickEvent(info); // 注册手势事件
     } else {
         HandleSingleClickEvent(info, firstGetFocus);
@@ -2169,32 +2163,6 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     isFocusedBeforeClick_ = false;
-}
-
-int32_t TextFieldPattern::CheckClickLocation(GestureEvent& info)
-{
-    TimeStamp clickTimeStamp = info.GetTimeStamp();
-    std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout = clickTimeStamp - lastClickTimeStamp_;
-    std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeoutLast =
-        lastClickTimeStamp_ - penultimateClickTimeStamp_;
-    penultimateClickTimeStamp_ = lastClickTimeStamp_;
-    lastClickTimeStamp_ = info.GetTimeStamp();
-
-    Offset location = info.GetLocalLocation();
-    auto deltaOffset = location - clickLocation_;
-    auto deltaDistance = deltaOffset.GetDistance();
-    clickLocation_ = location;
-
-    if (timeoutLast.count() >= DOUBLECLICK_MIN_INTERVAL_MS && timeoutLast.count() < DOUBLECLICK_INTERVAL_MS &&
-        timeout.count() >= DOUBLECLICK_MIN_INTERVAL_MS && timeout.count() < DOUBLECLICK_INTERVAL_MS &&
-        deltaDistance < DOUBLECLICK_DISTANCE.ConvertToPx()) {
-        return CLICK_TRIPLE;
-    }
-    if (timeout.count() >= DOUBLECLICK_MIN_INTERVAL_MS && timeout.count() < DOUBLECLICK_INTERVAL_MS &&
-        deltaDistance < DOUBLECLICK_DISTANCE.ConvertToPx()) {
-        return CLICK_DOUBLE;
-    }
-    return 0;
 }
 
 void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetFocus)

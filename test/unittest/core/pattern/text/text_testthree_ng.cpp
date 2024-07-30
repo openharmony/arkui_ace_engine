@@ -514,6 +514,12 @@ HWTEST_F(TextTestThreeNg, HandleDoubleClickEvent001, TestSize.Level1)
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
     ASSERT_NE(paragraph, nullptr);
     pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    auto makeEvent = [](GestureEvent& info, bool first) {
+        info.localLocation_ = Offset(0, first ? 0 : 10);
+        info.globalLocation_ = info.localLocation_;
+        TimeStamp timeStamp(std::chrono::nanoseconds(first ? 0 : 3000));
+        info.SetTimeStamp(timeStamp);
+    };
 
     /**
      * @tc.steps: step4. create GestureEvent and call HandleClickEvent function quickly to trigger doubleClick.
@@ -521,30 +527,41 @@ HWTEST_F(TextTestThreeNg, HandleDoubleClickEvent001, TestSize.Level1)
      */
     pattern->textSelector_.Update(-2, -2);
     GestureEvent info;
-    info.localLocation_ = Offset(0, 0);
-
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>(true);
     // test CopyOptions is None
     pattern->copyOption_ = CopyOptions::None;
+    pattern->isDoubleClick_ = false;
+    makeEvent(info, true);
     pattern->HandleClickEvent(info);
-    EXPECT_TRUE(pattern->hasClicked_);
+    EXPECT_TRUE(pattern->multipleClickRecognizer_->IsRunning());
+    makeEvent(info, false);
     pattern->HandleClickEvent(info);
-    EXPECT_FALSE(pattern->hasClicked_);
+    EXPECT_FALSE(pattern->isDoubleClick_);
 
     // test mouse doubleClick
     pattern->isMousePressed_ = true;
     pattern->copyOption_ = CopyOptions::Local;
+    pattern->isDoubleClick_ = false;
+    makeEvent(info, true);
     pattern->HandleClickEvent(info);
-    EXPECT_TRUE(pattern->hasClicked_);
+    EXPECT_TRUE(pattern->multipleClickRecognizer_->IsRunning());
+    makeEvent(info, false);
+    pattern->textForDisplay_ = "ABC";
     pattern->HandleClickEvent(info);
-    EXPECT_FALSE(pattern->hasClicked_);
+    EXPECT_TRUE(pattern->isDoubleClick_);
 
     // test gesture doubleClick
     pattern->isMousePressed_ = false;
     pattern->copyOption_ = CopyOptions::Local;
+    pattern->isDoubleClick_ = false;
+    makeEvent(info, true);
     pattern->HandleClickEvent(info);
-    EXPECT_TRUE(pattern->hasClicked_);
+    EXPECT_TRUE(pattern->multipleClickRecognizer_->IsRunning());
+    makeEvent(info, false);
     pattern->HandleClickEvent(info);
-    EXPECT_FALSE(pattern->hasClicked_);
+    EXPECT_TRUE(pattern->isDoubleClick_);
     pattern->pManager_->Reset();
 }
 
@@ -587,8 +604,14 @@ HWTEST_F(TextTestThreeNg, HandleDoubleClickEvent002, TestSize.Level1)
     pattern->isMousePressed_ = false;
     GestureEvent info;
     info.localLocation_ = Offset(0, 0);
+    info.globalLocation_ = Offset(0, 0);
+    TimeStamp timeStamp(std::chrono::nanoseconds(0));
+    info.SetTimeStamp(timeStamp);
     pattern->HandleClickEvent(info);
     info.localLocation_ = Offset(0, 10);
+    info.globalLocation_ = Offset(0, 10);
+    TimeStamp timeStamp0(std::chrono::nanoseconds(3000));
+    info.SetTimeStamp(timeStamp0);
     pattern->HandleClickEvent(info);
     EXPECT_TRUE(pattern->isDoubleClick_);
     EXPECT_EQ(pattern->textResponseType_, TextResponseType::NONE);

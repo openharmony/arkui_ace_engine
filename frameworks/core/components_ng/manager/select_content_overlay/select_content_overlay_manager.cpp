@@ -231,6 +231,11 @@ void SelectContentOverlayManager::RegisterTouchCallback(SelectOverlayInfo& info)
         CHECK_NULL_VOID(callback);
         callback->OnOverlayTouchMove(event);
     };
+    info.onClick = [weakCallback = WeakClaim(AceType::RawPtr(callback))](const GestureEvent& event, bool isClickCaret) {
+        auto callback = weakCallback.Upgrade();
+        CHECK_NULL_VOID(callback);
+        callback->OnOverlayClick(event, isClickCaret);
+    };
 }
 
 std::function<void()> SelectContentOverlayManager::MakeMenuCallback(

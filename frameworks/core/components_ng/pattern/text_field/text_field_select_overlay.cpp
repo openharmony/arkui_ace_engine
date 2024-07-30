@@ -541,4 +541,21 @@ void TextFieldSelectOverlay::OnHandleLevelModeChanged(HandleLevelMode mode)
     }
     BaseTextSelectOverlay::OnHandleLevelModeChanged(mode);
 }
+
+void TextFieldSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isClickCaret)
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto recognizer = pattern->GetMultipleClickRecognizer();
+    CHECK_NULL_VOID(recognizer);
+    if (recognizer->IsRunning() && recognizer->IsValidClick(event)) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield overlayClick multiple click recognizer is running.");
+        auto overlayEvent = event;
+        overlayEvent.SetLocalLocation(recognizer->GetBeginLocalLocation());
+        overlayEvent.SetGlobalLocation(recognizer->GetBeginGlobalLocation());
+        pattern->HandleClickEvent(overlayEvent);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield overlayClick");
+    }
+}
 } // namespace OHOS::Ace::NG
