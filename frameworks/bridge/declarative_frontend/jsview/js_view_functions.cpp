@@ -309,6 +309,11 @@ void ViewFunctions::InitViewFunctions(
     JSRef<JSVal> jsAboutToBeDeletedFunc = jsObject->GetProperty("aboutToBeDeleted");
     if (jsAboutToBeDeletedFunc->IsFunction()) {
         jsAboutToBeDeletedFunc_ = JSRef<JSFunc>::Cast(jsAboutToBeDeletedFunc);
+    } else {
+        jsAboutToBeDeletedFunc = jsObject->GetProperty("aboutToBeDeletedInternal");
+        if (jsAboutToBeDeletedFunc->IsFunction()) {
+            jsAboutToBeDeletedFunc_ = JSRef<JSFunc>::Cast(jsAboutToBeDeletedFunc);
+        }
     }
 
     JSRef<JSVal> jsAboutToRenderFunc = jsObject->GetProperty("aboutToRender");
