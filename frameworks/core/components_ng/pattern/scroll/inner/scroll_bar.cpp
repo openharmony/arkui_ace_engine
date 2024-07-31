@@ -703,8 +703,7 @@ void ScrollBar::OnCollectLongPressTarget(const OffsetF& coordinateOffset, const 
         longPressRecognizer_->SetSysGestureJudge([](const RefPtr<GestureInfo>& gestureInfo,
                                                  const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
             const auto &inputEventType = gestureInfo->GetInputEventType();
-            TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "ScrollBarPattern::OnCollectClickTarget inputEvent:%{public}d",
-                inputEventType);
+            TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "input event type:%{public}d", inputEventType);
             if (inputEventType == InputEventType::MOUSE_BUTTON) {
                 return GestureJudgeResult::CONTINUE;
             }
