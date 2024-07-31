@@ -317,8 +317,14 @@ void PluginSubContainer::SetPluginComponentTheme(const std::string& path, const 
         pluginResourceInfo.SetPackagePath(path.substr(0, position + 1));
     }
     pluginResourceInfo.SetResourceConfiguration(resConfig);
-    pipelineContext_->SetThemeManager(AceType::MakeRefPtr<ThemeManagerImpl>());
-    auto pluginThemeManager = pipelineContext_->GetThemeManager();
+    RefPtr<ThemeManagerImpl> pluginThemeManager;
+    if (SystemProperties::GetResourceDecoupling()) {
+        auto resourceAdapter = ResourceAdapter::CreateV2();
+        pluginThemeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
+    } else {
+        pluginThemeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+    }
+    pipelineContext_->SetThemeManager(pluginThemeManager);
     if (pluginThemeManager) {
         // Init resource, load theme map, do not parse yet.
         pluginThemeManager->InitResource(pluginResourceInfo);
