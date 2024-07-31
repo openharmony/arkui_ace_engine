@@ -365,9 +365,79 @@ void UINode::ResetParent()
     depth_ = -1;
 }
 
+namespace {
+std::ostream& operator<<(std::ostream& ss, const RefPtr<UINode>& node)
+{
+    return ss << node->GetId() << "(" << node->GetTag() << "," << node->GetDepth()
+        << "," << node->GetChildren().size() << ")";
+}
+
+std::string ToString(const RefPtr<UINode>& node)
+{
+    std::stringstream ss;
+    ss << node;
+    for (auto parent = node->GetParent(); parent; parent = parent->GetParent()) {
+        ss << "->" << parent;
+    }
+    return ss.str();
+}
+
+void LoopDetected(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
+{
+    auto childNode = ToString(child);
+    auto currentNode = ToString(current);
+
+    constexpr size_t totalLengthLimit = 900; // hilog oneline length limit is 1024
+    constexpr size_t childLengthLimit = 100;
+    static_assert(totalLengthLimit > childLengthLimit, "totalLengthLimit too small");
+    constexpr size_t currentLengthLimit = totalLengthLimit - childLengthLimit;
+
+    LOGF("Detected loop: child[%{public}.*s] vs current[%{public}.*s]",
+        (int)childLengthLimit, childNode.c_str(), (int)currentLengthLimit, currentNode.c_str());
+
+    // log full childNode info in case of hilog length limit reached
+    if (childNode.length() > childLengthLimit) {
+        auto s = childNode.c_str();
+        for (size_t i = 0; i < childNode.length(); i += totalLengthLimit) {
+            LOGI("child.%{public}zu:[%{public}.*s]", i, (int)totalLengthLimit, s + i);
+        }
+    }
+
+    // log full currentNode info in case of hilog length limit reached
+    if (currentNode.length() > currentLengthLimit) {
+        auto s = currentNode.c_str();
+        for (size_t i = 0; i < currentNode.length(); i += totalLengthLimit) {
+            LOGI("current.%{public}zu:[%{public}.*s]", i, (int)totalLengthLimit, s + i);
+        }
+    }
+
+    if (SystemProperties::GetLayoutDetectEnabled()) {
+        abort();
+    } else {
+        LogBacktrace();
+    }
+}
+
+bool DetectLoop(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
+{
+    if (!child->GetChildren().empty() || child == current) {
+        for (auto parent = current; parent; parent = parent->GetParent()) {
+            if (parent == child) {
+                LoopDetected(child, current);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+}
+
 void UINode::DoAddChild(
     std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently, bool addDefaultTransition)
 {
+    if (DetectLoop(child, Claim(this))) {
+        return;
+    }
     children_.insert(it, child);
 
     child->SetParent(Claim(this));
