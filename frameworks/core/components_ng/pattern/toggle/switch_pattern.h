@@ -163,10 +163,8 @@ private:
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
-    void HandleFocusEvent(const RefPtr<SwitchPaintProperty>& switchPaintProperty,
-        const RefPtr<SwitchTheme>& switchTheme);
-    void HandleBlurEvent(const RefPtr<SwitchPaintProperty>& switchPaintProperty,
-        const RefPtr<SwitchTheme>& switchTheme);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
     void UpdateColorWhenIsOn(bool isOn);
     float GetSwitchWidth() const;
     float GetSwitchContentOffsetX() const;
@@ -181,6 +179,7 @@ private:
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
     void OnIsFocusActiveUpdate(bool isFocusAcitve);
+    void UpdateSwitchStyle();
 
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);

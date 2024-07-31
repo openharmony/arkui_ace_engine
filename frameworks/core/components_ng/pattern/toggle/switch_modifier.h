@@ -274,6 +274,7 @@ private:
     Color activeColor_;
     Color inactiveColor_;
     Color userActiveColor_;
+    Color pointColorUnchecked_;
     Dimension hoverRadius_ = 8.0_vp;
     Dimension focusRadius_ = 8.0_vp;
     float hoverDuration_ = 0.0f;
