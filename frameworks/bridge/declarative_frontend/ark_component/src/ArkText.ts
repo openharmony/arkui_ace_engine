@@ -781,7 +781,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     super(nativePtr, classType);
   }
   allowChildTypes(): string[] {
-    return ["Span", "ImageSpan", "SymbolSpan", "ContainerSpan"];
+    return ['Span', 'ImageSpan', 'SymbolSpan', 'ContainerSpan'];
   }
   initialize(value: Object[]): void {
     modifierWithKey(this._modifiersWithKeys, TextContentModifier.identity, TextContentModifier, value[0]);
@@ -807,7 +807,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, FontColorModifier.identity, FontColorModifier, value);
     return this;
   }
-  fontSize(value: any): TextAttribute {
+  fontSize(value: number | string | Resource): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, FontSizeModifier.identity, FontSizeModifier, value);
     return this;
   }
