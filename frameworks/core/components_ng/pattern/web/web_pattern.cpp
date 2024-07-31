@@ -1792,6 +1792,7 @@ void WebPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
         drawSize.SetHeight(DEFAULT_WEB_HEIGHT);
     }
 
+    TAG_LOGD(AceLogTag::ACE_WEB, "BeforeSync, drawsize_ : %{public}s", drawSize.ToString().c_str());
     drawSize_ = drawSize;
     drawSizeCache_ = drawSize_;
 }
@@ -1823,6 +1824,7 @@ void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, do
         } else if (keyBoardAvoidMode_ == WebKeyboardAvoidMode::OVERLAYS_CONTENT) {
             return;
         } else {
+            TAG_LOGI(AceLogTag::ACE_WEB, "KeyboardShow newHeight: %{public}f", newHeight);
             drawSize_.SetHeight(newHeight);
             visibleViewportSize_.SetWidth(-1.0);
             visibleViewportSize_.SetHeight(-1.0);
