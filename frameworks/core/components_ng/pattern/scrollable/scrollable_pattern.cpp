@@ -822,7 +822,6 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
             scrollBarOverlayModifier_->SetOpacity(UINT8_MAX);
         }
         scrollBar_->ScheduleDisappearDelayTask();
-        UpdateScrollBarOffset();
     }
     UpdateBorderRadius();
 }
