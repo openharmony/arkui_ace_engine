@@ -6287,15 +6287,14 @@ void OverlayManager::MountToParentWithService(const RefPtr<UINode>& rootNode, co
     CHECK_NULL_VOID(rootNode);
     auto pipeline = rootNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetInstallationFree()) {
+    if (pipeline->GetInstallationFree() && SetNodeBeforeAppbar(rootNode, node)) {
         // it is in atomicservice
-        SetNodeBeforeAppbar(rootNode, node);
+        return;
+    }
+    if (node->GetTag() == V2::MODAL_PAGE_TAG) {
+        node->MountToParent(rootNode, DEFAULT_NODE_SLOT, false, false, true);
     } else {
-        if (node->GetTag() == V2::MODAL_PAGE_TAG) {
-            node->MountToParent(rootNode, DEFAULT_NODE_SLOT, false, false, true);
-        } else {
-            node->MountToParent(rootNode);
-        }
+        node->MountToParent(rootNode);
     }
 }
  
@@ -6315,23 +6314,24 @@ void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, cons
     }
 }
  
-void OverlayManager::SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, const RefPtr<FrameNode>& node)
+bool OverlayManager::SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, const RefPtr<FrameNode>& node)
 {
-    CHECK_NULL_VOID(rootNode);
-    CHECK_NULL_VOID(node);
+    CHECK_NULL_RETURN(rootNode, false);
+    CHECK_NULL_RETURN(node, false);
     for (auto child : rootNode->GetChildren()) {
-        CHECK_NULL_VOID(child);
+        CHECK_NULL_RETURN(child, false);
         if (child->GetTag() != V2::ATOMIC_SERVICE_ETS_TAG) {
             continue;
         }
         for (auto childNode : child->GetChildren()) {
-            CHECK_NULL_VOID(childNode);
+            CHECK_NULL_RETURN(childNode, false);
             if (childNode->GetTag() == V2::APP_BAR_ETS_TAG) {
                 TAG_LOGD(AceLogTag::ACE_OVERLAY, "setNodeBeforeAppbar AddChildBefore");
                 child->AddChildBefore(node, childNode, node->GetTag() == V2::MODAL_PAGE_TAG);
-                return;
+                return true;
             }
         }
     }
+    return false;
 }
 } // namespace OHOS::Ace::NG
