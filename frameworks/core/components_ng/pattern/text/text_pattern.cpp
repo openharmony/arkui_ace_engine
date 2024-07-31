@@ -64,8 +64,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double DIMENSION_VALUE = 16.0;
-constexpr const char COPY_ACTION[] = "复制";
-constexpr const char SELECT_ACTION[] = "选择文本";
+constexpr char COPY[] = "copy";
+constexpr char SELECT_TEXT[] = "selectText";
 constexpr const char SYMBOL_COLOR[] = "BLACK";
 constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
 const std::u16string SYMBOL_TRANS = u"\uF0001";
@@ -517,14 +517,6 @@ std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
     return value;
 }
 
-CopyOptions TextPattern::HandleOnCopyOptions()
-{
-    if (copyOption_ == CopyOptions::None && dataDetectorAdapter_->hasClickedMenuOption_) {
-        return CopyOptions::Local;
-    }
-    return copyOption_;
-}
-
 void TextPattern::HandleOnCopy()
 {
     CHECK_NULL_VOID(clipboard_);
@@ -537,7 +529,7 @@ void TextPattern::HandleOnCopy()
         if (isSpanStringMode_ && !externalParagraph_) {
             HandleOnCopySpanString();
         } else if (!value.empty()) {
-            clipboard_->SetData(value, HandleOnCopyOptions());
+            clipboard_->SetData(value, copyOption_);
         }
     }
     HiddenMenu();
@@ -561,7 +553,7 @@ void TextPattern::HandleOnCopySpanString()
     std::vector<uint8_t> tlvData;
     subSpanString->EncodeTlv(tlvData);
     clipboard_->AddSpanStringRecord(pasteData, tlvData);
-    clipboard_->SetData(pasteData, HandleOnCopyOptions());
+    clipboard_->SetData(pasteData, copyOption_);
 }
 
 void TextPattern::HiddenMenu()
@@ -878,10 +870,10 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
         CHECK_NULL_VOID(pattern);
         pattern->CloseSelectOverlay();
         pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
-        if (action == std::string(COPY_ACTION)) {
+        if (action == COPY) {
             pattern->HandleOnCopy();
             pattern->ResetSelection();
-        } else if (action == std::string(SELECT_ACTION)) {
+        } else if (action == SELECT_TEXT) {
             if (calculateHandleFunc == nullptr) {
                 pattern->CalculateHandleOffsetAndShowOverlay();
             } else {
@@ -927,7 +919,18 @@ bool TextPattern::ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFu
         aiRect = textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
     }
 
-    return dataDetectorAdapter_->ShowAIEntityMenu(aiSpan, aiRect, host, IsSelectableAndCopy());
+    bool isShowCopy = true;
+    bool isShowSelectText = true;
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+    if (copyOption_ == CopyOptions::None) {
+        isShowCopy = false;
+        isShowSelectText = false;
+    } else if (mode == TextSelectableMode::UNSELECTABLE) {
+        isShowSelectText = false;
+    }
+    return dataDetectorAdapter_->ShowAIEntityMenu(aiSpan, aiRect, host, isShowCopy, isShowSelectText);
 }
 
 void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
