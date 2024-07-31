@@ -41,7 +41,7 @@ constexpr int32_t MAX_POINTID = 9;
 constexpr int32_t MIN_POINTID = 0;
 } // namespace
 
-int32_t OH_ArkUI_DragEvent_GetModifierKeyStates(ArkUI_DragEvent* event, int64_t* keys)
+int32_t OH_ArkUI_DragEvent_GetModifierKeyStates(ArkUI_DragEvent* event, uint64_t* keys)
 {
     if (!event || !keys) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;

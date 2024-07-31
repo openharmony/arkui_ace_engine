@@ -57,7 +57,7 @@
 
 namespace OHOS::Ace::NG {
 namespace NodeModifier {
-int64_t CalculateModifierKeyState(const std::vector<OHOS::Ace::KeyCode>& status)
+uint64_t CalculateModifierKeyState(const std::vector<OHOS::Ace::KeyCode>& status)
 {
     uint64_t modifierKeysState = 0;
     // check ctrl
@@ -80,7 +80,7 @@ int64_t CalculateModifierKeyState(const std::vector<OHOS::Ace::KeyCode>& status)
         modifierKeysState |= ARKUI_MODIFIER_KEY_FN;
     }
 
-    return static_cast<int64_t>(modifierKeysState);
+    return modifierKeysState;
 }
 
 void SetDragEventProperty(const RefPtr<OHOS::Ace::DragEvent>& info, ArkUINodeEvent& event,

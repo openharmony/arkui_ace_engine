@@ -431,7 +431,7 @@ float OH_ArkUI_DragEvent_GetVelocity(ArkUI_DragEvent* event);
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
  * @since 12
  */
-int32_t OH_ArkUI_DragEvent_GetModifierKeyStates(ArkUI_DragEvent* event, int64_t* keys);
+int32_t OH_ArkUI_DragEvent_GetModifierKeyStates(ArkUI_DragEvent* event, uint64_t* keys);
 
 /**
  * @brief Sets whether to enable strict reporting on drag events.
