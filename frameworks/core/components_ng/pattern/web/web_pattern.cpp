@@ -348,12 +348,14 @@ bool WebPattern::NeedSoftKeyboard() const
 void WebPattern::OnAttachToMainTree()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern OnAttachToMainTree");
+    // report component is in foreground.
     delegate_->OnRenderToForeground();
 }
 
 void WebPattern::OnDetachFromMainTree()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern OnDetachFromMainTree");
+    // report component is in background.
     delegate_->OnRenderToBackground();
 }
 
