@@ -28,9 +28,7 @@ OHOS_DIR=${OHOS_DIR_ARG:=../../../../../../..}
 DEST_DIR=${DEST_DIR_ARG:=.}
 DTS_DIR=${DTS_DIR_ARG:=${OHOS_DIR}/interface/sdk-js/api/@internal/component/ets}
 TMP_DIR=${TMP_DIR_ARG:=${OHOS_DIR}/out/libace_c_api_generated}
-GENERATOR=${GENERATOR_ARG:=npx --yes @azanat/idlize@1.3.4 --dts2peer}
-# Use the below to run generator from your idlize workspace
-# GENERATOR=${GENERATOR_ARG:=node $IDLIZE_PATH/lib/index.js --dts2peer}
+GENERATOR=${GENERATOR_ARG:=npx --yes @azanat/idlize@1.3.5 --dts2peer}
 
 echo "Generating C API from ${DTS_DIR} to ${DEST_DIR} with ${GENERATOR}"
 

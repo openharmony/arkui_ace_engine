@@ -11669,8 +11669,8 @@ struct Ark_AnyAPI {
 /*
   For debug purpose:
   Current commit of idlize
-  2024/07/19 16:41:11 686931a13f6a7c3cb265d3b7f3c01db2ec5c8219 fixed colors rgba and align item for column
+  2024/07/31 17:07:32 85f3c2947734585f476a5ed83c1ce7831cf13c41 Image Implementation
 
-Change-Id: I624d5c76d913b3ba72125238e7238190f2378262
+Change-Id: I14b6c0ec6451f0786d6ae236c7dd5d5030eb9233
  */
 
