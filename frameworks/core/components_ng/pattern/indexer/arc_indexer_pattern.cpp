@@ -148,20 +148,22 @@ bool ArcIndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto layoutAlgorithm = DynamicCast<ArcIndexerLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
-    auto size = layoutAlgorithm->GetArcSize();
-    if (arcIndexerSize_ != size && autoCollapse_) {
-        arcIndexerSize_ = size;
-        isNewHeightCalculated_ = true;
-        auto hostNode = dirty->GetHostNode();
-        StartCollapseDelayTask(hostNode, ARC_INDEXER_COLLAPSE_WAIT_DURATION);
-    }
     strokeWidth_ = lastItemSize_;
     arcCenter_ = layoutAlgorithm->GetArcCenter();
     startAngle_ = layoutAlgorithm->GetStartAngle();
     sweepAngle_ = layoutAlgorithm->GetSweepAngle();
     arcRadius_ = layoutAlgorithm->GetArcRadius();
-    stepAngle_ = layoutAlgorithm->GetstepAngle();
     itemRadius_ = layoutAlgorithm->GetitemRadius();
+    auto size = layoutAlgorithm->GetArcSize();
+    auto stepAngle = layoutAlgorithm->GetstepAngle();
+    if ((arcIndexerSize_ != size && autoCollapse_) || (stepAngle_ != stepAngle)) {
+        arcIndexerSize_ = size;
+        stepAngle_ = stepAngle;
+        isNewHeightCalculated_ = true;
+        auto hostNode = dirty->GetHostNode();
+        StartCollapseDelayTask(hostNode, ARC_INDEXER_COLLAPSE_WAIT_DURATION);
+    }
+
     return true;
 }
 
@@ -602,7 +604,6 @@ void ArcIndexerPattern::SetChildNodeStyle(int32_t index, const std::string &node
     nodeLayoutProperty->UpdateFontWeight(defaultFont.GetFontWeight());
     nodeLayoutProperty->UpdateFontFamily(defaultFont.GetFontFamilies());
     nodeLayoutProperty->UpdateItalicFontStyle(defaultFont.GetFontStyle());
-    nodeLayoutProperty->UpdateTextColor(layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor()));
     auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
     if (textAccessibilityProperty) {
         textAccessibilityProperty->SetSelected(false);
