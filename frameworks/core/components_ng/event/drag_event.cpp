@@ -260,7 +260,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 } else {
                     gestureHub->SetPixelMap(nullptr);
                 }
-            } else if (!isNotInPreviewState_) {
+            } else {
                 HideEventColumn();
                 if (gestureHub->GetTextDraggable()) {
                     HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
@@ -292,16 +292,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 } else if (!gestureHub->GetIsTextDraggable()) {
                     gestureHub->SetPixelMap(nullptr);
                 }
-            } else if (!isNotInPreviewState_) {
+            } else {
                 HideEventColumn();
                 HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 HideFilter();
                 SubwindowManager::GetInstance()->HideMenuNG(false, true);
-                actuator->UpdatePreviewOptionFromModifier(frameNode);
-            } else {
-                // For the drag initiacating from mouse, there is no chance to execute the modifier in the floating
-                // pharse, so need to update here to make sure the preview option is available to pass through to drag
-                // framwork later.
                 actuator->UpdatePreviewOptionFromModifier(frameNode);
             }
         }
