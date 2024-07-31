@@ -32,31 +32,53 @@ class FakeAccessibilityManager : public AccessibilityNodeManager {
         int32_t action, const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset) override;
 };
 
-void FakeAccessibilityManager::SearchElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
-        std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
-        int64_t uiExtensionOffset)
+void FakeAccessibilityManager::SearchElementInfoByAccessibilityIdNG(
+    int64_t elementId,
+    int32_t mode,
+    std::list<AccessibilityElementInfo>& infos,
+    const RefPtr<PipelineBase>& context,
+    int64_t uiExtensionOffset
+)
 {
 }
 
-void FakeAccessibilityManager::SearchElementInfosByTextNG(int64_t elementId, const std::string& text,
-    std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
-    const int64_t uiExtensionOffset)
+void FakeAccessibilityManager::SearchElementInfosByTextNG(
+    int64_t elementId,
+    const std::string& text,
+    std::list<Accessibility::AccessibilityElementInfo>& infos,
+    const RefPtr<PipelineBase>& context,
+    const int64_t uiExtensionOffset
+)
 {
 }
 
-void FakeAccessibilityManager::FindFocusedElementInfoNG(int64_t elementId, int32_t focusType,
-        Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context,
-        const int64_t uiExtensionOffset)
+void FakeAccessibilityManager::FindFocusedElementInfoNG(
+    int64_t elementId,
+    int32_t focusType,
+    Accessibility::AccessibilityElementInfo& info,
+    const RefPtr<PipelineBase>& context,
+    const int64_t uiExtensionOffset
+)
 {
 }
 
-void FakeAccessibilityManager::FocusMoveSearchNG(int64_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info,
-        const RefPtr<PipelineBase>& context, const int64_t uiExtensionOffset)
+void FakeAccessibilityManager::FocusMoveSearchNG(
+    int64_t elementId,
+    int32_t direction,
+    Accessibility::AccessibilityElementInfo& info,
+    const RefPtr<PipelineBase>& context,
+    const int64_t uiExtensionOffset
+)
 {
 }
 
-bool FakeAccessibilityManager::ExecuteExtensionActionNG(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset)
+bool FakeAccessibilityManager::ExecuteExtensionActionNG(
+    int64_t elementId,
+    const std::map<std::string, std::string>& actionArguments,
+    int32_t action,
+    const RefPtr<PipelineBase>& context,
+    int64_t uiExtensionOffset
+)
 {
     return false;
 }
