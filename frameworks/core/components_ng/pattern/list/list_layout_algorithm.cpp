@@ -2096,7 +2096,7 @@ bool ListLayoutAlgorithm::IsUniformHeightProbably()
     return isUniformHeightProbably;
 }
 
-float ListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(uint32_t index, V2::ScrollSnapAlign scrollSnapAlign)
+float ListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(int32_t index, V2::ScrollSnapAlign scrollSnapAlign)
 {
     float predictSnapEndPos = 0;
     if (scrollSnapAlign == V2::ScrollSnapAlign::START) {
@@ -2117,7 +2117,7 @@ float ListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(uint32_t index
     return predictSnapEndPos;
 }
 
-void ListLayoutAlgorithm::OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, uint32_t index)
+void ListLayoutAlgorithm::OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, int32_t index)
 {
     if (!predictSnapEndPos_.has_value()) {
         return;
