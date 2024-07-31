@@ -790,8 +790,7 @@ void ScrollBarPattern::OnCollectClickTarget(const OffsetF& coordinateOffset,
         clickRecognizer_->SetSysGestureJudge([](const RefPtr<GestureInfo>& gestureInfo,
                                                  const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
             auto inputEventType = gestureInfo->GetInputEventType();
-            TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "ScrollBarPattern::OnCollectClickTarget inputEvent:%{public}d",
-                inputEventType);
+            TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "input event type:%{public}d", inputEventType);
             return inputEventType == InputEventType::MOUSE_BUTTON ? GestureJudgeResult::CONTINUE
                                                                   : GestureJudgeResult::REJECT;
         });
@@ -815,8 +814,7 @@ void ScrollBarPattern::OnCollectLongPressTarget(const OffsetF& coordinateOffset,
         longPressRecognizer_->SetSysGestureJudge([](const RefPtr<GestureInfo>& gestureInfo,
                                                      const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
             const auto &inputEventType = gestureInfo->GetInputEventType();
-            TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "ScrollBarPattern::OnCollectLongPressTarget inputEvent:%{public}d",
-                inputEventType);
+            TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "input event type:%{public}d", inputEventType);
             return inputEventType == InputEventType::MOUSE_BUTTON ? GestureJudgeResult::CONTINUE
                                                                   : GestureJudgeResult::REJECT;
         });
