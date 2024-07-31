@@ -481,4 +481,13 @@ std::optional<EffectOption> DragDropFuncWrapper::BrulStyleToEffection(
     return DragDropManager::GetMaxWidthBaseOnGridSystem(pipeline);
 }
 
+void DragDropFuncWrapper::SetExtraInfo(int32_t containerId, std::string extraInfo)
+{
+    auto pipelineContext = PipelineContext::GetContextByContainerId(containerId);
+    CHECK_NULL_VOID(pipelineContext);
+    auto manager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+    manager->SetExtraInfo(extraInfo);
+}
+
 } // namespace OHOS::Ace
