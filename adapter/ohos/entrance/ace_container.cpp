@@ -1460,7 +1460,7 @@ void AceContainer::OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode,
 }
 
 void FillAutoFillCustomConfig(const RefPtr<NG::FrameNode>& node,
-    AbilityRuntime::AutoFill::AutoFillCustomConfig& customConfig)
+    AbilityRuntime::AutoFill::AutoFillCustomConfig& customConfig, bool isNative)
 {
     CHECK_NULL_VOID(node);
     AbilityRuntime::AutoFill::PopupSize popupSize;
@@ -1470,6 +1470,10 @@ void FillAutoFillCustomConfig(const RefPtr<NG::FrameNode>& node,
     customConfig.isShowInSubWindow = false;
     customConfig.nodeId = node->GetId();
     customConfig.isEnableArrow = false;
+    if (!isNative) {
+        // web component will manually destroy the popup
+        customConfig.isAutoCancel = false;
+    }
 }
 
 void GetFocusedElementRect(const AbilityBase::ViewData& viewData, AbilityBase::Rect& rect)
@@ -1516,7 +1520,7 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
         callback->SetWindowRect(uiWindow_->GetRect());
     }
     AbilityRuntime::AutoFill::AutoFillCustomConfig customConfig;
-    FillAutoFillCustomConfig(node, customConfig);
+    FillAutoFillCustomConfig(node, customConfig, isNative);
     AbilityRuntime::AutoFill::AutoFillRequest autoFillRequest;
     autoFillRequest.config = customConfig;
     autoFillRequest.autoFillType = static_cast<AbilityBase::AutoFillType>(autoFillType);
