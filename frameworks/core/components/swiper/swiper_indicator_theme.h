@@ -38,6 +38,8 @@ constexpr Dimension SWIPER_INDICATOR_DIGIT_HEIGHT = 32.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DOT_PADDING_DEFAULT = 12.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DOT_ITEM_SPACE = 8.0_vp;
 constexpr double INDICATOR_ZOOM_IN_SCALE = 1.33;
+constexpr double INDICATOR_DRAG_MIN_ANGLE = 6.0f;
+constexpr double INDICATOR_DRAG_MAX_ANGLE = 10.0f;
 } // namespace
 
 enum class GestureState {
@@ -171,6 +173,10 @@ public:
             theme->springVelocityThreshold_ = swiperPattern->GetAttr<double>("swiper_spring_velocity_threshold", 0.0f);
             theme->crownTranslocationRatio_ = swiperPattern->GetAttr<double>("swiper_crown_translocation_ratio", 0.0f);
 #endif
+            theme->indicatorDragMinAngle_ =
+                swiperPattern->GetAttr<double>("swiper_indicator_drag_min_angle", INDICATOR_DRAG_MIN_ANGLE);
+            theme->indicatorDragMaxAngle_ =
+                swiperPattern->GetAttr<double>("swiper_indicator_drag_max_angle", INDICATOR_DRAG_MAX_ANGLE);
         }
     };
 
@@ -520,6 +526,16 @@ public:
     }
 #endif
 
+    double GetIndicatorDragMinAngle() const
+    {
+        return indicatorDragMinAngle_;
+    }
+
+    double GetIndicatorDragMaxAngle() const
+    {
+        return indicatorDragMaxAngle_;
+    }
+
 protected:
     SwiperIndicatorTheme() = default;
 
@@ -594,6 +610,8 @@ private:
     double springVelocityThreshold_ = 0.0f;
     double crownTranslocationRatio_ = 0.0f;
 #endif
+    double indicatorDragMinAngle_ = INDICATOR_DRAG_MIN_ANGLE;
+    double indicatorDragMaxAngle_ = INDICATOR_DRAG_MAX_ANGLE;
 };
 
 } // namespace OHOS::Ace

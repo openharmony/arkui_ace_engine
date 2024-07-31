@@ -265,6 +265,7 @@ private:
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
     void OnIsFocusActiveUpdate(bool isFocusAcitve);
+    double GetIndicatorDragAngleThreshold(bool isMaxAngle);
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
