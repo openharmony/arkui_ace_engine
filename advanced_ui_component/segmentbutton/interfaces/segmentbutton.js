@@ -544,9 +544,6 @@ class SelectItem extends ViewPU {
                             y: this.zoomScaleArray[this.selectedIndexes[0]]
                         });
                         Stack.shadow(ShadowStyle.OUTER_DEFAULT_XS);
-                        Stack.pixelRound({
-                            top: PixelRoundCalcPolicy.FORCE_FLOOR
-                        });
                     }, Stack);
                     Stack.pop();
                 });
@@ -1470,7 +1467,8 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                                     this.buttonItemsPosition[s37] = {
                                                         start: LengthMetrics.vp(Number.parseFloat(this.options.componentPadding.toString()) +
                                                             (Number.parseFloat(i39.width.toString()) + 1) * s37),
-                                                        top: LengthMetrics.vp(Number.parseFloat(this.options.componentPadding.toString()))
+                                                        top: LengthMetrics.px(Math.floor(this.getUIContext()
+                                                            .vp2px(Number.parseFloat(this.options.componentPadding.toString()))))
                                                     };
                                                 }
                                             });
