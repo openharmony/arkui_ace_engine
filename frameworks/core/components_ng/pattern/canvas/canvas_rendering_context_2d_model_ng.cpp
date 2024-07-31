@@ -172,7 +172,7 @@ std::string CanvasRenderingContext2DModelNG::GetJsonData(const std::string& path
 
 std::string CanvasRenderingContext2DModelNG::ToDataURL(const std::string& dataUrl, double quality)
 {
-    return pattern_ ? pattern_->ToDataURL(dataUrl + "," + std::to_string(quality)) : "";
+    return pattern_ ? pattern_->ToDataURL(dataUrl, quality) : "";
 }
 
 void CanvasRenderingContext2DModelNG::SetLineCap(const LineCapStyle& lineCap)
@@ -548,6 +548,12 @@ void CanvasRenderingContext2DModelNG::GetHeight(RefPtr<AceType>& canvasPattern, 
 {
     CHECK_NULL_VOID(pattern_);
     height = pattern_->GetHeight();
+}
+
+void CanvasRenderingContext2DModelNG::SetDensity(double density)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->SetDensity(density);
 }
 
 #ifdef PIXEL_MAP_SUPPORTED

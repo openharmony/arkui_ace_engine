@@ -233,15 +233,12 @@ void PipelineBase::SetRootSize(double density, float width, float height)
         }
         context->SetRootRect(width, height);
     };
-#ifdef NG_BUILD
+
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         task();
     } else {
         taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize");
     }
-#else
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize");
-#endif
 }
 
 void PipelineBase::SetFontScale(float fontScale)
@@ -477,12 +474,12 @@ void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
     }
     if (GetIsDeclarative()) {
         viewScale_ = DEFAULT_VIEW_SCALE;
-        int32_t pageWidth = width;
+        double pageWidth = width;
         if (IsContainerModalVisible()) {
             pageWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
         }
         designWidthScale_ =
-            windowConfig.autoDesignWidth ? density_ : static_cast<double>(pageWidth) / windowConfig.designWidth;
+            windowConfig.autoDesignWidth ? density_ : pageWidth / windowConfig.designWidth;
         windowConfig.designWidthScale = designWidthScale_;
     } else {
         viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;
@@ -933,6 +930,7 @@ void PipelineBase::Destroy()
     TAG_LOGI(AceLogTag::ACE_ANIMATION, "pipeline destroyed, has %{public}zu finish callbacks not executed",
         finishFunctions_.size());
     finishFunctions_.clear();
+    animationOption_ = {};
     {
         // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
         // thread.

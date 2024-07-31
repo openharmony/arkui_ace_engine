@@ -182,8 +182,6 @@ HWTEST_F(RichEditorOverlayTestNg, InitSelection001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    richEditorPattern->paragraphs_.paragraphs_.push_front({ paragraph });
     richEditorPattern->textForDisplay_ = "test";
     richEditorPattern->InitSelection(Offset(0, 0));
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
@@ -200,8 +198,6 @@ HWTEST_F(RichEditorOverlayTestNg, InitSelection002, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    richEditorPattern->paragraphs_.paragraphs_.push_front({ paragraph });
     richEditorPattern->textForDisplay_ = "test";
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     richEditorPattern->spans_.front()->position = 3;
@@ -1659,5 +1655,170 @@ HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg002, TestSize.Level1)
     richEditorOverlayModifier->UpdateScrollBar(AceType::RawPtr(paintWrapper));
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_EQ(scrollBar->GetOpacityAnimationType(), OpacityAnimationType::NONE);
+}
+
+/**
+ * @tc.name: RichEditorOverlayTestNg003
+ * @tc.desc: test OnHandleMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto focusHub = richEditorPattern->GetHost()->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+    AddImageSpan();
+
+    richEditorPattern->ShowSelectOverlay(
+    richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+
+    richEditorPattern->selectOverlay_->hasTransform_ = false;
+    richEditorPattern->selectOverlay_->SetHandleLevelMode(HandleLevelMode::EMBED);
+    richEditorPattern->selectOverlay_->OnHandleMove(RectF(1.0f, 0.0f, 10.0f, 10.0f), true);
+    EXPECT_EQ(richEditorPattern->textSelector_.firstHandle.GetOffset().GetX(), 1.0f);
+}
+
+/**
+ * @tc.name: RichEditorOverlayTestNg004
+ * @tc.desc: test CheckHandleVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto geometryNode = richEditorNode_->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(BUILDER_WIDTH, BUILDER_HEIGHT));
+
+    richEditorPattern->selectOverlay_->enableHandleLevel_ = true;
+    richEditorPattern->selectOverlay_->SetHandleLevelMode(HandleLevelMode::EMBED);
+    auto isShow1 = richEditorPattern->selectOverlay_->CheckHandleVisible(RectF(0.0f, 0.0f, 10.0f, 10.0f));
+    EXPECT_EQ(isShow1, true);
+
+    richEditorPattern->selectOverlay_->isSingleHandle_ = true;
+    auto isShow2 = richEditorPattern->selectOverlay_->CheckHandleVisible(RectF(0.0f, 0.0f, 10.0f, 10.0f));
+    EXPECT_EQ(isShow2, true);
+}
+
+/**
+ * @tc.name: RichEditorOverlayTestNg005
+ * @tc.desc: test UpdateSelectorOnHandleMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->selectOverlay_->isSingleHandle_ = false;
+    richEditorPattern->selectOverlay_->UpdateSelectorOnHandleMove(OffsetF(50.0f, 50.0f), false);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
+}
+
+/**
+ * @tc.name: RichEditorOverlayTestNg006
+ * @tc.desc: test CheckEditorTypeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg006, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->ShowSelectOverlay(
+    richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+
+    SelectOverlayInfo selectInfo;
+    richEditorPattern->selectOverlay_->CheckEditorTypeChange(selectInfo, TextSpanType::TEXT);
+    EXPECT_EQ(selectInfo.recreateOverlay, true);
+}
+
+/**
+ * @tc.name: RichEditorOverlayTestNg007
+ * @tc.desc: test OnMenuItemAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg007, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto focusHub = richEditorPattern->GetHost()->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = false;
+
+    richEditorPattern->textDetectEnable_ = true;
+    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::DISAPPEAR, OptionMenuType::MOUSE_MENU);
+    EXPECT_TRUE(richEditorPattern->GetTextDetectEnable());
+    EXPECT_FALSE(richEditorPattern->HasFocus());
+}
+
+/**
+ * @tc.name: RichEditorOverlayTestNg008
+ * @tc.desc: test OnCloseOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg008, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto focusHub = richEditorPattern->GetHost()->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = false;
+
+    richEditorPattern->textDetectEnable_ = true;
+    richEditorPattern->isEditing_ = true;
+    auto info = AceType::MakeRefPtr<OverlayInfo>();
+    richEditorPattern->selectOverlay_->OnCloseOverlay(
+        OptionMenuType::MOUSE_MENU, CloseReason::CLOSE_REASON_BACK_PRESSED, info);
+    EXPECT_EQ(richEditorPattern->caretTwinkling_, true);
+}
+
+/**
+ * @tc.name: RichEditorOverlayTestNg009
+ * @tc.desc: test OnHandleLevelModeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg009, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto selectOverlay = richEditorPattern->selectOverlay_;
+    ASSERT_NE(selectOverlay, nullptr);
+    selectOverlay->handleLevelMode_ = HandleLevelMode::EMBED;
+    selectOverlay->OnHandleLevelModeChanged(HandleLevelMode::OVERLAY);
+    EXPECT_EQ(selectOverlay->handleLevelMode_, HandleLevelMode::OVERLAY);
+
+    selectOverlay->handleLevelMode_ = HandleLevelMode::OVERLAY;
+    selectOverlay->OnHandleLevelModeChanged(HandleLevelMode::EMBED);
+    EXPECT_EQ(selectOverlay->handleLevelMode_, HandleLevelMode::EMBED);
+}
+
+/**
+ * @tc.name: RichEditorOverlayTestNg010
+ * @tc.desc: test OnAncestorNodeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg010, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    FrameNodeChangeInfoFlag flag = FRAME_NODE_CHANGE_GEOMETRY_CHANGE;
+    richEditorPattern->selectOverlay_->OnAncestorNodeChanged(flag);
+    EXPECT_EQ(richEditorPattern->selectOverlay_->IsAncestorNodeGeometryChange(flag), true);
 }
 } // namespace OHOS::Ace::NG

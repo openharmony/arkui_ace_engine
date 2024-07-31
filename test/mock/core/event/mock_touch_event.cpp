@@ -19,4 +19,9 @@ Offset GetTouchEventOriginOffset(const TouchEvent& event)
 {
     return Offset();
 }
-} // namespace OHOS::Ace
+
+TimeStamp GetTouchEventOriginTimeStamp(const TouchEvent& event)
+{
+    return event.time;
+}
+} // namespace OHOS::Ace::Platform

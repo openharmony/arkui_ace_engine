@@ -104,6 +104,7 @@ public:
     void RestoreLayer() override;
     void Reset() override;
     TextMetrics GetMeasureTextMetrics(const PaintState& state, const std::string& text) override;
+    void SetDensity(double density) override;
 
     // All interfaces that only the 'OffscreenCanvasRenderingContext2D' has.
     RefPtr<AceType> CreateOffscreenPattern(int width, int height) override;

@@ -80,7 +80,7 @@ public:
         aiDetectInitialized_ = false;
     }
     bool ShowAIEntityMenu(const AISpan& aiSpan, const NG::RectF& aiRect, const RefPtr<NG::FrameNode>& targetNode,
-        bool isShowSelectText = true);
+        bool isShowCopy = true, bool isShowSelectText = true);
     void ResponseBestMatchItem(const AISpan& aiSpan);
 
 private:

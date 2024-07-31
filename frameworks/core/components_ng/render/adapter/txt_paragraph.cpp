@@ -71,8 +71,8 @@ void TxtParagraph::CreateBuilder()
     style.textAlign = Constants::ConvertTxtTextAlign(paraStyle_.align);
     style.maxLines = paraStyle_.maxLines == UINT32_MAX ? UINT32_MAX - 1 : paraStyle_.maxLines;
     style.fontSize = paraStyle_.fontSize; // Rosen style.fontSize
-    style.ellipsisModal = static_cast<Rosen::EllipsisModal>(paraStyle_.ellipsisMode);
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle_.wordBreak);
+    style.ellipsisModal = static_cast<Rosen::EllipsisModal>(paraStyle_.ellipsisMode);
     style.textSplitRatio = TEXT_SPLIT_RATIO;
     style.breakStrategy = static_cast<Rosen::BreakStrategy>(paraStyle_.lineBreakStrategy);
 #endif
@@ -519,6 +519,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
     }
 
     const auto& textBox = boxes.back();
+
     // when text_ ends with a \n, return the top position of the next line.
     auto preIsPlaceholder = CalCulateAndCheckPreIsPlaceholder(extent - 1, extent);
     prevChar = text_[std::max(0, extent - 1)];
@@ -1043,4 +1044,13 @@ RSParagraph* TxtParagraph::GetParagraph()
     return externalParagraph_;
 }
 #endif
+
+void TxtParagraph::UpdateColor(size_t from, size_t to, const Color& color)
+{
+#ifndef USE_GRAPHIC_TEXT_GINE
+#else
+    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(GetParagraph());
+    paragraphTxt->UpdateColor(from, to, ToRSColor(color));
+#endif
+}
 } // namespace OHOS::Ace::NG

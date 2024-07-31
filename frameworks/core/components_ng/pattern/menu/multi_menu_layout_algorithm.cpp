@@ -117,7 +117,17 @@ void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(contentWidth, contentHeight));
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
 
-    if (layoutConstraint->selfIdealSize.Width().has_value()) {
+    auto node = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(pattern);
+    // Stack or Embedded submenu must follow parent width
+    if (pattern->IsStackSubmenu() || pattern->IsEmbedded()) {
+        auto idealSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+        auto width = layoutConstraint->maxSize.Width();
+        idealSize.SetWidth(width);
+        layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
+    } else if (layoutConstraint->selfIdealSize.Width().has_value()) {
         auto idealWidth = std::max(layoutConstraint->minSize.Width(),
             std::min(layoutConstraint->maxSize.Width(), layoutConstraint->selfIdealSize.Width().value()));
         auto idealSize = layoutWrapper->GetGeometryNode()->GetFrameSize();

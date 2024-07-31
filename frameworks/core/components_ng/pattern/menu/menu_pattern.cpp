@@ -862,7 +862,7 @@ RefPtr<LayoutAlgorithm> MenuPattern::CreateLayoutAlgorithm()
         case MenuType::SELECT_OVERLAY_SUB_MENU:
             return MakeRefPtr<SubMenuLayoutAlgorithm>();
         default:
-            return MakeRefPtr<MenuLayoutAlgorithm>(targetId_, targetTag_);
+            return MakeRefPtr<MenuLayoutAlgorithm>(targetId_, targetTag_, lastPosition_);
     }
 }
 
@@ -1015,7 +1015,6 @@ Offset MenuPattern::GetTransformCenter() const
     auto placement = layoutAlgorithm->GetPlacement();
     switch (placement) {
         case Placement::BOTTOM_LEFT:
-            return Offset(size.Width(), 0.0f);
         case Placement::RIGHT_TOP:
             return Offset();
         case Placement::BOTTOM_RIGHT:

@@ -45,7 +45,6 @@ public:
     {
         return false;
     }
-
     // search pattern needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
     {
@@ -54,7 +53,9 @@ public:
 
     bool NeedToRequestKeyboardOnFocus() const override
     {
-        auto pattern = textField_.Upgrade()->GetPattern();
+        auto textField = textField_.Upgrade();
+        CHECK_NULL_RETURN(textField, false);
+        auto pattern = textField->GetPattern();
         CHECK_NULL_RETURN(pattern, false);
         auto curPattern = DynamicCast<TextFieldPattern>(pattern);
         return curPattern->NeedToRequestKeyboardOnFocus();
@@ -72,7 +73,11 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto paintMethod = MakeRefPtr<SearchPaintMethod>(buttonSize_, searchButton_, isSearchButtonEnabled_);
+        if (!searchOverlayModifier_) {
+            searchOverlayModifier_ = AceType::MakeRefPtr<SearchOverlayModifier>(WeakClaim(this), buttonSize_);
+        }
+        auto paintMethod =
+            MakeRefPtr<SearchPaintMethod>(searchOverlayModifier_, buttonSize_, searchButton_, isSearchButtonEnabled_);
         return paintMethod;
     }
 
@@ -175,6 +180,11 @@ public:
         return searchNode_.Upgrade();
     }
 
+    bool GetIsSearchButtonEnabled() const
+    {
+        return isSearchButtonEnabled_;
+    }
+
     void ResetDragOption() override;
     void OnColorConfigurationUpdate() override;
 
@@ -209,9 +219,9 @@ private:
     void OnClickCancelButton();
     void OnClickTextField();
     void HandleCaretPosition(int32_t caretPosition);
+    void HandleTextContentRect(Rect& rect);
     int32_t HandleGetCaretIndex();
     NG::OffsetF HandleGetCaretPosition();
-    void HandleTextContentRect(Rect& rect);
     int32_t HandleTextContentLines();
     void StopEditing();
     // Init key event
@@ -254,7 +264,7 @@ private:
     void HandleClickEvent(GestureEvent& info);
     void UpdateIconChangeEvent();
     bool IsEventEnabled(const std::string& textValue, int16_t style);
-	
+
     void CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool isFromModifier);
     void CreateOrUpdateImage(int32_t index, bool isCreateNode);
     void UpdateImageIconProperties(RefPtr<FrameNode>& frameNode, int32_t index);
@@ -309,6 +319,7 @@ private:
     WeakPtr<FrameNode> searchIcon_;
     WeakPtr<FrameNode> cancelIcon_;
     WeakPtr<SearchNode> searchNode_;
+    RefPtr<SearchOverlayModifier> searchOverlayModifier_;
 };
 
 } // namespace OHOS::Ace::NG

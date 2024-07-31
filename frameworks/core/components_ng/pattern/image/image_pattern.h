@@ -362,7 +362,7 @@ public:
         return loadingCtx_->GetImageSize();
     }
 
-    void OnVisibleAreaChange(bool visible);
+    void OnVisibleAreaChange(bool visible = true, double ratio = 0.0);
 
     bool GetDefaultAutoResize()
     {
@@ -375,6 +375,11 @@ public:
         return interpolationDefault_;
     }
     void InitOnKeyEvent();
+
+    void SetIsComponentSnapshotNode(bool isComponentSnapshotNode = true)
+    {
+        isComponentSnapshotNode_ = isComponentSnapshotNode;
+    }
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
@@ -430,7 +435,8 @@ private:
     void PrepareAnimation(const RefPtr<CanvasImage>& image);
     void SetRedrawCallback(const RefPtr<CanvasImage>& image);
     void SetOnFinishCallback(const RefPtr<CanvasImage>& image);
-    void RegisterVisibleAreaChange();
+    void RegisterVisibleAreaChange(bool isCalcClip = true);
+    void TriggerVisibleAreaChangeForChild(const RefPtr<UINode>& node, bool visible, double ratio);
 
     void InitCopy();
     void HandleCopy();
@@ -470,6 +476,8 @@ private:
     void ReleaseImageAnalyzer();
     bool IsSupportImageAnalyzerFeature();
     void InitDefaultValue();
+    void ClearAltData();
+    void UpdateSvgSmoothEdgeValue();
 
     //animation
     RefPtr<PictureAnimation<int32_t>> CreatePictureAnimation(int32_t size);
@@ -552,6 +560,7 @@ private:
     bool hasSizeChanged = false;
     bool isPixelMapChanged_ = false;
     bool isSrcUndefined_ = false;
+    bool isComponentSnapshotNode_ = false;
 
     std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };

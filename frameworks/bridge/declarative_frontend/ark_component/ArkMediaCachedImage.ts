@@ -15,44 +15,68 @@
 
 /// <reference path='./import.ts' />
 
-class MeidaCachedImageImageSrcModifier extends ModifierWithKey<PixelMap | ResourceStr | DrawableDescriptor | ASTCResource> {
-    constructor(value: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource) {
-        super(value);
-    }
-    static identity: Symbol = Symbol('mediaCachedImageShowSrc');
+class MeidaCachedImageImageSrcModifier
+  extends ModifierWithKey<PixelMap | ResourceStr | DrawableDescriptor | ASTCResource> {
+  constructor(value: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource) {
+    super(value);
+  }
 
-    applyPeer(node: KNode, reset: boolean): void {
-        if (reset) {
-            getUINativeModule().mediaCachedImage.setMediaCachedImageSrc(node, '');
-        } else {
-            if(isResource(this.value) || isString(this.value)) {
-                getUINativeModule().mediaCachedImage.setMediaCachedImageSrc(node, 0, this.value);
-            } else if(Array.isArray(this.value.sources)) {
-                getUINativeModule().mediaCachedImage.setMediaCachedImageSrc(
-                    node, 1, this.value.sources, this.value.sources.length, this.value.column);
-            } else {
-                getUINativeModule().mediaCachedImage.setMediaCachedImageSrc(node, 0, this.value);
-            }
-        }
+  static identity: Symbol = Symbol('mediaCachedImageShowSrc');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().mediaCachedImage.setMediaCachedImageSrc(node, '');
+    } else {
+      if (isResource(this.value) || isString(this.value)) {
+        getUINativeModule().mediaCachedImage.setMediaCachedImageSrc(node, 0, this.value);
+      } else if (Array.isArray(this.value.sources)) {
+        getUINativeModule().mediaCachedImage.setMediaCachedImageSrc(
+          node, 1, this.value.sources, this.value.sources.length, this.value.column);
+      } else {
+        getUINativeModule().mediaCachedImage.setMediaCachedImageSrc(node, 0, this.value);
+      }
     }
+  }
 }
 
-class ArkMeidaCachedImageComponent extends ArkImageComponent implements ImageAttribute
-{
-    constructor(nativePtr: KNode, classType?: ModifierType) {
-        super(nativePtr, classType);
+class MediaCachedImageAltModifier extends ModifierWithKey<ResourceStr | PixelMap> {
+  static identity: Symbol = Symbol('mediaCachedImageAlt');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().mediaCachedImage.resetAlt(node);
+    } else {
+      getUINativeModule().mediaCachedImage.setAlt(node, this.value!);
     }
-    initialize(value: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource): this {
-        modifierWithKey(this._modifiersWithKeys, MeidaCachedImageImageSrcModifier.identity, MeidaCachedImageImageSrcModifier, value);
-        return this;
-    }
+  }
+
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
+class ArkMeidaCachedImageComponent extends ArkImageComponent implements ImageAttribute {
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
+  }
+
+  initialize(value: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource): this {
+    modifierWithKey(this._modifiersWithKeys, MeidaCachedImageImageSrcModifier.identity,
+      MeidaCachedImageImageSrcModifier, value);
+    return this;
+  }
+
+  alt(value: ResourceStr | PixelMap): this {
+    modifierWithKey(this._modifiersWithKeys, MediaCachedImageAltModifier.identity, MediaCachedImageAltModifier, value);
+    return this;
+  }
 }
 
 // @ts-ignore
 globalThis.MediaCachedImage.attributeModifier = function (modifier: ArkComponent): void {
-    attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
-        return new ArkMeidaCachedImageComponent(nativePtr);
-    }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJs) => {
-        return new modifierJS.MediaCachedImageModifier(nativePtr, classType);
-    });
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkMeidaCachedImageComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJs) => {
+    return new modifierJS.MediaCachedImageModifier(nativePtr, classType);
+  });
 };

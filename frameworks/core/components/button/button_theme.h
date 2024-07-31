@@ -118,11 +118,6 @@ public:
             theme->downloadFontSize_ = buttonPattern->GetAttr<Dimension>("button_download_font_size", 0.0_fp);
             theme->progressDiameter_ = buttonPattern->GetAttr<Dimension>("button_progress_diameter", 0.0_vp);
             theme->innerPadding_ = buttonPattern->GetAttr<Dimension>("button_inner_padding", 0.0_vp);
-            theme->focusBorderColor_ = buttonPattern->GetAttr<Color>("button_focus_border_color", Color(0xFF007DFF));
-            theme->focusBorderWidth_ = buttonPattern->GetAttr<Dimension>("button_focus_border_width", 2.0_vp);
-            theme->focusBoxGlow_ = static_cast<bool>(buttonPattern->GetAttr<double>("button_focus_effect_type", 0.0));
-            theme->defaultLightIlliminated_ =
-                static_cast<uint32_t>(buttonPattern->GetAttr<double>("button_default_light_illiminated", 0.0));
             theme->bigFontSizeScale_ = buttonPattern->GetAttr<double>("button_aging_big_font_size_scale", 0.0);
             theme->largeFontSizeScale_ = buttonPattern->GetAttr<double>("button_aging_large_font_size_scale", 0.0);
             theme->maxFontSizeScale_ = buttonPattern->GetAttr<double>("button_aging_max_font_size_scale", 0.0);
@@ -271,11 +266,6 @@ public:
         return downloadHeight_;
     }
 
-    const Dimension& GetFocusBorderWidth() const
-    {
-        return focusBorderWidth_;
-    }
-
     const Edge& GetPadding() const
     {
         return padding_;
@@ -299,11 +289,6 @@ public:
     uint32_t GetTextMaxLines() const
     {
         return textMaxLines_;
-    }
-
-    uint32_t GetDefaultLightIlliminated() const
-    {
-        return defaultLightIlliminated_;
     }
 
     const Dimension& GetMinCircleButtonDiameter() const
@@ -422,16 +407,6 @@ public:
         return padding_;
     }
 
-    const Color& GetFocusBorderColor() const
-    {
-        return focusBorderColor_;
-    }
-
-    bool IsFocusBoxGlow() const
-    {
-        return focusBoxGlow_;
-    }
-
     float GetBigFontSizeScale() const
     {
         return bigFontSizeScale_;
@@ -483,7 +458,6 @@ private:
     Color downloadTextColor_;
     Color downloadBorderColor_;
     Color downloadProgressColor_;
-    Color focusBorderColor_;
     TextStyle textStyle_;
     Edge padding_;
     Edge minCircleButtonPadding_;
@@ -502,7 +476,6 @@ private:
     Dimension maxCircleButtonIcon_;
     Dimension borderWidth_;
     Dimension downloadHeight_;
-    Dimension focusBorderWidth_;
     std::unordered_map<ButtonRole, std::unordered_map<ButtonStyleMode, Color>> bgColorMap_;
     std::unordered_map<ButtonRole, Color> textColorByRoleMap_;
     std::unordered_map<ButtonStyleMode, Color> textColorMap_;
@@ -511,8 +484,6 @@ private:
     std::unordered_map<ControlSize, Edge> paddingMap_;
     double bgDisabledAlpha_ = 1.0;
     uint32_t textMaxLines_ = 1;
-    bool focusBoxGlow_ = false;
-    uint32_t defaultLightIlliminated_ = 0;
     float bigFontSizeScale_ = 1.75f;
     float largeFontSizeScale_ = 2.0f;
     float maxFontSizeScale_ = 3.2f;

@@ -498,20 +498,6 @@ void ResetChainAnimationOptions(ArkUINodeHandle node)
     ListModelNG::SetChainAnimationOptions(frameNode, options);
 }
 
-void SetFadingEdge(ArkUINodeHandle node, ArkUI_Bool fadingEdge)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetFadingEdge(frameNode, fadingEdge);
-}
-
-void ResetFadingEdge(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetFadingEdge(frameNode, false);
-}
-
 ArkUI_Int32 SetNodeAdapter(ArkUINodeHandle node, ArkUINodeAdapterHandle handle)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -672,7 +658,7 @@ const ArkUIListModifier* GetListModifier()
         SetListScrollBarColor, ResetListScrollBarColor, GetAlignListItem, SetAlignListItem, ResetAlignListItem,
         SetScrollSnapAlign, ResetScrollSnapAlign, SetContentStartOffset, ResetContentStartOffset, SetContentEndOffset,
         ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions,
-        GetListSpace, SetListSpace, ResetListSpace, SetFadingEdge, ResetFadingEdge, SetNodeAdapter, ResetNodeAdapter,
+        GetListSpace, SetListSpace, ResetListSpace, SetNodeAdapter, ResetNodeAdapter,
         GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy, SetInitialIndex, ResetInitialIndex,
         SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions, GetInitialIndex,
         SetListFlingSpeedLimit, ResetListFlingSpeedLimit, GetlistDivider, SetInitialScroller, ResetInitialScroller };

@@ -311,6 +311,8 @@ enum class PropertyInfo {
     LINESPACING,
     SYMBOL_EFFECT_OPTIONS,
     HALFLEADING,
+    MIN_FONT_SCALE,
+    MAX_FONT_SCALE,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
@@ -425,6 +427,8 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolRenderingStrategy, uint32_t);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectStrategy, uint32_t);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectOptions, SymbolEffectOptions);
+    DEFINE_SPAN_FONT_STYLE_ITEM(MinFontScale, float);
+    DEFINE_SPAN_FONT_STYLE_ITEM(MaxFontScale, float);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
@@ -597,6 +601,57 @@ public:
     ACE_DISALLOW_COPY_AND_MOVE(CustomSpanItem);
     std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure;
     std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw;
+};
+
+class ACE_EXPORT CustomSpanNode : public FrameNode {
+    DECLARE_ACE_TYPE(CustomSpanNode, FrameNode);
+
+public:
+    static RefPtr<CustomSpanNode> CreateFrameNode(int32_t nodeId)
+    {
+        auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(
+            V2::CUSTOM_SPAN_NODE_ETS_TAG, nodeId);
+        customSpanNode->InitializePatternAndContext();
+        ElementRegister::GetInstance()->AddUINode(customSpanNode);
+        return customSpanNode;
+    }
+
+    static RefPtr<CustomSpanNode> GetOrCreateSpanNode(
+        const std::string& tag, int32_t nodeId)
+    {
+        auto frameNode = GetFrameNode(tag, nodeId);
+        CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<CustomSpanNode>(frameNode));
+        auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(tag, nodeId);
+        customSpanNode->InitializePatternAndContext();
+        ElementRegister::GetInstance()->AddUINode(customSpanNode);
+        return customSpanNode;
+    }
+
+    CustomSpanNode(const std::string& tag, int32_t nodeId) :
+        FrameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>()) {}
+    ~CustomSpanNode() override = default;
+
+    const RefPtr<CustomSpanItem>& GetSpanItem() const
+    {
+        return customSpanItem_;
+    }
+
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
+    void DumpInfo() override
+    {
+        FrameNode::DumpInfo();
+        CHECK_NULL_VOID(customSpanItem_);
+        customSpanItem_->DumpInfo();
+    }
+
+private:
+    RefPtr<CustomSpanItem> customSpanItem_ = MakeRefPtr<CustomSpanItem>();
+
+    ACE_DISALLOW_COPY_AND_MOVE(CustomSpanNode);
 };
 
 struct ImageSpanItem : public PlaceholderSpanItem {

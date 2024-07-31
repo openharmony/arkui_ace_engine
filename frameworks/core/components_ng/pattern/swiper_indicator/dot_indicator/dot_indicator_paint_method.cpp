@@ -28,6 +28,10 @@ namespace OHOS::Ace::NG {
 namespace {
 // for indicator
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
+constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
+constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
+constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
+
 constexpr float BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY = 0.4f;
 constexpr float LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY = 0.2f;
 constexpr float LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY = 1.0f;
@@ -42,7 +46,6 @@ constexpr float TOUCH_BOTTOM_BACKGROUND_WIDTH_MULTIPLE = 1.225f;
 constexpr float TOUCH_BOTTOM_DOT_WIDTH_MULTIPLE = 0.0125f;
 constexpr float LONG_POINT_TAIL_RATIO = 0.5f;
 constexpr float HALF_SELECTED_WIDTH = 2.0f;
-constexpr float HALF = 0.5f;
 constexpr int TWOFOLD = 2;
 } // namespace
 
@@ -66,8 +69,8 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     IsCustomSizeValue_ = paintProperty->GetIsCustomSizeValue(false);
     dotIndicatorModifier_->SetAxis(axis_);
     dotIndicatorModifier_->SetCurrentIndex(currentIndex_);
-    dotIndicatorModifier_->SetSelectedColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor()));
     dotIndicatorModifier_->SetUnselectedColor(paintProperty->GetColorValue(swiperTheme->GetColor()));
+    dotIndicatorModifier_->SetSelectedColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor()));
     dotIndicatorModifier_->SetIndicatorMask(paintProperty->GetIndicatorMaskValue(false));
     dotIndicatorModifier_->SetIsIndicatorCustomSize(IsCustomSizeValue_);
     dotIndicatorModifier_->SetOffset(geometryNode->GetContentOffset());
@@ -128,6 +131,7 @@ void DotIndicatorPaintMethod::PaintNormalIndicator(const PaintWrapper* paintWrap
 {
     auto [longPointCenterX, itemHalfSizes] = CalculateLongPointCenterX(paintWrapper);
     longPointCenterX_ = longPointCenterX;
+
     if (dotIndicatorModifier_->GetIsHover()) {
         dotIndicatorModifier_->UpdateHoverToNormalPaintProperty(
             normalMargin_, itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
@@ -155,14 +159,12 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapp
         static_cast<float>(paintProperty->GetSelectedItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
     // use radius calculation
     LinearVector<float> itemHalfSizes;
-    float scaleIndicator = swiperTheme->GetScaleSwiper();
-    itemHalfSizes.emplace_back(itemWidth * HALF * scaleIndicator);
-    itemHalfSizes.emplace_back(itemHeight * HALF * scaleIndicator);
-    itemHalfSizes.emplace_back(selectedItemWidth * HALF * scaleIndicator);
-    itemHalfSizes.emplace_back(selectedItemHeight * HALF * scaleIndicator);
-    Dimension paddingSide = swiperTheme->GetIndicatorPaddingDot();
+    itemHalfSizes.emplace_back(itemWidth * 0.5 * INDICATOR_ZOOM_IN_SCALE);
+    itemHalfSizes.emplace_back(itemHeight * 0.5 * INDICATOR_ZOOM_IN_SCALE);
+    itemHalfSizes.emplace_back(selectedItemWidth * 0.5 * INDICATOR_ZOOM_IN_SCALE);
+    itemHalfSizes.emplace_back(selectedItemHeight * 0.5 * INDICATOR_ZOOM_IN_SCALE);
     longPointCenterX_ =
-        CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
+        CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()),
             static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
 
     if (dotIndicatorModifier_->GetIsPressed()) {
@@ -185,7 +187,8 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapp
         dotIndicatorModifier_->SetNormalToHoverIndex(hoverIndex_);
         dotIndicatorModifier_->UpdateNormalToHoverPointDilateRatio();
     }
-    PaintHoverIndicator(itemHalfSizes, paddingSide);
+
+    PaintHoverIndicator(itemHalfSizes, INDICATOR_PADDING_HOVER);
 }
 void DotIndicatorPaintMethod::PaintHoverIndicator(LinearVector<float>& itemHalfSizes, const Dimension paddingSide)
 {
@@ -193,7 +196,6 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(LinearVector<float>& itemHalfS
         if (currentIndex_ == itemCount_ - displayCount_ && !isLoop_ && mouseClickIndex_ > currentIndex_ &&
             mouseClickIndex_ < itemCount_) {
             longPointCenterX_ = CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
-
                 static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
         } else {
             auto mouseClickIndex = mouseClickIndex_.value();
@@ -201,7 +203,6 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(LinearVector<float>& itemHalfS
                 mouseClickIndex = itemCount_ - 1 - mouseClickIndex_.value();
             }
             longPointCenterX_ = CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
-
                 static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), mouseClickIndex);
         }
         dotIndicatorModifier_->UpdateAllPointCenterXAnimation(
@@ -213,6 +214,7 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(LinearVector<float>& itemHalfS
         dotIndicatorModifier_->UpdateLongPointDilateRatio();
     }
 }
+
 void DotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
@@ -227,22 +229,18 @@ void DotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* paintWrapp
         static_cast<float>(paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
     auto selectedItemHeight =
         static_cast<float>(paintProperty->GetSelectedItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
-
     // use radius calculation
-    float scaleIndicator = swiperTheme->GetScaleSwiper();
-    auto itemHalfWidth = itemWidth * 0.5 * scaleIndicator;
-    auto itemHalfHeight = itemHeight * 0.5 * scaleIndicator;
-    auto selectedItemHalfWidth = selectedItemWidth * 0.5 * scaleIndicator;
-    auto selectedItemHalfHeight = selectedItemHeight * 0.5 * scaleIndicator;
+    auto itemHalfWidth = itemWidth * 0.5 * INDICATOR_ZOOM_IN_SCALE;
+    auto itemHalfHeight = itemHeight * 0.5 * INDICATOR_ZOOM_IN_SCALE;
+    auto selectedItemHalfWidth = selectedItemWidth * 0.5 * INDICATOR_ZOOM_IN_SCALE;
+    auto selectedItemHalfHeight = selectedItemHeight * 0.5 * INDICATOR_ZOOM_IN_SCALE;
     LinearVector<float> itemHalfSizes;
     itemHalfSizes.emplace_back(itemHalfWidth);
     itemHalfSizes.emplace_back(itemHalfHeight);
     itemHalfSizes.emplace_back(selectedItemHalfWidth);
     itemHalfSizes.emplace_back(selectedItemHalfHeight);
-    Dimension paddingSide = swiperTheme->GetIndicatorPaddingDot();
     longPointCenterX_ =
-        CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
-
+        CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()),
             static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
     if (dotIndicatorModifier_->GetIsPressed()) {
         dotIndicatorModifier_->UpdatePressPaintProperty(itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
@@ -268,15 +266,11 @@ void DotIndicatorPaintMethod::CalculateNormalMargin(const LinearVector<float>& i
         allPointDiameterSum = itemWidth * static_cast<float>(displayCount - 1) + selectedItemWidth;
     }
     auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) * (displayCount - 1);
-    auto swiperTheme = GetSwiperIndicatorTheme();
-    CHECK_NULL_VOID(swiperTheme);
-    Dimension paddingSide = swiperTheme->GetIndicatorPaddingDot();
-    auto indicatorPaddingSide = static_cast<float>(paddingSide.ConvertToPx());
-    auto contentWidth = indicatorPaddingSide + allPointDiameterSum + allPointSpaceSum + indicatorPaddingSide;
-    auto indicatorHeightPadding = swiperTheme->GetIndicatorBgHeight().ConvertToPx();
-    auto contentHeight = indicatorHeightPadding + itemHeight + indicatorHeightPadding;
+    auto indicatorPadding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
+    auto contentWidth = indicatorPadding + allPointDiameterSum + allPointSpaceSum + indicatorPadding;
+    auto contentHeight = indicatorPadding + itemHeight + indicatorPadding;
     if (selectedItemHeight > itemHeight) {
-        contentHeight = indicatorHeightPadding + selectedItemHeight + indicatorHeightPadding;
+        contentHeight = indicatorPadding + selectedItemHeight + indicatorPadding;
     }
     float marginX = ((axis_ == Axis::HORIZONTAL ? frameSize.Width() : frameSize.Height()) - contentWidth) * 0.5;
     float marginY = ((axis_ == Axis::HORIZONTAL ? frameSize.Height() : frameSize.Width()) - contentHeight) * 0.5;
@@ -334,9 +328,8 @@ std::tuple<std::pair<float, float>, LinearVector<float>> DotIndicatorPaintMethod
     itemHalfSizes.emplace_back(selectedItemWidth * 0.5);
     itemHalfSizes.emplace_back(selectedItemHeight * 0.5);
     CalculateNormalMargin(itemHalfSizes, frameSize, itemCount_);
-    Dimension paddingSide = swiperTheme->GetIndicatorPaddingDot();
     auto longPointCenterX = CalculatePointCenterX(itemHalfSizes, normalMargin_.GetX(),
-        static_cast<float>(paddingSide.ConvertToPx()),
+        static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx()),
         static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
     return { longPointCenterX, itemHalfSizes };
 }
@@ -465,19 +458,17 @@ void DotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
         static_cast<float>(paintProperty->GetSelectedItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
     // use radius calculation
     LinearVector<float> itemHalfSizes;
-    float scaleIndicator = swiperTheme->GetScaleSwiper();
-    itemHalfSizes.emplace_back(itemWidth * 0.5f * scaleIndicator);
-    itemHalfSizes.emplace_back(itemHeight * 0.5f * scaleIndicator);
-    itemHalfSizes.emplace_back(selectedItemWidth * 0.5f * scaleIndicator);
-    itemHalfSizes.emplace_back(selectedItemHeight * 0.5f * scaleIndicator);
+    itemHalfSizes.emplace_back(itemWidth * 0.5f * INDICATOR_ZOOM_IN_SCALE);
+    itemHalfSizes.emplace_back(itemHeight * 0.5f * INDICATOR_ZOOM_IN_SCALE);
+    itemHalfSizes.emplace_back(selectedItemWidth * 0.5f * INDICATOR_ZOOM_IN_SCALE);
+    itemHalfSizes.emplace_back(selectedItemHeight * 0.5f * INDICATOR_ZOOM_IN_SCALE);
     if (touchBottomType_ != TouchBottomType::NONE) {
         float allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ + 1);
         if (IsCustomSizeValue_) {
             allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ - 1) + selectedItemWidth;
         }
         float allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount_ - 1);
-        Dimension paddingSide = swiperTheme->GetIndicatorPaddingDot();
-        float padding = static_cast<float>(paddingSide.ConvertToPx());
+        float padding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
         float rectWidth = padding + allPointDiameterSum + allPointSpaceSum + padding;
         float newRectWidth =
             rectWidth * (TOUCH_BOTTOM_BACKGROUND_WIDTH_MULTIPLE - TOUCH_BOTTOM_DOT_WIDTH_MULTIPLE * itemCount_);
@@ -646,7 +637,6 @@ std::pair<float, float> DotIndicatorPaintMethod::ForwardCalculation(
         startCenterX += space;
         endCenterX += space;
     }
-
     AdjustPointCenterXForTouchBottom(
         pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex, selectedItemWidth, index);
     return CalculatePointCenterX(pointCenter, startVectorBlackPointCenterX, endVectorBlackPointCenterX);

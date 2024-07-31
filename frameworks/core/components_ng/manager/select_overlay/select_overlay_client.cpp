@@ -79,7 +79,7 @@ void SelectOverlayClient::InitSelectOverlay()
 
 void SelectOverlayClient::RequestOpenSelectOverlay(ClientOverlayInfo& showOverlayInfo)
 {
-    LOGI("first handle %{public}d, second handle %{public}d",
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "first handle %{public}d, second handle %{public}d",
         showOverlayInfo.firstHandleInfo.has_value(), showOverlayInfo.secondHandleInfo.has_value());
     if (SelectOverlayIsOn()) {
         UpdateShowingSelectOverlay(showOverlayInfo);
@@ -95,8 +95,8 @@ void SelectOverlayClient::CreateSelectOverlay(const ClientOverlayInfo& clientOve
     auto overlayInfo = GetSelectOverlayInfo(clientOverlayInfo);
     CHECK_NULL_VOID(overlayInfo);
     originIsMenuShow_ = overlayInfo->menuInfo.menuIsShow;
-    LOGI("first handle %{public}d, second handle %{public}d, select rect %{public}d", overlayInfo->firstHandle.isShow,
-        overlayInfo->secondHandle.isShow, overlayInfo->isSelectRegionVisible);
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "first handle %{public}d, second handle %{public}d, select rect %{public}d",
+        overlayInfo->firstHandle.isShow, overlayInfo->secondHandle.isShow, overlayInfo->isSelectRegionVisible);
     selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(
         *overlayInfo, WeakClaim(this), clientOverlayInfo.animation);
     if (!overlayInfo->isUsingMouse) {
@@ -121,8 +121,7 @@ std::optional<SelectOverlayInfo> SelectOverlayClient::GetSelectOverlayInfo(const
     overlayInfo.isSelectRegionVisible = CheckSelectionRectVisible();
     overlayInfo.selectArea = clientInfo.selectArea;
     overlayInfo.isNewAvoid = clientInfo.isNewAvoid;
-    overlayInfo.handlerColor =
-        clientInfo.handlerColor.has_value() ? clientInfo.handlerColor : overlayInfo.handlerColor;
+    overlayInfo.handlerColor = clientInfo.handlerColor.has_value() ? clientInfo.handlerColor : overlayInfo.handlerColor;
     if (!clientInfo.isUpdateMenu) {
         return overlayInfo;
     }
@@ -135,11 +134,11 @@ std::optional<SelectOverlayInfo> SelectOverlayClient::GetSelectOverlayInfo(const
 
 void SelectOverlayClient::UpdateShowingSelectOverlay(ClientOverlayInfo& clientInfo)
 {
-    LOGI("update select overlay");
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "update select overlay");
     auto isCurrentSingleHandle = IsShowingSingleHandle();
     auto hasRequestSingleHandle = !clientInfo.firstHandleInfo && clientInfo.secondHandleInfo;
     if (clientInfo.isShowMouseMenu || (isCurrentSingleHandle ^ hasRequestSingleHandle)) {
-        LOGI("force close and create new select overlay");
+        TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "force close and create new select overlay");
         RequestCloseSelectOverlay(true);
         clientInfo.isUpdateMenu = true;
         CreateSelectOverlay(clientInfo);
@@ -215,7 +214,7 @@ void SelectOverlayClient::UpdateSelectMenuVisibility(bool isVisible)
 void SelectOverlayClient::StartListeningScrollableParent(const RefPtr<FrameNode>& host)
 {
     if (!scrollableParentInfo_.hasParent) {
-        LOGI("has no scrollable parent");
+        TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "has no scrollable parent");
         return;
     }
     CHECK_NULL_VOID(host);
@@ -235,7 +234,7 @@ void SelectOverlayClient::StartListeningScrollableParent(const RefPtr<FrameNode>
             parent = parent->GetParent();
         }
         scrollableParentInfo_.hasParent = !scrollableParentInfo_.parentIds.empty();
-        LOGI("find scrollable parent %{public}d", scrollableParentInfo_.hasParent);
+        TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "find scrollable parent %{public}d", scrollableParentInfo_.hasParent);
     } else {
         for (const auto& scrollId : scrollableParentInfo_.parentIds) {
             RegisterParentScrollCallback(scrollId, host->GetId());

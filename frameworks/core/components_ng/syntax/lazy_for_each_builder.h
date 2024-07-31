@@ -102,6 +102,8 @@ public:
 
     bool ClassifyOperation(V2::Operation& operation, int32_t& initialIndex,
         std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp);
+    
+    bool ValidateIndex(int32_t index, std::string type);
 
     void OperateAdd(V2::Operation& operation, int32_t& initialIndex);
 

@@ -19,6 +19,7 @@
 #include <list>
 #include <map>
 
+#include "ability_runtime/context/environment_callback.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/pipeline/pipeline_base.h"
@@ -48,6 +49,7 @@
 #include "app_mgr_client.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "surface.h"
+#include "core/components_ng/render/adapter/rosen_render_surface.h"
 #endif
 #include "wm/window.h"
 #endif
@@ -762,6 +764,7 @@ public:
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void OnQuickMenuDismissed();
+    void HideHandleAndQuickMenuIfNecessary(bool hide);
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
@@ -912,6 +915,7 @@ public:
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
+    RefPtr<NG::RosenRenderSurface> renderSurface_ = nullptr;
 #endif
 #ifdef OHOS_STANDARD_SYSTEM
     void SetWebRendeGlobalPos(const Offset& pos)
@@ -1178,7 +1182,7 @@ private:
     WindowsSurfaceInfo surfaceInfo_ = { nullptr, EGL_NO_DISPLAY, nullptr, EGL_NO_CONTEXT };
     bool forceDarkMode_ = false;
     WebDarkMode current_dark_mode_ = WebDarkMode::Auto;
-    sptr<AppExecFwk::IConfigurationObserver> configChangeObserver_ = nullptr;
+    std::shared_ptr<OHOS::AbilityRuntime::EnvironmentCallback> configChangeObserver_ = nullptr;
     OHOS::NWeb::BlurReason blurReason_ = OHOS::NWeb::BlurReason::FOCUS_SWITCH;
     bool isPopup_ = false;
     int32_t parentNWebId_ = -1;

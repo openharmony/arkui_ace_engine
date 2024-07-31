@@ -127,7 +127,7 @@ public:
     void ResetTransform();
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
-    std::string ToDataURL(const std::string& args);
+    std::string ToDataURL(const std::string& type, double quality);
     std::string GetJsonData(const std::string& path);
 
     void UpdateGlobalAlpha(double alpha);
@@ -157,6 +157,7 @@ public:
     void SetTextDirection(TextDirection direction);
     void SetFilterParam(const std::string& filterStr);
     TransformParam GetTransform() const;
+    void SetDensity(double density);
 
     void SaveLayer();
     void RestoreLayer();
@@ -188,9 +189,7 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     bool isEnableAnalyzer_ = false;
     TextDirection currentSetTextDirection_ = TextDirection::INHERIT;
-
     RefPtr<CanvasModifier> contentModifier_;
-
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -173,6 +172,16 @@ void InputMethodManager::CloseKeyboard()
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PageChange CloseKeyboard SoftKeyboard Closes Successfully.");
     }
 #endif
+}
+
+void InputMethodManager::CloseKeyboardInPipelineDestroy()
+{
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Pipeline Destroyed, Ready to close SoftKeyboard.");
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (inputMethod) {
+        inputMethod->Close();
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Pipelinne Destroyed, Close SoftKeyboard Successfully.");
+    }
 }
 
 void InputMethodManager::CloseKeyboard(const RefPtr<NG::FrameNode>& focusNode)

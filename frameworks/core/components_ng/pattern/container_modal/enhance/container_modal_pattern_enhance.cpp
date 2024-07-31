@@ -108,6 +108,7 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     CHECK_NULL_VOID(controlButtonsContext);
     controlButtonsContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
     controlButtonsLayoutProperty->UpdateVisibility(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
+    SetControlButtonVisibleBeforeAnim(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
     auto gestureRow = GetGestureRow();
     CHECK_NULL_VOID(gestureRow);
     AddOrRemovePanEvent(customTitleRow);
@@ -295,9 +296,11 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
                 buttonsContext->OnTransformTranslateUpdate({ 0.0f,
                     beforeVisible == VisibleType::VISIBLE ? 0.0f : static_cast<float>(-titlePopupDistance), 0.0f });
             },
-            [floatingLayoutProperty, controlButtonsLayoutProperty, beforeVisible]() {
+            [floatingLayoutProperty, controlButtonsLayoutProperty, beforeVisible, weak = WeakClaim(this)]() {
+                auto containerModal = weak.Upgrade();
+                CHECK_NULL_VOID(containerModal);
                 floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
-                controlButtonsLayoutProperty->UpdateVisibility(beforeVisible);
+                controlButtonsLayoutProperty->UpdateVisibility(containerModal->GetControlButtonVisibleBeforeAnim());
             });
     }
 }

@@ -3024,12 +3024,16 @@ class stateMgmtDFX {
     static dumpObjectProperty(value) {
         let tempObj = {};
         try {
-            Object.getOwnPropertyNames(value)
-                .slice(0, 50)
+            let properties = Object.getOwnPropertyNames(value);
+            properties
+                .slice(0, stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT)
                 .forEach((varName) => {
                 const propertyValue = Reflect.get(value, varName);
                 tempObj[varName] = typeof propertyValue === 'object' ? this.getType(propertyValue) : propertyValue;
             });
+            if (properties.length > stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT) {
+                tempObj['...'] = '...';
+            }
         }
         catch (e) {
             stateMgmtConsole.warn(`can not dump Obj, error msg ${e.message}`);
@@ -3082,6 +3086,7 @@ class stateMgmtDFX {
 // enable profile
 stateMgmtDFX.enableProfiler = false;
 stateMgmtDFX.inRenderingElementId = new Array();
+stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT = 50;
 stateMgmtDFX.DUMP_MAX_LENGTH = 10;
 stateMgmtDFX.DUMP_LAST_LENGTH = 3;
 function setProfilerStatus(profilerStatus) {
@@ -6138,6 +6143,7 @@ class ViewPU extends PUV2ViewBase {
         this.watchedProps = new Map();
         this.recycleManager_ = undefined;
         this.hasBeenRecycled_ = false;
+        this.preventRecursiveRecycle_ = false;
         this.delayRecycleNodeRerender = false;
         this.delayRecycleNodeRerenderDeep = false;
         // @Provide'd variables by this class and its ancestors
@@ -6693,9 +6699,9 @@ class ViewPU extends PUV2ViewBase {
             return;
         }
         const _componentName = (classObject && ('name' in classObject)) ? Reflect.get(classObject, 'name') : 'unspecified UINode';
-        if (_componentName === "__Recycle__") {
+        if (_componentName === '__Recycle__') {
             return;
-        }       
+        }
         const _popFunc = (classObject && 'pop' in classObject) ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
             var _a, _b;
@@ -6852,11 +6858,18 @@ class ViewPU extends PUV2ViewBase {
         });
         this.runReuse_ = false;
     }
+    stopRecursiveRecycle() {
+        this.preventRecursiveRecycle_ = true;
+    }
     aboutToRecycleInternal() {
         this.runReuse_ = true;
         stateMgmtTrace.scopedTrace(() => {
             this.aboutToRecycle();
         }, 'aboutToRecycle', this.constructor.name);
+        if (this.preventRecursiveRecycle_) {
+            this.preventRecursiveRecycle_ = false;
+            return;
+        }
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
             if (child) {
@@ -9803,13 +9816,15 @@ class __Repeat {
     }
     // normalize template options
     normTemplateOptions(options) {
-        if (options) {
-            const cachedCount = options.cachedCount;
-            if (Number.isInteger(cachedCount) && cachedCount >= 0) {
-                return options;
+        const value = (options && Number.isInteger(options.cachedCount) && options.cachedCount >= 0)
+            ? {
+                cachedCount: Math.max(0, options.cachedCount),
+                cachedCountSpecified: true
             }
-        }
-        return { cachedCount: 1 };
+            : {
+                cachedCountSpecified: false
+            };
+        return value;
     }
 }
 ; // __Repeat<T>
@@ -10131,7 +10146,9 @@ class __RepeatVirtualScrollImpl {
                 let ttype = (_a = this.typeGenFunc_(this.arr_[i], i)) !== null && _a !== void 0 ? _a : '';
                 if (!this.itemGenFuncs_[ttype]) {
                     stateMgmtConsole.applicationError(`Repeat with virtual scroll elmtId: ${this.repeatElmtId_}. Factory function .templateId  returns template id '${ttype}'.` +
-                        (ttype == '') ? `Missing Repeat.each ` : `missing Repeat.template for id '${ttype}'` + `! Unrecoverable application error!"`);
+                        (ttype === '') ? 'Missing Repeat.each ' : `missing Repeat.template for id '${ttype}'` + '! Unrecoverable application error!');
+                    // fallback to use .each function and try to continue the app with it.
+                    ttype = '';
                 }
                 result.push(ttype);
             } // for
@@ -10161,13 +10178,13 @@ class __RepeatVirtualScrollImpl {
         // execute the itemGen function
         const itemType = (_a = this.typeGenFunc_(repeatItem.item, repeatItem.index)) !== null && _a !== void 0 ? _a : '';
         const itemFunc = (_b = this.itemGenFuncs_[itemType]) !== null && _b !== void 0 ? _b : this.itemGenFuncs_[''];
-        if (typeof itemFunc === "function") {
+        if (typeof itemFunc === 'function') {
             itemFunc(repeatItem);
         }
         else {
-            stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${this.repeatElmtId_}: `
-                + (itemType == '') ? "Missing Repeat.each " : `missing Repeat.template for id '${itemType}'`
-                + "! Unrecoverable application error!");
+            stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${this.repeatElmtId_}: ` +
+                (itemType === '') ? 'Missing Repeat.each ' : `missing Repeat.template for id '${itemType}'` +
+                '! Unrecoverable application error!');
         }
     }
     /**

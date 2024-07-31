@@ -13,8 +13,14 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
+#include "core/common/vibrator/vibrator_utils.h"
 
 namespace OHOS::Ace::NG {
-SwiperIndicatorType SwiperIndicatorUtils::swiperIndicatorType = SwiperIndicatorType::DOT;
+void VibratorUtils::StartVibraFeedback()
+{
+}
+
+void VibratorUtils::StartVibraFeedback(const std::string& vibratorType)
+{
+}
 } // namespace OHOS::Ace::NG

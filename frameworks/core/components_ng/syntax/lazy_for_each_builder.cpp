@@ -431,11 +431,20 @@ namespace OHOS::Ace::NG {
         return false;
     }
 
+    bool LazyForEachBuilder::ValidateIndex(int32_t index, std::string type)
+    {
+        if (index >= totalCountForDataset_ || index < 0) {
+            TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH,
+                "%{public}s(%{public}d) Operation is out of range", type.c_str(), index);
+            return true;
+        }
+        return false;
+    }
+
     void LazyForEachBuilder::OperateAdd(V2::Operation& operation, int32_t& initialIndex)
     {
         OperationInfo itemInfo;
-        if (operation.index >= totalCountForDataset_) {
-            TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH, "Add(%{public}d) Operation is out of range", operation.index);
+        if (ValidateIndex(operation.index, operation.type)) {
             return;
         }
         auto indexExist = operationList_.find(operation.index);
@@ -458,8 +467,7 @@ namespace OHOS::Ace::NG {
     void LazyForEachBuilder::OperateDelete(V2::Operation& operation, int32_t& initialIndex)
     {
         OperationInfo itemInfo;
-        if (operation.index >= totalCountForDataset_) {
-            TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH, "Delete(%{public}d) Operation is out of range", operation.index);
+        if (ValidateIndex(operation.index, operation.type)) {
             return;
         }
         auto indexExist = operationList_.find(operation.index);
@@ -486,8 +494,7 @@ namespace OHOS::Ace::NG {
         std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp)
     {
         OperationInfo itemInfo;
-        if (operation.index >= totalCountForDataset_) {
-            TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH, "Change(%{public}d) Operation is out of range", operation.index);
+        if (ValidateIndex(operation.index, operation.type)) {
             return;
         }
         auto indexExist = operationList_.find(operation.index);
@@ -517,10 +524,8 @@ namespace OHOS::Ace::NG {
     {
         OperationInfo fromInfo;
         OperationInfo toInfo;
-        if (operation.coupleIndex.first >= totalCountForDataset_ ||
-            operation.coupleIndex.second >= totalCountForDataset_) {
-            TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH, "Move(%{public}d, %{public}d) Operation is out of range",
-                operation.coupleIndex.first, operation.coupleIndex.second);
+        if (ValidateIndex(operation.coupleIndex.first, operation.type) ||
+            ValidateIndex(operation.coupleIndex.second, operation.type)) {
             return;
         }
         auto fromIndexExist = operationList_.find(operation.coupleIndex.first);
@@ -562,10 +567,8 @@ namespace OHOS::Ace::NG {
     {
         OperationInfo startInfo;
         OperationInfo endInfo;
-        if (operation.coupleIndex.first >= totalCountForDataset_ ||
-            operation.coupleIndex.second >= totalCountForDataset_) {
-            TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH, "Exchange(%{public}d, %{public}d) Operation is out of range",
-                operation.coupleIndex.first, operation.coupleIndex.second);
+        if (ValidateIndex(operation.coupleIndex.first, operation.type) ||
+            ValidateIndex(operation.coupleIndex.second, operation.type)) {
             return;
         }
         auto startIndexExist = operationList_.find(operation.coupleIndex.first);

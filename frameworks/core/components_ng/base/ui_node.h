@@ -35,9 +35,11 @@
 #include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
+class AccessibilityProperty;
 
 struct ExtraInfo {
     std::string page;
@@ -134,7 +136,7 @@ public:
     // int32_t second - index of the node
     std::pair<bool, int32_t> GetChildFlatIndex(int32_t id);
 
-    virtual const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const
+    virtual const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = true) const
     {
         return children_;
     }
@@ -180,10 +182,10 @@ public:
     // Tree operation end.
 
     // performance.
-    PipelineContext* GetContext();
+    PipelineContext* GetContext() const;
     PipelineContext* GetContextWithCheck();
 
-    RefPtr<PipelineContext> GetContextRefPtr();
+    RefPtr<PipelineContext> GetContextRefPtr() const;
 
     // When FrameNode creates a layout task, the corresponding LayoutWrapper tree is created, and UINode needs to update
     // the corresponding LayoutWrapper tree node at this time like add self wrapper to wrapper tree.
@@ -604,6 +606,11 @@ public:
     static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
     static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
 
+    virtual RefPtr<NG::AccessibilityProperty> GetVirtualAccessibilityProperty()
+    {
+        return nullptr;
+    }
+
     void AddFlag(uint32_t flag)
     {
         nodeFlag_ |= flag;
@@ -752,7 +759,7 @@ protected:
 
     virtual void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
     {
-        for (const auto& child : GetChildren()) {
+        for (const auto& child : GetChildren(false)) {
             child->OnGenerateOneDepthVisibleFrame(visibleList);
         }
     }
@@ -764,7 +771,7 @@ protected:
 
     virtual void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
     {
-        for (const auto& child : GetChildren()) {
+        for (const auto& child : GetChildren(false)) {
             child->OnGenerateOneDepthAllFrame(allList);
         }
     }
@@ -780,7 +787,7 @@ protected:
     }
     // Mount to the main tree to display.
     virtual void OnAttachToMainTree(bool recursive = false);
-    virtual void OnDetachFromMainTree(bool recursive = false);
+    virtual void OnDetachFromMainTree(bool recursive = false, PipelineContext* context = nullptr);
     virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
     // run offscreen process.
     virtual void OnOffscreenProcess(bool recursive) {}
@@ -803,6 +810,8 @@ protected:
     bool layoutSeperately_ = false;
 
     virtual void PaintDebugBoundary(bool flag) {}
+
+    void TraversingCheck(RefPtr<UINode> node = nullptr, bool withAbort = false);
 
     PipelineContext* context_ = nullptr;
 private:

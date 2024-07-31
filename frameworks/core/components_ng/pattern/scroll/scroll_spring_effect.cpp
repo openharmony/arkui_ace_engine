@@ -28,6 +28,7 @@ void ScrollSpringEffect::RegisterSpringCallback()
         CHECK_NULL_VOID(effect);
         effect->ProcessScrollOver(velocity);
     });
+    scrollable_->SetCurrentPositionCallback(currentPositionCallback_);
 }
 
 void ScrollSpringEffect::InitialEdgeEffect()

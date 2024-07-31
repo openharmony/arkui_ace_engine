@@ -43,20 +43,12 @@ void DialogTheme::Builder::ParsePattern(
         theme->radius_ = Radius(dialogPattern->GetAttr<Dimension>("radius", 24.0_vp));
         theme->backgroundColor_ = dialogPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color(0xd9ffffff));
     }
-    theme->text_align_content_ = dialogPattern->GetAttr<int>("text_align_content", 0);
-    theme->button_type_ = dialogPattern->GetAttr<int>("button_type", 0);
-    theme->text_align_title_ = dialogPattern->GetAttr<int>("text_align_title", 0);
-    theme->device_columns_dialog_ = dialogPattern->GetAttr<int>("device_columns_dialog", 0);
     theme->dividerLength_ = dialogPattern->GetAttr<Dimension>(DIALOG_DIVIDER_LENGTH, 24.0_vp);
     theme->dividerBetweenButtonWidth_ = dialogPattern->GetAttr<Dimension>(DIALOG_DIVIDER_BETWEEN_BUTTON_WIDTH, 2.0_px);
     theme->dividerColor_ = dialogPattern->GetAttr<Color>("divider_color", Color(0x33000000));
-    theme->backgroundBorderColor_ = dialogPattern->GetAttr<Color>("border_color", Color::TRANSPARENT);
-    theme->backgroundBorderWidth_ = dialogPattern->GetAttr<Dimension>("border_width", 0.0_vp);
-
     auto defaultPadding = dialogPattern->GetAttr<Dimension>(DIALOG_CONTENT_TOP_PADDING, 24.0_vp);
     theme->contentAdjustPadding_ = Edge(defaultPadding, defaultPadding, defaultPadding, 0.0_vp);
     theme->defaultPaddingBottomFixed_ = dialogPattern->GetAttr<Dimension>("default_padding_bottom_fixed", 24.0_vp);
-    theme->dialogRatioHeight_ = dialogPattern->GetAttr<double>("dialog_ratio_height", 0.8f);
     theme->defaultDialogMarginBottom_ = dialogPattern->GetAttr<Dimension>("default_dialog_margin_bottom", 16.0_vp);
     theme->buttonHighlightBgColor_ = dialogPattern->GetAttr<Color>("button_bg_highlight_color", Color(0xff007dff));
     theme->buttonHighlightFontColor_ = dialogPattern->GetAttr<Color>("first_button_text_color", Color::WHITE);
@@ -196,11 +188,6 @@ void DialogTheme::Builder::ParseNewPattern(
         dialogPattern->GetAttr<int>("dialog_background_shadow_on", static_cast<int>(ShadowStyle::None)));
     theme->defaultShadowOff_ = static_cast<uint32_t>(
         dialogPattern->GetAttr<int>("dialog_background_shadow_off", static_cast<int>(ShadowStyle::None)));
-    theme->shadowDialog_ = static_cast<uint32_t>(dialogPattern->GetAttr<double>("shadow_dialog", SHADOW_NONE));
-    theme->alignDialog_ = static_cast<int32_t>(dialogPattern->GetAttr<double>("align_dialog", DEFAULT_ALIGN_DIALOG));
-    theme->colorBgWithBlur_ = dialogPattern->GetAttr<Color>("color_bg_with_blur", Color::TRANSPARENT);
-    theme->paddingTopTitle_ = dialogPattern->GetAttr<Dimension>("padding_top_title", 24.0_vp);
-    theme->paddingSingleTitle_ = dialogPattern->GetAttr<Dimension>("padding_single_title", 0.0_vp);
     theme->alignment_ =
         static_cast<DialogAlignment>(dialogPattern->GetAttr<int>("dialog_alignment", DEFAULT_DIALOG_ALIGNMENT));
     theme->maxSizeScaleLandscape_ =

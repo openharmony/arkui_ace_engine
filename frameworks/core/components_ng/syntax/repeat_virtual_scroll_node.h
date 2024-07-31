@@ -37,14 +37,15 @@ class ACE_EXPORT RepeatVirtualScrollNode : public ForEachBaseNode {
 
 public:
     static RefPtr<RepeatVirtualScrollNode> GetOrCreateRepeatNode(int32_t nodeId, uint32_t totalCount,
-        const std::map<std::string, uint32_t>& templateCachedCountMap,
+        const std::map<std::string, std::pair<bool, uint32_t>>& templateCachedCountMap,
         const std::function<void(uint32_t)>& onCreateNode,
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range);
 
     RepeatVirtualScrollNode(int32_t nodeId, int32_t totalCount,
-        const std::map<std::string, uint32_t>& templateCacheCountMap, const std::function<void(uint32_t)>& onCreateNode,
+        const std::map<std::string, std::pair<bool, uint32_t>>& templateCacheCountMap,
+        const std::function<void(uint32_t)>& onCreateNode,
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range);
@@ -70,7 +71,7 @@ public:
      * function returns children_
      * function runs as part of idle task
      */
-    const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
+    const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = true) const override;
 
     /**
      * scenario: called by layout informs:

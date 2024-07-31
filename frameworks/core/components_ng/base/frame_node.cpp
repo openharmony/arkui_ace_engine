@@ -19,8 +19,8 @@
 #include "base/geometry/ng/rect_t.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#include "core/common/layout_inspector.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #endif
 #include "base/geometry/dimension.h"
@@ -479,7 +479,8 @@ FrameNode::~FrameNode()
 
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
-        OnDetachFromMainTree(false);
+        OnDetachFromMainTree(false, GetContext());
+        LOGW("%{public}s %{public}d should do detach before destroy function", GetTag().c_str(), GetId());
     }
     TriggerVisibleAreaChangeCallback(0, true);
     CleanVisibleAreaUserCallback();
@@ -1036,8 +1037,21 @@ void FrameNode::UpdateGeometryTransition()
     }
 }
 
+void FrameNode::TriggerRsProfilerNodeMountCallbackIfExist()
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    CHECK_NULL_VOID(renderContext_);
+    auto callback = LayoutInspector::GetRsProfilerNodeMountCallback();
+    if (callback) {
+        FrameNodeInfo info { GetId(), renderContext_->GetNodeId(), GetTag(), GetDebugLine() };
+        callback(info);
+    }
+#endif
+}
+
 void FrameNode::OnAttachToMainTree(bool recursive)
 {
+    TriggerRsProfilerNodeMountCallbackIfExist();
     eventHub_->FireOnAttach();
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear(recursive);
@@ -1131,7 +1145,7 @@ void FrameNode::TryVisibleChangeOnDescendant(bool isVisible)
     NotifyVisibleChange(isVisible);
 }
 
-void FrameNode::OnDetachFromMainTree(bool recursive)
+void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 {
     auto focusHub = GetFocusHub();
     if (focusHub) {
@@ -1146,6 +1160,12 @@ void FrameNode::OnDetachFromMainTree(bool recursive)
     eventHub_->FireOnDisappear();
     CHECK_NULL_VOID(renderContext_);
     renderContext_->OnNodeDisappear(recursive);
+    if (context) {
+        const auto& safeAreaManager = context->GetSafeAreaManager();
+        if (safeAreaManager) {
+            safeAreaManager->RemoveRestoreNode(WeakClaim(this));
+        }
+    }
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
@@ -1244,13 +1264,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         builderFunc_ = nullptr;
         backgroundNode_ = columnNode;
     }
-
-    // update focus state
-    auto focusHub = GetFocusHub();
-    if (focusHub && focusHub->IsCurrentFocus()) {
-        focusHub->ClearFocusState(false);
-        focusHub->PaintFocusState(false);
-    }
+    UpdateFocusState();
 
     // rebuild child render node.
     RebuildRenderContextTree();
@@ -2873,6 +2887,25 @@ OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
     return offset;
 }
 
+OffsetF FrameNode::GetPaintRectOffsetNG(bool excludeSelf) const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithoutTransform().GetOffset();
+    Point point = Matrix4::Invert(context->GetRevertMatrix()) * Point(offset.GetX(), offset.GetY());
+    auto parent = GetAncestorNodeOfFrame();
+    while (parent) {
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, OffsetF());
+        auto parentOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
+        point = point + Offset(parentOffset.GetX(), parentOffset.GetY());
+        auto parentMatrix = Matrix4::Invert(renderContext->GetRevertMatrix());
+        point = parentMatrix * point;
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return OffsetF(point.GetX(), point.GetY());
+}
+
 OffsetF FrameNode::GetPaintRectCenter(bool checkWindowBoundary) const
 {
     auto context = GetRenderContext();
@@ -3270,7 +3303,7 @@ std::vector<FrameNode*> FrameNode::GetNodesPtrById(const std::unordered_set<int3
 double FrameNode::GetPreviewScaleVal() const
 {
     double scale = 1.0;
-    auto maxWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
+    auto maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(GetContextRefPtr());
     auto geometryNode = GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, scale);
     auto width = geometryNode->GetFrameRect().Width();
@@ -3616,8 +3649,8 @@ void FrameNode::UpdateFocusState()
 {
     auto focusHub = GetFocusHub();
     if (focusHub && focusHub->IsCurrentFocus()) {
-        focusHub->ClearFocusState(false);
-        focusHub->PaintFocusState(false);
+        focusHub->ClearFocusState();
+        focusHub->PaintFocusState();
     }
 }
 

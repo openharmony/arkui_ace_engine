@@ -26,7 +26,6 @@
 #include "core/animation/spring_model.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/list/list_theme.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/list/list_height_offset_calculator.h"
@@ -49,9 +48,6 @@ constexpr double CHAIN_SPRING_DAMPING = 30.0;
 constexpr double CHAIN_SPRING_STIFFNESS = 228;
 constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
-constexpr float LIST_FADINGEDGE_DEFAULT = 32.0f;
-constexpr float LIST_START_MAIN_POS = 0.0f;
-constexpr float LIST_FADE_ERROR_RANGE = 1.0f;
 } // namespace
 
 void ListPattern::OnModifyDone()
@@ -95,31 +91,6 @@ void ListPattern::OnModifyDone()
     SetAccessibilityAction();
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
-    }
-    ReadThemeToFadingEdge();
-}
-
-void ListPattern::ReadThemeToFadingEdge()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
-    CHECK_NULL_VOID(listLayoutProperty);
-    auto conlist = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_VOID(conlist);
-    auto listTheme = conlist->GetTheme<ListTheme>();
-    CHECK_NULL_VOID(listTheme);
-    auto listThemeFadingEdge = listTheme->GetFadingEdge();
-    if (listLayoutProperty->GetFadingEdge().has_value()) {
-        isFadingEdge_ = listLayoutProperty->GetFadingEdge().value_or(listThemeFadingEdge);
-    } else if (GetAxis() == Axis::HORIZONTAL) {
-        isFadingEdge_ = false;
-    } else {
-        isFadingEdge_ = listThemeFadingEdge;
-    }
-    auto overlayNode = host->GetOverlayNode();
-    if (!overlayNode && isFadingEdge_) {
-        CreateAnalyzerOverlay(host);
     }
 }
 
@@ -337,35 +308,6 @@ float ListPattern::CalculateTargetPos(float startPos, float endPos)
     return 0.0f;
 }
 
-void ListPattern::CreateAnalyzerOverlay(const RefPtr<FrameNode> listNode)
-{
-    auto builderFunc = []() -> RefPtr<UINode> {
-        auto uiNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), []() {
-                return AceType::MakeRefPtr<LinearLayoutPattern>(true);
-            });
-        return uiNode;
-    };
-    auto overlayNode = AceType::DynamicCast<FrameNode>(builderFunc());
-    CHECK_NULL_VOID(overlayNode);
-    listNode->SetOverlayNode(overlayNode);
-    overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(listNode)));
-    overlayNode->SetActive(true);
-    overlayNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
-    auto overlayProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
-    CHECK_NULL_VOID(overlayProperty);
-    overlayProperty->SetIsOverlayNode(true);
-    overlayProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    overlayProperty->UpdateAlignment(Alignment::CENTER);
-    auto overlayOffsetX = std::make_optional<Dimension>(Dimension::FromString("0px"));
-    auto overlayOffsetY = std::make_optional<Dimension>(Dimension::FromString("0px"));
-    overlayProperty->SetOverlayOffset(overlayOffsetX, overlayOffsetY);
-    auto focusHub = overlayNode->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->SetFocusable(false);
-    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
-
 RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
 {
     auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
@@ -405,58 +347,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     paint->SetLaneGutter(laneGutter_);
     paint->SetItemsPosition(itemPosition_, pressedItem_);
     paint->SetContentModifier(listContentModifier_);
-
-    UpdateFadingEdge(paint);
     return paint;
-}
-
-void ListPattern::UpdateFadingEdge(const RefPtr<ListPaintMethod> paint)
-{
-    if (LIST_START_MAIN_POS == contentMainSize_) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto overlayNode = host->GetOverlayNode();
-    CHECK_NULL_VOID(overlayNode);
-    auto overlayRenderContext = overlayNode->GetRenderContext();
-    CHECK_NULL_VOID(overlayRenderContext);
-    if (!isFadingEdge_) {
-        paint->SetOverlayRenderContext(overlayRenderContext);
-        paint->SetFadingInfo(false, false);
-        isTopEdgeFading_ = false;
-        isLowerEdgeFading_ = false;
-        return;
-    }
-    auto isFadingTop = LessNotEqual(startMainPos_, LIST_START_MAIN_POS - LIST_FADE_ERROR_RANGE);
-    auto isFadingBottom = GreatNotEqual(endMainPos_, contentMainSize_ + LIST_FADE_ERROR_RANGE);
-    if (isFadingTop || isFadingBottom) {
-        auto isTopEdgeFadingUpdate = isTopEdgeFading_ != isFadingTop;
-        auto isLowerEdgeFadingUpdate = isLowerEdgeFading_ != isFadingBottom;
-        if (isTopEdgeFadingUpdate || isLowerEdgeFadingUpdate || (fadingAxis_ != GetAxis())) {
-            paint->SetOverlayRenderContext(overlayRenderContext);
-            UpdateFadeInfo(isFadingTop, isFadingBottom, paint);
-            fadingAxis_ = GetAxis();
-        }
-    } else if (isTopEdgeFading_ || isLowerEdgeFading_) {
-        paint->SetOverlayRenderContext(overlayRenderContext);
-        UpdateFadeInfo(isFadingTop, isFadingBottom, paint);
-    }
-    isTopEdgeFading_ = isFadingTop;
-    isLowerEdgeFading_ = isFadingBottom;
-}
-
-void ListPattern::UpdateFadeInfo(bool isFadingTop, bool isFadingBottom, const RefPtr<ListPaintMethod> paint)
-{
-    if (startIndex_ > 0) {
-        isFadingTop = true;
-    }
-    if (endIndex_ < maxListItemIndex_) {
-        isFadingBottom = true;
-    }
-    auto percentFading = CalcDimension(LIST_FADINGEDGE_DEFAULT, DimensionUnit::VP).ConvertToPx() /
-        std::abs(contentMainSize_ - LIST_START_MAIN_POS);
-    paint->SetFadingInfo(isFadingTop, isFadingBottom, percentFading);
 }
 
 bool ListPattern::UpdateStartListItemIndex()
@@ -687,6 +578,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     }
     if (predictSnapOffset_.has_value()) {
         listLayoutAlgorithm->SetPredictSnapOffset(predictSnapOffset_.value());
+        listLayoutAlgorithm->SetScrollSnapVelocity(scrollSnapVelocity_);
     }
     listLayoutAlgorithm->SetTotalOffset(GetTotalOffset());
     listLayoutAlgorithm->SetCurrentDelta(currentDelta_);

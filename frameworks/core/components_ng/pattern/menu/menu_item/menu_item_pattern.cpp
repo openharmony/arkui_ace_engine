@@ -55,6 +55,9 @@ constexpr double STIFFNESS = 328.0f;
 constexpr double DAMPING = 33.0f;
 constexpr double SEMI_CIRCLE_ANGEL = 180.0f;
 constexpr float OPACITY_EFFECT = 0.99;
+const std::string SYSTEM_RESOURCE_PREFIX = std::string("resource:///");
+// id of system resource start from 0x07800000
+constexpr unsigned long MIN_SYSTEM_RESOURCE_ID = 0x07800000;
 
 void UpdateFontSize(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
     const std::optional<Dimension>& fontSize, const Dimension& defaultFontSize)
@@ -357,9 +360,8 @@ void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
         props->UpdateExpandingMode(expandingMode_);
         if (expandingMode_ == SubMenuExpandingMode::STACK) {
             AddStackSubMenuHeader(frameNode);
-            pattern->BlockFurtherExpand();
+            pattern->SetIsStackSubmenu();
         } else if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
-            pattern->BlockFurtherExpand();
             pattern->SetIsEmbedded();
             return;
         }
@@ -654,11 +656,9 @@ void MenuItemPattern::OnClick()
     auto selectedChangeEvent = hub->GetSelectedChangeEvent();
     SetChange();
     if (selectedChangeEvent) {
-        LOGI("trigger onChangeEvent");
         selectedChangeEvent(IsSelected());
     }
     if (onChange) {
-        LOGI("trigger onChange");
         onChange(IsSelected());
         RecordChangeEvent();
     }
@@ -927,8 +927,6 @@ void MenuItemPattern::AddHoverRegions(const OffsetF& topLeftPoint, const OffsetF
     TouchRegion hoverRegion = TouchRegion(
         Offset(topLeftPoint.GetX(), topLeftPoint.GetY()), Offset(bottomRightPoint.GetX(), bottomRightPoint.GetY()));
     hoverRegions_.emplace_back(hoverRegion);
-    LOGI("MenuItemPattern::AddHoverRegions hoverRegion is %{public}s to %{public}s", topLeftPoint.ToString().c_str(),
-        bottomRightPoint.ToString().c_str());
 }
 
 bool MenuItemPattern::IsInHoverRegions(double x, double y)
@@ -1090,8 +1088,9 @@ void MenuItemPattern::AddExpandIcon(RefPtr<FrameNode>& row)
     auto menuPattern = menuNode ? menuNode->GetPattern<MenuPattern>() : nullptr;
     auto menuProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
     CHECK_NULL_VOID(menuProperty);
-    auto canExpand = (menuPattern ? menuPattern->CanExpand() : true) && GetSubBuilder() != nullptr &&
-        (expandingMode_ == SubMenuExpandingMode::EMBEDDED || expandingMode_ == SubMenuExpandingMode::STACK);
+    auto canExpand = GetSubBuilder() != nullptr && menuPattern
+        && !menuPattern->IsEmbedded() && !menuPattern->IsStackSubmenu()
+        && (expandingMode_ == SubMenuExpandingMode::EMBEDDED || expandingMode_ == SubMenuExpandingMode::STACK);
     if (!canExpand) {
         if (expandIcon_) {
             row->RemoveChild(expandIcon_);
@@ -1272,7 +1271,18 @@ void MenuItemPattern::UpdateImageIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
         auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateImageSourceInfo(imageSourceInfo);
-        UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), false);
+        bool useDefaultThemeIcon = false;
+        if (imageSourceInfo.IsSvg()) {
+            auto src = imageSourceInfo.GetSrc();
+            auto srcId = src.substr(SYSTEM_RESOURCE_PREFIX.size(),
+                src.substr(0, src.rfind(".svg")).size() - SYSTEM_RESOURCE_PREFIX.size());
+            auto isSystemIcon = (srcId.find("ohos_") != std::string::npos)
+                || (std::stoul(srcId) >= MIN_SYSTEM_RESOURCE_ID);
+            if (isSystemIcon) {
+                useDefaultThemeIcon = true;
+            }
+        }
+        UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), useDefaultThemeIcon);
     }
 }
 
@@ -1334,7 +1344,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
     CHECK_NULL_VOID(theme);
     UpdateTexOverflow(textProperty);
-    auto layoutDirection = textProperty->GetNonAutoLayoutDirection();
+    auto layoutDirection = itemProperty->GetNonAutoLayoutDirection();
     TextAlign textAlign = static_cast<TextAlign>(theme->GetMenuItemContentAlign());
     if (layoutDirection == TextDirection::RTL) {
         if (textAlign == TextAlign::LEFT) {

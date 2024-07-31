@@ -20,6 +20,9 @@ const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
+if (PUV2ViewBase.contextStack === undefined) {
+    Reflect.set(PUV2ViewBase, "contextStack", []);
+}
 
 const noop = (selectedIndexes) => {
 };
@@ -167,6 +170,7 @@ export class IconGroupSuffix extends ViewPU {
         return value;
     }
     initialRender() {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
         }, Row);
@@ -226,9 +230,12 @@ export class IconGroupSuffix extends ViewPU {
         }, ForEach);
         ForEach.pop();
         Row.pop();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
     rerender() {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 export class ChipGroup extends ViewPU {
@@ -557,6 +564,7 @@ export class ChipGroup extends ViewPU {
         return parseDimension(this.getUIContext(), this.chipGroupPadding.bottom, isValidDimensionNoPercentageString, defaultTheme.chipGroupPadding.bottom);
     }
     initialRender() {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.align(Alignment.End);
@@ -628,7 +636,7 @@ export class ChipGroup extends ViewPU {
                                         this.selectedIndexes.push(index);
                                     }
                                     this.getOnChange()(this.getSelectedIndexes());
-                                } }), this);
+                                } }));
                         });
                     }
                     else {
@@ -675,7 +683,7 @@ export class ChipGroup extends ViewPU {
                         Row.create();
                         Row.padding({ left: iconGroupSuffixTheme.marginLeft, right: iconGroupSuffixTheme.marginRight });
                     }, Row);
-                    this.suffix.bind(this)(this);
+                    this.suffix.bind(this)();
                     Row.pop();
                 });
             }
@@ -686,9 +694,12 @@ export class ChipGroup extends ViewPU {
         }, If);
         If.pop();
         Row.pop();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
     rerender() {
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.updateDirtyElements();
+        PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
 }
 

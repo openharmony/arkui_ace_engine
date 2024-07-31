@@ -130,6 +130,17 @@ export struct AtomicServiceWeb {
       this.atomicService = new AtomicServiceApi(this.context, this.navPathStack, this.onMessage);
       this.atomicServiceProxy = new AtomicServiceProxy(this.atomicService);
     }
+
+    try {
+      let bundleInfo: bundleManager.BundleInfo = bundleManager.getBundleInfoForSelfSync(
+        bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
+      if (bundleInfo?.appInfo?.appProvisionType === 'debug') {
+        console.log(`AtomicServiceWeb setWebDebuggingAccess`);
+        web_webview.WebviewController.setWebDebuggingAccess(true);
+      }
+    } catch (err) {
+      console.error(`AtomicServiceWeb set Web Debug Mode failed, code is ${err.code}, message is ${err.message}`);
+    }
   }
 
   aboutToDisappear(): void {

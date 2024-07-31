@@ -13,19 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_VIBRATOR_VIBRATOR_IMPL_H
-#define FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_VIBRATOR_VIBRATOR_IMPL_H
+#include "core/components_ng/pattern/bubble/bubble_accessibility_property.h"
+
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+#include "accessibility_element_info.h"
+#endif
+
+#include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
+
 namespace OHOS::Ace::NG {
-class VibratorImpl {
-public:
-    VibratorImpl() = delete;
-    ~VibratorImpl() = delete;
-
-    static void StartVibraFeedback();
-private:
-    static const char* GetFirstSupportedId();
-    static const char* supportedEffectId;
-};
+void BubbleAccessibilityProperty::GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo)
+{
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+    extraElementInfo.SetExtraElementInfo("SideBarContainerStates", showedState_);
+#endif
+}
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_VIBRATOR_VIBRATOR_IMPL_H
-

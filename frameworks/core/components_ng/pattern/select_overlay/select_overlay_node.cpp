@@ -129,7 +129,7 @@ float MeasureTextWidth(const TextStyle& textStyle, const std::string& text)
     content.fontWeight = fontweight;
     content.isReturnActualWidth = true;
     content.maxlines = 1;
-    return static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Width());
+    return std::max(static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Width()), 0.0f);
 #else
     return 0.0f;
 #endif
@@ -1652,7 +1652,7 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
     const std::shared_ptr<SelectOverlayInfo>& info)
 {
     std::vector<MenuItemParam> systemItemParams;
-    if (info->menuInfo.showCopy) {
+    if (info->menuInfo.showCopy || info->isUsingMouse) {
         MenuItemParam param;
         MenuOptionsParam menuOptionsParam;
         menuOptionsParam.id = OH_DEFAULT_COPY;
@@ -1661,7 +1661,7 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
         systemItemParams.emplace_back(param);
     }
 
-    if (info->menuInfo.showPaste) {
+    if (info->menuInfo.showPaste || info->isUsingMouse) {
         MenuItemParam param;
         MenuOptionsParam menuOptionsParam;
         menuOptionsParam.id = OH_DEFAULT_PASTE;
@@ -1670,7 +1670,7 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
         systemItemParams.emplace_back(param);
     }
 
-    if (info->menuInfo.showCut) {
+    if (info->menuInfo.showCut || info->isUsingMouse) {
         MenuItemParam param;
         MenuOptionsParam menuOptionsParam;
         menuOptionsParam.id = OH_DEFAULT_CUT;
@@ -1679,7 +1679,7 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
         systemItemParams.emplace_back(param);
     }
 
-    if (info->menuInfo.showCopyAll) {
+    if (info->menuInfo.showCopyAll || info->isUsingMouse) {
         MenuItemParam param;
         MenuOptionsParam menuOptionsParam;
         menuOptionsParam.id = OH_DEFAULT_SELECT_ALL;
@@ -1867,7 +1867,7 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
 
     auto gestureEventHub = menuWrapper->GetOrCreateGestureEventHub();
     if (gestureEventHub) {
-        gestureEventHub->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
+        gestureEventHub->SetHitTestMode(HitTestMode::HTMDEFAULT);
     }
     return menuWrapper;
 }

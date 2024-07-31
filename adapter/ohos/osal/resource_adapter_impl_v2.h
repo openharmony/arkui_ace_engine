@@ -19,7 +19,7 @@
 #include <mutex>
 
 #include "resource_manager.h"
-
+#include "base/thread/task_executor.h"
 #include "base/image/pixel_map.h"
 #include "base/utils/device_config.h"
 #include "core/components/theme/resource_adapter.h"
@@ -91,6 +91,7 @@ private:
     {
         return sysResourceManager_;
     }
+    RefPtr<TaskExecutor> GetTaskExecutor();
 
     std::shared_ptr<Global::Resource::ResourceManager> sysResourceManager_;
     std::string packagePathStr_;

@@ -180,6 +180,15 @@ export class AtomicServiceWeb extends ViewPU {
             this.atomicService = new AtomicServiceApi(this.context, this.navPathStack, this.onMessage);
             this.atomicServiceProxy = new AtomicServiceProxy(this.atomicService);
         }
+        try {
+            let h2 = bundleManager.getBundleInfoForSelfSync(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
+            if (h2?.appInfo?.appProvisionType === 'debug') {
+                console.log(`AtomicServiceWeb setWebDebuggingAccess`);
+                web_webview.WebviewController.setWebDebuggingAccess(true);
+            }
+        } catch (d2) {
+            console.error(`AtomicServiceWeb set Web Debug Mode failed, code is ${d2.code}, message is ${d2.message}`);
+        }
     }
 
     aboutToDisappear() {

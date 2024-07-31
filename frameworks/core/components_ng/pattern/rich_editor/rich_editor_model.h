@@ -262,7 +262,8 @@ class ACE_EXPORT RichEditorBaseControllerBase : public AceType {
 public:
     virtual int32_t GetCaretOffset() = 0;
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
-    virtual void SetTypingStyle(struct UpdateSpanStyle& typingStyle, TextStyle textStyle) = 0;
+    virtual void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
+        std::optional<TextStyle> textStyle) = 0;
     virtual void CloseSelectionMenu() = 0;
     virtual bool IsEditing() = 0;
     virtual void StopEditing() = 0;
@@ -314,6 +315,7 @@ public:
     virtual void SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func) = 0;
     virtual void SetAboutToIMEInput(std::function<bool(const NG::RichEditorInsertValue&)>&& func) = 0;
     virtual void SetOnIMEInputComplete(std::function<void(const NG::RichEditorAbstractSpanResult&)>&& func) = 0;
+    virtual void SetOnDidIMEInput(std::function<void(const TextRange&)>&& func) = 0;
     virtual void SetAboutToDelete(std::function<bool(const NG::RichEditorDeleteValue&)>&& func) = 0;
     virtual void SetOnDeleteComplete(std::function<void()>&& func) = 0;
     virtual void SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance = false) = 0;

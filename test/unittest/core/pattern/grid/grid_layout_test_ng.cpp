@@ -255,7 +255,7 @@ HWTEST_F(GridLayoutTestNg, GridScrollTest001, TestSize.Level1)
 HWTEST_F(GridLayoutTestNg, GridScrollTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create girdItem and initialize related properties.
+     * @tc.steps: step1. Create gridItem and initialize related properties.
      */
     GridModelNG model;
     model.Create(nullptr, nullptr);
@@ -279,7 +279,7 @@ HWTEST_F(GridLayoutTestNg, GridScrollTest002, TestSize.Level1)
 HWTEST_F(GridLayoutTestNg, GridScrollTest003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create girdItem and initialize related properties.
+     * @tc.steps: step1. Create gridItem and initialize related properties.
      */
     GridModelNG model;
     model.Create(nullptr, nullptr);
@@ -304,7 +304,7 @@ HWTEST_F(GridLayoutTestNg, GridScrollTest003, TestSize.Level1)
 HWTEST_F(GridLayoutTestNg, GridScrollTest004, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create girdItem and initialize related properties.
+     * @tc.steps: step1. Create gridItem and initialize related properties.
      */
     GridModelNG model;
     model.Create(nullptr, nullptr);
@@ -398,7 +398,7 @@ HWTEST_F(GridLayoutTestNg, GetAverageHeight001, TestSize.Level1)
 
 /**
  * @tc.name: GridItemDisableEventTest001
- * @tc.desc: GirdItem disable event test.
+ * @tc.desc: GridItem disable event test.
  * @tc.type: FUNC
  */
 HWTEST_F(GridLayoutTestNg, GridItemDisableEventTest001, TestSize.Level1)
@@ -408,7 +408,7 @@ HWTEST_F(GridLayoutTestNg, GridItemDisableEventTest001, TestSize.Level1)
     CreateDone(frameNode_);
 
     /**
-     * @tc.steps: step2. Get girdItem frameNode and pattern, set callback function.
+     * @tc.steps: step2. Get gridItem frameNode and pattern, set callback function.
      * @tc.expected: Related function is called.
      */
     auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
@@ -427,7 +427,7 @@ HWTEST_F(GridLayoutTestNg, GridItemDisableEventTest001, TestSize.Level1)
 
 /**
  * @tc.name: GridItemGetInnerFocusPaintRectTest001
- * @tc.desc: GirdItem GetInnerFocusPaintRect test.
+ * @tc.desc: GridItem GetInnerFocusPaintRect test.
  * @tc.type: FUNC
  */
 HWTEST_F(GridLayoutTestNg, GridItemGetInnerFocusPaintRectTest001, TestSize.Level1)
@@ -1678,7 +1678,7 @@ HWTEST_F(GridLayoutTestNg, LayoutWithAutoStretch003, TestSize.Level1)
 
 /**
  * @tc.name: GridItemDisableEventTest002
- * @tc.desc: GirdItem disable event test.
+ * @tc.desc: GridItem disable event test.
  * @tc.type: FUNC
  */
 HWTEST_F(GridLayoutTestNg, GridItemDisableEventTest002, TestSize.Level1)
@@ -1688,7 +1688,7 @@ HWTEST_F(GridLayoutTestNg, GridItemDisableEventTest002, TestSize.Level1)
     CreateDone(frameNode_);
 
     /**
-     * @tc.steps: step2. Get girdItem frameNode and pattern, set callback function.
+     * @tc.steps: step2. Get gridItem frameNode and pattern, set callback function.
      * @tc.expected: Related function is called.
      */
     auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);

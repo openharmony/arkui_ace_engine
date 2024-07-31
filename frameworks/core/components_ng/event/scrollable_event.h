@@ -135,7 +135,7 @@ public:
         }
     }
 
-    void SetBarCollectLongPressTargetCallback(const BarCollectTouchTargetCallback&& barCollectLongPressTarget)
+    void SetBarCollectClickAndLongPressTargetCallback(const BarCollectTouchTargetCallback&& barCollectLongPressTarget)
     {
         barCollectLongPressTarget_ = std::move(barCollectLongPressTarget);
     }

@@ -5612,6 +5612,10 @@ class ArkGridComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, GridFlingSpeedLimitModifier.identity, GridFlingSpeedLimitModifier, value);
     return this;
   }
+  alignItems(value) {
+    modifierWithKey(this._modifiersWithKeys, GridAlignItemsModifier.identity, GridAlignItemsModifier, value);
+    return this;
+  }
 
 }
 class GridColumnsTemplateModifier extends ModifierWithKey {
@@ -5934,6 +5938,20 @@ class GridFlingSpeedLimitModifier extends ModifierWithKey {
   }
 }
 GridFlingSpeedLimitModifier.identity = Symbol('gridFlingSpeedLimit');
+class GridAlignItemsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetAlignItems(node);
+    }
+    else {
+      getUINativeModule().grid.setAlignItems(node, this.value);
+    }
+  }
+}
+GridAlignItemsModifier.identity = Symbol('gridAlignItems');
 // @ts-ignore
 if (globalThis.Grid !== undefined) {
   globalThis.Grid.attributeModifier = function (modifier) {
@@ -16441,6 +16459,34 @@ class ScrollOnDidScrollModifier extends ModifierWithKey {
 }
 ScrollOnDidScrollModifier.identity = Symbol('scrollOnDidScroll');
 
+class ScrollOnWillScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnWillScroll(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnWillScroll(node, this.value);
+    }
+  }
+}
+ScrollOnWillScrollModifier.identity = Symbol('scrollOnWillScroll');
+
+class ScrollOnScrollFrameBeginModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnScrollFrameBegin(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnScrollFrameBegin(node, this.value);
+    }
+  }
+}
+ScrollOnScrollFrameBeginModifier.identity = Symbol('scrollOnScrollFrameBegin');
+
 class ArkScrollComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -16502,8 +16548,14 @@ class ArkScrollComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ScrollEdgeEffectModifier.identity, ScrollEdgeEffectModifier, effect);
     return this;
   }
-  onScrollFrameBegin(event) {
-    throw new Error('Method not implemented.');
+  onScrollFrameBegin(callback) {
+    modifierWithKey(this._modifiersWithKeys, ScrollOnScrollFrameBeginModifier.identity, ScrollOnScrollFrameBeginModifier, callback);
+    return this;
+  }
+
+  onWillScroll(callback) {
+    modifierWithKey(this._modifiersWithKeys, ScrollOnWillScrollModifier.identity, ScrollOnWillScrollModifier, callback);
+    return this;
   }
 
   onDidScroll(callback) {
@@ -24961,20 +25013,6 @@ class ListClipModifier extends ModifierWithKey {
   }
 }
 ListClipModifier.identity = Symbol('listClip');
-class ListFadingEdgeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().list.resetFadingEdge(node);
-    }
-    else {
-      getUINativeModule().list.setFadingEdge(node, this.value);
-    }
-  }
-}
-ListFadingEdgeModifier.identity = Symbol('fadingEdge');
 
 class ListChildrenMainSizeModifier extends ModifierWithKey {
   constructor(value) {
@@ -25206,10 +25244,6 @@ class ArkListComponent extends ArkComponent {
   }
   onScrollFrameBegin(event) {
     throw new Error('Method not implemented.');
-  }
-  fadingEdge(value) {
-    modifierWithKey(this._modifiersWithKeys, ListFadingEdgeModifier.identity, ListFadingEdgeModifier, value);
-    return this;
   }
   childrenMainSize(value) {
     modifierWithKey(this._modifiersWithKeys, ListChildrenMainSizeModifier.identity, ListChildrenMainSizeModifier, value);
@@ -28181,6 +28215,25 @@ class MediaCachedImageSrcModifier extends ModifierWithKey {
   }
 }
 MediaCachedImageSrcModifier.identity = Symbol('mediaCachedImageSrc');
+class MediaCachedImageAltModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (getUINativeAdvancedModule() === undefined) {
+      return;
+    }
+    if (reset) {
+      getUINativeAdvancedModule().mediaCachedImage.resetAlt(node);
+    } else {
+      getUINativeAdvancedModule().mediaCachedImage.setAlt(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+MediaCachedImageAltModifier.identity = Symbol('mediaCachedImageAlt');
 class ArkMediaCachedImageComponent extends ArkImageComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -28191,8 +28244,11 @@ class ArkMediaCachedImageComponent extends ArkImageComponent {
     }
     return this;
   }
+  alt(value) {
+    modifierWithKey(this._modifiersWithKeys, MediaCachedImageAltModifier.identity, MediaCachedImageAltModifier, value);
+    return this;
+  }
 }
-
 // @ts-ignore
 if (globalThis.MediaCachedImage !== undefined) {
   globalThis.MediaCachedImage.attributeModifier = function (modifier) {

@@ -320,7 +320,7 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest005, Test
     scrollableEvent->SetScrollable(scrollable);
     scrollableActuator->clickRecognizer_ = AceType::MakeRefPtr<ClickRecognizer>();
     scrollableEvent->SetInBarRectRegionCallback([](const PointF& point, SourceType source) { return true; });
-    scrollableEvent->SetBarCollectLongPressTargetCallback(
+    scrollableEvent->SetBarCollectClickAndLongPressTargetCallback(
         [](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
             const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
             TouchTestResult& responseLinkResult) { return true; });

@@ -151,8 +151,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone009, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 160.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 160.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -199,8 +199,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0010, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 160.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 160.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
     DirtySwapConfig dirtySwapConfig;
     dirtySwapConfig.skipMeasure = false;
@@ -245,8 +245,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0011, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 160.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 160.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -292,8 +292,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0012, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 160.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 160.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -340,8 +340,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0013, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 95.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 95.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -388,8 +388,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0014, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 160.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 160.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -436,8 +436,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0015, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 160.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 160.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -484,8 +484,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0016, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 160.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 160.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -531,8 +531,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0017, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 160.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 160.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -578,8 +578,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0018, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 160.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 160.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
     DirtySwapConfig dirtySwapConfig;
     dirtySwapConfig.skipMeasure = false;
@@ -624,8 +624,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0019, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 150.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 150.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -661,8 +661,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0020, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 150.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 150.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -698,8 +698,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0021, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 150.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 150.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -735,8 +735,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0022, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 150.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 150.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -772,8 +772,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0023, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 150.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 150.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -809,8 +809,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0024, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 150.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 150.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -846,8 +846,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0025, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 100.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 100.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -896,8 +896,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0026, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 100.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 100.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -946,8 +946,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0027, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 100.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 100.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -996,8 +996,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0028, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 100.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 100.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -1047,8 +1047,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0029, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 100.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 100.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
@@ -1097,8 +1097,8 @@ HWTEST_F(IndexerModelTestNg, OnModifyDone0030, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
-    indexerLayoutAlgorithm->actualHeight_ = 100.f;
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 100.f;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;

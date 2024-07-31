@@ -136,13 +136,13 @@ enum class CleanNodeStyle {
     INPUT,
 };
 
+enum class MenuPolicy { DEFAULT = 0, HIDE, SHOW };
+
 enum class CancelButtonStyle {
     CONSTANT,
     INVISIBLE,
     INPUT,
 };
-
-enum class MenuPolicy { DEFAULT = 0, HIDE, SHOW };
 
 struct SelectionOptions {
     MenuPolicy menuPolicy = MenuPolicy::DEFAULT;
@@ -325,6 +325,8 @@ public:
     virtual void SetFocusableAndFocusNode() {};
     virtual void SetSelectionMenuHidden(bool contextMenuHidden) = 0;
     virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false) = 0;
+    virtual void SetPasswordRules(const std::string& passwordRules) = 0;
+    virtual void SetEnableAutoFill(bool enableAutoFill) = 0;
     virtual void SetCounterType(int32_t value) {};
     virtual void SetShowCounterBorder(bool value) {};
     virtual void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) = 0;
@@ -333,12 +335,10 @@ public:
         const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName) = 0;
     virtual void SetCancelIconColor(const Color& iconColor) = 0;
     virtual void SetIsShowCancelButton(bool isShowCancelButton) = 0;
-    virtual void SetPasswordRules(const std::string& passwordRules) = 0;
-    virtual void SetEnableAutoFill(bool enableAutoFill) = 0;
 
     virtual void SetSelectAllValue(bool isSetSelectAllValue) = 0;
-
     virtual void SetLetterSpacing(const Dimension& value) {};
+    virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
     virtual void SetLineHeight(const Dimension& value) {};
     virtual void SetLineSpacing(const Dimension& value) {};
     virtual void SetAdaptMinFontSize(const Dimension& value) {};
@@ -347,7 +347,6 @@ public:
     virtual void SetTextDecoration(Ace::TextDecoration value) {};
     virtual void SetTextDecorationColor(const Color& value) {};
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
-    virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
 
     virtual void SetTextOverflow(Ace::TextOverflow value) {};
     virtual void SetTextIndent(const Dimension& value) {};

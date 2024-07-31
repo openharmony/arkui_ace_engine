@@ -399,7 +399,7 @@ void LayoutWrapper::GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, Exp
         auto innerSpaceLeftLength = parentInnerSpace.left.value_or(0.0f);
         // left side safeArea range is [border + padding, border + padding + safeAreaPadding]
         if (InRange(adjustingRect.Left(), innerSpaceLeftLength,
-                innerSpaceLeftLength + parentSafeAreaPadding.left.value_or(0.0f))) {
+            innerSpaceLeftLength + parentSafeAreaPadding.left.value_or(0.0f))) {
             rollingExpand.left = adjustingRect.Left() - innerSpaceLeftLength;
         }
     }
@@ -407,7 +407,7 @@ void LayoutWrapper::GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, Exp
         auto innerSpaceTopLength = parentInnerSpace.top.value_or(0.0f);
         // top side safeArea padding range is [top border + padding, top border + padding + safeAreaPadding]
         if (InRange(adjustingRect.Top(), innerSpaceTopLength,
-                innerSpaceTopLength + parentSafeAreaPadding.top.value_or(0.0f))) {
+            innerSpaceTopLength + parentSafeAreaPadding.top.value_or(0.0f))) {
             rollingExpand.top = adjustingRect.Top() - innerSpaceTopLength;
         }
     }
@@ -417,8 +417,8 @@ void LayoutWrapper::GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, Exp
         // right side safeArea padding range is
         // [parentWidth - (right border + padding) - right safeAreaPadding, parentWidth - (right border + padding)]
         if (InRange(adjustingRect.Right(),
-                parentWidth - innerSpaceRightLength - parentSafeAreaPadding.right.value_or(0.0f),
-                parentWidth - innerSpaceRightLength)) {
+            parentWidth - innerSpaceRightLength - parentSafeAreaPadding.right.value_or(0.0f),
+            parentWidth - innerSpaceRightLength)) {
             rollingExpand.right = parentWidth - innerSpaceRightLength - adjustingRect.Right();
         }
     }
@@ -429,8 +429,8 @@ void LayoutWrapper::GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, Exp
         // parentHeight - (bottom border + padding)]
         auto innerSpaceBottomLength = parentInnerSpace.bottom.value_or(0.0f);
         if (InRange(adjustingRect.Bottom(),
-                parentHeight - innerSpaceBottomLength - parentSafeAreaPadding.bottom.value_or(0.0f),
-                parentHeight - innerSpaceBottomLength)) {
+            parentHeight - innerSpaceBottomLength - parentSafeAreaPadding.bottom.value_or(0.0f),
+            parentHeight - innerSpaceBottomLength)) {
             rollingExpand.bottom = parentHeight - innerSpaceBottomLength - adjustingRect.Bottom();
         }
     }
@@ -571,6 +571,13 @@ void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
     }
 
     layoutProperty->UpdateLayoutConstraint(constraint);
+}
+
+void LayoutWrapper::ApplyConstraintWithoutMeasure(const std::optional<LayoutConstraintF>& constraint)
+{
+    if (constraint) {
+        ApplyConstraint(*constraint);
+    }
 }
 
 void LayoutWrapper::CreateRootConstraint()

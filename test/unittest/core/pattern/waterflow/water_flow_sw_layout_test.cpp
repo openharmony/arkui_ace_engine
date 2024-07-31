@@ -281,6 +281,91 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Order001
+ * @tc.desc: check fill order
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Order001, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(400.0f));
+        ViewAbstract::SetHeight(CalcLength(600.f));
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetRowsGap(Dimension(5.0f));
+        model.SetColumnsGap(Dimension(5.0f));
+        for (int i = 0; i < 30; ++i) {
+            CreateItemWithHeight(100.0f);
+        }
+    });
+    AddItemsAtSlot(5, 100.0f, 3);
+    frameNode_->ChildrenUpdatedFrom(3);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 3), (400.0f + 5.0f) / 2.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 4), 0.0f);
+}
+
+/**
+ * @tc.name: Update001
+ * @tc.desc: update section item count
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Update001, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            for (int i = 0; i < 35; ++i) {
+                CreateItemWithHeight(100.0f);
+            }
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_11);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 3), 325.0f);
+
+    /* Add 4 items at 3 */
+    AddItemsAtSlot(4, 100.0f, 3);
+    frameNode_->ChildrenUpdatedFrom(3);
+
+    auto section = SECTION_11[1];
+    section.itemsCount += 4;
+    section.crossCount = 3;
+    secObj->ChangeData(1, 1, { section });
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 5.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 3), 325.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 6), 430.0f);
+    UpdateCurrentOffset(-365.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 3), -40.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 6), 65.0f);
+
+    /* remove 4 items from 3 */
+    section.itemsCount -= 4;
+    section.crossCount = 2;
+    secObj->ChangeData(1, 1, { section });
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    for (int i = 0; i < 4; ++i) {
+        frameNode_->RemoveChildAtIndex(3);
+    }
+    frameNode_->ChildrenUpdatedFrom(3);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 3), -40.0f);
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 3), 320.0f);
+    EXPECT_EQ(info_->endIndex_, 6);
+}
+
+/**
  * @tc.name: OverScroll001
  * @tc.desc: Test overScroll past limits
  * @tc.type: FUNC
@@ -486,6 +571,58 @@ HWTEST_F(WaterFlowSWTest, Misaligned001, TestSize.Level1)
     EXPECT_EQ(GetChildX(frameNode_, 1), 0.0f);
     EXPECT_EQ(info_->lanes_[0][0].startPos, -47.0f);
     EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 0);
+}
+
+/**
+ * @tc.name: Misaligned002
+ * @tc.desc: Test misalignment with section
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Misaligned002, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            const std::vector<float> randomHeights = { 249, 228, 232, 171, 184, 168, 236, 167, 156, 163, 212, 50, 130,
+                225, 63, 106, 156, 213, 102, 93, 73, 184, 89, 156, 178, 163, 176, 187, 191, 118, 218, 212, 196, 52, 103,
+                57, 189, 55, 127, 230, 51, 167, 166, 118, 107 };
+            for (const float& f : randomHeights) {
+                CreateItemWithHeight(f);
+            }
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_10);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_FALSE(info_->IsMisaligned());
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    pattern_->ScrollToIndex(15, true, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, -575.0f);
+    UpdateCurrentOffset(550.0f);
+
+    EXPECT_EQ(GetChildY(frameNode_, 15), -25.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 15), 320.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 16), -62.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 16), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 17), -96.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 17), 160.0f);
+    EXPECT_EQ(info_->startIndex_, 15);
+    EXPECT_TRUE(info_->IsMisaligned());
+
+    UpdateCurrentOffset(100.0f);
+    EXPECT_EQ(info_->startIndex_, 13);
+    EXPECT_TRUE(info_->IsMisaligned());
+
+    pattern_->OnScrollEndCallback(); // check misalignment onScrollEnd
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 15), 4.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 15), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 16), 4.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 16), 160.0f);
+    EXPECT_FALSE(info_->IsMisaligned());
 }
 
 /**

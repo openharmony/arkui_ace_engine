@@ -200,7 +200,7 @@ void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
         button->OnPasswordIconClicked();
     };
     auto longPressCallback = [](GestureEvent& info) {
-        LOGI("PasswordResponseArea long press");
+        LOGD("PasswordResponseArea long press");
     };
     auto mouseTask = [id = Container::CurrentId(), weak = hostPattern_](MouseInfo& info) {
         info.SetStopPropagation(true);

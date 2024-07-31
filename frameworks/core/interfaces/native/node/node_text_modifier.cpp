@@ -40,8 +40,8 @@ constexpr bool DEFAULT_TEXT_DRAGGABLE = false;
 constexpr bool DEFAULT_TEXT_SENSITIVE = false;
 constexpr Dimension DEFAULT_MAX_FONT_SIZE;
 constexpr Dimension DEFAULT_MIN_FONT_SIZE;
-constexpr float DEFAULT_MIN_FONT_SCALE = 0.85f;
-constexpr float DEFAULT_MAX_FONT_SCALE = 3.20f;
+constexpr float DEFAULT_MIN_FONT_SCALE = 0.0f;
+constexpr float DEFAULT_MAX_FONT_SCALE = static_cast<float>(INT32_MAX);
 constexpr CopyOptions DEFAULT_COPY_OPTION = CopyOptions::None;
 constexpr Dimension DEFAULT_BASELINE_OFFSET = 0.0_fp;
 constexpr Dimension DEFAULT_FONT_SIZE = 16.0_fp;
@@ -1075,6 +1075,13 @@ void ResetTextHalfLeading(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetHalfLeading(frameNode, false);
 }
+
+ArkUI_Int32 GetTextHalfLeading(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetHalfLeading(frameNode));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1194,7 +1201,8 @@ const ArkUITextModifier* GetTextModifier()
         SetTextSelectionMenuOptions,
         ResetTextSelectionMenuOptions,
         SetTextHalfLeading,
-        ResetTextHalfLeading
+        ResetTextHalfLeading,
+        GetTextHalfLeading
     };
 
     return &modifier;

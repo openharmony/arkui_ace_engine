@@ -37,13 +37,16 @@ void CanvasModifier::onDraw(DrawingContext& drawingContext)
     CHECK_NULL_VOID(drawCmdList);
     auto rsDrawCmdList = static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList();
     CHECK_NULL_VOID(rsDrawCmdList);
-    recordingCanvasDrawSize_.SetWidth(rsDrawCmdList->GetWidth());
-    recordingCanvasDrawSize_.SetHeight(rsDrawCmdList->GetHeight());
+    if (SystemProperties::GetCanvasDebugMode() > 0) {
+        TAG_LOGI(AceLogTag::ACE_CANVAS,
+            "Canvas Size: [%{public}d, %{public}d]->[%{public}d, %{public}d]; Command Size: %{public}zu.",
+            rsDrawCmdList->GetWidth(), rsDrawCmdList->GetHeight(), drawCmdList->GetWidth(), drawCmdList->GetHeight(),
+            drawCmdList->GetOpItemSize());
+    }
     drawCmdSize_.SetWidth(drawCmdList->GetWidth());
     drawCmdSize_.SetHeight(drawCmdList->GetHeight());
     rsDrawCmdList->SetWidth(drawCmdList->GetWidth());
     rsDrawCmdList->SetHeight(drawCmdList->GetHeight());
-
     // Dump recent ten records
     CanvasModifierDump dumpInfo;
     dumpInfo.timestamp = GetCurrentTimestamp();
@@ -55,12 +58,6 @@ void CanvasModifier::onDraw(DrawingContext& drawingContext)
     } else {
         dumpInfos_.erase(dumpInfos_.begin());
         dumpInfos_.push_back(dumpInfo);
-    }
-    if (SystemProperties::GetCanvasDebugMode() > 0) {
-        TAG_LOGI(AceLogTag::ACE_CANVAS,
-            "Canvas Size: [%{public}d, %{public}d]->[%{public}d, %{public}d]; Command Size: %{public}zu.",
-            rsDrawCmdList->GetWidth(), rsDrawCmdList->GetHeight(), drawCmdList->GetWidth(), drawCmdList->GetHeight(),
-            drawCmdList->GetOpItemSize());
     }
     ResetSurface();
     CHECK_EQUAL_VOID(drawCmdList->IsEmpty(), true);

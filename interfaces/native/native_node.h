@@ -121,6 +121,8 @@ typedef enum {
     ARKUI_NODE_GRID,
     /** Grid item. */
     ARKUI_NODE_GRID_ITEM,
+    /** Custom_Span. */
+    ARKUI_NODE_CUSTOM_SPAN,
 } ArkUI_NodeType;
 
 /**
@@ -2021,6 +2023,18 @@ typedef enum {
     * .object indicates ArkUI_StyledString formatted string data. The parameter type is {@link ArkUI_StyledString}. \n
     */
     NODE_TEXT_CONTENT_WITH_STYLED_STRING,
+
+    /**
+     * @brief 设置文本居中显示。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：文本是否居中，默认值false。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：文本是否居中。\n
+     *
+     */
+    NODE_TEXT_HALF_LEADING = 1029,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -7129,6 +7143,45 @@ ArkUI_NodeHandle OH_ArkUI_NodeCustomEvent_GetNodeHandle(ArkUI_NodeCustomEvent* e
 * @since 12
 */
 ArkUI_NodeCustomEventType OH_ArkUI_NodeCustomEvent_GetEventType(ArkUI_NodeCustomEvent* event);
+
+/**
+* @brief 通过自定义组件事件获取自定义段落组件的测量信息。
+*
+* @param event 自定义组件事件。
+* @param info 需要获取的测量信息。
+* @return 错误码。
+*         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+*         {@link ARKUI_ERROR_CODE_PARAM_INVALID} 函数参数异常。
+* @since 12
+*/
+int32_t OH_ArkUI_NodeCustomEvent_GetCustomSpanMeasureInfo(
+    ArkUI_NodeCustomEvent* event, ArkUI_CustomSpanMeasureInfo* info);
+
+/**
+* @brief 通过自定义组件事件设置自定义段落的度量指标。
+*
+* @param event 自定义组件事件。
+* @param metrics 需要获取的度量指标信息。
+* @return 错误码。
+*         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+*         {@link ARKUI_ERROR_CODE_PARAM_INVALID} 函数参数异常。
+* @since 12
+*/
+int32_t OH_ArkUI_NodeCustomEvent_SetCustomSpanMetrics(
+    ArkUI_NodeCustomEvent* event, ArkUI_CustomSpanMetrics* metrics);
+
+/**
+* @brief 通过自定义组件事件获取自定义段落组件的绘制信息。
+*
+* @param event 自定义组件事件。
+* @param event 需要获取的绘制信息。
+* @return 错误码。
+*         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+*         {@link ARKUI_ERROR_CODE_PARAM_INVALID} 函数参数异常。
+* @since 12
+*/
+int32_t OH_ArkUI_NodeCustomEvent_GetCustomSpanDrawInfo(
+    ArkUI_NodeCustomEvent* event, ArkUI_CustomSpanDrawInfo* info);
 
 /**
  * @brief Adds a component to a node content.

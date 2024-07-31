@@ -68,16 +68,19 @@ void FfiOHOSAceFrameworkTextFieldSetBorder(CJBorder params)
     }
 
     FfiOHOSAceFrameworkViewAbstractSetBorder(params);
+    TextFieldModel::GetInstance()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetBorderWidth(double value, uint32_t unit)
 {
     FfiOHOSAceFrameworkViewAbstractSetBorderWidth(value, unit);
+    TextFieldModel::GetInstance()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetBorderColor(uint32_t color)
 {
     FfiOHOSAceFrameworkViewAbstractSetBorderColor(color);
+    TextFieldModel::GetInstance()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetBorderStyle(int32_t style)
@@ -88,12 +91,12 @@ void FfiOHOSAceFrameworkTextFieldSetBorderStyle(int32_t style)
     }
 
     FfiOHOSAceFrameworkViewAbstractSetBorderStyle(style);
+    TextFieldModel::GetInstance()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetBorderRadius(double value, uint32_t unit)
 {
-    CalcDimension borderRadius = CalcDimension(value, static_cast<DimensionUnit>(unit));
-    ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
+    FfiOHOSAceFrameworkViewAbstractSetBorderRadius(value, unit);
     TextFieldModel::GetInstance()->SetBackBorder();
 }
 

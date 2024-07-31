@@ -31,6 +31,8 @@
 #include "ui_extension_context.h"
 #include "window_manager.h"
 #include "wm/wm_common.h"
+#include "root_scene.h"
+#include "ws_common.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
@@ -102,6 +104,7 @@ constexpr uint32_t POPUPSIZE_HEIGHT = 0;
 constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
+constexpr int32_t POPUP_EDGE_INTERVAL = 48;
 
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
@@ -1172,10 +1175,6 @@ UIContentErrorCode AceContainer::RunPage(
     }
 
     if (isNamedRouter) {
-        RefPtr<OHOS::Ace::DeclarativeFrontend> declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(front);
-        CHECK_NULL_RETURN(declarativeFrontend, UIContentErrorCode::NULL_POINTER);
-        std::string name = declarativeFrontend->GetJsEngine()->SearchRouterRegisterMap(content);
-        CHECK_NULL_RETURN(name.size(), UIContentErrorCode::INVALID_URL);
         return front->RunPageByNamedRouter(content, params);
     }
 
@@ -1283,7 +1282,7 @@ public:
 
     void onPopupConfigWillUpdate(AbilityRuntime::AutoFill::AutoFillCustomConfig& config) override
     {
-        // Non-native component like web/xcomponent, popup always displayed in the center of the hap
+        // Non-native component like web/xcomponent
         // The offset needs to be calculated based on the placement
         if (isNative_ || !config.targetSize.has_value() || !config.placement.has_value()) {
             return;
@@ -1291,18 +1290,22 @@ public:
         auto node = node_.Upgrade();
         CHECK_NULL_VOID(node);
         auto rectf = node->GetRectWithRender();
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "frame rect:%{public}s", rectf.ToString().c_str());
         AbilityRuntime::AutoFill::PopupOffset offset;
         AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
         AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
-        // only support BOTTOM_XXX AND TOP_XXX
-        if (placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
-            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
-            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
-            offset.deltaY = rect_.top + rect_.height -
-                ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO);
+        if ((windowRect_.height_ - rectf.Height()) > (size.height + POPUP_EDGE_INTERVAL)) {
+            // popup will display at the bottom of the container
+            offset.deltaY = rect_.top + rect_.height - rectf.Height();
         } else {
-            offset.deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO);
+            // popup will display in the middle of the container
+            if (placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
+                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
+                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
+                offset.deltaY = rect_.top + rect_.height -
+                    ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO);
+            } else {
+                offset.deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO);
+            }
         }
 
         if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_LEFT ||
@@ -1315,14 +1318,19 @@ public:
             offset.deltaX = rect_.left + rect_.width - ((rectf.Width() + size.width) / POPUP_CALCULATE_RATIO);
         }
 
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "popup offset.deltaX:%{public}f", offset.deltaX);
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "popup offset.deltaY:%{public}f", offset.deltaY);
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "PopupOffset x:%{public}f,y:%{public}f", offset.deltaX, offset.deltaY);
         config.targetOffset = offset;
+        config.placement = AbilityRuntime::AutoFill::PopupPlacement::BOTTOM;
     }
 
     void SetFocusedRect(AbilityBase::Rect rect)
     {
         rect_ = rect;
+    }
+
+    void SetWindowRect(Rosen::Rect rect)
+    {
+        windowRect_ = rect;
     }
 private:
     WeakPtr<NG::PipelineContext> pipelineContext_ = nullptr;
@@ -1330,6 +1338,7 @@ private:
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
     bool isNative_ = true;
     AbilityBase::Rect rect_;
+    Rosen::Rect windowRect_;
 };
 
 bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
@@ -1504,6 +1513,7 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
         AbilityBase::Rect rect;
         GetFocusedElementRect(viewData, rect);
         callback->SetFocusedRect(rect);
+        callback->SetWindowRect(uiWindow_->GetRect());
     }
     AbilityRuntime::AutoFill::AutoFillCustomConfig customConfig;
     FillAutoFillCustomConfig(node, customConfig);
@@ -2266,6 +2276,28 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaTyp
     return {};
 }
 
+Rect AceContainer::GetSessionAvoidAreaByType(uint32_t safeAreaType)
+{
+    Rosen::WSRect avoidArea;
+    Rect sessionAvoidArea;
+    if (safeAreaType == NG::SAFE_AREA_TYPE_SYSTEM) {
+        auto ret =
+            Rosen::RootScene::staticRootScene_->GetSessionRectByType(Rosen::AvoidAreaType::TYPE_SYSTEM, avoidArea);
+        if (ret == Rosen::WMError::WM_OK) {
+            sessionAvoidArea.SetRect(avoidArea.posX_, avoidArea.posY_, avoidArea.width_, avoidArea.height_);
+        }
+    } else if (safeAreaType == NG::SAFE_AREA_TYPE_KEYBOARD) {
+        auto ret =
+            Rosen::RootScene::staticRootScene_->GetSessionRectByType(Rosen::AvoidAreaType::TYPE_KEYBOARD, avoidArea);
+        if (ret == Rosen::WMError::WM_OK) {
+            sessionAvoidArea.SetRect(avoidArea.posX_, avoidArea.posY_, avoidArea.width_, avoidArea.height_);
+        }
+    }
+    LOGI("GetSessionAvoidAreaByType safeAreaType: %{public}u, sessionAvoidArea; %{public}s", safeAreaType,
+        sessionAvoidArea.ToString().c_str());
+    return sessionAvoidArea;
+}
+
 NG::SafeAreaInsets AceContainer::GetKeyboardSafeArea()
 {
     CHECK_NULL_RETURN(uiWindow_, {});
@@ -2871,7 +2903,15 @@ bool AceContainer::IsSceneBoardEnabled()
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
+    CHECK_NULL_VOID(currentEvent);
     currentPointerEvent_ = currentEvent;
+    auto pointerAction = currentEvent->GetPointerAction();
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
+        return;
+    }
     MMI::PointerEvent::PointerItem pointerItem;
     currentEvent->GetPointerItem(currentEvent->GetPointerId(), pointerItem);
     int32_t originId = pointerItem.GetOriginPointerId();

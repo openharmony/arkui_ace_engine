@@ -484,9 +484,7 @@ napi_value ParseCurve(napi_env env, napi_value value, std::string& curveTypeStri
         curve = Framework::CreateCurve(params);
     }
     std::string curveString = curve->ToString();
-    LOGI("curveString %{public}s", curveString.c_str());
     ParseCurveInfo(curveString, curveTypeString, curveValue);
-    LOGI("curveTypeString %{public}s", curveTypeString.c_str());
     return nullptr;
 }
 

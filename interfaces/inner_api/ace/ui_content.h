@@ -419,7 +419,7 @@ public:
     
     virtual void SetStatusBarItemColor(uint32_t color) {};
 
-    virtual void SetForceSplitEnable(bool isForceSplit) {};
+    virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) {};
 };
 
 } // namespace OHOS::Ace

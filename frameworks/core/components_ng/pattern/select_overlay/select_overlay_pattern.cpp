@@ -70,9 +70,7 @@ void SelectOverlayPattern::SetGestureEvent()
         CHECK_NULL_VOID(pattern);
         pattern->HandleOnClick(info);
     });
-    if (info_->isSingleHandle) {
-        gesture->AddClickEvent(clickEvent_);
-    }
+    gesture->AddClickEvent(clickEvent_);
     auto panStart = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -222,8 +220,11 @@ void SelectOverlayPattern::UpdateHandleHotZone()
     host->GetOrCreateGestureEventHub()->SetResponseRegion(responseRegion);
 }
 
-void SelectOverlayPattern::HandleOnClick(GestureEvent& /*info*/)
+void SelectOverlayPattern::HandleOnClick(GestureEvent& info)
 {
+    if (info_->onClick) {
+        info_->onClick(info, false);
+    }
     if (!info_->isSingleHandle || clickConsumeBySimulate_) {
         return;
     }
@@ -375,17 +376,17 @@ void SelectOverlayPattern::HandlePanEnd(GestureEvent& /*info*/)
         host->UpdateToolBar(false);
     }
     if (firstHandleDrag_) {
+        firstHandleDrag_ = false;
         if (info_->onHandleMoveDone) {
             auto paintRect = GetHandlePaintRect(info_->firstHandle);
             info_->onHandleMoveDone(paintRect, true);
         }
-        firstHandleDrag_ = false;
     } else if (secondHandleDrag_) {
+        secondHandleDrag_ = false;
         if (info_->onHandleMoveDone) {
             auto paintRect = GetHandlePaintRect(info_->secondHandle);
             info_->onHandleMoveDone(paintRect, false);
         }
-        secondHandleDrag_ = false;
     }
     if (info_->isSingleHandle && !info_->isHandleLineShow) {
         StartHiddenHandleTask();
@@ -487,7 +488,7 @@ void SelectOverlayPattern::SetSelectRegionVisible(bool isSelectRegionVisible)
 
 void SelectOverlayPattern::UpdateFirstSelectHandleInfo(const SelectHandleInfo& info)
 {
-    if (info_->firstHandle == info) {
+    if (info_->firstHandle == info || firstHandleDrag_) {
         return;
     }
     info_->firstHandle = info;
@@ -504,7 +505,7 @@ void SelectOverlayPattern::UpdateFirstSelectHandleInfo(const SelectHandleInfo& i
 
 void SelectOverlayPattern::UpdateSecondSelectHandleInfo(const SelectHandleInfo& info)
 {
-    if (info_->secondHandle == info) {
+    if (info_->secondHandle == info || secondHandleDrag_) {
         return;
     }
     info_->secondHandle = info;
@@ -525,10 +526,10 @@ void SelectOverlayPattern::UpdateFirstAndSecondHandleInfo(
     if (info_->firstHandle == firstInfo && info_->secondHandle == secondInfo) {
         return;
     }
-    if (info_->firstHandle != firstInfo) {
+    if (info_->firstHandle != firstInfo && !firstHandleDrag_) {
         info_->firstHandle = firstInfo;
     }
-    if (info_->secondHandle != secondInfo) {
+    if (info_->secondHandle != secondInfo && !secondHandleDrag_) {
         info_->secondHandle = secondInfo;
     }
     CheckHandleReverse();

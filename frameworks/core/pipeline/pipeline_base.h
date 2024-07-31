@@ -957,6 +957,8 @@ public:
         return false;
     }
 
+    virtual void RequireSummary() {}
+
     void SetPluginOffset(const Offset& offset)
     {
         pluginOffset_ = offset;
@@ -1494,7 +1496,7 @@ private:
     WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     uint32_t frameCount_ = 0;
-    bool followSystem_ = true;
+    bool followSystem_ = false;
     float maxAppFontScale_ = static_cast<float>(INT32_MAX);
     float dragNodeGrayscale_ = 0.0f;
     

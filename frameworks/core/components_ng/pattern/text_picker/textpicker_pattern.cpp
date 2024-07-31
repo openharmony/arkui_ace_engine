@@ -539,6 +539,32 @@ void TextPickerPattern::SetFocusCornerRadius(RoundRect& paintRect)
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
 }
 
+RectF TextPickerPattern::CalculatePaintRect(int32_t currentFocusIndex,
+    float centerX, float centerY, float piantRectWidth, float piantRectHeight, float columnWidth)
+{
+    if (!GetIsShowInDialog()) {
+        piantRectHeight = piantRectHeight - OFFSET_LENGTH.ConvertToPx();
+        centerY = centerY + OFFSET.ConvertToPx();
+    } else {
+        piantRectHeight = piantRectHeight - DIALOG_OFFSET.ConvertToPx();
+        centerY = centerY + DIALOG_OFFSET_LENGTH.ConvertToPx();
+        centerX = centerX + FOUCS_WIDTH.ConvertToPx();
+    }
+    if (piantRectWidth > columnWidth) {
+        if (!GetIsShowInDialog()) {
+            piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_INTERVAL.ConvertToPx();
+            centerX = currentFocusIndex * (piantRectWidth + FOUCS_WIDTH.ConvertToPx() + PRESS_INTERVAL.ConvertToPx()) +
+                      FOUCS_WIDTH.ConvertToPx();
+        } else {
+            piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx();
+            centerX = currentFocusIndex * piantRectWidth + FOUCS_WIDTH.ConvertToPx() / HALF;
+        }
+    } else {
+        centerX = centerX - MARGIN_SIZE.ConvertToPx() / HALF;
+    }
+    return RectF(centerX, centerY, piantRectWidth, piantRectHeight);
+}
+
 void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
@@ -563,34 +589,20 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto frameSize = host->GetGeometryNode()->GetFrameSize();
     auto dividerSpacing = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing());
     auto pickerThemeWidth = dividerSpacing * RATE;
-
+    auto currentFocusIndex = focusKeyID_;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRtl) {
+        currentFocusIndex = childSize - 1 - focusKeyID_;
+    }
     auto centerX = (frameSize.Width() / childSize - pickerThemeWidth) / RATE +
-                   columnNode->GetGeometryNode()->GetFrameRect().Width() * focusKeyID_ +
+                   columnNode->GetGeometryNode()->GetFrameRect().Width() * currentFocusIndex +
                    PRESS_INTERVAL.ConvertToPx() * RATE;
     auto centerY = (frameSize.Height() - dividerSpacing) / RATE + PRESS_INTERVAL.ConvertToPx();
     float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * RATE;
     float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * RATE;
-    if (!GetIsShowInDialog()) {
-        piantRectHeight = piantRectHeight - OFFSET_LENGTH.ConvertToPx();
-        centerY = centerY + OFFSET.ConvertToPx();
-    } else {
-        piantRectHeight = piantRectHeight - DIALOG_OFFSET.ConvertToPx();
-        centerY = centerY + DIALOG_OFFSET_LENGTH.ConvertToPx();
-        centerX = centerX + FOUCS_WIDTH.ConvertToPx();
-    }
-    if (piantRectWidth > columnWidth) {
-        if (!GetIsShowInDialog()) {
-            piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_INTERVAL.ConvertToPx();
-            centerX = focusKeyID_ * (piantRectWidth + FOUCS_WIDTH.ConvertToPx() + PRESS_INTERVAL.ConvertToPx()) +
-                      FOUCS_WIDTH.ConvertToPx();
-        } else {
-            piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx();
-            centerX = focusKeyID_ * piantRectWidth + FOUCS_WIDTH.ConvertToPx() / HALF;
-        }
-    } else {
-        centerX = centerX - MARGIN_SIZE.ConvertToPx() / HALF;
-    }
-    paintRect.SetRect(RectF(centerX, centerY, piantRectWidth, piantRectHeight));
+    auto focusPaintRect = CalculatePaintRect(currentFocusIndex,
+        centerX, centerY, piantRectWidth, piantRectHeight, columnWidth);
+    paintRect.SetRect(focusPaintRect);
     SetFocusCornerRadius(paintRect);
 }
 
@@ -786,6 +798,60 @@ void TextPickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool is
     }
 }
 
+void TextPickerPattern::CheckFocusID(int32_t childSize)
+{
+    if (focusKeyID_ > childSize - 1) {
+        focusKeyID_ = childSize - 1;
+    } else if (focusKeyID_ < 0) {
+        focusKeyID_ = 0;
+    }
+}
+
+bool TextPickerPattern::ParseDirectionKey(
+    RefPtr<TextPickerColumnPattern>& textPickerColumnPattern, KeyCode& code, int32_t childSize)
+{
+    bool result = true;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    switch (code) {
+        case KeyCode::KEY_DPAD_UP:
+            textPickerColumnPattern->InnerHandleScroll(0, false);
+            break;
+        case KeyCode::KEY_DPAD_DOWN:
+            textPickerColumnPattern->InnerHandleScroll(1, false);
+            break;
+
+        case KeyCode::KEY_ENTER:
+            focusKeyID_ = 0;
+            PaintFocusState();
+            break;
+
+        case KeyCode::KEY_DPAD_LEFT:
+            if (isRtl) {
+                focusKeyID_ += 1;
+            } else {
+                focusKeyID_ -= 1;
+            }
+            CheckFocusID(childSize);
+            PaintFocusState();
+            break;
+
+        case KeyCode::KEY_DPAD_RIGHT:
+            if (isRtl) {
+                focusKeyID_ -= 1;
+            } else {
+                focusKeyID_ += 1;
+            }
+            CheckFocusID(childSize);
+            PaintFocusState();
+            break;
+
+        default:
+            result = false;
+            break;
+    }
+    return result;
+}
+
 bool TextPickerPattern::HandleDirectionKey(KeyCode code)
 {
     auto host = GetHost();
@@ -799,43 +865,7 @@ bool TextPickerPattern::HandleDirectionKey(KeyCode code)
     if (totalOptionCount == 0) {
         return false;
     }
-    bool result = true;
-    switch (code) {
-        case KeyCode::KEY_DPAD_UP:
-            textPickerColumnPattern->InnerHandleScroll(-1, false);
-            break;
-
-        case KeyCode::KEY_DPAD_DOWN:
-            textPickerColumnPattern->InnerHandleScroll(1, false);
-            break;
-
-        case KeyCode::KEY_ENTER:
-            focusKeyID_ = 0;
-            PaintFocusState();
-            break;
-
-        case KeyCode::KEY_DPAD_LEFT:
-            focusKeyID_ -= 1;
-            if (focusKeyID_ < 0) {
-                focusKeyID_ = 0;
-            }
-            PaintFocusState();
-            break;
-
-        case KeyCode::KEY_DPAD_RIGHT:
-            focusKeyID_ += 1;
-            if (focusKeyID_ > static_cast<int32_t>(childSize) - 1) {
-                focusKeyID_ = static_cast<int32_t>(childSize) - 1;
-            }
-            PaintFocusState();
-            break;
-
-        default:
-            result = false;
-            break;
-    }
-
-    return result;
+    return ParseDirectionKey(textPickerColumnPattern, code, static_cast<int32_t>(childSize));
 }
 
 std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::string>& values,

@@ -33,7 +33,8 @@ const T& GetValue(const T& current, const T& system, const T& defaultValue)
 
 void GridContainerInfo::BuildColumnWidth()
 {
-    BuildColumnWidth(GridSystemManager::GetInstance().GetScreenWidth());
+    auto pipeline = PipelineBase::GetCurrentContext();
+    BuildColumnWidth(GridSystemManager::GetInstance().GetScreenWidth(pipeline));
 }
 
 void GridContainerInfo::BuildColumnWidth(double width)

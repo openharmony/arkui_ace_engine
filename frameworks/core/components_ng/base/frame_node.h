@@ -332,6 +332,11 @@ public:
         return eventHub_->GetFocusHub();
     }
 
+    RefPtr<AccessibilityProperty> GetVirtualAccessibilityProperty() override
+    {
+        return accessibilityProperty_;
+    }
+
     FocusType GetFocusType() const
     {
         FocusType type = FocusType::DISABLE;
@@ -432,6 +437,8 @@ public:
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
 
+    OffsetF GetPaintRectOffsetNG(bool excludeSelf = false) const;
+
     OffsetF GetPaintRectCenter(bool checkWindowBoundary = true) const;
 
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
@@ -470,7 +477,7 @@ public:
 
     void MarkNeedRenderOnly();
 
-    void OnDetachFromMainTree(bool recursive) override;
+    void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
 
@@ -1001,6 +1008,16 @@ public:
         layoutAlgorithm_.Reset();
     }
 
+    bool GetDragHitTestBlock() const
+    {
+        return dragHitTestBlock_;
+    }
+
+    void SetDragHitTestBlock(bool dragHitTestBlock)
+    {
+        dragHitTestBlock_ = dragHitTestBlock;
+    }
+
 protected:
     void DumpInfo() override;
 
@@ -1102,6 +1119,8 @@ private:
     void TriggerShouldParallelInnerWith(
         const TouchTestResult& currentRecognizers, const TouchTestResult& responseLinkRecognizers);
 
+    void TriggerRsProfilerNodeMountCallbackIfExist();
+
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
 
     RectF ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const;
@@ -1197,6 +1216,7 @@ private:
     bool isGeometryTransitionIn_ = false;
     bool isLayoutNode_ = false;
     bool isCalculateInnerVisibleRectClip_ = false;
+    bool dragHitTestBlock_ = false;
 
     bool isUseTransitionAnimator_ = false;
 

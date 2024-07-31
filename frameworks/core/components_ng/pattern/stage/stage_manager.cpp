@@ -268,7 +268,6 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     // flush layout task.
     if (!stageNode_->GetGeometryNode()->GetMarginFrameSize().IsPositive()) {
         // in first load case, wait for window size.
-        LOGI("waiting for window size");
         return true;
     }
     stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
