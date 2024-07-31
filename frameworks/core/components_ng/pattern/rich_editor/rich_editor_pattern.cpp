@@ -6890,7 +6890,7 @@ void RichEditorPattern::AdjustSelectionExcludeSymbol(int32_t& start, int32_t& en
 void RichEditorPattern::InitSelection(const Offset& pos)
 {
     auto positionWithAffinity = paragraphs_.GetGlyphPositionAtCoordinate(pos);
-    int32_t currentPosition = positionWithAffinity.position_;
+    auto currentPosition = static_cast<int32_t>(positionWithAffinity.position_);
     switch (JudgeSelectType(positionWithAffinity)) {
         case SelectType::SELECT_NOTHING:
             textSelector_.Update(currentPosition, currentPosition);
@@ -6929,7 +6929,7 @@ void RichEditorPattern::InitSelection(const Offset& pos)
 SelectType RichEditorPattern::JudgeSelectType(const PositionWithAffinity& positionWithAffinity)
 {
     CHECK_NULL_RETURN(GetTextContentLength() != 0, SelectType::SELECT_NOTHING);
-    int32_t currentPosition = positionWithAffinity.position_;
+    auto currentPosition = static_cast<int32_t>(positionWithAffinity.position_);
     TextAffinity currentAffinity = positionWithAffinity.affinity_;
     if (previewLongPress_) {
         caretPosition_ = currentPosition;
