@@ -354,7 +354,7 @@ void WebPattern::OnAttachToMainTree()
 
 void WebPattern::OnDetachFromMainTree()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern OnDetachFromMainTree");
+    TAG_LOGD(AceLogTag::ACE_WEB, "OnDetachFromMainTree");
     // report component is in background.
     delegate_->OnRenderToBackground();
 }
