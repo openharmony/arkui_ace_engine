@@ -373,6 +373,30 @@ HWTEST_F(GridLayoutRangeTest, ChangeTemplate001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Jump001
+ * @tc.desc: Test jump to irregular item with extra offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, Jump001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo14());
+    model.SetColumnsGap(Dimension { 10.0f });
+    model.SetRowsGap(Dimension { 20.0f });
+    constexpr float itemHeight = 300.0f;
+    CreateFixedHeightItems(22, itemHeight);
+    CreateFixedHeightItems(1, (itemHeight + 20.0f) * 6);
+    CreateFixedHeightItems(77, itemHeight);
+    CreateDone(frameNode_);
+    pattern_->ScrollToIndex(22, false, ScrollAlign::AUTO, itemHeight);
+    FlushLayoutTask(frameNode_);
+    const auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(GetChildRect(frameNode_, 22).Bottom(), GRID_HEIGHT - itemHeight);
+    EXPECT_EQ(info.startIndex_, 22);
+}
+
+/**
  * @tc.name: MeasureToTarget001
  * @tc.desc: Test measure to target
  * @tc.type: FUNC
