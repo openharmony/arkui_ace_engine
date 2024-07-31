@@ -2310,7 +2310,9 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     }
     AccessibilityElementInfo info = eventInfo.GetElementInfo();
     int64_t elementId = eventInfo.GetAccessibilityId();
-    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(info.GetBelongTreeId(), elementId);
+    if (info.GetBelongTreeId() > 0) {
+        AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(info.GetBelongTreeId(), elementId);
+    }
     eventInfo.SetSource(elementId);
     UpdateElementInfoTreeId(info);
     eventInfo.SetElementInfo(info);
