@@ -39,6 +39,7 @@ constexpr Dimension CONTAINER_SHRINK_DIAMETER = 16.0_vp;
 constexpr float ITEM_SHRINK_PADDING = 5.0;
 constexpr float ITEM_SHRINK_MINOR_PADDING = 4.5;
 constexpr float ITEM_SHRINK_MINI_PADDING = 4.0;
+constexpr float ITEM_SHRINK_FADE_PADDING = 3.5;
 constexpr float SELECTED_ITEM_SHRINK_PADDING = 7.0;
 constexpr float ACTIVE_ITEM_SHRINK_ANGLE = 4.0;
 
@@ -48,6 +49,7 @@ constexpr Dimension CONTAINER_DILATE_DIAMETER = 24.0_vp;
 constexpr float ITEM_DILATE_PADDING = 10.0;
 constexpr float ITEM_DILATE_MINOR_PADDING = 9.0;
 constexpr float ITEM_DILATE_MINI_PADDING = 8.0;
+constexpr float ITEM_DILATE_FADE_PADDING = 6.0;
 constexpr float SELECTED_ITEM_DILATE_PADDING = 14.0;
 constexpr float ACTIVE_ITEM_DILATE_ANGLE = 8.0;
 constexpr double QUARTER_CIRCLE_ANGLE = 90.0;
@@ -233,16 +235,25 @@ void CircleDotIndicatorPaintMethod::CalculateRemainPointRadius(
     }
 }
 
-float CircleDotIndicatorPaintMethod::CalculateBlackPointRotateAngle(int32_t indicatorStartIndex)
+float CircleDotIndicatorPaintMethod::CalculateBlackPointRotateAngle(int32_t indicatorStartIndex, int32_t itemIndex)
 {
     if (itemCount_ > MAX_INDICATOR_DOT_COUNT) {
         auto itemPadding = ITEM_SHRINK_PADDING;
+        auto fadePadding = ITEM_SHRINK_PADDING - ITEM_SHRINK_FADE_PADDING;
         if (isLongPressed_) {
             itemPadding = ITEM_DILATE_PADDING;
+            fadePadding = ITEM_DILATE_PADDING - ITEM_DILATE_FADE_PADDING;
         }
         auto rotateAngle = -((itemCount_ - MAX_INDICATOR_DOT_COUNT) / HALF_DIVISOR - indicatorStartIndex) * itemPadding;
         if (itemCount_ % HALF_DIVISOR == 0) {
             rotateAngle = rotateAngle - itemPadding / HALF_DIVISOR;
+        }
+        if (itemIndex < indicatorStartIndex) {
+            rotateAngle = rotateAngle - ((indicatorStartIndex - itemIndex - 1) * itemPadding + fadePadding);
+        }
+        if (itemIndex >= indicatorStartIndex + MAX_INDICATOR_DOT_COUNT) {
+            rotateAngle = rotateAngle +
+                          ((itemIndex - (indicatorStartIndex + MAX_INDICATOR_DOT_COUNT)) * itemPadding + fadePadding);
         }
         return rotateAngle;
     } else {
@@ -386,8 +397,8 @@ std::pair<float, float> CircleDotIndicatorPaintMethod::CalculatePointAngle(
     SetFadeOutState(indicatorStartIndex);
     vectorBlackPointAngle_.resize(itemCount_);
     vectorBlackPointRadius_.resize(itemCount_);
-    float offset = CalculateBlackPointRotateAngle(indicatorStartIndex);
     for (int32_t i = 0; i < itemCount_; ++i) {
+        float offset = CalculateBlackPointRotateAngle(indicatorStartIndex, i);
         vectorBlackPointAngle_[i] = GetBlackPointAngle(itemSizes, i, index, offset);
         CalculatePointRadius(i, indicatorStartIndex);
     }
@@ -441,7 +452,7 @@ std::pair<float, float> CircleDotIndicatorPaintMethod::GetLongPointAngle(
     const LinearVector<float>& itemSizes, int32_t currentIndex, int32_t indicatorStartIndex)
 {
     float dotActiveAngle = itemSizes[ACTIVE_ITEM_ANGLE];
-    float offset = CalculateBlackPointRotateAngle(indicatorStartIndex);
+    float offset = CalculateBlackPointRotateAngle(indicatorStartIndex, currentIndex);
     float selectItemAngle = GetBlackPointAngle(itemSizes, currentIndex, currentIndex, offset);
     float LongPointStartAngle = 0.0;
     float LongPointEndAngle = 0.0;

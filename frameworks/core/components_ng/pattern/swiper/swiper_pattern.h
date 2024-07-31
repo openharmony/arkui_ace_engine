@@ -768,11 +768,14 @@ private:
     void PlayFadeAnimation();
 
     // use property animation feature
+    // ArcSwiper will implement this interface in order to reset the animation effect parameters.
     virtual void ResetAnimationParam() {};
+    // ArcSwiper will implement this interface in order to reset the animation effect of the current node.
+    virtual void ResetCurrentFrameNodeAnimation() {};
+    // ArcSwiper will implement this interface in order to achieve the function of the manual effect.
     virtual void PlayScrollAnimation(float offset) {};
-    virtual void ClearAnimationFinishList() {};
-    virtual void InitialFrameNodePropertyAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode);
-    virtual void CancelFrameNodePropertyAnimation(RefPtr<FrameNode>& frameNode);
+    virtual void InitialFrameNodePropertyAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
+    virtual void CancelFrameNodePropertyAnimation(const RefPtr<FrameNode>& frameNode);
     virtual void PlayPropertyTranslateAnimation(
         float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);

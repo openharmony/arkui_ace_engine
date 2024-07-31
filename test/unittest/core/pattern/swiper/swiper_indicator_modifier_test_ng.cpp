@@ -1968,27 +1968,43 @@ HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorGetBlackPointAngle001,
     indicatorPattern->CreateCircleDotIndicatorPaintMethod(pattern_);
     RefPtr<CircleDotIndicatorModifier> modifier = AceType::MakeRefPtr<CircleDotIndicatorModifier>();
     RefPtr<CircleDotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<CircleDotIndicatorPaintMethod>(modifier);
-    paintMethod->itemCount_ = 5;
+    paintMethod->itemCount_ = 16;
     LinearVector<float> itemSizes;
-    itemSizes.emplace_back(20.f);
-    itemSizes.emplace_back(20.f);
+    itemSizes.emplace_back(2.5f); // ITEM_SHRINK_RADIUS
+    itemSizes.emplace_back(2.5f); // SLECTED_ITEM_SHRINK_RADIUS
+    itemSizes.emplace_back(8.0f); // ONTAINER_SHRINK_RADIUS
+    itemSizes.emplace_back(5.0f); // ITEM_SHRINK_PADDING
+    itemSizes.emplace_back(7.0f); // SELECTED_ITEM_SHRINK_PADDING
+    itemSizes.emplace_back(4.0f); // ACTIVE_ITEM_SHRINK_ANGLE
+    itemSizes.emplace_back(4.5f); // ITEM_SHRINK_MINOR_PADDING
+    itemSizes.emplace_back(4.0f); // ITEM_SHRINK_MINI_PADDING
 
     /**
      * @tc.steps: step2. Call GetBlackPointAngle.
      */
     int32_t indicatorStartIndex = 0;
-    float offset = paintMethod->CalculateBlackPointRotateAngle(indicatorStartIndex);
-    paintMethod->GetBlackPointAngle(itemSizes, 0, 0, offset);
-    paintMethod->GetBlackPointAngle(itemSizes, 1, 0, offset);
-    paintMethod->GetBlackPointAngle(itemSizes, 1, 1, offset);
-    paintMethod->GetBlackPointAngle(itemSizes, 2, 1, offset);
-    paintMethod->GetBlackPointAngle(itemSizes, 1, 2, offset);
-    EXPECT_EQ(paintMethod->GetHalfIndex(), 2);
-    paintMethod->itemCount_ = 1;
-    paintMethod->GetBlackPointAngle(itemSizes, 1, 1, offset);
-    paintMethod->GetBlackPointAngle(itemSizes, 2, 1, offset);
-    paintMethod->GetBlackPointAngle(itemSizes, 1, 2, offset);
-    EXPECT_EQ(paintMethod->GetHalfIndex(), 0);
+    LinearVector<float> vectorBlackPointAngle = {};
+    vectorBlackPointAngle.resize(paintMethod->itemCount_);
+    for (int32_t i = 0; i < paintMethod->itemCount_; ++i) {
+        float offset = paintMethod->CalculateBlackPointRotateAngle(indicatorStartIndex, i);
+        vectorBlackPointAngle[i] = paintMethod->GetBlackPointAngle(itemSizes, i, 0, offset);
+    }
+    EXPECT_EQ(vectorBlackPointAngle[0], 35);
+    EXPECT_EQ(vectorBlackPointAngle[1], 28);
+    EXPECT_EQ(vectorBlackPointAngle[2], 23);
+    EXPECT_EQ(vectorBlackPointAngle[3], 18);
+    EXPECT_EQ(vectorBlackPointAngle[4], 13);
+    EXPECT_EQ(vectorBlackPointAngle[5], 8);
+    EXPECT_EQ(vectorBlackPointAngle[6], 3);
+    EXPECT_EQ(vectorBlackPointAngle[7], -2);
+    EXPECT_EQ(vectorBlackPointAngle[8], -7);
+    EXPECT_EQ(vectorBlackPointAngle[9], -12);
+    EXPECT_EQ(vectorBlackPointAngle[10], -17);
+    EXPECT_EQ(vectorBlackPointAngle[11], -22);
+    EXPECT_EQ(vectorBlackPointAngle[12], -27);
+    EXPECT_EQ(vectorBlackPointAngle[13], -32);
+    EXPECT_EQ(vectorBlackPointAngle[14], -37);
+    EXPECT_EQ(vectorBlackPointAngle[15], -40.5);
 }
 
 /**

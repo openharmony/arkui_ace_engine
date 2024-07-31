@@ -2119,6 +2119,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
     if (!IsLoop() && (isDragging_ || childScrolling_)) {
         // handle edge effects
         if (CheckOverScroll(offset)) {
+            ResetCurrentFrameNodeAnimation();
             return;
         }
     }
@@ -2163,7 +2164,6 @@ bool SwiperPattern::CheckOverScroll(float offset)
                 auto realOffset = IsOutOfStart(offset) ? - itemPosition_.begin()->second.startPos :
                     CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
                 currentDelta_ = currentDelta_ - realOffset;
-                PlayScrollAnimation(realOffset);
                 HandleSwiperCustomAnimation(realOffset);
                 MarkDirtyNodeSelf();
                 return true;
@@ -2639,6 +2639,9 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     UpdateAnimationProperty(static_cast<float>(dragVelocity));
     // nested and reached end, need to pass velocity to parent scrollable
     auto parent = GetNestedScrollParent();
+    if (NearZero(GetDistanceToEdge())) {
+        ResetCurrentFrameNodeAnimation();
+    }
     if (!IsLoop() && parent && NearZero(GetDistanceToEdge())) {
         parent->HandleScrollVelocity(dragVelocity);
         StartAutoPlay();
@@ -2870,13 +2873,13 @@ bool SwiperPattern::CheckDragOutOfBoundary(double dragVelocity)
     return false;
 }
 
-void SwiperPattern::InitialFrameNodePropertyAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode)
+void SwiperPattern::InitialFrameNodePropertyAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     frameNode->GetRenderContext()->UpdateTranslateInXY(offset);
 }
 
-void SwiperPattern::CancelFrameNodePropertyAnimation(RefPtr<FrameNode>& frameNode)
+void SwiperPattern::CancelFrameNodePropertyAnimation(const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     frameNode->GetRenderContext()->CancelTranslateXYAnimation();
