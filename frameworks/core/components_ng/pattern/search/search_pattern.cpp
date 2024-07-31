@@ -776,14 +776,14 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
         }
         if (focusChoice_ == FocusChoice::SEARCH && isAllTextSelected && !isCaretVisible &&
             event.code == KeyCode::KEY_DPAD_LEFT) {
-            return true; // no action
+            return IsConsumeEvent();
         }
     }
     if (event.code == KeyCode::KEY_DPAD_RIGHT || (event.pressedCodes.size() == 1 && event.code == KeyCode::KEY_TAB)) {
         if (focusChoice_ == FocusChoice::SEARCH && (isAllTextSelected || isTextEmpty || isOnlyTabPressed)) {
             if (NearZero(cancelButtonSize_.Height()) && !isSearchButtonEnabled_ &&
                 event.code == KeyCode::KEY_DPAD_RIGHT) {
-                return true;
+                return IsConsumeEvent();
             } else if (NearZero(cancelButtonSize_.Height()) && !isSearchButtonEnabled_) {
                 textFieldPattern->CloseKeyboard(true);
                 return false;
@@ -796,8 +796,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
             PaintFocusState();
             return true;
         } else if (focusChoice_ == FocusChoice::SEARCH && event.code == KeyCode::KEY_DPAD_RIGHT) {
-            textFieldPattern->OnKeyEvent(event);
-            return true;
+            return textFieldPattern->OnKeyEvent(event);
         }
         if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
             if (!NearZero(cancelButtonSize_.Height()) && (!isSearchButtonEnabled_) &&
@@ -839,6 +838,14 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     }
 }
 
+bool SearchPattern::IsConsumeEvent()
+{
+    if(directionKeysMoveFocusOut_) {
+        return false;
+    }
+    return true; // no action
+}
+
 void SearchPattern::PaintSearchFocusState()
 {
     auto host = GetHost();
@@ -878,8 +885,12 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
         if (!recoverFlag) {
             if (!textFieldPattern->GetTextValue().empty()) {
                 textFieldPattern->NeedRequestKeyboard();
-                textFieldPattern->HandleOnSelectAll(true); // Select all text
-                textFieldPattern->StopTwinkling();         // Hide caret
+                if(directionKeysMoveFocusOut_) {
+                    textFieldPattern->HandleFocusEvent();
+                } else {
+                    textFieldPattern->HandleOnSelectAll(true); // Select all text
+                    textFieldPattern->StopTwinkling();         // Hide caret
+                }
             } else {
                 textFieldPattern->HandleFocusEvent(); // Show caret
             }

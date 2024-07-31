@@ -276,6 +276,7 @@ private:
     void UpdateIconColor(int32_t index, const Color& color);
     void UpdateIconSize(int32_t index, const Dimension& value);
     Color GetDefaultIconColor(int32_t index);
+    bool IsConsumeEvent();
 
     uint32_t GetMaxLength() const;
     std::string SearchTypeToString() const;
@@ -314,6 +315,7 @@ private:
     bool isFocusBgColorSet_ = false;
     bool isFocusIconColorSet_ = false;
     bool isFocusTextColorSet_ = false;
+    bool directionKeysMoveFocusOut_ = false;
     Color searchHoverColor_;
     Color searchTouchColor_;
     Color searchNormalColor_;

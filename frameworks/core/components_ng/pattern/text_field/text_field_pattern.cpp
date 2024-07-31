@@ -389,7 +389,7 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
     if (PipelineBase::GetCurrentContext() &&
         // for normal app add version protection, enable keyboard as default start from API 10 or higher
         PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
-        needToRequestKeyboardOnFocus_ = true;
+        needToRequestKeyboardOnFocus_ = !GetIndependentControlKeyboard();
     }
     contentController_ = MakeRefPtr<ContentController>(WeakClaim(this));
     selectController_ = MakeRefPtr<TextSelectController>(WeakClaim(this));
@@ -408,6 +408,14 @@ TextFieldPattern::~TextFieldPattern()
     if (isCustomKeyboardAttached_) {
         CloseCustomKeyboard();
     }
+}
+
+bool TextFieldPattern::GetIndependentControlKeyboard()
+{
+    auto theme = GetTheme();
+    CHECK_NULL_RETURN(theme, false);
+    independentControlKeyboard_ = theme->GetIndependentControlKeyboard();
+    return independentControlKeyboard_;
 }
 
 void TextFieldPattern::BeforeCreateLayoutWrapper()
@@ -848,7 +856,7 @@ void TextFieldPattern::HandleFocusEvent()
     CHECK_NULL_VOID(layoutProperty);
     auto isSelectAll = layoutProperty->GetSelectAllValueValue(false);
     if (isSelectAll && !contentController_->IsEmpty()) {
-        needSelectAll_ = true;
+        needSelectAll_ = !independentControlKeyboard_;
     }
     SetFocusStyle();
     AddIsFocusActiveUpdateEvent();
@@ -1289,7 +1297,9 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.code == KeyCode::KEY_TAB && isFocusedBeforeClick_ && !contentController_->IsEmpty()) {
         isFocusedBeforeClick_ = false;
-        HandleOnSelectAll(false);
+        if(!independentControlKeyboard_) {
+            HandleOnSelectAll(false);   
+        }
     }
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
@@ -1298,7 +1308,29 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
         textFieldManager->GetImeShow()) {
         RequestKeyboard(false, true, true);
     }
+    // If independent control keyboard, press Enter to request keyboard.
+    if (event.code == KeyCode::KEY_ENTER && HasFocus() && independentControlKeyboard_) {
+        if (RequestKeyboard(false, true, true)) {
+            NotifyOnEditChanged(true);
+        }
+        return true;
+    }
+    if(directionKeysMoveFocusOut_ && (isMoveFocusOutFromLeft(event) || isMoveFocusOutFromRight(event))) {
+        TextInputClient::HandleKeyEvent(event);
+        return false;
+    }
     return TextInputClient::HandleKeyEvent(event);
+}
+
+bool TextFieldPattern::isMoveFocusOutFromLeft(const KeyEvent& event)
+{
+    return (event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_UP) && selectController_->GetCaretIndex() == 0;
+}
+
+bool TextFieldPattern::isMoveFocusOutFromRight(const KeyEvent& event)
+{
+    return (event.code == KeyCode::KEY_DPAD_RIGHT || event.code == KeyCode::KEY_DPAD_DOWN) &&
+     selectController_->GetCaretIndex() == static_cast<int32_t>(contentController_->GetWideText().length());
 }
 
 bool TextFieldPattern::HandleOnEscape()
@@ -2607,6 +2639,7 @@ void TextFieldPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
+    directionKeysMoveFocusOut_ = textFieldTheme->GetDirectionKeysMoveFocusOut();
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     CheckIfNeedToResetKeyboard();
@@ -4326,7 +4359,12 @@ bool TextFieldPattern::CursorMoveEnd()
 
 bool TextFieldPattern::CursorMoveUpOperation()
 {
-    CHECK_NULL_RETURN(IsTextArea(), false);
+    if(!IsTextArea()) {
+        if(directionKeysMoveFocusOut_) {
+            return CursorMoveLineBegin();
+        }
+        return false;
+    }
     auto originCaretPosition = selectController_->GetCaretIndex();
     auto offsetX = selectController_->GetCaretRect().GetX();
     // multiply by 0.5f to convert to the grapheme center point of the previous line.
@@ -4349,7 +4387,12 @@ bool TextFieldPattern::CursorMoveUp()
 
 bool TextFieldPattern::CursorMoveDownOperation()
 {
-    CHECK_NULL_RETURN(IsTextArea(), false);
+    if(!IsTextArea()) {
+        if(directionKeysMoveFocusOut_) {
+            return CursorMoveLineEnd();
+        }
+        return false;
+    }
     auto originCaretPosition = selectController_->GetCaretIndex();
     auto offsetX = selectController_->GetCaretRect().GetX();
     // multiply by 1.5f to convert to the grapheme center point of the next line.
@@ -5099,8 +5142,13 @@ bool TextFieldPattern::OnBackPressed()
     }
 
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    CloseKeyboard(true);
-    FocusHub::LostFocusToViewRoot();
+    if(independentControlKeyboard_) {
+        CloseKeyboard(true, false);
+    }
+    else {
+        CloseKeyboard(true);
+        FocusHub::LostFocusToViewRoot();
+    }
 #if defined(ANDROID_PLATFORM)
     return false;
 #else
