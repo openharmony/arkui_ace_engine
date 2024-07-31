@@ -643,13 +643,8 @@ RefPtr<CustomSpan> JSSpanString::ParseJsCustomSpan(const JSCallbackInfo& args)
     return AceType::MakeRefPtr<JSCustomSpan>(args[0], args);
 }
 
-
-void JSSpanString::FromHtml(const JSCallbackInfo& info)
+void JSSpanString::FromHtmlBackTask(napi_value result, const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsString()) {
-        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
-        return;
-    }
     std::string arg = info[0]->ToString();
     auto container = Container::CurrentSafely();
     if (!container) {
@@ -668,7 +663,6 @@ void JSSpanString::FromHtml(const JSCallbackInfo& info)
     auto asyncContext = std::make_shared<HtmlConverterAsyncCtx>();
     asyncContext->instanceId = Container::CurrentIdSafely();
     asyncContext->env = reinterpret_cast<napi_env>(nativeEngine);
-    napi_value result = nullptr;
     napi_create_promise(asyncContext->env, &asyncContext->deferred, &result);
     taskExecutor->PostTask(
         [htmlStr = arg, asyncContext]() mutable {
@@ -691,9 +685,20 @@ void JSSpanString::FromHtml(const JSCallbackInfo& info)
                     jsSpanString->SetController(styledString);
                     auto spanStrNapi = JsConverter::ConvertJsValToNapiValue(obj);
                     ProcessPromiseCallback(asyncContext, ERROR_CODE_NO_ERROR, spanStrNapi);
-            }, TaskExecutor::TaskType::UI, "FromHtmlReturnPromise", PriorityType::IMMEDIATE);
-        }, TaskExecutor::TaskType::BACKGROUND, "FromHtml", PriorityType::IMMEDIATE);
+                },
+                TaskExecutor::TaskType::UI, "FromHtmlReturnPromise", PriorityType::IMMEDIATE);
+        },
+        TaskExecutor::TaskType::BACKGROUND, "FromHtml", PriorityType::IMMEDIATE);
+}
 
+void JSSpanString::FromHtml(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1 || !info[0]->IsString()) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    napi_value result = nullptr;
+    FromHtmlBackTask(result, info);
     auto jsPromise = JsConverter::ConvertNapiValueToJsVal(result);
     CHECK_NULL_VOID(jsPromise->IsObject());
     info.SetReturnValue(JSRef<JSObject>::Cast(jsPromise));
