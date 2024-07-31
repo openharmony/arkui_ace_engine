@@ -125,7 +125,6 @@ void WindowScene::OnAttachToFrameNode()
             session_->GetPersistentId(), host->GetId(), session_->GetWindowType(), session_->GetWindowName().c_str());
         return;
     }
-
     auto surfaceNode = CreateLeashWindowNode();
     session_->SetLeashWinSurfaceNode(surfaceNode);
     CHECK_NULL_VOID(surfaceNode);
@@ -133,7 +132,6 @@ void WindowScene::OnAttachToFrameNode()
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
     surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
-
     RegisterFocusCallback();
     WindowPattern::OnAttachToFrameNode();
 }
@@ -626,8 +624,8 @@ void WindowScene::SetSubWinowBufferAvailableCallback(std::shared_ptr<Rosen::RSSu
         CHECK_NULL_VOID(host);
         auto session = weakSession.promote();
         CHECK_NULL_VOID(session);
-        TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE,
-            "subWinowCallback id: %{public}d, node id: %{public}d, type: %{public}d, name: %{public}s",
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+            "subWinowBufferAvailable id: %{public}d, node id: %{public}d, type: %{public}d, name: %{public}s",
             session->GetPersistentId(), host->GetId(), session->GetWindowType(), session->GetWindowName().c_str());
         session->SetBufferAvailable(true);
     };
