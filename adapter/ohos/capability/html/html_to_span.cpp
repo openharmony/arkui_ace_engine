@@ -221,6 +221,10 @@ Dimension HtmlToSpan::FromString(const std::string& str)
         if (str[i] >= '0' && str[i] <= '9') {
             value = StringUtils::StringToDouble(str.substr(0, i + 1));
             auto subStr = str.substr(i + 1);
+            if (subStr == "pt") {
+                value = static_cast<int>(value * PT_TO_PX + ROUND_TO_INT);
+                break;
+            }
             auto iter = uMap.find(subStr);
             if (iter != uMap.end()) {
                 unit = iter->second;
@@ -368,6 +372,9 @@ template<class T>
 void HtmlToSpan::InitDimension(
     const std::string& key, const std::string& value, const std::string& index, StyleValues& values)
 {
+    if (value.compare(0, strlen("normal"), "normal") == 0) {
+        return;
+    }
     auto [ret, styleValue] = GetStyleValue<T>(index, values);
     if (!ret) {
         return;
@@ -377,6 +384,25 @@ void HtmlToSpan::InitDimension(
         return;
     }
     obj->dimension = FromString(value);
+}
+
+void HtmlToSpan::InitLineHeight(const std::string& key, const std::string& value, StyleValues& values)
+{
+    auto [unit, size] = GetUnitAndSize(value);
+    if (!unit.empty()) {
+        InitDimension<LineHeightSpanSparam>(key, value, "line-height", values);
+        return;
+    }
+
+    auto it = values.find("font");
+    if (it == values.end()) {
+        return;
+    }
+    Font* font = Get<Font>(&it->second);
+    if (font == nullptr) {
+        size = size * font->fontSize->Value();
+        InitDimension<LineHeightSpanSparam>(key, std::to_string(size) + unit, "line-height", values);
+    }
 }
 
 bool HtmlToSpan::IsLetterSpacingAttr(const std::string& key)
@@ -449,7 +475,7 @@ bool HtmlToSpan::IsTextIndentAttr(const std::string& key)
 
 bool HtmlToSpan::IsLineHeightAttr(const std::string& key)
 {
-    return key.compare(0, strlen("line-height"), "line-height");
+    return key.compare(0, strlen("line-height"), "line-height") == 0;
 }
 
 bool HtmlToSpan::IsPaddingAttr(const std::string& key)
@@ -787,6 +813,19 @@ void HtmlToSpan::ToParagraphSpan(xmlNodePtr node, size_t len, size_t& pos, std::
     spanInfos.emplace_back(std::move(info));
 }
 
+std::pair<std::string, double> HtmlToSpan::GetUnitAndSize(const std::string& str)
+{
+    double value = 0.0;
+    for (int32_t i = static_cast<int32_t>(str.length() - 1); i >= 0; --i) {
+        if (str[i] >= '0' && str[i] <= '9') {
+            value = StringUtils::StringToDouble(str.substr(0, i + 1));
+            auto subStr = str.substr(i + 1);
+            return { subStr, value };
+        }
+    }
+    return { "", value };
+}
+
 std::map<std::string, HtmlToSpan::StyleValue> HtmlToSpan::ToTextSpanStyle(xmlAttrPtr curNode)
 {
     auto attrContent = xmlGetProp(curNode->parent, curNode->name);
@@ -806,7 +845,7 @@ std::map<std::string, HtmlToSpan::StyleValue> HtmlToSpan::ToTextSpanStyle(xmlAtt
         } else if (IsTextShadowAttr(key)) {
             InitTextShadow(key, value, "shadow", styleValues);
         } else if (IsLineHeightAttr(key)) {
-            InitDimension<LineHeightSpanSparam>(key, value, "line-height", styleValues);
+            InitLineHeight(key, value, styleValues);
         } else if (IsParagraphAttr(key)) {
             InitParagrap(key, value, "paragrap", styleValues);
         }
@@ -877,77 +916,65 @@ void HtmlToSpan::ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<S
     spanInfos.emplace_back(std::move(info));
 }
 
-bool HasElementNode(xmlNodePtr node)
+void HtmlToSpan::GetContent(
+    xmlNodePtr curNode, std::string& allContent, size_t& contentLen, size_t& curNodeLen, size_t& childLen)
 {
-    xmlNodePtr curNode = nullptr;
-    bool result = false;
-    for (curNode = node; curNode; curNode = curNode->next) {
-        if (curNode->type == XML_ELEMENT_NODE) {
-            return true;
-        }
-
-        result = HasElementNode(curNode->children);
+    auto content = xmlNodeGetContent(curNode);
+    if (content != nullptr) {
+        contentLen = StringUtils::ToWstring(reinterpret_cast<const char*>(content)).length();
     }
 
-    return result;
-}
-bool HtmlToSpan::IsValidNode(const std::string& name)
-{
-    if (name != "html" && name != "body" && name != "div") {
-        return true;
+    if (curNode->content) {
+        std::string curNodeContent = reinterpret_cast<const char*>(curNode->content);
+        allContent += curNodeContent;
+        curNodeLen = StringUtils::ToWstring(curNodeContent).length();
     }
-    return false;
+
+    if (curNode->children && curNode->children->content) {
+        std::string curNodeContent = reinterpret_cast<const char*>(curNode->children->content);
+        childLen = StringUtils::ToWstring(curNodeContent).length();
+    }
 }
 
 void HtmlToSpan::ToSpan(
     xmlNodePtr curNode, size_t& pos, std::string& allContent, size_t paragraphEndPos, std::vector<SpanInfo>& spanInfos)
 {
-    std::string contentStr;
     size_t contentLen = 0;
-    auto content = xmlNodeGetContent(curNode);
-    if (content != nullptr) {
-        contentLen = StringUtils::ToWstring(reinterpret_cast<const char*>(content)).length();
-        contentStr = reinterpret_cast<const char*>(content);
-    }
-
-    std::string nameStr = reinterpret_cast<const char*>(curNode->name);
     size_t curNodeLen = 0;
-    if (IsValidNode(nameStr)) {
-        if (curNode->children && curNode->children->content) {
-            std::string curNodeContent = reinterpret_cast<const char*>(curNode->children->content);
-            allContent += curNodeContent;
-            curNodeLen = StringUtils::ToWstring(curNodeContent).length();
-        }
-    }
-
-    size_t curPos = 0;
+    size_t childLen = 0;
+    GetContent(curNode, allContent, contentLen, curNodeLen, childLen);
+    std::string htmlTag = reinterpret_cast<const char*>(curNode->name);
+    size_t curPos = paragraphEndPos;
     if ((pos + curNodeLen + 1) == paragraphEndPos && paragraphEndPos > 0) {
         allContent += "\n";
         contentLen++;
         curNodeLen++;
     }
-    if (nameStr == "p") {
-        if (!HasElementNode(curNode->children)) {
+    if (htmlTag == "p") {
+        if (contentLen == 0) {
             allContent += "\n";
             curNodeLen++;
         } else {
             curPos = pos + contentLen + 1;
         }
-        ToParagraphSpan(curNode, contentLen + 1, pos, spanInfos);
-    } else if (nameStr == "img") {
+    } else if (htmlTag == "img") {
         contentLen++;
-        ToImage(curNode, contentLen, pos, spanInfos);
         curNodeLen++;
-    } else if (nameStr == "span" || nameStr == "strong" || nameStr == "figure") {
-        ToTextSpan(nameStr, curNode, contentLen, pos, spanInfos);
-    } else if (IsValidNode(nameStr)) {
-        ToDefalutSpan(curNode, contentLen, pos, spanInfos);
     }
 
-    if (IsValidNode(nameStr)) {
-        pos += curNodeLen;
+    if (curNode->type == XML_ELEMENT_NODE) {
+        if (htmlTag == "p") {
+            ToParagraphSpan(curNode, contentLen + 1, pos, spanInfos);
+        } else if (htmlTag == "img") {
+            ToImage(curNode, contentLen, pos, spanInfos);
+        } else {
+            if ((childLen + 1 + pos) == curPos) {
+                contentLen++;
+            }
+            ToTextSpan(htmlTag, curNode, contentLen, pos, spanInfos);
+        }
     }
-
+    pos += curNodeLen;
     ParaseHtmlToSpanInfo(curNode->children, pos, allContent, curPos, spanInfos);
 }
 
@@ -956,7 +983,7 @@ void HtmlToSpan::ParaseHtmlToSpanInfo(
 {
     xmlNodePtr curNode = nullptr;
     for (curNode = node; curNode; curNode = curNode->next) {
-        if (curNode->type == XML_ELEMENT_NODE) {
+        if (curNode->type == XML_ELEMENT_NODE || curNode->type == XML_TEXT_NODE) {
             ToSpan(curNode, pos, allContent, paragraphPos, spanInfos);
         }
     }
