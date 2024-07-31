@@ -5540,6 +5540,16 @@ void SwiperPattern::CalculateGestureState(float additionalOffset, float currentT
         needTurn_ = false;
     } else if (currentFirstIndex >= currentIndex) {
         gestureState_ = needTurn_ ? GestureState::GESTURE_STATE_FOLLOW_LEFT : GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+
+        if (!IsLoop() && currentFirstIndex == 0 && GreatOrEqual(mainDeltaSum_, 0.0f)) {
+            gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+            needTurn_ = false;
+        }
+
+        if (!IsLoop() && currentFirstIndex == TotalCount() - 1 && LessOrEqual(mainDeltaSum_, 0.0f)) {
+            gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+            needTurn_ = false;
+        }
     } else if (currentFirstIndex < currentIndex) {
         gestureState_ = needTurn_ ? GestureState::GESTURE_STATE_FOLLOW_RIGHT : GestureState::GESTURE_STATE_FOLLOW_LEFT;
     }
