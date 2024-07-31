@@ -59,12 +59,15 @@ constexpr int32_t ITEM_THREE_NUM = 3;
 
 constexpr float DEFAULT_DOT_PADDING_ANGLE = 5.0f;
 constexpr float DEFAULT_DOT_ACTIVE_PADDING_ANGLE = 7.0f;
+constexpr float ITEM_DILATE_PADDING = 10.0f;
+constexpr float ITEM_DILATE_FADE_PADDING = 6.0f;
 constexpr float DEFAULT_DOT_ACTIVE_ANGLE = 4.0f;
 constexpr Dimension DEFAULT_CONTAINER_BORDER_WIDTH = 16.0_vp;
 constexpr Dimension DEFAULT_ITEM_RADIUS = 2.5_vp;
 constexpr Dimension DEFAULT_ITEM_SELECT_WIDTH = 5.0_vp;
 constexpr int32_t MAX_INDICATOR_DOT_COUNT = 15;
 constexpr float HALF_DIVISOR = 2.0f;
+constexpr float PADDING_DIFF = ITEM_DILATE_PADDING - ITEM_DILATE_FADE_PADDING;
 } // namespace
 
 CircleDotIndicatorModifier::CircleDotIndicatorModifier()
@@ -189,15 +192,18 @@ float CircleDotIndicatorModifier::GetAllPointArcAngle(int32_t itemSize, float do
     float dotActivePaddingAngle, float dotActiveAngle)
 {
     float allPointArcAngle = 0;
+    const float fadeDiff =
+        (itemSize - MAX_INDICATOR_DOT_COUNT > 0) ? (itemSize - MAX_INDICATOR_DOT_COUNT) * PADDING_DIFF : 0.0f;
     if (currentIndex_ == 0 || currentIndex_ == itemSize - 1) {
         if (itemSize >= ITEM_TWO_NUM) {
-            allPointArcAngle =
-                (itemSize - ITEM_TWO_NUM) * dotPaddingAngle + dotActivePaddingAngle + dotActiveAngle / HALF_DIVISOR;
+            allPointArcAngle = (itemSize - ITEM_TWO_NUM) * dotPaddingAngle + dotActivePaddingAngle +
+                               dotActiveAngle / HALF_DIVISOR - fadeDiff;
         } else {
             allPointArcAngle = dotActiveAngle;
         }
     } else {
-        allPointArcAngle = (itemSize - ITEM_THREE_NUM) * dotPaddingAngle + dotActivePaddingAngle * HALF_DIVISOR;
+        allPointArcAngle =
+            (itemSize - ITEM_THREE_NUM) * dotPaddingAngle + dotActivePaddingAngle * HALF_DIVISOR - fadeDiff;
     }
     return allPointArcAngle;
 }

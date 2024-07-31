@@ -144,7 +144,7 @@ private:
                                    float itemMinorRadius,
                                    float itemMiniRadius,
                                    int32_t indicatorStartIndex);
-    float CalculateBlackPointRotateAngle(int32_t indicatorStartIndex);
+    float CalculateBlackPointRotateAngle(int32_t indicatorStartIndex, int32_t itemIndex);
     int32_t CalculateIndicatorStartIndex(int32_t priorIndicatorIndex);
     int32_t CalculateInitIndicatorPosition();
     void SetFadeOutState(int32_t indicatorStartIndex);

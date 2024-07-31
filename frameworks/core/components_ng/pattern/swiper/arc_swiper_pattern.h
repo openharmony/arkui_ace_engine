@@ -79,39 +79,41 @@ private:
     };
 
     void ResetAnimationParam() override;
-    void ClearAnimationFinishList() override;
-    void InitialFrameNodePropertyAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode) override;
-    void CancelFrameNodePropertyAnimation(RefPtr<FrameNode>& frameNode) override;
+    void InitialFrameNodePropertyAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode) override;
+    void CancelFrameNodePropertyAnimation(const RefPtr<FrameNode>& frameNode) override;
     void PlayPropertyTranslateAnimation(
         float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false) override;
     void PlayScrollAnimation(float offset) override;
+    void ResetCurrentFrameNodeAnimation() override;
+    void ResetFrameNodeAnimation(const RefPtr<FrameNode>& frameNode, bool resetBackgroundcolor);
+    void ClearAnimationFinishList();
     void HorizontalScrollAnimation();
-    void PlayHorizontalScrollExitAnimation(float swiperWidth, float startPos, RefPtr<FrameNode>& frameNode);
-    void PlayHorizontalScrollEntryAnimation(float swiperWidth, float startPos, RefPtr<FrameNode>& frameNode);
+    void PlayHorizontalScrollExitAnimation(float swiperWidth, float startPos, const RefPtr<FrameNode>& frameNode);
+    void PlayHorizontalScrollEntryAnimation(float swiperWidth, float startPos, const RefPtr<FrameNode>& frameNode);
     
     void VerticalScrollAnimation();
-    void PlayVerticalScrollExitAnimation(float swiperWidth, float startPos, RefPtr<FrameNode>& frameNode);
-    void PlayVerticalScrollEntryAnimation(float swiperWidth, float startPosj, RefPtr<FrameNode>& frameNode);
+    void PlayVerticalScrollExitAnimation(float swiperWidth, float startPos, const RefPtr<FrameNode>& frameNode);
+    void PlayVerticalScrollEntryAnimation(float swiperWidth, float startPosj, const RefPtr<FrameNode>& frameNode);
 
-    void PlayScrollScaleAnimation(float scale, RefPtr<RenderContext>& renderContext);
-    void PlayScrollBlurAnimation(float blur, RefPtr<RenderContext>& renderContext);
-    void PlayScrollAlpahAnimation(float alpha, RefPtr<RenderContext>& renderContext);
-    void PlayScrollBackgroundAnimation(const std::shared_ptr<Color>& color, RefPtr<RenderContext>& renderContext);
-
+    void PlayScrollScaleAnimation(float scale, const RefPtr<RenderContext>& renderContext);
+    void PlayScrollBlurAnimation(float blur, const RefPtr<RenderContext>& renderContext);
+    void PlayScrollAlpahAnimation(float alpha, const RefPtr<RenderContext>& renderContext);
+    void PlayScrollBackgroundAnimation(const std::shared_ptr<Color>& color,
+        const RefPtr<RenderContext>& parentRenderContext, bool exitNodeNeedTransparent);
     void PlayPropertyTranslateFlipAnimation(const OffsetF& offset);
 
-    void PlayHorizontalEntryAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode);
-    void PlayHorizontalExitAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode);
+    void PlayHorizontalEntryAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
+    void PlayHorizontalExitAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
     
-    void PlayVerticalExitAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode);
-    void PlayVerticalEntryAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode);
+    void PlayVerticalExitAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
+    void PlayVerticalEntryAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
    
-    void PlayAnimation(const OffsetF& offset, int32_t index, RefPtr<FrameNode>& frameNode);
-    void PlayHorizontalAnimation(const OffsetF& offset, int32_t index, RefPtr<FrameNode>& frameNode);
-    void PlayVerticalAnimation(const OffsetF& offset, int32_t index, RefPtr<FrameNode>& frameNode);
+    void PlayAnimation(const OffsetF& offset, int32_t index, const RefPtr<FrameNode>& frameNode);
+    void PlayHorizontalAnimation(const OffsetF& offset, int32_t index, const RefPtr<FrameNode>& frameNode);
+    void PlayVerticalAnimation(const OffsetF& offset, int32_t index, const RefPtr<FrameNode>& frameNode);
    
     void AnimationFinish();
-    void BuildAnimationFinishCallback(bool exit, AnimationParam& param, RefPtr<RenderContext>& renderContext,
+    void BuildAnimationFinishCallback(bool exit, AnimationParam& param, const RefPtr<RenderContext>& renderContext,
         FinishCallback& finishCallback);
     void HandlePropertyTranslateCallback(float translate, int32_t nextIndex, float velocity);
     void AddFinishAnimation(const AnimationFinishType& animationFinishType);
@@ -120,8 +122,6 @@ private:
     bool IsScrollOverCritical();
     std::shared_ptr<Color> GetBackgroundColorValue(const RefPtr<FrameNode>& frameNode);
     std::shared_ptr<AnimationUtils::Animation> Animation(bool exit, AnimationParam& param);
-    void ResetBackcolor();
-    void ResetScrollAnimation();
 #ifdef SUPPORT_DIGITAL_CROWN
     void HandleCrownActionBegin(double degree, double mainDelta, GestureEvent& info);
     void HandleCrownActionUpdate(double degree, double mainDelta, GestureEvent& info, const OffsetF& offset);
@@ -132,27 +132,25 @@ private:
 #endif
 
     std::shared_ptr<Color> preNodeBackgroundColor_;
-    std::shared_ptr<Color> entryNodeBackground_;
+    std::shared_ptr<Color> entryNodeBackgroundColor_;
     OffsetF offset_;
     std::vector<std::shared_ptr<AnimationUtils::Animation>> animationVector_;
     std::vector<AnimationFinishType> animationFinishList_;
     std::vector<std::shared_ptr<AnimationUtils::Animation>> scrollAnimationVector_;
-    std::map<WeakPtr<FrameNode>, std::shared_ptr<Color>> exitNodes_;
-    std::map<WeakPtr<FrameNode>, std::shared_ptr<Color>> entryNodes_;
-    float horizontalExitNodeScale_ = 0;
-    float horizontalExitNodeBlur_ = 0;
-    float horizontalExitNodeOpacity_ = 0;
-    float horizontalEntryNodeScale_ = 0;
-    float horizontalEntryNodeBlur_ = 0;
-    float horizontalEntryNodeOpacity_ = 0;
+    WeakPtr<FrameNode> exitFrameNode_;
+    float horizontalExitNodeScale_ = 0.0f;
+    float horizontalExitNodeBlur_ = 0.0f;
+    float horizontalExitNodeOpacity_ = 0.0f;
+    float horizontalEntryNodeScale_ = 0.0f;
+    float horizontalEntryNodeBlur_ = 0.0f;
+    float horizontalEntryNodeOpacity_ = 0.0f;
 
-    float verticalExitNodeScale_ = 0;
-    float verticalExitNodeBlur_ = 0;
-    float verticalExitNodeOpacity_ = 0;
-    float verticalEntryNodeScale_ = 0;
-    float verticalEntryNodeOpacity_ = 0;
-    bool hasGetExitColor_ = false;
-    bool hasGetEntryColor_ = false;
+    float verticalExitNodeScale_ = 0.0f;
+    float verticalExitNodeBlur_ = 0.0f;
+    float verticalExitNodeOpacity_ = 0.0f;
+    float verticalEntryNodeScale_ = 0.0f;
+    float verticalEntryNodeOpacity_ = 0.0f;
+    Axis axis_ = Axis::HORIZONTAL;
 #ifdef SUPPORT_DIGITAL_CROWN
     CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
     Offset accumulativeCrownPx_;

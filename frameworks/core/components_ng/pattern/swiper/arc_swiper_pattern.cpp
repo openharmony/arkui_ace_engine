@@ -44,7 +44,7 @@ constexpr int32_t VERTICAL_EXIT_BLUR_VALUE = 100;
 constexpr int32_t VERTICAL_EXIT_BLUR_DURATION = 330;
 constexpr int32_t VERTICAL_EXIT_ALPHA_DURATION = 200;
 
-constexpr float VERTICAL_ENTRY_SCALE_VALUE = 101.5 / 100;
+constexpr float VERTICAL_ENTRY_SCALE_VALUE = 101.5f / 100.0f;
 constexpr int32_t VERTICAL_ENTRY_SCALE_DELAY = 130;
 constexpr int32_t VERTICAL_ENTRY_SCALE_DURATION = 200;
 constexpr int32_t VERTICAL_ENTRY_OFFSET_DELAY = 130;
@@ -55,24 +55,24 @@ constexpr int32_t VERTICAL_ENTRY_COLOR_DURATION = 40;
 
 constexpr float HORIZONTAL_SCALE_REDUCTION_FACTOR = 0.4f;
 constexpr float HORIZONTAL_BLUR_MIN_RATIO = 0.2f;
-constexpr float HORIZONTAL_BLUR_REDUCTION_FACTOR = 750 / 250 * 30;
-constexpr float HORIZONTAL_BLUR_MAX_VALUE = 30;
-constexpr float HORIZONTAL_ALPHA_REDUCTION_FACTOR = 750 / 500;
+constexpr float HORIZONTAL_BLUR_REDUCTION_FACTOR = 750.0f / 250.0f * 30.0f;
+constexpr float HORIZONTAL_BLUR_MAX_VALUE = 30.0f;
+constexpr float HORIZONTAL_ALPHA_REDUCTION_FACTOR = 750.0f / 500.0f;
 
 constexpr float VERTICAL_EXIT_SCALE_REDUCTION_FACTOR = 0.05f;
 constexpr float VERTICAL_EXIT_SCALE_MIN_VALUE = 0.95f;
-constexpr float VERTICAL_EXIT_BLUR_INCREASE_FACTOR = 30;
-constexpr float VERTICAL_EXIT_BLUR_MAX_VALUE = 100;
+constexpr float VERTICAL_EXIT_BLUR_INCREASE_FACTOR = 30.0f;
+constexpr float VERTICAL_EXIT_BLUR_MAX_VALUE = 100.0f;
 constexpr float VERTICAL_EXIT_ALPHA_MIN_RATIO = 0.25f;
 constexpr float VERTICAL_EXIT_ALPHA_REDUCTION_FACTOR = 2.32f;
 constexpr float VERTICAL_EXIT_ALPHA_AT_CRITICAL_POINT = 0.42f;
 constexpr float VERTICAL_EXIT_ALPHA_REDUCTION_FACTOR_AFTER_CRITICAL_POINT = 0.63f;
 
 constexpr float VERTICAL_ENTRY_CRITICAL_POINT_OF_COLOR = 0.25f;
-constexpr float VERTICAL_ENTRY_CRITICAL_POINT_OF_OTHER = 130 / 330;
+constexpr float VERTICAL_ENTRY_CRITICAL_POINT_OF_OTHER = 130.0f / 330.0f;
 constexpr float VERTICAL_ENTRY_SCALE_INITIAL_VALUE = 1.015f;
 constexpr float VERTICAL_ENTRY_SCALE_REDUCTION_FACTOR = 0.015f;
-constexpr float VERTICAL_ENTRY_WHOLE_REDUCTION_FACTOR = 330 / 200;
+constexpr float VERTICAL_ENTRY_WHOLE_REDUCTION_FACTOR = 330.0f / 200.0f;
 constexpr int32_t HALF = 2;
 constexpr int32_t ANIMATION_SIZE = 8;
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -174,7 +174,7 @@ std::string ArcSwiperPattern::GradientToJson(Gradient colors) const
     return jsonArray->ToString();
 }
 
-void ArcSwiperPattern::PlayHorizontalAnimation(const OffsetF& offset, int32_t index, RefPtr<FrameNode>& frameNode)
+void ArcSwiperPattern::PlayHorizontalAnimation(const OffsetF& offset, int32_t index, const RefPtr<FrameNode>& frameNode)
 {
     if (IsPreItem(index, offset.GetX())) {
         PlayHorizontalExitAnimation(offset, frameNode);
@@ -183,7 +183,7 @@ void ArcSwiperPattern::PlayHorizontalAnimation(const OffsetF& offset, int32_t in
     }
 }
 
-void ArcSwiperPattern::PlayVerticalAnimation(const OffsetF& offset, int32_t index, RefPtr<FrameNode>& frameNode)
+void ArcSwiperPattern::PlayVerticalAnimation(const OffsetF& offset, int32_t index, const RefPtr<FrameNode>& frameNode)
 {
     if (IsPreItem(index, offset.GetY())) {
         PlayVerticalExitAnimation(offset, frameNode);
@@ -210,7 +210,7 @@ bool ArcSwiperPattern::IsPreItem(int32_t index, float translate)
 }
 
 void ArcSwiperPattern::BuildAnimationFinishCallback(bool exit, AnimationParam& param,
-    RefPtr<RenderContext>& renderContext, FinishCallback& finishCallback)
+    const RefPtr<RenderContext>& renderContext, FinishCallback& finishCallback)
 {
     BlurOption blurOption;
     finishCallback = [weak = WeakClaim(this), param, blurOption,
@@ -227,14 +227,14 @@ void ArcSwiperPattern::BuildAnimationFinishCallback(bool exit, AnimationParam& p
                 swiper->AddFinishAnimation(AnimationFinishType::ENTRY_SCALE);
             }
         } else if (param.type == AnimationType::TYPE_ALPHA) {
-            renderContext->UpdateOpacity(1);
+            renderContext->UpdateOpacity(1.0f);
             if (exit) {
                 swiper->AddFinishAnimation(AnimationFinishType::EXIT_ALPHA);
             } else {
                 swiper->AddFinishAnimation(AnimationFinishType::ENTRY_ALPHA);
             }
         } else if (param.type == AnimationType::TYPE_BLUR) {
-            renderContext->UpdateBackBlur(Dimension(0, DimensionUnit::PERCENT), blurOption);
+            renderContext->UpdateBackBlur(Dimension(0.0f,  DimensionUnit::PERCENT), blurOption);
             if (exit) {
                 swiper->AddFinishAnimation(AnimationFinishType::EXIT_BLUR);
             } else {
@@ -294,7 +294,7 @@ std::shared_ptr<AnimationUtils::Animation> ArcSwiperPattern::Animation(bool exit
     return AnimationUtils::StartAnimation(param.option, propertyCallback, finishCallback);
 }
 
-void ArcSwiperPattern::PlayHorizontalExitAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode)
+void ArcSwiperPattern::PlayHorizontalExitAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
@@ -346,7 +346,7 @@ void ArcSwiperPattern::PlayHorizontalExitAnimation(const OffsetF& offset, RefPtr
     AnimationParam alphaParam;
     alphaParam.type = AnimationType::TYPE_ALPHA;
     alphaParam.frameNode = frameNode;
-    alphaParam.opacityValue = 0;
+    alphaParam.opacityValue = 0.0f;
 
     AnimationOption alphaOption;
     alphaOption.SetDuration(HORIZONTAL_EXIT_ALPHA_DURATION);
@@ -355,7 +355,7 @@ void ArcSwiperPattern::PlayHorizontalExitAnimation(const OffsetF& offset, RefPtr
     animationVector_.push_back(Animation(true, alphaParam));
 }
 
-void ArcSwiperPattern::PlayHorizontalEntryAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode)
+void ArcSwiperPattern::PlayHorizontalEntryAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
@@ -394,7 +394,7 @@ void ArcSwiperPattern::PlayHorizontalEntryAnimation(const OffsetF& offset, RefPt
     AnimationParam blurParam;
     blurParam.type = AnimationType::TYPE_BLUR;
     blurParam.frameNode = frameNode;
-    blurParam.blurValue = 0;
+    blurParam.blurValue = 0.0f;
 
     AnimationOption blurAnimationOption;
     blurAnimationOption.SetDuration(HORIZONTAL_ENTRY_BLUR_DURATION);
@@ -407,7 +407,7 @@ void ArcSwiperPattern::PlayHorizontalEntryAnimation(const OffsetF& offset, RefPt
     AnimationParam alphaParam;
     alphaParam.type = AnimationType::TYPE_ALPHA;
     alphaParam.frameNode = frameNode;
-    alphaParam.opacityValue = 1;
+    alphaParam.opacityValue = 1.0f;
 
     AnimationOption alphaOption;
     alphaOption.SetDuration(HORIZONTAL_ENTRY_ALPHA_DURATION);
@@ -426,7 +426,7 @@ std::shared_ptr<Color> ArcSwiperPattern::GetBackgroundColorValue(const RefPtr<Fr
     return std::make_shared<Color>(color.value());
 }
 
-void ArcSwiperPattern::PlayVerticalExitAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode)
+void ArcSwiperPattern::PlayVerticalExitAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
@@ -478,21 +478,26 @@ void ArcSwiperPattern::PlayVerticalExitAnimation(const OffsetF& offset, RefPtr<F
     AnimationParam alphaParam;
     alphaParam.type = AnimationType::TYPE_ALPHA;
     alphaParam.frameNode = frameNode;
-    alphaParam.opacityValue = 0;
+    alphaParam.opacityValue = 0.0f;
 
     AnimationOption alphaOption;
     alphaOption.SetDuration(VERTICAL_EXIT_ALPHA_DURATION);
     alphaOption.SetCurve(Curves::LINEAR);
     alphaParam.option = alphaOption;
     animationVector_.push_back(Animation(true, alphaParam));
+
+    // color
+    renderContext->OnBackgroundColorUpdate(Color::TRANSPARENT);
 }
 
-void ArcSwiperPattern::PlayVerticalEntryAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode)
+void ArcSwiperPattern::PlayVerticalEntryAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-
+    // color
+    frameNode->GetRenderContext()->OnBackgroundColorUpdate(Color::TRANSPARENT);
+    
     // scale
     renderContext->UpdateTransformScale({ verticalEntryNodeScale_, verticalEntryNodeScale_ });
     AnimationParam scaleParam;
@@ -526,7 +531,7 @@ void ArcSwiperPattern::PlayVerticalEntryAnimation(const OffsetF& offset, RefPtr<
     AnimationParam alphaParam;
     alphaParam.type = AnimationType::TYPE_ALPHA;
     alphaParam.frameNode = frameNode;
-    alphaParam.opacityValue = 1;
+    alphaParam.opacityValue = 1.0f;
 
     AnimationOption alphaOption;
     alphaOption.SetDelay(VERTICAL_ENTRY_ALPHA_DELAY);
@@ -536,18 +541,19 @@ void ArcSwiperPattern::PlayVerticalEntryAnimation(const OffsetF& offset, RefPtr<
     animationVector_.push_back(Animation(false, alphaParam));
 
     // color
-    if (entryNodeBackground_) {
-        AnimationParam colorParam;
-        colorParam.type = AnimationType::TYPE_COLOR;
-        colorParam.frameNode = frameNode;
-        colorParam.backColor = *entryNodeBackground_;
+    entryNodeBackgroundColor_ = GetBackgroundColorValue(frameNode);
+    CHECK_NULL_VOID(entryNodeBackgroundColor_);
+    AnimationParam colorParam;
+    colorParam.type = AnimationType::TYPE_COLOR;
 
-        AnimationOption colorOption;
-        colorOption.SetDuration(VERTICAL_ENTRY_COLOR_DURATION);
-        colorOption.SetCurve(Curves::LINEAR);
-        colorParam.option = colorOption;
-        animationVector_.push_back(Animation(false, colorParam));
-    }
+    colorParam.frameNode = frameNode;
+    colorParam.backColor = *entryNodeBackgroundColor_;
+
+    AnimationOption colorOption;
+    colorOption.SetDuration(VERTICAL_ENTRY_COLOR_DURATION);
+    colorOption.SetCurve(Curves::LINEAR);
+    colorParam.option = colorOption;
+    animationVector_.push_back(Animation(false, colorParam));
 }
 
 bool ArcSwiperPattern::IsScrollOverCritical()
@@ -558,7 +564,7 @@ bool ArcSwiperPattern::IsScrollOverCritical()
     return true;
 }
 
-void ArcSwiperPattern::PlayAnimation(const OffsetF& offset, int32_t index, RefPtr<FrameNode>& frameNode)
+void ArcSwiperPattern::PlayAnimation(const OffsetF& offset, int32_t index, const RefPtr<FrameNode>& frameNode)
 {
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::FIRST_MOVE, "");
     if (IsScrollOverCritical()) {
@@ -613,7 +619,7 @@ void ArcSwiperPattern::PlayPropertyTranslateFlipAnimation(const OffsetF& offset)
     itemPositionInAnimation_ = itemPosition_;
 }
 
-void ArcSwiperPattern::InitialFrameNodePropertyAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode)
+void ArcSwiperPattern::InitialFrameNodePropertyAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     for (auto animaiton: animationVector_) {
@@ -627,10 +633,10 @@ void ArcSwiperPattern::InitialFrameNodePropertyAnimation(const OffsetF& offset, 
         CHECK_NULL_VOID(swiper);
         auto frameNode = weakFrameNode.Upgrade();
         CHECK_NULL_VOID(frameNode);
-        frameNode->GetRenderContext()->UpdateOpacity(1);
+        frameNode->GetRenderContext()->UpdateOpacity(1.0f);
         frameNode->GetRenderContext()->UpdateTransformScale({1.0f, 1.0f});
         BlurOption blurOption;
-        frameNode->GetRenderContext()->UpdateBackBlur(Dimension(0, DimensionUnit::PERCENT), blurOption);
+        frameNode->GetRenderContext()->UpdateBackBlur(Dimension(0.0f, DimensionUnit::PERCENT), blurOption);
         frameNode->GetRenderContext()->UpdateTranslateInXY(offset);
         auto colorPtr = swiper->GetBackgroundColorValue(frameNode);
         CHECK_NULL_VOID(colorPtr);
@@ -639,17 +645,17 @@ void ArcSwiperPattern::InitialFrameNodePropertyAnimation(const OffsetF& offset, 
     AnimationUtils::Animate(option, upgradeCallback);
 }
 
-void ArcSwiperPattern::CancelFrameNodePropertyAnimation(RefPtr<FrameNode>& frameNode)
+void ArcSwiperPattern::CancelFrameNodePropertyAnimation(const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     for (auto animaiton: animationVector_) {
         AnimationUtils::StopAnimation(animaiton);
     }
     animationVector_.clear();
-    frameNode->GetRenderContext()->UpdateOpacity(1);
+    frameNode->GetRenderContext()->UpdateOpacity(1.0f);
     frameNode->GetRenderContext()->UpdateTransformScale({1.0f, 1.0f});
     BlurOption blurOption;
-    frameNode->GetRenderContext()->UpdateBackBlur(Dimension(0, DimensionUnit::PERCENT), blurOption);
+    frameNode->GetRenderContext()->UpdateBackBlur(Dimension(0.0f, DimensionUnit::PERCENT), blurOption);
     frameNode->GetRenderContext()->CancelTranslateXYAnimation();
 }
 
@@ -681,29 +687,6 @@ void ArcSwiperPattern::HandlePropertyTranslateCallback(float translate, int32_t 
             swiper->FireAnimationStartEvent(swiper->GetLoopIndex(swiper->currentIndex_), nextIndex, info);
             swiper->FireAndCleanScrollingListener();
         });
-    }
-}
-
-void ArcSwiperPattern::ResetScrollAnimation()
-{
-    for (auto animation: scrollAnimationVector_) {
-        AnimationUtils::StopAnimation(animation);
-    }
-    scrollAnimationVector_.clear();
-
-    for (auto& item : itemPosition_) {
-        auto node = item.second.node;
-        CHECK_NULL_VOID(node);
-        auto context = node->GetRenderContext();
-        CHECK_NULL_VOID(context);
-        BlurOption blurOption;
-        context->UpdateBackBlur(Dimension(0, DimensionUnit::PERCENT), blurOption);
-        context->UpdateOpacity(1);
-        context->UpdateTransformScale({1.0, 1.0});
-        auto colorPtr = GetBackgroundColorValue(node);
-        if (colorPtr) {
-            context->OnBackgroundColorUpdate(*colorPtr);
-        }
     }
 }
 
@@ -746,7 +729,7 @@ void ArcSwiperPattern::PlayPropertyTranslateAnimation(
             return;
         }
     }
-
+    ClearAnimationFinishList();
     // initial translate info.
     for (auto& item : itemPosition_) {
         auto frameNode = item.second.node;
@@ -770,7 +753,7 @@ bool ArcSwiperPattern::IsLoop() const
     return false;
 }
 
-void ArcSwiperPattern::PlayScrollScaleAnimation(float scale, RefPtr<RenderContext>& renderContext)
+void ArcSwiperPattern::PlayScrollScaleAnimation(float scale, const RefPtr<RenderContext>& renderContext)
 {
     AnimationOption option;
     option.SetDelay(0);
@@ -784,7 +767,7 @@ void ArcSwiperPattern::PlayScrollScaleAnimation(float scale, RefPtr<RenderContex
     scrollAnimationVector_.push_back(AnimationUtils::StartAnimation(option, updateCallback));
 }
 
-void ArcSwiperPattern::PlayScrollBlurAnimation(float blur, RefPtr<RenderContext>& renderContext)
+void ArcSwiperPattern::PlayScrollBlurAnimation(float blur, const RefPtr<RenderContext>& renderContext)
 {
     AnimationOption option;
     option.SetDelay(0);
@@ -799,7 +782,7 @@ void ArcSwiperPattern::PlayScrollBlurAnimation(float blur, RefPtr<RenderContext>
     scrollAnimationVector_.push_back(AnimationUtils::StartAnimation(option, updateCallback));
 }
 
-void ArcSwiperPattern::PlayScrollAlpahAnimation(float alpha, RefPtr<RenderContext>& renderContext)
+void ArcSwiperPattern::PlayScrollAlpahAnimation(float alpha, const RefPtr<RenderContext>& renderContext)
 {
     AnimationOption option;
     option.SetDelay(0);
@@ -814,21 +797,32 @@ void ArcSwiperPattern::PlayScrollAlpahAnimation(float alpha, RefPtr<RenderContex
 }
 
 void ArcSwiperPattern::PlayScrollBackgroundAnimation(const std::shared_ptr<Color>& color,
-    RefPtr<RenderContext>& renderContext)
+    const RefPtr<RenderContext>& parentRenderContext, bool exitNodeNeedTransparent)
 {
     CHECK_NULL_VOID(color);
-    CHECK_NULL_VOID(renderContext);
-    auto finishCallback = [weak = WeakClaim(this), color]() {
-        auto swiper = weak.Upgrade();
-        CHECK_NULL_VOID(swiper);
-        swiper->preNodeBackgroundColor_ = color;
-    };
+    CHECK_NULL_VOID(parentRenderContext);
+    std::function<void()> updateCallback;
+    if (exitNodeNeedTransparent) {
+        auto exitFrameNode = exitFrameNode_.Upgrade();
+        CHECK_NULL_VOID(exitFrameNode);
+        auto exitRenderContext = exitFrameNode->GetRenderContext();
+        updateCallback = [weakParentRenderContext = WeakPtr<RenderContext>(parentRenderContext),
+                          weakExitRenderContext = WeakPtr<RenderContext>(exitRenderContext), color]() {
+            auto exitRenderContext = weakExitRenderContext.Upgrade();
+            CHECK_NULL_VOID(exitRenderContext);
+            exitRenderContext->OnBackgroundColorUpdate(Color::TRANSPARENT);
+            auto parentRenderContext = weakParentRenderContext.Upgrade();
+            CHECK_NULL_VOID(parentRenderContext);
+            parentRenderContext->OnBackgroundColorUpdate(*color);
+        };
+    } else {
+        updateCallback = [weakParentRenderContext = WeakPtr<RenderContext>(parentRenderContext), color]() {
+            auto parentRenderContext = weakParentRenderContext.Upgrade();
+            CHECK_NULL_VOID(parentRenderContext);
+            parentRenderContext->OnBackgroundColorUpdate(*color);
+        };
+    }
 
-    auto updateCallback = [weakRenderContext = WeakPtr<RenderContext>(renderContext), color]() {
-        auto renderContext = weakRenderContext.Upgrade();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->OnBackgroundColorUpdate(*color);
-    };
     AnimationOption option;
     option.SetDelay(0);
     option.SetDuration(VERTICAL_ENTRY_COLOR_DURATION);
@@ -837,7 +831,7 @@ void ArcSwiperPattern::PlayScrollBackgroundAnimation(const std::shared_ptr<Color
 }
 
 void ArcSwiperPattern::PlayHorizontalScrollExitAnimation(float swiperWidth, float startPos,
-    RefPtr<FrameNode>& frameNode)
+    const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto curContext = frameNode->GetRenderContext();
@@ -863,15 +857,15 @@ void ArcSwiperPattern::PlayHorizontalScrollExitAnimation(float swiperWidth, floa
     }
 
     // alpha
-    horizontalExitNodeOpacity_ = 1.0 - exitNodePercent;
-    if (horizontalExitNodeOpacity_ < 0) {
-        horizontalExitNodeOpacity_ = 0;
+    horizontalExitNodeOpacity_ = 1.0f - exitNodePercent;
+    if (horizontalExitNodeOpacity_ < 0.0f) {
+        horizontalExitNodeOpacity_ = 0.0f;
     }
     PlayScrollAlpahAnimation(horizontalExitNodeOpacity_, curContext);
 }
 
 void ArcSwiperPattern::PlayHorizontalScrollEntryAnimation(float swiperWidth, float startPos,
-    RefPtr<FrameNode>& frameNode)
+    const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto entryNodeContext = frameNode->GetRenderContext();
@@ -883,22 +877,22 @@ void ArcSwiperPattern::PlayHorizontalScrollEntryAnimation(float swiperWidth, flo
     // scale
     horizontalEntryNodeScale_ = HORIZONTAL_ENTRY_SCALE_INITIAL_VALUE +
         HORIZONTAL_SCALE_REDUCTION_FACTOR * entryNodePercent;
-    if (horizontalEntryNodeScale_ >= 1) {
-        horizontalEntryNodeScale_ = 1;
+    if (horizontalEntryNodeScale_ >= 1.0f) {
+        horizontalEntryNodeScale_ = 1.0f;
     }
     PlayScrollScaleAnimation(horizontalEntryNodeScale_, entryNodeContext);
 
     // blur
     horizontalEntryNodeBlur_ = HORIZONTAL_BLUR_MAX_VALUE - HORIZONTAL_BLUR_REDUCTION_FACTOR * entryNodePercent;
-    if (horizontalEntryNodeBlur_ < 0) {
-        horizontalEntryNodeBlur_ = 0;
+    if (horizontalEntryNodeBlur_ < 0.0f) {
+        horizontalEntryNodeBlur_ = 0.0f;
     }
     PlayScrollBlurAnimation(horizontalEntryNodeBlur_, entryNodeContext);
 
     // alpha
     horizontalEntryNodeOpacity_ = HORIZONTAL_ALPHA_REDUCTION_FACTOR * entryNodePercent;
-    if (horizontalEntryNodeOpacity_ > 1) {
-        horizontalEntryNodeOpacity_ = 1;
+    if (horizontalEntryNodeOpacity_ > 1.0f) {
+        horizontalEntryNodeOpacity_ = 1.0f;
     }
     PlayScrollAlpahAnimation(horizontalEntryNodeOpacity_, entryNodeContext);
 }
@@ -906,7 +900,7 @@ void ArcSwiperPattern::PlayHorizontalScrollEntryAnimation(float swiperWidth, flo
 void ArcSwiperPattern::HorizontalScrollAnimation()
 {
     auto swiperWidth = CalculateVisibleSize();
-    int32_t nextIndex = 0;
+    int32_t nextIndex = -1;
     if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
         nextIndex = currentIndex_ + 1;
     } else if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
@@ -914,13 +908,13 @@ void ArcSwiperPattern::HorizontalScrollAnimation()
     }
     auto nextInter = itemPosition_.find(nextIndex);
     if (nextInter == itemPosition_.end()) {
-        ResetScrollAnimation();
         return;
     }
     auto curInter = itemPosition_.find(currentIndex_);
     if (curInter != itemPosition_.end()) {
         auto curStartPos = curInter->second.startPos;
         auto curFrameNode = curInter->second.node;
+        CHECK_NULL_VOID(curFrameNode);
         PlayHorizontalScrollExitAnimation(swiperWidth, curStartPos, curFrameNode);
     }
 
@@ -934,16 +928,14 @@ void ArcSwiperPattern::HorizontalScrollAnimation()
 void ArcSwiperPattern::VerticalScrollAnimation()
 {
     auto swiperWidth = CalculateVisibleSize();
-    int32_t nextIndex = 0;
+    int32_t nextIndex = -1;
     if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
         nextIndex = currentIndex_ + 1;
     } else if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
         nextIndex = currentIndex_ - 1;
     }
- 
     auto nextInter = itemPosition_.find(nextIndex);
     if (nextInter == itemPosition_.end()) {
-        ResetScrollAnimation();
         return;
     }
     
@@ -951,6 +943,7 @@ void ArcSwiperPattern::VerticalScrollAnimation()
     if (curInter != itemPosition_.end()) {
         auto curStartPos = curInter->second.startPos;
         auto curFrameNode = curInter->second.node;
+        CHECK_NULL_VOID(curFrameNode);
         PlayVerticalScrollExitAnimation(swiperWidth, curStartPos, curFrameNode);
     }
 
@@ -962,24 +955,21 @@ void ArcSwiperPattern::VerticalScrollAnimation()
 }
 
 void ArcSwiperPattern::PlayVerticalScrollExitAnimation(float swiperWidth, float startPos,
-    RefPtr<FrameNode>& frameNode)
+    const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
+    exitFrameNode_ = WeakPtr<FrameNode>(frameNode);
     auto curNodeContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(curNodeContext);
     if (swiperWidth == 0) {
         return;
     }
     auto exitNodePercent = std::abs(startPos) / swiperWidth;
-    if (!hasGetExitColor_) {
-        auto colorPtr = GetBackgroundColorValue(frameNode);
-        preNodeBackgroundColor_ = colorPtr;
-        exitNodes_.insert(std::make_pair(WeakPtr<FrameNode>(frameNode), preNodeBackgroundColor_));
-        hasGetExitColor_ = true;
-    }
-
+    // color
+    preNodeBackgroundColor_ = GetBackgroundColorValue(frameNode);
+  
     // scale
-    verticalExitNodeScale_ = 1.0 - exitNodePercent * VERTICAL_EXIT_SCALE_REDUCTION_FACTOR;
+    verticalExitNodeScale_ = 1.0f - exitNodePercent * VERTICAL_EXIT_SCALE_REDUCTION_FACTOR;
     if (verticalExitNodeScale_ < VERTICAL_EXIT_SCALE_MIN_VALUE) {
         verticalExitNodeScale_ = VERTICAL_EXIT_SCALE_MIN_VALUE;
     }
@@ -987,6 +977,7 @@ void ArcSwiperPattern::PlayVerticalScrollExitAnimation(float swiperWidth, float 
 
     // blur
     verticalExitNodeBlur_ = VERTICAL_EXIT_BLUR_INITIAL_VALUE + exitNodePercent * VERTICAL_EXIT_BLUR_INCREASE_FACTOR;
+    
     if (verticalExitNodeBlur_ > VERTICAL_EXIT_BLUR_MAX_VALUE) {
         verticalExitNodeBlur_ = VERTICAL_EXIT_BLUR_MAX_VALUE;
     }
@@ -994,25 +985,21 @@ void ArcSwiperPattern::PlayVerticalScrollExitAnimation(float swiperWidth, float 
 
     // alpha
     if (exitNodePercent < VERTICAL_EXIT_ALPHA_MIN_RATIO) {
-        verticalExitNodeOpacity_ = 1.0 - VERTICAL_EXIT_ALPHA_REDUCTION_FACTOR * exitNodePercent;
+        verticalExitNodeOpacity_ = 1.0f - VERTICAL_EXIT_ALPHA_REDUCTION_FACTOR * exitNodePercent;
     } else if (exitNodePercent == VERTICAL_EXIT_ALPHA_MIN_RATIO) {
         verticalExitNodeOpacity_ = VERTICAL_EXIT_ALPHA_AT_CRITICAL_POINT;
     } else {
         verticalExitNodeOpacity_ = VERTICAL_EXIT_ALPHA_AT_CRITICAL_POINT -
             VERTICAL_EXIT_ALPHA_REDUCTION_FACTOR_AFTER_CRITICAL_POINT * exitNodePercent;
     }
-    if (verticalExitNodeOpacity_ < 0) {
-        verticalExitNodeOpacity_ = 0;
+    if (verticalExitNodeOpacity_ < 0.0f) {
+        verticalExitNodeOpacity_ = 0.0f;
     }
     PlayScrollAlpahAnimation(verticalExitNodeOpacity_, curNodeContext);
-
-    auto context = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    context->OnBackgroundColorUpdate(Color::TRANSPARENT);
 }
 
 void ArcSwiperPattern::PlayVerticalScrollEntryAnimation(float swiperWidth, float startPos,
-    RefPtr<FrameNode>& frameNode)
+    const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto entryNodeContext = frameNode->GetRenderContext();
@@ -1023,13 +1010,7 @@ void ArcSwiperPattern::PlayVerticalScrollEntryAnimation(float swiperWidth, float
     auto entryNodePercent = (swiperWidth - std::abs(startPos)) / swiperWidth;
 
     // color
-    if (!hasGetEntryColor_) {
-        auto colorPtr = GetBackgroundColorValue(frameNode);
-        entryNodeBackground_ = colorPtr;
-        entryNodes_.insert(std::make_pair(WeakPtr<FrameNode>(frameNode), entryNodeBackground_));
-        hasGetEntryColor_ = true;
-    }
-
+    entryNodeBackgroundColor_ = GetBackgroundColorValue(frameNode);
     auto parentNode = frameNode->GetParentFrameNode();
     CHECK_NULL_VOID(parentNode);
     auto parentContext = parentNode->GetRenderContext();
@@ -1037,13 +1018,11 @@ void ArcSwiperPattern::PlayVerticalScrollEntryAnimation(float swiperWidth, float
 
     if (entryNodePercent < VERTICAL_ENTRY_CRITICAL_POINT_OF_COLOR) {
         entryNodeContext->OnBackgroundColorUpdate(Color::TRANSPARENT);
-        PlayScrollBackgroundAnimation(preNodeBackgroundColor_, parentContext);
+        PlayScrollBackgroundAnimation(preNodeBackgroundColor_, parentContext, false);
     }
 
     if (entryNodePercent >= VERTICAL_ENTRY_CRITICAL_POINT_OF_COLOR) {
-        auto parentContext = parentNode->GetRenderContext();
-        CHECK_NULL_VOID(parentContext);
-        PlayScrollBackgroundAnimation(entryNodeBackground_, parentContext);
+        PlayScrollBackgroundAnimation(entryNodeBackgroundColor_, parentContext, true);
     }
 
     if (entryNodePercent >= VERTICAL_ENTRY_CRITICAL_POINT_OF_OTHER) {
@@ -1051,16 +1030,16 @@ void ArcSwiperPattern::PlayVerticalScrollEntryAnimation(float swiperWidth, float
         verticalEntryNodeScale_ = VERTICAL_ENTRY_SCALE_INITIAL_VALUE -
             VERTICAL_ENTRY_SCALE_REDUCTION_FACTOR * (entryNodePercent - VERTICAL_ENTRY_CRITICAL_POINT_OF_OTHER) *
             VERTICAL_ENTRY_WHOLE_REDUCTION_FACTOR;
-        if (verticalEntryNodeScale_ < 1) {
-            verticalEntryNodeScale_ = 1;
+        if (verticalEntryNodeScale_ < 1.0f) {
+            verticalEntryNodeScale_ = 1.0f;
         }
         PlayScrollScaleAnimation(verticalEntryNodeScale_, entryNodeContext);
 
         // alpha
         verticalEntryNodeOpacity_ = (entryNodePercent - VERTICAL_ENTRY_CRITICAL_POINT_OF_OTHER) *
             VERTICAL_ENTRY_WHOLE_REDUCTION_FACTOR;
-        if (verticalEntryNodeOpacity_ > 1) {
-            verticalEntryNodeOpacity_ = 1;
+        if (verticalEntryNodeOpacity_ > 1.0f) {
+            verticalEntryNodeOpacity_ = 1.0f;
         }
         PlayScrollAlpahAnimation(verticalEntryNodeOpacity_, entryNodeContext);
     }
@@ -1081,45 +1060,6 @@ void ArcSwiperPattern::PlayScrollAnimation(float offset)
     } else {
         VerticalScrollAnimation();
     }
-    MarkDirtyNodeSelf();
-}
-
-void ArcSwiperPattern::ResetBackcolor()
-{
-    for (auto& node: exitNodes_) {
-        auto frameNode = node.first.Upgrade();
-        CHECK_NULL_BREAK(frameNode);
-        auto context = frameNode->GetRenderContext();
-        CHECK_NULL_BREAK(context);
-        auto colorPtr = node.second;
-        CHECK_NULL_BREAK(colorPtr);
-        context->OnBackgroundColorUpdate(*colorPtr);
-        colorPtr = nullptr;
-    }
-    exitNodes_.clear();
-
-    for (auto& node: entryNodes_) {
-        auto frameNode = node.first.Upgrade();
-        CHECK_NULL_BREAK(frameNode);
-        auto context = frameNode->GetRenderContext();
-        CHECK_NULL_BREAK(context);
-        auto nodeColorPtr = node.second;
-        if (nodeColorPtr) {
-            context->OnBackgroundColorUpdate(*nodeColorPtr);
-            nodeColorPtr = nullptr;
-        }
-
-        auto parentFrameNode = frameNode->GetParentFrameNode();
-        CHECK_NULL_BREAK(parentFrameNode);
-        auto parentColorPtr = GetBackgroundColorValue(parentFrameNode);
-        if (parentColorPtr) {
-            auto parentContext = parentFrameNode->GetRenderContext();
-            CHECK_NULL_BREAK(parentContext);
-            parentContext->OnBackgroundColorUpdate(*parentColorPtr);
-            parentColorPtr = nullptr;
-        }
-    }
-    entryNodes_.clear();
 }
 
 void ArcSwiperPattern::ResetAnimationParam()
@@ -1128,24 +1068,68 @@ void ArcSwiperPattern::ResetAnimationParam()
         AnimationUtils::StopAnimation(aniamton);
     }
     scrollAnimationVector_.clear();
-    hasGetEntryColor_ = false;
-    hasGetExitColor_ = false;
-    ResetBackcolor();
     StopPropertyTranslateAnimation(isFinishAnimation_);
     StopIndicatorAnimation();
     
     horizontalExitNodeScale_ = 1.0f;
-    horizontalExitNodeBlur_ = 0;
+    horizontalExitNodeBlur_ = 0.0f;
     horizontalExitNodeOpacity_ = 1.0f;
     horizontalEntryNodeScale_ = HORIZONTAL_ENTRY_SCALE_INITIAL_VALUE;
     horizontalEntryNodeBlur_ = HORIZONTAL_ENTRY_BLUR_VALUE;
-    horizontalEntryNodeOpacity_ = 0;
+    horizontalEntryNodeOpacity_ = 0.0f;
 
     verticalExitNodeScale_ = 1.0f;
     verticalExitNodeBlur_ = VERTICAL_EXIT_BLUR_INITIAL_VALUE;
     verticalExitNodeOpacity_ = 1.0f;
     verticalEntryNodeScale_ = VERTICAL_ENTRY_SCALE_VALUE;
-    verticalEntryNodeOpacity_ = 0;
+    verticalEntryNodeOpacity_ = 0.0f;
+    if (axis_ == GetDirection()) {
+        return;
+    }
+    axis_ = GetDirection();
+    if (axis_ == Axis::HORIZONTAL) {
+        auto curInter = itemPosition_.find(currentIndex_);
+        if (curInter == itemPosition_.end()) {
+            return;
+        }
+
+        auto curFrameNode = curInter->second.node;
+        CHECK_NULL_VOID(curFrameNode);
+        auto parentFrameNode = curFrameNode->GetParentFrameNode();
+        CHECK_NULL_VOID(parentFrameNode);
+        auto parentContext = parentFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(parentContext);
+        auto colorPtr = GetBackgroundColorValue(parentFrameNode);
+        CHECK_NULL_VOID(colorPtr);
+        parentContext->OnBackgroundColorUpdate(*colorPtr);
+    }
+}
+
+void ArcSwiperPattern::ResetFrameNodeAnimation(const RefPtr<FrameNode>& frameNode, bool resetBackgroundcolor)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateTransformScale({1.0f, 1.0f});
+    context->UpdateOpacity(1.0f);
+    BlurOption blurOption;
+    context->UpdateBackBlur(Dimension(0.0f, DimensionUnit::PERCENT), blurOption);
+    if (resetBackgroundcolor) {
+        auto backColor = GetBackgroundColorValue(frameNode);
+        if (backColor) {
+            context->OnBackgroundColorUpdate(*backColor);
+        }
+    }
+}
+
+void ArcSwiperPattern::ResetCurrentFrameNodeAnimation()
+{
+    auto curInter = itemPosition_.find(currentIndex_);
+    if (curInter != itemPosition_.end()) {
+        auto curFrameNode = curInter->second.node;
+        CHECK_NULL_VOID(curFrameNode);
+        ResetFrameNodeAnimation(curFrameNode, true);
+    }
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN
