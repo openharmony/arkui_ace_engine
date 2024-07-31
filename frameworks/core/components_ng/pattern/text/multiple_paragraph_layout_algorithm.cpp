@@ -435,8 +435,8 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
         if (paraStyleSpanItem) {
             GetSpanParagraphStyle(paraStyleSpanItem->textLineStyle, spanParagraphStyle);
             if (paraStyleSpanItem->fontStyle->HasFontSize()) {
-                spanParagraphStyle.fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue().
-                    ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+                spanParagraphStyle.fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue().ConvertToPxDistribute(
+                    textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
             }
         }
         if (paraStyle.maxLines != UINT32_MAX && !spanStringHasMaxLines_ && isSpanStringMode_) {
@@ -554,7 +554,7 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
             imageSpanItem->UpdateParagraph(parentNode, paragraph, isSpanStringMode_, placeholderStyle);
     } else {
         placeholderStyle.baselineOffset = baselineOffset.ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         imageSpanItem->placeholderIndex =
             imageSpanItem->UpdateParagraph(parentNode, paragraph, isSpanStringMode_, placeholderStyle);
     }
@@ -645,7 +645,8 @@ void MultipleParagraphLayoutAlgorithm::ApplyIndent(
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         if (indentValue.Unit() != DimensionUnit::PERCENT) {
-            value = indentValue.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+            value = indentValue.ConvertToPxDistribute(
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         } else {
             value = static_cast<float>(width * indentValue.Value());
             paragraphStyle.indent = Dimension(value);
@@ -656,7 +657,7 @@ void MultipleParagraphLayoutAlgorithm::ApplyIndent(
     std::vector<float> indents;
     if (paragraphStyle.leadingMargin.has_value()) {
         leadingMarginValue = paragraphStyle.leadingMargin->size.Width().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     }
     indents.emplace_back(indent + leadingMarginValue);
     indents.emplace_back(leadingMarginValue);

@@ -653,7 +653,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
     // Font size must be px when transferring to Rosen::TextStyle
     txtStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
-        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     txtStyle.fontStyle = ConvertTxtFontStyle(textStyle.GetFontStyle());
 
     if (textStyle.GetWordSpacing().Unit() == DimensionUnit::PERCENT) {
@@ -661,16 +661,16 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     } else {
         if (pipelineContext) {
             txtStyle.wordSpacing = textStyle.GetWordSpacing().ConvertToPxDistribute(
-                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         } else {
             txtStyle.wordSpacing = textStyle.GetWordSpacing().Value();
         }
     }
     if (pipelineContext) {
         txtStyle.letterSpacing = textStyle.GetLetterSpacing().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         txtStyle.baseLineShift = -textStyle.GetBaselineOffset().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     }
 
     txtStyle.fontFamilies = textStyle.GetFontFamilies();
@@ -703,7 +703,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         double lineHeight = textStyle.GetLineHeight().Value();
         if (pipelineContext) {
             lineHeight = textStyle.GetLineHeight().ConvertToPxDistribute(
-                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         }
         lineHeightOnly = textStyle.HasHeightOverride();
         if (!NearEqual(lineHeight, fontSize) && (lineHeight > 0.0) && (!NearZero(fontSize))) {
@@ -725,7 +725,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         double lineSpacing = textStyle.GetLineSpacing().Value();
         if (pipelineContext) {
             lineSpacing = textStyle.GetLineSpacing().ConvertToPxDistribute(
-                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         }
         lineSpacingOnly = true;
         if (!NearEqual(lineSpacing, fontSize) && (lineSpacing > 0.0) && (!NearZero(fontSize))) {
@@ -766,11 +766,11 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     }
     auto radius = textBackgroundStyle->backgroundRadius;
     CHECK_NULL_VOID(radius.has_value());
-    auto radiusConverter = [context = pipelineContext, textStyle](
-                               const std::optional<Dimension>& radius) -> double {
+    auto radiusConverter = [context = pipelineContext, textStyle](const std::optional<Dimension>& radius) -> double {
         CHECK_NULL_RETURN(radius.has_value(), 0);
         CHECK_NULL_RETURN(context, radius->Value());
-        return radius.value().ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+        return radius.value().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     };
     txtStyle.backgroundRect.leftTopRadius = radiusConverter(radius->radiusTopLeft);
     txtStyle.backgroundRect.rightTopRadius = radiusConverter(radius->radiusTopRight);

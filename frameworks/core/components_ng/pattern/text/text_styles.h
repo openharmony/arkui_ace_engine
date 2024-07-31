@@ -200,6 +200,7 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineBreakStrategy, LineBreakStrategy);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NumberOfLines, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HalfLeading, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AllowScale, bool);
 };
 
 struct HandleInfoNG {
