@@ -1457,6 +1457,7 @@ void AceContainer::OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode,
         nodeInfos.emplace_back(node);
     }
     viewData.nodes = nodeInfos;
+    viewData.pageUrl = viewDataWrap->GetPageUrl();
 }
 
 void FillAutoFillCustomConfig(const RefPtr<NG::FrameNode>& node,
