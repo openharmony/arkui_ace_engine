@@ -46,11 +46,6 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     if (gridLayoutInfo_.jumpIndex_ != EMPTY_JUMP_INDEX) {
         MeasureOnJump(mainSize);
-        if (!NearZero(postJumpOffset_)) {
-            gridLayoutInfo_.currentOffset_ = postJumpOffset_;
-            enableSkip_ = false;
-            MeasureOnOffset(mainSize);
-        }
     } else {
         MeasureOnOffset(mainSize);
     }
@@ -144,10 +139,6 @@ void GridIrregularLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
 
     info.crossCount_ = static_cast<int32_t>(crossLens_.size());
     CheckForReset();
-
-    if (info.extraOffset_) {
-        postJumpOffset_ += *info.extraOffset_;
-    }
 }
 
 namespace {
@@ -310,13 +301,29 @@ bool GridIrregularLayoutAlgorithm::TrySkipping(float mainSize)
         info.jumpIndex_ = Negative(info.currentOffset_) ? SkipLinesForward() : SkipLinesBackward();
         info.scrollAlign_ = ScrollAlign::START;
         info.currentOffset_ = 0.0f;
-        MeasureOnJump(mainSize);
+        Jump(mainSize);
         return true;
     }
     return false;
 }
 
 void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
+{
+    Jump(mainSize);
+
+    auto& info = gridLayoutInfo_;
+    if (info.extraOffset_) {
+        info.currentOffset_ += *info.extraOffset_;
+        MeasureOnOffset(mainSize);
+    }
+    if (!NearZero(postJumpOffset_)) {
+        info.currentOffset_ = postJumpOffset_;
+        enableSkip_ = false;
+        MeasureOnOffset(mainSize);
+    }
+}
+
+void GridIrregularLayoutAlgorithm::Jump(float mainSize)
 {
     auto& info = gridLayoutInfo_;
 
