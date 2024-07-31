@@ -2580,7 +2580,7 @@ void SwiperPattern::StopAnimationOnScrollStart(bool flushImmediately)
     if (flushImmediately) {
         StopSpringAnimationAndFlushImmediately();
     } else {
-        StopSpringAnimation();
+        StopSpringAnimationImmediately();
     }
 }
 
