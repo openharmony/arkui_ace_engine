@@ -719,6 +719,7 @@ HWTEST_F(EventRecorderTest, Init001, TestSize.Level1)
     Recorder::EventConfig* config = new Recorder::EventConfig();
     config->Init(str);
     EXPECT_EQ(str, "");
+    delete config;
 }
 
 /**
@@ -733,6 +734,7 @@ HWTEST_F(EventRecorderTest, Init002, TestSize.Level1)
     Recorder::EventConfig* config = new Recorder::EventConfig();
     config->Init(str);
     EXPECT_NE(str, "");
+    delete config;
 }
 
 /**
@@ -747,6 +749,7 @@ HWTEST_F(EventRecorderTest, Init003, TestSize.Level1)
     Recorder::EventConfig* config = new Recorder::EventConfig();
     config->Init(str);
     EXPECT_NE(str, "");
+    delete config;
 }
 
 /**
@@ -761,6 +764,7 @@ HWTEST_F(EventRecorderTest, Init004, TestSize.Level1)
     Recorder::EventConfig* config = new Recorder::EventConfig();
     config->Init(str);
     EXPECT_NE(str, "");
+    delete config;
 }
 
 /**
@@ -775,6 +779,7 @@ HWTEST_F(EventRecorderTest, Init005, TestSize.Level1)
     Recorder::EventConfig* config = new Recorder::EventConfig();
     config->Init(str);
     EXPECT_NE(str, "");
+    delete config;
 }
 
 /**
@@ -1109,6 +1114,7 @@ HWTEST_F(EventRecorderTest, IsCategoryEnable001, TestSize.Level1)
     config->switches_->emplace(Recorder::EventCategory::CATEGORY_COMPONENT, false);
     bool result = config->IsCategoryEnable(Recorder::EventCategory::CATEGORY_PAGE);
     EXPECT_FALSE(result);
+    delete config;
 }
 
 /**
