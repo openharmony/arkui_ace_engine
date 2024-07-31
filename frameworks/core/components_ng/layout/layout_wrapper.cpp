@@ -267,6 +267,7 @@ void LayoutWrapper::ExpandSafeArea()
     AdjustChildren(diff, parentScrollable);
 
     if (parentScrollable) {
+        AdjustNotExpandNode();
         return;
     }
     auto selfAdjust = frame - geometryNode->GetFrameRect();
