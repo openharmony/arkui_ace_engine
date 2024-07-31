@@ -17,7 +17,6 @@ let TextModifier;
 if (globalThis.__hasUIFramework__) {
     TextModifier = requireNapi('arkui.modifier').TextModifier;
 } else {
-    globalThis.requireNapi('arkui.mock');
     TextModifier = requireNapi('arkui.mock').TextModifier;
 }
 

@@ -36,10 +36,6 @@ declare class __JSBaseNode__ {
   updateEnd(): void;
 }
 
-if (!globalThis.__hasUIFramework__) {
-  globalThis.requireNapi('arkui.mock');
-}
-
 class BaseNode extends __JSBaseNode__ {
   protected instanceId_?: number;
   protected nodePtr_: NodePtr;
