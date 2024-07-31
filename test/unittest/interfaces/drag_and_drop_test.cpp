@@ -386,8 +386,8 @@ HWTEST_F(DragAndDropTest, DragAndDropTest012, TestSize.Level1)
     auto ret1 = OH_ArkUI_DragPreviewOption_SetNumberBadgeEnabled(dragPreviewOption, true);
     EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
     auto* option = reinterpret_cast<ArkUIDragPreViewAndInteractionOptions*>(dragPreviewOption);
-    EXPECT_TRUE(option->isNumberBadgeEnabled);
-    EXPECT_EQ(option->badgeNumber, 1);
+    EXPECT_FALSE(option->isNumberBadgeEnabled);
+    EXPECT_TRUE(option->isShowBadge);
 
     /**
      * @tc.steps: step2.set preview option with nullptr.
@@ -412,6 +412,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest013, TestSize.Level1)
     auto ret1 = OH_ArkUI_DragPreviewOption_SetBadgeNumber(dragPreviewOption, 2);
     EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
     auto* option = reinterpret_cast<ArkUIDragPreViewAndInteractionOptions*>(dragPreviewOption);
+    EXPECT_TRUE(option->isNumberBadgeEnabled);
     EXPECT_EQ(option->badgeNumber, 2);
 
     /**

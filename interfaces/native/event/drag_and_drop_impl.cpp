@@ -400,8 +400,8 @@ int32_t OH_ArkUI_DragPreviewOption_SetNumberBadgeEnabled(ArkUI_DragPreviewOption
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto* options = reinterpret_cast<ArkUIDragPreViewAndInteractionOptions*>(option);
-    options->isNumberBadgeEnabled = enabled;
-    options->badgeNumber = static_cast<ArkUI_Int32>(enabled);
+    options->isNumberBadgeEnabled = false;
+    options->isShowBadge = enabled;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -411,6 +411,7 @@ int32_t OH_ArkUI_DragPreviewOption_SetBadgeNumber(ArkUI_DragPreviewOption* optio
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto* options = reinterpret_cast<ArkUIDragPreViewAndInteractionOptions*>(option);
+    options->isNumberBadgeEnabled = true;
     options->badgeNumber = static_cast<ArkUI_Int32>(forcedNumber);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
