@@ -721,6 +721,12 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
             static_cast<uint64_t>(time.time_since_epoch().count()) / SECOND_TO_MILLISECOND;
     }
 #endif
+    auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
+    if (layoutProperty && layoutProperty->GetIsTextLimitExceeded().has_value() &&
+        layoutProperty->GetIsTextLimitExceeded().value()) {
+        LOGW("The text of the security component is out of range.");
+        return -1;
+    }
     if (CheckComponentCoveredStatus(node->GetId())) {
         LOGW("Security component is covered by another component.");
         return -1;
@@ -743,6 +749,12 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
     if (data.size() > 0) {
         secEvent.extraInfo.data = data.data();
         secEvent.extraInfo.dataSize = data.size();
+    }
+    auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
+    if (layoutProperty && layoutProperty->GetIsTextLimitExceeded().has_value() &&
+        layoutProperty->GetIsTextLimitExceeded().value()) {
+        LOGW("The text of the security component is out of range.");
+        return -1;
     }
     if (CheckComponentCoveredStatus(node->GetId())) {
         LOGW("Security component is covered by another component.");
