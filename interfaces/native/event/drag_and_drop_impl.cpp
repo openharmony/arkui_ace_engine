@@ -114,7 +114,7 @@ int32_t OH_ArkUI_DragEvent_GetDataTypes(
             if (ret != 0) {
                 return ARKUI_ERROR_CODE_PARAM_INVALID;
             }
-            eventTypeArray[i][strLeng] = '\0';
+            eventTypeArray[i][strLeng - 1] = '\0';
         } else {
             eventTypeArray[i][0] = '\0';
         }
