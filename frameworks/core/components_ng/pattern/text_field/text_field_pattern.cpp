@@ -5144,8 +5144,7 @@ bool TextFieldPattern::OnBackPressed()
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     if(independentControlKeyboard_) {
         CloseKeyboard(true, false);
-    }
-    else {
+    } else {
         CloseKeyboard(true);
         FocusHub::LostFocusToViewRoot();
     }
