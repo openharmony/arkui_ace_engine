@@ -72,6 +72,13 @@ struct ReachEdge {
     bool atEnd = false;
 };
 
+struct ViewDataCommon {
+    OHOS::NWeb::NWebAutofillEvent eventType = OHOS::NWeb::NWebAutofillEvent::UNKNOWN;
+    std::string pageUrl;
+    bool isUserSelected = false;
+    bool isOtherAccount = false;
+};
+
 #ifdef OHOS_STANDARD_SYSTEM
 struct TouchInfo {
     double x = -1;
@@ -539,8 +546,9 @@ public:
         RefPtr<PageNodeInfoWrap> node, RectT<float>& rect, float viewScale);
     void ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
         std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, int32_t nodeId);
+    void ParseNWebViewDataCommonField(std::unique_ptr<JsonValue> child, ViewDataCommon& viewDataCommon);
     void ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson,
-        std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, OHOS::NWeb::NWebAutofillEvent& eventType);
+        std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, ViewDataCommon& viewDataCommon);
     AceAutoFillType GetFocusedType();
     void HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool RequestAutoFill(AceAutoFillType autoFillType);
@@ -1054,6 +1062,8 @@ private:
     uint32_t autoFillSessionId_ = 0;
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
     bool isAutoFillClosing_ = true;
+    ViewDataCommon viewDataCommon_;
+    bool isPasswordFill_ = false;
 };
 } // namespace OHOS::Ace::NG
 

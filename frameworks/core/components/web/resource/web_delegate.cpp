@@ -5874,6 +5874,20 @@ void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebNotifyAutoFillViewData");
 }
 
+void WebDelegate::AutofillCancel(const std::string& fillContent)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), fillContent]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            delegate->nweb_->OnAutofillCancel(fillContent);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIWebAutofillCancel");
+}
+
 void WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
 {
     auto pattern = webPattern_.Upgrade();
