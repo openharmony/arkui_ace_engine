@@ -1514,8 +1514,13 @@ void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceD
 
     if (hasInnerCallback) {
         auto visibleResult = GetCacheVisibleRect(timestamp);
-        ProcessVisibleAreaChangeEvent(visibleResult.innerVisibleRect, visibleResult.frameRect,
-            visibleAreaInnerRatios, visibleAreaInnerCallback, false);
+        if (isCalculateInnerVisibleRectClip_) {
+            ProcessVisibleAreaChangeEvent(visibleResult.innerVisibleRect, visibleResult.frameRect,
+                visibleAreaInnerRatios, visibleAreaInnerCallback, false);
+        } else {
+            ProcessVisibleAreaChangeEvent(visibleResult.visibleRect, visibleResult.frameRect,
+                visibleAreaInnerRatios, visibleAreaInnerCallback, false);
+        }
         if (hasUserCallback) {
             ProcessVisibleAreaChangeEvent(visibleResult.visibleRect, visibleResult.frameRect,
                 visibleAreaUserRatios, visibleAreaUserCallback, true);
