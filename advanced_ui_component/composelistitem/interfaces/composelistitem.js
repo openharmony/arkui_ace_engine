@@ -18,29 +18,29 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 }
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 export var IconType;
-(function (z13) {
-    z13[z13["BADGE"] = 1] = "BADGE";
-    z13[z13["NORMAL_ICON"] = 2] = "NORMAL_ICON";
-    z13[z13["SYSTEM_ICON"] = 3] = "SYSTEM_ICON";
-    z13[z13["HEAD_SCULPTURE"] = 4] = "HEAD_SCULPTURE";
-    z13[z13["APP_ICON"] = 5] = "APP_ICON";
-    z13[z13["PREVIEW"] = 6] = "PREVIEW";
-    z13[z13["LONGITUDINAL"] = 7] = "LONGITUDINAL";
-    z13[z13["VERTICAL"] = 8] = "VERTICAL";
+(function (y13) {
+    y13[y13["BADGE"] = 1] = "BADGE";
+    y13[y13["NORMAL_ICON"] = 2] = "NORMAL_ICON";
+    y13[y13["SYSTEM_ICON"] = 3] = "SYSTEM_ICON";
+    y13[y13["HEAD_SCULPTURE"] = 4] = "HEAD_SCULPTURE";
+    y13[y13["APP_ICON"] = 5] = "APP_ICON";
+    y13[y13["PREVIEW"] = 6] = "PREVIEW";
+    y13[y13["LONGITUDINAL"] = 7] = "LONGITUDINAL";
+    y13[y13["VERTICAL"] = 8] = "VERTICAL";
 })(IconType || (IconType = {}));
 var ItemHeight;
-(function (y13) {
-    y13[y13["FIRST_HEIGHT"] = 48] = "FIRST_HEIGHT";
-    y13[y13["SECOND_HEIGHT"] = 56] = "SECOND_HEIGHT";
-    y13[y13["THIRD_HEIGHT"] = 64] = "THIRD_HEIGHT";
-    y13[y13["FOURTH_HEIGHT"] = 72] = "FOURTH_HEIGHT";
-    y13[y13["FIFTH_HEIGHT"] = 96] = "FIFTH_HEIGHT";
+(function (x13) {
+    x13[x13["FIRST_HEIGHT"] = 48] = "FIRST_HEIGHT";
+    x13[x13["SECOND_HEIGHT"] = 56] = "SECOND_HEIGHT";
+    x13[x13["THIRD_HEIGHT"] = 64] = "THIRD_HEIGHT";
+    x13[x13["FOURTH_HEIGHT"] = 72] = "FOURTH_HEIGHT";
+    x13[x13["FIFTH_HEIGHT"] = 96] = "FIFTH_HEIGHT";
 })(ItemHeight || (ItemHeight = {}));
 var FontSizeScaleLevel;
-(function (x13) {
-    x13[x13["LEVEL1"] = 1.75] = "LEVEL1";
-    x13[x13["LEVEL2"] = 2] = "LEVEL2";
-    x13[x13["LEVEL3"] = 3.2] = "LEVEL3";
+(function (w13) {
+    w13[w13["LEVEL1"] = 1.75] = "LEVEL1";
+    w13[w13["LEVEL2"] = 2] = "LEVEL2";
+    w13[w13["LEVEL3"] = 3.2] = "LEVEL3";
 })(FontSizeScaleLevel || (FontSizeScaleLevel = {}));
 const TEXT_MAX_LINE = 1;
 const ITEM_BORDER_SHOWN = 2;
@@ -94,40 +94,40 @@ const OPERATEITEMRADIUS = 50;
 const OPERATEITEMBACKGROUNDCOLOR = '#33000000';
 const OPERATEITECOLOR = '#99000000';
 class ContentItemStruct extends ViewPU {
-    constructor(r13, s13, t13, u13 = -1, v13 = undefined, w13) {
-        super(r13, t13, u13, w13);
-        if (typeof v13 === "function") {
-            this.paramsGenerator_ = v13;
+    constructor(q13, r13, s13, t13 = -1, u13 = undefined, v13) {
+        super(q13, s13, t13, v13);
+        if (typeof u13 === "function") {
+            this.paramsGenerator_ = u13;
         }
-        this.__iconStyle = new SynchedPropertySimpleOneWayPU(s13.iconStyle, this, "iconStyle");
-        this.__icon = new SynchedPropertyObjectOneWayPU(s13.icon, this, "icon");
-        this.__primaryText = new SynchedPropertyObjectOneWayPU(s13.primaryText, this, "primaryText");
-        this.__secondaryText = new SynchedPropertyObjectOneWayPU(s13.secondaryText, this, "secondaryText");
-        this.__description = new SynchedPropertyObjectOneWayPU(s13.description, this, "description");
+        this.__iconStyle = new SynchedPropertySimpleOneWayPU(r13.iconStyle, this, "iconStyle");
+        this.__icon = new SynchedPropertyObjectOneWayPU(r13.icon, this, "icon");
+        this.__primaryText = new SynchedPropertyObjectOneWayPU(r13.primaryText, this, "primaryText");
+        this.__secondaryText = new SynchedPropertyObjectOneWayPU(r13.secondaryText, this, "secondaryText");
+        this.__description = new SynchedPropertyObjectOneWayPU(r13.description, this, "description");
         this.itemRowSpace = NORMAL_ITEM_ROW_SPACE;
-        this.__leftWidth = new SynchedPropertySimpleOneWayPU(s13.leftWidth, this, "leftWidth");
+        this.__leftWidth = new SynchedPropertySimpleOneWayPU(r13.leftWidth, this, "leftWidth");
         this.__primaryTextColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "primaryTextColor");
         this.__secondaryTextColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextColor");
         this.__descriptionColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.font_tertiary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "descriptionColor");
-        this.__iconImageModifier = new SynchedPropertyObjectOneWayPU(s13.iconImageModifier, this, "iconImageModifier");
-        this.__primaryTextModifier = new SynchedPropertyObjectOneWayPU(s13.primaryTextModifier, this, "primaryTextModifier");
-        this.__secondaryTextModifier = new SynchedPropertyObjectOneWayPU(s13.secondaryTextModifier, this, "secondaryTextModifier");
-        this.__descriptionModifier = new SynchedPropertyObjectOneWayPU(s13.descriptionModifier, this, "descriptionModifier");
-        this.__contentItemPadding = new SynchedPropertyObjectOneWayPU(s13.contentItemPadding, this, "contentItemPadding");
-        this.__itemSpace = new SynchedPropertyObjectOneWayPU(s13.itemSpace, this, "itemSpace");
-        this.__fontSizeScale = new SynchedPropertySimpleOneWayPU(s13.fontSizeScale, this, "fontSizeScale");
-        this.__parentDirection = new SynchedPropertySimpleOneWayPU(s13.parentDirection, this, "parentDirection");
-        this.__itemDirection = new SynchedPropertySimpleOneWayPU(s13.itemDirection, this, "itemDirection");
-        this.__isFocus = new SynchedPropertySimpleOneWayPU(s13.isFocus, this, "isFocus");
+        this.__iconImageModifier = new SynchedPropertyObjectOneWayPU(r13.iconImageModifier, this, "iconImageModifier");
+        this.__primaryTextModifier = new SynchedPropertyObjectOneWayPU(r13.primaryTextModifier, this, "primaryTextModifier");
+        this.__secondaryTextModifier = new SynchedPropertyObjectOneWayPU(r13.secondaryTextModifier, this, "secondaryTextModifier");
+        this.__descriptionModifier = new SynchedPropertyObjectOneWayPU(r13.descriptionModifier, this, "descriptionModifier");
+        this.__contentItemPadding = new SynchedPropertyObjectOneWayPU(r13.contentItemPadding, this, "contentItemPadding");
+        this.__itemSpace = new SynchedPropertyObjectOneWayPU(r13.itemSpace, this, "itemSpace");
+        this.__fontSizeScale = new SynchedPropertySimpleOneWayPU(r13.fontSizeScale, this, "fontSizeScale");
+        this.__parentDirection = new SynchedPropertySimpleOneWayPU(r13.parentDirection, this, "parentDirection");
+        this.__itemDirection = new SynchedPropertySimpleOneWayPU(r13.itemDirection, this, "itemDirection");
+        this.__isFocus = new SynchedPropertySimpleOneWayPU(r13.isFocus, this, "isFocus");
         this.__primaryTextSize = new ObservedPropertyObjectPU({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_left_text_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "primaryTextSize");
         this.__primaryTextColors = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.composeListItem_normal_left_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "primaryTextColors");
-        this.__itemHeight = new SynchedPropertyObjectOneWayPU(s13.itemHeight, this, "itemHeight");
+        this.__itemHeight = new SynchedPropertyObjectOneWayPU(r13.itemHeight, this, "itemHeight");
         this.__iconMagnitude = new ObservedPropertyObjectPU(null, this, "iconMagnitude");
         this.__iconColor = new ObservedPropertyObjectPU(null, this, "iconColor");
         this.__secondaryTextColors = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextColors");
         this.__secondaryThirdTextSize = new ObservedPropertyObjectPU({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryThirdTextSize");
         this.__descriptionColors = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.font_tertiary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "descriptionColors");
-        this.setInitiallyProvidedValue(s13);
+        this.setInitiallyProvidedValue(r13);
         this.declareWatch("iconStyle", this.onPropChange);
         this.declareWatch("icon", this.onPropChange);
         this.declareWatch("primaryText", this.onPropChange);
@@ -136,130 +136,130 @@ class ContentItemStruct extends ViewPU {
         this.declareWatch("isFocus", this.onPropChange);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(q13) {
-        if (q13.iconStyle === undefined) {
+    setInitiallyProvidedValue(p13) {
+        if (p13.iconStyle === undefined) {
             this.__iconStyle.set(null);
         }
-        if (q13.icon === undefined) {
+        if (p13.icon === undefined) {
             this.__icon.set(null);
         }
-        if (q13.primaryText === undefined) {
+        if (p13.primaryText === undefined) {
             this.__primaryText.set(null);
         }
-        if (q13.secondaryText === undefined) {
+        if (p13.secondaryText === undefined) {
             this.__secondaryText.set(null);
         }
-        if (q13.description === undefined) {
+        if (p13.description === undefined) {
             this.__description.set(null);
         }
-        if (q13.itemRowSpace !== undefined) {
-            this.itemRowSpace = q13.itemRowSpace;
+        if (p13.itemRowSpace !== undefined) {
+            this.itemRowSpace = p13.itemRowSpace;
         }
-        if (q13.leftWidth === undefined) {
+        if (p13.leftWidth === undefined) {
             this.__leftWidth.set(LEFT_PART_WIDTH);
         }
-        if (q13.primaryTextColor !== undefined) {
-            this.primaryTextColor = q13.primaryTextColor;
+        if (p13.primaryTextColor !== undefined) {
+            this.primaryTextColor = p13.primaryTextColor;
         }
-        if (q13.secondaryTextColor !== undefined) {
-            this.secondaryTextColor = q13.secondaryTextColor;
+        if (p13.secondaryTextColor !== undefined) {
+            this.secondaryTextColor = p13.secondaryTextColor;
         }
-        if (q13.descriptionColor !== undefined) {
-            this.descriptionColor = q13.descriptionColor;
+        if (p13.descriptionColor !== undefined) {
+            this.descriptionColor = p13.descriptionColor;
         }
-        if (q13.iconImageModifier === undefined) {
+        if (p13.iconImageModifier === undefined) {
             this.__iconImageModifier.set(null);
         }
-        if (q13.primaryTextModifier === undefined) {
+        if (p13.primaryTextModifier === undefined) {
             this.__primaryTextModifier.set(null);
         }
-        if (q13.secondaryTextModifier === undefined) {
+        if (p13.secondaryTextModifier === undefined) {
             this.__secondaryTextModifier.set(null);
         }
-        if (q13.descriptionModifier === undefined) {
+        if (p13.descriptionModifier === undefined) {
             this.__descriptionModifier.set(null);
         }
-        if (q13.contentItemPadding === undefined) {
+        if (p13.contentItemPadding === undefined) {
             this.__contentItemPadding.set(null);
         }
-        if (q13.itemSpace === undefined) {
+        if (p13.itemSpace === undefined) {
             this.__itemSpace.set(DEFAULT_ITEM_SPACE_WIDTH);
         }
-        if (q13.isFocus === undefined) {
+        if (p13.isFocus === undefined) {
             this.__isFocus.set(false);
         }
-        if (q13.primaryTextSize !== undefined) {
-            this.primaryTextSize = q13.primaryTextSize;
+        if (p13.primaryTextSize !== undefined) {
+            this.primaryTextSize = p13.primaryTextSize;
         }
-        if (q13.primaryTextColors !== undefined) {
-            this.primaryTextColors = q13.primaryTextColors;
+        if (p13.primaryTextColors !== undefined) {
+            this.primaryTextColors = p13.primaryTextColors;
         }
-        if (q13.itemHeight === undefined) {
+        if (p13.itemHeight === undefined) {
             this.__itemHeight.set(null);
         }
-        if (q13.iconMagnitude !== undefined) {
-            this.iconMagnitude = q13.iconMagnitude;
+        if (p13.iconMagnitude !== undefined) {
+            this.iconMagnitude = p13.iconMagnitude;
         }
-        if (q13.iconColor !== undefined) {
-            this.iconColor = q13.iconColor;
+        if (p13.iconColor !== undefined) {
+            this.iconColor = p13.iconColor;
         }
-        if (q13.secondaryTextColors !== undefined) {
-            this.secondaryTextColors = q13.secondaryTextColors;
+        if (p13.secondaryTextColors !== undefined) {
+            this.secondaryTextColors = p13.secondaryTextColors;
         }
-        if (q13.secondaryThirdTextSize !== undefined) {
-            this.secondaryThirdTextSize = q13.secondaryThirdTextSize;
+        if (p13.secondaryThirdTextSize !== undefined) {
+            this.secondaryThirdTextSize = p13.secondaryThirdTextSize;
         }
-        if (q13.descriptionColors !== undefined) {
-            this.descriptionColors = q13.descriptionColors;
+        if (p13.descriptionColors !== undefined) {
+            this.descriptionColors = p13.descriptionColors;
         }
     }
-    updateStateVars(p13) {
-        this.__iconStyle.reset(p13.iconStyle);
-        this.__icon.reset(p13.icon);
-        this.__primaryText.reset(p13.primaryText);
-        this.__secondaryText.reset(p13.secondaryText);
-        this.__description.reset(p13.description);
-        this.__leftWidth.reset(p13.leftWidth);
-        this.__iconImageModifier.reset(p13.iconImageModifier);
-        this.__primaryTextModifier.reset(p13.primaryTextModifier);
-        this.__secondaryTextModifier.reset(p13.secondaryTextModifier);
-        this.__descriptionModifier.reset(p13.descriptionModifier);
-        this.__contentItemPadding.reset(p13.contentItemPadding);
-        this.__itemSpace.reset(p13.itemSpace);
-        this.__fontSizeScale.reset(p13.fontSizeScale);
-        this.__parentDirection.reset(p13.parentDirection);
-        this.__itemDirection.reset(p13.itemDirection);
-        this.__isFocus.reset(p13.isFocus);
-        this.__itemHeight.reset(p13.itemHeight);
+    updateStateVars(o13) {
+        this.__iconStyle.reset(o13.iconStyle);
+        this.__icon.reset(o13.icon);
+        this.__primaryText.reset(o13.primaryText);
+        this.__secondaryText.reset(o13.secondaryText);
+        this.__description.reset(o13.description);
+        this.__leftWidth.reset(o13.leftWidth);
+        this.__iconImageModifier.reset(o13.iconImageModifier);
+        this.__primaryTextModifier.reset(o13.primaryTextModifier);
+        this.__secondaryTextModifier.reset(o13.secondaryTextModifier);
+        this.__descriptionModifier.reset(o13.descriptionModifier);
+        this.__contentItemPadding.reset(o13.contentItemPadding);
+        this.__itemSpace.reset(o13.itemSpace);
+        this.__fontSizeScale.reset(o13.fontSizeScale);
+        this.__parentDirection.reset(o13.parentDirection);
+        this.__itemDirection.reset(o13.itemDirection);
+        this.__isFocus.reset(o13.isFocus);
+        this.__itemHeight.reset(o13.itemHeight);
     }
-    purgeVariableDependenciesOnElmtId(o13) {
-        this.__iconStyle.purgeDependencyOnElmtId(o13);
-        this.__icon.purgeDependencyOnElmtId(o13);
-        this.__primaryText.purgeDependencyOnElmtId(o13);
-        this.__secondaryText.purgeDependencyOnElmtId(o13);
-        this.__description.purgeDependencyOnElmtId(o13);
-        this.__leftWidth.purgeDependencyOnElmtId(o13);
-        this.__primaryTextColor.purgeDependencyOnElmtId(o13);
-        this.__secondaryTextColor.purgeDependencyOnElmtId(o13);
-        this.__descriptionColor.purgeDependencyOnElmtId(o13);
-        this.__iconImageModifier.purgeDependencyOnElmtId(o13);
-        this.__primaryTextModifier.purgeDependencyOnElmtId(o13);
-        this.__secondaryTextModifier.purgeDependencyOnElmtId(o13);
-        this.__descriptionModifier.purgeDependencyOnElmtId(o13);
-        this.__contentItemPadding.purgeDependencyOnElmtId(o13);
-        this.__itemSpace.purgeDependencyOnElmtId(o13);
-        this.__fontSizeScale.purgeDependencyOnElmtId(o13);
-        this.__parentDirection.purgeDependencyOnElmtId(o13);
-        this.__itemDirection.purgeDependencyOnElmtId(o13);
-        this.__isFocus.purgeDependencyOnElmtId(o13);
-        this.__primaryTextSize.purgeDependencyOnElmtId(o13);
-        this.__primaryTextColors.purgeDependencyOnElmtId(o13);
-        this.__itemHeight.purgeDependencyOnElmtId(o13);
-        this.__iconMagnitude.purgeDependencyOnElmtId(o13);
-        this.__iconColor.purgeDependencyOnElmtId(o13);
-        this.__secondaryTextColors.purgeDependencyOnElmtId(o13);
-        this.__secondaryThirdTextSize.purgeDependencyOnElmtId(o13);
-        this.__descriptionColors.purgeDependencyOnElmtId(o13);
+    purgeVariableDependenciesOnElmtId(n13) {
+        this.__iconStyle.purgeDependencyOnElmtId(n13);
+        this.__icon.purgeDependencyOnElmtId(n13);
+        this.__primaryText.purgeDependencyOnElmtId(n13);
+        this.__secondaryText.purgeDependencyOnElmtId(n13);
+        this.__description.purgeDependencyOnElmtId(n13);
+        this.__leftWidth.purgeDependencyOnElmtId(n13);
+        this.__primaryTextColor.purgeDependencyOnElmtId(n13);
+        this.__secondaryTextColor.purgeDependencyOnElmtId(n13);
+        this.__descriptionColor.purgeDependencyOnElmtId(n13);
+        this.__iconImageModifier.purgeDependencyOnElmtId(n13);
+        this.__primaryTextModifier.purgeDependencyOnElmtId(n13);
+        this.__secondaryTextModifier.purgeDependencyOnElmtId(n13);
+        this.__descriptionModifier.purgeDependencyOnElmtId(n13);
+        this.__contentItemPadding.purgeDependencyOnElmtId(n13);
+        this.__itemSpace.purgeDependencyOnElmtId(n13);
+        this.__fontSizeScale.purgeDependencyOnElmtId(n13);
+        this.__parentDirection.purgeDependencyOnElmtId(n13);
+        this.__itemDirection.purgeDependencyOnElmtId(n13);
+        this.__isFocus.purgeDependencyOnElmtId(n13);
+        this.__primaryTextSize.purgeDependencyOnElmtId(n13);
+        this.__primaryTextColors.purgeDependencyOnElmtId(n13);
+        this.__itemHeight.purgeDependencyOnElmtId(n13);
+        this.__iconMagnitude.purgeDependencyOnElmtId(n13);
+        this.__iconColor.purgeDependencyOnElmtId(n13);
+        this.__secondaryTextColors.purgeDependencyOnElmtId(n13);
+        this.__secondaryThirdTextSize.purgeDependencyOnElmtId(n13);
+        this.__descriptionColors.purgeDependencyOnElmtId(n13);
     }
     aboutToBeDeleted() {
         this.__iconStyle.aboutToBeDeleted();
@@ -295,169 +295,169 @@ class ContentItemStruct extends ViewPU {
     get iconStyle() {
         return this.__iconStyle.get();
     }
-    set iconStyle(n13) {
-        this.__iconStyle.set(n13);
+    set iconStyle(m13) {
+        this.__iconStyle.set(m13);
     }
     get icon() {
         return this.__icon.get();
     }
-    set icon(m13) {
-        this.__icon.set(m13);
+    set icon(l13) {
+        this.__icon.set(l13);
     }
     get primaryText() {
         return this.__primaryText.get();
     }
-    set primaryText(l13) {
-        this.__primaryText.set(l13);
+    set primaryText(k13) {
+        this.__primaryText.set(k13);
     }
     get secondaryText() {
         return this.__secondaryText.get();
     }
-    set secondaryText(k13) {
-        this.__secondaryText.set(k13);
+    set secondaryText(j13) {
+        this.__secondaryText.set(j13);
     }
     get description() {
         return this.__description.get();
     }
-    set description(j13) {
-        this.__description.set(j13);
+    set description(i13) {
+        this.__description.set(i13);
     }
     get leftWidth() {
         return this.__leftWidth.get();
     }
-    set leftWidth(i13) {
-        this.__leftWidth.set(i13);
+    set leftWidth(h13) {
+        this.__leftWidth.set(h13);
     }
     get primaryTextColor() {
         return this.__primaryTextColor.get();
     }
-    set primaryTextColor(h13) {
-        this.__primaryTextColor.set(h13);
+    set primaryTextColor(g13) {
+        this.__primaryTextColor.set(g13);
     }
     get secondaryTextColor() {
         return this.__secondaryTextColor.get();
     }
-    set secondaryTextColor(g13) {
-        this.__secondaryTextColor.set(g13);
+    set secondaryTextColor(f13) {
+        this.__secondaryTextColor.set(f13);
     }
     get descriptionColor() {
         return this.__descriptionColor.get();
     }
-    set descriptionColor(f13) {
-        this.__descriptionColor.set(f13);
+    set descriptionColor(e13) {
+        this.__descriptionColor.set(e13);
     }
     get iconImageModifier() {
         return this.__iconImageModifier.get();
     }
-    set iconImageModifier(e13) {
-        this.__iconImageModifier.set(e13);
+    set iconImageModifier(d13) {
+        this.__iconImageModifier.set(d13);
     }
     get primaryTextModifier() {
         return this.__primaryTextModifier.get();
     }
-    set primaryTextModifier(d13) {
-        this.__primaryTextModifier.set(d13);
+    set primaryTextModifier(c13) {
+        this.__primaryTextModifier.set(c13);
     }
     get secondaryTextModifier() {
         return this.__secondaryTextModifier.get();
     }
-    set secondaryTextModifier(c13) {
-        this.__secondaryTextModifier.set(c13);
+    set secondaryTextModifier(b13) {
+        this.__secondaryTextModifier.set(b13);
     }
     get descriptionModifier() {
         return this.__descriptionModifier.get();
     }
-    set descriptionModifier(b13) {
-        this.__descriptionModifier.set(b13);
+    set descriptionModifier(a13) {
+        this.__descriptionModifier.set(a13);
     }
     get contentItemPadding() {
         return this.__contentItemPadding.get();
     }
-    set contentItemPadding(a13) {
-        this.__contentItemPadding.set(a13);
+    set contentItemPadding(z12) {
+        this.__contentItemPadding.set(z12);
     }
     get itemSpace() {
         return this.__itemSpace.get();
     }
-    set itemSpace(z12) {
-        this.__itemSpace.set(z12);
+    set itemSpace(y12) {
+        this.__itemSpace.set(y12);
     }
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
-    set fontSizeScale(y12) {
-        this.__fontSizeScale.set(y12);
+    set fontSizeScale(x12) {
+        this.__fontSizeScale.set(x12);
     }
     get parentDirection() {
         return this.__parentDirection.get();
     }
-    set parentDirection(x12) {
-        this.__parentDirection.set(x12);
+    set parentDirection(w12) {
+        this.__parentDirection.set(w12);
     }
     get itemDirection() {
         return this.__itemDirection.get();
     }
-    set itemDirection(w12) {
-        this.__itemDirection.set(w12);
+    set itemDirection(v12) {
+        this.__itemDirection.set(v12);
     }
     get isFocus() {
         return this.__isFocus.get();
     }
-    set isFocus(v12) {
-        this.__isFocus.set(v12);
+    set isFocus(u12) {
+        this.__isFocus.set(u12);
     }
     get primaryTextSize() {
         return this.__primaryTextSize.get();
     }
-    set primaryTextSize(u12) {
-        this.__primaryTextSize.set(u12);
+    set primaryTextSize(t12) {
+        this.__primaryTextSize.set(t12);
     }
     get primaryTextColors() {
         return this.__primaryTextColors.get();
     }
-    set primaryTextColors(t12) {
-        this.__primaryTextColors.set(t12);
+    set primaryTextColors(s12) {
+        this.__primaryTextColors.set(s12);
     }
     get itemHeight() {
         return this.__itemHeight.get();
     }
-    set itemHeight(s12) {
-        this.__itemHeight.set(s12);
+    set itemHeight(r12) {
+        this.__itemHeight.set(r12);
     }
     get iconMagnitude() {
         return this.__iconMagnitude.get();
     }
-    set iconMagnitude(r12) {
-        this.__iconMagnitude.set(r12);
+    set iconMagnitude(q12) {
+        this.__iconMagnitude.set(q12);
     }
     get iconColor() {
         return this.__iconColor.get();
     }
-    set iconColor(q12) {
-        this.__iconColor.set(q12);
+    set iconColor(p12) {
+        this.__iconColor.set(p12);
     }
     get secondaryTextColors() {
         return this.__secondaryTextColors.get();
     }
-    set secondaryTextColors(p12) {
-        this.__secondaryTextColors.set(p12);
+    set secondaryTextColors(o12) {
+        this.__secondaryTextColors.set(o12);
     }
     get secondaryThirdTextSize() {
         return this.__secondaryThirdTextSize.get();
     }
-    set secondaryThirdTextSize(o12) {
-        this.__secondaryThirdTextSize.set(o12);
+    set secondaryThirdTextSize(n12) {
+        this.__secondaryThirdTextSize.set(n12);
     }
     get descriptionColors() {
         return this.__descriptionColors.get();
     }
-    set descriptionColors(n12) {
-        this.__descriptionColors.set(n12);
+    set descriptionColors(m12) {
+        this.__descriptionColors.set(m12);
     }
-    onWillApplyTheme(m12) {
-        this.primaryTextColor = m12.colors.fontPrimary;
-        this.secondaryTextColor = m12.colors.fontSecondary;
-        this.descriptionColor = m12.colors.fontTertiary;
+    onWillApplyTheme(l12) {
+        this.primaryTextColor = l12.colors.fontPrimary;
+        this.secondaryTextColor = l12.colors.fontSecondary;
+        this.descriptionColor = l12.colors.fontTertiary;
     }
     onPropChange() {
         if (this.icon == null && this.iconStyle == null) {
@@ -486,16 +486,16 @@ class ContentItemStruct extends ViewPU {
         this.onPropChange();
         this.initIconColor();
     }
-    createIcon(v11 = null) {
-        this.observeComponentCreation2((x11, y11) => {
+    createIcon(u11 = null) {
+        this.observeComponentCreation2((w11, x11) => {
             If.create();
             if (this.icon != null && this.iconStyle != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((c12, d12) => {
+                    this.observeComponentCreation2((b12, c12) => {
                         If.create();
                         if (this.iconStyle <= IconType.PREVIEW) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((k12, l12) => {
+                                this.observeComponentCreation2((j12, k12) => {
                                     Image.create(this.icon);
                                     Image.objectFit(ImageFit.Contain);
                                     Image.width(this.iconMagnitude || ICON_SIZE_MAP.get(this.iconStyle));
@@ -511,7 +511,7 @@ class ContentItemStruct extends ViewPU {
                         }
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((g12, h12) => {
+                                this.observeComponentCreation2((f12, g12) => {
                                     Image.create(this.icon);
                                     Image.objectFit(ImageFit.Contain);
                                     Image.constraintSize({
@@ -540,13 +540,13 @@ class ContentItemStruct extends ViewPU {
         }, If);
         If.pop();
     }
-    createText(y10 = null) {
-        this.observeComponentCreation2((t11, u11) => {
+    createText(x10 = null) {
+        this.observeComponentCreation2((s11, t11) => {
             Column.create({ space: TEXT_COLUMN_SPACE });
             Column.flexShrink(1);
             Column.alignItems(HorizontalAlign.Start);
         }, Column);
-        this.observeComponentCreation2((r11, s11) => {
+        this.observeComponentCreation2((q11, r11) => {
             Text.create(this.primaryText);
             Text.fontSize(this.primaryTextSize || { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Text.fontColor(this.primaryTextColors || this.primaryTextColor);
@@ -556,11 +556,11 @@ class ContentItemStruct extends ViewPU {
             Text.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.primaryTextModifier));
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((k11, l11) => {
+        this.observeComponentCreation2((j11, k11) => {
             If.create();
             if (this.secondaryText != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((p11, q11) => {
+                    this.observeComponentCreation2((o11, p11) => {
                         Text.create(this.secondaryText);
                         Text.fontSize(this.secondaryThirdTextSize || { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                         Text.fontColor(this.secondaryTextColors || this.secondaryTextColor);
@@ -577,11 +577,11 @@ class ContentItemStruct extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((d11, e11) => {
+        this.observeComponentCreation2((c11, d11) => {
             If.create();
             if (this.description != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((i11, j11) => {
+                    this.observeComponentCreation2((h11, i11) => {
                         Text.create(this.description);
                         Text.fontSize(this.secondaryThirdTextSize || { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                         Text.fontColor(this.descriptionColors || this.descriptionColor);
@@ -610,7 +610,7 @@ class ContentItemStruct extends ViewPU {
         return LengthMetrics.vp(this.itemSpace ?? DEFAULT_ITEM_SPACE_WIDTH);
     }
     initialRender() {
-        this.observeComponentCreation2((w10, x10) => {
+        this.observeComponentCreation2((v10, w10) => {
             Flex.create({
                 space: { main: this.getItemSpace() },
                 direction: this.itemDirection,
@@ -635,43 +635,42 @@ class ContentItemStruct extends ViewPU {
 class CreateIconParam {
 }
 class OperateItemStruct extends ViewPU {
-    constructor(p10, q10, r10, s10 = -1, t10 = undefined, u10) {
-        super(p10, r10, s10, u10);
-        if (typeof t10 === "function") {
-            this.paramsGenerator_ = t10;
+    constructor(o10, p10, q10, r10 = -1, s10 = undefined, t10) {
+        super(o10, q10, r10, t10);
+        if (typeof s10 === "function") {
+            this.paramsGenerator_ = s10;
         }
-        this.__arrow = new SynchedPropertyObjectOneWayPU(q10.arrow, this, "arrow");
-        this.__icon = new SynchedPropertyObjectOneWayPU(q10.icon, this, "icon");
-        this.__subIcon = new SynchedPropertyObjectOneWayPU(q10.subIcon, this, "subIcon");
-        this.__button = new SynchedPropertyObjectOneWayPU(q10.button, this, "button");
-        this.__switch = new SynchedPropertyObjectOneWayPU(q10.switch, this, "switch");
-        this.__checkBox = new SynchedPropertyObjectOneWayPU(q10.checkBox, this, "checkBox");
-        this.__radio = new SynchedPropertyObjectOneWayPU(q10.radio, this, "radio");
-        this.__image = new SynchedPropertyObjectOneWayPU(q10.image, this, "image");
-        this.__text = new SynchedPropertyObjectOneWayPU(q10.text, this, "text");
+        this.__arrow = new SynchedPropertyObjectOneWayPU(p10.arrow, this, "arrow");
+        this.__icon = new SynchedPropertyObjectOneWayPU(p10.icon, this, "icon");
+        this.__subIcon = new SynchedPropertyObjectOneWayPU(p10.subIcon, this, "subIcon");
+        this.__button = new SynchedPropertyObjectOneWayPU(p10.button, this, "button");
+        this.__switch = new SynchedPropertyObjectOneWayPU(p10.switch, this, "switch");
+        this.__checkBox = new SynchedPropertyObjectOneWayPU(p10.checkBox, this, "checkBox");
+        this.__radio = new SynchedPropertyObjectOneWayPU(p10.radio, this, "radio");
+        this.__image = new SynchedPropertyObjectOneWayPU(p10.image, this, "image");
+        this.__text = new SynchedPropertyObjectOneWayPU(p10.text, this, "text");
         this.__switchState = new ObservedPropertySimplePU(false, this, "switchState");
         this.__radioState = new ObservedPropertySimplePU(false, this, "radioState");
         this.__checkBoxState = new ObservedPropertySimplePU(false, this, "checkBoxState");
-        this.__rightWidth = new SynchedPropertySimpleOneWayPU(q10.rightWidth, this, "rightWidth");
+        this.__rightWidth = new SynchedPropertySimpleOneWayPU(p10.rightWidth, this, "rightWidth");
         this.__secondaryTextColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextColor");
         this.__hoveringColor = new ObservedPropertyObjectPU('#0d000000', this, "hoveringColor");
         this.__activedColor = new ObservedPropertyObjectPU('#1a0a59f7', this, "activedColor");
-        this.__parentCanFocus = new SynchedPropertySimpleTwoWayPU(q10.parentCanFocus, this, "parentCanFocus");
-        this.__parentCanTouch = new SynchedPropertySimpleTwoWayPU(q10.parentCanTouch, this, "parentCanTouch");
-        this.__parentIsHover = new SynchedPropertySimpleTwoWayPU(q10.parentIsHover, this, "parentIsHover");
-        this.__parentCanHover = new SynchedPropertySimpleTwoWayPU(q10.parentCanHover, this, "parentCanHover");
-        this.__parentIsActive = new SynchedPropertySimpleTwoWayPU(q10.parentIsActive, this, "parentIsActive");
-        this.__parentFrontColor = new SynchedPropertyObjectTwoWayPU(q10.parentFrontColor, this, "parentFrontColor");
-        this.__isParentCanTouch = new SynchedPropertySimpleTwoWayPU(q10.isParentCanTouch, this, "isParentCanTouch");
-        this.__parentDirection = new SynchedPropertySimpleOneWayPU(q10.parentDirection, this, "parentDirection");
+        this.__parentCanFocus = new SynchedPropertySimpleTwoWayPU(p10.parentCanFocus, this, "parentCanFocus");
+        this.__parentCanTouch = new SynchedPropertySimpleTwoWayPU(p10.parentCanTouch, this, "parentCanTouch");
+        this.__parentIsHover = new SynchedPropertySimpleTwoWayPU(p10.parentIsHover, this, "parentIsHover");
+        this.__parentCanHover = new SynchedPropertySimpleTwoWayPU(p10.parentCanHover, this, "parentCanHover");
+        this.__parentIsActive = new SynchedPropertySimpleTwoWayPU(p10.parentIsActive, this, "parentIsActive");
+        this.__parentFrontColor = new SynchedPropertyObjectTwoWayPU(p10.parentFrontColor, this, "parentFrontColor");
+        this.__isParentCanTouch = new SynchedPropertySimpleTwoWayPU(p10.isParentCanTouch, this, "isParentCanTouch");
+        this.__parentDirection = new SynchedPropertySimpleOneWayPU(p10.parentDirection, this, "parentDirection");
         this.rowSpace = DEFAULT_ROW_SPACE;
-        this.__isFocus = new SynchedPropertySimpleTwoWayPU(q10.isFocus, this, "isFocus");
+        this.__isFocus = new SynchedPropertySimpleTwoWayPU(p10.isFocus, this, "isFocus");
         this.__secondaryTextSize = new ObservedPropertyObjectPU({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_right_text_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextSize");
         this.__secondaryTextColors = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.composeListItem_normal_right_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextColors");
-        this.__iconSize = new ObservedPropertyObjectPU({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_right_icon_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "iconSize");
         this.__iconColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.composeListItem_normal_right_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "iconColor");
-        this.__isOnClick = new SynchedPropertySimpleOneWayPU(q10.isOnClick, this, "isOnClick");
-        this.setInitiallyProvidedValue(q10);
+        this.__isOnClick = new SynchedPropertySimpleOneWayPU(p10.isOnClick, this, "isOnClick");
+        this.setInitiallyProvidedValue(p10);
         this.declareWatch("arrow", this.onPropChange);
         this.declareWatch("icon", this.onPropChange);
         this.declareWatch("subIcon", this.onPropChange);
@@ -685,119 +684,115 @@ class OperateItemStruct extends ViewPU {
         this.declareWatch("isOnClick", this.onPropChange);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(o10) {
-        if (o10.arrow === undefined) {
+    setInitiallyProvidedValue(n10) {
+        if (n10.arrow === undefined) {
             this.__arrow.set(null);
         }
-        if (o10.icon === undefined) {
+        if (n10.icon === undefined) {
             this.__icon.set(null);
         }
-        if (o10.subIcon === undefined) {
+        if (n10.subIcon === undefined) {
             this.__subIcon.set(null);
         }
-        if (o10.button === undefined) {
+        if (n10.button === undefined) {
             this.__button.set(null);
         }
-        if (o10.switch === undefined) {
+        if (n10.switch === undefined) {
             this.__switch.set(null);
         }
-        if (o10.checkBox === undefined) {
+        if (n10.checkBox === undefined) {
             this.__checkBox.set(null);
         }
-        if (o10.radio === undefined) {
+        if (n10.radio === undefined) {
             this.__radio.set(null);
         }
-        if (o10.image === undefined) {
+        if (n10.image === undefined) {
             this.__image.set(null);
         }
-        if (o10.text === undefined) {
+        if (n10.text === undefined) {
             this.__text.set(null);
         }
-        if (o10.switchState !== undefined) {
-            this.switchState = o10.switchState;
+        if (n10.switchState !== undefined) {
+            this.switchState = n10.switchState;
         }
-        if (o10.radioState !== undefined) {
-            this.radioState = o10.radioState;
+        if (n10.radioState !== undefined) {
+            this.radioState = n10.radioState;
         }
-        if (o10.checkBoxState !== undefined) {
-            this.checkBoxState = o10.checkBoxState;
+        if (n10.checkBoxState !== undefined) {
+            this.checkBoxState = n10.checkBoxState;
         }
-        if (o10.rightWidth === undefined) {
+        if (n10.rightWidth === undefined) {
             this.__rightWidth.set(RIGHT_PART_WIDTH);
         }
-        if (o10.secondaryTextColor !== undefined) {
-            this.secondaryTextColor = o10.secondaryTextColor;
+        if (n10.secondaryTextColor !== undefined) {
+            this.secondaryTextColor = n10.secondaryTextColor;
         }
-        if (o10.hoveringColor !== undefined) {
-            this.hoveringColor = o10.hoveringColor;
+        if (n10.hoveringColor !== undefined) {
+            this.hoveringColor = n10.hoveringColor;
         }
-        if (o10.activedColor !== undefined) {
-            this.activedColor = o10.activedColor;
+        if (n10.activedColor !== undefined) {
+            this.activedColor = n10.activedColor;
         }
-        if (o10.rowSpace !== undefined) {
-            this.rowSpace = o10.rowSpace;
+        if (n10.rowSpace !== undefined) {
+            this.rowSpace = n10.rowSpace;
         }
-        if (o10.secondaryTextSize !== undefined) {
-            this.secondaryTextSize = o10.secondaryTextSize;
+        if (n10.secondaryTextSize !== undefined) {
+            this.secondaryTextSize = n10.secondaryTextSize;
         }
-        if (o10.secondaryTextColors !== undefined) {
-            this.secondaryTextColors = o10.secondaryTextColors;
+        if (n10.secondaryTextColors !== undefined) {
+            this.secondaryTextColors = n10.secondaryTextColors;
         }
-        if (o10.iconSize !== undefined) {
-            this.iconSize = o10.iconSize;
+        if (n10.iconColor !== undefined) {
+            this.iconColor = n10.iconColor;
         }
-        if (o10.iconColor !== undefined) {
-            this.iconColor = o10.iconColor;
-        }
-        if (o10.isOnClick === undefined) {
+        if (n10.isOnClick === undefined) {
             this.__isOnClick.set(false);
         }
     }
-    updateStateVars(n10) {
-        this.__arrow.reset(n10.arrow);
-        this.__icon.reset(n10.icon);
-        this.__subIcon.reset(n10.subIcon);
-        this.__button.reset(n10.button);
-        this.__switch.reset(n10.switch);
-        this.__checkBox.reset(n10.checkBox);
-        this.__radio.reset(n10.radio);
-        this.__image.reset(n10.image);
-        this.__text.reset(n10.text);
-        this.__rightWidth.reset(n10.rightWidth);
-        this.__parentDirection.reset(n10.parentDirection);
-        this.__isOnClick.reset(n10.isOnClick);
+    updateStateVars(m10) {
+        this.__arrow.reset(m10.arrow);
+        this.__icon.reset(m10.icon);
+        this.__subIcon.reset(m10.subIcon);
+        this.__button.reset(m10.button);
+        this.__switch.reset(m10.switch);
+        this.__checkBox.reset(m10.checkBox);
+        this.__radio.reset(m10.radio);
+        this.__image.reset(m10.image);
+        this.__text.reset(m10.text);
+        this.__rightWidth.reset(m10.rightWidth);
+        this.__parentDirection.reset(m10.parentDirection);
+        this.__isOnClick.reset(m10.isOnClick);
     }
-    purgeVariableDependenciesOnElmtId(m10) {
-        this.__arrow.purgeDependencyOnElmtId(m10);
-        this.__icon.purgeDependencyOnElmtId(m10);
-        this.__subIcon.purgeDependencyOnElmtId(m10);
-        this.__button.purgeDependencyOnElmtId(m10);
-        this.__switch.purgeDependencyOnElmtId(m10);
-        this.__checkBox.purgeDependencyOnElmtId(m10);
-        this.__radio.purgeDependencyOnElmtId(m10);
-        this.__image.purgeDependencyOnElmtId(m10);
-        this.__text.purgeDependencyOnElmtId(m10);
-        this.__switchState.purgeDependencyOnElmtId(m10);
-        this.__radioState.purgeDependencyOnElmtId(m10);
-        this.__checkBoxState.purgeDependencyOnElmtId(m10);
-        this.__rightWidth.purgeDependencyOnElmtId(m10);
-        this.__secondaryTextColor.purgeDependencyOnElmtId(m10);
-        this.__hoveringColor.purgeDependencyOnElmtId(m10);
-        this.__activedColor.purgeDependencyOnElmtId(m10);
-        this.__parentCanFocus.purgeDependencyOnElmtId(m10);
-        this.__parentCanTouch.purgeDependencyOnElmtId(m10);
-        this.__parentIsHover.purgeDependencyOnElmtId(m10);
-        this.__parentCanHover.purgeDependencyOnElmtId(m10);
-        this.__parentIsActive.purgeDependencyOnElmtId(m10);
-        this.__parentFrontColor.purgeDependencyOnElmtId(m10);
-        this.__isParentCanTouch.purgeDependencyOnElmtId(m10);
-        this.__parentDirection.purgeDependencyOnElmtId(m10);
-        this.__isFocus.purgeDependencyOnElmtId(m10);
-        this.__secondaryTextSize.purgeDependencyOnElmtId(m10);
-        this.__secondaryTextColors.purgeDependencyOnElmtId(m10);
-        this.__iconSize.purgeDependencyOnElmtId(m10);
-        this.__iconColor.purgeDependencyOnElmtId(m10);
-        this.__isOnClick.purgeDependencyOnElmtId(m10);
+    purgeVariableDependenciesOnElmtId(l10) {
+        this.__arrow.purgeDependencyOnElmtId(l10);
+        this.__icon.purgeDependencyOnElmtId(l10);
+        this.__subIcon.purgeDependencyOnElmtId(l10);
+        this.__button.purgeDependencyOnElmtId(l10);
+        this.__switch.purgeDependencyOnElmtId(l10);
+        this.__checkBox.purgeDependencyOnElmtId(l10);
+        this.__radio.purgeDependencyOnElmtId(l10);
+        this.__image.purgeDependencyOnElmtId(l10);
+        this.__text.purgeDependencyOnElmtId(l10);
+        this.__switchState.purgeDependencyOnElmtId(l10);
+        this.__radioState.purgeDependencyOnElmtId(l10);
+        this.__checkBoxState.purgeDependencyOnElmtId(l10);
+        this.__rightWidth.purgeDependencyOnElmtId(l10);
+        this.__secondaryTextColor.purgeDependencyOnElmtId(l10);
+        this.__hoveringColor.purgeDependencyOnElmtId(l10);
+        this.__activedColor.purgeDependencyOnElmtId(l10);
+        this.__parentCanFocus.purgeDependencyOnElmtId(l10);
+        this.__parentCanTouch.purgeDependencyOnElmtId(l10);
+        this.__parentIsHover.purgeDependencyOnElmtId(l10);
+        this.__parentCanHover.purgeDependencyOnElmtId(l10);
+        this.__parentIsActive.purgeDependencyOnElmtId(l10);
+        this.__parentFrontColor.purgeDependencyOnElmtId(l10);
+        this.__isParentCanTouch.purgeDependencyOnElmtId(l10);
+        this.__parentDirection.purgeDependencyOnElmtId(l10);
+        this.__isFocus.purgeDependencyOnElmtId(l10);
+        this.__secondaryTextSize.purgeDependencyOnElmtId(l10);
+        this.__secondaryTextColors.purgeDependencyOnElmtId(l10);
+        this.__iconColor.purgeDependencyOnElmtId(l10);
+        this.__isOnClick.purgeDependencyOnElmtId(l10);
     }
     aboutToBeDeleted() {
         this.__arrow.aboutToBeDeleted();
@@ -827,7 +822,6 @@ class OperateItemStruct extends ViewPU {
         this.__isFocus.aboutToBeDeleted();
         this.__secondaryTextSize.aboutToBeDeleted();
         this.__secondaryTextColors.aboutToBeDeleted();
-        this.__iconSize.aboutToBeDeleted();
         this.__iconColor.aboutToBeDeleted();
         this.__isOnClick.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
@@ -836,170 +830,164 @@ class OperateItemStruct extends ViewPU {
     get arrow() {
         return this.__arrow.get();
     }
-    set arrow(l10) {
-        this.__arrow.set(l10);
+    set arrow(k10) {
+        this.__arrow.set(k10);
     }
     get icon() {
         return this.__icon.get();
     }
-    set icon(k10) {
-        this.__icon.set(k10);
+    set icon(j10) {
+        this.__icon.set(j10);
     }
     get subIcon() {
         return this.__subIcon.get();
     }
-    set subIcon(j10) {
-        this.__subIcon.set(j10);
+    set subIcon(i10) {
+        this.__subIcon.set(i10);
     }
     get button() {
         return this.__button.get();
     }
-    set button(i10) {
-        this.__button.set(i10);
+    set button(h10) {
+        this.__button.set(h10);
     }
     get switch() {
         return this.__switch.get();
     }
-    set switch(h10) {
-        this.__switch.set(h10);
+    set switch(g10) {
+        this.__switch.set(g10);
     }
     get checkBox() {
         return this.__checkBox.get();
     }
-    set checkBox(g10) {
-        this.__checkBox.set(g10);
+    set checkBox(f10) {
+        this.__checkBox.set(f10);
     }
     get radio() {
         return this.__radio.get();
     }
-    set radio(f10) {
-        this.__radio.set(f10);
+    set radio(e10) {
+        this.__radio.set(e10);
     }
     get image() {
         return this.__image.get();
     }
-    set image(e10) {
-        this.__image.set(e10);
+    set image(d10) {
+        this.__image.set(d10);
     }
     get text() {
         return this.__text.get();
     }
-    set text(d10) {
-        this.__text.set(d10);
+    set text(c10) {
+        this.__text.set(c10);
     }
     get switchState() {
         return this.__switchState.get();
     }
-    set switchState(c10) {
-        this.__switchState.set(c10);
+    set switchState(b10) {
+        this.__switchState.set(b10);
     }
     get radioState() {
         return this.__radioState.get();
     }
-    set radioState(b10) {
-        this.__radioState.set(b10);
+    set radioState(a10) {
+        this.__radioState.set(a10);
     }
     get checkBoxState() {
         return this.__checkBoxState.get();
     }
-    set checkBoxState(a10) {
-        this.__checkBoxState.set(a10);
+    set checkBoxState(z9) {
+        this.__checkBoxState.set(z9);
     }
     get rightWidth() {
         return this.__rightWidth.get();
     }
-    set rightWidth(z9) {
-        this.__rightWidth.set(z9);
+    set rightWidth(y9) {
+        this.__rightWidth.set(y9);
     }
     get secondaryTextColor() {
         return this.__secondaryTextColor.get();
     }
-    set secondaryTextColor(y9) {
-        this.__secondaryTextColor.set(y9);
+    set secondaryTextColor(x9) {
+        this.__secondaryTextColor.set(x9);
     }
     get hoveringColor() {
         return this.__hoveringColor.get();
     }
-    set hoveringColor(x9) {
-        this.__hoveringColor.set(x9);
+    set hoveringColor(w9) {
+        this.__hoveringColor.set(w9);
     }
     get activedColor() {
         return this.__activedColor.get();
     }
-    set activedColor(w9) {
-        this.__activedColor.set(w9);
+    set activedColor(v9) {
+        this.__activedColor.set(v9);
     }
     get parentCanFocus() {
         return this.__parentCanFocus.get();
     }
-    set parentCanFocus(v9) {
-        this.__parentCanFocus.set(v9);
+    set parentCanFocus(u9) {
+        this.__parentCanFocus.set(u9);
     }
     get parentCanTouch() {
         return this.__parentCanTouch.get();
     }
-    set parentCanTouch(u9) {
-        this.__parentCanTouch.set(u9);
+    set parentCanTouch(t9) {
+        this.__parentCanTouch.set(t9);
     }
     get parentIsHover() {
         return this.__parentIsHover.get();
     }
-    set parentIsHover(t9) {
-        this.__parentIsHover.set(t9);
+    set parentIsHover(s9) {
+        this.__parentIsHover.set(s9);
     }
     get parentCanHover() {
         return this.__parentCanHover.get();
     }
-    set parentCanHover(s9) {
-        this.__parentCanHover.set(s9);
+    set parentCanHover(r9) {
+        this.__parentCanHover.set(r9);
     }
     get parentIsActive() {
         return this.__parentIsActive.get();
     }
-    set parentIsActive(r9) {
-        this.__parentIsActive.set(r9);
+    set parentIsActive(q9) {
+        this.__parentIsActive.set(q9);
     }
     get parentFrontColor() {
         return this.__parentFrontColor.get();
     }
-    set parentFrontColor(q9) {
-        this.__parentFrontColor.set(q9);
+    set parentFrontColor(p9) {
+        this.__parentFrontColor.set(p9);
     }
     get isParentCanTouch() {
         return this.__isParentCanTouch.get();
     }
-    set isParentCanTouch(p9) {
-        this.__isParentCanTouch.set(p9);
+    set isParentCanTouch(o9) {
+        this.__isParentCanTouch.set(o9);
     }
     get parentDirection() {
         return this.__parentDirection.get();
     }
-    set parentDirection(o9) {
-        this.__parentDirection.set(o9);
+    set parentDirection(n9) {
+        this.__parentDirection.set(n9);
     }
     get isFocus() {
         return this.__isFocus.get();
     }
-    set isFocus(n9) {
-        this.__isFocus.set(n9);
+    set isFocus(m9) {
+        this.__isFocus.set(m9);
     }
     get secondaryTextSize() {
         return this.__secondaryTextSize.get();
     }
-    set secondaryTextSize(m9) {
-        this.__secondaryTextSize.set(m9);
+    set secondaryTextSize(l9) {
+        this.__secondaryTextSize.set(l9);
     }
     get secondaryTextColors() {
         return this.__secondaryTextColors.get();
     }
-    set secondaryTextColors(l9) {
-        this.__secondaryTextColors.set(l9);
-    }
-    get iconSize() {
-        return this.__iconSize.get();
-    }
-    set iconSize(k9) {
-        this.__iconSize.set(k9);
+    set secondaryTextColors(k9) {
+        this.__secondaryTextColors.set(k9);
     }
     get iconColor() {
         return this.__iconColor.get();
@@ -1224,7 +1212,7 @@ class OperateItemStruct extends ViewPU {
             Image.height(OPERATEITEM_ICONLIKE_SIZE);
             Image.width(OPERATEITEM_ARROW_WIDTH);
             Image.focusable(true);
-            Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.icon_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Image.fillColor(FOCUSABLE ? { "id": -1, "type": 10001, params: ['sys.color.icon_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.iconColor);
             Image.draggable(false);
         }, Image);
         Button.pop();
@@ -1235,7 +1223,7 @@ class OperateItemStruct extends ViewPU {
             Radio.radioStyle({
                 uncheckedBorderColor: FOCUSABLE ? null : (this.isFocus && !this.radioState ? OPERATEITECOLOR : null)
             });
-            Radio.backgroundColor(FOCUSABLE ? null : (this.isFocus && !this.radioState ? OPERATEITEMBACKGROUNDCOLOR : null));
+            Radio.backgroundColor(FOCUSABLE ? null : (this.isFocus ? OPERATEITEMBACKGROUNDCOLOR : null));
             Radio.borderRadius(FOCUSABLE ? null : OPERATEITEMRADIUS);
             Radio.margin({ end: LengthMetrics.vp(OperateItemStruct.RIGHT_ITEM_OFFSET_LEVEL1) });
             Radio.checked(this.radioState);
@@ -1417,7 +1405,7 @@ class OperateItemStruct extends ViewPU {
             Image.create(this.arrow?.value);
             Image.height(OPERATEITEM_ICONLIKE_SIZE);
             Image.width(OPERATEITEM_ARROW_WIDTH);
-            Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.icon_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Image.fillColor(FOCUSABLE ? { "id": -1, "type": 10001, params: ['sys.color.icon_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.iconColor);
             Image.focusable(true);
             Image.draggable(false);
         }, Image);
@@ -2086,7 +2074,6 @@ export class ComposeListItem extends ViewPU {
                 x: this.isFocus ? LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_focused_magnification'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }).value : RECOVERYSCALE,
                 y: this.isFocus ? LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_focused_magnification'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }).value : RECOVERYSCALE
             });
-            Stack.blur(this.isFocus ? CLEARBLUR : LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_fuzzy_value'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }).value);
             Stack.shadow(this.isFocus ? LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_focused_shadow_attribute'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }).value : LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_shadow_attribute'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }).value);
             Stack.margin({
                 start: this.getComposeItemLeftPadding(),
@@ -2132,9 +2119,8 @@ export class ComposeListItem extends ViewPU {
             ViewStackProcessor.visualState("focused");
             Flex.border({
                 radius: { "id": -1, "type": 10002, params: ['sys.float.composeListItem_focused_circular_bead'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } || { "id": -1, "type": 10002, params: ['sys.float.corner_radius_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                width: (LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_focused_border'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }).value || ITEM_BORDER_SHOWN) * LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_focused_magnification'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" })
-                    .value,
-                color: { "id": -1, "type": 10001, params: ['sys.color.composeListItem_color_border_focused'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } || this.focusOutlineColor,
+                width: ITEM_BORDER_SHOWN,
+                color: this.focusOutlineColor,
                 style: BorderStyle.Solid
             });
             ViewStackProcessor.visualState("normal");
@@ -2157,7 +2143,7 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((l1, m1) => {
                             if (m1) {
-                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1014, col: 11 });
+                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1013, col: 11 });
                                 ViewPU.create(n1);
                                 let o1 = () => {
                                     return {};
@@ -2202,7 +2188,7 @@ export class ComposeListItem extends ViewPU {
                                     itemDirection: this.contentItemDirection,
                                     isFocus: this.isFocus,
                                     itemHeight: this.itemHeight,
-                                }, undefined, a1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1017, col: 11 });
+                                }, undefined, a1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1016, col: 11 });
                                 ViewPU.create(c1);
                                 let d1 = () => {
                                     return {
@@ -2297,7 +2283,7 @@ export class ComposeListItem extends ViewPU {
                                     parentDirection: this.containerDirection,
                                     isFocus: this.__isFocus,
                                     isOnClick: this.isOnClick,
-                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1038, col: 11 });
+                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 1037, col: 11 });
                                 ViewPU.create(n);
                                 let o = () => {
                                     return {
