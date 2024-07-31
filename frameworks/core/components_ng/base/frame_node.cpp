@@ -4555,7 +4555,7 @@ CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp)
 
     if (!parentUi || IsWindowBoundary()) {
         cachedVisibleRectResult_ = {timestamp,
-            {rectToParent.GetOffset(), rectToParent, rectToParent, scale, rectToParent}};
+            {rectToParent.GetOffset(), rectToParent, rectToParent, scale, rectToParent, rectToParent}};
         return cachedVisibleRectResult_.second;
     }
 
@@ -4587,12 +4587,16 @@ CacheVisibleRectResult FrameNode::CalculateCacheVisibleRect(CacheVisibleRectResu
 
     auto visibleRect = rect.Constrain(parentCacheVisibleRect.visibleRect);
     auto innerVisibleRect = rect;
+    auto innerBoundaryRect = parentCacheVisibleRect.innerBoundaryRect;
     if (parentRenderContext && parentRenderContext->GetClipEdge().value_or(false)) {
-        innerVisibleRect = rect.Constrain(parentCacheVisibleRect.visibleRect);
+        innerBoundaryRect = parentCacheVisibleRect.innerVisibleRect.Constrain(innerBoundaryRect);
     }
+    innerVisibleRect = rect.Constrain(innerBoundaryRect);
+
     scale = {scale.x * parentCacheVisibleRect.cumulativeScale.x, scale.y * parentCacheVisibleRect.cumulativeScale.y};
-    cachedVisibleRectResult_ = {timestamp, {windowOffset, visibleRect, innerVisibleRect, scale, rect}};
-    return {windowOffset, visibleRect, innerVisibleRect, scale, rect};
+    cachedVisibleRectResult_ = { timestamp,
+        { windowOffset, visibleRect, innerVisibleRect, scale, rect, innerBoundaryRect } };
+    return {windowOffset, visibleRect, innerVisibleRect, scale, rect, innerBoundaryRect};
 }
 
 bool FrameNode::IsContextTransparent()

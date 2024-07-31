@@ -73,6 +73,7 @@ struct CacheVisibleRectResult {
     RectF innerVisibleRect = RectF();
     VectorF cumulativeScale = {1.0f, 1.0f};
     RectF frameRect = RectF();
+    RectF innerBoundaryRect = RectF();
 };
 
 // FrameNode will display rendering region in the screen.
