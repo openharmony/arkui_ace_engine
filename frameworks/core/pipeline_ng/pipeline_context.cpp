@@ -3241,7 +3241,7 @@ void PipelineContext::Destroy()
     needRenderNode_.clear();
     dirtyRequestFocusNode_.Reset();
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PipelineContext::Destroy Check If need to close Keyboard");
-    if (textFieldManager_->GetImeShow()) {
+    if (textFieldManager_ && textFieldManager_->GetImeShow()) {
         InputMethodManager::GetInstance()->CloseKeyboardInPipelineDestroy();
     }
 #ifdef WINDOW_SCENE_SUPPORTED
