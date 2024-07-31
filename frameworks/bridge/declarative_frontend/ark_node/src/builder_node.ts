@@ -163,12 +163,12 @@ class JSBuilderNode extends BaseNode {
   }
   private buildWithNestingBuilder(builder: WrappedBuilder<Object[]>): void {
     if (this._supportNestingBuilder && this.isObject(this.params_)) {
-      this._proxyObjectParam = new Proxy(this, {
-        set(target, property, val) {
+      this._proxyObjectParam = new Proxy(this.params_, {
+        set(target, property, val): boolean {
           throw Error(`@Builder : Invalid attempt to set(write to) parameter '${property.toString()}' error!`);
         },
-        get: (target, property, receiver) => { return target?.params_ ? target.params_[property] : undefined; }
-      })
+        get: (target, property, receiver) => { return this.params_?.[property] }
+      });
       this.nodePtr_ = super.create(builder.builder, this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration);
     } else {
       this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative, this.updateConfiguration);
