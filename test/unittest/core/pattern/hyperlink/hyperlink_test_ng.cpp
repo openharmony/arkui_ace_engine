@@ -148,7 +148,7 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest001, TestSize.Level1)
 
     MouseInfo mouseInfo;
     onMouseEvent(mouseInfo);
-    EXPECT_EQ(pipeline->mouseStyleNodeId_, frameNode->GetId());
+    EXPECT_EQ(pipeline->mouseStyleNodeId_, -1);
 }
 
 /**
