@@ -644,7 +644,7 @@ void ViewAbstractModelNG::SetAccessibilityVirtualNode(std::function<void()>&& bu
     virtualFrameNode->SetAccessibilityNodeVirtual();
     virtualFrameNode->SetAccessibilityVirtualNodeParent(AceType::Claim(AceType::DynamicCast<NG::UINode>(frameNode)));
     virtualFrameNode->SetFirstAccessibilityVirtualNode();
-    FrameNode::ProcessOffscreenNode(virtualFrameNode);
+    frameNode->HasAccessibilityVirtualNode(true);
     accessibilityProperty->SaveAccessibilityVirtualNode(virtualNode);
 }
 
