@@ -2105,6 +2105,9 @@ RefPtr<FocusHub> FocusHub::GetNearestNodeByProjectArea(const std::list<RefPtr<Fo
         if (!geometryNode) {
             continue;
         }
+        if (!node->IsFocusable()) {
+            continue;
+        }
         RectF frameRect = RectF(frameOffset, geometryNode->GetFrameRect().GetSize());
         auto realStep = step;
         if (step == FocusStep::TAB) {
