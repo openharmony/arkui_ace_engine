@@ -3108,6 +3108,25 @@ bool OverlayManager::RemoveModalInOverlay()
 
 bool OverlayManager::RemoveAllModalInOverlay()
 {
+    if (modalStack_.empty()) {
+        return true;
+    }
+
+    auto topModalNode = modalStack_.top().Upgrade();
+    bool isModalUiextensionNode = IsModalUiextensionNode(topModalNode);
+    bool isProhibitedRemoveByRouter = IsProhibitedRemoveByRouter(topModalNode);
+    TAG_LOGI(AceLogTag::ACE_OVERLAY,
+        "isModalUiextensionNode: %{public}d, isProhibitedRemoveByRouter: %{public}d,",
+        isModalUiextensionNode, isProhibitedRemoveByRouter);
+    if (isModalUiextensionNode && isProhibitedRemoveByRouter) {
+        return RemoveAllModalInOverlayByList();
+    }
+
+    return RemoveAllModalInOverlayByStack();
+}
+
+bool OverlayManager::RemoveAllModalInOverlayByStack()
+{
     while (!modalStack_.empty()) {
         auto topModalNode = modalStack_.top().Upgrade();
         if (!topModalNode) {
@@ -3147,6 +3166,108 @@ bool OverlayManager::RemoveAllModalInOverlay()
     }
     return true;
 }
+
+bool OverlayManager::RemoveAllModalInOverlayByList()
+{
+    TAG_LOGI(AceLogTag::ACE_OVERLAY,
+        "RemoveAllModalInOverlayByList modalStack size: %{public}zu, "
+        "modalList size: %{public}zu", modalStack_.size(), modalList_.size());
+    if (modalStack_.size() != modalList_.size()) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY,
+            "Not RemoveAllModalInOverlayByList due to modalStack not same with modalList.");
+        return true;
+    }
+
+    bool ret = OnRemoveAllModalInOverlayByList();
+    // To keep the modalStack consistent with the modalList
+    AfterRemoveAllModalInOverlayByList();
+    return ret;
+}
+
+bool OverlayManager::OnRemoveAllModalInOverlayByList()
+{
+    auto modalIter = modalList_.begin();
+    while (modalIter != modalList_.end()) {
+        auto topModalNode = (*modalIter).Upgrade();
+        if (!topModalNode) {
+            modalIter = modalList_.erase(modalIter);
+            continue;
+        }
+        if (IsModalUiextensionNode(topModalNode)) {
+            break;
+        }
+        auto rootNode = FindWindowScene(topModalNode);
+        CHECK_NULL_RETURN(rootNode, true);
+        auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
+        CHECK_NULL_RETURN(builder, false);
+        ModalPageLostFocus(topModalNode);
+        if (!ModalExitProcess(topModalNode)) {
+            modalIter = modalList_.erase(modalIter);
+            continue;
+        }
+        if (topModalNode->GetTag() == V2::MODAL_PAGE_TAG) {
+            auto modalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
+            CHECK_NULL_RETURN(modalPattern, false);
+            auto modalTransition = modalPattern->GetType();
+            if (modalTransition == ModalTransition::NONE || builder->GetRenderContext()->HasDisappearTransition()) {
+                // Fire shown event of navdestination under the disappeared modal
+                FireNavigationStateChange(true);
+            }
+        }
+        auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
+        if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG && sheetPattern) {
+            sheetMap_.erase(sheetPattern->GetSheetKey());
+        }
+        modalIter = modalList_.erase(modalIter);
+    }
+    return true;
+}
+
+void OverlayManager::AfterRemoveAllModalInOverlayByList()
+{
+    TAG_LOGI(AceLogTag::ACE_OVERLAY,
+        "AfterRemoveAllModalInOverlayByList modalList size: %{public}zu", modalList_.size());
+    std::stack<WeakPtr<FrameNode>> modalStack;
+    modalStack_.swap(modalStack);
+    for (auto modal = modalList_.begin(); modal != modalList_.end(); ++modal) {
+        modalStack_.push(*modal);
+    }
+}
+
+bool OverlayManager::IsModalUiextensionNode(const RefPtr<FrameNode>& topModalNode)
+{
+    if (topModalNode == nullptr) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "topModalNode is null,");
+        return false;
+    }
+
+    if (topModalNode->GetTag() != V2::MODAL_PAGE_TAG) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "topModalNode is not modalPage");
+        return false;
+    }
+
+    auto modalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
+    CHECK_NULL_RETURN(modalPattern, false);
+    return modalPattern->IsUIExtension();
+}
+
+bool OverlayManager::IsProhibitedRemoveByRouter(const RefPtr<FrameNode>& topModalNode)
+{
+    if (topModalNode == nullptr) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "topModalNode is null,");
+        return false;
+    }
+
+    if (topModalNode->GetTag() != V2::MODAL_PAGE_TAG) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "topModalNode is not modalPage");
+        return false;
+    }
+
+    auto modalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
+    CHECK_NULL_RETURN(modalPattern, false);
+    return modalPattern->IsProhibitedRemoveByRouter();
+}
+
 
 bool OverlayManager::ModalExitProcess(const RefPtr<FrameNode>& topModalNode)
 {
@@ -3511,6 +3632,7 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     modalPagePattern->UpdateOnAppear(std::move(onAppear));
     modalPagePattern->UpdateOnWillDismiss(std::move(contentCoverParam.onWillDismiss));
     modalPagePattern->UpdateUIExtensionMode(modalStyle.isUIExtension);
+    modalPagePattern->SetProhibitedRemoveByRouter(modalStyle.prohibitedRemoveByRouter);
     modalPagePattern->SetHasTransitionEffect(contentCoverParam.transitionEffect != nullptr);
     modalNode->GetRenderContext()->UpdateChainedTransition(contentCoverParam.transitionEffect);
     modalStack_.push(WeakClaim(RawPtr(modalNode)));
@@ -3520,8 +3642,9 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     modalNode->AddChild(builder);
     if (!isAllowedBeCovered_ && modalNode->GetParent()) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY,
-            "modalNode->GetParent() %{public}d mark IsProhibitedAddChildNode when sessionId %{public}d.",
-            modalNode->GetParent()->GetId(), targetId);
+            "modalNode->GetParent() %{public}d mark IsProhibitedAddChildNode when sessionId %{public}d,"
+            "prohibitedRemoveByRouter: %{public}d.",
+            modalNode->GetParent()->GetId(), targetId, modalStyle.prohibitedRemoveByRouter);
         if (AddCurSessionId(targetId)) {
             modalNode->GetParent()->UpdateModalUiextensionCount(true);
         }
@@ -5540,6 +5663,7 @@ int32_t OverlayManager::CreateModalUIExtension(
         ModalStyle modalStyle;
         modalStyle.modalTransition = NG::ModalTransition::NONE;
         modalStyle.isUIExtension = true;
+        modalStyle.prohibitedRemoveByRouter = config.prohibitedRemoveByRouter;
         SetIsAllowedBeCovered(config.isAllowedBeCovered);
         // Convert the sessionId into a negative number to distinguish it from the targetId of other modal pages
         BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr, nullptr,
@@ -5548,6 +5672,7 @@ int32_t OverlayManager::CreateModalUIExtension(
     } else {
         auto bindModalCallback = [weak = WeakClaim(this), buildNodeFunc, sessionId, id = Container::CurrentId(),
             isAllowedBeCovered = config.isAllowedBeCovered,
+            prohibitedRemoveByRouter = config.prohibitedRemoveByRouter,
             doAfterAsyncModalBinding = std::move(config.doAfterAsyncModalBinding)]() {
             ContainerScope scope(id);
             auto overlayManager = weak.Upgrade();
@@ -5556,6 +5681,7 @@ int32_t OverlayManager::CreateModalUIExtension(
             ModalStyle modalStyle;
             modalStyle.modalTransition = NG::ModalTransition::NONE;
             modalStyle.isUIExtension = true;
+            modalStyle.prohibitedRemoveByRouter = prohibitedRemoveByRouter;
             overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr,
                 nullptr, nullptr, ContentCoverParam(), nullptr, -(sessionId));
             overlayManager->SetIsAllowedBeCovered(true);
