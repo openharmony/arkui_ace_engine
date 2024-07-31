@@ -1461,6 +1461,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest008, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_FONT_FAMILY, &fontItem);
     nodeAPI->setAttribute(rootNode, NODE_TEXT_CONTENT, &fontItem);
     nodeAPI->setAttribute(rootNode, NODE_TEXT_DECORATION, &decorationItem);
+    value[0].i32 = true;
+    nodeAPI->setAttribute(rootNode, NODE_TEXT_HALF_LEADING, &item);
     decoration[2].i32 = -1;
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_DECORATION, &decorationItem), ARKUI_ERROR_CODE_PARAM_INVALID);
 
@@ -1493,6 +1495,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest008, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_ENABLE_DATA_DETECTOR_CONFIG), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_SELECTED_BACKGROUND_COLOR), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_CONTENT_WITH_STYLED_STRING), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_HALF_LEADING), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_CONTENT), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_FONT_COLOR), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_FONT_SIZE), nullptr);
@@ -1522,6 +1525,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest008, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_ENABLE_DATA_DETECTOR_CONFIG), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_SELECTED_BACKGROUND_COLOR), nullptr);
     EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_TEXT_CONTENT_WITH_STYLED_STRING), nullptr);
+    EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_TEXT_HALF_LEADING), nullptr);
     nodeAPI->disposeNode(rootNode);
 }
 
@@ -5196,5 +5200,25 @@ HWTEST_F(NativeNodeTest, NativeNodeTest079, TestSize.Level1)
     mixEvent.mixedEvent.subKind = ArkUIEventSubKind::ON_TEXT_AREA_WILL_INSERT;
     event.origin = &mixEvent;
     EXPECT_EQ(OH_ArkUI_NodeEvent_SetReturnNumberValue(&event, value, size), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeNodeTest080
+ * @tc.desc: Test customSpanNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest080, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_CUSTOM_SPAN, nullptr});
+
+    EXPECT_EQ(nodeAPI->registerNodeCustomEvent(
+        rootNode, ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE, 0, nullptr), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->registerNodeCustomEvent(
+        rootNode, ARKUI_NODE_CUSTOM_EVENT_ON_DRAW, 1, nullptr), ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeCustomEvent(rootNode, ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE);
+    nodeAPI->unregisterNodeCustomEvent(rootNode, ARKUI_NODE_CUSTOM_EVENT_ON_DRAW);
+    nodeAPI->disposeNode(rootNode);
 }
 } // namespace OHOS::Ace
