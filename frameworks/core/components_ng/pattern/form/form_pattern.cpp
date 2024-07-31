@@ -1533,6 +1533,19 @@ void FormPattern::CreateCardContainer()
     }
 }
 
+void FormPattern::AttachJsRSNode(const std::shared_ptr<Rosen::RSNode> &jsNode)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
+    CHECK_NULL_VOID(externalRenderContext);
+    externalRenderContext->SetRSNode(jsNode);
+
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->AddChild(externalRenderContext, 0);
+}
+
 std::unique_ptr<DrawDelegate> FormPattern::GetDrawDelegate()
 {
     auto drawDelegate = std::make_unique<DrawDelegate>();
@@ -1548,7 +1561,7 @@ std::unique_ptr<DrawDelegate> FormPattern::GetDrawDelegate()
             CHECK_NULL_VOID(context);
             auto rsNode = context->GetRSNode();
             CHECK_NULL_VOID(rsNode);
-            rsNode->AddChild(node, -1);
+            form->AttachJsRSNode(node);
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         });
 
@@ -1566,7 +1579,7 @@ std::unique_ptr<DrawDelegate> FormPattern::GetDrawDelegate()
             CHECK_NULL_VOID(formContext);
             auto rsNode = formContext->GetRSNode();
             CHECK_NULL_VOID(rsNode);
-            rsNode->AddChild(node, -1);
+            form->AttachJsRSNode(node);
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         });
 #endif
