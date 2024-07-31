@@ -472,14 +472,19 @@ int32_t OH_ArkUI_SetNodeDragPreviewOption(ArkUI_NodeHandle node, ArkUI_DragPrevi
 int32_t OH_ArkUI_SetNodeDragPreview(ArkUI_NodeHandle node, OH_PixelmapNative* preview)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !node || !preview) {
+    if (!impl || !node) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!preview) {
+        impl->getNodeModifiers()->getCommonModifier()->resetDragPreview(node->uiNodeHandle);
+        return ARKUI_ERROR_CODE_NO_ERROR;
     }
     auto previewPixelNative = reinterpret_cast<OH_PixelmapNativeHandle>(preview);
     auto pixelMap = previewPixelNative->GetInnerPixelmap();
     impl->getDragAdapterAPI()->setDragPreview(node->uiNodeHandle, &pixelMap);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
+
 int32_t OH_ArkUI_SetNodeAllowedDropDataTypes(ArkUI_NodeHandle node, const char* typesArray[], int32_t count)
 {
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
