@@ -26,8 +26,6 @@ namespace OHOS::Ace::NG {
 constexpr int32_t TEXT_ANIMATION_DURATION = 300;
 constexpr Dimension TEXT_DRAG_DEFAULT_OFFSET = 8.0_vp;
 
-class TextDragPattern;
-enum class DragAnimType { FLOATING, FLOATING_CANCEL, DEFAULT };
 class TextDragOverlayModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(TextDragOverlayModifier, OverlayModifier);
 
@@ -38,7 +36,6 @@ public:
     virtual void StartFloatingAnimate()
     {
         isAnimating_ = true;
-        type_ = DragAnimType::FLOATING;
         backgroundOffset_->Set(0);
         AnimationOption option;
         option.SetDuration(TEXT_ANIMATION_DURATION);
@@ -57,14 +54,12 @@ public:
         };
         AnimationUtils::Animate(option, propertyCallback, option.GetOnFinishEvent());
     }
-    Color GetDragBackgroundColor(const Color& defaultColor);
-    DragAnimType type_ = DragAnimType::DEFAULT;
+
     bool IsHandlesShow()
     {
         return isHandlesShow_;
     }
-    void PaintBackground(const RSPath& path, RSCanvas& canvas, RefPtr<TextDragPattern> textDragPattern);
-    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas);
+
     void UpdateHandlesShowFlag(bool isHandlesShow)
     {
         isHandlesShow_ = isHandlesShow;
@@ -78,23 +73,11 @@ public:
     void onDraw(DrawingContext& context) override;
     void SetBackgroundOffset(float offset);
     void SetSelectedBackgroundOpacity(float opacity);
-    void SetSelectedColor(uint32_t selectedColor)
-    {
-        CHECK_NULL_VOID(selectedColor_);
-        selectedColor_->Set(static_cast<int32_t>(selectedColor));
-    }
-        void SetShadowOpacity(float opacity)
-    {
-        CHECK_NULL_VOID(shadowOpacity_);
-        shadowOpacity_->Set(opacity);
-    }
+
 protected:
     WeakPtr<Pattern> pattern_;
     bool isAnimating_ = false;
     bool isHandlesShow_ = false;
-    RefPtr<PropertyInt> selectedColor_;
-    RefPtr<AnimatablePropertyFloat> handleOpacity_;
-    RefPtr<AnimatablePropertyFloat> shadowOpacity_;
     RefPtr<AnimatablePropertyFloat> backgroundOffset_;
     RefPtr<AnimatablePropertyFloat> selectedBackgroundOpacity_;
 

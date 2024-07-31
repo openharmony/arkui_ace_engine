@@ -76,7 +76,7 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
     auto dragPattern = dragNode->GetPattern<RichEditorDragPattern>();
     CHECK_NULL_RETURN(dragPattern, nullptr);
     auto richEditor = hostNode->GetPattern<TextPattern>();
-    CHECK_NULL_RETURN(richEditor, dragNode);
+    CHECK_NULL_RETURN(richEditor, nullptr);
     auto placeholderIndex = richEditor->GetPlaceHolderIndex();
     auto rectsForPlaceholders = richEditor->GetRectsForPlaceholders();
 
