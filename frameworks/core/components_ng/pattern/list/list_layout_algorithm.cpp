@@ -115,7 +115,9 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     paddingBeforeContent_ = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
     paddingAfterContent_ = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
     contentMainSize_ = 0.0f;
-    totalItemCount_ = layoutWrapper->GetTotalChildCount();
+    if (needUpdateTotalItemCount_) {
+        totalItemCount_ = layoutWrapper->GetTotalChildCount();
+    }
     isSnapCenter_ = IsScrollSnapAlignCenter(layoutWrapper);
     if (childrenSize_) {
         childrenSize_->ResizeChildrenSize(totalItemCount_);
@@ -1423,7 +1425,9 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
     paddingOffset_ = padding.Offset();
     float crossSize = GetCrossAxisSize(size, axis_);
-    totalItemCount_ = layoutWrapper->GetTotalChildCount();
+    if (needUpdateTotalItemCount_) {
+        totalItemCount_ = layoutWrapper->GetTotalChildCount();
+    }
     listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
     int32_t startIndex = GetStartIndex();
     isReverse_ = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;

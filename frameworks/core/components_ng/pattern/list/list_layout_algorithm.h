@@ -389,9 +389,10 @@ public:
         return range_;
     }
 
-    void SetTotalItemCount(int32_t count)
+    void SetTotalItemCount(int32_t count, bool needUpdate = true)
     {
         totalItemCount_ = count;
+        needUpdateTotalItemCount_ = needUpdate;
     }
 
     void SetItemAdapterFeature(const std::pair<bool, bool>& requestFeature)
@@ -528,6 +529,7 @@ private:
     bool expandSafeArea_ = false;
 
     int32_t totalItemCount_ = 0;
+    bool needUpdateTotalItemCount_ = true;
 
     V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::START;
 

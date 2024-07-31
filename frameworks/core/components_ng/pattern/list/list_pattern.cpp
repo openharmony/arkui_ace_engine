@@ -778,7 +778,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
         listLayoutAlgorithm->SetPredictSnapEndPosition(predictSnapEndPos_.value());
     }
     if (adapter_) {
-        listLayoutAlgorithm->SetTotalItemCount(adapter_->totalCount);
+        listLayoutAlgorithm->SetTotalItemCount(adapter_->totalCount, false);
         listLayoutAlgorithm->SetItemAdapterFeature(adapter_->requestFeature);
         listLayoutAlgorithm->SetLazyFeature(!!adapter_->requestItemFunc);
     }

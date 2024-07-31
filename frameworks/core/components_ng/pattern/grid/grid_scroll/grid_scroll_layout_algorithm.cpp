@@ -211,6 +211,13 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         int32_t itemIdex = -1;
         float lineHeight = gridLayoutInfo_.lineHeightMap_[line->first];
+        // adjust offset for the requested upward lazy items
+        if (i < prevStartMainLineIndex_) {
+            auto h = lineHeight + mainGap_;
+            gridLayoutInfo_.currentOffset_ -= h;
+            gridLayoutInfo_.prevOffset_ -= h;
+            childFrameOffset_ -= gridLayoutProperty->IsVertical() ? OffsetF(0.0f, h) : OffsetF(h, 0.0f);
+        }
         Alignment align = axis_ == Axis::VERTICAL ? Alignment::TOP_CENTER : Alignment::CENTER_LEFT;
         if (gridLayoutProperty->GetPositionProperty()) {
             align = gridLayoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
@@ -274,6 +281,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (!gridLayoutInfo_.hasMultiLineItem_ && !isLazyFeature_) {
         layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheCount * crossCount_, cacheCount * crossCount_);
     }
+    prevStartMainLineIndex_ = -1;
     gridLayoutInfo_.totalHeightOfItemsInView_ = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_);
 
     if (SystemProperties::GetGridCacheEnabled()) {
@@ -1202,6 +1210,10 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_ + 1;
             gridLayoutInfo_.UpdateStartIndexByStartLine();
+            if (isLazyFeature_ && gridLayoutInfo_.startIndex_ > gridLayoutInfo_.endIndex_) {
+                // advance [endIndex_] if requested lazy items are still loaded
+                gridLayoutInfo_.endIndex_ = std::min(static_cast<int32_t>(gridLayoutInfo_.startIndex_ + crossCount_), layoutWrapper->GetTotalChildCount() - 1);
+            }
         }
     }
     // Case 1. if this while-loop breaks due to running out of records, the [currentMainLineIndex_] is larger by 1 than
@@ -1370,7 +1382,9 @@ float GridScrollLayoutAlgorithm::FillNewLineForward(float crossSize, float mainS
         // add more than one line
         UpdateMatrixForAddedItems();
     }
-    gridLayoutInfo_.startMainLineIndex_--;
+    auto prevStartMainLineIndex = gridLayoutInfo_.startMainLineIndex_--;
+    gridLayoutInfo_.UpdateStartIndexByStartLine();
+
     bool doneCreateNewLine = false;
     auto gridMatrixIter = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.startMainLineIndex_);
     if (gridMatrixIter == gridLayoutInfo_.gridMatrix_.end()) {
@@ -1390,6 +1404,7 @@ float GridScrollLayoutAlgorithm::FillNewLineForward(float crossSize, float mainS
         if (!itemWrapper) {
             if (currentIndex <= layoutWrapper->GetTotalChildCount() - 1) {
                 requestFeature_.first = true;
+                prevStartMainLineIndex_ = std::max(prevStartMainLineIndex_, prevStartMainLineIndex);
             }
             break;
         }
