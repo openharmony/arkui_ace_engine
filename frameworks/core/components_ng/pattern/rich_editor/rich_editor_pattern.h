@@ -854,8 +854,11 @@ public:
         return true;
     }
 
+    TextStyle GetDefaultTextStyle();
+
 protected:
     bool CanStartAITask() override;
+
     template<typename T>
     RefPtr<T> GetTheme()
     {
