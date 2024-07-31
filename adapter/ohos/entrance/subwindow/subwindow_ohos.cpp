@@ -532,7 +532,6 @@ bool SubwindowOhos::ShowDragPreviewWindowNG()
     CHECK_NULL_RETURN(window_, false);
     ShowWindow(false);
     ResizeWindow();
-    window_->SetTouchable(false);
     return true;
 }
 

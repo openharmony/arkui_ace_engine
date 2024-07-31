@@ -166,9 +166,7 @@ void DragDropManager::HideDragPreviewOverlay()
 
 void DragDropManager::HideDragPreviewWindow(int32_t containerId)
 {
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
-    CHECK_NULL_VOID(subwindow);
-    auto overlayManager = subwindow->GetOverlayManager();
+    auto overlayManager = GetDragAnimationOverlayManager(containerId);
     CHECK_NULL_VOID(overlayManager);
     overlayManager->RemovePixelMap();
     overlayManager->RemoveGatherNode();
@@ -521,9 +519,8 @@ void DragDropManager::TransDragWindowToDragFwk(int32_t windowContainerId)
     TAG_LOGI(AceLogTag::ACE_DRAG, "TransDragWindowToDragFwk is %{public}d", isDragFwkShow_);
     InteractionInterface::GetInstance()->SetDragWindowVisible(true);
     isDragFwkShow_ = true;
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(windowContainerId);
-    CHECK_NULL_VOID(subwindow);
-    auto overlayManager = subwindow->GetOverlayManager();
+    auto overlayManager = GetDragAnimationOverlayManager(windowContainerId);
+    CHECK_NULL_VOID(overlayManager);
     overlayManager->RemovePixelMap();
     overlayManager->RemoveGatherNode();
     SubwindowManager::GetInstance()->HideDragPreviewWindowNG();
@@ -1606,11 +1603,9 @@ void DragDropManager::DoDragMoveAnimate(const PointerEvent& pointerEvent)
         return;
     }
     isPullMoveReceivedForCurrentDrag_ = true;
-    auto containerId = Container::CurrentId();
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
     CHECK_NULL_VOID(info_.imageNode);
-    CHECK_NULL_VOID(subwindow);
-    auto overlayManager = subwindow->GetOverlayManager();
+    auto containerId = Container::CurrentId();
+    auto overlayManager = GetDragAnimationOverlayManager(containerId);
     CHECK_NULL_VOID(overlayManager);
     auto x = pointerEvent.GetPoint().GetX();
     auto y = pointerEvent.GetPoint().GetY();
@@ -1899,10 +1894,7 @@ bool DragDropManager::IsNeedDisplayInSubwindow()
     if (IsNeedScaleDragPreview()) {
         return true;
     }
-    auto containerId = Container::CurrentId();
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
-    CHECK_NULL_RETURN(subwindow, false);
-    auto overlayManager = subwindow->GetOverlayManager();
+    auto overlayManager = GetDragAnimationOverlayManager(Container::CurrentId());
     CHECK_NULL_RETURN(overlayManager, false);
     auto gatherNode = overlayManager->GetGatherNode();
     return gatherNode != nullptr;
@@ -2024,6 +2016,14 @@ double DragDropManager::GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& 
     auto columns = columnInfo->GetColumns(gridSizeType);
     double maxWidth = columnInfo->GetWidth(columns);
     return maxWidth;
+}
+
+const RefPtr<NG::OverlayManager> DragDropManager::GetDragAnimationOverlayManager(int32_t containerId)
+{
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId >= MIN_SUBCONTAINER_ID ?
+        SubwindowManager::GetInstance()->GetParentContainerId(containerId) : containerId);
+    CHECK_NULL_RETURN(subwindow, nullptr);
+    return subwindow->GetOverlayManager();
 }
 
 } // namespace OHOS::Ace::NG
