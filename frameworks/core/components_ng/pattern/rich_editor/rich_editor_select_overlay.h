@@ -57,12 +57,16 @@ public:
     bool IsHandleShow();
     void OnHandleMoveStart(bool isFirst) override;
     void UpdateHandleOffset();
+    void ToggleMenu();
 
 private:
     void RemoveAreaChangeInner();
     void CloseMagnifier();
     void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle) override;
-    void CheckEditorTypeChange(SelectOverlayInfo& selectInfo, TextSpanType selectType);
+    void CheckMenuParamChange(SelectOverlayInfo& selectInfo, TextSpanType selectType, TextResponseType responseType);
+    std::shared_ptr<SelectionMenuParams> lastMenuParams_ = nullptr;
+    std::pair<TextSpanType, TextResponseType> lastSelectResponseComb_;
+    bool needRefreshMenu_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorSelectOverlay);
 };
