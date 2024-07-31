@@ -70,6 +70,7 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
         UPDATE_TEXT_STYLE(textLineStyle, EllipsisMode, SetEllipsisMode);
         UPDATE_TEXT_STYLE(textLineStyle, LineSpacing, SetLineSpacing);
         UPDATE_TEXT_STYLE(textLineStyle, LineBreakStrategy, SetLineBreakStrategy);
+        UPDATE_TEXT_STYLE(textLineStyle, AllowScale, SetAllowScale);
     }
     return textStyle;
 }
