@@ -2814,6 +2814,7 @@ void SetAllowDrop(ArkUINodeHandle node, ArkUI_CharPtr* allowDropCharArray, ArkUI
         allowDropStr = allowDropCharArray[i];
         allowDropSet.insert(allowDropStr);
     }
+    frameNode->SetDisallowDropForcedly(false);
     ViewAbstract::SetAllowDrop(frameNode, allowDropSet);
 }
 
@@ -2822,6 +2823,7 @@ void ResetAllowDrop(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::set<std::string> allowDrop;
+    frameNode->SetDisallowDropForcedly(false);
     ViewAbstract::SetAllowDrop(frameNode, allowDrop);
 }
 
