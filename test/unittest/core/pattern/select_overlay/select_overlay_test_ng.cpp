@@ -4510,4 +4510,28 @@ HWTEST_F(SelectOverlayTestNg, CreatExtensionMenu001, TestSize.Level1)
     selectOverlayNode->CreatExtensionMenu(std::move(params));
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
 }
+
+/**
+ * @tc.name: IsFirstHandleMoveStart
+ * @tc.desc: Test IsFirstHandleMoveStart.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, IsFirstHandleMoveStart, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    GestureEvent info;
+    info.localLocation_ = Offset(1, 1);
+    pattern->isFirstHandleTouchDown_ = true;
+    pattern->isSecondHandleTouchDown_ = true;
+    EXPECT_FALSE(pattern->IsSingleHandleMenuShow());
+    EXPECT_FALSE(pattern->IsSingleHandle());
+    EXPECT_FALSE(pattern->IsFirstHandleMoveStart(info.GetLocalLocation()));
+}
+
 } // namespace OHOS::Ace::NG
