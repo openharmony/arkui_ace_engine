@@ -1353,12 +1353,7 @@ void SelectOverlayNode::CreateToolBar()
     auto top = CalcLength(padding.Top().ConvertToPx());
     auto bottom = CalcLength(padding.Bottom().ConvertToPx());
     selectMenuInner_->GetLayoutProperty()->UpdatePadding({ left, right, top, bottom });
-
-    if (LessNotEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
-        selectMenuInner_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-            { std::nullopt, CalcLength(textOverlayTheme->GetMenuToolbarHeight()) });
-    }
-
+    SetSelectMenuInnerSize();
     if (info->menuInfo.menuIsShow) {
         selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
         selectMenuStatus_ = FrameNodeStatus::VISIBLE;
@@ -1745,6 +1740,8 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
 {
     CHECK_NULL_VOID(selectMenuInner_);
     selectMenuInner_->Clean();
+    selectMenuInner_->GetLayoutProperty()->ClearUserDefinedIdealSize(true, true);
+    SetSelectMenuInnerSize();
     selectMenuInner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     if (isExtensionMenu_) {
         MoreOrBackAnimation(false, noAnimation);
@@ -1786,6 +1783,21 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
         }
     }
     AddExtensionMenuOptions(info, extensionOptionStartIndex);
+}
+
+void SelectOverlayNode::SetSelectMenuInnerSize()
+{
+    CHECK_NULL_VOID(selectMenuInner_);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(textOverlayTheme);
+    if (LessNotEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        selectMenuInner_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            { std::nullopt, CalcLength(textOverlayTheme->GetMenuToolbarHeight()) });
+    } else {
+        selectMenuInner_->GetLayoutProperty()->UpdateUserDefinedIdealSize({ std::nullopt, std::nullopt });
+    }
 }
 
 void SelectOverlayNode::LandscapeMenuAddMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems,
