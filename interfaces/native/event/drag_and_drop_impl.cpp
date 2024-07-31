@@ -562,6 +562,21 @@ int32_t OH_ArkUI_DragEvent_SetSuggestedDropOperation(ArkUI_DragEvent* event, Ark
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+int32_t OH_ArkUI_DragEvent_GetDropOperation(ArkUI_DragEvent* event, ArkUI_DropOperation* operation)
+{
+    if (!event || !operation) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    if (dragEvent->dragBehavior >= static_cast<int32_t>(ArkUI_DropOperation::ARKUI_DROP_OPERATION_COPY) &&
+        dragEvent->dragBehavior <= static_cast<int32_t>(ArkUI_DropOperation::ARKUI_DROP_OPERATION_MOVE)) {
+        *operation = static_cast<ArkUI_DropOperation>(dragEvent->dragBehavior);
+    } else {
+        *operation = ARKUI_DROP_OPERATION_COPY;
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 float OH_ArkUI_DragEvent_GetPreviewTouchPointX(ArkUI_DragEvent* event)
 {
     if (!event) {
