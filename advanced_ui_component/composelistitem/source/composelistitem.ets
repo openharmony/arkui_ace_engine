@@ -674,8 +674,17 @@ struct OperateItemStruct {
     Button({ type: ButtonType.Normal }) {
       Row({ space: SPECICAL_ROW_SPACE }) {
         Text(this.text)
-          .fontSize($r('sys.float.ohos_id_text_size_body2'))
-          .fontColor($r('sys.color.font_secondary'))
+          .fontSize(this.secondaryTextSize || $r('sys.float.ohos_id_text_size_body2'))
+          .fontColor(this.secondaryTextColors || $r('sys.color.font_secondary'))
+          .textOverflow({
+            overflow: LengthMetrics.resource($r('sys.float.composeListItem_right_textOverflow'))
+              .value === 1 ? TextOverflow.MARQUEE : TextOverflow.None
+          })
+          .marqueeOptions({
+            start: this.isFocus,
+            fadeout: LengthMetrics.resource($r('sys.float.composeListItem_marqueeOptions_right')).value === 1
+          })
+          .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value === 1 ? 1 : null)
           .focusable(true)
           .draggable(false)
           .constraintSize({
