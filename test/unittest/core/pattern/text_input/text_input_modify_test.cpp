@@ -504,7 +504,7 @@ HWTEST_F(TextFieldModifyTest, DoCallback002, TestSize.Level1)
     GetFocus();
     gestureEvent.SetSourceDevice(SourceType::MOUSE);
     pattern_->HandleLongPress(gestureEvent);
-    EXPECT_FALSE(pattern_->isTouchCaret_);
+    EXPECT_FALSE(pattern_->moveCaretState_.isTouchCaret);
 }
 
 /**

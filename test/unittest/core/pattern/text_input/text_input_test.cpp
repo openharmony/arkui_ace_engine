@@ -53,7 +53,7 @@ HWTEST_F(TextFieldUXTest, UpdateCaretByTouchMove001, TestSize.Level1)
      * @tc.steps: step4. test touch down
      */
     pattern_->HandleTouchEvent(touchInfo1);
-    EXPECT_TRUE(pattern_->isTouchCaret_);
+    EXPECT_TRUE(pattern_->moveCaretState_.isTouchCaret);
 
     /**
      * @tc.steps: step5. create location info, touch type MOVE
@@ -91,7 +91,7 @@ HWTEST_F(TextFieldUXTest, UpdateCaretByTouchMove001, TestSize.Level1)
      * @tc.steps: step10. test touch up
      */
     pattern_->HandleTouchEvent(touchInfo3);
-    EXPECT_FALSE(pattern_->isTouchCaret_);
+    EXPECT_FALSE(pattern_->moveCaretState_.isTouchCaret);
 }
 
 /**
@@ -195,7 +195,8 @@ HWTEST_F(TextFieldUXTest, RepeatClickCaret, TestSize.Level1)
     /**
      * @tc.steps: step3. test repeat click caret
      */
-    EXPECT_TRUE(pattern_->RepeatClickCaret(clickOffset, lastIndex, lastCaretRect));
+    EXPECT_TRUE(pattern_->RepeatClickCaret(clickOffset, lastIndex));
+    EXPECT_TRUE(pattern_->RepeatClickCaret(clickOffset, lastCaretRect));
 }
 
 /**
