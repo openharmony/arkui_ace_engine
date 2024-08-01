@@ -95,7 +95,7 @@ public:
         return targetId_;
     }
 
-    const std::string& GetTargetTag() const
+    std::string GetTargetTag() const
     {
         return targetTag_;
     }
