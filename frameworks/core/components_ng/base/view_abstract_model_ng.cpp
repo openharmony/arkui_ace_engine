@@ -281,8 +281,8 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
                 auto taskExecutor = Container::CurrentTaskExecutor();
                 CHECK_NULL_VOID(taskExecutor);
                 taskExecutor->PostTask(
-                    TAG_LOGI(AceLogTag::ACE_MENU, "Execute longPress task for menu");
                     [containerId, builder = builderF, weakTarget, menuParam, previewBuildFunc, info]() mutable {
+                        TAG_LOGI(AceLogTag::ACE_MENU, "Execute longPress task for menu");
                         auto targetNode = weakTarget.Upgrade();
                         CHECK_NULL_VOID(targetNode);
                         auto pipelineContext = NG::PipelineContext::GetCurrentContext();
