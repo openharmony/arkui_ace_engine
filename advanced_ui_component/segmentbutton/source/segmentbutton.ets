@@ -1087,6 +1087,7 @@ export struct SegmentButton {
         }
         .direction(this.options.direction)
         .size(this.componentSize)
+        .animation({ duration: 0 })
         .borderRadius((this.options.type === 'capsule' && (this.options.multiply ?? false) ?
         this.options.iconTextRadius : this.options.iconTextBackgroundRadius) ??
           this.componentSize.height as number / 2)
