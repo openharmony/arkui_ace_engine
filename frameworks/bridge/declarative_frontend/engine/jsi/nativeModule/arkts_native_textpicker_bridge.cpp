@@ -378,6 +378,7 @@ ArkUINativeModuleValue TextPickerBridge::SetDivider(ArkUIRuntimeCallInfo* runtim
     CalcDimension dividerEndMargin;
     Color colorObj;
     auto context = reinterpret_cast<FrameNode*>(nativeNode)->GetContext();
+    CHECK_NULL_RETURN(context, panda::NativePointerRef::New(vm, nullptr));
     auto themeManager = context->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, panda::NativePointerRef::New(vm, nullptr));
     auto pickerTheme = themeManager->GetTheme<PickerTheme>();
@@ -430,6 +431,7 @@ ArkUINativeModuleValue TextPickerBridge::SetGradientHeight(ArkUIRuntimeCallInfo*
     Local<JSValueRef> itemHeightValue = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     auto context = reinterpret_cast<FrameNode*>(nativeNode)->GetContext();
+    CHECK_NULL_RETURN(context, panda::NativePointerRef::New(vm, nullptr));
     auto themeManager = context->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, panda::NativePointerRef::New(vm, nullptr));
     auto pickerTheme = themeManager->GetTheme<PickerTheme>();

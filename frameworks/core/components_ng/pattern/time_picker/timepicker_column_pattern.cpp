@@ -1161,6 +1161,7 @@ void TimePickerColumnPattern::SetDividerHeight(uint32_t showOptionCount)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     auto childSize = host->GetChildren().size();
     if (childSize != CHILDREN_SIZE) {
