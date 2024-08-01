@@ -62,6 +62,13 @@ void ListItemModelNG::Create()
     stack->Push(frameNode);
 }
 
+RefPtr<FrameNode> ListItemModelNG::CreateListItem(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
+    return frameNode;
+}
+
 void ListItemModelNG::OnDidPop()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
