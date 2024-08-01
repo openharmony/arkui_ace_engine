@@ -222,7 +222,7 @@ void LayoutWrapperNode::Measure(const std::optional<LayoutConstraintF>& parentCo
             // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and
             // aspectRatio are all set, the height is not used.
             auto width = geometryNode_->GetFrameSize().Width();
-            auto height = width / aspectRatio;
+            auto height = width / ((aspectRatio != 0) ? aspectRatio : 1.0f);
             geometryNode_->SetFrameSize(SizeF({ width, height }));
         }
     }

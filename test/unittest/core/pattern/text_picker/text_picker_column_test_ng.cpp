@@ -1864,4 +1864,44 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest012, TestSize.Level1
         EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.emplace_back(i), i);
     }
 }
+
+/**
+ * @tc.name: TextPickerColumnPatternTest013
+ * @tc.desc: Test TextPickerColumnPattern GetDigitalCrownSensitivity and SetDigitalCrownSensitivity.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest013, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    EXPECT_NE(textPickerColumnPattern->GetDigitalCrownSensitivity(), INVALID_CROWNSENSITIVITY);
+    EXPECT_EQ(textPickerColumnPattern->GetDigitalCrownSensitivity(), DEFAULT_CROWNSENSITIVITY);
+    textPickerColumnPattern->SetDigitalCrownSensitivity(2);
+    EXPECT_EQ(textPickerColumnPattern->GetDigitalCrownSensitivity(), 2);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest014
+ * @tc.desc: Test TextPickerColumnPattern GetDigitalCrownSensitivity and ToUpdateSelectedTextProperties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest014, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto child = columnNode_->GetChildren();
+    auto iter = child.begin();
+    auto textNode = AceType::DynamicCast<FrameNode>(*iter);
+    ASSERT_TRUE(textNode);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    ASSERT_TRUE(textPattern);
+    RefPtr<TextLayoutProperty> textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_TRUE(textLayoutProperty);
+    textPickerColumnPattern->ToUpdateSelectedTextProperties(theme);
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), Color::BLACK);
+}
 } // namespace OHOS::Ace::NG
