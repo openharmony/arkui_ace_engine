@@ -2635,7 +2635,7 @@ HWTEST_F(TextTestFiveNg, onDraw001, TestSize.Level1)
 
     textContentModifier->animatableTextColor_ =
         AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
-    textContentModifier->obscuredReasons_.emplace_back(ObscuredReasons::PLACEHOLDER);
+    textContentModifier->ifPaintObscuration_ = true;
     textContentModifier->drawObscuredRects_.emplace_back(RectF(0, 0, 10, 10));
 
     textContentModifier->onDraw(drawingContext);
