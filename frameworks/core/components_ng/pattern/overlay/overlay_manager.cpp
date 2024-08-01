@@ -666,7 +666,7 @@ void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
         TaskExecutor::TaskType::UI, "ArkUIOverlayDialogCloseEvent");
 }
 
-void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode, bool isBindSheet = false)
+void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "fire auto save enter");
     CHECK_NULL_VOID(ContainerNode);
@@ -677,14 +677,17 @@ void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode, bool i
     auto currentId = Container::CurrentId();
     CHECK_NULL_VOID(container);
 
-    if (isBindSheet) {
-        // BindSheet does not use subwindowManage. If use subwindow for display based on the input instanceId, autosave is started in the main window.
+    auto nodeTag = ContainerNode->GetTag();
+    if (nodeTag == V2::SHEET_PAGE_TAG) {
+        // BindSheet does not use subwindowManage. If use subwindow for display, autosave is started in the main window.
         auto layoutProperty = ContainerNode->GetLayoutProperty<SheetPresentationProperty>();
         CHECK_NULL_VOID(layoutProperty);
         auto currentStyle = layoutProperty->GetSheetStyleValue();
-        auto currentInstanceId = currentStyle.instanceId;
-        if (currentInstanceId.has_value()) {
-            currentId = CONTAINER_ID_DIVIDE_SIZE;
+        if (currentStyle.instanceId.has_value()) {
+            auto pattern = ContainerNode->GetPattern<SheetPresentationPattern>();
+            auto targetNode = FrameNode::GetFrameNode(pattern->GetTargetTag(), pattern->GetTargetId());
+            CHECK_NULL_VOID(targetNode);
+            currentId = targetNode->GetInstanceId();
         }
     } else if (container->IsSubContainer()) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
@@ -4097,7 +4100,7 @@ void OverlayManager::PlaySheetTransition(
                 CHECK_NULL_VOID(root);
                 auto sheetParent = DynamicCast<FrameNode>(sheet->GetParent());
                 CHECK_NULL_VOID(sheetParent);
-                overlayManager->FireAutoSave(sheet, true);
+                overlayManager->FireAutoSave(sheet);
                 overlayManager->RemoveChildWithService(root, sheetParent);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             });

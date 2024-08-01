@@ -95,6 +95,11 @@ public:
         return targetId_;
     }
 
+    std::string GetTargetTag() const
+    {
+        return targetTag_;
+    }
+
     void FireCallback(const std::string& value)
     {
         if (callback_) {
