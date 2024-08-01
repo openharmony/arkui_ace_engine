@@ -100,6 +100,11 @@ public:
 
     virtual void OnVirtualKeyboardAreaChanged() {}
 
+    virtual RefPtr<Clipboard> GetClipboard()
+    {
+        return nullptr;
+    }
+
     const RectF& GetContentRect() const
     {
         return contentRect_;
@@ -138,11 +143,6 @@ public:
     virtual OffsetF GetSecondHandleOffset() const
     {
         return OffsetF();
-    }
-
-    virtual RefPtr<Clipboard> GetClipboard()
-    {
-        return nullptr;
     }
 
     TextSelector GetTextSelector() const
