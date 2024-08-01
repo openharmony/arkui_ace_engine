@@ -471,6 +471,23 @@ void ContextMenuSwitchDragPreviewScaleAnimationProc(const RefPtr<RenderContext>&
         });
 }
 
+void UpdateContextMenuSwitchDragPreviewBefore(const RefPtr<FrameNode>& menu)
+{
+    CHECK_NULL_VOID(menu);
+    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern && menuWrapperPattern->GetIsShowHoverImage());
+    auto previewChild = menuWrapperPattern->GetPreview();
+    CHECK_NULL_VOID(previewChild);
+    auto previewPattern = previewChild->GetPattern<MenuPreviewPattern>();
+    CHECK_NULL_VOID(previewPattern);
+
+    if (previewPattern->IsHoverImageScalePlaying()) {
+        auto previewRenderContext = previewChild->GetRenderContext();
+        CHECK_NULL_VOID(previewRenderContext);
+        previewRenderContext->UpdateOpacity(0.0);
+    }
+}
+
 void ContextMenuSwitchDragPreviewAnimationProc(const RefPtr<FrameNode>& menu,
     const RefPtr<NG::FrameNode>& dragPreviewNode, const NG::OffsetF& offset)
 {
@@ -660,6 +677,7 @@ void OverlayManager::ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::Fram
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
         if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            UpdateContextMenuSwitchDragPreviewBefore(node);
             ContextMenuSwitchDragPreviewAnimationProc(node, dragPreviewNode, offset);
         }
     }
@@ -2129,8 +2147,9 @@ void OverlayManager::CleanPreviewInSubWindow()
         if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
             for (auto& childNode : node->GetChildren()) {
                 auto frameNode = DynamicCast<FrameNode>(childNode);
-                if (frameNode &&
-                    (frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || frameNode->GetTag() == V2::IMAGE_ETS_TAG)) {
+                if (frameNode && (frameNode->GetTag() == V2::FLEX_ETS_TAG ||
+                    frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || frameNode->GetTag() == V2::IMAGE_ETS_TAG)) {
+                    CleanHoverImagePreviewInSubWindow(frameNode);
                     auto imagelayoutProperty = frameNode->GetLayoutProperty();
                     if (imagelayoutProperty) {
                         imagelayoutProperty->UpdateVisibility(VisibleType::GONE);
