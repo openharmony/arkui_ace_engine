@@ -96,11 +96,19 @@ protected:
     virtual void SkipIrregularLines(LayoutWrapper* layoutWrapper, bool forward);
 
 private:
+    enum class RequestFeature {
+        FIRST = 0,
+        SECOND
+    };
+
+    bool CheckPredictItems(
+        RequestFeature requestFeature, LayoutWrapper* layoutWrapper, float mainSize, float mainLength);
     void FillGridViewportAndMeasureChildren(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     void ReloadToStartIndex(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     void ReloadFromUpdateIdxToStartIndex(
         float mainSize, float crossSize, int32_t updateLineIndex, LayoutWrapper* layoutWrapper);
     float MeasureRecordedItems(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
+    void AdjustEndIndex(LayoutWrapper* layoutWrapper);
     bool UseCurrentLines(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
     virtual void SkipLargeOffset(float mainSize, LayoutWrapper* layoutWrapper);
 

@@ -499,6 +499,37 @@ void GridScrollLayoutAlgorithm::InitialItemsCrossSize(
     }
 }
 
+bool GridScrollLayoutAlgorithm::CheckPredictItems(
+    RequestFeature requestFeature, LayoutWrapper* layoutWrapper, float mainSize, float mainLength)
+{
+    if (requestFeature == RequestFeature::FIRST && requestFeature_.first && isLazyFeature_) {
+        // request more items.
+        auto remainSize = gridLayoutInfo_.currentOffset_;
+        if (cellAveLength_ > 0 && remainSize > 0) {
+            int32_t remainCount = std::ceil((remainSize / cellAveLength_) + 1) * crossCount_;
+            range_.first = std::max(gridLayoutInfo_.startIndex_ - remainCount, 0);
+            range_.first = std::max(range_.first - static_cast<int32_t>(range_.first % crossCount_), 0);
+        } else {
+            range_.first = std::max(gridLayoutInfo_.startIndex_ - static_cast<int32_t>(crossCount_), 0);
+            range_.first = std::max(range_.first - static_cast<int32_t>(range_.first % crossCount_), 0);
+        }
+        return true;
+    }
+    if (requestFeature == RequestFeature::SECOND && requestFeature_.second && isLazyFeature_) {
+        // request more items.
+        auto remainSize = mainSize - mainLength;
+        if (cellAveLength_ > 0 && remainSize > 0) {
+            int32_t remainCount = std::ceil((remainSize / cellAveLength_) + 1) * crossCount_;
+            range_.second = std::min(gridLayoutInfo_.endIndex_ + remainCount, layoutWrapper->GetTotalChildCount() - 1);
+        } else {
+            range_.second = std::min(
+                gridLayoutInfo_.endIndex_ + static_cast<int32_t>(crossCount_), layoutWrapper->GetTotalChildCount() - 1);
+        }
+        return true;
+    }
+    return false;
+}
+
 void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
 {
@@ -532,17 +563,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
 
     // Step2: When done measure items in record, request new items to fill blank at end
     FillBlankAtEnd(mainSize, crossSize, layoutWrapper, mainLength);
-    // check predict item.
-    if (requestFeature_.second && isLazyFeature_) {
-        // request more items.
-        auto remainSize = mainSize - mainLength;
-        if (cellAveLength_ > 0 && remainSize > 0) {
-            int32_t remainCount = std::ceil((remainSize / cellAveLength_) + 1) * crossCount_;
-            range_.second = std::min(gridLayoutInfo_.endIndex_ + remainCount, layoutWrapper->GetTotalChildCount() - 1);
-        } else {
-            range_.second = std::min(
-                gridLayoutInfo_.endIndex_ + static_cast<int32_t>(crossCount_), layoutWrapper->GetTotalChildCount() - 1);
-        }
+    if (CheckPredictItems(RequestFeature::SECOND, layoutWrapper, mainSize, mainLength)) {
         return;
     }
     if (gridLayoutInfo_.reachEnd_) { // If it reaches end when [FillBlankAtEnd], modify [currentOffset_]
@@ -551,18 +572,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
 
     // Step3: Check if need to fill blank at start (in situation of grid items moving down)
     auto haveNewLineAtStart = FillBlankAtStart(mainSize, crossSize, layoutWrapper);
-    // check predict item.
-    if (requestFeature_.first && isLazyFeature_) {
-        // request more items.
-        auto remainSize = gridLayoutInfo_.currentOffset_;
-        if (cellAveLength_ > 0 && remainSize > 0) {
-            int32_t remainCount = std::ceil((remainSize / cellAveLength_) + 1) * crossCount_;
-            range_.first = std::max(gridLayoutInfo_.startIndex_ - remainCount, 0);
-            range_.first = std::max(range_.first - static_cast<int32_t>(range_.first % crossCount_), 0);
-        } else {
-            range_.first = std::max(gridLayoutInfo_.startIndex_ - static_cast<int32_t>(crossCount_), 0);
-            range_.first = std::max(range_.first - static_cast<int32_t>(range_.first % crossCount_), 0);
-        }
+    if (CheckPredictItems(RequestFeature::FIRST, layoutWrapper, mainSize, mainLength)) {
         return;
     }
     if (gridLayoutInfo_.reachStart_) {
@@ -758,10 +768,10 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
         for (uint32_t i = (mainIter->second.empty() ? 0 : mainIter->second.rbegin()->first); i < crossCount_; i++) {
             // Step1. Get wrapper of [GridItem]
             auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
+            if (!itemWrapper && currentIndex >= 0) {
+                requestFeature_.first = true;
+            }
             if (!itemWrapper) {
-                if (currentIndex >= 0) {
-                    requestFeature_.first = true;
-                }
                 break;
             }
             // Step2. Measure child
@@ -1148,6 +1158,15 @@ float GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float cros
     return mainLength;
 }
 
+void GridScrollLayoutAlgorithm::AdjustEndIndex(LayoutWrapper* layoutWrapper)
+{
+    if (isLazyFeature_ && gridLayoutInfo_.startIndex_ > gridLayoutInfo_.endIndex_) {
+        // advance [endIndex_] if requested lazy items are still loaded
+        gridLayoutInfo_.endIndex_ = std::min(gridLayoutInfo_.startIndex_ + static_cast<int32_t>(crossCount_),
+            layoutWrapper->GetTotalChildCount() - 1);
+    }
+}
+
 bool GridScrollLayoutAlgorithm::UseCurrentLines(
     float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength)
 {
@@ -1210,10 +1229,7 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_ + 1;
             gridLayoutInfo_.UpdateStartIndexByStartLine();
-            if (isLazyFeature_ && gridLayoutInfo_.startIndex_ > gridLayoutInfo_.endIndex_) {
-                // advance [endIndex_] if requested lazy items are still loaded
-                gridLayoutInfo_.endIndex_ = std::min(static_cast<int32_t>(gridLayoutInfo_.startIndex_ + crossCount_), layoutWrapper->GetTotalChildCount() - 1);
-            }
+            AdjustEndIndex(layoutWrapper);
         }
     }
     // Case 1. if this while-loop breaks due to running out of records, the [currentMainLineIndex_] is larger by 1 than

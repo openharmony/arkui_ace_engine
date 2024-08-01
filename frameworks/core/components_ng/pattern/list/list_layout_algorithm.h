@@ -79,6 +79,8 @@ public:
     using PositionMap = std::map<int32_t, ListItemInfo>;
     static constexpr int32_t LAST_ITEM = -1;
 
+    static constexpr uint32_t INITIAL_RANGE_SECOND = 2;
+
     ListLayoutAlgorithm() = default;
 
     ~ListLayoutAlgorithm() override = default;
@@ -298,7 +300,9 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    bool RequestForward(LayoutWrapper* layoutWrapper, int32_t currentIndex, float currentEndPos, float chainOffset);
     void LayoutForward(LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos);
+    bool RequestBackward(LayoutWrapper* layoutWrapper, int32_t currentIndex, float currentStartPos, float chainOffset);
     void LayoutBackward(LayoutWrapper* layoutWrapper, int32_t endIndex, float endPos);
 
     void BeginLayoutForward(float startPos, LayoutWrapper* layoutWrapper);

@@ -1466,31 +1466,31 @@ void GetLayoutConstraint(ArkUINodeHandle node, ArkUI_Int32* value)
 
 struct Continuation;
 std::unordered_map<int, Continuation*> continuations;
-int currentContinuationId = 1;
+int g_currentContinuationId = 1;
 
 // Continuation is invoked when managed callback is executed, and calls us back.
 struct Continuation {
     Continuation()
     {
-        _id = currentContinuationId++;
+        id = g_currentContinuationId++;
     }
     virtual ~Continuation() {}
-    int _id;
-    int id()
+    int id;
+    int Id()
     {
-        return this->_id;
+        return this->id;
     }
-    virtual ArkUIEventCallbackArg args(int index)
+    virtual ArkUIEventCallbackArg Args(int index)
     {
         ArkUIEventCallbackArg result;
         result.i32 = 0;
         return result;
     }
-    virtual int numArgs()
+    virtual int NumArgs()
     {
         return 0;
     }
-    virtual void call(int argCount, ArkUIEventCallbackArg* args) {}
+    virtual void Call(int argCount, ArkUIEventCallbackArg* args) {}
 };
 
 struct ListItemAdapterContinuation : Continuation {
@@ -1500,7 +1500,7 @@ struct ListItemAdapterContinuation : Continuation {
         this->nodePtr = nodePtr;
     }
 
-    void call(int argCount, ArkUIEventCallbackArg* args) override
+    void Call(int argCount, ArkUIEventCallbackArg* args) override
     {
         auto* frameNode = reinterpret_cast<FrameNode*>(nodePtr);
         CHECK_NULL_VOID(frameNode);
@@ -1515,7 +1515,7 @@ struct GridItrmAdapterContinuation : Continuation {
         this->nodePtr = nodePtr;
     }
 
-    void call(int argCount, ArkUIEventCallbackArg* args) override
+    void Call(int argCount, ArkUIEventCallbackArg* args) override
     {
         auto* frameNode = reinterpret_cast<FrameNode*>(nodePtr);
         CHECK_NULL_VOID(frameNode);
@@ -1527,7 +1527,7 @@ void CallContinuation(int continuationId, int argCount, ArkUIEventCallbackArg* a
 {
     const auto iter = continuations.find(continuationId);
     if (iter != continuations.end()) {
-        iter->second->call(argCount, args);
+        iter->second->Call(argCount, args);
     }
 }
 
@@ -1557,8 +1557,8 @@ void SetRangeUpdater(ArkUINodeHandle nodePtr, int updaterId)
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == OHOS::Ace::V2::LIST_ETS_TAG) {
         auto continuation = new ListItemAdapterContinuation(nodePtr);
-        continuations.emplace(continuation->id(), continuation);
-        auto requestFunc = [updaterId, id = continuation->id()](int start, int end) {
+        continuations.emplace(continuation->Id(), continuation);
+        auto requestFunc = [updaterId, id = continuation->Id()](int start, int end) {
             ArkUINodeEvent event;
             event.kind = ArkUIEventCategory::CALLBACK_EVENT;
             event.callback.id = updaterId;
@@ -1573,8 +1573,8 @@ void SetRangeUpdater(ArkUINodeHandle nodePtr, int updaterId)
     }
     if (frameNode->GetTag() == OHOS::Ace::V2::GRID_ETS_TAG) {
         auto continuation = new GridItrmAdapterContinuation(nodePtr);
-        continuations.emplace(continuation->id(), continuation);
-        auto requestFunc = [updaterId, id = continuation->id()](int start, int end) {
+        continuations.emplace(continuation->Id(), continuation);
+        auto requestFunc = [updaterId, id = continuation->Id()](int start, int end) {
             ArkUINodeEvent event;
             event.kind = ArkUIEventCategory::CALLBACK_EVENT;
             event.callback.id = updaterId;
