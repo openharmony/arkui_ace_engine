@@ -238,9 +238,14 @@ bool FocusView::RequestDefaultFocus()
     auto viewRootScope = GetViewRootScope();
     CHECK_NULL_RETURN(viewRootScope, false);
     isViewHasFocused_ = true;
+
+    auto defaultFocusNode = focusViewHub->GetChildFocusNodeByType(FocusNodeType::DEFAULT);
+    if (defaultFocusNode && defaultFocusNode->IsCurrentFocus()) {
+        isDefaultHasBeFocused_ = true;
+    }
+
     auto isViewRootScopeHasChildFocused = viewRootScope->HasFocusedChild();
     if (!isDefaultHasBeFocused_ && !isViewRootScopeHasChildFocused) {
-        auto defaultFocusNode = focusViewHub->GetChildFocusNodeByType(FocusNodeType::DEFAULT);
         if (!defaultFocusNode) {
             TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view has no default focus.");
         } else if (!defaultFocusNode->IsFocusableWholePath()) {
