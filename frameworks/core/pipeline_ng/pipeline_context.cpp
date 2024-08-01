@@ -2306,7 +2306,7 @@ bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<Vie
     dumpNode->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer, needsRecordData);
     // The page path may not be obtained in the container, use the node tag as the page path.
     if (node) {
-        auto nodeTag = node->GetTag();
+        const auto& nodeTag = node->GetTag();
         if (nodeTag == V2::DIALOG_ETS_TAG || nodeTag == V2::SHEET_PAGE_TAG || nodeTag == V2::MODAL_PAGE_TAG) {
             viewDataWrap->SetPageUrl(nodeTag);
             return true;

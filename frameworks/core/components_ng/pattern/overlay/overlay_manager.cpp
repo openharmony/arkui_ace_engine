@@ -677,7 +677,7 @@ void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode)
     auto currentId = Container::CurrentId();
     CHECK_NULL_VOID(container);
 
-    auto nodeTag = ContainerNode->GetTag();
+    const auto& nodeTag = ContainerNode->GetTag();
     if (nodeTag == V2::SHEET_PAGE_TAG) {
         // BindSheet does not use subwindowManage. If use subwindow for display, autosave is started in the main window.
         auto layoutProperty = ContainerNode->GetLayoutProperty<SheetPresentationProperty>();
