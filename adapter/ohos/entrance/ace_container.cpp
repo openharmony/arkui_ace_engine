@@ -1310,12 +1310,20 @@ public:
 
         if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_LEFT ||
             placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT) {
-            offset.deltaX = rect_.left - ((rectf.Width() - size.width) / POPUP_CALCULATE_RATIO);
+            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
+            offset.deltaX = rect_.left - edgeDist;
+            if (offset.deltaX > edgeDist) {
+                offset.deltaX = edgeDist;
+            }
         }
 
         if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_RIGHT ||
             placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
-            offset.deltaX = rect_.left + rect_.width - ((rectf.Width() + size.width) / POPUP_CALCULATE_RATIO);
+            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
+            offset.deltaX = edgeDist + rect_.left + rect_.width - rectf.Width();
+            if ((offset.deltaX < -DBL_EPSILON) && (std::fabs(offset.deltaX) > edgeDist)) {
+                offset.deltaX = -edgeDist;
+            }
         }
 
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "PopupOffset x:%{public}f,y:%{public}f", offset.deltaX, offset.deltaY);
