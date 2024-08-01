@@ -58,6 +58,10 @@ public:
     {
         return focusedBGColorUnselected_;
     }
+    const Color& GetPointColorUnchecked() const
+    {
+        return pointColorUnchecked_;
+    }
     const Dimension& GetWidth() const
     {
         return width_;
@@ -227,6 +231,7 @@ protected:
     Color focusBoardColor_;
     Color borderFocusedColor_;
     Color focusedBGColorUnselected_;
+    Color pointColorUnchecked_;
     Color focusedBgColor_;
     Dimension sizeFocusBg_;
     Dimension sizeHoverBg_;
