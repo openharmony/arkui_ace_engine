@@ -937,6 +937,13 @@ public:
         return false;
     }
 
+    void HasAccessibilityVirtualNode(bool hasAccessibilityVirtualNode)
+    {
+        hasAccessibilityVirtualNode_ = hasAccessibilityVirtualNode;
+    }
+
+    void ProcessAccessibilityVirtualNode();
+
     RectF GetVirtualNodeTransformRectRelativeToWindow()
     {
         auto parentUinode = GetVirtualNodeParent().Upgrade();
@@ -1139,6 +1146,7 @@ private:
     std::function<void()> colorModeUpdateCallback_;
 
     RefPtr<AccessibilityProperty> accessibilityProperty_;
+    bool hasAccessibilityVirtualNode_ = false;
     RefPtr<LayoutProperty> layoutProperty_;
     RefPtr<PaintProperty> paintProperty_;
     RefPtr<RenderContext> renderContext_ = RenderContext::Create();

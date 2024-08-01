@@ -3677,6 +3677,24 @@ bool FrameNode::SelfOrParentExpansive()
     return SelfExpansive() || ParentExpansive();
 }
 
+void FrameNode::ProcessAccessibilityVirtualNode()
+{
+    if (!hasAccessibilityVirtualNode_) {
+        return;
+    }
+    auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
+    auto virtualNode = accessibilityProperty->GetAccessibilityVirtualNode();
+    auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
+    if (virtualFrameNode) {
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto constraint = GetLayoutConstraint();
+        virtualFrameNode->ApplyConstraint(constraint);
+        ProcessOffscreenNode(virtualFrameNode);
+        pipeline->SendUpdateVirtualNodeFocusEvent();
+    }
+}
+
 bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
 {
     auto context = GetContext();
@@ -3747,9 +3765,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     layoutAlgorithm_.Reset();
-    auto pipeline = GetContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    pipeline->SendUpdateVirtualNodeFocusEvent();
+    ProcessAccessibilityVirtualNode();
     return true;
 }
 
