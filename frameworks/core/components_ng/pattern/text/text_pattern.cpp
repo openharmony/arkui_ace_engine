@@ -3203,9 +3203,8 @@ void TextPattern::HandleSelectionChange(int32_t start, int32_t end)
     if (textSelector_.GetStart() == start && textSelector_.GetEnd() == end) {
         return;
     }
-
-    UpdateSelectionSpanType(std::min(start, end), std::max(start, end));
     textSelector_.Update(start, end);
+    UpdateSelectionSpanType(std::min(start, end), std::max(start, end));
     FireOnSelectionChange(std::min(start, end), std::max(start, end));
 }
 
