@@ -592,6 +592,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     taskScheduler_->StartRecordFrameInfo(GetCurrentFrameInfo(recvTime_, nanoTimestamp));
     taskScheduler_->FlushTask();
     UIObserverHandler::GetInstance().HandleLayoutDoneCallBack();
+    // flush correct rect again
+    taskScheduler_->FlushPersistAfterLayoutTask();
     taskScheduler_->FinishRecordFrameInfo();
     FlushNodeChangeFlag();
     FlushAnimationClosure();
