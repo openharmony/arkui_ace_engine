@@ -213,9 +213,7 @@ public:
                 hostNode_->GetId(), hostNode_->GetTag().c_str());
             if (SystemProperties::GetDebugEnabled()) {
                 abort();
-            } else {
-                LogBacktrace();
-            }
+            } 
             delayReset_ = true;
             needResetChild_ = needResetChild;
             hostNode_->frameProxy_ = std::make_unique<FrameProxy>(hostNode_);
