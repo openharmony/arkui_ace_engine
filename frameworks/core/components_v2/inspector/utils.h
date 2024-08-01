@@ -505,13 +505,13 @@ inline std::string ConvertWrapCopyOptionToString(CopyOptions copyOptions)
 inline std::string ConvertWrapWordBreakToString(WordBreak wordBreak)
 {
     static const LinearEnumMapNode<WordBreak, std::string> wordBreakTable[] = {
-        { WordBreak::NORMAL, "WordBreak.NORMAL" },
-        { WordBreak::BREAK_ALL, "WordBreak.BREAK_ALL" },
-        { WordBreak::BREAK_WORD, "WordBreak.BREAK_WORD" },
+        { WordBreak::NORMAL, "normal" },
+        { WordBreak::BREAK_ALL, "break-all" },
+        { WordBreak::BREAK_WORD, "break-word" },
     };
 
     auto index = BinarySearchFindIndex(wordBreakTable, ArraySize(wordBreakTable), wordBreak);
-    return index < 0 ? "WordBreak.BREAK_WORD" : wordBreakTable[index].value;
+    return index < 0 ? "break-word" : wordBreakTable[index].value;
 }
 
 inline std::string ConvertEllipsisModeToString(EllipsisMode value)
