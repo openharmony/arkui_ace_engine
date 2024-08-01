@@ -655,6 +655,30 @@ void OverlayManager::UpdateContextMenuDisappearPosition(
     UpdateContextMenuDisappearPositionAnimation(menuWrapper, overlayManager->GetUpdateDragMoveVector(), menuScale);
 }
 
+OffsetF OverlayManager::CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset)
+{
+    CHECK_NULL_RETURN(menuWrapperNode, OffsetF(0.0f, 0.0f));
+    UpdateDragMoveVector(offset);
+    if (IsOriginDragMoveVector() || !IsUpdateDragMoveVector()) {
+        return OffsetF(0.0f, 0.0f);
+    }
+
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, OffsetF(0.0f, 0.0f));
+    auto menuNode = menuWrapperPattern->GetMenu();
+    CHECK_NULL_RETURN(menuNode, OffsetF(0.0f, 0.0f));
+    auto menuOffset = GetUpdateDragMoveVector();
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, OffsetF(0.0f, 0.0f));
+    auto menuGeometryNode = menuNode->GetGeometryNode();
+    CHECK_NULL_RETURN(menuGeometryNode, OffsetF(0.0f, 0.0f));
+    auto menuPosition = menuGeometryNode->GetFrameOffset();
+    menuPosition += menuOffset;
+    menuGeometryNode->SetFrameOffset(menuPosition);
+    menuPattern->SetEndOffset(menuPosition);
+    return menuPosition;
+}
+
 bool OverlayManager::GetMenuPreviewCenter(NG::OffsetF& offset)
 {
     auto rootNode = rootNodeWeak_.Upgrade();
