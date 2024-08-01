@@ -188,9 +188,9 @@ public:
             theme->cancelButtonIconColor_ = pattern->GetAttr<Color>("cancel_button_icon_color", Color());
             theme->previewUnderlineColor_ = pattern->GetAttr<Color>(PREVIEW_UNDERLINE_COLOR, Color());
             theme->previewBoardColor_ = pattern->GetAttr<Color>(PREVIEW_BOARD_COLOR, Color());
-            theme->independentControlKeyboard_ = 
+            theme->independentControlKeyboard_ =
                 static_cast<bool>(pattern->GetAttr<double>("independent_control_keyboard", 0.0));
-            theme->directionKeysMoveFocusOut_ = 
+            theme->directionKeysMoveFocusOut_ =
                 static_cast<bool>(pattern->GetAttr<double>("direction_keys_move_focus_out", 0.0));
         }
     };
