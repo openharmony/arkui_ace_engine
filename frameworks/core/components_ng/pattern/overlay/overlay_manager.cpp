@@ -2775,6 +2775,19 @@ bool OverlayManager::DialogInMapHoldingFocus()
     return false;
 }
 
+bool OverlayManager::HasModalPage()
+{
+    if (modalList_.empty()) {
+        return false;
+    }
+    for (auto modal : modalList_) {
+        if (modal.Upgrade() && modal.Upgrade()->GetTag() == V2::MODAL_PAGE_TAG) {
+            return true;
+        }
+    }
+    return false;
+}
+
 RefPtr<FrameNode> OverlayManager::GetDialog(int32_t dialogId)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "get dialog enter");

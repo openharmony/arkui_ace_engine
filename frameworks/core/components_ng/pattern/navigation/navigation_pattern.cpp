@@ -881,7 +881,13 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
     int32_t standardIndex = lastStandardIndex >= 0 ? lastStandardIndex : 0;
     int32_t start = standardIndex;
     int32_t end = navigationPattern->navigationStack_->Size();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
     if (isOnShow) {
+        if (overlayManager && overlayManager->HasModalPage()) {
+            return;
+        }
         for (int32_t index = start; index < end; index++) {
             const auto& curPath = navDestinationNodes[index];
             auto curDestination = AceType::DynamicCast<NavDestinationGroupNode>(
