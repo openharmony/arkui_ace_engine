@@ -1608,7 +1608,7 @@ private:
     bool IsShowMenu(const std::optional<SelectionOptions>& options);
     bool IsContentRectNonPositive();
     bool IsHandleDragging();
-
+    void ReportEvent();
     RectF frameRect_;
     RectF textRect_;
     RefPtr<Paragraph> paragraph_;
