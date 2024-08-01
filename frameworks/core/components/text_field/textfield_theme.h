@@ -189,7 +189,7 @@ public:
             auto textfieldShowHandle = pattern->GetAttr<std::string>("textfield_show_handle", "0");
             theme->textfieldShowHandle_ = StringUtils::StringToInt(textfieldShowHandle);
 
-            theme->cancelButtonIconColor_ = pattern->GetAttr<Color>("cancel_button_icon_color", Color());
+            theme->cancelButtonIconColor_ = pattern->GetAttr<Color>("textfield_symbol_color", Color());
             theme->previewUnderlineColor_ = pattern->GetAttr<Color>(PREVIEW_UNDERLINE_COLOR, Color());
             theme->previewBoardColor_ = pattern->GetAttr<Color>(PREVIEW_BOARD_COLOR, Color());
 
