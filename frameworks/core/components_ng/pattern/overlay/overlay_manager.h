@@ -237,6 +237,12 @@ public:
     bool RemoveMenu(const RefPtr<FrameNode>& overlay);
     bool RemoveModalInOverlay();
     bool RemoveAllModalInOverlay();
+    bool RemoveAllModalInOverlayByStack();
+    bool RemoveAllModalInOverlayByList();
+    bool OnRemoveAllModalInOverlayByList();
+    void AfterRemoveAllModalInOverlayByList();
+    bool IsModalUiextensionNode(const RefPtr<FrameNode>& topModalNode);
+    bool IsProhibitedRemoveByRouter(const RefPtr<FrameNode>& topModalNode);
     bool RemoveOverlayInSubwindow();
 
     void RegisterOnHideDialog(std::function<void()> callback)

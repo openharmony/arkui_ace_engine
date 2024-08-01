@@ -155,6 +155,21 @@ public:
         return isExecuteOnDisappear_;
     }
 
+    bool IsUIExtension() const
+    {
+        return isUIExtension_;
+    }
+
+    void SetProhibitedRemoveByRouter(bool prohibitedRemoveByRouter)
+    {
+        prohibitedRemoveByRouter_ = prohibitedRemoveByRouter;
+    }
+
+    bool IsProhibitedRemoveByRouter() const
+    {
+        return prohibitedRemoveByRouter_;
+    }
+
     bool AvoidKeyboard() const override
     {
         // If UIExtensionComponent uses ModalPage, ModalPage will avoid KeyBoard.
@@ -187,6 +202,7 @@ public:
 private:
     void OnAttachToFrameNode() override;
     bool isUIExtension_ = false;
+    bool prohibitedRemoveByRouter_ = false;
     int32_t targetId_ = -1;
     ModalTransition type_ = ModalTransition::DEFAULT;
     bool hasTransitionEffect_ = false;
