@@ -19,6 +19,8 @@
 
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/text/html_utils.h"
@@ -669,6 +671,7 @@ void JSSpanString::FromHtmlBackTask(napi_value result, const JSCallbackInfo& inf
             ContainerScope scope(asyncContext->instanceId);
             // FromHtml may cost much time because of pixelmap.
             // Therefore this function should be called in Background thread.
+            LOGI("begin to convert html");
             auto styledString = HtmlUtils::FromHtml(htmlStr);
             auto container = AceEngine::Get().GetContainer(asyncContext->instanceId);
             CHECK_NULL_VOID(container);
@@ -693,6 +696,7 @@ void JSSpanString::FromHtmlBackTask(napi_value result, const JSCallbackInfo& inf
 
 void JSSpanString::FromHtml(const JSCallbackInfo& info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     if (info.Length() != 1 || !info[0]->IsString()) {
         ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
         return;
