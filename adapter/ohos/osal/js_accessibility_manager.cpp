@@ -2608,7 +2608,7 @@ RefPtr<NG::PipelineContext> JsAccessibilityManager::GetPipelineByWindowId(uint32
     return nullptr;
 }
 
-void JsAccessibilityManager::DumpTreeNG(bool useWindowId, uint32_t windowId, int64_t rootId)
+void JsAccessibilityManager::DumpTreeNG(bool useWindowId, uint32_t windowId, int64_t rootId, bool isDumpSimplify)
 {
     if (!useWindowId && rootId == -1) {
         // used to adapt old function
@@ -2628,7 +2628,7 @@ void JsAccessibilityManager::DumpTreeNG(bool useWindowId, uint32_t windowId, int
     CHECK_NULL_VOID(mainPipeline);
     GenerateCommonProperty(pipeline, commonProperty, mainPipeline);
     auto nodeId = rootId == -1 ? rootNode->GetAccessibilityId() : rootId;
-    DumpTreeNG(rootNode, 0, nodeId, commonProperty);
+    DumpTreeNG(rootNode, 0, nodeId, commonProperty, isDumpSimplify);
 }
 
 void JsAccessibilityManager::DumpHoverTestNG(uint32_t windowId, int64_t rootId, int32_t x, int32_t y, bool verbose)
@@ -2660,9 +2660,22 @@ void JsAccessibilityManager::DumpHoverTestNG(uint32_t windowId, int64_t rootId, 
     }
 }
 
+bool JsAccessibilityManager::CheckDumpInfoParams(const std::vector<std::string> &params)
+{
+    if (params.size() < 1) {
+        return false;
+    }
+    const std::string firstParam = params[0];
+    if (firstParam.compare("-inspector") != 0 && firstParam.compare("-accessibility") != 0 &&
+        firstParam.compare("-simplify") != 0) {
+        return false;
+    }
+    return true;
+}
+
 void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId)
 {
-    if (params.size() < 1 || (params[0] != "-inspector" && params[0] != "-accessibility")) {
+    if (!CheckDumpInfoParams(params)) {
         DumpLog::GetInstance().Print("Error: invalid arguments!");
         return;
     }
@@ -2674,6 +2687,7 @@ void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params
     };
     bool useWindowId = false;
     DumpMode mode = DumpMode::TREE;
+    bool isDumpSimplify = params[0].compare("-simplify") == 0;
     bool verbose = false;
     int64_t rootId = -1;
     int32_t pointX = 0;
@@ -2724,7 +2738,7 @@ void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params
     }
     switch (mode) {
         case DumpMode::TREE:
-            DumpTreeNG(useWindowId, windowId, rootId);
+            DumpTreeNG(useWindowId, windowId, rootId, isDumpSimplify);
             break;
         case DumpMode::NODE:
             DumpPropertyNG(nodeId);
@@ -3013,6 +3027,138 @@ static void DumpTreeNodeInfoNG(
     DumpLog::GetInstance().Print(depth, node->GetTag(), childSize);
 }
 
+void JsAccessibilityManager::DumpTreeNodeSafeAreaInfoNg(const RefPtr<NG::FrameNode>& node)
+{
+    auto layoutProperty = node->GetLayoutProperty();
+    if (layoutProperty) {
+        auto&& opts = layoutProperty->GetSafeAreaExpandOpts();
+        if (opts && opts->type != NG::SAFE_AREA_TYPE_NONE && opts->edges != NG::SAFE_AREA_EDGE_NONE) {
+            DumpLog::GetInstance().AddDesc(opts->ToString());
+        }
+        if (layoutProperty->GetSafeAreaInsets()) {
+            DumpLog::GetInstance().AddDesc(layoutProperty->GetSafeAreaInsets()->ToString());
+        }
+    }
+    if (node->SelfOrParentExpansive()) {
+        auto geometryNode = node->GetGeometryNode();
+        if (geometryNode) {
+            auto rect = geometryNode->GetSelfAdjust();
+            auto parentRect = geometryNode->GetParentAdjust();
+            bool isDefaultSize = NearZero(rect.GetX(), 0.0) && NearZero(rect.GetY(), 0.0) &&
+                                 NearZero(rect.Width(), 0.0) && NearZero(rect.Height(), 0.0);
+            bool isParentDefaultSize = NearZero(parentRect.GetX(), 0.0) && NearZero(parentRect.GetY(), 0.0) &&
+                                       NearZero(parentRect.Width(), 0.0) && NearZero(parentRect.Height(), 0.0);
+            if (!isDefaultSize && !isParentDefaultSize) {
+                DumpLog::GetInstance().AddDesc(std::string("selfAdjust: ")
+                                                   .append(rect.ToString().c_str())
+                                                   .append(",parentAdjust")
+                                                   .append(parentRect.ToString().c_str()));
+            }
+        }
+    }
+    CHECK_NULL_VOID(node->GetTag() == V2::PAGE_ETS_TAG);
+    auto pipeline = node->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(manager);
+    if (!manager->IsIgnoreAsfeArea() && !manager->IsNeedAvoidWindow() && !manager->IsFullScreen() &&
+        !manager->KeyboardSafeAreaEnabled() && !pipeline->GetUseCutout()) {
+        DumpLog::GetInstance().AddDesc(std::string("ignoreSafeArea: ")
+                                           .append(std::to_string(manager->IsIgnoreAsfeArea()))
+                                           .append(std::string(", isNeedAvoidWindow: ").c_str())
+                                           .append(std::to_string(manager->IsNeedAvoidWindow()))
+                                           .append(std::string(", IisFullScreen: ").c_str())
+                                           .append(std::to_string(manager->IsFullScreen()))
+                                           .append(std::string(", isKeyboardAvoidMode: ").c_str())
+                                           .append(std::to_string(manager->KeyboardSafeAreaEnabled()))
+                                           .append(std::string(", isUseCutout: ").c_str())
+                                           .append(std::to_string(pipeline->GetUseCutout())));
+    }
+}
+
+void JsAccessibilityManager::DumpPadding(const std::unique_ptr<NG::PaddingProperty>& padding, std::string label)
+{
+    NG::CalcLength defaultValue = NG::CalcLength(Dimension(0));
+    auto left = padding->left.value_or(defaultValue).GetDimension().Value();
+    auto right = padding->right.value_or(defaultValue).GetDimension().Value();
+    auto top = padding->top.value_or(defaultValue).GetDimension().Value();
+    auto bottom = padding->bottom.value_or(defaultValue).GetDimension().Value();
+    if (!NearZero(left, 0.0) && !NearZero(right, 0.0) && !NearZero(top, 0.0) && !NearZero(bottom, 0.0)) {
+        DumpLog::GetInstance().AddDesc(label.append(padding->ToString().c_str()));
+    }
+}
+
+void JsAccessibilityManager::DumpBorder(const std::unique_ptr<NG::BorderWidthProperty>& border, std::string label)
+{
+    Dimension defaultValue(0);
+    auto left = border->leftDimen.value_or(defaultValue).Value();
+    auto right = border->rightDimen.value_or(defaultValue).Value();
+    auto top = border->topDimen.value_or(defaultValue).Value();
+    auto bottom = border->bottomDimen.value_or(defaultValue).Value();
+    if (!NearZero(left, 0.0) && !NearZero(right, 0.0) && !NearZero(top, 0.0) && !NearZero(bottom, 0.0)) {
+        DumpLog::GetInstance().AddDesc(label.append(border->ToString().c_str()));
+    }
+}
+
+void JsAccessibilityManager::DumpTreeNodeCommonInfoNg(
+    const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty)
+{
+    DumpLog::GetInstance().AddDesc("ID: " + std::to_string(node->GetAccessibilityId()));
+    auto renderContext = node->GetRenderContext();
+    if (renderContext) {
+        auto backgroundColor = renderContext->GetBackgroundColor();
+        if (backgroundColor && backgroundColor->ColorToString().compare("#00000000") != 0) {
+            DumpLog::GetInstance().AddDesc("BackgroundColor: " + backgroundColor->ColorToString());
+        }
+        DumpLog::GetInstance().AddDesc(std::string("PaintRectWithoutTransform: ")
+                                           .append(renderContext->GetPaintRectWithoutTransform().ToString()));
+    }
+    NG::RectF rect = node->GetTransformRectRelativeToWindow();
+    auto top = rect.Top() + commonProperty.windowTop;
+    auto left = rect.Left() + commonProperty.windowLeft;
+    if (!NearZero(top, 0.0) && !NearZero(left, 0.0)) {
+        DumpLog::GetInstance().AddDesc("top: " + std::to_string(top));
+        DumpLog::GetInstance().AddDesc("left: " + std::to_string(left));
+    }
+    DumpLog::GetInstance().AddDesc("width: " + std::to_string(rect.Width()));
+    DumpLog::GetInstance().AddDesc("height: " + std::to_string(rect.Height()));
+    auto layoutProperty = node->GetLayoutProperty();
+    if (layoutProperty) {
+        if (!node->IsVisible()) {
+            DumpLog::GetInstance().AddDesc(
+                "visible: " + std::to_string(static_cast<int32_t>(layoutProperty->GetVisibility().value())));
+        }
+        auto& padding = layoutProperty->GetPaddingProperty();
+        if (padding) {
+            DumpPadding(padding, std::string("Padding: "));
+        }
+        auto& safeAreaPadding = layoutProperty->GetSafeAreaPaddingProperty();
+        if (safeAreaPadding) {
+            DumpPadding(safeAreaPadding, std::string("SafeAreaPadding: "));
+        }
+        auto& margin = layoutProperty->GetMarginProperty();
+        if (margin) {
+            DumpPadding(margin, std::string("Margin: "));
+        }
+        auto& border = layoutProperty->GetBorderWidthProperty();
+        if (border) {
+            DumpBorder(border, std::string("Border: "));
+        }
+        auto layoutRect = layoutProperty->GetLayoutRect();
+        if (layoutRect) {
+            DumpLog::GetInstance().AddDesc(std::string("LayoutRect: ").append(layoutRect.value().ToString().c_str()));
+        }
+    }
+}
+
+void JsAccessibilityManager::DumpTreeNodeSimplifyInfoNG(
+    const RefPtr<NG::FrameNode>& node, int32_t depth, const CommonProperty& commonProperty, int32_t childSize)
+{
+    DumpTreeNodeCommonInfoNg(node, commonProperty);
+    DumpTreeNodeSafeAreaInfoNg(node);
+    DumpLog::GetInstance().Print(depth, node->GetTag(), childSize);
+}
+
 void JsAccessibilityManager::DumpTreeAccessibilityNodeNG(const RefPtr<NG::UINode>& uiNodeParent, int32_t depth,
     int64_t nodeID, const CommonProperty& commonProperty)
 {
@@ -3038,7 +3184,7 @@ void JsAccessibilityManager::DumpTreeAccessibilityNodeNG(const RefPtr<NG::UINode
 }
 
 void JsAccessibilityManager::DumpTreeNG(const RefPtr<NG::FrameNode>& parent, int32_t depth,
-    int64_t nodeID, const CommonProperty& commonProperty)
+    int64_t nodeID, const CommonProperty& commonProperty, bool isDumpSimplify)
 {
     auto node = GetFramenodeByAccessibilityId(parent, nodeID);
     if (!node) {
@@ -3052,7 +3198,11 @@ void JsAccessibilityManager::DumpTreeNG(const RefPtr<NG::FrameNode>& parent, int
     for (const auto& item : node->GetChildren(true)) {
         GetFrameNodeChildren(item, children, commonProperty.pageId);
     }
-    DumpTreeNodeInfoNG(node, depth, commonProperty, children.size());
+    if (isDumpSimplify) {
+        DumpTreeNodeSimplifyInfoNG(node, depth, commonProperty, children.size());
+    } else {
+        DumpTreeNodeInfoNG(node, depth, commonProperty, children.size());
+    }
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     auto uiVirtualNode = accessibilityProperty->GetAccessibilityVirtualNode();
     bool hasVirtualNode = false;
@@ -3075,17 +3225,17 @@ void JsAccessibilityManager::DumpTreeNG(const RefPtr<NG::FrameNode>& parent, int
     }
     if (!hasVirtualNode) {
         for (auto childId : children) {
-            DumpTreeNG(node, depth + 1, childId, commonProperty);
+            DumpTreeNG(node, depth + 1, childId, commonProperty, isDumpSimplify);
         }
     }
 }
 
-void JsAccessibilityManager::DumpTree(int32_t depth, int64_t nodeID)
+void JsAccessibilityManager::DumpTree(int32_t depth, int64_t nodeID, bool isDumpSimplify)
 {
     auto pipeline = context_.Upgrade();
     CHECK_NULL_VOID(pipeline);
     if (!AceType::InstanceOf<NG::PipelineContext>(pipeline)) {
-        AccessibilityNodeManager::DumpTree(depth, nodeID);
+        AccessibilityNodeManager::DumpTree(depth, nodeID, isDumpSimplify);
     } else {
         auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
         auto rootNode = ngPipeline->GetRootElement();
@@ -3093,7 +3243,7 @@ void JsAccessibilityManager::DumpTree(int32_t depth, int64_t nodeID)
         nodeID = rootNode->GetAccessibilityId();
         CommonProperty commonProperty;
         GenerateCommonProperty(ngPipeline, commonProperty, pipeline);
-        DumpTreeNG(rootNode, depth, nodeID, commonProperty);
+        DumpTreeNG(rootNode, depth, nodeID, commonProperty, isDumpSimplify);
         for (auto subContext : GetSubPipelineContexts()) {
             auto subPipeline = subContext.Upgrade();
             ngPipeline = AceType::DynamicCast<NG::PipelineContext>(subPipeline);
@@ -3106,7 +3256,7 @@ void JsAccessibilityManager::DumpTree(int32_t depth, int64_t nodeID)
             commonProperty.windowTop = GetWindowTop(ngPipeline->GetWindowId());
             commonProperty.pageId = 0;
             commonProperty.pagePath = "";
-            DumpTreeNG(rootNode, depth, nodeID, commonProperty);
+            DumpTreeNG(rootNode, depth, nodeID, commonProperty, isDumpSimplify);
         }
     }
 }
