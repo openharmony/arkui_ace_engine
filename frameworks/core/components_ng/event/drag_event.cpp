@@ -266,7 +266,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 } else {
                     HideFilter();
-                    HideMenu(frameNode->GetId());
                     SubwindowManager::GetInstance()->HideMenuNG(false, true);
                 }
             }
@@ -1334,19 +1333,6 @@ void DragEventActuator::HideFilter()
     manager->RemoveFilterAnimation();
 }
 
-void DragEventActuator::HideMenu(int32_t targetId)
-{
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto manager = pipelineContext->GetOverlayManager();
-    CHECK_NULL_VOID(manager);
-    auto menuNode = manager->GetMenuNode(targetId);
-    CHECK_NULL_VOID(menuNode);
-    TAG_LOGI(AceLogTag::ACE_DRAG, "will hide menu, tagetNode id %{public}d menuNode id %{public}d.",
-        targetId, menuNode->GetId());
-    manager->HideMenu(menuNode, targetId);
-}
-
 void DragEventActuator::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float menuScale, bool isRedragStart)
 {
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
@@ -1412,10 +1398,6 @@ void DragEventActuator::BindClickEvent(const RefPtr<FrameNode>& columnNode)
         } else {
             actuator->HidePixelMap();
             actuator->HideFilter();
-            auto frameNode = gestureHub->GetFrameNode();
-            if (frameNode) {
-                actuator->HideMenu(frameNode->GetId());
-            }
         }
     };
     auto columnGestureHub = columnNode->GetOrCreateGestureEventHub();
