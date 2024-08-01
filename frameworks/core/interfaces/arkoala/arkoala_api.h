@@ -57,6 +57,7 @@ typedef long long ArkUI_Int64;
 typedef float ArkUI_Float32;
 typedef double ArkUI_Float64;
 typedef const char* ArkUI_CharPtr;
+typedef unsigned long long ArkUI_Uint64;
 
 // Several opaque struct declarations.
 struct _ArkUIVMContext;
@@ -236,7 +237,7 @@ struct ArkUIDragEvent {
     ArkUI_Float64 displayY;
     ArkUI_Float64 screenX;
     ArkUI_Float64 screenY;
-    ArkUI_Int64 modifierKeyState;
+    ArkUI_Uint64 modifierKeyState;
     ArkUI_Int32 dragBehavior;
     bool useCustomDropAnimation;
     ArkUI_Int32 subKind;
