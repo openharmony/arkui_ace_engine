@@ -2045,6 +2045,6 @@
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_CustomSpanDrawInfo_GetBaseLine"
+        "name": "OH_ArkUI_CustomSpanDrawInfo_GetBaseline"
     }
 ]

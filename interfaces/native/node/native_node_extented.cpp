@@ -243,7 +243,7 @@ float OH_ArkUI_CustomSpanDrawInfo_GetLineBottom(ArkUI_CustomSpanDrawInfo* info)
     return info->optionsLineBottom;
 }
 
-float OH_ArkUI_CustomSpanDrawInfo_GetBaseLine(ArkUI_CustomSpanDrawInfo* info)
+float OH_ArkUI_CustomSpanDrawInfo_GetBaseline(ArkUI_CustomSpanDrawInfo* info)
 {
     if (!info) {
         return 0.0f;

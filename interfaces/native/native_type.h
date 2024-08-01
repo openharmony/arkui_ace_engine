@@ -3721,7 +3721,7 @@ float OH_ArkUI_CustomSpanDrawInfo_GetLineBottom(ArkUI_CustomSpanDrawInfo* info);
  * @return 基线偏移量值。若函数参数异常，返回0.0f。
  * @since 12
 */
-float OH_ArkUI_CustomSpanDrawInfo_GetBaseLine(ArkUI_CustomSpanDrawInfo* info);
+float OH_ArkUI_CustomSpanDrawInfo_GetBaseline(ArkUI_CustomSpanDrawInfo* info);
 #ifdef __cplusplus
 };
 #endif
