@@ -776,14 +776,14 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
         }
         if (focusChoice_ == FocusChoice::SEARCH && isAllTextSelected && !isCaretVisible &&
             event.code == KeyCode::KEY_DPAD_LEFT) {
-            return true; // no action
+            return IsConsumeEvent();
         }
     }
     if (event.code == KeyCode::KEY_DPAD_RIGHT || (event.pressedCodes.size() == 1 && event.code == KeyCode::KEY_TAB)) {
         if (focusChoice_ == FocusChoice::SEARCH && (isAllTextSelected || isTextEmpty || isOnlyTabPressed)) {
             if (NearZero(cancelButtonSize_.Height()) && !isSearchButtonEnabled_ &&
                 event.code == KeyCode::KEY_DPAD_RIGHT) {
-                return true;
+                return IsConsumeEvent();
             } else if (NearZero(cancelButtonSize_.Height()) && !isSearchButtonEnabled_) {
                 textFieldPattern->CloseKeyboard(true);
                 return false;
@@ -796,8 +796,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
             PaintFocusState();
             return true;
         } else if (focusChoice_ == FocusChoice::SEARCH && event.code == KeyCode::KEY_DPAD_RIGHT) {
-            textFieldPattern->OnKeyEvent(event);
-            return true;
+            return textFieldPattern->OnKeyEvent(event);
         }
         if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
             if (!NearZero(cancelButtonSize_.Height()) && (!isSearchButtonEnabled_) &&
@@ -839,6 +838,11 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     }
 }
 
+bool SearchPattern::IsConsumeEvent()
+{
+    return !directionKeysMoveFocusOut_;
+}
+
 void SearchPattern::PaintSearchFocusState()
 {
     auto host = GetHost();
@@ -874,18 +878,7 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
     CHECK_NULL_VOID(textFieldPattern);
 
     if (focusChoice_ == FocusChoice::SEARCH) {
-        PaintSearchFocusState();
-        if (!recoverFlag) {
-            if (!textFieldPattern->GetTextValue().empty()) {
-                textFieldPattern->NeedRequestKeyboard();
-                textFieldPattern->HandleOnSelectAll(true); // Select all text
-                textFieldPattern->StopTwinkling();         // Hide caret
-            } else {
-                textFieldPattern->HandleFocusEvent(); // Show caret
-            }
-        } else {
-            textFieldPattern->HandleFocusEvent();
-        }
+        HandleFocusChoiceSearch(textFieldPattern, recoverFlag);
     } else {
         if (textFieldPattern->IsSelected() || textFieldPattern->GetCursorVisible()) {
             textFieldPattern->HandleSetSelection(0, 0, false); // Clear text selection & caret if focus has gone
@@ -906,6 +899,22 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
         focusHub->PaintInnerFocusState(focusRect, true);
     }
     host->MarkModifyDone();
+}
+
+void SearchPattern::HandleFocusChoiceSearch(const RefPtr<TextFieldPattern>& textFieldPattern, bool recoverFlag)
+{
+    PaintSearchFocusState();
+    if (!recoverFlag && !textFieldPattern->GetTextValue().empty()) {
+        textFieldPattern->NeedRequestKeyboard();
+        if (directionKeysMoveFocusOut_) {
+            textFieldPattern->HandleFocusEvent();
+        } else {
+            textFieldPattern->HandleOnSelectAll(true); // Select all text
+            textFieldPattern->StopTwinkling();         // Hide caret
+        }
+        return;
+    }
+    textFieldPattern->HandleFocusEvent();
 }
 
 void SearchPattern::GetSearchFocusPaintRadius(float& radiusTopLeft, float& radiusTopRight,

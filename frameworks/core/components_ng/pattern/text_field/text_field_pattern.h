@@ -1534,6 +1534,9 @@ private:
     void TwinklingByFocus();
 
     bool FinishTextPreviewByPreview(const std::string& insertValue);
+    bool GetIndependentControlKeyboard();
+    bool IsMoveFocusOutFromLeft(const KeyEvent& event);
+    bool IsMoveFocusOutFromRight(const KeyEvent& event);
 
     RectF frameRect_;
     RectF textRect_;
@@ -1721,6 +1724,8 @@ private:
     bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;
     int32_t clickTimes_ = -1;
+    bool independentControlKeyboard_ = false;
+    bool directionKeysMoveFocusOut_ = false;
 };
 } // namespace OHOS::Ace::NG
 
