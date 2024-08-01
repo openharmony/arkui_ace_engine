@@ -2232,11 +2232,13 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())),
             static_cast<WindowSizeChangeReason>(reason));
     };
-
-    auto pipelineContext = container->GetPipelineContext();
-    if (pipelineContext) {
-        pipelineContext->ChangeDarkModeBrightness();
-    }
+    auto changeBrightnessTask = [container]() {
+        auto pipelineContext = container->GetPipelineContext();
+        if (pipelineContext) {
+            pipelineContext->ChangeDarkModeBrightness();
+        }
+    };
+    taskExecutor->PostTask(std::move(changeBrightnessTask), TaskExecutor::TaskType::UI, "ArkUIUpdateBrightness");
     AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
     if (container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
         reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) {
