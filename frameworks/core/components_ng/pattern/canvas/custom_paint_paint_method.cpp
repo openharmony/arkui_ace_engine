@@ -1470,8 +1470,8 @@ void CustomPaintPaintMethod::SetFilterParam(const std::string& filterStr)
         return;
     }
     colorMatrix_ = RSColorMatrix();
-    colorFilter_ = nullptr;
-    blurFilter_ = nullptr;
+    colorFilter_ = RSColorFilter::CreateMatrixColorFilter(colorMatrix_);
+    blurFilter_ = RSImageFilter::CreateBlurImageFilter(0, 0, RSTileMode::DECAL, nullptr);
     for (FilterProperty filter : filters) {
         switch (filter.filterType_) {
             case FilterType::NONE:
@@ -1981,8 +1981,8 @@ void CustomPaintPaintMethod::ResetStates()
     std::vector<std::shared_ptr<RSColorFilter>>().swap(saveColorFilter_);
     std::vector<std::shared_ptr<RSImageFilter>>().swap(saveBlurFilter_);
     colorMatrix_ = RSColorMatrix();
-    colorFilter_ = nullptr;
-    blurFilter_ = nullptr;
+    colorFilter_ = RSColorFilter::CreateMatrixColorFilter(colorMatrix_);
+    blurFilter_ = RSImageFilter::CreateBlurImageFilter(0, 0, RSTileMode::DECAL, nullptr);
 }
 
 void CustomPaintPaintMethod::PaintShadow(
