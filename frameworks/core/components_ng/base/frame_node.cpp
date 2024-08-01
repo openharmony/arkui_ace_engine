@@ -327,7 +327,7 @@ public:
             if ((start <= end && index >= start && index <= end) || (start > end && (index <= end || start <= index))) {
                 itor++;
             } else {
-                partFrameNodeChildren_.erase(itor++);
+                itor = partFrameNodeChildren_.erase(itor);
             }
         }
         auto guard = GetGuard();
@@ -347,7 +347,7 @@ public:
             if (activeChildSets->activeItems.find(index) != activeChildSets->activeItems.end()) {
                 itor++;
             } else {
-                partFrameNodeChildren_.erase(itor++);
+                itor = partFrameNodeChildren_.erase(itor);
             }
         }
         auto guard = GetGuard();
