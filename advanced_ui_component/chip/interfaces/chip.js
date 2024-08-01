@@ -30,6 +30,7 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 const resourceFn = resourceManager.getSystemResourceManager();
 const iconTypeList = ['prefixIcon', 'suffixIcon'];
 const shadowRange = 6;
+const fontWeightRangeList = [100, 900];
 export var ChipSize;
 (function (ChipSize) {
     ChipSize["NORMAL"] = "NORMAL";
@@ -67,6 +68,7 @@ export const defaultTheme = {
         smallFocusFontSize: { "id": -1, "type": 10002, params: ['sys.float.chip_small_focused_fontsize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         focusFontColor: { "id": -1, "type": 10001, params: ['sys.color.chip_focus_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         fontColor: { "id": -1, "type": 10001, params: ['sys.color.chip_font_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        activatedFontWeight: { "id": -1, "type": 10002, params: ['sys.float.chip_activated_fontweight'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         activatedFontColor: { "id": -1, "type": 10001, params: ['sys.color.chip_activated_fontcolor'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         fontFamily: "HarmonyOS Sans",
         normalDefaultMargin: {
@@ -201,7 +203,7 @@ export function Chip(options, parent = null) {
                     chipDirection: options.direction,
                     onClose: options.onClose,
                     onClicked: options.onClicked,
-                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/chip.ets", line: 336, col: 3 });
+                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/chip.ets", line: 339, col: 3 });
                 ViewPU.create(componentCall);
                 let paramsLambda = () => {
                     return {
@@ -794,7 +796,9 @@ export class ChipComponent extends ViewPU {
     }
     getLabelFontWeight() {
         if (this.getChipActive()) {
-            return FontWeight.Medium;
+            let index = LengthMetrics.resource(this.theme.label.activatedFontWeight).value;
+            return (index >= fontWeightRangeList[0] && index <= fontWeightRangeList[1]) ?
+                index : FontWeight.Medium;
         }
         return FontWeight.Regular;
     }

@@ -24,8 +24,9 @@ import componentUtils from '@ohos.arkui.componentUtils';
 import hilog from '@ohos.hilog';
 
 const resourceFn = resourceManager.getSystemResourceManager();
-const iconTypeList = ['prefixIcon', 'suffixIcon'];
-const shadowRange = 6;
+const iconTypeList: string[] = ['prefixIcon', 'suffixIcon'];
+const shadowRange: number = 6;
+const fontWeightRangeList: number[] = [100, 900];
 
 export enum ChipSize {
   NORMAL = "NORMAL",
@@ -106,6 +107,7 @@ interface LabelTheme {
   smallFocusFontSize: Dimension;
   focusFontColor: ResourceColor;
   fontColor: ResourceColor;
+  activatedFontWeight: Dimension;
   activatedFontColor: ResourceColor;
   fontFamily: string;
   normalMargin: Margin;
@@ -200,6 +202,7 @@ export const defaultTheme: ChipTheme = {
     smallFocusFontSize: $r('sys.float.chip_small_focused_fontsize'),
     focusFontColor: $r('sys.color.chip_focus_text'),
     fontColor: $r('sys.color.chip_font_color'),
+    activatedFontWeight: $r('sys.float.chip_activated_fontweight'),
     activatedFontColor: $r('sys.color.chip_activated_fontcolor'),
     fontFamily: "HarmonyOS Sans",
     normalDefaultMargin: {
@@ -511,9 +514,11 @@ export struct ChipComponent {
     return this.label?.fontFamily ?? this.theme.label.fontFamily;
   }
 
-  private getLabelFontWeight(): FontWeight {
+  private getLabelFontWeight(): FontWeight | number {
     if (this.getChipActive()) {
-      return FontWeight.Medium;
+      let index = Number(LengthMetrics.resource(this.theme.label.activatedFontWeight as Resource).value);
+      return (index >= fontWeightRangeList[0] && index <= fontWeightRangeList[1]) ?
+        index : FontWeight.Medium;
     }
     return FontWeight.Regular;
   }
@@ -1331,7 +1336,6 @@ export struct ChipComponent {
               this.deleteChipNodeAnimate();
             })
         }
-
       }
       .direction(this.chipDirection)
       .alignItems(VerticalAlign.Center)
