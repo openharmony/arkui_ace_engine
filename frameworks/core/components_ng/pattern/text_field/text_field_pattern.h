@@ -1535,8 +1535,8 @@ private:
 
     bool FinishTextPreviewByPreview(const std::string& insertValue);
     bool GetIndependentControlKeyboard();
-    bool isMoveFocusOutFromLeft(const KeyEvent& event);
-    bool isMoveFocusOutFromRight(const KeyEvent& event);
+    bool IsMoveFocusOutFromLeft(const KeyEvent& event);
+    bool IsMoveFocusOutFromRight(const KeyEvent& event);
 
     RectF frameRect_;
     RectF textRect_;

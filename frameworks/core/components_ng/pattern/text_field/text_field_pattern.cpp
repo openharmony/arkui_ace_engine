@@ -1315,20 +1315,20 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
         }
         return true;
     }
-    if (directionKeysMoveFocusOut_ && (isMoveFocusOutFromLeft(event) || isMoveFocusOutFromRight(event))) {
+    if (directionKeysMoveFocusOut_ && (IsMoveFocusOutFromLeft(event) || IsMoveFocusOutFromRight(event))) {
         TextInputClient::HandleKeyEvent(event);
         return false;
     }
     return TextInputClient::HandleKeyEvent(event);
 }
 
-bool TextFieldPattern::isMoveFocusOutFromLeft(const KeyEvent& event)
+bool TextFieldPattern::IsMoveFocusOutFromLeft(const KeyEvent& event)
 {
     return (event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_UP) &&
      selectController_->GetCaretIndex() == 0;
 }
 
-bool TextFieldPattern::isMoveFocusOutFromRight(const KeyEvent& event)
+bool TextFieldPattern::IsMoveFocusOutFromRight(const KeyEvent& event)
 {
     return (event.code == KeyCode::KEY_DPAD_RIGHT || event.code == KeyCode::KEY_DPAD_DOWN) &&
      selectController_->GetCaretIndex() == static_cast<int32_t>(contentController_->GetWideText().length());
