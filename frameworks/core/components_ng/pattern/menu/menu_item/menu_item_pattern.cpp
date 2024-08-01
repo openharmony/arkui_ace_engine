@@ -1271,20 +1271,22 @@ void MenuItemPattern::UpdateImageIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
         auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateImageSourceInfo(imageSourceInfo);
-        bool useDefaultThemeIcon = false;
-        if (imageSourceInfo.IsSvg()) {
-            auto src = imageSourceInfo.GetSrc();
-            auto srcId = src.substr(SYSTEM_RESOURCE_PREFIX.size(),
-                src.substr(0, src.rfind(".svg")).size() - SYSTEM_RESOURCE_PREFIX.size());
-            auto isSystemIcon = (srcId.find("ohos_") != std::string::npos)
-                || ((std::all_of(srcId.begin(), srcId.end(), ::isdigit))
-                    && (std::stoul(srcId) >= MIN_SYSTEM_RESOURCE_ID));
-            if (isSystemIcon) {
-                useDefaultThemeIcon = true;
-            }
-        }
+        bool useDefaultThemeIcon = UseDefaultThemeIcon(imageSourceInfo);
         UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), useDefaultThemeIcon);
     }
+}
+
+bool MenuItemPattern::UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo)
+{
+    if (imageSourceInfo.IsSvg()) {
+        auto src = imageSourceInfo.GetSrc();
+        auto srcId = src.substr(SYSTEM_RESOURCE_PREFIX.size(),
+            src.substr(0, src.rfind(".svg")).size() - SYSTEM_RESOURCE_PREFIX.size());
+        return (srcId.find("ohos_") != std::string::npos)
+            || ((std::all_of(srcId.begin(), srcId.end(), ::isdigit))
+                && (std::stoul(srcId) >= MIN_SYSTEM_RESOURCE_ID));
+    }
+    return false;
 }
 
 void MenuItemPattern::UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>& iconNode, ImageSourceInfo& iconSrc,
