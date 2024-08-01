@@ -504,7 +504,7 @@ export struct ChipComponent {
   }
 
   private getLabelFontColor(): ResourceColor {
-    if (this.getChipActive()) {
+    if (this.getChipActive() && !this.chipNodeOnFocus) {
       return this.label?.activatedFontColor ?? this.theme.label.activatedFontColor;
     }
     return this.label?.fontColor ?? this.getFontColor();
@@ -516,7 +516,7 @@ export struct ChipComponent {
 
   private getLabelFontWeight(): FontWeight | number {
     if (this.getChipActive()) {
-      let index = Number(LengthMetrics.resource(this.theme.label.activatedFontWeight as Resource).value);
+      let index = LengthMetrics.resource(this.theme.label.activatedFontWeight as Resource).value;
       return (index >= fontWeightRangeList[0] && index <= fontWeightRangeList[1]) ?
         index : FontWeight.Medium;
     }
@@ -615,7 +615,7 @@ export struct ChipComponent {
   }
 
   private getChipNodeBorderColor(): ResourceColor {
-    if (this.getChipActive()) {
+    if (this.getChipActive() && !this.chipNodeOnFocus) {
       return this.getActivatedChipNodeBorderColor();
     }
     if (this.chipSize === ChipSize.NORMAL && !this.isSetbackgroundColor()) {

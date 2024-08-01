@@ -786,7 +786,7 @@ export class ChipComponent extends ViewPU {
         return this.chipNodeOnFocus ? this.theme.label.focusFontColor : this.theme.label.fontColor;
     }
     getLabelFontColor() {
-        if (this.getChipActive()) {
+        if (this.getChipActive() && !this.chipNodeOnFocus) {
             return this.label?.activatedFontColor ?? this.theme.label.activatedFontColor;
         }
         return this.label?.fontColor ?? this.getFontColor();
@@ -896,7 +896,7 @@ export class ChipComponent extends ViewPU {
         }
     }
     getChipNodeBorderColor() {
-        if (this.getChipActive()) {
+        if (this.getChipActive() && !this.chipNodeOnFocus) {
             return this.getActivatedChipNodeBorderColor();
         }
         if (this.chipSize === ChipSize.NORMAL && !this.isSetbackgroundColor()) {
