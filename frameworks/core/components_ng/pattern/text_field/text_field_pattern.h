@@ -170,14 +170,22 @@ struct SourceAndValueInfo {
     bool isIME = false;
 };
 
+struct TouchAndMoveCaretState {
+    bool isTouchCaret = false;
+    bool isMoveCaret = false;
+    Offset touchDownOffset;
+    Dimension minDinstance = 5.0_vp;
+};
+
 class TextFieldPattern : public ScrollablePattern,
                          public TextDragBase,
                          public ValueChangeObserver,
                          public TextInputClient,
                          public TextBase,
-                         public Magnifier {
-    DECLARE_ACE_TYPE(
-        TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient, TextBase, Magnifier);
+                         public Magnifier,
+                         public TextGestureSelector {
+    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient, TextBase,
+        Magnifier, TextGestureSelector);
 
 public:
     TextFieldPattern();
@@ -1395,6 +1403,8 @@ public:
         return multipleClickRecognizer_;
     }
 
+    void ShowCaretAndStopTwinkling();
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override
@@ -1410,7 +1420,11 @@ protected:
     bool IsReverse() const override
     {
         return false;
-    };
+    }
+
+    int32_t GetTouchIndex(const OffsetF& offset) override;
+    void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
+    void OnTextGenstureSelectionEnd() override;
 
     bool IsTextEditableForStylus() const override;
 
@@ -1463,7 +1477,6 @@ private:
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
-    void ShowSelectOverlayForLongPress(bool shouldProcessOverlayAfterLayout);
     bool CanChangeSelectState();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void CursorMoveOnClick(const Offset& offset);
@@ -1546,7 +1559,8 @@ private:
     void UpdateSelectController();
     void UpdateHandlesOffsetOnScroll(float offset);
     void CloseHandleAndSelect() override;
-    bool RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex, const RectF& lastCaretRect);
+    bool RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex);
+    bool RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect);
     void PaintTextRect();
     void GetIconPaintRect(const RefPtr<TextInputResponseArea>& responseArea, RoundRect& paintRect);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
@@ -1620,7 +1634,6 @@ private:
 
     void CalculatePreviewingTextMovingLimit(const Offset& touchOffset, double& limitL, double& limitR);
     void UpdateParam(GestureEvent& info, bool shouldProcessOverlayAfterLayout);
-    void ShowCaretAndStopTwinkling();
     void OnCaretMoveDone(const TouchEventInfo& info);
     void HandleCrossPlatformInBlurEvent();
     void ModifyInnerStateInBlurEvent();
@@ -1634,6 +1647,7 @@ private:
     bool IsContentRectNonPositive();
     bool IsHandleDragging();
     void ReportEvent();
+
     RectF frameRect_;
     RectF textRect_;
     RefPtr<Paragraph> paragraph_;
@@ -1780,7 +1794,7 @@ private:
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
-    bool isTouchCaret_ = false;
+    TouchAndMoveCaretState moveCaretState_;
     bool needSelectAll_ = false;
     bool isModifyDone_ = false;
     bool initTextRect_ = false;

@@ -87,6 +87,8 @@ public:
     float GetHandleDiameter();
     void ConvertPointRelativeToNode(const RefPtr<FrameNode>& node, PointF& point);
     bool IsTouchAtHandle(const PointF& localPoint, const PointF& globalPoint);
+    void SetHandleCircleIsShow(bool isFirst, bool isShow);
+    void SetIsHandleLineShow(bool isShow);
 
 private:
     void SetHolder(const RefPtr<SelectOverlayHolder>& holder);

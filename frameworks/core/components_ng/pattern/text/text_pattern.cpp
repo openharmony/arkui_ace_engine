@@ -81,6 +81,9 @@ TextPattern::~TextPattern()
 
 void TextPattern::OnWindowHide()
 {
+    if (magnifierController_) {
+        magnifierController_->RemoveMagnifierFrameNode();
+    }
     CHECK_NULL_VOID(contentMod_);
     contentMod_->PauseAnimation();
     auto host = GetHost();
@@ -355,7 +358,10 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     parentGlobalOffset_ = GetParentGlobalOffset();
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay(true);
-    ShowSelectOverlay({ .animation = true });
+    if (magnifierController_) {
+        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
+    }
+    StartGestureSelection(textSelector_.GetStart(), textSelector_.GetEnd());
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -1206,7 +1212,7 @@ void TextPattern::InitTouchEvent()
 
 void TextPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
-    return;
+    DoGestureSelection(info);
 }
 
 void TextPattern::InitKeyEvent()
@@ -2826,6 +2832,9 @@ void TextPattern::OnColorConfigurationUpdate()
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+    if (magnifierController_) {
+        magnifierController_->SetColorModeChange(true);
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_TEXT_SCOPED_TRACE("OnColorConfigurationUpdate[Text][self:%d]", host->GetId());
@@ -3689,5 +3698,33 @@ void TextPattern::BeforeCreatePaintWrapper()
     if (contentMod_) {
         contentMod_->ContentChange();
     }
+}
+
+int32_t TextPattern::GetTouchIndex(const OffsetF& offset)
+{
+    auto paragraphOffset =
+        offset - GetTextContentRect().GetOffset() + OffsetF(0.0f, std::min(GetBaselineOffset(), 0.0f));
+    return GetHandleIndex({ paragraphOffset.GetX(), paragraphOffset.GetY() });
+}
+
+void TextPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info)
+{
+    auto localOffset = info.GetTouches().front().GetLocalLocation();
+    if (magnifierController_) {
+        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    HandleSelectionChange(start, end);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextPattern::OnTextGenstureSelectionEnd()
+{
+    if (magnifierController_) {
+        magnifierController_->RemoveMagnifierFrameNode();
+    }
+    CalculateHandleOffsetAndShowOverlay();
+    ShowSelectOverlay({ .animation = true });
 }
 } // namespace OHOS::Ace::NG

@@ -113,8 +113,8 @@ struct CaretOffsetInfo {
 };
 
 class RichEditorPattern
-    : public TextPattern, public ScrollablePattern, public TextInputClient, public Magnifier, public SpanWatcher {
-    DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, ScrollablePattern, TextInputClient, Magnifier, SpanWatcher);
+    : public TextPattern, public ScrollablePattern, public TextInputClient, public SpanWatcher {
+    DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, ScrollablePattern, TextInputClient, SpanWatcher);
 
 public:
     RichEditorPattern();
