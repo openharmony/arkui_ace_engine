@@ -686,9 +686,9 @@ void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
         TaskExecutor::TaskType::UI, "ArkUIOverlayDialogCloseEvent");
 }
 
-void OverlayManager::FireDialogAutoSave(const RefPtr<FrameNode>& ContainerNode)
+void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "fire dialog auto save enter");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "fire auto save enter");
     CHECK_NULL_VOID(ContainerNode);
     if (!ContainerNode->NeedRequestAutoSave()) {
         return;
@@ -696,7 +696,20 @@ void OverlayManager::FireDialogAutoSave(const RefPtr<FrameNode>& ContainerNode)
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
     CHECK_NULL_VOID(container);
-    if (container->IsSubContainer()) {
+
+    const auto& nodeTag = ContainerNode->GetTag();
+    if (nodeTag == V2::SHEET_PAGE_TAG) {
+        // BindSheet does not use subwindowManage. If use subwindow for display, autosave is started in the main window.
+        auto layoutProperty = ContainerNode->GetLayoutProperty<SheetPresentationProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto currentStyle = layoutProperty->GetSheetStyleValue();
+        if (currentStyle.instanceId.has_value()) {
+            auto pattern = ContainerNode->GetPattern<SheetPresentationPattern>();
+            auto targetNode = FrameNode::GetFrameNode(pattern->GetTargetTag(), pattern->GetTargetId());
+            CHECK_NULL_VOID(targetNode);
+            currentId = targetNode->GetInstanceId();
+        }
+    } else if (container->IsSubContainer()) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
     }
     container->RequestAutoSave(ContainerNode, nullptr, nullptr, true, currentId);
@@ -708,7 +721,7 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(node);
 
     BlurOverlayNode(node);
-    FireDialogAutoSave(node);
+    FireAutoSave(node);
 
     auto dialogPattern = node->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
@@ -3297,6 +3310,7 @@ void OverlayManager::PlayTransitionEffectOut(const RefPtr<FrameNode>& topModalNo
             FireNavigationStateChange(false, topModalNode);
         }
         auto rootNode = FindWindowScene(topModalNode);
+        FireAutoSave(topModalNode);
         RemoveChildWithService(rootNode, topModalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         // Fire shown event of navdestination under the disappeared modal
@@ -3315,6 +3329,7 @@ void OverlayManager::PlayTransitionEffectOut(const RefPtr<FrameNode>& topModalNo
                     // Fire hidden event of navdestination on the disappeared modal
                     overlayManager->FireNavigationStateChange(false, modal);
                 }
+                overlayManager->FireAutoSave(modal);
                 overlayManager->RemoveChildWithService(root, modal);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                 // Fire shown event of navdestination under the disappeared modal
@@ -3352,6 +3367,7 @@ bool OverlayManager::ModalPageExitProcess(const RefPtr<FrameNode>& topModalNode)
         topModalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
         // Fire hidden event of navdestination on the disappeared modal
         FireNavigationStateChange(false, topModalNode);
+        FireAutoSave(topModalNode);
         RemoveChildWithService(rootNode, topModalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -3713,6 +3729,7 @@ void OverlayManager::HandleModalPop(
             // Fire hidden event of navdestination on the disappeared modal
             FireNavigationStateChange(false, topModalNode);
         }
+        FireAutoSave(topModalNode);
         RemoveChildWithService(rootNode, topModalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -3810,6 +3827,7 @@ void OverlayManager::PlayDefaultModalOut(
                 // Fire hidden event of navdestination on the disappeared modal
                 overlayManager->FireNavigationStateChange(false, modal);
             }
+            overlayManager->FireAutoSave(modal);
             overlayManager->RemoveChildWithService(root, modal);
             root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             // Fire shown event of navdestination under the disappeared modal
@@ -3871,6 +3889,7 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
                     // Fire hidden event of navdestination on the disappeared modal
                     overlayManager->FireNavigationStateChange(false, modal);
                 }
+                overlayManager->FireAutoSave(modal);
                 overlayManager->RemoveChildWithService(root, modal);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                 // Fire shown event of navdestination under the disappeared modal
@@ -4244,6 +4263,7 @@ void OverlayManager::PlaySheetTransition(
                 CHECK_NULL_VOID(root);
                 auto sheetParent = DynamicCast<FrameNode>(sheet->GetParent());
                 CHECK_NULL_VOID(sheetParent);
+                overlayManager->FireAutoSave(sheet);
                 overlayManager->RemoveChildWithService(root, sheetParent);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             });
