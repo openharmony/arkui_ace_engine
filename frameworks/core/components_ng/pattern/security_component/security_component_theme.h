@@ -163,6 +163,11 @@ public:
         return saveDescriptions_[index];
     }
 
+    uint32_t GetDefaultTextMaxLines() const
+    {
+        return defaultTextMaxLines_;
+    }
+
 private:
     SecurityComponentTheme() = default;
     static void ParseLocationDescriptions(RefPtr<ThemeStyle> securityComponentPattern,
@@ -275,6 +280,8 @@ private:
     Color fontColorNoBg_;
     Color backgroundColor_;
     Color borderColor_;
+
+    uint32_t defaultTextMaxLines_ = 1000000; // Infinity
 
     std::vector<std::string> locationDescriptions_;
     std::vector<std::string> pasteDescriptions_;
