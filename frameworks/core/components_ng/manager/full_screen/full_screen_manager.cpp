@@ -22,7 +22,11 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef WEB_SUPPORTED
+#if !defined(CROSS_PLATFORM)
 #include "core/components_ng/pattern/web/web_pattern.h"
+#else
+#include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
+#endif
 #endif
 namespace OHOS::Ace::NG {
 
@@ -113,6 +117,7 @@ bool FullScreenManager::OnBackPressed()
         return videoPattern->OnBackPressed();
     }
 #ifdef WEB_SUPPORTED
+#if !defined(CROSS_PLATFORM)
     if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_RETURN(pattern, false);
@@ -120,6 +125,7 @@ bool FullScreenManager::OnBackPressed()
         CHECK_NULL_RETURN(webPattern, false);
         return webPattern->OnBackPressedForFullScreen();
     }
+#endif
 #endif
     return false;
 }
