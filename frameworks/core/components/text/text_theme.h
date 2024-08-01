@@ -23,7 +23,6 @@
 
 namespace OHOS::Ace {
 namespace {
-constexpr Color DEFAULT_TEXT_COLOR = Color(0xe5000000);
 constexpr float DRAG_BACKGROUND_OPACITY = 0.95f;
 } // namespace
 
@@ -74,12 +73,8 @@ public:
             theme->dragBackgroundColor_ = dragBackgroundColor;
             constexpr double childMinSize = 20.0;
             theme->linearSplitChildMinSize_ = pattern->GetAttr<double>(LINEAR_SPLIT_CHILD_MIN_SIZE, childMinSize);
-            theme->caretColor_ = pattern->GetAttr<Color>("caret_color", Color(0xff007dff));
-            theme->selectedBackgroundColor_ = pattern->GetAttr<Color>("selected_background_color", Color(0xff007dff));
             auto textShowHandle = pattern->GetAttr<std::string>("text_show_handle", "0");
             theme->isShowHandle_ = StringUtils::StringToInt(textShowHandle);
-            theme->textStyle_.SetTextColor(pattern->GetAttr<Color>("default_text_color", DEFAULT_TEXT_COLOR));
-            theme->textStyle_.SetTextDecorationColor(pattern->GetAttr<Color>("default_text_color", DEFAULT_TEXT_COLOR));
         }
     };
 
@@ -98,16 +93,6 @@ public:
     bool GetDraggable() const
     {
         return draggable_;
-    }
-
-    const Color GetCaretColor()
-    {
-        return caretColor_;
-    }
-
-    const Color GetSelectedBackgroundColor()
-    {
-        return selectedBackgroundColor_;
     }
 
     double GetLinearSplitChildMinSize() const
@@ -134,8 +119,6 @@ private:
     Color dragBackgroundColor_ = Color::WHITE;
     bool draggable_ = false;
     double linearSplitChildMinSize_ = 20.0;
-    Color caretColor_ = Color(0xff007dff);
-    Color selectedBackgroundColor_ = Color(0xff007dff);
     bool isShowHandle_ = false;
 };
 
