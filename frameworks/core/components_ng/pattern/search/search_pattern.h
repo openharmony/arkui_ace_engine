@@ -265,6 +265,9 @@ private:
     void UpdateIconChangeEvent();
     bool IsEventEnabled(const std::string& textValue, int16_t style);
 
+    void UpdateSearchSymbolIconColor();
+    void UpdateCancelSymbolIconColor();
+
     void CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool isFromModifier);
     void CreateOrUpdateImage(int32_t index, bool isCreateNode);
     void UpdateImageIconProperties(RefPtr<FrameNode>& frameNode, int32_t index);

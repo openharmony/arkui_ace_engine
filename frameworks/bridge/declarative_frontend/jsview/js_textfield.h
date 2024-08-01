@@ -124,6 +124,9 @@ public:
     static void SetTextIndent(const JSCallbackInfo& info);
     static void EditMenuOptions(const JSCallbackInfo& info);
     static void SetEnablePreviewText(const JSCallbackInfo& info);
+
+private:
+    static void SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam);
 };
 
 } // namespace OHOS::Ace::Framework
