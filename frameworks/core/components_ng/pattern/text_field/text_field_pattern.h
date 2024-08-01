@@ -1542,6 +1542,7 @@ private:
 
     void PasswordResponseKeyEvent();
     void UnitResponseKeyEvent();
+    void ProcBorderAndUnderlineInBlurEvent();
     void ProcNormalInlineStateInBlurEvent();
     bool IsMouseOverScrollBar(const GestureEvent& info);
 
