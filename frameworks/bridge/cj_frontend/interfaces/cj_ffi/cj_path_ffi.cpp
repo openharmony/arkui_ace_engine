@@ -46,6 +46,9 @@ void FfiOHOSAceFrameworkPathCreateWithSize(
 int64_t FfiOHOSAceFrameworkPathInsCreate(const char* commands)
 {
     auto nativePath = OHOS::FFI::FFIData::Create<OHOS::Ace::Framework::NativePath>(commands);
+    if (nativePath == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return nativePath->GetID();
 }
 
@@ -55,6 +58,9 @@ int64_t FfiOHOSAceFrameworkPathInsCreateWithSize(
     OHOS::Ace::Dimension dWidth(width, static_cast<OHOS::Ace::DimensionUnit>(widthUnit));
     OHOS::Ace::Dimension dHeight(height, static_cast<OHOS::Ace::DimensionUnit>(heightUnit));
     auto nativePath = OHOS::FFI::FFIData::Create<OHOS::Ace::Framework::NativePath>(commands);
+    if (nativePath == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     nativePath->SetWidth(dWidth);
     nativePath->SetHeight(dHeight);
     return nativePath->GetID();

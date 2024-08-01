@@ -26,6 +26,9 @@ extern "C" {
     {
         auto chainedTransitionEffect = NativeTransitionEffect::Opacity(number);
         auto nativeTransitionEffect = FFIData::Create<NativeTransitionEffect>(chainedTransitionEffect);
+        if (nativeTransitionEffect == nullptr) {
+            return FFI_ERROR_CODE;
+        }
         return nativeTransitionEffect->GetID();
     }
 
@@ -33,6 +36,9 @@ extern "C" {
     {
         auto chainedTransitionEffect = NativeTransitionEffect::Translate(options);
         auto nativeTransitionEffect = FFIData::Create<NativeTransitionEffect>(chainedTransitionEffect);
+        if (nativeTransitionEffect == nullptr) {
+            return FFI_ERROR_CODE;
+        }
         return nativeTransitionEffect->GetID();
     }
 
@@ -40,6 +46,9 @@ extern "C" {
     {
         auto chainedTransitionEffect = NativeTransitionEffect::Scale(options);
         auto nativeTransitionEffect = FFIData::Create<NativeTransitionEffect>(chainedTransitionEffect);
+        if (nativeTransitionEffect == nullptr) {
+            return FFI_ERROR_CODE;
+        }
         return nativeTransitionEffect->GetID();
     }
 
@@ -47,6 +56,9 @@ extern "C" {
     {
         auto chainedTransitionEffect = NativeTransitionEffect::Rotate(options);
         auto nativeTransitionEffect = FFIData::Create<NativeTransitionEffect>(chainedTransitionEffect);
+        if (nativeTransitionEffect == nullptr) {
+            return FFI_ERROR_CODE;
+        }
         return nativeTransitionEffect->GetID();
     }
 
@@ -54,6 +66,9 @@ extern "C" {
     {
         auto chainedTransitionEffect = NativeTransitionEffect::Move(edge);
         auto nativeTransitionEffect = FFIData::Create<NativeTransitionEffect>(chainedTransitionEffect);
+        if (nativeTransitionEffect == nullptr) {
+            return FFI_ERROR_CODE;
+        }
         return nativeTransitionEffect->GetID();
     }
 
@@ -61,19 +76,31 @@ extern "C" {
     {
         auto chainedTransitionEffect = NativeTransitionEffect::Asymmetric(appearId, disappearId);
         auto nativeTransitionEffect = FFIData::Create<NativeTransitionEffect>(chainedTransitionEffect);
+        if (nativeTransitionEffect == nullptr) {
+            return FFI_ERROR_CODE;
+        }
         return nativeTransitionEffect->GetID();
     }
 
     void FfiOHOSAceFrameworkTransitionEffectCombine(int64_t id, int64_t effectId)
     {
         auto nativeTransitionEffect = FFIData::GetData<NativeTransitionEffect>(id);
+        if (nativeTransitionEffect == nullptr) {
+            return;
+        }
         auto tagEffect = FFIData::GetData<NativeTransitionEffect>(effectId);
+        if (tagEffect == nullptr) {
+            return;
+        }
         nativeTransitionEffect->Combine(tagEffect);
     }
 
     void FfiOHOSAceFrameworkTransitionEffectAnimation(int64_t id, NativeAnimateParam param)
     {
         auto nativeTransitionEffect = FFIData::GetData<NativeTransitionEffect>(id);
+        if (nativeTransitionEffect == nullptr) {
+            return;
+        }
         auto animationOptionResult = std::make_shared<AnimationOption>();
         ParseCjAnimation(param, *animationOptionResult);
         nativeTransitionEffect->Animation(animationOptionResult);
@@ -83,6 +110,9 @@ extern "C" {
     {
         auto chainedTransitionEffect = NativeTransitionEffect::Identity();
         auto nativeTransitionEffect = FFIData::Create<NativeTransitionEffect>(chainedTransitionEffect);
+        if (nativeTransitionEffect == nullptr) {
+            return FFI_ERROR_CODE;
+        }
         return nativeTransitionEffect->GetID();
     }
 
@@ -90,6 +120,9 @@ extern "C" {
     {
         auto chainedTransitionEffect = NativeTransitionEffect::SlideSwitch();
         auto nativeTransitionEffect = FFIData::Create<NativeTransitionEffect>(chainedTransitionEffect);
+        if (nativeTransitionEffect == nullptr) {
+            return FFI_ERROR_CODE;
+        }
         return nativeTransitionEffect->GetID();
     }
 };
