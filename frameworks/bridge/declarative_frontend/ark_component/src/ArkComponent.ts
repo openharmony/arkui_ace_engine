@@ -102,6 +102,10 @@ const UI_STATE_DISABLED = 1 << 2;
 const UI_STATE_SELECTED = 1 << 3;
 
 function applyUIAttributesInit(modifier: AttributeModifier<CommonAttribute>, nativeNode: KNode): void {
+  if (modifier.applyPressedAttribute == undefined && modifier.applyFocusedAttribute == undefined &&
+    modifier.applyDisabledAttribute == undefined && modifier.applySelectedAttribute == undefined) {
+    return;
+  }
   let state = 0;
   if (modifier.applyPressedAttribute !== undefined) {
     state |= UI_STATE_PRESSED;
@@ -3099,8 +3103,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
-    this._instanceId = -1;
     if (classType === ModifierType.FRAME_NODE) {
+      this._instanceId = -1;
       this._modifiersWithKeys = new ObservedMap();
       (this._modifiersWithKeys as ObservedMap).setOnChange((key, value) => {
         if (this.nativePtr === undefined) {
@@ -3164,7 +3168,6 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   applyModifierPatch(): void {
-    let expiringItems = [];
     let expiringItemsWithKeys = [];
     this._modifiersWithKeys.forEach((value, key) => {
       if (value.applyStage(this.nativePtr, this)) {
