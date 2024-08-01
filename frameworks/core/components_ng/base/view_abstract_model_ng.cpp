@@ -276,10 +276,12 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
             // create or show menu on long press
             auto event =
                 [builderF = buildFunc, weakTarget, menuParam, previewBuildFunc](const GestureEvent& info) mutable {
+                TAG_LOGI(AceLogTag::ACE_MENU, "Trigger longPress event for menu");
                 auto containerId = Container::CurrentId();
                 auto taskExecutor = Container::CurrentTaskExecutor();
                 CHECK_NULL_VOID(taskExecutor);
                 taskExecutor->PostTask(
+                    TAG_LOGI(AceLogTag::ACE_MENU, "Execute longPress task for menu");
                     [containerId, builder = builderF, weakTarget, menuParam, previewBuildFunc, info]() mutable {
                         auto targetNode = weakTarget.Upgrade();
                         CHECK_NULL_VOID(targetNode);
