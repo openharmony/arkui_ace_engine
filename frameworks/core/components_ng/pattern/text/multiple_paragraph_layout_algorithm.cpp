@@ -346,7 +346,7 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
         .indent = textStyle.GetTextIndent()
-    };
+        };
 }
 
 TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(
