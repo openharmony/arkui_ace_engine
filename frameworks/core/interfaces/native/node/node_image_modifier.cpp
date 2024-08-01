@@ -838,27 +838,26 @@ const ArkUIImageModifier* GetImageModifier()
     return &modifier;
 }
 
-std::optional<std::string> ImageResourceToString(ArkUINodeHandle node, const ArkUIResource* resource) {
+std::optional<std::string> ImageResourceToString(ArkUINodeHandle node, const ArkUIResource* resource)
+{
     std::optional<std::string> src;
     if (resource) {
         auto themeConstants = GetThemeConstants(node, resource->bundleName, resource->moduleName);
-
-        if (themeConstants) {
-            if (resource->type == static_cast<int32_t>(ResourceType::RAWFILE)) {
-                src = themeConstants->GetRawfile(resource->name);
+        if (!themeConstants) {
+            return src;
+        }
+        if (resource->type == static_cast<int32_t>(ResourceType::RAWFILE)) {
+            src = themeConstants->GetRawfile(resource->name);
+        }
+        if (resource->type == static_cast<int32_t>(ResourceType::MEDIA)) {
+            if (resource->id == -1 && resource->name) {
+                src = themeConstants->GetMediaPathByName(resource->name);
             }
-            if (resource->type == static_cast<int32_t>(ResourceType::MEDIA)) {
-                if (resource->id == -1) {
-                    if (resource->name) {
-                        src = themeConstants->GetMediaPathByName(resource->name);
-                    }
-                } else {
-                    src = themeConstants->GetMediaPath(resource->id);
-                }
+            if (resource->id != -1) {
+                src = themeConstants->GetMediaPath(resource->id);
             }
         }
     }
-
     return src;
 }
 

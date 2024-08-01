@@ -36,10 +36,9 @@ void SendArkUIAsyncCustomEvent(struct ArkUICustomNodeEvent* event);
 namespace OHOS::Ace::NG::NodeModifier {
 
 /*
- * ATTENTION !!!
- * Keep the following enum in sync with the same enum in frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h
+ * Keep this enum in sync with the same enum in frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h
  */
-enum class ResourceType : uint32_t { 
+enum class ResourceType : uint32_t {
     COLOR = 10001,
     FLOAT,
     STRING,

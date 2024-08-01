@@ -55,7 +55,8 @@ public:
     static void RemoveTabBarItem(const RefPtr<TabContentNode>& tabContentNode);
     static RefPtr<TabsNode> FindTabsNode(const RefPtr<UINode>& tabContent);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetTabBar(FrameNode* node, const std::string& label, const std::string& icon, TabBarBuilderFunc&& builder);
+    static void SetTabBar(
+        FrameNode* node, const std::string& label, const std::string& icon, TabBarBuilderFunc&& builder);
     static void SetLayoutMode(FrameNode* node, LayoutMode layoutMode);
     static void SetId(FrameNode* node, const std::string& id);
     void SetOnWillShow(std::function<void()>&& onWillShow) override;
