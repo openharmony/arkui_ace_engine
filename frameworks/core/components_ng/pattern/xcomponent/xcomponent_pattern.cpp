@@ -252,6 +252,20 @@ void XComponentPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+#ifdef PLATFORM_VIEW_SUPPORTED
+    if (type_ == XComponentType::PLATFORM_VIEW) {
+        ContainerScope scope(GetHostInstanceId());
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+        platformTask.PostTask([weak = WeakClaim(this)] {
+            auto xComponentPattern = weak.Upgrade();
+            CHECK_NULL_VOID(xComponentPattern);
+            xComponentPattern->RegisterPlatformViewEvent();
+            xComponentPattern->PrepareSurface();
+            }, "ArkUIXComponentPatternOnModifyDone");
+    }
+#endif
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
