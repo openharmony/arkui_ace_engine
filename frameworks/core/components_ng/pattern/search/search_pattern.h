@@ -277,6 +277,7 @@ private:
     void UpdateIconSize(int32_t index, const Dimension& value);
     Color GetDefaultIconColor(int32_t index);
     bool IsConsumeEvent();
+    void HandleFocusChoiceSearch(const RefPtr<TextFieldPattern>& textFieldPattern, bool recoverFlag);
 
     uint32_t GetMaxLength() const;
     std::string SearchTypeToString() const;

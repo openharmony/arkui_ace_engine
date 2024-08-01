@@ -878,22 +878,7 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
     CHECK_NULL_VOID(textFieldPattern);
 
     if (focusChoice_ == FocusChoice::SEARCH) {
-        PaintSearchFocusState();
-        if (!recoverFlag) {
-            if (!textFieldPattern->GetTextValue().empty()) {
-                textFieldPattern->NeedRequestKeyboard();
-                if(directionKeysMoveFocusOut_) {
-                    textFieldPattern->HandleFocusEvent();
-                } else {
-                    textFieldPattern->HandleOnSelectAll(true); // Select all text
-                    textFieldPattern->StopTwinkling();         // Hide caret
-                }
-            } else {
-                textFieldPattern->HandleFocusEvent(); // Show caret
-            }
-        } else {
-            textFieldPattern->HandleFocusEvent();
-        }
+        HandleFocusChoiceSearch(textFieldPattern, recoverFlag);
     } else {
         if (textFieldPattern->IsSelected() || textFieldPattern->GetCursorVisible()) {
             textFieldPattern->HandleSetSelection(0, 0, false); // Clear text selection & caret if focus has gone
@@ -914,6 +899,24 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
         focusHub->PaintInnerFocusState(focusRect, true);
     }
     host->MarkModifyDone();
+}
+
+void SearchPattern::HandleFocusChoiceSearch(const RefPtr<TextFieldPattern>& textFieldPattern, bool recoverFlag)
+{
+    PaintSearchFocusState();
+    if (!recoverFlag) {
+        if (!textFieldPattern->GetTextValue().empty()) {
+            textFieldPattern->NeedRequestKeyboard();
+            if (directionKeysMoveFocusOut_) {
+                textFieldPattern->HandleFocusEvent();
+            } else {
+                textFieldPattern->HandleOnSelectAll(true); // Select all text
+                textFieldPattern->StopTwinkling();         // Hide caret
+            }
+            return;
+        }
+    }
+    textFieldPattern->HandleFocusEvent();
 }
 
 void SearchPattern::GetSearchFocusPaintRadius(float& radiusTopLeft, float& radiusTopRight,

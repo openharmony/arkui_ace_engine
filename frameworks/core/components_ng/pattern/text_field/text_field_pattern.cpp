@@ -1297,8 +1297,8 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.code == KeyCode::KEY_TAB && isFocusedBeforeClick_ && !contentController_->IsEmpty()) {
         isFocusedBeforeClick_ = false;
-        if(!independentControlKeyboard_) {
-            HandleOnSelectAll(false);   
+        if (!independentControlKeyboard_) {
+            HandleOnSelectAll(false);
         }
     }
     auto pipeline = GetContext();
@@ -1315,7 +1315,7 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
         }
         return true;
     }
-    if(directionKeysMoveFocusOut_ && (isMoveFocusOutFromLeft(event) || isMoveFocusOutFromRight(event))) {
+    if (directionKeysMoveFocusOut_ && (isMoveFocusOutFromLeft(event) || isMoveFocusOutFromRight(event))) {
         TextInputClient::HandleKeyEvent(event);
         return false;
     }
@@ -1324,7 +1324,8 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
 
 bool TextFieldPattern::isMoveFocusOutFromLeft(const KeyEvent& event)
 {
-    return (event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_UP) && selectController_->GetCaretIndex() == 0;
+    return (event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_UP) &&
+     selectController_->GetCaretIndex() == 0;
 }
 
 bool TextFieldPattern::isMoveFocusOutFromRight(const KeyEvent& event)
@@ -4359,8 +4360,8 @@ bool TextFieldPattern::CursorMoveEnd()
 
 bool TextFieldPattern::CursorMoveUpOperation()
 {
-    if(!IsTextArea()) {
-        if(directionKeysMoveFocusOut_) {
+    if (!IsTextArea()) {
+        if (directionKeysMoveFocusOut_) {
             return CursorMoveLineBegin();
         }
         return false;
@@ -4387,8 +4388,8 @@ bool TextFieldPattern::CursorMoveUp()
 
 bool TextFieldPattern::CursorMoveDownOperation()
 {
-    if(!IsTextArea()) {
-        if(directionKeysMoveFocusOut_) {
+    if (!IsTextArea()) {
+        if (directionKeysMoveFocusOut_) {
             return CursorMoveLineEnd();
         }
         return false;
@@ -5142,7 +5143,7 @@ bool TextFieldPattern::OnBackPressed()
     }
 
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    if(independentControlKeyboard_) {
+    if (independentControlKeyboard_) {
         CloseKeyboard(true, false);
     } else {
         CloseKeyboard(true);
