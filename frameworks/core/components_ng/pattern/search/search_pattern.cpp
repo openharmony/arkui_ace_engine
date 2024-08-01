@@ -840,10 +840,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
 
 bool SearchPattern::IsConsumeEvent()
 {
-    if(directionKeysMoveFocusOut_) {
-        return false;
-    }
-    return true; // no action
+    return !directionKeysMoveFocusOut_;
 }
 
 void SearchPattern::PaintSearchFocusState()
