@@ -415,6 +415,7 @@ public:
     {
         return modalStack_.empty();
     }
+    bool HasModalPage();
     void DismissSheet();
     void DismissContentCover();
     void SheetSpringBack();
