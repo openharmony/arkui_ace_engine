@@ -2663,12 +2663,13 @@ class ListNodeDataSource extends BasicDataSource {
       return false;
     }
     let selectedNodeItem: NodeItem = this.currentNodeInfo.getNodeInfoNode();
-    let parentId: number | undefined = selectedNodeItem.parentNodeId;
-    while (parentId !== undefined && parentId !== -1) {
-      if (parentId === insertNodeId) {
+    let parentId: number = selectedNodeItem.currentNodeId;
+    let insertParentId: number | undefined = this.nodeIdNodeItemMap.get(insertNodeId as number)?.parentNodeId;
+    while (insertParentId !== undefined && insertParentId !== -1) {
+      if (parentId === insertParentId) {
         return true;
       } else {
-        parentId = this.nodeIdNodeItemMap.get(parentId as number)?.parentNodeId;
+        insertParentId = this.nodeIdNodeItemMap.get(insertParentId as number)?.parentNodeId;
       }
     }
     return false;
@@ -3480,7 +3481,7 @@ class ListNodeDataSource extends BasicDataSource {
       if (parent.children.length === 0) {
         return [];
       } else if (parent.children.length > 0) {
-        let childrenNodeInfo: Array<NodeInfoView> = new Array(parent.children.length);
+        let childrenNodeInfo: NodeInfoView[] = new Array(parent.children.length);
         for (let i: number = 0; i < childrenNodeInfo.length; i++) {
           childrenNodeInfo[i] = {};
         }
@@ -4075,7 +4076,7 @@ export class CollapseImageNode extends NodeBaseInfo {
 class CollapseImageNodeFactory {
   private static instance: CollapseImageNodeFactory = new CollapseImageNodeFactory();
 
-  private constructor(){
+  private constructor() {
   }
 
   public static getInstance(): CollapseImageNodeFactory {
@@ -4113,7 +4114,7 @@ class CollapseImageNodeFactory {
 }
 
 class CollapseImageNodeFlyweightFactory {
-  static nodeMap: Map<CollapseImageType, CollapseImageNode> = new Map<CollapseImageType, CollapseImageNode>();
+  private static nodeMap: Map<CollapseImageType, CollapseImageNode> = new Map<CollapseImageType, CollapseImageNode>();
 
   static getCollapseImageNodeByType(type: CollapseImageType): CollapseImageNode {
     let node: CollapseImageNode | undefined = CollapseImageNodeFlyweightFactory.nodeMap.get(type);

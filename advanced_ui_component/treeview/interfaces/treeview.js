@@ -2304,13 +2304,14 @@ class ListNodeDataSource extends BasicDataSource {
             return false;
         }
         let u13 = this.currentNodeInfo.getNodeInfoNode();
-        let v13 = u13.parentNodeId;
-        while (v13 !== undefined && v13 !== -1) {
-            if (v13 === t13) {
+        let v13 = u13.currentNodeId;
+        let k15 = this.nodeIdNodeItemMap.get(t13)?.parentNodeId;
+        while (k15 !== undefined && k15 !== -1) {
+            if (v13 === k15) {
                 return true;
             }
             else {
-                v13 = this.nodeIdNodeItemMap.get(v13)?.parentNodeId;
+                k15 = this.nodeIdNodeItemMap.get(k15)?.parentNodeId;
             }
         }
         return false;
