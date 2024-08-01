@@ -57,6 +57,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/mouse_event.h"
 #include "core/image/image_source_info.h"
+#include "interfaces/native/node/resource.h"
 
 #undef private
 #undef protected
