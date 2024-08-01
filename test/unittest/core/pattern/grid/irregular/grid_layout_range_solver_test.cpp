@@ -326,6 +326,35 @@ HWTEST_F(GridLayoutRangeTest, Solve001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HorizontalOverScroll001
+ * @tc.desc: Test horizontal and overScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, Horizontal001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo14());
+    model.SetRowsGap(Dimension { 1.0f });
+    model.SetColumnsGap(Dimension { 5.0f });
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedWidthItems(1, 910.0f);
+    CreateFixedWidthItems(1, 300.0f);
+    CreateFixedWidthItems(20, 605.0f);
+    CreateFixedWidthItems(8, 300.0f);
+    CreateDone(frameNode_);
+
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    UpdateCurrentOffset(FLT_MAX);
+    const auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, -1);
+    for (int i = 0; i < 5; ++i) {
+        EXPECT_FALSE(GetChildFrameNode(frameNode_, i)->IsActive());
+    }
+}
+
+/**
  * @tc.name: ChangeTemplate001
  * @tc.desc: Test changing template
  * @tc.type: FUNC
