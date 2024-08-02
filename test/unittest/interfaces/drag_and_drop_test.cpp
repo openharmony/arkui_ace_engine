@@ -628,4 +628,29 @@ HWTEST_F(DragAndDropTest, DragAndDropTest020, TestSize.Level1)
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_DRAG_END);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_DRAG_END));
 }
+
+/**
+ * @tc.name: DragAndDropTest0021
+ * @tc.desc: test OH_ArkUI_DragEvent_GetDropOperation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest021, TestSize.Level1)
+{
+    /**
+     *@tc.steps : step1.create and set property.
+     */
+    ArkUIDragEvent dragEvent;
+    dragEvent.dragBehavior = ArkUI_DropOperation::ARKUI_DROP_OPERATION_MOVE;
+    auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+    ArkUI_DropOperation operation;
+    auto ret = OH_ArkUI_DragEvent_GetDropOperation(drag_Event, &operation);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(operation, ArkUI_DropOperation::ARKUI_DROP_OPERATION_MOVE);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetDropOperation(nullptr, &operation), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetDropOperation(drag_Event, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+}
 } // namespace OHOS::Ace

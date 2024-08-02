@@ -221,16 +221,29 @@ ArkUI_PreDragStatus OH_ArkUI_NodeEvent_GetPreDragStatus(ArkUI_NodeEvent* nodeEve
 int32_t OH_ArkUI_DragEvent_DisableDefaultDropAnimation(ArkUI_DragEvent* event, bool disable);
 
 /**
- * @brief Sets the data processing mode.
+ * @brief Obtains the drop operation from a drag event.
  *
  * @param event Indicates the pointer to an <b>ArkUI_DragEvent</b> object.
- * @param dropOperation Indicates the data processing mode.
+ * @param operation Indicates the drop operation which the data receiver set.
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *                 Possible causes: 1. The given parameters are null or the given event is not a valid DragEvent.
  * @since 12
  */
 int32_t OH_ArkUI_DragEvent_SetSuggestedDropOperation(ArkUI_DragEvent* event, ArkUI_DropOperation dropOperation);
+
+/**
+ * @brief Obtains the drop operation from a drag event.
+ *
+ * @param event Indicates the pointer to an <b>ArkUI_DragEvent</b> object.
+ * @param operation Indicates the drop operation which the data receiver set.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operations successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 12
+ */
+int32_t OH_ArkUI_DragEvent_GetDropOperation(ArkUI_DragEvent* event, ArkUI_DropOperation* operation);
 
 /**
  * @brief Sets the result for a drag event.
