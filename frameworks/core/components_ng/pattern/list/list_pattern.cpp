@@ -786,8 +786,9 @@ float ListPattern::GetEndOverScrollOffset(float offset, float endMainPos, float 
     float ChainDelta = chainAnimation_ ? chainAnimation_->GetValuePredict(endIndex_, -offset) : 0.f;
     auto endPos = endMainPos + ChainDelta - currentDelta_;
     auto contentEndPos = contentMainSize_ - contentEndOffset_;
-    if (GreatNotEqual(contentEndPos, endMainPos - startMainPos)) {
-        endPos = startMainPos + contentEndPos;
+    auto contentMainSize = contentMainSize_ - contentEndOffset_ - contentStartOffset_;
+    if (GreatNotEqual(contentMainSize, endMainPos - startMainPos)) {
+        endPos = startMainPos + contentMainSize;
     }
     auto newEndPos = endPos + offset;
     if (endPos < contentEndPos && newEndPos < contentEndPos) {
