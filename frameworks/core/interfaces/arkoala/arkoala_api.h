@@ -699,10 +699,10 @@ enum ArkUIEventCategory {
     TEXT_INPUT = 5,
     GESTURE_ASYNC_EVENT = 6,
     TOUCH_EVENT = 7,
-    TEXT_ARRAY = 8,
     MOUSE_INPUT_EVENT = 9,
-    MIXED_EVENT = 10,
-    DRAG_EVENT = 11,
+    TEXT_ARRAY = 10,
+    MIXED_EVENT = 11,
+    DRAG_EVENT = 12,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
