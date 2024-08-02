@@ -1363,6 +1363,7 @@ struct ArkUIDragAction {
     DragStatusCallback listener;
     void* unifiedData;
     bool hasTouchPoint = false;
+    void** pixelmapNativeList;
 };
 
 struct ArkUICommonModifier {

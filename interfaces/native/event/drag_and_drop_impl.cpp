@@ -188,7 +188,7 @@ int32_t OH_ArkUI_DragAction_SetPixelMaps(ArkUI_DragAction* dragAction, OH_Pixelm
     if (count < size || size < 0) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    dragActions->pixelmapArray = reinterpret_cast<void**>(pixelmapArray);
+    dragActions->pixelmapNativeList = reinterpret_cast<void**>(pixelmapArray);
     dragActions->size = size;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -301,7 +301,7 @@ int32_t OH_ArkUI_StartDrag(ArkUI_DragAction* dragAction)
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     std::vector<std::shared_ptr<OHOS::Media::PixelMap>> pixelMapList;
-    auto pixelmapArray = reinterpret_cast<OH_PixelmapNative**>(dragActions->pixelmapArray);
+    auto pixelmapArray = reinterpret_cast<OH_PixelmapNative**>(dragActions->pixelmapNativeList);
     for (int32_t index = 0; index < dragActions->size; index++) {
         if (!pixelmapArray[index]) {
             continue;
