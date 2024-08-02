@@ -623,63 +623,6 @@ void WaterFlowPattern::NotifyDataChange(int32_t index, int32_t count)
     }
 }
 
-void WaterFlowPattern::DumpAdvanceInfo()
-{
-    auto property = GetLayoutProperty<WaterFlowLayoutProperty>();
-    CHECK_NULL_VOID(property);
-    ScrollablePattern::DumpAdvanceInfo();
-    auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
-    std::vector<std::string> scrollAlign = { "START", "CENTER", "END", "AUTO", "NONE" };
-
-    DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(info->currentOffset_));
-    DumpLog::GetInstance().AddDesc("prevOffset:" + std::to_string(info->prevOffset_));
-    DumpLog::GetInstance().AddDesc("lastMainSize:" + std::to_string(info->lastMainSize_));
-    DumpLog::GetInstance().AddDesc("maxHeight:" + std::to_string(info->maxHeight_));
-    DumpLog::GetInstance().AddDesc("startIndex:" + std::to_string(info->startIndex_));
-    DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(info->endIndex_));
-    DumpLog::GetInstance().AddDesc("jumpIndex:" + std::to_string(info->jumpIndex_));
-    DumpLog::GetInstance().AddDesc("childrenCount:" + std::to_string(info->childrenCount_));
-
-    DumpLog::GetInstance().AddDesc("RowsTemplate:", property->GetRowsTemplate()->c_str());
-    DumpLog::GetInstance().AddDesc("ColumnsTemplate:", property->GetColumnsTemplate()->c_str());
-    DumpLog::GetInstance().AddDesc("CachedCount:" + std::to_string(property->GetCachedCount().value_or(1)));
-    DumpLog::GetInstance().AddDesc("ScrollAlign:" + scrollAlign[static_cast<int32_t>(layoutInfo_->align_)]);
-
-    property->IsReverse() ? DumpLog::GetInstance().AddDesc("isReverse:true")
-                          : DumpLog::GetInstance().AddDesc("isReverse:false");
-    info->itemStart_ ? DumpLog::GetInstance().AddDesc("itemStart:true")
-                     : DumpLog::GetInstance().AddDesc("itemStart:false");
-    info->itemEnd_ ? DumpLog::GetInstance().AddDesc("itemEnd:true") : DumpLog::GetInstance().AddDesc("itemEnd:false");
-    info->offsetEnd_ ? DumpLog::GetInstance().AddDesc("offsetEnd:true")
-                     : DumpLog::GetInstance().AddDesc("offsetEnd:false");
-    footer_.Upgrade() ? DumpLog::GetInstance().AddDesc("footer:true") : DumpLog::GetInstance().AddDesc("footer:false");
-
-    property->GetItemMinSize().has_value()
-        ? DumpLog::GetInstance().AddDesc("ItemMinSize:" + property->GetItemMinSize().value().ToString())
-        : DumpLog::GetInstance().AddDesc("ItemMinSize:null");
-    property->GetItemMaxSize().has_value()
-        ? DumpLog::GetInstance().AddDesc("ItemMaxSize:" + property->GetItemMaxSize().value().ToString())
-        : DumpLog::GetInstance().AddDesc("ItemMaxSize:null");
-
-    if (sections_) {
-        DumpLog::GetInstance().AddDesc("-----------start print sections_------------");
-        std::string res = std::string("");
-        int32_t index = 0;
-        for (const auto& section : sections_->GetSectionInfo()) {
-            res.append("[section:" + std::to_string(index) + "]");
-            res.append("{ itemCount:" + std::to_string(section.itemsCount) + " },")
-                .append("{ crossCount:" + std::to_string(section.crossCount.value_or(1)) + " },")
-                .append("{ columnsGap:" + section.columnsGap.value_or(Dimension(0.0)).ToString() + " },")
-                .append("{ rowsGap:" + section.rowsGap.value_or(Dimension(0.0)).ToString() + " },")
-                .append("{ margin:[" + section.margin.value_or(MarginProperty()).ToString() + " ]}");
-            DumpLog::GetInstance().AddDesc(res);
-            res.clear();
-            index++;
-        }
-        DumpLog::GetInstance().AddDesc("-----------end print sections_------------");
-    }
-}
-
 ScopeFocusAlgorithm WaterFlowPattern::GetScopeFocusAlgorithm()
 {
     return { layoutInfo_->axis_ == Axis::VERTICAL, true, ScopeType::OTHERS,
@@ -752,5 +695,62 @@ std::function<bool(int32_t)> WaterFlowPattern::GetScrollIndexAbility()
         }
         return true;
     };
+}
+
+void WaterFlowPattern::DumpAdvanceInfo()
+{
+    auto property = GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    ScrollablePattern::DumpAdvanceInfo();
+    auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
+    std::vector<std::string> scrollAlign = { "START", "CENTER", "END", "AUTO", "NONE" };
+
+    DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(info->currentOffset_));
+    DumpLog::GetInstance().AddDesc("prevOffset:" + std::to_string(info->prevOffset_));
+    DumpLog::GetInstance().AddDesc("lastMainSize:" + std::to_string(info->lastMainSize_));
+    DumpLog::GetInstance().AddDesc("maxHeight:" + std::to_string(info->maxHeight_));
+    DumpLog::GetInstance().AddDesc("startIndex:" + std::to_string(info->startIndex_));
+    DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(info->endIndex_));
+    DumpLog::GetInstance().AddDesc("jumpIndex:" + std::to_string(info->jumpIndex_));
+    DumpLog::GetInstance().AddDesc("childrenCount:" + std::to_string(info->childrenCount_));
+
+    DumpLog::GetInstance().AddDesc("RowsTemplate:", property->GetRowsTemplate()->c_str());
+    DumpLog::GetInstance().AddDesc("ColumnsTemplate:", property->GetColumnsTemplate()->c_str());
+    DumpLog::GetInstance().AddDesc("CachedCount:" + std::to_string(property->GetCachedCount().value_or(1)));
+    DumpLog::GetInstance().AddDesc("ScrollAlign:" + scrollAlign[static_cast<int32_t>(layoutInfo_->align_)]);
+
+    property->IsReverse() ? DumpLog::GetInstance().AddDesc("isReverse:true")
+                          : DumpLog::GetInstance().AddDesc("isReverse:false");
+    info->itemStart_ ? DumpLog::GetInstance().AddDesc("itemStart:true")
+                     : DumpLog::GetInstance().AddDesc("itemStart:false");
+    info->itemEnd_ ? DumpLog::GetInstance().AddDesc("itemEnd:true") : DumpLog::GetInstance().AddDesc("itemEnd:false");
+    info->offsetEnd_ ? DumpLog::GetInstance().AddDesc("offsetEnd:true")
+                     : DumpLog::GetInstance().AddDesc("offsetEnd:false");
+    footer_.Upgrade() ? DumpLog::GetInstance().AddDesc("footer:true") : DumpLog::GetInstance().AddDesc("footer:false");
+
+    property->GetItemMinSize().has_value()
+        ? DumpLog::GetInstance().AddDesc("ItemMinSize:" + property->GetItemMinSize().value().ToString())
+        : DumpLog::GetInstance().AddDesc("ItemMinSize:null");
+    property->GetItemMaxSize().has_value()
+        ? DumpLog::GetInstance().AddDesc("ItemMaxSize:" + property->GetItemMaxSize().value().ToString())
+        : DumpLog::GetInstance().AddDesc("ItemMaxSize:null");
+
+    if (sections_) {
+        DumpLog::GetInstance().AddDesc("-----------start print sections_------------");
+        std::string res = std::string("");
+        int32_t index = 0;
+        for (const auto& section : sections_->GetSectionInfo()) {
+            res.append("[section:" + std::to_string(index) + "]");
+            res.append("{ itemCount:" + std::to_string(section.itemsCount) + " },")
+                .append("{ crossCount:" + std::to_string(section.crossCount.value_or(1)) + " },")
+                .append("{ columnsGap:" + section.columnsGap.value_or(Dimension(0.0)).ToString() + " },")
+                .append("{ rowsGap:" + section.rowsGap.value_or(Dimension(0.0)).ToString() + " },")
+                .append("{ margin:[" + section.margin.value_or(MarginProperty()).ToString() + " ]}");
+            DumpLog::GetInstance().AddDesc(res);
+            res.clear();
+            index++;
+        }
+        DumpLog::GetInstance().AddDesc("-----------end print sections_------------");
+    }
 }
 } // namespace OHOS::Ace::NG
