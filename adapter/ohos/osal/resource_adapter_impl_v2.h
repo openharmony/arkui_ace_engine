@@ -23,6 +23,7 @@
 #include "base/image/pixel_map.h"
 #include "base/utils/device_config.h"
 #include "core/components/theme/resource_adapter.h"
+#include "adapter/ohos/osal/resource_theme_style.h"
 
 namespace OHOS::Ace {
 class ResourceAdapterImplV2 : public ResourceAdapter {
@@ -99,6 +100,7 @@ private:
     bool appHasDarkRes_ = false;
     std::mutex updateResConfigMutex_;
     ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImplV2);
+    void PreloadTheme(int32_t themeId, RefPtr<ResourceThemeStyle> theme);
 };
 } // namespace OHOS::Ace
 
