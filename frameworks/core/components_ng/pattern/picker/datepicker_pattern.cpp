@@ -331,6 +331,12 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     if (!ShowMonthDays()) {
         childSize = static_cast<float>(host->GetChildren().size());
     }
+    auto leftTotalColumnWith = 0.0f;
+    for (uint32_t index = 0; index < focusKeyID_; ++index) {
+        auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(index));
+        CHECK_NULL_VOID(stackChild);
+        leftTotalColumnWith += stackChild->GetGeometryNode()->GetFrameSize().Width();
+    }
     auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     CHECK_NULL_VOID(stackChild);
     auto blendChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
@@ -342,20 +348,17 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    auto frameWidth = host->GetGeometryNode()->GetFrameSize().Width();
     auto dividerSpacing = pickerTheme->GetDividerSpacing().ConvertToPx();
     auto pickerThemeWidth = dividerSpacing * 2;
 
-    auto centerX = (frameWidth / childSize - pickerThemeWidth) / 2 +
-                   pickerChild->GetGeometryNode()->GetFrameRect().Width() * focusKeyID_ +
-                   PRESS_INTERVAL.ConvertToPx() * 2;
+    auto centerX = (columnWidth - pickerThemeWidth) / 2 + leftTotalColumnWith + PRESS_INTERVAL.ConvertToPx() * 2;
     auto centerY =
         (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / 2 + PRESS_INTERVAL.ConvertToPx();
     float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2;
     float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2;
     if (piantRectWidth > columnWidth) {
         piantRectWidth = columnWidth;
-        centerX = focusKeyID_ * columnWidth;
+        centerX = leftTotalColumnWith;
     }
     paintRect.SetRect(RectF(centerX, centerY, piantRectWidth, piantRectHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
