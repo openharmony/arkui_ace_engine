@@ -51,7 +51,7 @@ private:
     RefPtr<ResourceAdapter> resAdapter_;
     std::promise<void> promise_;
     std::shared_future<void> future_ = promise_.get_future();
-    std::vector<std::string> checkThemeStyleVector; // theme pattern name list for checking the preloaded theme style 
+    std::vector<std::string> checkThemeStyleVector; // theme pattern name list for checking the preloaded theme style
 };
 } // namespace OHOS::Ace
 

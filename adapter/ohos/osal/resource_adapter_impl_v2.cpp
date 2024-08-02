@@ -235,7 +235,7 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
     return theme;
 }
 
-void ResourceAdapterImplV2::PreloadTheme(int32_t themeId, RefPtr<ResourceThemeStyle> theme) 
+void ResourceAdapterImplV2::PreloadTheme(int32_t themeId, RefPtr<ResourceThemeStyle> theme)
 {
     auto container = Container::CurrentSafely();
     CHECK_NULL_VOID(container);
@@ -243,8 +243,8 @@ void ResourceAdapterImplV2::PreloadTheme(int32_t themeId, RefPtr<ResourceThemeSt
     CHECK_NULL_VOID(manager);
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    
-    // post an asynchronous task to preload themes in PRELOAD_LIST 
+
+    // post an asynchronous task to preload themes in PRELOAD_LIST
     auto task = [themeId, manager, resourceThemeStyle = WeakPtr<ResourceThemeStyle>(theme),
         weak = WeakClaim(this)]() -> void {
         auto themeStyle = resourceThemeStyle.Upgrade();
@@ -265,7 +265,7 @@ void ResourceAdapterImplV2::PreloadTheme(int32_t themeId, RefPtr<ResourceThemeSt
     };
 
     // isolation of loading card themes
-    if(!container->IsFormRender()) {
+    if (!container->IsFormRender()) {
         taskExecutor->PostTask(task, TaskExecutor::TaskType::BACKGROUND, "ArkUILoadTheme");
     }
 }
