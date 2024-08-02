@@ -136,6 +136,7 @@ public:
     void UpdateBubbleText();
     void UpdateText(const RefPtr<UINode>& node, const RefPtr<PopupTheme>& popupTheme);
     void AddPipelineCallBack();
+    void UpdateAgingTextSize();
 
     void SetMessageColor(bool isSetMessageColor)
     {

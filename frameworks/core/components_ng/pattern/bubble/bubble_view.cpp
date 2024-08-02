@@ -49,7 +49,10 @@ constexpr double DOUBLENESS = 2.0;
 constexpr Dimension OUT_RANGE_SPACE = 40.0_vp;
 constexpr Dimension MIN_BUTTON_FONT_SIZE = 9.0_vp;
 constexpr int32_t BUTTON_MAX_LINE = 2;
-constexpr float AGE_FONT_MAX_SIZE_SCALE = 2.0;
+constexpr float AGE_FONT_MAX_SIZE_SCALE = 2.0f;
+constexpr float AGE_SCALE_NUMBER = 1.0f;
+constexpr float AGE_FONT_DOUBLE_LINE_WITH_GAP = 2.5f;
+constexpr float AGE_BUTTONS_LAYOUT_HEIGHT_RATE = 15.0f;
 
 OffsetF GetDisplayWindowRectOffset()
 {
@@ -82,18 +85,12 @@ Dimension GetMaxWith()
     return maxWidth;
 }
 
-double GetAgeFontSizeScale()
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, 0.0);
-    auto fontSizeScale = pipeline->GetFontScale();
-    return fontSizeScale;
-}
-
 Dimension GetAgeFontSize(const std::optional<Dimension>& originalFontSize)
 {
-    auto fontSizeScale = GetAgeFontSizeScale();
     auto fontSize = Dimension(originalFontSize->Value(), originalFontSize->Unit());
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, fontSize);
+    auto fontSizeScale = pipeline->GetFontScale();
     auto fontScale = fontSizeScale > AGE_FONT_MAX_SIZE_SCALE ? AGE_FONT_MAX_SIZE_SCALE : fontSizeScale;
     fontSize.SetValue((originalFontSize->Value()) * fontScale);
     return fontSize;
@@ -108,7 +105,8 @@ void UpdateTextProperties(const RefPtr<PopupParam>& param, const RefPtr<TextLayo
     auto fontSize = param->GetFontSize();
     if (fontSize.has_value()) {
         if (!param->IsUseCustom()) {
-            textLayoutProps->UpdateFontSize(GetAgeFontSize(fontSize));
+            textLayoutProps->UpdateMaxFontScale(AGE_FONT_MAX_SIZE_SCALE);
+            textLayoutProps->UpdateFontSize(fontSize.value());
         } else {
             textLayoutProps->UpdateFontSize(fontSize.value());
         }
@@ -637,8 +635,8 @@ RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message, bool IsU
     auto popupTheme = GetPopupTheme();
     CHECK_NULL_RETURN(popupTheme, nullptr);
     if (!IsUseCustom) {
-        auto fontSize = popupTheme->GetFontSize();
-        layoutProperty->UpdateFontSize(GetAgeFontSize(fontSize));
+        layoutProperty->UpdateMaxFontScale(AGE_FONT_MAX_SIZE_SCALE);
+        layoutProperty->UpdateFontSize(popupTheme->GetFontSize());
     } else {
         layoutProperty->UpdateFontSize(popupTheme->GetFontSize());
     }
@@ -668,13 +666,25 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
     CHECK_NULL_RETURN(bubblePattern, nullptr);
     bubblePattern->SetMessageNode(message);
     auto popupTheme = GetPopupTheme();
+    CHECK_NULL_RETURN(popupTheme, nullptr);
     auto padding = popupTheme->GetPadding();
     auto textLayoutProps = message->GetLayoutProperty<TextLayoutProperty>();
     PaddingProperty textPadding;
     textPadding.left = CalcLength(padding.Left());
     textPadding.right = CalcLength(padding.Right());
     textPadding.top = CalcLength(padding.Top());
-    textLayoutProps->UpdatePadding(textPadding);
+    textPadding.bottom = CalcLength(padding.Bottom());
+    if (!param->IsUseCustom()) {
+        auto textBottomPadding = popupTheme->GetTextBottomPadding();
+        PaddingProperty textSpacing;
+        textSpacing.left = CalcLength(textBottomPadding.Left());
+        textSpacing.right = CalcLength(textBottomPadding.Right());
+        textSpacing.top = CalcLength(padding.Top() + textBottomPadding.Top());
+        textSpacing.bottom = CalcLength(padding.Bottom() - textBottomPadding.Bottom());
+        textLayoutProps->UpdatePadding(textSpacing);
+    } else {
+        textLayoutProps->UpdatePadding(textPadding);
+    }
     textLayoutProps->UpdateAlignSelf(FlexAlign::FLEX_START);
     UpdateTextProperties(param, textLayoutProps);
     message->MarkModifyDone();
@@ -694,8 +704,15 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
         auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
         scrollProps->UpdateAxis(Axis::VERTICAL);
         scrollProps->UpdateAlignment(Alignment::CENTER_LEFT);
-        scrollProps->UpdateCalcMaxSize(
-            CalcSize(std::nullopt, CalcLength(Dimension(popupMaxHeight) - buttonTheme->GetHeight() * DOUBLENESS)));
+        if (pipelineContext->GetFontScale() == AGE_SCALE_NUMBER) {
+            scrollProps->UpdateCalcMaxSize(
+                CalcSize(std::nullopt, CalcLength(Dimension(popupMaxHeight) - buttonTheme->GetHeight() * DOUBLENESS)));
+        } else {
+            auto buttonFontSize = popupTheme->GetButtonFontSize();
+            scrollProps->UpdateCalcMaxSize(CalcSize(std::nullopt,
+                CalcLength(Dimension(popupMaxHeight) -
+				GetAgeFontSize(buttonFontSize) * AGE_BUTTONS_LAYOUT_HEIGHT_RATE)));
+        }
         scrollNode->MarkModifyDone();
         message->MountToParent(scrollNode);
         scrollNode->MountToParent(columnNode);
@@ -746,6 +763,7 @@ RefPtr<FrameNode> BubbleView::CreateButtons(const RefPtr<PopupParam>& param, int
         secondaryButton->MountToParent(layoutNode);
     }
     auto popupTheme = GetPopupTheme();
+    CHECK_NULL_RETURN(popupTheme, nullptr);
     auto littlePadding = popupTheme->GetLittlePadding();
     PaddingProperty rowPadding;
     rowPadding.right = CalcLength(littlePadding);
@@ -756,7 +774,17 @@ RefPtr<FrameNode> BubbleView::CreateButtons(const RefPtr<PopupParam>& param, int
         layoutProps->UpdatePadding(rowPadding);
     } else {
         auto layoutProps = layoutNode->GetLayoutProperty<FlexLayoutProperty>();
-        layoutProps->UpdatePadding(rowPadding);
+        if (!param->IsUseCustom()) {
+            auto bottomPadding = popupTheme->GetBottomPadding();
+            PaddingProperty bottomRowPadding;
+            bottomRowPadding.left = CalcLength(bottomPadding);
+            bottomRowPadding.bottom = CalcLength(bottomPadding + littlePadding);
+            bottomRowPadding.top = CalcLength(bottomPadding + littlePadding);
+            bottomRowPadding.right = CalcLength(bottomPadding);
+            layoutProps->UpdatePadding(bottomRowPadding);
+        } else {
+            layoutProps->UpdatePadding(rowPadding);
+    }
     }
     layoutNode->MarkModifyDone();
     return layoutNode;
@@ -766,8 +794,17 @@ void UpdateButtonFontSize(RefPtr<TextLayoutProperty>& textLayoutProps)
 {
     auto popupTheme = GetPopupTheme();
     CHECK_NULL_VOID(popupTheme);
+    auto pipeline = PipelineBase::GetCurrentContext();
     auto fontSize = popupTheme->GetButtonFontSize();
-    textLayoutProps->UpdateFontSize(GetAgeFontSize(fontSize));
+    auto fontSizeScale = pipeline->GetFontScale();
+    auto fontScale = fontSizeScale > AGE_FONT_MAX_SIZE_SCALE ? AGE_FONT_MAX_SIZE_SCALE : fontSizeScale;
+    if (fontScale == AGE_SCALE_NUMBER) {
+        textLayoutProps->UpdateAdaptMaxFontSize(popupTheme->GetButtonFontSize());
+        textLayoutProps->UpdateAdaptMinFontSize(MIN_BUTTON_FONT_SIZE);
+    } else {
+        textLayoutProps->UpdateMaxFontScale(AGE_FONT_MAX_SIZE_SCALE);
+    }
+    textLayoutProps->UpdateFontSize(fontSize);
 }
 
 RefPtr<FrameNode> BubbleView::CreateButton(
@@ -798,8 +835,6 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     auto textLayoutProperty = buttonTextNode->GetLayoutProperty<TextLayoutProperty>();
     UpdateButtonFontSize(textLayoutProperty);
     textLayoutProperty->UpdateMaxLines(BUTTON_MAX_LINE);
-    textLayoutProperty->UpdateAdaptMaxFontSize(popupTheme->GetButtonFontSize());
-    textLayoutProperty->UpdateAdaptMinFontSize(MIN_BUTTON_FONT_SIZE);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     if (!(Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
         textLayoutProperty->UpdateTextColor(popupTheme->GetButtonFontColor());
@@ -811,9 +846,21 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     auto padding = buttonTheme->GetPadding();
     buttonPadding.left = CalcLength(buttonTextInsideMargin);
     buttonPadding.right = CalcLength(buttonTextInsideMargin);
-    buttonProp->UpdatePadding(buttonPadding);
+    if (!param->IsUseCustom()) {
+        auto buttonTextSpacing = popupTheme->GetButtonTextSpacing();
+        PaddingProperty buttonSpacing;
+        buttonSpacing.left = CalcLength(buttonTextSpacing);
+        buttonSpacing.right = CalcLength(buttonTextSpacing);
+        buttonSpacing.top = CalcLength(buttonTextSpacing - buttonTextInsideMargin);
+        buttonSpacing.bottom = CalcLength(buttonTextSpacing);
+        buttonProp->UpdatePadding(buttonSpacing);
+    } else {
+        buttonProp->UpdatePadding(buttonPadding);
+    }
     buttonProp->UpdateType(ButtonType::CAPSULE);
-    buttonProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(buttonTheme->GetHeight())));
+    auto fontSize = popupTheme->GetFontSize();
+    buttonProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
+        CalcLength(GetAgeFontSize(fontSize) * AGE_FONT_DOUBLE_LINE_WITH_GAP)));
     buttonProp->UpdateAlignment(Alignment::CENTER);
     auto buttonMiniMumWidth = popupTheme->GetButtonMiniMumWidth().ConvertToPx();
     buttonProp->UpdateCalcMinSize(CalcSize(CalcLength(buttonMiniMumWidth), std::nullopt));
