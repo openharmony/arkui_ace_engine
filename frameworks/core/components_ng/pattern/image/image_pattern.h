@@ -295,6 +295,8 @@ public:
         return true;
     }
 
+    bool AllowVisibleAreaCheck() const override;
+
     void OnInActive() override
     {
         if (status_ == Animator::Status::RUNNING) {
