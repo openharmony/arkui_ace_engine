@@ -1566,7 +1566,7 @@ void TextPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& result
         }
         auto it = pattern->spans_.begin();
         if (resultObj.spanPosition.spanIndex >= static_cast<int32_t>(pattern->spans_.size())) {
-            std::advance(it, pattern->spans_.size() ? pattern->spans_.size() - 1 : 0);
+            std::advance(it, !pattern->spans_.empty() ? static_cast<int32_t>(pattern->spans_.size()) - 1 : 0);
             TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "resultObj.spanPosition.spanIndex is larger than spans size.");
         } else {
             std::advance(it, resultObj.spanPosition.spanIndex);
@@ -1773,7 +1773,8 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
         fontFamilyValue += str;
         fontFamilyValue += ",";
     }
-    fontFamilyValue = fontFamilyValue.substr(0, fontFamilyValue.size() ? fontFamilyValue.size() - 1 : 0);
+    fontFamilyValue =
+        fontFamilyValue.substr(0, !fontFamilyValue.empty() ? static_cast<int32_t>(fontFamilyValue.size()) - 1 : 0);
     textStyle.fontFamily = !fontFamilyValue.empty() ? fontFamilyValue : defaultFontFamily.front();
     textStyle.decorationType = static_cast<int32_t>(node->GetTextDecorationValue(TextDecoration::NONE));
     textStyle.decorationColor = node->GetTextDecorationColorValue(Color::BLACK).ColorToString();
@@ -1921,7 +1922,8 @@ SymbolSpanStyle TextPattern::GetSymbolSpanStyleObject(const RefPtr<SpanNode>& no
     for (const auto& color : *symbolColors) {
         symbolColorValue += color.ColorToString() + ",";
     }
-    symbolColorValue = symbolColorValue.substr(0, symbolColorValue.size() ? symbolColorValue.size() - 1 : 0);
+    symbolColorValue =
+        symbolColorValue.substr(0, !symbolColorValue.empty() ? static_cast<int32_t>(symbolColorValue.size()) - 1 : 0);
     symbolSpanStyle.symbolColor = !symbolColorValue.empty() ? symbolColorValue : SYMBOL_COLOR;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         symbolSpanStyle.fontSize = node->GetFontSizeValue(Dimension(DIMENSION_VALUE, DimensionUnit::VP)).ConvertToFp();
@@ -3514,7 +3516,7 @@ bool TextPattern::IsSetObscured()
 TextLineMetrics TextPattern::GetLineMetrics(int32_t lineNumber)
 {
     CHECK_NULL_RETURN(pManager_, TextLineMetrics());
-    if (lineNumber < 0 || static_cast<size_t>(lineNumber) > GetLineCount() - 1) {
+    if (lineNumber < 0 || GetLineCount() == 0 || lineNumber > static_cast<int32_t>(GetLineCount()) - 1) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "GetLineMetrics failed, lineNumber not between 0 and max lines:%{public}d",
             lineNumber);
         return TextLineMetrics();
@@ -3610,7 +3612,7 @@ void TextPattern::UpdateFontColor(const Color& value)
         for (auto &&info : paragraphs) {
             auto paragraph = info.paragraph;
             CHECK_NULL_VOID(paragraph);
-            int32_t length = paragraph->GetParagraphText().length();
+            auto length = paragraph->GetParagraphText().length();
             paragraph->UpdateColor(0, length, value);
         }
     } else {
