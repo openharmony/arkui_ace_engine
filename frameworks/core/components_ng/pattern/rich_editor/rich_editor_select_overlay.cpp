@@ -157,14 +157,14 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     GetLocalPointWithTransform(movingHandleOffsetF); // do affine transformation
     pattern->SetMovingHandleOffset(movingHandleOffsetF);
 
-    auto contentRect = pattern->GetContentRect();
-    auto caretRect = pattern->GetCaretRect();
-    float x = std::clamp(localOffset.GetX(), contentRect.Left(), contentRect.Right() - caretRect.Width());
+    float x = localOffset.GetX();
     float y = localOffset.GetY();
-    if (!isFirst) {
-        y = y + handleRect.Height() - caretRect.Height();
+    auto diameter = GetHandleDiameter();
+    if (isFirst) {
+        y -= (diameter / 2); // 2: get the radius
+    } else {
+        y += handleRect.Height() + (diameter / 2); // 2: get the radius
     }
-    y = std::clamp(y, contentRect.Top(), contentRect.Bottom() - caretRect.Height());
     auto magnifierLocalOffset = OffsetF(x, y);
     GetLocalPointWithTransform(magnifierLocalOffset); // do affine transformation
     pattern->magnifierController_->SetLocalOffset(magnifierLocalOffset);
@@ -226,7 +226,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     }
     pattern->CalculateHandleOffsetAndShowOverlay();
     pattern->StopAutoScroll();
-    pattern->magnifierController_->UpdateShowMagnifier();
+    pattern->magnifierController_->RemoveMagnifierFrameNode();
     if (!IsSingleHandleShow() && textSelector.StartEqualToDest()) {
         HideMenu();
         CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);

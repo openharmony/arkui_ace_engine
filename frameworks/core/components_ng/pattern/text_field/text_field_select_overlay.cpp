@@ -493,7 +493,7 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         overlayManager->MarkInfoChange(DIRTY_COPY_ALL_ITEM);
     }
     if (pattern->GetMagnifierController()) {
-        pattern->GetMagnifierController()->UpdateShowMagnifier();
+        pattern->GetMagnifierController()->RemoveMagnifierFrameNode();
     }
     auto selectController = pattern->GetTextSelectController();
     if (!IsSingleHandle()) {
