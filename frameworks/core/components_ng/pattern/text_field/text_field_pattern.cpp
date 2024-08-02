@@ -1215,6 +1215,29 @@ void TextFieldPattern::ProcNormalInlineStateInBlurEvent()
     }
 }
 
+void TextFieldPattern::ProcBorderAndUnderlineInBlurEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    bool isShowError = IsShowError();
+    bool isUnderlineMode = IsUnderlineMode();
+    if (!isShowError && isUnderlineMode) {
+        underlineColor_ = userUnderlineColor_.normal.value_or(textFieldTheme->GetUnderlineColor());
+        underlineWidth_ = UNDERLINE_WIDTH;
+    }
+    if (showCountBorderStyle_) {
+        showCountBorderStyle_ = false;
+        if (isShowError) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    }
+    if (!isShowError || (isShowError && !isUnderlineMode && !IsInPasswordMode())) {
+        HandleCounterBorder();
+    }
+}
+
 void TextFieldPattern::HandleBlurEvent()
 {
     auto host = GetHost();
@@ -1227,12 +1250,8 @@ void TextFieldPattern::HandleBlurEvent()
     if (textFieldManager) {
         textFieldManager->ClearOnFocusTextField(host->GetId());
     }
-    auto textFieldTheme = GetTheme();
-    CHECK_NULL_VOID(textFieldTheme);
-    if (!IsShowError() && IsUnderlineMode()) {
-        underlineColor_ = userUnderlineColor_.normal.value_or(textFieldTheme->GetUnderlineColor());
-        underlineWidth_ = UNDERLINE_WIDTH;
-    }
+    
+    ProcBorderAndUnderlineInBlurEvent();
     ProcNormalInlineStateInBlurEvent();
     ModifyInnerStateInBlurEvent();
     magnifierController_->UpdateShowMagnifier();
@@ -1245,8 +1264,6 @@ void TextFieldPattern::HandleBlurEvent()
     HandleCrossPlatformInBlurEvent();
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     NotifyOnEditChanged(false);
-    showCountBorderStyle_ = false;
-    HandleCounterBorder();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
