@@ -1634,6 +1634,21 @@ void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geomet
     imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
 }
 
+bool ImagePattern::AllowVisibleAreaCheck() const
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    RefPtr<FrameNode> parentUi = frameNode->GetAncestorNodeOfFrame(true);
+    while (parentUi) {
+        auto layoutProperty = parentUi->GetLayoutProperty();
+        if (layoutProperty && layoutProperty->IsOverlayNode()) {
+            return true;
+        }
+        parentUi = parentUi->GetAncestorNodeOfFrame(true);
+    }
+    return false;
+}
+
 void ImagePattern::InitDefaultValue()
 {
     // add API version protection
