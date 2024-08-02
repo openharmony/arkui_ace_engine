@@ -64,14 +64,45 @@ void MouseResponseRegionImpl(Ark_NativePointer node,
 void SizeImpl(Ark_NativePointer node,
               const Ark_SizeOptions* value)
 {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto width = Converter::OptConvert<CalcLength>(value->width);
+    if (width) {
+        ViewAbstract::SetWidth(frameNode, width.value());
+    }
+    auto height = Converter::OptConvert<CalcLength>(value->height);
+    if (height) {
+        ViewAbstract::SetHeight(frameNode, height.value());
+    }
 }
 void ConstraintSizeImpl(Ark_NativePointer node,
                         const Ark_ConstraintSizeOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto minWidth = Converter::OptConvert<CalcLength>(value->minWidth);
+    if (minWidth) {
+        ViewAbstract::SetMinWidth(frameNode, minWidth.value());
+    }
+    auto minHeight = Converter::OptConvert<CalcLength>(value->minHeight);
+    if (minHeight) {
+        ViewAbstract::SetMinHeight(frameNode, minHeight.value());
+    }
+    auto maxWidth = Converter::OptConvert<CalcLength>(value->maxWidth);
+    if (maxWidth) {
+        ViewAbstract::SetMaxWidth(frameNode, maxWidth.value());
+    }
+    auto maxHeight = Converter::OptConvert<CalcLength>(value->maxHeight);
+    if (maxHeight) {
+        ViewAbstract::SetMaxHeight(frameNode, maxHeight.value());
+    }
 }
 void TouchableImpl(Ark_NativePointer node,
                    Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetTouchable(frameNode, static_cast<bool>(value));
 }
 void HitTestBehaviorImpl(Ark_NativePointer node,
                          Ark_Int32 value)
@@ -88,10 +119,44 @@ void LayoutWeightImpl(Ark_NativePointer node,
 void PaddingImpl(Ark_NativePointer node,
                  const Type_CommonMethod_padding_Arg0* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    PaddingProperty indents;
+    switch (value->selector)
+    {
+        case 0: {
+            indents.left = Converter::OptConvert<CalcLength>(value->value0.left);
+            indents.top = Converter::OptConvert<CalcLength>(value->value0.top);
+            indents.right = Converter::OptConvert<CalcLength>(value->value0.right);
+            indents.bottom = Converter::OptConvert<CalcLength>(value->value0.bottom);
+            break;
+        }
+        case 1: indents = Converter::OptConvert<PaddingProperty>(value->value1).value(); break;
+        case 2: indents = Converter::Convert<PaddingProperty>(value->value2); break;
+        default: LOGE("ARKOALA: CommonMethod::PaddingImpl: Unexpected selector: %{public}d\n", value->selector); abort(); 
+    }
+    ViewAbstract::SetPadding(frameNode, indents);
 }
 void MarginImpl(Ark_NativePointer node,
                 const Type_CommonMethod_margin_Arg0* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    PaddingProperty indents;
+    switch (value->selector)
+    {
+        case 0: {
+            indents.left = Converter::OptConvert<CalcLength>(value->value0.left);
+            indents.top = Converter::OptConvert<CalcLength>(value->value0.top);
+            indents.right = Converter::OptConvert<CalcLength>(value->value0.right);
+            indents.bottom = Converter::OptConvert<CalcLength>(value->value0.bottom);
+            break;
+        }
+        case 1: indents = Converter::OptConvert<PaddingProperty>(value->value1).value(); break;
+        case 2: indents = Converter::OptConvert<PaddingProperty>(value->value2).value(); break;
+        default: LOGE("ARKOALA: CommonMethod::MarginImpl: Unexpected selector: %{public}d\n", value->selector); abort(); 
+    }
+    ViewAbstract::SetMargin(frameNode, indents);
 }
 void BackgroundImpl(Ark_NativePointer node,
                     const CustomBuilder* builder,
@@ -106,7 +171,7 @@ void BackgroundColorImpl(Ark_NativePointer node,
     if (color) {
         ViewAbstract::SetBackgroundColor(frameNode, color.value());
     } else {
-        LOGI("#### CommonMethod::BackgroundColor impl: color is empty");
+        LOGI("#### CommonMethod::BackgroundColorImpl: color is empty");
     }
 }
 void PixelRoundImpl(Ark_NativePointer node,
@@ -215,6 +280,13 @@ void OutlineRadiusImpl(Ark_NativePointer node,
 void ForegroundColorImpl(Ark_NativePointer node,
                          const Type_CommonMethod_foregroundColor_Arg0* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto color = Converter::OptConvert<Color>(*value);
+    if (color) {
+        ViewAbstract::SetForegroundColor(frameNode, color.value());
+    } else {
+        LOGI("#### CommonMethod::ForegroundColorImpl: color is empty");
+    }
 }
 void OnClickImpl(Ark_NativePointer node,
                  Ark_Function event)
@@ -310,6 +382,61 @@ void OnMouseImpl(Ark_NativePointer node,
 void OnTouchImpl(Ark_NativePointer node,
                  Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [frameNode](TouchEventInfo& eventInfo) {
+        Ark_TouchEvent onTouch;
+        onTouch.axisHorizontal.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+        onTouch.axisVertical.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+        onTouch.changedTouches.array = nullptr;
+        onTouch.changedTouches.length = 0;
+        auto changedTouches = eventInfo.GetChangedTouches();
+        if (!changedTouches.empty()) {
+            std::vector<Ark_TouchObject> array;
+            for (auto& info : changedTouches) {
+                array.push_back(Converter::ConvertTouchInfo(info));
+            }
+            onTouch.changedTouches.array = &array[0];
+            onTouch.changedTouches.length = changedTouches.size();
+        }
+        onTouch.pressure.tag = Ark_Tag::ARK_TAG_FLOAT32;
+        onTouch.pressure.f32 = 0.0f;
+        onTouch.preventDefault.id = 0;
+        onTouch.source = static_cast<int32_t>(eventInfo.GetSourceDevice());
+        onTouch.sourceTool = 0;
+        onTouch.stopPropagation.id = 0;
+        onTouch.target.area.globalPosition.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+        onTouch.target.area.globalPosition.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+        onTouch.target.area.height.type = 0;
+        onTouch.target.area.height.unit = 1;
+        onTouch.target.area.height.value = 0;
+        onTouch.target.area.width.type = 0;
+        onTouch.target.area.width.unit = 1;
+        onTouch.target.area.width.value = 0;
+        onTouch.target.area.position.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+        onTouch.target.area.position.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+        onTouch.tiltX.tag = Ark_Tag::ARK_TAG_FLOAT32;
+        onTouch.tiltX.f32 = 0;
+        onTouch.tiltY.tag = Ark_Tag::ARK_TAG_FLOAT32;
+        onTouch.tiltY.f32 = 0;
+        onTouch.timestamp.tag = Ark_Tag::ARK_TAG_INT32;
+        onTouch.timestamp.i32 = eventInfo.GetTimeStamp().time_since_epoch().count();
+        onTouch.type = 0;
+        onTouch.touches.array = nullptr;
+        onTouch.touches.length = 0;
+        auto touches = eventInfo.GetTouches();
+        if (!touches.empty()) {
+            std::vector<Ark_TouchObject> array;
+            for (auto& info : touches) {
+                array.push_back(Converter::ConvertTouchInfo(info));
+            }
+            onTouch.touches.array = &array[0];
+            onTouch.touches.length = touches.size();
+        }
+
+        GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onTouch(frameNode->GetId(), onTouch);
+    };
+    ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
 }
 void OnKeyEventImpl(Ark_NativePointer node,
                     Ark_Function event)
@@ -322,10 +449,19 @@ void OnKeyPreImeImpl(Ark_NativePointer node,
 void FocusableImpl(Ark_NativePointer node,
                    Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetFocusable(frameNode, static_cast<bool>(value));
 }
 void OnFocusImpl(Ark_NativePointer node,
                  Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [frameNode]() {
+        GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onFocus(frameNode->GetId());
+    };
+    ViewAbstract::SetOnFocus(frameNode, std::move(onEvent));
 }
 void OnBlurImpl(Ark_NativePointer node,
                 Ark_Function event)
@@ -486,10 +622,22 @@ void TransformImpl(Ark_NativePointer node,
 void OnAppearImpl(Ark_NativePointer node,
                   Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [frameNode]() {
+        GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onAppear(frameNode->GetId());
+    };
+    ViewAbstract::SetOnAppear(frameNode, std::move(onEvent));
 }
 void OnDisAppearImpl(Ark_NativePointer node,
                      Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [frameNode]() {
+        GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onDisAppear(frameNode->GetId());
+    };
+    ViewAbstract::SetOnDisappear(frameNode, std::move(onEvent));
 }
 void OnAttachImpl(Ark_NativePointer node,
                   Ark_Function callback)
@@ -506,6 +654,9 @@ void OnAreaChangeImpl(Ark_NativePointer node,
 void VisibilityImpl(Ark_NativePointer node,
                     Ark_Int32 value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetVisibility(frameNode, static_cast<VisibleType>(value));
 }
 void FlexGrowImpl(Ark_NativePointer node,
                   const Ark_Number* value)
@@ -547,6 +698,28 @@ void AlignImpl(Ark_NativePointer node,
 void PositionImpl(Ark_NativePointer node,
                   const Type_CommonMethod_position_Arg0* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    switch (value->selector)
+    {
+    case 0: {
+        auto x = Converter::ConvertOrDefault(value->value0.x, Dimension());
+        auto y = Converter::ConvertOrDefault(value->value0.y, Dimension());
+        ViewAbstract::SetPosition(frameNode, { x, y });
+        break;
+    }
+    case 1: {
+        auto result = Converter::ConvertOrDefault(value->value1, EdgesParam());
+        ViewAbstract::SetPositionEdges(frameNode, result);
+        break;
+    }
+    case 2: {
+        LOGE("ARKOALA: LocalizedEdges is not fully support.");
+        ViewAbstract::SetPositionLocalizedEdges(frameNode, true);
+        break;
+    }
+    default: LOGE("ARKOALA:PositionImpl: Unexpected value->selector: %{public}d\n", value->selector); abort();
+    }
 }
 void MarkAnchorImpl(Ark_NativePointer node,
                     const Type_CommonMethod_markAnchor_Arg0* value)
@@ -555,10 +728,35 @@ void MarkAnchorImpl(Ark_NativePointer node,
 void OffsetImpl(Ark_NativePointer node,
                 const Type_CommonMethod_offset_Arg0* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    switch (value->selector)
+    {
+        case 0: {
+            auto x = Converter::ConvertOrDefault(value->value0.x, Dimension());
+            auto y = Converter::ConvertOrDefault(value->value0.y, Dimension());
+            ViewAbstract::SetOffset(frameNode, { x, y });
+            break;
+        }
+        case 1: {
+            auto result = Converter::ConvertOrDefault(value->value1, EdgesParam());
+            ViewAbstract::SetOffsetEdges(frameNode, result);
+            break;
+        }
+        case 2: {
+            LOGE("ARKOALA: LocalizedEdges is not fully support.");
+            ViewAbstract::SetOffsetLocalizedEdges(frameNode, true);
+            break;
+        }
+        default: LOGE("ARKOALA:OffsetImpl: Unexpected value->selector: %{public}d\n", value->selector); abort();
+    }
 }
 void EnabledImpl(Ark_NativePointer node,
                  Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetEnabled(frameNode, static_cast<bool>(value));
 }
 void UseSizeTypeImpl(Ark_NativePointer node,
                      const Type_CommonMethod_useSizeType_Arg0* value)

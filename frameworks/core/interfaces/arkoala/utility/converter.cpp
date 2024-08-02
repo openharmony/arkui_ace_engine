@@ -50,7 +50,48 @@ void ParseDimension(const Ark_String &string, Ark_Length *result)
     }
     result->unit = static_cast<Ark_Int32>(unit);
 }
+Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo& info)
+{
+    Ark_TouchObject touch;
+    Offset globalOffset = info.GetGlobalLocation();
+    Offset localOffset = info.GetLocalLocation();
+    Offset screenOffset = info.GetScreenLocation();
 
+    touch.displayX.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.displayX.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
+    touch.displayY.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.displayY.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
+
+    touch.id.tag = Ark_Tag::ARK_TAG_INT32;
+    touch.id.i32 = static_cast<int32_t>(info.GetTouchDeviceId());
+
+    touch.screenX.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.screenX.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    touch.screenY.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.screenY.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+
+    touch.type = static_cast<int32_t>(info.GetTouchType());
+
+    touch.windowX.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.windowX.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    touch.windowY.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.windowY.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+
+    touch.x.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.x.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
+    touch.y.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.y.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
+
+    return touch;
+}
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
     constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
@@ -68,7 +109,7 @@ bool ParseColorFromArkResource(const Ark_Resource &res, Color &result)
     constexpr int32_t ERROR_COLOR_ID = -1;
 
     auto themeConstants = NodeModifier::GetThemeConstants(0, res.bundleName.chars, res.moduleName.chars);
-    CHECK_NULL_RETURN(themeConstants, false);
+    CHECK_NULL_RETURN(themeConstants, false);>
 
     CHECK_NULL_RETURN(res.id.tag == ARK_TAG_INT32, false);
     auto resId = res.id.i32;
