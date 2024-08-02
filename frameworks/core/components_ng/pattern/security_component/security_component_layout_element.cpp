@@ -190,6 +190,9 @@ bool TextLayoutElement::GetTextLimitExceededFlag(double maxHeight)
     currentTextSize = GetMeasureTextSize(textProp->GetContent().value_or(""),
         textProp->GetFontSize().value_or(minFontSize_),
         textProp->GetFontWeight().value_or(FontWeight::NORMAL));
+    if (!currentTextSize.has_value()) {
+        return false;
+    }
 
     auto textConstraint = textProp->GetContentLayoutConstraint();
     CHECK_NULL_RETURN(textConstraint, false);
