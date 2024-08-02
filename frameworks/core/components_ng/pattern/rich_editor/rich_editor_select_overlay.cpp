@@ -482,4 +482,14 @@ void RichEditorSelectOverlay::UpdateHandleOffset()
     manager->MarkInfoChange(DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE);
 }
 
+void RichEditorSelectOverlay::UpdateSelectOverlayOnAreaChanged()
+{
+    HideMenu(true);
+    CHECK_NULL_VOID(SelectOverlayIsOn() || SelectOverlayIsCreating());
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->CalculateHandleOffsetAndShowOverlay();
+    UpdateHandleOffset();
+}
+
 } // namespace OHOS::Ace::NG
