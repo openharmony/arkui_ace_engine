@@ -313,16 +313,16 @@ int32_t OH_ArkUI_StartDrag(ArkUI_DragAction* dragAction)
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_PreviewDragStatus OH_ArkUI_NodeEvent_GetPreviewDragStatus(ArkUI_NodeEvent* nodeEvent)
+ArkUI_PreDragStatus OH_ArkUI_NodeEvent_GetPreDragStatus(ArkUI_NodeEvent* nodeEvent)
 {
     if (!nodeEvent || nodeEvent->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT)) {
-        return ArkUI_PreviewDragStatus::ARKUI_PREVIEW_DRAG_STATUS_UNKNOWN;
+        return ArkUI_PreDragStatus::ARKUI_PRE_DRAG_STATUS_UNKNOWN;
     }
     const auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(nodeEvent->origin);
     if (!originNodeEvent) {
-        return ArkUI_PreviewDragStatus::ARKUI_PREVIEW_DRAG_STATUS_UNKNOWN;
+        return ArkUI_PreDragStatus::ARKUI_PRE_DRAG_STATUS_UNKNOWN;
     }
-    auto status = static_cast<ArkUI_PreviewDragStatus>(originNodeEvent->componentAsyncEvent.data[0].i32);
+    auto status = static_cast<ArkUI_PreDragStatus>(originNodeEvent->componentAsyncEvent.data[0].i32);
     return status;
 }
 
