@@ -42,6 +42,7 @@ CJ_EXPORT bool FfiOHOSAceFrameworkNativeViewNeedsUpdate(int64_t nativeViewId);
 CJ_EXPORT void FfiOHOSAceFrameworkNativeViewMarkStatic(int64_t nativeViewId);
 CJ_EXPORT bool FfiOHOSAceFrameworkNativeViewIsStatic(int64_t nativeViewId);
 CJ_EXPORT ExternalString FfiOHOSAceFrameworkProcessViewId(int64_t nativeViewId);
+CJ_EXPORT bool FfiOHOSAceFrameworkNativeViewIsFirstRender(int64_t nativeViewId);
 
 CJ_EXPORT VectorToCFFIArray FfiOHOSAceFrameworkViewGetDeletedElemtIds(int64_t nativeViewId);
 CJ_EXPORT VectorCJInt64Handle FFICJCreateVectorCJInt64(int64_t size);
