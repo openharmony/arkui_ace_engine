@@ -105,6 +105,7 @@ constexpr int32_t ERROR_CODE_NON_EXIST = 150003;
 
 // ComponentSnapshot error code
 constexpr int32_t ERROR_CODE_COMPONENT_SNAPSHOT_IMAGE_LOAD_ERROR = 160001;
+constexpr int32_t ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT = 160002;
 
 // FromHtml error code
 constexpr int32_t ERROR_CODE_FROM_HTML_CONVERT_ERROR = 170001;
