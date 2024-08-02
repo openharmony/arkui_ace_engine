@@ -78,22 +78,22 @@ typedef enum {
  */
 typedef enum {
     /** Unknown. */
-    ARKUI_PREVIEW_DRAG_STATUS_UNKNOWN = -1,
+    ARKUI_PRE_DRAG_STATUS_UNKNOWN = -1,
     /** A drag gesture is being detected. */
-    ARKUI_PREVIEW_DRAG_STATUS_ACTION_DETECTING,
+    ARKUI_PRE_DRAG_STATUS_ACTION_DETECTING,
     /** The component is ready to be dragged. */
-    ARKUI_PREVIEW_DRAG_STATUS_READY_TO_TRIGGER_DRAG,
+    ARKUI_PRE_DRAG_STATUS_READY_TO_TRIGGER_DRAG,
     /** A lift animation is started. */
-    ARKUI_PREVIEW_DRAG_STATUS_PREVIEW_LIFT_STARTED,
+    ARKUI_PRE_DRAG_STATUS_PREVIEW_LIFT_STARTED,
     /** A lift animation is finished. */
-    ARKUI_PREVIEW_DRAG_STATUS_PREVIEW_LIFT_FINISHED,
+    ARKUI_PRE_DRAG_STATUS_PREVIEW_LIFT_FINISHED,
     /** A drop animation is started. */
-    ARKUI_PREVIEW_DRAG_STATUS_PREVIEW_LANDING_STARTED,
+    ARKUI_PRE_DRAG_STATUS_PREVIEW_LANDING_STARTED,
     /** A drop animation is finished. */
-    ARKUI_PREVIEW_DRAG_STATUS_PREVIEW_LANDING_FINISHED,
+    ARKUI_PRE_DRAG_STATUS_PREVIEW_LANDING_FINISHED,
     /** A drop animation is terminated. */
-    ARKUI_PREVIEW_DRAG_STATUS_CANCELED_BEFORE_DRAG,
-} ArkUI_PreviewDragStatus;
+    ARKUI_PRE_DRAG_STATUS_CANCELED_BEFORE_DRAG,
+} ArkUI_PreDragStatus;
 
 /**
  * @brief Defines an enum for drag preview scale modes.
@@ -204,7 +204,7 @@ ArkUI_DragEvent* OH_ArkUI_NodeEvent_GetDragEvent(ArkUI_NodeEvent* nodeEvent);
  * @return Returns the interaction state prior to the drop and drop operation.
  * @since 12
  */
-ArkUI_PreviewDragStatus OH_ArkUI_NodeEvent_GetPreviewDragStatus(ArkUI_NodeEvent* nodeEvent);
+ArkUI_PreDragStatus OH_ArkUI_NodeEvent_GetPreDragStatus(ArkUI_NodeEvent* nodeEvent);
 
 /**
  * @brief Sets whether to disable the default drop animation.

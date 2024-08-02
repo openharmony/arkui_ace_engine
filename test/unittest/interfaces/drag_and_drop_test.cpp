@@ -172,7 +172,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest004, TestSize.Level1)
 
 /**
  * @tc.name: DragAndDropTest005
- * @tc.desc: Test the OH_ArkUI_NodeEvent_GetPreviewDragStatus.
+ * @tc.desc: Test the OH_ArkUI_NodeEvent_GetPreDragStatus.
  * @tc.type: FUNC
  */
 HWTEST_F(DragAndDropTest, DragAndDropTest005, TestSize.Level1)
@@ -188,33 +188,33 @@ HWTEST_F(DragAndDropTest, DragAndDropTest005, TestSize.Level1)
         static_cast<ArkUI_Int32>(OHOS::Ace::PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION);
     nodeEvent.origin = &event;
     nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_COMPONENT_EVENT;
-    auto ret1 = OH_ArkUI_NodeEvent_GetPreviewDragStatus(&nodeEvent);
+    auto ret1 = OH_ArkUI_NodeEvent_GetPreDragStatus(&nodeEvent);
 
     /**
      * @tc.steps: step2.set DragEvent is nullptr, related function is called.
      */
-    auto ret2 = OH_ArkUI_NodeEvent_GetPreviewDragStatus(nullptr);
+    auto ret2 = OH_ArkUI_NodeEvent_GetPreDragStatus(nullptr);
 
     /**
      * @tc.steps: step3.set category to other type, related function is called.
      */
     nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
-    auto ret3 = OH_ArkUI_NodeEvent_GetPreviewDragStatus(&nodeEvent);
+    auto ret3 = OH_ArkUI_NodeEvent_GetPreDragStatus(&nodeEvent);
 
     /**
      * @tc.steps: step4.set origin to nullptr, related function is called.
      */
     nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_COMPONENT_EVENT;
     nodeEvent.origin = nullptr;
-    auto ret4 = OH_ArkUI_NodeEvent_GetPreviewDragStatus(&nodeEvent);
+    auto ret4 = OH_ArkUI_NodeEvent_GetPreDragStatus(&nodeEvent);
 
     /**
      * @tc.expected: Return expected results.
      */
-    EXPECT_EQ(ret1, ArkUI_PreviewDragStatus::ARKUI_PREVIEW_DRAG_STATUS_READY_TO_TRIGGER_DRAG);
-    EXPECT_EQ(ret2, ArkUI_PreviewDragStatus::ARKUI_PREVIEW_DRAG_STATUS_UNKNOWN);
-    EXPECT_EQ(ret3, ArkUI_PreviewDragStatus::ARKUI_PREVIEW_DRAG_STATUS_UNKNOWN);
-    EXPECT_EQ(ret4, ArkUI_PreviewDragStatus::ARKUI_PREVIEW_DRAG_STATUS_UNKNOWN);
+    EXPECT_EQ(ret1, ArkUI_PreDragStatus::ARKUI_PRE_DRAG_STATUS_READY_TO_TRIGGER_DRAG);
+    EXPECT_EQ(ret2, ArkUI_PreDragStatus::ARKUI_PRE_DRAG_STATUS_UNKNOWN);
+    EXPECT_EQ(ret3, ArkUI_PreDragStatus::ARKUI_PRE_DRAG_STATUS_UNKNOWN);
+    EXPECT_EQ(ret4, ArkUI_PreDragStatus::ARKUI_PRE_DRAG_STATUS_UNKNOWN);
 }
 
 /**
