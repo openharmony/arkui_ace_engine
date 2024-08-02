@@ -214,6 +214,7 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
+    lastTouchEvent_.pressedKeyCodes_ = event.pressedKeyCodes_;
     if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         return;
     }
