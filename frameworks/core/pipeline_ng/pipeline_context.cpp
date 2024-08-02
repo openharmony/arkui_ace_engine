@@ -3245,6 +3245,9 @@ void PipelineContext::Destroy()
     rootNode_.Reset();
     accessibilityManagerNG_.Reset();
     stageManager_.Reset();
+    if (overlayManager_) {
+        overlayManager_->ClearUIExtensionNode();
+    }
     overlayManager_.Reset();
     sharedTransitionManager_.Reset();
     dragDropManager_.Reset();

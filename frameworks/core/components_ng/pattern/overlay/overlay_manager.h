@@ -100,10 +100,7 @@ class ACE_FORCE_EXPORT OverlayManager : public virtual AceType {
 
 public:
     explicit OverlayManager(const RefPtr<FrameNode>& rootNode) : rootNodeWeak_(rootNode) {}
-    ~OverlayManager() override
-    {
-        popupMap_.clear();
-    }
+    ~OverlayManager() override;
     void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);
     void RemoveIndexerPopupById(int32_t targetId);
     void RemoveIndexerPopup();
@@ -594,6 +591,7 @@ public:
     }
 
     void SetIsAllowedBeCovered(bool isAllowedBeCovered = true);
+    void ClearUIExtensionNode();
     void DeleteUIExtensionNode(int32_t sessionId);
     bool AddCurSessionId(int32_t curSessionId);
     void ResetRootNode(int32_t sessionId);
