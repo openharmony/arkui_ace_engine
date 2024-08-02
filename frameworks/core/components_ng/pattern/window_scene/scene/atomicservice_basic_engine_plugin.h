@@ -30,12 +30,12 @@ public:
     virtual ~AtomicserviceIconInfo() = default;
 
     // The following functions are used to get data
-    std::string GetBundleName();
-    std::string GetModuleName();
-    std::string GetAbilityName();
-    std::string GetCircleIcon();
-    std::string GetEyelashRingIcon();
-    std::string GetAppName();
+    std::string GetBundleName() const;
+    std::string GetModuleName() const;
+    std::string GetAbilityName() const;
+    std::string GetCircleIcon() const;
+    std::string GetEyelashRingIcon() const;
+    std::string GetAppName() const;
 
     // The following functions are used to set data
     void SetBundleName(const std::string &val);

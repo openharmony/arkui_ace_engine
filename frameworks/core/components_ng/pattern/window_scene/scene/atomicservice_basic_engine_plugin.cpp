@@ -22,32 +22,32 @@ AtomicserviceIconInfo::AtomicserviceIconInfo()
     : bundleName_(""), moduleName_(""), abilityName_(""), circleIcon_(""), eyelashRingIcon_(""), appName_("")
 {}
 
-std::string AtomicserviceIconInfo::GetBundleName()
+std::string AtomicserviceIconInfo::GetBundleName() const
 {
     return bundleName_;
 }
 
-std::string AtomicserviceIconInfo::GetModuleName()
+std::string AtomicserviceIconInfo::GetModuleName() const
 {
     return moduleName_;
 }
 
-std::string AtomicserviceIconInfo::GetAbilityName()
+std::string AtomicserviceIconInfo::GetAbilityName() const
 {
     return abilityName_;
 }
 
-std::string AtomicserviceIconInfo::GetCircleIcon()
+std::string AtomicserviceIconInfo::GetCircleIcon() const
 {
     return circleIcon_;
 }
 
-std::string AtomicserviceIconInfo::GetEyelashRingIcon()
+std::string AtomicserviceIconInfo::GetEyelashRingIcon() const
 {
     return eyelashRingIcon_;
 }
 
-std::string AtomicserviceIconInfo::GetAppName()
+std::string AtomicserviceIconInfo::GetAppName() const
 {
     return appName_;
 }
