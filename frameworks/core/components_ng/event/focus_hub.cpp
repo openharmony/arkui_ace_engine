@@ -1680,6 +1680,18 @@ bool FocusHub::IsFocusableWholePath()
     return IsFocusable();
 }
 
+bool FocusHub::IsSelfFocusableWholePath()
+{
+    auto parent = GetParentFocusHub();
+    while (parent) {
+        if (!parent->IsFocusableNode()) {
+            return false;
+        }
+        parent = parent->GetParentFocusHub();
+    }
+    return IsFocusableNode();
+}
+
 bool FocusHub::IsOnRootTree() const
 {
     auto parent = GetParentFocusHub();

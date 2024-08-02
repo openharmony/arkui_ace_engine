@@ -540,6 +540,7 @@ public:
     bool IsFocusableScopeByTab();
 
     bool IsFocusableWholePath();
+    bool IsSelfFocusableWholePath();
     bool IsOnRootTree() const;
 
     bool IsFocusable();
