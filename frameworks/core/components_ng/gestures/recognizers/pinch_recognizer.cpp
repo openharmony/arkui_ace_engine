@@ -89,6 +89,9 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pinch %{public}d down, begin to detect pinch,"
         "state: %{public}d", event.touchEventId, event.id, refereeState_);
+    if (touchPoints_.size() == 1 && refereeState_ == RefereeState::FAIL) {
+        refereeState_ = RefereeState::READY;
+    }
     touchPoints_[event.id] = event;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
