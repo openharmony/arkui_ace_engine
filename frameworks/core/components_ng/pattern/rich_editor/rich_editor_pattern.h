@@ -856,6 +856,10 @@ public:
     }
 
     TextStyle GetDefaultTextStyle();
+    void SetRequestKeyboardOnFocus(bool needToRequest)
+    {
+        needToRequestKeyboardOnFocus_ = needToRequest;
+    }
 
 protected:
     bool CanStartAITask() override;
@@ -1244,6 +1248,7 @@ private:
     bool needMoveCaretToContentRect_ = false;
     std::queue<std::function<void()>> tasks_;
     bool isModifyingContent_ = false;
+    bool needToRequestKeyboardOnFocus_ = true;
 };
 } // namespace OHOS::Ace::NG
 
