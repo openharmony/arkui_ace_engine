@@ -110,6 +110,12 @@ class ComponentSnapshot {
             __JSScopeUtil__.restoreInstanceId();
         }
     }
+    getSync(id, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let pixelmap = this.ohos_componentSnapshot.getSync(id, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return pixelmap;
+    }
 }
 
 class DragController {
