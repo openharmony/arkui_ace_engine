@@ -387,10 +387,10 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void UpdateScrollBarOffset() override;
     void SetAccessibilityAction() override;
-    bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
     bool ScrollSnapTrigger();
     void CheckScrollable();
     OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
+    bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
 
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
