@@ -147,7 +147,7 @@ public:
             HandleCrownMoveEvent(event);
             isCrownEventEnded_ = false;
         } else if (event.action == OHOS::Ace::CrownAction::END) {
-            HandleCrownEndEvent();
+            HandleCrownEndEvent(event);
             isCrownEventEnded_ = true;
         } else {
             return false;
@@ -162,7 +162,7 @@ private:
 #ifdef SUPPORT_DIGITAL_CROWN
     virtual void HandleCrownBeginEvent(const CrownEvent& event)= 0;
     virtual void HandleCrownMoveEvent(const CrownEvent& event) = 0;
-    virtual void HandleCrownEndEvent() = 0;
+    virtual void HandleCrownEndEvent(const CrownEvent& event) = 0;
 #endif
 
 protected:
