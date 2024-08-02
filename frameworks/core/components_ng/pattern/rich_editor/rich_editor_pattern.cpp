@@ -8941,12 +8941,16 @@ void RichEditorPattern::BeforeRedo(
             RichEditorDeleteDirection::FORWARD);
         GetReplacedSpan(changeValue, innerPosition, record.addText.value(), innerPosition, std::nullopt, std::nullopt);
     } else if (record.deleteText.has_value()) {
-        innerPosition = std::min(innerPosition, record.afterCaretPosition);
+        innerPosition = record.beforeCaretPosition - StringUtils::ToWstring(record.deleteText.value_or("")).length();
         GetDeletedSpan(changeValue, innerPosition, StringUtils::ToWstring(record.deleteText.value_or("")).length(),
             RichEditorDeleteDirection::FORWARD);
     } else if (record.addText.has_value()) {
         innerPosition = std::min(innerPosition, record.afterCaretPosition);
         int32_t innerAddPosition = record.afterCaretPosition - static_cast<int32_t>(record.addText.value().length());
+        if (changeValue.GetRichEditorOriginalSpans().empty()) {
+            innerPosition = caretPosition_;
+            innerAddPosition = caretPosition_;
+        }
         GetReplacedSpan(changeValue, innerAddPosition, record.addText.value(), innerPosition,
             std::nullopt, std::nullopt);
     }
