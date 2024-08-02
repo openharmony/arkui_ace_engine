@@ -722,19 +722,23 @@ void ImagePattern::OnModifyDone()
 
 void ImagePattern::InitOnKeyEvent()
 {
+    if (keyEventCallback_) {
+        return;
+    }
+    
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto focusHub = hub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto onKeyEvent = [weak = WeakClaim(this)](const KeyEvent& event) -> bool {
+    keyEventCallback_ = [weak = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
         pattern->OnKeyEvent();
         return false;
     };
-    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+    focusHub->SetOnKeyEventInternal(std::move(keyEventCallback_));
 }
 
 void ImagePattern::OnKeyEvent()

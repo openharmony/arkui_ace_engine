@@ -526,6 +526,7 @@ private:
     RefPtr<SelectOverlayProxy> selectOverlay_;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
+    std::function<bool(const KeyEvent& event)> keyEventCallback_ = nullptr;
     bool syncLoad_ = false;
     bool needBorderRadius_ = false;
     bool loadInVipChannel_ = false;
