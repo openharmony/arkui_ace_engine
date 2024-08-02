@@ -796,6 +796,8 @@ HWTEST_F(SearchTestNg, SetCaretWidth001, TestSize.Level1)
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
     auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
     ASSERT_NE(textPaintProperty, nullptr);
+    NG::DragPreviewOption option { false };
+    searchModelInstance.SetDragPreviewOptions(option);
     searchModelInstance.SetCaretWidth(14.0_vp);
     searchModelInstance.SetCaretColor(Color::RED);
     EXPECT_EQ(textPaintProperty->GetCursorWidth()->Value(), 14);
@@ -1246,6 +1248,7 @@ HWTEST_F(SearchTestNg, SetTextAlign001, TestSize.Level1)
     ASSERT_NE(textFieldChild, nullptr);
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(textFieldLayoutProperty, nullptr);
+    searchModelInstance.SetTextAlign(OHOS::Ace::TextAlign::START);
     searchModelInstance.SetTextAlign(OHOS::Ace::TextAlign::CENTER);
     EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::CENTER);
     searchModelInstance.SetTextAlign(OHOS::Ace::TextAlign::CENTER);
@@ -2116,5 +2119,89 @@ HWTEST_F(SearchTestNg, SetTextAlign002, TestSize.Level1)
             EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), textAlign);
         }
     }
+}
+/**
+ * @tc.name: SetSearchEnterKeyType001
+ * @tc.desc: SetSearchEnterKeyType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchEnterKeyType001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    searchModelInstance.SetSearchEnterKeyType(TextInputAction::UNSPECIFIED);
+}
+/**
+ * @tc.name: SetSearchEnterKeyType002
+ * @tc.desc: SetSearchEnterKeyType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchEnterKeyType002, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    searchModelInstance.SetTextIndent(DEFAULT_INDENT_SIZE);
+    searchModelInstance.SetSearchEnterKeyType(TextInputAction::GO);
+}
+/**
+ * @tc.name: SetEnablePreviewText
+ * @tc.desc: Test SetEnablePreviewText
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetEnablePreviewText, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    searchModelInstance.SetEnablePreviewText(true);
+    EXPECT_TRUE(textFieldPattern->GetSupportPreviewText());
+}
+/**
+ * @tc.name: ConvertTextFontScaleValue001
+ * @tc.desc: Test ConvertTextFontScaleValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, ConvertTextFontScaleValue001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetFontScale(0.0f);
+    const Dimension fontsizevalue = Dimension(20.1, DimensionUnit::PX);
+    EXPECT_EQ(searchModelInstance.ConvertTextFontScaleValue(fontsizevalue), fontsizevalue);
+}
+/**
+ * @tc.name: ConvertTextFontScaleValue002
+ * @tc.desc: Test ConvertTextFontScaleValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, ConvertTextFontScaleValue002, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetFontScale(3.0f);
+    const Dimension fontsizevalue = Dimension(6.0, DimensionUnit::PX);
+    EXPECT_EQ(searchModelInstance.ConvertTextFontScaleValue(fontsizevalue), Dimension(4.0, DimensionUnit::PX));
 }
 } // namespace OHOS::Ace::NG
