@@ -617,6 +617,12 @@ void FireMenuDisappear(AnimationOption& option, const RefPtr<MenuWrapperPattern>
 }
 } // namespace
 
+OverlayManager::~OverlayManager()
+{
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "OverlayManager destroyed");
+    popupMap_.clear();
+}
+
 void OverlayManager::UpdateContextMenuDisappearPosition(const NG::OffsetF& offset, float menuScale, bool isRedragStart)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -5772,6 +5778,17 @@ int32_t OverlayManager::CreateModalUIExtension(
         uiExtNodes_[sessionId] = WeakClaim(RawPtr(uiExtNode));
     }
     return sessionId;
+}
+
+void OverlayManager::ClearUIExtensionNode()
+{
+    for (auto& item: uiExtNodes_) {
+        auto uiExtNode = item.second.Upgrade();
+        if (uiExtNode) {
+            ModalUIExtension::SetBindModalCallback(uiExtNode, nullptr);
+        }
+    }
+    uiExtNodes_.clear();
 }
 
 void OverlayManager::DeleteUIExtensionNode(int32_t sessionId)
