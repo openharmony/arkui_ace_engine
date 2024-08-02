@@ -796,6 +796,7 @@ private:
     void ProcessMarqueeVisibleAreaCallback();
     void ParseOriText(const std::string& currentText);
     bool IsMarqueeOverflow() const;
+    virtual void ResetAfterTextChange();
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
