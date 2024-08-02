@@ -4656,7 +4656,6 @@ void RichEditorPattern::CreateTextSpanNode(
     spanItem->hasResourceFontColor = true;
     spanItem->hasResourceDecorationColor = true;
     spanNode->UpdateContent(insertValue);
-    AddSpanItem(spanItem, info.GetSpanIndex());
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
         spanItem->hasResourceFontColor = typingStyle_->hasResourceFontColor;
         spanItem->hasResourceDecorationColor = typingStyle_->hasResourceDecorationColor;
@@ -4668,6 +4667,7 @@ void RichEditorPattern::CreateTextSpanNode(
         spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
         SetDefaultColor(spanNode);
     }
+    AddSpanItem(spanItem, info.GetSpanIndex());
     SpanNodeFission(spanNode);
     AfterInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), true, isIME);
 }
