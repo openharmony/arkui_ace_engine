@@ -641,14 +641,6 @@ bool ListPattern::IsScrollSnapAlignCenter() const
     return false;
 }
 
-void ListPattern::UpdateScrollSnap()
-{
-    if (!AnimateStoped()) {
-        return;
-    }
-    predictSnapOffset_ = 0.0f;
-}
-
 bool ListPattern::NeedScrollSnapAlignEffect() const
 {
     auto host = GetHost();
