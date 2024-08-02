@@ -2475,7 +2475,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
         ngPipeline = FindPipelineByElementId(accessibilityEvent.nodeId, node);
         CHECK_NULL_VOID(ngPipeline);
         CHECK_NULL_VOID(node);
-        GetRealEventWindowId(accessibilityEvent,ngPipeline,realWindowId);
+        GetRealEventWindowId(accessibilityEvent, ngPipeline, realWindowId);
         FillEventInfo(node, eventInfo, ngPipeline, Claim(this),
             FillEventInfoParam {
                 accessibilityEvent.nodeId, accessibilityEvent.stackNodeId, realWindowId });
