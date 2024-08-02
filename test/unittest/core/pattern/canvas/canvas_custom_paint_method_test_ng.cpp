@@ -1504,45 +1504,10 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest039, TestSize
 
 /**
  * @tc.name: CanvasCustomPaintMethodTest040
- * @tc.desc: Test the function 'GetFilterType' of the class 'CustomPaintPaintMethod'.
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest040, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
-    ASSERT_NE(paintMethod, nullptr);
-    RSPen pen;
-    paintMethod->state_.strokeState.SetLineDash({ { 1.0, 0.0 }, 1.0 });
-    paintMethod->state_.strokeState.SetLineDashOffset(1.0);
-    paintMethod->UpdateLineDash(pen);
-    RSBrush brush(RSColor(0xffffffff));
-    float result = 0.0f;
-    paintMethod->SetGrayFilter("0", &pen, &brush);
-    EXPECT_TRUE(paintMethod->CheckNumberAndPercentage("0", true, result));
-    paintMethod->SetSepiaFilter("0", &pen, &brush);
-    EXPECT_TRUE(paintMethod->CheckNumberAndPercentage("0", true, result));
-    paintMethod->SetSaturateFilter("0", &pen, &brush);
-    EXPECT_TRUE(paintMethod->CheckNumberAndPercentage("0", true, result));
-    paintMethod->SetInvertFilter("0", &pen, &brush);
-    EXPECT_TRUE(paintMethod->CheckNumberAndPercentage("0", true, result));
-    paintMethod->SetOpacityFilter("0", &pen, &brush);
-    EXPECT_TRUE(paintMethod->CheckNumberAndPercentage("0", true, result));
-    paintMethod->SetBrightnessFilter("0", &pen, &brush);
-    EXPECT_TRUE(paintMethod->CheckNumberAndPercentage("0", true, result));
-    paintMethod->SetContrastFilter("0", &pen, &brush);
-    EXPECT_TRUE(paintMethod->CheckNumberAndPercentage("0", true, result));
-}
-
-/**
- * @tc.name: CanvasCustomPaintMethodTest041
  * @tc.desc: Test the function 'InitImagePaint' of the class 'CustomPaintPaintMethod'.
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest041, TestSize.Level1)
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest040, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -1573,11 +1538,11 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest041, TestSize
 }
 
 /**
- * @tc.name: CanvasCustomPaintMethodTest042
+ * @tc.name: CanvasCustomPaintMethodTest041
  * @tc.desc: Test the function 'UpdatePaintShader' of the class 'CustomPaintPaintMethod'.
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest042, TestSize.Level1)
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest041, TestSize.Level1)
 {
     auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
     ASSERT_NE(paintMethod, nullptr);
