@@ -303,6 +303,7 @@ public:
                     SetUIExtensionImeShow(keyboardRect, pipeline);
                 }
                 if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
+                    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "uiExtension consumed");
                     taskExecutor->PostTask(
                         [context] {
                             CHECK_NULL_VOID(context);
@@ -2177,8 +2178,9 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
 {
-    LOGI("[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s", bundleName_.c_str(),
-        moduleName_.c_str(), instanceId_, config.ToString().c_str());
+    LOGI("[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %d",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(),
+        static_cast<uint32_t>(reason));
     SystemProperties::SetDeviceOrientation(config.Orientation());
     TAG_LOGI(
         AceLogTag::ACE_WINDOW, "Update orientation to : %{public}d", static_cast<uint32_t>(config.Orientation()));
