@@ -73,12 +73,16 @@ void ArkUIPerfMonitor::RecordTimeSlice(MonitorTag tag, int64_t duration)
 {
     SetRecordingStatus(tag, MonitorStatus::IDLE);
     if (tag == MonitorTag::STATIC_API) {
+        propertyNum_++;
         if (!monitorStatus_) {
             return;
         }
-        propertyNum_++;
+        timeSlice_[tag] += duration;
+        return;
     }
-    timeSlice_[tag] += duration;
+    if (monitorStatus_ == 0) {
+        timeSlice_[tag] += duration;
+    }
 }
 
 void ArkUIPerfMonitor::RecordStateMgmtNode(int64_t num)
