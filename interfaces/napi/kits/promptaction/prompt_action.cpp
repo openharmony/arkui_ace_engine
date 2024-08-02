@@ -163,6 +163,10 @@ bool GetToastShowMode(napi_env env, napi_value showModeNApi, NG::ToastShowMode& 
             showMode = static_cast<NG::ToastShowMode>(num);
         }
     }
+
+    if (showMode == NG::ToastShowMode::TOP_MOST) {
+        showMode = NG::ToastShowMode::DEFAULT;
+    }
     return true;
 }
 
