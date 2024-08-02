@@ -1568,7 +1568,7 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
     auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
     CHECK_NULL_VOID(pageInfo);
 
-    if (index == static_cast<int32_t>(pageRouterStack_.size() - 1)) {
+    if (index == static_cast<int32_t>(pageRouterStack_.size()) - 1) {
         pageInfo->ReplacePageParams(target.params);
         pageInfo->ReplaceRecoverable(target.recoverable);
         if (forceShowCurrent) {
@@ -2061,7 +2061,7 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
         "router replace in new lifecycle(API version > 11), replace mode: %{public}d, url: %{public}s",
         static_cast<int32_t>(info.routerMode), info.url.c_str());
     auto popNode = GetCurrentPageNode();
-    int32_t popIndex = static_cast<int32_t>(pageRouterStack_.size() - 1);
+    int32_t popIndex = static_cast<int32_t>(pageRouterStack_.size()) - 1;
     bool findPage = false;
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
