@@ -7140,7 +7140,7 @@ size_t RichEditorPattern::GetLineCount() const
 
 TextLineMetrics RichEditorPattern::GetLineMetrics(int32_t lineNumber)
 {
-    if (lineNumber < 0 || static_cast<uint32_t>(lineNumber) > GetLineCount() - 1) {
+    if (lineNumber < 0 || GetLineCount() == 0 || static_cast<uint32_t>(lineNumber) > GetLineCount() - 1) {
         TAG_LOGE(AceLogTag::ACE_RICH_TEXT,
                 "GetLineMetrics failed, lineNumber not between 0 and max lines:%{public}d", lineNumber);
         return TextLineMetrics();
