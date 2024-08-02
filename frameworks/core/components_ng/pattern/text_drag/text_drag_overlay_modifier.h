@@ -26,6 +26,9 @@ namespace OHOS::Ace::NG {
 constexpr int32_t TEXT_ANIMATION_DURATION = 300;
 constexpr Dimension TEXT_DRAG_DEFAULT_OFFSET = 8.0_vp;
 
+class TextDragPattern;
+enum class DragAnimType { FLOATING, FLOATING_CANCEL, DEFAULT };
+
 class TextDragOverlayModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(TextDragOverlayModifier, OverlayModifier);
 
@@ -36,6 +39,7 @@ public:
     virtual void StartFloatingAnimate()
     {
         isAnimating_ = true;
+        type_ = DragAnimType::FLOATING;
         backgroundOffset_->Set(0);
         AnimationOption option;
         option.SetDuration(TEXT_ANIMATION_DURATION);
@@ -46,11 +50,13 @@ public:
         CHECK_NULL_VOID(modifier);
         modifier->SetAnimateFlag(false);
         };
+        SetShadowOpacity(0.0);
         option.SetOnFinishEvent(finishFuc);
         auto propertyCallback = [weakModifier = WeakClaim(this)]() {
             auto modifier = weakModifier.Upgrade();
             CHECK_NULL_VOID(modifier);
             modifier->SetBackgroundOffset(TEXT_DRAG_DEFAULT_OFFSET.ConvertToPx());
+            modifier->SetShadowOpacity(1.0);
         };
         AnimationUtils::Animate(option, propertyCallback, option.GetOnFinishEvent());
     }
@@ -70,6 +76,14 @@ public:
         isAnimating_ = isAnimate;
     }
 
+    void SetShadowOpacity(float opacity)
+    {
+        CHECK_NULL_VOID(shadowOpacity_);
+        shadowOpacity_->Set(opacity);
+    }
+
+    void PaintBackground(const RSPath& path, RSCanvas& canvas, RefPtr<TextDragPattern> textDragPattern);
+    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas);
     void onDraw(DrawingContext& context) override;
     void SetBackgroundOffset(float offset);
     void SetSelectedBackgroundOpacity(float opacity);
@@ -80,6 +94,9 @@ protected:
     bool isHandlesShow_ = false;
     RefPtr<AnimatablePropertyFloat> backgroundOffset_;
     RefPtr<AnimatablePropertyFloat> selectedBackgroundOpacity_;
+private:
+    DragAnimType type_ = DragAnimType::DEFAULT;
+    RefPtr<AnimatablePropertyFloat> shadowOpacity_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextDragOverlayModifier);
 };
