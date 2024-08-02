@@ -447,4 +447,21 @@ void RichEditorModelNG::SetSelectionMenuOptions(
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
+
+void RichEditorModelNG::SetRequestKeyboardOnFocus(bool needToRequest)
+{
+    CHECK_NULL_VOID(!isStyledStringMode_);
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetRequestKeyboardOnFocus(needToRequest);
+}
+
+void RichEditorModelNG::SetRequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetRequestKeyboardOnFocus(needToRequest);
+}
+
 } // namespace OHOS::Ace::NG
