@@ -44,6 +44,9 @@ declare_args() {
   # Enalbe point light
   ace_engine_feature_enable_point_light = true
 
+  # Set atomicservice basic engine so path
+  ace_engine_feature_asbng_path = ""
+
   # Disable in OH Core
   ace_engine_standard_fonts_enable = true
 
