@@ -189,7 +189,7 @@ void PluginComponentManager::UIServiceListener::OnReturnRequest(
                     },
                     TaskExecutor::TaskType::JS, "ArkUIPluginReturnRequestCallback");
                 callbacks_.emplace(iter->first);
-                callbackVec_.erase(iter++);
+                iter = callbackVec_.erase(iter);
             } else {
                 iter++;
             }
@@ -204,7 +204,7 @@ void PluginComponentManager::UIServiceListener::RequestByJsonPath(
     for (auto iter = callbackVec_.begin(); iter != callbackVec_.end();) {
         if (iter->second == CallBackType::RequestCallBack && iter->first != nullptr) {
             iter->first->OnRequestCallBack(pluginTemplate, data, "{}");
-            callbackVec_.erase(iter++);
+            iter = callbackVec_.erase(iter);
         } else {
             iter++;
         }
