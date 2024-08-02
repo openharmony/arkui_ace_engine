@@ -3124,7 +3124,7 @@ bool RichEditorPattern::HandleUserLongPressEvent(GestureEvent& info)
 void RichEditorPattern::HandleMenuCallbackOnSelectAll()
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleMenuCallbackOnSelectAll");
-    auto textSize = static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
+    auto textSize = GetTextContentLength();
     textSelector_.Update(0, textSize);
     CalculateHandleOffsetAndShowOverlay();
     if (selectOverlay_->IsUsingMouse()) {

@@ -946,6 +946,7 @@ private:
     void ResetSelectionAfterAddSpan(bool isPaste);
     void SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem) override;
     SelectionInfo GetAdjustedSelectionInfo(const SelectionInfo& textSelectInfo);
+    void ResetAfterTextChange() override {};
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
     {
