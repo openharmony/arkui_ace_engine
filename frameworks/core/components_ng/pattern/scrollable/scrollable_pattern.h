@@ -543,48 +543,24 @@ public:
         needLinked_ = needLinked;
     }
 
-    virtual std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems()
-    {
-        std::vector<RefPtr<FrameNode>> children;
-        return children;
-    }
-
     void SetAnimateCanOverScroll(bool animateCanOverScroll)
     {
         bool isScrollable = !(IsAtBottom() && IsAtTop() && !GetAlwaysEnabled());
         animateCanOverScroll_ = isScrollable && animateCanOverScroll;
     }
+
+    virtual std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems()
+    {
+        std::vector<RefPtr<FrameNode>> children;
+        return children;
+    }
+    void InitScrollBarGestureEvent();
     virtual void InitScrollBarClickEvent();
     void HandleClickEvent();
-    void InitScrollBarGestureEvent();
     void InitScrollBarMouseEvent();
     virtual void ScrollPage(
         bool reverse, bool smooth = false, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
-
-    void SetScrollToSafeAreaHelper(bool isScrollToSafeAreaHelper)
-    {
-        isScrollToSafeAreaHelper_ = isScrollToSafeAreaHelper;
-    }
-
-    bool IsScrollToSafeAreaHelper() const
-    {
-        return isScrollToSafeAreaHelper_;
-    }
-
-    void ScrollAtFixedVelocity(float velocity);
-
-    PositionMode GetPositionMode();
-
-    virtual std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility()
-    {
-        return { nullptr, Axis::NONE };
-    }
-
-    virtual std::function<bool(int32_t)> GetScrollIndexAbility()
-    {
-        return nullptr;
-    }
 
     void CheckRestartSpring(bool sizeDiminished, bool needNestedScrolling = true);
 
@@ -611,6 +587,30 @@ public:
     void GetEventDumpInfo();
 
     void DumpAdvanceInfo() override;
+
+    void SetScrollToSafeAreaHelper(bool isScrollToSafeAreaHelper)
+    {
+        isScrollToSafeAreaHelper_ = isScrollToSafeAreaHelper;
+    }
+
+    bool IsScrollToSafeAreaHelper() const
+    {
+        return isScrollToSafeAreaHelper_;
+    }
+
+    virtual std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility()
+    {
+        return { nullptr, Axis::NONE };
+    }
+
+    virtual std::function<bool(int32_t)> GetScrollIndexAbility()
+    {
+        return nullptr;
+    }
+
+    void ScrollAtFixedVelocity(float velocity);
+
+    PositionMode GetPositionMode();
 
     void HandleMoveEventInComp(const PointF& point);
     void HandleLeaveHotzoneEvent();
