@@ -85,6 +85,7 @@ public:
                 theme->horizontalBottomTabBarSpace_ =
                     pattern->GetAttr<Dimension>("horizontal_bottom_tab_bar_space", 0.0_vp);
                 theme->subTabBarHoverDuration_ = pattern->GetAttr<double>("sub_tab_bar_hover_duration", 0.0);
+                theme->subTabFocusedStyle_ = static_cast<bool>(pattern->GetAttr<int>("subtab_focused_style", 0));
                 theme->subTabBarHoverToPressDuration_ =
                     pattern->GetAttr<double>("sub_tab_bar_hover_to_press_duration", 0.0);
                 theme->tabContentAnimationDuration_ =
@@ -354,6 +355,11 @@ public:
         return subTabBarHoverDuration_;
     }
 
+    bool GetSubTabFocusedStyle() const
+    {
+        return subTabFocusedStyle_;
+    }
+
     double GetSubTabBarHoverToPressDuration() const
     {
         return subTabBarHoverToPressDuration_;
@@ -496,6 +502,7 @@ private:
     Dimension bottomTabBarSpace_;
     Dimension horizontalBottomTabBarSpace_;
     double subTabBarHoverDuration_;
+    bool subTabFocusedStyle_;
     double subTabBarHoverToPressDuration_;
     double tabContentAnimationDuration_;
     Dimension tabBarDefaultHeight_;

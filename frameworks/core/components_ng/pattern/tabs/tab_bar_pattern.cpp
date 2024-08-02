@@ -1853,11 +1853,7 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
         auto isSelected = columnNode->GetId() == selectedColumnId;
         auto isFocused = columnNode->GetId() == focusedColumnId;
         if (index >= 0 && index < static_cast<int32_t>(labelStyles_.size())) {
-            if (isFocused && isFocusSet_ && pipelineContext->GetIsFocusActive()) {
-                textLayoutProperty->UpdateTextColor(labelStyles_[index].selectedColor.has_value()
-                                                        ? labelStyles_[index].selectedColor.value()
-                                                        : tabTheme->GetSubTabTextFocusedColor());
-            } else if (isSelected) {
+            if (isSelected) {
                 textLayoutProperty->UpdateTextColor(labelStyles_[index].selectedColor.has_value()
                                                         ? labelStyles_[index].selectedColor.value()
                                                         : tabTheme->GetSubTabTextOnColor());
@@ -1865,6 +1861,13 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
                 textLayoutProperty->UpdateTextColor(labelStyles_[index].unselectedColor.has_value()
                                                         ? labelStyles_[index].unselectedColor.value()
                                                         : tabTheme->GetSubTabTextOffColor());
+            }
+            if (tabTheme->GetSubTabFocusedStyle()) {
+                if (isFocused && isFocusSet_ && pipelineContext->GetIsFocusActive()) {
+                    textLayoutProperty->UpdateTextColor(labelStyles_[index].selectedColor.has_value()
+                                                            ? labelStyles_[index].selectedColor.value()
+                                                            : tabTheme->GetSubTabTextFocusedColor());
+                }
             }
         }
         if (IsNeedUpdateFontWeight(index)) {
