@@ -24,10 +24,13 @@ namespace OHOS::Ace::NG {
 
 void FocusView::FocusViewShow(bool isTriggerByStep)
 {
-    if (!GetFocusViewFocusable()) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d is not focusable, cannot be shown",
-            GetFrameName().c_str(), GetFrameId());
-        return;
+    if (GetFrameName() == V2::NAVBAR_ETS_TAG ||
+        GetFrameName() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        if (!GetFocusViewFocusable()) {
+            TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d is not focusable, cannot be shown",
+                GetFrameName().c_str(), GetFrameId());
+            return;
+        }
     }
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d show", GetFrameName().c_str(), GetFrameId());
     auto viewRootScope = GetViewRootScope();
@@ -322,19 +325,7 @@ bool FocusView::GetFocusViewFocusable()
 {
     auto focusViewHub = GetFocusHub();
     CHECK_NULL_RETURN(focusViewHub, false);
-    if (!focusViewHub->IsFocusable()) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "focusViewHub: %{public}s/%{public}d is unFocusable.",
-            focusViewHub->GetFrameName().c_str(), focusViewHub->GetFrameId());
-        return false;
-    }
-
-    auto viewRootScope = GetViewRootScope();
-    while (viewRootScope != focusViewHub) {
-        if (viewRootScope && viewRootScope->IsFocusable()) {
-            viewRootScope = viewRootScope->GetParentFocusHub();
-            continue;
-        }
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "viewRootScope not exist or parent is unFocusable.");
+    if (!focusViewHub->IsSelfFocusableWholePath()) {
         return false;
     }
     return true;
