@@ -393,7 +393,7 @@ public:
         return textDecorationColor_.ToColor();
     }
 
-    const Color GetDynamicTextDecorationColor() const
+    const DynamicColor GetDynamicTextDecorationColor() const
     {
         return textDecorationColor_;
     }
