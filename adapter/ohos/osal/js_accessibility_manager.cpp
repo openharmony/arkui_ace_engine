@@ -2444,6 +2444,20 @@ void JsAccessibilityManager::SendEventToAccessibilityWithNode(
     }
 }
 
+void GetRealEventWindowId(
+    const AccessibilityEvent& accessibilityEvent, const RefPtr<NG::PipelineContext>& ngPipeline, uint32_t windowId)
+{
+    if ((accessibilityEvent.type == AccessibilityEventType::PAGE_CHANGE && accessibilityEvent.windowId != 0) ||
+        accessibilityEvent.windowChangeTypes == WINDOW_UPDATE_ADDED) {
+        windowId = accessibilityEvent.windowId;
+        return;
+    }
+    if ((ngPipeline != nullptr) && (ngPipeline->IsFormRender())) {
+        return;
+    }
+    windowId = ngPipeline->GetFocusWindowId();
+}
+
 void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent)
 {
     ACE_ACCESS_SCOPED_TRACE("SendAccessibilityAsyncEvent");
@@ -2455,15 +2469,17 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
     }
     RefPtr<NG::PipelineContext> ngPipeline;
     AccessibilityEventInfo eventInfo;
+    uint32_t realWindowId = GetWindiwId();
     if (AceType::InstanceOf<NG::PipelineContext>(context)) {
         RefPtr<NG::FrameNode> node;
         ngPipeline = FindPipelineByElementId(accessibilityEvent.nodeId, node);
         CHECK_NULL_VOID(ngPipeline);
         CHECK_NULL_VOID(node);
+        GetRealEventWindowId(accessibilityEvent,ngPipeline,realWindowId);
         FillEventInfo(node, eventInfo, ngPipeline, Claim(this),
             FillEventInfoParam {
-                accessibilityEvent.nodeId, accessibilityEvent.stackNodeId, ngPipeline->GetFocusWindowId() });
-        eventInfo.SetWindowId(ngPipeline->GetFocusWindowId());
+                accessibilityEvent.nodeId, accessibilityEvent.stackNodeId, realWindowId });
+        eventInfo.SetWindowId(realWindowId);
     } else {
         ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
         auto node = GetAccessibilityNodeFromPage(accessibilityEvent.nodeId);
