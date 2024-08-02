@@ -57,6 +57,7 @@ public:
     bool IsHandleShow();
     void OnHandleMoveStart(bool isFirst) override;
     void UpdateHandleOffset();
+    void UpdateSelectOverlayOnAreaChanged();
     void ToggleMenu();
 
 private:
