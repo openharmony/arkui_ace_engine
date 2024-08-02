@@ -2630,7 +2630,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEventInner(const Accessibilit
     }
     RefPtr<NG::PipelineContext> ngPipeline;
     AccessibilityEventInfo eventInfo;
-    uint32_t realWindowId = GetWindiwId();
+    uint32_t realWindowId = GetWindowId();
     if (AceType::InstanceOf<NG::PipelineContext>(context)) {
         RefPtr<NG::FrameNode> node;
         ngPipeline = FindPipelineByElementId(accessibilityEvent.nodeId, node);
