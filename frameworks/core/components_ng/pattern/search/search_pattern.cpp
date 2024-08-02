@@ -249,7 +249,12 @@ void SearchPattern::SetAccessibilityAction()
     CHECK_NULL_VOID(host);
     auto textAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(textAccessibilityProperty);
-    textAccessibilityProperty->SetActionSetSelection([host](int32_t start, int32_t end, bool isForward) {
+    textAccessibilityProperty->SetActionSetSelection(
+        [weak = WeakClaim(this)](int32_t start, int32_t end, bool isForward) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
         auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
         CHECK_NULL_VOID(textFieldFrameNode);
         auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
@@ -278,7 +283,11 @@ void SearchPattern::SetSearchFieldAccessibilityAction()
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
     auto textFieldAccessibilityProperty = textFieldFrameNode->GetAccessibilityProperty<AccessibilityProperty>();
-    textFieldAccessibilityProperty->SetActionClick([host]() {
+    textFieldAccessibilityProperty->SetActionClick([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
         auto gesture = host->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gesture);
         auto actuator = gesture->GetUserClickEventActuator();
@@ -290,7 +299,11 @@ void SearchPattern::SetSearchFieldAccessibilityAction()
     });
 
     auto textAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-    textAccessibilityProperty->SetActionSetText([host](const std::string& value) {
+    textAccessibilityProperty->SetActionSetText([weak = WeakClaim(this)](const std::string& value) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
         auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
         CHECK_NULL_VOID(textFieldFrameNode);
         auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
@@ -298,6 +311,7 @@ void SearchPattern::SetSearchFieldAccessibilityAction()
         textFieldPattern->InsertValue(value);
     });
 }
+
 
 void SearchPattern::HandleBackgroundColor()
 {
