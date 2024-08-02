@@ -104,14 +104,16 @@ public:
     static bool ParseJsCustomKeyboardBuilder(
         const JSCallbackInfo& info, int32_t index, std::function<void()>& buildFunc);
     static void SetCustomKeyboard(const JSCallbackInfo& info);
+
     static void SetPasswordRules(const JSCallbackInfo& info);
     static void SetEnableAutoFill(const JSCallbackInfo& info);
-    static void SetCancelButton(const JSCallbackInfo& info);
     static void ShowPasswordText(const JSCallbackInfo& info);
-    static void SetSelectAllValue(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static void CreateJsTextFieldCommonEvent(const JSCallbackInfo& info);
     static Local<JSValueRef> JsKeepEditableState(panda::JsiRuntimeCallInfo *info);
+    static void SetCancelButton(const JSCallbackInfo& info);
+    static void SetSelectAllValue(const JSCallbackInfo& info);
+    static void SetFontFeature(const JSCallbackInfo& info);
     static void SetDecoration(const JSCallbackInfo& info);
     static void SetMinFontSize(const JSCallbackInfo& info);
     static void SetMaxFontSize(const JSCallbackInfo& info);
@@ -119,7 +121,6 @@ public:
     static void SetLetterSpacing(const JSCallbackInfo& info);
     static void SetLineHeight(const JSCallbackInfo& info);
     static void SetLineSpacing(const JSCallbackInfo& info);
-    static void SetFontFeature(const JSCallbackInfo& info);
     static void SetTextOverflow(const JSCallbackInfo& info);
     static void SetTextIndent(const JSCallbackInfo& info);
     static void EditMenuOptions(const JSCallbackInfo& info);
