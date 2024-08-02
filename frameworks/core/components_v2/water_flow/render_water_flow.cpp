@@ -1291,7 +1291,7 @@ void RenderWaterFlow::ClearFlowMatrix(size_t index, bool clearAll)
     if (!clearAll) {
         for (auto it = flowMatrix_.begin(); it != flowMatrix_.end();) {
             if (it->first >= index) {
-                flowMatrix_.erase(it++);
+                it = flowMatrix_.erase(it);
             } else {
                 it++;
             }
