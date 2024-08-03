@@ -4622,6 +4622,7 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
     if (!isVisible_) {
         CloseSelectOverlay();
         SelectCancel();
+        isDragEndMenuShow_ = false;
         if (isVisibleActiveEnable_) {
             OnInActive();
         }
