@@ -374,22 +374,24 @@ void GridScrollLayoutAlgorithm::LayoutForwardCachedLine(LayoutWrapper* layoutWra
     // startMainLineIndex will greater than endMainLineIndex
     auto currentLine = std::min(gridLayoutInfo_.startMainLineIndex_, gridLayoutInfo_.endMainLineIndex_);
     auto nextLineHeight = gridLayoutInfo_.lineHeightMap_[currentLine] + mainGap_;
-    auto nextLineIter = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.startMainLineIndex_);
     std::map<int32_t, int32_t> nextLine;
-    if (nextLineIter != gridLayoutInfo_.gridMatrix_.end()) {
-        nextLine = nextLineIter->second;
-    }
     for (int32_t i = 1; i <= cacheCount && currentLine - i >= 0; i++) {
         int32_t currLine = currentLine - i;
         const auto& line = gridLayoutInfo_.gridMatrix_.find(currLine);
         if (line == gridLayoutInfo_.gridMatrix_.end() || line->second.empty()) {
-            break;
+            continue;
         }
         auto nextLineOffset = axis_ == Axis::VERTICAL ? OffsetF(0.0, nextLineHeight) : OffsetF(nextLineHeight, 0.0);
         int32_t itemIdex = -1;
         auto lineHeightIter = gridLayoutInfo_.lineHeightMap_.find(line->first);
         if (lineHeightIter == gridLayoutInfo_.lineHeightMap_.end()) {
-            return;
+            continue;
+        }
+        auto nextLineIter = gridLayoutInfo_.gridMatrix_.find(currLine + 1);
+        if (nextLineIter != gridLayoutInfo_.gridMatrix_.end()) {
+            nextLine = nextLineIter->second;
+        } else {
+            nextLine.clear();
         }
         float lineHeight = lineHeightIter->second;
         Alignment align = axis_ == Axis::VERTICAL ? Alignment::TOP_CENTER : Alignment::CENTER_LEFT;
@@ -404,8 +406,7 @@ void GridScrollLayoutAlgorithm::LayoutForwardCachedLine(LayoutWrapper* layoutWra
             itemIdex = iter.second;
             auto crossIter = itemsCrossPosition_.find(itemIdex);
             if (crossIter == itemsCrossPosition_.end()) {
-                crossIter =
-                    itemsCrossPosition_.emplace(itemIdex, ComputeItemCrossPosition(iter.first)).first;
+                crossIter = itemsCrossPosition_.emplace(itemIdex, ComputeItemCrossPosition(iter.first)).first;
             }
             bool nextLineNotContains =
                 std::none_of(nextLine.begin(), nextLine.end(), [itemIdex](auto ite) { return ite.second == itemIdex; });
@@ -429,7 +430,7 @@ void GridScrollLayoutAlgorithm::LayoutForwardCachedLine(LayoutWrapper* layoutWra
             auto translate = OffsetF(0.0f, 0.0f);
             translate = Alignment::GetAlignPosition(blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), align);
 
-            wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + translate);
+            wrapper->GetGeometryNode()->SetMarginFrameOffset(offset - translate);
             SyncGeometry(wrapper);
             wrapper->SetActive(false);
         }
