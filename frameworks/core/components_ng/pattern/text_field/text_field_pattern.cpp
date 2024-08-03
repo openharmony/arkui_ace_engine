@@ -3628,10 +3628,9 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     CHECK_NULL_RETURN(theme, {});
     auto windowRect = pipeline->GetCurrentWindowRect();
     double positionY = (tmpHost->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY() + windowRect.Top();
-    double height = frameRect_.Height();
     auto offset = AVOID_OFFSET.ConvertToPx();
     auto textPaintOffset = GetPaintRectGlobalOffset();
-    height = selectController_->GetCaretRect().Bottom() + windowRect.Top() +
+    double height = selectController_->GetCaretRect().Bottom() + windowRect.Top() +
              textPaintOffset.GetY() + offset - positionY;
 
     GetInlinePositionYAndHeight(positionY, height);
@@ -3643,8 +3642,9 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     }
 
     TAG_LOGI(
-        AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d MiscTextConfig positionY: %{public}f, height: %{public}f",
-        tmpHost->GetId(), positionY, height);
+        AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d positionY: %{public}f, height: %{public}f,"
+        "paintOffset: %{public}s, windowRect: %{public}f",
+        tmpHost->GetId(), positionY, height, textPaintOffset.ToString().c_str(), windowRect.Top());
 
     MiscServices::CursorInfo cursorInfo { .left = selectController_->GetCaretRect().Left() + windowRect.Left() +
                                                   textPaintOffset.GetX(),

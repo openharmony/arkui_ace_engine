@@ -1753,6 +1753,14 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             AceLogTag::ACE_KEYBOARD, "KeyboardHeight as same as last time, don't need to calculate keyboardOffset");
         return;
     }
+
+    if (!forceChange && NearEqual(keyboardHeight + 1, safeAreaManager_->GetKeyboardInset().Length()) &&
+        prevKeyboardAvoidMode_ == safeAreaManager_->KeyboardSafeAreaEnabled() && manager->PrevHasTextFieldPattern()) {
+        TAG_LOGI(
+            AceLogTag::ACE_KEYBOARD, "Ignore ileagal keyboard height change");
+        return;
+    }
+
     manager->UpdatePrevHasTextFieldPattern();
     prevKeyboardAvoidMode_ = safeAreaManager_->KeyboardSafeAreaEnabled();
 
@@ -1783,7 +1791,10 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         float positionYWithOffset = positionY;
         float currentPos = manager->GetClickPosition().GetY() - context->GetRootRect().GetOffset().GetY() -
             context->GetSafeAreaManager()->GetKeyboardOffset();
-        if (manager->GetIfFocusTextFieldIsInline()) {
+
+        if (!manager->GetOnFocusTextField().Upgrade()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "use origin arg from the window");
+        } else if (manager->GetIfFocusTextFieldIsInline()) {
             manager->GetInlineTextFieldAvoidPositionYAndHeight(positionY, height);
             positionYWithOffset = positionY;
         } else if (!NearEqual(positionY, currentPos) && !context->IsEnableKeyBoardAvoidMode()) {
