@@ -153,6 +153,15 @@ HWTEST_F(ScrollableCoverTestNg, SetScrollBarWidthTest001, TestSize.Level1)
     ScrollableModelNG::SetScrollBarWidth(SCROLLBAR_WIDTH_PERCENT);
     EXPECT_EQ(scrollablePn->GetBarWidth().Value(), SCROLLBAR_WIDTH_VALUE_PERCENT);
     EXPECT_EQ(scrollablePn->GetBarWidth().Unit(), DimensionUnit::PERCENT);
+    
+    /**
+     * @tc.steps: step4. Set ScrollBarWidth to vp width with frameNode
+     * @tc.expected: ScrollablePaintProperty ScrollBarWidth is updated to vp width
+     */
+    ScrollableModelNG::SetScrollBarWidth(&(*scroll_), SCROLLBAR_WIDTH_VP);
+    scrollablePn = scroll_->GetPaintProperty<ScrollablePaintProperty>();
+    EXPECT_EQ(scrollablePn->GetBarWidth().Value(), SCROLLBAR_WIDTH_VALUE_VP);
+    EXPECT_EQ(scrollablePn->GetBarWidth().Unit(), DimensionUnit::VP);
 }
 
 /**
@@ -176,6 +185,14 @@ HWTEST_F(ScrollableCoverTestNg, SetScrollBarColorTest001, TestSize.Level1)
      */
     ScrollableModelNG::SetScrollBarColor(SCROLLBAR_COLOR_RED);
     EXPECT_EQ(scrollablePn->GetBarColor(), Color::FromString(SCROLLBAR_COLOR_RED));
+
+    /**
+     * @tc.steps: step3. Set ScrollBarColor to blue with frameNode
+     * @tc.expected: ScrollablePaintProperty ScrollBarColor is updated to blue
+     */
+    ScrollableModelNG::SetScrollBarColor(&(*scroll_), SCROLLBAR_COLOR_BLUE);
+    scrollablePn = scroll_->GetPaintProperty<ScrollablePaintProperty>();
+    EXPECT_EQ(scrollablePn->GetBarColor(), Color::FromString(SCROLLBAR_COLOR_BLUE));
 }
 
 /**
@@ -1070,5 +1087,21 @@ HWTEST_F(ScrollableCoverTestNg, Fling001, TestSize.Level1)
     double flingVelocity = 10.0;
     controller->Fling(flingVelocity);
     EXPECT_TRUE(scrollPn->scrollAbort_);
+}
+
+/**
+ * @tc.name: SetMaxFlingSpeed001
+ * @tc.desc: Test the behavior of the SetMaxFlingSpeed method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, SetMaxFlingSpeed001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get scrollablePn and set SetMaxFlingSpeed max to 100.0
+     * @tc.expected: maxFlingVelocity_ is updated to max * density
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ScrollableModelNG::SetMaxFlingSpeed(&(*scroll_), 100.0);
+    EXPECT_EQ(scrollPn->maxFlingVelocity_, 100.0);
 }
 } // namespace OHOS::Ace::NG
