@@ -1797,7 +1797,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0107, TestSize.Level1)
     parentFocusHub->isFocusScope_ = true;
     EXPECT_TRUE(parentFocusHub->RequestFocusByPriorityInScope());
     parentFocusHub->isFocusScope_ = false;
-    EXPECT_TRUE(parentFocusHub->RequestFocusByPriorityInScope());
+    EXPECT_FALSE(parentFocusHub->RequestFocusByPriorityInScope());
     EXPECT_TRUE(child2FocusHub->IsCurrentFocus());
 
     auto pipeline = PipelineContext::GetCurrentContext();
