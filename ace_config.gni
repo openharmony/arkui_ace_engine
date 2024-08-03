@@ -47,6 +47,9 @@ declare_args() {
   # Set atomicservice basic engine so path
   ace_engine_feature_asbng_path = ""
 
+  # Enable asbng so path
+  ace_engine_feature_asbng_path_enable = ""
+
   # Disable in OH Core
   ace_engine_standard_fonts_enable = true
 
