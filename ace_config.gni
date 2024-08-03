@@ -259,6 +259,12 @@ if (defined(global_parts_info) &&
   uiservice_xcollie_enable = false
 }
 
+if (ace_engine_feature_asbng_path == "") {
+  ace_engine_feature_asbng_path_enable = false;
+} else {
+  ace_engine_feature_asbng_path_enable = true;
+}
+
 ace_platforms = []
 
 _ace_adapter_dir = rebase_path("$ace_root/adapter", root_build_dir)

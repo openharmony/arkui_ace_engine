@@ -60,8 +60,7 @@ ace_unittest("ui_extension_component_test_ng") {
     ]
     cflags = []
 
-    if (defined(global_parts_info) && defined(
-            global_parts_info.atomicservicedistribution_atomicservice_basic_engine)) {
+    if (ace_engine_feature_asbng_path_enable) {
       defines += [ "ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
       cflags +=
           [ "-DACE_ENGINE_PLUGIN_PATH=\"${ace_engine_feature_asbng_path}\"" ]
