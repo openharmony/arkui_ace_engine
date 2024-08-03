@@ -46,7 +46,7 @@ build_component_ng("window_scene") {
     "screen/screen_node.cpp",
     "screen/screen_pattern.cpp",
   ]
-  
+
   if (ace_engine_feature_asbng_path_enable) {
     sources += [ "scene/atomicservice_basic_engine_plugin.cpp" ]
   }
