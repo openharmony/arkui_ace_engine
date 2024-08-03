@@ -235,8 +235,8 @@ void SwiperPattern::OnLoopChange()
     if (preLoop_.value() != props->GetLoop().value_or(true) &&
         (props->GetPrevMargin().has_value() || props->GetNextMargin().has_value())) {
         jumpIndex_ = GetLoopIndex(currentIndex_);
-        preLoop_ = props->GetLoop().value_or(true);
     }
+    preLoop_ = props->GetLoop().value_or(true);
 }
 
 void SwiperPattern::AdjustCurrentIndexOnSwipePage(int32_t index)
