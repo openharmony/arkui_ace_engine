@@ -312,6 +312,7 @@ export struct ChipComponent {
   private callbackId: number | undefined = undefined
   @State prefixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("PrefixSymbolGlyph")?.size?.width);
   @State suffixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("SuffixSymbolGlyph")?.size?.width);
+  @State allowCloseSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("AllowCloseSymbolGlyph")?.size?.width);
   @State symbolEffect: SymbolEffect = new SymbolEffect();
 
   private isChipSizeEnum(): boolean {
@@ -682,7 +683,7 @@ export struct ChipComponent {
     } else if (this.suffixIcon?.src) {
       return this.getSuffixIconSize().width
     } else if (!this.suffixIcon?.src && (this.allowClose ?? true)) {
-      return this.theme.defaultSymbol.fontSize
+      return this.allowCloseSymbolWidth
     } else {
       return 0
     }
@@ -991,6 +992,10 @@ export struct ChipComponent {
           SymbolGlyph($r('sys.symbol.xmark'))
             .fontSize(this.theme.defaultSymbol.fontSize)
             .fontColor(this.getDefaultSymbolColor())
+            .onSizeChange((oldValue, newValue) => {
+              this.allowCloseSymbolWidth = newValue?.width
+            })
+            .key("AllowCloseSymbolGlyph")
             .onClick(() => {
               if (!this.getChipEnable()) {
                 return
