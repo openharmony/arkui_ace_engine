@@ -100,10 +100,7 @@ class ACE_FORCE_EXPORT OverlayManager : public virtual AceType {
 
 public:
     explicit OverlayManager(const RefPtr<FrameNode>& rootNode) : rootNodeWeak_(rootNode) {}
-    ~OverlayManager() override
-    {
-        popupMap_.clear();
-    }
+    ~OverlayManager() override;
     void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);
     void RemoveIndexerPopupById(int32_t targetId);
     void RemoveIndexerPopup();
@@ -168,6 +165,8 @@ public:
     void ClearToast();
     void ShowToast(const NG::ToastInfo& toastInfo, const std::function<void(int32_t)>& callback);
     void CloseToast(int32_t toastId, const std::function<void(int32_t)>& callback);
+
+    void FireAutoSave(const RefPtr<FrameNode>& ContainerNode);
 
     std::unordered_map<int32_t, RefPtr<FrameNode>> GetDialogMap()
     {
@@ -237,6 +236,12 @@ public:
     bool RemoveMenu(const RefPtr<FrameNode>& overlay);
     bool RemoveModalInOverlay();
     bool RemoveAllModalInOverlay();
+    bool RemoveAllModalInOverlayByStack();
+    bool RemoveAllModalInOverlayByList();
+    bool OnRemoveAllModalInOverlayByList();
+    void AfterRemoveAllModalInOverlayByList();
+    bool IsModalUiextensionNode(const RefPtr<FrameNode>& topModalNode);
+    bool IsProhibitedRemoveByRouter(const RefPtr<FrameNode>& topModalNode);
     bool RemoveOverlayInSubwindow();
 
     void RegisterOnHideDialog(std::function<void()> callback)
@@ -586,6 +591,7 @@ public:
     }
 
     void SetIsAllowedBeCovered(bool isAllowedBeCovered = true);
+    void ClearUIExtensionNode();
     void DeleteUIExtensionNode(int32_t sessionId);
     bool AddCurSessionId(int32_t curSessionId);
     void ResetRootNode(int32_t sessionId);
@@ -670,6 +676,7 @@ private:
     void ShowMenuAnimation(const RefPtr<FrameNode>& menu);
     void SetPatternFirstShow(const RefPtr<FrameNode>& menu);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
+    void ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
     void ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper, AnimationOption& option,
         bool showPreviewAnimation, bool startDrag);
     bool IsContextMenuBindedOnOrigNode();
@@ -765,8 +772,6 @@ private:
     void RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     CustomKeyboardOffsetInfo CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard);
     void SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow);
-
-    void FireDialogAutoSave(const RefPtr<FrameNode>& ContainerNode);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index

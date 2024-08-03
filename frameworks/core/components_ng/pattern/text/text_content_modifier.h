@@ -28,6 +28,11 @@
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
+
+enum class MarqueeState {
+    IDLE, RUNNING, PAUSED, STOPPED
+};
+
 class TextContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(TextContentModifier, ContentModifier)
 
@@ -65,14 +70,9 @@ public:
         paintOffset_ = paintOffset;
     }
 
-    void SetObscured(const std::vector<ObscuredReasons>& reasons)
+    void SetIfPaintObscuration(bool value)
     {
-        obscuredReasons_ = reasons;
-    }
-
-    void SetIfHaveSpanItemChildren(bool value)
-    {
-        ifHaveSpanItemChildren_ = value;
+        ifPaintObscuration_ = value;
     }
 
     void SetDrawObscuredRects(const std::vector<RectF>& drawObscuredRects)
@@ -137,6 +137,11 @@ private:
     bool DrawImage(const RefPtr<FrameNode>& imageNode, RSCanvas& canvas, float x, float y, const RectF& rect);
     void PaintCustomSpan(DrawingContext& drawingContext);
     void DrawTextRacing(DrawingContext& drawingContext);
+    void SetMarqueeState(MarqueeState state);
+    bool CheckMarqueeState(MarqueeState state)
+    {
+        return marqueeState_ == state;
+    }
 
     std::optional<Dimension> fontSize_;
     RefPtr<AnimatablePropertyFloat> fontSizeFloat_;
@@ -172,7 +177,6 @@ private:
     std::optional<Dimension> baselineOffset_;
     RefPtr<AnimatablePropertyFloat> baselineOffsetFloat_;
 
-    bool textRacing_ = false;
     WeakPtr<Pattern> pattern_;
 
     RefPtr<AnimatablePropertyFloat> racePercentFloat_;
@@ -188,10 +192,10 @@ private:
     OffsetF paintOffset_;
     float textRaceSpaceWidth_ = 0;
 
-    std::vector<ObscuredReasons> obscuredReasons_;
-    bool ifHaveSpanItemChildren_ = false;
+    bool ifPaintObscuration_ = false;
     std::vector<RectF> drawObscuredRects_;
     std::vector<WeakPtr<FrameNode>> imageNodeList_;
+    MarqueeState marqueeState_ = MarqueeState::IDLE;
     ACE_DISALLOW_COPY_AND_MOVE(TextContentModifier);
 };
 } // namespace OHOS::Ace::NG

@@ -110,20 +110,22 @@ void UnRegisterStatusListener(ArkUIDragAction* dragAction)
 
 ArkUIDragAction* CreateDragActionWithNode(ArkUINodeHandle node)
 {
-    auto* dragAction = new ArkUIDragAction();
     CHECK_NULL_RETURN(node, nullptr);
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
+    auto* dragAction = new ArkUIDragAction();
+    CHECK_NULL_RETURN(dragAction, nullptr);
     dragAction->instanceId = pipeline->GetInstanceId();
     return dragAction;
 }
 
 ArkUIDragAction* CreateDragActionWithContext(ArkUIContext* context)
 {
-    auto* dragAction = new ArkUIDragAction();
     CHECK_NULL_RETURN(context, nullptr);
+    auto* dragAction = new ArkUIDragAction();
+    CHECK_NULL_RETURN(dragAction, nullptr);
     dragAction->instanceId = context->id;
     return dragAction;
 }

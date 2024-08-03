@@ -1653,6 +1653,7 @@ void LayoutProperty::CheckLocalizedEdgeWidths(
     if (!borderWidth.leftDimen.has_value() && borderWidth.rightDimen.has_value()) {
         borderWidth.leftDimen = std::optional<Dimension>(Dimension(0));
     }
+    borderWidth.multiValued = true;
     layoutProperty->UpdateBorderWidth(borderWidth);
     target->UpdateBorderWidth(borderWidth);
 }

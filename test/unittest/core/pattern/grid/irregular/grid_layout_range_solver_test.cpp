@@ -326,6 +326,35 @@ HWTEST_F(GridLayoutRangeTest, Solve001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HorizontalOverScroll001
+ * @tc.desc: Test horizontal and overScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, Horizontal001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo14());
+    model.SetRowsGap(Dimension { 1.0f });
+    model.SetColumnsGap(Dimension { 5.0f });
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedWidthItems(1, 910.0f);
+    CreateFixedWidthItems(1, 300.0f);
+    CreateFixedWidthItems(20, 605.0f);
+    CreateFixedWidthItems(8, 300.0f);
+    CreateDone(frameNode_);
+
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    UpdateCurrentOffset(FLT_MAX);
+    const auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, -1);
+    for (int i = 0; i < 5; ++i) {
+        EXPECT_FALSE(GetChildFrameNode(frameNode_, i)->IsActive());
+    }
+}
+
+/**
  * @tc.name: ChangeTemplate001
  * @tc.desc: Test changing template
  * @tc.type: FUNC
@@ -370,6 +399,30 @@ HWTEST_F(GridLayoutRangeTest, ChangeTemplate001, TestSize.Level1)
     EXPECT_EQ(info.endIndex_, 23);
     EXPECT_EQ(info.currentOffset_, 10.0f);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 29)->IsActive());
+}
+
+/**
+ * @tc.name: Jump001
+ * @tc.desc: Test jump to irregular item with extra offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, Jump001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo14());
+    model.SetColumnsGap(Dimension { 10.0f });
+    model.SetRowsGap(Dimension { 20.0f });
+    constexpr float itemHeight = 300.0f;
+    CreateFixedHeightItems(22, itemHeight);
+    CreateFixedHeightItems(1, (itemHeight + 20.0f) * 6);
+    CreateFixedHeightItems(77, itemHeight);
+    CreateDone(frameNode_);
+    pattern_->ScrollToIndex(22, false, ScrollAlign::AUTO, itemHeight);
+    FlushLayoutTask(frameNode_);
+    const auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(GetChildRect(frameNode_, 22).Bottom(), GRID_HEIGHT - itemHeight);
+    EXPECT_EQ(info.startIndex_, 22);
 }
 
 /**

@@ -55,7 +55,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation001, TestSize.Level1
     swiperItemInfo.endPos = -1.0f;
     pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
     pattern_->PlaySpringAnimation(dragVelocity);
-    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
 }
 
 /**
@@ -121,6 +121,8 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation004, TestSize.Level1
     pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
     pattern_->PlaySpringAnimation(dragVelocity);
     pattern_->StopSpringAnimation();
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    pattern_->StopSpringAnimationImmediately();
     EXPECT_FALSE(pattern_->springAnimationIsRunning_);
 }
 

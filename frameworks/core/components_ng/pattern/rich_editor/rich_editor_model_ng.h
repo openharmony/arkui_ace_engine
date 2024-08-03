@@ -50,6 +50,7 @@ public:
     void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) override;
     void SetSelectionMenuOptions(const OnCreateMenuCallback&& onCreateMenuCallback,
         const OnMenuItemClickCallback&& onMenuItemClick) override;
+    void SetRequestKeyboardOnFocus(bool needToRequest) override;
 
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value,
@@ -73,6 +74,7 @@ public:
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;
     static void SetOnSubmit(FrameNode* frameNode, std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& callback);
     static void SetAboutToIMEInput(FrameNode* frameNode, std::function<bool(const RichEditorInsertValue&)>&& callback);
+    static void SetRequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
 
 private:
     void SetDraggable(bool draggable);

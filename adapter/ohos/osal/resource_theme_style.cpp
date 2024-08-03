@@ -90,7 +90,8 @@ static const std::set<std::string> stringAttrs = {
     "textfield_accessibility_show_password",
     "textfield_accessibility_hide_password",
     "rich_editor_show_handle",
-    "text_show_handle"
+    "text_show_handle",
+    "textfield_symbol_color"
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)
@@ -127,14 +128,16 @@ void ResourceThemeStyle::ParseContent()
         if (attrName.empty() || attrValue.empty()) {
             continue;
         }
+        if (stringAttrs.find(attrName) != stringAttrs.end()) {
+            // string
+            attributes_[attrName] = { .type = ThemeConstantsType::STRING, .value = attrValue };
+            continue;
+        }
         if (attrValue.front() == '#' || attrValue.find(COLOR_VALUE_PREFIX) != std::string::npos) {
             // color
             attributes_[attrName] = { .type = ThemeConstantsType::COLOR, .value = Color::FromString(attrValue) };
         } else if (attrValue.find(MEDIA_VALUE_PREFIX) != std::string::npos) {
             OnParseResourceMedia(attrName, attrValue);
-        } else if (stringAttrs.find(attrName) != stringAttrs.end()) {
-            // string
-            attributes_[attrName] = { .type = ThemeConstantsType::STRING, .value = attrValue };
         } else if (attrValue.find(REF_ATTR_VALUE_KEY_WORD) != std::string::npos) {
             attributes_[attrName] = { .type = ThemeConstantsType::REFERENCE_ATTR, .value = attrValue };
         } else {

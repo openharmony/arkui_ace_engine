@@ -200,6 +200,7 @@ public:
             onWillDismiss_(reason);
         }
     }
+    
     void SetHasTransition(bool hasTransition)
     {
         hasTransition_ = hasTransition;
@@ -270,6 +271,8 @@ private:
     OffsetF arrowPosition_;
     SizeF childSize_;
     RectF touchRegion_;
+    // top right bottom left
+    std::vector<float> arrowOffsetByClips_ = { 0.0f, 0.0f, 0.0f, 0.0f };
     std::optional<Placement> arrowPlacement_;
     std::vector<std::vector<float>> arrowOffsetsFromClip_
         = { {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f} };

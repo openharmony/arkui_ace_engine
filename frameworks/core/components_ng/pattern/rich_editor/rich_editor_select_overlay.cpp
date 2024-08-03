@@ -319,7 +319,7 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
         selectInfo.isSingleHandle = true;
     }
     selectInfo.recreateOverlay = requestCode == REQUEST_RECREATE;
-    CheckEditorTypeChange(selectInfo, pattern->GetEditorType());
+    CheckMenuParamChange(selectInfo, pattern->GetEditorType(), responseType);
     pattern->CopySelectionMenuParams(selectInfo, responseType);
     if (hasTransform_) {
         selectInfo.callerNodeInfo = {
@@ -328,18 +328,19 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
         };
     }
 }
-void RichEditorSelectOverlay::CheckEditorTypeChange(SelectOverlayInfo& selectInfo, TextSpanType selectType)
+void RichEditorSelectOverlay::CheckMenuParamChange(SelectOverlayInfo& selectInfo,
+    TextSpanType selectType, TextResponseType responseType)
 {
     auto manager = SelectContentOverlayManager::GetOverlayManager();
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(manager->IsOpen());
-    auto overlayInfo = manager->GetSelectOverlayInfo();
-    CHECK_NULL_VOID(overlayInfo);
-    auto lastSelectType = overlayInfo->menuInfo.editorType.value_or(static_cast<int32_t>(TextSpanType::NONE));
-    // need to recreate overlay, when overlay is on, but select type changed
-    if (lastSelectType != static_cast<int32_t>(selectType)) {
-        selectInfo.recreateOverlay = true;
-    }
+
+    auto pattern = GetPattern<RichEditorPattern>();
+    auto menuParams = pattern ? pattern->GetMenuParams(selectType, responseType) : nullptr;
+    std::pair<TextSpanType, TextResponseType> selectResponseComb = { selectType, responseType };
+    selectInfo.recreateOverlay |= (lastMenuParams_ || menuParams) && selectResponseComb != lastSelectResponseComb_;
+    lastMenuParams_ = menuParams;
+    lastSelectResponseComb_ = selectResponseComb;
 }
 
 // set menu callback
@@ -351,6 +352,7 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
     auto usingMouse = pattern->IsUsingMouse();
     switch (id) {
         case OptionMenuActionId::COPY:
+            needRefreshMenu_ = !IsShowPaste() && pattern->copyOption_ != CopyOptions::None;
             pattern->HandleOnCopy();
             break;
         case OptionMenuActionId::CUT:
@@ -376,6 +378,17 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
             TAG_LOGI(AceLogTag::ACE_TEXT, "Unsupported menu option id %{public}d", id);
             break;
     }
+}
+
+void RichEditorSelectOverlay::ToggleMenu()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    if (manager && !manager->IsMenuShow() && needRefreshMenu_) {
+        needRefreshMenu_ = false;
+        ProcessOverlay({ .menuIsShow = true, .animation = true, .requestCode = REQUEST_RECREATE });
+        return;
+    }
+    BaseTextSelectOverlay::ToggleMenu();
 }
 
 void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
@@ -467,6 +480,16 @@ void RichEditorSelectOverlay::UpdateHandleOffset()
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE);
+}
+
+void RichEditorSelectOverlay::UpdateSelectOverlayOnAreaChanged()
+{
+    HideMenu(true);
+    CHECK_NULL_VOID(SelectOverlayIsOn() || SelectOverlayIsCreating());
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->CalculateHandleOffsetAndShowOverlay();
+    UpdateHandleOffset();
 }
 
 } // namespace OHOS::Ace::NG

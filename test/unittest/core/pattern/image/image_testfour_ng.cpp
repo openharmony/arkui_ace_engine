@@ -341,4 +341,208 @@ HWTEST_F(ImageTestFourNg, ImageModelNGTest028, TestSize.Level1)
     bool bl = imageModelNG.IsSrcSvgImage(nullptr);
     EXPECT_FALSE(bl);
 }
+
+/**
+ * @tc.name:  ImageModelNGTest029
+ * @tc.desc: Test SetOnDownloadProgress method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestFourNg, ImageModelNGTest029, TestSize.Level1)
+{
+    ImageModelNG imageModelNG;
+    auto callback = [](const uint32_t&, const uint32_t&) {};
+    imageModelNG.SetOnDownloadProgress(nullptr, callback);
+}
+
+/**
+ * @tc.name:  ImageModelNGTest030
+ * @tc.desc: Test SetOnDownloadProgress method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestFourNg, ImageModelNGTest030, TestSize.Level1)
+{
+    ImageModelNG imageModelNG;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto callback = [](const uint32_t&, const uint32_t&) {};
+    imageModelNG.SetOnDownloadProgress(frameNode, callback);
+}
+
+/**
+ * @tc.name:  ImageModelNGTest031
+ * @tc.desc: Test SetAltResource method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestFourNg, ImageModelNGTest031, TestSize.Level1)
+{
+    ImageModelNG imageModelNG;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    imageModelNG.SetAltResource(frameNode, nullptr);
+}
+
+/**
+ * @tc.name:  ImageModelNGTest032
+ * @tc.desc: Test SetAltResource method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestFourNg, ImageModelNGTest032, TestSize.Level1)
+{
+    ImageModelNG imageModelNG;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ArkUI_Resource* source = new ArkUI_Resource();
+    imageModelNG.SetAltResource(frameNode, source);
+    delete source;
+}
+
+/**
+ * @tc.name:  ImagePaintMethodTest001
+ * @tc.desc: Test UpdateOverlayModifier method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestFourNg, ImagePaintMethodTest001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
+    imagePaintMethod.UpdateOverlayModifier(nullptr);
+}
+
+/**
+ * @tc.name:  ImagePaintMethodTest002
+ * @tc.desc: Test UpdateOverlayModifier method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestFourNg, ImagePaintMethodTest002, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(WIDTH, HEIGHT));
+    geometryNode->SetFrameOffset(OffsetF(WIDTH, HEIGHT));
+    PaintWrapper paintWrapper(nullptr, geometryNode, imageRenderProperty);
+    ASSERT_NE(&paintWrapper, nullptr);
+    imagePaintMethod.UpdateOverlayModifier(&paintWrapper);
+}
+
+/**
+ * @tc.name:  ImagePaintMethodTest003
+ * @tc.desc: Test UpdateOverlayModifier method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestFourNg, ImagePaintMethodTest003, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_->SetPaintConfig(ImagePaintConfig());
+    RefPtr<ImageOverlayModifier> imageOverlayModifier = AceType::MakeRefPtr<ImageOverlayModifier>();
+    ASSERT_NE(imageOverlayModifier, nullptr);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, true, imageOverlayModifier);
+    ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(WIDTH, HEIGHT));
+    geometryNode->SetFrameOffset(OffsetF(WIDTH, HEIGHT));
+    PaintWrapper paintWrapper(nullptr, geometryNode, imageRenderProperty);
+    ASSERT_NE(&paintWrapper, nullptr);
+    imagePaintMethod.UpdateOverlayModifier(&paintWrapper);
+}
+
+/**
+ * @tc.name:  ImagePatternTest001
+ * @tc.desc: test TriggerFirstVisibleAreaChange methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestFourNg, ImagePatternTest001, TestSize.Level1)
+{
+    ImagePattern imagePattern;
+    imagePattern.TriggerFirstVisibleAreaChange();
+}
+
+/**
+ * @tc.name:  ImagePatternTest002
+ * @tc.desc: test UpdateDragEvent methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestFourNg, ImagePatternTest002, TestSize.Level1)
+{
+    ImagePattern imagePattern;
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    imagePattern.UpdateDragEvent(dragEvent);
+}
+
+/**
+ * @tc.name:  ImagePatternTest003
+ * @tc.desc: test SetImageAIOptions methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestFourNg, ImagePatternTest003, TestSize.Level1)
+{
+    ImagePattern imagePattern;
+    imagePattern.imageAnalyzerManager_ = nullptr;
+    imagePattern.SetImageAIOptions(nullptr);
+    ASSERT_NE(imagePattern.imageAnalyzerManager_, nullptr);
+}
+
+/**
+ * @tc.name:  ImagePatternTest004
+ * @tc.desc: test UpdateAnalyzerOverlay methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestFourNg, ImagePatternTest004, TestSize.Level1)
+{
+    ImagePattern imagePattern;
+    imagePattern.UpdateAnalyzerOverlay();
+}
+
+/**
+ * @tc.name:  ImagePatternTest005
+ * @tc.desc: test UpdateShowingImageInfo methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestFourNg, ImagePatternTest005, TestSize.Level1)
+{
+    ImagePattern imagePattern;
+    imagePattern.UpdateShowingImageInfo(nullptr, 1);
+}
+
+/**
+ * @tc.name:  ImagePatternTest006
+ * @tc.desc: test UpdateCacheImageInfo methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestFourNg, ImagePatternTest006, TestSize.Level1)
+{
+    ImagePattern imagePattern;
+    ImagePattern::CacheImageStruct cacheImage;
+    int32_t index = 0;
+    imagePattern.UpdateCacheImageInfo(cacheImage, index);
+}
+
+/**
+ * @tc.name:  ImagePatternTest007
+ * @tc.desc: test FindCacheImageNode methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestFourNg, ImagePatternTest007, TestSize.Level1)
+{
+    ImagePattern imagePattern;
+    RefPtr<PixelMap> pixelMapRef;
+    imagePattern.FindCacheImageNode(pixelMapRef);
+}
 } // namespace OHOS::Ace::NG

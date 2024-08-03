@@ -282,6 +282,7 @@ void ContainerModalViewEnhance::BondingMaxBtnInputEvent(
             auto menuPosY =
                 info.GetScreenLocation().GetY() - info.GetLocalLocation().GetY() + MENU_FLOAT_Y.ConvertToPx();
             OffsetF menuPosition { menuPosX, menuPosY };
+            LOGI("ContainerModal menuPosition = %{public}s", menuPosition.ToString().c_str());
             CalculateMenuOffset(menuPosition);
         }
     };
@@ -320,7 +321,7 @@ void ContainerModalViewEnhance::BondingMaxBtnInputEvent(
 
 RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>& targetNode, OffsetF menuPosition)
 {
-    LOGI("ShowMaxMenu called");
+    LOGI("ContainerModal ShowMaxMenu called menuOffset_ = %{public}s", menuPosition.ToString().c_str());
     if (!enableSplit_) {
         LOGI("the app window is not support spilt menu");
         return nullptr;
@@ -543,6 +544,7 @@ void ContainerModalViewEnhance::CalculateMenuOffset(OffsetF currentOffset)
         offsetY = offsetY - menuHeight - titleHeight;
     }
     menuOffset_ = { offsetX, offsetY };
+    LOGI("ContainerModal menuOffset_ = %{public}s", menuOffset_.ToString().c_str());
 }
 
 RefPtr<FrameNode> ContainerModalViewEnhance::BuildGestureRow(RefPtr<FrameNode>& containerNode)

@@ -1769,7 +1769,7 @@
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_NodeEvent_GetPreviewDragStatus"
+        "name": "OH_ArkUI_NodeEvent_GetPreDragStatus"
     },
     {
         "first_introduced": "12",
@@ -1778,6 +1778,10 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_DragEvent_SetSuggestedDropOperation"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_GetDropOperation"
     },
     {
         "first_introduced": "12",
@@ -2045,6 +2049,6 @@
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_CustomSpanDrawInfo_GetBaseLine"
+        "name": "OH_ArkUI_CustomSpanDrawInfo_GetBaseline"
     }
 ]

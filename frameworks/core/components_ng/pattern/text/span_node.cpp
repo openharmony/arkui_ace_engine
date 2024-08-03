@@ -508,8 +508,8 @@ void SpanItem::UpdateContentTextStyle(
 std::string SpanItem::GetSpanContent(const std::string& rawContent, bool isMarquee)
 {
     std::string data;
-    if (needRemoveNewLine) {
-        data = rawContent.substr(0, rawContent.length() - 1);
+    if (needRemoveNewLine && !rawContent.empty()) {
+        data = rawContent.substr(0, static_cast<int32_t>(rawContent.length()) - 1);
     } else {
         data = rawContent;
     }

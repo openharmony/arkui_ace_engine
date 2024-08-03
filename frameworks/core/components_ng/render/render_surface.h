@@ -33,21 +33,8 @@ class ACE_FORCE_EXPORT RenderSurface : public virtual AceType {
 public:
     RenderSurface() = default;
     ~RenderSurface() override = default;
- 
-// under the condition of supporting cross platform and texture rendering,
-// it is necessary to dynamically set the rendering type of the surface node.
-// the defalut type is RenderSurfaceType::TEXTURE.
-#ifdef RENDER_EXTRACT_SUPPORTED
-    enum class RenderSurfaceType {
-        UNKNOWN = -1,
-        SURFACE = 0,
-        TEXTURE
-    };
-    static RefPtr<RenderSurface> Create(const RenderSurfaceType& type = RenderSurfaceType::TEXTURE);
-#else
-// under the condition of supporting ohos platform
+
     static RefPtr<RenderSurface> Create();
-#endif
 
     virtual void InitSurface() {}
 
@@ -98,15 +85,6 @@ public:
     virtual void SetInstanceId(int32_t instanceId) {}
 
     virtual void SetSurfaceDefaultSize(int32_t width, int32_t height) {}
-
-    virtual bool IsTexture()
-    {
-        return false;
-    }
-
-    virtual void AttachToGLContext(int64_t textureId, bool isAttach) {}
-
-    virtual void UpdateTextureImage(std::vector<float>& matrix) {}
 
     virtual void SetWebMessage(OffsetF offset) {}
 

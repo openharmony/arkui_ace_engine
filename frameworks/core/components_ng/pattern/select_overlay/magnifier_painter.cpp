@@ -79,7 +79,7 @@ bool MagnifierPainter::GetMagnifierRect(
     CHECK_NULL_RETURN(textDragBasePattern, false);
     CHECK_NULL_RETURN(textBasePattern, false);
 
-    auto cursorOffsetX = magnifierRect_.cursorOffset.GetX();
+    auto cursorOffsetX = magnifierRect_.localOffset.GetX();
     auto magnifierWidth = MAGNIFIER_WIDTH.ConvertToPx();
     auto magnifierHeight = MAGNIFIER_HEIGHT.ConvertToPx();
     auto magnifierOffsetY = MAGNIFIER_OFFSET_Y.ConvertToPx();

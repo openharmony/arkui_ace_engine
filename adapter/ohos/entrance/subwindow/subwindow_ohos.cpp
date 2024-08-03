@@ -327,6 +327,9 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     ContainerScope scope(childContainerId_);
     overlayManager->HidePopup(targetId == -1 ? popupTargetId_ : targetId, popupInfo);
     context->FlushPipelineImmediately();
+    HideEventColumn();
+    HidePixelMap();
+    HideFilter(false);
 }
 
 void SubwindowOhos::GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo)
@@ -527,16 +530,15 @@ void SubwindowOhos::ClearMenu()
 #endif
 }
 
-bool SubwindowOhos::ShowDragPreviewWindowNG()
+bool SubwindowOhos::ShowPreviewNG()
 {
     CHECK_NULL_RETURN(window_, false);
     ShowWindow(false);
     ResizeWindow();
-    window_->SetTouchable(false);
     return true;
 }
 
-void SubwindowOhos::HideDragPreviewWindowNG()
+void SubwindowOhos::HidePreviewNG()
 {
     auto overlayManager = GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);

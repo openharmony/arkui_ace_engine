@@ -19,6 +19,8 @@
 
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/text/html_utils.h"
@@ -643,9 +645,9 @@ RefPtr<CustomSpan> JSSpanString::ParseJsCustomSpan(const JSCallbackInfo& args)
     return AceType::MakeRefPtr<JSCustomSpan>(args[0], args);
 }
 
-
 void JSSpanString::FromHtml(const JSCallbackInfo& info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     if (info.Length() != 1 || !info[0]->IsString()) {
         ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
         return;
@@ -657,10 +659,7 @@ void JSSpanString::FromHtml(const JSCallbackInfo& info)
         return;
     }
     auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
-        return;
-    }
+    CHECK_NULL_VOID(taskExecutor);
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(engine);
     NativeEngine* nativeEngine = engine->GetNativeEngine();
@@ -691,9 +690,10 @@ void JSSpanString::FromHtml(const JSCallbackInfo& info)
                     jsSpanString->SetController(styledString);
                     auto spanStrNapi = JsConverter::ConvertJsValToNapiValue(obj);
                     ProcessPromiseCallback(asyncContext, ERROR_CODE_NO_ERROR, spanStrNapi);
-            }, TaskExecutor::TaskType::UI, "FromHtmlReturnPromise", PriorityType::IMMEDIATE);
-        }, TaskExecutor::TaskType::BACKGROUND, "FromHtml", PriorityType::IMMEDIATE);
-
+                },
+                TaskExecutor::TaskType::UI, "FromHtmlReturnPromise", PriorityType::IMMEDIATE);
+        },
+        TaskExecutor::TaskType::BACKGROUND, "FromHtml", PriorityType::IMMEDIATE);
     auto jsPromise = JsConverter::ConvertNapiValueToJsVal(result);
     CHECK_NULL_VOID(jsPromise->IsObject());
     info.SetReturnValue(JSRef<JSObject>::Cast(jsPromise));

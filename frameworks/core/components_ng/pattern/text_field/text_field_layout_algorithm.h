@@ -169,7 +169,6 @@ private:
         bool isInlineStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty);
     float GetVisualTextWidth() const;
     void CalcInlineMeasureItem(LayoutWrapper* layoutWrapper);
-    void ApplyIndent(double width);
     bool IsInlineFocusAdaptExceedLimit(const SizeF& maxSize);
     bool IsInlineFocusAdaptMinExceedLimit(const SizeF& maxSize, uint32_t maxViewLines);
     void HandleCounterLayout(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& counterNode,
@@ -182,6 +181,7 @@ private:
         float imageWidth);
     float CalculateContentHeight(const LayoutConstraintF& contentConstraint);
     LayoutConstraintF BuildInfinityLayoutConstraint(const LayoutConstraintF& contentConstraint);
+    void ApplyIndent(double width);
     LayoutConstraintF BuildInlineFocusLayoutConstraint(const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper);
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutAlgorithm);

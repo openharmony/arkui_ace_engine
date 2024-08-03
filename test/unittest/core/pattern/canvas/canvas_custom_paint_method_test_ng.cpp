@@ -306,14 +306,14 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest006, TestSize
      * @tc.expected: return value are as expected.
      */
     paintMethod->SetFilterParam("none");
-    EXPECT_TRUE(paintMethod->GetFilterType(filters));
+    EXPECT_TRUE(paintMethod->GetFilterType("none", filters));
     filters.clear();
     paintMethod->SetFilterParam("gray(10px)");
-    EXPECT_FALSE(paintMethod->GetFilterType(filters));
+    EXPECT_FALSE(paintMethod->GetFilterType("gray(10px)", filters));
     EXPECT_EQ(filters.size(), 0);
     filters.clear();
     paintMethod->SetFilterParam("blur(10px)");
-    paintMethod->GetFilterType(filters);
+    paintMethod->GetFilterType("blur(10px)", filters);
     EXPECT_EQ(filters[0].filterType_, FilterType::BLUR);
     EXPECT_EQ(filters[0].filterParam_, "10px");
     EXPECT_EQ(filters.size(), 1);
@@ -1336,7 +1336,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest035, TestSize
     paintMethod->TranslateMatrix(tx, ty);
     ty = 1.0;
     paintMethod->TranslateMatrix(tx, ty);
-    EXPECT_STREQ(paintMethod->filterParam_.c_str(), "");
+    EXPECT_TRUE(paintMethod->matrixStates_.empty());
 }
 
 /**
@@ -1360,34 +1360,22 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest036, TestSize
     paintMethod->UpdateLineDash(pen);
     float percentNum = 1.0f;
     FilterProperty filter;
-    paintMethod->lastFilters_.clear();
     filter.filterType_ = FilterType::INVERT;
-    paintMethod->lastFilters_.push_back(filter);
     paintMethod->SetPaintImage(&pen, &brush);
     EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
-    paintMethod->lastFilters_.clear();
     filter.filterType_ = FilterType::OPACITY;
-    paintMethod->lastFilters_.push_back(filter);
     paintMethod->SetPaintImage(&pen, &brush);
     EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
-    paintMethod->lastFilters_.clear();
     filter.filterType_ = FilterType::BRIGHTNESS;
-    paintMethod->lastFilters_.push_back(filter);
     paintMethod->SetPaintImage(&pen, &brush);
     EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
-    paintMethod->lastFilters_.clear();
     filter.filterType_ = FilterType::BRIGHTNESS;
-    paintMethod->lastFilters_.push_back(filter);
     paintMethod->SetPaintImage(&pen, &brush);
     EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
-    paintMethod->lastFilters_.clear();
     filter.filterType_ = FilterType::CONTRAST;
-    paintMethod->lastFilters_.push_back(filter);
     paintMethod->SetPaintImage(&pen, &brush);
     EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
-    paintMethod->lastFilters_.clear();
     filter.filterType_ = FilterType::BLUR;
-    paintMethod->lastFilters_.push_back(filter);
     paintMethod->SetPaintImage(&pen, &brush);
     EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
 }
@@ -1414,19 +1402,18 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest037, TestSize
     paintMethod->UpdateLineDash(pen);
 
     paintMethod->SetFilterParam("none");
-    paintMethod->SetHueRotateFilter(paintMethod->filterParam_, &pen, &brush);
-    EXPECT_EQ(paintMethod->filterParam_, "none");
+    EXPECT_NE(paintMethod->colorFilter_, nullptr);
 
-    paintMethod->SetFilterParam("deg");
-    paintMethod->SetHueRotateFilter(paintMethod->filterParam_, &pen, &brush);
-    EXPECT_EQ(paintMethod->filterParam_, "deg");
+    paintMethod->SetFilterParam("hue-rotate(90deg)");
+    paintMethod->SetHueRotateFilter("hue-rotate(90deg)");
+    EXPECT_NE(paintMethod->colorFilter_, nullptr);
 
-    paintMethod->SetFilterParam("turn");
-    paintMethod->SetHueRotateFilter(paintMethod->filterParam_, &pen, &brush);
-    EXPECT_EQ(paintMethod->filterParam_, "turn");
-    paintMethod->SetFilterParam("rad");
-    paintMethod->SetHueRotateFilter(paintMethod->filterParam_, &pen, &brush);
-    EXPECT_EQ(paintMethod->filterParam_, "rad");
+    paintMethod->SetFilterParam("hue-rotate(90turn)");
+    paintMethod->SetHueRotateFilter("hue-rotate(90turn)");
+    EXPECT_NE(paintMethod->colorFilter_, nullptr);
+    paintMethod->SetFilterParam("hue-rotate(90rad)");
+    paintMethod->SetHueRotateFilter("hue-rotate(90rad)");
+    EXPECT_NE(paintMethod->colorFilter_, nullptr);
 }
 
 /**
@@ -1451,27 +1438,18 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest038, TestSize
     FilterProperty filter;
     filter.filterParam_ = "test";
     filter.filterType_ = FilterType::NONE;
-    paintMethod->lastFilters_.push_back(filter);
     paintMethod->SetPaintImage(&pen, &brush);
-    paintMethod->lastFilters_.clear();
     filter.filterType_ = FilterType::GRAYSCALE;
-    paintMethod->lastFilters_.push_back(filter);
     paintMethod->SetPaintImage(&pen, &brush);
     float percentNum = 1.0f;
     EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
-    paintMethod->lastFilters_.clear();
     filter.filterType_ = FilterType::SEPIA;
-    paintMethod->lastFilters_.push_back(filter);
     paintMethod->SetPaintImage(&pen, &brush);
     EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
-    paintMethod->lastFilters_.clear();
     filter.filterType_ = FilterType::SATURATE;
-    paintMethod->lastFilters_.push_back(filter);
     paintMethod->SetPaintImage(&pen, &brush);
     EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
-    paintMethod->lastFilters_.clear();
     filter.filterType_ = FilterType::HUE_ROTATE;
-    paintMethod->lastFilters_.push_back(filter);
     paintMethod->SetPaintImage(&pen, &brush);
     EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
 }

@@ -115,6 +115,7 @@ public:
     void OnDragMoveOut(const PointerEvent& pointerEvent);
     void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
+    void EnsureStatusForPullIn();
     void OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
     void OnItemDragMove(float globalX, float globalY, int32_t draggedIndex, DragType dragType);
     void OnItemDragEnd(float globalX, float globalY, int32_t draggedIndex, DragType dragType);
@@ -130,8 +131,8 @@ public:
     float GetWindowScale() const;
     void UpdateDragStyle(
         const DragCursorStyleCore& dragCursorStyleCore = DragCursorStyleCore::DEFAULT, const int32_t eventId = -1);
-    void UpdateDragAllowDrop(
-        const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior, const int32_t eventId = -1);
+    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior,
+        const int32_t eventId = -1, bool isCapi = false);
     void RequireSummary();
     void ClearSummary();
     void SetSummaryMap(const std::map<std::string, int64_t>& summaryMap)
@@ -497,6 +498,7 @@ private:
     bool GetDragPreviewInfo(const OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager>& overlayManager,
         DragPreviewInfo& dragPreviewInfo);
     bool IsNeedDoDragMoveAnimate(const PointerEvent& pointerEvent);
+    const RefPtr<NG::OverlayManager> GetDragAnimationOverlayManager(int32_t containerId);
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY,
         const RefPtr<FrameNode>& node = nullptr);
     void FireOnDragEvent(

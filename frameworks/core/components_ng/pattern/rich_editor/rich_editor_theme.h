@@ -79,6 +79,10 @@ public:
             theme->caretColor_ = pattern->GetAttr<Color>("caret_color", Color(0xff007dff));
             theme->selectedBackgroundColor_ = pattern->GetAttr<Color>("selected_background_color", Color(0xff007dff));
             theme->previewUnderlineColor_ = pattern->GetAttr<Color>("preview_underline_color", Color(0xff007dff));
+            theme->popIconColor_ = pattern->GetAttr<Color>("pop_icon_color", Color(0x99000000));
+            theme->menuTitleColor_ = pattern->GetAttr<Color>("menu_title_color", Color(0x99000000));
+            theme->menuTextColor_ = pattern->GetAttr<Color>("menu_text_color", Color(0x99000000));
+            theme->menuIconColor_ = pattern->GetAttr<Color>("menu_icon_color", Color(0x99000000));
             theme->previewUnderlineWidth_ = pattern->GetAttr<Dimension>("preview_underline_width", 2.0_vp);
             auto showHandle = pattern->GetAttr<std::string>("rich_editor_show_handle", "0");
             theme->richeditorShowHandle_ = StringUtils::StringToInt(showHandle);
@@ -124,6 +128,26 @@ public:
         return previewUnderlineColor_;
     }
 
+    const Color& GetPopIconColor() const
+    {
+        return popIconColor_;
+    }
+
+    const Color& GetMenuTitleColor() const
+    {
+        return menuTitleColor_;
+    }
+
+    const Color& GetMenuTextColor() const
+    {
+        return menuTextColor_;
+    }
+
+    const Color& GetMenuIconColor() const
+    {
+        return menuIconColor_;
+    }
+
     const Dimension& GetPreviewUnderlineWidth()
     {
         return previewUnderlineWidth_;
@@ -149,14 +173,14 @@ public:
         return richeditorShowHandle_;
     }
 
-    TextStyle GetTextStyle() const
-    {
-        return textStyle_;
-    }
-
     const Color& GetDragBackgroundColor() const
     {
         return dragBackgroundColor_;
+    }
+
+    TextStyle GetTextStyle() const
+    {
+        return textStyle_;
     }
 
     Dimension GetDragCornerRadius() const
@@ -176,7 +200,6 @@ private:
 
     // UX::insert cursor offset up by 8vp
     Dimension insertCursorOffset_ = 8.0_vp;
-
     TextStyle textStyle_;
     Color placeholderColor_ = Color(0x99000000);
     Color caretColor_ = Color(0xff007dff);
@@ -184,6 +207,10 @@ private:
     Color dragBackgroundColor_ = Color::WHITE;
     Dimension dragCornerRadius_ = 18.0_vp;
     Color previewUnderlineColor_ = Color(0xff007dff);
+    Color popIconColor_ = Color(0x99000000);
+    Color menuTitleColor_ = Color(0x99000000);
+    Color menuTextColor_ = Color(0x99000000);
+    Color menuIconColor_ = Color(0x99000000);
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool richeditorShowHandle_ = false;
 };

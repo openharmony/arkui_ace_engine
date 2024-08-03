@@ -169,6 +169,10 @@ void RadioPattern::ImageNodeCreate()
             []() { return AceType::MakeRefPtr<ImagePattern>(); });
         CHECK_NULL_VOID(node);
         builderChildNode_ = AceType::DynamicCast<FrameNode>(node);
+        CHECK_NULL_VOID(builderChildNode_);
+        auto gesturehub = builderChildNode_->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gesturehub);
+        gesturehub->SetHitTestMode(HitTestMode::HTMNONE);
     }
     CHECK_NULL_VOID(builderChildNode_);
     auto radioPaintProperty = host->GetPaintProperty<RadioPaintProperty>();

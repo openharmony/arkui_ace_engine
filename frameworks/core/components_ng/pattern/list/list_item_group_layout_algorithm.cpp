@@ -59,7 +59,7 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<ListItemGroupLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     axis_ = listLayoutProperty_->GetListDirection().value_or(Axis::VERTICAL);
-    layoutDirection_ = layoutProperty->GetNonAutoLayoutDirection();
+    layoutDirection_ = listLayoutProperty_->GetNonAutoLayoutDirection();
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     paddingBeforeContent_ = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
     paddingAfterContent_ = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
@@ -904,7 +904,8 @@ void ListItemGroupLayoutAlgorithm::AdjustItemPosition()
             itemInfo.startIndex = start.first;
             itemInfo.startPos = start.second.startPos;
         }
-        if (end.first >= itemInfo.endIndex || GreatNotEqual(end.second.endPos, itemInfo.endPos)) {
+        if (end.first >= itemInfo.endIndex || GreatNotEqual(end.second.endPos, itemInfo.endPos) ||
+            itemInfo.endIndex > totalItemCount_ - 1) {
             itemInfo.endIndex = end.first;
             itemInfo.endPos = end.second.endPos;
         }

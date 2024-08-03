@@ -87,16 +87,6 @@ public:
 
     void DumpInfo() override;
 
-    bool GetNeedCallBack()
-    {
-        return needCallBack_;
-    }
-
-    void SetNeedCallBack(bool needCallBack)
-    {
-        needCallBack_ = needCallBack;
-    }
-
     bool IsInHoverMode() const
     {
         return hasInHoverMode_;
@@ -111,11 +101,6 @@ public:
     std::time_t GetLastTime()
     {
         return lastTime_;
-    }
-
-    bool HasFoldStatusDelayTask() const
-    {
-        return hasFoldStatusDelayTask_;
     }
 
 private:
@@ -138,12 +123,10 @@ private:
     bool isAppearCallback_ = false;
     RefPtr<DisplayInfo> displayInfo_;
     bool hasInHoverMode_ = false;
-    bool needCallBack_ = false;
     FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
     FoldStatus lastFoldStatus_ = FoldStatus::UNKNOWN;
     CancelableCallback<void()> foldStatusDelayTask_;
     std::time_t lastTime_ = std::time(0);
-    bool hasFoldStatusDelayTask_ = false;
 };
 } // namespace OHOS::Ace::NG
 

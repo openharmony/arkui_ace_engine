@@ -112,7 +112,13 @@ public:
     static RefPtr<NG::ChainedTransitionEffect> Asymmetric(int64_t appearId, int64_t disappearId)
     {
         auto appear = FFIData::GetData<NativeTransitionEffect>(appearId);
+        if (appear == nullptr) {
+            return nullptr;
+        }
         auto disappear = FFIData::GetData<NativeTransitionEffect>(disappearId);
+        if (disappear == nullptr) {
+            return nullptr;
+        }
         auto appearEffect = appear->effect;
         auto disappearEffect = disappear->effect;
         return AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearEffect, disappearEffect);

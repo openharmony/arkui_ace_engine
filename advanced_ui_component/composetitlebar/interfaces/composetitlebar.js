@@ -453,7 +453,7 @@ class CollapsibleMenuSection extends ViewPU {
   aboutToAppear() {
     if (this.menuItems) {
       this.menuItems.forEach((r, q) => {
-        if (r.isEnabled && this.firstFocusableIndex == -1 &&
+        if (r.isEnabled && this.firstFocusableIndex === -1 &&
           q > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
           this.firstFocusableIndex = this.index * 1000 + q + 1;
         }
@@ -573,7 +573,7 @@ class CollapsibleMenuSection extends ViewPU {
                   Row.border({
                     radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '', 'moduleName': '' },
                     width: ImageMenuItem.focusBorderWidth,
-                    color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '', "moduleName": '' },
+                    color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '', 'moduleName': '' },
                     style: BorderStyle.Solid
                   });
                   ViewStackProcessor.visualState("normal");
@@ -700,7 +700,7 @@ class CollapsibleMenuSection extends ViewPU {
                       };
                     };
                     ViewPU.create(new ImageMenuItem(this, { item: r, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + q },
-                      undefined, b, m, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 300 }));
+                      undefined, b, m, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 300 }));
                   }
                   else {
                     this.updateStateVarsOfChildByElmtId(b, {});

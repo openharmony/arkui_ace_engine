@@ -73,6 +73,7 @@ struct CacheVisibleRectResult {
     RectF innerVisibleRect = RectF();
     VectorF cumulativeScale = {1.0f, 1.0f};
     RectF frameRect = RectF();
+    RectF innerBoundaryRect = RectF();
 };
 
 // FrameNode will display rendering region in the screen.
@@ -438,6 +439,10 @@ public:
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
 
     OffsetF GetPaintRectOffsetNG(bool excludeSelf = false) const;
+
+    bool GetRectPointToParentWithTransform(std::vector<Point>& pointList, const RefPtr<FrameNode>& parent) const;
+
+    RectF GetPaintRectToWindowWithTransform();
 
     OffsetF GetPaintRectCenter(bool checkWindowBoundary = true) const;
 
@@ -936,6 +941,13 @@ public:
         return false;
     }
 
+    void HasAccessibilityVirtualNode(bool hasAccessibilityVirtualNode)
+    {
+        hasAccessibilityVirtualNode_ = hasAccessibilityVirtualNode;
+    }
+
+    void ProcessAccessibilityVirtualNode();
+
     RectF GetVirtualNodeTransformRectRelativeToWindow()
     {
         auto parentUinode = GetVirtualNodeParent().Upgrade();
@@ -1138,6 +1150,7 @@ private:
     std::function<void()> colorModeUpdateCallback_;
 
     RefPtr<AccessibilityProperty> accessibilityProperty_;
+    bool hasAccessibilityVirtualNode_ = false;
     RefPtr<LayoutProperty> layoutProperty_;
     RefPtr<PaintProperty> paintProperty_;
     RefPtr<RenderContext> renderContext_ = RenderContext::Create();

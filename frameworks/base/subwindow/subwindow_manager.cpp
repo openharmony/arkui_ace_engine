@@ -197,7 +197,7 @@ Rect SubwindowManager::GetParentWindowRect()
     return currentSubwindow_->GetParentWindowRect();
 }
 
-RefPtr<Subwindow> SubwindowManager::ShowDragPreviewWindowNG()
+RefPtr<Subwindow> SubwindowManager::ShowPreviewNG()
 {
     auto containerId = Container::CurrentId();
     auto subwindow =
@@ -206,7 +206,7 @@ RefPtr<Subwindow> SubwindowManager::ShowDragPreviewWindowNG()
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get or create subwindow failed");
         return nullptr;
     }
-    if (!subwindow->ShowDragPreviewWindowNG()) {
+    if (!subwindow->ShowPreviewNG()) {
         return nullptr;
     }
     return subwindow;
@@ -244,11 +244,11 @@ void SubwindowManager::ShowMenuNG(std::function<void()>&& buildFunc, std::functi
     subwindow->ShowMenuNG(std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
 }
 
-void SubwindowManager::HideDragPreviewWindowNG()
+void SubwindowManager::HidePreviewNG()
 {
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
-        subwindow->HideDragPreviewWindowNG();
+        subwindow->HidePreviewNG();
     }
 }
 

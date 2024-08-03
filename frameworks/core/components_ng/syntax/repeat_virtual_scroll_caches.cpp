@@ -72,7 +72,6 @@ bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to)
 
     const bool isRebuildingKeyCaches =
         ((key4index_.size() == 0) && (to >= lastActiveRanges_[0].first) && (from <= lastActiveRanges_[0].second));
-
     if (isRebuildingKeyCaches) {
         // following a key4index_/ttype4index_ purge fetch the whole range
         to = (to < lastActiveRanges_[0].second) ? lastActiveRanges_[0].second : to;

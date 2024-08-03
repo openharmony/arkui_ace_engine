@@ -503,6 +503,7 @@ public:
     virtual void OnDpiConfigurationUpdate() {}
     virtual void OnIconConfigurationUpdate() {}
     virtual void OnFontConfigurationUpdate() {}
+    virtual void OnFontScaleConfigurationUpdate() {}
 
     virtual bool ShouldDelayChildPressedState() const
     {

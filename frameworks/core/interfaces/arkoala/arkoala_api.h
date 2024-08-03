@@ -57,6 +57,7 @@ typedef long long ArkUI_Int64;
 typedef float ArkUI_Float32;
 typedef double ArkUI_Float64;
 typedef const char* ArkUI_CharPtr;
+typedef unsigned long long ArkUI_Uint64;
 
 // Several opaque struct declarations.
 struct _ArkUIVMContext;
@@ -236,7 +237,7 @@ struct ArkUIDragEvent {
     ArkUI_Float64 displayY;
     ArkUI_Float64 screenX;
     ArkUI_Float64 screenY;
-    ArkUI_Int64 modifierKeyState;
+    ArkUI_Uint64 modifierKeyState;
     ArkUI_Int32 dragBehavior;
     bool useCustomDropAnimation;
     ArkUI_Int32 subKind;
@@ -698,10 +699,10 @@ enum ArkUIEventCategory {
     TEXT_INPUT = 5,
     GESTURE_ASYNC_EVENT = 6,
     TOUCH_EVENT = 7,
-    TEXT_ARRAY = 8,
     MOUSE_INPUT_EVENT = 9,
-    MIXED_EVENT = 10,
-    DRAG_EVENT = 11,
+    TEXT_ARRAY = 10,
+    MIXED_EVENT = 11,
+    DRAG_EVENT = 12,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -1362,6 +1363,7 @@ struct ArkUIDragAction {
     DragStatusCallback listener;
     void* unifiedData;
     bool hasTouchPoint = false;
+    void** pixelmapNativeList;
 };
 
 struct ArkUICommonModifier {

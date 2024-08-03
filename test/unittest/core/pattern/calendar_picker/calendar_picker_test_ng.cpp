@@ -3743,8 +3743,12 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerUpdateButtonStyles001, TestSize.Lev
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest0050, TestSize.Level1)
 {
-    CalendarPickerTestNg::SetUpTestCase();
-
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto calendarTheme = AceType::MakeRefPtr<CalendarTheme>();
+    ASSERT_NE(calendarTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(calendarTheme));
     CalendarDialogView calendarDialogView;
     CalendarSettingData settingData;
     DialogProperties properties;
@@ -3754,6 +3758,9 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest0050, TestSize.Level1)
     auto selectedDate = PickerDate(2000, 1, 1);
     settingData.selectedDate = selectedDate;
     settingData.dayRadius = TEST_SETTING_RADIUS;
+    auto entryColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<CalendarDialogPattern>());
+    settingData.entryNode = AceType::WeakClaim(AceType::RawPtr(entryColumn));
     std::map<std::string, NG::DialogEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
 
@@ -3763,7 +3770,11 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest0050, TestSize.Level1)
     buttonInfos.push_back(info1);
 
     auto dialogNode = calendarDialogView.Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
-    ASSERT_NE(dialogNode, nullptr);
+    auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<CalendarDialogPattern>());
+    calendarDialogView.OperationsToPattern(contentColumn, settingData, properties, buttonInfos);
+    auto pattern = contentColumn->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(pattern->entryNode_.Upgrade(), nullptr);
 }
 
 /**

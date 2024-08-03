@@ -569,7 +569,7 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto childSize = host->GetChildren().size();
+    auto childSize = static_cast<int32_t>(host->GetChildren().size());
     if (childSize == 0) {
         return;
     }

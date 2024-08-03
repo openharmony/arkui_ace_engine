@@ -136,7 +136,7 @@ public:
     // int32_t second - index of the node
     std::pair<bool, int32_t> GetChildFlatIndex(int32_t id);
 
-    virtual const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = true) const
+    virtual const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const
     {
         return children_;
     }
@@ -759,7 +759,7 @@ protected:
 
     virtual void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
     {
-        for (const auto& child : GetChildren(false)) {
+        for (const auto& child : GetChildren()) {
             child->OnGenerateOneDepthVisibleFrame(visibleList);
         }
     }
@@ -771,7 +771,7 @@ protected:
 
     virtual void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
     {
-        for (const auto& child : GetChildren(false)) {
+        for (const auto& child : GetChildren()) {
             child->OnGenerateOneDepthAllFrame(allList);
         }
     }

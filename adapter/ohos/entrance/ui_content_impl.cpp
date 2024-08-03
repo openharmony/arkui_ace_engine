@@ -2240,9 +2240,13 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())),
             static_cast<WindowSizeChangeReason>(reason));
     };
-    if (pipelineContext) {
-        pipelineContext->ChangeDarkModeBrightness();
-    }
+    auto changeBrightnessTask = [container]() {
+        auto pipelineContext = container->GetPipelineContext();
+        if (pipelineContext) {
+            pipelineContext->ChangeDarkModeBrightness();
+        }
+    };
+    taskExecutor->PostTask(std::move(changeBrightnessTask), TaskExecutor::TaskType::UI, "ArkUIUpdateBrightness");
     AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
     if (container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
         reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) {
@@ -2809,9 +2813,9 @@ int32_t UIContentImpl::CreateModalUIExtension(
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
         "[%{public}s][%{public}s][%{public}d]: create modal page, "
         "sessionId=%{public}d, isProhibitBack=%{public}d, isAsyncModalBinding=%{public}d, "
-        "isAllowedBeCovered=%{public}d",
+        "isAllowedBeCovered=%{public}d, prohibitedRemoveByRouter=%{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, sessionId, config.isProhibitBack,
-        config.isAsyncModalBinding, config.isAllowedBeCovered);
+        config.isAsyncModalBinding, config.isAllowedBeCovered, config.prohibitedRemoveByRouter);
     return sessionId;
 }
 

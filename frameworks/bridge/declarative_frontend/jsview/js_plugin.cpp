@@ -29,26 +29,20 @@
 #include "frameworks/core/components/plugin/plugin_component.h"
 
 namespace OHOS::Ace {
-std::unique_ptr<PluginModel> PluginModel::instance_;
-std::mutex PluginModel::mutex_;
-
 PluginModel* PluginModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::PluginModelNG());
+    static NG::PluginModelNG model;
+    return &model;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::PluginModelNG());
-            } else {
-                instance_.reset(new Framework::PluginModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::PluginModelNG model;
+        return &model;
+    } else {
+        static Framework::PluginModelImpl model;
+        return &model;
     }
-    return instance_.get();
+#endif
 }
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
@@ -145,7 +139,7 @@ void JSPlugin::JsOnComplete(const JSCallbackInfo& info)
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto OnComplete = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
-                              const std::string& param) {
+                                const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Plugin.OnComplete");
             PipelineContext::SetCallBackNode(node);
@@ -163,7 +157,7 @@ void JSPlugin::JsOnError(const JSCallbackInfo& info)
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
-                           const std::string& param) {
+                            const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Plugin.OnComplete");
             std::vector<std::string> keys = { "errcode", "msg" };

@@ -1294,7 +1294,7 @@ HWTEST_F(RichEditorEditTestNg, GetImageSpansInfo, TestSize.Level1)
     auto imageStyleout = info.selection_.resultObjects.begin()->imageStyle;
     EXPECT_EQ(imageStyleout.borderRadius,
         "{\"topLeft\":\"10.00px\",\"topRight\":\"10.00px\",\"bottomLeft\":\"10.00px\",\"bottomRight\":\"10.00px\"}");
-    EXPECT_EQ(imageStyleout.margin, "left: [10.00px]right: [10.00px]top: [10.00px]bottom: [10.00px]");
+    EXPECT_EQ(imageStyleout.margin, marginProp->ToString());
     ClearSpan();
 }
 
@@ -1745,7 +1745,7 @@ HWTEST_F(RichEditorEditTestNg, DeleteValueSetImageSpan, TestSize.Level1)
     spanResult.SetSpanIndex(0);
     auto spanItem = richEditorPattern->spans_.front();
     richEditorPattern->DeleteValueSetImageSpan(spanItem, spanResult);
-    EXPECT_EQ(spanResult.GetMargin(), "left: [10.00px]right: [10.00px]top: [10.00px]bottom: [10.00px]");
+    EXPECT_EQ(spanResult.GetMargin(), marginProp->ToString());
     EXPECT_EQ(spanResult.GetBorderRadius(),
         "{\"topLeft\":\"10.00px\",\"topRight\":\"10.00px\",\"bottomLeft\":\"10.00px\",\"bottomRight\":\"10.00px\"}");
 

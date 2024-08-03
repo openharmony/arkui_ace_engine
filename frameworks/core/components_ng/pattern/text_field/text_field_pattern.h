@@ -1091,6 +1091,7 @@ public:
 
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
+    void DumpPlaceHolderInfo();
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
@@ -1542,6 +1543,7 @@ private:
 
     void PasswordResponseKeyEvent();
     void UnitResponseKeyEvent();
+    void ProcBorderAndUnderlineInBlurEvent();
     void ProcNormalInlineStateInBlurEvent();
     bool IsMouseOverScrollBar(const GestureEvent& info);
 
@@ -1608,7 +1610,7 @@ private:
     bool IsShowMenu(const std::optional<SelectionOptions>& options);
     bool IsContentRectNonPositive();
     bool IsHandleDragging();
-
+    void ReportEvent();
     RectF frameRect_;
     RectF textRect_;
     RefPtr<Paragraph> paragraph_;

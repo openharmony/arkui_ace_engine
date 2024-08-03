@@ -41,7 +41,7 @@ constexpr int32_t MAX_POINTID = 9;
 constexpr int32_t MIN_POINTID = 0;
 } // namespace
 
-int32_t OH_ArkUI_DragEvent_GetModifierKeyStates(ArkUI_DragEvent* event, int64_t* keys)
+int32_t OH_ArkUI_DragEvent_GetModifierKeyStates(ArkUI_DragEvent* event, uint64_t* keys)
 {
     if (!event || !keys) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -114,7 +114,7 @@ int32_t OH_ArkUI_DragEvent_GetDataTypes(
             if (ret != 0) {
                 return ARKUI_ERROR_CODE_PARAM_INVALID;
             }
-            eventTypeArray[i][strLeng] = '\0';
+            eventTypeArray[i][strLeng - 1] = '\0';
         } else {
             eventTypeArray[i][0] = '\0';
         }
@@ -188,7 +188,7 @@ int32_t OH_ArkUI_DragAction_SetPixelMaps(ArkUI_DragAction* dragAction, OH_Pixelm
     if (count < size || size < 0) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    dragActions->pixelmapArray = reinterpret_cast<void**>(pixelmapArray);
+    dragActions->pixelmapNativeList = reinterpret_cast<void**>(pixelmapArray);
     dragActions->size = size;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -301,7 +301,7 @@ int32_t OH_ArkUI_StartDrag(ArkUI_DragAction* dragAction)
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     std::vector<std::shared_ptr<OHOS::Media::PixelMap>> pixelMapList;
-    auto pixelmapArray = reinterpret_cast<OH_PixelmapNative**>(dragActions->pixelmapArray);
+    auto pixelmapArray = reinterpret_cast<OH_PixelmapNative**>(dragActions->pixelmapNativeList);
     for (int32_t index = 0; index < dragActions->size; index++) {
         if (!pixelmapArray[index]) {
             continue;
@@ -313,16 +313,16 @@ int32_t OH_ArkUI_StartDrag(ArkUI_DragAction* dragAction)
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_PreviewDragStatus OH_ArkUI_NodeEvent_GetPreviewDragStatus(ArkUI_NodeEvent* nodeEvent)
+ArkUI_PreDragStatus OH_ArkUI_NodeEvent_GetPreDragStatus(ArkUI_NodeEvent* nodeEvent)
 {
     if (!nodeEvent || nodeEvent->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT)) {
-        return ArkUI_PreviewDragStatus::ARKUI_PREVIEW_DRAG_STATUS_UNKNOWN;
+        return ArkUI_PreDragStatus::ARKUI_PRE_DRAG_STATUS_UNKNOWN;
     }
     const auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(nodeEvent->origin);
     if (!originNodeEvent) {
-        return ArkUI_PreviewDragStatus::ARKUI_PREVIEW_DRAG_STATUS_UNKNOWN;
+        return ArkUI_PreDragStatus::ARKUI_PRE_DRAG_STATUS_UNKNOWN;
     }
-    auto status = static_cast<ArkUI_PreviewDragStatus>(originNodeEvent->componentAsyncEvent.data[0].i32);
+    auto status = static_cast<ArkUI_PreDragStatus>(originNodeEvent->componentAsyncEvent.data[0].i32);
     return status;
 }
 
@@ -400,8 +400,8 @@ int32_t OH_ArkUI_DragPreviewOption_SetNumberBadgeEnabled(ArkUI_DragPreviewOption
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto* options = reinterpret_cast<ArkUIDragPreViewAndInteractionOptions*>(option);
-    options->isNumberBadgeEnabled = enabled;
-    options->badgeNumber = static_cast<ArkUI_Int32>(enabled);
+    options->isNumberBadgeEnabled = false;
+    options->isShowBadge = enabled;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -411,6 +411,7 @@ int32_t OH_ArkUI_DragPreviewOption_SetBadgeNumber(ArkUI_DragPreviewOption* optio
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto* options = reinterpret_cast<ArkUIDragPreViewAndInteractionOptions*>(option);
+    options->isNumberBadgeEnabled = true;
     options->badgeNumber = static_cast<ArkUI_Int32>(forcedNumber);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -472,14 +473,19 @@ int32_t OH_ArkUI_SetNodeDragPreviewOption(ArkUI_NodeHandle node, ArkUI_DragPrevi
 int32_t OH_ArkUI_SetNodeDragPreview(ArkUI_NodeHandle node, OH_PixelmapNative* preview)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !node || !preview) {
+    if (!impl || !node) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!preview) {
+        impl->getNodeModifiers()->getCommonModifier()->resetDragPreview(node->uiNodeHandle);
+        return ARKUI_ERROR_CODE_NO_ERROR;
     }
     auto previewPixelNative = reinterpret_cast<OH_PixelmapNativeHandle>(preview);
     auto pixelMap = previewPixelNative->GetInnerPixelmap();
     impl->getDragAdapterAPI()->setDragPreview(node->uiNodeHandle, &pixelMap);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
+
 int32_t OH_ArkUI_SetNodeAllowedDropDataTypes(ArkUI_NodeHandle node, const char* typesArray[], int32_t count)
 {
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -559,6 +565,21 @@ int32_t OH_ArkUI_DragEvent_SetSuggestedDropOperation(ArkUI_DragEvent* event, Ark
     }
     auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
     dragEvent->dragBehavior = static_cast<ArkUI_Int32>(proposal);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_DragEvent_GetDropOperation(ArkUI_DragEvent* event, ArkUI_DropOperation* operation)
+{
+    if (!event || !operation) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    if (dragEvent->dragBehavior >= static_cast<int32_t>(ArkUI_DropOperation::ARKUI_DROP_OPERATION_COPY) &&
+        dragEvent->dragBehavior <= static_cast<int32_t>(ArkUI_DropOperation::ARKUI_DROP_OPERATION_MOVE)) {
+        *operation = static_cast<ArkUI_DropOperation>(dragEvent->dragBehavior);
+    } else {
+        *operation = ARKUI_DROP_OPERATION_COPY;
+    }
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 

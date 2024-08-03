@@ -153,7 +153,13 @@ void TimePickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host
     if (timePickerRowPattern->GetIsEnableHaptic()) {
         isEnableHaptic_ = true;
         if (!hapticController_) {
-            hapticController_ = TimepickerAudioHapticFactory::GetInstance();
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->hapticController_ = TimepickerAudioHapticFactory::GetInstance();
+            });
         }
     } else {
         isEnableHaptic_ = false;
@@ -1155,6 +1161,7 @@ void TimePickerColumnPattern::SetDividerHeight(uint32_t showOptionCount)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     auto childSize = host->GetChildren().size();
     if (childSize != CHILDREN_SIZE) {
