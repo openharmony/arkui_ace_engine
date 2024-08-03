@@ -760,6 +760,7 @@ public:
     }
 
     std::string ToString() const;
+    void UpdateColorByResourceId();
 
 private:
     std::vector<std::string> fontFamilies_;
