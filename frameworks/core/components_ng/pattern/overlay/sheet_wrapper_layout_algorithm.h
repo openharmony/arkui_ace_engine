@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OVERLAY_SHEET_WRAPPER_LAYOUT_ALGORITHM_H
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
-#include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SheetWrapperLayoutAlgorithm : public BoxLayoutAlgorithm {
@@ -27,7 +26,7 @@ public:
     SheetWrapperLayoutAlgorithm() = default;
     ~SheetWrapperLayoutAlgorithm() override = default;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(LayoutWrapper* layoutWrapper) override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SheetWrapperLayoutAlgorithm);
