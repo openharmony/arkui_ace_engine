@@ -400,6 +400,7 @@ HWTEST_F(WaterFlowSegmentIntegratedTest, Replace003, TestSize.Level1)
     std::vector<WaterFlowSections::Section> newSection { SECTION_7[3] };
     newSection[0].itemsCount = 40;
     secObj->ChangeData(3, 1, newSection);
+    pattern_->BeforeCreateLayoutWrapper();
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     EXPECT_EQ(info->itemInfos_.size(), 27);
     EXPECT_EQ(info->items_[3].at(0).size(), 20);
@@ -417,6 +418,7 @@ HWTEST_F(WaterFlowSegmentIntegratedTest, Replace003, TestSize.Level1)
     AddItems(7);
     frameNode_->ChildrenUpdatedFrom(7);
     secObj->ChangeData(1, 1, ADD_SECTION_7);
+    pattern_->BeforeCreateLayoutWrapper();
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     EXPECT_EQ(info->itemInfos_.size(), 14);
     EXPECT_EQ(info->segmentTails_[1], 13);
@@ -450,6 +452,7 @@ HWTEST_F(WaterFlowSegmentIntegratedTest, Replace004, TestSize.Level1)
     std::vector<WaterFlowSections::Section> newSection { SECTION_9[0] };
     newSection[0].itemsCount = 106;
     secObj->ChangeData(0, 1, newSection);
+    pattern_->BeforeCreateLayoutWrapper();
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     EXPECT_EQ(info->itemInfos_.size(), 6);
     EXPECT_EQ(info->items_[0].at(0).size(), 2);
@@ -471,6 +474,7 @@ HWTEST_F(WaterFlowSegmentIntegratedTest, Replace004, TestSize.Level1)
     frameNode_->ChildrenUpdatedFrom(10);
     newSection[0].itemsCount = 10;
     secObj->ChangeData(0, 1, newSection);
+    pattern_->BeforeCreateLayoutWrapper();
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     EXPECT_EQ(info->segmentTails_[0], 9);
     FlushLayoutTask(frameNode_);
@@ -512,6 +516,7 @@ HWTEST_F(WaterFlowSegmentIntegratedTest, Replace005, TestSize.Level1)
     std::vector<WaterFlowSections::Section> newSection { SECTION_7[2] };
     newSection[0].itemsCount = 10;
     secObj->ChangeData(2, 1, newSection);
+    pattern_->BeforeCreateLayoutWrapper();
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     // section 2 reset should be skipped
     EXPECT_EQ(info->endPosArray_.size(), 16);
