@@ -783,6 +783,11 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafely()
     return NG::MockPipelineContext::GetCurrent();
 }
 
+RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafelyWithCheck()
+{
+    return NG::MockPipelineContext::GetCurrent();
+}
+
 double PipelineBase::GetCurrentDensity()
 {
     auto pipelineContext = NG::MockPipelineContext::GetCurrentContext();
