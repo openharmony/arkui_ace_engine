@@ -1086,6 +1086,8 @@ private:
 
     void RaiseZIndex(); // Recover z-index in ClearFocusState
 
+    bool RequestFocusImmediatelyInner(bool isJudgeRootTree = false);
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;
