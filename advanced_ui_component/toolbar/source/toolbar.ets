@@ -333,8 +333,8 @@ export struct ToolBar {
         .width('100%')
         .height(this.toLengthString(this.toolBarModifier.heightValue))
         .padding({
-          start: this.toolBarList.length < 5 ? this.toolBarModifier.paddingValue :  LengthMetrics.vp(0),
-          end: this.toolBarList.length < 5 ? this.toolBarModifier.paddingValue :  LengthMetrics.vp(0),
+          start: this.toolBarList.length < 5 ? this.toolBarModifier.paddingValue : LengthMetrics.vp(0),
+          end: this.toolBarList.length < 5 ? this.toolBarModifier.paddingValue : LengthMetrics.vp(0),
         })
       }
       .justifyContent(FlexAlign.Center)
