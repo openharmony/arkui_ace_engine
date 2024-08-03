@@ -59,6 +59,7 @@ private:
     void RegisterFocusCallback();
     void DisposeSnapShotAndBlankWindow();
     void CleanBlankWindow();
+    void SetSubWinowBufferAvailableCallback(std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode);
 
     bool destroyed_ = false;
     OHOS::Rosen::WindowMode initWindowMode_ = OHOS::Rosen::WindowMode::WINDOW_MODE_UNDEFINED;

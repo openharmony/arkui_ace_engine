@@ -119,12 +119,12 @@ void WindowScene::OnAttachToFrameNode()
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
         surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
+        SetSubWinowBufferAvailableCallback(surfaceNode);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "[WMSSystem]OnAttachToFrameNode id: %{public}d, node id: %{public}d, type: %{public}d, name: %{public}s",
             session_->GetPersistentId(), host->GetId(), session_->GetWindowType(), session_->GetWindowName().c_str());
         return;
     }
-
     auto surfaceNode = CreateLeashWindowNode();
     session_->SetLeashWinSurfaceNode(surfaceNode);
     CHECK_NULL_VOID(surfaceNode);
@@ -132,7 +132,6 @@ void WindowScene::OnAttachToFrameNode()
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
     surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
-
     RegisterFocusCallback();
     WindowPattern::OnAttachToFrameNode();
 }
@@ -612,5 +611,24 @@ void WindowScene::CleanBlankWindow()
 uint32_t WindowScene::GetWindowPatternType() const
 {
     return static_cast<uint32_t>(WindowPatternType::WINDOW_SCENE);
+}
+
+void WindowScene::SetSubWinowBufferAvailableCallback(std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode)
+{
+    CHECK_NULL_VOID(surfaceNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(session_);
+    auto subWinowCallback = [weakSession = wptr(session_), weak = WeakClaim(RawPtr(host))]() {
+        auto host = weak.Upgrade();
+        CHECK_NULL_VOID(host);
+        auto session = weakSession.promote();
+        CHECK_NULL_VOID(session);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+            "subWinowBufferAvailable id: %{public}d, node id: %{public}d, type: %{public}d, name: %{public}s",
+            session->GetPersistentId(), host->GetId(), session->GetWindowType(), session->GetWindowName().c_str());
+        session->SetBufferAvailable(true);
+    };
+    surfaceNode->SetBufferAvailableCallback(subWinowCallback);
 }
 } // namespace OHOS::Ace::NG
