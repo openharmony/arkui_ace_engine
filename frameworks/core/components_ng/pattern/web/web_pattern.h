@@ -550,7 +550,7 @@ public:
     void ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson,
         std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, ViewDataCommon& viewDataCommon);
     AceAutoFillType GetFocusedType();
-    void HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
+    bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool RequestAutoFill(AceAutoFillType autoFillType);
     bool RequestAutoSave();
     bool UpdateAutoFillPopup();

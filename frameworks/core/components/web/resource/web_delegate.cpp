@@ -2790,7 +2790,9 @@ public:
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
         auto delegate = delegate_.Upgrade();
         CHECK_NULL_VOID(delegate);
-        delegate->HandleAutoFillEvent(result);
+        bool ret = delegate->HandleAutoFillEvent(result);
+        result->SetType(NWebValue::Type::BOOLEAN);
+        result->SetBoolean(ret);
     }
 
 private:
@@ -5888,11 +5890,11 @@ void WebDelegate::AutofillCancel(const std::string& fillContent)
         TaskExecutor::TaskType::UI, "ArkUIWebAutofillCancel");
 }
 
-void WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
+bool WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
 {
     auto pattern = webPattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    pattern->HandleAutoFillEvent(viewDataJson);
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->HandleAutoFillEvent(viewDataJson);
 }
 
 #endif

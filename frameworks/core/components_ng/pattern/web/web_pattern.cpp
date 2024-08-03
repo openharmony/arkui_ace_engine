@@ -72,7 +72,8 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string IMAGE_POINTER_CONTEXT_MENU_PATH = "etc/webview/ohos_nweb/context-menu.svg";
 const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
-constexpr int32_t AUTO_FILL_CANCEL = 2;
+const std::string AUTO_FILL_VIEW_DATA_PAGE_URL = "autofill_viewdata_origin_pageurl";
+const std::string AUTO_FILL_VIEW_DATA_OTHER_ACCOUNT = "autofill_viewdata_other_account";
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t AUTOFILL_DELAY_TIME = 200;
 constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
@@ -3443,6 +3444,10 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
             focusType = type;
         }
     }
+    auto pageUrl = viewDataWrap->GetPageUrl();
+    jsonNode->Put(AUTO_FILL_VIEW_DATA_PAGE_URL.c_str(), pageUrl.c_str());
+    auto otherAccount = viewDataWrap->GetOtherAccount();
+    jsonNode->Put(AUTO_FILL_VIEW_DATA_OTHER_ACCOUNT.c_str(), otherAccount);
     delegate_->NotifyAutoFillViewData(jsonNode->ToString());
 
     // shift focus after autofill
@@ -3466,7 +3471,7 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
 void WebPattern::NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent, bool isPopup)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "called, errCode:%{public}d", errCode);
-    if (errCode == AUTO_FILL_CANCEL || isPasswordFill_) {
+    if (isPasswordFill_) {
         delegate_->AutofillCancel(fillContent);
     }
 }
@@ -3609,36 +3614,40 @@ AceAutoFillType WebPattern::GetFocusedType()
     return type;
 }
 
-void WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
+bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "AutoFillEvent");
     viewDataCommon_ = {};
+    isPasswordFill_ = false;
     ParseNWebViewDataJson(viewDataJson, pageNodeInfo_, viewDataCommon_);
     auto eventType = viewDataCommon_.eventType;
 
     if (eventType == OHOS::NWeb::NWebAutofillEvent::FILL) {
         auto host = GetHost();
-        CHECK_NULL_VOID(host);
+        CHECK_NULL_RETURN(host, false);
         auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
+        CHECK_NULL_RETURN(context, false);
         auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostDelayedTask(
+        CHECK_NULL_RETURN(taskExecutor, false);
+        bool fillRet = taskExecutor->PostDelayedTask(
             [weak = WeakClaim(this)] () {
                 auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->RequestAutoFill(pattern->GetFocusedType());
+                CHECK_NULL_RETURN(pattern, false);
+                return pattern->RequestAutoFill(pattern->GetFocusedType());
             },
             TaskExecutor::TaskType::UI, AUTOFILL_DELAY_TIME, "ArkUIWebHandleAutoFillEvent");
+        return fillRet;
     }
 
     if (eventType == OHOS::NWeb::NWebAutofillEvent::SAVE) {
-        RequestAutoSave();
+        return RequestAutoSave();
     } else if (eventType == OHOS::NWeb::NWebAutofillEvent::UPDATE) {
-        UpdateAutoFillPopup();
+        return UpdateAutoFillPopup();
     } else if (eventType == OHOS::NWeb::NWebAutofillEvent::CLOSE) {
-        CloseAutoFillPopup();
+        return CloseAutoFillPopup();
     }
+
+    return false;
 }
 
 bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
