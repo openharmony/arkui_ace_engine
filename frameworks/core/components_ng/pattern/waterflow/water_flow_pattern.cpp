@@ -418,14 +418,7 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
     auto callback = [weakPattern = WeakClaim(this)](int32_t start) {
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto context = PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_VOID(context);
-        context->AddBuildFinishCallBack([weakPattern, start]() {
-            auto pattern = weakPattern.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnSectionChanged(start);
-        });
-        context->RequestFrame();
+        pattern->AddSectionChangeStartPos(start);
     };
     sections_->SetOnDataChange(callback);
     sections_->SetNotifyDataChange(sectionChangeCallback);
@@ -752,5 +745,13 @@ void WaterFlowPattern::DumpAdvanceInfo()
         }
         DumpLog::GetInstance().AddDesc("-----------end print sections_------------");
     }
+}
+
+void WaterFlowPattern::BeforeCreateLayoutWrapper()
+{
+    for (const auto& start : sectionChangeStartPos_) {
+        OnSectionChanged(start);
+    }
+    sectionChangeStartPos_.clear();
 }
 } // namespace OHOS::Ace::NG
