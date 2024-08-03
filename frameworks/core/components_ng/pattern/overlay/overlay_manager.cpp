@@ -6080,6 +6080,20 @@ void OverlayManager::MarkDirty(PropertyChangeFlag flag)
             }
         }
     }
+
+    // markdirty toast node under pipeline root node
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+
+    if (rootNode == markNode) {
+        return;
+    }
+
+    for (auto&& child : rootNode->GetChildren()) {
+        if (child->GetTag() == V2::TOAST_ETS_TAG && (child != root->GetFirstChild() || pipeline->IsSubPipeline())) {
+            child->MarkDirtyNode(flag);
+        }
+    }
 }
 
 void OverlayManager::MarkDirtyOverlay()
