@@ -166,8 +166,8 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
     RefPtr<LayoutWrapper> scroll;
     RefPtr<LayoutWrapper> list;
     for (const auto& children : layoutWrapper->GetAllChildrenWithBuild()) {
-        restWidth = children->GetGeometryNode()->GetMarginFrameSize().Width();
-        restHeight = children->GetGeometryNode()->GetMarginFrameSize().Height();
+        restWidth = children->GetLayoutProperty()->GetContentLayoutConstraint()->maxSize.Width();
+        restHeight = children->GetLayoutProperty()->GetContentLayoutConstraint()->maxSize.Height();
         for (const auto& grandson : children->GetAllChildrenWithBuild()) {
             if (grandson->GetHostTag() == V2::SCROLL_ETS_TAG) {
                 scroll = grandson;
