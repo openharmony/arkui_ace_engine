@@ -499,6 +499,16 @@ public:
         colorModeUpdateCallback_ = callback;
     }
 
+    void SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback)
+    {
+        ndkColorModeUpdateCallback_ = callback;
+    }
+
+    void SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback)
+    {
+        ndkFontUpdateCallback_ = callback;
+    }
+
     bool MarkRemoving() override;
 
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
@@ -1137,7 +1147,8 @@ private:
 
     std::list<std::function<void()>> destroyCallbacks_;
     std::function<void()> colorModeUpdateCallback_;
-
+    std::function<void(int32_t)> ndkColorModeUpdateCallback_;
+    std::function<void(float, float)> ndkFontUpdateCallback_;
     RefPtr<AccessibilityProperty> accessibilityProperty_;
     RefPtr<LayoutProperty> layoutProperty_;
     RefPtr<PaintProperty> paintProperty_;
