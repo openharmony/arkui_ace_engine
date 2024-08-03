@@ -52,7 +52,7 @@ enum class FontWeight {
 };
 
 enum class FontStyle {
-    NORMAL = 0,
+    NORMAL,
     ITALIC,
     NONE
 };
@@ -687,6 +687,16 @@ public:
         return locale_;
     }
 
+    void SetTextBackgroundStyle(const std::optional<TextBackgroundStyle>& style)
+    {
+        textBackgroundStyle_ = style;
+    }
+
+    const std::optional<TextBackgroundStyle>& GetTextBackgroundStyle() const
+    {
+        return textBackgroundStyle_;
+    }
+
     bool isSymbolGlyph_ = false;
 
     void SetRenderColors(std::vector<Color>& renderColors)
@@ -732,16 +742,6 @@ public:
     int32_t GetEffectStrategy() const
     {
         return effectStrategy_;
-    }
-
-    void SetTextBackgroundStyle(const std::optional<TextBackgroundStyle>& style)
-    {
-        textBackgroundStyle_ = style;
-    }
-
-    const std::optional<TextBackgroundStyle>& GetTextBackgroundStyle() const
-    {
-        return textBackgroundStyle_;
     }
 
     LineBreakStrategy GetLineBreakStrategy() const
@@ -799,6 +799,7 @@ private:
     bool adaptHeight_ = false; // whether adjust text size with height.
     bool allowScale_ = true;
     bool halfLeading_ = false;
+    std::optional<TextBackgroundStyle> textBackgroundStyle_;
     std::optional<float> minFontScale_;
     std::optional<float> maxFontScale_;
 
@@ -807,8 +808,6 @@ private:
     int32_t renderStrategy_ = 0;
     int32_t effectStrategy_ = 0;
     std::optional<NG::SymbolEffectOptions> symbolEffectOptions_;
-
-    std::optional<TextBackgroundStyle> textBackgroundStyle_;
     double heightScale_ = 1.0;
     bool heightOnly_ = false;
     std::u16string ellipsis_;
