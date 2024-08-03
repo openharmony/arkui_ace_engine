@@ -19,30 +19,20 @@
 #include <optional>
 
 #include "gtest/gtest.h"
+#include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/geometry/dimension.h"
 
 #define protected public
 #define private public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/unittest/core/pattern/test_ng.h"
-
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
 #include "core/components/indexer/indexer_theme.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_paint_property.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-#include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -57,9 +47,37 @@ public:
     void GetIndexer();
 
     IndexerModelNG CreateIndexer(std::vector<std::string> arrayValue, int32_t selected = 0);
-    AssertionResult Selected(int32_t expectSelected);
-    void MoveIndex(GestureEvent gestureEvent);
-    AssertionResult Touch(TouchType touchType, float locationY, int32_t expectSelected);
+
+    std::vector<std::string> GetLongArrayValue()
+    {
+        return { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
+            "U", "V", "W", "X", "Y", "Z" };
+    }
+
+    std::vector<std::string> GetShortArrayValue()
+    {
+        return { "A", "B", "C", "D", "E", "F", "G", "H", "I" };
+    }
+
+    std::vector<std::string> GetAutoCollapseArrayValue()
+    {
+        return { "#", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L" };
+    }
+
+    std::function<std::vector<std::string>(const int32_t selected)> GetPopupData()
+    {
+        return [](int32_t) -> std::vector<std::string> { return { "白", "别" }; };
+    }
+
+    std::function<std::vector<std::string>(const int32_t selected)> GetMorePopupData()
+    {
+        return [](int32_t) -> std::vector<std::string> { return { "白", "别", "吧", "不", "被" }; };
+    }
+
+    std::function<std::vector<std::string>(const int32_t selected)> GetMorePopupData2()
+    {
+        return [](int32_t) -> std::vector<std::string> { return { "白", "别", "吧", "不", "被", "包", "毕" }; };
+    }
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<IndexerPattern> pattern_;
@@ -67,6 +85,7 @@ public:
     RefPtr<IndexerLayoutProperty> layoutProperty_;
     RefPtr<IndexerPaintProperty> paintProperty_;
     RefPtr<IndexerAccessibilityProperty> accessibilityProperty_;
+    RefPtr<IndexerTheme> indexerTheme_;
 };
 } // namespace OHOS::Ace::NG
 
