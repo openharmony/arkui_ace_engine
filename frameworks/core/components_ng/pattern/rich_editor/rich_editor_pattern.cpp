@@ -2906,7 +2906,9 @@ std::pair<OffsetF, float> RichEditorPattern::CalculateCaretOffsetAndHeight()
     auto caretPosition = caretPosition_;
     float caretHeightUp = 0.0f;
     OffsetF caretOffsetUp = CalcCursorOffsetByPosition(caretPosition, caretHeightUp, false, false);
-    CHECK_NULL_RETURN(!isShowPlaceholder_, { caretOffsetUp, caretHeightUp });
+    if (isShowPlaceholder_) {
+        return { caretOffsetUp, caretHeightUp };
+    }
     if (GetTextContentLength() <= 0) {
         constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
         auto [caretOffset, preferredHeight] = CalculateEmptyValueCaretRect();
