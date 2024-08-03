@@ -1738,7 +1738,7 @@ void TextFieldPattern::HandleTouchUp()
 
 void TextFieldPattern::HandleTouchMove(const TouchEventInfo& info)
 {
-    if (isTouchCaret_ || isTouchPreviewText_) {
+    if (isTouchCaret_ || (GetIsPreviewText() && isTouchPreviewText_)) {
         UpdateCaretByTouchMove(info);
     }
 }
