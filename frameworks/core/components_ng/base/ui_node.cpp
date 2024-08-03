@@ -420,7 +420,7 @@ void LoopDetected(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
 
 bool DetectLoop(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
 {
-    if (!child->GetChildren().empty() || child == current) {
+    if ((child->GetDepth() > 0 && child->GetDepth() < INT32_MAX) || child == current) {
         for (auto parent = current; parent; parent = parent->GetParent()) {
             if (parent == child) {
                 LoopDetected(child, current);
