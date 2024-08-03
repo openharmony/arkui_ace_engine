@@ -148,6 +148,8 @@ public:
         return isNestedInterrupt_;
     }
 
+    virtual void OnScrollDragEndRecursive();
+
 protected:
     /**
      * @brief Helper function. Searches for the parent NestableScrollContainer of the current instance.

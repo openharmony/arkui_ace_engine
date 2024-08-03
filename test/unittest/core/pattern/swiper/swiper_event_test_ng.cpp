@@ -608,6 +608,33 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwiperPatternHandleScroll009
+ * @tc.desc: test HandleScroll called by CHILD_SCROLL when edge is reached. Should pass offset back to child.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto swiperNode = FrameNode::CreateFrameNode("Swiper", 0, AceType::MakeRefPtr<SwiperPattern>());
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto layoutproperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    layoutproperty->UpdateLoop(false);
+    /**
+     * @tc.steps: step2. alignment Right to left (RTL),state != NestedState::GESTURE.
+     */
+    layoutproperty->UpdateLayoutDirection(TextDirection::RTL);
+    EXPECT_EQ(swiperPattern->IsHorizontalAndRightToLeft(), true);
+    swiperPattern->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::SPRING);
+    swiperPattern->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = -0.5 } });
+    auto res = swiperPattern->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    EXPECT_EQ(res.remain, -4.5f);
+}
+
+
+/**
  * @tc.name: SwiperPatternHandleScrollMultiChildren001
  * @tc.desc: test HandleScroll with multiple scrollable children
  * @tc.type: FUNC
@@ -635,6 +662,11 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollMultiChildren001, TestSize.
     pattern_->HandleScroll(-5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     EXPECT_TRUE(pattern_->childScrolling_);
     EXPECT_FALSE(pattern_->usePropertyAnimation_);
+    pattern_->OnScrollEndRecursive(std::nullopt);
+
+    // self scroll
+    pattern_->HandleScroll(-5.0f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    EXPECT_FALSE(pattern_->childScrolling_);
 }
 
 /**
@@ -740,6 +772,31 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollVelocity003, TestSize.Level
     res = pattern_->HandleScrollVelocity(5.0f);
     EXPECT_FALSE(pattern_->childScrolling_);
     EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: SwiperPatternHandleScrollVelocity004
+ * @tc.desc: test HandleScrollVelocity self handle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollVelocity004, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetEdgeEffect(EdgeEffect::NONE);
+        model.SetLoop(false);
+    });
+    /**
+     * @tc.steps: step1. alignment Right to left (RTL).
+     */
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    EXPECT_EQ(pattern_->IsHorizontalAndRightToLeft(), true);
+    pattern_->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::SPRING);
+    pattern_->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = -0.5 } });
+    auto res = pattern_->HandleScrollVelocity(5.0f);
+    EXPECT_TRUE(res);
+    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisableSwipe(true);
+    res = pattern_->HandleScrollVelocity(5.0f);
+    EXPECT_FALSE(res);
 }
 
 /**

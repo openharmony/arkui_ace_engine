@@ -652,10 +652,11 @@ HWTEST_F(AnimateImplTest, AnimateImplTest040, TestSize.Level1)
     ArkUI_AnimateCompleteCallback* complete = new ArkUI_AnimateCompleteCallback();
     complete->type = ARKUI_FINISH_CALLBACK_LOGICALLY;
     complete->callback = AnimateCompleteCallback;
-    int32_t userData = 0;
-    complete->userData = (void *)userData;
+    void* userData = malloc(100);
+    complete->userData = userData;
     int32_t ret = AnimateTo(&context, option, update, complete);
     ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    free(userData);
     delete option;
     delete curve;
     delete update;

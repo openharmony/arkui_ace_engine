@@ -18,6 +18,9 @@
 #include "base/utils/utils.h"
 #define protected public
 #define private public
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "core/common/ace_application_info.h"
 #include "core/components_ng/render/render_property.h"
 
 #undef private
@@ -72,7 +75,21 @@ void MakeGraphicsProperty(NG::GraphicsProperty& graphicsProperty)
 };
 } // namespace
 
-class RenderPropertyTestNg : public testing::Test {};
+class RenderPropertyTestNg : public testing::Test {
+public:
+    void SetUp() override;
+    void TearDown() override;
+};
+
+void RenderPropertyTestNg::SetUp()
+{
+    NG::MockPipelineContext::SetUp();
+}
+
+void RenderPropertyTestNg::TearDown()
+{
+    NG::MockPipelineContext::TearDown();
+}
 
 /**
  * @tc.name: RenderPositionPropertyTest001
@@ -469,5 +486,288 @@ HWTEST_F(RenderPropertyTestNg, TransformPropertyTest001, TestSize.Level1)
     EXPECT_EQ(json->GetValue("translate")->GetString("x"), "40.00px");
     EXPECT_EQ(json->GetValue("translate")->GetString("y"), "80.00px");
     EXPECT_EQ(json->GetValue("translate")->GetString("z"), "10.00px");
+}
+
+/**
+ * @tc.name: RenderPropertyTest001
+ * @tc.desc: Test cast to RenderPropertyTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPropertyTestNg, RenderPropertyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object renderPositionProperty.
+     */
+    NG::RenderPositionProperty renderPositionProperty;
+    NG::InspectorFilter testFilter;
+    auto jsonValue = JsonUtil::Create(true);
+    auto offset = NG::OffsetT<Dimension>(Dimension(1), Dimension(1));
+    renderPositionProperty.propOffset = offset;
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    int32_t tempVersion = static_cast<int32_t>(context->GetMinPlatformVersion());
+    context->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    renderPositionProperty.ToJsonValue(jsonValue, testFilter);
+    context->SetMinPlatformVersion(tempVersion);
+    EXPECT_EQ(jsonValue->GetValue("offset")->GetString("x"), "1.00px");
+    testFilter.AddFilterAttr("focusable");
+    renderPositionProperty.ToJsonValue(jsonValue, testFilter);
+    EXPECT_EQ(jsonValue->GetValue("offset")->GetString("x"), "1.00px");
+}
+
+/**
+ * @tc.name: RenderPropertyTest002
+ * @tc.desc: Test cast to RenderPropertyTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPropertyTestNg, RenderPropertyTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object graphicsProperty.
+     */
+    NG::GraphicsProperty graphicsProperty;
+    NG::InspectorFilter testFilter;
+    auto jsonValue = JsonUtil::Create(true);
+    Shadow shadow(VALUE_TEST, OFFSETS, WHITE, ShadowStyle::None);
+    shadow.colorStrategy_ = ShadowColorStrategy::AVERAGE;
+    graphicsProperty.propBackShadow = shadow;
+    InvertOption option;
+    option.low_ = 1.0f;
+    option.high_ = 1.0f;
+    InvertVariant testInvert = option;
+    graphicsProperty.propFrontInvert = testInvert;
+    std::vector<std::pair<float, float>> fractionStops;
+    fractionStops.push_back(std::pair<float, float>(0.0f, 1.0f));
+    CalcDimension dimensionRadius(0.0);
+    NG::LinearGradientBlurPara blurPara(dimensionRadius, fractionStops, NG::GradientDirection::LEFT);
+    graphicsProperty.propLinearGradientBlur = blurPara;
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     */
+    graphicsProperty.ToJsonValue(jsonValue, testFilter);
+    EXPECT_EQ(jsonValue->GetValue(SHADOW_TEST)->GetString("color"), "ColoringStrategy.AVERAGE");
+    blurPara.direction_ = static_cast<NG::GradientDirection>(11); // 11 is not a valid GradientDirection.
+    graphicsProperty.propLinearGradientBlur = blurPara;
+    graphicsProperty.ToJsonValue(jsonValue, testFilter);
+    EXPECT_EQ(jsonValue->GetValue(SHADOW_TEST)->GetString("color"), "ColoringStrategy.AVERAGE");
+    testFilter.AddFilterAttr("focusable");
+    graphicsProperty.ToJsonValue(jsonValue, testFilter);
+    EXPECT_EQ(jsonValue->GetValue(SHADOW_TEST)->GetString("color"), "ColoringStrategy.AVERAGE");
+}
+
+/**
+ * @tc.name: RenderPropertyTest003
+ * @tc.desc: Test cast to RenderPropertyTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPropertyTestNg, RenderPropertyTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object backgroundProperty.
+     */
+    NG::BackgroundProperty backgroundProperty;
+    NG::InspectorFilter testFilter;
+    auto jsonValue = JsonUtil::Create(true);
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.src_ = SRC_IMAGES;
+    backgroundProperty.propBackgroundImage = imageSourceInfo;
+    backgroundProperty.propBackgroundImageSize = BACKGROUND_SIZE;
+    backgroundProperty.propBackgroundImagePosition = BACKGROUND_POSITION;
+    backgroundProperty.propBackgroundImageRepeat = static_cast<ImageRepeat>(4); // 4 is not a valid ImageRepeat.
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     */
+    backgroundProperty.ToJsonValue(jsonValue, testFilter);
+    EXPECT_EQ(jsonValue->GetString("backgroundImage"), BACKGROUND_IMAGES);
+    EXPECT_EQ(jsonValue->GetString("backgroundImageSize"), "ImageSize.Cover");
+    EXPECT_EQ(jsonValue->GetString("backgroundImagePosition"), "Alignment.TopEnd");
+    testFilter.AddFilterAttr("focusable");
+    backgroundProperty.ToJsonValue(jsonValue, testFilter);
+    EXPECT_EQ(jsonValue->GetString("backgroundImage"), BACKGROUND_IMAGES);
+    EXPECT_EQ(jsonValue->GetString("backgroundImageSize"), "ImageSize.Cover");
+    EXPECT_EQ(jsonValue->GetString("backgroundImagePosition"), "Alignment.TopEnd");
+}
+
+/**
+ * @tc.name: RenderPropertyTest004
+ * @tc.desc: Test cast to RenderPropertyTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPropertyTestNg, RenderPropertyTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object customBackgroundProperty.
+     */
+    NG::CustomBackgroundProperty customBackgroundProperty;
+    NG::InspectorFilter testFilter;
+    auto jsonValue = JsonUtil::Create(true);
+    customBackgroundProperty.propBackgroundAlign = Alignment::BOTTOM_RIGHT;
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     */
+    customBackgroundProperty.ToJsonValue(jsonValue, testFilter);
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    customBackgroundProperty.propBackgroundPixelMap = pixelMap;
+    customBackgroundProperty.ToJsonValue(jsonValue, testFilter);
+    EXPECT_EQ(jsonValue->GetString("backgroundAlign"), "Alignment (1.0, 1.0)");
+    testFilter.AddFilterAttr("focusable");
+    customBackgroundProperty.ToJsonValue(jsonValue, testFilter);
+    EXPECT_EQ(jsonValue->GetString("backgroundAlign"), "Alignment (1.0, 1.0)");
+}
+
+/**
+ * @tc.name: RenderPropertyTest005
+ * @tc.desc: Test cast to RenderPropertyTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPropertyTestNg, RenderPropertyTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object foregroundProperty.
+     */
+    NG::ForegroundProperty foregroundProperty;
+    NG::InspectorFilter testFilter;
+    auto jsonValue = JsonUtil::Create(true);
+    MotionBlurOption motionBlurOption;
+    motionBlurOption.radius = 1.0;
+    motionBlurOption.anchor.x = 1.0;
+    motionBlurOption.anchor.y = 1.0;
+    foregroundProperty.propMotionBlur = motionBlurOption;
+    foregroundProperty.propForegroundEffect = 1.0f;
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     */
+    foregroundProperty.ToJsonValue(jsonValue, testFilter);
+    EXPECT_EQ(jsonValue->GetString("motionBlur"), "");
+    testFilter.AddFilterAttr("focusable");
+    foregroundProperty.ToJsonValue(jsonValue, testFilter);
+    EXPECT_EQ(jsonValue->GetString("motionBlur"), "");
+}
+
+/**
+ * @tc.name: RenderPropertyTest006
+ * @tc.desc: Test cast to RenderPropertyTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPropertyTestNg, RenderPropertyTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object clipProperty.
+     */
+    NG::ClipProperty clipProperty;
+    NG::InspectorFilter testFilter;
+    auto jsonValue = JsonUtil::Create(true);
+    RefPtr<BasicShape> basicShape = AceType::MakeRefPtr<BasicShape>();
+    basicShape->SetBasicShapeType(static_cast<BasicShapeType>(7)); // 7 is not a valid BasicShapeType.
+    clipProperty.propClipShape = basicShape;
+    clipProperty.propClipMask = basicShape;
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     */
+    clipProperty.ToJsonValue(jsonValue, testFilter);
+    EXPECT_EQ(jsonValue->GetString("clip"), "{}");
+    testFilter.AddFilterAttr("focusable");
+    clipProperty.ToJsonValue(jsonValue, testFilter);
+    EXPECT_EQ(jsonValue->GetString("clip"), "{}");
+}
+
+/**
+ * @tc.name: RenderPropertyTest007
+ * @tc.desc: Test cast to RenderPropertyTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPropertyTestNg, RenderPropertyTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object gradientProperty.
+     */
+    NG::GradientProperty gradientProperty;
+    NG::InspectorFilter testFilter;
+    auto jsonValue = JsonUtil::Create(true);
+    NG::Gradient gradient;
+    gradientProperty.propLinearGradient = gradient;
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     */
+    gradientProperty.ToJsonValue(jsonValue, testFilter);
+    EXPECT_TRUE(gradientProperty.propLinearGradient.has_value());
+    testFilter.AddFilterAttr("focusable");
+    gradientProperty.ToJsonValue(jsonValue, testFilter);
+    EXPECT_TRUE(gradientProperty.propLinearGradient.has_value());
+}
+
+/**
+ * @tc.name: RenderPropertyTest008
+ * @tc.desc: Test cast to RenderPropertyTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPropertyTestNg, RenderPropertyTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object transformProperty.
+     */
+    NG::TransformProperty transformProperty;
+    NG::BorderProperty borderProperty;
+    NG::OuterBorderProperty outerBorderProperty;
+    NG::InspectorFilter testFilter;
+    auto jsonValue = JsonUtil::Create(true);
+    transformProperty.propTransformRotate = VECTOR_5F_TEST;
+    auto offset = DimensionOffset(Offset(1.0, 1.0));
+    offset.SetZ(1.0_px);
+    transformProperty.propTransformCenter = offset;
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     */
+    transformProperty.ToJsonValue(jsonValue, testFilter);
+    EXPECT_EQ(jsonValue->GetValue("rotate")->GetString("x"), "20.000000");
+    EXPECT_EQ(jsonValue->GetValue("rotate")->GetString("y"), "40.000000");
+    EXPECT_EQ(jsonValue->GetValue("rotate")->GetString("z"), "60.000000");
+    EXPECT_EQ(jsonValue->GetValue("rotate")->GetString("angle"), "80.000000");
+    testFilter.AddFilterAttr("focusable");
+    transformProperty.ToJsonValue(jsonValue, testFilter);
+    borderProperty.ToJsonValue(jsonValue, testFilter);
+    outerBorderProperty.ToJsonValue(jsonValue, testFilter);
+    EXPECT_EQ(jsonValue->GetValue("rotate")->GetString("x"), "20.000000");
+    EXPECT_EQ(jsonValue->GetValue("rotate")->GetString("y"), "40.000000");
+    EXPECT_EQ(jsonValue->GetValue("rotate")->GetString("z"), "60.000000");
+    EXPECT_EQ(jsonValue->GetValue("rotate")->GetString("angle"), "80.000000");
+}
+
+/**
+ * @tc.name: RenderPropertyTest009
+ * @tc.desc: Test cast to RenderPropertyTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPropertyTestNg, RenderPropertyTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object pointLightProperty.
+     */
+    NG::PointLightProperty pointLightProperty;
+    NG::InspectorFilter testFilter;
+    auto jsonValue = JsonUtil::Create(true);
+    NG::TranslateOptions options { 0.0f, 0.0f, 0.0f };
+    pointLightProperty.propLightPosition = options;
+    pointLightProperty.propLightIntensity = 1.0;
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     */
+    pointLightProperty.ToJsonValue(jsonValue, testFilter);
+    EXPECT_EQ(jsonValue->GetValue("pointLight")->GetString("lightIntensity"), "");
+    testFilter.AddFilterAttr("focusable");
+    pointLightProperty.ToJsonValue(jsonValue, testFilter);
+    EXPECT_EQ(jsonValue->GetValue("pointLight")->GetString("lightIntensity"), "");
 }
 } // namespace OHOS::Ace

@@ -34,9 +34,9 @@ void TabContentNode::OnAttachToMainTree(bool recursive)
     FrameNode::OnOffscreenProcess(recursive);
 }
 
-void TabContentNode::OnDetachFromMainTree(bool recursive)
+void TabContentNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 {
-    FrameNode::OnDetachFromMainTree(recursive);
+    FrameNode::OnDetachFromMainTree(recursive, context);
     auto tabs = TabContentModelNG::FindTabsNode(Referenced::Claim(this));
     CHECK_NULL_VOID(tabs);
 
@@ -53,6 +53,10 @@ void TabContentNode::OnDetachFromMainTree(bool recursive)
 
     auto deletedIdx = swiper->GetChildFlatIndex(GetId()).second;
     auto currentIdx = swiperPattern->GetCurrentShownIndex();
+    // Removing currently shown tab, focus on first after that
+    if (currentIdx == deletedIdx) {
+        swiperPattern->GetSwiperController()->SwipeToWithoutAnimation(0);
+    }
     TabContentModelNG::RemoveTabBarItem(Referenced::Claim(this));
 
     // Removing tab before current, re-focus on the same tab with new index

@@ -19,7 +19,7 @@ namespace OHOS::Ace::NG {
 
 void GridLayoutBaseAlgorithm::AdjustChildrenHeight(LayoutWrapper* layoutWrapper)
 {
-    clearStretch_ = false;
+    gridLayoutInfo_.clearStretch_ = false;
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
     const int32_t cacheCount = gridLayoutProperty->GetCachedCountValue(1);

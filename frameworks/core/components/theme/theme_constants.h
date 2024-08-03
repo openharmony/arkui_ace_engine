@@ -351,6 +351,7 @@ public:
 
     RefPtr<ThemeStyle> GetPatternByName(const std::string& patternName)
     {
+        currentThemeStyle_->CheckThemeStyleLoaded(patternName);
         auto patternStyle = currentThemeStyle_->GetAttr<RefPtr<ThemeStyle>>(patternName, nullptr);
         if (!patternStyle && resAdapter_) {
             patternStyle = resAdapter_->GetPatternByName(patternName);

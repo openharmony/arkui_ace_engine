@@ -26,6 +26,10 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
 
+namespace OHOS::Accessibility {
+class ExtraElementInfo;
+}
+
 namespace OHOS::Ace::NG {
 using ActionNoParam = std::function<void()>;
 using ActionSetTextImpl = std::function<void(const std::string&)>;
@@ -45,6 +49,7 @@ using ActionGetCursorIndexImpl = std::function<int32_t(void)>;
 using ActionClickImpl = ActionNoParam;
 using ActionLongClickImpl = ActionNoParam;
 using ActionsImpl = std::function<void((uint32_t actionType))>;
+using GetRelatedElementInfoImpl = std::function<void(Accessibility::ExtraElementInfo& extraElementInfo)>;
 using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
 
 class FrameNode;
@@ -530,6 +535,11 @@ public:
         return accessibilityVirtualNode_;
     }
 
+    NG::UINode* GetAccessibilityVirtualNodePtr()
+    {
+        return Referenced::RawPtr(accessibilityVirtualNode_);
+    }
+
     bool HasAccessibilityVirtualNode() const
     {
         return accessibilityVirtualNode_ != nullptr;
@@ -605,6 +615,21 @@ public:
     */
     static bool IsAccessibilityFocusableDebug(const RefPtr<FrameNode>& node, std::unique_ptr<JsonValue>& info);
 
+    virtual void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) {}
+
+    void SetRelatedElementInfoCallback(const GetRelatedElementInfoImpl& getRelatedElementInfoImpl)
+    {
+        getRelatedElementInfoImpl_ = getRelatedElementInfoImpl;
+    }
+    
+    void GetAllExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo)
+    {
+        if (getRelatedElementInfoImpl_) {
+            getRelatedElementInfoImpl_(extraElementInfo);
+        }
+        GetExtraElementInfo(extraElementInfo);
+    }
+
     void SetAccessibilityActions(uint32_t actions);
     void ResetAccessibilityActions();
     bool HasAccessibilityActions();
@@ -652,13 +677,21 @@ private:
         const PointF& parentPoint,
         const RefPtr<FrameNode>& node,
         AccessibilityHoverTestPath& path,
-        std::unique_ptr<HoverTestDebugTraceInfo>& debugInfo
+        std::unique_ptr<HoverTestDebugTraceInfo>& debugInfo,
+        bool& ancestorGroupFlag
     );
 
-    static bool ProcessHoverTestRecursive(const PointF& noOffsetPoint, const RefPtr<FrameNode>& node,
-        AccessibilityHoverTestPath& path, std::unique_ptr<HoverTestDebugTraceInfo>& debugInfo, bool hitTarget);
+    struct RecursiveParam {
+        bool hitTarget;
+        bool ancestorGroupFlag;
+    };
 
-    static std::unique_ptr<JsonValue> CreateNodeSearchInfo(const RefPtr<FrameNode>& node, const PointF& parentPoint);
+    static bool ProcessHoverTestRecursive(const PointF& noOffsetPoint, const RefPtr<FrameNode>& node,
+        AccessibilityHoverTestPath& path, std::unique_ptr<HoverTestDebugTraceInfo>& debugInfo,
+        RecursiveParam recursiveParam);
+
+    static std::unique_ptr<JsonValue> CreateNodeSearchInfo(const RefPtr<FrameNode>& node, const PointF& parentPoint,
+        bool& ancestorGroupFlag);
 
     /*
     * Get whether node and its children should be searched.
@@ -666,7 +699,7 @@ private:
     *         second: children of node should be searched.
     * param: {node} should be not-null
     */
-    static std::pair<bool, bool> GetSearchStrategy(const RefPtr<FrameNode>& node);
+    static std::tuple<bool, bool, bool> GetSearchStrategy(const RefPtr<FrameNode>& node, bool& ancestorGroupFlag);
 
     void GetGroupTextRecursive(bool forceGetChildren, std::string& text) const;
 
@@ -696,6 +729,7 @@ protected:
     ActionClickImpl actionClickImpl_;
     ActionLongClickImpl actionLongClickImpl_;
     ActionsImpl actionsImpl_;
+    GetRelatedElementInfoImpl getRelatedElementInfoImpl_;
     OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
     bool accessibilityGroup_ = false;
     int32_t childTreeId_ = -1;

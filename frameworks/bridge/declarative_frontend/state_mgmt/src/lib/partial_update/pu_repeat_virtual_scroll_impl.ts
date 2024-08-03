@@ -26,7 +26,7 @@ class __RepeatVirtualScrollImpl<T> {
 
     private totalCount_: number;
     private totalCountSpecified : boolean = false;
-    private templateOptions_: { [type: string]: RepeatTemplateOptions };
+    private templateOptions_: { [type: string]: RepeatTemplateImplOptions };
 
     private mkRepeatItem_: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
     private onMoveHandler_?: OnMoveHandler;
@@ -51,7 +51,7 @@ class __RepeatVirtualScrollImpl<T> {
         // if totalCountSpecified==false, then need to create dependency on array length 
         // so when array length changes, will update totalCount
         this.totalCountSpecified = config.totalCountSpecified;
-        this.totalCount_ = (!this.totalCountSpecified || config.totalCount<0) 
+        this.totalCount_ = (!this.totalCountSpecified || config.totalCount < 0) 
             ? this.arr_.length
             : config.totalCount;
 
@@ -68,7 +68,10 @@ class __RepeatVirtualScrollImpl<T> {
     }
 
     /**/
-    private initialRender(owningView: ViewV2, repeatElmtId: number): void {
+    private initialRender(
+        owningView: ViewV2, 
+        repeatElmtId: number
+    ): void {
 
         this.repeatElmtId_ = repeatElmtId;
 
@@ -92,7 +95,7 @@ class __RepeatVirtualScrollImpl<T> {
             // execute the itemGen function
             this.initialRenderItem(repeatItem);
             stateMgmtConsole.debug(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onCreateNode for index ${forIndex} key "${forKey}" - end `);
-        };  // onCreateNode
+        }; // onCreateNode
 
         const onUpdateNode = (fromKey: string, forIndex: number): void => {
             if (!fromKey || fromKey === '' || forIndex < 0 || forIndex >= this.totalCount_ || forIndex >= this.arr_.length) {
@@ -124,7 +127,7 @@ class __RepeatVirtualScrollImpl<T> {
                 stateMgmtConsole.debug(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex} forKey="${forKey}". Initiating UINodes update synchronously ...`);
                 ObserveV2.getObserve().updateDirty2(true);
             }
-        };  // onUpdateNode
+        }; // onUpdateNode
 
         const onGetKeys4Range = (from: number, to: number): Array<string> => {
 
@@ -152,7 +155,7 @@ class __RepeatVirtualScrollImpl<T> {
 
             let needsRerender = false;
             result.forEach((key, index) => {
-                const forIndex= index+from;
+                const forIndex = index + from;
                 // if repeatItem exists, and needs update then do the update, and call sync update as well
             // thereby ensure cached items are up-to-date on C++ side. C++ does not need to request update 
             // from TS side 
@@ -165,7 +168,7 @@ class __RepeatVirtualScrollImpl<T> {
                     needsRerender = true;
                 }
             }); // forEach
-            
+
             if (needsRerender) {
                 stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}) onGetKeys4Range:  Initiating UINodes update synchronously ...`);
                 ObserveV2.getObserve().updateDirty2(true);
@@ -197,7 +200,9 @@ class __RepeatVirtualScrollImpl<T> {
                 let ttype = this.typeGenFunc_(this.arr_[i], i) ?? '';
                 if (!this.itemGenFuncs_[ttype]) {
                     stateMgmtConsole.applicationError(`Repeat with virtual scroll elmtId: ${this.repeatElmtId_}. Factory function .templateId  returns template id '${ttype}'.` + 
-                        (ttype=='') ? `Missing Repeat.each ` : `missing Repeat.template for id '${ttype}'` + `! Unrecoverable application error!"`);
+                        (ttype === '') ? 'Missing Repeat.each ' : `missing Repeat.template for id '${ttype}'` + '! Unrecoverable application error!');
+                    // fallback to use .each function and try to continue the app with it.
+                    ttype = '';
                 } 
                 result.push(ttype);
             } // for
@@ -220,7 +225,7 @@ class __RepeatVirtualScrollImpl<T> {
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): initialRenderVirtualScroll`);
     }
 
-    private reRender() {
+    private reRender(): void {
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): reRender ...`);
         this.purgeKeyCache();
         RepeatVirtualScrollNative.invalidateKeyCache(this.totalCount_);
@@ -231,12 +236,12 @@ class __RepeatVirtualScrollImpl<T> {
         // execute the itemGen function
         const itemType = this.typeGenFunc_(repeatItem.item, repeatItem.index) ?? '';
         const itemFunc = this.itemGenFuncs_[itemType] ?? this.itemGenFuncs_[''];
-        if (typeof itemFunc === "function") {
+        if (typeof itemFunc === 'function') {
             itemFunc(repeatItem);
         } else {
-            stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${this.repeatElmtId_}: ` 
-                + (itemType=='') ? "Missing Repeat.each " : `missing Repeat.template for id '${itemType}'` 
-                + "! Unrecoverable application error!" );
+            stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${this.repeatElmtId_}: ` +
+                (itemType === '') ? 'Missing Repeat.each ' : `missing Repeat.template for id '${itemType}'` +
+                '! Unrecoverable application error!');
         }
     }
 

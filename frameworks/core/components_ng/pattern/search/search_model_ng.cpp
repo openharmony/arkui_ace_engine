@@ -736,7 +736,6 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     pattern->InitSurfaceChangedCallback();
     pattern->InitSurfacePositionChangedCallback();
-    pattern->SetTextFadeoutCapacity(true);
     if (pipeline->GetHasPreviewTextOption()) {
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     }
@@ -767,10 +766,10 @@ void SearchModelNG::TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode)
     textFieldPaintProperty->UpdateCursorWidth(textFieldTheme->GetCursorWidth());
     PaddingProperty padding({ CalcLength(0.0), CalcLength(0.0), CalcLength(0.0), CalcLength(0.0) });
     textFieldLayoutProperty->UpdatePadding(padding);
+    BorderRadiusProperty borderRadius;
+    textFieldPaintProperty->UpdateBorderRadiusFlagByUser(borderRadius);
     pattern->SetEnableTouchAndHoverEffect(true);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-
-    UpdateTextFieldFontValue(frameNode);
 }
 
 void SearchModelNG::RequestKeyboardOnFocus(bool needToRequest)
@@ -1786,20 +1785,5 @@ const Dimension SearchModelNG::ConvertTextFontScaleValue(const Dimension& fontSi
         }
     }
     return fontSizeValue;
-}
-
-void SearchModelNG::UpdateTextFieldFontValue(const RefPtr<FrameNode>& frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(textFieldTheme);
-
-    Dimension fontSize = textFieldTheme->GetFontSize();
-
-    textFieldLayoutProperty->UpdateFontSize(ConvertTextFontScaleValue(fontSize));
 }
 } // namespace OHOS::Ace::NG

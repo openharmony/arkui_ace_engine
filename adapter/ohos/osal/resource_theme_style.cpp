@@ -39,7 +39,7 @@ constexpr char RES_HAP_PATH[] = "/data/storage/el1/bundle/ohos.global.systemres/
 #endif
 
 const std::string DIMENSION_PATTERN = R"(^([+-]?\d+(\.\d+)?)(px|fp|lpx|vp|%)?)";
-
+constexpr int32_t WAIT_FOR_TIME = 50;
 static const std::set<std::string> stringAttrs = {
     "attribute_text_font_family_regular",
     "attribute_text_font_family_medium",
@@ -80,8 +80,6 @@ static const std::set<std::string> stringAttrs = {
     "dialog_expand_display",
     "show_password_directly",
     "textfield_show_handle",
-    "list_fadeout_enable",
-    "text_fadeout_enable",
     "dialog_radius_level10",
     "dialog_icon_primary",
     "dialog_font_primary",
@@ -92,7 +90,8 @@ static const std::set<std::string> stringAttrs = {
     "textfield_accessibility_show_password",
     "textfield_accessibility_hide_password",
     "rich_editor_show_handle",
-    "text_show_handle"
+    "text_show_handle",
+    "textfield_symbol_color"
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)
@@ -129,14 +128,16 @@ void ResourceThemeStyle::ParseContent()
         if (attrName.empty() || attrValue.empty()) {
             continue;
         }
+        if (stringAttrs.find(attrName) != stringAttrs.end()) {
+            // string
+            attributes_[attrName] = { .type = ThemeConstantsType::STRING, .value = attrValue };
+            continue;
+        }
         if (attrValue.front() == '#' || attrValue.find(COLOR_VALUE_PREFIX) != std::string::npos) {
             // color
             attributes_[attrName] = { .type = ThemeConstantsType::COLOR, .value = Color::FromString(attrValue) };
         } else if (attrValue.find(MEDIA_VALUE_PREFIX) != std::string::npos) {
             OnParseResourceMedia(attrName, attrValue);
-        } else if (stringAttrs.find(attrName) != stringAttrs.end()) {
-            // string
-            attributes_[attrName] = { .type = ThemeConstantsType::STRING, .value = attrValue };
         } else if (attrValue.find(REF_ATTR_VALUE_KEY_WORD) != std::string::npos) {
             attributes_[attrName] = { .type = ThemeConstantsType::REFERENCE_ATTR, .value = attrValue };
         } else {
@@ -199,5 +200,16 @@ void ResourceThemeStyle::OnParseResourceMedia(const std::string& attrName, const
         mediaPath = std::string(RES_TAG) + attrValue.substr(pos + 1);
     }
     attributes_[attrName] = { .type = ThemeConstantsType::STRING, .value = mediaPath };
+}
+
+void ResourceThemeStyle::CheckThemeStyleLoaded(const std::string& patternName)
+{
+    auto it = std::find(checkThemeStyleVector.begin(), checkThemeStyleVector.end(), patternName.c_str());
+    if (it == checkThemeStyleVector.end()) {
+        return;
+    }
+    if (future_.valid()) {
+        future_.wait_until(std::chrono::system_clock::now() + std::chrono::milliseconds(WAIT_FOR_TIME));
+    }
 }
 } // namespace OHOS::Ace

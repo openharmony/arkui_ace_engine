@@ -73,6 +73,7 @@ struct CacheVisibleRectResult {
     RectF innerVisibleRect = RectF();
     VectorF cumulativeScale = {1.0f, 1.0f};
     RectF frameRect = RectF();
+    RectF innerBoundaryRect = RectF();
 };
 
 // FrameNode will display rendering region in the screen.
@@ -332,6 +333,11 @@ public:
         return eventHub_->GetFocusHub();
     }
 
+    RefPtr<AccessibilityProperty> GetVirtualAccessibilityProperty() override
+    {
+        return accessibilityProperty_;
+    }
+
     FocusType GetFocusType() const
     {
         FocusType type = FocusType::DISABLE;
@@ -432,6 +438,12 @@ public:
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
 
+    OffsetF GetPaintRectOffsetNG(bool excludeSelf = false) const;
+
+    bool GetRectPointToParentWithTransform(std::vector<Point>& pointList, const RefPtr<FrameNode>& parent) const;
+
+    RectF GetPaintRectToWindowWithTransform();
+
     OffsetF GetPaintRectCenter(bool checkWindowBoundary = true) const;
 
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
@@ -465,9 +477,12 @@ public:
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
 
+    void OnAccessibilityEvent(
+        AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType);
+
     void MarkNeedRenderOnly();
 
-    void OnDetachFromMainTree(bool recursive) override;
+    void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
 
@@ -493,7 +508,7 @@ public:
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
     void RemoveLastHotZoneRect() const;
 
-    virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType);
+    virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent);
 
     bool IsLayoutDirtyMarked() const
     {
@@ -813,6 +828,7 @@ public:
         return localMat_;
     }
     OffsetF GetOffsetInScreen();
+    OffsetF GetOffsetInSubwindow(const OffsetF& subwindowOffset);
     RefPtr<PixelMap> GetPixelMap();
     RefPtr<FrameNode> GetPageNode();
     RefPtr<FrameNode> GetFirstAutoFillContainerNode();
@@ -925,6 +941,13 @@ public:
         return false;
     }
 
+    void HasAccessibilityVirtualNode(bool hasAccessibilityVirtualNode)
+    {
+        hasAccessibilityVirtualNode_ = hasAccessibilityVirtualNode;
+    }
+
+    void ProcessAccessibilityVirtualNode();
+
     RectF GetVirtualNodeTransformRectRelativeToWindow()
     {
         auto parentUinode = GetVirtualNodeParent().Upgrade();
@@ -938,6 +961,16 @@ public:
         return currentRect;
     }
 
+    void SetIsUseTransitionAnimator(bool isUseTransitionAnimator)
+    {
+        isUseTransitionAnimator_ = isUseTransitionAnimator;
+    }
+
+    bool GetIsUseTransitionAnimator()
+    {
+        return isUseTransitionAnimator_;
+    }
+    
     // this method will check the cache state and return the cached revert matrix preferentially,
     // but the caller can pass in true to forcible refresh the cache
     Matrix4& GetOrRefreshRevertMatrixFromCache(bool forceRefresh = false);
@@ -980,10 +1013,21 @@ public:
     void ProcessFrameNodeChangeFlag();
     void OnNodeTransformInfoUpdate(bool changed);
     void OnNodeTransitionInfoUpdate();
+    uint32_t GetWindowPatternType() const;
 
     void ResetLayoutAlgorithm()
     {
         layoutAlgorithm_.Reset();
+    }
+
+    bool GetDragHitTestBlock() const
+    {
+        return dragHitTestBlock_;
+    }
+
+    void SetDragHitTestBlock(bool dragHitTestBlock)
+    {
+        dragHitTestBlock_ = dragHitTestBlock;
     }
 
 protected:
@@ -1035,7 +1079,7 @@ private:
     void DumpAlignRulesInfo();
     void DumpExtensionHandlerInfo();
     void DumpAdvanceInfo() override;
-    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
+    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void DumpOnSizeChangeInfo();
     bool CheckAutoSave() override;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
@@ -1087,6 +1131,8 @@ private:
     void TriggerShouldParallelInnerWith(
         const TouchTestResult& currentRecognizers, const TouchTestResult& responseLinkRecognizers);
 
+    void TriggerRsProfilerNodeMountCallbackIfExist();
+
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
 
     RectF ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const;
@@ -1104,6 +1150,7 @@ private:
     std::function<void()> colorModeUpdateCallback_;
 
     RefPtr<AccessibilityProperty> accessibilityProperty_;
+    bool hasAccessibilityVirtualNode_ = false;
     RefPtr<LayoutProperty> layoutProperty_;
     RefPtr<PaintProperty> paintProperty_;
     RefPtr<RenderContext> renderContext_ = RenderContext::Create();
@@ -1182,6 +1229,9 @@ private:
     bool isGeometryTransitionIn_ = false;
     bool isLayoutNode_ = false;
     bool isCalculateInnerVisibleRectClip_ = false;
+    bool dragHitTestBlock_ = false;
+
+    bool isUseTransitionAnimator_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

@@ -490,13 +490,24 @@ bool RichEditorEventHub::FireAboutToIMEInput(const RichEditorInsertValue& info)
 
 void RichEditorEventHub::SetOnIMEInputComplete(std::function<void(const RichEditorAbstractSpanResult&)>&& func)
 {
-    onIMEIputComplete_ = std::move(func);
+    onIMEInputComplete_ = std::move(func);
 }
 
 void RichEditorEventHub::FireOnIMEInputComplete(const RichEditorAbstractSpanResult& info)
 {
-    if (onIMEIputComplete_)
-        onIMEIputComplete_(info);
+    if (onIMEInputComplete_)
+        onIMEInputComplete_(info);
+}
+
+void RichEditorEventHub::SetOnDidIMEInput(std::function<void(const TextRange&)>&& func)
+{
+    onDidIMEInput_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnDidIMEInput(const TextRange& range)
+{
+    if (onDidIMEInput_)
+        onDidIMEInput_(range);
 }
 
 void RichEditorEventHub::SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func)

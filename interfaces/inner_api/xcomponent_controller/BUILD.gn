@@ -58,7 +58,6 @@ ohos_shared_library("ace_xcomponent_controller") {
     "napi:ace_napi",
   ]
   public_external_deps = [ "hilog:libhilog" ]
-
   subsystem_name = ace_engine_subsystem
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = ace_engine_part

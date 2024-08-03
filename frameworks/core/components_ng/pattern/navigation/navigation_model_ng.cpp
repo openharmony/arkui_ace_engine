@@ -663,7 +663,7 @@ void NavigationModelNG::Create()
     // navigation node
     int32_t nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVIGATION_VIEW_ETS_TAG, nodeId);
-    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+    auto navigationGroupNode = NavigationRegister::GetInstance()->GetOrCreateGroupNode(
         V2::NAVIGATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     if (!CreateNavBarNodeIfNeeded(navigationGroupNode) ||  // navBar node
         !CreateContentNodeIfNeeded(navigationGroupNode) || // content node
@@ -1275,6 +1275,7 @@ void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolB
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    std::string navigationId = navigationGroupNode->GetInspectorId().value_or("");
     if (navBarNode->GetPrevToolBarIsCustom().value_or(false)) {
         navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
     } else {
@@ -1321,6 +1322,12 @@ void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolB
             auto toolBarItemNode =
                 CreateToolbarItemInContainer(toolBarItem, toolBarItems.size(), count, needMoreButton);
             CHECK_NULL_VOID(toolBarItemNode);
+
+            // set navigation toolBar menuItem InspectorId
+            std::string toolBarItemId = toolBarItemNode->GetTag() + std::to_string(count);
+            NavigationTitleUtil::SetInnerChildId(toolBarItemNode, NG::NAV_FIELD,
+                containerNode->GetTag(), toolBarItemId, navigationId);
+
             containerNode->AddChild(toolBarItemNode);
         }
     }
@@ -1344,6 +1351,11 @@ void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolB
         auto toolBarItemNode = CreateToolbarMoreMenuNode(barItemNode);
         CHECK_NULL_VOID(toolBarItemNode);
         BuildToolbarMoreMenuNodeAction(barItemNode, barMenuNode, toolBarItemNode);
+
+        // set navigation toolBar "more" button InspectorId
+        NavigationTitleUtil::SetInnerChildId(toolBarItemNode, NG::NAV_FIELD,
+            containerNode->GetTag(), "More", navigationId);
+
         containerNode->AddChild(toolBarItemNode);
         navBarNode->SetToolbarMenuNode(barMenuNode);
     }
@@ -1968,7 +1980,7 @@ void NavigationModelNG::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
 
 RefPtr<FrameNode> NavigationModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+    auto navigationGroupNode = NavigationRegister::GetInstance()->GetOrCreateGroupNode(
         V2::NAVIGATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     // navBar node
     if (!navigationGroupNode->GetNavBarNode()) {

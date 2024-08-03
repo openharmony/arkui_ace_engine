@@ -26,10 +26,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
-#include "core/common/ace_engine.h"
-#include "core/common/ace_view.h"
 #include "core/common/ai/image_analyzer_manager.h"
-#include "core/common/container.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -54,6 +51,7 @@
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/pattern/video/video_node.h"
+#include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -172,6 +170,95 @@ SizeF MeasureVideoContentLayout(const SizeF& layoutSize, const RefPtr<VideoLayou
 
     // Just return contentSize as the video frame area.
     return contentSize;
+}
+
+float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor)
+{
+    float fractials = fmod(value, 1.0f);
+    if (fractials < 0.0f) {
+        ++fractials;
+    }
+    if (forceCeil) {
+        return (value - fractials + 1.0f);
+    } else if (forceFloor) {
+        return (value - fractials);
+    } else if (isRound) {
+        if (NearEqual(fractials, 1.0f) || GreatOrEqual(fractials, 0.50f)) {
+            return (value - fractials + 1.0f);
+        } else {
+            return (value - fractials);
+        }
+    }
+    return value;
+}
+
+RectF AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound)
+{
+    RectF rect;
+    float relativeLeft = positionX;
+    float relativeTop = positionY;
+    float nodeWidth = width;
+    float nodeHeight = height;
+    float absoluteRight = relativeLeft + nodeWidth;
+    float absoluteBottom = relativeTop + nodeHeight;
+    float roundToPixelErrorX = 0.0f;
+    float roundToPixelErrorY = 0.0f;
+
+    float nodeLeftI = RoundValueToPixelGrid(relativeLeft, isRound, false, false);
+    float nodeTopI = RoundValueToPixelGrid(relativeTop, isRound, false, false);
+    roundToPixelErrorX += nodeLeftI - relativeLeft;
+    roundToPixelErrorY += nodeTopI - relativeTop;
+    rect.SetLeft(nodeLeftI);
+    rect.SetTop(nodeTopI);
+
+    float nodeWidthI = RoundValueToPixelGrid(absoluteRight, isRound, false, false) - nodeLeftI;
+    float nodeWidthTemp = RoundValueToPixelGrid(nodeWidth, isRound, false, false);
+    roundToPixelErrorX += nodeWidthI - nodeWidth;
+    if (roundToPixelErrorX > 0.5f) {
+        nodeWidthI -= 1.0f;
+        roundToPixelErrorX -= 1.0f;
+    }
+    if (roundToPixelErrorX < -0.5f) {
+        nodeWidthI += 1.0f;
+        roundToPixelErrorX += 1.0f;
+    }
+    if (nodeWidthI < nodeWidthTemp) {
+        roundToPixelErrorX += nodeWidthTemp - nodeWidthI;
+        nodeWidthI = nodeWidthTemp;
+    }
+
+    float nodeHeightI = RoundValueToPixelGrid(absoluteBottom, isRound, false, false) - nodeTopI;
+    float nodeHeightTemp = RoundValueToPixelGrid(nodeHeight, isRound, false, false);
+    roundToPixelErrorY += nodeHeightI - nodeHeight;
+    if (roundToPixelErrorY > 0.5f) {
+        nodeHeightI -= 1.0f;
+        roundToPixelErrorY -= 1.0f;
+    }
+    if (roundToPixelErrorY < -0.5f) {
+        nodeHeightI += 1.0f;
+        roundToPixelErrorY += 1.0f;
+    }
+    if (nodeHeightI < nodeHeightTemp) {
+        roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
+        nodeHeightI = nodeHeightTemp;
+    }
+
+    rect.SetWidth(nodeWidthI);
+    rect.SetHeight(nodeHeightI);
+    return rect;
+}
+Gradient ConvertToGradient(Color color) {
+    Gradient gradient;
+    GradientColor gradientColorBegin;
+    gradientColorBegin.SetLinearColor(LinearColor(color));
+    gradientColorBegin.SetDimension(Dimension(0.0f));
+    gradient.AddColor(gradientColorBegin);
+    OHOS::Ace::NG::GradientColor gradientColorEnd;
+    gradientColorEnd.SetLinearColor(LinearColor(color));
+    gradientColorEnd.SetDimension(Dimension(1.0f));
+    gradient.AddColor(gradientColorEnd);
+
+    return gradient;
 }
 } // namespace
 
@@ -334,42 +421,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
             "ArkUIVideoSeekDone");
     };
     mediaPlayer_->RegisterMediaPlayerSeekDoneEvent(std::move(seekDoneEvent));
-
-#ifdef RENDER_EXTRACT_SUPPORTED
-    auto&& textureRefreshEvent = [videoPattern, uiTaskExecutor](int32_t instanceId, int64_t textureId) {
-        uiTaskExecutor.PostSyncTask([&videoPattern, instanceId, textureId] {
-            auto video = videoPattern.Upgrade();
-            CHECK_NULL_VOID(video);
-            void* nativeWindow = video->GetNativeWindow(instanceId, textureId);
-            if (!nativeWindow) {
-                LOGE("the native window is nullptr.");
-                return;
-            }
-            video->OnTextureRefresh(nativeWindow);
-        }, "ArkUIVideoTextureRefresh");
-    };
-    mediaPlayer_->RegisterTextureEvent(textureRefreshEvent);
-#endif
 }
-
-#ifdef RENDER_EXTRACT_SUPPORTED
-void* VideoPattern::GetNativeWindow(int32_t instanceId, int64_t textureId)
-{
-    auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, nullptr);
-    auto nativeView = container->GetAceView();
-    CHECK_NULL_RETURN(nativeView, nullptr);
-    return const_cast<void*>(nativeView->GetNativeWindowById(textureId));
-}
-
-void VideoPattern::OnTextureRefresh(void* surface)
-{
-    CHECK_NULL_VOID(surface);
-    auto renderContextForMediaPlayer = renderContextForMediaPlayerWeakPtr_.Upgrade();
-    CHECK_NULL_VOID(renderContextForMediaPlayer);
-    renderContextForMediaPlayer->MarkNewFrameAvailable(surface);
-}
-#endif
 
 void VideoPattern::PrintPlayerStatus(PlaybackStatus status)
 {
@@ -414,7 +466,7 @@ void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
     if (duration_ == 0) {
         int32_t duration = 0;
         if (mediaPlayer_ && mediaPlayer_->GetDuration(duration) == 0) {
-            duration_ = duration / MILLISECONDS_TO_SECONDS;
+            duration_ = static_cast<uint32_t>(duration / MILLISECONDS_TO_SECONDS);
             OnUpdateTime(duration_, DURATION_POS);
         }
     }
@@ -750,23 +802,9 @@ void VideoPattern::OnAttachToFrameNode()
     pipeline->AddWindowStateChangedCallback(host->GetId());
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-
-#ifdef RENDER_EXTRACT_SUPPORTED
-    CHECK_NULL_VOID(renderSurface_);
-    auto contextType = renderSurface_->IsTexture() ?
-        RenderContext::ContextType::HARDWARE_TEXTURE : RenderContext::ContextType::HARDWARE_SURFACE;
-    static RenderContext::ContextParam param = { contextType, "MediaPlayerSurface",
-                                                 RenderContext::PatternType::VIDEO };
-#else
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
                                                  RenderContext::PatternType::VIDEO };
-#endif
     renderContextForMediaPlayer_->InitContext(false, param);
-
-    if (SystemProperties::GetExtSurfaceEnabled()) {
-        RegisterRenderContextCallBack();
-    }
-
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
     renderContext->SetClipToBounds(true);
@@ -821,7 +859,6 @@ void VideoPattern::RegisterRenderContextCallBack()
     renderSurfaceWeakPtr_ = renderSurface_;
     renderContextForMediaPlayerWeakPtr_ = renderContextForMediaPlayer_;
     auto OnAttachCallBack = [weak = WeakClaim(this)](int64_t textureId, bool isAttach) mutable {
-        LOGI("OnAttachCallBack.");
         auto videoPattern = weak.Upgrade();
         CHECK_NULL_VOID(videoPattern);
         if (auto renderSurface = videoPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface) {
@@ -850,12 +887,8 @@ void VideoPattern::OnModifyDone()
 
     // src has changed
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
-#ifdef RENDER_EXTRACT_SUPPORTED
-    if ((layoutProperty && layoutProperty->HasVideoSource() && layoutProperty->GetVideoSource().value() != src_)) {
-#else
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
         (layoutProperty && layoutProperty->HasVideoSource() && layoutProperty->GetVideoSource().value() != src_)) {
-#endif
         ResetStatus();
     }
 
@@ -1052,9 +1085,16 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
     // Change the surface layout for drawing video frames
     if (renderContextForMediaPlayer_) {
-        renderContextForMediaPlayer_->SetBounds((videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
-            (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
-            videoFrameSize.Height());
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto rect = AdjustPaintRect((videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
+                videoFrameSize.Height(), true);
+            renderContextForMediaPlayer_->SetBounds(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+        } else {
+            renderContextForMediaPlayer_->SetBounds((videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
+                videoFrameSize.Height());
+        }
     }
 
     if (IsSupportImageAnalyzer()) {
@@ -1089,12 +1129,7 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 
 void VideoPattern::OnAreaChangedInner()
 {
-#ifndef RENDER_EXTRACT_SUPPORTED
-    auto isFullScreen = IsFullScreen();
-    if (SystemProperties::GetExtSurfaceEnabled() && isFullScreen) {
-#else
     if (SystemProperties::GetExtSurfaceEnabled()) {
-#endif
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto geometryNode = host->GetGeometryNode();
@@ -1237,7 +1272,9 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
     auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_RETURN(sliderPaintProperty, nullptr);
     sliderPaintProperty->UpdateMax(static_cast<float>(duration_));
-    sliderPaintProperty->UpdateSelectColor(Color::BLACK);
+    sliderPaintProperty->UpdateSelectColor(videoTheme->GetSelectColor());
+    sliderPaintProperty->UpdateTrackBackgroundColor(ConvertToGradient(videoTheme->GetTrackBgColor()));
+    sliderPaintProperty->UpdateTrackBackgroundIsResourceColor(true);
     sliderPaintProperty->UpdateValue(static_cast<float>(currentPos_));
     sliderNode->MarkModifyDone();
     return sliderNode;
@@ -1276,13 +1313,19 @@ RefPtr<FrameNode> VideoPattern::CreateText(uint32_t time)
 
 RefPtr<FrameNode> VideoPattern::CreateSVG()
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = GetHost()->GetContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
 
     auto svgNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(svgNode, nullptr);
+
+    auto imageRenderProperty = svgNode->GetPaintPropertyPtr<ImageRenderProperty>();
+    imageRenderProperty->UpdateSvgFillColor(videoTheme->GetIconColor());
+    auto renderContext = svgNode->GetRenderContext();
+    renderContext->UpdateForegroundColor(videoTheme->GetIconColor());
+
     auto svgLayoutProperty = svgNode->GetLayoutProperty<ImageLayoutProperty>();
 
     auto btnEdge = videoTheme->GetBtnEdge();
@@ -1681,9 +1724,6 @@ void VideoPattern::EnableDrag()
 
 VideoPattern::~VideoPattern()
 {
-    if (renderContextForMediaPlayer_) {
-        renderContextForMediaPlayer_->RemoveSurfaceChangedCallBack();
-    }
     if (IsSupportImageAnalyzer()) {
         DestroyAnalyzerOverlay();
     }
@@ -1804,7 +1844,8 @@ bool VideoPattern::IsSupportImageAnalyzer()
     return isEnableAnalyzer_ && !needControlBar && imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
 }
 
-bool VideoPattern::ShouldUpdateImageAnalyzer() {
+bool VideoPattern::ShouldUpdateImageAnalyzer()
+{
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     const auto& constraint = layoutProperty->GetCalcLayoutConstraint();
@@ -1842,7 +1883,7 @@ void VideoPattern::StartImageAnalyzer()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->CreateAnalyzerOverlay();
-    }, ANALYZER_DELAY_TIME, "ArkUIVideoCreateAnalyzerOverlay");
+        }, ANALYZER_DELAY_TIME, "ArkUIVideoCreateAnalyzerOverlay");
 }
 
 void VideoPattern::CreateAnalyzerOverlay()
@@ -1887,7 +1928,7 @@ void VideoPattern::StartUpdateImageAnalyzer()
         }
         pattern->UpdateAnalyzerOverlay();
         pattern->isContentSizeChanged_ = false;
-    }, ANALYZER_CAPTURE_DELAY_TIME, "ArkUIVideoUpdateAnalyzerOverlay");
+        }, ANALYZER_CAPTURE_DELAY_TIME, "ArkUIVideoUpdateAnalyzerOverlay");
     isContentSizeChanged_ = true;
 }
 

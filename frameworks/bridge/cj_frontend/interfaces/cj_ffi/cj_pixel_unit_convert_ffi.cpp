@@ -24,12 +24,20 @@ namespace OHOS::Ace::Framework {
 extern "C" {
 double FfiOHOSAceFrameworkVp2Px(double value)
 {
+    auto container = Container::Current();
+    if (!container) {
+        return NAN;
+    }
     double density = PipelineBase::GetCurrentDensity();
     return value * density;
 }
 
 double FfiOHOSAceFrameworkPx2Vp(double value)
 {
+    auto container = Container::Current();
+    if (!container) {
+        return NAN;
+    }
     double density = PipelineBase::GetCurrentDensity();
     if (NearZero(density)) {
         return 1.0f;

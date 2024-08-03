@@ -232,6 +232,7 @@ protected:
     RefPtr<FrameNode> GetMenuWrapper();
 
 private:
+    friend class ServiceCollaborationMenuAceHelper;
     // register menu item's callback
     void RegisterOnClick();
     void RegisterOnHover();
@@ -246,7 +247,7 @@ private:
     void AddExpandIcon(RefPtr<FrameNode>& row);
     void AddClickableArea();
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
-    void UpdateTexOverflow(RefPtr<TextLayoutProperty>& textProperty);
+    void UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty);
     void AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode);
     RefPtr<FrameNode> GetClickableArea();
     void UpdateDisabledStyle();

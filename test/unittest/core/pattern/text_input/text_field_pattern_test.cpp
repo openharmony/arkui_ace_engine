@@ -1673,10 +1673,10 @@ HWTEST_F(TextFieldPatternTest, TextPattern072, TestSize.Level0)
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->needToRefreshSelectOverlay_ = true;
-    pattern->ProcessOverlayAfterLayout(false);
+    pattern->ProcessOverlayAfterLayout(OffsetF());
     auto func = [] {};
     pattern->processOverlayDelayTask_ = func;
-    pattern->ProcessOverlayAfterLayout(false);
+    pattern->ProcessOverlayAfterLayout(OffsetF());
 }
 
 /**

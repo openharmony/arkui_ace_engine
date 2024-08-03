@@ -42,7 +42,9 @@ void TextSelectController::UpdateCaretIndex(int32_t index)
 {
     auto newIndex = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
     caretInfo_.index = newIndex;
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "newIndex change to %{public}d", newIndex);
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "newIndex change to %{public}d", newIndex);
+    }
     firstHandleInfo_.index = newIndex;
     secondHandleInfo_.index = newIndex;
 }

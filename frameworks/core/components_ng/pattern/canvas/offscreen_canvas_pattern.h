@@ -52,9 +52,8 @@ public:
     void BezierCurveTo(const BezierCurveParam& param);
     void QuadraticCurveTo(const QuadraticCurveParam& param);
 
-    void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state);
-    void StrokeText(
-        const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state);
+    void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth);
+    void StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
     
     void DrawImage(const Ace::CanvasImage& image, double width, double height);
@@ -117,6 +116,7 @@ public:
     bool IsSucceed();
     void Reset();
     RefPtr<PixelMap> TransferToImageBitmap();
+    void SetDensity(double density);
 
     size_t GetBitmapSize();
 private:

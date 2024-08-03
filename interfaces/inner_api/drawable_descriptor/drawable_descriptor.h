@@ -186,6 +186,9 @@ private:
     void TransformToPixelMap(const Rosen::Drawing::Bitmap& bitmap, const Rosen::Drawing::ImageInfo& imageInfo);
     void DrawOntoCanvas(const std::shared_ptr<Rosen::Drawing::Bitmap>& bitMap, float width, float height,
         Rosen::Drawing::Canvas& canvas);
+    void BlendForeground(Rosen::Drawing::Canvas& bitmapCanvas, Rosen::Drawing::Brush& brush,
+        Rosen::Drawing::Image& image, const std::shared_ptr<Rosen::Drawing::Bitmap>& background,
+        const std::shared_ptr<Rosen::Drawing::Bitmap>& foreground);
 #endif
 
     std::unique_ptr<uint8_t[]> defaultMaskData_;

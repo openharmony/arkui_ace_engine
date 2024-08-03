@@ -203,9 +203,8 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     }
     std::string resultInfo = std::string("fingerId: ").append(std::to_string(touchPoint.id));
     for (const auto& item : touchTestResultInfo) {
-        resultInfo.append("{ id: ")
-            .append(std::to_string(item.first))
-            .append(", tag: ")
+        resultInfo.append("{ ")
+            .append("tag: ")
             .append(item.second.tag)
             .append(", inspectorId: ")
             .append(item.second.inspectorId)
@@ -297,9 +296,8 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result, 
     for (const auto& item : hittedRecognizerInfo) {
         hittedRecognizerTypeInfo.append("recognizer type ").append(item.first).append(" node info:");
         for (const auto& nodeInfo : item.second) {
-            hittedRecognizerTypeInfo.append(" { id: ")
-                .append(std::to_string(nodeInfo.nodeId))
-                .append(", tag: ")
+            hittedRecognizerTypeInfo.append(" { ")
+                .append("tag: ")
                 .append(nodeInfo.tag)
                 .append(", inspectorId: ")
                 .append(nodeInfo.inspectorId)
@@ -312,7 +310,9 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result, 
         std::list<std::pair<int32_t, std::string>> dumpList;
         eventTree_.Dump(dumpList, 0, DUMP_START_NUMBER);
         for (auto& item : dumpList) {
-            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
+            if (!SystemProperties::GetAceCommercialLogEnabled()) {
+                TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
+            }
         }
     }
 }
@@ -734,6 +734,19 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     lastTouchEventEndTimestamp_ = GetSysTimestamp();
     lastDownFingerNumber_ = static_cast<int32_t>(downFingerIds_.size());
     return true;
+}
+
+void EventManager::ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent)
+{
+    refereeNG_->CleanGestureScope(touchEvent.id);
+    referee_->CleanGestureScope(touchEvent.id);
+    touchTestResults_.erase(touchEvent.id);
+    touchEvent.isMocked = true;
+    touchEvent.type = TouchType::CANCEL;
+    for (const auto& iter : downFingerIds_) {
+        touchEvent.id = iter;
+        DispatchTouchEvent(touchEvent);
+    }
 }
 
 void EventManager::CleanRecognizersForDragBegin(TouchEvent& touchEvent)

@@ -68,7 +68,7 @@ int32_t RegisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType
     }
 
     if (eventType & ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE) {
-        if (node->type == ARKUI_NODE_CUSTOM) {
+        if (node->type == ARKUI_NODE_CUSTOM || node->type == ARKUI_NODE_CUSTOM_SPAN) {
             NodeAddExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE, targetId, userData);
         } else {
             return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -95,8 +95,13 @@ int32_t RegisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType
         NodeAddExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_OVERLAY_DRAW, targetId, userData);
     }
     auto* impl = GetFullImpl();
-    impl->getExtendedAPI()->registerCustomNodeAsyncEvent(
-        node->uiNodeHandle, eventType, reinterpret_cast<void*>(node));
+    if (node->type == ARKUI_NODE_CUSTOM_SPAN) {
+        impl->getExtendedAPI()->registerCustomSpanAsyncEvent(
+            node->uiNodeHandle, eventType, reinterpret_cast<void*>(node));
+    } else {
+        impl->getExtendedAPI()->registerCustomNodeAsyncEvent(
+            node->uiNodeHandle, eventType, reinterpret_cast<void*>(node));
+    }
     return ERROR_CODE_NO_ERROR;
 }
 

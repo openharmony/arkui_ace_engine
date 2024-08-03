@@ -860,7 +860,7 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
 #else
     auto* paragraphTxt = static_cast<Rosen::Typography*>(paragraph.get());
 #endif
-    if (paragraphTxt->GetLineCount() == 1) {
+    if (paragraphTxt->GetLineCount() == 1 && !context.isReturnActualWidth) {
 #ifndef USE_GRAPHIC_TEXT_GINE
         textWidth = std::max(paragraph->GetLongestLine(), paragraph->GetMaxIntrinsicWidth());
 #else

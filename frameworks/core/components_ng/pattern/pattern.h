@@ -85,7 +85,7 @@ public:
         return true;
     }
 
-    virtual bool StopExpandMark()
+    virtual bool ConsumeChildrenAdjustment(const OffsetF& /* offset */)
     {
         return false;
     }
@@ -379,7 +379,7 @@ public:
 
     virtual void DumpInfo() {}
     virtual void DumpAdvanceInfo() {}
-    virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
+    virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
     virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
     virtual void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) {}
@@ -503,6 +503,7 @@ public:
     virtual void OnDpiConfigurationUpdate() {}
     virtual void OnIconConfigurationUpdate() {}
     virtual void OnFontConfigurationUpdate() {}
+    virtual void OnFontScaleConfigurationUpdate() {}
 
     virtual bool ShouldDelayChildPressedState() const
     {
@@ -607,6 +608,21 @@ public:
     virtual bool OnAccessibilityHoverEvent(const PointF& point)
     {
         return false;
+    }
+
+    virtual uint32_t GetWindowPatternType() const
+    {
+        return 0;
+    }
+    
+    virtual bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const
+    {
+        return false;
+    }
+
+    virtual RectF ExpandDefaultResponseRegion(RectF& rect)
+    {
+        return RectF();
     }
 
 protected:

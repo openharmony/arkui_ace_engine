@@ -161,7 +161,8 @@ HWTEST_F(RefreshTestNg, RefreshNestedSwiper001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Test OnScrollStartRecursive.
-     * @tc.expected: isSourceFromAnimation_ of refresh  is false, the nestedOption of swiper is PARENT_FIRST and SELF_FIRST.
+     * @tc.expected: isSourceFromAnimation_ of refresh  is false,
+     *               the nestedOption of swiper is PARENT_FIRST and SELF_FIRST.
      */
     swiperPattern_->OnScrollStartRecursive(0.f, 0.f);
     EXPECT_FALSE(pattern_->isSourceFromAnimation_);

@@ -144,8 +144,8 @@ void ClickRecognizer::OnAccepted()
     firstInputTime_.reset();
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Click accepted, tag: %{public}s, id: %{public}s",
-        node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Click accepted, tag: %{public}s",
+        node ? node->GetTag().c_str() : "null");
     if (onAccessibilityEventFunc_) {
         onAccessibilityEventFunc_(AccessibilityEventType::CLICK);
     }
@@ -183,6 +183,7 @@ void ClickRecognizer::OnAccepted()
 
 void ClickRecognizer::OnRejected()
 {
+    SendRejectMsg();
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
 }
@@ -447,6 +448,9 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
 
 void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& onAction)
 {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return;
+    }
     if (onAction && *onAction) {
         GestureEvent info = GetGestureEventInfo();
         // onAction may be overwritten in its invoke so we copy it first
@@ -475,6 +479,7 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     info->SetSourceDevice(deviceType_);
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
     info->SetForce(touchPoint.force);
+    gestureInfo_->SetInputEventType(inputEventType_);
     if (touchPoint.tiltX.has_value()) {
         info->SetTiltX(touchPoint.tiltX.value());
     }

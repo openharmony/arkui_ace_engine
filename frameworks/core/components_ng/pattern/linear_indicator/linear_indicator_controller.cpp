@@ -58,7 +58,6 @@ RefPtr<FrameNode> LinearIndicatorController::GetProgressNode(int32_t index)
 
 void LinearIndicatorController::InitProgressValue()
 {
-    LOGI("LinearIndicator: Initialize all progress bars.");
     int32_t size = GetProgressSize();
     int32_t index = animationData_.Index();
     for (int32_t i = 0; i < size; ++i) {
@@ -92,7 +91,6 @@ void LinearIndicatorController::SetProgressValue(float value)
         SetValueAndCallback(value, false);
         return;
     }
-    LOGE("LinearIndicator: Failed to set progress.");
     StopAnimation(LinearIndicatorControllerDataState::ANIMATION_PAUSE);
     animationData_.SetIndexAndValue(0, .0f);
     StartProgressAnimation();
@@ -100,7 +98,6 @@ void LinearIndicatorController::SetProgressValue(float value)
 
 void LinearIndicatorController::ProgreAnimationStart()
 {
-    LOGI("LinearIndicator: Callback for the start of the animation.");
     if (animationData_.Index() == 0) {
         InitProgressValue();
     }
@@ -108,7 +105,6 @@ void LinearIndicatorController::ProgreAnimationStart()
 
 void LinearIndicatorController::StartProgressInterval(int32_t intervalTime)
 {
-    LOGI("LinearIndicator: Start the interval task.");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
@@ -120,7 +116,6 @@ void LinearIndicatorController::StartProgressInterval(int32_t intervalTime)
     animationData_.ProgressInterval().Reset([weak] {
         auto control = weak.Upgrade();
         CHECK_NULL_VOID(control);
-        LOGI("LinearIndicator: Interval task execution completed.");
         control->StartProgressAnimation();
     });
     taskExecutor->PostDelayedTask(
@@ -138,7 +133,6 @@ void LinearIndicatorController::ProgreAnimationEnd()
     if (!animationData_.IsRuning()) {
         return;
     }
-    LOGI("LinearIndicator: Callback at the end of the animation.");
     int32_t index = animationData_.UpdateIndex();
     int32_t progressSize = GetProgressSize();
     if (progressSize == 0) {
@@ -161,7 +155,6 @@ void LinearIndicatorController::StartProgressAnimation()
     if (animationData_.IsProgressAnimation()) {
         return;
     }
-    LOGI("LinearIndicator: Start an animation session.");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto weak = AceType::WeakClaim(this);
@@ -243,15 +236,12 @@ void LinearIndicatorController::Start(int32_t animationTime, int32_t intervalTim
         intervalTime = 0;
     }
     if (animationData_.IsRuning()) {
-        LOGI("LinearIndicator: Update the time of the running animation.");
         PlayingUpdateTime(animationTime, intervalTime);
     } else if (animationData_.IsPause()) {
-        LOGI("LinearIndicator: Pause state starts the animation.");
         if (animationData_.State() == LinearIndicatorControllerDataState::INTERVAL_PAUSE) {
             animationData_.SetTime(animationTime, intervalTime);
             int32_t consumeTime = animationData_.IntervalConsumeTime();
             if (consumeTime >= intervalTime) {
-                LOGI("LinearIndicator: Interval task execution completes, starts progress bar animation.");
                 StartProgressAnimation();
             } else {
                 StartProgressInterval(intervalTime - consumeTime);
@@ -262,7 +252,6 @@ void LinearIndicatorController::Start(int32_t animationTime, int32_t intervalTim
             StartProgressAnimation();
         }
     } else {
-        LOGI("LinearIndicator: Start animation.");
         animationData_.SetTime(animationTime, intervalTime);
         StartProgressAnimation();
     }
@@ -273,7 +262,6 @@ void LinearIndicatorController::Pause()
     if (!animationData_.IsRuning()) {
         return;
     }
-    LOGI("LinearIndicator: Pause the animation.");
     if (animationData_.State() == LinearIndicatorControllerDataState::INTERVAL) {
         animationData_.SetState(LinearIndicatorControllerDataState::INTERVAL_PAUSE);
         animationData_.ProgressInterval().Cancel();
@@ -284,7 +272,6 @@ void LinearIndicatorController::Pause()
 
 void LinearIndicatorController::Stop()
 {
-    LOGI("LinearIndicator: Stop the animation.");
     if (animationData_.IsRuning()) {
         if (animationData_.State() == LinearIndicatorControllerDataState::INTERVAL) {
             animationData_.ProgressInterval().Cancel();
@@ -309,15 +296,12 @@ void LinearIndicatorController::SetProgress(int32_t index, float value)
     int32_t progressSize = GetProgressSize();
     if (progressSize == 0) {
         animationData_.InitData();
-        LOGE("LinearIndicator: The number of progress bars is 0.");
         return;
     }
     if (index < 0 || index >= progressSize) {
-        LOGE("LinearIndicator: The index value is incorrect.");
         return;
     }
     if (value < 0 || value > END_VALUE) {
-        LOGE("LinearIndicator: The progress value is incorrect.");
         return;
     }
     if (changeCallback_) {
@@ -326,7 +310,6 @@ void LinearIndicatorController::SetProgress(int32_t index, float value)
     bool isRuning = animationData_.IsRuning();
     bool isPause = animationData_.IsPause();
     if (isRuning) {
-        LOGI("LinearIndicator: Animation to cancel.");
         if (animationData_.State() == LinearIndicatorControllerDataState::INTERVAL) {
             animationData_.ProgressInterval().Cancel();
         } else {
@@ -336,7 +319,6 @@ void LinearIndicatorController::SetProgress(int32_t index, float value)
     animationData_.SetIndexAndValue(index, value);
     InitProgressValue();
     if (isRuning) {
-        LOGI("LinearIndicator: Restart the animation.");
         StartProgressAnimation();
     } else if (isPause) {
         animationData_.SetState(LinearIndicatorControllerDataState::ANIMATION_PAUSE);

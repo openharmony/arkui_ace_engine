@@ -161,19 +161,16 @@ int32_t FrontendDelegateDeclarative::GetMinPlatformVersion()
 UIContentErrorCode FrontendDelegateDeclarative::RunPage(
     const std::string& url, const std::string& params, const std::string& profile, bool isNamedRouter)
 {
-    LOGI("FrontendDelegateDeclarative RunPage url=%{public}s", url.c_str());
+    LOGI("RunPage:%{public}s", url.c_str());
     std::string jsonContent;
     if (GetAssetContent(MANIFEST_JSON, jsonContent)) {
         manifestParser_->Parse(jsonContent);
         manifestParser_->Printer();
     } else if (!profile.empty() && GetAssetContent(profile, jsonContent)) {
-        LOGI("Parse profile %{public}s", profile.c_str());
         manifestParser_->Parse(jsonContent);
     } else if (GetAssetContent(PAGES_JSON, jsonContent)) {
-        LOGI("Parse main_pages.json");
         manifestParser_->Parse(jsonContent);
     } else {
-        LOGE("RunPage parse manifest.json failed");
         EventReport::SendPageRouterException(PageRouterExcepType::RUN_PAGE_ERR, url);
         return UIContentErrorCode::PARSE_MANIFEST_FAILED;
     }
@@ -1891,7 +1888,6 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const WeakPtr<NG::UINode>& n
         CHECK_NULL_VOID(overlayManager);
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
         overlayManager->CloseCustomDialog(node, std::move(callback));
-        SubwindowManager::GetInstance()->CloseCustomDialogNG(node, std::move(callback));
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog");
     return;
@@ -1911,12 +1907,11 @@ void FrontendDelegateDeclarative::UpdateCustomDialog(
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
     }
-    auto task = [dialogAttr, dialogProperties, node, callback]
+    auto task = [dialogProperties, node, callback]
         (const RefPtr<NG::OverlayManager>& overlayManager) mutable {
         CHECK_NULL_VOID(overlayManager);
         LOGI("begin to update custom dialog.");
         overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
-        SubwindowManager::GetInstance()->UpdateCustomDialogNG(node, dialogAttr, std::move(callback));
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayUpdateCustomDialog");
     return;

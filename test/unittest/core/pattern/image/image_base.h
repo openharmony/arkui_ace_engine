@@ -57,6 +57,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/mouse_event.h"
 #include "core/image/image_source_info.h"
+#include "interfaces/native/node/resource.h"
 
 #undef private
 #undef protected
@@ -144,6 +145,9 @@ auto GetCompoment()
     EXPECT_NE(renderProperty, nullptr);
     return std::make_tuple(frameNode, layoutProperty, pattern, renderProperty);
 }
+
+std::vector<RefPtr<UINode>> PopUINodes();
+void PushUINodes(std::vector<RefPtr<UINode>> &vec);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_TEXTFIELD_TEXTINPUT_TEST_NG_H

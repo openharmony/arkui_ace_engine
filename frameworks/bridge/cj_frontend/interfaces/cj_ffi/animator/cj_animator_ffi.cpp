@@ -43,6 +43,9 @@ extern "C" {
         opt->fill = std::string(option.fill);
         opt->direction = std::string(option.direction);
         auto nativeAnimatorResult = FFIData::Create<AnimatorResultImpl>(std::move(animator), std::move(opt));
+        if (nativeAnimatorResult == nullptr) {
+            return INIT_ERROR;
+        }
         int64_t id = nativeAnimatorResult->GetID();
         return id;
     }

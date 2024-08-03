@@ -28,6 +28,7 @@
 #include "core/animation/animator.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/popup_param.h"
@@ -36,7 +37,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
-#include "core/components_ng/pattern/indexer/vibrator_impl.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
@@ -184,10 +184,10 @@ bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto indexerLayoutAlgorithm = DynamicCast<IndexerLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(indexerLayoutAlgorithm, false);
-    itemSizeRender_ = indexerLayoutAlgorithm->GetItemSizeRender();
-    auto height = indexerLayoutAlgorithm->GetActualHeight();
-    if (actualIndexerHeight_ != height && lastAutoCollapse_) {
-        actualIndexerHeight_ = height;
+    itemHeight_ = indexerLayoutAlgorithm->GetItemHeight();
+    auto height = indexerLayoutAlgorithm->GetMaxContentHeight();
+    if (maxContentHeight_ != height && lastAutoCollapse_) {
+        maxContentHeight_ = height;
         isNewHeightCalculated_ = true;
         auto hostNode = dirty->GetHostNode();
         StartCollapseDelayTask(hostNode, INDEXER_COLLAPSE_WAIT_DURATION);
@@ -245,7 +245,7 @@ void IndexerPattern::CollapseArrayValue()
     auto itemSize =
         layoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP)).ConvertToVp();
     int32_t maxItemsCount = 0;
-    auto height = Dimension(actualIndexerHeight_, DimensionUnit::PX).ConvertToVp();
+    auto height = Dimension(maxContentHeight_, DimensionUnit::PX).ConvertToVp();
     if (height > 0 && itemSize > 0) {
         maxItemsCount = static_cast<int32_t>(height / itemSize);
     }
@@ -532,14 +532,14 @@ void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
 
 void IndexerPattern::MoveIndexByOffset(const Offset& offset)
 {
-    if (itemSizeRender_ <= 0) {
+    if (itemHeight_ <= 0) {
         return;
     }
     if (itemCount_ <= 0) {
         return;
     }
     auto nextSelectIndex = GetSelectChildIndex(offset);
-    if (nextSelectIndex == childPressIndex_) {
+    if (nextSelectIndex == childPressIndex_ || nextSelectIndex == -1) {
         return;
     }
     childPressIndex_ = nextSelectIndex;
@@ -569,15 +569,15 @@ int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset)
         CHECK_NULL_RETURN(geometryNode, -1);
         auto childOffset = geometryNode->GetFrameOffset();
         if (index == 0 && LessNotEqual(offset.GetY(), childOffset.GetY())) {
-            return 0;
+            return -1;
         }
         if (GreatOrEqual(offset.GetY(), childOffset.GetY()) &&
-            LessNotEqual(offset.GetY(), childOffset.GetY() + itemSizeRender_)) {
+            LessNotEqual(offset.GetY(), childOffset.GetY() + itemHeight_)) {
             break;
         }
         index++;
     }
-    return std::clamp(index, 0, itemCount_ - 1);
+    return index < itemCount_ ? index : -1;
 }
 
 bool IndexerPattern::KeyIndexByStep(int32_t step)
@@ -764,6 +764,7 @@ void IndexerPattern::ApplyIndexChanged(
             nodeLayoutProperty->UpdateContent(nodeStr);
             nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
             nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
+            nodeLayoutProperty->UpdateMaxFontScale(1.0f);
             if (index == childFocusIndex_) {
                 auto borderWidth = indexerTheme->GetFocusBgOutlineSize();
                 nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
@@ -830,6 +831,7 @@ void IndexerPattern::ApplyIndexChanged(
         nodeLayoutProperty->UpdateContent(nodeStr);
         nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
+        nodeLayoutProperty->UpdateMaxFontScale(1.0f);
         nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
         childRenderContext->ResetBlendBorderColor();
         auto defaultFont = layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle());
@@ -849,14 +851,14 @@ void IndexerPattern::ApplyIndexChanged(
         if (isTextNodeInTree) childNode->MarkDirtyNode();
     }
     if (selectChanged) {
-        ShowBubble();
+        ShowBubble(fromTouchUp);
         if (enableHapticFeedback_ && selectedChangedForHaptic_ && !fromTouchUp) {
-            VibratorImpl::StartVibraFeedback();
+            VibratorUtils::StartVibraFeedback();
         }
     }
 }
 
-void IndexerPattern::ShowBubble()
+void IndexerPattern::ShowBubble(bool fromTouchUp)
 {
     if (!NeedShowBubble() || itemCount_ < 1) {
         return;
@@ -878,7 +880,9 @@ void IndexerPattern::ShowBubble()
     }
     UpdateBubbleView();
     delayTask_.Cancel();
-    StartBubbleAppearAnimation();
+    if (!fromTouchUp) {
+        StartBubbleAppearAnimation();
+    }
     if (!isTouch_) {
         StartDelayTask(INDEXER_BUBBLE_ENTER_DURATION + INDEXER_BUBBLE_WAIT_DURATION);
     }
@@ -1120,6 +1124,7 @@ void IndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     letterLayoutProperty->UpdateTextColor(layoutProperty->GetPopupColor().value_or(indexerTheme->GetPopupTextColor()));
     letterLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     letterLayoutProperty->UpdateAlignment(Alignment::CENTER);
+    letterLayoutProperty->UpdateMaxFontScale(1.0f);
     auto textPadding = Dimension(IndexerTheme::TEXT_PADDING_LEFT, DimensionUnit::VP).ConvertToPx();
     letterLayoutProperty->UpdatePadding(
         { CalcLength(textPadding), CalcLength(textPadding), CalcLength(0), CalcLength(0) });
@@ -1436,6 +1441,7 @@ void IndexerPattern::UpdateBubbleListItem(
             static_cast<int32_t>(i) == popupClickedIndex_ ? popupSelectedTextColor : popupUnselectedTextColor);
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+        textLayoutProperty->UpdateMaxFontScale(1.0f);
         UpdateBubbleListItemContext(listNode, indexerTheme, i);
         UpdateBubbleListItemMarkModify(textNode, listItemNode);
     }
@@ -1929,49 +1935,69 @@ void IndexerPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(textNode);
         auto accessibilityProperty = textNode->GetAccessibilityProperty<AccessibilityProperty>();
         CHECK_NULL_VOID(accessibilityProperty);
-        accessibilityProperty->SetActionSelect(
-            [weakPtr = WeakClaim(this), node = WeakClaim(RawPtr(textNode)), childrenNode]() {
-                const auto& indexerPattern = weakPtr.Upgrade();
-                CHECK_NULL_VOID(indexerPattern);
-                const auto& frameNode = node.Upgrade();
-                CHECK_NULL_VOID(frameNode);
-                auto index = 0;
-                auto nodeId = frameNode->GetAccessibilityId();
-                for (auto& child : childrenNode) {
-                    if (child->GetAccessibilityId() == nodeId) {
-                        break;
-                    }
-                    index++;
-                }
-                indexerPattern->selected_ = index;
-                indexerPattern->ResetStatus();
-                indexerPattern->ApplyIndexChanged(true, true, true);
-                indexerPattern->OnSelect();
-            });
-
-        accessibilityProperty->SetActionClearSelection(
-            [weakPtr = WeakClaim(this), node = WeakClaim(RawPtr(textNode)), childrenNode] {
-                const auto& indexerPattern = weakPtr.Upgrade();
-                CHECK_NULL_VOID(indexerPattern);
-                const auto& frameNode = node.Upgrade();
-                CHECK_NULL_VOID(frameNode);
-                auto index = 0;
-                auto nodeId = frameNode->GetAccessibilityId();
-                for (auto& child : childrenNode) {
-                    if (child->GetAccessibilityId() == nodeId) {
-                        break;
-                    }
-                    index++;
-                }
-                if (indexerPattern->selected_ != index) {
-                    return;
-                }
-                indexerPattern->selected_ = 0;
-                indexerPattern->ResetStatus();
-                indexerPattern->ApplyIndexChanged(true, false);
-                indexerPattern->OnSelect();
-            });
+        SetActionSelect(textNode, accessibilityProperty);
+        SetActionClearSelection(textNode, accessibilityProperty);
     }
+}
+
+void IndexerPattern::SetActionSelect(RefPtr<FrameNode>& textNode, RefPtr<AccessibilityProperty>& accessibilityProperty)
+{
+    CHECK_NULL_VOID(textNode);
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionSelect(
+        [weakPtr = WeakClaim(this), node = WeakClaim(RawPtr(textNode))]() {
+            const auto& indexerPattern = weakPtr.Upgrade();
+            CHECK_NULL_VOID(indexerPattern);
+            auto host = indexerPattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto childrenNode = host->GetChildren();
+            const auto& frameNode = node.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto index = 0;
+            auto nodeId = frameNode->GetAccessibilityId();
+            for (auto& child : childrenNode) {
+                if (child->GetAccessibilityId() == nodeId) {
+                    break;
+                }
+                index++;
+            }
+            indexerPattern->selected_ = index;
+            indexerPattern->ResetStatus();
+            indexerPattern->ApplyIndexChanged(true, true, true);
+            indexerPattern->OnSelect();
+        });
+}
+
+void IndexerPattern::SetActionClearSelection(
+    RefPtr<FrameNode>& textNode, RefPtr<AccessibilityProperty>& accessibilityProperty)
+{
+    CHECK_NULL_VOID(textNode);
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionClearSelection(
+        [weakPtr = WeakClaim(this), node = WeakClaim(RawPtr(textNode))] {
+            const auto& indexerPattern = weakPtr.Upgrade();
+            CHECK_NULL_VOID(indexerPattern);
+            auto host = indexerPattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto childrenNode = host->GetChildren();
+            const auto& frameNode = node.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto index = 0;
+            auto nodeId = frameNode->GetAccessibilityId();
+            for (auto& child : childrenNode) {
+                if (child->GetAccessibilityId() == nodeId) {
+                    break;
+                }
+                index++;
+            }
+            if (indexerPattern->selected_ != index) {
+                return;
+            }
+            indexerPattern->selected_ = 0;
+            indexerPattern->ResetStatus();
+            indexerPattern->ApplyIndexChanged(true, false);
+            indexerPattern->OnSelect();
+        });
 }
 
 void IndexerPattern::RemoveBubble()

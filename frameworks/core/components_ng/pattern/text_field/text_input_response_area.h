@@ -42,7 +42,7 @@ public:
 
     virtual void ClearArea() {}
 
-    virtual OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth) = 0;
+    virtual OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth);
 
     RectF GetAreaRect()
     {
@@ -76,8 +76,6 @@ public:
     SizeF Measure(LayoutWrapper* layoutWrapper, int32_t index) override;
 
     void Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth) override;
-
-    OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth) override;
 
     void AddEvent(const RefPtr<FrameNode>& node);
 
@@ -147,8 +145,6 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth) override;
 
-    OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth) override;
-
     const RefPtr<FrameNode> GetFrameNode() override;
 
     void ClearArea() override
@@ -179,8 +175,6 @@ public:
     SizeF Measure(LayoutWrapper* layoutWrapper, int32_t index) override;
 
     void Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth) override;
-
-    OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth) override;
 
     const RefPtr<FrameNode> GetFrameNode() override;
 

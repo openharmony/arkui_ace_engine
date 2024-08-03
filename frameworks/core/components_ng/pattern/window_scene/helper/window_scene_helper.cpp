@@ -284,16 +284,54 @@ void WindowSceneHelper::InjectPointerEvent(
 bool WindowSceneHelper::InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme)
 {
     CHECK_NULL_RETURN(keyEvent, false);
-    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-        "KeyEvent Process to inject, eventInfo: id:%{public}d, "
-        "keyEvent info: keyCode is %{public}d, "
-        "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
-        keyEvent->GetId(), keyEvent->GetKeyCode(), keyEvent->GetKeyAction(), keyEvent->GetActionTime());
+    if (!SystemProperties::GetAceCommercialLogEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "KeyEvent Process to inject, eventInfo: id:%{public}d, "
+            "keyEvent info: keyCode is %{public}d, "
+            "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
+            keyEvent->GetId(), keyEvent->GetKeyCode(), keyEvent->GetKeyAction(), keyEvent->GetActionTime());
+    }
 
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto aceView = AceType::DynamicCast<OHOS::Ace::Platform::AceViewOhos>(container->GetAceView());
     CHECK_NULL_RETURN(aceView, false);
     return OHOS::Ace::Platform::AceViewOhos::DispatchKeyEvent(aceView, keyEvent, isPreIme);
+}
+
+bool WindowSceneHelper::IsWindowPattern(const RefPtr<FrameNode>& node)
+{
+    if (!node) {
+        return false;
+    }
+    return node->GetWindowPatternType() > static_cast<uint32_t>(WindowPatternType::SCREEN_SCENE);
+}
+
+bool WindowSceneHelper::HasWindowSession(const RefPtr<FrameNode>& node)
+{
+    if (!node) {
+        return false;
+    }
+    return node->GetWindowPatternType() > static_cast<uint32_t>(WindowPatternType::TRANSFORM_SCENE);
+}
+
+bool WindowSceneHelper::IsTransformScene(uint32_t type)
+{
+    return type == static_cast<uint32_t>(WindowPatternType::TRANSFORM_SCENE);
+}
+
+bool WindowSceneHelper::IsSystemWindowScene(uint32_t type)
+{
+    return type == static_cast<uint32_t>(WindowPatternType::SYSTEM_WINDOW_SCENE);
+}
+
+bool WindowSceneHelper::IsPanelScene(uint32_t type)
+{
+    return type == static_cast<uint32_t>(WindowPatternType::PANEL_SCENE);
+}
+
+bool WindowSceneHelper::IsScreenScene(uint32_t type)
+{
+    return type == static_cast<uint32_t>(WindowPatternType::SCREEN_SCENE);
 }
 } // namespace OHOS::Ace::NG

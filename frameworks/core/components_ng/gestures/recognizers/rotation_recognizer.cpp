@@ -57,8 +57,8 @@ void RotationRecognizer::OnAccepted()
     }
     
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Rotation accepted, tag = %{public}s, id = %{public}s",
-        node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Rotation accepted, tag = %{public}s",
+        node ? node->GetTag().c_str() : "null");
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onActionStart_);
 }
@@ -68,6 +68,7 @@ void RotationRecognizer::OnRejected()
     if (refereeState_ != RefereeState::SUCCEED) {
         refereeState_ = RefereeState::FAIL;
     }
+    SendRejectMsg();
     firstInputTime_.reset();
 }
 
@@ -387,6 +388,7 @@ GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
         touchPoint = touchPoints_.begin()->second;
     }
     info->SetForce(touchPoint.force);
+    gestureInfo_->SetInputEventType(inputEventType_);
     if (touchPoint.tiltX.has_value()) {
         info->SetTiltX(touchPoint.tiltX.value());
     }

@@ -72,7 +72,7 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
 
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper->GetLayoutProperty());
     auto padding = props->CreatePaddingAndBorder();
-    OffsetF paddingOffset { padding.top.value_or(0.0f), padding.top.value_or(0.0f) };
+    OffsetF paddingOffset { padding.left.value_or(0.0f), padding.top.value_or(0.0f) };
 
     bool reverse = props->IsReverse();
     bool rtl = props->GetNonAutoLayoutDirection() == TextDirection::RTL && axis_ == Axis::VERTICAL;
@@ -214,13 +214,9 @@ void WaterFlowLayoutSW::ApplyDelta(float delta)
 
     if (Positive(delta)) {
         // positive offset is scrolling upwards
-        int32_t idx = info_->StartIndex() - 1;
-        info_->PrepareSectionPos(idx, false);
-        FillFront(0.0f, idx, 0);
+        FillFront(0.0f, info_->StartIndex() - 1, 0);
     } else {
-        int32_t idx = info_->EndIndex() + 1;
-        info_->PrepareSectionPos(idx, true);
-        FillBack(mainLen_, idx, itemCnt_ - 1);
+        FillBack(mainLen_, info_->EndIndex() + 1, itemCnt_ - 1);
     }
 }
 
@@ -256,22 +252,22 @@ using EndPosQ = std::priority_queue<lanePos, std::vector<lanePos>, std::greater<
 
 using Lanes = std::vector<WaterFlowLayoutInfoSW::Lane>;
 
-void PrepareStartPosQueue(StartPosQ& q, Lanes& lanes, float mainGap, float viewportBound)
+void PrepareStartPosQueue(StartPosQ& q, const Lanes& lanes, float mainGap, float viewportBound)
 {
     for (size_t i = 0; i < lanes.size(); ++i) {
-        float startPos = lanes[i].startPos - (lanes[i].items_.empty() ? 0.0f : mainGap);
-        if (GreatNotEqual(startPos, viewportBound)) {
-            q.push({ startPos, i });
+        const float nextPos = lanes[i].startPos - (lanes[i].items_.empty() ? 0.0f : mainGap);
+        if (GreatNotEqual(nextPos, viewportBound)) {
+            q.push({ lanes[i].startPos, i });
         }
     }
 }
 
-void PrepareEndPosQueue(EndPosQ& q, Lanes& lanes, float mainGap, float viewportBound)
+void PrepareEndPosQueue(EndPosQ& q, const Lanes& lanes, float mainGap, float viewportBound)
 {
     for (size_t i = 0; i < lanes.size(); ++i) {
-        float endPos = lanes[i].endPos + (lanes[i].items_.empty() ? 0.0f : mainGap);
-        if (LessNotEqual(endPos, viewportBound)) {
-            q.push({ endPos, i });
+        const float nextPos = lanes[i].endPos + (lanes[i].items_.empty() ? 0.0f : mainGap);
+        if (LessNotEqual(nextPos, viewportBound)) {
+            q.push({ lanes[i].endPos, i });
         }
     }
 }
@@ -281,6 +277,8 @@ void WaterFlowLayoutSW::FillBack(float viewportBound, int32_t idx, int32_t maxCh
 {
     idx = std::max(idx, 0);
     maxChildIdx = std::min(maxChildIdx, itemCnt_ - 1);
+
+    info_->PrepareSectionPos(idx, true);
     while (!FillBackSection(viewportBound, idx, maxChildIdx)) {
         if (idx > maxChildIdx) {
             break;
@@ -316,6 +314,8 @@ void WaterFlowLayoutSW::FillFront(float viewportBound, int32_t idx, int32_t minC
 {
     idx = std::min(itemCnt_ - 1, idx);
     minChildIdx = std::max(minChildIdx, 0);
+
+    info_->PrepareSectionPos(idx, false);
     while (!FillFrontSection(viewportBound, idx, minChildIdx)) {
         if (idx < minChildIdx) {
             break;

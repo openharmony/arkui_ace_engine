@@ -401,6 +401,8 @@ struct GridLayoutInfo {
 
     std::map<int32_t, bool> irregularLines_;
 
+    bool clearStretch_ = false;
+
 private:
     float GetCurrentOffsetOfRegularGrid(float mainGap) const;
     float GetContentHeightOfRegularGrid(float mainGap) const;

@@ -71,10 +71,31 @@ public:
 
     static std::string GetTitleString(const RefPtr<TitleBarNode>& titleBarNode, bool isCustom);
     static std::string GetSubtitleString(const RefPtr<TitleBarNode>& titleBarNode);
+
+    static void SetInnerChildId(const RefPtr<FrameNode>& node, const std::string& field, const std::string& nodeTag,
+        const std::string& nodeValue, const std::string& parentId)
+    {
+        // navigation/navdestination Field + nodeTag + nodeValue + parentId
+        std::string id;
+        id.append(field);
+        id.append(nodeTag);
+        id.append("__");
+        id.append(nodeValue);
+        id.append("__");
+        id.append(parentId);
+        CHECK_NULL_VOID(node);
+        node->UpdateInspectorId(id);
+    }
+    
 private:
     static RefPtr<FrameNode> CreatePopupDialogNode(
         const RefPtr<FrameNode> targetNode, const std::vector<NG::BarItem>& menuItems, int32_t index);
     static RefPtr<FrameNode> CreateSymbolDialog(const std::string& message, const RefPtr<FrameNode>& targetNode);
+
+    static void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& menuNode,
+        const std::vector<NG::BarItem>& menuItems);
+    static void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& menuNode,
+        const std::vector<NG::BarItem>& menuItems);
 };
 
 } // namespace OHOS::Ace::NG

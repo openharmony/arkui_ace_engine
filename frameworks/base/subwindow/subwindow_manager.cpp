@@ -197,7 +197,7 @@ Rect SubwindowManager::GetParentWindowRect()
     return currentSubwindow_->GetParentWindowRect();
 }
 
-RefPtr<Subwindow> SubwindowManager::ShowDragPreviewWindowNG()
+RefPtr<Subwindow> SubwindowManager::ShowPreviewNG()
 {
     auto containerId = Container::CurrentId();
     auto subwindow =
@@ -206,7 +206,7 @@ RefPtr<Subwindow> SubwindowManager::ShowDragPreviewWindowNG()
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get or create subwindow failed");
         return nullptr;
     }
-    if (!subwindow->ShowDragPreviewWindowNG()) {
+    if (!subwindow->ShowPreviewNG()) {
         return nullptr;
     }
     return subwindow;
@@ -244,11 +244,11 @@ void SubwindowManager::ShowMenuNG(std::function<void()>&& buildFunc, std::functi
     subwindow->ShowMenuNG(std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
 }
 
-void SubwindowManager::HideDragPreviewWindowNG()
+void SubwindowManager::HidePreviewNG()
 {
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
-        subwindow->HideDragPreviewWindowNG();
+        subwindow->HidePreviewNG();
     }
 }
 
@@ -294,6 +294,15 @@ void SubwindowManager::UpdatePreviewPosition()
     if (subwindow) {
         subwindow->UpdatePreviewPosition();
     }
+}
+
+bool SubwindowManager::GetMenuPreviewCenter(NG::OffsetF& offset)
+{
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        return subwindow->GetMenuPreviewCenter(offset);
+    }
+    return false;
 }
 
 void SubwindowManager::ClearMenuNG(int32_t instanceId, int32_t targetId, bool inWindow, bool showAnimation)
@@ -962,5 +971,20 @@ void SubwindowManager::OnWindowSizeChanged(int32_t instanceId, Rect windowRect, 
     CHECK_NULL_VOID(overlayManager);
     overlayManager->OnUIExtensionWindowSizeChange();
     uiExtensionWindowRect_ = windowRect;
+}
+
+RefPtr<NG::FrameNode> SubwindowManager::GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node)
+{
+    auto iter = subwindowMap_.begin();
+    while (iter != subwindowMap_.end()) {
+        auto overlay = iter->second->GetOverlayManager();
+        CHECK_NULL_RETURN(overlay, nullptr);
+        auto dialogNode = overlay->GetDialogNodeWithExistContent(node);
+        if (dialogNode) {
+            return dialogNode;
+        }
+        ++iter;
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace

@@ -225,6 +225,34 @@ const std::vector<WaterFlowSections::Section> SECTION_10 = {
     { .itemsCount = 2, .crossCount = 2 },
     { .itemsCount = 30, .crossCount = 3 },
 };
+
+const PaddingProperty MARGIN_3 = {
+    .bottom = CalcLength(5.0_vp),
+    .top = CalcLength(5.0_vp),
+    .left = CalcLength(2.0_vp),
+    .right = CalcLength(2.0_vp),
+};
+
+const std::vector<WaterFlowSections::Section> SECTION_11 = {
+    WaterFlowSections::Section { .itemsCount = 3,
+        .onGetItemMainSizeByIndex = GET_MAIN_SIZE_2,
+        .crossCount = 1,
+        .rowsGap = 5.0_vp,
+        .margin = MARGIN_3 },
+    WaterFlowSections::Section { .itemsCount = 2,
+        .onGetItemMainSizeByIndex = GET_MAIN_SIZE_2,
+        .crossCount = 2,
+        .rowsGap = 5.0_vp,
+        .columnsGap = 5.0_vp, .margin = MARGIN_3 },
+    WaterFlowSections::Section { .itemsCount = 0,
+        .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC,
+        .crossCount = 5,
+        .margin = MARGIN_3 },
+    WaterFlowSections::Section { .itemsCount = 30,
+        .onGetItemMainSizeByIndex = GET_MAIN_SIZE_2,
+        .rowsGap = 2.0_px,
+        .margin = MARGIN_3 },
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_WATER_FLOW_ITEM_MAPS_H

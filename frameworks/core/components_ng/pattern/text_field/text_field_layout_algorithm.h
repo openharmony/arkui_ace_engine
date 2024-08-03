@@ -136,9 +136,13 @@ protected:
     virtual bool CreateParagraphEx(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) = 0;
 
+    LayoutConstraintF CalculateFrameSizeConstraint(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> inlineParagraph_;
     InlineMeasureItem inlineMeasureItem_;
+    LayoutConstraintF textFieldContentConstraint_;
 
     RectF textRect_;
     OffsetF parentGlobalOffset_;
@@ -161,15 +165,10 @@ private:
     static void UpdatePlaceholderTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& placeholderTextStyle, bool isDisabled);
-    static void UpdateTextFadeoutTextStyle(
-        const RefPtr<FrameNode>& frameNode, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle);
-    void UpdateParagraphTextFadeoutWidth(
-        const LayoutConstraintF& contentConstraint, const RefPtr<FrameNode>& frameNode);
     void UpdateTextStyleTextOverflowAndWordBreak(TextStyle& textStyle, bool isTextArea,
         bool isInlineStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty);
     float GetVisualTextWidth() const;
     void CalcInlineMeasureItem(LayoutWrapper* layoutWrapper);
-    void ApplyIndent(double width);
     bool IsInlineFocusAdaptExceedLimit(const SizeF& maxSize);
     bool IsInlineFocusAdaptMinExceedLimit(const SizeF& maxSize, uint32_t maxViewLines);
     void HandleCounterLayout(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& counterNode,
@@ -178,14 +177,11 @@ private:
         const RefPtr<TextFieldPattern>& pattern, bool isRTL, float& countX);
     void HandleTextArea(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& counterNode,
         const RefPtr<TextFieldPattern>& pattern, bool isRTL, float& countX);
-    void HandleRTLTextArea(const std::unique_ptr<GeometryProperty>& content,
-        const RefPtr<GeometryNode>& textGeometryNode, float& countX, float errTextWidth);
-    void HandleLTRTextArea(const std::unique_ptr<GeometryProperty>& content,
-        const RefPtr<GeometryNode>& textGeometryNode, float &countX);
     float CalculateContentWidth(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
         float imageWidth);
     float CalculateContentHeight(const LayoutConstraintF& contentConstraint);
     LayoutConstraintF BuildInfinityLayoutConstraint(const LayoutConstraintF& contentConstraint);
+    void ApplyIndent(double width);
     LayoutConstraintF BuildInlineFocusLayoutConstraint(const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper);
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutAlgorithm);

@@ -37,12 +37,14 @@ public:
 
     void UpdateConfigSync(const T& config, std::function<void()> &&task)
     {
-        task();
-
         // Update current state
-        std::lock_guard<std::mutex> taskLock(updateTaskMutex_);
-        currentTask_.updateTask.Cancel();
-        currentTask_.target = config;
+        {
+            std::lock_guard<std::mutex> taskLock(updateTaskMutex_);
+            currentTask_.updateTask.Cancel();
+            currentTask_.target = config;
+        }
+
+        task();
     }
 
     void UpdateConfig(const T& config, std::function<void()> &&task, const RefPtr<Container>& container,

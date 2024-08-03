@@ -40,13 +40,13 @@ void OffscreenCanvasRenderingContext2DModelNG::SetPattern(RefPtr<AceType> patter
 void OffscreenCanvasRenderingContext2DModelNG::SetFillText(const PaintState& state, const FillTextInfo& fillTextInfo)
 {
     CHECK_NULL_VOID(pattern_);
-    pattern_->FillText(fillTextInfo.text, fillTextInfo.x, fillTextInfo.y, fillTextInfo.maxWidth, state);
+    pattern_->FillText(fillTextInfo.text, fillTextInfo.x, fillTextInfo.y, fillTextInfo.maxWidth);
 }
 
 void OffscreenCanvasRenderingContext2DModelNG::SetStrokeText(const PaintState& state, const FillTextInfo& fillTextInfo)
 {
     CHECK_NULL_VOID(pattern_);
-    pattern_->StrokeText(fillTextInfo.text, fillTextInfo.x, fillTextInfo.y, fillTextInfo.maxWidth, state);
+    pattern_->StrokeText(fillTextInfo.text, fillTextInfo.x, fillTextInfo.y, fillTextInfo.maxWidth);
 }
 
 void OffscreenCanvasRenderingContext2DModelNG::SetAntiAlias(bool anti)
@@ -537,6 +537,12 @@ void OffscreenCanvasRenderingContext2DModelNG::Reset()
 {
     CHECK_NULL_VOID(pattern_);
     pattern_->Reset();
+}
+
+void OffscreenCanvasRenderingContext2DModelNG::SetDensity(double density)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->SetDensity(density);
 }
 
 // All interfaces that only the 'OffscreenCanvasRenderingContext2D' has.

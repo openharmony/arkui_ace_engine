@@ -120,7 +120,7 @@ bool SelectOverlayContentModifier::PaintSingleHandleWithPoints(RSCanvas& canvas)
         auto startPoint = firstHandlePaintInfo_.startPoint;
         startPoint.SetY(startPoint.GetY() + 1.0f);
         auto centerOffset = CalculateCenterPoint(
-            firstHandlePaintInfo_.startPoint, firstHandlePaintInfo_.endPoint, handleRadius_->Get(), false);
+            firstHandlePaintInfo_.startPoint, firstHandlePaintInfo_.endPoint, GetDrawHandleRadius(), false);
         HandleDrawInfo drawInfo = { .startPoint = startPoint - centerOffset,
             .endPoint = firstHandlePaintInfo_.endPoint - centerOffset,
             .centerOffset = centerOffset,
@@ -132,7 +132,7 @@ bool SelectOverlayContentModifier::PaintSingleHandleWithPoints(RSCanvas& canvas)
         auto startPoint = secondHandlePaintInfo_.startPoint;
         startPoint.SetY(startPoint.GetY() + 1.0f);
         auto centerOffset = CalculateCenterPoint(
-            secondHandlePaintInfo_.startPoint, secondHandlePaintInfo_.endPoint, handleRadius_->Get(), false);
+            secondHandlePaintInfo_.startPoint, secondHandlePaintInfo_.endPoint, GetDrawHandleRadius(), false);
         HandleDrawInfo drawInfo = { .startPoint = startPoint - centerOffset,
             .endPoint = secondHandlePaintInfo_.endPoint - centerOffset,
             .centerOffset = centerOffset,
@@ -168,7 +168,7 @@ bool SelectOverlayContentModifier::PaintDoubleHandleWithPoint(RSCanvas& canvas)
     if (firstHandleIsShow_->Get()) {
         auto handleOnTop = !handleReverse_->Get();
         auto centerOffset = CalculateCenterPoint(
-            firstHandlePaintInfo_.startPoint, firstHandlePaintInfo_.endPoint, handleRadius_->Get(), handleOnTop);
+            firstHandlePaintInfo_.startPoint, firstHandlePaintInfo_.endPoint, GetDrawHandleRadius(), handleOnTop);
         auto offsetY = handleOnTop ? -1.0f : 1.0f;
         auto startPoint = firstHandlePaintInfo_.startPoint;
         startPoint.SetY(startPoint.GetY() + offsetY);
@@ -183,7 +183,7 @@ bool SelectOverlayContentModifier::PaintDoubleHandleWithPoint(RSCanvas& canvas)
     if (secondHandleIsShow_->Get()) {
         auto handleOnTop = handleReverse_->Get();
         auto centerOffset = CalculateCenterPoint(
-            secondHandlePaintInfo_.startPoint, secondHandlePaintInfo_.endPoint, handleRadius_->Get(), handleOnTop);
+            secondHandlePaintInfo_.startPoint, secondHandlePaintInfo_.endPoint, GetDrawHandleRadius(), handleOnTop);
         auto offsetY = handleOnTop ? -1.0f : 1.0f;
         auto startPoint = secondHandlePaintInfo_.startPoint;
         startPoint.SetY(startPoint.GetY() + offsetY);

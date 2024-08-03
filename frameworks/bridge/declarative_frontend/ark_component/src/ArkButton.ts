@@ -267,6 +267,16 @@ class ButtonTypeModifier extends ModifierWithKey<number> {
     super(value);
   }
   static identity: Symbol = Symbol('buttonType');
+  applyStage(node: KNode, component?: ArkComponent): boolean {
+    if (this.stageValue === undefined || this.stageValue === null) {
+      this.value = this.stageValue;
+      this.applyPeer(node, true, component);
+      return true;
+    }
+    this.value = this.stageValue;
+    this.applyPeer(node, false, component);
+    return false;
+  }
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().button.resetType(node);

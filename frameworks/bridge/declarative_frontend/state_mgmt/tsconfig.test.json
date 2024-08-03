@@ -81,6 +81,7 @@
 
     // sdk
     "src/lib/sdk/v2_persistence.ts",
+    "src/lib/sdk/ui_utils.ts",
 
     // unit testing
     "src/utest/common/helpers_for_test.ts",

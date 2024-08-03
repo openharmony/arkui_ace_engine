@@ -102,6 +102,10 @@ const UI_STATE_DISABLED = 1 << 2;
 const UI_STATE_SELECTED = 1 << 3;
 
 function applyUIAttributesInit(modifier: AttributeModifier<CommonAttribute>, nativeNode: KNode): void {
+  if (modifier.applyPressedAttribute == undefined && modifier.applyFocusedAttribute == undefined &&
+    modifier.applyDisabledAttribute == undefined && modifier.applySelectedAttribute == undefined) {
+    return;
+  }
   let state = 0;
   if (modifier.applyPressedAttribute !== undefined) {
     state |= UI_STATE_PRESSED;
@@ -3023,6 +3027,21 @@ class FocusScopePriorityModifier extends ModifierWithKey<ArkFocusScopePriority> 
   }
 }
 
+class FocusBoxModifier extends ModifierWithKey<FocusBoxStyle> {
+  constructor(value: FocusBoxStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('focusBox');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetFocusBox(node);
+    } else {
+      getUINativeModule().common.setFocusBox(node, this.value?.margin,
+        this.value?.strokeWidth, this.value?.strokeColor);
+    }
+  }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType): boolean => typeof val === 'string';
@@ -3084,8 +3103,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
-    this._instanceId = -1;
     if (classType === ModifierType.FRAME_NODE) {
+      this._instanceId = -1;
       this._modifiersWithKeys = new ObservedMap();
       (this._modifiersWithKeys as ObservedMap).setOnChange((key, value) => {
         if (this.nativePtr === undefined) {
@@ -3103,10 +3122,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       (this._modifiersWithKeys as ObservedMap).setFrameNode(true);
     } else if (classType === ModifierType.EXPOSE_MODIFIER || classType === ModifierType.STATE) {
       this._modifiersWithKeys = new ObservedMap();
+      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     } else {
       this._modifiersWithKeys = new Map();
-    }
-    if (classType === ModifierType.STATE) {
       this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     }
     this._nativePtrChanged = false;
@@ -3141,12 +3159,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     if (this.nativePtr !== instance.nativePtr) {
       this.nativePtr = instance.nativePtr;
       this._nativePtrChanged = true;
-      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(instance.nativePtr);
+      if (instance._weakPtr) {
+        this._weakPtr = instance._weakPtr;
+      } else {
+        this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(this.nativePtr);
+      }
     }
   }
 
   applyModifierPatch(): void {
-    let expiringItems = [];
     let expiringItemsWithKeys = [];
     this._modifiersWithKeys.forEach((value, key) => {
       if (value.applyStage(this.nativePtr, this)) {
@@ -4388,6 +4409,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
   pixelRound(value:PixelRoundPolicy):this {
     modifierWithKey(this._modifiersWithKeys, PixelRoundModifier.identity, PixelRoundModifier, value);
+  }
+  focusBox(value:FocusBoxStyle):this {
+    modifierWithKey(this._modifiersWithKeys, FocusBoxModifier.identity, FocusBoxModifier, value);
   }
 }
 

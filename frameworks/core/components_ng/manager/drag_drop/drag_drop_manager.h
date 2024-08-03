@@ -26,9 +26,11 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/gestures/velocity_tracker.h"
+#include "core/components_ng/manager/drag_drop/utils/internal_drag_action.h"
 
 namespace OHOS::Ace {
 class UnifiedData;
+class GridColumnInfo;
 }
 namespace OHOS::Ace::NG {
 enum class DragDropMgrState : int32_t {
@@ -113,6 +115,7 @@ public:
     void OnDragMoveOut(const PointerEvent& pointerEvent);
     void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
+    void EnsureStatusForPullIn();
     void OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
     void OnItemDragMove(float globalX, float globalY, int32_t draggedIndex, DragType dragType);
     void OnItemDragEnd(float globalX, float globalY, int32_t draggedIndex, DragType dragType);
@@ -128,8 +131,8 @@ public:
     float GetWindowScale() const;
     void UpdateDragStyle(
         const DragCursorStyleCore& dragCursorStyleCore = DragCursorStyleCore::DEFAULT, const int32_t eventId = -1);
-    void UpdateDragAllowDrop(
-        const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior, const int32_t eventId = -1);
+    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior,
+        const int32_t eventId = -1, bool isCapi = false);
     void RequireSummary();
     void ClearSummary();
     void SetSummaryMap(const std::map<std::string, int64_t>& summaryMap)
@@ -219,9 +222,16 @@ public:
         dragCursorStyleCore_ = dragCursorStyleCore;
     }
 
+    std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> GetDragAction()
+    {
+        return dragAction_;
+    }
+    
     RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
         std::vector<RefPtr<FrameNode>> hitFrameNodes, bool findDrop);
     
+    bool CheckFrameNodeCanDrop(const RefPtr<FrameNode>& node);
+
     RefPtr<FrameNode> FindTargetDropNode(const RefPtr<UINode> parentNode, PointF localPoint);
 
     std::unordered_set<int32_t> FindHitFrameNodes(const Point& point);
@@ -446,6 +456,11 @@ public:
     }
 
     bool IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode);
+    
+    void SetDragAction(const std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction>& dragAction)
+    {
+        dragAction_ = dragAction;
+    }
 
     void AddNewDragAnimation()
     {
@@ -461,6 +476,17 @@ public:
 
     float GetCurrentDistance(float x, float y);
 
+    uint32_t GetDampingOverflowCount() const
+    {
+        return dampingOverflowCount_ ;
+    }
+
+    void SetDampingOverflowCount()
+    {
+        dampingOverflowCount_++;
+    }
+    static double GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& pipeline);
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -472,6 +498,7 @@ private:
     bool GetDragPreviewInfo(const OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager>& overlayManager,
         DragPreviewInfo& dragPreviewInfo);
     bool IsNeedDoDragMoveAnimate(const PointerEvent& pointerEvent);
+    const RefPtr<NG::OverlayManager> GetDragAnimationOverlayManager(int32_t containerId);
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY,
         const RefPtr<FrameNode>& node = nullptr);
     void FireOnDragEvent(
@@ -499,7 +526,6 @@ private:
     bool ReachMoveLimit(const PointerEvent& pointerEvent, const Point& point);
     bool IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node);
     bool IsUIExtensionComponent(const RefPtr<NG::UINode>& node);
-    int32_t GetWindowId();
 
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
@@ -537,7 +563,6 @@ private:
     bool isDragWindowShow_ = false;
     bool hasNotifiedTransformation_ = false;
     bool isPullMoveReceivedForCurrentDrag_ = false;
-    bool isDragWindowSubWindow_ = false;
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;
@@ -561,7 +586,9 @@ private:
     OffsetF dragMovePosition_ = OffsetF(0.0f, 0.0f);
     OffsetF lastDragMovePosition_ = OffsetF(0.0f, 0.0f);
     OffsetF dragTotalMovePosition_ = OffsetF(0.0f, 0.0f);
-
+    uint32_t dampingOverflowCount_ = 0;
+    std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction_;
+    RefPtr<GridColumnInfo> columnInfo_;
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };
 } // namespace OHOS::Ace::NG

@@ -19,21 +19,23 @@
 #include "gtest/gtest.h"
 
 #include "frameworks/core/components_ng/base/frame_node.h"
+#include "test/unittest/core/pattern/test_ng.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-class ScrollableTestNg : public testing::Test {
+class ScrollableTestNg : public TestNG {
 public:
     void SetUp() override;
     void TearDown() override;
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    
+protected:
+    virtual void InitNestedScrolls();
 
 private:
-    void InitNestedScrolls();
-
     RefPtr<FrameNode> scroll_;
     RefPtr<FrameNode> mockScroll_;
 };

@@ -64,7 +64,7 @@ void JsFunctionBase::Execute(const std::vector<std::string>& keys, const std::st
         const std::string key = *iter;
         const auto value = argsPtr->GetValue(key);
         if (!value) {
-            LOGI("key[%{public}s] is not exist.", key.c_str());
+            LOGD("key[%{public}s] not exist.", key.c_str());
             continue;
         }
         ExecuteInternal(value, key, eventInfo);

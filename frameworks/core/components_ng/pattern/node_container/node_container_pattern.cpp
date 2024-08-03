@@ -30,8 +30,8 @@ bool CheckBeforeAddNode(const RefPtr<UINode>& hostNode, const RefPtr<UINode>& ne
         return false;
     }
     auto parent = newNode->GetParent();
-    if (parent) {
-        TAG_LOGE(AceLogTag::ACE_NODE_CONTAINER,
+    if (parent && parent != hostNode) {
+        TAG_LOGF(AceLogTag::ACE_NODE_CONTAINER,
             "Add [id:%{public}d][tag:%{public}s] to [id:%{public}d][tag:%{public}s] with previous parent "
             "[id:%{public}d][tag:%{public}s]",
             newNode->GetId(), newNode->GetTag().c_str(), hostNode->GetId(), hostNode->GetTag().c_str(), parent->GetId(),

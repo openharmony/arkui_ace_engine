@@ -149,7 +149,10 @@ public:
     // Percentage unit conversion is not supported.
     double ConvertToFp() const;
 
-    double ConvertToPxDistribute(std::optional<float> minOptional, std::optional<float> maxOptional) const;
+    DimensionUnit GetAdaptDimensionUnit(const Dimension& dimension);
+
+    double ConvertToPxDistribute(
+        std::optional<float> minOptional, std::optional<float> maxOptional, bool allowScale = true) const;
 
     double ConvertToPxByCustomFontScale(float minFontScale, float maxFontScale) const;
 

@@ -25,7 +25,8 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/manager/focus/focus_view.h"
-#include "core/components_ng/pattern/bubble//bubble_event_hub.h"
+#include "core/components_ng/pattern/bubble/bubble_accessibility_property.h"
+#include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_algorithm.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_paint_method.h"
@@ -104,6 +105,11 @@ public:
         return MakeRefPtr<BubbleEventHub>();
     }
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<BubbleAccessibilityProperty>();
+    }
+
     OffsetF GetChildOffset()
     {
         return childOffset_;
@@ -135,6 +141,7 @@ public:
     void OnColorConfigurationUpdate() override;
     void UpdateBubbleText();
     void UpdateText(const RefPtr<UINode>& node, const RefPtr<PopupTheme>& popupTheme);
+    void AddPipelineCallBack();
 
     void SetMessageColor(bool isSetMessageColor)
     {
@@ -193,6 +200,7 @@ public:
             onWillDismiss_(reason);
         }
     }
+    
     void SetHasTransition(bool hasTransition)
     {
         hasTransition_ = hasTransition;
@@ -263,6 +271,8 @@ private:
     OffsetF arrowPosition_;
     SizeF childSize_;
     RectF touchRegion_;
+    // top right bottom left
+    std::vector<float> arrowOffsetByClips_ = { 0.0f, 0.0f, 0.0f, 0.0f };
     std::optional<Placement> arrowPlacement_;
     std::vector<std::vector<float>> arrowOffsetsFromClip_
         = { {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f} };
@@ -290,6 +300,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(BubblePattern);
 
     bool hasTransition_ = false;
+    bool hasOnAreaChange_ = false;
 };
 } // namespace OHOS::Ace::NG
 

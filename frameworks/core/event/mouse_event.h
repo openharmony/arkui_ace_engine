@@ -112,6 +112,7 @@ struct MouseEvent final {
     int32_t originalId = 0;
     std::vector<KeyCode> pressedKeyCodes_;
     bool isInjected = false;
+    bool isPrivacyMode = false;
 
     Offset GetOffset() const
     {
@@ -165,7 +166,8 @@ struct MouseEvent final {
             .pointerEvent = pointerEvent,
             .originalId = originalId,
             .pressedKeyCodes_ = pressedKeyCodes_,
-            .isInjected = isInjected
+            .isInjected = isInjected,
+            .isPrivacyMode = isPrivacyMode
         };
     }
 
@@ -223,6 +225,7 @@ struct MouseEvent final {
             .SetTouchEventId(touchEventId)
             .SetOriginalId(pointOriginalId)
             .SetIsInjected(isInjected);
+        event.isPrivacyMode = isPrivacyMode;
         event.pointers.emplace_back(std::move(point));
         event.pressedKeyCodes_ = pressedKeyCodes_;
         return event;
@@ -252,7 +255,8 @@ struct MouseEvent final {
             .pointerEvent = pointerEvent,
             .originalId = originalId,
             .pressedKeyCodes_ = pressedKeyCodes_,
-            .isInjected = isInjected
+            .isInjected = isInjected,
+            .isPrivacyMode = isPrivacyMode
         };
     }
 };

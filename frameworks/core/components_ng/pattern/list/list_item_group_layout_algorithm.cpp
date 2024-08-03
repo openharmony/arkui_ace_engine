@@ -59,7 +59,7 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<ListItemGroupLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     axis_ = listLayoutProperty_->GetListDirection().value_or(Axis::VERTICAL);
-    layoutDirection_ = layoutProperty->GetNonAutoLayoutDirection();
+    layoutDirection_ = listLayoutProperty_->GetNonAutoLayoutDirection();
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     paddingBeforeContent_ = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
     paddingAfterContent_ = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
@@ -431,9 +431,11 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         MeasureAuto(layoutWrapper, layoutConstraint, startIndex);
     } else if (forwardLayout_) {
         startIndex = GetLanesFloor(startIndex);
+        CheckJumpForwardForBigOffset(startIndex, startPos);
         MeasureForward(layoutWrapper, layoutConstraint, startIndex, startPos);
     } else {
         endIndex = GetLanesCeil(endIndex);
+        CheckJumpBackwardForBigOffset(endIndex, endPos);
         MeasureBackward(layoutWrapper, layoutConstraint, endIndex, endPos);
     }
 }
@@ -721,6 +723,44 @@ void ListItemGroupLayoutAlgorithm::MeasureEnd(LayoutWrapper* layoutWrapper,
     }
 }
 
+void ListItemGroupLayoutAlgorithm::CheckJumpForwardForBigOffset(int32_t& startIndex, float& startPos)
+{
+    if (!isNeedCheckOffset_ || childrenSize_ || !layoutedItemInfo_.has_value()) {
+        return;
+    }
+    float th = startPos_ - (endPos_ - startPos_) - referencePos_;
+    if (LessOrEqual(startPos, th)) {
+        const auto& itemInfo = layoutedItemInfo_.value();
+        auto totalHeight = (itemInfo.endPos - itemInfo.startPos + spaceWidth_);
+        auto itemCount = itemInfo.endIndex - itemInfo.startIndex + 1;
+        float averageHeight = totalHeight / itemCount;
+        float distance = startPos_ - referencePos_ - startPos;
+        int32_t jumpCount = distance / averageHeight;
+        jumpCount = std::min(jumpCount, totalItemCount_ - 1 - startIndex);
+        startPos += jumpCount * averageHeight;
+        startIndex += jumpCount;
+    }
+}
+
+void ListItemGroupLayoutAlgorithm::CheckJumpBackwardForBigOffset(int32_t& endIndex, float& endPos)
+{
+    if (!isNeedCheckOffset_ || childrenSize_ || !layoutedItemInfo_.has_value()) {
+        return;
+    }
+    float th = endPos_ + (endPos_ - startPos_) - (referencePos_ - totalMainSize_);
+    if (GreatOrEqual(endPos, th)) {
+        const auto& itemInfo = layoutedItemInfo_.value();
+        auto totalHeight = (itemInfo.endPos - itemInfo.startPos + spaceWidth_);
+        auto itemCount = itemInfo.endIndex - itemInfo.startIndex + 1;
+        float averageHeight = totalHeight / itemCount;
+        float distance = endPos - (endPos_ - (referencePos_ - totalMainSize_));
+        int32_t jumpCount = distance / averageHeight;
+        jumpCount = std::min(jumpCount, endIndex);
+        endPos -= jumpCount * averageHeight;
+        endIndex -= jumpCount;
+    }
+}
+
 void ListItemGroupLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper,
     const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos)
 {
@@ -864,7 +904,8 @@ void ListItemGroupLayoutAlgorithm::AdjustItemPosition()
             itemInfo.startIndex = start.first;
             itemInfo.startPos = start.second.startPos;
         }
-        if (end.first >= itemInfo.endIndex || LessNotEqual(end.second.endPos, itemInfo.endPos)) {
+        if (end.first >= itemInfo.endIndex || GreatNotEqual(end.second.endPos, itemInfo.endPos) ||
+            itemInfo.endIndex > totalItemCount_ - 1) {
             itemInfo.endIndex = end.first;
             itemInfo.endPos = end.second.endPos;
         }
@@ -1139,8 +1180,8 @@ ListItemGroupLayoutInfo ListItemGroupLayoutAlgorithm::GetLayoutInfo() const
         const auto& itemInfo = layoutedItemInfo_.value();
         info.atStart = itemInfo.startIndex == 0;
         info.atEnd = itemInfo.endIndex == totalItemCount_ - 1;
-        auto totalHeight = (layoutedItemInfo_.value().endPos - layoutedItemInfo_.value().startPos + spaceWidth_);
-        auto itemCount = layoutedItemInfo_.value().endIndex - layoutedItemInfo_.value().startIndex + 1;
+        auto totalHeight = (itemInfo.endPos - itemInfo.startPos + spaceWidth_);
+        auto itemCount = itemInfo.endIndex - itemInfo.startIndex + 1;
         info.averageHeight = totalHeight / itemCount;
     }
     return info;

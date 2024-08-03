@@ -66,7 +66,7 @@ SelectOverlayModifier::SelectOverlayModifier(const OffsetF& menuOptionOffset)
     rotationAngle_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(ROTATION_ANGLE);
     AttachProperty(rotationAngle_);
 
-    circlesAndBackArrowOpacity_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
+    circlesAndBackArrowOpacity_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0);
     AttachProperty(circlesAndBackArrowOpacity_);
 
     firstHandleIsShow_ = AceType::MakeRefPtr<PropertyBool>(false);
@@ -74,6 +74,9 @@ SelectOverlayModifier::SelectOverlayModifier(const OffsetF& menuOptionOffset)
 
     secondHandleIsShow_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(secondHandleIsShow_);
+
+    hasExtensionMenu_ = AceType::MakeRefPtr<PropertyBool>(false);
+    AttachProperty(hasExtensionMenu_);
 
     SetDefaultCircleAndLineEndOffset();
 }
@@ -94,7 +97,7 @@ void SelectOverlayModifier::SetDefaultCircleAndLineEndOffset()
     }
 }
 
-void SelectOverlayModifier::SetOtherPointRadius(const Dimension& radius)
+void SelectOverlayModifier::SetOtherPointRadius(const Dimension& radius, bool noAnimation)
 {
     if (pointRadius_) {
         AnimationOption option = AnimationOption();
@@ -108,7 +111,7 @@ void SelectOverlayModifier::SetOtherPointRadius(const Dimension& radius)
     }
 }
 
-void SelectOverlayModifier::SetHeadPointRadius(const Dimension& radius)
+void SelectOverlayModifier::SetHeadPointRadius(const Dimension& radius, bool noAnimation)
 {
     if (headPointRadius_) {
         AnimationOption option = AnimationOption();
@@ -122,7 +125,7 @@ void SelectOverlayModifier::SetHeadPointRadius(const Dimension& radius)
     }
 }
 
-void SelectOverlayModifier::SetLineEndOffset(bool isMore)
+void SelectOverlayModifier::SetLineEndOffset(bool isMore, bool noAnimation)
 {
     for (int32_t i = 0; i < ROUND_NUMBER; i++) {
         CHECK_NULL_VOID(circleOffset_[i]);
@@ -130,71 +133,92 @@ void SelectOverlayModifier::SetLineEndOffset(bool isMore)
             CHECK_NULL_VOID(lineEndOffset_[i]);
         }
     }
-    LineEndOffsetWithAnimation(isMore);
+    LineEndOffsetWithAnimation(isMore, noAnimation);
 }
 
-void SelectOverlayModifier::LineEndOffsetWithAnimation(bool isMore)
+void SelectOverlayModifier::ChangeCircle()
+{
+    circleOffset_[FIRST_INDEX]->Set(
+        OffsetF(MORE_ANIMATION_LINEEND_X.ConvertToPx(), MORE_ANIMATION_TOP_CIRCLE_Y.ConvertToPx()));
+    circleOffset_[SECOND_INDEX]->Set(
+        OffsetF(-MORE_ANIMATION_OTHER_CIRCLE_X.ConvertToPx(), -MORE_ANIMATION_OTHER_CIRCLE_Y.ConvertToPx()));
+    circleOffset_[THIRD_INDEX]->Set(OffsetF(MORE_ANIMATION_END_CIRCLE_X.ConvertToPx(), 0));
+    circleOffset_[FOURTH_INDEX]->Set(
+        OffsetF(-MORE_ANIMATION_OTHER_CIRCLE_X.ConvertToPx(), MORE_ANIMATION_OTHER_CIRCLE_Y.ConvertToPx()));
+    // Adjust the direction of back arrow when reverse layout.
+    lineEndOffset_[FIRST_INDEX]->Set(
+        OffsetF(isReverse_ ? -MORE_ANIMATION_LINEEND_X.ConvertToPx() : MORE_ANIMATION_LINEEND_X.ConvertToPx(),
+            -MORE_ANIMATION_LINEEND_Y.ConvertToPx()));
+    lineEndOffset_[SECOND_INDEX]->Set(
+        OffsetF(MORE_ANIMATION_LINEEND_X.ConvertToPx(), Dimension(0, DimensionUnit::VP).ConvertToPx()));
+    lineEndOffset_[THIRD_INDEX]->Set(
+        OffsetF(isReverse_ ? -MORE_ANIMATION_LINEEND_X.ConvertToPx() : MORE_ANIMATION_LINEEND_X.ConvertToPx(),
+            MORE_ANIMATION_LINEEND_Y.ConvertToPx()));
+    rotationAngle_->Set(0);
+}
+
+void SelectOverlayModifier::LineEndOffsetWithAnimation(bool isMore, bool noAnimation)
 {
     CHECK_NULL_VOID(rotationAngle_);
-    AnimationOption option = AnimationOption();
-    option.SetDuration(ICON_MICRO_ANIMATION_DURATION1);
-    option.SetCurve(Curves::FRICTION);
     if (isMore) {
-        AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this),
-                                            weakRotationAngle = AceType::WeakClaim(AceType::RawPtr(rotationAngle_))]() {
-            auto overlayModifier = weak.Upgrade();
-            CHECK_NULL_VOID(overlayModifier);
-            auto rotationAngle = weakRotationAngle.Upgrade();
-            overlayModifier->circleOffset_[FIRST_INDEX]->Set(
-                OffsetF(MORE_ANIMATION_LINEEND_X.ConvertToPx(), MORE_ANIMATION_TOP_CIRCLE_Y.ConvertToPx()));
-            overlayModifier->circleOffset_[SECOND_INDEX]->Set(
-                OffsetF(-MORE_ANIMATION_OTHER_CIRCLE_X.ConvertToPx(), -MORE_ANIMATION_OTHER_CIRCLE_Y.ConvertToPx()));
-            overlayModifier->circleOffset_[THIRD_INDEX]->Set(OffsetF(MORE_ANIMATION_END_CIRCLE_X.ConvertToPx(), 0));
-            overlayModifier->circleOffset_[FOURTH_INDEX]->Set(
-                OffsetF(-MORE_ANIMATION_OTHER_CIRCLE_X.ConvertToPx(), MORE_ANIMATION_OTHER_CIRCLE_Y.ConvertToPx()));
-            // Adjust the direction of back arrow when reverse layout.
-            overlayModifier->lineEndOffset_[FIRST_INDEX]->Set(
-                OffsetF(overlayModifier->isReverse_ ? -MORE_ANIMATION_LINEEND_X.ConvertToPx() :
-                    MORE_ANIMATION_LINEEND_X.ConvertToPx(), -MORE_ANIMATION_LINEEND_Y.ConvertToPx()));
-            overlayModifier->lineEndOffset_[SECOND_INDEX]->Set(
-                OffsetF(MORE_ANIMATION_LINEEND_X.ConvertToPx(), Dimension(0, DimensionUnit::VP).ConvertToPx()));
-            overlayModifier->lineEndOffset_[THIRD_INDEX]->Set(
-                OffsetF(overlayModifier->isReverse_ ? -MORE_ANIMATION_LINEEND_X.ConvertToPx() :
-                    MORE_ANIMATION_LINEEND_X.ConvertToPx(), MORE_ANIMATION_LINEEND_Y.ConvertToPx()));
-            rotationAngle->Set(0);
-        });
+        if (!noAnimation) {
+            AnimationOption option = AnimationOption();
+            option.SetDuration(ICON_MICRO_ANIMATION_DURATION1);
+            option.SetCurve(Curves::FRICTION);
+            AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this)]() {
+                auto overlayModifier = weak.Upgrade();
+                CHECK_NULL_VOID(overlayModifier);
+                overlayModifier->ChangeCircle();
+            });
+        } else {
+            ChangeCircle();
+        }
     } else {
-        BackArrowTransitionAnimation();
+        BackArrowTransitionAnimation(noAnimation);
     }
 }
 
-void SelectOverlayModifier::BackArrowTransitionAnimation()
+void SelectOverlayModifier::BackArrowTransitionChange(const OffsetF& coordinate, int32_t i)
+{
+    circleOffset_[i]->Set(coordinate);
+    rotationAngle_->Set(ROTATION_ANGLE);
+    if (i > 0) {
+        lineEndOffset_[i - 1]->Set(coordinate);
+    };
+}
+
+void SelectOverlayModifier::BackArrowTransitionAnimation(bool noAnimation)
 {
     CHECK_NULL_VOID(rotationAngle_);
-    AnimationOption option = AnimationOption();
-    option.SetDuration(ICON_MICRO_ANIMATION_DURATION1);
-    option.SetCurve(Curves::FRICTION);
+    if (!noAnimation) {
+        AnimationOption option = AnimationOption();
+        option.SetDuration(ICON_MICRO_ANIMATION_DURATION1);
+        option.SetCurve(Curves::FRICTION);
 
-    for (int32_t i = 0; i < ROUND_NUMBER; i++) {
-        auto coordinate =
-            OffsetF(COORDINATE_X.ConvertToPx() * circle_x[i], COORDINATE_Y.ConvertToPx() * circle_Y[i]);
-        AnimationUtils::Animate(
-            option, [weak = AceType::WeakClaim(this),
-                        weakRotationAngle = AceType::WeakClaim(AceType::RawPtr(rotationAngle_)), i, coordinate]() {
-                auto overlayModifier = weak.Upgrade();
-                CHECK_NULL_VOID(overlayModifier);
-                auto rotationAngle = weakRotationAngle.Upgrade();
-                overlayModifier->circleOffset_[i]->Set(coordinate);
-                rotationAngle->Set(ROTATION_ANGLE);
-                if (i > 0) {
-                    overlayModifier->lineEndOffset_[i - 1]->Set(coordinate);
-                };
-            });
+        for (int32_t i = 0; i < ROUND_NUMBER; i++) {
+            auto coordinate =
+                OffsetF(COORDINATE_X.ConvertToPx() * circle_x[i], COORDINATE_Y.ConvertToPx() * circle_Y[i]);
+            AnimationUtils::Animate(
+                option, [weak = AceType::WeakClaim(this),
+                            weakRotationAngle = AceType::WeakClaim(AceType::RawPtr(rotationAngle_)), i, coordinate]() {
+                    auto overlayModifier = weak.Upgrade();
+                    CHECK_NULL_VOID(overlayModifier);
+                    overlayModifier->BackArrowTransitionChange(coordinate, i);
+                });
+        }
+    } else {
+        for (int32_t i = 0; i < ROUND_NUMBER; i++) {
+            auto coordinate =
+                OffsetF(COORDINATE_X.ConvertToPx() * circle_x[i], COORDINATE_Y.ConvertToPx() * circle_Y[i]);
+            BackArrowTransitionChange(coordinate, i);
+        }
     }
 }
 
 void SelectOverlayModifier::onDraw(DrawingContext& drawingContext)
 {
+    CHECK_NULL_VOID(hasExtensionMenu_);
+    CHECK_NULL_VOID(hasExtensionMenu_->Get());
     for (int32_t i = 0; i < ROUND_NUMBER; i++) {
         CHECK_NULL_VOID(circleOffset_[i]);
         if (i < ROUND_NUMBER - 1) {

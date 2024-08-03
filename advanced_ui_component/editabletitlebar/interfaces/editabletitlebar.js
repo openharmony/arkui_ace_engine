@@ -190,7 +190,6 @@ export class EditableTitleBar extends ViewPU {
         this.editableTitleBarTheme.iconColor = v9.colors.iconPrimary;
         this.editableTitleBarTheme.titleColor = v9.colors.fontPrimary;
         this.editableTitleBarTheme.subTitleColor = v9.colors.fontSecondary;
-        this.editableTitleBarTheme.iconBackgroundColor = v9.colors.compBackgroundTertiary;
         this.editableTitleBarTheme.iconBackgroundPressedColor = v9.colors.interactivePressed;
         this.editableTitleBarTheme.iconBackgroundHoverColor = v9.colors.interactiveHover;
         this.editableTitleBarTheme.iconBackgroundFocusOutlineColor = v9.colors.interactiveFocus;

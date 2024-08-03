@@ -65,7 +65,7 @@ void JSImageSpan::SetObjectFit(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     if (args->IsNumber()) {
         auto fit = static_cast<ImageFit>(args->ToNumber<int32_t>());
-        if (fit < ImageFit::FILL || fit > ImageFit::SCALE_DOWN) {
+        if (fit < ImageFit::FILL || fit > ImageFit::BOTTOM_END) {
             fit = ImageFit::COVER;
         }
         ImageModel::GetInstance()->SetImageFit(fit);

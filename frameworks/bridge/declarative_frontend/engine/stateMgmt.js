@@ -297,13 +297,13 @@ class LocalStorage extends NativeLocalStorage {
     set(propName, newValue) {
         
         if (newValue === undefined && !Utils.isApiVersionEQAbove(12)) {
-            stateMgmtConsole.warn(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
+            
             
             return false;
         }
         var p = this.storage_.get(propName);
         if (p === undefined) {
-            stateMgmtConsole.warn(`${this.constructor.name}: set: no property ${propName} error.`);
+            
             
             return false;
         }
@@ -325,7 +325,7 @@ class LocalStorage extends NativeLocalStorage {
     setOrCreate(propName, newValue) {
         
         if (newValue == undefined && !Utils.isApiVersionEQAbove(12)) {
-            stateMgmtConsole.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
+            
             
             return false;
         }
@@ -406,7 +406,7 @@ class LocalStorage extends NativeLocalStorage {
         
         var p = this.storage_.get(propName);
         if (p == undefined) {
-            stateMgmtConsole.warn(`${this.constructor.name}: link: no property ${propName} error.`);
+            
             
             return undefined;
         }
@@ -461,7 +461,7 @@ class LocalStorage extends NativeLocalStorage {
         
         var p = this.storage_.get(propName);
         if (p == undefined) {
-            stateMgmtConsole.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
+            
             
             return undefined;
         }
@@ -534,7 +534,7 @@ class LocalStorage extends NativeLocalStorage {
             return true;
         }
         else {
-            stateMgmtConsole.warn(`${this.constructor.name}: Attempt to delete unknown property ${propName}.`);
+            
             
             return false;
         }
@@ -1076,7 +1076,6 @@ class AppStorage extends LocalStorage {
     */
     static getOrCreate() {
         if (!AppStorage.instance_) {
-            stateMgmtConsole.warn('AppStorage instance missing. Use AppStorage.createInstance(initObj). Creating instance without any initialization.');
             AppStorage.instance_ = new AppStorage({});
         }
         return AppStorage.instance_;
@@ -3025,12 +3024,16 @@ class stateMgmtDFX {
     static dumpObjectProperty(value) {
         let tempObj = {};
         try {
-            Object.getOwnPropertyNames(value)
-                .slice(0, 50)
+            let properties = Object.getOwnPropertyNames(value);
+            properties
+                .slice(0, stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT)
                 .forEach((varName) => {
                 const propertyValue = Reflect.get(value, varName);
                 tempObj[varName] = typeof propertyValue === 'object' ? this.getType(propertyValue) : propertyValue;
             });
+            if (properties.length > stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT) {
+                tempObj['...'] = '...';
+            }
         }
         catch (e) {
             stateMgmtConsole.warn(`can not dump Obj, error msg ${e.message}`);
@@ -3083,6 +3086,7 @@ class stateMgmtDFX {
 // enable profile
 stateMgmtDFX.enableProfiler = false;
 stateMgmtDFX.inRenderingElementId = new Array();
+stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT = 50;
 stateMgmtDFX.DUMP_MAX_LENGTH = 10;
 stateMgmtDFX.DUMP_LAST_LENGTH = 3;
 function setProfilerStatus(profilerStatus) {
@@ -5356,10 +5360,6 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
                 // code path for 
                 // 1- source is of same type C in parent, source is its value, not the backing store ObservedPropertyObject
                 // 2- nested Object/Array inside observed another object/array in parent, source is its value
-                if (typeof sourceValue == 'object' && !((sourceValue instanceof SubscribableAbstract) || ObservedObject.IsObservedObject(sourceValue))) {
-                    stateMgmtConsole.applicationWarn(`${this.debugInfo()}: Provided source object's class lacks @Observed class decorator.
-            Object property changes will not be observed.`);
-                }
                 
                 this.createSourceDependency(sourceValue);
                 this.source_ = new ObservedPropertyObjectPU(sourceValue, this, this.getPropSourceObservedPropertyFakeName());
@@ -6143,6 +6143,7 @@ class ViewPU extends PUV2ViewBase {
         this.watchedProps = new Map();
         this.recycleManager_ = undefined;
         this.hasBeenRecycled_ = false;
+        this.preventRecursiveRecycle_ = false;
         this.delayRecycleNodeRerender = false;
         this.delayRecycleNodeRerenderDeep = false;
         // @Provide'd variables by this class and its ancestors
@@ -6698,6 +6699,9 @@ class ViewPU extends PUV2ViewBase {
             return;
         }
         const _componentName = (classObject && ('name' in classObject)) ? Reflect.get(classObject, 'name') : 'unspecified UINode';
+        if (_componentName === '__Recycle__') {
+            return;
+        }
         const _popFunc = (classObject && 'pop' in classObject) ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
             var _a, _b;
@@ -6854,11 +6858,18 @@ class ViewPU extends PUV2ViewBase {
         });
         this.runReuse_ = false;
     }
+    stopRecursiveRecycle() {
+        this.preventRecursiveRecycle_ = true;
+    }
     aboutToRecycleInternal() {
         this.runReuse_ = true;
         stateMgmtTrace.scopedTrace(() => {
             this.aboutToRecycle();
         }, 'aboutToRecycle', this.constructor.name);
+        if (this.preventRecursiveRecycle_) {
+            this.preventRecursiveRecycle_ = false;
+            return;
+        }
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
             if (child) {
@@ -9805,13 +9816,15 @@ class __Repeat {
     }
     // normalize template options
     normTemplateOptions(options) {
-        if (options) {
-            const cachedCount = options.cachedCount;
-            if (Number.isInteger(cachedCount) && cachedCount >= 0) {
-                return options;
+        const value = (options && Number.isInteger(options.cachedCount) && options.cachedCount >= 0)
+            ? {
+                cachedCount: Math.max(0, options.cachedCount),
+                cachedCountSpecified: true
             }
-        }
-        return { cachedCount: 1 };
+            : {
+                cachedCountSpecified: false
+            };
+        return value;
     }
 }
 ; // __Repeat<T>
@@ -10133,7 +10146,9 @@ class __RepeatVirtualScrollImpl {
                 let ttype = (_a = this.typeGenFunc_(this.arr_[i], i)) !== null && _a !== void 0 ? _a : '';
                 if (!this.itemGenFuncs_[ttype]) {
                     stateMgmtConsole.applicationError(`Repeat with virtual scroll elmtId: ${this.repeatElmtId_}. Factory function .templateId  returns template id '${ttype}'.` +
-                        (ttype == '') ? `Missing Repeat.each ` : `missing Repeat.template for id '${ttype}'` + `! Unrecoverable application error!"`);
+                        (ttype === '') ? 'Missing Repeat.each ' : `missing Repeat.template for id '${ttype}'` + '! Unrecoverable application error!');
+                    // fallback to use .each function and try to continue the app with it.
+                    ttype = '';
                 }
                 result.push(ttype);
             } // for
@@ -10163,13 +10178,13 @@ class __RepeatVirtualScrollImpl {
         // execute the itemGen function
         const itemType = (_a = this.typeGenFunc_(repeatItem.item, repeatItem.index)) !== null && _a !== void 0 ? _a : '';
         const itemFunc = (_b = this.itemGenFuncs_[itemType]) !== null && _b !== void 0 ? _b : this.itemGenFuncs_[''];
-        if (typeof itemFunc === "function") {
+        if (typeof itemFunc === 'function') {
             itemFunc(repeatItem);
         }
         else {
-            stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${this.repeatElmtId_}: `
-                + (itemType == '') ? "Missing Repeat.each " : `missing Repeat.template for id '${itemType}'`
-                + "! Unrecoverable application error!");
+            stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${this.repeatElmtId_}: ` +
+                (itemType === '') ? 'Missing Repeat.each ' : `missing Repeat.template for id '${itemType}'` +
+                '! Unrecoverable application error!');
         }
     }
     /**
@@ -10631,6 +10646,47 @@ PersistenceV2Impl.KEYS_ARR_ = '___keys_arr';
 PersistenceV2Impl.MAX_DATA_LENGTH_ = 8000;
 PersistenceV2Impl.NOT_SUPPORT_TYPES_ = [Array, Set, Map, WeakSet, WeakMap, Date, Boolean, Number, String, Symbol, BigInt, RegExp, Function, Promise, ArrayBuffer];
 PersistenceV2Impl.instance_ = undefined;
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+class UIUtilsImpl {
+    getTarget(source) {
+        if (!source || typeof source !== 'object') {
+            return source;
+        }
+        if (ObservedObject.IsObservedObject(source)) {
+            // V1 Proxy object
+            return ObservedObject.GetRawObject(source);
+        }
+        else if (source[ObserveV2.SYMBOL_PROXY_GET_TARGET]) {
+            // V2 Proxy object
+            return source[ObserveV2.SYMBOL_PROXY_GET_TARGET];
+        }
+        else {
+            // other situation, not handle
+            return source;
+        }
+    }
+    static instance() {
+        if (UIUtilsImpl.instance_) {
+            return UIUtilsImpl.instance_;
+        }
+        UIUtilsImpl.instance_ = new UIUtilsImpl();
+        return UIUtilsImpl.instance_;
+    }
+}
+UIUtilsImpl.instance_ = undefined;
 /*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");

@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
+#include "core/components_ng/pattern/text/multiple_click_recognizer.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
@@ -619,12 +620,20 @@ public:
         parentGlobalOffset_ = GetParentGlobalOffset();
     }
 
+    void SetPrintInfo(const std::string& area, const OffsetF& paintOffset)
+    {
+        paintInfo_ = area + paintOffset.ToString();
+    }
+
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
     {
         isUserSetResponseRegion_ = isUserSetResponseRegion;
     }
 
-    void UnregisterNodeChangeListenerWithoutSelect();
+    void UpdateFontColor(const Color& value);
+    void BeforeCreatePaintWrapper() override;
+
+    void OnTextOverflowChanged();
 
 protected:
     void OnAttachToFrameNode() override;
@@ -632,10 +641,6 @@ protected:
     void OnAfterModifyDone() override;
     virtual bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan);
     void InitMouseEvent();
-    void InitFocusEvent();
-    void InitHoverEvent();
-    void RecoverCopyOption();
-    void InitCopyOption();
     void RecoverSelection();
     virtual void HandleOnCameraInput() {};
     void InitSelection(const Offset& pos);
@@ -700,8 +705,6 @@ protected:
     bool panEventInitialized_ = false;
     bool clickEventInitialized_ = false;
     bool touchEventInitialized_ = false;
-    bool focusInitialized_ = false;
-    bool hoverInitialized_ = false;
     bool isSpanStringMode_ = false;
     RefPtr<MutableSpanString> styledString_ = MakeRefPtr<MutableSpanString>("");
     bool keyEventInitialized_ = false;
@@ -716,6 +719,7 @@ protected:
     CopyOptions copyOption_ = CopyOptions::None;
 
     std::string textForDisplay_;
+    std::string paintInfo_ = "NA";
     std::optional<TextStyle> textStyle_;
     std::list<RefPtr<SpanItem>> spans_;
     mutable std::list<RefPtr<UINode>> childNodes_;
@@ -734,8 +738,6 @@ protected:
     OffsetF parentGlobalOffset_;
     std::optional<TextResponseType> textResponseType_;
 
-    friend class TextContentModifier;
-
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleSpanLongPressEvent(GestureEvent& info);
@@ -753,7 +755,6 @@ private:
     RefPtr<RenderContext> GetRenderContext();
     void ProcessBoundRectByTextShadow(RectF& rect);
     void FireOnSelectionChange(int32_t start, int32_t end);
-    void FireOnMarqueeStateChange(const TextMarqueeState& state);
     void HandleMouseLeftButton(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseRightButton(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftPressAction(const MouseInfo& info, const Offset& textOffset);
@@ -792,26 +793,20 @@ private:
     void ProcessOverlayAfterLayout();
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     Offset ConvertLocalOffsetToParagraphOffset(const Offset& offset);
-    void RegisterMarqueeNodeChangeListener();
-    void UnregisterMarqueeNodeChangeListener();
-    void HandleMarqueeWithIsVisible(FrameNodeChangeInfoFlag flag);
+    void ProcessMarqueeVisibleAreaCallback();
     void ParseOriText(const std::string& currentText);
+    bool IsMarqueeOverflow() const;
+    virtual void ResetAfterTextChange();
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
     bool leftMousePressed_ = false;
     bool isCustomFont_ = false;
     bool blockPress_ = false;
-    bool hasClicked_ = false;
     bool isDoubleClick_ = false;
     bool showSelected_ = false;
     bool isSensitive_ = false;
     int32_t clickedSpanPosition_ = -1;
-    TimeStamp lastClickTimeStamp_;
-    bool leftFadeout_ = false;
-    bool rightFadeout_ = false;
-    float gradientPercent_ = 0.0;
-    bool isMarqueeRunning_ = false;
 
     RefPtr<ParagraphManager> pManager_;
     std::vector<int32_t> placeholderIndex_;
@@ -836,6 +831,7 @@ private:
     std::optional<void*> externalParagraph_;
     std::optional<ParagraphStyle> externalParagraphStyle_;
     bool isUserSetResponseRegion_ = false;
+    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

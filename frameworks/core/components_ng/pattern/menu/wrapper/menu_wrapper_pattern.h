@@ -135,7 +135,9 @@ public:
 
     RefPtr<FrameNode> GetHoverImageStackNode() const
     {
-        auto node = AceType::DynamicCast<FrameNode>(GetHoverImageFlexNode()->GetChildAtIndex(0));
+        auto hoverImageFlexNode = GetHoverImageFlexNode();
+        CHECK_NULL_RETURN(hoverImageFlexNode, nullptr);
+        auto node = AceType::DynamicCast<FrameNode>(hoverImageFlexNode->GetChildAtIndex(0));
         CHECK_NULL_RETURN(node, nullptr);
         if (node->GetTag() != V2::STACK_ETS_TAG) {
             return nullptr;
@@ -145,7 +147,9 @@ public:
 
     RefPtr<FrameNode> GetHoverImagePreview() const
     {
-        auto node = AceType::DynamicCast<FrameNode>(GetHoverImageStackNode()->GetChildAtIndex(0));
+        auto hoverImageStackNode = GetHoverImageStackNode();
+        CHECK_NULL_RETURN(hoverImageStackNode, nullptr);
+        auto node = AceType::DynamicCast<FrameNode>(hoverImageStackNode->GetChildAtIndex(0));
         CHECK_NULL_RETURN(node, nullptr);
         if (node->GetTag() != V2::IMAGE_ETS_TAG) {
             return nullptr;
@@ -155,7 +159,9 @@ public:
 
     RefPtr<FrameNode> GetHoverImageCustomPreview() const
     {
-        auto node = AceType::DynamicCast<FrameNode>(GetHoverImageStackNode()->GetChildAtIndex(1));
+        auto hoverImageStackNode = GetHoverImageStackNode();
+        CHECK_NULL_RETURN(hoverImageStackNode, nullptr);
+        auto node = AceType::DynamicCast<FrameNode>(hoverImageStackNode->GetChildAtIndex(1));
         CHECK_NULL_RETURN(node, nullptr);
         if (node->GetTag() != V2::MENU_PREVIEW_ETS_TAG) {
             return nullptr;

@@ -82,6 +82,20 @@ void RefreshPattern::OnAttachToFrameNode()
     host->GetRenderContext()->UpdateClipEdge(true);
 }
 
+bool RefreshPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    if (isRemoveCustomBuilder_ || isTextNodeChanged_) {
+        UpdateFirstChildPlacement();
+        if (isRefreshing_) {
+            UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
+        }
+        isRemoveCustomBuilder_ = false;
+        isTextNodeChanged_ = false;
+    }
+    return false;
+}
+
 void RefreshPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -93,10 +107,12 @@ void RefreshPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    refreshOffset_ = layoutProperty->GetRefreshOffset().value_or(GetTriggerRefreshDisTance()).Value() > 0 ?
-        layoutProperty->GetRefreshOffset().value_or(GetTriggerRefreshDisTance()) : GetTriggerRefreshDisTance();
-    pullToRefresh_ = layoutProperty->GetPullToRefresh().value_or(true);
     hasLoadingText_ = layoutProperty->HasLoadingText();
+    refreshOffset_ = layoutProperty->GetRefreshOffset().value_or(GetTriggerRefreshDisTance());
+    if (LessOrEqual(refreshOffset_.Value(), 0)) {
+        refreshOffset_ = GetTriggerRefreshDisTance();
+    }
+    pullToRefresh_ = layoutProperty->GetPullToRefresh().value_or(true);
     InitPanEvent(gestureHub);
     InitOnKeyEvent();
     InitChildNode();
@@ -210,9 +226,6 @@ void RefreshPattern::InitProgressNode()
     }
     layoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
     host->AddChild(progressChild_, 0);
-    if (hasLoadingText_) {
-        InitProgressColumn();
-    }
     progressChild_->MarkDirtyNode();
 }
 
@@ -308,11 +321,7 @@ void RefreshPattern::InitChildNode()
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             auto progressContext = progressChild_->GetRenderContext();
             CHECK_NULL_VOID(progressContext);
-            UpdateFirstChildPlacement();
-            if (isRefreshing_) {
-                UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
-            }
-            UpdateLoadingTextOpacity(1.0f);
+            progressContext->UpdateOpacity(0.0f);
         } else {
             UpdateLoadingProgress();
         }
@@ -320,6 +329,17 @@ void RefreshPattern::InitChildNode()
     auto progressAccessibilityProperty = progressChild_->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(progressAccessibilityProperty);
     progressAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
+
+    if (hasLoadingText_ && !loadingTextNode_) {
+        InitProgressColumn();
+        isTextNodeChanged_ = true;
+    } else if (!hasLoadingText_ && loadingTextNode_) {
+        host->RemoveChild(columnNode_);
+        columnNode_ = nullptr;
+        loadingTextNode_ = nullptr;
+        isTextNodeChanged_ = true;
+        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    }
 
     if (hasLoadingText_ && loadingTextNode_) {
         auto loadingTextLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
@@ -523,9 +543,12 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!builder) {
-        host->RemoveChild(customBuilder_);
-        isCustomBuilderExist_ = false;
-        customBuilder_ = nullptr;
+        if (isCustomBuilderExist_) {
+            host->RemoveChild(customBuilder_);
+            isCustomBuilderExist_ = false;
+            customBuilder_ = nullptr;
+            isRemoveCustomBuilder_ = true;
+        }
         return;
     }
 

@@ -57,6 +57,13 @@ protected:
         const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const;
     virtual bool CreateParagraph(
         const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper, double maxWidth = 0.0) = 0;
+    virtual void HandleEmptyParagraph(RefPtr<Paragraph> paragraph, const std::list<RefPtr<SpanItem>>& spanGroup) {}
+    virtual RefPtr<SpanItem> GetParagraphStyleSpanItem(const std::list<RefPtr<SpanItem>>& spanGroup)
+    {
+        CHECK_NULL_RETURN(!spanGroup.empty(), nullptr);
+        return spanGroup.front();
+    }
+
     void ApplyIndent(ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width,
         const TextStyle& textStyle);
     void ConstructTextStyles(

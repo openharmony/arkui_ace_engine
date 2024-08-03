@@ -59,12 +59,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     // update layout and render props
     auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialog->GetLayoutProperty());
     CHECK_NULL_RETURN(dialogLayoutProp, dialog);
-    DialogAlignment align = static_cast<DialogAlignment>(dialogTheme->GetAlignDialog());
-    if (param.alignment != DialogAlignment::DEFAULT && align == DialogAlignment::CENTER) {
-        dialogLayoutProp->UpdateDialogAlignment(align);
-    } else {
-        dialogLayoutProp->UpdateDialogAlignment(param.alignment);
-    }
+    dialogLayoutProp->UpdateDialogAlignment(param.alignment);
     dialogLayoutProp->UpdateDialogOffset(param.offset);
     dialogLayoutProp->UpdateUseCustomStyle(param.customStyle);
     dialogLayoutProp->UpdateAutoCancel(param.autoCancel);
@@ -105,6 +100,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
 
     pattern->BuildChild(param);
     pattern->SetOnWillDismiss(param.onWillDismiss);
+    pattern->SetOnWillDismissByNDK(param.onWillDismissCallByNDK);
 
     if (param.transitionEffect != nullptr) {
         dialogContext->UpdateChainedTransition(param.transitionEffect);

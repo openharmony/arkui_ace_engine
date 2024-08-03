@@ -230,7 +230,6 @@ DatePickerSettingData OverlayTestUpdate::GenDatePickerSettingData()
 void OverlayTestUpdate::TestUpdateAlign(
     RefPtr<OHOS::Ace::NG::LayoutAlgorithm> toastLayoutAlgorithm, LayoutWrapper* layoutWrapper, ToastInfo toastInfo)
 {
-    std::cout<<"TestUpdateAlign start"<<std::endl;
     ASSERT_NE(toastLayoutAlgorithm, nullptr);
     ASSERT_NE(layoutWrapper, nullptr);
 
@@ -460,12 +459,14 @@ HWTEST_F(OverlayTestUpdate, ToastTest005, TestSize.Level1)
     /**
      * @tc.steps: step3. text textContext.
      */
-    ToastView::UpdateTextContext(textNode);
+    ToastView::UpdateToastContext(toastNode);
+    auto toastContext = toastNode->GetRenderContext();
+    ASSERT_NE(toastContext, nullptr);
     /**
      * @tc.steps: step4. GetBackBlurStyle GetBackgroundColorValue.
      */
-    auto styleOption = textContext->GetBackBlurStyle();
-    auto testval1 = textContext->GetBackgroundColorValue();
+    auto styleOption = toastContext->GetBackBlurStyle();
+    auto testval1 = toastContext->GetBackgroundColorValue();
     EXPECT_EQ(testval1, Color::TRANSPARENT);
     EXPECT_EQ(styleOption->blurStyle, BlurStyle::COMPONENT_ULTRA_THICK);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
@@ -506,14 +507,16 @@ HWTEST_F(OverlayTestUpdate, ToastTest006, TestSize.Level1)
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();;
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     /**
-     * @tc.steps: step3. test UpdateTextContext.
+     * @tc.steps: step3. test UpdateToastContext.
      */
-    ToastView::UpdateTextContext(textNode);
+    ToastView::UpdateToastContext(toastNode);
+    auto toastContext = toastNode->GetRenderContext();
+    ASSERT_NE(toastContext, nullptr);
     /**
      * @tc.steps: step4. GetBackBlurStyle GetBackgroundColorValue.
      */
-    auto styleOption = textContext->GetBackBlurStyle();
-    auto testval1 = textContext->GetBackgroundColorValue();
+    auto styleOption = toastContext->GetBackBlurStyle();
+    auto testval1 = toastContext->GetBackgroundColorValue();
     EXPECT_EQ(testval1, Color::TRANSPARENT);
     EXPECT_EQ(styleOption->blurStyle, BlurStyle::COMPONENT_ULTRA_THICK);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
@@ -554,14 +557,16 @@ HWTEST_F(OverlayTestUpdate, ToastTest007, TestSize.Level1)
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();;
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     /**
-     * @tc.steps: step5. Test UpdateTextContext.
+     * @tc.steps: step5. Test UpdateToastContext.
      */
-    ToastView::UpdateTextContext(textNode);
+    ToastView::UpdateToastContext(toastNode);
+    auto toastContext = toastNode->GetRenderContext();
+    ASSERT_NE(toastContext, nullptr);
     /**
      * @tc.steps: step6. GetBackBlurStyle and GetBackgroundColorValue.
      */
-    auto styleOption = textContext->GetBackBlurStyle();
-    auto testval1 = textContext->GetBackgroundColorValue();
+    auto styleOption = toastContext->GetBackBlurStyle();
+    auto testval1 = toastContext->GetBackgroundColorValue();
     EXPECT_EQ(testval1, Color::TRANSPARENT);
     EXPECT_EQ(styleOption->blurStyle, BlurStyle::COMPONENT_ULTRA_THICK);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
@@ -598,12 +603,14 @@ HWTEST_F(OverlayTestUpdate, ToastTest008, TestSize.Level1)
     int32_t settingApiVersion = VERSION_TWELVE;
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();;
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-    ToastView::UpdateTextContext(textNode);
+    ToastView::UpdateToastContext(toastNode);
+    auto toastContext = toastNode->GetRenderContext();
+    ASSERT_NE(toastContext, nullptr);
     /**
      * @tc.steps: step4. text textContext.
      */
-    auto styleOption = textContext->GetBackBlurStyle();
-    auto testval1 = textContext->GetBackgroundColorValue();
+    auto styleOption = toastContext->GetBackBlurStyle();
+    auto testval1 = toastContext->GetBackgroundColorValue();
     EXPECT_EQ(testval1, Color::TRANSPARENT);
     EXPECT_EQ(styleOption->blurStyle, BlurStyle::COMPONENT_ULTRA_THICK);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
@@ -611,7 +618,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest008, TestSize.Level1)
 
 /**
  * @tc.name: ToastTest009
- * @tc.desc: Test UpdateTextContext Low version change ToastView.
+ * @tc.desc: Test UpdateToastContext Low version change ToastView.
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayTestUpdate, ToastTest009, TestSize.Level1)
@@ -649,22 +656,24 @@ HWTEST_F(OverlayTestUpdate, ToastTest009, TestSize.Level1)
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     /**
-     * @tc.steps: step6. Change low version UpdateTextContext and Save.
+     * @tc.steps: step6. Change low version UpdateToastContext and Save.
      */
     int32_t settingApiVersion = VERSION_ELEVEN;
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();;
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     /**
-     * @tc.steps: step7. text low version UpdateTextContext.
+     * @tc.steps: step7. text low version UpdateToastContext.
      */
-    ToastView::UpdateTextContext(textNode);
-    EXPECT_EQ(textContext->GetBackgroundColorValue(), toastBackgroundColor);
+    ToastView::UpdateToastContext(toastNode);
+    auto toastContext = toastNode->GetRenderContext();
+    ASSERT_NE(toastContext, nullptr);
+    EXPECT_EQ(toastContext->GetBackgroundColorValue(), toastBackgroundColor);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
  * @tc.name: ToastTest010
- * @tc.desc: Test UpdateTextContext Low version change ToastView.
+ * @tc.desc: Test UpdateToastContext Low version change ToastView.
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayTestUpdate, ToastTest010, TestSize.Level1)
@@ -704,22 +713,24 @@ HWTEST_F(OverlayTestUpdate, ToastTest010, TestSize.Level1)
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     /**
-     * @tc.steps: step6. Change low version UpdateTextContext and Save.
+     * @tc.steps: step6. Change low version UpdateToastContext and Save.
      */
     int32_t settingApiVersion = VERSION_ELEVEN;
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();;
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     /**
-     * @tc.steps: step7. text low version UpdateTextContext.
+     * @tc.steps: step7. text low version UpdateToastContext.
      */
-    ToastView::UpdateTextContext(textNode);
-    EXPECT_EQ(textContext->GetBackgroundColorValue(), toastBackgroundColor);
+    ToastView::UpdateToastContext(toastNode);
+    auto toastContext = toastNode->GetRenderContext();
+    ASSERT_NE(toastContext, nullptr);
+    EXPECT_EQ(toastContext->GetBackgroundColorValue(), toastBackgroundColor);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
  * @tc.name: ToastTest011
- * @tc.desc: Test UpdateTextContext Low version change ToastView.
+ * @tc.desc: Test UpdateToastContext Low version change ToastView.
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayTestUpdate, ToastTest011, TestSize.Level1)
@@ -759,22 +770,24 @@ HWTEST_F(OverlayTestUpdate, ToastTest011, TestSize.Level1)
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     /**
-     * @tc.steps: step6. Change low version UpdateTextContext and Save.
+     * @tc.steps: step6. Change low version UpdateToastContext and Save.
      */
     int32_t settingApiVersion = VERSION_ELEVEN;
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();;
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     /**
-     * @tc.steps: step7. text low version UpdateTextContext.
+     * @tc.steps: step7. text low version UpdateToastContext.
      */
-    ToastView::UpdateTextContext(textNode);
-    EXPECT_EQ(textContext->GetBackgroundColorValue(), toastBackgroundColor);
+    ToastView::UpdateToastContext(toastNode);
+    auto toastContext = toastNode->GetRenderContext();
+    ASSERT_NE(toastContext, nullptr);
+    EXPECT_EQ(toastContext->GetBackgroundColorValue(), toastBackgroundColor);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
  * @tc.name: ToastTest012
- * @tc.desc: Test UpdateTextContext Low version change ToastView.
+ * @tc.desc: Test UpdateToastContext Low version change ToastView.
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayTestUpdate, ToastTest012, TestSize.Level1)
@@ -814,16 +827,18 @@ HWTEST_F(OverlayTestUpdate, ToastTest012, TestSize.Level1)
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     /**
-     * @tc.steps: step6. Change low version UpdateTextContext and Save.
+     * @tc.steps: step6. Change low version UpdateToastContext and Save.
      */
     int32_t settingApiVersion = VERSION_ELEVEN;
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();;
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     /**
-     * @tc.steps: step7. text low version UpdateTextContext.
+     * @tc.steps: step7. text low version UpdateToastContext.
      */
-    ToastView::UpdateTextContext(textNode);
-    EXPECT_EQ(textContext->GetBackgroundColorValue(), toastBackgroundColor);
+    ToastView::UpdateToastContext(toastNode);
+    auto toastContext = toastNode->GetRenderContext();
+    ASSERT_NE(toastContext, nullptr);
+    EXPECT_EQ(toastContext->GetBackgroundColorValue(), toastBackgroundColor);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
@@ -1034,7 +1049,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest017, TestSize.Level1)
     textProperty->UpdateAdaptMinFontSize(ADAPT_TOAST_MIN_FONT_SIZE);
     auto toastMaxFontSize = toastTheme->GetTextStyle().GetFontSize();
     /**
-     * @tc.steps: step5. text VERSION_TWELVE version UpdateTextContext .
+     * @tc.steps: step5. text VERSION_TWELVE version UpdateToastContext .
      */
     Dimension text1 = 0.0_fp;
     toastPattern1->UpdateTextSizeConstraint(textNode);
@@ -1086,7 +1101,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest018, TestSize.Level1)
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     auto toastMaxFontSize = toastTheme->GetTextStyle().GetFontSize();
     /**
-     * @tc.steps: step5. text VERSION_TWELVE version UpdateTextContext .
+     * @tc.steps: step5. text VERSION_TWELVE version UpdateToastContext .
      */
     toastPattern1->UpdateTextSizeConstraint(textNode);
     textProperty->UpdateAdaptMinFontSize(ADAPT_TOAST_MAX_FONT_SIZE);
@@ -1139,7 +1154,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest019, TestSize.Level1)
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     auto toastMaxFontSize = toastTheme->GetTextStyle().GetFontSize();
     /**
-     * @tc.steps: step5. text VERSION_TWELVE version UpdateTextContext .
+     * @tc.steps: step5. text VERSION_TWELVE version UpdateToastContext .
      */
     toastPattern1->UpdateTextSizeConstraint(textNode);
     textProperty->UpdateAdaptMinFontSize(ADAPT_TOAST_NORMAL_FONT_SIZE);
@@ -1191,7 +1206,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest020, TestSize.Level1)
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     auto toastMaxFontSize = toastTheme->GetTextStyle().GetFontSize();
     /**
-     * @tc.steps: step5. text VERSION_TWELVE version UpdateTextContext .
+     * @tc.steps: step5. text VERSION_TWELVE version UpdateToastContext .
      */
     toastPattern1->UpdateTextSizeConstraint(textNode);
     textProperty->UpdateAdaptMinFontSize(ADAPT_TOAST_ZERO_FONT_SIZE);
@@ -1243,7 +1258,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest021, TestSize.Level1)
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     auto toastMaxFontSize = toastTheme->GetTextStyle().GetFontSize();
     /**
-     * @tc.steps: step5. text VERSION_TWELVE version UpdateTextContext .
+     * @tc.steps: step5. text VERSION_TWELVE version UpdateToastContext .
      */
     toastPattern1->UpdateTextSizeConstraint(textNode);
     textProperty->UpdateAdaptMinFontSize(ADAPT_TOAST_NEG_FONT_SIZE);
@@ -1294,7 +1309,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest022, TestSize.Level1)
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();;
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     /**
-     * @tc.steps: step5. text VERSION_TWELVE version UpdateTextContext .
+     * @tc.steps: step5. text VERSION_TWELVE version UpdateToastContext .
      */
     toastPattern1->UpdateTextSizeConstraint(textNode);
     textProperty->UpdateAdaptMinFontSize(ADAPT_TOAST_MIN_FONT_SIZE);
@@ -1346,7 +1361,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest023, TestSize.Level1)
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();;
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     /**
-     * @tc.steps: step5. text VERSION_TWELVE version UpdateTextContext .
+     * @tc.steps: step5. text VERSION_TWELVE version UpdateToastContext .
      */
     toastPattern1->UpdateTextSizeConstraint(textNode);
     textProperty->UpdateAdaptMinFontSize(ADAPT_TOAST_MAX_FONT_SIZE);
@@ -1398,7 +1413,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest024, TestSize.Level1)
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();;
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     /**
-     * @tc.steps: step5. text VERSION_TWELVE version UpdateTextContext .
+     * @tc.steps: step5. text VERSION_TWELVE version UpdateToastContext .
      */
     toastPattern1->UpdateTextSizeConstraint(textNode);
     textProperty->UpdateAdaptMinFontSize(ADAPT_TOAST_NORMAL_FONT_SIZE);
@@ -1450,7 +1465,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest025, TestSize.Level1)
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();;
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     /**
-     * @tc.steps: step5. text VERSION_TWELVE version UpdateTextContext .
+     * @tc.steps: step5. text VERSION_TWELVE version UpdateToastContext .
      */
     toastPattern1->UpdateTextSizeConstraint(textNode);
     textProperty->UpdateAdaptMinFontSize(ADAPT_TOAST_ZERO_FONT_SIZE);
@@ -1502,7 +1517,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest026, TestSize.Level1)
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();;
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     /**
-     * @tc.steps: step5. text VERSION_TWELVE version UpdateTextContext .
+     * @tc.steps: step5. text VERSION_TWELVE version UpdateToastContext .
      */
     toastPattern1->UpdateTextSizeConstraint(textNode);
     textProperty->UpdateAdaptMinFontSize(ADAPT_TOAST_NEG_FONT_SIZE);
@@ -1554,7 +1569,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest027, TestSize.Level1)
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();;
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     /**
-     * @tc.steps: step5. text VERSION_TWELVE version UpdateTextContext .
+     * @tc.steps: step5. text VERSION_TWELVE version UpdateToastContext .
      */
     toastPattern1->UpdateTextSizeConstraint(textNode);
     textProperty->UpdateAdaptMinFontSize(ADAPT_TOAST_MIN_FONT_SIZE);
@@ -1596,7 +1611,6 @@ HWTEST_F(OverlayTestUpdate, ToastTest028, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapperNode>(textNode, textNode->GetGeometryNode(), textNode->GetLayoutProperty());
     ASSERT_NE(textLayoutWrapper, nullptr);
     layoutWrapper->AppendChild(textLayoutWrapper);
-std::cout<<"TDD start"<<std::endl;
     /**
      * @tc.steps: step3. Test left to right alignment.
      */

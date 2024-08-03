@@ -250,8 +250,10 @@ void GestureScope::CleanGestureScopeState()
 {
     for (const auto& weak : recognizers_) {
         auto recognizer = weak.Upgrade();
-        if (recognizer) {
-            recognizer->CleanRecognizerState();
+        auto multiFingerRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(recognizer);
+        if (multiFingerRecognizer && multiFingerRecognizer->CheckTouchId(touchId_) &&
+            multiFingerRecognizer->GetTouchPointsSize() == 1) {
+            multiFingerRecognizer->CleanRecognizerState();
         }
     }
 }

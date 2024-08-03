@@ -139,14 +139,11 @@ void WindowPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto state = session_->GetSessionState();
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-        "[WMSMain] id: %{public}d, node id: %{public}d, state: %{public}u, name: %{public}s, in recents: %{public}d",
-        session_->GetPersistentId(), host->GetId(),
-        state, session_->GetSessionInfo().bundleName_.c_str(), session_->GetShowRecent());
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain]OnAttachToFrameNode id: %{public}d, node id: %{public}d, "
+        "name: %{public}s, state: %{public}u, in recents: %{public}d", session_->GetPersistentId(), host->GetId(),
+        session_->GetSessionInfo().bundleName_.c_str(), state, session_->GetShowRecent());
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
-        if (!HasStartingPage()) {
-            return;
-        }
+        CHECK_EQUAL_VOID(HasStartingPage(), false);
         if (session_->GetShowRecent() && session_->GetScenePersistence() &&
             (session_->GetScenePersistence()->IsSnapshotExisted() ||
             session_->GetScenePersistence()->IsSavingSnapshot())) {
@@ -178,11 +175,16 @@ void WindowPattern::OnAttachToFrameNode()
 
     AddChild(host, appWindow_, appWindowName_, 0);
     auto surfaceNode = session_->GetSurfaceNode();
-    if (surfaceNode && !surfaceNode->IsBufferAvailable()) {
+    CHECK_NULL_VOID(surfaceNode);
+    if (!surfaceNode->IsBufferAvailable()) {
         CreateStartingWindow();
         AddChild(host, startingWindow_, startingWindowName_);
         surfaceNode->SetBufferAvailableCallback(coldStartCallback_);
+        return;
     }
+    CreateSnapshotWindow();
+    AddChild(host, snapshotWindow_, snapshotWindowName_);
+    attachToFrameNodeFlag_ = true;
 }
 
 void WindowPattern::CreateBlankWindow()
@@ -605,7 +607,9 @@ void WindowPattern::FilterInvalidPointerItem(const std::shared_ptr<MMI::PointerE
             continue;
         }
         const NG::PointF point { static_cast<float>(item.GetDisplayX()), static_cast<float>(item.GetDisplayY()) };
-        if (host->IsOutOfTouchTestRegion(point, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN)) {
+        OHOS::Ace::TouchEvent touchEvent;
+        touchEvent.sourceType = static_cast<SourceType>(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+        if (host->IsOutOfTouchTestRegion(point, touchEvent)) {
             pointerEvent->RemovePointerItem(id);
         }
     }

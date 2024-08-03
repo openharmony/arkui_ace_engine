@@ -28,23 +28,19 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<GridRowModel> GridRowModel::instance_;
-std::mutex GridRowModel::mutex_;
 
 GridRowModel* GridRowModel::GetInstance()
 {
     if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::GridRowModelNG());
+        instance_.reset(new NG::GridRowModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::GridRowModelNG());
-            } else {
-                instance_.reset(new Framework::GridRowModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::GridRowModelNG());
+        } else {
+            instance_.reset(new Framework::GridRowModelImpl());
         }
+#endif
     }
     return instance_.get();
 }

@@ -33,7 +33,8 @@ struct ModalUIExtensionConfig {
     bool isProhibitBack = false;
     bool isAsyncModalBinding = false;
     bool isAllowedBeCovered = false;
-    std::function<void()> doAfterAsyncModalBinding;
+    std::function<void()> doAfterAsyncModalBinding = nullptr;
+    bool prohibitedRemoveByRouter = false;
 };
 
 struct ModalUIExtensionCallbacks {

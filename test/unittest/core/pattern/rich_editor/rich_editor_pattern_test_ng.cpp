@@ -233,57 +233,6 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestRequestKeyboard001, TestS
 }
 
 /**
- * @tc.name: RichEditorPatternTestOnColorConfigurationUpdate001
- * @tc.desc: test OnColorConfigurationUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestOnColorConfigurationUpdate001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
-
-    auto oldThemeManager = PipelineBase::GetCurrentContext()->themeManager_;
-    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
-
-    auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, testFrameNodeId, richEditorPattern);
-    ASSERT_NE(childFrameNode, nullptr);
-    auto spanNode = AceType::MakeRefPtr<SpanNode>(testSpanNodeId);
-    ASSERT_NE(spanNode, nullptr);
-
-    do {
-        auto newHost1 = richEditorPattern->GetHost();
-        auto newHost2 = richEditorPattern->GetHost();
-        ASSERT_EQ(newHost1, newHost2);
-
-        newHost1->children_.emplace_back(childFrameNode);
-        newHost1->children_.emplace_back(spanNode);
-        ASSERT_EQ(newHost1, newHost2);
-    } while (0);
-
-    spanNode->UpdateTextColor(TEXT_COLOR_VALUE);
-    richEditorPattern->OnColorConfigurationUpdate();
-    ASSERT_EQ(spanNode->GetTextColor(), TEXT_COLOR_VALUE);
-
-    auto oldSpanItem = spanNode->spanItem_;
-    spanNode->spanItem_ = nullptr;
-    richEditorPattern->OnColorConfigurationUpdate();
-    spanNode->spanItem_ = oldSpanItem;
-
-    auto spanItem = spanNode->GetSpanItem();
-    spanItem->hasResourceFontColor = true;
-    spanItem->hasResourceDecorationColor = true;
-    spanNode->UpdateTextColor(TEXT_COLOR_VALUE);
-    richEditorPattern->OnColorConfigurationUpdate();
-    ASSERT_NE(spanNode->GetTextColor(), TEXT_COLOR_VALUE);
-
-    PipelineBase::GetCurrentContext()->themeManager_ = oldThemeManager;
-}
-
-/**
  * @tc.name: RichEditorPatternTestInitMouseEvent001
  * @tc.desc: test InitMouseEvent
  * @tc.type: FUNC
@@ -1895,5 +1844,72 @@ HWTEST_F(RichEditorPatternTestNg, IsLineSeparatorInLast001, TestSize.Level1)
 
     spanItem->content = "nihao\n";
     EXPECT_TRUE(richEditorPattern->IsLineSeparatorInLast(spanNode));
+}
+
+/**
+ * @tc.name: GetRichEditorController001
+ * @tc.desc: test GetRichEditorController
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, GetRichEditorController001, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto controller = richEditorModel.GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
+}
+
+/**
+ * @tc.name: BindSelectionMenu001
+ * @tc.desc: test BindSelectionMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, BindSelectionMenu001, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    std::function<void()> buildFunc = []() {
+        callBack1 = 1;
+        return;
+    };
+    TextSpanType textSpanType = TextSpanType::TEXT;
+    TextResponseType textResponseType = TextResponseType::LONG_PRESS;
+    SelectMenuParam menuParam { .onAppear = [](int32_t, int32_t) {}, .onDisappear = []() {} };
+    richEditorModel.BindSelectionMenu(textSpanType, textResponseType, buildFunc, menuParam);
+}
+
+/**
+ * @tc.name: OnHandleMove001
+ * @tc.desc: test OnHandleMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, OnHandleMove001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
+    RectF rect(testNumber0, testNumber0, testNumber5, testNumber5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, testNumber5);
+    richEditorPattern->selectOverlay_->OnHandleMove(rect, true);
+}
+
+/**
+ * @tc.name: UpdateSelectorOnHandleMove001
+ * @tc.desc: test UpdateSelectorOnHandleMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, UpdateSelectorOnHandleMove001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
+    auto offsetF = OffsetF(5.0f, 30.0f);
+    RectF rect(testNumber0, testNumber0, testNumber5, testNumber5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, testNumber5);
+    richEditorPattern->selectOverlay_->UpdateSelectorOnHandleMove(offsetF, true);
 }
 } // namespace

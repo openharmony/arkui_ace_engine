@@ -1196,7 +1196,7 @@ void CalendarPickerPattern::FlushTextStyle()
 
         if (selected_ != CalendarPickerSelectedType::YEAR && selected_ != CalendarPickerSelectedType::MONTH &&
             selected_ != CalendarPickerSelectedType::DAY && layoutProperty->HasColor()) {
-            textLayoutProperty->UpdateTextColor(layoutProperty->GetColor().value());
+            ResetTextStateByNode(textNode);
         } else {
             SetSelectedType(selected_);
         }

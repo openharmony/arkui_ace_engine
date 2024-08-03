@@ -35,9 +35,11 @@
 #include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
+class AccessibilityProperty;
 
 struct ExtraInfo {
     std::string page;
@@ -84,7 +86,8 @@ public:
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false);
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
-    void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
+    void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode,
+        bool addModalUiextension = false);
 
     std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child, bool allowTransition = false);
     int32_t RemoveChildAndReturnIndex(const RefPtr<UINode>& child);
@@ -107,7 +110,7 @@ public:
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     [[deprecated]] void AttachToMainTree(bool recursive = false);
     void AttachToMainTree(bool recursive, PipelineContext* context);
-    void DetachFromMainTree(bool recursive = false);
+    virtual void DetachFromMainTree(bool recursive = false);
     void UpdateConfigurationUpdate(const ConfigurationChange& configurationChange);
     virtual void OnConfigurationUpdate(const ConfigurationChange& configurationChange) {}
 
@@ -179,17 +182,18 @@ public:
     // Tree operation end.
 
     // performance.
-    PipelineContext* GetContext();
+    PipelineContext* GetContext() const;
     PipelineContext* GetContextWithCheck();
 
-    RefPtr<PipelineContext> GetContextRefPtr();
+    RefPtr<PipelineContext> GetContextRefPtr() const;
 
     // When FrameNode creates a layout task, the corresponding LayoutWrapper tree is created, and UINode needs to update
     // the corresponding LayoutWrapper tree node at this time like add self wrapper to wrapper tree.
     virtual void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout);
 
     bool IsAutoFillContainerNode();
-    void DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer = false);
+    void DumpViewDataPageNodes(
+        RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer = false, bool needsRecordData = false);
     bool NeedRequestAutoSave();
     // DFX info.
     void DumpTree(int32_t depth);
@@ -602,6 +606,11 @@ public:
     static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
     static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
 
+    virtual RefPtr<NG::AccessibilityProperty> GetVirtualAccessibilityProperty()
+    {
+        return nullptr;
+    }
+
     void AddFlag(uint32_t flag)
     {
         nodeFlag_ |= flag;
@@ -771,14 +780,14 @@ protected:
     // dump self info.
     virtual void DumpInfo() {}
     virtual void DumpAdvanceInfo() {}
-    virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
+    virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
     virtual bool CheckAutoSave()
     {
         return false;
     }
     // Mount to the main tree to display.
     virtual void OnAttachToMainTree(bool recursive = false);
-    virtual void OnDetachFromMainTree(bool recursive = false);
+    virtual void OnDetachFromMainTree(bool recursive = false, PipelineContext* context = nullptr);
     virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
     // run offscreen process.
     virtual void OnOffscreenProcess(bool recursive) {}
@@ -801,6 +810,8 @@ protected:
     bool layoutSeperately_ = false;
 
     virtual void PaintDebugBoundary(bool flag) {}
+
+    void TraversingCheck(RefPtr<UINode> node = nullptr, bool withAbort = false);
 
     PipelineContext* context_ = nullptr;
 private:
@@ -828,6 +839,7 @@ private:
     bool isBuildByJS_ = false;
     bool isRootBuilderNode_ = false;
     bool isArkTsFrameNode_ = false;
+    bool isTraversing_ = false;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RootNodeType rootNodeType_ = RootNodeType::PAGE_ETS_TAG;
     RefPtr<ExportTextureInfo> exportTextureInfo_;

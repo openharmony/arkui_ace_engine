@@ -104,7 +104,7 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
             context->AddAfterLayoutTask([weakNode = WeakPtr<FrameNode>(rootNode)]() {
                 auto hostNode = weakNode.Upgrade();
                 CHECK_NULL_VOID(hostNode);
-                hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+                hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
             });
         },
         TaskExecutor::TaskType::UI, "ArkUISelectOverlayShow");
@@ -208,7 +208,7 @@ void SelectOverlayManager::Destroy(const RefPtr<FrameNode>& overlay)
         if (AceType::InstanceOf<FrameNode>(hostNode)) {
             auto frameNode = AceType::DynamicCast<FrameNode>(hostNode);
             CHECK_NULL_VOID(frameNode);
-            frameNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+            frameNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE);
         }
     });
 }
@@ -465,5 +465,23 @@ const RefPtr<SelectContentOverlayManager>& SelectOverlayManager::GetSelectConten
         selectContentManager_->SetLegacyManagerBridge(callbacks);
     }
     return selectContentManager_;
+}
+
+void SelectOverlayManager::OnFontChanged()
+{
+    auto contentOverlayManager = GetSelectContentOverlayManager();
+    CHECK_NULL_VOID(contentOverlayManager);
+    contentOverlayManager->NotifyUpdateToolBar(true);
+}
+
+SelectOverlayManager::~SelectOverlayManager()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (pipeline) {
+        auto fontManager = pipeline->GetFontManager();
+        if (fontManager) {
+            fontManager->RemoveFontChangeObserver(WeakClaim(this));
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

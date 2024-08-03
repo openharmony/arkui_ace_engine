@@ -274,8 +274,12 @@ void ImageLoadingContext::CacheDownloadedImage()
 {
     CHECK_NULL_VOID(Downloadable());
     ImageProvider::CacheImageObject(imageObj_);
-    ImageLoader::CacheImageData(GetSourceInfo().GetKey(), imageObj_->GetData());
-    ImageLoader::WriteCacheToFile(GetSourceInfo().GetSrc(), imageDataCopy_);
+    if (imageObj_->GetData()) {
+        ImageLoader::CacheImageData(GetSourceInfo().GetKey(), imageObj_->GetData());
+    }
+    if (!downloadedUrlData_.empty()) {
+        ImageLoader::WriteCacheToFile(GetSourceInfo().GetSrc(), downloadedUrlData_);
+    }
 }
 
 void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData)
@@ -294,7 +298,7 @@ void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData)
         FailCallback("After download successful, imageObject Create fail");
         return;
     }
-    imageDataCopy_ = imageData;
+    downloadedUrlData_ = imageData;
     DataReadyCallback(imageObj);
 }
 

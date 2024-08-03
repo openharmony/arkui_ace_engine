@@ -145,7 +145,6 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     CHECK_NULL_VOID(textFieldPattern);
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (!(layoutProperty->GetShowUnderlineValue(false) && textFieldPattern->IsUnspecifiedOrTextType())) {
         return;
     }
@@ -155,26 +154,23 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     auto contentRect = textFieldPattern->GetContentRect();
     auto textFrameRect = textFieldPattern->GetFrameRect();
     auto responseArea = textFieldPattern->GetResponseArea();
-    Point leftPoint, rightPoint;
     auto responseAreaWidth = responseArea ? responseArea->GetAreaRect().Width() : 0.0f;
-    if (layoutProperty->GetShowCounterValue(false)) {
-        leftPoint.SetX(contentRect.Left());
-        leftPoint.SetY(textFrameRect.Height());
+    auto clearNodeResponseArea = textFieldPattern->GetCleanNodeResponseArea();
+    responseAreaWidth += clearNodeResponseArea ? clearNodeResponseArea->GetAreaRect().Width() : 0.0f;
+    auto hasResponseArea = GreatNotEqual(responseAreaWidth, 0.0f);
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    Point leftPoint, rightPoint;
+    if (isRTL) {
+        leftPoint.SetX(hasResponseArea ? 0.0 : contentRect.Left());
         rightPoint.SetX(contentRect.Right());
-        rightPoint.SetY(textFrameRect.Height());
     } else {
-        if (isRTL) {
-            leftPoint.SetX(contentRect.Left() - responseAreaWidth);
-            leftPoint.SetY(textFrameRect.Height());
-            rightPoint.SetX(contentRect.Right());
-            rightPoint.SetY(textFrameRect.Height());
-        } else {
-            leftPoint.SetX(contentRect.Left());
-            leftPoint.SetY(textFrameRect.Height());
-            rightPoint.SetX(contentRect.Right() + responseAreaWidth);
-            rightPoint.SetY(textFrameRect.Height());
-        }
+        leftPoint.SetX(contentRect.Left());
+        rightPoint.SetX(hasResponseArea ? textFrameRect.Width() : contentRect.Right());
     }
+
+    leftPoint.SetY(textFrameRect.Height());
+    rightPoint.SetY(textFrameRect.Height());
+
     RSPen pen;
     pen.SetColor(ToRSColor(underlineColor_->Get()));
     pen.SetWidth(underlineWidth_->Get());

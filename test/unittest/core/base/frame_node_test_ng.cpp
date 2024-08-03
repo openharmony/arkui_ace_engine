@@ -726,7 +726,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0014, TestSiz
     FRAME_NODE3->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
     FRAME_NODE2->TriggerVisibleAreaChangeCallback(8);
     EXPECT_TRUE(context->GetOnShow());
-    EXPECT_EQ(FRAME_NODE2->lastVisibleRatio_, 0);
+    EXPECT_EQ(FRAME_NODE2->lastVisibleRatio_, 1);
 }
 
 /**
@@ -927,11 +927,12 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsOutOfTouchTestRegion0025, TestSize.Level1)
      */
     PointF pointF;
     std::vector<RectF> rectF;
-    auto test = FRAME_NODE2->IsOutOfTouchTestRegion(std::move(pointF), 0);
+    TouchEvent touchEvent;
+    auto test = FRAME_NODE2->IsOutOfTouchTestRegion(std::move(pointF), touchEvent);
     EXPECT_TRUE(test);
 
     auto test1 = FRAME_NODE2->InResponseRegionList(pointF, rectF);
-    auto test2 = FRAME_NODE2->IsOutOfTouchTestRegion(std::move(pointF), 0);
+    auto test2 = FRAME_NODE2->IsOutOfTouchTestRegion(std::move(pointF), touchEvent);
     EXPECT_FALSE(test1);
     EXPECT_TRUE(test2);
 }
@@ -1013,6 +1014,32 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnAccessibilityEvent0028, TestSize.Level1)
      */
     auto test1 = AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = false;
     FRAME_NODE2->OnAccessibilityEvent(AccessibilityEventType::ACCESSIBILITY_FOCUSED);
+    EXPECT_FALSE(test1);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg0029
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeOnAccessibilityEventForVirtualNode0029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. callback OnAccessibilityEventForVirtualNode.
+     * @tc.expected: expect The function is true.
+     */
+    AccessibilityEvent event;
+    auto accessibilityId = 1;
+    auto test = AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = true;
+    FRAME_NODE2->OnAccessibilityEventForVirtualNode(AccessibilityEventType::CHANGE, accessibilityId);
+    EXPECT_TRUE(test);
+
+    /**
+     * @tc.steps: step2. callback OnAccessibilityEventForVirtualNode.
+     * @tc.expected: expect The function is false.
+     */
+    auto test1 = AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = false;
+    FRAME_NODE2->OnAccessibilityEventForVirtualNode(AccessibilityEventType::FOCUS, accessibilityId);
     EXPECT_FALSE(test1);
 }
 

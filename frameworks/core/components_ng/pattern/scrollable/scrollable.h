@@ -80,6 +80,7 @@ public:
     ~Scrollable() override;
 
     static void SetVelocityScale(double sVelocityScale);
+    static double GetVelocityScale();
     static void SetFriction(double sFriction);
 
     void Initialize(const WeakPtr<PipelineBase>& context);
@@ -210,6 +211,11 @@ public:
     void SetNotifyScrollOverCallBack(const ScrollOverCallback& scrollOverCallback)
     {
         notifyScrollOverCallback_ = scrollOverCallback;
+    }
+
+    void SetCurrentPositionCallback(const std::function<double()>& currentPositionCallback)
+    {
+        currentPositionCallback_ = currentPositionCallback;
     }
 
     void SetOutBoundaryCallback(const OutBoundaryCallback& outBoundaryCallback)
@@ -488,6 +494,7 @@ private:
     ScrollOverCallback scrollOverCallback_;       // scroll motion controller when edge set to spring
     ScrollOverCallback notifyScrollOverCallback_; // scroll motion controller when edge set to spring
     OutBoundaryCallback outBoundaryCallback_;     // whether out of boundary check when edge set to spring
+    std::function<double()> currentPositionCallback_;
     IsReverseCallback isReverseCallback_;
 
     WatchFixCallback watchFixCallback_;

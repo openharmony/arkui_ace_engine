@@ -15,10 +15,10 @@
 
 import { KeyCode } from '@ohos.multimodalInput.keyCode'
 
-export interface SelectTitleBarMenuItem {
-  value: ResourceStr;
-  isEnabled?: boolean;
-  action?: () => void;
+export declare class SelectTitleBarMenuItem {
+  public value: ResourceStr;
+  public isEnabled?: boolean;
+  public action?: () => void;
 }
 
 const PUBLIC_MORE: Resource = $r('sys.media.ohos_ic_public_more');
@@ -215,8 +215,8 @@ struct CollapsibleMenuSection {
         } else {
           ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
             (item: SelectTitleBarMenuItem, index) => {
-              ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
-            })
+            ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
+          })
 
           Row() {
             Image(PUBLIC_MORE)
@@ -295,8 +295,8 @@ struct CollapsibleMenuSection {
     Column() {
       ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length),
         (item: SelectTitleBarMenuItem, index) => {
-          ImageMenuItem({ item: item, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + index })
-        })
+        ImageMenuItem({ item: item, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + index })
+      })
     }
     .width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum)
     .margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding })

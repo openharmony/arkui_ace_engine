@@ -1949,4 +1949,34 @@ HWTEST_F(RatingTestNg, RatingPatternTest074, TestSize.Level1)
     ratingpattern->HandleHoverEvent(false);
     EXPECT_EQ(ratingpattern->state_, RatingModifier::RatingAnimationType::NONE);
 }
+
+/**
+ * @tc.name: RatingPatternTest075
+ * @tc.desc: test InitPanEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternTest075, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(RATING_STEP_SIZE_1);
+    rating.SetStars(DEFAULT_STAR_NUM);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Mock GestureEvent info
+     */
+    GestureEvent dragInfo;
+    pattern->InitPanEvent(gestureHub);
+    EXPECT_FALSE(LessNotEqual(dragInfo.GetLocalLocation().GetX(), 0.0));
+}
 } // namespace OHOS::Ace::NG

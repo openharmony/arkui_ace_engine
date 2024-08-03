@@ -240,6 +240,7 @@ void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
     ret.scale = info.GetScale();
     ret.pinchCenterX = info.GetPinchCenter().GetX();
     ret.pinchCenterY = info.GetPinchCenter().GetY();
+    ret.speed = info.GetSpeed();
     ret.source = static_cast<int32_t>(info.GetSourceDevice());
 }
 

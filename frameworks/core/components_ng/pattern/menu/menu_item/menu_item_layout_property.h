@@ -185,6 +185,7 @@ public:
         auto defaultLabelFontColor = theme ? theme->GetSecondaryFontColor() : Color::GRAY;
         json->PutExtAttr("labelFontColor",
             GetLabelFontColor().value_or(defaultLabelFontColor).ColorToString().c_str(), filter);
+        json->PutFixedAttr("label", GetContent().value_or("").c_str(), filter, FIXED_ATTR_CONTENT);
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemLayoutProperty);

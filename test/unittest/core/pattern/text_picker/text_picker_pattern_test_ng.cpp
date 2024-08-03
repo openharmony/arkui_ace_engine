@@ -1750,7 +1750,10 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternUpdateColumnChildPosition002,
 HWTEST_F(TextPickerPatternTestNg, LinearFontSize001, TestSize.Level1)
 {
     InitTextPickerPatternTestNg();
-    textPickerColumnPattern_->LinearFontSize(Dimension(FONT_SIZE_10), Dimension(FONT_SIZE_20), 1);
+    Dimension dimension = Dimension(FONT_SIZE_10);
+    Dimension dimension1;
+    dimension1 = textPickerColumnPattern_->LinearFontSize(dimension, dimension, 1);
+    EXPECT_FALSE(dimension < dimension1);
 }
 
 /**
@@ -1761,7 +1764,10 @@ HWTEST_F(TextPickerPatternTestNg, LinearFontSize001, TestSize.Level1)
 HWTEST_F(TextPickerPatternTestNg, LinearFontSize002, TestSize.Level1)
 {
     InitTextPickerPatternTestNg();
-    textPickerColumnPattern_->LinearFontSize(Dimension(FONT_SIZE_10), Dimension(FONT_SIZE_20), 2);
+    Dimension dimension = Dimension(FONT_SIZE_10);
+    Dimension dimension1;
+    dimension1 = textPickerColumnPattern_->LinearFontSize(dimension, dimension, 2);
+    EXPECT_FALSE(dimension < dimension1);
 }
 
 /**

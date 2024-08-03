@@ -244,7 +244,7 @@ void BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlay
 RectF BaseTextSelectOverlay::GetVisibleRect(const RefPtr<FrameNode>& node, const RectF& visibleRect)
 {
     CHECK_NULL_RETURN(node, visibleRect);
-    auto parentNode = node->GetAncestorNodeOfFrame();
+    auto parentNode = node->GetAncestorNodeOfFrame(true);
     CHECK_NULL_RETURN(parentNode, visibleRect);
     if (parentNode->GetTag() == V2::PAGE_ETS_TAG) {
         return visibleRect;
@@ -436,6 +436,9 @@ void BaseTextSelectOverlay::GetGlobalPointsWithTransform(std::vector<OffsetF>& p
     auto pointConverter = [](const OffsetF& offset) { return PointF(offset.GetX(), offset.GetY()); };
     std::transform(points.begin(), points.end(), std::back_inserter(convertPoints), pointConverter);
     while (parent) {
+        if (parent->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+            break;
+        }
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         auto paintOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
@@ -443,7 +446,7 @@ void BaseTextSelectOverlay::GetGlobalPointsWithTransform(std::vector<OffsetF>& p
             pointElement = pointElement + paintOffset;
             renderContext->GetPointTransform(pointElement);
         }
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     points.clear();
     auto offsetConverter = [](const PointF& point) { return OffsetF(point.GetX(), point.GetY()); };
@@ -550,7 +553,7 @@ void BaseTextSelectOverlay::RevertLocalPointWithTransform(OffsetF& point)
     std::stack<RefPtr<FrameNode>> nodeStack;
     while (parent) {
         nodeStack.push(parent);
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     CHECK_NULL_VOID(!nodeStack.empty());
     PointF localPoint(point.GetX(), point.GetY());
@@ -592,7 +595,7 @@ OffsetF BaseTextSelectOverlay::GetPaintOffsetWithoutTransform()
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
         offset += renderContext->GetPaintRectWithoutTransform().GetOffset();
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     return offset;
 }
@@ -608,7 +611,6 @@ void BaseTextSelectOverlay::UpdateTransformFlag()
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
-            hasTransform = false;
             break;
         }
         if (!hasTransform) {
@@ -663,6 +665,7 @@ void BaseTextSelectOverlay::SwitchToOverlayMode()
 
 void BaseTextSelectOverlay::SwitchToEmbedMode()
 {
+    CHECK_NULL_VOID(!isHandleMoving_);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     handleLevelMode_ = HandleLevelMode::EMBED;
@@ -698,6 +701,7 @@ VectorF BaseTextSelectOverlay::GetHostScale()
 
 void BaseTextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
+    isHandleDragging_ = false;
     if (enableHandleLevel_) {
         auto host = GetOwner();
         CHECK_NULL_VOID(host);
@@ -809,6 +813,8 @@ void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
     isSwitchToEmbed = isSwitchToEmbed && (!IsAncestorNodeEndScroll(flag) || HasUnsupportedTransform());
     if (isStartScroll || isStartAnimation || isTransformChanged || isStartTransition) {
         HideMenu(true);
+    } else if (IsAncestorNodeEndScroll(flag)) {
+        ShowMenu();
     }
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
@@ -895,6 +901,9 @@ bool BaseTextSelectOverlay::HasUnsupportedTransform()
         CHECK_NULL_RETURN(renderContext, false);
         if (parent->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
             return false;
+        }
+        if (renderContext->HasMotionPath()) {
+            return true;
         }
         auto rotateVector = renderContext->GetTransformRotate();
         if (rotateVector.has_value() && !NearZero(rotateVector->w) &&
@@ -995,5 +1004,84 @@ bool BaseTextSelectOverlay::CheckAndUpdateHostGlobalPaintRect()
     auto changed = globalPaintRect_ != framePaintRect;
     globalPaintRect_ = framePaintRect;
     return changed;
+}
+
+bool BaseTextSelectOverlay::CheckHasTransformAttr()
+{
+    auto pattern = GetPattern<Pattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto hasTransform = false;
+    VectorF scaleIdentity(1.0f, 1.0f);
+    Vector5F rotateIdentity(0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+    while (host) {
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+            break;
+        }
+        if (renderContext->HasMotionPath()) {
+            hasTransform = true;
+            break;
+        }
+        // has rotate.
+        auto rotateVector = renderContext->GetTransformRotate();
+        if (rotateVector.has_value() && !(rotateIdentity == rotateVector.value())) {
+            hasTransform = true;
+            break;
+        }
+        // has scale.
+        auto scaleVector = renderContext->GetTransformScale();
+        if (scaleVector.has_value() && !(scaleIdentity == scaleVector.value())) {
+            hasTransform = true;
+            break;
+        }
+        // has z translate.
+        auto translate = renderContext->GetTransformTranslate();
+        if (translate && !NearZero(translate->z.Value())) {
+            hasTransform = true;
+            break;
+        }
+        if (CheckHasTransformMatrix(renderContext)) {
+            hasTransform = true;
+            break;
+        }
+        host = host->GetAncestorNodeOfFrame(true);
+    }
+    return hasTransform;
+}
+
+bool BaseTextSelectOverlay::CheckHasTransformMatrix(const RefPtr<RenderContext>& context)
+{
+    auto transformMatrix = context->GetTransformMatrix();
+    CHECK_NULL_RETURN(transformMatrix, false);
+    const int32_t xIndex = 0;
+    const int32_t yIndex = 1;
+    const int32_t zIndex = 2;
+    const int32_t wIndex = 3;
+    DecomposedTransform transform;
+    TransformUtil::DecomposeTransform(transform, transformMatrix.value());
+    if (!NearZero(transform.translate[zIndex])) {
+        return true;
+    }
+    Quaternion quaternionIdentity(0.0f, 0.0f, 0.0f, 1.0f);
+    if (transform.quaternion != quaternionIdentity) {
+        return true;
+    }
+    Vector3F scaleIdentity(1.0f, 1.0f, 1.0f);
+    Vector3F scaleVector(transform.scale[xIndex], transform.scale[yIndex], transform.scale[zIndex]);
+    if (!(scaleVector == scaleIdentity)) {
+        return true;
+    }
+    Vector3F skewIdentity(0.0f, 0.0f, 0.0f);
+    Vector3F skewVector(transform.skew[xIndex], transform.skew[yIndex], transform.skew[zIndex]);
+    if (!(skewVector == skewIdentity)) {
+        return true;
+    }
+    Vector4F perspectiveIdentity(0.0f, 0.0f, 0.0f, 1.0f);
+    Vector4F perspectiveVector(transform.perspective[xIndex], transform.perspective[yIndex],
+        transform.perspective[zIndex], transform.perspective[wIndex]);
+    return !(perspectiveVector == perspectiveIdentity);
 }
 } // namespace OHOS::Ace::NG

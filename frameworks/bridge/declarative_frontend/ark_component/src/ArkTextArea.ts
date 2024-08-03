@@ -1070,7 +1070,7 @@ class TextAreaEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> {
     super(value);
   }
   static identity: Symbol = Symbol('textEditMenuOptions');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().textArea.resetSelectionMenuOptions(node);
     } else {
@@ -1430,7 +1430,7 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     modifierWithKey(this._modifiersWithKeys, TextAreaEnablePreviewTextModifier.identity, TextAreaEnablePreviewTextModifier, value);
     return this;
   }
-  editMenuOptions(value: EditMenuOptions) {
+  editMenuOptions(value: EditMenuOptions): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaEditMenuOptionsModifier.identity,
       TextAreaEditMenuOptionsModifier, value);
     return this;

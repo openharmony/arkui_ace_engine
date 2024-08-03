@@ -90,7 +90,9 @@ struct SymbolSpanStyle {
         for (const auto& color : style.GetSymbolColorList()) {
             symbolColor += color.ColorToString() + ",";
         }
-        symbolColor = symbolColor.substr(0, symbolColor.size() - 1);
+        if (symbolColor.size() > 0) {
+            symbolColor = symbolColor.substr(0, symbolColor.size() - 1);
+        }
         symbolColor = symbolColor.empty() ? DEFAULT_SYMBOL_COLOR.ColorToString() : symbolColor;
 
         fontFeature = style.GetFontFeatures();
@@ -136,6 +138,7 @@ struct TextStyleResult {
     int32_t wordBreak = static_cast<int32_t>(WordBreak::BREAK_WORD);
     int32_t lineBreakStrategy = static_cast<int32_t>(LineBreakStrategy::GREEDY);
     std::string leadingMarginSize[2] = { "0.00px", "0.00px" };
+    std::vector<Shadow> textShadows;
 };
 
 struct ImageStyleResult {

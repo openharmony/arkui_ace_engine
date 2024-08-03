@@ -189,13 +189,16 @@ public:
     }
 
     void InitClickEvent();
-    void HandleClickEvent(GestureEvent& info);
+    void HandleClickEvent();
     void InitLongPressEvent();
     void HandleLongPress(bool smooth);
     void InitMouseEvent();
     bool IsInScrollBar();
     void ScheduleCaretLongPress();
     void StartLongPressEventTimer();
+    void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& responseLinkResult);
     void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
         TouchTestResult& responseLinkResult);
@@ -355,7 +358,7 @@ private:
     std::shared_ptr<AnimationUtils::Animation> disappearAnimation_;
     bool isMousePressed_ = false;
     bool isScrolling_ = false;
-    RefPtr<ClickEvent> clickListener_;
+    RefPtr<ClickRecognizer> clickRecognizer_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<InputEvent> mouseEvent_;
     Offset locationInfo_;
