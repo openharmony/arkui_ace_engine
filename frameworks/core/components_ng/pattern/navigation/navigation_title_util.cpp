@@ -89,12 +89,12 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
     auto mostMenuItemCount = GetOrInitMaxMenuNums(theme, titleBarNode);
     bool needMoreButton = menuItems.size() > mostMenuItemCount ? true : false;
 
-    uint32_t count = 0;
+    int32_t count = 0;
     std::vector<OptionParam> params;
     OptionParam param;
     for (const auto& menuItem : menuItems) {
         ++count;
-        if (needMoreButton && (count > mostMenuItemCount - 1)) {
+        if (needMoreButton && (count > static_cast<int32_t>(mostMenuItemCount) - 1)) {
             param = { menuItem.text.value_or(""), menuItem.icon.value_or(""), menuItem.isEnabled.value_or(true),
                 menuItem.action, menuItem.iconSymbol.value_or(nullptr) };
             param.SetSymbolUserDefinedIdealFontSize(theme->GetMenuIconSize());
