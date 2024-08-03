@@ -1233,11 +1233,12 @@ DragRet WebPattern::GetDragAcceptableStatus()
 {
     OHOS::NWeb::NWebDragData::DragOperation status = delegate_->GetDragAcceptableStatus();
     if (status == OHOS::NWeb::NWebDragData::DragOperation::DRAG_OPERATION_MOVE ||
-        status == OHOS::NWeb::NWebDragData::DragOperation::DRAG_OPERATION_COPY ||
         status == OHOS::NWeb::NWebDragData::DragOperation::DRAG_OPERATION_LINK) {
-        return DragRet::ENABLE_DROP;
+        return DragRet::DRAG_DEFAULT;
+    } else if (status == OHOS::NWeb::NWebDragData::DragOperation::DRAG_OPERATION_COPY) {
+        return DragRet::DRAG_DEFAULT;
     }
-    return DragRet::DISABLE_DROP;
+    return DragRet::DRAG_DEFAULT;
 }
 
 bool WebPattern::NotifyStartDragTask()
