@@ -2711,8 +2711,14 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         auto stroke = item->size > NUM_1 ? item->value[NUM_1].u32 : DEFAULT_FIll_COLOR;
         float strokeWidth = item->size > NUM_2 ? item->value[NUM_2].f32 : NUM_0;
         ArkUI_Float32 pathAttributes[NUM_2];
-        pathAttributes[NUM_0] = item->size > NUM_4 ? item->value[NUM_4].f32 : NUM_0; // path width
-        pathAttributes[NUM_1] = item->size > NUM_5 ? item->value[NUM_5].f32 : NUM_0; // path height
+        if (item->size < NUM_5 || LessNotEqual(item->value[NUM_4].f32, 0.0f)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        pathAttributes[NUM_0] = item->value[NUM_4].f32; // path width
+        if (item->size < NUM_6 || LessNotEqual(item->value[NUM_5].f32, 0.0f)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        pathAttributes[NUM_1] = item->value[NUM_5].f32; // path height
         fullImpl->getNodeModifiers()->getCommonModifier()->setMaskPath(
             node->uiNodeHandle, "path", fill, stroke, strokeWidth, &pathAttributes, item->string, unit);
     } else if (item->value[0].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_PROGRESS) {
