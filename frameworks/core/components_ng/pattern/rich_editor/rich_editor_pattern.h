@@ -704,7 +704,7 @@ public:
 
     bool IsSelectAreaVisible();
 
-    void SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
+    bool SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
 
     void HandleOnCameraInput() override;
 
