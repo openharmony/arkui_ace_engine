@@ -47,9 +47,6 @@ declare_args() {
   # Set atomicservice basic engine so path
   ace_engine_feature_asbng_path = ""
 
-  # Enable asbng so path
-  ace_engine_feature_asbng_path_enable = ""
-
   # Disable in OH Core
   ace_engine_standard_fonts_enable = true
 
@@ -263,9 +260,9 @@ if (defined(global_parts_info) &&
 }
 
 if (ace_engine_feature_asbng_path == "") {
-  ace_engine_feature_asbng_path_enable = false;
+  ace_engine_feature_asbng_path_enable = false
 } else {
-  ace_engine_feature_asbng_path_enable = true;
+  ace_engine_feature_asbng_path_enable = true
 }
 
 ace_platforms = []
