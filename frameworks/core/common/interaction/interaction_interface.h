@@ -30,6 +30,8 @@ public:
 
     virtual int32_t SetDragWindowVisible(bool visible) = 0;
 
+    virtual int32_t SetMouseDragMonitorState(bool state) = 0;
+
     virtual int32_t StartDrag(const DragDataCore& dragData,
         std::function<void(const OHOS::Ace::DragNotifyMsg&)> callback) = 0;
 
