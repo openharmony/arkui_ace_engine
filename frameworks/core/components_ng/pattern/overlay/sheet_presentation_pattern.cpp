@@ -338,6 +338,15 @@ void SheetPresentationPattern::OnAttachToFrameNode()
         TAG_LOGD(AceLogTag::ACE_SHEET, "The sheet hits the touch event.");
     };
     gesture->AddTouchEvent(MakeRefPtr<TouchEventImpl>(std::move(touchTask)));
+    auto callbackId = pipelineContext->RegisterFoldDisplayModeChangedCallback(
+        [weak = WeakClaim(this)](FoldDisplayMode foldDisplayMode) {
+            if (foldDisplayMode == FoldDisplayMode::FULL || foldDisplayMode == FoldDisplayMode::MAIN) {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->isFoldStatusChanged_ = true;
+            }
+        });
+    UpdateFoldDisplayModeChangedCallbackId(callbackId);
 }
 
 void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -348,6 +357,9 @@ void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
     pipeline->RemoveOnAreaChangeNode(targetNode->GetId());
+    if (HasFoldDisplayModeChangedCallbackId()) {
+        pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
+    }
 }
 
 void SheetPresentationPattern::SetSheetBorderWidth(bool isPartialUpdate)
@@ -1653,10 +1665,6 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     if (sheetType_ != sheetType) {
-        if (sheetType == SheetType::SHEET_BOTTOM || SheetType::SHEET_CENTER) {
-            // exchange of folded and unfolded states
-            isFoldable_ = true;
-        }
         sheetType_ = sheetType;
         SetSheetBorderWidth();
     }
