@@ -4346,7 +4346,7 @@ void SwiperPattern::PostIdleTask(const RefPtr<FrameNode>& frameNode)
                 ACE_SCOPED_TRACE("Swiper cached self index: %d", *it);
                 auto wrapper = frameNode->GetOrCreateChildByIndex(*it, false, true);
                 if (!wrapper) {
-                    cachedItems.erase(it++);
+                    it = cachedItems.erase(it);
                     continue;
                 }
                 auto childNode = wrapper->GetHostNode();
@@ -4354,7 +4354,7 @@ void SwiperPattern::PostIdleTask(const RefPtr<FrameNode>& frameNode)
                     childNode->GetGeometryNode()->SetParentLayoutConstraint(pattern->GetLayoutConstraint());
                     FrameNode::ProcessOffscreenNode(childNode);
                 }
-                cachedItems.erase(it++);
+                it = cachedItems.erase(it);
             }
             pattern->SetCachedItems(cachedItems);
             if (!cachedItems.empty()) {

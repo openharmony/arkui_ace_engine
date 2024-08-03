@@ -2174,7 +2174,7 @@ void ListPattern::RefreshLanesItemRange()
         if (it->second < updatePos) {
             it++;
         } else if (it->first >= updatePos) {
-            lanesItemRange_.erase(it++);
+            it = lanesItemRange_.erase(it);
         } else {
             it->second = updatePos - 1;
             it++;

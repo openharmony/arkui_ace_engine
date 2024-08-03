@@ -464,7 +464,7 @@ bool WaterFlowLayoutInfoSW::IsMisaligned() const
         }
         const float startPos = SectionStartPos(lanes_[i]);
         if (std::any_of(lanes_[i].begin(), lanes_[i].end(),
-                [&startPos](const auto& lane) { return !NearEqual(lane.startPos, startPos); })) {
+                        [&startPos](const auto& lane) { return !NearEqual(lane.startPos, startPos); })) {
             return true;
         }
         const int32_t sectionStart = (i == 0) ? 0 : segmentTails_[i - 1] + 1;
