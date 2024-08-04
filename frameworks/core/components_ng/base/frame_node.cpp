@@ -1111,6 +1111,10 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         }
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        if (ndkColorModeUpdateCallback_) {
+            auto colorModeChange = ndkColorModeUpdateCallback_;
+            colorModeChange(SystemProperties::GetColorMode() == ColorMode::DARK);
+        }
     }
     if (configurationChange.directionUpdate) {
         pattern_->OnDirectionConfigurationUpdate();
@@ -1140,6 +1144,14 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         pattern_->OnFontScaleConfigurationUpdate();
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    if (configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate) {
+        if (ndkFontUpdateCallback_) {
+            auto fontChangeCallback = ndkFontUpdateCallback_;
+            auto pipeline = GetContextWithCheck();
+            CHECK_NULL_VOID(pipeline);
+            fontChangeCallback(pipeline->GetFontScale(), pipeline->GetFontWeightScale());
+        }
     }
 }
 
