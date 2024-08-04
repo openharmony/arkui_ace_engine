@@ -537,6 +537,43 @@ public:
     ~LinearGradientBlurPara() = default;
 };
 
+class MagnifierParams final {
+public:
+    float factor_ = 0.f;
+    float width_ = 0.f;
+    float height_ = 0.f;
+    float borderWidth_ = 0.f;
+    float cornerRadius_ = 0.f;
+    float offsetX_ = 0.f;
+    float offsetY_ = 0.f;
+
+    float shadowOffsetX_ = 0.f;
+    float shadowOffsetY_ = 0.f;
+    float shadowSize_ = 0.f;
+    float shadowStrength_ = 0.f;
+
+    // rgba
+    uint32_t gradientMaskColor1_ = 0x00000000;
+    uint32_t gradientMaskColor2_ = 0x00000000;
+    uint32_t outerContourColor1_ = 0x00000000;
+    uint32_t outerContourColor2_ = 0x00000000;
+
+    bool operator==(const MagnifierParams& other) const
+    {
+        return NearEqual(factor_, other.factor_) && NearEqual(width_, other.width_) &&
+               NearEqual(height_, other.height_) && NearEqual(borderWidth_, other.borderWidth_) &&
+               NearEqual(cornerRadius_, other.cornerRadius_) && NearEqual(offsetX_, other.offsetX_) &&
+               NearEqual(offsetY_, other.offsetY_) && NearEqual(shadowOffsetX_, other.shadowOffsetX_) &&
+               NearEqual(shadowOffsetY_, other.shadowOffsetY_) && NearEqual(shadowSize_, other.shadowSize_) &&
+               NearEqual(shadowStrength_, other.shadowStrength_) &&
+               NearEqual(gradientMaskColor1_, other.gradientMaskColor1_) &&
+               NearEqual(gradientMaskColor2_, other.gradientMaskColor2_) &&
+               NearEqual(outerContourColor1_, other.outerContourColor1_) &&
+               NearEqual(outerContourColor2_, other.outerContourColor2_);
+    }
+    MagnifierParams() = default;
+    ~MagnifierParams() = default;
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GRADIENT_PROPERTY_H

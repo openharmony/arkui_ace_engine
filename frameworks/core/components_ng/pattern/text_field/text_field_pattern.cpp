@@ -1730,8 +1730,8 @@ void TextFieldPattern::HandleTouchUp()
     if (isMousePressed_) {
         isMousePressed_ = false;
     }
-    if (magnifierController_->GetShowMagnifier() && !GetIsPreviewText()) {
-        magnifierController_->UpdateShowMagnifier();
+    if (magnifierController_ && !GetIsPreviewText()) {
+        magnifierController_->RemoveMagnifierFrameNode();
     }
     ScheduleDisappearDelayTask();
 }
@@ -4754,6 +4754,9 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     UpdateCaretInfoToController(true);
+    if (magnifierController_->GetShowMagnifier()) {
+        magnifierController_->RemoveMagnifierFrameNode();
+    }
 }
 
 void TextFieldPattern::HandleSurfacePositionChanged(int32_t posX, int32_t posY)
@@ -6650,6 +6653,9 @@ void TextFieldPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(paintProperty);
     if (!paintProperty->HasTextColorFlagByUser()) {
         layoutProperty->UpdateTextColor(theme->GetTextColor());
+    }
+    if (magnifierController_) {
+        magnifierController_->SetColorModeChange(true);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
