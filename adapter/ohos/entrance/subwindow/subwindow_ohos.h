@@ -66,7 +66,8 @@ public:
     void HidePreviewNG() override;
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) override;
     void HideMenuNG(bool showPreviewAnimation, bool startDrag) override;
-    void UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float menuScale, bool isRedragStart) override;
+    void UpdateHideMenuOffsetNG(
+        const NG::OffsetF& offset, float menuScale, bool isRedragStart, int32_t menuWrapperId = -1) override;
     void ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset) override;
     void UpdatePreviewPosition() override;

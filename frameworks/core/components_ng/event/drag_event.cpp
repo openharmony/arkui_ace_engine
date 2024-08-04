@@ -267,6 +267,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 } else {
                     HideFilter();
+                    RecordMenuWrapperNodeForDrag(frameNode->GetId());
                     SubwindowManager::GetInstance()->HideMenuNG(false, true);
                 }
             }
@@ -296,6 +297,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 HideEventColumn();
                 HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 HideFilter();
+                RecordMenuWrapperNodeForDrag(frameNode->GetId());
                 SubwindowManager::GetInstance()->HideMenuNG(false, true);
                 actuator->UpdatePreviewOptionFromModifier(frameNode);
             }
@@ -765,18 +767,17 @@ void DragEventActuator::HandleDragDampingMove(const Point& point, int32_t pointe
     auto updateOffset =
         OffsetF(dragStartDampingRatio * point.GetX() + (1 - dragStartDampingRatio) * startPoint.GetX(),
             dragStartDampingRatio * point.GetY() + (1 - dragStartDampingRatio) * startPoint.GetY());
+    auto menuWrapperNode = dragDropManager->GetMenuWrapperNode();
+    auto menuWrapperId = menuWrapperNode ? menuWrapperNode->GetId() : -1;
     if (isRedragStart && !isRedragStart_) {
         isRedragStart_ = true;
-        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, true);
-        UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, true);
+        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, true, menuWrapperId);
         dragDropManager->UpdateDragMovePosition(updateOffset, true);
     } else {
-        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, false);
-        UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, false);
+        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, false, menuWrapperId);
         dragDropManager->UpdateDragMovePosition(updateOffset, false);
     }
     SubwindowManager::GetInstance()->UpdatePreviewPosition();
-    UpdatePreviewPosition();
 }
 
 void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
@@ -1319,30 +1320,6 @@ void DragEventActuator::HideFilter()
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
     manager->RemoveFilterAnimation();
-}
-
-void DragEventActuator::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float menuScale, bool isRedragStart)
-{
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto overlay = pipelineContext->GetOverlayManager();
-    CHECK_NULL_VOID(overlay);
-    if (overlay->IsContextMenuDragHideFinished()) {
-        return;
-    }
-    overlay->UpdateContextMenuDisappearPosition(offset, menuScale, isRedragStart);
-}
-
-void DragEventActuator::UpdatePreviewPosition()
-{
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto overlay = pipelineContext->GetOverlayManager();
-    CHECK_NULL_VOID(overlay);
-    if (overlay->GetHasPixelMap()) {
-        return;
-    }
-    overlay->UpdatePixelMapPosition(true);
 }
 
 void DragEventActuator::HidePixelMap(bool startDrag, double x, double y, bool showAnimation)
@@ -2420,5 +2397,21 @@ void DragEventActuator::ResetPreScaledPixelMapForDragThroughTouch()
 {
     preScaledPixelMap_ = nullptr;
     preScaleValue_ = 1.0f;
+}
+
+void DragEventActuator::RecordMenuWrapperNodeForDrag(int32_t targetId)
+{
+    auto subWindow = SubwindowManager::GetInstance()->GetCurrentWindow();
+    CHECK_NULL_VOID(subWindow);
+    auto overlayManager = subWindow->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto menuWrapperNode = overlayManager->GetMenuNode(targetId);
+    CHECK_NULL_VOID(menuWrapperNode);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetMenuWrapperNode(menuWrapperNode);
 }
 } // namespace OHOS::Ace::NG
