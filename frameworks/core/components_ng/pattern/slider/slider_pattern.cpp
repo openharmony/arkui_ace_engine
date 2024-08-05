@@ -298,11 +298,11 @@ void SliderPattern::UpdateStepPointsAccessibilityVirtualNodeSelected()
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
     auto selectedTxt = theme->GetSelectedTxt();
     auto unSelectedTxt = theme->GetUnselectedTxt();
     auto unSelectedDesc = theme->GetUnselectedDesc();
     auto disabledDesc = theme->GetDisabelDesc();
-
     for (uint32_t i = 0; i < pointCount; i++) {
         RefPtr<FrameNode>& pointNode = pointAccessibilityNodeVec_[i];
         auto pointAccessibilityProperty = pointNode->GetAccessibilityProperty<TextAccessibilityProperty>();
