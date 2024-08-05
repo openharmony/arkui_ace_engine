@@ -26,7 +26,7 @@ namespace OHOS::Ace::NG {
 #ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
 class AtomicserviceIconInfo : public virtual Parcelable {
 public:
-    AtomicserviceIconInfo();
+    AtomicserviceIconInfo() {}
     virtual ~AtomicserviceIconInfo() = default;
 
     // The following functions are used to get data

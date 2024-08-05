@@ -18,10 +18,6 @@
 
 namespace OHOS::Ace::NG {
 #ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
-AtomicserviceIconInfo::AtomicserviceIconInfo()
-    : bundleName_(""), moduleName_(""), abilityName_(""), circleIcon_(""), eyelashRingIcon_(""), appName_("")
-{}
-
 std::string AtomicserviceIconInfo::GetBundleName() const
 {
     return bundleName_;
