@@ -56,6 +56,7 @@ constexpr float LIST_FADE_ERROR_RANGE = 1.0f;
 
 void ListPattern::OnModifyDone()
 {
+    Pattern::CheckLocalized();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
