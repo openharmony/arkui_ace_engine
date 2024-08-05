@@ -38,6 +38,9 @@ declare_args() {
   # Enable atomic for building.
   ace_engine_feature_enable_atomic = false
 
+  # Set Instruction Sched Model
+  ace_engine_feature_sched_model = ""
+
   # Enable test coverage
   ace_engine_feature_enable_coverage = false
 
