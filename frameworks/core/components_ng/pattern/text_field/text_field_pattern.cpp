@@ -4001,8 +4001,7 @@ void TextFieldPattern::UpdateCounterMargin()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!IsTextArea() && layoutProperty->GetShowCounterValue(false) && !IsNormalInlineState() &&
-        !IsInPasswordMode()) {
+    if (!IsTextArea() && IsShowCount()) {
         MarginProperty margin;
         const auto& getMargin = layoutProperty->GetMarginProperty();
         if (!getMargin) {
@@ -6192,6 +6191,15 @@ void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
 
 void TextFieldPattern::SetAccessibilityAction()
 {
+    SetAccessibilityActionOverlayAndSelection();
+    SetAccessibilityActionGetAndSetCaretPosition();
+    SetAccessibilityScrollAction();
+    SetAccessibilityMoveTextAction();
+    SetAccessibilityErrotText();
+}
+
+void TextFieldPattern::SetAccessibilityActionOverlayAndSelection()
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
@@ -6244,9 +6252,6 @@ void TextFieldPattern::SetAccessibilityAction()
         pattern->CloseSelectOverlay(true);
         pattern->StartTwinkling();
     });
-    SetAccessibilityActionGetAndSetCaretPosition();
-    SetAccessibilityScrollAction();
-    SetAccessibilityMoveTextAction();
 }
 
 void TextFieldPattern::SetAccessibilityActionGetAndSetCaretPosition()
@@ -6336,6 +6341,15 @@ void TextFieldPattern::SetAccessibilityScrollAction()
             // AccessibilityEventType::SCROLL_END
         }
     });
+}
+
+void TextFieldPattern::SetAccessibilityErrotText()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetErrorText(GetErrorTextString());
 }
 
 void TextFieldPattern::StopEditing()
