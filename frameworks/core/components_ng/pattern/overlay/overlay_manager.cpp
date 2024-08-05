@@ -2986,7 +2986,11 @@ int32_t OverlayManager::GetPopupIdByNode(const RefPtr<FrameNode>& overlay)
 int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
     RefPtr<Pattern>& pattern, bool isBackPressed, bool isPageRouter)
 {
-    auto currentIndex = rootNode->GetChildren().size() - 1;
+    const size_t size = rootNode->GetChildren().size();
+    if (size == 0) {
+        return OVERLAY_EXISTS;
+    }
+    auto currentIndex = size - 1;
     while (InstanceOf<ToastPattern>(pattern)) {
         // still have nodes on root expect stage and toast node.
         if (currentIndex > 0) {

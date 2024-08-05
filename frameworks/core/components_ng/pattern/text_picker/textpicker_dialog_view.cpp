@@ -1276,7 +1276,7 @@ void TextPickerDialogView::SetDialogButtonActive(RefPtr<FrameNode>& contentColum
     if (dialogNodePage == 0) {
         SetFirstDialogButtonActive(contentRow);
         SetDividerNodeActive(contentRow, true, false, false);
-    } else if (dialogNodePage != (columnCount - 1)) {
+    } else if (columnCount > 0 && dialogNodePage != (columnCount - 1)) {
         SetSecondDialogButtonActive(contentRow);
         SetDividerNodeActive(contentRow, false, true, false);
     } else {

@@ -998,7 +998,7 @@ float TimePickerColumnPattern::GetShiftDistance(uint32_t index, TimePickerScroll
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, 0.0f);
-    uint32_t optionCounts = GetShowCount();
+    const uint32_t optionCounts = GetShowCount();
     uint32_t nextIndex = 0;
     float distance = 0.0f;
     float val = 0.0f;
