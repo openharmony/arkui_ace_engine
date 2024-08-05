@@ -18,26 +18,13 @@
 #ifndef WINDOWS_PLATFORM
 #include <dlfcn.h>
 #endif
-#include <regex>
-#include <unistd.h>
 
 #include "base/i18n/localization.h"
-#include "base/log/ace_trace.h"
-#include "base/log/event_report.h"
-#include "base/thread/task_executor.h"
-#include "base/utils/time_util.h"
-#include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "bridge/js_frontend/engine/jsi/jsi_base_utils.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/connect_server_manager.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
 #include "core/components/common/layout/grid_system_manager.h"
-#include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_api_perf.h"
-#include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
-#include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_animation_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_animator_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_badge_bridge.h"

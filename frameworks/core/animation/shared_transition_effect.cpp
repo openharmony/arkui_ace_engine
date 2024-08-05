@@ -15,15 +15,9 @@
 
 #include "core/animation/shared_transition_effect.h"
 
-#include "core/animation/animation_pub.h"
-#include "core/animation/animator.h"
-#include "core/animation/curve_animation.h"
-#include "core/animation/keyframe.h"
-#include "core/components/common/properties/motion_path_evaluator.h"
 #include "core/components/common/properties/page_transition_option.h"
 #include "core/components/overlay/overlay_element.h"
 #include "core/components/positioned/positioned_component.h"
-#include "core/components/positioned/render_positioned.h"
 #include "core/components/shared_transition/shared_transition_element.h"
 #include "core/components/tween/tween_component.h"
 
