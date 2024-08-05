@@ -671,11 +671,13 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaCh
             keyboardHeight = keyboardHeight + (displayArea_.Bottom() - curWindow.Bottom());
         }
     }
-    info->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
-    UIEXT_LOGI("OcccupiedArea keyboardHeight = %{public}d, displayArea = %{public}s, "
+    sptr<Rosen::OccupiedAreaChangeInfo> newInfo = new Rosen::OccupiedAreaChangeInfo(
+        info->type_, info->rect_, info->safeHeight_, info->textFieldPositionY_, info->textFieldHeight_);
+    newInfo->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
+    UIEXT_LOGI("OccupiedArea keyboardHeight = %{public}d, displayArea = %{public}s, "
         "curWindow = %{public}s, persistentid = %{public}d.",
         keyboardHeight, displayArea_.ToString().c_str(), curWindow.ToString().c_str(), GetSessionId());
-    session_->NotifyOccupiedAreaChangeInfo(info);
+    session_->NotifyOccupiedAreaChangeInfo(newInfo);
     return true;
 }
 
