@@ -148,6 +148,7 @@ public:
 
     void DumpAdvanceInfo() override;
     void DumpInfo() override;
+    void DumpScaleInfo();
 
     TextSelector GetTextSelector() const
     {
