@@ -1013,6 +1013,7 @@ void TextContentModifier::ResumeTextRace(bool bounce)
     }
 
     if (!bounce) {
+        marqueeCount_ = 0;
         auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
         CHECK_NULL_VOID(textPattern);
         textPattern->FireOnMarqueeStateChange(TextMarqueeState::START);
