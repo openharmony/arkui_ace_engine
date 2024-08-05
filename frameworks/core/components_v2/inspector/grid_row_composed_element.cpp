@@ -134,7 +134,7 @@ std::string GridRowComposedElement::GetGridRowBreakpoints() const
         result.append(", ");
     }
     if (result.size() > 1) {
-        result = result.substr(0, result.size() - 1).append("]");
+        result = result.substr(0, static_cast<int32_t>(result.size()) - 1).append("]");
     } else {
         result = result.append("]");
     }
