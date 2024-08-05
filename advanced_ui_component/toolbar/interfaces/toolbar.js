@@ -94,9 +94,7 @@ export { ToolBarOptions };
 export class ToolBarModifier {
   constructor() {
     this.backgroundColorValue = {
-      'id': -1,
-      'type': 10001,
-      params: ['sys.color.ohos_id_color_toolbar_bg'],
+      'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_toolbar_bg'],
       'bundleName': '',
       'moduleName': '',
     };
