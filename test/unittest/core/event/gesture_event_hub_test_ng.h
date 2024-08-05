@@ -22,10 +22,14 @@
 #undef SECURITY_COMPONENT_ENABLE
 
 #include "test/mock/base/mock_drag_window.h"
+#include "test/mock/base/mock_pixel_map.h"
+#include "test/mock/base/mock_subwindow.h"
 #include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_interaction_interface.h"
 #include "test/mock/core/common/mock_udmf.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
@@ -72,6 +76,11 @@ constexpr int32_t FINGERS_NUMBER = 2;
 } // namespace
 
 class GestureEventHubTestNg : public testing::Test {
+public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+};
+class GestureEventHubTestCoverageNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
