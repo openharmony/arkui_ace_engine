@@ -683,7 +683,13 @@ protected:
 
     virtual bool CanStartAITask()
     {
-        return textDetectEnable_ && enabled_ && dataDetectorAdapter_;
+        auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+        if (textLayoutProperty) {
+            return textDetectEnable_ && enabled_ &&
+                   textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE;
+        } else {
+            return textDetectEnable_ && enabled_;
+        }
     };
 
     void OnAttachToMainTree() override
