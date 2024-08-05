@@ -37,6 +37,9 @@
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -47,6 +50,12 @@ constexpr float DRAG_FIX_OFFSET_RATIO = 0.85f;
 constexpr float ARC_LIST_DRAG_OVER_FRICTION = 0.5f;
 constexpr float ARC_LIST_ITEM_MOVE_THRESHOLD_RATIO = 0.4f;
 constexpr float FLOAT_TWO = 2.0f;
+#ifdef SUPPORT_DIGITAL_CROWN
+constexpr int32_t VIBRATOR_TYPE_ONE = 0;
+constexpr int32_t VIBRATOR_TYPE_THREE = 2;
+constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.crown.strength1";
+constexpr const char* HAPTIC_STRENGTH5 = "watchhaptic.crown.strength5";
+#endif
 } // namespace
 
 ArcListPattern::ArcListPattern()
@@ -508,5 +517,29 @@ float ArcListPattern::GetScrollUpdateFriction(float overScroll)
 {
     return ARC_LIST_DRAG_OVER_FRICTION;
 }
+
+void ArcListPattern::OnMidIndexChanged(int32_t lastIndex, int32_t curIndex)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int32_t totalCnt = host->GetTotalChildCount() - itemStartIndex_;
+
+    StartVibrator(curIndex == 0 || curIndex == totalCnt - 1);
+#endif
+}
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void ArcListPattern::StartVibrator(bool bEdge)
+{
+    if (!GetCrownEventDragging()) {
+        return;
+    }
+
+    const char* effectId = bEdge ? HAPTIC_STRENGTH5 : HAPTIC_STRENGTH1;
+    int32_t usage = bEdge ? VIBRATOR_TYPE_THREE : VIBRATOR_TYPE_ONE;
+    VibratorImpl::StartVibraFeedback(effectId, usage);
+}
+#endif
 
 } // namespace OHOS::Ace::NG

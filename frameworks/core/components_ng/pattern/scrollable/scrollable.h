@@ -470,6 +470,12 @@ public:
         CHECK_NULL_RETURN(panRecognizerNG_, Axis::NONE);
         return panRecognizerNG_->GetAxisDirection();
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool GetCrownEventDragging() const
+    {
+        return isCrownEventDragging_;
+    }
+#endif
 
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
@@ -601,6 +607,7 @@ private:
     CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
     VelocityTracker crownVelocityTracker_;
     Offset accumulativeCrownPx_;
+    bool isCrownEventDragging_ = false;
 #endif
 };
 
