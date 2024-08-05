@@ -6064,7 +6064,7 @@ typedef enum {
      * settings, such as keyboard and mouse operations. \n
      * 2. Scrolling can be initiated by calling the controller API. \n
      * 3. The out-of-bounds bounce effect is supported. \n
-     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is 
      * {@link ArkUI_NodeComponentEvent}. \n
      * {@link ArkUI_NodeComponentEvent} contains two parameters: \n
      * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: scroll offset of each frame. The offset is positive when the list
