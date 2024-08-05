@@ -5822,7 +5822,7 @@ void WebPattern::InitAiEngine()
         [&, instanceId = context->GetInstanceId()] {
             ContainerScope scope(instanceId);
             TAG_LOGI(AceLogTag::ACE_WEB, "ArkWeb init data detector.");
-            DataDetectorMgr::GetInstance();
+            DataDetectorMgr::GetInstance().GetWordSelection("ArkWeb", 0);
         },
         "ArkWebTextInitDataDetect");
     isInit = true;
