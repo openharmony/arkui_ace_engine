@@ -321,10 +321,11 @@ public:
     } DragPreviewInfo;
     bool IsNeedScaleDragPreview();
     void DoDragMoveAnimate(const PointerEvent& pointerEvent);
-    void DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager,
-        const GestureEvent& event, bool isSubwindowOverlay = false);
-    void DragStartAnimation(
-        const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager, const OffsetF& gatherNodeCenter);
+    void DragMoveAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager, Point point);
+    void DoDragStartAnimation(
+        const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event, bool isSubwindowOverlay = false);
+    void DragStartAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager,
+        const OffsetF& gatherNodeCenter, Point point = { 1, 1 });
     void SetDragResult(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void SetDragBehavior(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void ResetDragPreviewInfo()
