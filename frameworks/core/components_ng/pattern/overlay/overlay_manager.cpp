@@ -4283,7 +4283,7 @@ void OverlayManager::PlaySheetTransition(
                 return;
             }
         }
-        if (sheetPattern->IsFoldable()) {
+        if (sheetPattern->IsFoldStatusChanged()) {
             option.SetDuration(0);
             option.SetCurve(Curves::LINEAR);
         }
@@ -4316,7 +4316,7 @@ void OverlayManager::PlaySheetTransition(
                 }
             },
             option.GetOnFinishEvent());
-        sheetPattern->SetIsFoldable(false);
+        sheetPattern->SetFoldStatusChanged(false);
     } else {
         option.SetOnFinishEvent(
             [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), weakOverlayManager = WeakClaim(this)] {
