@@ -602,4 +602,8 @@ const char NODE_CONTAINER_ETS_TAG[] = "NodeContainer";
 // MovingPhoto
 const char MOVING_PHOTO_COMPONENT_TAG[] = "MovingPhotoComponent";
 const char MOVING_PHOTO_ETS_TAG[] = "MovingPhoto";
+
+// AnalogClock
+const char ANALOGCLOCK_COMPONENT_TAG[] = "AnalogClockComponent";
+const char ANALOGCLOCK_ETS_TAG[] = "AnalogClock";
 } // namespace OHOS::Ace::V2
