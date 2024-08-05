@@ -13,13 +13,8 @@
  * limitations under the License.
  */
 #include "core/components_ng/render/adapter/media_player_impl.h"
-#include <cstdint>
 
 #include "base/i18n/localization.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components/video/video_utils.h"
 #include "core/components_ng/render/adapter/render_surface_impl.h"
 #ifdef RENDER_EXTRACT_SUPPORTED
 #include "core/components_ng/render/adapter/render_texture_impl.h"

@@ -15,14 +15,7 @@
 
 #include "core/components_ng/render/adapter/form_render_window.h"
 
-#include <memory>
-
-#include "base/log/log.h"
 #include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/common/thread_checker.h"
-#include "core/components_ng/base/frame_node.h"
-
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "transaction/rs_interfaces.h"
