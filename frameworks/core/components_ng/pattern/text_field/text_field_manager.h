@@ -50,6 +50,9 @@ public:
         if (pattern && pattern->GetHost()) {
             onFocusTextFieldId = pattern->GetHost()->GetId();
         }
+        if (onFocusTextField_ != onFocusTextField) {
+            SetImeAttached(false);
+        }
         onFocusTextField_ = onFocusTextField;
     }
 
