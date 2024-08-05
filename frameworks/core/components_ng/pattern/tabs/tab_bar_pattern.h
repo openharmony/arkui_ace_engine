@@ -204,7 +204,7 @@ public:
 
     void UpdateSymbolEffect(int32_t index);
 
-    void UpdateSubTabBoard();
+    void UpdateSubTabBoard(int32_t index);
 
     SelectedMode GetSelectedMode() const;
 
