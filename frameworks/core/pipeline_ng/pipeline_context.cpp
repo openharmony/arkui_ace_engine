@@ -869,8 +869,17 @@ void PipelineContext::FlushFocusScroll()
 void PipelineContext::FlushPipelineImmediately()
 {
     CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE();
-    FlushPipelineWithoutAnimation();
+    ACE_SCOPED_TRACE("PipelineContext::FlushPipelineImmediately, isLayouting_ %d", taskScheduler_->IsLayouting());
+    if (!taskScheduler_->IsLayouting()) {
+        FlushPipelineWithoutAnimation();
+        return;
+    }
+    auto task = [weak = WeakClaim(this)]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->FlushPipelineWithoutAnimation();
+    };
+    AddAfterLayoutTask(task);
 }
 
 void PipelineContext::RebuildFontNode()
