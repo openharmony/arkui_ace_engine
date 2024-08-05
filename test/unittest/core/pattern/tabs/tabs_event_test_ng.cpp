@@ -1482,17 +1482,17 @@ HWTEST_F(TabsEventTestNg, SetOnChangeEvent002, TestSize.Level1)
      */
     pattern_->onIndexChangeEvent_ = nullptr;
     pattern_->SetOnIndexChangeEvent([](const BaseEventInfo* info) {});
-    swiperPattern_->FireChangeEvent();
+    swiperPattern_->FireChangeEvent(0, 1);
     tabBarPattern_->isMaskAnimationByCreate_ = true;
-    swiperPattern_->FireChangeEvent();
+    swiperPattern_->FireChangeEvent(0, 1);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    swiperPattern_->FireChangeEvent();
+    swiperPattern_->FireChangeEvent(0, 1);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    swiperPattern_->FireChangeEvent();
+    swiperPattern_->FireChangeEvent(0, 1);
     EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(Axis::HORIZONTAL), Axis::HORIZONTAL);
     tabBarPattern_->changeByClick_ = true;
-    swiperPattern_->FireChangeEvent();
+    swiperPattern_->FireChangeEvent(0, 1);
     pattern_->SetOnTabBarClickEvent([](const BaseEventInfo* info) {});
     auto onTabBarClickEvent = pattern_->GetTabBarClickEvent();
     (*onTabBarClickEvent)(1);
@@ -1610,5 +1610,34 @@ HWTEST_F(TabsEventTestNg, TabsControllerPreloadItems001, TestSize.Level1)
     swiperController_->SetPreloadFinishCallback(onPreloadFinish);
     swiperController_->PreloadItems(indexSet);
     EXPECT_EQ(code, ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: ObserverTestNg001
+ * @tc.desc: Test the operation of Observer
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, ObserverTestNg001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: steps2. Init tabContent state update callback the swipe to 1
+     * @tc.expected: steps2. Check state value.
+     */
+    UIObserverHandler::TabContentStateHandleFunc func = [](const TabContentInfo& info) {
+        if (info.index == 0) {
+            EXPECT_EQ(info.state, TabContentState::ON_HIDE);
+        } else if (info.index == 1) {
+            EXPECT_EQ(info.state, TabContentState::ON_SHOW);
+        }
+    };
+    UIObserverHandler::GetInstance().SetHandleTabContentStateUpdateFunc(func);
+
+    swiperController_->SwipeTo(1);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
 }
 } // namespace OHOS::Ace::NG

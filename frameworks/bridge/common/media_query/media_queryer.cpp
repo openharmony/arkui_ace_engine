@@ -103,13 +103,13 @@ double TransferValue(double value, const std::string& unit)
 bool CalculateExpression(double lvalue, const std::string& relationship, double rvalue, MediaError& failReason)
 {
     if (relationship == RelationShip::GREAT_OR_EQUAL) {
-        return GreatOrEqual(lvalue, rvalue);
+        return GreatOrEqualCustomPrecision(lvalue, rvalue);
     } else if (relationship == RelationShip::GREAT_NOT_EQUAL) {
-        return GreatNotEqual(lvalue, rvalue);
+        return GreatNotEqualCustomPrecision(lvalue, rvalue);
     } else if (relationship == RelationShip::LESS_OR_EQUAL) {
-        return LessOrEqual(lvalue, rvalue);
+        return LessOrEqualCustomPrecision(lvalue, rvalue);
     } else if (relationship == RelationShip::LESS_NOT_EQUAL) {
-        return LessNotEqual(lvalue, rvalue);
+        return LessNotEqualCustomPrecision(lvalue, rvalue);
     } else {
         failReason = MediaError::SYNTAX;
     }

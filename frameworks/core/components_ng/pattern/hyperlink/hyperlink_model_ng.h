@@ -26,6 +26,7 @@ public:
     void Pop() override {};
     void SetColor(const Color& value) override;
     void SetDraggable(bool draggable) override;
+    void SetResponseRegion(bool isUserSetResponseRegion) override;
     static void SetColor(FrameNode* frameNode, const Color& value);
     static void SetDraggable(FrameNode* frameNode, bool draggable);
 

@@ -694,9 +694,9 @@ RefPtr<ImageSpan> JSImageAttachment::ParseJsImageSpan(const JSRef<JSObject>& obj
 ImageSpanOptions JSImageAttachment::CreateImageOptions(const JSRef<JSObject>& obj)
 {
     ImageSpanOptions options;
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, options);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, options);
     bool isCard = context->IsFormRender() && !container->IsDynamicRender();
 
@@ -745,7 +745,7 @@ ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSOb
     JSRef<JSVal> objectFit = obj->GetProperty("objectFit");
     if (!objectFit->IsNull() && objectFit->IsNumber()) {
         auto fit = static_cast<ImageFit>(objectFit->ToNumber<int32_t>());
-        if (fit < ImageFit::FILL || fit > ImageFit::SCALE_DOWN) {
+        if (fit < ImageFit::FILL || fit > ImageFit::BOTTOM_END) {
             fit = ImageFit::COVER;
         }
         imageStyle.objectFit = fit;
@@ -968,7 +968,9 @@ bool JSCustomSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     if (!customSpan) {
         return false;
     }
-    return &(customSpan->customSpanObj_) == &customSpanObj_;
+    return (customSpan->customSpanObj_)
+        ->GetLocalHandle()
+        ->IsStrictEquals(customSpanObj_->GetEcmaVM(), customSpanObj_->GetLocalHandle());
 }
 
 std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMeasureFunc(
@@ -1459,8 +1461,11 @@ bool JSExtSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     if (!extSpan) {
         return false;
     }
-    return &(extSpan->extSpanObj_) == &extSpanObj_;
+    return (extSpan->extSpanObj_)
+        ->GetLocalHandle()
+        ->IsStrictEquals(extSpanObj_->GetEcmaVM(), extSpanObj_->GetLocalHandle());
 }
+
 void JSExtSpan::SetJsExtSpanObject(const JSRef<JSObject>& extSpanObj)
 {
     extSpanObj_ = extSpanObj;

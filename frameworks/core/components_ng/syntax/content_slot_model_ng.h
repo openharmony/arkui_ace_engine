@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_CONTENT_SLOT_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_CONTENT_SLOT_MODEL_NG_H
 
 #include "core/components_ng/syntax/node_content.h"
 
@@ -22,3 +23,4 @@ namespace OHOS::Ace::NG::ContentSlotModel {
 void Create(NodeContent* content);
 
 } // namespace OHOS::Ace::NG::ContentSlotModel
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_CONTENT_SLOT_MODEL_NG_H

@@ -138,12 +138,14 @@ void PluginPattern::InitPluginManagerDelegate()
         CHECK_NULL_VOID(host);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([weak, instanceID] {
-            ContainerScope scope(instanceID);
-            auto plugin = weak.Upgrade();
-            CHECK_NULL_VOID(plugin);
-            plugin->FireOnCompleteEvent();
-        }, "ArkUIPluginCompleteEvent");
+        uiTaskExecutor.PostTask(
+            [weak, instanceID] {
+                ContainerScope scope(instanceID);
+                auto plugin = weak.Upgrade();
+                CHECK_NULL_VOID(plugin);
+                plugin->FireOnCompleteEvent();
+            },
+            "ArkUIPluginCompleteEvent");
     });
     pluginManagerBridge_->AddPluginUpdateCallback([weak = WeakClaim(this), instanceID](int64_t id, std::string data) {
         ContainerScope scope(instanceID);
@@ -153,11 +155,13 @@ void PluginPattern::InitPluginManagerDelegate()
         CHECK_NULL_VOID(host);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([id, data, weak] {
-            auto plugin = weak.Upgrade();
-            CHECK_NULL_VOID(plugin);
-            plugin->GetPluginSubContainer()->UpdatePlugin(data);
-        }, "ArkUIPluginUpdate");
+        uiTaskExecutor.PostTask(
+            [id, data, weak] {
+                auto plugin = weak.Upgrade();
+                CHECK_NULL_VOID(plugin);
+                plugin->GetPluginSubContainer()->UpdatePlugin(data);
+            },
+            "ArkUIPluginUpdate");
     });
     pluginManagerBridge_->AddPluginErrorCallback(
         [weak = WeakClaim(this), instanceID](std::string code, std::string msg) {
@@ -168,12 +172,14 @@ void PluginPattern::InitPluginManagerDelegate()
             CHECK_NULL_VOID(host);
             auto uiTaskExecutor =
                 SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask([code, msg, weak, instanceID] {
-                ContainerScope scope(instanceID);
-                auto plugin = weak.Upgrade();
-                CHECK_NULL_VOID(plugin);
-                plugin->FireOnErrorEvent(code, msg);
-            }, "ArkUIPluginErrorEvent");
+            uiTaskExecutor.PostTask(
+                [code, msg, weak, instanceID] {
+                    ContainerScope scope(instanceID);
+                    auto plugin = weak.Upgrade();
+                    CHECK_NULL_VOID(plugin);
+                    plugin->FireOnErrorEvent(code, msg);
+                },
+                "ArkUIPluginErrorEvent");
         });
 }
 
@@ -216,32 +222,34 @@ void PluginPattern::CreatePluginSubContainer()
     auto uiTaskExecutor = SingleTaskExecutor::Make(host_->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
 
     int32_t instanceID = context->GetInstanceId();
-    uiTaskExecutor.PostTask([weak, instanceID] {
-        ContainerScope scope(instanceID);
-        auto pluginPattern = weak.Upgrade();
-        CHECK_NULL_VOID(pluginPattern);
-        auto pluginSubContainer = pluginPattern->GetPluginSubContainer();
-        RequestPluginInfo info = pluginPattern->GetPluginRequestInfo();
-        CHECK_NULL_VOID(pluginSubContainer);
-        auto packagePathStr = pluginPattern->GetPackagePath(weak, info);
-        if (packagePathStr.empty()) {
-            pluginPattern->FireOnErrorEvent("1", "package path is empty.");
-            return;
-        }
-        if (!info.bundleName.empty() && !info.moduleName.empty()) {
-            pluginPattern->pluginSubContainer_->SetPluginBundleName(info.bundleName);
-            pluginPattern->pluginSubContainer_->SetPluginModuleName(info.moduleName);
-        }
-        if (packagePathStr.rfind(".hap") != std::string::npos) {
-            std::string sub = packagePathStr.substr(1, packagePathStr.size() - 5) + "/";
-            pluginPattern->ReplaceAll(info.source, sub, "");
-            pluginPattern->pluginSubContainer_->RunDecompressedPlugin(
-                packagePathStr, info.abilityName, info.source, info.moduleResPath, pluginPattern->GetData());
-        } else {
-            pluginPattern->pluginSubContainer_->RunPlugin(
-                packagePathStr, info.abilityName, info.source, info.moduleResPath, pluginPattern->GetData());
-        }
-    }, "ArkUIPluginRun");
+    uiTaskExecutor.PostTask(
+        [weak, instanceID] {
+            ContainerScope scope(instanceID);
+            auto pluginPattern = weak.Upgrade();
+            CHECK_NULL_VOID(pluginPattern);
+            auto pluginSubContainer = pluginPattern->GetPluginSubContainer();
+            RequestPluginInfo info = pluginPattern->GetPluginRequestInfo();
+            CHECK_NULL_VOID(pluginSubContainer);
+            auto packagePathStr = pluginPattern->GetPackagePath(weak, info);
+            if (packagePathStr.empty()) {
+                pluginPattern->FireOnErrorEvent("1", "package path is empty.");
+                return;
+            }
+            if (!info.bundleName.empty() && !info.moduleName.empty()) {
+                pluginPattern->pluginSubContainer_->SetPluginBundleName(info.bundleName);
+                pluginPattern->pluginSubContainer_->SetPluginModuleName(info.moduleName);
+            }
+            if (packagePathStr.rfind(".hap") != std::string::npos) {
+                std::string sub = packagePathStr.substr(1, packagePathStr.size() - 5) + "/";
+                pluginPattern->ReplaceAll(info.source, sub, "");
+                pluginPattern->pluginSubContainer_->RunDecompressedPlugin(
+                    packagePathStr, info.abilityName, info.source, info.moduleResPath, pluginPattern->GetData());
+            } else {
+                pluginPattern->pluginSubContainer_->RunPlugin(
+                    packagePathStr, info.abilityName, info.source, info.moduleResPath, pluginPattern->GetData());
+            }
+        },
+        "ArkUIPluginRun");
 }
 
 void PluginPattern::ReplaceAll(std::string& str, const std::string& pattern, const std::string& newPattern)

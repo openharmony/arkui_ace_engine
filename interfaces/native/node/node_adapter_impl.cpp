@@ -27,7 +27,7 @@
 extern "C" {
 #endif
 
-ArkUI_NodeAdapterHandle OH_ArkUI_NodeAdapter_Create()
+ArkUI_NodeAdapterHandle OH_ArkUI_NodeAdapter_Create(void)
 {
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(fullImpl, nullptr);
@@ -204,6 +204,20 @@ int32_t OH_ArkUI_NodeAdapterEvent_SetNodeId(ArkUI_NodeAdapterEvent* event, int32
     innerEvent->id = id;
     innerEvent->idSet = true;
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ContextHandle OH_ArkUI_GetContextByNode(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, nullptr);
+    auto basicAPI = fullImpl->getBasicAPI();
+    CHECK_NULL_RETURN(basicAPI, nullptr);
+    int32_t instanceId = basicAPI->getContextByNode(node->uiNodeHandle);
+    if (instanceId < 0) {
+        return nullptr;
+    }
+    return new ArkUI_Context({ .id = instanceId });
 }
 
 #ifdef __cplusplus

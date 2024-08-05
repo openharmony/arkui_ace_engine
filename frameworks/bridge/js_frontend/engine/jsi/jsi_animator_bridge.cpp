@@ -303,10 +303,12 @@ void AddFrameListener(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, const RefPtr
             return;
         }
         auto jsTaskExecutor = delegate->GetAnimationJsTask();
-        jsTaskExecutor.PostTask([bridgeWeak, weakRuntime, value]() mutable {
-            LOGI("call animation onframe event");
-            CallAnimationFrameJs(bridgeWeak, weakRuntime.lock(), value);
-        }, "ArkUIAnimationFrame");
+        jsTaskExecutor.PostTask(
+            [bridgeWeak, weakRuntime, value]() mutable {
+                LOGI("call animation onframe event");
+                CallAnimationFrameJs(bridgeWeak, weakRuntime.lock(), value);
+            },
+            "ArkUIAnimationFrame");
     });
 }
 
@@ -589,12 +591,14 @@ void JsiAnimatorTaskCreate::AnimatorBridgeTaskFunc(const RefPtr<JsAcePage>& page
     auto jsTaskExecutor = delegate->GetAnimationJsTask();
     if (bridgeFree) {
         auto weakBridge = AceType::WeakClaim(AceType::RawPtr(bridgeFree));
-        jsTaskExecutor.PostTask([weakBridge]() mutable {
-            auto bridgeFree = weakBridge.Upgrade();
-            if (bridgeFree != nullptr) {
-                bridgeFree.Reset();
-            }
-        }, "ArkUIAnimatorBridgeRelease");
+        jsTaskExecutor.PostTask(
+            [weakBridge]() mutable {
+                auto bridgeFree = weakBridge.Upgrade();
+                if (bridgeFree != nullptr) {
+                    bridgeFree.Reset();
+                }
+            },
+            "ArkUIAnimatorBridgeRelease");
     }
     page->RemoveAnimatorBridge(bridgeId);
     bridge_->JsCreateAnimation(param_);

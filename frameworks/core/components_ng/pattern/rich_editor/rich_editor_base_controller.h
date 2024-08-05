@@ -30,13 +30,14 @@ public:
     void SetPattern(const WeakPtr<RichEditorPattern>& pattern);
     int32_t GetCaretOffset() override;
     bool SetCaretOffset(int32_t caretPosition) override;
-    void SetTypingStyle(struct UpdateSpanStyle& typingStyle, TextStyle textStyle) override;
+    void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle, std::optional<TextStyle> textStyle) override;
     void CloseSelectionMenu() override;
     bool IsEditing() override;
     void StopEditing() override;
     void SetSelection(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
     WeakPtr<LayoutInfoInterface> GetLayoutInfoInterface() override;
+    const PreviewTextInfo GetPreviewTextInfo() const override;
 protected:
     WeakPtr<RichEditorPattern> pattern_;
 };

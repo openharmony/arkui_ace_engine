@@ -174,6 +174,11 @@ public:
             }
             return;
         }
+        ToJsonColorHasValue(json, filter);
+    }
+
+    void ToJsonColorHasValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+    {
         auto jsonGradientColors = JsonUtil::CreateArray(true);
         if (propGradientColors_.has_value() && propValues_.has_value() &&
             (propGradientColors_.value().size() == propValues_.value().size())) {

@@ -23,14 +23,17 @@
 #include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 
 namespace OHOS::Ace {
-std::shared_ptr<XComponentController> XComponentController::GetXComponentControllerFromNapiValue(napi_value napiValue)
+std::shared_ptr<XComponentController> XComponentController::GetXComponentControllerFromNapiValue(
+    napi_env env, napi_value napiValue)
 {
+    auto vm = reinterpret_cast<NativeEngine*>(env)->GetEcmaVm();
     auto localRef = NapiValueToLocalValue(napiValue);
     if (localRef->IsNull()) {
         return nullptr;
     }
     auto* jsXComponentController =
-        static_cast<Framework::JSXComponentController*>(Local<panda::ObjectRef>(localRef)->GetNativePointerField(0));
+        static_cast<Framework::JSXComponentController*>(Local<panda::ObjectRef>(localRef)->GetNativePointerField(
+            vm, 0));
     if (!jsXComponentController) {
         return nullptr;
     }

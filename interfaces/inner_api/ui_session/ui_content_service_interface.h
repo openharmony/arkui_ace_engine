@@ -33,24 +33,25 @@ public:
         REGISTER_SEARCH_EVENT,
         REGISTER_ROUTER_CHANGE_EVENT,
         REGISTER_COMPONENT_EVENT,
+        REGISTER_WEB_UNFOCUS_EVENT,
         UNREGISTER_CLICK_EVENT,
         UNREGISTER_SEARCH_EVENT,
         UNREGISTER_ROUTER_CHANGE_EVENT,
         UNREGISTER_COMPONENT_EVENT,
-
+        UNREGISTER_WEB_UNFOCUS_EVENT,
     };
 
     /**
      * @description: define get the current page inspector tree info interface
      * @return: result number
      */
-    virtual int32_t GetInspectorTree(const EventCallback& eventCallback) = 0;
+    virtual int32_t GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback) = 0;
 
     /**
      * @description: define SA process and current process connect interface
      * @return: result number
      */
-    virtual int32_t Connect() = 0;
+    virtual int32_t Connect(const EventCallback& eventCallback) = 0;
 
     /**
      * @description: define register a callback on click event occur to execute interface
@@ -77,6 +78,13 @@ public:
     virtual int32_t RegisterComponentChangeEventCallback(const EventCallback& eventCallback) = 0;
 
     /**
+     * @description: define register a callback on web unfocus event occur to execute interface
+     * @return: result number
+     */
+    virtual int32_t RegisterWebUnfocusEventCallback(
+        const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback) = 0;
+
+    /**
      * @description: define unregister the click event occur callback last register interface
      * @return: result number
      */
@@ -99,6 +107,12 @@ public:
      * @return: result number
      */
     virtual int32_t UnregisterComponentChangeEventCallback() = 0;
+
+    /**
+     * @description: define unregister the web focus event occur callback last register interface
+     * @return: result number
+     */
+    virtual int32_t UnregisterWebUnfocusEventCallback() = 0;
 };
 class ACE_FORCE_EXPORT ReportService : public OHOS::IRemoteBroker {
 public:
@@ -111,7 +125,9 @@ public:
         REPORT_SWITCH_EVENT,
         REPORT_COMPONENT_EVENT,
         REPORT_SEARCH_EVENT,
-        REPORT_INSPECTOR_VALUE
+        REPORT_INSPECTOR_VALUE,
+        REPORT_WEB_UNFOCUS_EVENT,
+        SEND_BASE_INFO,
     };
 
     /**
@@ -137,7 +153,17 @@ public:
     /**
      * @description: define reports inspector value to the proxy interface
      */
-    virtual void ReportInspectorTreeValue(const std::string& data) = 0;
+    virtual void ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart) = 0;
+
+    /**
+     * @description: define reports web unfocus value to the proxy interface
+     */
+    virtual void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) = 0;
+
+    /**
+     * @description: define send base info value to the proxy interface
+     */
+    virtual void SendBaseInfo(const std::string& data) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H

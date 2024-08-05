@@ -130,6 +130,7 @@ template("ace_osal_ohos_source_set") {
       if (frame_trace_support) {
         sources += [ "frame_trace_adapter_impl.cpp" ]
         external_deps += [ "frame_aware_sched:frame_trace_intf" ]
+        defines += [ "FRAME_TRACE_ENABLE" ]
       } else {
         sources += [ "frame_trace_adapter_fake_impl.cpp" ]
       }
@@ -139,6 +140,7 @@ template("ace_osal_ohos_source_set") {
     sources += [
       "background_task_helper_ohos.cpp",
       "drawing_color_filter_ohos.cpp",
+      "drawing_lattice_ohos.cpp",
       "file_uri_helper_ohos.cpp",
       "image_packer_ohos.cpp",
       "image_source_ohos.cpp",

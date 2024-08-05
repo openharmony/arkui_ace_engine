@@ -317,6 +317,8 @@ SwiperParameters GetDotIndicatorProps(FrameNode* frameNode, ArkUISwiperIndicator
         indicator->colorValue.isSet == 1 ? Color(indicator->colorValue.value) : swiperIndicatorTheme->GetColor();
     swiperParameters.selectedColorVal = indicator->selectedColorValue.isSet == 1 ?
         Color(indicator->selectedColorValue.value) : swiperIndicatorTheme->GetSelectedColor();
+    swiperParameters.maxDisplayCountVal = indicator->maxDisplayCount.isSet == 1 ?
+        indicator->maxDisplayCount.value : NUM_0;
     return swiperParameters;
 }
 
@@ -405,7 +407,19 @@ void SetIndicatorInteractive(ArkUINodeHandle node, ArkUI_Bool value)
     SwiperModelNG::SetIndicatorInteractive(frameNode, static_cast<bool>(value));
 }
 
-void ResetIndicatorInteractive(ArkUINodeHandle node) {}
+void ResetIndicatorInteractive(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetIndicatorInteractive(frameNode, true);
+}
+
+ArkUI_Int32 GetIndicatorInteractive(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(SwiperModelNG::GetIndicatorInteractive(frameNode));
+}
 
 void SetSwiperNextMargin(
     ArkUINodeHandle node, ArkUI_Float32 nextMarginValue, ArkUI_Int32 nextMarginUnit, ArkUI_Bool ignoreBlank)
@@ -1010,6 +1024,7 @@ void GetSwiperIndicator(ArkUINodeHandle node, ArkUISwiperIndicator* props)
         props->maskValue = ArkUIOptionalInt { 1, params->maskValue.value_or(0) };
         props->colorValue = ArkUIOptionalUint { 1, params->colorVal.value().GetValue() };
         props->selectedColorValue = ArkUIOptionalUint { 1, params->selectedColorVal.value().GetValue() };
+        props->maxDisplayCount = ArkUIOptionalInt { 1, params->maxDisplayCountVal.value() };
     }
 }
 
@@ -1138,7 +1153,7 @@ const ArkUISwiperModifier* GetSwiperModifier()
         GetSwiperNextMargin, SetSwiperIndicatorStyle, GetSwiperIndicator, GetSwiperController,
         SetSwiperOnChange, ResetSwiperOnChange, SetSwiperOnAnimationStart, ResetSwiperOnAnimationStart,
         SetSwiperOnAnimationEnd, ResetSwiperOnAnimationEnd, SetSwiperOnGestureSwipe, ResetSwiperOnGestureSwipe,
-        SetOnContentDidScroll, ResetOnContentDidScroll };
+        SetOnContentDidScroll, ResetOnContentDidScroll, GetIndicatorInteractive };
     return &modifier;
 }
 

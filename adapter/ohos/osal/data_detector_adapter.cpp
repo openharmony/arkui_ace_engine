@@ -15,17 +15,12 @@
 
 #include "core/common/ai/data_detector_adapter.h"
 
-#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
-#include "want.h"
+#include "iremote_object.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/log_wrapper.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ai/data_detector_mgr.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -33,142 +28,123 @@ namespace OHOS::Ace {
 constexpr int32_t AI_TEXT_MAX_LENGTH = 500;
 constexpr int32_t AI_TEXT_GAP = 100;
 constexpr int32_t AI_DELAY_TIME = 100;
-const std::pair<std::string, std::string> UI_EXTENSION_TYPE = { "ability.want.params.uiExtensionType",
-    "sys/visualExtension" };
 constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
+
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
     { TextDataDetectType::EMAIL, "email" }, { TextDataDetectType::ADDRESS, "location" },
-    { TextDataDetectType::DATETIME, "datetime" }
+    { TextDataDetectType::DATE_TIME, "datetime" }
 };
 const std::unordered_map<std::string, TextDataDetectType> TEXT_DETECT_MAP_REVERSE = {
     { "phoneNum", TextDataDetectType::PHONE_NUMBER }, { "url", TextDataDetectType::URL },
     { "email", TextDataDetectType::EMAIL }, { "location", TextDataDetectType::ADDRESS },
-    { "datetime", TextDataDetectType::DATETIME }
+    { "datetime", TextDataDetectType::DATE_TIME }
 };
 
-bool DataDetectorAdapter::ShowUIExtensionMenu(
-    const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode)
+void DataDetectorAdapter::GetAIEntityMenu()
 {
-    ModalUIExtensionCallbacks callbacks;
-    callbacks.onResult = [onClickMenu = onClickMenu_](int32_t code, const AAFwk::Want& want) {
-        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension Ability onResult, code: %{public}d", code);
-        auto action = want.GetStringParam("action");
-        if (!action.empty() && onClickMenu) {
-            onClickMenu(action);
-        }
-    };
-    callbacks.onDestroy = []() { TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension Ability Destroy"); };
-    callbacks.onError = [](int32_t code, const std::string& name, const std::string& message) {
-        TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-            "UIExtension Ability Error, code: %{public}d, name: %{public}s, message: %{public}s", code, name.c_str(),
-            message.c_str());
-    };
-    callbacks.onRelease = [](int32_t code) {
-        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension Ability Release, code: %{public}d", code);
-    };
-    AAFwk::Want want;
-    want.SetElementName(uiExtensionBundleName_, uiExtensionAbilityName_);
-    SetWantParamaters(aiSpan, want);
-
-    uiExtNode_ = NG::UIExtensionModelNG::Create(want, callbacks);
-    CHECK_NULL_RETURN(uiExtNode_, false);
-    auto onReceive = GetOnReceive(aiRect, targetNode);
-    auto pattern = uiExtNode_->GetPattern<NG::UIExtensionPattern>();
-    CHECK_NULL_RETURN(pattern, false);
-    pattern->SetOnReceiveCallback(std::move(onReceive));
-    uiExtNode_->MarkModifyDone();
-    return true;
+    auto context = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+    uiTaskExecutor.PostTask(
+        [&, instanceId = context->GetInstanceId()] {
+            ContainerScope scope(instanceId);
+            TAG_LOGI(AceLogTag::ACE_TEXT, "Get AI entity menu from ai_engine");
+            DataDetectorMgr::GetInstance().GetAIEntityMenu(textDetectResult_);
+        },
+        "ArkUITextInitDataDetect");
 }
 
-std::function<void(const AAFwk::WantParams&)> DataDetectorAdapter::GetOnReceive(
-    NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode)
+bool DataDetectorAdapter::ShowAIEntityMenu(const AISpan& aiSpan, const NG::RectF& aiRect,
+    const RefPtr<NG::FrameNode>& targetNode, bool isShowCopy, bool isShowSelectText)
 {
-    return [aiRect, weak = AceType::WeakClaim(this), targetNodeWeak = AceType::WeakClaim(AceType::RawPtr(targetNode))](
-               const AAFwk::WantParams& wantParams) {
-        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension Ability onReceive");
-        auto dataDetectorAdapter = weak.Upgrade();
-        CHECK_NULL_VOID(dataDetectorAdapter);
-        CHECK_NULL_VOID(dataDetectorAdapter->uiExtNode_);
-        auto targetNode = targetNodeWeak.Upgrade();
-        CHECK_NULL_VOID(targetNode);
-        auto pipeline = NG::PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        const std::string& action = wantParams.GetStringParam("action");
-        if (!action.empty() && dataDetectorAdapter->onClickMenu_) {
-            dataDetectorAdapter->onClickMenu_(action);
+    if (textDetectResult_.menuOptionAndAction.empty()) {
+        TAG_LOGW(AceLogTag::ACE_TEXT, "menu option is empty, please try again");
+        GetAIEntityMenu();
+        return false;
+    }
+
+    mainContainerId_ = Container::CurrentId();
+    std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
+    auto menuOptionAndAction = textDetectResult_.menuOptionAndAction[TEXT_DETECT_MAP.at(aiSpan.type)];
+    if (menuOptionAndAction.empty()) {
+        return false;
+    }
+    if (!isShowSelectText) {
+        // delete the last option: selectText.
+        menuOptionAndAction.pop_back();
+        if (!isShowCopy) {
+        // delete the last option: copy.
+            menuOptionAndAction.pop_back();
         }
-        const std::string& abilityType = wantParams.GetStringParam("abilityType");
-        if (!abilityType.empty()) {
-            auto abilityParams = wantParams.GetWantParams("abilityParams");
-            dataDetectorAdapter->StartAbilityByType(abilityType, abilityParams);
-        }
-        const std::string& closeMenu = wantParams.GetStringParam("closeMenu");
-        if (closeMenu == "true") {
-            overlayManager->CloseUIExtensionMenu(targetNode->GetId());
-            return;
-        }
-        const std::string& longestContent = wantParams.GetStringParam("longestContent");
-        const int32_t& menuSize = wantParams.GetIntParam("menuSize", -1);
-        if (longestContent.empty() || menuSize == -1) {
-            return;
-        }
-        overlayManager->ShowUIExtensionMenu(
-            dataDetectorAdapter->uiExtNode_, aiRect, longestContent, menuSize, targetNode);
-    };
+    }
+
+    for (auto menuOption : menuOptionAndAction) {
+        std::function<void()> onClickEvent = [aiSpan, menuOption, weak = AceType::WeakClaim(this),
+                                                 targetNodeWeak = AceType::WeakClaim(AceType::RawPtr(targetNode))]() {
+            auto dataDetectorAdapter = weak.Upgrade();
+            CHECK_NULL_VOID(dataDetectorAdapter);
+            auto targetNode = targetNodeWeak.Upgrade();
+            CHECK_NULL_VOID(targetNode);
+            dataDetectorAdapter->OnClickAIMenuOption(aiSpan, menuOption, targetNode);
+        };
+        menuOptions.push_back(std::make_pair(menuOption.first, onClickEvent));
+    }
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    return overlayManager->ShowAIEntityMenu(menuOptions, aiRect, targetNode);
 }
 
-void DataDetectorAdapter::StartAbilityByType(const std::string& type, AAFwk::WantParams& wantParams)
+void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
+    const std::pair<std::string, FuncVariant>& menuOption, const RefPtr<NG::FrameNode>& targetNode)
 {
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    TAG_LOGI(AceLogTag::ACE_TEXT, "Click AI menu option: %{public}s", menuOption.first.c_str());
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    if (targetNode) {
+        overlayManager->CloseAIEntityMenu(targetNode);
+    }
+    Container::UpdateCurrent(mainContainerId_);
+
     auto runtimeContext = Platform::AceContainer::GetRuntimeContext(pipeline->GetInstanceId());
     CHECK_NULL_VOID(runtimeContext);
-    auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(
-        runtimeContext->shared_from_this());
-    CHECK_NULL_VOID(abilityContext);
+    auto token = runtimeContext->GetToken();
+    auto bundleName = runtimeContext->GetBundleName();
 
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_VOID(engine);
-    NativeEngine* nativaEngine = engine->GetNativeEngine();
-    auto env = reinterpret_cast<napi_env>(nativaEngine);
-    CHECK_NULL_VOID(env);
-    std::shared_ptr<OHOS::AbilityRuntime::JsUIExtensionCallback> callback =
-        std::make_shared<OHOS::AbilityRuntime::JsUIExtensionCallback>(env);
-    abilityContext->StartAbilityByType(type, wantParams, callback);
+    hasClickedMenuOption_ = true;
+    if (onClickMenu_ && std::holds_alternative<std::function<std::string()>>(menuOption.second)) {
+        onClickMenu_(std::get<std::function<std::string()>>(menuOption.second)());
+    } else if (std::holds_alternative<std::function<void(sptr<IRemoteObject>, std::string)>>(menuOption.second)) {
+        std::get<std::function<void(sptr<IRemoteObject>, std::string)>>(menuOption.second)(token, aiSpan.content);
+    } else if (std::holds_alternative<std::function<void(int32_t, std::string)>>(menuOption.second)) {
+        std::get<std::function<void(int32_t, std::string)>>(menuOption.second)(mainContainerId_, aiSpan.content);
+    } else if (std::holds_alternative<std::function<void(int32_t, std::string, std::string, int32_t, std::string)>>(
+                   menuOption.second)) {
+        std::get<std::function<void(int32_t, std::string, std::string, int32_t, std::string)>>(menuOption.second)(
+            mainContainerId_, textForAI_, bundleName, aiSpan.start, aiSpan.content);
+    } else {
+        TAG_LOGW(AceLogTag::ACE_TEXT, "No matching menu option");
+    }
+    hasClickedMenuOption_ = false;
 }
 
 void DataDetectorAdapter::ResponseBestMatchItem(const AISpan& aiSpan)
 {
-    ModalUIExtensionCallbacks callbacks;
-    AAFwk::Want want;
-    want.SetElementName(uiExtensionBundleName_, uiExtensionAbilityName_);
-    SetWantParamaters(aiSpan, want);
-    want.SetParam(std::string("clickType"), std::string("leftMouse"));
-    auto uiExtNode = NG::UIExtensionModelNG::Create(want, callbacks);
-    CHECK_NULL_VOID(uiExtNode);
-
-    // Extend the lifecycle of the uiExtNode with callback
-    auto onReceive = [uiExtNode] (const AAFwk::WantParams& wantParams) {};
-    auto pattern = uiExtNode->GetPattern<NG::UIExtensionPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetOnReceiveCallback(std::move(onReceive));
-}
-
-void DataDetectorAdapter::SetWantParamaters(const AISpan& aiSpan, AAFwk::Want& want)
-{
-    want.SetParam("entityType", TEXT_DETECT_MAP.at(aiSpan.type));
-    want.SetParam("entityText", aiSpan.content);
-    want.SetParam(UI_EXTENSION_TYPE.first, UI_EXTENSION_TYPE.second);
-    if (entityJson_.find(aiSpan.start) != entityJson_.end()) {
-        want.SetParam("entityJson", entityJson_[aiSpan.start]);
+    if (textDetectResult_.menuOptionAndAction.empty()) {
+        TAG_LOGW(AceLogTag::ACE_TEXT, "menu option is empty, please try again");
+        GetAIEntityMenu();
+        return;
     }
-    if (aiSpan.type == TextDataDetectType::DATETIME) {
-        want.SetParam("fullText", textForAI_);
-        want.SetParam("offset", aiSpan.start);
+    auto menuOptions = textDetectResult_.menuOptionAndAction[TEXT_DETECT_MAP.at(aiSpan.type)];
+    if (menuOptions.empty()) {
+        TAG_LOGW(AceLogTag::ACE_TEXT, "menu option is empty");
+        return;
     }
+    OnClickAIMenuOption(aiSpan, menuOptions[0]);
 }
 
 void DataDetectorAdapter::SetTextDetectTypes(const std::string& types)
@@ -193,14 +169,18 @@ void DataDetectorAdapter::SetTextDetectTypes(const std::string& types)
 
 bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::string& text)
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT, "Parse origine text entry");
     auto runtimeContext = Platform::AceContainer::GetRuntimeContext(Container::CurrentId());
     CHECK_NULL_RETURN(runtimeContext, false);
     if (runtimeContext->GetBundleName() != entityJson->GetString("bundleName")) {
+        TAG_LOGW(AceLogTag::ACE_TEXT,
+            "Wrong bundleName, the context bundleName is: %{public}s, but your bundleName is: %{public}s",
+            runtimeContext->GetBundleName().c_str(), entityJson->GetString("bundleName").c_str());
         return false;
     }
     auto aiSpanArray = entityJson->GetValue("entity");
     if (aiSpanArray->IsNull() || !aiSpanArray->IsArray()) {
-        TAG_LOGW(AceLogTag::ACE_TEXT, "Error AI Entity.");
+        TAG_LOGW(AceLogTag::ACE_TEXT, "Wrong AI entity");
         return false;
     }
 
@@ -213,18 +193,14 @@ bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJ
         aiSpan.end = item->GetInt("end");
         aiSpanMap_[aiSpan.start] = aiSpan;
     }
-    auto entityMenuServiceInfoJson = entityJson->GetValue("entityMenuServiceInfoJson");
-    if (!entityMenuServiceInfoJson->IsNull()) {
-        if (uiExtensionBundleName_.empty()) {
-            uiExtensionBundleName_ = entityMenuServiceInfoJson->GetString("bundlename");
-        }
-        if (uiExtensionAbilityName_.empty()) {
-            uiExtensionAbilityName_ = entityMenuServiceInfoJson->GetString("abilityname");
-        }
-    }
     aiDetectInitialized_ = true;
     text = entityJson->GetString("content");
     textForAI_ = text;
+    if (textDetectResult_.menuOptionAndAction.empty()) {
+        GetAIEntityMenu();
+    }
+
+    TAG_LOGI(AceLogTag::ACE_TEXT, "Parse origin text successful");
     return true;
 }
 
@@ -234,7 +210,7 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
     info.text = detectText;
     info.module = textDetectTypes_;
 
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     int32_t instanceID = context->GetInstanceId();
     auto textFunc = [weak = WeakClaim(this), instanceID, startPos, info](const TextDataDetectResult result) {
@@ -246,37 +222,33 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([result, weak, instanceID, startPos, info] {
-            ContainerScope scope(instanceID);
-            auto dataDetectorAdapter = weak.Upgrade();
-            CHECK_NULL_VOID(dataDetectorAdapter);
-            if (info.module != dataDetectorAdapter->textDetectTypes_) {
-                return;
-            }
-            dataDetectorAdapter->ParseAIResult(result, startPos);
-            auto host = dataDetectorAdapter->GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-        }, "ArkUITextParseAIResult");
+        uiTaskExecutor.PostTask(
+            [result, weak, instanceID, startPos, info] {
+                ContainerScope scope(instanceID);
+                auto dataDetectorAdapter = weak.Upgrade();
+                CHECK_NULL_VOID(dataDetectorAdapter);
+                if (info.module != dataDetectorAdapter->textDetectTypes_) {
+                    return;
+                }
+                dataDetectorAdapter->ParseAIResult(result, startPos);
+                auto host = dataDetectorAdapter->GetHost();
+                CHECK_NULL_VOID(host);
+                host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+            },
+            "ArkUITextParseAIResult");
     };
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    uiTaskExecutor.PostTask([info, textFunc] {
-        TAG_LOGI(AceLogTag::ACE_TEXT, "Start entity detect using AI");
-        DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
-    }, "ArkUITextInitDataDetect");
+    uiTaskExecutor.PostTask(
+        [info, textFunc] {
+            TAG_LOGI(AceLogTag::ACE_TEXT, "Start entity detect using AI");
+            DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
+        },
+        "ArkUITextInitDataDetect");
 }
 
 void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int32_t startPos)
 {
-    auto entityMenuServiceInfoJson = JsonUtil::ParseJsonString(result.entityMenuServiceInfo);
-    CHECK_NULL_VOID(entityMenuServiceInfoJson);
-    if (uiExtensionBundleName_.empty()) {
-        uiExtensionBundleName_ = entityMenuServiceInfoJson->GetString("bundlename");
-    }
-    if (uiExtensionAbilityName_.empty()) {
-        uiExtensionAbilityName_ = entityMenuServiceInfoJson->GetString("abilityname");
-    }
     auto entityJson = JsonUtil::ParseJsonString(result.entity);
     CHECK_NULL_VOID(entityJson);
     for (const auto& type : TEXT_DETECT_MAP) {
@@ -308,7 +280,6 @@ void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int3
         auto resultJson = JsonUtil::Create(true);
         resultJson->Put("entity", entityJsonArray);
         resultJson->Put("code", result.code);
-        resultJson->Put("entityMenuServiceInfoJson", entityMenuServiceInfoJson);
         SetTextDetectResult(result);
         FireOnResult(resultJson->ToString());
     }
@@ -318,7 +289,7 @@ void DataDetectorAdapter::ParseAIJson(
     const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos)
 {
     if (!jsonValue || !jsonValue->IsArray()) {
-        TAG_LOGW(AceLogTag::ACE_TEXT, "Error AI Result.");
+        TAG_LOGW(AceLogTag::ACE_TEXT, "Wrong AI result");
         return;
     }
 
@@ -331,12 +302,12 @@ void DataDetectorAdapter::ParseAIJson(
         int32_t end = startPos + charOffset + static_cast<int32_t>(wOriText.length());
         if (charOffset < 0 || startPos + charOffset >= static_cast<int32_t>(wTextForAI.length()) ||
             end >= startPos + AI_TEXT_MAX_LENGTH || oriText.empty()) {
-            TAG_LOGW(AceLogTag::ACE_TEXT, "The result of AI is error");
+            TAG_LOGW(AceLogTag::ACE_TEXT, "The result of AI is wrong");
             continue;
         }
         if (oriText !=
             StringUtils::ToString(wTextForAI.substr(startPos + charOffset, static_cast<int32_t>(wOriText.length())))) {
-            TAG_LOGW(AceLogTag::ACE_TEXT, "The charOffset is error");
+            TAG_LOGW(AceLogTag::ACE_TEXT, "The charOffset is wrong");
             continue;
         }
         int32_t start = startPos + charOffset;
@@ -350,9 +321,9 @@ void DataDetectorAdapter::ParseAIJson(
         std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> costTime =
             currentDetectorTimeStamp - startDetectorTimeStamp_;
         item->Put("costTime", costTime.count());
-        item->Put("resultCode", textDetectResult_->code);
+        item->Put("resultCode", textDetectResult_.code);
         entityJson_[start] = item->ToString();
-        TAG_LOGD(AceLogTag::ACE_TEXT, "The json of the entity is: %{public}s", entityJson_[start].c_str());
+        TAG_LOGI(AceLogTag::ACE_TEXT, "The json of the entity is: %{public}s", entityJson_[start].c_str());
 
         AISpan aiSpan;
         aiSpan.start = start;
@@ -431,7 +402,7 @@ void DataDetectorAdapter::StartAITask()
     typeChanged_ = false;
     lastTextForAI_ = textForAI_;
     startDetectorTimeStamp_ = std::chrono::high_resolution_clock::now();
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);

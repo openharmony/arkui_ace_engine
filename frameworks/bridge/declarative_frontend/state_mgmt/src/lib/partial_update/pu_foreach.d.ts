@@ -57,4 +57,6 @@ declare class RepeatVirtualScrollNative {
   ): void;
   // invalidate C++ side map index -> key
   static invalidateKeyCache(totalCount : number): void;
+  // drag and drop
+  static onMove(handler: (from: number, to: number) => void);
 }

@@ -92,10 +92,6 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         // code path for 
         // 1- source is of same type C in parent, source is its value, not the backing store ObservedPropertyObject
         // 2- nested Object/Array inside observed another object/array in parent, source is its value
-        if (typeof sourceValue == 'object' && !((sourceValue instanceof SubscribableAbstract) || ObservedObject.IsObservedObject(sourceValue))) {
-          stateMgmtConsole.applicationWarn(`${this.debugInfo()}: Provided source object's class lacks @Observed class decorator.
-            Object property changes will not be observed.`);
-        }
         stateMgmtConsole.debug(`${this.debugInfo()}: constructor: wrapping source in a new ObservedPropertyObjectPU`);
         this.createSourceDependency(sourceValue);
         this.source_ = new ObservedPropertyObjectPU<C>(sourceValue, this, this.getPropSourceObservedPropertyFakeName());
@@ -401,7 +397,6 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       return obj;
     }
 
-    let stack = new Array<{ name: string }>();
     let copiedObjects = new Map<Object, Object>();
 
     return getDeepCopyOfObjectRecursive(obj);
@@ -413,8 +408,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
 
       const alreadyCopiedObject = copiedObjects.get(obj);
       if (alreadyCopiedObject) {
-        let msg = `@Prop deepCopyObject: Found reference to already copied object: Path ${variable ? variable : 'unknown variable'}`;
-        stateMgmtConsole.debug(msg);
+        stateMgmtConsole.debug(`@Prop deepCopyObject: Found reference to already copied object: Path ${variable ? variable : 'unknown variable'}`);
         return alreadyCopiedObject;
       }
 
@@ -424,18 +418,14 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
         copiedObjects.set(obj, copy);
         obj.forEach((setKey: any) => {
-          stack.push({ name: setKey });
           copy.add(getDeepCopyOfObjectRecursive(setKey));
-          stack.pop();
         });
       } else if (obj instanceof Map) {
         copy = new Map<any, any>();
         Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
         copiedObjects.set(obj, copy);
         obj.forEach((mapValue: any, mapKey: any) => {
-          stack.push({ name: mapKey });
           copy.set(mapKey, getDeepCopyOfObjectRecursive(mapValue));
-          stack.pop();
         });
       } else if (obj instanceof Date) {
         copy = new Date()
@@ -463,16 +453,9 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         return obj;
       }
       Object.keys(obj).forEach((objKey: any) => {
-        stack.push({ name: objKey });
-        try {
-          Reflect.set(copy, objKey, getDeepCopyOfObjectRecursive(obj[objKey]));
-        } catch (error) {
-          stateMgmtConsole.error('DeepCopy failed, will use shallow copy instead. Error message is:', error);
-          copy[objKey] = obj[objKey];
-        }
-        stack.pop();
+          copy[objKey] = getDeepCopyOfObjectRecursive(obj[objKey]);
       });
-      return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
+      return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, undefined) : copy;
     }
   }
 }

@@ -112,13 +112,13 @@ public:
     static void SetValues(FrameNode* frameNode, const std::vector<std::string>& values);
     static void SetColumns(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
+    static void SetDivider(FrameNode* frameNode, const ItemDivider& divider);
     static PickerTextStyle getSelectedTextStyle(FrameNode* frameNode);
     static PickerTextStyle getNormalTextStyle(FrameNode* frameNode);
     static PickerTextStyle getDisappearTextStyle(FrameNode* frameNode);
     static int32_t getTextPickerSelectedIndex(FrameNode* frameNode);
     static std::string getTextPickerValue(FrameNode* frameNode);
     static std::string getTextPickerRange(FrameNode* frameNode);
-    static void SetDivider(FrameNode* frameNode, const ItemDivider& divider);
     static void SetGradientHeight(FrameNode* frameNode, const Dimension& value);
     static void SetOnCascadeChange(FrameNode* frameNode, TextCascadeChangeEvent&& onChange);
     static int32_t GetSelectedSize(FrameNode* frameNode);
@@ -128,7 +128,7 @@ public:
     static Dimension GetDefaultPickerItemHeight(FrameNode* frameNode);
     static void SetTextPickerRangeType(FrameNode* frameNode, int32_t rangeType);
     static int32_t GetTextPickerRangeType(FrameNode* frameNode);
-
+    static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();

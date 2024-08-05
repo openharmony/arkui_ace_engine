@@ -77,6 +77,7 @@ UIContentErrorCode FormFrontendDeclarative::RunDynamicPage(
 void FormFrontendDeclarative::UpdateData(const std::string& dataList)
 {
     CHECK_NULL_VOID(taskExecutor_);
+    // eTSCard UI == Main JS/UI/PLATFORM
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), dataList] {
             auto frontend = weak.Upgrade();
@@ -84,7 +85,7 @@ void FormFrontendDeclarative::UpdateData(const std::string& dataList)
                 frontend->UpdatePageData(dataList);
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIFormFrontendUpdatePageData"); // eTSCard UI == Main JS/UI/PLATFORM
+        TaskExecutor::TaskType::UI, "ArkUIFormFrontendUpdatePageData", PriorityType::HIGH);
 }
 
 void FormFrontendDeclarative::UpdatePageData(const std::string& dataList)

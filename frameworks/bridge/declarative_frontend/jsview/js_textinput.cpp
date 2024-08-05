@@ -73,7 +73,6 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("style", &JSTextField::SetInputStyle);
     JSClass<JSTextInput>::StaticMethod("hoverEffect", &JSTextField::JsHoverEffect);
     JSClass<JSTextInput>::StaticMethod("copyOption", &JSTextField::SetCopyOption);
-    JSClass<JSTextInput>::StaticMethod("textMenuOptions", &JSTextField::JsMenuOptionsExtension);
     JSClass<JSTextInput>::StaticMethod("foregroundColor", &JSTextField::SetForegroundColor);
     JSClass<JSTextInput>::StaticMethod("showUnit", &JSTextField::SetShowUnit);
     JSClass<JSTextInput>::StaticMethod("showError", &JSTextField::SetShowError);
@@ -113,21 +112,22 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("selectAll", &JSTextField::SetSelectAllValue);
     JSClass<JSTextInput>::StaticMethod("lineBreakStrategy", &JSTextField::SetLineBreakStrategy);
     JSClass<JSTextInput>::StaticMethod("showCounter", &JSTextField::SetShowCounter);
+    JSClass<JSTextInput>::StaticMethod("fontFeature", &JSTextField::SetFontFeature);
     JSClass<JSTextInput>::StaticMethod("decoration", &JSTextField::SetDecoration);
-    JSClass<JSTextInput>::StaticMethod("showPassword", &JSTextField::ShowPasswordText);
     JSClass<JSTextInput>::StaticMethod("minFontSize", &JSTextField::SetMinFontSize);
     JSClass<JSTextInput>::StaticMethod("maxFontSize", &JSTextField::SetMaxFontSize);
     JSClass<JSTextInput>::StaticMethod("heightAdaptivePolicy", &JSTextField::SetHeightAdaptivePolicy);
     JSClass<JSTextInput>::StaticMethod("letterSpacing", &JSTextField::SetLetterSpacing);
     JSClass<JSTextInput>::StaticMethod("lineHeight", &JSTextField::SetLineHeight);
-    JSClass<JSTextInput>::StaticMethod("fontFeature", &JSTextField::SetFontFeature);
     JSClass<JSTextInput>::StaticMethod("textOverflow", &JSTextField::SetTextOverflow);
     JSClass<JSTextInput>::StaticMethod("textIndent", &JSTextField::SetTextIndent);
+    JSClass<JSTextInput>::StaticMethod("showPassword", &JSTextField::ShowPasswordText);
+
     JSClass<JSTextInput>::StaticMethod("onWillInsert", &JSTextField::OnWillInsertValue);
     JSClass<JSTextInput>::StaticMethod("onDidInsert", &JSTextField::OnDidInsertValue);
     JSClass<JSTextInput>::StaticMethod("onWillDelete", &JSTextField::OnWillDelete);
     JSClass<JSTextInput>::StaticMethod("onDidDelete", &JSTextField::OnDidDelete);
-    JSClass<JSTextInput>::StaticMethod("selectionMenuOptions", &JSTextField::SelectionMenuOptions);
+    JSClass<JSTextInput>::StaticMethod("editMenuOptions", &JSTextField::EditMenuOptions);
     JSClass<JSTextInput>::StaticMethod("enablePreviewText", &JSTextField::SetEnablePreviewText);
     JSClass<JSTextInput>::InheritAndBind<JSViewAbstract>(globalObj);
 }

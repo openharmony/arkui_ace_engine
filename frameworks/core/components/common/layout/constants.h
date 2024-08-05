@@ -217,7 +217,7 @@ enum class TextDataDetectType {
     URL,
     EMAIL,
     ADDRESS,
-    DATETIME,
+    DATE_TIME,
 };
 
 enum class LineBreakStrategy {
@@ -262,17 +262,6 @@ inline std::string ToString(const TextOverflow& textOverflow)
     return iter != -1 ? table[iter].value : "";
 }
 } // namespace StringUtils
-
-enum class TextMarqueeState {
-    START = 0,
-    BOUNCE,
-    FINISH,
-};
-
-enum class MarqueeStartPolicy {
-    DEFAULT = 0,
-    ON_FOCUS,
-};
 
 // overflow-x: visible|hidden|scroll|auto|no-display|no-content;
 enum class TextFieldOverflowX {
@@ -336,6 +325,14 @@ enum class ImageFit {
     NONE,
     SCALE_DOWN,
     TOP_LEFT,
+    TOP,
+    TOP_END,
+    START,
+    CENTER,
+    END,
+    BOTTOM_START,
+    BOTTOM,
+    BOTTOM_END,
     COVER_TOP_LEFT,
 };
 
@@ -346,7 +343,8 @@ enum class DynamicRangeMode {
 };
 
 enum class AIImageQuality {
-    NONE = 1,
+    NONE = 0,
+    LOW,
     NORMAL,
     HIGH,
 };
@@ -388,6 +386,8 @@ enum class BorderImageDirection {
     RIGHT,
     TOP,
     BOTTOM,
+    START,
+    END,
 };
 
 enum class TimePickerFormat {
@@ -864,6 +864,12 @@ enum class NodeRenderType : uint32_t {
 enum class MarqueeUpdateStrategy : uint32_t {
     DEFAULT = 0,
     PRESERVE_POSITION,
+};
+
+enum class EdgeType {
+    MARGIN,
+    PADDING,
+    SAFE_AREA_PADDING,
 };
 
 enum class SafeAreaSyncType : uint32_t {

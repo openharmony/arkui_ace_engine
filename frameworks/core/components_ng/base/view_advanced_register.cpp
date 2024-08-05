@@ -26,6 +26,11 @@ ViewAdvancedRegister* ViewAdvancedRegister::GetInstance()
     return ViewAdvancedRegister::instance_;
 }
 
+RefPtr<PagePattern> ViewAdvancedRegister::CreatePagePattern(const RefPtr<PageInfo>& pageInfo)
+{
+    return AceType::MakeRefPtr<PagePattern>(pageInfo);
+}
+
 RefPtr<Pattern> ViewAdvancedRegister::GeneratePattern(const std::string& patternName)
 {
     if (patternName == V2::STAGE_ETS_TAG) {

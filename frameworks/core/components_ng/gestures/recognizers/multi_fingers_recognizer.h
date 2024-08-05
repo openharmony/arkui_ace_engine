@@ -33,7 +33,7 @@ public:
 
     ~MultiFingersRecognizer() override = default;
 
-    virtual void UpdateFingerListInfo();
+    void UpdateFingerListInfo();
 
     bool CheckTouchId(int32_t touchId) override
     {
@@ -89,6 +89,9 @@ protected:
         fingerList_.clear();
         activeFingers_.clear();
         lastPointEvent_.reset();
+        currentFingers_ = 0;
+        refereeState_ = RefereeState::READY;
+        disposal_ = GestureDisposal::NONE;
     }
 
     bool IsNeedResetStatus();

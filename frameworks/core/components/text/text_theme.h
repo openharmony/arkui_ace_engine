@@ -22,6 +22,9 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr float DRAG_BACKGROUND_OPACITY = 0.95f;
+} // namespace
 
 /**
  * TextTheme defines color and styles of ThemeComponent. TextTheme should be built
@@ -63,17 +66,15 @@ public:
             theme->selectedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, Color(0x33007dff));
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
+            auto dragBackgroundColor = pattern->GetAttr<Color>("drag_background_color", Color::WHITE);
+            if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+                dragBackgroundColor = dragBackgroundColor.ChangeOpacity(DRAG_BACKGROUND_OPACITY);
+            }
+            theme->dragBackgroundColor_ = dragBackgroundColor;
             constexpr double childMinSize = 20.0;
             theme->linearSplitChildMinSize_ = pattern->GetAttr<double>(LINEAR_SPLIT_CHILD_MIN_SIZE, childMinSize);
-            theme->isTextFadeout_ = pattern->GetAttr<std::string>("text_fadeout_enable", "") == "true";
-            theme->fadeoutWidth_ = pattern->GetAttr<Dimension>("text_fadeout_width", 16.0_vp);
-            RefPtr<ThemeStyle> textfieldPattern = themeConstants->GetPatternByName("textfield_pattern");
-            if (!textfieldPattern) {
-                LOGW("find pattern of textfield fail");
-                return;
-            }
-            auto textfieldShowHandle = textfieldPattern->GetAttr<std::string>("textfield_show_handle", "0");
-            theme->isShowHandle_ = StringUtils::StringToInt(textfieldShowHandle);
+            auto textShowHandle = pattern->GetAttr<std::string>("text_show_handle", "0");
+            theme->isShowHandle_ = StringUtils::StringToInt(textShowHandle);
         }
     };
 
@@ -99,19 +100,14 @@ public:
         return linearSplitChildMinSize_;
     }
 
-    bool GetIsTextFadeout() const
-    {
-        return isTextFadeout_;
-    }
-
-    const Dimension& GetFadeoutWidth() const
-    {
-        return fadeoutWidth_;
-    }
-
     bool IsShowHandle() const
     {
         return isShowHandle_;
+    }
+
+    const Color& GetDragBackgroundColor() const
+    {
+        return dragBackgroundColor_;
     }
 
 protected:
@@ -120,10 +116,9 @@ protected:
 private:
     TextStyle textStyle_;
     Color selectedColor_;
+    Color dragBackgroundColor_ = Color::WHITE;
     bool draggable_ = false;
     double linearSplitChildMinSize_ = 20.0;
-    bool isTextFadeout_ = false;
-    Dimension fadeoutWidth_;
     bool isShowHandle_ = false;
 };
 

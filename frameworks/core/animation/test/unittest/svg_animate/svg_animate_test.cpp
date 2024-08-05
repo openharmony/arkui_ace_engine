@@ -73,8 +73,7 @@ public:
         if (!svgAnimate_) {
             return;
         }
-        std::function<void(T)> callback;
-        callback = [weak = AceType::WeakClaim(this)](T value) {
+        std::function<void(T)> callback = [weak = AceType::WeakClaim(this)](T value) {
             auto mock = weak.Upgrade();
             if (!mock) {
                 LOGE("mock is null");
@@ -90,8 +89,7 @@ public:
         if (!svgAnimate_) {
             return;
         }
-        std::function<void(double)> callback;
-        callback = [weak = AceType::WeakClaim(this)](double value) {
+        std::function<void(double)> callback = [weak = AceType::WeakClaim(this)](double value) {
             auto mock = weak.Upgrade();
             if (!mock) {
                 LOGE("mock is null");

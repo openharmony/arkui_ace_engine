@@ -97,7 +97,7 @@ public:
     static void OnChange(const JSCallbackInfo& info);
     static void Loop(const JSCallbackInfo& info);
     static void UseMilitaryTime(bool isUseMilitaryTime);
-    static void EnableHapticFeedback(bool isEnableHapticFeedback);
+    static void EnableHapticFeedback(const JSCallbackInfo& info);
     static void PickerBackgroundColor(const JSCallbackInfo& info);
 
     static void SetDisappearTextStyle(const JSCallbackInfo& info);

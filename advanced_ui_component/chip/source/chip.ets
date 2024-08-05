@@ -620,14 +620,7 @@ export struct ChipComponent {
       sourceColor = ColorMetrics.resourceColor(currentColor);
     } catch (err) {
       hilog.error(0x3900, 'Ace', `Chip resourceColor, error: ${err.toString()}`);
-      if (this.getChipActive()) {
-        sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor);
-      } else {
-        sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor);
-      }
-      if (!this.isShowPressedBackGroundColor) {
-        return Color.Transparent
-      }
+      sourceColor = ColorMetrics.resourceColor(Color.Transparent);
     }
     if (!this.isShowPressedBackGroundColor) {
       return sourceColor.color
@@ -716,7 +709,7 @@ export struct ChipComponent {
       return
     }
     if (this.isHover) {
-      if (event.type === TouchType.Down || event.type == TouchEvent.Move) {
+      if (event.type === TouchType.Down || event.type === TouchType.Move) {
         this.isShowPressedBackGroundColor = true
       } else if (event.type === TouchType.Up) {
         this.isShowPressedBackGroundColor = false
@@ -724,7 +717,7 @@ export struct ChipComponent {
         this.isShowPressedBackGroundColor = false
       }
     } else {
-      if (event.type === TouchType.Down || event.type == TouchType.Move) {
+      if (event.type === TouchType.Down || event.type === TouchType.Move) {
         this.isShowPressedBackGroundColor = true
       } else if (event.type === TouchType.Up) {
         this.isShowPressedBackGroundColor = false
@@ -921,7 +914,6 @@ export struct ChipComponent {
         } else if (this.prefixIcon?.src !== "") {
           Image(this.prefixIcon?.src)
             .direction(this.chipDirection)
-            .matchTextDirection(this.chipDirection == Direction.Ltr ? false : true)
             .opacity(this.getChipNodeOpacity())
             .size(this.getPrefixIconSize())
             .fillColor(this.getPrefixIconFilledColor())
@@ -965,7 +957,6 @@ export struct ChipComponent {
         } else if (this.suffixIcon?.src !== "") {
           Image(this.getSuffixIconSrc())
             .direction(this.chipDirection)
-            .matchTextDirection(this.chipDirection == Direction.Ltr ? false : true)
             .opacity(this.getChipNodeOpacity())
             .size(this.getSuffixIconSize())
             .fillColor(this.getSuffixIconFilledColor())

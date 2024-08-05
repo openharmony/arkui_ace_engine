@@ -502,7 +502,7 @@ HWTEST_F(TabsTestNg, TabPatternOnModifyDone001, TestSize.Level1)
      * @tc.expected: step3. related function is called.
      */
     pattern_->OnModifyDone();
-    pattern_->onChangeEvent_ = std::make_shared<ChangeEvent>();
+    pattern_->onChangeEvent_ = std::make_shared<ChangeEventWithPreIndex>();
     pattern_->OnModifyDone();
 }
 
@@ -522,14 +522,14 @@ HWTEST_F(TabsTestNg, SetOnIndexChangeEvent001, TestSize.Level1)
     CreateTabsDone(model);
 
     /**
-     * @tc.steps: step3. invoke OnModifyDone and onChangeEvent_.
+     * @tc.steps: step3. invoke OnModifyDone and onIndexChangeEvent_.
      * @tc.expected: step3. related function is called.
      */
     pattern_->onIndexChangeEvent_ = std::make_shared<ChangeEvent>();
     pattern_->SetOnIndexChangeEvent([](const BaseEventInfo* info) {});
     pattern_->onIndexChangeEvent_ = nullptr;
     pattern_->SetOnIndexChangeEvent([](const BaseEventInfo* info) {});
-    swiperPattern_->FireChangeEvent();
+    swiperPattern_->FireChangeEvent(0, 1);
 }
 
 /**
@@ -555,25 +555,6 @@ HWTEST_F(TabsTestNg, InitScrollable001, TestSize.Level1)
     tabBarPattern_->InitScrollable(gestureHub);
     tabBarPattern_->axis_ = Axis::VERTICAL;
     ASSERT_TRUE(tabBarPattern_->visibleItemPosition_.empty());
-}
-
-/**
-* @tc.name: DumpAdvanceInfo005
-* @tc.desc: test AddTabBarItem
-* @tc.type: FUNC
-*/
-HWTEST_F(TabsTestNg, DumpAdvanceInfo005, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    tabBarPattern_->DumpAdvanceInfo();
-    tabBarPattern_->axis_ = Axis::VERTICAL;
-    tabBarPattern_->DumpAdvanceInfo();
-    tabBarPattern_->axis_ = Axis::FREE;
-    tabBarPattern_->DumpAdvanceInfo();
-    tabBarPattern_->axis_ = Axis::NONE;
-    tabBarPattern_->DumpAdvanceInfo();
 }
 
 /**

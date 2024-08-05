@@ -151,7 +151,7 @@ auto& onDidRangeAfter = onDidChangeValue.rangeAfter_;
 const TextStyle TEXT_STYLE_1(10.0);
 const TextStyle TEXT_STYLE_2(20.0);
 const TextStyle TEXT_STYLE_3(30.0);
-const TextSpanOptions TEXT_SPAN_OPTIONS_1 = { .value = INIT_VALUE_1, .style = TEXT_STYLE_1 };
+TextSpanOptions TEXT_SPAN_OPTIONS_1 = { .value = INIT_VALUE_1, .style = TEXT_STYLE_1 };
 const ImageSpanAttribute IMAGE_SPAN_ATTRIBUTE_1 = {
     .size = ImageSpanSize{ .width = 200.0_px, .height = 100.0_px },
     .verticalAlign = VerticalAlign::CENTER,
@@ -167,6 +167,12 @@ const ImageSpanOptions IMAGE_SPAN_OPTIONS_1 = {
     .moduleName = std::nullopt,
     .imagePixelMap = std::nullopt,
     .imageAttribute = IMAGE_SPAN_ATTRIBUTE_1
+};
+const SymbolSpanOptions SYMBOL_SPAN_OPTIONS_1 = {
+    .offset = std::nullopt,
+    .symbolId = 0,
+    .style = TEXT_STYLE_1,
+    .resourceObject = nullptr
 };
 } // namespace
 

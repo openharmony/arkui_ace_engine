@@ -36,6 +36,8 @@ public:
     void SetTextSelectableMode(TextSelectableMode value) override {};
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
+    void SetMinFontScale(const float value) override;
+    void SetMaxFontScale(const float value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetTextAlign(TextAlign value) override;
     void SetTextOverflow(TextOverflow value) override;
@@ -67,15 +69,13 @@ public:
     void SetEllipsisMode(EllipsisMode modal) override {};
     void SetClipEdge(bool clip) override {};
     void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) override {};
-    void SetMarqueeOptions(const NG::TextMarqueeOptions& options) override {};
-    void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override {};
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void SetDraggable(bool draggable) override;
-    void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) override;
+    void SetHalfLeading(bool halfLeading) override;
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

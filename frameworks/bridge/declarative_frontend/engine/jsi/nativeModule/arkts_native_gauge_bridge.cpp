@@ -76,7 +76,7 @@ void ConvertGradientColor(
         return ConvertResourceColor(vm, itemParam, colors);
     }
     Framework::JSLinearGradient* jsLinearGradient =
-        static_cast<Framework::JSLinearGradient*>(itemParam->ToObject(vm)->GetNativePointerField(0));
+        static_cast<Framework::JSLinearGradient*>(itemParam->ToObject(vm)->GetNativePointerField(vm, 0));
     if (!jsLinearGradient) {
         type = NG::GaugeType::TYPE_CIRCULAR_MONOCHROME;
         return ConvertResourceColor(vm, itemParam, colors);

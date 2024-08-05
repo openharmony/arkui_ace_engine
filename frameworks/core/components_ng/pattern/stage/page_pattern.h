@@ -77,9 +77,9 @@ public:
         return pageInfo_ ? pageInfo_->GetPageUrl() : "";
     }
 
-    void OnShow();
+    virtual void OnShow();
 
-    void OnHide();
+    virtual void OnHide();
 
     bool OnBackPressed();
 
@@ -153,6 +153,11 @@ public:
         isPageInTransition_ = pageTransition;
     }
 
+    bool GetPageInTransition() const
+    {
+        return isPageInTransition_;
+    }
+
     // Mark current page node invisible in render tree.
     void ProcessHideState();
     // Mark current page node visible in render tree.
@@ -218,7 +223,7 @@ public:
         visibilityChangeCallback_ = std::move(callback);
     }
 
-private:
+protected:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
@@ -234,6 +239,11 @@ private:
         return true;
     }
     bool AvoidBottom() const override
+    {
+        return true;
+    }
+
+    bool AvoidCutout() const override
     {
         return true;
     }
@@ -259,6 +269,10 @@ private:
     bool isPageInTransition_ = false;
     bool isRenderDone_ = false;
     bool isModalCovered_ = false;
+
+#if defined(ENABLE_SPLIT_MODE)
+    bool needFireObserver_ = true;
+#endif
 
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;

@@ -21,6 +21,7 @@
 #include "node_model.h"
 #include "gesture_impl.h"
 
+#include "base/utils/utils.h"
 #include "core/gestures/gesture_event.h"
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
@@ -120,7 +121,7 @@ float OH_ArkUI_SwipeGesture_GetAngle(const ArkUI_GestureEvent* event)
 
 float OH_ArkUI_SwipeGesture_GetVelocity(const ArkUI_GestureEvent* event)
 {
-    return event->eventData.velocity;
+    return event->eventData.speed;
 }
 
 float OH_ArkUI_RotationGesture_GetAngle(const ArkUI_GestureEvent* event)
@@ -145,6 +146,9 @@ float OH_ArkUI_PinchGesture_GetCenterY(const ArkUI_GestureEvent* event)
 
 ArkUI_NodeHandle OH_ArkUI_GestureEvent_GetNode(const ArkUI_GestureEvent* event)
 {
+    if (!event) {
+        return nullptr;
+    }
     return reinterpret_cast<ArkUI_NodeHandle>(event->attachNode);
 }
 
@@ -160,10 +164,16 @@ ArkUI_GestureRecognizer* OH_ArkUI_GestureInterruptInfo_GetRecognizer(const ArkUI
 
 ArkUI_GestureEvent* OH_ArkUI_GestureInterruptInfo_GetGestureEvent(const ArkUI_GestureInterruptInfo* event)
 {
-    ArkUI_GestureEvent* gestureEvent = reinterpret_cast<ArkUI_GestureEvent *>(event->interruptData.event);
-    ArkUI_UIInputEvent* uiEvent = new ArkUI_UIInputEvent{
-        ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID, gestureEvent->eventData.rawPointerEvent };
+    CHECK_NULL_RETURN(event, nullptr);
+    ArkUI_GestureEvent* gestureEvent = reinterpret_cast<ArkUI_GestureEvent*>(event->interruptData.gestureEvent);
+    CHECK_NULL_RETURN(gestureEvent, nullptr);
+
+    ArkUI_UIInputEvent* uiEvent = reinterpret_cast<ArkUI_UIInputEvent*>(event->interruptData.inputEvent);
     gestureEvent->eventData.rawPointerEvent = uiEvent;
+
+    auto* gestureRecognizer = reinterpret_cast<ArkUI_GestureRecognizer*>(event->interruptData.userData);
+    CHECK_NULL_RETURN(gestureRecognizer, nullptr);
+    gestureEvent->attachNode = gestureRecognizer->attachNode;
     return gestureEvent;
 }
 
@@ -181,6 +191,9 @@ constexpr int32_t DEFAULT_PAN_FINGERS = 1;
 constexpr int32_t MAX_PAN_FINGERS = 10;
 constexpr double DEFAULT_PINCH_DISTANCE = 5.0f;
 constexpr double DEFAULT_SWIPE_SPEED = 100.0f;
+constexpr int32_t DEFAULT_TAP_COUNT = 1;
+constexpr int32_t DEFAULT_TAP_FINGERS = 1;
+constexpr int32_t MAX_TAP_FINGERS = 10;
 
 struct GestureInnerData {
     void (*targetReceiver)(ArkUI_GestureEvent* event, void* extraParam);
@@ -190,6 +203,8 @@ struct GestureInnerData {
 
 ArkUI_GestureRecognizer* CreateTapGesture(int32_t count, int32_t fingers)
 {
+    count = std::max(count, DEFAULT_TAP_COUNT);
+    fingers = std::clamp(fingers, DEFAULT_TAP_FINGERS, MAX_TAP_FINGERS);
     auto* ndkGesture = new ArkUI_GestureRecognizer{ TAP_GESTURE, nullptr, nullptr, nullptr };
     auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createTapGesture(
         count, fingers, ndkGesture);

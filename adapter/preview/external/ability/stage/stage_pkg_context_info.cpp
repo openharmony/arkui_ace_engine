@@ -44,30 +44,35 @@ void StagePkgContextInfo::SetPkgContextInfoAndAliasMap(const std::map<std::strin
         }
         std::vector<std::vector<std::string>> pkgContextInfoList;
         std::unique_ptr<JsonValue> item = json->GetChild();
-        while (item && !item->GetKey().empty()) {
-            std::vector<std::string> sonMap;
-            std::string key = item->GetKey();
-            sonMap.push_back(key);
-            std::unique_ptr<JsonValue> item1 = item->GetChild();
-            while (item1 && !item1->GetKey().empty()) {
-                std::string key1 = item1->GetKey();
-                sonMap.push_back(key1);
-                if ("dependencyAlias" == key1) {
-                    bool value = item1->GetBool();
-                    std::string val1 = value ? "true" : "false";
-                    sonMap.push_back(val1);
-                    pkgAliasMap_.emplace(val1, key);
-                } else {
-                    std::string val1 = item1->GetString();
-                    sonMap.push_back(val1);
-                }
-                item1 = item1->GetNext();
-            }
-            pkgContextInfoList.push_back(sonMap);
-            item = item->GetNext();
-        }
-        pkgContextInfoMap_[moduleName] = pkgContextInfoList;
+        AliasMap(item, pkgContextInfoList, moduleName);
     }
+}
+void StagePkgContextInfo::AliasMap(std::unique_ptr<JsonValue>& item,
+    std::vector<std::vector<std::string>>& pkgContextInfoList, const std::string& moduleName)
+{
+    while (item && !item->GetKey().empty()) {
+        std::vector<std::string> sonMap;
+        std::string key = item->GetKey();
+        sonMap.push_back(key);
+        std::unique_ptr<JsonValue> item1 = item->GetChild();
+        while (item1 && !item1->GetKey().empty()) {
+            std::string key1 = item1->GetKey();
+            sonMap.push_back(key1);
+            if ("dependencyAlias" == key1) {
+                bool value = item1->GetBool();
+                std::string val1 = value ? "true" : "false";
+                sonMap.push_back(val1);
+                pkgAliasMap_.emplace(val1, key);
+            } else {
+                std::string val1 = item1->GetString();
+                sonMap.push_back(val1);
+            }
+            item1 = item1->GetNext();
+        }
+        pkgContextInfoList.push_back(sonMap);
+        item = item->GetNext();
+    }
+    pkgContextInfoMap_[moduleName] = pkgContextInfoList;
 }
 const std::map<std::string, std::string>& StagePkgContextInfo::GetPkgNameMap() const
 {

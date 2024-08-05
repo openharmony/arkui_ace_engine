@@ -14,6 +14,9 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_list.h"
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/geometry/axis.h"
 #include "base/log/ace_scoring_log.h"
@@ -137,9 +140,9 @@ void JSList::SetScrollBar(const JSCallbackInfo& info)
     ListModel::GetInstance()->SetScrollBar(displayMode);
 }
 
-void JSList::SetScrollBarColor(const std::string& color)
+void JSList::SetScrollBarColor(const JSCallbackInfo& info)
 {
-    auto scrollBarColor = JSScrollable::ParseBarColor(color);
+    auto scrollBarColor = JSScrollable::ParseBarColor(info);
     if (!scrollBarColor.empty()) {
         ListModel::GetInstance()->SetScrollBarColor(scrollBarColor);
     }
@@ -502,6 +505,9 @@ void JSList::ReachStartCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onReachStart");
+#endif
             return;
         };
         ListModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
@@ -514,6 +520,9 @@ void JSList::ReachEndCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onReachEnd");
+#endif
             return;
         };
         ListModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
@@ -538,6 +547,9 @@ void JSList::ScrollStopCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onScrollStop");
+#endif
             return;
         };
         ListModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
@@ -725,6 +737,9 @@ void JSList::ItemDropCallback(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("List.onItemDrop");
         func->ItemDropExecute(dragInfo, itemIndex, insertIndex, isSuccess);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "List.onItemDrop");
+#endif
     };
     ListModel::GetInstance()->SetOnItemDrop(onItemDrop);
 }
@@ -794,11 +809,6 @@ void JSList::ScrollFrameBeginCallback(const JSCallbackInfo& args)
     }
 }
 
-void JSList::SetFadingEdge(bool fadingEdge)
-{
-    ListModel::GetInstance()->SetFadingEdge(fadingEdge);
-}
-
 void JSList::JSBind(BindingTarget globalObj)
 {
     JSClass<JSList>::Declare("List");
@@ -838,19 +848,6 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("onScrollVisibleContentChange", &JSList::ScrollVisibleContentChangeCallback);
     JSClass<JSList>::StaticMethod("onScrollBegin", &JSList::ScrollBeginCallback);
     JSClass<JSList>::StaticMethod("onScrollFrameBegin", &JSList::ScrollFrameBeginCallback);
-    JSClass<JSList>::StaticMethod("onItemDragStart", &JSList::ItemDragStartCallback);
-    JSClass<JSList>::StaticMethod("onItemDragEnter", &JSList::ItemDragEnterCallback);
-    JSClass<JSList>::StaticMethod("onItemDragMove", &JSList::ItemDragMoveCallback);
-    JSClass<JSList>::StaticMethod("onItemDragLeave", &JSList::ItemDragLeaveCallback);
-    JSClass<JSList>::StaticMethod("onItemDrop", &JSList::ItemDropCallback);
-    JSClass<JSList>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-    JSClass<JSList>::StaticMethod("fadingEdge", &JSList::SetFadingEdge);
-    BindInteractableViewMethods();
-    JSClass<JSList>::InheritAndBind<JSScrollableBase>(globalObj);
-}
-
-void JSList::BindInteractableViewMethods()
-{
     JSClass<JSList>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSList>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSList>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -860,6 +857,15 @@ void JSList::BindInteractableViewMethods()
     JSClass<JSList>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSList>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSList>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+
+    JSClass<JSList>::StaticMethod("onItemDragStart", &JSList::ItemDragStartCallback);
+    JSClass<JSList>::StaticMethod("onItemDragEnter", &JSList::ItemDragEnterCallback);
+    JSClass<JSList>::StaticMethod("onItemDragMove", &JSList::ItemDragMoveCallback);
+    JSClass<JSList>::StaticMethod("onItemDragLeave", &JSList::ItemDragLeaveCallback);
+    JSClass<JSList>::StaticMethod("onItemDrop", &JSList::ItemDropCallback);
+    JSClass<JSList>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+
+    JSClass<JSList>::InheritAndBind<JSScrollableBase>(globalObj);
 }
 
 void JSListScroller::JSBind(BindingTarget globalObj)

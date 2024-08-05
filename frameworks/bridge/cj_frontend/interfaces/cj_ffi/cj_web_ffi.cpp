@@ -383,6 +383,11 @@ void FfiOHOSAceFrameworkWebUserAgent(const std::string& userAgent)
     WebModel::GetInstance()->SetUserAgent(userAgent);
 }
 
+void FfiOHOSAceFrameworkWebBackgroundColor(uint32_t color)
+{
+    WebModel::GetInstance()->SetBackgroundColor(Color(color));
+}
+
 void OnCommonDialog(bool (*callback)(FfiWebEvent event), int64_t dialogEventType)
 {
     auto instanceId = Container::CurrentId();

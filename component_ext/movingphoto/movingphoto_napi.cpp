@@ -297,8 +297,8 @@ napi_value ExportMovingPhoto(napi_env env, napi_value exports)
 
 } // namespace OHOS::Ace
 
-extern "C" __attribute__((visibility("default")))
-void NAPI_multimedia_movingphotoview_GetJSCode(const char** buf, int* bufLen)
+extern "C" __attribute__((visibility("default"))) void NAPI_multimedia_movingphotoview_GetJSCode(
+    const char** buf, int* bufLen)
 {
     if (buf != nullptr) {
         *buf = _binary_multimedia_movingphotoview_js_start;
@@ -310,8 +310,8 @@ void NAPI_multimedia_movingphotoview_GetJSCode(const char** buf, int* bufLen)
 }
 
 // multimedia_movingphotoview JS register
-extern "C" __attribute__((visibility("default")))
-void NAPI_multimedia_movingphotoview_GetABCCode(const char** buf, int* buflen)
+extern "C" __attribute__((visibility("default"))) void NAPI_multimedia_movingphotoview_GetABCCode(
+    const char** buf, int* buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_multimedia_movingphotoview_abc_start;

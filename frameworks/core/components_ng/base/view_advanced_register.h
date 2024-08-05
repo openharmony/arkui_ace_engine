@@ -17,12 +17,16 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ADVANCED_REGISTER_H
 
 #include "frameworks/core/components_ng/pattern/pattern.h"
+#include "frameworks/core/components_ng/pattern/stage/page_info.h"
+#include "frameworks/core/components_ng/pattern/stage/page_pattern.h"
 #include "frameworks/core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ViewAdvancedRegister : public AceType {
 public:
     ACE_FORCE_EXPORT static ViewAdvancedRegister* GetInstance();
+
+    RefPtr<PagePattern> CreatePagePattern(const RefPtr<PageInfo>& pageInfo);
 
     RefPtr<Pattern> GeneratePattern(const std::string& patternName);
 

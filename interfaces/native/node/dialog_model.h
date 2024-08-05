@@ -28,6 +28,12 @@ struct ArkUI_NativeDialog {
     ArkUIDialogHandle controller = nullptr;
 };
 
+struct ArkUI_DialogDismissEvent {
+    void* userData;
+    int32_t reason = -1;
+    bool BlockDismiss = false;
+};
+
 #ifdef __cplusplus
 };
 #endif
@@ -51,6 +57,8 @@ int32_t EnableCustomAnimation(ArkUI_NativeDialogHandle handle, bool enableCustom
 int32_t RegisterOnWillDismiss(ArkUI_NativeDialogHandle handle, ArkUI_OnWillDismissEvent eventHandler);
 int32_t Show(ArkUI_NativeDialogHandle handle, bool showInSubWindow);
 int32_t Close(ArkUI_NativeDialogHandle handle);
+int32_t RegisterOnWillDismissWithUserData(
+    ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event));
 } // namespace OHOS::Ace::NG::DialogModel
 
 #endif // ARKUI_NATIVE_NODE_DIALOG_MODEL_H

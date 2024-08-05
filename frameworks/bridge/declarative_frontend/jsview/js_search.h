@@ -45,7 +45,7 @@ public:
     static void JsBorderStyle(const JSCallbackInfo& info);
     static void JsBorderRadius(const JSCallbackInfo& info);
     static void OnSubmit(const JSCallbackInfo& info);
-    static JSRef<JSVal> CreateJsOnChangeObj(const TextRange& textRange);
+    static JSRef<JSVal> CreateJsOnChangeObj(const PreviewText& previewText);
     static void OnChange(const JSCallbackInfo& info);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
     static void SetOnScroll(const JSCallbackInfo& info);
@@ -61,18 +61,17 @@ public:
     static void OnWillDelete(const JSCallbackInfo& info);
     static void OnDidDelete(const JSCallbackInfo& info);
     static void SetIconStyle(const JSCallbackInfo& info);
-    static void JsMenuOptionsExtension(const JSCallbackInfo& info);
     static void SetSelectionMenuHidden(const JSCallbackInfo& info);
     static void SetCustomKeyboard(const JSCallbackInfo& info);
     static void SetEnterKeyType(const JSCallbackInfo& info);
     static void SetMaxLength(const JSCallbackInfo& info);
+    static void SetFontFeature(const JSCallbackInfo& info);
     static void SetType(const JSCallbackInfo& info);
     static void SetDecoration(const JSCallbackInfo& info);
     static void SetMinFontSize(const JSCallbackInfo& info);
     static void SetMaxFontSize(const JSCallbackInfo& info);
     static void SetLetterSpacing(const JSCallbackInfo& info);
     static void SetLineHeight(const JSCallbackInfo& info);
-    static void SetFontFeature(const JSCallbackInfo& info);
     static void SetId(const JSCallbackInfo& info);
     static void SetKey(const std::string& key);
     static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
@@ -81,8 +80,14 @@ public:
     static void SetTextIndent(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static void SetDragPreviewOptions(const JSCallbackInfo& info);
-    static void SelectionMenuOptions(const JSCallbackInfo& info);
+    static void EditMenuOptions(const JSCallbackInfo& info);
     static void SetEnablePreviewText(const JSCallbackInfo& info);
+    static void SetSearchDefaultIcon();
+    static void SetSearchSymbolIcon(const JSCallbackInfo& info);
+    static void SetSearchImageIcon(const JSCallbackInfo& info);
+    static void SetCancelDefaultIcon();
+    static void SetCancelSymbolIcon(const JSCallbackInfo& info);
+    static void SetCancelImageIcon(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {

@@ -702,7 +702,7 @@ void WebDelegateCross::CreatePluginResource(
         webDelegate->hash_ = webDelegate->MakeResourceHash();
         webDelegate->RegisterWebEvent();
         webDelegate->RegisterWebObjectEvent();
-    }, "ArkUIWebCreatePluginResource");
+        }, "ArkUIWebCreatePluginResource");
 }
 
 int WebDelegateCross::GetWebId()

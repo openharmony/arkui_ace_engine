@@ -37,9 +37,9 @@ public:
     bool PreProcessOverlay(const OverlayRequest& request) override;
     bool CheckHandleVisible(const RectF& paintRect) override;
 
-    bool OnlyAllowedPasteNonEmptyString() override
+    std::vector<std::string> GetPasteMimeTypes() override
     {
-        return true;
+        return pasteMimeTypes_;
     }
 
     void OnResetTextSelection() override;
@@ -78,14 +78,23 @@ public:
         return lastSourceType_ == SourceType::TOUCH;
     }
 
+    void OnHandleLevelModeChanged(HandleLevelMode mode) override;
+    void OnOverlayClick(const GestureEvent& event, bool isClickCaret) override;
+    bool IsRegisterTouchCallback() override
+    {
+        return true;
+    }
+
 private:
     std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);
     void UpdatePattern(const OverlayRequest& request);
     int32_t GetCaretPositionOnHandleMove(const OffsetF& localOffset);
     int32_t GetTextAreaCaretPosition(const OffsetF& localOffset);
     int32_t GetTextInputCaretPosition(const OffsetF& localOffset);
+    void StartVibratorByCaretIndexChange(const int32_t currentIndex, const int32_t preIndex);
     void CloseMagnifier();
     SourceType lastSourceType_ = SourceType::NONE;
+    std::vector<std::string> pasteMimeTypes_ = { "text/plain", "text/html" };
 };
 
 } // namespace OHOS::Ace::NG

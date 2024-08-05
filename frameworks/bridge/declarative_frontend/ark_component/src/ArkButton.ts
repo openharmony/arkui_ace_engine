@@ -52,7 +52,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
       modifierWithKey(this._modifiersWithKeys, ButtonCreateTypeModifier.identity, ButtonCreateTypeModifier, false);
     }
     if (value.length === 1) {
-      if (isObject(value[0])) {
+      if (!isNull(value[0]) && isObject(value[0])) {
         modifierWithKey(this._modifiersWithKeys, ButtonOptionsModifier.identity, ButtonOptionsModifier, value[0]);
       } else if (isResource(value[0]) || isString(value[0])) {
         modifierWithKey(this._modifiersWithKeys, ButtonLabelModifier.identity, ButtonLabelModifier, value[0]);
@@ -267,6 +267,16 @@ class ButtonTypeModifier extends ModifierWithKey<number> {
     super(value);
   }
   static identity: Symbol = Symbol('buttonType');
+  applyStage(node: KNode, component?: ArkComponent): boolean {
+    if (this.stageValue === undefined || this.stageValue === null) {
+      this.value = this.stageValue;
+      this.applyPeer(node, true, component);
+      return true;
+    }
+    this.value = this.stageValue;
+    this.applyPeer(node, false, component);
+    return false;
+  }
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().button.resetType(node);

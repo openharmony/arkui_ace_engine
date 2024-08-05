@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_MOCK_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_MOCK_H
 
+#include "test/mock/core/rosen/testing_image_blur_type.h"
 #include "test/mock/core/rosen/testing_bitmap.h"
 #include "test/mock/core/rosen/testing_brush.h"
 #include "test/mock/core/rosen/testing_camera.h"
@@ -121,6 +122,7 @@ using RSFont = Testing::TestingFont;
 using RSTextEncoding = Testing::TestingTextEncoding;
 using RSSaveLayerOps = Testing::TestingSaveLayerOps;
 using RSSrcRectConstraint = Testing::SrcRectConstraint;
+using RSImageBlurType = Testing::ImageBlurType;
 #ifdef USE_ROSEN_DRAWING
 using RSRecordingColorFilter = Testing::TestingColorFilter;
 using RSRecordingImageFilter = Testing::TestingImageFilter;

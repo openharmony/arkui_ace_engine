@@ -103,13 +103,17 @@ bool MarqueePattern::OnDirtyLayoutWrapperSwap(
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    if (measureChanged_) {
+    auto geoNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geoNode, false);
+    auto marqueeWidth = geoNode->GetFrameSize().Width();
+    if (measureChanged_ || marqueeWidth_ != marqueeWidth) {
         measureChanged_ = false;
         auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
         CHECK_NULL_RETURN(paintProperty, false);
         auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
         StopMarqueeAnimation(playStatus);
     }
+    marqueeWidth_ = marqueeWidth;
     return false;
 }
 
@@ -122,8 +126,13 @@ void MarqueePattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     auto textChild = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(textChild);
+    auto childRenderContext = textChild->GetRenderContext();
+    CHECK_NULL_VOID(childRenderContext);
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    auto gestureHub = textChild->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetHitTestMode(HitTestMode::HTMNONE);
     auto src = layoutProperty->GetSrc().value_or(" ");
     textLayoutProperty->UpdateContent(src);
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -140,7 +149,8 @@ void MarqueePattern::OnModifyDone()
     }
     textLayoutProperty->UpdateTextColor(layoutProperty->GetFontColor().value_or(theme->GetTextStyle().GetTextColor()));
     textChild->MarkModifyDone();
-    textChild->GetRenderContext()->SetClipToFrame(true);
+    childRenderContext->UpdateClipEdge(true);
+    childRenderContext->SetClipToFrame(true);
     if (CheckMeasureFlag(layoutProperty->GetPropertyChangeFlag()) ||
         CheckLayoutFlag(layoutProperty->GetPropertyChangeFlag())) {
         measureChanged_ = true;

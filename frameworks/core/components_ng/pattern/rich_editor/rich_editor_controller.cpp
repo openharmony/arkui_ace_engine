@@ -76,10 +76,8 @@ SelectionInfo RichEditorController::GetSpansInfo(int32_t start, int32_t end)
 {
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(richEditorPattern, {});
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetSpans, start, range=[%{public}d,%{public}d]", start, end);
-    SelectionInfo value = richEditorPattern->GetSpansInfo(start, end, GetSpansMethod::GETSPANS);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetSpans end");
-    return value;
+    ACE_SCOPED_TRACE("RichEditorControllerGetSpansInfo");
+    return richEditorPattern->GetSpansInfo(start, end, GetSpansMethod::GETSPANS);
 }
 
 SelectionInfo RichEditorController::GetSelectionSpansInfo()

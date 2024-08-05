@@ -130,6 +130,26 @@ public:
         y_ = y;
     }
 
+    double GetDisplayX() const
+    {
+        return displayX_;
+    }
+
+    double GetDisplayY() const
+    {
+        return displayY_;
+    }
+
+    void SetDisplayX(double x)
+    {
+        displayX_ = x;
+    }
+
+    void SetDisplayY(double y)
+    {
+        displayY_ = y;
+    }
+
     void SetDescription(const std::string& description)
     {
         description_ = description;
@@ -267,12 +287,24 @@ public:
         pressedKeyCodes_ = pressedKeyCodes;
     }
 
+    void SetCapi(bool isCapi)
+    {
+        isCapi_ = isCapi;
+    }
+
+    bool IsCapi()
+    {
+        return isCapi_;
+    }
+
 private:
     RefPtr<PasteData> pasteData_;
     double screenX_ = 0.0;
     double screenY_ = 0.0;
     double x_ = 0.0;
     double y_ = 0.0;
+    double displayX_ = 0.0;
+    double displayY_ = 0.0;
     std::string description_;
     RefPtr<PixelMap> pixelMap_;
     std::map<std::string, int64_t> summary_;
@@ -288,6 +320,7 @@ private:
     RefPtr<UnifiedData> dragInfo_;
     Velocity velocity_;
     std::vector<KeyCode> pressedKeyCodes_;
+    bool isCapi_ = false;
 };
 
 class NotifyDragEvent : public DragEvent {

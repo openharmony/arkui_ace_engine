@@ -143,6 +143,13 @@ RefPtr<Container> AceEngine::GetContainer(int32_t instanceId)
     }
 }
 
+bool AceEngine::HasContainer(int32_t containerId) const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    auto iter = containerMap_.find(containerId);
+    return iter != containerMap_.end();
+}
+
 void AceEngine::RegisterToWatchDog(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor, bool useUIAsJSThread)
 {
     CHECK_NULL_VOID(watchDog_);
@@ -169,7 +176,7 @@ void AceEngine::DefusingBomb(int32_t instanceId)
 
 void AceEngine::TriggerGarbageCollection()
 {
-    std::unordered_map<int32_t, RefPtr<Container>> copied;
+    decltype(containerMap_) copied;
     {
         std::shared_lock<std::shared_mutex> lock(mutex_);
         if (containerMap_.empty()) {
@@ -201,7 +208,7 @@ void AceEngine::TriggerGarbageCollection()
 void AceEngine::NotifyContainers(const std::function<void(const RefPtr<Container>&)>& callback)
 {
     CHECK_NULL_VOID(callback);
-    std::unordered_map<int32_t, RefPtr<Container>> copied;
+    decltype(containerMap_) copied;
     {
         std::shared_lock<std::shared_mutex> lock(mutex_);
         copied = containerMap_;
@@ -213,9 +220,26 @@ void AceEngine::NotifyContainers(const std::function<void(const RefPtr<Container
     }
 }
 
+void AceEngine::NotifyContainersOrderly(const std::function<void(const RefPtr<Container>&)>& callback)
+{
+    CHECK_NULL_VOID(callback);
+    std::map<int32_t, RefPtr<Container>> copied;
+    {
+        std::shared_lock<std::shared_mutex> lock(mutex_);
+        for (const auto& pair : containerMap_) {
+            copied.insert(pair);
+        }
+    }
+    for (const auto& [first, second] : copied) {
+        // first = container ID
+        ContainerScope scope(first);
+        callback(second);
+    }
+}
+
 void AceEngine::DumpJsHeap(bool isPrivate) const
 {
-    std::unordered_map<int32_t, RefPtr<Container>> copied;
+    decltype(containerMap_) copied;
     {
         std::shared_lock<std::shared_mutex> lock(mutex_);
         copied = containerMap_;
@@ -227,7 +251,7 @@ void AceEngine::DumpJsHeap(bool isPrivate) const
 
 void AceEngine::DestroyHeapProfiler() const
 {
-    std::unordered_map<int32_t, RefPtr<Container>> copied;
+    decltype(containerMap_) copied;
     {
         std::shared_lock<std::shared_mutex> lock(mutex_);
         copied = containerMap_;
@@ -239,7 +263,7 @@ void AceEngine::DestroyHeapProfiler() const
 
 void AceEngine::ForceFullGC() const
 {
-    std::unordered_map<int32_t, RefPtr<Container>> copied;
+    decltype(containerMap_) copied;
     {
         std::shared_lock<std::shared_mutex> lock(mutex_);
         copied = containerMap_;

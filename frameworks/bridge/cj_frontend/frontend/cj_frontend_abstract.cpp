@@ -231,7 +231,14 @@ void CJFrontendAbstract::ShowToast(
                     const RefPtr<NG::OverlayManager>& overlayManager) {
         CHECK_NULL_VOID(overlayManager);
         ContainerScope scope(containerId);
-        overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode);
+        auto toastInfo = NG::ToastInfo { .message = message,
+            .duration = durationTime,
+            .bottom = bottom,
+            .showMode = showMode,
+            .isRightToLeft = isRightToLeft,
+            .alignment = -1,
+            .offset = std::nullopt };
+        overlayManager->ShowToast(toastInfo, nullptr);
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayShowToast");
 }
@@ -400,8 +407,8 @@ VectorStringHandle CJFrontendAbstract::GetSystemFontList()
 
 NativeOptionFontInfo CJFrontendAbstract::GetSystemFont(const std::string& fontName)
 {
-    auto fontInfo = new FontInfo;
-    if (!pipelineContextHolder_.Get()->GetSystemFont(fontName, *fontInfo)) {
+    FontInfo fontInfo;
+    if (!pipelineContextHolder_.Get()->GetSystemFont(fontName, fontInfo)) {
         return NativeOptionFontInfo {
             .hasValue = false,
             .info = nullptr
@@ -410,16 +417,16 @@ NativeOptionFontInfo CJFrontendAbstract::GetSystemFont(const std::string& fontNa
     return NativeOptionFontInfo {
         .hasValue = true,
         .info = new NativeFontInfo {
-            .path = fontInfo->path.c_str(),
-            .postScriptName = fontInfo->postScriptName.c_str(),
-            .fullName = fontInfo->fullName.c_str(),
-            .family = fontInfo->family.c_str(),
-            .subfamily = fontInfo->subfamily.c_str(),
-            .weight = fontInfo->weight,
-            .width = fontInfo->width,
-            .italic = fontInfo->italic,
-            .monoSpace = fontInfo->monoSpace,
-            .symbolic =  fontInfo->symbolic
+            .path = fontInfo.path.c_str(),
+            .postScriptName = fontInfo.postScriptName.c_str(),
+            .fullName = fontInfo.fullName.c_str(),
+            .family = fontInfo.family.c_str(),
+            .subfamily = fontInfo.subfamily.c_str(),
+            .weight = fontInfo.weight,
+            .width = fontInfo.width,
+            .italic = fontInfo.italic,
+            .monoSpace = fontInfo.monoSpace,
+            .symbolic =  fontInfo.symbolic
         }
     };
 }

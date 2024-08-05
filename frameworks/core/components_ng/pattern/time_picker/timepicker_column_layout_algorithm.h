@@ -60,6 +60,11 @@ public:
 private:
     float pickerItemHeight_ = 0.0f;
     std::vector<int32_t> currentOffset_;
+    float dividerSpacingFontScale_ = 1.0f;
+    float gradientFontScale_ = 1.0f;
+    const Dimension AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale);
+    bool NeedAdaptForAging();
+    float ReCalcItemHeightScale(const Dimension& userSetHeight, bool isDividerSpacing = true);
     bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
     void InitGradient(const float& gradientPercent, const RefPtr<FrameNode> blendNode,
         const RefPtr<FrameNode> columnNode);

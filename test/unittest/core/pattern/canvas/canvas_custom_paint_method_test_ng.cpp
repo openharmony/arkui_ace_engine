@@ -23,18 +23,18 @@
 
 #define protected public
 #define private public
-#include "core/components_ng/pattern/custom_paint/canvas_event_hub.h"
-#include "core/components_ng/pattern/custom_paint/canvas_layout_algorithm.h"
-#include "core/components_ng/pattern/custom_paint/canvas_model.h"
-#include "core/components_ng/pattern/custom_paint/canvas_model_ng.h"
-#include "core/components_ng/pattern/custom_paint/canvas_modifier.h"
-#include "core/components_ng/pattern/custom_paint/canvas_paint_mem.h"
-#include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
-#include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
-#include "core/components_ng/pattern/custom_paint/canvas_pattern.h"
-#include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
-#include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
-#include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
+#include "core/components_ng/pattern/canvas/canvas_event_hub.h"
+#include "core/components_ng/pattern/canvas/canvas_layout_algorithm.h"
+#include "core/components_ng/pattern/canvas/canvas_model.h"
+#include "core/components_ng/pattern/canvas/canvas_model_ng.h"
+#include "core/components_ng/pattern/canvas/canvas_modifier.h"
+#include "core/components_ng/pattern/canvas/canvas_paint_mem.h"
+#include "core/components_ng/pattern/canvas/canvas_paint_method.h"
+#include "core/components_ng/pattern/canvas/canvas_paint_op.h"
+#include "core/components_ng/pattern/canvas/canvas_pattern.h"
+#include "core/components_ng/pattern/canvas/custom_paint_paint_method.h"
+#include "core/components_ng/pattern/canvas/offscreen_canvas_paint_method.h"
+#include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #undef private
@@ -306,14 +306,14 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest006, TestSize
      * @tc.expected: return value are as expected.
      */
     paintMethod->SetFilterParam("none");
-    EXPECT_TRUE(paintMethod->GetFilterType(filters));
+    EXPECT_TRUE(paintMethod->GetFilterType("none", filters));
     filters.clear();
     paintMethod->SetFilterParam("gray(10px)");
-    EXPECT_FALSE(paintMethod->GetFilterType(filters));
+    EXPECT_FALSE(paintMethod->GetFilterType("gray(10px)", filters));
     EXPECT_EQ(filters.size(), 0);
     filters.clear();
     paintMethod->SetFilterParam("blur(10px)");
-    paintMethod->GetFilterType(filters);
+    paintMethod->GetFilterType("blur(10px)", filters);
     EXPECT_EQ(filters[0].filterType_, FilterType::BLUR);
     EXPECT_EQ(filters[0].filterParam_, "10px");
     EXPECT_EQ(filters.size(), 1);
@@ -1231,5 +1231,316 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest031, TestSize
     align = RSTextAlign::JUSTIFY;
     result = paintMethod->GetEffectiveAlign(align, direction);
     EXPECT_EQ(result, RSTextAlign::JUSTIFY);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest032
+ * @tc.desc: Test the function 'Ellipse' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest032, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    EllipseParam param;
+    Testing::MockPath path;
+    Testing::MockMatrix matrix;
+    /**
+     * @tc.steps2: Call the function Ellipse.
+     * @tc.expected: return value are as expected.
+     */
+    param.x = 1.0;
+    param.y = 1.0;
+    param.startAngle = 5.0;
+    param.endAngle = 5.0;
+    param.rotation = 1.0;
+    param.anticlockwise = true;
+
+    EXPECT_CALL(matrix, Rotate(_, _, _)).WillRepeatedly(Return());
+    EXPECT_CALL(path, Transform(_)).WillRepeatedly(Return());
+    paintMethod->Ellipse(param);
+    param.endAngle = M_PI * MAX_WIDTH;
+    EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest033
+ * @tc.desc: Test the function 'RestoreMatrix' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    paintMethod->SaveMatrix();
+    paintMethod->RestoreMatrix();
+    paintMethod->RestoreMatrix();
+    EXPECT_TRUE(paintMethod->matrixStates_.empty());
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest034
+ * @tc.desc: Test the function 'PutImageData' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest034, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    Ace::ImageData imageData1;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    imageData1.pixelMap = pixelMap;
+    paintMethod->PutImageData(imageData1);
+    EXPECT_TRUE(imageData1.data.empty());
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest035
+ * @tc.desc: Test the function 'TranslateMatrix' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest035, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+
+    /**
+     * @tc.steps2: Call the function TranslateMatrix.
+     */
+    double tx = .0;
+    double ty = .0;
+    paintMethod->TranslateMatrix(tx, ty);
+    ty = 1.0;
+    paintMethod->TranslateMatrix(tx, ty);
+    tx = 1.0;
+    ty = .0;
+    paintMethod->TranslateMatrix(tx, ty);
+    ty = 1.0;
+    paintMethod->TranslateMatrix(tx, ty);
+    EXPECT_TRUE(paintMethod->matrixStates_.empty());
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest036
+ * @tc.desc: Test the function 'SetPaintImage' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest036, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    RSColor color;
+    RSBrush brush(RSColor(0xffffffff));
+    RSPen pen;
+    paintMethod->state_.strokeState.SetLineDash({ { 1.0, 0.0 }, 1.0 });
+    paintMethod->state_.strokeState.SetLineDashOffset(1.0);
+    paintMethod->UpdateLineDash(pen);
+    float percentNum = 1.0f;
+    FilterProperty filter;
+    filter.filterType_ = FilterType::INVERT;
+    paintMethod->SetPaintImage(&pen, &brush);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    filter.filterType_ = FilterType::OPACITY;
+    paintMethod->SetPaintImage(&pen, &brush);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    filter.filterType_ = FilterType::BRIGHTNESS;
+    paintMethod->SetPaintImage(&pen, &brush);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    filter.filterType_ = FilterType::BRIGHTNESS;
+    paintMethod->SetPaintImage(&pen, &brush);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    filter.filterType_ = FilterType::CONTRAST;
+    paintMethod->SetPaintImage(&pen, &brush);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    filter.filterType_ = FilterType::BLUR;
+    paintMethod->SetPaintImage(&pen, &brush);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest037
+ * @tc.desc: Test the function 'SetHueRotateFilter' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest037, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+
+    RSColor color;
+    RSBrush brush(RSColor(0xffffffff));
+    RSPen pen;
+    paintMethod->state_.strokeState.SetLineDash({ { 1.0, 0.0 }, 1.0 });
+    paintMethod->state_.strokeState.SetLineDashOffset(1.0);
+    paintMethod->UpdateLineDash(pen);
+
+    paintMethod->SetFilterParam("none");
+    EXPECT_NE(paintMethod->colorFilter_, nullptr);
+
+    paintMethod->SetFilterParam("hue-rotate(90deg)");
+    paintMethod->SetHueRotateFilter("hue-rotate(90deg)");
+    EXPECT_NE(paintMethod->colorFilter_, nullptr);
+
+    paintMethod->SetFilterParam("hue-rotate(90turn)");
+    paintMethod->SetHueRotateFilter("hue-rotate(90turn)");
+    EXPECT_NE(paintMethod->colorFilter_, nullptr);
+    paintMethod->SetFilterParam("hue-rotate(90rad)");
+    paintMethod->SetHueRotateFilter("hue-rotate(90rad)");
+    EXPECT_NE(paintMethod->colorFilter_, nullptr);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest038
+ * @tc.desc: Test the function 'SetPaintImage' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest038, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    RSColor color;
+    RSBrush brush(RSColor(0xffffffff));
+    RSPen pen;
+    paintMethod->state_.strokeState.SetLineDash({ { 1.0, 0.0 }, 1.0 });
+    paintMethod->state_.strokeState.SetLineDashOffset(1.0);
+    paintMethod->UpdateLineDash(pen);
+    FilterProperty filter;
+    filter.filterParam_ = "test";
+    filter.filterType_ = FilterType::NONE;
+    paintMethod->SetPaintImage(&pen, &brush);
+    filter.filterType_ = FilterType::GRAYSCALE;
+    paintMethod->SetPaintImage(&pen, &brush);
+    float percentNum = 1.0f;
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    filter.filterType_ = FilterType::SEPIA;
+    paintMethod->SetPaintImage(&pen, &brush);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    filter.filterType_ = FilterType::SATURATE;
+    paintMethod->SetPaintImage(&pen, &brush);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    filter.filterType_ = FilterType::HUE_ROTATE;
+    paintMethod->SetPaintImage(&pen, &brush);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest0138
+ * @tc.desc: Test the function 'HasImageShadow' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest039, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+
+    Shadow shadow(1.0, Offset(1.0, 1.0), Color::WHITE, ShadowStyle::OuterDefaultXS);
+    paintMethod->imageShadow_ = std::make_unique<Shadow>(std::move(shadow));
+    Offset offset(0, 0);
+    paintMethod->imageShadow_->SetOffset(offset);
+    paintMethod->imageShadow_->blurRadius_ = 0;
+    EXPECT_FALSE(paintMethod->HasImageShadow());
+    paintMethod->imageShadow_->SetOffsetX(1.0);
+    paintMethod->imageShadow_->SetOffsetY(1.0);
+    paintMethod->imageShadow_->blurRadius_ = 1.0;
+    EXPECT_TRUE(paintMethod->HasImageShadow());
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest040
+ * @tc.desc: Test the function 'InitImagePaint' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest040, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    RSPen pen;
+    paintMethod->state_.strokeState.SetLineDash({ { 1.0, 0.0 }, 1.0 });
+    paintMethod->state_.strokeState.SetLineDashOffset(1.0);
+    paintMethod->UpdateLineDash(pen);
+    RSBrush brush(RSColor(0xffffffff));
+    paintMethod->smoothingQuality_ = "medium";
+    float percentNum = 1.0f;
+    FilterProperty filter;
+    RSSamplingOptions options;
+    paintMethod->InitImagePaint(&pen, &brush, options);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    paintMethod->smoothingQuality_ = "high";
+    paintMethod->InitImagePaint(&pen, &brush, options);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    paintMethod->smoothingQuality_ = "test";
+    paintMethod->InitImagePaint(&pen, &brush, options);
+    paintMethod->smoothingEnabled_ = false;
+    paintMethod->smoothingQuality_ = "high";
+    paintMethod->InitImagePaint(&pen, &brush, options);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest041
+ * @tc.desc: Test the function 'UpdatePaintShader' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest041, TestSize.Level1)
+{
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    RSPen pen;
+    paintMethod->state_.strokeState.SetLineDash({ { 1.0, 0.0 }, 1.0 });
+    paintMethod->state_.strokeState.SetLineDashOffset(1.0);
+    paintMethod->UpdateLineDash(pen);
+    RSBrush brush(RSColor(0xffffffff));
+    Ace::Gradient gradient;
+    paintMethod->UpdatePaintShader(&pen, &brush, gradient);
+    EXPECT_EQ(gradient.GetType(), Ace::GradientType::LINEAR);
+    gradient.type_ = Ace::GradientType::CONIC;
+    paintMethod->UpdatePaintShader(&pen, &brush, gradient);
+    EXPECT_EQ(gradient.GetType(), Ace::GradientType::CONIC);
+    gradient.type_ = Ace::GradientType::SWEEP;
+    paintMethod->UpdatePaintShader(&pen, &brush, gradient);
+    RSPoint beginPoint = RSPoint(static_cast<RSScalar>(gradient.GetBeginOffset().GetX()),
+        static_cast<RSScalar>(gradient.GetBeginOffset().GetY()));
+    RSPoint endPoint = RSPoint(
+        static_cast<RSScalar>(gradient.GetEndOffset().GetX()), static_cast<RSScalar>(gradient.GetEndOffset().GetY()));
+    EXPECT_FALSE(gradient.GetInnerRadius() <= 0.0 && beginPoint == endPoint);
 }
 } // namespace OHOS::Ace::NG

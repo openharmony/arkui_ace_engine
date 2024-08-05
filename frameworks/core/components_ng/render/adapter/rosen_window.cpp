@@ -66,15 +66,15 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             CHECK_NULL_VOID(window);
             int64_t refreshPeriod = window->GetVSyncPeriod();
             window->OnVsync(static_cast<uint64_t>(timeStampNanos), static_cast<uint64_t>(frameCount));
+            ArkUIPerfMonitor::GetInstance().FinishPerf();
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
             pipeline->OnIdle(std::min(ts, timeStampNanos) + refreshPeriod);
-            JankFrameReport::GetInstance().JankFrameRecord(std::min(ts, timeStampNanos), window->GetWindowName());
+            JankFrameReport::GetInstance().JankFrameRecord(timeStampNanos, window->GetWindowName());
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushEnd();
             }
-            ArkUIPerfMonitor::GetInstance().FinishPerf();
-            pipeline->UpdateLastVsyncEndTimestamp(GetSysTimestamp());
+            window->SetLastVsyncEndTimestamp(GetSysTimestamp());
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
@@ -113,12 +113,12 @@ void RosenWindow::Init()
     }
 }
 
-void RosenWindow::FlushFrameRate(int32_t rate, bool isAnimatorStopped, int32_t rateType)
+void RosenWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType)
 {
     if (!rsWindow_ || rate < 0) {
         return;
     }
-    rsWindow_->FlushFrameRate(rate, isAnimatorStopped, rateType);
+    rsWindow_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
 }
 
 void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
@@ -127,7 +127,7 @@ void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
         return;
     }
     if (dvsyncSwitch) {
-        ACE_SCOPED_TRACE("enale dvsync");
+        ACE_SCOPED_TRACE("enable dvsync");
     } else {
         ACE_SCOPED_TRACE("disable dvsync");
     }
@@ -143,7 +143,7 @@ void RosenWindow::RequestFrame()
     if (rsWindow_) {
         isRequestVsync_ = true;
         rsWindow_->RequestVsync(vsyncCallback_);
-        lastRequestVsyncTime_ = GetSysTimestamp();
+        lastRequestVsyncTime_ = static_cast<uint64_t>(GetSysTimestamp());
 #ifdef VSYNC_TIMEOUT_CHECK
         if (taskExecutor) {
             auto windowId = rsWindow_->GetWindowId();

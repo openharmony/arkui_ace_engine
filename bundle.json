@@ -16,7 +16,16 @@
             "SystemCapability.ArkUI.ArkUI.Full",
             "SystemCapability.ArkUI.ArkUI.Lite"
         ],
-        "features": [],
+        "features": [
+            "ace_engine_feature_enable_accessibility",
+            "ace_engine_feature_enable_web",
+            "ace_engine_feature_enable_pgo",
+            "ace_engine_feature_pgo_path",
+            "ace_engine_feature_enable_atomic",
+            "ace_engine_feature_enable_coverage",
+            "ace_engine_feature_enable_point_light",
+            "ace_engine_feature_enable_nav_split_mode"
+        ],
         "adapted_system_type": [
             "standard"
         ],
@@ -91,7 +100,9 @@
                 "zlib",
                 "skia",
                 "libuv",
-                "background_task_mgr"
+                "background_task_mgr",
+                "atomicservice_basic_engine",
+                "egl"
             ],
             "third_party": []
         },

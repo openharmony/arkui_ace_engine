@@ -48,8 +48,8 @@ const X_OFF_SET = '0vp';
 const Y_OFF_SET = '2.75vp';
 const Y_BOTTOM_OFF_SET = '-1.25vp';
 const Y_BASE_PLATE_OFF_SET = '1.5vp';
-const COLOR_IMAGE_EDIT = '#FFFFFF';
 const COLOR_IMAGE_ROW = '#00000000';
+const COLOR_IMAGE_EDIT = '#FFFFFF';
 const COLOR_SELECT = '#1A0A59F7';
 const SHADOW_COLOR = '#00001E';
 const GRAG_POP_UP_HEIGHT = '48';
@@ -1051,7 +1051,7 @@ export class TreeView extends ViewPU {
     }
 
     clearLastIndexColor() {
-        if (this.viewLastIndex === -1 || this.viewLastIndex >= this.nodeList.length) {
+        if (this.viewLastIndex === -1) {
             return;
         }
         this.setImageSources(this.viewLastIndex, InteractionStatus.Normal);
@@ -1426,6 +1426,7 @@ export class TreeController {
         let u19 = this.listNodeUtils.removeNode(s19, t19);
         this.listNodeDataSource.refreshData(this.listNodeUtils, MenuOperation.REMOVE_NODE, t19, u19);
         this.nodeIdList.splice(this.nodeIdList.indexOf(s19), 1);
+        this.listNodeDataSource.lastIndex = -1;
     }
 
     modifyNode() {
@@ -1760,7 +1761,7 @@ class ListNodeDataSource extends BasicDataSource {
     }
 
     clearLastIndexStatus() {
-        if (this.lastIndex === -1 || this.lastIndex >= this.listNode.length) {
+        if (this.lastIndex === -1) {
             return;
         }
         this.setImageSource(this.lastIndex, InteractionStatus.Normal);
@@ -2185,13 +2186,7 @@ class ListNodeDataSource extends BasicDataSource {
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__',
             });
-            f15.setPopUpTextColor({
-                'id': -1,
-                'type': 10001,
-                params: ['sys.color.ohos_id_color_text_secondary'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__',
-            });
+            f15.setPopUpTextColor(this.treeViewTheme.secondaryTitleFontColor);
         }
         else if (b15 === PopUpType.WARNINGS) {
             if (f15.getNodeItem().inputText !== null) {

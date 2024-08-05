@@ -76,7 +76,7 @@ bool ConvertGradientColor(const EcmaVM* vm, const Local<JSValueRef>& itemParam, 
         return ConvertResourceColor(vm, itemParam, gradient);
     }
     Framework::JSLinearGradient* jsLinearGradient =
-        static_cast<Framework::JSLinearGradient*>(itemParam->ToObject(vm)->GetNativePointerField(0));
+        static_cast<Framework::JSLinearGradient*>(itemParam->ToObject(vm)->GetNativePointerField(vm, 0));
     if (!jsLinearGradient) {
         return ConvertResourceColor(vm, itemParam, gradient);
     }
@@ -298,9 +298,9 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelStrokeWidth(ArkUIRuntimeCall
         strokeWidth = theme->GetThickness();
     }
 
-    if (jsValue->IsString(vm) && (jsValue->ToString(vm)->ToString().empty() ||
+    if (jsValue->IsString(vm) && (jsValue->ToString(vm)->ToString(vm).empty() ||
         !StringUtils::StringToDimensionWithUnitNG(
-        jsValue->ToString(vm)->ToString(), strokeWidth))) {
+        jsValue->ToString(vm)->ToString(vm), strokeWidth))) {
         strokeWidth = theme->GetThickness();
     }
 
@@ -346,7 +346,7 @@ ArkUINativeModuleValue DataPanelBridge::SetContentModifierBuilder(ArkUIRuntimeCa
             auto context = NapiValueToLocalValue(Container::Current()->GetFrontend()->GetContextValue());
             auto obj = panda::ObjectRef::New(vm);
             auto valueArray = panda::ArrayRef::New(vm, config.values_.size());
-            for (int i = 0; i<config.values_.size(); i++) {
+            for (uint32_t i = 0; i < config.values_.size(); ++i) {
                 panda::ArrayRef::SetValueAt(vm, valueArray, i, panda::NumberRef::New(vm, config.values_[i]));
             }
             obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "values"), valueArray);

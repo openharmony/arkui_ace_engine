@@ -242,19 +242,6 @@ void ListLanesLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32
     layoutWrapper->SetCacheCount(count);
 }
 
-void ListLanesLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheCount)
-{
-    auto& itemPosition = GetItemPosition();
-    if (itemPosition.empty()) {
-        layoutWrapper->SetActiveChildRange(-1, -1);
-        return;
-    }
-    auto cacheStart = itemPosition.begin()->second.isGroup ? cacheCount : cacheCount * lanes_;
-    auto cacheEnd = itemPosition.rbegin()->second.isGroup ? cacheCount : cacheCount * lanes_;
-    layoutWrapper->SetActiveChildRange(
-        itemPosition.begin()->first, itemPosition.rbegin()->first, cacheStart, cacheEnd);
-}
-
 int32_t ListLanesLayoutAlgorithm::CalculateLanesParam(std::optional<float>& minLaneLength,
     std::optional<float>& maxLaneLength, int32_t lanes, std::optional<float> crossSizeOptional, float laneGutter)
 {
@@ -585,12 +572,13 @@ float ListLanesLayoutAlgorithm::GetLayoutCrossAxisSize(LayoutWrapper* layoutWrap
     return GetCrossAxisSize(size, axis_);
 }
 
-int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper, int32_t cacheCount, int32_t cached)
+int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
+    int32_t cacheCount, int32_t cached, int32_t& currIndex)
 {
     ACE_SCOPED_TRACE("LayoutCachedForward:%d,%d", cacheCount, cached);
     float crossSize = GetLayoutCrossAxisSize(layoutWrapper);
     RefPtr<LayoutWrapper> wrapper;
-    int32_t currIndex = GetItemPosition().rbegin()->first + 1;
+    currIndex = GetItemPosition().rbegin()->first + 1;
     auto startPos = GetItemPosition().rbegin()->second.endPos + GetSpaceWidth();
     while (cached < cacheCount && currIndex <= GetMaxListItemIndex()) {
         ListLayoutAlgorithm::PositionMap posMap;
@@ -622,7 +610,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapp
         }
         startPos = startPos + mainLen + GetSpaceWidth();
         if (isGroup) {
-            auto res = GetLayoutGroupCachedCount(wrapper, true, cacheCount);
+            auto res = GetLayoutGroupCachedCount(wrapper, true, cacheCount - cached, true);
             if (res.first < res.second && res.first < cacheCount - cached) {
                 return currIndex;
             }
@@ -635,12 +623,13 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapp
     return -1;
 }
 
-int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper, int32_t cacheCount, int32_t cached)
+int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
+    int32_t cacheCount, int32_t cached, int32_t& currIndex)
 {
     ACE_SCOPED_TRACE("LayoutCachedBackward:%d,%d", cacheCount, cached);
     float crossSize = GetLayoutCrossAxisSize(layoutWrapper);
     RefPtr<LayoutWrapper> wrapper;
-    int32_t currIndex = GetItemPosition().begin()->first - 1;
+    currIndex = GetItemPosition().begin()->first - 1;
     auto endPos = GetItemPosition().begin()->second.startPos - GetSpaceWidth();
     while (cached < cacheCount && currIndex >= 0) {
         ListLayoutAlgorithm::PositionMap posMap;
@@ -674,13 +663,14 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
             LayoutCachedALine(layoutWrapper, pos, startIndex, crossSize);
         }
         endPos = endPos - mainLen - GetSpaceWidth();
-        cached++;
         if (isGroup) {
-            auto res = GetLayoutGroupCachedCount(wrapper, true, cacheCount);
+            auto res = GetLayoutGroupCachedCount(wrapper, false, cacheCount - cached, true);
             if (res.first < res.second && res.first < cacheCount - cached) {
                 return currIndex;
             }
-            cached += std::max(res.second, 1) - 1;
+            cached += std::max(res.second, 1);
+        } else {
+            cached++;
         }
         currIndex -= cnt;
     }

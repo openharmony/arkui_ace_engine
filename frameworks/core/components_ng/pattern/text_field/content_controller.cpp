@@ -29,7 +29,7 @@ namespace {
 const std::string DIGIT_WHITE_LIST = "[0-9]";
 const std::string DIGIT_DECIMAL_WHITE_LIST = "[0-9.]";
 const std::string PHONE_WHITE_LIST = R"([0-9 \+\-\*\#\(\)])";
-const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
+const std::string EMAIL_WHITE_LIST = R"([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~@-])";
 // when do ai analaysis, we should list the left and right of the string
 constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
 constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;
@@ -185,7 +185,9 @@ void ContentController::FilterValue()
         property->HasMaxLength() ? property->GetMaxLengthValue(Infinity<uint32_t>()) : Infinity<uint32_t>();
     auto textWidth = static_cast<int32_t>(GetWideText().length());
     if (GreatNotEqual(textWidth, maxLength)) {
-        content_ = StringUtils::ToString(GetWideText().substr(0, maxLength));
+        // clamp emoji
+        auto subWstring = TextEmojiProcessor::SubWstring(0, maxLength, GetWideText());
+        content_ = StringUtils::ToString(subWstring);
     }
 }
 
@@ -239,8 +241,12 @@ std::string ContentController::RemoveErrorTextFromValue(const std::string& value
 
 std::string ContentController::FilterWithRegex(const std::string& filter, std::string& result)
 {
-    std::regex filterRegex(filter);
-    auto errorText = std::regex_replace(result, filterRegex, "");
+    // convert wstring for processing unicode characters
+    std::wstring wFilter = StringUtils::ToWstring(filter);
+    std::wstring wResult = StringUtils::ToWstring(result);
+    std::wregex wFilterRegex(wFilter);
+    std::wstring wErrorText = std::regex_replace(wResult, wFilterRegex, L"");
+    std::string errorText = StringUtils::ToString(wErrorText);
     result = RemoveErrorTextFromValue(result, errorText);
     return errorText;
 }

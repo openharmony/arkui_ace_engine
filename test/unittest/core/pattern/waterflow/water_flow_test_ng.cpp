@@ -59,6 +59,7 @@ void WaterFlowTestNg::SetUpTestSuite()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*MockPipelineContext::GetCurrent(), FlushUITasks).Times(AnyNumber());
 
 #ifndef TEST_SEGMENTED_WATER_FLOW
     g_segmentedWaterflow = false;
@@ -157,14 +158,17 @@ void WaterFlowTestNg::CreateFocusableItem(int32_t number)
             ButtonModelNG buttonModelNG;
             std::list<RefPtr<Component>> buttonChildren;
             buttonModelNG.CreateWithLabel({ .label = "label" }, buttonChildren);
+            ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
             ViewStackProcessor::GetInstance()->Pop();
         }
+        ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
         ViewStackProcessor::GetInstance()->Pop();
     }
 }
 
 void WaterFlowTestNg::CreateRandomItem(int32_t number)
 {
+    std::srand(0);
     for (int32_t i = 0; i < number; i++) {
         WaterFlowItemModelNG waterFlowItemModel;
         waterFlowItemModel.Create();
@@ -187,6 +191,17 @@ void WaterFlowTestNg::AddItems(int32_t number)
                 CalcSize(CalcLength(FILL_LENGTH), CalcLength(Dimension(ITEM_HEIGHT))));
         }
         frameNode_->AddChild(child);
+    }
+}
+
+void WaterFlowTestNg::AddItemsAtSlot(int32_t cnt, float height, int32_t slotIdx)
+{
+    for (int i = 0; i < cnt; ++i) {
+        auto child = WaterFlowItemNode::GetOrCreateFlowItem(
+            V2::FLOW_ITEM_ETS_TAG, -1, []() { return AceType::MakeRefPtr<WaterFlowItemPattern>(); });
+        child->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(FILL_LENGTH), CalcLength(Dimension(height))));
+        frameNode_->AddChild(child, slotIdx);
     }
 }
 
@@ -1756,34 +1771,5 @@ HWTEST_F(WaterFlowTestNg, Reverse001, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 3), 200.0f);
     EXPECT_EQ(GetChildY(frameNode_, 4), 100.0f);
     EXPECT_EQ(GetChildY(frameNode_, 5), -100.0f);
-}
-
-/**
- * @tc.name: EstimateContentHeight001
- * @tc.desc: Test EstimateContentHeight.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, EstimateContentHeight001, TestSize.Level1)
-{
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateItem(TOTAL_LINE_NUMBER * 4);
-    });
-    FlushLayoutTask(frameNode_);
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-    EXPECT_EQ(info->startIndex_, 0);
-    EXPECT_EQ(info->endIndex_, 10);
-
-    int32_t childCount = 0;
-    for (const auto& item : info->items_[0]) {
-        childCount += item.second.size();
-    }
-    EXPECT_EQ(info->EstimateContentHeight(), info->GetMaxMainHeight() / childCount * info->childrenCount_);
-
-    pattern_->UpdateCurrentOffset(-5000.f, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info->startIndex_, 31);
-    EXPECT_EQ(info->endIndex_, TOTAL_LINE_NUMBER * 4 - 1);
-    EXPECT_EQ(info->EstimateContentHeight(), info->maxHeight_);
 }
 } // namespace OHOS::Ace::NG

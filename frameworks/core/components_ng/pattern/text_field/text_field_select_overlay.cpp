@@ -16,10 +16,12 @@
 #include "core/components_ng/pattern/text_field/text_field_select_overlay.h"
 
 #include <algorithm>
+#include <cstdint>
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
@@ -68,7 +70,9 @@ void TextFieldSelectOverlay::UpdatePattern(const OverlayRequest& request)
     CHECK_NULL_VOID(pattern);
     bool isRequestSelectAll = (static_cast<uint32_t>(request.requestCode) & REQUEST_SELECT_ALL) == REQUEST_SELECT_ALL;
     auto selectController = pattern->GetTextSelectController();
-    selectController->CalculateHandleOffset();
+    if ((static_cast<uint32_t>(request.requestCode) & REQUEST_SELECT_ALL) != REQUEST_SELECT_ALL) {
+        selectController->CalculateHandleOffset();
+    }
     if (pattern->IsSelected() && selectController->IsHandleSamePosition()) {
         SetIsSingleHandle(true);
         selectController->UpdateCaretIndex(selectController->GetFirstHandleIndex());
@@ -107,7 +111,7 @@ void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason
     CloseMagnifier();
     if (CloseReason::CLOSE_REASON_BACK_PRESSED == reason) {
         OnResetTextSelection();
-        if (info && info->CanBackPressed()) {
+        if (info && info->isSingleHandle) {
             pattern->OnBackPressed();
         }
     }
@@ -291,7 +295,7 @@ void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overla
     auto paintProperty = textFieldPattern->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     overlayInfo.handlerColor = paintProperty->GetCursorColor();
-    overlayInfo.menuOptionItems = textFieldPattern->GetMenuOptionItems();
+    OnUpdateOnCreateMenuCallback(overlayInfo);
     auto layoutProperty =
         DynamicCast<TextFieldLayoutProperty>(textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>());
     CHECK_NULL_VOID(layoutProperty);
@@ -415,6 +419,13 @@ int32_t TextFieldSelectOverlay::GetCaretPositionOnHandleMove(const OffsetF& loca
     return GetTextInputCaretPosition(localOffset);
 }
 
+void TextFieldSelectOverlay::StartVibratorByCaretIndexChange(const int32_t currentIndex, const int32_t preIndex)
+{
+    if (currentIndex != preIndex) {
+        VibratorUtils::StartVibraFeedback("slide");
+    }
+}
+
 void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
 {
     auto pattern = GetPattern<TextFieldPattern>();
@@ -425,6 +436,9 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
         localOffset = localOffset - GetPaintOffsetWithoutTransform();
     }
     auto selectController = pattern->GetTextSelectController();
+    CHECK_NULL_VOID(selectController);
+    int32_t startIndex = selectController->GetFirstHandleIndex();
+    int32_t endIndex = selectController->GetSecondHandleIndex();
     if (pattern->GetMagnifierController() && SelectOverlayIsOn()) {
         auto movingCaretOffset =
             selectController->CalcCaretOffsetByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
@@ -443,14 +457,18 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
         pattern->GetMagnifierController()->SetLocalOffset(magnifierLocalOffset);
     }
     if (IsSingleHandle()) {
+        int32_t preIndex = selectController->GetCaretIndex();
         selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
+        StartVibratorByCaretIndexChange(selectController->GetCaretIndex(), preIndex);
     } else {
         auto position = GetCaretPositionOnHandleMove(localOffset);
         if (isFirst) {
+            StartVibratorByCaretIndexChange(position, startIndex);
             selectController->MoveFirstHandleToContentRect(position, false);
             UpdateSecondHandleOffset();
         } else {
-            selectController->MoveSecondHandleToContentRect(position);
+            StartVibratorByCaretIndexChange(position, endIndex);
+            selectController->MoveSecondHandleToContentRect(position, false);
             UpdateFirstHandleOffset();
         }
     }
@@ -462,6 +480,7 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
 
 void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
 {
+    BaseTextSelectOverlay::OnHandleMoveDone(rect, isFirst);
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
@@ -474,7 +493,7 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         overlayManager->MarkInfoChange(DIRTY_COPY_ALL_ITEM);
     }
     if (pattern->GetMagnifierController()) {
-        pattern->GetMagnifierController()->UpdateShowMagnifier();
+        pattern->GetMagnifierController()->RemoveMagnifierFrameNode();
     }
     auto selectController = pattern->GetTextSelectController();
     if (!IsSingleHandle()) {
@@ -509,5 +528,34 @@ void TextFieldSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
         UpdateAllHandlesOffset();
     }
     BaseTextSelectOverlay::OnAncestorNodeChanged(flag);
+}
+
+void TextFieldSelectOverlay::OnHandleLevelModeChanged(HandleLevelMode mode)
+{
+    if (handleLevelMode_ != mode && mode == HandleLevelMode::OVERLAY) {
+        auto pattern = GetPattern<TextFieldPattern>();
+        if (pattern) {
+            pattern->UpdateParentGlobalOffset();
+            pattern->GetTextSelectController()->CalculateHandleOffset();
+        }
+    }
+    BaseTextSelectOverlay::OnHandleLevelModeChanged(mode);
+}
+
+void TextFieldSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isClickCaret)
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto recognizer = pattern->GetMultipleClickRecognizer();
+    CHECK_NULL_VOID(recognizer);
+    if (recognizer->IsRunning() && recognizer->IsValidClick(event)) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield overlayClick multiple click recognizer is running.");
+        auto overlayEvent = event;
+        overlayEvent.SetLocalLocation(recognizer->GetBeginLocalLocation());
+        overlayEvent.SetGlobalLocation(recognizer->GetBeginGlobalLocation());
+        pattern->HandleClickEvent(overlayEvent);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield overlayClick");
+    }
 }
 } // namespace OHOS::Ace::NG

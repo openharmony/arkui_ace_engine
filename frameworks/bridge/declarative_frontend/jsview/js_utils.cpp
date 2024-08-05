@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 
 #include "scope_manager/native_scope_manager.h"
+#include "base/image/drawing_lattice.h"
 
 #if !defined(PREVIEW)
 #include <dlfcn.h>
@@ -99,7 +100,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const JSRef<JSVal>& obj, NativeEngi
     if (localNativeEngine != nullptr) {
         nativeEngine = localNativeEngine;
     } else {
-        auto engine = EngineHelper::GetCurrentEngine();
+        auto engine = EngineHelper::GetCurrentEngineSafely();
         if (!engine) {
             return nullptr;
         }
@@ -185,6 +186,11 @@ const Rosen::Filter* CreateRSFilterFromNapiValue(JSRef<JSVal> obj)
 RefPtr<DrawingColorFilter> CreateDrawingColorFilter(JSRef<JSVal> obj)
 {
     return DrawingColorFilter::CreateDrawingColorFilter(UnwrapNapiValue(obj));
+}
+
+RefPtr<DrawingLattice> CreateDrawingLattice(JSRef<JSVal> obj)
+{
+    return DrawingLattice::CreateDrawingLattice(UnwrapNapiValue(obj));
 }
 
 std::optional<NG::BorderRadiusProperty> HandleDifferentRadius(JsiRef<JSVal> args)

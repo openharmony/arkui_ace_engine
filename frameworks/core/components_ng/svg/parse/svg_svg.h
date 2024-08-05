@@ -39,6 +39,7 @@ public:
 
     Rect GetViewBox() const;
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
+    void AdjustContentAreaByViewBox(RSCanvas& canvas, const Size& viewPort) override;
 
 private:
     SvgAttributes svgAttr_;

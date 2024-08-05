@@ -75,17 +75,7 @@ public:
             focusPaintParam.SetPaintWidth(focusBorderWidth_);
             return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };
         }
-        FocusPattern focusPattern(FocusType::NODE, true, FocusStyleType::OUTER_BORDER);
-        auto pipline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipline, focusPattern);
-        auto theme = pipline->GetTheme<ButtonTheme>();
-        CHECK_NULL_RETURN(theme, focusPattern);
-        FocusPaintParam focusPaintParam;
-        focusPaintParam.SetPaintColor(theme->GetFocusBorderColor());
-        focusPaintParam.SetPaintWidth(theme->GetFocusBorderWidth());
-        focusPaintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
-        focusPattern.SetFocusPaintParams(focusPaintParam);
-        return focusPattern;
+        return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
     }
 
     bool IsNeedAdjustByAspectRatio() override
@@ -153,13 +143,6 @@ public:
                                    .value_or(layoutProperty->HasLabel() ? textStyle.GetTextColor() : Color::BLACK)
                                    .ColorToString()
                                    .c_str(), filter);
-        auto fontFamilyVector =
-            layoutProperty->GetFontFamily().value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
-        std::string fontFamily = fontFamilyVector.at(0);
-        for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
-            fontFamily += ',' + fontFamilyVector.at(i);
-        }
-        json->PutExtAttr("fontFamily", fontFamily.c_str(), filter);
         json->PutExtAttr("fontStyle",
             layoutProperty->GetFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL ?
                 "FontStyle.Normal" : "FontStyle.Italic", filter);
@@ -173,7 +156,22 @@ public:
             "type", ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
         optionJson->Put("stateEffect", eventHub->GetStateEffect() ? "true" : "false");
         json->PutExtAttr("options", optionJson->ToString().c_str(), filter);
+        ToJsonValueAttribute(json, filter);
+    }
 
+    void ToJsonValueAttribute(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto fontFamilyVector =
+            layoutProperty->GetFontFamily().value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
+        std::string fontFamily = fontFamilyVector.at(0);
+        for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
+            fontFamily += ',' + fontFamilyVector.at(i);
+        }
+        json->PutExtAttr("fontFamily", fontFamily.c_str(), filter);
         auto fontJsValue = JsonUtil::Create(true);
         fontJsValue->Put("size", layoutProperty->GetFontSizeValue(Dimension(0)).ToString().c_str());
         fontJsValue->Put("weight",
@@ -339,6 +337,16 @@ public:
         return preFrameSize_;
     }
 
+    void SetHasCustomPadding(bool hasCustomPadding)
+    {
+        hasCustomPadding_ = hasCustomPadding;
+    }
+
+    bool GetHasCustomPadding()
+    {
+        return hasCustomPadding_;
+    }
+
 protected:
     bool IsNeedInitClickEventRecorder() const override
     {
@@ -353,8 +361,7 @@ protected:
     void OnTouchDown();
     void OnTouchUp();
     void HandleHoverEvent(bool isHover);
-    void UpdateTexOverflow(bool isMarqueeStart);
-    void HandleButtonStyle();
+    void HandleBackgroundColor();
     void HandleEnabled();
     void InitButtonLabel();
     Color GetColorFromType(const RefPtr<ButtonTheme>& theme, const int32_t& type);
@@ -373,7 +380,6 @@ private:
     Color focusBorderColor_;
     Color themeBgColor_;
     Color themeTextColor_;
-    Color borderColor_;
     bool isSetClickedColor_ = false;
     ComponentButtonType buttonType_ = ComponentButtonType::BUTTON;
     void FireBuilder();
@@ -386,37 +392,19 @@ private:
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> hoverListener_;
     bool isHover_ = false;
-    bool isFocus_ = false;
     bool isPress_ = false;
 
     bool isInHover_ = false;
     Offset localLocation_;
     Dimension focusBorderWidth_;
-    Dimension borderWidth_;
 
     std::optional<Color> blendClickColor_ = std::nullopt;
     std::optional<Color> blendHoverColor_ = std::nullopt;
 
-    bool isTextFadeOut_ = false;
     bool isColorUpdateFlag_ = false;
     SizeF preFrameSize_;
+    bool hasCustomPadding_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);
-    bool focusEventInitialized_ = false;
-    bool focusTextColorModify_ = false;
-    bool bgColorModify_ = false;
-    bool scaleModify_ = false;
-    bool shadowModify_ = false;
-    
-    void HandleBorderStyle(RefPtr<ButtonLayoutProperty>& layoutProperty,
-        RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
-    void HandleBackgroundStyle(RefPtr<ButtonLayoutProperty>& layoutProperty,
-        RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
-    void HandleFocusStatusStyle(RefPtr<ButtonLayoutProperty>& layoutProperty,
-        RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
-    void HandleFocusStyleTask(RefPtr<ButtonLayoutProperty>,
-        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
-    void HandleBlurStyleTask(RefPtr<ButtonLayoutProperty>,
-        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
 };
 } // namespace OHOS::Ace::NG
 

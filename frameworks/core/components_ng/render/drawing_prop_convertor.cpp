@@ -222,9 +222,7 @@ RSTextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& 
     rsTextStyle.decoration = ToRSTextDecoration(textStyle.GetTextDecoration());
     rsTextStyle.decorationColor = ToRSColor(textStyle.GetTextDecorationColor());
 #endif
-    // TODO: convert fontFamily and other styles.
 
-    // TODO: convert missing textBaseline
 #ifndef USE_GRAPHIC_TEXT_GINE
     rsTextStyle.fontWeight_ = ToRSFontWeight(textStyle.GetFontWeight());
     rsTextStyle.fontStyle_ = static_cast<RSFontStyle>(textStyle.GetFontStyle());

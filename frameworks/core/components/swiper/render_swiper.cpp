@@ -933,7 +933,6 @@ bool RenderSwiper::SpringItems(const DragEndInfo& info)
                 maxTrainling = needReverse_ ? (GreatNotEqual(scrollOffset_, 0.0) ?
                     -(swiperWidth_ - std::abs(prevItemOffset_)) : (swiperWidth_ - std::abs(prevItemOffset_))) : 0.0;
             }
-
             double friction = CalculateFriction(std::abs(dragOffset_) /
                  (axis_ == Axis::VERTICAL ? swiperHeight_ : swiperWidth_));
             StartSpringMotion(scrollOffset_, info.GetMainVelocity() * friction,

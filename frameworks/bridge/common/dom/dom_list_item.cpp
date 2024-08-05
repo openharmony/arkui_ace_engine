@@ -205,7 +205,7 @@ bool DOMListItem::SetSpecializedStyle(const std::pair<std::string, std::string>&
     };
     // The radius still needs to be set to the radius of the box component, so return false.
     auto radiusIter = BinarySearchFindIndex(listItemRadiusStyleOperators,
-                            ArraySize(listItemRadiusStyleOperators), style.first.c_str());
+        ArraySize(listItemRadiusStyleOperators), style.first.c_str());
     if (radiusIter != -1) {
         listItemRadiusStyleOperators[radiusIter].value(style.second, *this);
         return false;

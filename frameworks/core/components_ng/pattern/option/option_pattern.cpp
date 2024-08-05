@@ -98,12 +98,10 @@ void OptionPattern::OnSelectProcess()
     CHECK_NULL_VOID(hub);
     auto JsAction = hub->GetJsCallback();
     if (JsAction) {
-        LOGI("Option's callback executing");
         JsAction();
     }
     auto onSelect = hub->GetOnSelect();
     if (onSelect) {
-        LOGI("selecting option %d", index_);
         onSelect(index_);
     }
     host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
@@ -258,9 +256,8 @@ void OptionPattern::OnPress(const TouchEventInfo& info)
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         // disable next option node's divider
         UpdateNextNodeDivider(false);
-    }
-    // leave press status
-    else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+    } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+        // leave press status
         if (IsHover()) {
             SetBgBlendColor(theme->GetHoverColor());
         } else {

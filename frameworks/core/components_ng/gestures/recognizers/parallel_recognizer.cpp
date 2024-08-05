@@ -49,7 +49,11 @@ void ParallelRecognizer::OnRejected()
             auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
             group->ForceReject();
         } else {
+            if (recognizer->IsBridgeMode()) {
+                continue;
+            }
             recognizer->OnRejected();
+            recognizer->OnRejectBridgeObj();
         }
     }
 }
@@ -85,7 +89,7 @@ void ParallelRecognizer::OnBlocked()
 bool ParallelRecognizer::HandleEvent(const TouchEvent& point)
 {
     if (point.type == TouchType::DOWN || point.type == TouchType::UP) {
-        TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, parallel %{public}d type: %{public}d", point.touchEventId,
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, parallel %{public}d type: %{public}d", point.touchEventId,
             point.id, static_cast<int32_t>(point.type));
     }
     if (refereeState_ == RefereeState::READY) {

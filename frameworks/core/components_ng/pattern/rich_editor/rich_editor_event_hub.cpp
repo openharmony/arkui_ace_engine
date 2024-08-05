@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
@@ -258,6 +261,16 @@ const std::string& RichEditorAbstractSpanResult::GetColor() const
     return color_;
 }
 
+void RichEditorAbstractSpanResult::SetTextDecorationStyle(TextDecorationStyle textDecorationStyle)
+{
+    textDecorationStyle_ = textDecorationStyle;
+}
+
+TextDecorationStyle RichEditorAbstractSpanResult::GetTextDecorationStyle() const
+{
+    return textDecorationStyle_;
+}
+
 void RichEditorAbstractSpanResult::SetValuePixelMap(const RefPtr<PixelMap>& valuePixelMap)
 {
     valuePixelMap_ = valuePixelMap;
@@ -477,13 +490,24 @@ bool RichEditorEventHub::FireAboutToIMEInput(const RichEditorInsertValue& info)
 
 void RichEditorEventHub::SetOnIMEInputComplete(std::function<void(const RichEditorAbstractSpanResult&)>&& func)
 {
-    onIMEIputComplete_ = std::move(func);
+    onIMEInputComplete_ = std::move(func);
 }
 
 void RichEditorEventHub::FireOnIMEInputComplete(const RichEditorAbstractSpanResult& info)
 {
-    if (onIMEIputComplete_)
-        onIMEIputComplete_(info);
+    if (onIMEInputComplete_)
+        onIMEInputComplete_(info);
+}
+
+void RichEditorEventHub::SetOnDidIMEInput(std::function<void(const TextRange&)>&& func)
+{
+    onDidIMEInput_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnDidIMEInput(const TextRange& range)
+{
+    if (onDidIMEInput_)
+        onDidIMEInput_(range);
 }
 
 void RichEditorEventHub::SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func)
@@ -502,8 +526,12 @@ void RichEditorEventHub::SetOnDeleteComplete(std::function<void()>&& func)
 }
 void RichEditorEventHub::FireOnDeleteComplete()
 {
-    if (onDeleteComplete_)
+    if (onDeleteComplete_) {
         onDeleteComplete_();
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Radio.onChange");
+#endif
+    }
 }
 
 std::string RichEditorEventHub::GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType type)

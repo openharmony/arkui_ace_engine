@@ -241,7 +241,8 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest007, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textNode, nullptr);
 
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, 1000);
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 1000, []() { return AceType::MakeRefPtr<Pattern>(); });
     barItemNode->SetIconNode(imageNode);
     barItemNode->SetTextNode(textNode);
 

@@ -31,6 +31,7 @@ build_component_ng("pattern_ng") {
     "blank/blank_model_ng.cpp",
     "blank/blank_paint_method.cpp",
     "blank/blank_pattern.cpp",
+    "bubble/bubble_accessibility_property.cpp",
     "bubble/bubble_layout_algorithm.cpp",
     "bubble/bubble_paint_method.cpp",
     "bubble/bubble_pattern.cpp",
@@ -53,7 +54,17 @@ build_component_ng("pattern_ng") {
     "calendar_picker/calendar_picker_layout_algorithm.cpp",
     "calendar_picker/calendar_picker_model_ng.cpp",
     "calendar_picker/calendar_picker_pattern.cpp",
+    "canvas/canvas_layout_algorithm.cpp",
+    "canvas/canvas_model_ng.cpp",
+    "canvas/canvas_modifier.cpp",
+    "canvas/canvas_paint_method.cpp",
+    "canvas/canvas_paint_op.cpp",
+    "canvas/canvas_pattern.cpp",
     "canvas/canvas_rendering_context_2d_model_ng.cpp",
+    "canvas/custom_paint_paint_method.cpp",
+    "canvas/custom_paint_util.cpp",
+    "canvas/offscreen_canvas_paint_method.cpp",
+    "canvas/offscreen_canvas_pattern.cpp",
     "canvas/offscreen_canvas_rendering_context_2d_model_ng.cpp",
     "checkbox/checkbox_accessibility_property.cpp",
     "checkbox/checkbox_layout_algorithm.cpp",
@@ -84,16 +95,6 @@ build_component_ng("pattern_ng") {
     "custom/custom_node_layout_algorithm.cpp",
     "custom/custom_node_pattern.cpp",
     "custom/custom_title_node.cpp",
-    "custom_paint/canvas_layout_algorithm.cpp",
-    "custom_paint/canvas_model_ng.cpp",
-    "custom_paint/canvas_modifier.cpp",
-    "custom_paint/canvas_paint_method.cpp",
-    "custom_paint/canvas_paint_op.cpp",
-    "custom_paint/canvas_pattern.cpp",
-    "custom_paint/custom_paint_paint_method.cpp",
-    "custom_paint/custom_paint_util.cpp",
-    "custom_paint/offscreen_canvas_paint_method.cpp",
-    "custom_paint/offscreen_canvas_pattern.cpp",
     "data_panel/data_panel_layout_algorithm.cpp",
     "data_panel/data_panel_model_ng.cpp",
     "data_panel/data_panel_modifier.cpp",
@@ -133,10 +134,12 @@ build_component_ng("pattern_ng") {
     "grid/grid_adaptive/grid_adaptive_layout_algorithm.cpp",
     "grid/grid_event_hub.cpp",
     "grid/grid_item_accessibility_property.cpp",
+    "grid/grid_item_layout_algorithm.cpp",
     "grid/grid_item_layout_property.cpp",
     "grid/grid_item_model_ng.cpp",
     "grid/grid_item_pattern.cpp",
     "grid/grid_layout/grid_layout_algorithm.cpp",
+    "grid/grid_layout_base_algorithm.cpp",
     "grid/grid_layout_info.cpp",
     "grid/grid_layout_property.cpp",
     "grid/grid_model_ng.cpp",
@@ -173,6 +176,10 @@ build_component_ng("pattern_ng") {
     "indexer/indexer_layout_property.cpp",
     "indexer/indexer_model_ng.cpp",
     "indexer/indexer_pattern.cpp",
+    "linear_indicator/linear_indicator_controller.cpp",
+    "linear_indicator/linear_indicator_layout_property.cpp",
+    "linear_indicator/linear_indicator_model_ng.cpp",
+    "linear_indicator/linear_indicator_pattern.cpp",
     "linear_layout/column_model_ng.cpp",
     "linear_layout/linear_layout_utils.cpp",
     "linear_layout/row_model_ng.cpp",
@@ -265,6 +272,7 @@ build_component_ng("pattern_ng") {
     "navrouter/navrouter_group_node.cpp",
     "navrouter/navrouter_model_ng.cpp",
     "navrouter/navrouter_pattern.cpp",
+    "node_container/node_container_event_hub.cpp",
     "node_container/node_container_layout_algorithm.cpp",
     "node_container/node_container_model_ng.cpp",
     "node_container/node_container_node.cpp",
@@ -287,6 +295,7 @@ build_component_ng("pattern_ng") {
     "overlay/sheet_presentation_layout_algorithm.cpp",
     "overlay/sheet_presentation_pattern.cpp",
     "overlay/sheet_view.cpp",
+    "overlay/sheet_wrapper_layout_algorithm.cpp",
     "panel/close_icon_layout_algorithm.cpp",
     "panel/close_icon_pattern.cpp",
     "panel/drag_bar_layout_algorithm.cpp",
@@ -326,6 +335,7 @@ build_component_ng("pattern_ng") {
     "rating/rating_modifier.cpp",
     "rating/rating_pattern.cpp",
     "recycle_view/recycle_dummy_node.cpp",
+    "recycle_view/recycle_manager.cpp",
     "recycle_view/recycle_view_model_ng.cpp",
     "refresh/refresh_accessibility_property.cpp",
     "refresh/refresh_layout_algorithm.cpp",
@@ -372,6 +382,7 @@ build_component_ng("pattern_ng") {
     "search/search_layout_algorithm.cpp",
     "search/search_model_ng.cpp",
     "search/search_node.cpp",
+    "search/search_overlay_modifier.cpp",
     "search/search_paint_method.cpp",
     "search/search_pattern.cpp",
     "search/search_text_field.cpp",
@@ -381,7 +392,6 @@ build_component_ng("pattern_ng") {
     "select/select_pattern.cpp",
     "select_content_overlay/select_content_overlay_pattern.cpp",
     "select_overlay/magnifier_controller.cpp",
-    "select_overlay/magnifier_painter.cpp",
     "select_overlay/select_overlay_content_modifier.cpp",
     "select_overlay/select_overlay_layout_algorithm.cpp",
     "select_overlay/select_overlay_modifier.cpp",
@@ -389,6 +399,7 @@ build_component_ng("pattern_ng") {
     "select_overlay/select_overlay_paint_method.cpp",
     "select_overlay/select_overlay_pattern.cpp",
     "select_overlay/select_overlay_property.cpp",
+    "select_overlay/service_collaboration_menu_ace_helper.cpp",
     "shape/circle_model_ng.cpp",
     "shape/ellipse_model_ng.cpp",
     "shape/line_layout_algorithm.cpp",
@@ -429,16 +440,13 @@ build_component_ng("pattern_ng") {
     "stepper/stepper_model_ng.cpp",
     "stepper/stepper_node.cpp",
     "stepper/stepper_pattern.cpp",
-    "swiper/arc_swiper_pattern.cpp",
     "swiper/swiper_accessibility_property.cpp",
+    "swiper/swiper_helper.cpp",
     "swiper/swiper_layout_algorithm.cpp",
     "swiper/swiper_model_ng.cpp",
     "swiper/swiper_paint_method.cpp",
     "swiper/swiper_paint_property.cpp",
     "swiper/swiper_pattern.cpp",
-    "swiper_indicator/circle_dot_indicator/circle_dot_indicator_layout_algorithm.cpp",
-    "swiper_indicator/circle_dot_indicator/circle_dot_indicator_modifier.cpp",
-    "swiper_indicator/circle_dot_indicator/circle_dot_indicator_paint_method.cpp",
     "swiper_indicator/digit_indicator/digit_indicator_layout_algorithm.cpp",
     "swiper_indicator/dot_indicator/dot_indicator_layout_algorithm.cpp",
     "swiper_indicator/dot_indicator/dot_indicator_modifier.cpp",
@@ -449,7 +457,6 @@ build_component_ng("pattern_ng") {
     "swiper_indicator/indicator_common/swiper_arrow_pattern.cpp",
     "swiper_indicator/indicator_common/swiper_indicator_accessibility_property.cpp",
     "swiper_indicator/indicator_common/swiper_indicator_pattern.cpp",
-    "swiper_indicator/indicator_common/swiper_indicator_utils.cpp",
     "symbol/symbol_effect_options.cpp",
     "symbol/symbol_model_ng.cpp",
     "symbol/symbol_source_info.cpp",
@@ -467,6 +474,7 @@ build_component_ng("pattern_ng") {
     "tabs/tabs_pattern.cpp",
     "text/base_text_select_overlay.cpp",
     "text/image_span_view.cpp",
+    "text/multiple_click_recognizer.cpp",
     "text/multiple_paragraph_layout_algorithm.cpp",
     "text/span/mutable_span_string.cpp",
     "text/span/span_object.cpp",
@@ -524,6 +532,7 @@ build_component_ng("pattern_ng") {
     "time_picker/timepicker_row_accessibility_property.cpp",
     "time_picker/timepicker_row_pattern.cpp",
     "time_picker/toss_animation_controller.cpp",
+    "toast/toast_accessibility_property.cpp",
     "toast/toast_layout_algorithm.cpp",
     "toast/toast_pattern.cpp",
     "toast/toast_view.cpp",
@@ -565,10 +574,7 @@ build_component_ng("pattern_ng") {
   if (defined(vendor_configs.ace_engine_advanced)) {
     sources += vendor_configs.ace_engine_advanced_pattern
     external_deps += vendor_configs.ace_engine_ext_extra_deps
-  }
-
-  if (enable_split_mode && defined(vendor_configs.ace_advanced_split_mode)) {
-    sources += vendor_configs.ace_advanced_split_mode
+    external_deps += vendor_configs.ace_engine_ext_jsview_deps
   }
 
   if (is_ohos_standard_system) {
@@ -578,12 +584,6 @@ build_component_ng("pattern_ng") {
     ]
     if (!use_mingw_win && !use_mac && !use_linux) {
       external_deps += [ "window_manager:scene_session" ]
-    }
-    if (product_name == "ohos-sdk") {
-      sources += [
-        "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp",
-        "$ace_root/test/mock/core/pattern/mock_time_picker_haptic_controller.cpp",
-      ]
     }
   } else if (is_arkui_x) {
     deps += [

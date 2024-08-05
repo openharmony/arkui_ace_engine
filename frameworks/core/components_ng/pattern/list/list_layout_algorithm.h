@@ -33,12 +33,19 @@ namespace OHOS::Ace::NG {
 class PipelineContext;
 class ListPositionMap;
 
+struct ListItemGroupLayoutInfo {
+    bool atStart = false;
+    bool atEnd = false;
+    float averageHeight = -1;
+};
+
 struct ListItemInfo {
     int32_t id;
     float startPos;
     float endPos;
     bool isGroup;
     bool isPressed = false;
+    std::optional<ListItemGroupLayoutInfo> groupInfo;
 };
 
 struct ListPredictLayoutParam {
@@ -145,6 +152,11 @@ public:
         return predictSnapEndPos_;
     }
 
+    void SetScrollSnapVelocity(float velocity)
+    {
+        scrollSnapVelocity_ = velocity;
+    }
+
     void SetIndexInGroup(int32_t index)
     {
         jumpIndexInGroup_ = index;
@@ -163,7 +175,7 @@ public:
 
     float GetCurrentOffset() const
     {
-        return currentOffset_ - adjustOffset_;
+        return currentOffset_ + adjustOffset_;
     }
 
     void SetIsNeedCheckOffset(bool isNeedCheckOffset)
@@ -361,7 +373,7 @@ public:
         return childLayoutConstraint_;
     }
 
-    void OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, uint32_t index);
+    void OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, int32_t index);
 
     void SetListChildrenMainSize(const RefPtr<ListChildrenMainSize>& childrenMainSize)
     {
@@ -396,7 +408,7 @@ protected:
         return index;
     }
     virtual void SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount);
-    virtual void SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheCount);
+    virtual void SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheStart, int32_t cacheEnd);
 
     void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index, float referencePos,
         bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout,
@@ -417,7 +429,7 @@ protected:
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     void ReviseSpace(const RefPtr<ListLayoutProperty>& listLayoutProperty);
     std::pair<int32_t, int32_t> GetLayoutGroupCachedCount(
-        const RefPtr<LayoutWrapper>& wrapper, bool forward, int32_t cacheCount);
+        const RefPtr<LayoutWrapper>& wrapper, bool forward, int32_t cacheCount, bool outOfView);
 
     Axis axis_ = Axis::VERTICAL;
     LayoutConstraintF childLayoutConstraint_;
@@ -449,19 +461,27 @@ private:
     static void PostIdleTask(RefPtr<FrameNode> frameNode, const ListPredictLayoutParam& param);
     static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
 
-    virtual int32_t LayoutCachedForward(LayoutWrapper* layoutWrapper, int32_t cacheCount, int32_t cached);
-    virtual int32_t LayoutCachedBackward(LayoutWrapper* layoutWrapper, int32_t cacheCount, int32_t cached);
+    void ProcessCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount);
+    virtual int32_t LayoutCachedForward(LayoutWrapper* layoutWrapper,
+        int32_t cacheCount, int32_t cached, int32_t& currIndex);
+    virtual int32_t LayoutCachedBackward(LayoutWrapper* layoutWrapper,
+        int32_t cacheCount, int32_t cached, int32_t& currIndex);
     std::list<PredictLayoutItem> LayoutCachedItemV2(LayoutWrapper* layoutWrapper, int32_t cacheCount);
     static bool PredictBuildGroup(RefPtr<LayoutWrapper> wrapper,
         const LayoutConstraintF& constraint, bool forward, int64_t deadline, int32_t cached);
     static void PostIdleTaskV2(RefPtr<FrameNode> frameNode, const ListPredictLayoutParamV2& param);
     static void PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t deadline);
 
-    float GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign);
+    float GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign) const;
+    void FindPredictSnapIndexInItemPositionsStart(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
+    void FindPredictSnapIndexInItemPositionsCenter(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
+    void FindPredictSnapIndexInItemPositionsEnd(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
     int32_t FindPredictSnapEndIndexInItemPositions(float predictEndPos, V2::ScrollSnapAlign scrollSnapAlign);
     bool IsUniformHeightProbably();
-    float CalculatePredictSnapEndPositionByIndex(uint32_t index, V2::ScrollSnapAlign scrollSnapAlign);
+    float CalculatePredictSnapEndPositionByIndex(int32_t index, V2::ScrollSnapAlign scrollSnapAlign);
     void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper);
+    std::optional<ListItemGroupLayoutInfo> GetListItemGroupLayoutInfo(
+        const RefPtr<LayoutWrapper>& wrapper) const;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
@@ -469,6 +489,7 @@ private:
     std::optional<int32_t> targetIndexStaged_;
     std::optional<float> predictSnapOffset_;
     std::optional<float> predictSnapEndPos_;
+    float scrollSnapVelocity_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
     ScrollAutoType scrollAutoType_ = ScrollAutoType::NOT_CHANGE;
 
@@ -503,7 +524,8 @@ private:
 
     bool mainSizeIsDefined_ = false;
     bool crossMatchChild_ = false;
-    bool isSnapCenter_ = false;
+    V2::ScrollSnapAlign scrollSnapAlign_ = V2::ScrollSnapAlign::NONE;
+    bool isReverse_ = false;
     float contentMainSize_ = 0.0f;
     float prevContentMainSize_ = 0.0f;
     float paddingBeforeContent_ = 0.0f;

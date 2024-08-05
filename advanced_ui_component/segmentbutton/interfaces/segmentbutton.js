@@ -97,21 +97,21 @@ const segmentButtonTheme = {
     FOCUS_BORDER_COLOR: {
         "id": -1,
         "type": 10001,
-        params: ["sys.color.ohos_id_color_focused_outline"],
+        params: ['sys.color.ohos_id_color_focused_outline'],
         "bundleName": "__harDefaultBundleName__",
         "moduleName": "__harDefaultModuleName__"
     },
     HOVER_COLOR: {
         "id": -1,
         "type": 10001,
-        params: ["sys.color.ohos_id_color_hover"],
+        params: ['sys.color.ohos_id_color_hover'],
         "bundleName": "__harDefaultBundleName__",
         "moduleName": "__harDefaultModuleName__"
     },
     PRESS_COLOR: {
         "id": -1,
         "type": 10001,
-        params: ["sys.color.ohos_id_color_click_effect"],
+        params: ['sys.color.ohos_id_color_click_effect'],
         "bundleName": "__harDefaultBundleName__",
         "moduleName": "__harDefaultModuleName__"
     },
@@ -134,18 +134,18 @@ SegmentButtonItemOptions = __decorate([
 ], SegmentButtonItemOptions);
 let SegmentButtonItemOptionsArray = SegmentButtonItemOptionsArray_1 = class SegmentButtonItemOptionsArray extends Array {
     constructor(a48) {
-        super(typeof a48 === "number" ? a48 : 0);
+        super(typeof a48 === 'number' ? a48 : 0);
         this.changeStartIndex = void 0;
         this.deleteCount = void 0;
         this.addLength = void 0;
-        if (typeof a48 !== "number" && a48 !== void 0) {
+        if (typeof a48 !== 'number' && a48 !== void 0) {
             super.push(...a48.map((c48) => new SegmentButtonItemOptions(c48)));
         }
     }
 
     push(...x47) {
         if (this.length + x47.length > MAX_ITEM_COUNT) {
-            console.warn("Exceeded the maximum number of elements (5).");
+            console.warn('Exceeded the maximum number of elements (5).');
             return this.length;
         }
         this.changeStartIndex = this.length;
@@ -156,7 +156,7 @@ let SegmentButtonItemOptionsArray = SegmentButtonItemOptionsArray_1 = class Segm
 
     pop() {
         if (this.length <= MIN_ITEM_COUNT) {
-            console.warn("Below the minimum number of elements (2).");
+            console.warn('Below the minimum number of elements (2).');
             return void 0;
         }
         this.changeStartIndex = this.length - 1;
@@ -167,7 +167,7 @@ let SegmentButtonItemOptionsArray = SegmentButtonItemOptionsArray_1 = class Segm
 
     shift() {
         if (this.length <= MIN_ITEM_COUNT) {
-            console.warn("Below the minimum number of elements (2).");
+            console.warn('Below the minimum number of elements (2).');
             return void 0;
         }
         this.changeStartIndex = 0;
@@ -178,7 +178,7 @@ let SegmentButtonItemOptionsArray = SegmentButtonItemOptionsArray_1 = class Segm
 
     unshift(...u47) {
         if (this.length + u47.length > MAX_ITEM_COUNT) {
-            console.warn("Exceeded the maximum number of elements (5).");
+            console.warn('Exceeded the maximum number of elements (5).');
             return this.length;
         }
         if (u47.length > 0) {
@@ -193,11 +193,11 @@ let SegmentButtonItemOptionsArray = SegmentButtonItemOptionsArray_1 = class Segm
         let t47 = (this.length - r47) < 0 ? 0 : (this.length - r47);
         t47 += s47.length;
         if (t47 < MIN_ITEM_COUNT) {
-            console.warn("Below the minimum number of elements (2).");
+            console.warn('Below the minimum number of elements (2).');
             return [];
         }
         if (t47 > MAX_ITEM_COUNT) {
-            console.warn("Exceeded the maximum number of elements (5).");
+            console.warn('Exceeded the maximum number of elements (5).');
             return [];
         }
         this.changeStartIndex = q47;
@@ -249,7 +249,7 @@ let SegmentButtonOptions = SegmentButtonOptions_1 = class SegmentButtonOptions {
         this.localizedButtonPadding = l47.localizedButtonPadding;
         this.direction = l47.direction ?? Direction.Auto;
         this.buttons = new SegmentButtonItemOptionsArray(l47.buttons);
-        if (this.type === "capsule") {
+        if (this.type === 'capsule') {
             this.multiply = l47.multiply ?? false;
             this.buttons.forEach(n47 => {
                 this.showText ||= n47.text !== void 0;
@@ -271,7 +271,7 @@ let SegmentButtonOptions = SegmentButtonOptions_1 = class SegmentButtonOptions {
 
     static tab(k47) {
         return new SegmentButtonOptions_1({
-            type: "tab",
+            type: 'tab',
             buttons: k47.buttons,
             fontColor: k47.fontColor,
             selectedFontColor: k47.selectedFontColor,
@@ -293,7 +293,7 @@ let SegmentButtonOptions = SegmentButtonOptions_1 = class SegmentButtonOptions {
 
     static capsule(j47) {
         return new SegmentButtonOptions_1({
-            type: "capsule",
+            type: 'capsule',
             buttons: j47.buttons,
             multiply: j47.multiply,
             fontColor: j47.fontColor,
@@ -544,9 +544,6 @@ class SelectItem extends ViewPU {
                             y: this.zoomScaleArray[this.selectedIndexes[0]]
                         });
                         Stack.shadow(ShadowStyle.OUTER_DEFAULT_XS);
-                        Stack.pixelRound({
-                            top: PixelRoundCalcPolicy.FORCE_FLOOR
-                        });
                     }, Stack);
                     Stack.pop();
                 });
@@ -747,7 +744,7 @@ class SegmentButtonItem extends ViewPU {
         this.__options = new SynchedPropertyNesedObjectPU(q43.options, this, "options");
         this.__property = new SynchedPropertyNesedObjectPU(q43.property, this, "property");
         this.__index = new SynchedPropertySimpleOneWayPU(q43.index, this, "index");
-        this.groupId = "";
+        this.groupId = '';
         this.setInitiallyProvidedValue(q43);
         this.finalizeConstruction();
     }
@@ -873,7 +870,6 @@ class SegmentButtonItem extends ViewPU {
                     this.observeComponentCreation2((f43, g43) => {
                         Image.create(this.property.isSelected ? this.itemOptions.selectedIcon : this.itemOptions.icon);
                         Image.direction(this.options.direction);
-                        Image.matchTextDirection(this.options.direction == Direction.Ltr ? false : true);
                         Image.size(this.options.imageSize ?? { width: 24, height: 24 });
                         Image.focusable(!this.options.showText);
                         Image.draggable(false);
@@ -1471,7 +1467,8 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                                     this.buttonItemsPosition[s37] = {
                                                         start: LengthMetrics.vp(Number.parseFloat(this.options.componentPadding.toString()) +
                                                             (Number.parseFloat(i39.width.toString()) + 1) * s37),
-                                                        top: LengthMetrics.vp(Number.parseFloat(this.options.componentPadding.toString()))
+                                                        top: LengthMetrics.px(Math.floor(this.getUIContext()
+                                                            .vp2px(Number.parseFloat(this.options.componentPadding.toString()))))
                                                     };
                                                 }
                                             });
@@ -2007,7 +2004,7 @@ export class SegmentButton extends ViewPU {
     }
 
     isMovedFromPanGestureStartPoint(a35, b35) {
-        return!nearEqual(a35, this.panGestureStartPoint.x) || !nearEqual(b35, this.panGestureStartPoint.y);
+        return !nearEqual(a35, this.panGestureStartPoint.x) || !nearEqual(b35, this.panGestureStartPoint.y);
     }
 
     isShouldMirror() {
@@ -2095,7 +2092,7 @@ export class SegmentButton extends ViewPU {
             TapGesture.pop();
             SwipeGesture.create();
             SwipeGesture.onAction((p34) => {
-                if (this.options === void 0 || this.options.buttons === void 0) {
+                if (this.options === void 0 || this.options.buttons === void 0 || p34.sourceTool === SourceTool.TOUCHPAD) {
                     return;
                 }
                 if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
@@ -2347,8 +2344,10 @@ export class SegmentButton extends ViewPU {
                     If.pop();
                     this.observeComponentCreation2((u31, v31) => {
                         Stack.create();
+                        Context.animation({ duration: 0 });
                         Stack.direction(this.options.direction);
                         Stack.size(ObservedObject.GetRawObject(this.componentSize));
+                        Context.animation(null);
                         Stack.borderRadius((this.options.type === 'capsule' && (this.options.multiply ?? false) ?
                         this.options.iconTextRadius : this.options.iconTextBackgroundRadius) ??
                             this.componentSize.height / 2);

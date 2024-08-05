@@ -356,7 +356,7 @@ enum class ScrollSource {
 constexpr char TRAILING_ANIMATION[] = "TRAILING_ANIMATION ";
 
 // scroller animation, such as scrollTo, scrollPage
-constexpr char SCROLLER_ANIMATION[] = "SCROLLER_ANIMATION ";
+constexpr char SCROLLER_ANIMATION[] = "CUSTOM_ANIMATOR_SCROLLER_ANIMATION ";
 
 // scrollToEdge at a fixed speed
 constexpr char SCROLLER_FIX_VELOCITY_ANIMATION[] = "SCROLLER_FIX_VELOCITY_ANIMATION ";

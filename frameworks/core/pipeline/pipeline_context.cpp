@@ -103,8 +103,8 @@ constexpr int64_t SEC_TO_NANOSEC = 1000000000;
 constexpr char JS_THREAD_NAME[] = "JS";
 constexpr char UI_THREAD_NAME[] = "UI";
 constexpr uint32_t DEFAULT_MODAL_COLOR = 0x00000000;
-constexpr float ZOOM_DISTANCE_DEFAULT = 50.0;       // TODO: Need confirm value
-constexpr float ZOOM_DISTANCE_MOVE_PER_WHEEL = 5.0; // TODO: Need confirm value
+constexpr float ZOOM_DISTANCE_DEFAULT = 50.0;
+constexpr float ZOOM_DISTANCE_MOVE_PER_WHEEL = 5.0;
 constexpr int32_t FLUSH_RELOAD_TRANSITION_DURATION_MS = 400;
 
 PipelineContext::TimeProvider g_defaultTimeProvider = []() -> uint64_t {
@@ -908,7 +908,7 @@ void PipelineContext::SetupRootElement()
     requestedRenderNode_.Reset();
 }
 
-RefPtr<Element> PipelineContext::SetupSubRootElement()
+void PipelineContext::SetupSubRootElement()
 {
     LOGI("Set up SubRootElement!");
 
@@ -935,7 +935,7 @@ RefPtr<Element> PipelineContext::SetupSubRootElement()
     if (!rootElement_) {
         LOGE("Set up SubRootElement failed!");
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
-        return RefPtr<Element>();
+        return;
     }
     const auto& rootRenderNode = rootElement_->GetRenderNode();
     window_->SetRootRenderNode(rootRenderNode);
@@ -952,7 +952,7 @@ RefPtr<Element> PipelineContext::SetupSubRootElement()
     cardTransitionController_->RegisterTransitionListener();
     requestedRenderNode_.Reset();
     LOGI("Set up SubRootElement success!");
-    return rootElement_;
+    return;
 }
 
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
@@ -1577,7 +1577,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         return;
     }
     auto scalePoint = point.CreateScalePoint(viewScale_);
-    ResSchedReport::GetInstance().OnTouchEvent(scalePoint.type);
+    ResSchedReport::GetInstance().OnTouchEvent(scalePoint);
     if (scalePoint.type == TouchType::DOWN) {
         eventManager_->HandleOutOfRectCallback(
             { scalePoint.x, scalePoint.y, scalePoint.sourceType }, rectCallbackList_);
@@ -1624,7 +1624,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
             auto movePoint = (*iter).CreateScalePoint(GetViewScale());
             if (scalePoint.id == movePoint.id) {
                 lastMoveEvent = movePoint;
-                touchEvents_.erase(iter++);
+                iter = touchEvents_.erase(iter);
             }
         }
         if (lastMoveEvent.has_value()) {
@@ -2021,7 +2021,8 @@ void PipelineContext::OnIdle(int64_t deadline)
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance,
+    bool forceChange)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
@@ -2914,7 +2915,7 @@ void PipelineContext::ClearDeactivateElements()
         auto element = iter->second;
         RefPtr<RenderNode> render = element ? element->GetRenderNode() : nullptr;
         if (!render || !render->IsDisappearing()) {
-            deactivateElements_.erase(iter++);
+            iter = deactivateElements_.erase(iter);
         } else {
             iter++;
         }
@@ -3004,7 +3005,6 @@ void PipelineContext::ProcessDragEvent(
     auto info = GestureEvent();
     info.SetGlobalPoint(globalPoint);
     auto preTargetDragDropNode = GetPreTargetRenderNode();
-
     if (targetDragDropNode == preTargetDragDropNode) {
         if (targetDragDropNode && targetDragDropNode->GetOnDragMove()) {
             auto renderList = renderNode->FindChildNodeOfClass<V2::RenderList>(globalPoint, globalPoint);

@@ -128,14 +128,16 @@ void TimePickerHapticController::ThreadLoop()
         // Set different volumes for different sliding speeds:
         //    sound effect loudness
         //    (dB) = sound effect dB set by the user + (0.0066 screen movement speed (mm/s) - 0.01)
+        //    the range of volume interface setting is [0.0f, 1.0f]
         float volume = userVolume + 0.0066 * absSpeedInMm_ - 0.01;
         volume = std::clamp(volume, 0.0f, 1.0f);
 
         // Different vibration parameters for different sliding speeds:
         //    the frequency is between 260~300Hz and fixed, the vibration amount
-        //    (g) = 0.007 * screen movement speed (mm/s) + 0.3
-        float haptic = (absSpeedInMm_ == 0) ? 0 : absSpeedInMm_ * 0.007 + 0.3;
-        haptic = std::clamp(haptic, 0.0f, 100.0f);
+        //    (g) = (0.007 * screen movement speed (mm/s) + 0.3) * 100
+        //    the range of haptic intensity interface setting is [1.0f, 100.0f]
+        float haptic = ((absSpeedInMm_ == 0) ? 0 : absSpeedInMm_ * 0.007 + 0.3) * 100;
+        haptic = std::clamp(haptic, 1.0f, 100.0f);
 
         auto startTime = std::chrono::high_resolution_clock::now();
         effectAudioHapticPlayer_->SetVolume(volume);

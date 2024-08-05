@@ -13,6 +13,12 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
+ace_unittest("drag_animation_helper_test_ng") {
+  type = "new"
+  module_output = "manager"
+  sources = [ "drag_animation_helper_test_ng.cpp" ]
+}
+
 ace_unittest("drag_drop_func_wrapper_test_ng") {
   type = "new"
   module_output = "manager"
@@ -108,6 +114,7 @@ group("core_manager_unittest") {
   testonly = true
   deps = [
     ":display_sync_manager_test_ng",
+    ":drag_animation_helper_test_ng",
     ":drag_drop_func_wrapper_test_ng",
     ":drag_drop_manager_test_ng",
     ":drag_drop_proxy_test_ng",

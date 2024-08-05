@@ -68,19 +68,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg002, TestSize.Level1)
 }
 
 /**
- * @tc.name: FrameNodeTestNg003
- * @tc.desc: Test frame node method
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeTestNg003, TestSize.Level1)
-{
-    auto jsonValue = std::make_unique<JsonValue>();
-    FRAME_NODE->GetOrCreateFocusHub();
-    FRAME_NODE->FocusToJsonValue(jsonValue, filter);
-    EXPECT_FALSE(jsonValue->GetBool("enabled", false));
-}
-
-/**
  * @tc.name: FrameNodeTestNg004
  * @tc.desc: Test frame node method
  * @tc.type: FUNC
@@ -700,7 +687,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0014, TestSiz
      */
     VisibleCallbackInfo callbackInfo;
     FRAME_NODE2->SetVisibleAreaUserCallback({ 0.0f }, callbackInfo);
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(1);
 
     /**
      * @tc.steps: step2. callback SetParent
@@ -708,18 +695,18 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0014, TestSiz
      */
     auto parentNode = AceType::MakeRefPtr<FrameNode>("test", -1, AceType::MakeRefPtr<Pattern>(), false);
     FRAME_NODE2->SetParent(FRAME_NODE3);
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(2);
     auto parent = FRAME_NODE2->GetParent();
     EXPECT_EQ(parent, 1);
 
     auto parentNode1 = FrameNode::CreateFrameNode("parent", 2, AceType::MakeRefPtr<Pattern>());
     RefPtr<FrameNode> frameNodes[3] = { parentNode1, nullptr, nullptr };
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(3);
     auto parent1 = FRAME_NODE2->GetParent();
     EXPECT_EQ(parent1, 1);
 
     FRAME_NODE2->lastVisibleRatio_ = 1.0;
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(4);
 
     /**
      * @tc.steps: step3. set onShow_ and call TriggerVisibleAreaChangeCallback
@@ -727,19 +714,19 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0014, TestSiz
      */
     auto context = PipelineContext::GetCurrentContext();
     context->onShow_ = true;
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(5);
     auto testNode_ = TestNode::CreateTestNode(101);
     FRAME_NODE3->SetParent(testNode_);
     FRAME_NODE3->isActive_ = true;
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(6);
     FRAME_NODE3->layoutProperty_->UpdateVisibility(VisibleType::INVISIBLE);
     FRAME_NODE2->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
     FRAME_NODE2->isActive_ = true;
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(7);
     FRAME_NODE3->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(8);
     EXPECT_TRUE(context->GetOnShow());
-    EXPECT_EQ(FRAME_NODE2->lastVisibleRatio_, 0);
+    EXPECT_EQ(FRAME_NODE2->lastVisibleRatio_, 1);
 }
 
 /**
@@ -940,11 +927,12 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsOutOfTouchTestRegion0025, TestSize.Level1)
      */
     PointF pointF;
     std::vector<RectF> rectF;
-    auto test = FRAME_NODE2->IsOutOfTouchTestRegion(std::move(pointF), 0);
+    TouchEvent touchEvent;
+    auto test = FRAME_NODE2->IsOutOfTouchTestRegion(std::move(pointF), touchEvent);
     EXPECT_TRUE(test);
 
     auto test1 = FRAME_NODE2->InResponseRegionList(pointF, rectF);
-    auto test2 = FRAME_NODE2->IsOutOfTouchTestRegion(std::move(pointF), 0);
+    auto test2 = FRAME_NODE2->IsOutOfTouchTestRegion(std::move(pointF), touchEvent);
     EXPECT_FALSE(test1);
     EXPECT_TRUE(test2);
 }
@@ -1026,6 +1014,32 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnAccessibilityEvent0028, TestSize.Level1)
      */
     auto test1 = AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = false;
     FRAME_NODE2->OnAccessibilityEvent(AccessibilityEventType::ACCESSIBILITY_FOCUSED);
+    EXPECT_FALSE(test1);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg0029
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeOnAccessibilityEventForVirtualNode0029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. callback OnAccessibilityEventForVirtualNode.
+     * @tc.expected: expect The function is true.
+     */
+    AccessibilityEvent event;
+    auto accessibilityId = 1;
+    auto test = AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = true;
+    FRAME_NODE2->OnAccessibilityEventForVirtualNode(AccessibilityEventType::CHANGE, accessibilityId);
+    EXPECT_TRUE(test);
+
+    /**
+     * @tc.steps: step2. callback OnAccessibilityEventForVirtualNode.
+     * @tc.expected: expect The function is false.
+     */
+    auto test1 = AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = false;
+    FRAME_NODE2->OnAccessibilityEventForVirtualNode(AccessibilityEventType::FOCUS, accessibilityId);
     EXPECT_FALSE(test1);
 }
 
@@ -1635,5 +1649,37 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback053, TestSize
     FRAME_NODE2->SetCanSuggestOpInc(false);
     FRAME_NODE2->SetOpIncGroupCheckedThrough(false);
     EXPECT_TRUE(FRAME_NODE2->MarkSuggestOpIncGroup(true, true));
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_IsPaintRectWithTransformValid054
+ * @tc.desc: Test frame node method IsPaintRectWithTransformValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeIsPaintRectWithTransformValid054, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. callback IsPaintRectWithTransformValid.
+     * @tc.expected: expect The function return value is true when width or height is nearZero.
+     */
+    auto node = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    node->renderContext_ = mockRenderContext;
+
+    mockRenderContext->rect_ = RectF(0, 0, 0, 10);
+    auto test1 = node->IsPaintRectWithTransformValid();
+    EXPECT_TRUE(test1);
+
+    mockRenderContext->rect_ = RectF(0, 0, 10, 0);
+    auto test2 = node->IsPaintRectWithTransformValid();
+    EXPECT_TRUE(test2);
+
+    mockRenderContext->rect_ = RectF(0, 0, 10, 10);
+    auto test3 = node->IsPaintRectWithTransformValid();
+    EXPECT_FALSE(test3);
+
+    mockRenderContext->rect_ = RectF(0, 0, 0, 0);
+    auto test4 = node->IsPaintRectWithTransformValid();
+    EXPECT_TRUE(test4);
 }
 } // namespace OHOS::Ace::NG

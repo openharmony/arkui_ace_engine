@@ -367,7 +367,8 @@ std::string ResourceAdapterImpl::GetPluralString(uint32_t resId, int quantity)
     auto pluralChoice = Localization::GetInstance()->PluralRulesFormat(quantity);
     auto iter = std::find(pluralResults.begin(), pluralResults.end(), pluralChoice);
     std::string originStr;
-    if (iter != pluralResults.end() && ++iter != pluralResults.end()) {
+    if (iter != pluralResults.end() && iter + 1 != pluralResults.end()) {
+        iter++;
         originStr = *iter;
     }
     return originStr;

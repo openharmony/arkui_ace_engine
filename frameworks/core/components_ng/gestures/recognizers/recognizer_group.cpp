@@ -70,7 +70,6 @@ const std::list<RefPtr<NGGestureRecognizer>>& RecognizerGroup::GetGroupRecognize
 
 void RecognizerGroup::AddChildren(const std::list<RefPtr<NGGestureRecognizer>>& recognizers)
 {
-    // TODO: add state adjustment.
     for (const auto& child : recognizers) {
         if (child && !Existed(child) && child->SetGestureGroup(AceType::WeakClaim(this))) {
             recognizers_.emplace_back(child);
@@ -115,10 +114,14 @@ void RecognizerGroup::ForceReject()
 {
     for (auto& recognizer : recognizers_) {
         if (!AceType::InstanceOf<RecognizerGroup>(recognizer)) {
+            if (recognizer->IsBridgeMode()) {
+                continue;
+            }
             if (recognizer->GetRefereeState() != RefereeState::SUCCEED_BLOCKED &&
                 recognizer->GetRefereeState() != RefereeState::SUCCEED &&
                 recognizer->GetRefereeState() != RefereeState::FAIL) {
                 recognizer->OnRejected();
+                recognizer->OnRejectBridgeObj();
             }
             continue;
         }

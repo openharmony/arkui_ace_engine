@@ -20,6 +20,9 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
@@ -211,8 +214,13 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
     if (ParseJsColor(colorValue, result)) {
         colorVal = result;
     } else {
-        // default color
-        colorVal = Color::BLACK;
+        auto theme = GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+            colorVal = theme->GetTextStyle().GetTextColor();
+        } else {
+            colorVal = Color::BLACK;
+        }
     }
     SpanModel::GetInstance()->SetTextDecoration(textDecoration.value());
     SpanModel::GetInstance()->SetTextDecorationColor(colorVal.value());
@@ -240,6 +248,9 @@ void JSSpan::JsOnClick(const JSCallbackInfo& info)
             ACE_SCORING_EVENT("onClick");
             PipelineContext::SetCallBackNode(node);
             func->Execute(*clickInfo);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+            JSInteractableView::ReportClickEvent(node);
+#endif
         };
         SpanModel::GetInstance()->SetOnClick(std::move(onClick));
         return;

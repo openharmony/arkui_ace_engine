@@ -517,7 +517,7 @@ void RenderTabContent::ApplyRestoreInfo()
     if (restoreInfo.empty()) {
         return;
     }
-    currentIndex_ = static_cast<size_t>(StringUtils::StringToInt(GetRestoreInfo()));
+    currentIndex_ = StringUtils::StringToInt(GetRestoreInfo());
     grandParent->SetRestoreInfo("");
 }
 

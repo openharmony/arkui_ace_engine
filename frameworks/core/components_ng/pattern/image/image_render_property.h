@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_RENDER_PROPERTY_H
 
 #include "base/image/drawing_color_filter.h"
+#include "base/image/drawing_lattice.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
@@ -31,6 +32,7 @@ struct ImagePaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ImageRepeat, ImageRepeat);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ColorFilter, std::vector<float>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DrawingColorFilter, RefPtr<DrawingColorFilter>);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ImageResizableLattice, RefPtr<DrawingLattice>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MatchTextDirection, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SvgFillColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SmoothEdge, float);
@@ -101,6 +103,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, ColorFilter, std::vector<float>, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         ImagePaintStyle, DrawingColorFilter, RefPtr<DrawingColorFilter>, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        ImagePaintStyle, ImageResizableLattice, RefPtr<DrawingLattice>, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, MatchTextDirection, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, SvgFillColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, SmoothEdge, float, PROPERTY_UPDATE_RENDER);

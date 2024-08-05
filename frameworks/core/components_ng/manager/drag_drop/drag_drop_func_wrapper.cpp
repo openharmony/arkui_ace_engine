@@ -13,9 +13,19 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
+
+#include <mutex>
+
+#include "base/image/pixel_map.h"
+#include "base/json/json_util.h"
+#include "core/common/ace_engine.h"
+#include "core/common/interaction/interaction_interface.h"
+#include "core/common/udmf/udmf_client.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/theme/blur_style_theme.h"
 #include "core/components/theme/shadow_theme.h"
-#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -26,8 +36,244 @@ constexpr float BLUR_SIGMA_SCALE = 0.57735f;
 constexpr float SCALE_HALF = 0.5f;
 constexpr float MIN_OPACITY { 0.0f };
 constexpr float MAX_OPACITY { 1.0f };
+using DragNotifyMsg = OHOS::Ace::DragNotifyMsg;
+using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
+using StopDragCallback = std::function<void()>;
+constexpr int32_t MOUSE_POINTER_ID = 1001;
+constexpr int32_t SOURCE_TOOL_PEN = 1;
+constexpr int32_t SOURCE_TYPE_TOUCH = 2;
+constexpr int32_t PEN_POINTER_ID = 102;
+constexpr int32_t SOURCE_TYPE_MOUSE = 1;
 }
 
+static bool CheckInternalDragging(const RefPtr<Container>& container)
+{
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext || !pipelineContext->IsDragging()) {
+        return false;
+    }
+    return true;
+}
+
+void GetShadowInfoArray(
+    std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction, std::vector<ShadowInfoCore>& shadowInfos)
+{
+    auto minScaleWidth = NG::DragDropFuncWrapper::GetScaleWidth(dragAction->instanceId);
+    for (auto& pixelMap : dragAction->pixelMapList) {
+        double scale = 1.0;
+        if (pixelMap.GetRawPtr()) {
+            if (pixelMap->GetWidth() > minScaleWidth && dragAction->previewOption.isScaleEnabled) {
+                scale = minScaleWidth / pixelMap->GetWidth();
+            }
+            auto pixelMapScale = dragAction->windowScale * scale;
+            pixelMap->Scale(pixelMapScale, pixelMapScale, AceAntiAliasingOption::HIGH);
+        }
+        int32_t width = pixelMap->GetWidth();
+        int32_t height = pixelMap->GetHeight();
+        double x = dragAction->touchPointX;
+        double y = dragAction->touchPointY;
+        if (!dragAction->hasTouchPoint) {
+            x = -width * PIXELMAP_WIDTH_RATE;
+            y = -height * PIXELMAP_HEIGHT_RATE;
+        }
+        ShadowInfoCore shadowInfo { pixelMap, -x, -y };
+        shadowInfos.push_back(shadowInfo);
+    }
+}
+
+void PostStopDrag(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction, const RefPtr<Container>& container)
+{
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto windowId = container->GetWindowId();
+    taskExecutor->PostTask(
+        [dragAction, windowId]() {
+            CHECK_NULL_VOID(dragAction);
+            TAG_LOGI(AceLogTag::ACE_DRAG, "drag state is reject, stop drag, windowId is %{public}d.", windowId);
+            OHOS::Ace::DragDropRet dropResult { OHOS::Ace::DragRet::DRAG_CANCEL, false, windowId,
+                OHOS::Ace::DragBehavior::UNKNOWN };
+            InteractionInterface::GetInstance()->StopDrag(dropResult);
+            InteractionInterface::GetInstance()->SetDragWindowVisible(false);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIDragStop");
+}
+
+bool ConfirmCurPointerEventInfo(
+    std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction, const RefPtr<Container>& container)
+{
+    CHECK_NULL_RETURN(dragAction, false);
+    CHECK_NULL_RETURN(container, false);
+    StopDragCallback stopDragCallback = [dragAction, container]() {
+        CHECK_NULL_VOID(dragAction);
+        CHECK_NULL_VOID(container);
+        bool needPostStopDrag = false;
+        if (dragAction->dragState == DragAdapterState::SENDING) {
+            needPostStopDrag = true;
+        }
+        {
+            std::lock_guard<std::mutex> lock(dragAction->dragStateMutex);
+            dragAction->dragState = DragAdapterState::REJECT;
+        }
+        if (needPostStopDrag) {
+            PostStopDrag(dragAction, container);
+        }
+    };
+    int32_t sourceTool = -1;
+    bool getPointSuccess = container->GetCurPointerEventInfo(dragAction->pointer, dragAction->x, dragAction->y,
+        dragAction->sourceType, sourceTool, std::move(stopDragCallback));
+    if (dragAction->sourceType == SOURCE_TYPE_MOUSE) {
+        dragAction->pointer = MOUSE_POINTER_ID;
+    } else if (dragAction->sourceType == SOURCE_TYPE_TOUCH && sourceTool == SOURCE_TOOL_PEN) {
+        dragAction->pointer = PEN_POINTER_ID;
+    }
+    return getPointSuccess;
+}
+
+void EnvelopedDragData(
+    std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction, std::optional<DragDataCore>& dragData)
+{
+    auto container = AceEngine::Get().GetContainer(dragAction->instanceId);
+    CHECK_NULL_VOID(container);
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_VOID(displayInfo);
+    dragAction->displayId = static_cast<int32_t>(displayInfo->GetDisplayId());
+
+    std::vector<ShadowInfoCore> shadowInfos;
+    GetShadowInfoArray(dragAction, shadowInfos);
+    if (shadowInfos.empty()) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "shadowInfo array is empty");
+        return;
+    }
+    auto pointerId = dragAction->pointer;
+    std::string udKey;
+    std::map<std::string, int64_t> summary;
+    int32_t dataSize = 1;
+    if (dragAction->unifiedData) {
+        int32_t ret = UdmfClient::GetInstance()->SetData(dragAction->unifiedData, udKey);
+        if (ret != 0) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set data failed, return value is %{public}d", ret);
+        } else {
+            ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
+            if (ret != 0) {
+                TAG_LOGI(AceLogTag::ACE_DRAG, "get summary failed, return value is %{public}d", ret);
+            }
+        }
+        dataSize = static_cast<int32_t>(dragAction->unifiedData->GetSize());
+    }
+    int32_t recordSize = (dataSize != 0 ? dataSize : static_cast<int32_t>(shadowInfos.size()));
+    if (dragAction->previewOption.isNumber) {
+        recordSize = dragAction->previewOption.badgeNumber > 1 ? dragAction->previewOption.badgeNumber : 1;
+    } else if (!dragAction->previewOption.isShowBadge) {
+        recordSize = 1;
+    }
+    auto windowId = container->GetWindowId();
+    auto arkExtraInfoJson = JsonUtil::Create(true);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    dragAction->dipScale = pipeline->GetDipScale();
+    arkExtraInfoJson->Put("dip_scale", dragAction->dipScale);
+    NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, dragAction->previewOption);
+    dragData = { shadowInfos, {}, udKey, dragAction->extraParams, arkExtraInfoJson->ToString(), dragAction->sourceType,
+        recordSize, pointerId, dragAction->x, dragAction->y, dragAction->displayId, windowId, true, false, summary };
+}
+
+void HandleCallback(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
+    const OHOS::Ace::DragNotifyMsg& dragNotifyMsg, const DragAdapterStatus& dragStatus)
+{
+    TAG_LOGI(AceLogTag::ACE_DRAG, "drag notify message result is %{public}d.", dragNotifyMsg.result);
+    CHECK_NULL_VOID(dragAction);
+    bool hasHandle = false;
+    {
+        std::lock_guard<std::mutex> lock(dragAction->mutex);
+        hasHandle = dragAction->hasHandle;
+        dragAction->hasHandle = true;
+    }
+    if (hasHandle) {
+        return;
+    }
+    auto container = AceEngine::Get().GetContainer(dragAction->instanceId);
+    CHECK_NULL_VOID(container);
+    if (dragStatus == DragAdapterStatus::ENDED) {
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->ResetDragging();
+    }
+    int32_t dragState = static_cast<int32_t>(dragStatus);
+    dragAction->callback(dragNotifyMsg, dragState);
+}
+
+int32_t CheckStartAction(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
+    const RefPtr<Container>& container, const RefPtr<DragDropManager>& manager)
+{
+    if (CheckInternalDragging(container)) {
+        return -1;
+    }
+    {
+        std::lock_guard<std::mutex> lock(dragAction->dragStateMutex);
+        if (manager->GetDragAction() != nullptr && (manager->GetDragAction())->dragState == DragAdapterState::SENDING) {
+            return -1;
+        }
+        dragAction->dragState = DragAdapterState::SENDING;
+    }
+    DragDropFuncWrapper::UpdatePreviewOptionDefaultAttr(dragAction->previewOption);
+    auto isGetPointSuccess = ConfirmCurPointerEventInfo(dragAction, container);
+    if (!isGetPointSuccess) {
+        return -1;
+    }
+    return 0;
+}
+
+int32_t DragDropFuncWrapper::StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction)
+{
+    auto pipelineContext = PipelineContext::GetContextByContainerId(dragAction->instanceId);
+    CHECK_NULL_RETURN(pipelineContext, -1);
+    auto manager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_RETURN(manager, -1);
+    auto container = AceEngine::Get().GetContainer(dragAction->instanceId);
+    CHECK_NULL_RETURN(container, -1);
+    auto windowScale = container->GetWindowScale();
+    CHECK_NULL_RETURN(windowScale, -1);
+    dragAction->windowScale = windowScale;
+    manager->SetDragAction(dragAction);
+    if (CheckStartAction(dragAction, container, manager) == -1) {
+        manager->GetDragAction()->dragState = DragAdapterState::INIT;
+        return -1;
+    }
+    std::optional<DragDataCore> dragData;
+    EnvelopedDragData(dragAction, dragData);
+    if (!dragData) {
+        manager->GetDragAction()->dragState = DragAdapterState::INIT;
+        return -1;
+    }
+    OnDragCallback callback = [dragAction, manager](const OHOS::Ace::DragNotifyMsg& dragNotifyMsg) {
+        {
+            std::lock_guard<std::mutex> lock(dragAction->dragStateMutex);
+            dragAction->dragState = DragAdapterState::INIT;
+            manager->SetDragAction(dragAction);
+        }
+        HandleCallback(dragAction, dragNotifyMsg, DragAdapterStatus::ENDED);
+    };
+    NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(dragAction->pointer, dragAction->instanceId);
+    int32_t ret = InteractionInterface::GetInstance()->StartDrag(dragData.value(), callback);
+    if (ret != 0) {
+        manager->GetDragAction()->dragState = DragAdapterState::INIT;
+        return -1;
+    }
+    HandleCallback(dragAction, DragNotifyMsg {}, DragAdapterStatus::STARTED);
+    pipelineContext->SetIsDragging(true);
+    std::lock_guard<std::mutex> lock(dragAction->dragStateMutex);
+    if (dragAction->dragState == DragAdapterState::SENDING) {
+        dragAction->dragState = DragAdapterState::SUCCESS;
+        InteractionInterface::GetInstance()->SetDragWindowVisible(true);
+        auto pipelineContext = container->GetPipelineContext();
+        pipelineContext->OnDragEvent(
+            { dragAction->x, dragAction->y }, DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER);
+        NG::DragDropFuncWrapper::DecideWhetherToStopDragging(
+            { dragAction->x, dragAction->y }, dragAction->extraParams, dragAction->pointer, dragAction->instanceId);
+    }
+    return 0;
+}
 
 void DragDropFuncWrapper::SetDraggingPointerAndPressedState(int32_t currentPointerId, int32_t containerId)
 {
@@ -226,6 +472,13 @@ std::optional<EffectOption> DragDropFuncWrapper::BrulStyleToEffection(
     EffectOption bgEffection = {dimen, saturation, brightness, maskColor,
         blurStyleOp->adaptiveColor, blurStyleOp->blurOption};
     return std::optional<EffectOption>(bgEffection);
+}
+
+[[maybe_unused]] double DragDropFuncWrapper::GetScaleWidth(int32_t containerId)
+{
+    auto pipeline = Container::GetContainer(containerId)->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, -1.0f);
+    return DragDropManager::GetMaxWidthBaseOnGridSystem(pipeline);
 }
 
 } // namespace OHOS::Ace

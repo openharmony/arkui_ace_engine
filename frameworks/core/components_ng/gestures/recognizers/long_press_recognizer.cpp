@@ -63,8 +63,8 @@ void LongPressRecognizer::OnAccepted()
     }
     
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "LongPress accepted, tag = %{public}s, id = %{public}s",
-        node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "LongPress accepted, tag = %{public}s",
+        node ? node->GetTag().c_str() : "null");
     if (onAccessibilityEventFunc_) {
         onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
     }
@@ -95,6 +95,7 @@ void LongPressRecognizer::OnRejected()
     if (refereeState_ == RefereeState::SUCCEED) {
         return;
     }
+    SendRejectMsg();
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
 }
@@ -122,8 +123,8 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, LongPress %{public}d down, state: %{public}d", event.touchEventId,
-        event.id, refereeState_);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d down, state: %{public}d",
+        event.touchEventId, event.id, refereeState_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -146,9 +147,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         if (currentTimeStamp > eventTimeStamp) {
             // nanoseconds to millisceond.
             curDuration = curDuration - static_cast<int32_t>((currentTimeStamp - eventTimeStamp) / (1000 * 1000));
-            if (curDuration < 0) {
-                curDuration = 0;
-            }
+            curDuration = curDuration < 0 ? 0 : curDuration;
         }
     }
 #endif
@@ -167,9 +166,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
     UpdateFingerListInfo();
-    auto pointsCount = GetValidFingersCount();
-
-    if (pointsCount == fingers_) {
+    if (GetValidFingersCount() == fingers_) {
         refereeState_ = RefereeState::DETECTING;
         if (useCatchMode_) {
             DeadlineTimer(curDuration, true);
@@ -183,8 +180,8 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, LongPress %{public}d up, state: %{public}d", event.touchEventId,
-        event.id, refereeState_);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d up, state: %{public}d",
+        event.touchEventId, event.id, refereeState_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
@@ -235,8 +232,8 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, LongPress %{public}d cancel, TPS:%{public}d", event.touchEventId,
-        event.id, static_cast<int32_t>(touchPoints_.size()));
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d cancel, TPS:%{public}d",
+        event.touchEventId, event.id, static_cast<int32_t>(touchPoints_.size()));
     if (refereeState_ == RefereeState::FAIL) {
         return;
     }
@@ -353,25 +350,22 @@ void LongPressRecognizer::SendCallbackMsg(
         info.SetTimeStamp(time_);
         info.SetRepeat(isRepeat);
         info.SetFingerList(fingerList_);
-        TouchEvent trackPoint = {};
-        if (!touchPoints_.empty()) {
-            trackPoint = touchPoints_.begin()->second;
-        }
         info.SetSourceDevice(deviceType_);
         info.SetDeviceId(deviceId_);
-        info.SetTargetDisplayId(trackPoint.targetDisplayId);
+        info.SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
         info.SetGlobalPoint(globalPoint_);
-        info.SetScreenLocation(trackPoint.GetScreenOffset());
-        info.SetGlobalLocation(trackPoint.GetOffset()).SetLocalLocation(trackPoint.GetOffset() - coordinateOffset_);
+        info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
+        info.SetGlobalLocation(lastTouchEvent_.GetOffset())
+            .SetLocalLocation(lastTouchEvent_.GetOffset() - coordinateOffset_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        info.SetForce(trackPoint.force);
-        if (trackPoint.tiltX.has_value()) {
-            info.SetTiltX(trackPoint.tiltX.value());
+        info.SetForce(lastTouchEvent_.force);
+        if (lastTouchEvent_.tiltX.has_value()) {
+            info.SetTiltX(lastTouchEvent_.tiltX.value());
         }
-        if (trackPoint.tiltY.has_value()) {
-            info.SetTiltY(trackPoint.tiltY.value());
+        if (lastTouchEvent_.tiltY.has_value()) {
+            info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
-        info.SetSourceTool(trackPoint.sourceTool);
+        info.SetSourceTool(lastTouchEvent_.sourceTool);
         info.SetPointerEvent(lastPointEvent_);
         info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         // callback may be overwritten in its invoke so we copy it first
@@ -458,6 +452,7 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
     }
     auto info = std::make_shared<LongPressGestureEvent>();
     info->SetTimeStamp(time_);
+    info->SetDeviceId(deviceId_);
     info->SetRepeat(repeat_);
     info->SetFingerList(fingerList_);
     TouchEvent trackPoint = {};
@@ -467,6 +462,7 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
     info->SetSourceDevice(deviceType_);
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
     info->SetForce(trackPoint.force);
+    gestureInfo_->SetInputEventType(inputEventType_);
     if (trackPoint.tiltX.has_value()) {
         info->SetTiltX(trackPoint.tiltX.value());
     }

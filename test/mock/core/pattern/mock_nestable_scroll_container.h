@@ -29,7 +29,7 @@ class MockNestableScrollContainer : public NestableScrollContainer {
 public:
     MOCK_METHOD(OHOS::Ace::Axis, GetAxis, (), (const, override));
     MOCK_METHOD(ScrollResult, HandleScroll, (float, int32_t, NestedState, float), (override));
-    MOCK_METHOD(bool, HandleScrollVelocity, (float), (override));
+    MOCK_METHOD(bool, HandleScrollVelocity, (float, const RefPtr<NestableScrollContainer>&), (override));
     MOCK_METHOD(void, OnScrollStartRecursive, (float, float), (override));
     MOCK_METHOD(void, OnScrollEndRecursive, (const std::optional<float>&), (override));
 };

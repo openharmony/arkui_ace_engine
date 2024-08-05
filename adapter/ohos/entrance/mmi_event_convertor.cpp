@@ -115,6 +115,31 @@ Offset GetTouchEventOriginOffset(const TouchEvent& event)
     }
 }
 
+TimeStamp GetTouchEventOriginTimeStamp(const TouchEvent& event)
+{
+    auto pointerEvent = event.pointerEvent;
+    if (!pointerEvent) {
+        return event.time;
+    }
+    std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
+    TimeStamp time(microseconds);
+    return time;
+}
+
+void UpdateMouseEventForPen(const MMI::PointerEvent::PointerItem& pointerItem, MouseEvent& mouseEvent)
+{
+    if (mouseEvent.sourceType != SourceType::TOUCH || mouseEvent.sourceTool != SourceTool::PEN) {
+        return;
+    }
+    mouseEvent.id = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(mouseEvent.sourceTool);
+    // Pen use type double XY position.
+    mouseEvent.x = pointerItem.GetWindowXPos();
+    mouseEvent.y = pointerItem.GetWindowYPos();
+    mouseEvent.screenX = pointerItem.GetDisplayXPos();
+    mouseEvent.screenY = pointerItem.GetDisplayYPos();
+    mouseEvent.originalId = mouseEvent.id;
+}
+
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     int32_t pointerID = pointerEvent->GetPointerId();
@@ -152,6 +177,7 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     GetEventDevice(orgDevice, event);
     int32_t orgAction = pointerEvent->GetPointerAction();
     SetTouchEventType(orgAction, event);
+    event.isPrivacyMode = pointerEvent->HasFlag(OHOS::MMI::InputEvent::EVENT_FLAG_PRIVACY_MODE);
     UpdateTouchEvent(pointerEvent, event);
     if (event.sourceType == SourceType::TOUCH && event.sourceTool == SourceTool::PEN) {
         // Pen use type double XY position.
@@ -210,6 +236,9 @@ void SetTouchEventType(int32_t orgAction, TouchEvent& event)
             return;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_EXIT:
             event.type = TouchType::HOVER_EXIT;
+            return;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL:
+            event.type = TouchType::HOVER_CANCEL;
             return;
         default:
             LOGW("unknown type");
@@ -306,8 +335,10 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     GetMouseEventButton(orgButton, events);
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, events);
+    events.isPrivacyMode = pointerEvent->HasFlag(OHOS::MMI::InputEvent::EVENT_FLAG_PRIVACY_MODE);
     events.targetDisplayId = pointerEvent->GetTargetDisplayId();
     events.originalId = item.GetOriginPointerId();
+    events.deviceId = pointerEvent->GetDeviceId();
 
     std::set<int32_t> pressedSet = pointerEvent->GetPressedButtons();
     uint32_t pressedButtons = 0;
@@ -323,19 +354,10 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     events.pressedButtons = static_cast<int32_t>(pressedButtons);
 
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
-    TimeStamp time(microseconds);
-    events.time = time;
+    events.time = TimeStamp(microseconds);
     events.pointerEvent = pointerEvent;
     events.sourceTool = GetSourceTool(item.GetToolType());
-    if (events.sourceType == SourceType::TOUCH && events.sourceTool == SourceTool::PEN) {
-        events.id = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(events.sourceTool);
-        // Pen use type double XY position.
-        events.x = item.GetWindowXPos();
-        events.y = item.GetWindowYPos();
-        events.screenX = item.GetDisplayXPos();
-        events.screenY = item.GetDisplayYPos();
-        events.originalId = events.id;
-    }
+    UpdateMouseEventForPen(item, events);
     events.touchEventId = pointerEvent->GetId();
     events.pressedKeyCodes_.clear();
     for (const auto& curCode : pointerEvent->GetPressedKeys()) {
@@ -392,6 +414,7 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     event.sourceTool = GetSourceTool(item.GetToolType());
     event.pointerEvent = pointerEvent;
     event.originalId = item.GetOriginPointerId();
+    event.deviceId = pointerEvent->GetDeviceId();
 
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
@@ -431,6 +454,49 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     }
 }
 
+void GetPointerEventAction(int32_t action,  PointerEvent& event)
+{
+    switch (action) {
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
+            event.action = PointerAction::CANCEL;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN:
+            event.action = PointerAction::DOWN;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
+            event.action = PointerAction::MOVE;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_UP:
+            event.action = PointerAction::UP;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
+            event.action = PointerAction::PULL_MOVE;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
+            event.action = PointerAction::PULL_UP;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW:
+            event.action = PointerAction::PULL_IN_WINDOW;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW:
+            event.action = PointerAction::PULL_OUT_WINDOW;
+            break;
+        default:
+            event.action = PointerAction::UNKNOWN;
+            break;
+    }
+}
+
+void UpdatePointerAction(std::shared_ptr<MMI::PointerEvent>& pointerEvent, const PointerAction action)
+{
+    if (action == PointerAction::PULL_IN_WINDOW) {
+        pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW);
+    }
+    if (action == PointerAction::PULL_OUT_WINDOW) {
+        pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW);
+    }
+}
+
 void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, PointerEvent& event)
 {
     event.rawPointerEvent = pointerEvent;
@@ -456,6 +522,8 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     for (const auto& curCode : pointerEvent->GetPressedKeys()) {
         event.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
     }
+    int32_t orgAction = pointerEvent->GetPointerAction();
+    GetPointerEventAction(orgAction, event);
 }
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t instanceId)
@@ -471,7 +539,7 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_
         }
     }
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("point source: %{public}d", pointerEvent->GetSourceType());
+        LOGD("point source: %{public}d", pointerEvent->GetSourceType());
         auto actionId = pointerEvent->GetPointerId();
         MMI::PointerEvent::PointerItem item;
         if (pointerEvent->GetPointerItem(actionId, item)) {

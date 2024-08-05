@@ -20,6 +20,7 @@
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/image/drawing_color_filter.h"
+#include "base/image/drawing_lattice.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
@@ -56,6 +57,7 @@ struct ImagePaintConfig {
     int32_t frameCount_ = 1;
     std::vector<ObscuredReasons> obscuredReasons_;
     ImageResizableSlice resizableSlice_;
+    RefPtr<DrawingLattice> resizableLattice_ = nullptr;
     ImageSourceInfo sourceInfo_;
 };
 
@@ -68,6 +70,7 @@ public:
     ~CanvasImage() override = default;
     virtual void DrawToRSCanvas(
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) = 0;
+    virtual void DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) {}
 
     static RefPtr<CanvasImage> Create(void* rawImage);
     static RefPtr<CanvasImage> Create();

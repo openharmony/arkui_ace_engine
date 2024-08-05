@@ -95,7 +95,7 @@ if (defined(global_parts_info.graphic_graphic_3d)) {
 window_scene_support = true
 dynamic_component_support = true
 vsync_timeout_check = true
-use_fast_taskpool = true
+use_fast_taskpool = false
 state_mgmt_use_aot = true
 
 if (defined(preview_support) && preview_support) {

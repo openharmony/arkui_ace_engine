@@ -35,12 +35,13 @@ public:
     static RepeatVirtualScrollModel* GetInstance();
     virtual void Create(
         uint32_t totalCount,
-        const std::map<std::string, uint32_t>& templateCachedCountMap,
+        const std::map<std::string, std::pair<bool, uint32_t>>& templateCachedCountMap,
         const std::function<void(uint32_t forIndex)>& onCreateNode,
         const std::function<void(const std::string& fromKey, uint32_t forIndex)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetTypes4Range) = 0;
     virtual void InvalidateKeyCache(uint32_t totalCount) = 0;
+    virtual void OnMove(std::function<void(int32_t, int32_t)>&& onMove) = 0;
 
 private:
     static std::unique_ptr<RepeatVirtualScrollModel> instance_;

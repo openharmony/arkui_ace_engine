@@ -27,6 +27,7 @@ public:
 
     static void Create(const JSCallbackInfo& info);
     static void InvalidateKeyCache(const JSCallbackInfo& info);
+    static void OnMove(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

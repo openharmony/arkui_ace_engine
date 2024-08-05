@@ -65,6 +65,7 @@ protected:
     void MouseSelectRelease();
     static std::function<void()> GetDefaultHeaderBuilder();
     void AddItems(int32_t number);
+    void AddItemsAtSlot(int32_t number, float height, int32_t slotIdx);
     AssertionResult IsEqualTotalOffset(float expectOffset);
     void HandleDrag(float offset);
 

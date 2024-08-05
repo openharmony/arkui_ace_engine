@@ -41,14 +41,22 @@ ArkUITransitionEffectOption* ConvertToEffectOption(ArkUI_TransitionEffect* effec
             break;
         }
         case ARKUI_TRANSITION_EFFECT_TRANSLATE: {
-            CHECK_NULL_RETURN(effectOption->translate, nullptr);
+            if (!effectOption->translate) {
+                delete toEffectOption;
+                toEffectOption = nullptr;
+                return nullptr;
+            }
             toEffectOption->translate.x = effectOption->translate->x;
             toEffectOption->translate.y = effectOption->translate->y;
             toEffectOption->translate.z = effectOption->translate->z;
             break;
         }
         case ARKUI_TRANSITION_EFFECT_SCALE: {
-            CHECK_NULL_RETURN(effectOption->scale, nullptr);
+            if (!effectOption->scale) {
+                delete toEffectOption;
+                toEffectOption = nullptr;
+                return nullptr;
+            }
             toEffectOption->scale.x = effectOption->scale->x;
             toEffectOption->scale.y = effectOption->scale->y;
             toEffectOption->scale.z = effectOption->scale->z;
@@ -57,7 +65,11 @@ ArkUITransitionEffectOption* ConvertToEffectOption(ArkUI_TransitionEffect* effec
             break;
         }
         case ARKUI_TRANSITION_EFFECT_ROTATE: {
-            CHECK_NULL_RETURN(effectOption->rotate, nullptr);
+            if (!effectOption->rotate) {
+                delete toEffectOption;
+                toEffectOption = nullptr;
+                return nullptr;
+            }
             toEffectOption->rotate.x = effectOption->rotate->x;
             toEffectOption->rotate.y = effectOption->rotate->y;
             toEffectOption->rotate.z = effectOption->rotate->z;
@@ -90,6 +102,12 @@ ArkUITransitionEffectOption* ConvertToEffectOption(ArkUI_TransitionEffect* effec
         toEffectOption->animation.duration = effectOption->animation->duration;
         toEffectOption->animation.tempo = effectOption->animation->tempo;
         toEffectOption->animation.curve = effectOption->animation->curve;
+        if (effectOption->animation->iCurve) {
+            toEffectOption->animation.iCurve = effectOption->animation->iCurve->curve;
+            toEffectOption->animation.curveType = effectOption->animation->iCurve->type;
+        } else {
+            toEffectOption->animation.iCurve = nullptr;
+        }
         toEffectOption->animation.delay = effectOption->animation->delay;
         toEffectOption->animation.iterations = effectOption->animation->iterations;
         toEffectOption->animation.playMode = effectOption->animation->playMode;

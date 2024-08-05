@@ -423,6 +423,20 @@ class TabClipModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
+class TabEdgeEffectModifier extends ModifierWithKey<EdgeEffect> {
+  static identity: Symbol = Symbol('tabedgeEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetTabEdgeEffect(node);
+    } else {
+      getUINativeModule().tabs.setTabEdgeEffect(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TabWidthModifier extends ModifierWithKey<Length> {
   constructor(value: Length) {
     super(value);

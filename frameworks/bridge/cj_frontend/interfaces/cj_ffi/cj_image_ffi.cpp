@@ -56,7 +56,6 @@ const std::vector<ImageRenderMode> IMAGE_RENDER_MODES = {
 extern "C" {
 void FfiOHOSAceFrameworkImageCreateWithUrl(const char* url)
 {
-    LOGI("FfiOHOSAceFrameworkImageCreateWithUrl url: %{public}s", url);
     ImageInfoConfig imageInfoConfig;
     imageInfoConfig.src = std::make_shared<std::string>(std::string(url));
     imageInfoConfig.bundleName = "";

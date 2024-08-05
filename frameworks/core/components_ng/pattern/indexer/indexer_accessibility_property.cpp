@@ -26,8 +26,8 @@ int32_t IndexerAccessibilityProperty::GetCollectionItemCounts() const
     CHECK_NULL_RETURN(frameNode, 0);
     auto layoutProperty = frameNode->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, 0);
-    if (layoutProperty->GetArrayValue().has_value()) {
-        auto arrayValue = layoutProperty->GetArrayValue().value();
+    if (layoutProperty->GetActualArrayValue().has_value()) {
+        auto arrayValue = layoutProperty->GetActualArrayValue().value();
         return static_cast<int32_t>(arrayValue.size());
     } else {
         return 0;
@@ -54,8 +54,8 @@ std::string IndexerAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(frameNode, "");
     auto layoutProperty = frameNode->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    if (layoutProperty->GetArrayValue().has_value()) {
-        auto arrayValue = layoutProperty->GetArrayValue().value();
+    if (layoutProperty->GetActualArrayValue().has_value()) {
+        auto arrayValue = layoutProperty->GetActualArrayValue().value();
         auto selectIndex = GetCurrentIndex();
         if (selectIndex < static_cast<int32_t>(arrayValue.size())) {
             return arrayValue.at(selectIndex);

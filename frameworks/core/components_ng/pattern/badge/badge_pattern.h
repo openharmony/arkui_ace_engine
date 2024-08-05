@@ -53,10 +53,8 @@ public:
 
 private:
     void OnModifyDone() override;
-    void BadgeAnimation(RefPtr<FrameNode>& frameNode, bool isShowBadge) const;
+    void DumpInfo() override;
     int32_t textNodeId_ = -2;
-    bool lastBadgeVisible_ = false;
-    const int32_t duration_ = 200;
 };
 } // namespace OHOS::Ace::NG
 

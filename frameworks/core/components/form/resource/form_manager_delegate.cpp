@@ -50,6 +50,7 @@ constexpr char FORM_ADAPTOR_RESOURCE_NAME[] = "formAdaptor";
 constexpr char NTC_PARAM_RICH_TEXT[] = "formAdaptor";
 constexpr char FORM_RENDERER_PROCESS_ON_ADD_SURFACE[] = "ohos.extra.param.key.process_on_add_surface";
 constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
+constexpr char PARAM_FORM_MIGRATE_FORM_KEY[] = "ohos.extra.param.key.migrate_form";
 constexpr int32_t RENDER_DEAD_CODE = 16501006;
 constexpr int32_t FORM_NOT_TRUST_CODE = 16501007;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
@@ -214,9 +215,12 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
     newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, needHandleCachedClick);
 
     onFormSurfaceNodeCallback_(rsSurfaceNode, newWant);
-    if (!formRendererDispatcher_) {
-        sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
+
+    sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
+    if (proxy != nullptr) {
         formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_FORM, "want renderer dispatcher null");
     }
 
     isDynamic_ = formInfo.isDynamic;
@@ -227,6 +231,10 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
 
 void FormManagerDelegate::HandleCachedClickEvents()
 {
+    if (formRendererDispatcher_ == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "dispatcher is null, formId:%{public}" PRId64, runningCardId_);
+        return;
+    }
     if (!isDynamic_) {
         TAG_LOGE(AceLogTag::ACE_FORM, "failed to handle cached click, not dynamic card");
         return;
@@ -823,6 +831,10 @@ void FormManagerDelegate::ReAddForm()
         recycleStatus_ = RecycleStatus::RECOVERED;
     }
     formRendererDispatcher_ = nullptr; // formRendererDispatcher_ need reset, otherwise PointerEvent will disable
+    if (wantCache_.HasParameter(PARAM_FORM_MIGRATE_FORM_KEY)) {
+        TAG_LOGW(AceLogTag::ACE_FORM, "Remove migrate form key.");
+        wantCache_.RemoveParam(PARAM_FORM_MIGRATE_FORM_KEY);
+    }
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
     auto ret =
         OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(formJsInfo_.formId, wantCache_, clientInstance, formJsInfo_);

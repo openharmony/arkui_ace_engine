@@ -269,12 +269,9 @@ void RosenRenderSurface::DrawBuffer(int32_t width, int32_t height)
         }
     }
     if (!surfaceNode) {
-        LOGE("RosenRenderSurface::surfaceNode is null");
         return;
     }
-    if (!CompareBufferSize(width, height, surfaceNode)) {
-        LOGE("RosenRenderSurface buffer is not matched.");
-    }
+    CompareBufferSize(width, height, surfaceNode);
     ACE_SCOPED_TRACE("Web DrawBuffer");
     rosenRenderContext->StartRecording();
     auto rsNode = rosenRenderContext->GetRSNode();
@@ -361,8 +358,6 @@ void RosenRenderSurface::ConsumeWebBuffer()
             int32_t stepStear = bufferWidth - ADJUST_WEB_DRAW_LENGTH * 2;
             orgin_.SetX(stepStear * ADJUST_WEB_DRAW_LENGTH);
         }
-    } else {
-        LOGE("ConsumeWebBuffer axis is not vertical or horizontal");
     }
     LOGD("ConsumeWebBuffer x : %{public}f, y : %{public}f, width : %{public}d, height : %{public}d",
         orgin_.GetX(), orgin_.GetY(), bufferWidth, bufferHeight);

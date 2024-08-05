@@ -84,10 +84,12 @@ void UIDisplaySync::OnFrame()
         data_->onFrame_();
     }
 
+    // Callback from JS_DisplaySync and Native_XComponent
     if (data_->noSkip_ && data_->onFrameWithData_) {
         data_->onFrameWithData_(data_);
     }
 
+    // Callback from Animator
     if (data_->noSkip_ && data_->onFrameWithTimestamp_) {
         data_->onFrameWithTimestamp_(data_->timestamp_);
     }
@@ -317,6 +319,13 @@ RefPtr<PipelineBase> UIDisplaySync::GetCurrentContext()
     return context;
 }
 
+UIDisplaySync::UIDisplaySync(UIObjectType uiObjectType)
+    : uiObjectType_(uiObjectType)
+{
+    TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "Create UIDisplaySync, Type: %{public}d",
+        static_cast<int32_t>(uiObjectType_));
+}
+
 UIDisplaySync::UIDisplaySync() {}
 
 UIDisplaySync::~UIDisplaySync() noexcept {}
@@ -338,6 +347,21 @@ bool UIDisplaySync::SetVsyncRate(int32_t vsyncRate)
 RefPtr<DisplaySyncData> UIDisplaySync::GetDisplaySyncData() const
 {
     return data_;
+}
+
+int32_t UIDisplaySync::GetAnimatorExpectedRate()
+{
+    // Callback from Animator
+    if (data_ && data_->onFrameWithTimestamp_ == nullptr &&
+        uiObjectType_ != UIObjectType::DISPLAYSYNC_ANIMATOR) {
+        return INVALID_ANIMATOR_EXPECTED_RATE;
+    }
+
+    int32_t animatorExpectedRate = 0;
+    if (data_ && data_->rateRange_) {
+        animatorExpectedRate = data_->rateRange_->preferred_;
+    }
+    return animatorExpectedRate;
 }
 
 bool UIDisplaySync::IsCommonDivisor(int32_t expectedRate, int32_t vsyncRate)

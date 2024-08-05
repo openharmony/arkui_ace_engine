@@ -111,6 +111,8 @@ public:
         std::optional<Dimension> rightDimension;
         std::optional<Dimension> topDimension;
         std::optional<Dimension> bottomDimension;
+        std::optional<Dimension> startDimension;
+        std::optional<Dimension> endDimension;
     };
 
     void SetEdgeSlice(BorderImageDirection direction, const Dimension& sliceDimension);
@@ -146,6 +148,8 @@ public:
         return hasBorderImageWidth_;
     }
 
+    std::optional<BorderImageEdge> borderImageStart_;
+    std::optional<BorderImageEdge> borderImageEnd_;
 private:
     std::string src_;
     BorderImageEdge borderImageLeft_;

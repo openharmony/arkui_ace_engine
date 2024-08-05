@@ -19,6 +19,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_list.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/core/components/list/list_theme.h"
+#include "frameworks/core/components_ng/pattern/list/list_model.h"
+#include "frameworks/core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
@@ -540,7 +542,7 @@ ArkUINativeModuleValue ListBridge::ResetScrollSnapAlign(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getListModifier()->resetAlignListItem(nativeNode);
+    GetArkUINodeModifiers()->getListModifier()->resetScrollSnapAlign(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -746,34 +748,6 @@ ArkUINativeModuleValue ListBridge::ResetChainAnimationOptions(ArkUIRuntimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue ListBridge::SetFadingEdge(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsUndefined()) {
-        GetArkUINodeModifiers()->getListModifier()->resetFadingEdge(nativeNode);
-    } else {
-        bool fadingEdge = secondArg->ToBoolean(vm)->Value();
-        GetArkUINodeModifiers()->getListModifier()->setFadingEdge(nativeNode, fadingEdge);
-    }
-
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue ListBridge::ResetFadingEdge(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getListModifier()->resetFadingEdge(nativeNode);
-
-    return panda::JSValueRef::Undefined(vm);
-}
-
 ArkUINativeModuleValue ListBridge::SetListChildrenMainSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -843,4 +817,48 @@ ArkUINativeModuleValue ListBridge::ResetSpace(ArkUIRuntimeCallInfo* runtimeCallI
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ListBridge::SetInitialScroller(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    Framework::JSRef<Framework::JSVal> args = info[1];
+    if (args->IsObject()) {
+        Framework::JSScroller* scroller =
+            Framework::JSRef<Framework::JSObject>::Cast(args)->Unwrap<Framework::JSScroller>();
+        RefPtr<Framework::JSScroller> jsScroller = Referenced::Claim(scroller);
+        jsScroller->SetInstanceId(Container::CurrentId());
+        SetScroller(runtimeCallInfo, jsScroller);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListBridge::ResetInitialScroller(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getListModifier()->resetInitialScroller(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+void ListBridge::SetScroller(ArkUIRuntimeCallInfo* runtimeCallInfo, RefPtr<Framework::JSScroller> jsScroller)
+{
+    if (jsScroller) {
+        EcmaVM* vm = runtimeCallInfo->GetVM();
+        Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+        auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+        RefPtr<ScrollControllerBase> listController = ListModel::GetInstance()->CreateScrollController();
+        jsScroller->SetController(listController);
+        auto proxy = jsScroller->GetScrollBarProxy();
+        if (!proxy) {
+            proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+            jsScroller->SetScrollBarProxy(proxy);
+        }
+        auto controller = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(listController));
+        auto proxyPtr = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(proxy));
+        GetArkUINodeModifiers()->getListModifier()->setInitialScroller(nativeNode, controller, proxyPtr);
+    }
+}
 } // namespace OHOS::Ace::NG

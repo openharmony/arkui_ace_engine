@@ -23,8 +23,10 @@
 #include "securec.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/error/error_code.h"
 #include "core/event/touch_event.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "interfaces/native/drag_and_drop.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {
@@ -202,6 +204,20 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_TOUCH;
         case NODE_ON_CLICK:
             return ON_CLICK;
+        case NODE_ON_DRAG_START:
+            return ON_DRAG_START;
+        case NODE_ON_DRAG_ENTER:
+            return ON_DRAG_ENTER;
+        case NODE_ON_DROP:
+            return ON_DRAG_DROP;
+        case NODE_ON_DRAG_MOVE:
+            return ON_DRAG_MOVE;
+        case NODE_ON_DRAG_LEAVE:
+            return ON_DRAG_LEAVE;
+        case NODE_ON_DRAG_END:
+            return ON_DRAG_END;
+        case NODE_ON_PRE_DRAG:
+            return ON_PRE_DRAG;
         case NODE_CHECKBOX_EVENT_ON_CHANGE:
             return ON_CHECKBOX_CHANGE;
         case NODE_SLIDER_EVENT_ON_CHANGE:
@@ -222,6 +238,14 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_TEXT_INPUT_CONTENT_SCROLL;
         case NODE_TEXT_AREA_ON_INPUT_FILTER_ERROR:
             return ON_TEXT_AREA_INPUT_FILTER_ERROR;
+        case NODE_TEXT_INPUT_ON_WILL_INSERT:
+            return ON_TEXT_INPUT_WILL_INSERT;
+        case NODE_TEXT_INPUT_ON_DID_INSERT:
+            return ON_TEXT_INPUT_DID_INSERT;
+        case NODE_TEXT_INPUT_ON_WILL_DELETE:
+            return ON_TEXT_INPUT_WILL_DELETE;
+        case NODE_TEXT_INPUT_ON_DID_DELETE:
+            return ON_TEXT_INPUT_DID_DELETE;
         case NODE_TEXT_AREA_ON_EDIT_CHANGE:
             return ON_TEXTAREA_EDIT_CHANGE;
         case NODE_TEXT_AREA_ON_SUBMIT:
@@ -234,6 +258,14 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_TEXTAREA_TEXT_SELECTION_CHANGE;
         case NODE_TEXT_AREA_ON_CONTENT_SCROLL:
             return ON_TEXT_AREA_CONTENT_SCROLL;
+        case NODE_TEXT_AREA_ON_WILL_INSERT:
+            return ON_TEXT_AREA_WILL_INSERT;
+        case NODE_TEXT_AREA_ON_DID_INSERT:
+            return ON_TEXT_AREA_DID_INSERT;
+        case NODE_TEXT_AREA_ON_WILL_DELETE:
+            return ON_TEXT_AREA_WILL_DELETE;
+        case NODE_TEXT_AREA_ON_DID_DELETE:
+            return ON_TEXT_AREA_DID_DELETE;
         case NODE_SWIPER_EVENT_ON_CHANGE:
             return ON_SWIPER_CHANGE;
         case NODE_SWIPER_EVENT_ON_ANIMATION_START:
@@ -364,6 +396,20 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TOUCH_EVENT;
         case ON_CLICK:
             return NODE_ON_CLICK;
+        case ON_DRAG_START:
+            return NODE_ON_DRAG_START;
+        case ON_DRAG_ENTER:
+            return NODE_ON_DRAG_ENTER;
+        case ON_DRAG_DROP:
+            return NODE_ON_DROP;
+        case ON_DRAG_MOVE:
+            return NODE_ON_DRAG_MOVE;
+        case ON_DRAG_LEAVE:
+            return NODE_ON_DRAG_LEAVE;
+        case ON_DRAG_END:
+            return NODE_ON_DRAG_END;
+        case ON_PRE_DRAG:
+            return NODE_ON_PRE_DRAG;
         case ON_CHECKBOX_CHANGE:
             return NODE_CHECKBOX_EVENT_ON_CHANGE;
         case ON_SLIDER_CHANGE:
@@ -384,6 +430,14 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_INPUT_ON_CONTENT_SCROLL;
         case ON_TEXT_AREA_INPUT_FILTER_ERROR:
             return NODE_TEXT_AREA_ON_INPUT_FILTER_ERROR;
+        case ON_TEXT_INPUT_WILL_INSERT:
+            return NODE_TEXT_INPUT_ON_WILL_INSERT;
+        case ON_TEXT_INPUT_DID_INSERT:
+            return NODE_TEXT_INPUT_ON_DID_INSERT;
+        case ON_TEXT_INPUT_WILL_DELETE:
+            return NODE_TEXT_INPUT_ON_WILL_DELETE;
+        case ON_TEXT_INPUT_DID_DELETE:
+            return NODE_TEXT_INPUT_ON_DID_DELETE;
         case ON_TEXTAREA_EDIT_CHANGE:
             return NODE_TEXT_AREA_ON_EDIT_CHANGE;
         case ON_TEXTAREA_ON_SUBMIT:
@@ -396,6 +450,14 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_AREA_ON_TEXT_SELECTION_CHANGE;
         case ON_TEXT_AREA_CONTENT_SCROLL:
             return NODE_TEXT_AREA_ON_CONTENT_SCROLL;
+        case ON_TEXT_AREA_WILL_INSERT:
+            return NODE_TEXT_AREA_ON_WILL_INSERT;
+        case ON_TEXT_AREA_DID_INSERT:
+            return NODE_TEXT_AREA_ON_DID_INSERT;
+        case ON_TEXT_AREA_WILL_DELETE:
+            return NODE_TEXT_AREA_ON_WILL_DELETE;
+        case ON_TEXT_AREA_DID_DELETE:
+            return NODE_TEXT_AREA_ON_DID_DELETE;
         case ON_SWIPER_CHANGE:
             return NODE_SWIPER_EVENT_ON_CHANGE;
         case ON_SWIPER_ANIMATION_START:
@@ -529,6 +591,18 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
         case MOUSE_INPUT_EVENT: {
             event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
             ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->mouseEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        case MIXED_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_MIXED_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->mixedEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        case DRAG_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->dragEvent.subKind);
             event->kind = ConvertToNodeEventType(subKind);
             return true;
         }
@@ -742,6 +816,92 @@ void* OH_ArkUI_NodeEvent_GetUserData(ArkUI_NodeEvent* event)
     }
     return event->userData;
 }
+
+int32_t OH_ArkUI_NodeEvent_GetNumberValue(ArkUI_NodeEvent* event, int32_t index, ArkUI_NumberValue* value)
+{
+    if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_MIXED_EVENT)) {
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
+    }
+    const auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(event->origin);
+    if (!originNodeEvent) {
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
+    }
+    auto mixedData = reinterpret_cast<const ArkUIMixedEvent*>(&(originNodeEvent->mixedEvent));
+    if (index > mixedData->numberDataLength || index < 0) {
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INDEX_OUT_OF_RANGE;
+    }
+    if (index > 1) {
+        value[index].i32 = mixedData->numberData[index].i32;
+    } else {
+        value[index].f32 = mixedData->numberData[index].f32;
+    }
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_NodeEvent_GetStringValue(
+    ArkUI_NodeEvent* event, int32_t index, char** string, int32_t* stringSize)
+{
+    if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_MIXED_EVENT)) {
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
+    }
+    const auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(event->origin);
+    if (!originNodeEvent) {
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
+    }
+    auto mixedData = reinterpret_cast<const ArkUIMixedEvent*>(&(originNodeEvent->mixedEvent));
+    if (index > mixedData->stringPtrDataLength) {
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INDEX_OUT_OF_RANGE;
+    }
+    const char* str = reinterpret_cast<char*>(mixedData->stringPtrData[index]);
+    if (!str) {
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
+    }
+    int32_t strLen = static_cast<int32_t>(strlen(str));
+    int32_t size = stringSize[index];
+    if (size <= 0) {
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
+    }
+    bool copyResult = false;
+    if (strLen >= size) {
+        copyResult = strncpy_s(string[index], size, str, size - 1);
+        string[index][size - 1] = '\0';
+    } else {
+        copyResult = strcpy_s(string[index], size, str);
+    }
+    if (!copyResult) {
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
+    }
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_NumberValue* value, int32_t size)
+{
+    if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_MIXED_EVENT)) {
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
+    }
+    auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(event->origin);
+    if (!originNodeEvent) {
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
+    }
+    auto* mixedData = reinterpret_cast<ArkUIMixedEvent*>(&(originNodeEvent->mixedEvent));
+    for (int i = 0; i < size; i++) {
+        mixedData->numberReturnData[i].i32 = value[i].i32;
+    }
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_DragEvent* OH_ArkUI_NodeEvent_GetDragEvent(ArkUI_NodeEvent* nodeEvent)
+{
+    if (!nodeEvent || nodeEvent->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT)) {
+        return nullptr;
+    }
+    const auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(nodeEvent->origin);
+    if (!originNodeEvent) {
+        return nullptr;
+    }
+    return const_cast<ArkUI_DragEvent*>(reinterpret_cast<const ArkUI_DragEvent*>(&(originNodeEvent->dragEvent)));
+}
+
 #ifdef __cplusplus
 };
 #endif

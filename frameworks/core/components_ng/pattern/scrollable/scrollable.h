@@ -65,6 +65,7 @@ using NeedScrollSnapToSideCallback = std::function<bool(float delta)>;
 using NestableScrollCallback = std::function<ScrollResult(float, int32_t, NestedState)>;
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using IsReverseCallback = std::function<bool()>;
+using RemainVelocityCallback = std::function<bool(float)>;
 
 class FrameNode;
 class PipelineContext;
@@ -79,6 +80,7 @@ public:
     ~Scrollable() override;
 
     static void SetVelocityScale(double sVelocityScale);
+    static double GetVelocityScale();
     static void SetFriction(double sFriction);
 
     void Initialize(const WeakPtr<PipelineBase>& context);
@@ -87,13 +89,12 @@ public:
 
     bool IsMotionStop() const
     {
-        return isSpringAnimationStop_  &&
-               isFrictionAnimationStop_ && !moved_;
+        return isSpringAnimationStop_ && isFrictionAnimationStop_ && !moved_;
     }
 
     bool IsSpringMotionRunning() const
     {
-        return !isSpringAnimationStop_ ;
+        return !isSpringAnimationStop_;
     }
 
     bool IsDragging() const
@@ -197,6 +198,11 @@ public:
         scrollEnd_ = scrollEnd;
     }
 
+    void SetRemainVelocityCallback(const RemainVelocityCallback& remainVelocityCallback)
+    {
+        remainVelocityCallback_ = remainVelocityCallback;
+    }
+
     void SetScrollOverCallBack(const ScrollOverCallback& scrollOverCallback)
     {
         scrollOverCallback_ = scrollOverCallback;
@@ -205,6 +211,11 @@ public:
     void SetNotifyScrollOverCallBack(const ScrollOverCallback& scrollOverCallback)
     {
         notifyScrollOverCallback_ = scrollOverCallback;
+    }
+
+    void SetCurrentPositionCallback(const std::function<double()>& currentPositionCallback)
+    {
+        currentPositionCallback_ = currentPositionCallback;
     }
 
     void SetOutBoundaryCallback(const OutBoundaryCallback& outBoundaryCallback)
@@ -449,6 +460,11 @@ public:
         return panRecognizerNG_->GetAxisDirection();
     }
 
+    void SetNestedScrolling(bool nestedScrolling)
+    {
+        nestedScrolling_ = nestedScrolling;
+    }
+
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
@@ -460,8 +476,8 @@ private:
     double GetGain(double delta);
     void SetDelayedTask();
     void MarkNeedFlushAnimationStartTime();
-    float GetFrictionVelocityByFinalPosition(float final, float position, float signum, float friction,
-        float threshold = DEFAULT_MULTIPLIER);
+    float GetFrictionVelocityByFinalPosition(
+        float final, float position, float signum, float friction, float threshold = DEFAULT_MULTIPLIER);
 
     /**
      * @brief Checks if the scroll event is caused by a mouse wheel.
@@ -478,6 +494,7 @@ private:
     ScrollOverCallback scrollOverCallback_;       // scroll motion controller when edge set to spring
     ScrollOverCallback notifyScrollOverCallback_; // scroll motion controller when edge set to spring
     OutBoundaryCallback outBoundaryCallback_;     // whether out of boundary check when edge set to spring
+    std::function<double()> currentPositionCallback_;
     IsReverseCallback isReverseCallback_;
 
     WatchFixCallback watchFixCallback_;
@@ -528,10 +545,12 @@ private:
     NestableScrollCallback handleScrollCallback_;
     // ScrollablePattern::HandleOverScroll
     std::function<bool(float)> overScrollCallback_;
-    // ScrollablePattern::onScrollStartRecursive
+    // ScrollablePattern::onScrollStartRecursiveInner
     std::function<void(float)> onScrollStartRec_;
-    // ScrollablePattern::onScrollEndRecursive
+    // ScrollablePattern::onScrollEndRecursiveInner
     std::function<void(const std::optional<float>&)> onScrollEndRec_;
+    // ScrollablePattern::RemainVelocityToChild
+    RemainVelocityCallback remainVelocityCallback_;
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool canOverScroll_ = true;
@@ -554,7 +573,7 @@ private:
 
     RefPtr<NodeAnimatablePropertyFloat> springOffsetProperty_;
     bool isSpringAnimationStop_ = true;
-    bool skipRestartSpring_ = false;
+    bool skipRestartSpring_ = false; // set to true when need to skip repeated spring animation
     uint32_t updateSnapAnimationCount_ = 0;
     uint32_t springAnimationCount_ = 0;
 
@@ -564,6 +583,7 @@ private:
     float snapVelocity_ = 0.0f;
     float endPos_ = 0.0;
     bool isSnapAnimation_ = false;
+    bool nestedScrolling_ = false;
 };
 
 } // namespace OHOS::Ace::NG

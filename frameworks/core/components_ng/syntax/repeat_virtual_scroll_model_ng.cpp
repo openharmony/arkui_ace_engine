@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 
 void RepeatVirtualScrollModelNG::Create(
     uint32_t totalCount,
-    const std::map<std::string, uint32_t>& templateCachedCountMap,
+    const std::map<std::string, std::pair<bool, uint32_t>>& templateCachedCountMap,
     const std::function<void(uint32_t forIndex)>& onCreateNode,
     const std::function<void(const std::string& fromKey, uint32_t forIndex)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetKeys4Range,
@@ -56,5 +56,14 @@ void RepeatVirtualScrollModelNG::InvalidateKeyCache(uint32_t totalCount)
     repeatNode->UpdateTotalCount(totalCount);
     repeatNode->InvalidateKeyCache();
 }
+
+void RepeatVirtualScrollModelNG::OnMove(std::function<void(int32_t, int32_t)>&& onMove)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto node = AceType::DynamicCast<RepeatVirtualScrollNode>(stack->GetMainElementNode());
+    CHECK_NULL_VOID(node);
+    node->SetOnMove(std::move(onMove));
+}
+
 
 } // namespace OHOS::Ace::NG

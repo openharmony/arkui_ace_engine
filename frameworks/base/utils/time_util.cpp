@@ -102,7 +102,8 @@ TimeOfNow GetTimeOfNow(int32_t hoursWest)
         minutesWest = Round(TOTAL_MINUTE_OF_HOUR * timeOfNow.hoursWest_);
     } else {
         // when [hoursWest] is invalid, set current time zone to [hoursWest].
-        if (!NearEqual(timeOfNow.hoursWest_, INT_MAX)) { // default value of hoursWest_ is INT_MAX
+        // default value of hoursWest_ is INT_MAX
+        if (!NearEqual(timeOfNow.hoursWest_, INT_MAX)) {
             LOGW("hoursWest [%{public}d] is invalid, use current time zone.", timeOfNow.hoursWest_);
         }
         timeOfNow.hoursWest_ = timeZone.tz_minuteswest / TOTAL_MINUTE_OF_HOUR;
@@ -156,7 +157,8 @@ TimeOfZone GetTimeOfZone(int32_t hoursWest)
         minutesWest = Round(TOTAL_MINUTE_OF_HOUR * timeOfZone.hoursWest_);
     } else {
         // when [hoursWest] is invalid, set current time zone to [hoursWest].
-        if (!NearEqual(timeOfZone.hoursWest_, DEFAULT_HOURS_WEST)) { // default value of hoursWest_ is DEFAULT_HOURS_WEST
+        // default value of hoursWest_ is DEFAULT_HOURS_WEST
+        if (!NearEqual(timeOfZone.hoursWest_, DEFAULT_HOURS_WEST)) {
             LOGW("hoursWest [%{public}d] is invalid, use current time zone.", timeOfZone.hoursWest_);
         }
         timeOfZone.hoursWest_ = minutesWest / TOTAL_MINUTE_OF_HOUR;

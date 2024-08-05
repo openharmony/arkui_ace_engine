@@ -65,7 +65,6 @@ private:
     void ComputeInnerLayoutParam(LayoutConstraintF& innerLayout, const RefPtr<DialogLayoutProperty>& dialogProp);
     double GetMaxWidthBasedOnGridType(const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType);
     int32_t GetDeviceColumns(GridSizeType type, DeviceType deviceType);
-    int32_t GetDeviceColumn(GridSizeType type);
     OffsetF ComputeChildPosition(
         const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& slefSize);
     bool SetAlignmentSwitch(const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint);
@@ -92,7 +91,8 @@ private:
         LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
     void ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog, bool isClip);
     void AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child);
-    
+    void UpdateIsScrollHeightNegative(LayoutWrapper* layoutWrapper, float height);
+
     RectF touchRegion_;
     OffsetF topLeftPoint_;
     bool customSize_ = false;
@@ -100,6 +100,8 @@ private:
     bool isModal_ = true;
     bool isShowInSubWindow_ = false;
     bool isSuitableForElderly_ = false;
+    bool isSuitOldMeasure_ = false;
+    float dialogMaxHeight_ = 0.0f;
     int32_t gridCount_ = -1;
     int32_t subWindowId_ = -1;
     DimensionOffset dialogOffset_;

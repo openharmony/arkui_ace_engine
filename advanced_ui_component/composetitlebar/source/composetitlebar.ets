@@ -21,25 +21,7 @@ export declare interface ComposeTitleBarMenuItem {
   action?: () => void
 }
 
-const PUBLIC_MORE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY' +
-  'AAABS3GwHAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAA' +
-  'AAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAOxAAADsQBlSsOGwAABEZJREFUeNrt3D1rFFEUBuA' +
-  'xhmAhFlYpUohYiYWFRcAmKAhWK2pjo1iKf8BCMIKFf8BarCyMhVj4VZhGSKEg2FqJyCKWIhYWnstMINgYsh+cmfs88BI' +
-  'Cydxw7jmzu2HvNg0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADBN+3r6dx+LXIqsRpa7FF8j48hm5Fn3Peo9mAEYRdY' +
-  'jJ3f582Vj7nZfUe/eDsCRyMPI2h5/fyNyI/JDT6v3Tvt7sBllE15ETkxwjeORi5G3ke/6W737MgBnI68jh6ZwrcORq5H' +
-  'nhkC9+zAA5YXXy8jBKV5zKXIu8jjyS7+rd+YBeNVtyrSVO9PRyBM9r94LSTfjWuTUDK9/eYIXeENUbb0zDsBi5PYc1rm' +
-  'j79U74wCszuih+F/ljrSi/+uud8YBGA10rayqrnfGAVgb6FpZVV3vjAOwPNC1sqq63hkHYGWga2VVdb0XKt/8Rf1fd70' +
-  'zDsB4jmt5u3Tl9a59AMb6v+56ZxyArYGulVXV9c44ABtzXOup/q+73hkH4N2cHio/Rj7r/7rrnXEAfkfuz2Gddb2v3ln' +
-  '/DfpgxneLzaY9xE3l9c46AH8iVyI/Z3Dt8nB/Xc+rd5H5QMy3yJemPVs6zY0edc9HUe/0Z4I/dQ/N5Vjd0oTXKp9QcKF' +
-  'pD2qj3r0YgO1NeRM507TH6/bifeR85IMeV++d+vTBWOV9JDcjt5rdv6uw3M3uRR7pa/Xu+wBsOxA53bTnTP/3UX1b3fN' +
-  'Q1BsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKqyr6d/97HIpchqZLlL8TUyjmxGnnX' +
-  'fo96DGYBRZD1ycpc/XzbmbvcV9e7tAByJPIys7fH3NyI3Ij/0tHrvtL8Hm1E24UXkxATXOB65GHkb+a6/1bsvA3A28jp' +
-  'yaArXOhy5GnluCNS7DwNQXni9jByc4jWXIucijyO/9Lt6Zx6AV92mTFu5Mx2NPNHz6r2QdDOuRU7N8PqXJ3iBN0TV1jv' +
-  'jACxGbs9hnTv6Xr0zDsDqjB6K/1XuSCv6v+56ZxyA0UDXyqrqemccgLWBrpVV1fXOOADLA10rq6rrnXEAVga6VlZV13u' +
-  'h8s1f1P911zvjAIznuJa3S1de79oHYKz/6653xgHYGuhaWVVd74wDsDHHtZ7q/7rrnXEA3s3pofJj5LP+r7veGQfgd+T' +
-  '+HNZZ1/vqnfXfoA9mfLfYbNpD3FRe76wD8CdyJfJzBtcuD/fX9bx6F5kPxHyLfGnas6XT3OhR93wU9U5/JvhT99BcjtU' +
-  'tTXit8gkFF5r2oDbq3YsB2N6UN5EzTXu8bi/eR85HPuhx9d6pTx+MVd5HcjNyq9n9uwrL3exe5JG+Vu++D8C2A5HTTXv' +
-  'O9H8f1bfVPQ9FvQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgCn7C9HjBtwWfXpKAAAAAElFTkSuQmCC'
+const PUBLIC_MORE = $r('sys.media.ohos_ic_public_more')
 
 const PUBLIC_BACK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY' +
   'AAABS3GwHAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAA' +
@@ -182,9 +164,9 @@ struct CollapsibleMenuSection {
   @State isMoreIconOnClick: boolean = false
 
   getMoreIconFgColor() {
-    return this.isMoreIconOnClick
-      ? $r('sys.color.ohos_id_color_titlebar_icon_pressed')
-      : $r('sys.color.ohos_id_color_titlebar_icon')
+    return this.isMoreIconOnClick ?
+    $r('sys.color.ohos_id_color_titlebar_icon_pressed') :
+    $r('sys.color.ohos_id_color_titlebar_icon')
   }
 
   getMoreIconBgColor() {
@@ -200,7 +182,8 @@ struct CollapsibleMenuSection {
   aboutToAppear() {
     if (this.menuItems) {
       this.menuItems.forEach((item, index) => {
-        if (item.isEnabled && this.firstFocusableIndex == -1 && index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+        if (item.isEnabled && this.firstFocusableIndex == -1 &&
+          index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
           this.firstFocusableIndex = this.index * 1000 + index + 1
         }
       })
@@ -216,14 +199,16 @@ struct CollapsibleMenuSection {
               ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
             })
           } else {
-            ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), (item:ComposeTitleBarMenuItem, index:number) => {
-              ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
-            })
+            ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
+              (item:ComposeTitleBarMenuItem, index:number) => {
+                ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
+              })
 
             Row() {
               Image(PUBLIC_MORE)
                 .width(ImageMenuItem.imageSize)
                 .height(ImageMenuItem.imageSize)
+                .fillColor($r('sys.color.icon_primary'))
                 .focusable(true)
             }
             .width(ImageMenuItem.imageHotZoneWidth)
@@ -252,7 +237,8 @@ struct CollapsibleMenuSection {
             .onBlur(() => this.isMoreIconOnFocus = false)
             .onHover((isOn) => this.isMoreIconOnHover = isOn)
             .onKeyEvent((event) => {
-              if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
+              if (event.keyCode !== KeyCode.KEYCODE_ENTER &&
+                event.keyCode !== KeyCode.KEYCODE_SPACE) {
                 return
               }
               if (event.type === KeyType.Down) {
@@ -296,15 +282,20 @@ struct CollapsibleMenuSection {
   popupBuilder() {
     Column() {
       if (this.menuItems) {
-        ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), (item:ComposeTitleBarMenuItem, index:number) => {
-          ImageMenuItem({ item: item, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + index })
-        })
+        ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1,
+          this.menuItems.length),
+          (item:ComposeTitleBarMenuItem, index:number) => {
+            ImageMenuItem({ item: item, index: this.index * 1000 +
+            CollapsibleMenuSection.maxCountOfVisibleItems + index })
+          })
       }
     }
-    .width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum)
+    .width(ImageMenuItem.imageHotZoneWidth +
+      CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum)
     .margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding })
     .onAppear(() => {
-      focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex)
+      focusControl.requestFocus(ImageMenuItem.focusablePrefix +
+      this.firstFocusableIndex)
     })
   }
 }
@@ -390,7 +381,8 @@ struct ImageMenuItem {
       if (!this.item?.isEnabled) {
         return
       }
-      if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
+      if (event.keyCode !== KeyCode.KEYCODE_ENTER &&
+        event.keyCode !== KeyCode.KEYCODE_SPACE) {
         return
       }
       if (event.type === KeyType.Down) {
@@ -419,4 +411,4 @@ struct ImageMenuItem {
   }
 }
 
-export  { ComposeTitleBar }
+export { ComposeTitleBar }

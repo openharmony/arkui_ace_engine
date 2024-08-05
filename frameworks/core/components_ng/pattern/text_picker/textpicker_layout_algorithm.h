@@ -74,6 +74,11 @@ private:
     double defaultPickerItemHeight_ = 0.0;
     bool isDefaultPickerItemHeight_ = false;
     int32_t halfDisplayCounts_ = 0;
+    float dividerSpacingFontScale_ = 1.0f;
+    float gradientFontScale_ = 1.0f;
+    const Dimension AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale);
+    bool NeedAdaptForAging();
+    float ReCalcItemHeightScale(const Dimension& userSetHeight, bool isDividerSpacing = true);
     void InitGradient(const float& gradientPercent, const RefPtr<FrameNode> stackNode,
         const RefPtr<FrameNode> columnNode);
 

@@ -19,8 +19,8 @@
 #include "hilog/log.h"
 
 #define PRINT_HILOG(level, fmt, ...) \
-    HILOG_IMPL(LOG_CORE, LOG_##level, 0xD003900, "AceDrawableDescriptor", "[%{public}s:%{public}d]" fmt, \
-        __FUNCTION__, __LINE__, ##__VA_ARGS__)
+    HILOG_IMPL(LOG_CORE, LOG_##level, 0xD003900, "AceDrawableDescriptor", "[%{public}d]" fmt, \
+        __LINE__, ##__VA_ARGS__)
 
 #define HILOGE(fmt, ...) PRINT_HILOG(ERROR, fmt, ##__VA_ARGS__)
 #define HILOGW(fmt, ...) PRINT_HILOG(WARN, fmt, ##__VA_ARGS__)

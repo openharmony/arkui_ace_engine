@@ -67,22 +67,25 @@ public:
             }
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
-            theme->dragBackgroundColor_ =
-                pattern->GetAttr<Color>("drag_background_color", Color::WHITE).ChangeOpacity(DRAG_BACKGROUND_OPACITY);
+            auto dragBackgroundColor = pattern->GetAttr<Color>("drag_background_color", Color::WHITE);
+            if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+                dragBackgroundColor = dragBackgroundColor.ChangeOpacity(DRAG_BACKGROUND_OPACITY);
+            }
+            theme->dragBackgroundColor_ = dragBackgroundColor;
+            theme->dragCornerRadius_ = pattern->GetAttr<Dimension>("drag_corner_radius", 18.0_vp);
             theme->defaultCaretHeight_ = pattern->GetAttr<Dimension>("default_caret_height", 18.5_vp);
             theme->disabledAlpha_ = static_cast<float>(pattern->GetAttr<double>("text_color_disabled_alpha", 0.0));
             theme->placeholderColor_ = pattern->GetAttr<Color>("tips_text_color", Color(0x99000000));
             theme->caretColor_ = pattern->GetAttr<Color>("caret_color", Color(0xff007dff));
             theme->selectedBackgroundColor_ = pattern->GetAttr<Color>("selected_background_color", Color(0xff007dff));
             theme->previewUnderlineColor_ = pattern->GetAttr<Color>("preview_underline_color", Color(0xff007dff));
+            theme->popIconColor_ = pattern->GetAttr<Color>("pop_icon_color", Color(0x99000000));
+            theme->menuTitleColor_ = pattern->GetAttr<Color>("menu_title_color", Color(0x99000000));
+            theme->menuTextColor_ = pattern->GetAttr<Color>("menu_text_color", Color(0x99000000));
+            theme->menuIconColor_ = pattern->GetAttr<Color>("menu_icon_color", Color(0x99000000));
             theme->previewUnderlineWidth_ = pattern->GetAttr<Dimension>("preview_underline_width", 2.0_vp);
-            RefPtr<ThemeStyle> textfieldPattern = themeConstants->GetPatternByName("textfield_pattern");
-            if (!textfieldPattern) {
-                LOGW("find pattern of textfield fail");
-                return;
-            }
-            auto textfieldShowHandle = textfieldPattern->GetAttr<std::string>("textfield_show_handle", "0");
-            theme->richeditorShowHandle_ = StringUtils::StringToInt(textfieldShowHandle);
+            auto showHandle = pattern->GetAttr<std::string>("rich_editor_show_handle", "0");
+            theme->richeditorShowHandle_ = StringUtils::StringToInt(showHandle);
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>("default_text_color", DEFAULT_TEXT_COLOR));
             theme->textStyle_.SetTextDecorationColor(pattern->GetAttr<Color>("default_text_color", DEFAULT_TEXT_COLOR));
         }
@@ -125,6 +128,26 @@ public:
         return previewUnderlineColor_;
     }
 
+    const Color& GetPopIconColor() const
+    {
+        return popIconColor_;
+    }
+
+    const Color& GetMenuTitleColor() const
+    {
+        return menuTitleColor_;
+    }
+
+    const Color& GetMenuTextColor() const
+    {
+        return menuTextColor_;
+    }
+
+    const Color& GetMenuIconColor() const
+    {
+        return menuIconColor_;
+    }
+
     const Dimension& GetPreviewUnderlineWidth()
     {
         return previewUnderlineWidth_;
@@ -150,14 +173,19 @@ public:
         return richeditorShowHandle_;
     }
 
+    const Color& GetDragBackgroundColor() const
+    {
+        return dragBackgroundColor_;
+    }
+
     TextStyle GetTextStyle() const
     {
         return textStyle_;
     }
 
-    const Color& GetDragBackgroundColor() const
+    Dimension GetDragCornerRadius() const
     {
-        return dragBackgroundColor_;
+        return dragCornerRadius_;
     }
 
 protected:
@@ -172,13 +200,17 @@ private:
 
     // UX::insert cursor offset up by 8vp
     Dimension insertCursorOffset_ = 8.0_vp;
-
     TextStyle textStyle_;
     Color placeholderColor_ = Color(0x99000000);
     Color caretColor_ = Color(0xff007dff);
     Color selectedBackgroundColor_ = Color(0xff007dff);
     Color dragBackgroundColor_ = Color::WHITE;
+    Dimension dragCornerRadius_ = 18.0_vp;
     Color previewUnderlineColor_ = Color(0xff007dff);
+    Color popIconColor_ = Color(0x99000000);
+    Color menuTitleColor_ = Color(0x99000000);
+    Color menuTextColor_ = Color(0x99000000);
+    Color menuIconColor_ = Color(0x99000000);
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool richeditorShowHandle_ = false;
 };

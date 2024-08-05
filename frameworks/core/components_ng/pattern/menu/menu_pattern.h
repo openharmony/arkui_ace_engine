@@ -468,6 +468,8 @@ public:
         }
     }
 
+    bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
+
     bool UseContentModifier()
     {
         return builderNode_.Upgrade() != nullptr;
@@ -477,17 +479,7 @@ public:
 
     BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
 
-    void OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press);
-    
-    void BlockFurtherExpand()
-    {
-        canExpand_ = false;
-    }
-    
-    bool CanExpand()
-    {
-        return canExpand_;
-    }
+    void OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover = false);
 
     RefPtr<FrameNode> GetLastSelectedItem()
     {
@@ -498,6 +490,10 @@ public:
     {
         lastSelectedItem_ = lastSelectedItem;
     }
+    void UpdateLastPosition(std::optional<OffsetF> lastPosition)
+    {
+        lastPosition_ = lastPosition;
+    }
 
     void SetIsEmbedded()
     {
@@ -506,6 +502,14 @@ public:
     bool IsEmbedded()
     {
         return isEmbedded_;
+    }
+    void SetIsStackSubmenu()
+    {
+        isStackSubmenu_ = true;
+    }
+    bool IsStackSubmenu()
+    {
+        return isStackSubmenu_;
     }
 protected:
     void UpdateMenuItemChildren(RefPtr<UINode>& host);
@@ -540,7 +544,6 @@ private:
     void DisableTabInMenu();
 
     Offset GetTransformCenter() const;
-    void CallMenuAboutToAppearCallback();
     void ShowPreviewMenuAnimation();
     void ShowPreviewMenuScaleAnimation();
     void ShowMenuAppearAnimation();
@@ -559,6 +562,8 @@ private:
     RefPtr<UINode> GetOutsideForEachMenuItem(const RefPtr<UINode>& forEachNode, bool next);
 
     RefPtr<FrameNode> BuildContentModifierNode(int index);
+    bool IsMenuScrollable() const;
+
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
     std::optional<Offset> lastTouchOffset_;
@@ -585,6 +590,7 @@ private:
     bool hasAnimation_ = true;
     bool needHideAfterTouch_ = true;
 
+    std::optional<OffsetF> lastPosition_;
     OffsetF originOffset_;
     OffsetF endOffset_;
     OffsetF previewOriginOffset_;
@@ -596,9 +602,9 @@ private:
     bool hasOptionWidth_ = false;
     SizeF targetSize_;
     bool expandDisplay_ = false;
-    bool canExpand_ = true;
     RefPtr<FrameNode> lastSelectedItem_ = nullptr;
     bool isEmbedded_ = false;
+    bool isStackSubmenu_ = false;
     bool isNeedDivider_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);

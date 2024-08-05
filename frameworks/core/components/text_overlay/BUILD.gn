@@ -45,6 +45,7 @@ build_component("text_overlay_for_web") {
 
   standard_web_deps = [ "webview:libnweb" ]
   external_deps += [
+    "ability_runtime:abilitykit_native",
     "ability_runtime:app_manager",
     "window_manager:libwm",
   ]

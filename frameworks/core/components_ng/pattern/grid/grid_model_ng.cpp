@@ -206,6 +206,11 @@ void GridModelNG::SetFriction(double friction)
     pattern->SetFriction(friction);
 }
 
+void GridModelNG::SetAlignItems(GridItemAlignment itemAlign)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, AlignItems, itemAlign);
+}
+
 void GridModelNG::SetOnScrollToIndex(ScrollToIndexFunc&& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -499,6 +504,11 @@ void GridModelNG::SetFriction(FrameNode* frameNode, double friction)
         pattern->SetFriction(FRICTION);
     }
     pattern->SetFriction(friction);
+}
+
+void GridModelNG::SetAlignItems(FrameNode* frameNode, GridItemAlignment itemAlign)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, AlignItems, itemAlign, frameNode);
 }
 
 RefPtr<ScrollControllerBase> GridModelNG::CreatePositionController()

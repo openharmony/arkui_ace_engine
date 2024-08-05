@@ -25,17 +25,23 @@ public:
     {
         return false;
     }
-    bool DownloadAsync(
-        DownloadCallback&& /* downloadCallback */, const std::string& /* url */, int32_t /* instanceId */) override
+
+    bool Download(const std::string& /* url */, const std::shared_ptr<DownloadResult>& /* result */) override
     {
         return false;
     }
-    bool DownloadSync(
-        DownloadCallback&& /* downloadCallback */, const std::string& /* url */, int32_t /* instanceId */) override
+
+    bool DownloadAsync(DownloadCallback&& /* downloadCallback */, const std::string& /* url */,
+        int32_t /* instanceId */, int32_t /* nodeId */) override
     {
         return false;
     }
-    bool RemoveDownloadTask(const std::string& /* url */) override
+    bool DownloadSync(DownloadCallback&& /* downloadCallback */, const std::string& /* url */, int32_t /* instanceId */,
+        int32_t /* nodeId */) override
+    {
+        return false;
+    }
+    bool RemoveDownloadTask(const std::string& /* url */, int32_t /*nodeId*/) override
     {
         return false;
     }

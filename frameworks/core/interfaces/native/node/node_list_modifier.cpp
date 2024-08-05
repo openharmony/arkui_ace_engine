@@ -498,20 +498,6 @@ void ResetChainAnimationOptions(ArkUINodeHandle node)
     ListModelNG::SetChainAnimationOptions(frameNode, options);
 }
 
-void SetFadingEdge(ArkUINodeHandle node, ArkUI_Bool fadingEdge)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetFadingEdge(frameNode, fadingEdge);
-}
-
-void ResetFadingEdge(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetFadingEdge(frameNode, false);
-}
-
 ArkUI_Int32 SetNodeAdapter(ArkUINodeHandle node, ArkUINodeAdapterHandle handle)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -639,6 +625,24 @@ void GetlistDivider(ArkUINodeHandle node, ArkUIdividerOptions* option, ArkUI_Int
     option->startMargin = divider.startMargin.GetNativeValue(static_cast<DimensionUnit>(unit));
     option->endMargin = divider.endMargin.GetNativeValue(static_cast<DimensionUnit>(unit));
 }
+
+void SetInitialScroller(ArkUINodeHandle node, ArkUINodeHandle controller, ArkUINodeHandle proxy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto listProxy = AceType::Claim(reinterpret_cast<ScrollProxy*>(proxy));
+    auto listController = AceType::Claim(reinterpret_cast<ScrollControllerBase*>(controller));
+    ListModelNG::SetScroller(frameNode, listController, listProxy);
+}
+
+void ResetInitialScroller(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<ScrollControllerBase> listController;
+    RefPtr<ScrollProxy> listProxy;
+    ListModelNG::SetScroller(frameNode, listController, listProxy);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -654,10 +658,10 @@ const ArkUIListModifier* GetListModifier()
         SetListScrollBarColor, ResetListScrollBarColor, GetAlignListItem, SetAlignListItem, ResetAlignListItem,
         SetScrollSnapAlign, ResetScrollSnapAlign, SetContentStartOffset, ResetContentStartOffset, SetContentEndOffset,
         ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions,
-        GetListSpace, SetListSpace, ResetListSpace, SetFadingEdge, ResetFadingEdge, SetNodeAdapter, ResetNodeAdapter,
+        GetListSpace, SetListSpace, ResetListSpace, SetNodeAdapter, ResetNodeAdapter,
         GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy, SetInitialIndex, ResetInitialIndex,
         SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions, GetInitialIndex,
-        SetListFlingSpeedLimit, ResetListFlingSpeedLimit, GetlistDivider };
+        SetListFlingSpeedLimit, ResetListFlingSpeedLimit, GetlistDivider, SetInitialScroller, ResetInitialScroller };
     return &modifier;
 }
 

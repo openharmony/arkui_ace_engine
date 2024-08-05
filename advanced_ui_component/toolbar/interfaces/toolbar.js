@@ -68,106 +68,112 @@ ToolBarOptions = __decorate([
 export { ToolBarOptions };
 
 export class ToolBar extends ViewPU {
-  constructor(d3, e3, f3, g3 = -1, h3 = undefined, i3) {
-    super(d3, f3, g3, i3);
-    if (typeof h3 === 'function') {
-      this.paramsGenerator_ = h3;
+  constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+    super(parent, __localStorage, elmtId, extraInfo);
+    if (typeof paramsLambda === 'function') {
+      this.paramsGenerator_ = paramsLambda;
     }
-    this.__toolBarList = new SynchedPropertyNesedObjectPU(e3.toolBarList, this, 'toolBarList');
+    this.__toolBarList = new SynchedPropertyNesedObjectPU(params.toolBarList, this, 'toolBarList');
     this.controller = new TabsController();
-    this.__activateIndex = new SynchedPropertySimpleOneWayPU(e3.activateIndex, this, 'activateIndex');
-    this.__moreText = new SynchedPropertySimpleOneWayPU(e3.moreText, this, 'moreText');
+    this.__activateIndex = new SynchedPropertySimpleOneWayPU(params.activateIndex, this, 'activateIndex');
+    this.__moreText = new SynchedPropertyObjectOneWayPU(params.moreText, this, 'moreText');
     this.__menuContent = new ObservedPropertyObjectPU([], this, 'menuContent');
     this.toolBarItemBackground = [];
     this.__itemBackground = new ObservedPropertyObjectPU({
-      id: -1,
-      type: 10001,
+      'id': -1,
+      'type': 10001,
       params: ['sys.color.ohos_id_color_toolbar_bg'],
-      bundleName: '',
-      moduleName: '',
+      'bundleName': '',
+      'moduleName': '',
     }, this, 'itemBackground');
     this.__iconPrimaryColor = new ObservedPropertyObjectPU({
-      id: -1,
-      type: 10001,
+      'id': -1,
+      'type': 10001,
       params: ['sys.color.icon_primary'],
-      bundleName: '',
-      moduleName: '',
+      'bundleName': '',
+      'moduleName': '',
     }, this, 'iconPrimaryColor');
     this.__iconActivePrimaryColor = new ObservedPropertyObjectPU({
-      id: -1,
-      type: 10001,
+      'id': -1,
+      'type': 10001,
       params: ['sys.color.icon_emphasize'],
-      bundleName: '',
-      moduleName: '',
+      'bundleName': '',
+      'moduleName': '',
     }, this, 'iconActivePrimaryColor');
     this.__fontPrimaryColor = new ObservedPropertyObjectPU({
-      id: -1,
-      type: 10001,
+      'id': -1,
+      'type': 10001,
       params: ['sys.color.font_primary'],
-      bundleName: '',
-      moduleName: '',
+      'bundleName': '',
+      'moduleName': '',
     }, this, 'fontPrimaryColor');
     this.__fontActivatedPrimaryColor = new ObservedPropertyObjectPU({
-      id: -1,
-      type: 10001,
+      'id': -1,
+      'type': 10001,
       params: ['sys.color.font_emphasize'],
-      bundleName: '',
-      moduleName: '',
+      'bundleName': '',
+      'moduleName': '',
     }, this, 'fontActivatedPrimaryColor');
-    this.setInitiallyProvidedValue(e3);
+    this.setInitiallyProvidedValue(params);
     this.finalizeConstruction();
   }
 
-  setInitiallyProvidedValue(c3) {
-    this.__toolBarList.set(c3.toolBarList);
-    if (c3.controller !== undefined) {
-      this.controller = c3.controller;
+  setInitiallyProvidedValue(params) {
+    this.__toolBarList.set(params.toolBarList);
+    if (params.controller !== undefined) {
+      this.controller = params.controller;
     }
-    if (c3.activateIndex === undefined) {
+    if (params.activateIndex === undefined) {
       this.__activateIndex.set(-1);
     }
-    if (c3.moreText === undefined) {
-      this.__moreText.set('更多');
+    if (params.moreText === undefined) {
+      this.__moreText.set({
+        'id': -1,
+        'type': 10003,
+        params: ['sys.string.ohos_toolbar_more'],
+        'bundleName': '',
+        'moduleName': '',
+      });
     }
-    if (c3.menuContent !== undefined) {
-      this.menuContent = c3.menuContent;
+    if (params.menuContent !== undefined) {
+      this.menuContent = params.menuContent;
     }
-    if (c3.toolBarItemBackground !== undefined) {
-      this.toolBarItemBackground = c3.toolBarItemBackground;
+    if (params.toolBarItemBackground !== undefined) {
+      this.toolBarItemBackground = params.toolBarItemBackground;
     }
-    if (c3.itemBackground !== undefined) {
-      this.itemBackground = c3.itemBackground;
+    if (params.itemBackground !== undefined) {
+      this.itemBackground = params.itemBackground;
     }
-    if (c3.iconPrimaryColor !== undefined) {
-      this.iconPrimaryColor = c3.iconPrimaryColor;
+    if (params.iconPrimaryColor !== undefined) {
+      this.iconPrimaryColor = params.iconPrimaryColor;
     }
-    if (c3.iconActivePrimaryColor !== undefined) {
-      this.iconActivePrimaryColor = c3.iconActivePrimaryColor;
+    if (params.iconActivePrimaryColor !== undefined) {
+      this.iconActivePrimaryColor = params.iconActivePrimaryColor;
     }
-    if (c3.fontPrimaryColor !== undefined) {
-      this.fontPrimaryColor = c3.fontPrimaryColor;
+    if (params.fontPrimaryColor !== undefined) {
+      this.fontPrimaryColor = params.fontPrimaryColor;
     }
-    if (c3.fontActivatedPrimaryColor !== undefined) {
-      this.fontActivatedPrimaryColor = c3.fontActivatedPrimaryColor;
+    if (params.fontActivatedPrimaryColor !== undefined) {
+      this.fontActivatedPrimaryColor = params.fontActivatedPrimaryColor;
     }
   }
 
-  updateStateVars(b3) {
-    this.__toolBarList.set(b3.toolBarList);
-    this.__activateIndex.reset(b3.activateIndex);
-    this.__moreText.reset(b3.moreText);
+  updateStateVars(params) {
+    this.__toolBarList.set(params.toolBarList);
+    this.__activateIndex.reset(params.activateIndex);
+    this.__moreText.reset(params.moreText);
   }
 
-  purgeVariableDependenciesOnElmtId(a3) {
-    this.__toolBarList.purgeDependencyOnElmtId(a3);
-    this.__activateIndex.purgeDependencyOnElmtId(a3);
-    this.__moreText.purgeDependencyOnElmtId(a3);
-    this.__menuContent.purgeDependencyOnElmtId(a3);
-    this.__itemBackground.purgeDependencyOnElmtId(a3);
-    this.__iconPrimaryColor.purgeDependencyOnElmtId(a3);
-    this.__iconActivePrimaryColor.purgeDependencyOnElmtId(a3);
-    this.__fontPrimaryColor.purgeDependencyOnElmtId(a3);
-    this.__fontActivatedPrimaryColor.purgeDependencyOnElmtId(a3);
+  purgeVariableDependenciesOnElmtId(rmElmtId) {
+    this.__toolBarList.purgeDependencyOnElmtId(rmElmtId);
+    this.__activateIndex.purgeDependencyOnElmtId(rmElmtId);
+    this.__moreText.purgeDependencyOnElmtId(rmElmtId);
+    this.__menuContent.purgeDependencyOnElmtId(rmElmtId);
+    this.__itemBackground.purgeDependencyOnElmtId(rmElmtId);
+    this.__iconPrimaryColor.purgeDependencyOnElmtId(rmElmtId);
+    this.__iconActivePrimaryColor.purgeDependencyOnElmtId(rmElmtId);
+    this.__fontPrimaryColor.purgeDependencyOnElmtId(rmElmtId);
+    this.__fontActivatedPrimaryColor.purgeDependencyOnElmtId(rmElmtId);
   }
 
   aboutToBeDeleted() {
@@ -191,176 +197,207 @@ export class ToolBar extends ViewPU {
   get activateIndex() {
     return this.__activateIndex.get();
   }
-
-  set activateIndex(z2) {
-    this.__activateIndex.set(z2);
+  set activateIndex(newValue) {
+    this.__activateIndex.set(newValue);
   }
 
   get moreText() {
     return this.__moreText.get();
   }
 
-  set moreText(y2) {
-    this.__moreText.set(y2);
+  set moreText(newValue) {
+    this.__moreText.set(newValue);
   }
 
   get menuContent() {
     return this.__menuContent.get();
   }
 
-  set menuContent(x2) {
-    this.__menuContent.set(x2);
+  set menuContent(newValue) {
+    this.__menuContent.set(newValue);
   }
 
   get itemBackground() {
     return this.__itemBackground.get();
   }
 
-  set itemBackground(w2) {
-    this.__itemBackground.set(w2);
+  set itemBackground(newValue) {
+    this.__itemBackground.set(newValue);
   }
 
   get iconPrimaryColor() {
     return this.__iconPrimaryColor.get();
   }
 
-  set iconPrimaryColor(v2) {
-    this.__iconPrimaryColor.set(v2);
+  set iconPrimaryColor(newValue) {
+    this.__iconPrimaryColor.set(newValue);
   }
 
   get iconActivePrimaryColor() {
     return this.__iconActivePrimaryColor.get();
   }
 
-  set iconActivePrimaryColor(u2) {
-    this.__iconActivePrimaryColor.set(u2);
+  set iconActivePrimaryColor(newValue) {
+    this.__iconActivePrimaryColor.set(newValue);
   }
 
   get fontPrimaryColor() {
     return this.__fontPrimaryColor.get();
   }
 
-  set fontPrimaryColor(t2) {
-    this.__fontPrimaryColor.set(t2);
+  set fontPrimaryColor(newValue) {
+    this.__fontPrimaryColor.set(newValue);
   }
 
   get fontActivatedPrimaryColor() {
     return this.__fontActivatedPrimaryColor.get();
   }
 
-  set fontActivatedPrimaryColor(s2) {
-    this.__fontActivatedPrimaryColor.set(s2);
+  set fontActivatedPrimaryColor(newValue) {
+    this.__fontActivatedPrimaryColor.set(newValue);
   }
 
-  onWillApplyTheme(r2) {
-    this.iconPrimaryColor = r2.colors.iconPrimary;
-    this.iconActivePrimaryColor = r2.colors.iconEmphasize;
-    this.fontPrimaryColor = r2.colors.fontPrimary;
-    this.fontActivatedPrimaryColor = r2.colors.fontEmphasize;
+  onWillApplyTheme(theme) {
+    this.iconPrimaryColor = theme.colors.iconPrimary;
+    this.iconActivePrimaryColor = theme.colors.iconEmphasize;
+    this.fontPrimaryColor = theme.colors.fontPrimary;
+    this.fontActivatedPrimaryColor = theme.colors.fontEmphasize;
   }
 
-  MoreTabBuilder(g2, h2 = null) {
-    this.observeComponentCreation2((p2, q2) => {
+  MoreTabBuilder(index, parent = null) {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Column.create();
-      Column.bindMenu(ObservedObject.GetRawObject(this.menuContent),
-        { placement: Placement.TopRight, offset: { x: -12, y : -10 } });
       Column.width('100%');
       Column.height('100%');
+      Column.bindMenu(ObservedObject.GetRawObject(this.menuContent),
+        { placement: Placement.TopRight, offset: { x: -12, y: -10 } });
       Column.padding({ start: LengthMetrics.vp(4), end: LengthMetrics.vp(4) });
-      Column.borderRadius({ id: -1, type: 10002, params: ['sys.float.ohos_id_corner_radius_clicked'],
-        bundleName: '', moduleName: '' });
+      Column.borderRadius({
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.ohos_id_corner_radius_clicked'],
+        'bundleName': '',
+        'moduleName': '' });
     }, Column);
-    this.observeComponentCreation2((n2, o2) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Image.create(PUBLIC_MORE);
       Image.width(24);
       Image.height(24);
       Image.fillColor(ObservedObject.GetRawObject(this.iconPrimaryColor));
       Image.margin({ top: 8, bottom: 2 });
       Image.objectFit(ImageFit.Contain);
+      Image.draggable(false);
     }, Image);
-    this.observeComponentCreation2((l2, m2) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Text.create(this.moreText);
       Text.fontColor(ObservedObject.GetRawObject(this.fontPrimaryColor));
-      Text.fontSize({ id: -1, type: 10002, params: ['sys.float.ohos_id_text_size_caption'],
-        bundleName: '', moduleName: '' });
+      Text.fontSize({
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.ohos_id_text_size_caption'],
+        'bundleName': '',
+        'moduleName': '__harDefaultModuleName__' });
       Text.fontWeight(FontWeight.Medium);
     }, Text);
     Text.pop();
     Column.pop();
   }
 
-  TabBuilder(r1, s1 = null) {
-    this.observeComponentCreation2((a2, b2) => {
+  TabBuilder(index, parent = null) {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Column.create();
       Column.width('100%');
       Column.height('100%');
-      Column.focusable(!(this.toolBarList[r1]?.state === 2));
-      Column.focusOnTouch(!(this.toolBarList[r1]?.state === 2));
+      Column.focusable(!(this.toolBarList[index]?.state === 2));
+      Column.focusOnTouch(!(this.toolBarList[index]?.state === 2));
       Column.padding({ start: LengthMetrics.vp(4), end: LengthMetrics.vp(4) });
       Column.borderRadius({
-        id: -1, type: 10002,
+        'id': -1,
+        'type': 10002,
         params: ['sys.float.ohos_id_corner_radius_clicked'],
-        bundleName: '', moduleName: '' });
+        'bundleName': '',
+        'moduleName': '__harDefaultModuleName__' });
       Column.backgroundColor(ObservedObject.GetRawObject(this.itemBackground));
       Column.onClick(() => {
-        let f2 = this.toolBarList[r1];
-        if (f2.state === ItemState.ACTIVATE) {
-          if (this.activateIndex === r1) {
+        let toolbar = this.toolBarList[index];
+        if (toolbar.state === ItemState.ACTIVATE) {
+          if (this.activateIndex === index) {
             this.activateIndex = -1;
-          } else {
-            this.activateIndex = r1;
+          }
+          else {
+            this.activateIndex = index;
           }
         }
-        if (!(f2.state === ItemState.DISABLE)) {
-          f2.action && f2.action();
+        if (!(toolbar.state === ItemState.DISABLE)) {
+          toolbar.action && toolbar.action();
         }
       });
-      Column.onHover((e2) => {
-        if (e2) {
-          this.toolBarItemBackground[r1] = (this.toolBarList[r1]?.state === ItemState.DISABLE) ?
-            { id: -1, type: 10001,
-              params: ['sys.color.ohos_id_color_toolbar_bg'],
-              bundleName: '', moduleName: '' } :
-            { id: -1, type: 10001, params: ['sys.color.ohos_id_color_hover'],
-              bundleName: '', moduleName: '' };
+      Column.onHover((isHover) => {
+        if (isHover) {
+          this.toolBarItemBackground[index] = (this.toolBarList[index]?.state === ItemState.DISABLE) ? {
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_toolbar_bg'],
+            'bundleName': '',
+            'moduleName': '' } : { 'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_hover'],
+            'bundleName': '',
+            'moduleName': '' };
         }
         else {
-          this.toolBarItemBackground[r1] = { id: -1, type: 10001, params: ['sys.color.ohos_id_color_toolbar_bg'],
-            bundleName: '', moduleName: '' };
+          this.toolBarItemBackground[index] = {
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_toolbar_bg'],
+            'bundleName': '',
+            'moduleName': '' };
         }
-        this.itemBackground = this.toolBarItemBackground[r1];
+        this.itemBackground = this.toolBarItemBackground[index];
       });
       ViewStackProcessor.visualState('pressed');
-      Column.backgroundColor((this.toolBarList[r1]?.state === ItemState.DISABLE) ?
-      this.toolBarItemBackground[r1] : { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'],
-          'bundleName': '', 'moduleName': '' });
-      ViewStackProcessor.visualState("normal");
-      Column.backgroundColor(this.toolBarItemBackground[r1]);
+      Column.backgroundColor((this.toolBarList[index]?.state === ItemState.DISABLE) ?
+      this.toolBarItemBackground[index] : {
+          'id': -1,
+          'type': 10001,
+          params: ['sys.color.ohos_id_color_click_effect'],
+          'bundleName': '',
+          'moduleName': '' });
+      ViewStackProcessor.visualState('normal');
+      Column.backgroundColor(this.toolBarItemBackground[index]);
       ViewStackProcessor.visualState();
     }, Column);
-    this.observeComponentCreation2((y1, z1) => {
-      Image.create(this.toolBarList[r1]?.icon);
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
+      Image.create(this.toolBarList[index]?.icon);
       Image.width(24);
       Image.height(24);
-      Image.fillColor(this.activateIndex === r1 && !(this.toolBarList[r1]?.state === 2)
+      Image.fillColor(this.activateIndex === index && !(this.toolBarList[index]?.state === 2)
         ? this.iconActivePrimaryColor : this.iconPrimaryColor);
-      Image.opacity((this.toolBarList[r1]?.state === 2) ? 0.4 : 1);
+      Image.opacity((this.toolBarList[index]?.state === 2) ? 0.4 : 1);
       Image.margin({ top: 8, bottom: 2 });
       Image.objectFit(ImageFit.Contain);
+      Image.draggable(false);
     }, Image);
-    this.observeComponentCreation2((w1, x1) => {
-      Text.create(this.toolBarList[r1]?.content);
-      Text.fontColor(this.activateIndex === r1 && !(this.toolBarList[r1]?.state === 2)
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
+      Text.create(this.toolBarList[index]?.content);
+      Text.fontColor(this.activateIndex === index && !(this.toolBarList[index]?.state === 2)
         ? this.fontActivatedPrimaryColor : this.fontPrimaryColor);
-      Text.fontSize({ id: -1, type: 10002, params: ['sys.float.ohos_id_text_size_caption'],
-        bundleName: '', moduleName: '' });
-      Text.maxFontSize({ id: -1, type: 10002, params: ['sys.float.ohos_id_text_size_caption'],
-        bundleName: '', moduleName: '' });
+      Text.fontSize({
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.ohos_id_text_size_caption'],
+        'bundleName': '',
+        'moduleName': '' });
+      Text.maxFontSize({
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.ohos_id_text_size_caption'],
+        'bundleName': '', 'moduleName': '' });
       Text.minFontSize(9);
       Text.fontWeight(FontWeight.Medium);
       Text.maxLines(2);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-      Text.opacity((this.toolBarList[r1]?.state === 2) ? 0.4 : 1);
+      Text.opacity((this.toolBarList[index]?.state === 2) ? 0.4 : 1);
     }, Text);
     Text.pop();
     Column.pop();
@@ -368,18 +405,21 @@ export class ToolBar extends ViewPU {
 
   refreshData() {
     this.menuContent = [];
-    for (let q1 = 0; q1 < this.toolBarList.length; q1++) {
-      if (q1 >= 4 && this.toolBarList.length > 5) {
-        this.menuContent[q1 - 4] = {
-          value: this.toolBarList[q1].content,
-          action: this.toolBarList[q1].action,
-          enabled: this.toolBarList[q1].state !== ItemState.DISABLE,
+    for (let i = 0; i < this.toolBarList.length; i++) {
+      if (i >= 4 && this.toolBarList.length > 5) {
+        this.menuContent[i - 4] = {
+          value: this.toolBarList[i].content,
+          action: this.toolBarList[i].action,
+          enabled: this.toolBarList[i].state !== ItemState.DISABLE,
         };
       }
       else {
-        this.toolBarItemBackground[q1] = { id: -1, type: 10001,
+        this.toolBarItemBackground[i] = {
+          'id': -1,
+          'type': 10001,
           params: ['sys.color.ohos_id_color_toolbar_bg'],
-          bundleName: '', moduleName: '' };
+          'bundleName': '',
+          'moduleName': '' };
         this.menuContent = [];
       }
     }
@@ -391,24 +431,24 @@ export class ToolBar extends ViewPU {
   }
 
   initialRender() {
-    this.observeComponentCreation2((o1, p1) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Column.create();
     }, Column);
-    this.observeComponentCreation2((m1, n1) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Divider.create();
       Divider.width('100%');
       Divider.height(1);
     }, Divider);
-    this.observeComponentCreation2((k1, l1) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Column.create();
       Column.width('100%');
     }, Column);
-    this.observeComponentCreation2((g1, h1) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Tabs.create({ barPosition: BarPosition.End, controller: this.controller });
       Tabs.vertical(false);
       Tabs.constraintSize({ minHeight: 56, maxHeight: 56 });
       Tabs.barMode(BarMode.Fixed);
-      Tabs.onChange((j1) => {
+      Tabs.onChange((index) => {
       });
       Tabs.width('100%');
       Tabs.padding({
@@ -416,39 +456,40 @@ export class ToolBar extends ViewPU {
         end: LengthMetrics.vp(this.toolBarList.length < 5 ? 24 : 0)
       });
       Tabs.backgroundColor({
-        id: -1, type: 10001,
+        'id': -1,
+        'type': 10001,
         params: ['sys.color.ohos_id_color_toolbar_bg'],
-        bundleName: '', moduleName: '',
-      });
+        'bundleName': '',
+        'moduleName': '' });
     }, Tabs);
-    this.observeComponentCreation2((n, o) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       ForEach.create();
-      const p = (r, s) => {
-        const t = r;
-        this.observeComponentCreation2((v, w) => {
+      const forEachItemGenFunction = (_item, index) => {
+        const item = _item;
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
           If.create();
           if (this.toolBarList.length <= 5) {
             this.ifElseBranchUpdateFunction(0, () => {
-              this.observeComponentCreation2((e1, f1) => {
+              this.observeComponentCreation2((elmtId, isInitialRender) => {
                 TabContent.create();
                 TabContent.tabBar({ builder: () => {
-                  this.TabBuilder.call(this, s);
+                  this.TabBuilder.call(this, index);
                 } });
-                TabContent.enabled(!(this.toolBarList[s]?.state === 2));
-                TabContent.focusOnTouch(!(this.toolBarList[s]?.state === 2));
+                TabContent.enabled(!(this.toolBarList[index]?.state === 2));
+                TabContent.focusOnTouch(!(this.toolBarList[index]?.state === 2));
               }, TabContent);
               TabContent.pop();
             });
           }
-          else if (s < 4) {
+          else if (index < 4) {
             this.ifElseBranchUpdateFunction(1, () => {
-              this.observeComponentCreation2((a1, b1) => {
+              this.observeComponentCreation2((elmtId, isInitialRender) => {
                 TabContent.create();
                 TabContent.tabBar({ builder: () => {
-                  this.TabBuilder.call(this, s);
+                  this.TabBuilder.call(this, index);
                 } });
-                TabContent.enabled(!(this.toolBarList[s]?.state === 2));
-                TabContent.focusOnTouch(!(this.toolBarList[s]?.state === 2));
+                TabContent.enabled(!(this.toolBarList[index]?.state === 2));
+                TabContent.focusOnTouch(!(this.toolBarList[index]?.state === 2));
               }, TabContent);
               TabContent.pop();
             });
@@ -460,14 +501,14 @@ export class ToolBar extends ViewPU {
         }, If);
         If.pop();
       };
-      this.forEachUpdateFunction(n, this.toolBarList, p, undefined, true, false);
+      this.forEachUpdateFunction(elmtId, this.toolBarList, forEachItemGenFunction, undefined, true, false);
     }, ForEach);
     ForEach.pop();
-    this.observeComponentCreation2((g, h) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
       if (this.refreshData() && this.toolBarList.length > 5) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((l, m) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             TabContent.create();
             TabContent.tabBar({ builder: () => {
               this.MoreTabBuilder.call(this, 4);
@@ -491,4 +532,4 @@ export class ToolBar extends ViewPU {
     this.updateDirtyElements();
   }
 }
-export default { ToolBarOptions, ToolBar };
+export default { ToolBarOptions, ToolBar, ItemState, ToolBarOption };

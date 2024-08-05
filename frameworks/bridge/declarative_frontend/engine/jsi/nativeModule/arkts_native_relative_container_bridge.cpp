@@ -21,6 +21,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int NUM_0 = 0;
+constexpr int NUM_1 = 1;
+constexpr int NUM_2 = 2;
+constexpr int NUM_3 = 3;
 constexpr int POSITION_DIMENSION = 2;
 constexpr char END_CHAR = '\0';
 
@@ -60,7 +64,7 @@ void ParseReferencedId(EcmaVM* vm, int32_t referenceSize,
     for (int32_t i = 0; i < referenceSize; i++) {
         Local<JSValueRef> referencedId = panda::ArrayRef::GetValueAt(vm, array, i);
         if (referencedId->IsString(vm)) {
-            std::string str = referencedId->ToString(vm)->ToString();
+            std::string str = referencedId->ToString(vm)->ToString(vm);
             referencedIds.push_back(ParseStringToCharPtr(str));
         }
     }
@@ -71,10 +75,10 @@ ArkUINativeModuleValue RelativeContainerBridge::SetGuideLine(ArkUIRuntimeCallInf
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> idsArg = runtimeCallInfo->GetCallArgRef(1);
-    Local<JSValueRef> directionsArg = runtimeCallInfo->GetCallArgRef(2);
-    Local<JSValueRef> positionsArg = runtimeCallInfo->GetCallArgRef(3);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> idsArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> directionsArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> positionsArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (!idsArg->IsArray(vm) || !directionsArg->IsArray(vm) || !positionsArg->IsArray(vm)) {
         GetArkUINodeModifiers()->getRelativeContainerModifier()->resetGuideline(nativeNode);
@@ -89,7 +93,7 @@ ArkUINativeModuleValue RelativeContainerBridge::SetGuideLine(ArkUIRuntimeCallInf
         ArkUIGuidelineStyle info;
         Local<JSValueRef> idVal = panda::ArrayRef::GetValueAt(vm, idsArr, i);
         if (idVal->IsString(vm)) {
-            std::string str = idVal->ToString(vm)->ToString();
+            std::string str = idVal->ToString(vm)->ToString(vm);
             info.id = ParseStringToCharPtr(str);
         }
         Local<JSValueRef> directionVal = panda::ArrayRef::GetValueAt(vm, directionsArr, i);
@@ -132,10 +136,10 @@ ArkUINativeModuleValue RelativeContainerBridge::SetBarrier(ArkUIRuntimeCallInfo*
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> idsArg = runtimeCallInfo->GetCallArgRef(1);
-    Local<JSValueRef> directionsArg = runtimeCallInfo->GetCallArgRef(2);
-    Local<JSValueRef> referenceIdsArg = runtimeCallInfo->GetCallArgRef(3);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> idsArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> directionsArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> referenceIdsArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (!idsArg->IsArray(vm) || !directionsArg->IsArray(vm) || !referenceIdsArg->IsArray(vm)) {
         GetArkUINodeModifiers()->getRelativeContainerModifier()->resetBarrier(nativeNode);
@@ -153,7 +157,7 @@ ArkUINativeModuleValue RelativeContainerBridge::SetBarrier(ArkUIRuntimeCallInfo*
         Local<JSValueRef> directionVal = panda::ArrayRef::GetValueAt(vm, directionsArr, i);
         Local<JSValueRef> referencedIdVal = panda::ArrayRef::GetValueAt(vm, referenceIdsArr, i);
         if (idVal->IsString(vm)) {
-            std::string str = idVal->ToString(vm)->ToString();
+            std::string str = idVal->ToString(vm)->ToString(vm);
             info.id = ParseStringToCharPtr(str);
         }
         if (directionVal->IsNumber()) {

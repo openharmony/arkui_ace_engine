@@ -119,6 +119,7 @@ Render3D::PointerEvent ModelTouchHandler::CreateSceneTouchEvent(const TouchEvent
         case TouchType::HOVER_ENTER:
         case TouchType::HOVER_MOVE:
         case TouchType::HOVER_EXIT:
+        case TouchType::HOVER_CANCEL:
         case TouchType::UNKNOWN:
             break;
     }

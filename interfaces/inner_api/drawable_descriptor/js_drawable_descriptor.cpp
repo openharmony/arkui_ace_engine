@@ -199,24 +199,31 @@ napi_value JsDrawableDescriptor::LayeredConstructor(napi_env env, napi_callback_
         napi_close_escapable_handle_scope(env, scope);
         return thisVar;
     }
+    std::shared_ptr<Media::PixelMap> foregroundPixelMap = nullptr;
+    auto updateUndefinedPixelMap = [&pos, &layeredDrawable, &foregroundPixelMap]() -> void {
+        if (pos == MASK_INDEX) {
+            std::shared_ptr<Global::Resource::ResourceManager> resMgr(Global::Resource::CreateResourceManager());
+            layeredDrawable->InitialMask(resMgr);
+        } else if (pos == BACKGROUND_INDEX && foregroundPixelMap) {
+            UpdateLayeredParam(layeredDrawable, pos, foregroundPixelMap);
+        }
+    };
+    napi_valuetype type;
     for (const auto& arg : argv) {
         pos++;
-        napi_valuetype type;
         napi_typeof(env, arg, &type);
         if (type == napi_undefined) {
-            if (pos == MASK_INDEX) {
-                std::shared_ptr<Global::Resource::ResourceManager> resMgr(Global::Resource::CreateResourceManager());
-                layeredDrawable->InitialMask(resMgr);
-            }
+            updateUndefinedPixelMap();
             continue;
         }
         auto pixelMap = GetPixelMapFromDrawableNapi(env, arg);
         if (!pixelMap) {
-            continue;
+            updateUndefinedPixelMap();
+        } else {
+            UpdateLayeredParam(layeredDrawable, pos, pixelMap);
+            if (pos == FOREGROUND_INDEX) foregroundPixelMap = std::move(pixelMap);
         }
-        UpdateLayeredParam(layeredDrawable, pos, pixelMap);
     }
-    // wrap to napi_value
     napi_wrap(env, thisVar, layeredDrawable, Destructor, nullptr, nullptr);
     napi_escape_handle(env, scope, thisVar, &thisVar);
     napi_close_escapable_handle_scope(env, scope);

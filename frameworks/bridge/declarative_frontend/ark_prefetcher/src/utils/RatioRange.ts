@@ -39,10 +39,10 @@ class RatioRange {
   }
 
   contains(point: number): boolean {
-    if (point == this.start.value) {
+    if (point === this.start.value) {
       return this.start.inclusive;
     }
-    if (point == this.end.value) {
+    if (point === this.end.value) {
       return this.end.inclusive;
     }
     return this.start.value < point && point < this.end.value;

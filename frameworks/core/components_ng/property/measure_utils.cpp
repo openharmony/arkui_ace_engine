@@ -50,8 +50,6 @@ std::optional<float> ConvertToPx(const CalcLength& value, const ScaleProperty& s
     double result = -1.0;
     if (!value.NormalizeToPx(
             scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
-        LOGE("fail to Convert CalcDimension To Px: %{public}f, %{public}f, %{public}f, %{public}f",
-            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference);
         return std::nullopt;
     }
     return static_cast<float>(result);
@@ -66,8 +64,6 @@ std::optional<float> ConvertToPx(
     double result = -1.0;
     if (!value.value().NormalizeToPx(
             scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
-        LOGE("optional: fail to Convert CalcDimension To Px: %{public}f, %{public}f, %{public}f, %{public}f",
-            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference);
         return std::nullopt;
     }
     return static_cast<float>(result);
@@ -78,8 +74,6 @@ std::optional<float> ConvertToPx(const Dimension& dimension, const ScaleProperty
     double result = -1.0;
     if (!dimension.NormalizeToPx(
             scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
-        LOGE("fail to Convert dimension To Px: %{public}f, %{public}f, %{public}f, %{public}f", scaleProperty.vpScale,
-            scaleProperty.fpScale, scaleProperty.lpxScale, percentReference);
         return std::nullopt;
     }
     return static_cast<float>(result);
@@ -94,8 +88,6 @@ std::optional<float> ConvertToPx(
     double result = -1.0;
     if (!dimension.value().NormalizeToPx(
             scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
-        LOGE("fail to Convert dimension To Px: %{public}f, %{public}f, %{public}f, %{public}f", scaleProperty.vpScale,
-            scaleProperty.fpScale, scaleProperty.lpxScale, percentReference);
         return std::nullopt;
     }
     return static_cast<float>(result);
@@ -115,22 +107,24 @@ SizeF ConstrainSize(const SizeF& size, const SizeF& minSize, const SizeF& maxSiz
 }
 
 PaddingPropertyF ConvertToPaddingPropertyF(const std::unique_ptr<PaddingProperty>& padding,
-    const ScaleProperty& scaleProperty, float percentReference, bool roundPixel)
+    const ScaleProperty& scaleProperty, float percentReference, bool roundPixel, bool nonNegative)
 {
     if (!padding) {
         return {};
     }
-    return ConvertToPaddingPropertyF(*padding, scaleProperty, percentReference, roundPixel);
+    return ConvertToPaddingPropertyF(*padding, scaleProperty, percentReference, roundPixel, nonNegative);
 }
 
-PaddingPropertyF ConvertToPaddingPropertyF(
-    const PaddingProperty& padding, const ScaleProperty& scaleProperty, float percentReference, bool roundPixel)
+PaddingPropertyF ConvertToPaddingPropertyF(const PaddingProperty& padding, const ScaleProperty& scaleProperty,
+    float percentReference, bool roundPixel, bool nonNegative)
 {
     auto left = ConvertToPx(padding.left, scaleProperty, percentReference);
     auto right = ConvertToPx(padding.right, scaleProperty, percentReference);
     auto top = ConvertToPx(padding.top, scaleProperty, percentReference);
     auto bottom = ConvertToPx(padding.bottom, scaleProperty, percentReference);
-    if (roundPixel && AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    bool versionSatisfy =
+        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
+    if (roundPixel && versionSatisfy) {
         if (left.has_value()) {
             left = floor(left.value());
         }
@@ -142,6 +136,20 @@ PaddingPropertyF ConvertToPaddingPropertyF(
         }
         if (bottom.has_value()) {
             bottom = floor(bottom.value());
+        }
+    }
+    if (nonNegative && versionSatisfy) {
+        if (left.has_value()) {
+            left = std::max(left.value(), 0.0f);
+        }
+        if (right.has_value()) {
+            right = std::max(right.value(), 0.0f);
+        }
+        if (top.has_value()) {
+            top = std::max(top.value(), 0.0f);
+        }
+        if (bottom.has_value()) {
+            bottom = std::max(bottom.value(), 0.0f);
         }
     }
     return PaddingPropertyF { left, right, top, bottom };

@@ -140,9 +140,11 @@ public:
         gridLayoutInfo_.endMainLineIndex_ = 0;
         gridLayoutInfo_.ResetPositionFlags();
         gridLayoutInfo_.irregularItemsPosition_.clear();
+        gridLayoutInfo_.clearStretch_ = true;
     }
 
-    void SetIrregular(bool value) {
+    void SetIrregular(bool value)
+    {
         irregular_ = value;
     }
 
@@ -168,7 +170,8 @@ public:
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const;
 
-    void ScrollPage(bool reverse, bool smooth = false) override;
+    void ScrollPage(bool reverse, bool smooth = false,
+        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
 
     bool UpdateStartIndex(int32_t index);
 
@@ -183,8 +186,7 @@ public:
 
     void OnAnimateStop() override;
 
-    void AnimateTo(
-        float position, float duration, const RefPtr<Curve> &curve, bool smooth, bool canOverScroll = false,
+    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll = false,
         bool useTotalOffset = true) override;
     void ScrollTo(float position) override;
 
@@ -199,8 +201,8 @@ public:
 
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::AUTO,
         std::optional<float> extraOffset = std::nullopt) override;
-    void AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
-    bool AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
+    void AnimateToTarget(ScrollAlign align, const RefPtr<LayoutAlgorithmWrapper>& algo);
+    bool AnimateToTargetImpl(ScrollAlign align, const RefPtr<LayoutAlgorithmWrapper>& algo);
 
     int32_t GetOriginalIndex() const;
     int32_t GetCrossCount() const;
@@ -220,15 +222,15 @@ public:
     {
         return true;
     }
-    
-    std::optional<GridPredictLayoutParam> GetPredictLayoutParam() const
+
+    const std::list<int32_t>& GetPreloadItemList() const
     {
-        return predictLayoutParam_;
+        return preloadItemList_;
     }
 
-    void SetPredictLayoutParam(std::optional<GridPredictLayoutParam> param)
+    void SetPreloadItemList(std::list<int32_t>&& list)
     {
-        predictLayoutParam_ = param;
+        preloadItemList_ = std::move(list);
     }
 
     std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
@@ -253,7 +255,7 @@ private:
     float GetMainGap() const;
     float GetAllDelta();
     void CheckScrollable();
-    bool IsOutOfBoundary(bool useCurrentDelta = true) override;
+    bool IsOutOfBoundary(bool useCurrentDelta) override;
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     SizeF GetContentSize() const;
     void OnModifyDone() override;
@@ -279,12 +281,16 @@ private:
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
-    void SetAccessibilityAction();
 
     void ProcessEvent(bool indexChanged, float finalOffset);
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
 
+    /**
+     * @brief preform a layout if LayoutInfo is out of sync before calculating spring positions.
+     * INVARIANT: overScroll always enabled in the scope of this function. Because this function only runs in the
+     * context of spring animation.
+     */
     void SyncLayoutBeforeSpring();
 
     void FireOnScrollStart() override;
@@ -296,10 +302,13 @@ private:
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     void ResetAllDirectionsStep();
 
+    std::string GetIrregularIndexesString() const;
+
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
 
     bool scrollable_ = true;
+    bool forceOverScroll_ = false;
 
     float endHeight_ = 0.0f;
     bool isLeftStep_ = false;
@@ -317,7 +326,7 @@ private:
     GridItemIndexInfo curFocusIndexInfo_;
     GridLayoutInfo scrollGridLayoutInfo_;
     GridLayoutInfo gridLayoutInfo_;
-    std::optional<GridPredictLayoutParam> predictLayoutParam_;
+    std::list<int32_t> preloadItemList_; // list of GridItems to build preemptively in IdleTask
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };
 

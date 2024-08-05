@@ -334,7 +334,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert008, TestSize.Level1)
 {
     auto spanString = AceType::MakeRefPtr<SpanString>("段落标题\n正文第一段开始");
     SpanParagraphStyle spanParagraphStyle;
-    spanParagraphStyle.align = TextAlign::START;
+    spanParagraphStyle.align = TextAlign::CENTER;
     // default max lines 4
     spanParagraphStyle.maxLines = 4;
     spanParagraphStyle.wordBreak = WordBreak::BREAK_ALL;
@@ -350,10 +350,10 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert008, TestSize.Level1)
     SpanToHtml convert;
     auto out = convert.ToHtml(*spanString);
     std::string result =
-        "<div ><p style=\"text-indent: 23.00px;word-break: break_all;text-overflow: ellipsis;\"><span "
-        "style=\"font-size: 16.00fp;font-style: normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS "
-        "Sans;\">段落标题</span></p><span style=\"font-size: 16.00fp;font-style: normal;font-weight: normal;color: "
-        "#000000FF;font-family: HarmonyOS Sans;\">正文第一段开始</span></div>";
+        "<div ><p style=\"text-align: center;text-indent: 23.00px;word-break: break_all;text-overflow: ellipsis;\">"
+        "<span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;font-family: "
+        "HarmonyOS Sans;\">段落标题</span></p><span style=\"font-size: 16.00px;font-style: normal;font-weight: "
+        "normal;color: #000000FF;font-family: HarmonyOS Sans;\">正文第一段开始</span></div>";
     EXPECT_EQ(out, result);
 }
 
@@ -366,11 +366,34 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert009, TestSize.Level1)
     SpanToHtml convert;
     auto out = convert.ToHtml(*spanString);
     std::string result =
-        "<div ><span style=\"font-size: 16.00fp;font-style: normal;font-weight: normal;color: #000000FF;font-family: "
-        "HarmonyOS Sans;vertical-align: 20.00px;\">向上到顶</span><span style=\"font-size: 16.00fp;font-style: "
+        "<div ><span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;font-family: "
+        "HarmonyOS Sans;vertical-align: 20.00px;\">向上到顶</span><span style=\"font-size: 16.00px;font-style: "
         "normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;vertical-align: "
-        "10.00px;\">适中</span><span style=\"font-size: 16.00fp;font-style: normal;font-weight: normal;color: "
+        "10.00px;\">适中</span><span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: "
         "#000000FF;font-family: HarmonyOS Sans;\">向下到底</span></div>";
     EXPECT_EQ(out, result);
+}
+
+HWTEST_F(HtmlConvertTestNg, HtmlConvert010, TestSize.Level1)
+{
+    const std::string multiHtml =
+        "<html>"
+        "<body>"
+        "<p style=\"font-size:50px\"><span style=\"font-size:100px\">100fontsize</span>dddd当地经的123456<span "
+        "style=\"font-size:30px\">30fontsize</span>1232132</p>"
+        "</body>"
+        "</html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(multiHtml);
+    std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
+    EXPECT_EQ(spans.size(), 4);
+
+    SpanToHtml convert;
+    auto dstHtml = convert.ToHtml(*dstSpan);
+    HtmlToSpan toSpan1;
+    auto dstSpan1 = toSpan1.ToSpanString(dstHtml);
+    EXPECT_EQ(IsSpanItemSame(dstSpan->GetSpanItems(), dstSpan1->GetSpanItems()), true);
+    auto secondHtml = convert.ToHtml(*dstSpan1);
+    EXPECT_EQ(secondHtml, dstHtml);
 }
 } // namespace OHOS::Ace::NG

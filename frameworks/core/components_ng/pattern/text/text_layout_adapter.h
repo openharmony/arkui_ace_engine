@@ -19,6 +19,7 @@
 #include <string>
 
 namespace OHOS::Ace::NG {
+
 class TextLayoutadapter {
 public:
     static bool IsLeftToRight(int32_t charOfShowingText);

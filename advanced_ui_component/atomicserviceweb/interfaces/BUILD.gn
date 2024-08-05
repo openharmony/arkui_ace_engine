@@ -1,0 +1,64 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/es2abc_config.gni")
+import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
+import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
+
+es2abc_gen_abc("gen_atomicserviceweb_abc") {
+  src_js = rebase_path("atomicserviceweb.js")
+  dst_file = rebase_path(target_out_dir + "/atomicserviceweb.abc")
+  in_puts = [ "atomicserviceweb.js" ]
+  out_puts = [ target_out_dir + "/atomicserviceweb.abc" ]
+  extra_args = [ "--module" ]
+}
+
+gen_js_obj("atomicserviceweb_abc") {
+  input = get_label_info(":gen_atomicserviceweb_abc", "target_out_dir") +
+          "/atomicserviceweb.abc"
+  output = target_out_dir + "/atomicserviceweb_abc.o"
+  dep = ":gen_atomicserviceweb_abc"
+}
+
+gen_obj("atomicserviceweb_abc_preview") {
+  input = get_label_info(":gen_atomicserviceweb_abc", "target_out_dir") +
+          "/atomicserviceweb.abc"
+  output = target_out_dir + "/atomicserviceweb_abc.c"
+  snapshot_dep = [ ":gen_atomicserviceweb_abc" ]
+}
+
+ohos_shared_library("atomicserviceweb") {
+  include_dirs = [ "include" ]
+
+  sources = [
+    "api_policy_adapter.cpp",
+    "atomicserviceweb.cpp",
+  ]
+
+  if (use_mingw_win || use_mac || use_linux) {
+    deps = [ ":gen_obj_src_atomicserviceweb_abc_preview" ]
+  } else {
+    deps = [ ":atomicserviceweb_abc" ]
+  }
+
+  external_deps = [
+    "hilog:libhilog",
+    "napi:ace_napi",
+  ]
+
+  relative_install_dir = "module/atomicservice"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}

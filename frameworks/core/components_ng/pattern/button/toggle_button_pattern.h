@@ -25,7 +25,6 @@
 #include "core/components_ng/pattern/button/toggle_button_event_hub.h"
 #include "core/components_ng/pattern/button/toggle_button_paint_property.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
-#include "core/components/toggle/toggle_theme.h"
 
 namespace OHOS::Ace::NG {
 class ToggleButtonPattern : public ButtonPattern {
@@ -87,16 +86,7 @@ private:
     void HandleEnabled();
     void InitClickEvent();
     void InitButtonAndText();
-    void InitButtonShadow();
     void InitOnKeyEvent();
-    void InitFocusEvent();
-    void HandleBlurEvent(RefPtr<RenderContext> renderContext, RefPtr<ToggleTheme> toggleTheme,
-        RefPtr<FrameNode> textNode, RefPtr<TextLayoutProperty> textLayoutProperty,
-        RefPtr<ToggleButtonPaintProperty> paintProperty);
-    void HandleFocusEvent(RefPtr<RenderContext> renderContext, RefPtr<ToggleTheme> toggleTheme,
-        RefPtr<FrameNode> textNode, RefPtr<TextLayoutProperty> textLayoutProperty,
-        RefPtr<ToggleButtonPaintProperty> paintProperty);
-    void HandleBorderColorAndWidth();
     bool OnKeyEvent(const KeyEvent& event);
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
@@ -104,12 +94,10 @@ private:
     void OnTouchDown();
     void OnTouchUp();
     void FireBuilder();
-    void HandleOnOffStyle(bool isOnToOff, bool isFocus);
 
     RefPtr<FrameNode> BuildContentModifierNode();
     std::optional<SwitchMakeCallback> toggleMakeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
-    void SetIsFocus(bool isFocus);
     RefPtr<TouchEventImpl> touchListener_;
     int32_t nodeId_ = -1;
 
@@ -125,12 +113,6 @@ private:
     Dimension buttonRadius_;
     Dimension textFontSize_;
     Color textColor_;
-    bool isShadow_ = false;
-    bool isScale_ = false;
-    bool isTextColor_ = false;
-    bool isCheckedShadow_ = false;
-    bool isbgColorFocus_ = false;
-    bool isFocus_ = false;
     bool isPress_ = false;
     bool isSetClickedColor_ = false;
     bool IsNeedToHandleHoverOpacity();

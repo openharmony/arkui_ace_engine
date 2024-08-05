@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
 
 CustomNodeBase::~CustomNodeBase()
 {
+    RecycleManager::Erase(recycleInfo_.elemtId);
     // appearFunc_ & destroyFunc_ should be executed in pairs
     if (!executeFireOnAppear_ && appearFunc_) {
         appearFunc_();
@@ -62,8 +63,11 @@ void CustomNodeBase::MarkNeedUpdate()
 
 void CustomNodeBase::FireRecycleSelf()
 {
-    AceType::DynamicCast<UINode>(Claim(this))->OnRecycle();
+    auto uiNode = AceType::DynamicCast<UINode>(Claim(this));
+    uiNode->OnRecycle();
     if (recycleCustomNodeFunc_) {
+        recycleInfo_.Recycle(uiNode->GetId());
+        RecycleManager::Push(uiNode->GetId(), AceType::WeakClaim(this));
         recycleCustomNodeFunc_(AceType::Claim<CustomNodeBase>(this));
     }
 }
@@ -72,11 +76,13 @@ void CustomNodeBase::FireRecycleRenderFunc()
 {
     if (recycleRenderFunc_) {
         ACE_SCOPED_TRACE("CustomNode:BuildRecycle %s", GetJSViewName().c_str());
+        auto node = AceType::DynamicCast<UINode>(Claim(this));
+        recycleInfo_.Reuse();
+        RecycleManager::Pop(node->GetId());
         {
             ScopedViewStackProcessor scopedViewStackProcessor;
             recycleRenderFunc_();
         }
-        auto node = AceType::DynamicCast<UINode>(Claim(this));
         node->OnReuse();
         node->SetJSViewActive(true);
         recycleRenderFunc_ = nullptr;

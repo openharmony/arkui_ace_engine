@@ -39,12 +39,6 @@ using LayoutPair = std::pair<RefPtr<LayoutWrapper>, NewLineOffset>;
 
 namespace {
 constexpr int32_t DEFAULT_COLUMN_NUMBER = 12;
-std::string ConvertSizeTypeToString(GridSizeType sizeType)
-{
-    auto index = static_cast<int32_t>(sizeType);
-    std::array<const char*, 7> refs { "xs", "sm", "md", "lg", "xl", "xxl", "undefined" }; // 7 types of size
-    return refs[index];
-}
 
 void ParseNewLineForLargeOffset(
     int32_t childSpan, int32_t childOffset, int32_t restColumnNum, int32_t totalColumnNum, NewLineOffset& newLineOffset)
@@ -206,7 +200,6 @@ void GridRowLayoutAlgorithm::CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper
             if (alignSelf == FlexAlign::AUTO) {
                 alignSelf = gridRowAlignItem;
             }
-
         } else {
             alignSelf = gridRowAlignItem;
         }
@@ -253,12 +246,24 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto sizeType = GridContainerUtils::ProcessGridSizeType(layoutProperty->GetBreakPointsValue(),
         Size(maxSize.Width(), maxSize.Height()), mode, PipelineBase::GetCurrentContext());
     if (hostLayoutProperty->GetSizeTypeValue(V2::GridSizeType::UNDEFINED) != sizeType) {
-        auto sizeTypeString = ConvertSizeTypeToString(sizeType);
-        TAG_LOGD(AceLogTag::ACE_GRIDROW,
-            "breakpoint has changed to a new sizeType:%{public}s and breakpoint reference %{public}d",
-            sizeTypeString.c_str(), layoutProperty->GetBreakPointsValue().reference);
-        layoutWrapper->GetHostNode()->GetEventHub<GridRowEventHub>()->FireChangeEvent(sizeTypeString);
-        hostLayoutProperty->UpdateSizeType(sizeType);
+        auto frameNode = layoutWrapper->GetHostNode();
+        auto task = [weak = WeakClaim(RawPtr(frameNode)), sizeType]() {
+            auto host = weak.Upgrade();
+            CHECK_NULL_VOID(host);
+            auto sizeTypeString = GridRowLayoutAlgorithm::ConvertSizeTypeToString(sizeType);
+            auto hostLayoutProperty = host->GetLayoutProperty<GridRowLayoutProperty>();
+            CHECK_NULL_VOID(hostLayoutProperty);
+            auto hostEventHub = host->GetEventHub<GridRowEventHub>();
+            CHECK_NULL_VOID(hostEventHub);
+            hostLayoutProperty->UpdateSizeType(sizeType);
+            TAG_LOGD(AceLogTag::ACE_GRIDROW,
+                "[%{public}s-%{public}d] breakpoint has changed to a new sizeType:%{public}s and breakpoint reference "
+                "%{public}d",
+                host->GetTag().c_str(), host->GetId(), sizeTypeString.c_str(),
+                hostLayoutProperty->GetBreakPointsValue().reference);
+            hostEventHub->FireChangeEvent(sizeTypeString);
+        };
+        context->AddAfterLayoutTask(task);
     }
     auto gutter = GridContainerUtils::ProcessGutter(sizeType, layoutProperty->GetGutterValue());
     gutterInDouble_ =
@@ -302,6 +307,7 @@ void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 offsetWidth = ((newLineOffset.span + newLineOffset.offset) * columnUnitWidth_ +
                                ((newLineOffset.span + newLineOffset.offset) - 1) * gutterInDouble_.first);
                 offsetWidth = width - offsetWidth;
+                paddingOffset = { -padding.right.value_or(0.0f), padding.top.value_or(0.0f) };
             } else { // V2::GridRowDirection::Row
                 offsetWidth = newLineOffset.offset * columnUnitWidth_ + newLineOffset.offset * gutterInDouble_.first;
             }

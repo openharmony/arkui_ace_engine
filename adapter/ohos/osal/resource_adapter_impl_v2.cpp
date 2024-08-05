@@ -21,7 +21,6 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_convertor.h"
-#include "adapter/ohos/osal/resource_theme_style.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
@@ -54,7 +53,14 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_TEXT_OVERLAY,
     THEME_PATTERN_CONTAINER_MODAL
 };
-const std::string RESOURCE_TOKEN_PATTERN = "\\[.+?\\]\\.(\\S+?\\.\\S+)";
+
+// PRELOAD_LIST contain themes that should be preloaded asynchronously
+const char* PRELOAD_LIST[] = {
+    THEME_BLUR_STYLE_COMMON,
+    THEME_PATTERN_ICON
+};
+
+constexpr char RESOURCE_TOKEN_PATTERN[] = "\\[.+?\\]\\.(\\S+?\\.\\S+)";
 
 bool IsDirExist(const std::string& path)
 {
@@ -90,7 +96,7 @@ RefPtr<ResourceAdapter> ResourceAdapter::CreateV2()
 RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
     const std::string& bundleName, const std::string& moduleName)
 {
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, nullptr);
     auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
     CHECK_NULL_RETURN(aceContainer, nullptr);
@@ -99,7 +105,9 @@ RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
     auto context = aceContainer->GetAbilityContextByModule(bundleName, moduleName);
     if (context) {
         auto resourceManager = context->GetResourceManager();
-        newResourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(resourceManager);
+        auto resourceAdapterV2 = AceType::MakeRefPtr<ResourceAdapterImplV2>(resourceManager);
+        resourceAdapterV2->SetAppHasDarkRes(aceContainer->GetResourceConfiguration().GetAppHasDarkRes());
+        newResourceAdapter = resourceAdapterV2;
     } else {
         newResourceAdapter = ResourceAdapter::CreateV2();
         auto resourceInfo = aceContainer->GetResourceInfo();
@@ -136,6 +144,7 @@ ResourceAdapterImplV2::ResourceAdapterImplV2(
         sysResourceManager_->UpdateResConfig(*resConfig);
     }
     resConfig_ = resConfig;
+    appHasDarkRes_ = resourceInfo.GetResourceConfiguration().GetAppHasDarkRes();
 }
 
 void ResourceAdapterImplV2::Init(const ResourceInfo& resourceInfo)
@@ -152,6 +161,7 @@ void ResourceAdapterImplV2::Init(const ResourceInfo& resourceInfo)
     sysResourceManager_ = newResMgr;
     packagePathStr_ = (hapPath.empty() || IsDirExist(resPath)) ? resPath : std::string();
     resConfig_ = resConfig;
+    appHasDarkRes_ = resourceInfo.GetResourceConfiguration().GetAppHasDarkRes();
 }
 
 bool ResourceAdapterImplV2::NeedUpdateResConfig(const std::shared_ptr<Global::Resource::ResConfig>& oldResConfig,
@@ -195,6 +205,7 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
 {
     CheckThemeId(themeId);
     auto theme = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
+    
     constexpr char OHFlag[] = "ohos_"; // fit with resource/base/theme.json and pattern.json
     {
         auto manager = GetResourceManager();
@@ -219,7 +230,51 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
 
     theme->ParseContent();
     theme->patternAttrs_.clear();
+
+    PreloadTheme(themeId, theme);
     return theme;
+}
+
+void ResourceAdapterImplV2::PreloadTheme(int32_t themeId, RefPtr<ResourceThemeStyle> theme)
+{
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto manager = GetResourceManager();
+    CHECK_NULL_VOID(manager);
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    // post an asynchronous task to preload themes in PRELOAD_LIST
+    auto task = [themeId, manager, resourceThemeStyle = WeakPtr<ResourceThemeStyle>(theme),
+        weak = WeakClaim(this)]() -> void {
+        auto themeStyle = resourceThemeStyle.Upgrade();
+        CHECK_NULL_VOID(themeStyle);
+        auto adapter = weak.Upgrade();
+        CHECK_NULL_VOID(adapter);
+        for (size_t i = 0; i < sizeof(PRELOAD_LIST) / sizeof(PRELOAD_LIST[0]); ++i) {
+            std::string patternName = PRELOAD_LIST[i];
+            themeStyle->checkThemeStyleVector.push_back(patternName);
+            auto style = adapter->GetPatternByName(patternName);
+            if (style) {
+                ResValueWrapper value = { .type = ThemeConstantsType::PATTERN, .value = style };
+                themeStyle->SetAttr(patternName, value);
+            }
+        }
+
+        themeStyle->SetPromiseValue();
+    };
+
+    // isolation of loading card themes
+    if (!container->IsFormRender()) {
+        taskExecutor->PostTask(task, TaskExecutor::TaskType::BACKGROUND, "ArkUILoadTheme");
+    }
+}
+
+RefPtr<TaskExecutor> ResourceAdapterImplV2::GetTaskExecutor()
+{
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, nullptr);
+    return context->GetTaskExecutor();
 }
 
 RefPtr<ThemeStyle> ResourceAdapterImplV2::GetPatternByName(const std::string& patternName)
@@ -778,5 +833,20 @@ void ResourceAdapterImplV2::UpdateColorMode(ColorMode colorMode)
     auto resConfig = aceContainer->GetResourceConfiguration();
     resConfig.SetColorMode(colorMode);
     UpdateConfig(resConfig, false);
+}
+
+ColorMode ResourceAdapterImplV2::GetResourceColorMode() const
+{
+    CHECK_NULL_RETURN(resConfig_, ColorMode::LIGHT);
+    if (resConfig_->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK && !resConfig_->GetAppColorMode() &&
+        !appHasDarkRes_) {
+        return ColorMode::LIGHT;
+    }
+    return resConfig_->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK ? ColorMode::DARK : ColorMode::LIGHT;
+}
+
+void ResourceAdapterImplV2::SetAppHasDarkRes(bool hasDarkRes)
+{
+    appHasDarkRes_ = hasDarkRes;
 }
 } // namespace OHOS::Ace

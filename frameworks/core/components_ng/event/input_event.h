@@ -34,6 +34,8 @@ public:
     
     explicit InputEvent(OnAxisEventFunc&& callback) : onAxisCallback_(std::move(callback)) {}
 
+    explicit InputEvent(OnAccessibilityHoverFunc&& callback) : onAccessibilityHoverFunc_(std::move(callback)) {}
+
     ~InputEvent() override = default;
 
     const OnMouseEventFunc& GetOnMouseEventFunc() const
@@ -54,6 +56,11 @@ public:
     const OnAxisEventFunc& GetOnAxisEventFunc() const
     {
         return onAxisCallback_;
+    }
+
+    const OnAccessibilityHoverFunc& GetOnAccessibilityHoverFunc() const
+    {
+        return onAccessibilityHoverFunc_;
     }
 
     void operator()(MouseInfo& info) const
@@ -83,11 +90,19 @@ public:
         }
     }
 
+    void operator()(bool state, AccessibilityHoverInfo& info) const
+    {
+        if (onAccessibilityHoverFunc_) {
+            onAccessibilityHoverFunc_(state, info);
+        }
+    }
+
 private:
     OnMouseEventFunc onMouseCallback_;
     OnHoverEventFunc onHoverCallback_;
     OnHoverFunc onHoverEventCallback_;
     OnAxisEventFunc onAxisCallback_;
+    OnAccessibilityHoverFunc onAccessibilityHoverFunc_;
 };
 
 class ACE_EXPORT InputEventActuator : public virtual AceType {
@@ -148,6 +163,14 @@ public:
         userCallback_ = MakeRefPtr<InputEvent>(std::move(callback));
     }
 
+    void ReplaceInputEvent(OnAccessibilityHoverFunc&& callback)
+    {
+        if (userCallback_) {
+            userCallback_.Reset();
+        }
+        userCallback_ = MakeRefPtr<InputEvent>(std::move(callback));
+    }
+
     void AddInputEvent(const RefPtr<InputEvent>& inputEvent)
     {
         if (inputEvents_.empty()) {
@@ -172,6 +195,9 @@ public:
 
     void OnCollectHoverEffect(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result);
+    
+    void OnCollectAccessibilityHoverEvent(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& host);
 
     void OnCollectAxisEvent(
         const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, AxisTestResult& onAxisResult);
@@ -181,6 +207,7 @@ private:
     RefPtr<MouseEventTarget> mouseEventTarget_;
     RefPtr<HoverEventTarget> hoverEventTarget_;
     RefPtr<HoverEffectTarget> hoverEffectTarget_;
+    RefPtr<HoverEventTarget> accessibilityHoverEventTarget_;
     RefPtr<AxisEventTarget> axisEventTarget_;
     std::list<RefPtr<InputEvent>> inputEvents_;
     RefPtr<InputEvent> userCallback_;

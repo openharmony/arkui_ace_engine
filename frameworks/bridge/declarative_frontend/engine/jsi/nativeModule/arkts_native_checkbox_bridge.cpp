@@ -35,10 +35,10 @@ panda::Local<panda::JSValueRef> JsCheckboxChangeCallback(panda::JsiRuntimeCallIn
     bool value = firstArg->ToBoolean(vm)->Value();
     auto ref = runtimeCallInfo->GetThisRef();
     auto obj = ref->ToObject(vm);
-    if (obj->GetNativePointerFieldCount() < 1) {
+    if (obj->GetNativePointerFieldCount(vm) < 1) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(0));
+    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(vm, 0));
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     CheckBoxModelNG::SetChangeValue(frameNode, value);
     return panda::JSValueRef::Undefined(vm);

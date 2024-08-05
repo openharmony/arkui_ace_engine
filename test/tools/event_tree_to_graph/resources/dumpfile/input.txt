@@ -1,0 +1,321 @@
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: WindowName: EntryView
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: DisplayId: 0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: WinId: 8
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: Pid: 1550
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: Type: 2001
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: Mode: 1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: Flag: 0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: Orientation: 8
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: IsStartingWindow: false
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: FirstFrameCallbackCalled: 0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: VisibilityState: 0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: Focusable: true
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: DecoStatus: true
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: IsPrivacyMode: false
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: isSnapshotSkip: 0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: WindowRect: [ 0, 0, 720, 1280 ]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: TouchHotAreas: [ 0, 0, 720, 1280 ]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: bundleName:com.ohos.launcher
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: moduleName:phone_launcher
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: 0: event tree =>
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:  touch points:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   id: 0, point: Offset (392.00, 312.00), screenPoint: Offset (392.00, 312.00), type: TouchDown, timestamp: 2017-08-25 15:00:20.165, isInjected: 0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   id: 0, point: Offset (392.00, 312.00), screenPoint: Offset (392.00, 312.00), type: TouchUp, timestamp: 2017-08-25 15:00:20.233, isInjected: 0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   id: 1, point: Offset (200.00, 112.00), screenPoint: Offset (200.00, 112.00), type: TouchDown, timestamp: 2017-08-25 15:00:27.165, isInjected: 0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   id: 1, point: Offset (100.00, 456.00), screenPoint: Offset (100.00, 456.00), type: TouchUp, timestamp: 2017-08-25 15:00:27.233, isInjected: 0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:  hittest:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 0, parentId: -1, tag: root, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 1, parentId: 0, tag: stage, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 4, parentId: 1, tag: page, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 7, parentId: 4, tag: Stack, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 8, parentId: 7, tag: Flex, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 11, parentId: 8, tag: Column, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (45.50, 1077.50) - [629.00 x 130.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 9, parentId: 8, tag: Column, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 14, parentId: 9, tag: __Common__, comId: PageDesktopLayout, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 16, parentId: 14, tag: Column, comId: GridSwiper, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 84, parentId: 16, tag: Swiper, comId: GridSwiper_Swiper, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 91, parentId: 84, tag: SwiperIndicator, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (330.00, 1029.50) - [60.00 x 48.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 88, parentId: 84, tag: Column, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 135.50) - [720.00 x 942.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 89, parentId: 88, tag: __Common__, comId: SwiperPage_00, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 825.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 92, parentId: 89, tag: Grid, comId: SwiperPage_Grid_0, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (18.00, 0.00) - [684.00 x 825.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 228, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_7, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (282.00, 141.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 231, parentId: 228, tag: __Common__, comId: SwiperPage_AppItem_7, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 233, parentId: 231, tag: Column, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 235, parentId: 233, tag: Column, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 236, parentId: 235, tag: Column, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 240, parentId: 236, tag: Column, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (40.00, 91.50) - [40.00 x 24.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 237, parentId: 236, tag: Column, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (19.50, 4.50) - [81.00 x 81.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 242, parentId: 237, tag: Column, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [81.00 x 81.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 243, parentId: 242, tag: Badge, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [81.00 x 81.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 245, parentId: 243, tag: Text, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (84.00, -3.00) - [0.00 x 0.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 244, parentId: 243, tag: Image, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [81.00 x 81.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:  event procedures:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   finger:0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:    frameNodeId: 242, type: TouchEventActuator, depth: 0, id: 0xef6c5fa0, parentId: 0x0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchDown, timestamp: 2017-08-25 15:00:20.170
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchUp, timestamp: 2017-08-25 15:00:20.235
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:    frameNodeId: 233, type: TouchEventActuator, depth: 0, id: 0xf072b8a0, parentId: 0x0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchDown, timestamp: 2017-08-25 15:00:20.170
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchUp, timestamp: 2017-08-25 15:00:20.236
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:    frameNodeId: 84, type: TouchEventActuator, depth: 0, id: 0xf072b240, parentId: 0x0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchDown, timestamp: 2017-08-25 15:00:20.174
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchUp, timestamp: 2017-08-25 15:00:20.236
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:    frameNodeId: 84, type: ExclusiveRecognizer, depth: 0, id: 0xf063eed0, parentId: 0x0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchDown, state: READY, disposal: NONE, timestamp: 2017-08-25 15:00:20.177
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchUp, state: SUCCEED, disposal: ACCEPT, timestamp: 2017-08-25 15:00:20.245
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     frameNodeId: 88, type: ExclusiveRecognizer, depth: 1, id: 0xef57cf40, parentId: 0xf063eed0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchDown, state: READY, disposal: NONE, timestamp: 2017-08-25 15:00:20.177
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchUp, state: SUCCEED, disposal: REJECT, timestamp: 2017-08-25 15:00:20.245
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      frameNodeId: 233, type: ExclusiveRecognizer, depth: 2, id: 0xef57c6f0, parentId: 0xef57cf40
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:        procedure: HandleTouchDown, state: READY, disposal: NONE, timestamp: 2017-08-25 15:00:20.177
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:        procedure: HandleTouchUp, state: SUCCEED, disposal: ACCEPT, timestamp: 2017-08-25 15:00:20.245
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       frameNodeId: 235, type: ParallelRecognizer, depth: 3, id: 0xef57c350, parentId: 0xef57c6f0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:        stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:         procedure: HandleTouchDown, state: DETECTING, disposal: NONE, timestamp: 2017-08-25 15:00:20.176
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:         procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:20.237
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:        frameNodeId: 235, type: ParallelRecognizer, depth: 4, id: 0xef57bf70, parentId: 0xef57c350
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:         stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:          procedure: HandleTouchDown, state: DETECTING, disposal: NONE, timestamp: 2017-08-25 15:00:20.176
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:          procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:20.237
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:         frameNodeId: 237, type: LongPressRecognizer, depth: 5, id: 0xeedba4f0, parentId: 0xef57bf70, customInfo: duration: 800, isForDrag: 0, repeat: 0, fingers: 1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:          stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:           procedure: HandleTouchDown, state: DETECTING, disposal: NONE, timestamp: 2017-08-25 15:00:20.175
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:           procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:20.236
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:         frameNodeId: 237, type: SequencedRecognizer, depth: 5, id: 0xef57bb90, parentId: 0xef57bf70
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:          stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:           procedure: HandleTouchDown, state: READY, disposal: NONE, timestamp: 2017-08-25 15:00:20.175
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:           procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:20.236
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:          frameNodeId: 237, type: LongPressRecognizer, depth: 6, id: 0xf06b6f70, parentId: 0xef57bb90, customInfo: duration: 500, isForDrag: 1, repeat: 0, fingers: 1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:           stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:            procedure: HandleTouchDown, state: DETECTING, disposal: NONE, timestamp: 2017-08-25 15:00:20.175
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:            procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:20.236
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:          frameNodeId: 237, type: PanRecognizer, depth: 6, id: 0xf0710020, parentId: 0xef57bb90, customInfo: direction: 15, isForDrag: 1, distance: 7.5, fingers: 1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:           stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:         frameNodeId: 237, type: LongPressRecognizer, depth: 5, id: 0xeedb9fb0, parentId: 0xef57bf70, customInfo: duration: 800, isForDrag: 1, repeat: 0, fingers: 1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:          stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:           procedure: HandleTouchDown, state: DETECTING, disposal: NONE, timestamp: 2017-08-25 15:00:20.176
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:           procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:20.237
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:        frameNodeId: 235, type: LongPressRecognizer, depth: 4, id: 0xeedbaa30, parentId: 0xef57c350, customInfo: duration: 500, isForDrag: 0, repeat: 0, fingers: 1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:         stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:          procedure: HandleTouchDown, state: DETECTING, disposal: NONE, timestamp: 2017-08-25 15:00:20.176
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:          procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:20.237
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       frameNodeId: 233, type: ClickRecognizer, depth: 3, id: 0xf0c19f90, parentId: 0xef57c6f0, customInfo: count: 1, fingers: 1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:        stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:         procedure: HandleTouchDown, state: READY, disposal: NONE, timestamp: 2017-08-25 15:00:20.177
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:         procedure: HandleTouchUp, state: SUCCEED, disposal: ACCEPT, timestamp: 2017-08-25 15:00:20.245
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      frameNodeId: 88, type: LongPressRecognizer, depth: 2, id: 0xef748aa0, parentId: 0xef57cf40, customInfo: duration: 500, isForDrag: 0, repeat: 0, fingers: 1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:        procedure: HandleTouchDown, state: DETECTING, disposal: NONE, timestamp: 2017-08-25 15:00:20.177
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:        procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:20.245
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     frameNodeId: 84, type: PanRecognizer, depth: 1, id: 0xf3d6bfc0, parentId: 0xf063eed0, customInfo: direction: 3, isForDrag: 0, distance: 7.5, fingers: 1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchDown, state: DETECTING, disposal: NONE, timestamp: 2017-08-25 15:00:20.177
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchUp, state: FAIL, disposal: NONE, timestamp: 2017-08-25 15:00:20.245
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   finger:1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:    frameNodeId: 84, type: TouchEventActuator, depth: 0, id: 0xf072b240, parentId: 0x0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchDown, timestamp: 2017-08-25 15:00:22.046
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchUp, timestamp: 2017-08-25 15:00:22.130
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:    frameNodeId: 84, type: ExclusiveRecognizer, depth: 0, id: 0xf063eed0, parentId: 0x0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchDown, state: READY, disposal: NONE, timestamp: 2017-08-25 15:00:22.046
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:22.131
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     frameNodeId: 88, type: LongPressRecognizer, depth: 1, id: 0xef748aa0, parentId: 0xf063eed0, customInfo: duration: 500, isForDrag: 0, repeat: 0, fingers: 1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchDown, state: DETECTING, disposal: NONE, timestamp: 2017-08-25 15:00:22.046
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:22.131
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     frameNodeId: 84, type: PanRecognizer, depth: 1, id: 0xf3d6bfc0, parentId: 0xf063eed0, customInfo: direction: 3, isForDrag: 0, distance: 7.5, fingers: 1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchDown, state: DETECTING, disposal: NONE, timestamp: 2017-08-25 15:00:22.046
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:22.131
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: 1: event tree =>
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:  touch points:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   id: 0, point: Offset (288.00, 530.00), screenPoint: Offset (288.00, 530.00), type: TouchDown, timestamp: 2017-08-25 15:00:22.043, isInjected: 0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   id: 0, point: Offset (288.00, 536.00), screenPoint: Offset (288.00, 536.00), type: TouchUp, timestamp: 2017-08-25 15:00:22.130, isInjected: 0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:  hittest:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 0, parentId: -1, tag: root, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 1, parentId: 0, tag: stage, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 4, parentId: 1, tag: page, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 7, parentId: 4, tag: Stack, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 8, parentId: 7, tag: Flex, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 11, parentId: 8, tag: Column, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (45.50, 1077.50) - [629.00 x 130.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 9, parentId: 8, tag: Column, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 14, parentId: 9, tag: __Common__, comId: PageDesktopLayout, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 16, parentId: 14, tag: Column, comId: GridSwiper, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 84, parentId: 16, tag: Swiper, comId: GridSwiper_Swiper, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 91, parentId: 84, tag: SwiperIndicator, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (330.00, 1029.50) - [60.00 x 48.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 88, parentId: 84, tag: Column, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 135.50) - [720.00 x 942.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 89, parentId: 88, tag: __Common__, comId: SwiperPage_00, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 825.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 92, parentId: 89, tag: Grid, comId: SwiperPage_Grid_0, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (18.00, 0.00) - [684.00 x 825.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 228, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_7, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (282.00, 141.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 131, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_6, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (141.00, 141.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 125, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_5, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (0.00, 141.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 119, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_4, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (564.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 113, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_3, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (423.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 107, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_2, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (282.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 101, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_1, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (141.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 95, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_0, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:  event procedures:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   finger:0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:    frameNodeId: 84, type: TouchEventActuator, depth: 0, id: 0xf072b240, parentId: 0x0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchDown, timestamp: 2017-08-25 15:00:22.046
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchUp, timestamp: 2017-08-25 15:00:22.130
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:    frameNodeId: 84, type: ExclusiveRecognizer, depth: 0, id: 0xf063eed0, parentId: 0x0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchDown, state: READY, disposal: NONE, timestamp: 2017-08-25 15:00:22.046
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:22.131
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     frameNodeId: 88, type: LongPressRecognizer, depth: 1, id: 0xef748aa0, parentId: 0xf063eed0, customInfo: duration: 500, isForDrag: 0, repeat: 0, fingers: 1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchDown, state: DETECTING, disposal: NONE, timestamp: 2017-08-25 15:00:22.046
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:22.131
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     frameNodeId: 84, type: PanRecognizer, depth: 1, id: 0xf3d6bfc0, parentId: 0xf063eed0, customInfo: direction: 3, isForDrag: 0, distance: 7.5, fingers: 1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchDown, state: DETECTING, disposal: NONE, timestamp: 2017-08-25 15:00:22.046
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:22.131
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: 2: event tree =>
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:  touch points:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   id: 0, point: Offset (278.00, 551.00), screenPoint: Offset (278.00, 551.00), type: TouchDown, timestamp: 2017-08-25 15:00:22.244, isInjected: 0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   id: 0, point: Offset (278.00, 551.00), screenPoint: Offset (278.00, 551.00), type: TouchUp, timestamp: 2017-08-25 15:00:22.295, isInjected: 0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:  hittest:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 0, parentId: -1, tag: root, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 1, parentId: 0, tag: stage, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 4, parentId: 1, tag: page, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 7, parentId: 4, tag: Stack, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 8, parentId: 7, tag: Flex, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 11, parentId: 8, tag: Column, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (45.50, 1077.50) - [629.00 x 130.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 9, parentId: 8, tag: Column, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 14, parentId: 9, tag: __Common__, comId: PageDesktopLayout, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 16, parentId: 14, tag: Column, comId: GridSwiper, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 84, parentId: 16, tag: Swiper, comId: GridSwiper_Swiper, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 91, parentId: 84, tag: SwiperIndicator, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (330.00, 1029.50) - [60.00 x 48.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 88, parentId: 84, tag: Column, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 135.50) - [720.00 x 942.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 89, parentId: 88, tag: __Common__, comId: SwiperPage_00, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 825.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 92, parentId: 89, tag: Grid, comId: SwiperPage_Grid_0, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (18.00, 0.00) - [684.00 x 825.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 228, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_7, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (282.00, 141.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 131, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_6, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (141.00, 141.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 125, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_5, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (0.00, 141.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 119, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_4, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (564.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 113, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_3, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (423.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 107, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_2, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (282.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 101, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_1, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (141.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 95, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_0, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:  event procedures:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   finger:0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:    frameNodeId: 84, type: TouchEventActuator, depth: 0, id: 0xf072b240, parentId: 0x0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchDown, timestamp: 2017-08-25 15:00:22.247
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchUp, timestamp: 2017-08-25 15:00:22.295
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:    frameNodeId: 84, type: ExclusiveRecognizer, depth: 0, id: 0xf063eed0, parentId: 0x0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchDown, state: READY, disposal: NONE, timestamp: 2017-08-25 15:00:22.247
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:22.295
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     frameNodeId: 88, type: LongPressRecognizer, depth: 1, id: 0xef748aa0, parentId: 0xf063eed0, customInfo: duration: 500, isForDrag: 0, repeat: 0, fingers: 1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchDown, state: DETECTING, disposal: NONE, timestamp: 2017-08-25 15:00:22.247
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:22.295
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     frameNodeId: 84, type: PanRecognizer, depth: 1, id: 0xf3d6bfc0, parentId: 0xf063eed0, customInfo: direction: 3, isForDrag: 0, distance: 7.5, fingers: 1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchDown, state: DETECTING, disposal: NONE, timestamp: 2017-08-25 15:00:22.247
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:22.295
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: 3: event tree =>
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:  touch points:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   id: 0, point: Offset (511.00, 636.00), screenPoint: Offset (511.00, 636.00), type: TouchDown, timestamp: 2017-08-25 15:00:25.152, isInjected: 0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   id: 0, point: Offset (122.00, 673.00), screenPoint: Offset (122.00, 673.00), type: TouchUp, timestamp: 2017-08-25 15:00:25.402, isInjected: 0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:  hittest:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 0, parentId: -1, tag: root, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 1, parentId: 0, tag: stage, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 4, parentId: 1, tag: page, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 7, parentId: 4, tag: Stack, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 8, parentId: 7, tag: Flex, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 11, parentId: 8, tag: Column, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (45.50, 1077.50) - [629.00 x 130.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 9, parentId: 8, tag: Column, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 14, parentId: 9, tag: __Common__, comId: PageDesktopLayout, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 16, parentId: 14, tag: Column, comId: GridSwiper, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 84, parentId: 16, tag: Swiper, comId: GridSwiper_Swiper, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 91, parentId: 84, tag: SwiperIndicator, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (330.00, 1029.50) - [60.00 x 48.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 88, parentId: 84, tag: Column, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 135.50) - [720.00 x 942.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 89, parentId: 88, tag: __Common__, comId: SwiperPage_00, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 825.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 92, parentId: 89, tag: Grid, comId: SwiperPage_Grid_0, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (18.00, 0.00) - [684.00 x 825.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 228, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_7, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (282.00, 141.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 131, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_6, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (141.00, 141.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 125, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_5, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (0.00, 141.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 119, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_4, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (564.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 113, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_3, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (423.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 107, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_2, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (282.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 101, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_1, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (141.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 95, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_0, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:  event procedures:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   finger:0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:    frameNodeId: 84, type: TouchEventActuator, depth: 0, id: 0xf072b240, parentId: 0x0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchDown, timestamp: 2017-08-25 15:00:25.155
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchUp, timestamp: 2017-08-25 15:00:25.404
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:    frameNodeId: 84, type: ExclusiveRecognizer, depth: 0, id: 0xf063eed0, parentId: 0x0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchDown, state: READY, disposal: NONE, timestamp: 2017-08-25 15:00:25.156
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchMove, state: SUCCEED, disposal: ACCEPT, timestamp: 2017-08-25 15:00:25.341
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchUp, state: SUCCEED, disposal: REJECT, timestamp: 2017-08-25 15:00:25.416
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     frameNodeId: 88, type: LongPressRecognizer, depth: 1, id: 0xef748aa0, parentId: 0xf063eed0, customInfo: duration: 500, isForDrag: 0, repeat: 0, fingers: 1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchDown, state: DETECTING, disposal: NONE, timestamp: 2017-08-25 15:00:25.155
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:25.404
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     frameNodeId: 84, type: PanRecognizer, depth: 1, id: 0xf3d6bfc0, parentId: 0xf063eed0, customInfo: direction: 3, isForDrag: 0, distance: 7.5, fingers: 1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchDown, state: DETECTING, disposal: NONE, timestamp: 2017-08-25 15:00:25.156
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchMove, state: SUCCEED, disposal: ACCEPT, timestamp: 2017-08-25 15:00:25.341
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchUp, state: READY, disposal: ACCEPT, timestamp: 2017-08-25 15:00:25.416
+xxx)-(10000:10000:scope)] EventTreeDumpInfo: 4: event tree =>
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:  touch points:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   id: 0, point: Offset (198.00, 581.00), screenPoint: Offset (198.00, 581.00), type: TouchDown, timestamp: 2017-08-25 15:00:26.348, isInjected: 0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   id: 0, point: Offset (559.00, 562.00), screenPoint: Offset (559.00, 562.00), type: TouchUp, timestamp: 2017-08-25 15:00:26.611, isInjected: 0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:  hittest:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 0, parentId: -1, tag: root, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 1, parentId: 0, tag: stage, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 4, parentId: 1, tag: page, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 7, parentId: 4, tag: Stack, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 8, parentId: 7, tag: Flex, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1280.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 11, parentId: 8, tag: Column, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (45.50, 1077.50) - [629.00 x 130.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 9, parentId: 8, tag: Column, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 14, parentId: 9, tag: __Common__, comId: PageDesktopLayout, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 16, parentId: 14, tag: Column, comId: GridSwiper, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 84, parentId: 16, tag: Swiper, comId: GridSwiper_Swiper, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 1077.50]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 91, parentId: 84, tag: SwiperIndicator, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (330.00, 1029.50) - [60.00 x 48.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 88, parentId: 84, tag: Column, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 135.50) - [720.00 x 942.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 89, parentId: 88, tag: __Common__, comId: SwiperPage_00, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [720.00 x 825.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 92, parentId: 89, tag: Grid, comId: SwiperPage_Grid_0, monopolizeEvents: 0, isHit: 1, hitTestMode: 0, responseRegion: RectT (18.00, 0.00) - [684.00 x 825.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 228, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_7, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (282.00, 141.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 131, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_6, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (141.00, 141.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 125, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_5, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (0.00, 141.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 119, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_4, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (564.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 113, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_3, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (423.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 107, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_2, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (282.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 101, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_1, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (141.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   nodeId: 95, parentId: 92, tag: GridItem, comId: SwiperPage_GridItem_0, monopolizeEvents: 0, isHit: 0, hitTestMode: 0, responseRegion: RectT (0.00, 0.00) - [120.00 x 120.00]
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:  event procedures:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:   finger:0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:    frameNodeId: 84, type: TouchEventActuator, depth: 0, id: 0xf072b240, parentId: 0x0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchDown, timestamp: 2017-08-25 15:00:26.351
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchUp, timestamp: 2017-08-25 15:00:26.613
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:    frameNodeId: 84, type: ExclusiveRecognizer, depth: 0, id: 0xf063eed0, parentId: 0x0
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchDown, state: READY, disposal: NONE, timestamp: 2017-08-25 15:00:26.352
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchMove, state: SUCCEED, disposal: ACCEPT, timestamp: 2017-08-25 15:00:26.414
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      procedure: HandleTouchUp, state: SUCCEED, disposal: REJECT, timestamp: 2017-08-25 15:00:26.617
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     frameNodeId: 88, type: LongPressRecognizer, depth: 1, id: 0xef748aa0, parentId: 0xf063eed0, customInfo: duration: 500, isForDrag: 0, repeat: 0, fingers: 1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchDown, state: DETECTING, disposal: NONE, timestamp: 2017-08-25 15:00:26.351
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchMove, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:26.411
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:26.613
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:     frameNodeId: 84, type: PanRecognizer, depth: 1, id: 0xf3d6bfc0, parentId: 0xf063eed0, customInfo: direction: 3, isForDrag: 0, distance: 7.5, fingers: 1
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:      stateHistory:
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchDown, state: DETECTING, disposal: NONE, timestamp: 2017-08-25 15:00:26.352
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchMove, state: SUCCEED, disposal: ACCEPT, timestamp: 2017-08-25 15:00:26.414
+xxx)-(10000:10000:scope)] EventTreeDumpInfo:       procedure: HandleTouchUp, state: READY, disposal: ACCEPT, timestamp: 2017-08-25 15:00:26.617

@@ -298,7 +298,9 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
       return;
     }
     const child = iChild as ViewPU | ViewV2;
-    child.updateStateVars(params);
+    if ('updateStateVars' in child) {
+      child.updateStateVars(params);
+    }
     stateMgmtConsole.debug(`${this.debugInfo__()}: updateChildViewById(${elmtId}) - end`);
     stateMgmtProfiler.end();
   }
@@ -326,7 +328,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   */
   public forceCompleteRerender(deep: boolean = false): void {
     stateMgmtProfiler.begin('ViewPU/V2.forceCompleteRerender');
-    stateMgmtConsole.warn(`${this.debugInfo__()}: forceCompleteRerender - start.`);
+    stateMgmtConsole.debug(`${this.debugInfo__()}: forceCompleteRerender - start.`);
 
     // see which elmtIds are managed by this View
     // and clean up all book keeping for them

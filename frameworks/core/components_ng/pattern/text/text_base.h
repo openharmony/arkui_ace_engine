@@ -100,6 +100,11 @@ public:
 
     virtual void OnVirtualKeyboardAreaChanged() {}
 
+    virtual RefPtr<Clipboard> GetClipboard()
+    {
+        return nullptr;
+    }
+
     const RectF& GetContentRect() const
     {
         return contentRect_;
@@ -140,14 +145,15 @@ public:
         return OffsetF();
     }
 
-    virtual RefPtr<Clipboard> GetClipboard()
-    {
-        return nullptr;
-    }
-
     TextSelector GetTextSelector() const
     {
         return textSelector_;
+    }
+
+    virtual void GetSelectIndex(int32_t& start, int32_t& end) const
+    {
+        start = textSelector_.GetTextStart();
+        end = textSelector_.GetTextEnd();
     }
 
     virtual const Dimension& GetAvoidSoftKeyboardOffset() const

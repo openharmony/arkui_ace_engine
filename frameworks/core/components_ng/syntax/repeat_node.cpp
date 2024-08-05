@@ -39,6 +39,7 @@ RefPtr<RepeatNode> RepeatNode::GetOrCreateRepeatNode(int32_t nodeId)
 void RepeatNode::CreateTempItems()
 {
     std::swap(ids_, tempIds_);
+    TraversingCheck();
     std::swap(ModifyChildren(), tempChildren_);
 
     tempChildrenOfRepeat_ = std::vector<RefPtr<UINode>>(tempChildren_.begin(), tempChildren_.end());
@@ -114,7 +115,7 @@ void RepeatNode::FlushUpdateAndMarkDirty()
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
-// FIXME called from where ?
+// STATE_MGMT_NOTE called from where ?
 RefPtr<FrameNode> RepeatNode::GetFrameNode(int32_t index)
 {
     return AceType::DynamicCast<FrameNode>(GetFrameChildByIndex(index, false, false));

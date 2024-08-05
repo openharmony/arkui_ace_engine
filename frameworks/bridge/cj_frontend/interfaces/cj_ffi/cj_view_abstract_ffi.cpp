@@ -254,6 +254,16 @@ void FfiOHOSAceFrameworkViewAbstractSetHeight(double height, int32_t unit)
     ViewAbstractModel::GetInstance()->SetHeight(value);
 }
 
+void FFISetWidthWithEmpty()
+{
+    ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+}
+
+void FFISetHeightWithEmpty()
+{
+    ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetSize(double width, int32_t widthUnit, double height, int32_t heightUnit)
 {
     Dimension widthDime(width, static_cast<DimensionUnit>(widthUnit));
@@ -693,6 +703,9 @@ void FfiOHOSAceFrameworkViewAbstractSetTransition()
 void FfiOHOSAceFrameworkViewAbstractTransition(int64_t id)
 {
     auto nativeTransitionEffect = FFIData::GetData<NativeTransitionEffect>(id);
+    if (nativeTransitionEffect == nullptr) {
+        return;
+    }
     auto chainedEffect = nativeTransitionEffect->effect;
     ViewAbstractModel::GetInstance()->SetChainedTransition(chainedEffect);
 }
@@ -1328,8 +1341,10 @@ static void NewCjRadialGradient(RadialGradientParam radialGradientParam, NG::Gra
         newGradient.GetRadialGradient()->radialCenterY = CalcDimension(columnValue, DimensionUnit::PERCENT);
     }
     // radius
-    newGradient.GetRadialGradient()->radialVerticalSize = CalcDimension(radialGradientParam.radius);
-    newGradient.GetRadialGradient()->radialHorizontalSize = CalcDimension(radialGradientParam.radius);
+    newGradient.GetRadialGradient()->radialVerticalSize =
+        Dimension(radialGradientParam.radius, static_cast<DimensionUnit>(radialGradientParam.radiusUnit));
+    newGradient.GetRadialGradient()->radialHorizontalSize =
+        Dimension(radialGradientParam.radius, static_cast<DimensionUnit>(radialGradientParam.radiusUnit));
     // repeating
     newGradient.SetRepeat(radialGradientParam.repeating);
     // color stops

@@ -231,19 +231,21 @@ void CalendarDataAdapter::SaveCacheData(const CalendarDataRequest& request, cons
     auto context = pipelineContext_.Upgrade();
     auto bkTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
 
-    bkTaskExecutor.PostTask([request, result]() {
-        std::string url = cachePath_;
-        url.append("/")
-            .append(std::to_string(request.month.year))
-            .append(std::to_string(request.month.month))
-            .append(Localization::GetInstance()->GetLanguageTag());
-        std::ofstream outFile(url, std::fstream::out);
-        if (!outFile) {
-            LOGE("the file open failed");
-            return;
-        }
-        outFile.write(reinterpret_cast<const char*>(result.c_str()), result.size());
-    }, "ArkUICalendarSaveCacheData");
+    bkTaskExecutor.PostTask(
+        [request, result]() {
+            std::string url = cachePath_;
+            url.append("/")
+                .append(std::to_string(request.month.year))
+                .append(std::to_string(request.month.month))
+                .append(Localization::GetInstance()->GetLanguageTag());
+            std::ofstream outFile(url, std::fstream::out);
+            if (!outFile) {
+                LOGE("the file open failed");
+                return;
+            }
+            outFile.write(reinterpret_cast<const char*>(result.c_str()), result.size());
+        },
+        "ArkUICalendarSaveCacheData");
 }
 
 void CalendarDataAdapter::ParseCardCalendarData(const std::string& source)

@@ -117,6 +117,10 @@ constexpr char NAVIGATION_MODULE_NAME[] = "moduleName";
 constexpr char NAVIGATION_PAGE_PATH[] = "pagePath";
 constexpr char IS_USER_CREATE_STACK[] = "isUserCreateStack";
 
+// navigation/navdestination Field
+constexpr const char* NAV_FIELD = "__NavigationField__";
+constexpr const char* DES_FIELD = "__NavdestinationField__";
+
 // font scale
 constexpr float STANDARD_FONT_SCALE = 1.0f;
 

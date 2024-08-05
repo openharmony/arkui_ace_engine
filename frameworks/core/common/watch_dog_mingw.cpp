@@ -183,7 +183,6 @@ void ThreadWatcher::DetonatedBomb()
     if (inputTaskIds_.empty()) {
         return;
     }
-
     uint64_t currentTime = GetMilliseconds();
     uint64_t bombId = inputTaskIds_.front();
     if (currentTime - bombId > ANR_INPUT_FREEZE_TIME) {

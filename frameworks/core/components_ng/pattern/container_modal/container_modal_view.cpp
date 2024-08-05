@@ -151,7 +151,7 @@ RefPtr<FrameNode> ContainerModalView::AddControlButtons(RefPtr<FrameNode>& contr
         [wk = WeakClaim(RawPtr(windowManager))](GestureEvent& info) {
             auto windowManager = wk.Upgrade();
             CHECK_NULL_VOID(windowManager);
-            LOGI("left split button clicked");
+            TAG_LOGI(AceLogTag::ACE_APPBAR, "left split button clicked");
             windowManager->FireWindowSplitCallBack();
         }));
     controlButtonsRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
@@ -160,10 +160,10 @@ RefPtr<FrameNode> ContainerModalView::AddControlButtons(RefPtr<FrameNode>& contr
             CHECK_NULL_VOID(windowManager);
             auto mode = windowManager->GetWindowMode();
             if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
-                LOGI("recover button clicked");
+                TAG_LOGI(AceLogTag::ACE_APPBAR, "recover button clicked");
                 windowManager->WindowRecover();
             } else {
-                LOGI("maximize button clicked");
+                TAG_LOGI(AceLogTag::ACE_APPBAR, "maximize button clicked");
                 windowManager->WindowMaximize();
             }
         }));
@@ -171,7 +171,7 @@ RefPtr<FrameNode> ContainerModalView::AddControlButtons(RefPtr<FrameNode>& contr
         [wk = WeakClaim(RawPtr(windowManager))](GestureEvent& info) {
             auto windowManager = wk.Upgrade();
             CHECK_NULL_VOID(windowManager);
-            LOGI("minimize button clicked");
+            TAG_LOGI(AceLogTag::ACE_APPBAR, "minimize button clicked");
             windowManager->WindowMinimize();
         }));
     controlButtonsRow->AddChild(BuildControlButton(
@@ -179,7 +179,7 @@ RefPtr<FrameNode> ContainerModalView::AddControlButtons(RefPtr<FrameNode>& contr
         [wk = WeakClaim(RawPtr(windowManager))](GestureEvent& info) {
             auto windowManager = wk.Upgrade();
             CHECK_NULL_VOID(windowManager);
-            LOGI("close button clicked");
+            TAG_LOGI(AceLogTag::ACE_APPBAR, "close button clicked");
             windowManager->WindowClose();
         },
         true));
@@ -387,8 +387,10 @@ void ContainerModalView::AddButtonHoverEvent(
             isHoverType = isFocus ? ControlBtnColorType::NORMAL : ControlBtnColorType::UNFOCUS;
         }
         sourceInfo->SetFillColor(theme->GetControlBtnColor(isCloseBtn, isHoverFillType));
-        auto renderContext = buttonNode->GetRenderContext();
-        renderContext->UpdateBackgroundColor(theme->GetControlBtnColor(isCloseBtn, isHoverType));
+        if (isCloseBtn) {
+            auto renderContext = buttonNode->GetRenderContext();
+            renderContext->UpdateBackgroundColor(theme->GetControlBtnColor(isCloseBtn, isHoverType));
+        }
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo.value());
         buttonNode->MarkModifyDone();
         imageNode->MarkModifyDone();

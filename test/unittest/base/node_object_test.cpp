@@ -79,4 +79,67 @@ HWTEST_F(NodeObjectTest, NodeObjectTest001, TestSize.Level1)
     EXPECT_EQ(nodeObject->GetBool("bool", true), false);
     EXPECT_EQ(nodeObject->GetBool("", true), true);
 }
+
+/**
+ * @tc.name: NodeObjectTest002
+ * @tc.desc: Put(const char* key, size_t value)/GetUInt(const std::string& key, uint32_t defaultVal)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeObjectTest, NodeObjectTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a NodeObject.
+     */
+    auto nodeObject = NodeObject::Create();
+
+    /**
+     * @tc.steps: step2. Put(const char* key, size_t value)
+     * @tc.expected: step2. Asserting put success.
+     */
+    const char* key = "key-string";
+    size_t value = 5;
+    bool ret = nodeObject->Put(key, value);
+    EXPECT_EQ(ret, true);
+
+    /**
+     * @tc.steps: step3. GetUInt(const std::string& key, uint32_t defaultVal)
+     * @tc.expected: step3. Asserting  success.
+     */
+    const std::string key2 = "aaaa";
+    uint32_t defaultVal = 0;
+    // key not exist
+    uint32_t ret2 = nodeObject->GetUInt(key2, defaultVal);
+    EXPECT_EQ(ret2, defaultVal);
+    // key exist
+    const char* key3 = "key-temp";
+    nodeObject->Put(key3, 11);
+    uint32_t ret3 = nodeObject->GetUInt(key3, defaultVal);
+    EXPECT_EQ(ret3, 11);
+}
+
+/**
+ * @tc.name: NodeObjectTest003
+ * @tc.desc: Put(const char* key, const std::unique_ptr<NodeObject>& value)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeObjectTest, NodeObjectTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a NodeObject.
+     */
+    auto nodeObject = NodeObject::Create();
+
+    // value is nullptr
+    const std::unique_ptr<NodeObject> value = nullptr;
+    const char* key = nullptr;
+    bool ret = nodeObject->Put(key, value);
+    EXPECT_EQ(ret, false);
+    // value is not nullptr,key is nullptr
+    auto value2 = NodeObject::Create();
+    bool ret2 = nodeObject->Put(key, value2);
+    EXPECT_EQ(ret2, false);
+    const std::unique_ptr<JsonValue> value3 = std::make_unique<JsonValue>();
+    bool ret3 = nodeObject->Put(key, value3);
+    EXPECT_EQ(ret3, false);
+}
 } // namespace OHOS::Ace

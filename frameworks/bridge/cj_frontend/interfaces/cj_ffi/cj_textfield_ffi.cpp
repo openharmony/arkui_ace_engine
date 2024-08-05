@@ -68,16 +68,19 @@ void FfiOHOSAceFrameworkTextFieldSetBorder(CJBorder params)
     }
 
     FfiOHOSAceFrameworkViewAbstractSetBorder(params);
+    TextFieldModel::GetInstance()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetBorderWidth(double value, uint32_t unit)
 {
     FfiOHOSAceFrameworkViewAbstractSetBorderWidth(value, unit);
+    TextFieldModel::GetInstance()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetBorderColor(uint32_t color)
 {
     FfiOHOSAceFrameworkViewAbstractSetBorderColor(color);
+    TextFieldModel::GetInstance()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetBorderStyle(int32_t style)
@@ -88,12 +91,12 @@ void FfiOHOSAceFrameworkTextFieldSetBorderStyle(int32_t style)
     }
 
     FfiOHOSAceFrameworkViewAbstractSetBorderStyle(style);
+    TextFieldModel::GetInstance()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkTextFieldSetBorderRadius(double value, uint32_t unit)
 {
-    CalcDimension borderRadius = CalcDimension(value, static_cast<DimensionUnit>(unit));
-    ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
+    FfiOHOSAceFrameworkViewAbstractSetBorderRadius(value, unit);
     TextFieldModel::GetInstance()->SetBackBorder();
 }
 
@@ -104,12 +107,26 @@ void FfiOHOSAceFrameworkTextFieldSetBackgroundColor(uint32_t value)
 
 void FfiOHOSAceFrameworkTextFieldSetPadding(double value, int32_t unit)
 {
-    FfiOHOSAceFrameworkViewAbstractSetPadding(value, unit);
+    struct CJEdge textEdge;
+    textEdge.top = value;
+    textEdge.topUnit = unit;
+    textEdge.right = value;
+    textEdge.rightUnit = unit;
+    textEdge.bottom = value;
+    textEdge.bottomUnit = unit;
+    textEdge.left = value;
+    textEdge.leftUnit = unit;
+    FfiOHOSAceFrameworkTextFieldSetPaddings(textEdge);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetPaddings(CJEdge params)
 {
-    FfiOHOSAceFrameworkViewAbstractSetPaddings(params);
+    NG::PaddingProperty paddings;
+    paddings.top = NG::CalcLength(Dimension(params.top, static_cast<DimensionUnit>(params.topUnit)));
+    paddings.bottom = NG::CalcLength(Dimension(params.right, static_cast<DimensionUnit>(params.rightUnit)));
+    paddings.left = NG::CalcLength(Dimension(params.bottom, static_cast<DimensionUnit>(params.bottomUnit)));
+    paddings.right = NG::CalcLength(Dimension(params.left, static_cast<DimensionUnit>(params.leftUnit)));
+    TextFieldModel::GetInstance()->SetPadding(paddings, Edge(), false);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetMargin(double value, int32_t unit)
@@ -245,7 +262,7 @@ void FfiOHOSAceFrameworkTextFieldOnSubmit(void (*callback)(int32_t value))
 void FfiOHOSAceFrameworkTextFieldOnChange(void (*callback)(const char* value))
 {
     auto onChange = [func = FormatCharFunction(callback)](
-        const std::string& val, TextRange& range) {
+        const std::string& val, PreviewText& previewText) {
         func(val);
     };
     TextFieldModel::GetInstance()->SetOnChange(onChange);

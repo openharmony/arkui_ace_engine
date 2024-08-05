@@ -112,6 +112,11 @@ public:
         return isStatic_;
     }
 
+    bool IsFirstRender() const
+    {
+        return isFirstRender_;
+    }
+
     bool IsUseNewPipeline() const { return useNewPipeline_; }
 
     /**

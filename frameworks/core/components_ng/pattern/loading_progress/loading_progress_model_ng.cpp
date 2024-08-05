@@ -68,7 +68,8 @@ void LoadingProgressModelNG::SetColor(FrameNode* frameNode, const Color& value)
 bool LoadingProgressModelNG::GetEnableLoading(FrameNode* frameNode)
 {
     bool enable = true;
-    ACE_GET_NODE_PAINT_PROPERTY(LoadingProgressPaintProperty, EnableLoading, enable, frameNode);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(LoadingProgressPaintProperty,
+        EnableLoading, enable, frameNode, enable);
     return enable;
 }
 

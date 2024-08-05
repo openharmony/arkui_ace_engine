@@ -544,10 +544,7 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount003, TestSize.Level1)
      * @tc.cases: Set displayCount to ITEM_NUMBER+1
      * @tc.expected: DisplayCount is ITEM_NUMBER+1, last item place has placeholder child
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayCount(ITEM_NUMBER + 1);
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
-    });
+    CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(ITEM_NUMBER + 1); });
     EXPECT_EQ(pattern_->GetDisplayCount(), 5);
     EXPECT_EQ(pattern_->TotalCount(), ITEM_NUMBER); // child number still is 4
     EXPECT_GT(GetChildWidth(frameNode_, 3), 0.f); // item size > 0
@@ -565,10 +562,7 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount004, TestSize.Level1)
      * @tc.cases: Set minsize to half of swiper width
      * @tc.expected: show 2 item in one page
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetMinSize(Dimension(SWIPER_WIDTH / 3));
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
-    });
+    CreateWithItem([](SwiperModelNG model) { model.SetMinSize(Dimension(SWIPER_WIDTH / 3)); });
     EXPECT_TRUE(pattern_->IsAutoFill());
     EXPECT_EQ(pattern_->GetDisplayCount(), 2);
     EXPECT_GT(GetChildWidth(frameNode_, 0), 0.f); // item size > 0
@@ -691,6 +685,8 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin001, TestSize.Level1)
     CreateWithItem([](SwiperModelNG model) {});
     EXPECT_EQ(pattern_->GetNextMargin(), 0.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), 0.f);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), SWIPER_WIDTH);
 }
 
 /**
@@ -701,15 +697,16 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin001, TestSize.Level1)
 HWTEST_F(SwiperAttrTestNg, AttrMargin002, TestSize.Level1)
 {
     /**
-     * @tc.cases: Set margin to 10,5
-     * @tc.expected: Margin is 10,5
+     * @tc.cases: Set margin
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(10.f), false);
-        model.SetPreviousMargin(Dimension(5.f), false);
+        model.SetPreviousMargin(Dimension(PRE_MARGIN), false);
+        model.SetNextMargin(Dimension(NEXT_MARGIN), false);
     });
-    EXPECT_EQ(pattern_->GetNextMargin(), 10.f);
-    EXPECT_EQ(pattern_->GetPrevMargin(), 5.f);
+    EXPECT_EQ(pattern_->GetPrevMargin(), PRE_MARGIN);
+    EXPECT_EQ(pattern_->GetNextMargin(), NEXT_MARGIN);
+    EXPECT_EQ(GetChildX(frameNode_, 0), PRE_MARGIN);
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), SWIPER_WIDTH - PRE_MARGIN - NEXT_MARGIN);
 }
 
 /**
@@ -761,9 +758,9 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin005, TestSize.Level1)
      * @tc.cases: Only set nextMargin
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(10.f), false);
+        model.SetNextMargin(Dimension(NEXT_MARGIN), false);
     });
-    EXPECT_EQ(pattern_->GetNextMargin(), 10.f);
+    EXPECT_EQ(pattern_->GetNextMargin(), NEXT_MARGIN);
     EXPECT_EQ(pattern_->GetPrevMargin(), 0.f);
 }
 
@@ -778,10 +775,10 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin006, TestSize.Level1)
      * @tc.cases: Only set preMargin
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetPreviousMargin(Dimension(5.f), false);
+        model.SetPreviousMargin(Dimension(PRE_MARGIN), false);
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 0.f);
-    EXPECT_EQ(pattern_->GetPrevMargin(), 5.f);
+    EXPECT_EQ(pattern_->GetPrevMargin(), PRE_MARGIN);
 }
 /**
  * @tc.name: AttrNestedScroll001
@@ -1175,54 +1172,5 @@ HWTEST_F(SwiperAttrTestNg, SwiperPaintProperty001, TestSize.Level1)
     auto jsonFrom = JsonUtil::Create(true);
     paintProperty_->FromJson(jsonFrom);
     EXPECT_TRUE(jsonFrom);
-}
-
-/**
- * @tc.name: ArcDotIndicator001
- * @tc.desc: Test property about indicator
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAttrTestNg, ArcDotIndicator001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create swiper and set parameters.
-     */
-    SwiperArcDotParameters swiperArcDotParameters;
-    swiperArcDotParameters.arcDirection = SwiperArcDirection::NINE_CLOCK_DIRECTION;
-    swiperArcDotParameters.itemColor = Color::GREEN;
-    swiperArcDotParameters.selectedItemColor = Color::RED;
-    swiperArcDotParameters.containerColor = Color::BLUE;
-    CreateWithItem([=](SwiperModelNG model) {
-        model.Create(true);
-        model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
-        model.SetArcDotIndicatorStyle(swiperArcDotParameters);
-    });
-    auto paintProperty = indicatorNode_->GetPaintProperty<CircleDotIndicatorPaintProperty>();
-    RefPtr<SwiperPattern> indicatorPattern = frameNode_->GetPattern<SwiperPattern>();
-    indicatorPattern->OnModifyDone();
-    EXPECT_EQ(pattern_->GetIndicatorType(), SwiperIndicatorType::ARC_DOT);
-    EXPECT_EQ(paintProperty->GetArcDirection(), SwiperArcDirection::NINE_CLOCK_DIRECTION);
-    EXPECT_EQ(paintProperty->GetColor(), Color::GREEN);
-    EXPECT_EQ(paintProperty->GetSelectedColor(), Color::RED);
-    EXPECT_EQ(paintProperty->GetContainerColor(), Color::BLUE);
-}
-
-/**
- * @tc.name: ArcDotIndicator001
- * @tc.desc: Test property about indicator
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAttrTestNg, ArcDotIndicator002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create swiper and set parameters.
-     */
-    CreateWithItem([=](SwiperModelNG model) {
-        model.Create(true);
-        model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
-    });
-    RefPtr<ArcSwiperPattern> indicatorPattern = frameNode_->GetPattern<ArcSwiperPattern>();
-    indicatorPattern->GetSwiperArcDotParameters();
-    EXPECT_NE(indicatorPattern->swiperArcDotParameters_, nullptr);
 }
 } // namespace OHOS::Ace::NG

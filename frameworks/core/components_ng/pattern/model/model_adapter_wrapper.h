@@ -19,6 +19,8 @@
 #include <memory>
 
 #include "custom/shader_input_buffer.h"
+#include "graphics_task.h"
+#include "ohos/graphics_manager.h"
 #include "ohos/texture_layer.h"
 #include "widget_adapter.h"
 
@@ -65,7 +67,7 @@ public:
     void OnRebuildFrame(RefPtr<RenderContext>& context);
     void OnAttachToFrameNode(const RefPtr<RenderContext>& context);
     void OnDirtyLayoutWrapperSwap(const Render3D::WindowChangeInfo& windowChangeInfo);
-    void Deinit();
+    std::shared_future<void> Deinit();
 
     OHOS::Render3D::SurfaceType GetSurfaceType()
     {
@@ -80,10 +82,6 @@ private:
     void Initialize();
     void UnloadSceneAndBackground();
     void DrawFrame();
-    void UpdateCamera(const RefPtr<ModelPaintProperty>& modelPaintProperty);
-    void UpdateLights(const RefPtr<ModelPaintProperty>& modelPaintProperty);
-    void UpdateGLTFAnimations(const RefPtr<ModelPaintProperty>& modelPaintProperty);
-    void UpdateGeometries(const RefPtr<ModelPaintProperty>& modelPaintProperty);
     void UpdateScene(const RefPtr<ModelPaintProperty>& modelPaintProperty);
     void UpdateEnviroment(const RefPtr<ModelPaintProperty>& modelPaintProperty);
     void UpdateCustomRender(const RefPtr<ModelPaintProperty>& modelPaintProperty);

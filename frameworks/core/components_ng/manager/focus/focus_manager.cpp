@@ -40,6 +40,7 @@ void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView, bool isTrig
             focusView->GetFrameName().c_str(), focusView->GetFrameId());
         return;
     }
+    focusView->SetIsViewHasShow(true);
     auto lastFocusView = lastFocusView_.Upgrade();
     if (lastFocusView) {
         if (lastFocusView == focusView || lastFocusView->IsChildFocusViewOf(focusView)) {
@@ -84,6 +85,7 @@ void FocusManager::FocusViewClose(const RefPtr<FocusView>& focusView)
 {
     CHECK_NULL_VOID(focusView);
     focusView->LostViewFocus();
+    focusView->SetIsViewHasShow(false);
     for (auto iter = focusViewStack_.begin(); iter != focusViewStack_.end();) {
         auto view = (*iter).Upgrade();
         if (view && (view == focusView || view->IsChildFocusViewOf(focusView))) {
@@ -159,9 +161,6 @@ void FocusManager::PaintFocusState()
     CHECK_NULL_VOID(rootNode);
     auto rootFocusHub = rootNode->GetFocusHub();
     CHECK_NULL_VOID(rootFocusHub);
-    if (!pipeline->GetIsFocusActive()) {
-        return;
-    }
     rootFocusHub->ClearAllFocusState();
     rootFocusHub->PaintAllFocusState();
 }

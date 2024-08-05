@@ -1148,4 +1148,11 @@ void WebModelNG::SetOverlayScrollbarEnabled(bool isEnabled)
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateOverlayScrollbarEnabled(isEnabled);
 }
+
+void WebModelNG::SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateKeyboardAvoidMode(mode);
+}
 } // namespace OHOS::Ace::NG

@@ -374,6 +374,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSweepGradient(SweepGradientParam s
 struct RadialGradientParam {
     CTupleLength center;
     double radius;
+    int32_t radiusUnit;
     CArrCColors colors;
     bool repeating;
 };
@@ -398,6 +399,9 @@ CJ_EXPORT void FFIOHOSAceFrameworkDefaultFocus(bool isDefaultFocus);
 CJ_EXPORT void FFIOHOSAceFrameworkGroupDefaultFocus(bool isGroupDefaultFocus);
 CJ_EXPORT void FFIOHOSAceFrameworkFocusOnTouch(bool isFocusOnTouch);
 CJ_EXPORT bool FFIOHOSAceFrameworkRequestFocus(const char* inspectorKey);
+
+CJ_EXPORT void FFISetWidthWithEmpty();
+CJ_EXPORT void FFISetHeightWithEmpty();
 
 struct CJContentCoverOptions {
     uint32_t modalTransition;

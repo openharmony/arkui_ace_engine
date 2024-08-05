@@ -30,7 +30,7 @@
 namespace OHOS::Ace::NG {
 void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    if (gridLayoutInfo_.childrenCount_ <= 0) {
+    if (info_.childrenCount_ <= 0) {
         return;
     }
     wrapper_ = layoutWrapper;
@@ -39,76 +39,94 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float mainSize = MeasureSelf(props);
     Init(props);
 
-    if (gridLayoutInfo_.targetIndex_) {
+    if (info_.targetIndex_) {
         MeasureToTarget();
-        gridLayoutInfo_.targetIndex_.reset();
+        info_.targetIndex_.reset();
     }
 
-    if (gridLayoutInfo_.jumpIndex_ != EMPTY_JUMP_INDEX) {
+    if (info_.jumpIndex_ != EMPTY_JUMP_INDEX) {
         MeasureOnJump(mainSize);
-        if (!NearZero(postJumpOffset_)) {
-            gridLayoutInfo_.currentOffset_ = postJumpOffset_;
-            MeasureOnOffset(mainSize);
-        }
     } else {
         MeasureOnOffset(mainSize);
     }
 
+    if (props->GetAlignItems().value_or(GridItemAlignment::DEFAULT) == GridItemAlignment::STRETCH) {
+        GridLayoutBaseAlgorithm::AdjustChildrenHeight(layoutWrapper);
+    }
+
     UpdateLayoutInfo();
-    wrapper_->SetCacheCount(static_cast<int32_t>(props->GetCachedCountValue(1) * gridLayoutInfo_.crossCount_));
+    wrapper_->SetCacheCount(static_cast<int32_t>(props->GetCachedCountValue(1) * info_.crossCount_));
 }
 
 void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    if (gridLayoutInfo_.childrenCount_ <= 0) {
+    const auto& info = gridLayoutInfo_;
+    if (info.childrenCount_ <= 0) {
         return;
     }
     wrapper_ = layoutWrapper;
 
-    LayoutChildren(gridLayoutInfo_.currentOffset_);
+    LayoutChildren(info.currentOffset_);
 
     auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     CHECK_NULL_VOID(props);
-    auto cachedCount = props->GetCachedCountValue(1) * gridLayoutInfo_.crossCount_;
-    wrapper_->SetActiveChildRange(gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_, cachedCount, cachedCount);
+    const int32_t cacheCnt = props->GetCachedCountValue(1) * info.crossCount_;
+    wrapper_->SetActiveChildRange(std::min(info.startIndex_, info.endIndex_), info.endIndex_, cacheCnt, cacheCnt);
+
+    std::list<int32_t> itemsToPreload;
+    for (int32_t i = 1; i <= cacheCnt; ++i) {
+        const int32_t l = info.startIndex_ - i;
+        if (l >= 0 && !wrapper_->GetChildByIndex(l)) {
+            itemsToPreload.push_back(l);
+        }
+        const int32_t r = info.endIndex_ + i;
+        if (r < info.childrenCount_ && !wrapper_->GetChildByIndex(r)) {
+            itemsToPreload.push_back(r);
+        }
+    }
+    GridLayoutUtils::PreloadGridItems(wrapper_->GetHostNode()->GetPattern<GridPattern>(), std::move(itemsToPreload),
+        [](const RefPtr<FrameNode>& host, int32_t itemIdx) {
+            if (host) {
+                host->GetOrCreateChildByIndex(itemIdx);
+            };
+            return false;
+        });
 }
 
 float GridIrregularLayoutAlgorithm::MeasureSelf(const RefPtr<GridLayoutProperty>& props)
 {
     // set self size
-    auto size =
-        CreateIdealSize(props->GetLayoutConstraint().value(), gridLayoutInfo_.axis_, props->GetMeasureType(), true);
+    auto size = CreateIdealSize(props->GetLayoutConstraint().value(), info_.axis_, props->GetMeasureType(), true);
     wrapper_->GetGeometryNode()->SetFrameSize(size);
 
     // set content size
     const auto& padding = props->CreatePaddingAndBorder();
     wrapper_->GetGeometryNode()->UpdatePaddingWithBorder(padding);
     MinusPaddingToSize(padding, size);
-    gridLayoutInfo_.contentEndPadding_ = ScrollableUtils::CheckHeightExpansion(props, gridLayoutInfo_.axis_);
-    size.AddHeight(gridLayoutInfo_.contentEndPadding_);
+    info_.contentEndPadding_ = ScrollableUtils::CheckHeightExpansion(props, info_.axis_);
+    size.AddHeight(info_.contentEndPadding_);
     wrapper_->GetGeometryNode()->SetContentSize(size);
 
-    return size.MainSize(gridLayoutInfo_.axis_);
+    return size.MainSize(info_.axis_);
 }
 
 void GridIrregularLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
 {
-    auto& info = gridLayoutInfo_;
     const auto& contentSize = wrapper_->GetGeometryNode()->GetContentSize();
-    crossGap_ = GridUtils::GetCrossGap(props, contentSize, info.axis_);
-    mainGap_ = GridUtils::GetMainGap(props, contentSize, info.axis_);
+    crossGap_ = GridUtils::GetCrossGap(props, contentSize, info_.axis_);
+    mainGap_ = GridUtils::GetMainGap(props, contentSize, info_.axis_);
 
     std::string args;
     if (props->GetRowsTemplate()) {
-        info.axis_ = Axis::HORIZONTAL;
+        info_.axis_ = Axis::HORIZONTAL;
         args = props->GetRowsTemplate().value_or("");
     } else {
-        info.axis_ = Axis::VERTICAL;
+        info_.axis_ = Axis::VERTICAL;
         args = props->GetColumnsTemplate().value_or("");
     }
 
-    const float crossSize = contentSize.CrossSize(info.axis_);
-    auto res = ParseTemplateArgs(GridUtils::ParseArgs(args), crossSize, crossGap_, info.childrenCount_);
+    const float crossSize = contentSize.CrossSize(info_.axis_);
+    auto res = ParseTemplateArgs(GridUtils::ParseArgs(args), crossSize, crossGap_, info_.childrenCount_);
 
     crossLens_ = std::vector<float>(res.first.begin(), res.first.end());
     if (crossLens_.empty()) {
@@ -117,12 +135,8 @@ void GridIrregularLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
 
     crossGap_ = res.second;
 
-    info.crossCount_ = static_cast<int32_t>(crossLens_.size());
+    info_.crossCount_ = static_cast<int32_t>(crossLens_.size());
     CheckForReset();
-
-    if (info.extraOffset_) {
-        postJumpOffset_ += *info.extraOffset_;
-    }
 }
 
 namespace {
@@ -149,45 +163,43 @@ inline void ResetLayoutRange(GridLayoutInfo& info)
 
 void GridIrregularLayoutAlgorithm::CheckForReset()
 {
-    auto& info = gridLayoutInfo_;
-
-    if (info.IsResetted()) {
-        // reset layout info and perform jump to current startIndex
-        postJumpOffset_ = info.currentOffset_;
-        PrepareJumpOnReset(info);
-        ResetMaps(info);
-        ResetLayoutRange(info);
+    if (info_.IsResetted()) {
+        // reset layout info_ and perform jump to current startIndex
+        postJumpOffset_ = info_.currentOffset_;
+        PrepareJumpOnReset(info_);
+        ResetMaps(info_);
+        ResetLayoutRange(info_);
         return;
     }
 
     int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
     if (updateIdx != -1) {
-        auto it = info.FindInMatrix(updateIdx);
-        if (it != info.gridMatrix_.end()) {
-            info.ClearHeightsToEnd(it->first);
-            info.ClearMatrixToEnd(updateIdx, it->first);
+        auto it = info_.FindInMatrix(updateIdx);
+        if (it != info_.gridMatrix_.end()) {
+            info_.ClearHeightsToEnd(it->first);
+            info_.ClearMatrixToEnd(updateIdx, it->first);
         }
-        if (updateIdx <= info.endIndex_) {
-            postJumpOffset_ = info.currentOffset_;
-            PrepareJumpOnReset(info);
-            ResetLayoutRange(info);
+        if (updateIdx <= info_.endIndex_) {
+            postJumpOffset_ = info_.currentOffset_;
+            PrepareJumpOnReset(info_);
+            ResetLayoutRange(info_);
         }
         wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
         return;
     }
 
     if (wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
-        postJumpOffset_ = info.currentOffset_;
-        info.lineHeightMap_.clear();
-        PrepareJumpOnReset(info);
-        ResetLayoutRange(info);
+        postJumpOffset_ = info_.currentOffset_;
+        info_.lineHeightMap_.clear();
+        PrepareJumpOnReset(info_);
+        ResetLayoutRange(info_);
         return;
     }
 
     if (!wrapper_->IsConstraintNoChanged()) {
         // need to remeasure all items in current view
-        postJumpOffset_ = info.currentOffset_;
-        PrepareJumpOnReset(info);
+        postJumpOffset_ = info_.currentOffset_;
+        PrepareJumpOnReset(info_);
     }
 }
 
@@ -197,7 +209,7 @@ void GridIrregularLayoutAlgorithm::MeasureOnOffset(float mainSize)
         return;
     }
 
-    if (GreatNotEqual(gridLayoutInfo_.currentOffset_, gridLayoutInfo_.prevOffset_)) {
+    if (GreatNotEqual(info_.currentOffset_, info_.prevOffset_)) {
         MeasureBackward(mainSize);
     } else {
         MeasureForward(mainSize);
@@ -220,30 +232,28 @@ inline float GetPrevHeight(const GridLayoutInfo& info, float mainGap)
 
 void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
 {
-    auto& info = gridLayoutInfo_;
-
-    float heightToFill = mainSize - info.currentOffset_ - GetPrevHeight(info, mainGap_);
+    float heightToFill = mainSize - info_.currentOffset_ - GetPrevHeight(info_, mainGap_);
     if (Positive(heightToFill)) {
-        GridIrregularFiller filler(&gridLayoutInfo_, wrapper_);
-        filler.Fill({ crossLens_, crossGap_, mainGap_ }, heightToFill, info.endMainLineIndex_);
+        GridIrregularFiller filler(&info_, wrapper_);
+        filler.Fill({ crossLens_, crossGap_, mainGap_ }, heightToFill, info_.endMainLineIndex_);
     }
 
-    GridLayoutRangeSolver solver(&info, wrapper_);
+    GridLayoutRangeSolver solver(&info_, wrapper_);
     auto res = solver.FindStartingRow(mainGap_);
-    UpdateStartInfo(info, res);
+    UpdateStartInfo(info_, res);
     auto [endMainLineIdx, endIdx] = solver.SolveForwardForEndIdx(mainGap_, mainSize - res.pos, res.row);
-    info.endMainLineIndex_ = endMainLineIdx;
-    info.endIndex_ = endIdx;
+    info_.endMainLineIndex_ = endMainLineIdx;
+    info_.endIndex_ = endIdx;
 
     // adjust offset
-    if (!overScroll_ && info.endIndex_ == info.childrenCount_ - 1) {
+    if (!overScroll_ && info_.endIndex_ == info_.childrenCount_ - 1) {
         float overDis =
-            -info.GetDistanceToBottom(mainSize, info.GetTotalHeightOfItemsInView(mainGap_, false), mainGap_);
+            -info_.GetDistanceToBottom(mainSize, info_.GetTotalHeightOfItemsInView(mainGap_, false), mainGap_);
         if (Negative(overDis)) {
             return;
         }
-        info.currentOffset_ += overDis;
-        if (Positive(info.currentOffset_)) {
+        info_.currentOffset_ += overDis;
+        if (Positive(info_.currentOffset_)) {
             MeasureBackward(mainSize);
         }
     }
@@ -251,22 +261,21 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
 
 void GridIrregularLayoutAlgorithm::MeasureBackward(float mainSize)
 {
-    auto& info = gridLayoutInfo_;
     // skip adding starting lines that are outside viewport in LayoutIrregular
-    auto [it, offset] = info.SkipLinesAboveView(mainGap_);
-    GridIrregularFiller filler(&gridLayoutInfo_, wrapper_);
+    auto [it, offset] = info_.SkipLinesAboveView(mainGap_);
+    GridIrregularFiller filler(&info_, wrapper_);
     filler.MeasureBackward({ crossLens_, crossGap_, mainGap_ }, offset + it->second + mainGap_, it->first);
 
-    GridLayoutRangeSolver solver(&info, wrapper_);
+    GridLayoutRangeSolver solver(&info_, wrapper_);
     auto res = solver.FindStartingRow(mainGap_);
     if (!overScroll_ && res.row == 0) {
         res.pos = std::min(res.pos, 0.0f);
     }
-    UpdateStartInfo(info, res);
+    UpdateStartInfo(info_, res);
 
     auto [endLine, endIdx] = solver.SolveForwardForEndIdx(mainGap_, mainSize - res.pos, res.row);
-    info.endMainLineIndex_ = endLine;
-    info.endIndex_ = endIdx;
+    info_.endMainLineIndex_ = endLine;
+    info_.endIndex_ = endIdx;
 }
 
 namespace {
@@ -275,17 +284,16 @@ constexpr float SKIP_THRESHOLD = 2.0f;
 
 bool GridIrregularLayoutAlgorithm::TrySkipping(float mainSize)
 {
-    auto& info = gridLayoutInfo_;
-    float delta = std::abs(info.currentOffset_ - info.prevOffset_);
+    float delta = std::abs(info_.currentOffset_ - info_.prevOffset_);
     if (enableSkip_ && GreatNotEqual(delta, mainSize)) {
         // a more costly check, therefore perform after comparing to [mainSize]
-        if (LessOrEqual(delta, SKIP_THRESHOLD * info.GetTotalHeightOfItemsInView(mainGap_))) {
+        if (LessOrEqual(delta, SKIP_THRESHOLD * info_.GetTotalHeightOfItemsInView(mainGap_))) {
             return false;
         }
-        info.jumpIndex_ = Negative(info.currentOffset_) ? SkipLinesForward() : SkipLinesBackward();
-        info.scrollAlign_ = ScrollAlign::START;
-        info.currentOffset_ = 0.0f;
-        MeasureOnJump(mainSize);
+        info_.jumpIndex_ = Negative(info_.currentOffset_) ? SkipLinesForward() : SkipLinesBackward();
+        info_.scrollAlign_ = ScrollAlign::START;
+        info_.currentOffset_ = 0.0f;
+        Jump(mainSize);
         return true;
     }
     return false;
@@ -293,71 +301,82 @@ bool GridIrregularLayoutAlgorithm::TrySkipping(float mainSize)
 
 void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
 {
-    auto& info = gridLayoutInfo_;
+    Jump(mainSize);
 
-    if (info.jumpIndex_ == JUMP_TO_BOTTOM_EDGE) {
-        GridIrregularFiller filler(&info, wrapper_);
-        filler.FillMatrixOnly(info.childrenCount_ - 1);
-        info.PrepareJumpToBottom();
+    if (info_.extraOffset_) {
+        info_.currentOffset_ += *info_.extraOffset_;
+        MeasureOnOffset(mainSize);
+    }
+    if (!NearZero(postJumpOffset_)) {
+        info_.currentOffset_ = postJumpOffset_;
+        enableSkip_ = false;
+        MeasureOnOffset(mainSize);
+    }
+}
+
+void GridIrregularLayoutAlgorithm::Jump(float mainSize)
+{
+    if (info_.jumpIndex_ == JUMP_TO_BOTTOM_EDGE) {
+        GridIrregularFiller filler(&info_, wrapper_);
+        filler.FillMatrixOnly(info_.childrenCount_ - 1);
+        info_.PrepareJumpToBottom();
     }
 
-    if (info.jumpIndex_ == LAST_ITEM) {
-        info.jumpIndex_ = info.childrenCount_ - 1;
+    if (info_.jumpIndex_ == LAST_ITEM) {
+        info_.jumpIndex_ = info_.childrenCount_ - 1;
     }
 
-    if (info.scrollAlign_ == ScrollAlign::AUTO) {
-        int32_t height = GridLayoutUtils::GetItemSize(&info, wrapper_, info.jumpIndex_).rows;
-        info.scrollAlign_ = info.TransformAutoScrollAlign(info.jumpIndex_, height, mainSize, mainGap_);
+    if (info_.scrollAlign_ == ScrollAlign::AUTO) {
+        int32_t height = GridLayoutUtils::GetItemSize(&info_, wrapper_, info_.jumpIndex_).rows;
+        info_.scrollAlign_ = info_.TransformAutoScrollAlign(info_.jumpIndex_, height, mainSize, mainGap_);
     }
-    if (info.scrollAlign_ == ScrollAlign::NONE) {
-        info.jumpIndex_ = EMPTY_JUMP_INDEX;
+    if (info_.scrollAlign_ == ScrollAlign::NONE) {
+        info_.jumpIndex_ = EMPTY_JUMP_INDEX;
         return;
     }
 
-    int32_t jumpLineIdx = FindJumpLineIdx(info.jumpIndex_);
+    int32_t jumpLineIdx = FindJumpLineIdx(info_.jumpIndex_);
 
     PrepareLineHeight(mainSize, jumpLineIdx);
 
-    GridLayoutRangeSolver solver(&info, wrapper_);
-    auto res = solver.FindRangeOnJump(info.jumpIndex_, jumpLineIdx, mainGap_);
+    GridLayoutRangeSolver solver(&info_, wrapper_);
+    const auto res = solver.FindRangeOnJump(info_.jumpIndex_, jumpLineIdx, mainGap_);
 
-    info.currentOffset_ = res.pos;
-    info.startMainLineIndex_ = res.startRow;
-    info.startIndex_ = res.startIdx;
-    info.endMainLineIndex_ = res.endRow;
-    info.endIndex_ = res.endIdx;
-    info.jumpIndex_ = EMPTY_JUMP_INDEX;
+    info_.currentOffset_ = res.pos;
+    info_.startMainLineIndex_ = res.startRow;
+    info_.startIndex_ = res.startIdx;
+    info_.endMainLineIndex_ = res.endRow;
+    info_.endIndex_ = res.endIdx;
+    info_.jumpIndex_ = EMPTY_JUMP_INDEX;
 }
 
 void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
 {
-    auto& info = gridLayoutInfo_;
-
-    info.reachStart_ = info.startIndex_ == 0 && NonNegative(info.currentOffset_);
+    info_.reachStart_ = info_.startIndex_ == 0 && NonNegative(info_.currentOffset_);
     // GridLayoutInfo::reachEnd_ has a different meaning
-    info.reachEnd_ = info.endIndex_ == info.childrenCount_ - 1;
+    info_.reachEnd_ = info_.endIndex_ == info_.childrenCount_ - 1;
 
-    float mainSize = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info.axis_);
+    float mainSize = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info_.axis_);
 
-    info.lastMainSize_ = mainSize;
-    info.totalHeightOfItemsInView_ = info.GetTotalHeightOfItemsInView(mainGap_, false);
-    info.avgLineHeight_ = info.GetTotalLineHeight(0.0f) / static_cast<float>(info.lineHeightMap_.size());
+    info_.lastMainSize_ = mainSize;
+    info_.totalHeightOfItemsInView_ = info_.GetTotalHeightOfItemsInView(mainGap_, false);
+    info_.avgLineHeight_ = info_.GetTotalLineHeight(0.0f) / static_cast<float>(info_.lineHeightMap_.size());
 
-    if (info.reachEnd_) {
-        info.offsetEnd_ = NonPositive(info.GetDistanceToBottom(mainSize, info.totalHeightOfItemsInView_, mainGap_));
+    if (info_.reachEnd_) {
+        info_.offsetEnd_ = NonPositive(info_.GetDistanceToBottom(mainSize, info_.totalHeightOfItemsInView_, mainGap_));
     } else {
-        info.offsetEnd_ = false;
+        info_.offsetEnd_ = false;
     }
-    info.prevOffset_ = info.currentOffset_;
+    info_.prevOffset_ = info_.currentOffset_;
 
     // validity check
-    for (int i = info.startMainLineIndex_; i <= info.endMainLineIndex_; ++i) {
-        if (info.lineHeightMap_.find(i) == info.lineHeightMap_.end()) {
+    for (int i = info_.startMainLineIndex_; i <= info_.endMainLineIndex_; ++i) {
+        if (info_.lineHeightMap_.find(i) == info_.lineHeightMap_.end()) {
             TAG_LOGW(AceLogTag::ACE_GRID,
                 "lineHeight at line %d not ready. Data is corrupted. StartLine = %d, EndLine = %d", i,
-                info.startMainLineIndex_, info.endMainLineIndex_);
-            info.endMainLineIndex_ = i - 1;
-            info.endIndex_ = info.startIndex_ - 1;
+                info_.startMainLineIndex_, info_.endMainLineIndex_);
+            info_.endMainLineIndex_ = i - 1;
+            info_.endIndex_ = info_.startIndex_ - 1;
             return;
         }
     }
@@ -425,9 +444,9 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
 
 std::vector<float> GridIrregularLayoutAlgorithm::CalculateCrossPositions(const PaddingPropertyF& padding)
 {
-    std::vector<float> res(gridLayoutInfo_.crossCount_, 0.0f);
-    res[0] = gridLayoutInfo_.axis_ == Axis::HORIZONTAL ? padding.top.value_or(0.0f) : 0.0f;
-    for (int32_t i = 1; i < gridLayoutInfo_.crossCount_; ++i) {
+    std::vector<float> res(info_.crossCount_, 0.0f);
+    res[0] = info_.axis_ == Axis::HORIZONTAL ? padding.top.value_or(0.0f) : 0.0f;
+    for (int32_t i = 1; i < info_.crossCount_; ++i) {
         res[i] = res[i - 1] + crossLens_[i - 1] + crossGap_;
     }
     return res;
@@ -435,21 +454,20 @@ std::vector<float> GridIrregularLayoutAlgorithm::CalculateCrossPositions(const P
 
 int32_t GridIrregularLayoutAlgorithm::FindJumpLineIdx(int32_t jumpIdx)
 {
-    auto& info = gridLayoutInfo_;
     int32_t jumpLine = -1;
-    auto it = info.FindInMatrix(jumpIdx);
-    if (it == info.gridMatrix_.end()) {
+    auto it = info_.FindInMatrix(jumpIdx);
+    if (it == info_.gridMatrix_.end()) {
         // fill matrix up to jumpIndex_
-        GridIrregularFiller filler(&info, wrapper_);
+        GridIrregularFiller filler(&info_, wrapper_);
         jumpLine = filler.FillMatrixOnly(jumpIdx);
     } else {
         jumpLine = it->first;
     }
 
-    if (info.scrollAlign_ == ScrollAlign::END) {
+    if (info_.scrollAlign_ == ScrollAlign::END) {
         // jump to the last line the item occupies
-        auto lastLine = jumpLine + GridLayoutUtils::GetItemSize(&info, wrapper_, jumpIdx).rows - 1;
-        GridIrregularFiller filler(&info, wrapper_);
+        auto lastLine = jumpLine + GridLayoutUtils::GetItemSize(&info_, wrapper_, jumpIdx).rows - 1;
+        GridIrregularFiller filler(&info_, wrapper_);
         filler.FillMatrixByLine(jumpLine, lastLine + 1);
         jumpLine = lastLine;
     }
@@ -461,15 +479,18 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
     /* When mainSize can't be filled, adjust parameters and call function again. The maximum length of
      * the recursion is 3 iterations ([Start && len not filled] -> [End && len not filled] -> [Start with jumpIdx 0]).
      */
-    auto& info = gridLayoutInfo_;
-    GridIrregularFiller filler(&info, wrapper_);
-    switch (info.scrollAlign_) {
+    GridIrregularFiller filler(&info_, wrapper_);
+    switch (info_.scrollAlign_) {
         case ScrollAlign::START: {
-            float len = filler.Fill({ crossLens_, crossGap_, mainGap_ }, mainSize, jumpLineIdx).length;
+            const GridIrregularFiller::FillParameters params { crossLens_, crossGap_, mainGap_ };
+            // call this to ensure irregular items on the first line are measured, not skipped
+            filler.MeasureLineWithIrregulars(params, jumpLineIdx);
+
+            float len = filler.Fill(params, mainSize, jumpLineIdx).length;
             // condition [jumpLineIdx > 0] guarantees a finite call stack
-            if (len < mainSize && jumpLineIdx > 0) {
-                jumpLineIdx = info.lineHeightMap_.rbegin()->first;
-                info.scrollAlign_ = ScrollAlign::END;
+            if (LessNotEqual(len, mainSize) && jumpLineIdx > 0) {
+                jumpLineIdx = info_.lineHeightMap_.rbegin()->first;
+                info_.scrollAlign_ = ScrollAlign::END;
                 PrepareLineHeight(mainSize, jumpLineIdx);
             }
             break;
@@ -479,27 +500,27 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
             // Using the full [mainSize]
             float targetLen = mainSize / 2.0f;
             float backwardLen = filler.MeasureBackward({ crossLens_, crossGap_, mainGap_ }, mainSize, jumpLineIdx);
-            backwardLen -= info.lineHeightMap_.at(jumpLineIdx) / 2.0f;
-            if (backwardLen < targetLen) {
+            backwardLen -= info_.lineHeightMap_.at(jumpLineIdx) / 2.0f;
+            if (LessNotEqual(backwardLen, targetLen)) {
                 jumpLineIdx = 0;
-                info.scrollAlign_ = ScrollAlign::START;
+                info_.scrollAlign_ = ScrollAlign::START;
                 PrepareLineHeight(mainSize, jumpLineIdx);
                 return;
             }
             float forwardLen = filler.Fill({ crossLens_, crossGap_, mainGap_ }, mainSize, jumpLineIdx).length;
-            forwardLen -= info.lineHeightMap_.at(jumpLineIdx) / 2.0f;
-            if (forwardLen < targetLen) {
-                jumpLineIdx = info.lineHeightMap_.rbegin()->first;
-                info.scrollAlign_ = ScrollAlign::END;
+            forwardLen -= info_.lineHeightMap_.at(jumpLineIdx) / 2.0f;
+            if (LessNotEqual(forwardLen, targetLen)) {
+                jumpLineIdx = info_.lineHeightMap_.rbegin()->first;
+                info_.scrollAlign_ = ScrollAlign::END;
                 PrepareLineHeight(mainSize, jumpLineIdx);
             }
             break;
         }
         case ScrollAlign::END: {
             float len = filler.MeasureBackward({ crossLens_, crossGap_, mainGap_ }, mainSize, jumpLineIdx);
-            if (len < mainSize) {
+            if (LessNotEqual(len, mainSize)) {
                 jumpLineIdx = 0;
-                info.scrollAlign_ = ScrollAlign::START;
+                info_.scrollAlign_ = ScrollAlign::START;
                 PrepareLineHeight(mainSize, jumpLineIdx);
             }
             break;
@@ -524,14 +545,13 @@ void AddLineHeight(float& height, int32_t curLine, int32_t startLine, const std:
 
 int32_t GridIrregularLayoutAlgorithm::SkipLinesForward()
 {
-    auto& info = gridLayoutInfo_;
-    int32_t line = info.startMainLineIndex_;
+    int32_t line = info_.startMainLineIndex_;
     float height = 0.0f;
-    while (LessNotEqual(height, -info.currentOffset_)) {
-        AddLineHeight(height, line++, info.startMainLineIndex_, info.lineHeightMap_);
+    while (LessNotEqual(height, -info_.currentOffset_)) {
+        AddLineHeight(height, line++, info_.startMainLineIndex_, info_.lineHeightMap_);
     }
-    GridIrregularFiller filler(&info, wrapper_);
-    return filler.FillMatrixByLine(info.startMainLineIndex_, line);
+    GridIrregularFiller filler(&info_, wrapper_);
+    return filler.FillMatrixByLine(info_.startMainLineIndex_, line);
 }
 
 int32_t GridIrregularLayoutAlgorithm::SkipLinesBackward() const
@@ -549,14 +569,25 @@ int32_t GridIrregularLayoutAlgorithm::SkipLinesBackward() const
 
 void GridIrregularLayoutAlgorithm::MeasureToTarget()
 {
-    auto& info = gridLayoutInfo_;
-    GridIrregularFiller filler(&gridLayoutInfo_, wrapper_);
+    GridIrregularFiller filler(&info_, wrapper_);
     GridIrregularFiller::FillParameters param { crossLens_, crossGap_, mainGap_ };
-    if (info.targetIndex_ < info.startIndex_) {
-        auto it = info.FindInMatrix(*info.targetIndex_);
-        filler.MeasureBackwardToTarget(param, it->first, info.startMainLineIndex_);
+    if (info_.targetIndex_ < info_.startIndex_) {
+        auto it = info_.FindInMatrix(*info_.targetIndex_);
+        filler.MeasureBackwardToTarget(param, it->first, info_.startMainLineIndex_);
     } else {
-        filler.FillToTarget(param, *info.targetIndex_, info.startMainLineIndex_);
+        filler.FillToTarget(param, *info_.targetIndex_, info_.startMainLineIndex_);
     }
+}
+
+bool GridIrregularLayoutAlgorithm::IsIrregularLine(int32_t lineIndex) const
+{
+    const auto& line = info_.gridMatrix_.find(lineIndex);
+    if (line == info_.gridMatrix_.end()) {
+        return true;
+    }
+    auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
+    const auto& opts = *props->GetLayoutOptions();
+    return std::any_of(line->second.begin(), line->second.end(),
+        [opts](const auto& item) { return opts.irregularIndexes.count(std::abs(item.second)); });
 }
 } // namespace OHOS::Ace::NG

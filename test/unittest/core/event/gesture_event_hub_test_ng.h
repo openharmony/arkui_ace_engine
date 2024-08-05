@@ -18,11 +18,13 @@
 #include "gtest/gtest.h"
 
 #define private public
+#define protected public
 #undef SECURITY_COMPONENT_ENABLE
 
 #include "test/mock/base/mock_drag_window.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_interaction_interface.h"
 #include "test/mock/core/common/mock_udmf.h"
 
 #include "base/geometry/axis.h"

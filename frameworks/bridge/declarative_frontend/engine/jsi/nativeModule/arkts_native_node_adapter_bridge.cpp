@@ -291,12 +291,17 @@ ArkUINativeModuleValue NodeAdapterBridge::AttachNodeAdapter(ArkUIRuntimeCallInfo
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto* adapter = GetNodeAdapter(runtimeCallInfo);
-    CHECK_NULL_RETURN(adapter, panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(adapter, panda::BooleanRef::New(vm, false));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(!nodeArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(!nodeArg.IsNull(), panda::BooleanRef::New(vm, false));
+    auto* frameNode = reinterpret_cast<FrameNode*>(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(frameNode, panda::BooleanRef::New(vm, false));
+    if (frameNode->GetFirstChild()) {
+        return panda::BooleanRef::New(vm, false);
+    }
     auto* nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUIFullNodeAPI()->getNodeAdapterAPI()->attachHostNode(adapter->GetHandle(), nativeNode);
-    return panda::JSValueRef::Undefined(vm);
+    return panda::BooleanRef::New(vm, true);
 }
 
 ArkUINativeModuleValue NodeAdapterBridge::DetachNodeAdapter(ArkUIRuntimeCallInfo* runtimeCallInfo)

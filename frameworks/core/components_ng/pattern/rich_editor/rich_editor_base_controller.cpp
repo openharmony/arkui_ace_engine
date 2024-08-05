@@ -45,7 +45,8 @@ bool RichEditorBaseController::SetCaretOffset(int32_t caretPosition)
     return richEditorPattern->SetCaretOffset(caretPosition);
 }
 
-void RichEditorBaseController::SetTypingStyle(struct UpdateSpanStyle& typingStyle, TextStyle textStyle)
+void RichEditorBaseController::SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
+    std::optional<TextStyle> textStyle)
 {
     auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(richEditorPattern);
@@ -79,5 +80,12 @@ void RichEditorBaseController::SetSelection(
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->SetSelection(selectionStart, selectionEnd, options, isForward);
+}
+
+const PreviewTextInfo RichEditorBaseController::GetPreviewTextInfo() const
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, PreviewTextInfo());
+    return richEditorPattern->GetPreviewTextInfo();
 }
 } // namespace OHOS::Ace::NG

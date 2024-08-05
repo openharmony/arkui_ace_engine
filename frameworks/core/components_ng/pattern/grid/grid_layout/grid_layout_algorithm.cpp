@@ -88,10 +88,10 @@ void GridLayoutAlgorithm::InitGridCeils(LayoutWrapper* layoutWrapper, const Size
     columnsGap_ = cols.second;
 
     if (static_cast<uint32_t>(mainCount_) != rowsLen.size()) {
-        mainCount_ = rowsLen.size();
+        mainCount_ = static_cast<int32_t>(rowsLen.size());
     }
     if (static_cast<uint32_t>(crossCount_) != colsLen.size()) {
-        crossCount_ = colsLen.size();
+        crossCount_ = static_cast<int32_t>(colsLen.size());
         gridLayoutInfo_.crossCount_ = crossCount_;
     }
 

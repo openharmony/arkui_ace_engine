@@ -272,6 +272,7 @@ public:
     ~JsiDeclarativeEngine() override;
 
     bool Initialize(const RefPtr<FrontendDelegate>& delegate) override;
+    void EngineTask(bool sharedRuntime);
 
     void Destroy() override;
 

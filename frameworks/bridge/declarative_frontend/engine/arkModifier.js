@@ -101,6 +101,7 @@ class ModifierUtils {
   static putDirtyModifier(arkModifier, attributeModifierWithKey) {
     attributeModifierWithKey.value = attributeModifierWithKey.stageValue;
     if (!arkModifier._weakPtr.invalid()) {
+      ArkLogConsole.info("pointer is invalid when putDirtyModifier");
       attributeModifierWithKey.applyPeer(arkModifier.nativePtr,
         (attributeModifierWithKey.value === undefined ||
           attributeModifierWithKey.value === null)
@@ -206,6 +207,7 @@ class AttributeUpdater {
     this._state = value;
   }
   initializeModifier(instance) {}
+  onComponentChanged(instance) {}
   updateConstructorParams(...args) {
     if (!this.attribute) {
       ArkLogConsole.info("AttributeUpdater has not been initialized before updateConstructorParams.");
@@ -1001,6 +1003,17 @@ class ParticleModifier extends ArkParticleComponent {
   }
 }
 
+class MediaCachedImageModifier extends ArkMediaCachedImageComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier(instance, this);
+  }
+}
+
 class SymbolGlyphModifier extends ArkSymbolGlyphComponent {
   constructor(src, nativePtr, classType) {
     super(nativePtr, classType);
@@ -1060,4 +1073,4 @@ export default { CommonModifier, AlphabetIndexerModifier, BlankModifier, ButtonM
   ScrollModifier, SearchModifier, SelectModifier, ShapeModifier, SideBarContainerModifier, SliderModifier, SpanModifier, StackModifier, StepperItemModifier,
   SwiperModifier, TabsModifier, TextAreaModifier, TextModifier, TextClockModifier, TextInputModifier, TextPickerModifier, TextTimerModifier, TimePickerModifier,
   ToggleModifier, VideoModifier, WaterFlowModifier, FlexModifier, PluginComponentModifier, RefreshModifier, TabContentModifier, ModifierUtils, AttributeUpdater,
-  ParticleModifier, SymbolGlyphModifier, SymbolSpanModifier, Component3DModifier, ContainerSpanModifier };
+  ParticleModifier, MediaCachedImageModifier, SymbolGlyphModifier, SymbolSpanModifier, Component3DModifier, ContainerSpanModifier };

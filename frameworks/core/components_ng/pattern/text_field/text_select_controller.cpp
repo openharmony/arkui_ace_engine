@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
+constexpr float BOX_EPSILON = 1.0f;
 } // namespace
 void TextSelectController::UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex)
 {
@@ -41,7 +42,9 @@ void TextSelectController::UpdateCaretIndex(int32_t index)
 {
     auto newIndex = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
     caretInfo_.index = newIndex;
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "newIndex change to %{public}d", newIndex);
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "newIndex change to %{public}d", newIndex);
+    }
     firstHandleInfo_.index = newIndex;
     secondHandleInfo_.index = newIndex;
 }
@@ -288,7 +291,7 @@ std::pair<int32_t, int32_t> TextSelectController::GetSelectParagraphByOffset(con
     if (!textFiled->IsUsingMouse()) {
         smartSelect = AdjustWordSelection(pos, start, end, localOffset);
     }
-    
+
     GetSubParagraphByOffset(pos, start, end);
 
     if (SystemProperties::GetDebugEnabled()) {
@@ -404,6 +407,8 @@ std::vector<RectF> TextSelectController::GetSelectedRects() const
 
 void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment) const
 {
+    TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "before move, handleRect.GetX():%{public}f,handleRect.GetY():%{public}f",
+        handleRect.GetX(), handleRect.GetY());
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto textFiled = DynamicCast<TextFieldPattern>(pattern);
@@ -438,6 +443,8 @@ void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boun
     textFiled->SetTextRect(textRect);
     AdjustHandleAtEdge(handleRect);
     textFiled->UpdateScrollBarOffset();
+    TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "after move, handleRect.GetX():%{public}f,handleRect.GetY():%{public}f",
+        handleRect.GetX(), handleRect.GetY());
 }
 
 void TextSelectController::AdjustHandleAtEdge(RectF& handleRect) const
@@ -471,13 +478,22 @@ void TextSelectController::AdjustHandleOffset(RectF& handleRect) const
     if (LessNotEqual(handleRect.GetX(), textRect.GetX())) {
         handleRect.SetOffset(OffsetF(textRect.GetX(), handleRect.GetY()));
     }
+
+    // Adjust the y-axis of the handle into the text
+    if (GreatNotEqual(handleRect.GetY() + handleRect.Height(), textRect.GetY() + textRect.Height() + BOX_EPSILON)) {
+        auto contentRight = contentRect_.GetX() + contentRect_.Width();
+        auto textRectRight = textRect.GetX() + textRect.Width();
+        handleRect.SetOffset(
+            OffsetF(std::min(contentRight, textRectRight), textRect.GetY() + textRect.Height() - handleRect.Height()));
+    }
 }
 
 void TextSelectController::MoveFirstHandleToContentRect(int32_t index, bool moveHandle)
 {
     CaretMetricsF firstHandleMetrics;
     firstHandleInfo_.index = index;
-    CalcCaretMetricsByPosition(GetFirstHandleIndex(), firstHandleMetrics, TextAffinity::DOWNSTREAM);
+    CalcCaretMetricsByPosition(
+        GetFirstHandleIndex(), firstHandleMetrics, HasReverse() ? TextAffinity::UPSTREAM : TextAffinity::DOWNSTREAM);
     OffsetF firstHandleOffset = firstHandleMetrics.offset;
     RectF firstHandle;
     firstHandle.SetOffset(firstHandleOffset);
@@ -494,7 +510,8 @@ void TextSelectController::MoveSecondHandleToContentRect(int32_t index, bool mov
 {
     CaretMetricsF secondHandleMetrics;
     secondHandleInfo_.index = index;
-    CalcCaretMetricsByPosition(GetSecondHandleIndex(), secondHandleMetrics, TextAffinity::UPSTREAM);
+    CalcCaretMetricsByPosition(
+        GetSecondHandleIndex(), secondHandleMetrics, HasReverse() ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM);
     OffsetF secondHandleOffset = secondHandleMetrics.offset;
     RectF secondHandle;
     secondHandle.SetOffset(secondHandleOffset);
@@ -582,7 +599,8 @@ void TextSelectController::MoveCaretAnywhere(const Offset& touchOffset)
 void TextSelectController::UpdateFirstHandleOffset()
 {
     CaretMetricsF caretMetrics;
-    CalcCaretMetricsByPosition(GetFirstHandleIndex(), caretMetrics, TextAffinity::DOWNSTREAM);
+    CalcCaretMetricsByPosition(
+        GetFirstHandleIndex(), caretMetrics, HasReverse() ? TextAffinity::UPSTREAM : TextAffinity::DOWNSTREAM);
     firstHandleInfo_.rect.SetOffset(caretMetrics.offset);
     firstHandleInfo_.rect.SetHeight(caretMetrics.height);
     AdjustHandleOffset(firstHandleInfo_.rect);
@@ -591,7 +609,8 @@ void TextSelectController::UpdateFirstHandleOffset()
 void TextSelectController::UpdateSecondHandleOffset()
 {
     CaretMetricsF caretMetrics;
-    CalcCaretMetricsByPosition(GetSecondHandleIndex(), caretMetrics, TextAffinity::UPSTREAM);
+    CalcCaretMetricsByPosition(
+        GetSecondHandleIndex(), caretMetrics, HasReverse() ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM);
     secondHandleInfo_.rect.SetOffset(caretMetrics.offset);
     secondHandleInfo_.rect.SetHeight(caretMetrics.height);
     AdjustHandleOffset(secondHandleInfo_.rect);

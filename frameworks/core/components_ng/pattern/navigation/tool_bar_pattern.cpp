@@ -67,12 +67,13 @@ void NavToolbarPattern::OnModifyDone()
     CHECK_NULL_VOID(context);
     float scale = context->GetFontScale();
     if (LessNotEqual(scale, AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
-        gestureHub->RemoveDragEvent();
-        gestureHub->SetLongPressEvent(nullptr);
         return;
     }
     InitLongPressEvent(gestureHub);
     InitDragEvent(gestureHub);
+    auto accessibilityProperty = containerNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO);
 }
 
 void NavToolbarPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -192,8 +193,9 @@ void NavToolbarPattern::ShowDialogWithNode(const RefPtr<BarItemNode>& barItemNod
         if (imageNode->GetTag() == V2::SYMBOL_ETS_TAG) {
             auto symbolProperty = imageNode->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(symbolProperty);
-            dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(
-                message, symbolProperty->GetSymbolSourceInfoValue(), symbolProperty->GetSymbolColorListValue({}));
+            dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message,
+                symbolProperty->GetSymbolSourceInfoValue(), symbolProperty->GetSymbolColorListValue({}),
+                symbolProperty->GetFontWeightValue(FontWeight::NORMAL));
             return;
         }
         auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();

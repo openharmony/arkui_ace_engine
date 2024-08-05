@@ -281,8 +281,8 @@ const ArkUICheckboxModifier *GetCheckboxModifier()
     static const ArkUICheckboxModifier modifier = { SetSelect, SetSelectedColor,
         SetUnSelectedColor, SetCheckboxWidth, SetCheckboxHeight, SetMark,  SetCheckboxPadding,
         SetCheckboxResponseRegion, ResetSelect, ResetSelectedColor,
-        ResetUnSelectedColor, ResetCheckboxWidth, ResetCheckboxHeight, ResetMark, SetCheckboxShape, ResetCheckboxShape,
-        ResetCheckboxPadding, ResetCheckboxResponseRegion,
+        ResetUnSelectedColor, ResetCheckboxWidth, ResetCheckboxHeight, ResetMark, SetCheckboxShape,
+        ResetCheckboxShape, ResetCheckboxPadding, ResetCheckboxResponseRegion,
         GetSelect, GetSelectedColor, GetUnSelectedColor, GetCheckMarkColor, GetCheckMarkSize, GetCheckMarkWidth,
         GetCheckboxShape };
     return &modifier;

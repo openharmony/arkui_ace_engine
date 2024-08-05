@@ -40,10 +40,11 @@ using namespace OHOS::Ace::Framework;
 namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
+const std::string TEXT_TIMER_FORMAT = "HH:mm:ss.SSS";
 } // namespace
 
 struct TestProperty {
-    std::optional<std::string> format = std::nullopt;
+    std::optional<std::string> format = std::make_optional(TEXT_TIMER_FORMAT);;
     std::optional<double> inputCount = std::nullopt;
     std::optional<bool> isCountDown = std::nullopt;
     std::optional<Dimension> fontSize = std::nullopt;

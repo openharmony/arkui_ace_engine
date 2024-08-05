@@ -27,17 +27,8 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsSetHandleCameraMove(const JSCallbackInfo& info);
-    static void JsCamera(const JSCallbackInfo& info);
-    static void JsSetTransparent(const JSCallbackInfo& info);
     static void JsSetBackground(const JSCallbackInfo& info);
-    static void JsLight(const JSCallbackInfo& info);
-    static void JsAddCube(const JSCallbackInfo& info);
-    static void JsAddSphere(const JSCallbackInfo& info);
-    static void JsAddCone(const JSCallbackInfo& info);
-    static void JsGLTFAnimation(const JSCallbackInfo& info);
     static void JsAddCustomRender(const JSCallbackInfo& info);
-    static void JsWidth(const JSCallbackInfo& info);
-    static void JsHeight(const JSCallbackInfo& info);
     static void JsRenderHeight(const JSCallbackInfo& info);
     static void JsRenderWidth(const JSCallbackInfo& info);
     static void JsRenderFrameRate(const JSCallbackInfo& info);

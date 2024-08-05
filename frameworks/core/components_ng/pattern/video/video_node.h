@@ -22,11 +22,10 @@
 #include "core/components_ng/pattern/video/video_pattern.h"
 
 namespace OHOS::Ace::NG {
-namespace {
+
 constexpr int32_t PREVIEW_IMAGE_INDEX = 1;
 constexpr int32_t CONTROLLER_ROW_INDEX = 2;
 constexpr int32_t MEDIA_COLUMN_INDEX = 0;
-} // namespace
 
 class ACE_EXPORT VideoNode : public FrameNode {
     DECLARE_ACE_TYPE(VideoNode, FrameNode);

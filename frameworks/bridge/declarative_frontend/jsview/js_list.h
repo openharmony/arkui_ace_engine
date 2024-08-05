@@ -36,7 +36,6 @@ public:
 class JSList : public JSScrollableBase {
 public:
     static void JSBind(BindingTarget globalObj);
-    static void BindInteractableViewMethods();
     static void SetScroller(RefPtr<JSScroller> scroller);
     static void Create(const JSCallbackInfo& args);
 
@@ -57,7 +56,7 @@ public:
     static void SetDivider(const JSCallbackInfo& args);
     static void SetDirection(int32_t direction);
     static void SetScrollBar(const JSCallbackInfo& info);
-    static void SetScrollBarColor(const std::string& color);
+    static void SetScrollBarColor(const JSCallbackInfo& info);
     static void SetScrollBarWidth(const JSCallbackInfo& scrollWidth);
     static void SetEdgeEffect(const JSCallbackInfo& info);
     static void SetEditMode(bool editMode);
@@ -82,7 +81,6 @@ public:
     static void ItemDragMoveCallback(const JSCallbackInfo& info);
     static void ItemDragLeaveCallback(const JSCallbackInfo& info);
     static void ItemDropCallback(const JSCallbackInfo& info);
-    static void SetFadingEdge(bool fadingEdge);
     static void SetListItemIndex(JSRef<JSObject> listItemInfo, ListItemIndex indexInfo);
 };
 

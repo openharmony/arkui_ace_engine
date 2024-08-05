@@ -41,6 +41,9 @@ public:
         onAccessibilityEventFunc_ = std::move(onAccessibilityEvent);
     }
 
+    virtual void AddTouchListener(const TouchRestrict& touchRestrict)
+    {}
+
 protected:
     OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
 };

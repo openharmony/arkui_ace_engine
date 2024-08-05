@@ -43,8 +43,8 @@ constexpr int32_t RADIO_PADDING_COUNT = 2;
 
 constexpr float DEFAULT_INTERPOLATINGSPRING_VELOCITY = 0.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_MASS = 1.0f;
-constexpr float DEFAULT_INTERPOLATINGSPRING_STIFFNESS = 200.0f;
-constexpr float DEFAULT_INTERPOLATINGSPRING_DAMPING = 20.0f;
+constexpr float DEFAULT_INTERPOLATINGSPRING_STIFFNESS = 728.0f;
+constexpr float DEFAULT_INTERPOLATINGSPRING_DAMPING = 46.0f;
 
 enum class RadioIndicatorType {
     TICK = 0,
@@ -150,78 +150,10 @@ void RadioPattern::OnModifyDone()
     InitClickEvent();
     InitTouchEvent();
     InitMouseEvent();
-    InitFocusEvent();
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     SetAccessibilityAction();
-}
-
-void RadioPattern::InitFocusEvent()
-{
-    if (focusEventInitialized_) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto focusHub = host->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    auto focusTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleFocusEvent();
-        }
-    };
-    focusHub->SetOnFocusInternal(focusTask);
-    auto blurTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleBlurEvent();
-    };
-    focusHub->SetOnBlurInternal(blurTask);
-    focusEventInitialized_ = true;
-}
-
-void RadioPattern::HandleFocusEvent()
-{
-    CHECK_NULL_VOID(radioModifier_);
-    AddIsFocusActiveUpdateEvent();
-    OnIsFocusActiveUpdate(true);
-}
-
-void RadioPattern::HandleBlurEvent()
-{
-    CHECK_NULL_VOID(radioModifier_);
-    RemoveIsFocusActiveUpdateEvent();
-    OnIsFocusActiveUpdate(false);
-}
-
-void RadioPattern::AddIsFocusActiveUpdateEvent()
-{
-    if (!isFocusActiveUpdateEvent_) {
-        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
-        };
-    }
-
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
-}
-
-void RadioPattern::RemoveIsFocusActiveUpdateEvent()
-{
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
-}
-
-void RadioPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
-{
-    CHECK_NULL_VOID(radioModifier_);
-    radioModifier_->SetIsFocused(isFocusAcitve);
 }
 
 void RadioPattern::ImageNodeCreate()
@@ -237,6 +169,10 @@ void RadioPattern::ImageNodeCreate()
             []() { return AceType::MakeRefPtr<ImagePattern>(); });
         CHECK_NULL_VOID(node);
         builderChildNode_ = AceType::DynamicCast<FrameNode>(node);
+        CHECK_NULL_VOID(builderChildNode_);
+        auto gesturehub = builderChildNode_->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gesturehub);
+        gesturehub->SetHitTestMode(HitTestMode::HTMNONE);
     }
     CHECK_NULL_VOID(builderChildNode_);
     auto radioPaintProperty = host->GetPaintProperty<RadioPaintProperty>();

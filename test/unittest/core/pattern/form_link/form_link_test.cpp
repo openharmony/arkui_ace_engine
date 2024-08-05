@@ -14,13 +14,14 @@
  */
 
 #include "gtest/gtest.h"
-#define private public
+
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "frameworks/core/components_ng/pattern/form_link/form_link_model_ng.h"
 #include "frameworks/core/components_ng/base/view_abstract.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
+#define private public
 #include "frameworks/core/components_ng/pattern/form_link/form_link_pattern.h"
-
+#undef private
 #include "frameworks/core/components_ng/base/frame_node.h"
 
 using namespace testing;

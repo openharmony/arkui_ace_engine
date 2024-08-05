@@ -34,7 +34,7 @@ public:
     MOCK_METHOD(int32_t, StartDrag, (const DragDataCore& dragData,
         std::function<void(const OHOS::Ace::DragNotifyMsg&)> callback), (override));
 
-    MOCK_METHOD(int32_t, UpdateDragStyle, (DragCursorStyleCore style), (override));
+    MOCK_METHOD(int32_t, UpdateDragStyle, (DragCursorStyleCore style, const int32_t eventId), (override));
     
     MOCK_METHOD(int32_t, UpdatePreviewStyle, (const PreviewStyle& previewStyle), (override));
 

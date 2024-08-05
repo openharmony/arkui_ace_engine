@@ -46,7 +46,8 @@ void GridRowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
         str.append(breakpoint);
         str.append(", ");
     }
-    str = (breakPoints.breakpoints.size() > 1) ? str.substr(0, str.size() - 1).append("]") : str.append("]");
+    str = (static_cast<int32_t>(breakPoints.breakpoints.size()) > 1) ?
+        str.substr(0, static_cast<int32_t>(str.size()) - 1).append("]") : str.append("]");
     json->PutExtAttr("breakpoints", std::to_string(columns).c_str(), filter);
 
     auto direction = GetDirection();

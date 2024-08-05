@@ -293,7 +293,7 @@ ArkUINativeModuleValue TimepickerBridge::SetTimepickerDateTimeOptions(ArkUIRunti
     ZeroPrefixType secondType = ZeroPrefixType::AUTO;
     std::string hour = "hour";
     if (hourArg->IsString(vm)) {
-        std::string hour = hourArg->ToString(vm)->ToString();
+        std::string hour = hourArg->ToString(vm)->ToString(vm);
         if (hour == "2-digit") {
             hourType = ZeroPrefixType::SHOW;
         } else if (hour == "numeric") {
@@ -303,7 +303,7 @@ ArkUINativeModuleValue TimepickerBridge::SetTimepickerDateTimeOptions(ArkUIRunti
     std::string minute = "minute";
     if (minuteArg->IsString(vm)) {
         minuteType = ZeroPrefixType::SHOW;
-        std::string minute = minuteArg->ToString(vm)->ToString();
+        std::string minute = minuteArg->ToString(vm)->ToString(vm);
         if (minute == "numeric") {
             minuteType = ZeroPrefixType::HIDE;
         }
@@ -311,7 +311,7 @@ ArkUINativeModuleValue TimepickerBridge::SetTimepickerDateTimeOptions(ArkUIRunti
     std::string second = "second";
     if (secondArg->IsString(vm)) {
         secondType = ZeroPrefixType::SHOW;
-        std::string second = secondArg->ToString(vm)->ToString();
+        std::string second = secondArg->ToString(vm)->ToString(vm);
         if (second == "numeric") {
             secondType = ZeroPrefixType::HIDE;
         }

@@ -93,13 +93,19 @@ public:
     ScrollResult HandleScroll(
         float offset, int32_t source, NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
 
-    bool HandleScrollVelocity(float velocity) override;
+    bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
 
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
 
     void OnScrollStartRecursive(float position, float velocity = 0.f) override;
+    
+    bool NestedScrollOutOfBoundary() override
+    {
+        return !NearZero(scrollOffset_);
+    }
 
 private:
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(bool isDrag = true, float mainSpeed = 0.0f);
     ScrollResult HandleDragUpdate(float delta, float mainSpeed = 0.0f);
@@ -151,6 +157,8 @@ private:
     bool isRefreshing_ = false;
     bool isKeyEventRegisted_ = false;
     bool hasLoadingText_ = false;
+    bool isRemoveCustomBuilder_ = false;
+    bool isTextNodeChanged_ = false;
     RefPtr<FrameNode> progressChild_;
     RefPtr<FrameNode> loadingTextNode_;
     RefPtr<FrameNode> columnNode_;

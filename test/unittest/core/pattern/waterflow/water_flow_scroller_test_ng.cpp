@@ -589,4 +589,73 @@ HWTEST_F(WaterFlowScrollerTestNg, Focus001, TestSize.Level1)
     EXPECT_EQ(AceType::RawPtr(next), AceType::RawPtr(cmp));
     EXPECT_EQ(GetChildY(frameNode_, 18), 0.0f);
 }
+
+/**
+ * @tc.name: Focus002
+ * @tc.desc: Test GetScrollIndexAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, Focus002, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateFocusableItem(30);
+    });
+    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    focusHub->SetFocusDependence(FocusDependence::AUTO);
+
+    /**
+     * @tc.steps: step1. ScrollToEdge SCROLL_BOTTOM false
+     * @tc.expected: scroll to bottom
+     */
+    focusHub->FocusToHeadOrTailChild(false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetBeginIndex(), 19);
+    EXPECT_EQ(pattern_->GetEndIndex(), 29);
+    EXPECT_EQ(pattern_->layoutInfo_->itemStart_, false);
+    EXPECT_EQ(pattern_->layoutInfo_->itemEnd_, true);
+    EXPECT_EQ(pattern_->layoutInfo_->offsetEnd_, true);
+    EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, -100);
+
+    /**
+     * @tc.steps: step1. ScrollToEdge SCROLL_TOP false
+     * @tc.expected: scroll to top
+     */
+    focusHub->FocusToHeadOrTailChild(true);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetBeginIndex(), 0);
+    EXPECT_EQ(pattern_->GetEndIndex(), 10);
+    EXPECT_EQ(pattern_->layoutInfo_->itemStart_, true);
+    EXPECT_EQ(pattern_->layoutInfo_->itemEnd_, false);
+    EXPECT_EQ(pattern_->layoutInfo_->offsetEnd_, false);
+    EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, 0);
+
+    /**
+     * @tc.steps: step1. ScrollToIndex 29 false ScrollAlign::AUTO
+     * @tc.expected: scroll to bottom
+     */
+    auto scrollIndexAbility = pattern_->GetScrollIndexAbility();
+    EXPECT_TRUE(scrollIndexAbility(29));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetBeginIndex(), 19);
+    EXPECT_EQ(pattern_->GetEndIndex(), 29);
+    EXPECT_EQ(pattern_->layoutInfo_->itemStart_, false);
+    EXPECT_EQ(pattern_->layoutInfo_->itemEnd_, true);
+    EXPECT_EQ(pattern_->layoutInfo_->offsetEnd_, true);
+    EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, -100);
+
+    /**
+     * @tc.steps: step1. ScrollToIndex 0 false ScrollAlign::AUTO
+     * @tc.expected: scroll to top
+     */
+    EXPECT_TRUE(scrollIndexAbility(0));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetBeginIndex(), 0);
+    EXPECT_EQ(pattern_->GetEndIndex(), 10);
+    EXPECT_EQ(pattern_->layoutInfo_->itemStart_, true);
+    EXPECT_EQ(pattern_->layoutInfo_->itemEnd_, false);
+    EXPECT_EQ(pattern_->layoutInfo_->offsetEnd_, false);
+    EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, 0);
+}
 } // namespace OHOS::Ace::NG

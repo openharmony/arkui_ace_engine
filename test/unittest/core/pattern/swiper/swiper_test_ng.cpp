@@ -118,6 +118,7 @@ void SwiperTestNg::CreateItem(int32_t itemNumber)
     for (int32_t index = 0; index < itemNumber; index++) {
         ButtonModelNG buttonModelNG;
         buttonModelNG.CreateWithLabel("label");
+        ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
         ViewStackProcessor::GetInstance()->Pop();
     }
 }
@@ -160,7 +161,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnDirtyLayoutWrapperSwap001, TestSize.Level1
         model.SetDisplayArrow(true); // show arrow
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
     });
     auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode_);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -686,7 +686,8 @@ HWTEST_F(SwiperTestNg, UpdateCurrentOffset001, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
     pattern_->UpdateCurrentOffset(10.f);
-    EXPECT_EQ(pattern_->currentDelta_, -10.f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 10.f);
 }
 
 /**
@@ -703,9 +704,15 @@ HWTEST_F(SwiperTestNg, UpdateCurrentOffset002, TestSize.Level1)
     pattern_->isTouchPad_ = true;
     pattern_->childScrolling_ = true;
     pattern_->UpdateCurrentOffset(10.f);
-    EXPECT_GT(pattern_->currentDelta_, -10.f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_GT(GetChildX(frameNode_, 0), 0.f);
+    EXPECT_LT(GetChildX(frameNode_, 0), 10.f);
+
+    float preOffset = GetChildX(frameNode_, 0);
     pattern_->UpdateCurrentOffset(-20.f);
-    EXPECT_GT(pattern_->currentDelta_, 10.f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_LT(GetChildX(frameNode_, 0), preOffset);
+    EXPECT_GT(GetChildX(frameNode_, 0), -20.f);
 }
 
 /**
@@ -722,9 +729,12 @@ HWTEST_F(SwiperTestNg, UpdateCurrentOffset003, TestSize.Level1)
     EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::FADE);
     pattern_->childScrolling_ = true;
     pattern_->UpdateCurrentOffset(10.f);
-    EXPECT_EQ(pattern_->currentDelta_, 0.f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.f);
+
     pattern_->UpdateCurrentOffset(-20.f);
-    EXPECT_EQ(pattern_->currentDelta_, 20.f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -20.f);
 }
 
 /**
@@ -741,9 +751,12 @@ HWTEST_F(SwiperTestNg, UpdateCurrentOffset004, TestSize.Level1)
     EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::NONE);
     pattern_->childScrolling_ = true;
     pattern_->UpdateCurrentOffset(10.f);
-    EXPECT_EQ(pattern_->currentDelta_, 0.f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.f);
+
     pattern_->UpdateCurrentOffset(-20.f);
-    EXPECT_EQ(pattern_->currentDelta_, 20.f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -20.f);
 }
 
 /**
@@ -755,7 +768,8 @@ HWTEST_F(SwiperTestNg, UpdateCurrentOffset005, TestSize.Level1)
 {
     Create([](SwiperModelNG model) {});
     pattern_->UpdateCurrentOffset(10.f);
-    EXPECT_EQ(pattern_->currentDelta_, 0.f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->currentOffset_, 0.f);
 }
 
 /**
@@ -1838,21 +1852,6 @@ HWTEST_F(SwiperTestNg, SwipeCaptureLayoutInfo002, TestSize.Level1)
     }
 }
 
-void SwiperTestNg::CreateWithCustomAnimation()
-{
-    CreateWithItem([](SwiperModelNG model) {
-        SwiperContentAnimatedTransition transitionInfo;
-        transitionInfo.timeout = 0;
-        transitionInfo.transition = [](const RefPtr<SwiperContentTransitionProxy>& proxy) {};
-        model.SetCustomContentTransition(transitionInfo);
-
-        auto onContentDidScroll = [](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {};
-        model.SetOnContentDidScroll(std::move(onContentDidScroll));
-    });
-    pattern_->contentMainSize_ = SWIPER_WIDTH;
-    EXPECT_TRUE(pattern_->SupportSwiperCustomAnimation());
-}
-
 /**
  * @tc.name: FadeOverScroll001
  * @tc.desc: Test SwiperPattern FadeOverScroll
@@ -1915,7 +1914,7 @@ HWTEST_F(SwiperTestNg, FadeOverScroll001, TestSize.Level1)
     offset = 0.0f;
     EXPECT_FALSE(pattern_->FadeOverScroll(offset));
     EXPECT_FALSE(pattern_->IsVisibleChildrenSizeLessThanSwiper());
-    offset = -20.0f;
+    offset = 10.0f;
     EXPECT_TRUE(pattern_->FadeOverScroll(offset));
 }
 
@@ -1944,7 +1943,7 @@ HWTEST_F(SwiperTestNg, IsOutOfStart001, TestSize.Level1)
      * @tc.steps: step2. call mirror func.
      */
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    offset = -10.0f;
+    offset = 10.0f;
     EXPECT_TRUE(pattern_->IsOutOfStart(offset));
 }
 
@@ -1993,7 +1992,7 @@ HWTEST_F(SwiperTestNg, IsOutOfBoundary001, TestSize.Level1)
      * @tc.steps: step2. call mirror func.
      */
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    EXPECT_TRUE(pattern_->IsOutOfBoundary(10.0f));
+    EXPECT_TRUE(pattern_->IsOutOfBoundary(-10.0f));
 }
 
 /**
@@ -2029,35 +2028,6 @@ HWTEST_F(SwiperTestNg, CheckTargetIndexheckTargetIndex001, TestSize.Level1)
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
     EXPECT_EQ(pattern_->CheckTargetIndex(targetIndex, true), targetIndex - 1);
     EXPECT_EQ(pattern_->CheckTargetIndex(targetIndex, false), targetIndex + 1);
-}
-
-/**
- * @tc.name: WearableSwiperOnModifyDone001
- * @tc.desc: Test OnModifyDone
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, WearableSwiperOnModifyDone001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create swiper and set parameters.
-     */
-    CreateWithItem([](SwiperModelNG model) {
-        model.Create(true);
-        model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
-    });
-    RefPtr<SwiperPattern> indicatorPattern = frameNode_->GetPattern<SwiperPattern>();
-    EXPECT_NE(indicatorPattern, nullptr);
-    indicatorPattern->GetArcDotIndicatorStyle();
-
-    /**
-     * @tc.steps: step2. call UpdateContentModifier.
-     */
-    indicatorPattern->OnModifyDone();
-    indicatorPattern->swiperController_->removeSwiperEventCallback_();
-    indicatorPattern->swiperController_->addSwiperEventCallback_();
-    indicatorPattern->OnAfterModifyDone();
-    EXPECT_EQ(indicatorPattern->lastSwiperIndicatorType_, SwiperIndicatorType::ARC_DOT);
 }
 
 /**

@@ -904,6 +904,7 @@ HWTEST_F(WaterFlowSegmentTest, Segmented005, TestSize.Level1)
 
     secObj->ChangeData(0, 4, SECTION_5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    pattern_->BeforeCreateLayoutWrapper();
     EXPECT_EQ(secObj->GetSectionInfo().size(), 5);
     info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     EXPECT_EQ(info->startIndex_, 47);
@@ -1031,6 +1032,8 @@ HWTEST_F(WaterFlowSegmentTest, Segmented004, TestSize.Level1)
         AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_));
 
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    
+    pattern_->BeforeCreateLayoutWrapper();
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->endIndex_, 10);
     EXPECT_EQ(info->itemInfos_.size(), 11);
@@ -1048,6 +1051,7 @@ HWTEST_F(WaterFlowSegmentTest, Segmented004, TestSize.Level1)
     pattern_->layoutInfo_ = info;
     auto secObj = pattern_->GetSections();
     secObj->ChangeData(5, 0, ADD_SECTION_6);
+    pattern_->BeforeCreateLayoutWrapper();
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     AddItems(10);
     info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
@@ -1393,7 +1397,7 @@ HWTEST_F(WaterFlowSegmentTest, Constraint001, TestSize.Level1)
         EXPECT_EQ(GetChildWidth(frameNode_, i), 500.f / 3);
     }
     for (int i = 5; i < 10; i++) {
-        EXPECT_EQ(GetChildWidth(frameNode_, i), (500.f - 3) / 5);
+        EXPECT_EQ(GetChildWidth(frameNode_, i), (500.f - 8.0f) / 5);
     }
     EXPECT_EQ(GetChildWidth(frameNode_, 10), 500.f);
     EXPECT_EQ(info->endIndex_, 10);
