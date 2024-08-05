@@ -15,8 +15,6 @@
 
 #include "core/gestures/click_recognizer.h"
 
-#include "base/geometry/offset.h"
-#include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
 
 namespace OHOS::Ace {

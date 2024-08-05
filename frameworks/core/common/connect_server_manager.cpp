@@ -16,19 +16,8 @@
 #include "core/common/connect_server_manager.h"
 
 #include <dlfcn.h>
-#include <string>
 #include <unistd.h>
-
-#include "base/json/json_util.h"
-#include "base/log/log.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/ace_engine.h"
-#include "core/common/ace_page.h"
-#include "core/common/container.h"
 #include "core/common/layout_inspector.h"
-#include "core/event/ace_event_handler.h"
-
 #if defined(IOS_PLATFORM)
 #include "inspector/connect_inspector.h"
 #include <sys/sysctl.h>

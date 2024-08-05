@@ -15,23 +15,17 @@
 
 #include "core/common/task_executor_impl.h"
 
-#include <cerrno>
-#include <functional>
 #if !defined(PREVIEW)
 #ifdef OHOS_STANDARD_SYSTEM
 #include <sys/prctl.h>
 #endif
 #include <sys/resource.h>
 #endif
-#include <sys/time.h>
 #include <unistd.h>
 
-#include "base/log/log.h"
 #include "base/log/trace_id.h"
 #include "base/thread/background_task_executor.h"
-#include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/common/container_scope.h"
 #include "core/common/task_runner_adapter_factory.h"
 
 namespace OHOS::Ace {

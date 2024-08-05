@@ -14,28 +14,13 @@
  */
 
 #include "core/common/event_manager.h"
-#include <set>
 
-#include "base/geometry/ng/point_t.h"
-#include "base/json/json_util.h"
-#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
-#include "base/memory/ace_type.h"
 #include "base/thread/frame_trace_adapter.h"
-#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/xcollie/xcollieInterface.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/touch_event.h"
-#include "core/components_ng/gestures/recognizers/recognizer_group.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
-#include "core/event/ace_events.h"
-#include "core/event/key_event.h"
-#include "core/event/touch_event.h"
-#include "core/gestures/gesture_referee.h"
-#include "core/pipeline/base/element.h"
-#include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
 constexpr uint8_t KEYS_MAX_VALUE = 3;
