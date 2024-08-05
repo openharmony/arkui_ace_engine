@@ -183,8 +183,9 @@ class NodeAdapter {
         if (!node.isModifiable()) {
             return false;
         }
-        if (node.hasOwnProperty('attribute_')) {
-            let frameeNode = node as TypedFrameNode<any>;
+        const hasAttributeProperty = Object.prototype.hasOwnProperty.call(node, 'attribute_');
+        if (hasAttributeProperty) {
+            let frameeNode = node as TypedFrameNode<ArkComponent>;
             if (frameeNode.attribute_.allowChildCount !== undefined) {
                 const allowCount = frameeNode.attribute_.allowChildCount();
                 if (allowCount <= 1) {
