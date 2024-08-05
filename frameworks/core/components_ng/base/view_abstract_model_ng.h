@@ -217,11 +217,6 @@ public:
         ViewAbstract::SetPadding(paddings);
     }
 
-    void SetPaddings(const NG::PaddingProperty& paddings) override
-    {
-        ViewAbstract::SetPadding(paddings);
-    }
-
     void ResetSafeAreaPadding() override
     {
         ViewAbstract::ResetSafeAreaPadding();
@@ -285,11 +280,6 @@ public:
                 margins.right = NG::CalcLength(right.value());
             }
         }
-        ViewAbstract::SetMargin(margins);
-    }
-
-    void SetMargins(const NG::MarginProperty& margins) override
-    {
         ViewAbstract::SetMargin(margins);
     }
 

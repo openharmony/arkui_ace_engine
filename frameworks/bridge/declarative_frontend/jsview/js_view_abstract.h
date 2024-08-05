@@ -199,7 +199,7 @@ public:
         std::optional<CalcDimension>& bottom, std::optional<CalcDimension>& left, std::optional<CalcDimension>& right);
     static void ParseLocalizedMarginOrLocalizedPaddingCorner(
         const JSRef<JSObject>& object, LocalizedCalcDimension& localizedCalcDimension);
-    static bool ParseCommonMarginOrPaddingCorner(
+    static void ParseCommonMarginOrPaddingCorner(
         const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension);
     static void GetBorderRadiusByLengthMetrics(const char* key, JSRef<JSObject>& object, CalcDimension& radius);
     static void JsOutline(const JSCallbackInfo& info);
@@ -612,9 +612,6 @@ public:
     static void JsBackgroundFilter(const JSCallbackInfo& info);
     static void JsForegroundFilter(const JSCallbackInfo& info);
     static void JsCompositingFilter(const JSCallbackInfo& info);
-    static NG::PaddingProperty GetLocalizedPadding(const std::optional<CalcDimension>& top,
-        const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& start,
-        const std::optional<CalcDimension>& end);
     static NG::BorderColorProperty GetLocalizedBorderColor(const std::optional<Color>& colorStart,
         const std::optional<Color>& colorEnd, const std::optional<Color>& colorTop,
         const std::optional<Color>& colorBottom);

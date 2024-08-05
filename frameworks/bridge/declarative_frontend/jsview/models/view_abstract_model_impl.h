@@ -108,8 +108,7 @@ public:
     void SetPosition(const Dimension& x, const Dimension& y) override;
     void SetOffset(const Dimension& x, const Dimension& y) override;
     void MarkAnchor(const Dimension& x, const Dimension& y) override;
-    void SetPaddings(const NG::PaddingProperty& paddings) override {};
-    void SetMargins(const NG::MarginProperty& margins) override {};
+
     void SetBorderRadius(const NG::BorderRadiusProperty& borderRadius) override {};
     void SetBorderColor(const NG::BorderColorProperty& borderColors) override {};
     void SetBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
