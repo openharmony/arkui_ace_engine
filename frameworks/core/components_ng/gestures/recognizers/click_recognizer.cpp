@@ -72,10 +72,14 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
     return true;
 }
 
-ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count) : MultiFingersRecognizer(fingers), count_(count)
+ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold)
+    : MultiFingersRecognizer(fingers), count_(count), distanceThreshold_(distanceThreshold)
 {
     if (fingers_ > MAX_TAP_FINGERS || fingers_ < DEFAULT_TAP_FINGERS) {
         fingers_ = DEFAULT_TAP_FINGERS;
+    }
+    if (distanceThreshold_ < 0) {
+        distanceThreshold_ = std::numeric_limits<double>::infinity();
     }
 }
 
@@ -335,7 +339,16 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
     }
-    IsPointInRegion(event);
+    if (distanceThreshold_ < std::numeric_limits<double>::infinity()) {
+        Offset offset = event.GetScreenOffset() - touchPoints_[event.id].GetScreenOffset();
+        if (offset.GetDistance() > distanceThreshold_) {
+            TAG_LOGI(AceLogTag::ACE_GESTURE, "Click move distance is larger than distanceThreshold_, "
+            "distanceThreshold_ is %{public}f", distanceThreshold_);
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
+    } else {
+        IsPointInRegion(event);
+    }
     UpdateFingerListInfo();
 }
 
@@ -525,7 +538,7 @@ RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
 
 RefPtr<Gesture> ClickRecognizer::CreateGestureFromRecognizer() const
 {
-    return AceType::MakeRefPtr<TapGesture>(count_, fingers_);
+    return AceType::MakeRefPtr<TapGesture>(count_, fingers_, distanceThreshold_);
 }
 
 void ClickRecognizer::CleanRecognizerState()

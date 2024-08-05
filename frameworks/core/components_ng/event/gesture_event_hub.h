@@ -282,7 +282,8 @@ public:
 
     void CheckClickActuator();
     // Set by user define, which will replace old one.
-    void SetUserOnClick(GestureEventFunc&& clickEvent);
+    void SetUserOnClick(GestureEventFunc&& clickEvent,
+        double distanceThreshold = std::numeric_limits<double>::infinity());
 
      // Set by JS FrameNode.
     void SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent);

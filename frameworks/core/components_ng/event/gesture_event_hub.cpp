@@ -1234,15 +1234,19 @@ void GestureEventHub::CheckClickActuator()
     }
 }
 
-void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent)
+void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent, double distanceThreshold)
 {
     CheckClickActuator();
     if (parallelCombineClick) {
         userParallelClickEventActuator_->SetUserCallback(std::move(clickEvent));
         SetFocusClickEvent(userParallelClickEventActuator_->GetClickEvent());
+        auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
+        clickRecognizer->SetDistanceThreshold(distanceThreshold);
     } else {
         clickEventActuator_->SetUserCallback(std::move(clickEvent));
         SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+        auto clickRecognizer = clickEventActuator_->GetClickRecognizer();
+        clickRecognizer->SetDistanceThreshold(distanceThreshold);
     }
 }
 

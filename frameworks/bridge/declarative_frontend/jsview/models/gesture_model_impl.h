@@ -32,7 +32,7 @@ public:
 
 class TapGestureModelImpl : public OHOS::Ace::TapGestureModel {
 public:
-    void Create(int32_t countNum, int32_t fingersNum) override;
+    void Create(int32_t countNum, int32_t fingersNum, double distanceThreshold) override;
 };
 
 class LongPressGestureModelImpl : public OHOS::Ace::LongPressGestureModel {
