@@ -1763,7 +1763,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         return;
     }
 
-    if (!forceChange && NearEqual(keyboardHeight + 1, safeAreaManager_->GetKeyboardInset().Length()) &&
+    if (!forceChange && (NearEqual(keyboardHeight + 1, safeAreaManager_->GetKeyboardInset().Length()) ||
+        NearEqual(keyboardHeight - 1, safeAreaManager_->GetKeyboardInset().Length())) &&
         prevKeyboardAvoidMode_ == safeAreaManager_->KeyboardSafeAreaEnabled() && manager->PrevHasTextFieldPattern()) {
         TAG_LOGI(
             AceLogTag::ACE_KEYBOARD, "Ignore ileagal keyboard height change");
