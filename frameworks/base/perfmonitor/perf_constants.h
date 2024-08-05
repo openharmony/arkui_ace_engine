@@ -139,7 +139,7 @@ public:
     static constexpr char WINDOW_TITLE_BAR_RECOVER[] = "WINDOW_TITLE_BAR_RECOVER";
 
     // PC start app from transition
-    static constexpr char LAUNCHER_APP_LAUNCHE_FROM_TRANSITION[] = "LAUNCHER_APP_LAUNCHE_FROM_TRANSITION";
+    static constexpr char LAUNCHER_APP_LAUNCH_FROM_TRANSITION[] = "LAUNCHER_APP_LAUNCH_FROM_TRANSITION";
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_SCENE_ID_H
