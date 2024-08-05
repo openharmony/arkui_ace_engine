@@ -21,7 +21,6 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
-#include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -99,8 +98,8 @@ bool TextAdaptFontSizer::AdaptMinFontSize(TextStyle& textStyle, const std::strin
     return true;
 }
 
-void TextAdaptFontSizer::GetAdaptMaxMinFontSize(
-    const TextStyle& textStyle, double& maxFontSize, double& minFontSize, const LayoutConstraintF& contentConstraint)
+void TextAdaptFontSizer::GetAdaptMaxMinFontSize(const TextStyle& textStyle, double& maxFontSize, double& minFontSize,
+    const LayoutConstraintF& contentConstraint)
 {
     maxFontSize = textStyle.GetAdaptMaxFontSize().ConvertToPxDistribute(
         textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
@@ -108,8 +107,8 @@ void TextAdaptFontSizer::GetAdaptMaxMinFontSize(
         textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
 }
 
-void TextAdaptFontSizer::GetAdaptFontSizeStep(
-    const TextStyle& textStyle, double& stepSize, const Dimension& stepUnit, const LayoutConstraintF& contentConstraint)
+void TextAdaptFontSizer::GetAdaptFontSizeStep(const TextStyle& textStyle, double& stepSize, const Dimension& stepUnit,
+    const LayoutConstraintF& contentConstraint)
 {
     Dimension step = stepUnit;
     if (GreatNotEqual(textStyle.GetAdaptFontSizeStep().Value(), 0.0)) {
