@@ -28,7 +28,7 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
-#include "hag_serviceability_client.h"
+#include "core/components_ng/pattern/window_scene/scene/atomicservice_basic_engine_plugin.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -37,6 +37,9 @@ constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
 
 #ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
+constexpr uint32_t ASENGINE_ATTRIBUTIONS_COUNT = 3;
+constexpr uint32_t CIRCLE_ICON_INDEX = 1;
+constexpr uint32_t EYELASHRING_ICON_INDEX = 2;
 constexpr float HALF_PERCENT_TAG = 0.5f;
 constexpr float BASE_X_OFFSET = 0.25f;
 constexpr float BASE_Y_OFFSET = 0.4f;
@@ -335,12 +338,20 @@ void WindowPattern::CreateASStartingWindow()
     CHECK_NULL_VOID(session_);
     const auto& sessionInfo = session_->GetSessionInfo();
     // get atomic service resources
-    OHOS::AppExecFwk::AtomicserviceEcologicalRuleManager::AtomicserviceIconInfo atomicserviceIconInfo;
-    OHOS::AppExecFwk::AtomicserviceEcologicalRuleManager::HagServiceablityClient::GetInstance()->
-        GetAtomicserviceIconInfo(sessionInfo.bundleName_, atomicserviceIconInfo);
-    const auto& appNameInfo = atomicserviceIconInfo.GetAppName();
-    const auto& eyelashRingIcon = atomicserviceIconInfo.GetEyelashRingIcon();
-    const auto& circleIcon = atomicserviceIconInfo.GetCircleIcon();
+    std::string appNameInfo = "";
+    std::string eyelashRingIcon = "";
+    std::string circleIcon = "";
+
+#ifdef ACE_ENGINE_PLUGIN_PATH
+    std::vector<std::string> atomicServiceIconInfo = AtomicServiceBasicEnginePlugin::GetInstance().
+        getParamsFromAtomicServiceBasicEngine(sessionInfo.bundleName_);
+    if (atomicServiceIconInfo.size() >= ASENGINE_ATTRIBUTIONS_COUNT) {
+        appNameInfo = atomicServiceIconInfo[0];
+        circleIcon = atomicServiceIconInfo[CIRCLE_ICON_INDEX];
+        eyelashRingIcon = atomicServiceIconInfo[EYELASHRING_ICON_INDEX];
+    }
+    AtomicServiceBasicEnginePlugin::GetInstance().releaseData();
+#endif // ACE_ENGINE_PLUGIN_PATH
 
     startingWindow_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
