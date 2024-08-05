@@ -302,6 +302,38 @@ HWTEST_F(GridLayoutRangeTest, SolveOverScroll002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollItem001
+ * @tc.desc: Test an error condition
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, ScrollItem001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo14());
+    model.SetColumnsGap(Dimension { 10.0f });
+    model.SetRowsGap(Dimension { 10.0f });
+    constexpr float itemHeight = 500.0f;
+    CreateFixedHeightItems(1, itemHeight * 2 + 10.0f);
+    CreateFixedHeightItems(1, itemHeight);
+    CreateFixedHeightItems(1, itemHeight * 2 + 10.0f);
+    CreateFixedHeightItems(19, itemHeight);
+    CreateFixedHeightItems(1, itemHeight * 6 + 50.0f);
+    CreateFixedHeightItems(77, itemHeight);
+    CreateDone(frameNode_);
+    const auto& info = pattern_->gridLayoutInfo_;
+
+    pattern_->ScrollToIndex(88, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.startIndex_, 85);
+    EXPECT_EQ(info.endIndex_, 90);
+    pattern_->ScrollToIndex(2, false, ScrollAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.startIndex_, 2);
+    EXPECT_EQ(info.endIndex_, 2);
+}
+
+/**
  * @tc.name: LayoutRangeSolver::Solve001
  * @tc.desc: Test LayoutRangeSolver::FindStartingRow when matrix is empty.
  * @tc.type: FUNC

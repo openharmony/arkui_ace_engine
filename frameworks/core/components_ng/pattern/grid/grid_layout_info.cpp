@@ -954,7 +954,7 @@ float GridLayoutInfo::GetHeightInRange(int32_t startLine, int32_t endLine, float
     if (endLine <= startLine) {
         return 0.0f;
     }
-    auto endIt = lineHeightMap_.find(endLine);
+    auto endIt = lineHeightMap_.lower_bound(endLine);
     auto it = lineHeightMap_.find(startLine);
     if (it == lineHeightMap_.end()) {
         return 0.0f;
