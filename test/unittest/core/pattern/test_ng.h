@@ -16,9 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_TEST_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_TEST_NG_H
 
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <type_traits>
-
-#include "gtest/gtest.h"
 
 #define private public
 #define protected public
@@ -30,7 +30,11 @@
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern//linear_layout/column_model_ng.h"
+#include "core/components_ng/pattern//linear_layout/row_model_ng.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -52,6 +56,10 @@ public:
     TouchEventInfo CreateTouchEventInfo(TouchType touchType, Offset location);
     static RefPtr<ThemeConstants> CreateThemeConstants(const std::string& patternName);
     void FlushExpandSafeAreaTask();
+    void CreateLayoutTask(const RefPtr<FrameNode>& frameNode);
+    RefPtr<FrameNode> CreateText(const std::string& content, const std::function<void(TextModelNG)>& callback);
+    RefPtr<FrameNode> CreateRow(const std::function<void(RowModelNG)>& callback);
+    RefPtr<FrameNode> CreateColumn(const std::function<void(ColumnModelNG)>& callback);
 
     AssertionResult IsEqual(const SizeF& actual, const SizeF& expected)
     {

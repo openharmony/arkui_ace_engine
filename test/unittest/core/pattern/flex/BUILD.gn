@@ -16,8 +16,10 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("flex_test_ng") {
   type = "new"
   sources = [
-    "flex_test_ng.cpp",
-    "flex_testthree_ng.cpp",
-    "flex_testtwo_ng.cpp",
+    "flex_base_test_ng.cpp",
+    "flex_new_test_ng.cpp",
+    "old_cases/flex_test_ng.cpp",
+    "old_cases/flex_testthree_ng.cpp",
+    "old_cases/flex_testtwo_ng.cpp",
   ]
 }
