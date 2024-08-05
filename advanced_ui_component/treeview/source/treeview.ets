@@ -2192,6 +2192,7 @@ class ListNodeDataSource extends BasicDataSource {
       this.initHandler(listNode, 0);
       this.listNode.splice(0, this.listNode.length);
       this.listNode.push(...listNode);
+      this.notifyDataReload();
       clearTimeout(timeId);
     }, DELAY_TIME);
   }
