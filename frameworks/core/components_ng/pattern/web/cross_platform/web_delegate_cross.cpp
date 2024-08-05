@@ -1722,4 +1722,9 @@ void WebDelegateCross::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t 
 {
     // cross platform is not support now;
 }
+
+void WebDelegateCross::DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width)
+{
+    // cross platform is not support now;
+}
 }
