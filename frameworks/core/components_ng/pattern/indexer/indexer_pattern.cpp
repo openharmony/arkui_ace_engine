@@ -764,6 +764,7 @@ void IndexerPattern::ApplyIndexChanged(
             nodeLayoutProperty->UpdateContent(nodeStr);
             nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
             nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
+            nodeLayoutProperty->UpdateMinFontScale(1.0f);
             nodeLayoutProperty->UpdateMaxFontScale(1.0f);
             if (index == childFocusIndex_) {
                 auto borderWidth = indexerTheme->GetFocusBgOutlineSize();
@@ -831,6 +832,7 @@ void IndexerPattern::ApplyIndexChanged(
         nodeLayoutProperty->UpdateContent(nodeStr);
         nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
+        nodeLayoutProperty->UpdateMinFontScale(1.0f);
         nodeLayoutProperty->UpdateMaxFontScale(1.0f);
         nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
         childRenderContext->ResetBlendBorderColor();
@@ -1124,6 +1126,7 @@ void IndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     letterLayoutProperty->UpdateTextColor(layoutProperty->GetPopupColor().value_or(indexerTheme->GetPopupTextColor()));
     letterLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     letterLayoutProperty->UpdateAlignment(Alignment::CENTER);
+    letterLayoutProperty->UpdateMinFontScale(1.0f);
     letterLayoutProperty->UpdateMaxFontScale(1.0f);
     auto textPadding = Dimension(IndexerTheme::TEXT_PADDING_LEFT, DimensionUnit::VP).ConvertToPx();
     letterLayoutProperty->UpdatePadding(
@@ -1441,6 +1444,7 @@ void IndexerPattern::UpdateBubbleListItem(
             static_cast<int32_t>(i) == popupClickedIndex_ ? popupSelectedTextColor : popupUnselectedTextColor);
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+        textLayoutProperty->UpdateMinFontScale(1.0f);
         textLayoutProperty->UpdateMaxFontScale(1.0f);
         UpdateBubbleListItemContext(listNode, indexerTheme, i);
         UpdateBubbleListItemMarkModify(textNode, listItemNode);
