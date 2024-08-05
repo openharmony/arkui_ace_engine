@@ -15,14 +15,7 @@
 
 #include "core/accessibility/accessibility_node.h"
 
-#include "base/json/json_util.h"
-#include "base/log/ace_trace.h"
-#include "base/log/log.h"
-#include "base/utils/linear_map.h"
-#include "base/utils/utils.h"
-#include "core/accessibility/accessibility_utils.h"
 #include "core/common/container.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {
