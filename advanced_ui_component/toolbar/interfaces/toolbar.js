@@ -188,7 +188,8 @@ export class ToolBar extends ViewPU {
       this.__toolBarModifier.set(new ToolBarModifier()
         .padding(LengthMetrics.vp(24))
         .stateEffect(true)
-        .height(LengthMetrics.vp(56)));
+        .height(LengthMetrics.vp(56))
+        .backgroundColor('sys.color.ohos_id_color_toolbar_bg'));
     }
     if (y3.moreText === undefined) {
       this.__moreText.set({
