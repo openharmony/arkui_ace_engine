@@ -138,12 +138,14 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                     SHEET_SPLIT_AI_BAR.ConvertToPx();
             }
             auto maxHeight = std::min(sheetMaxHeight, sheetMaxWidth_) * POPUP_LARGE_SIZE;
-            if (sheetHeight_ > maxHeight) {
-                sheetHeight_ = maxHeight;
-            } else if (sheetHeight_ < 0.0f) {
+            maxHeight = SheetInSplitWindow()
+                ? maxHeight : std::max(maxHeight, static_cast<float>(SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx()));
+            if (LessNotEqual(sheetHeight_, 0.0f)) {
                 sheetHeight_ = SHEET_BIG_WINDOW_HEIGHT.ConvertToPx();
-            } else if (sheetHeight_ < SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx() && !SheetInSplitWindow()) {
+            } else if (LessOrEqual(sheetHeight_, SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx()) && !SheetInSplitWindow()) {
                 sheetHeight_ = SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx();
+            } else if (GreatOrEqual(sheetHeight_, maxHeight)) {
+                sheetHeight_ = maxHeight;
             }
             SizeF idealSize(sheetWidth_, sheetHeight_);
             layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
@@ -420,12 +422,14 @@ float SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle() const
             height = sheetStyle_.height->ConvertToPx();
         }
 
-        if (height > maxHeight) {
-            height = maxHeight;
-        } else if (height < 0.0f) {
+        maxHeight = SheetInSplitWindow()
+            ? maxHeight : std::max(maxHeight, static_cast<float>(SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx()));
+        if (LessNotEqual(height, 0.0f)) {
             height = SHEET_BIG_WINDOW_HEIGHT.ConvertToPx();
-        } else if (height < SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx() && !SheetInSplitWindow()) {
+        } else if (LessOrEqual(height, SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx()) && !SheetInSplitWindow()) {
             height = SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx();
+        } else if (GreatOrEqual(height, maxHeight)) {
+            height = maxHeight;
         }
     } else {
         height = SHEET_BIG_WINDOW_HEIGHT.ConvertToPx();
