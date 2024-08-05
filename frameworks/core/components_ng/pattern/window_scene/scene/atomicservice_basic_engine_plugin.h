@@ -38,16 +38,16 @@ public:
     std::string GetAppName() const;
 
     // The following functions are used to set data
-    void SetBundleName(const std::string &val);
-    void SetModuleName(const std::string &val);
-    void SetAbilityName(const std::string &val);
-    void SetCircleIcon(const std::string &val);
-    void SetEyelashRingIcon(const std::string &val);
-    void SetAppName(const std::string &val);
+    void SetBundleName(const std::string& val);
+    void SetModuleName(const std::string& val);
+    void SetAbilityName(const std::string& val);
+    void SetCircleIcon(const std::string& val);
+    void SetEyelashRingIcon(const std::string& val);
+    void SetAppName(const std::string& val);
 
     // The following functions are used for serialization and deserialization
-    bool Marshalling(Parcel &parcel) const override;
-    static AtomicserviceIconInfo *Unmarshalling(Parcel &parcel);
+    bool Marshalling(Parcel& parcel) const override;
+    static AtomicserviceIconInfo *Unmarshalling(Parcel& parcel);
 
 private:
     // Member variable

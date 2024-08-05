@@ -52,37 +52,37 @@ std::string AtomicserviceIconInfo::GetAppName() const
     return appName_;
 }
 
-void AtomicserviceIconInfo::SetBundleName(const std::string &val)
+void AtomicserviceIconInfo::SetBundleName(const std::string& val)
 {
     bundleName_ = val;
 }
 
-void AtomicserviceIconInfo::SetModuleName(const std::string &val)
+void AtomicserviceIconInfo::SetModuleName(const std::string& val)
 {
     moduleName_ = val;
 }
 
-void AtomicserviceIconInfo::SetAbilityName(const std::string &val)
+void AtomicserviceIconInfo::SetAbilityName(const std::string& val)
 {
     abilityName_ = val;
 }
 
-void AtomicserviceIconInfo::SetCircleIcon(const std::string &val)
+void AtomicserviceIconInfo::SetCircleIcon(const std::string& val)
 {
     circleIcon_ = val;
 }
 
-void AtomicserviceIconInfo::SetEyelashRingIcon(const std::string &val)
+void AtomicserviceIconInfo::SetEyelashRingIcon(const std::string& val)
 {
     eyelashRingIcon_ = val;
 }
 
-void AtomicserviceIconInfo::SetAppName(const std::string &val)
+void AtomicserviceIconInfo::SetAppName(const std::string& val)
 {
     appName_ = val;
 }
 
-bool AtomicserviceIconInfo::Marshalling(Parcel &parcel) const
+bool AtomicserviceIconInfo::Marshalling(Parcel& parcel) const
 {
     parcel.WriteString(bundleName_);
     parcel.WriteString(moduleName_);
@@ -93,7 +93,7 @@ bool AtomicserviceIconInfo::Marshalling(Parcel &parcel) const
     return true;
 }
 
-AtomicserviceIconInfo *AtomicserviceIconInfo::Unmarshalling(Parcel &parcel)
+AtomicserviceIconInfo *AtomicserviceIconInfo::Unmarshalling(Parcel& parcel)
 {
     AtomicserviceIconInfo *data = new AtomicserviceIconInfo();
     data->SetBundleName(parcel.ReadString());
