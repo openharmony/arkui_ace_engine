@@ -226,7 +226,7 @@ bool CheckWhetherNeedToHideToolbar(const RefPtr<NavBarNode>& hostNode, const Siz
 
     auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(hostNode->GetToolBarNode());
     CHECK_NULL_RETURN(toolbarNode, false);
-    if (!toolbarNode->HasValidContent() && hostNode->GetPrevToolBarIsCustom().value_or(false)) {
+    if (!toolbarNode->HasValidContent()) {
         return true;
     }
 
@@ -242,7 +242,6 @@ bool CheckWhetherNeedToHideToolbar(const RefPtr<NavBarNode>& hostNode, const Siz
     float gridWidth = static_cast<float>(columnInfo->GetWidth(rotationLimitCount));
     float gutterWidth = columnInfo->GetParent()->GetGutterWidth().ConvertToPx();
     float hideLimitWidth = gridWidth + gutterWidth * 2;
-    auto toolBar = AceType::DynamicCast<FrameNode>(toolbarNode->GetChildAtIndex(0));
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
         if (currentColumns >= static_cast<int32_t>(rotationLimitCount) &&
             GreatOrEqual(navigationSize.Width(), gridWidth)) {
