@@ -70,9 +70,8 @@ int32_t OH_ArkUI_DragEvent_GetUdmfData(ArkUI_DragEvent* event, OH_UdmfData* data
     if (!event || !dragEvent || (dragEvent->unifiedData == nullptr) || !data) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    auto rawData = reinterpret_cast<OH_UdmfData*>(dragEvent->unifiedData);
-    auto raw = dynamic_cast<OH_UdmfData*>(rawData);
-    if (raw) {
+
+    if (!(dragEvent->isSuitGetData)) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto unifiedData =
