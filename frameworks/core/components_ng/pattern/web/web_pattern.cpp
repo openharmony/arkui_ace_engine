@@ -493,6 +493,7 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         if (!pattern->GetIsFixedNestedScrollMode() || !pattern->GetNestedScrollParent()) {
             pattern->SetParentScrollable();
         }
+        pattern->GetParentAxis();
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto pattern = weak.Upgrade();
@@ -502,6 +503,12 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+
+        auto parent = pattern->GetNestedScrollParent();
+        if (parent) {
+            parent->OnScrollDragEndRecursive();
+        }
+
         pattern->HandleFlingMove(info);
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
@@ -4823,7 +4830,6 @@ void WebPattern::OnScrollState(bool scrollState)
     if (!scrollState) {
         OnScrollEndRecursive(std::nullopt);
     } else {
-        GetParentAxis();
         OnScrollStartRecursive(std::vector<float>({ 0.0, 0.0 }));
         if (imageAnalyzerManager_) {
             imageAnalyzerManager_->UpdateOverlayStatus(
@@ -4977,6 +4983,11 @@ bool WebPattern::FilterScrollEventHandleOffset(const float offset)
     } else if (((offset > 0) && nestedScroll.backward == NestedScrollMode::PARALLEL) ||
                ((offset < 0) && nestedScroll.forward == NestedScrollMode::PARALLEL)) {
         HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    } else if (parent.Upgrade()->NestedScrollOutOfBoundary() &&
+                ((Positive(offset) && nestedScroll.backward == NestedScrollMode::SELF_FIRST) ||
+               (Negative(offset) && nestedScroll.forward == NestedScrollMode::SELF_FIRST))) {
+        HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+        return true;
     }
     UpdateFlingReachEdgeState(offset, false);
     return false;
