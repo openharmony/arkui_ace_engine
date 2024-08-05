@@ -36,6 +36,8 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
     auto titleBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
     auto constraint = navBarLayoutProperty->CreateChildConstraint();
+
+    // if titlebar is hidden or there is no child in titlebar, set zero to its size.
     if (navBarLayoutProperty->GetHideTitleBar().value_or(false) || titleBarNode->GetChildren().empty()) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
         titleBarWrapper->Measure(constraint);
@@ -217,13 +219,14 @@ NavSafeArea CheckIgnoreLayoutSafeArea(LayoutWrapper* layoutWrapper, const RefPtr
 
 bool CheckWhetherNeedToHideToolbar(const RefPtr<NavBarNode>& hostNode, const SizeF& navigationSize)
 {
-    if (hostNode->GetPrevMenuIsCustomValue(false)) {
+    // if current menu or toolBar is custom, no need to hide.
+    if (hostNode->GetPrevMenuIsCustomValue(false) || hostNode->GetPrevToolBarIsCustom().value_or(false)) {
         return false;
     }
 
     auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(hostNode->GetToolBarNode());
     CHECK_NULL_RETURN(toolbarNode, false);
-    if (!toolbarNode->HasValidContent()) {
+    if (!toolbarNode->HasValidContent() && hostNode->GetPrevToolBarIsCustom().value_or(false)) {
         return true;
     }
 
@@ -242,7 +245,7 @@ bool CheckWhetherNeedToHideToolbar(const RefPtr<NavBarNode>& hostNode, const Siz
     auto toolBar = AceType::DynamicCast<FrameNode>(toolbarNode->GetChildAtIndex(0));
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
         if (currentColumns >= static_cast<int32_t>(rotationLimitCount) &&
-            GreatOrEqual(navigationSize.Width(), gridWidth) && toolBar->GetTag() == V2::TOOL_BAR_ETS_TAG) {
+            GreatOrEqual(navigationSize.Width(), gridWidth)) {
             return true;
         }
     } else if (SystemProperties::GetDeviceType() == DeviceType::TABLET) {
