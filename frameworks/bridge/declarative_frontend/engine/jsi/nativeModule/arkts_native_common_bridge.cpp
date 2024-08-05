@@ -4984,11 +4984,11 @@ ArkUINativeModuleValue CommonBridge::SetDragPreview(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> inspectorId = runtimeCallInfo->GetCallArgRef(NUM_1);
- 
+
     struct ArkUIDragPreview dragPreview = { "" };
-    
+    std::string stringValue;
     if (inspectorId->IsString(vm)) {
-        std::string stringValue = inspectorId->ToString(vm)->ToString(vm);
+        stringValue = inspectorId->ToString(vm)->ToString(vm);
         dragPreview.inspectorId = stringValue.c_str();
     }
 
