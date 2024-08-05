@@ -408,6 +408,8 @@ RefPtr<SpanBase> SpanString::GetDefaultSpan(SpanType type)
             return MakeRefPtr<LineHeightSpan>();
         case SpanType::ExtSpan:
             return MakeRefPtr<ExtSpan>();
+        case SpanType::Url:
+            return MakeRefPtr<UrlSpan>();
         case SpanType::BackgroundColor:
             return MakeRefPtr<BackgroundColorSpan>();
         default:
