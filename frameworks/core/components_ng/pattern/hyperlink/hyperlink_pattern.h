@@ -61,6 +61,7 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
 
     bool isLinked_ = false;
+    bool isTouchPreventDefault_ = false;
     RefPtr<TouchEventImpl> onTouchEvent_;
     RefPtr<InputEvent> onHoverEvent_;
     RefPtr<InputEvent> onMouseEvent_;
