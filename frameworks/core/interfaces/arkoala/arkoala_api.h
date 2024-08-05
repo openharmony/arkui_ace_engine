@@ -225,6 +225,7 @@ struct ArkUIMouseEvent {
 struct ArkUIDragEvent {
     void* unifiedData;
     void* unifiedDataSummary;
+    bool isSuitGetData;
     ArkUI_Int32 dragResult;
     ArkUI_Float64 touchPointX;
     ArkUI_Float64 touchPointY;

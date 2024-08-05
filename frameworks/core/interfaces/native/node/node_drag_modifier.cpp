@@ -135,6 +135,7 @@ void SetOnDragDrop(ArkUINodeHandle node, void* extraParam)
         std::vector<std::string> keepStr(summary.size());
 
         SetDragEventProperty(info, event, strList, keepStr);
+        event.dragEvent.isSuitGetData = true;
 
         auto unifiedData = UdmfClient::GetInstance()->TransformUnifiedDataPtr(info->GetData());
 
@@ -167,6 +168,7 @@ void SetOnDragStart(ArkUINodeHandle node, void* extraParam)
         std::vector<std::string> keepStr(summary.size());
 
         SetDragEventProperty(info, event, strList, keepStr);
+        event.dragEvent.isSuitGetData = false;
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUIAsyncEvent(&event);
@@ -201,6 +203,7 @@ void SetOnDragEnter(ArkUINodeHandle node, void* extraParam)
         auto unifiedData = UdmfClient::GetInstance()->TransformUnifiedDataPtr(info->GetData());
         event.dragEvent.dragBehavior = static_cast<ArkUI_Int32>(DragBehavior::UNKNOWN);
         event.dragEvent.unifiedData = unifiedData;
+        event.dragEvent.isSuitGetData = false;
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUIAsyncEvent(&event);
@@ -231,6 +234,8 @@ void SetOnDragMove(ArkUINodeHandle node, void* extraParam)
         auto unifiedData = UdmfClient::GetInstance()->TransformUnifiedDataPtr(info->GetData());
         event.dragEvent.dragBehavior = static_cast<ArkUI_Int32>(DragBehavior::UNKNOWN);
         event.dragEvent.unifiedData = unifiedData;
+        event.dragEvent.isSuitGetData = false;
+
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUIAsyncEvent(&event);
         info->SetResult(static_cast<DragRet>(event.dragEvent.dragResult));
@@ -261,6 +266,8 @@ void SetOnDragLeave(ArkUINodeHandle node, void* extraParam)
         auto unifiedData = UdmfClient::GetInstance()->TransformUnifiedDataPtr(info->GetData());
         event.dragEvent.dragBehavior = static_cast<ArkUI_Int32>(DragBehavior::UNKNOWN);
         event.dragEvent.unifiedData = unifiedData;
+        event.dragEvent.isSuitGetData = false;
+
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUIAsyncEvent(&event);
         info->SetResult(static_cast<DragRet>(event.dragEvent.dragResult));
@@ -301,6 +308,7 @@ void SetOnDragEnd(ArkUINodeHandle node, void* extraParam)
         auto unifiedData = UdmfClient::GetInstance()->TransformUnifiedDataPtr(info->GetData());
 
         event.dragEvent.unifiedData = unifiedData;
+        event.dragEvent.isSuitGetData = false;
 
         // Did NOT define pressCode, so will NOT pass presscode to UI.
         event.dragEvent.dragResult = static_cast<ArkUI_Int32>(info->GetResult());
@@ -326,6 +334,8 @@ void SetOnPreDrag(ArkUINodeHandle node, void* extraParam)
 
         // Did NOT define pressCode, so will NOT pass presscode to UI.
         event.componentAsyncEvent.data[0].i32 = static_cast<ArkUI_Int32>(preDragStatus);
+        event.dragEvent.isSuitGetData = false;
+
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUIAsyncEvent(&event);
     };
