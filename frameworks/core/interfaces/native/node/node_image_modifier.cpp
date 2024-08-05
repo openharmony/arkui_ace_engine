@@ -591,7 +591,7 @@ void SetImageOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
     CHECK_NULL_VOID(frameNode);
     auto opacityValue = static_cast<float>(opacity);
     if ((LessNotEqual(opacityValue, 0.0)) || GreatNotEqual(opacityValue, 1.0)) {
-        opacityValue = 0.0f;
+        opacityValue = 1.0f;
     }
     ViewAbstract::SetOpacity(frameNode, opacityValue);
 }
@@ -600,7 +600,7 @@ void ResetImageOpacity(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetOpacity(frameNode, 0.0f);
+    ViewAbstract::SetOpacity(frameNode, 1.0f);
 }
 
 void SetEdgeAntialiasing(ArkUINodeHandle node, ArkUI_Float32 edgeAntialiasing)

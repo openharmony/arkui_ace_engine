@@ -233,73 +233,6 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestRequestKeyboard001, TestS
 }
 
 /**
- * @tc.name: RichEditorPatternTestOnColorConfigurationUpdate001
- * @tc.desc: test OnColorConfigurationUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestOnColorConfigurationUpdate001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
-
-    auto oldThemeManager = PipelineBase::GetCurrentContext()->themeManager_;
-    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
-
-    auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, testFrameNodeId, richEditorPattern);
-    ASSERT_NE(childFrameNode, nullptr);
-    auto spanNode = AceType::MakeRefPtr<SpanNode>(testSpanNodeId);
-    ASSERT_NE(spanNode, nullptr);
-
-    do {
-        auto newHost1 = richEditorPattern->GetHost();
-        auto newHost2 = richEditorPattern->GetHost();
-        ASSERT_EQ(newHost1, newHost2);
-
-        newHost1->children_.emplace_back(childFrameNode);
-        newHost1->children_.emplace_back(spanNode);
-        ASSERT_EQ(newHost1, newHost2);
-    } while (0);
-
-    spanNode->UpdateTextColor(TEXT_COLOR_VALUE);
-    richEditorPattern->OnColorConfigurationUpdate();
-    ASSERT_EQ(spanNode->GetTextColor(), TEXT_COLOR_VALUE);
-
-    auto oldSpanItem = spanNode->spanItem_;
-    spanNode->spanItem_ = nullptr;
-    richEditorPattern->OnColorConfigurationUpdate();
-    spanNode->spanItem_ = oldSpanItem;
-
-    auto spanItem = spanNode->GetSpanItem();
-    spanItem->hasResourceFontColor = true;
-    spanItem->hasResourceDecorationColor = true;
-    spanNode->UpdateTextColor(TEXT_COLOR_VALUE);
-    richEditorPattern->OnColorConfigurationUpdate();
-    ASSERT_NE(spanNode->GetTextColor(), TEXT_COLOR_VALUE);
-
-    PipelineBase::GetCurrentContext()->themeManager_ = oldThemeManager;
-}
-
-/**
- * @tc.name: RichEditorPatternTestBetweenPreviewTextPosition001
- * @tc.desc: test BetweenPreviewTextPosition
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestBetweenPreviewTextPosition001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    Offset globalOffset;
-
-    ASSERT_EQ(richEditorPattern->BetweenPreviewTextPosition(globalOffset), false);
-}
-
-/**
  * @tc.name: RichEditorPatternTestInitMouseEvent001
  * @tc.desc: test InitMouseEvent
  * @tc.type: FUNC
@@ -380,8 +313,6 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestUpdatePreviewText001, Tes
     previewRange.start = -1;
     previewRange.end = -1;
     richEditorPattern->SetPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
-    auto previewTextSpan = richEditorPattern->previewTextRecord_.previewTextSpan;
-    ASSERT_NE(previewTextSpan, nullptr);
 
     previewRange.start = -1;
     previewRange.end = -1;
@@ -776,7 +707,7 @@ HWTEST_F(RichEditorPatternTestNg, HandleCursorOnDragMoved001, TestSize.Level1)
      */
     richEditorPattern->isCursorAlwaysDisplayed_ = false;
     richEditorPattern->HandleCursorOnDragMoved(notifyDragEvent);
-    EXPECT_EQ(richEditorPattern->isCursorAlwaysDisplayed_, true);
+    EXPECT_EQ(richEditorPattern->isCursorAlwaysDisplayed_, false);
 }
 
 /**
@@ -1613,79 +1544,6 @@ HWTEST_F(RichEditorPatternTestNg, GetPreviewTextUnderlineWidth001, TestSize.Leve
 }
 
 /**
- * @tc.name: MergeSpanContent001
- * @tc.desc: test MergeSpanContent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, MergeSpanContent001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto target = AceType::MakeRefPtr<SpanItem>();
-    auto source = AceType::MakeRefPtr<SpanItem>();
-
-    richEditorPattern->MergeSpanContent(target, source, false);
-
-    target->content = PREVIEW_TEXT_VALUE1;
-    source->content = PREVIEW_TEXT_VALUE3;
-    richEditorPattern->MergeSpanContent(target, source, true);
-
-    EXPECT_EQ(target->content, PREVIEW_TEXT_VALUE2);
-}
-
-/**
- * @tc.name: MergeSameStyleSpan001
- * @tc.desc: test MergeSameStyleSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, MergeSameStyleSpan001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto target = AceType::MakeRefPtr<SpanItem>();
-    auto source = AceType::MakeRefPtr<SpanItem>();
-
-    richEditorPattern->MergeSameStyleSpan(target, source, false);
-
-    target->content = PREVIEW_TEXT_VALUE1;
-    source->content = PREVIEW_TEXT_VALUE3;
-    richEditorPattern->MergeSameStyleSpan(target, source, true);
-    EXPECT_EQ(target->content, PREVIEW_TEXT_VALUE2);
-}
-
-/**
- * @tc.name: CallbackAfterSetPreviewText001
- * @tc.desc: test CallbackAfterSetPreviewText
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, CallbackAfterSetPreviewText001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    std::string previewTextValue = INIT_VALUE_1;
-    PreviewRange previewRange;
-
-    previewRange.start = -1;
-    previewRange.end = -1;
-    ASSERT_EQ(richEditorPattern->SetPreviewText(PREVIEW_TEXT_VALUE1, previewRange), 0);
-
-    int32_t delta = -1;
-    EXPECT_EQ(richEditorPattern->CallbackAfterSetPreviewText(delta), true);
-
-    delta = testNumber0;
-    EXPECT_EQ(richEditorPattern->CallbackAfterSetPreviewText(delta), true);
-
-    delta = testNumber1;
-    EXPECT_EQ(richEditorPattern->CallbackAfterSetPreviewText(delta), true);
-}
-
-/**
  * @tc.name: FromStyledString001
  * @tc.desc: test FromStyledString
  * @tc.type: FUNC
@@ -1800,50 +1658,8 @@ HWTEST_F(RichEditorPatternTestNg, FinishTextPreview001, TestSize.Level1)
 
     richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
     richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE2, previewRange);
-    EXPECT_NE(richEditorPattern->previewTextRecord_.previewTextSpan, nullptr);
     richEditorPattern->FinishTextPreview();
-    EXPECT_EQ(richEditorPattern->previewTextRecord_.previewTextSpan, nullptr);
-}
-
-/**
- * @tc.name: BetweenPreviewTextPosition002
- * @tc.desc: test BetweenPreviewTextPosition
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, BetweenPreviewTextPosition002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    PreviewRange previewRange;
-    previewRange.start = -1;
-    previewRange.end = -1;
-    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
-    richEditorPattern->previewTextRecord_.previewTextSpan = nullptr;
-
-    Offset globalOffset;
-    globalOffset.SetX(testNumber0);
-    globalOffset.SetY(testNumber5);
-
-    auto firstParagraph = MockParagraph::GetOrCreateMockParagraph();
-    std::vector<RectF> firstRects { RectF(testNumber0, testNumber0, testNumber5, testNumber5) };
-    EXPECT_CALL(*firstParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(firstRects));
-    richEditorPattern->paragraphs_.AddParagraph(
-        { .paragraph = firstParagraph, .start = testNumber0, .end = testNumber2 });
-    richEditorPattern->paragraphs_.AddParagraph(
-        { .paragraph = firstParagraph, .start = testNumber2, .end = testNumber4 });
-    EXPECT_EQ(richEditorPattern->BetweenPreviewTextPosition(globalOffset), true);
-
-    auto secondParagraph = MockParagraph::GetOrCreateMockParagraph();
-    std::vector<RectF> secondRects { RectF(testNumber0, testNumber0, testNumber3, testNumber3) };
-    EXPECT_CALL(*secondParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(secondRects));
-    richEditorPattern->paragraphs_.Reset();
-    richEditorPattern->paragraphs_.AddParagraph(
-        { .paragraph = secondParagraph, .start = testNumber0, .end = testNumber2 });
-    richEditorPattern->paragraphs_.AddParagraph(
-        { .paragraph = secondParagraph, .start = testNumber2, .end = testNumber4 });
-    EXPECT_EQ(richEditorPattern->BetweenPreviewTextPosition(globalOffset), false);
+    EXPECT_EQ(richEditorPattern->previewTextRecord_.previewContent, "");
 }
 
 /**
@@ -1974,7 +1790,7 @@ HWTEST_F(RichEditorPatternTestNg, GetPreviewTextRects001, TestSize.Level1)
 
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     std::vector<RectF> firstRects { RectF(testNumber0, testNumber0, testNumber5, testNumber5) };
-    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(firstRects));
+    EXPECT_CALL(*paragraph, GetTightRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(firstRects));
     richEditorPattern->paragraphs_.AddParagraph(
         { .paragraph = paragraph, .start = testNumber0, .end = testNumber2 });
     richEditorPattern->paragraphs_.AddParagraph(
@@ -2028,5 +1844,72 @@ HWTEST_F(RichEditorPatternTestNg, IsLineSeparatorInLast001, TestSize.Level1)
 
     spanItem->content = "nihao\n";
     EXPECT_TRUE(richEditorPattern->IsLineSeparatorInLast(spanNode));
+}
+
+/**
+ * @tc.name: GetRichEditorController001
+ * @tc.desc: test GetRichEditorController
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, GetRichEditorController001, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto controller = richEditorModel.GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
+}
+
+/**
+ * @tc.name: BindSelectionMenu001
+ * @tc.desc: test BindSelectionMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, BindSelectionMenu001, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    std::function<void()> buildFunc = []() {
+        callBack1 = 1;
+        return;
+    };
+    TextSpanType textSpanType = TextSpanType::TEXT;
+    TextResponseType textResponseType = TextResponseType::LONG_PRESS;
+    SelectMenuParam menuParam { .onAppear = [](int32_t, int32_t) {}, .onDisappear = []() {} };
+    richEditorModel.BindSelectionMenu(textSpanType, textResponseType, buildFunc, menuParam);
+}
+
+/**
+ * @tc.name: OnHandleMove001
+ * @tc.desc: test OnHandleMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, OnHandleMove001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
+    RectF rect(testNumber0, testNumber0, testNumber5, testNumber5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, testNumber5);
+    richEditorPattern->selectOverlay_->OnHandleMove(rect, true);
+}
+
+/**
+ * @tc.name: UpdateSelectorOnHandleMove001
+ * @tc.desc: test UpdateSelectorOnHandleMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, UpdateSelectorOnHandleMove001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
+    auto offsetF = OffsetF(5.0f, 30.0f);
+    RectF rect(testNumber0, testNumber0, testNumber5, testNumber5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, testNumber5);
+    richEditorPattern->selectOverlay_->UpdateSelectorOnHandleMove(offsetF, true);
 }
 } // namespace

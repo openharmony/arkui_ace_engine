@@ -31,6 +31,7 @@
 #include "base/notification/eventhandler/interfaces/inner_api/event_handler.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
@@ -41,7 +42,6 @@
 #include "adapter/ohos/capability/html/span_to_html.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "core/components_ng/render/adapter/rosen_render_surface.h"
 #endif
 #include "core/common/ace_application_info.h"
 #include "core/event/ace_event_helper.h"
@@ -762,6 +762,7 @@ void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
 
 WebDelegate::~WebDelegate()
 {
+    SetAccessibilityState(false);
     OnNativeEmbedAllDestory();
     ReleasePlatformResource();
     if (IsDeviceTabletOr2in1() && GetWebOptimizationValue()) {
@@ -1708,6 +1709,9 @@ void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<
         }
         return;
     }
+    if (renderMode_ == static_cast<int32_t>(RenderMode::SYNC_RENDER)) {
+        renderSurface_ = rosenRenderSurface;
+    }
     SetSurface(rosenRenderSurface->GetSurface());
     InitOHOSWeb(context);
 #endif
@@ -2112,15 +2116,10 @@ void WebDelegate::RegisterConfigObserver()
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
-            if (appMgrClient->ConnectAppMgrService()) {
-                return;
-            }
-            delegate->configChangeObserver_ =
-                sptr<AppExecFwk::IConfigurationObserver>(new (std::nothrow) WebConfigurationObserver(delegate));
-            if (appMgrClient->RegisterConfigurationObserver(delegate->configChangeObserver_)) {
-                return;
-            }
+            auto abilityContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
+            CHECK_NULL_VOID(abilityContext);
+            delegate->configChangeObserver_.reset(new (std::nothrow) WebConfigurationObserver(delegate));
+            abilityContext->RegisterEnvironmentCallback(delegate->configChangeObserver_);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebAddConfigObserver");
 }
@@ -2136,14 +2135,11 @@ void WebDelegate::UnRegisterConfigObserver()
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            if (delegate->configChangeObserver_) {
-                auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
-                if (appMgrClient->ConnectAppMgrService()) {
-                    return;
-                }
-                appMgrClient->UnregisterConfigurationObserver(delegate->configChangeObserver_);
-                delegate->configChangeObserver_ = nullptr;
-            }
+            CHECK_NULL_VOID(delegate->configChangeObserver_);
+            auto abilityContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
+            CHECK_NULL_VOID(abilityContext);
+            abilityContext->UnregisterEnvironmentCallback(delegate->configChangeObserver_);
+            delegate->configChangeObserver_.reset();
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebRemoveConfigObserver");
 }
@@ -2733,8 +2729,9 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
     }
     auto ret = OHOS::Rosen::RSInterfaces::GetInstance().RegisterSurfaceOcclusionChangeCallback(
         surfaceNodeId_,
-        [weak = WeakClaim(this), weakContext = context_](float visibleRatio) {
+        [weak = WeakClaim(this)](float visibleRatio) {
             auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
             auto context = delegate->context_.Upgrade();
             CHECK_NULL_VOID(context);
             context->GetTaskExecutor()->PostTask(
@@ -2782,6 +2779,23 @@ void WebDelegate::RegisterAvoidAreaChangeListener()
         TAG_LOGI(AceLogTag::ACE_WEB, "CANNOT RegisterAvoidAreaChangeListener");
     }
 }
+
+class NWebAutoFillCallbackImpl : public OHOS::NWeb::NWebMessageValueCallback {
+public:
+    NWebAutoFillCallbackImpl(const WeakPtr<WebDelegate>& delegate) : delegate_(delegate) {}
+    ~NWebAutoFillCallbackImpl() = default;
+
+    void OnReceiveValue(std::shared_ptr<NWebMessage> result) override
+    {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        auto delegate = delegate_.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        delegate->HandleAutoFillEvent(result);
+    }
+
+private:
+    WeakPtr<WebDelegate> delegate_;
+};
 
 void WebDelegate::UnregisterAvoidAreaChangeListener()
 {
@@ -2879,6 +2893,8 @@ void WebDelegate::InitWebViewWithSurface()
 #ifdef OHOS_STANDARD_SYSTEM
             auto screenLockCallback = std::make_shared<NWebScreenLockCallbackImpl>(context);
             delegate->nweb_->RegisterScreenLockFunction(Container::CurrentId(), screenLockCallback);
+            auto autoFillCallback = std::make_shared<NWebAutoFillCallbackImpl>(weak);
+            delegate->nweb_->SetAutofillCallback(autoFillCallback);
 #endif
             auto findListenerImpl = std::make_shared<FindListenerImpl>();
             findListenerImpl->SetWebDelegate(weak);
@@ -3243,14 +3259,12 @@ void WebDelegate::UpdateDarkMode(const WebDarkMode& mode)
 
 void WebDelegate::UpdateDarkModeAuto(RefPtr<WebDelegate> delegate, std::shared_ptr<OHOS::NWeb::NWebPreference> setting)
 {
-    auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
-    if (appMgrClient->ConnectAppMgrService()) {
-        return;
-    }
-    auto systemConfig = OHOS::AppExecFwk::Configuration();
-    appMgrClient->GetConfiguration(systemConfig);
-    std::string colorMode = systemConfig.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     CHECK_NULL_VOID(setting);
+    auto abilityContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
+    CHECK_NULL_VOID(abilityContext);
+    auto appConfig = abilityContext->GetConfiguration();
+    CHECK_NULL_VOID(appConfig);
+    auto colorMode = appConfig->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     if (colorMode == "dark") {
         setting->PutDarkSchemeEnabled(true);
         if (delegate->GetForceDarkMode()) {
@@ -3925,6 +3939,7 @@ void WebDelegate::LoadUrl()
 
 void WebDelegate::OnInactive()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnInactive, webId:%{public}d", GetWebId());
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -3944,6 +3959,7 @@ void WebDelegate::OnInactive()
 
 void WebDelegate::OnActive()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnActive, webId:%{public}d", GetWebId());
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -4922,6 +4938,20 @@ void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequ
         TaskExecutor::TaskType::JS, "ArkUIWebErrorReceive");
 }
 
+void WebDelegate::ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart)
+{
+    if (sceneId == "") {
+        TAG_LOGE(AceLogTag::ACE_WEB, "sceneId is null, do not report.");
+        return;
+    }
+    ACE_SCOPED_TRACE("ReportDynamicFrameLossEvent, sceneId: %s, isStart: %u", sceneId.c_str(), isStart);
+    if (isStart) {
+        PerfMonitor::GetPerfMonitor()->Start(sceneId, PerfActionType::FIRST_MOVE, "");
+    } else {
+        PerfMonitor::GetPerfMonitor()->End(sceneId, false);
+    }
+}
+
 void WebDelegate::OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response)
 {
@@ -5370,7 +5400,7 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
         [weak = WeakClaim(this), targetUrl, isAlert, isUserTrigger, handler]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
-            int32_t parentNWebId = (delegate->nweb_ ? delegate->nweb_->GetWebId() : -1);
+            int32_t parentNWebId = (delegate->nweb_ ? static_cast<int32_t>(delegate->nweb_->GetWebId()) : -1);
             auto param = std::make_shared<WebWindowNewEvent>(
                 targetUrl, isAlert, isUserTrigger, AceType::MakeRefPtr<WebWindowNewHandlerOhos>(handler, parentNWebId));
 #ifdef NG_BUILD
@@ -5685,6 +5715,13 @@ bool WebDelegate::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> 
 #endif
 }
 
+void WebDelegate::HideHandleAndQuickMenuIfNecessary(bool hide)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->HideHandleAndQuickMenuIfNecessary(hide);
+}
+
 void WebDelegate::OnQuickMenuDismissed()
 {
 #ifdef NG_BUILD
@@ -5818,6 +5855,44 @@ void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y)
     if (nweb_) {
         nweb_->SendAccessibilityHoverEvent(x, y);
     }
+}
+
+void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), jsonStr]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            auto webMessage = std::make_shared<OHOS::NWeb::NWebMessage>(NWebValue::Type::NONE);
+            webMessage->SetType(NWebValue::Type::STRING);
+            webMessage->SetString(jsonStr);
+            delegate->nweb_->FillAutofillData(webMessage);
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebNotifyAutoFillViewData");
+}
+
+void WebDelegate::AutofillCancel(const std::string& fillContent)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), fillContent]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            delegate->nweb_->OnAutofillCancel(fillContent);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIWebAutofillCancel");
+}
+
+void WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
+{
+    auto pattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->HandleAutoFillEvent(viewDataJson);
 }
 
 #endif
@@ -7022,8 +7097,6 @@ NG::WebInfoType WebDelegate::GetWebInfoType()
 
 void WebDelegate::OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "OnAdsBlocked %{public}s", url.c_str());
-
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     context->GetTaskExecutor()->PostTask(

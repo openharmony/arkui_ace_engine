@@ -16,7 +16,8 @@
 @Component
 export struct ColorPalette {
   @Prop color: ResourceColor | undefined = undefined;
-  @Prop colors: ResourceColor[] = ['#0A59F7', '#646AFD', '#FE7062', '#E9E8ED', '#1C1C1C'];
+  @Prop colors: ResourceColor[] =
+    ['#0A59F7', '#646AFD', '#FE7062', '#E9E8ED', '#1C1C1C', $r('sys.color.ohos_id_color_text_primary_contrary')];
   @Prop isEnabled: boolean = false;
   onChange?: (color: ResourceColor) => void;
 
@@ -49,6 +50,7 @@ export struct ColorPalette {
         })
       })
     }
+    .enabled(this.isEnabled)
     .width('100%')
     .grayscale(this.isEnabled ? 0 : 1)
   }

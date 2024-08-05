@@ -182,8 +182,9 @@ bool SceneRecord::IsTimeOut(int64_t nowTime)
 
 void SceneRecord::RecordFrame(int64_t vsyncTime, int64_t duration, int32_t skippedFrames)
 {
+    int64_t currentTimeNs = GetCurrentRealTimeNs();
     if (totalFrames == 0) {
-        beginVsyncTime = GetCurrentRealTimeNs();
+        beginVsyncTime = currentTimeNs;
         isFirstFrame = true;
     } else {
         isFirstFrame = false;
@@ -206,6 +207,7 @@ void SceneRecord::RecordFrame(int64_t vsyncTime, int64_t duration, int32_t skipp
     }
     if (!isFirstFrame && duration > maxFrameTime) {
         maxFrameTime = duration;
+        maxFrameTimeSinceStart = (currentTimeNs - beginVsyncTime) / NS_TO_MS;
     }
     totalFrames++;
 }
@@ -242,6 +244,9 @@ void SceneRecord::Reset()
     beginVsyncTime = 0;
     endVsyncTime = 0;
     maxFrameTime = 0;
+    maxFrameTimeSinceStart = 0;
+    maxHitchTime = 0;
+    maxHitchTimeSinceStart = 0;
     maxSuccessiveFrames = 0;
     seqMissFrames = 0;
     totalMissed = 0;
@@ -339,7 +344,7 @@ void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank,
             if ((it->second)->IsTimeOut(vsyncTime + duration)) {
                 CheckTimeOutOfExceptAnimatorStatus(it->second->sceneId);
                 delete it->second;
-                mRecords.erase(it++);
+                it = mRecords.erase(it);
                 continue;
             }
             if ((it->second)->IsFirstFrame()) {
@@ -353,7 +358,7 @@ void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank,
 
 void PerfMonitor::ReportJankFrameApp(double jank)
 {
-    if (jank >= static_cast<double>(JANK_SKIPPED_THRESHOLD)) {
+    if (jank >= static_cast<double>(JANK_SKIPPED_THRESHOLD) && !isBackgroundApp) {
         JankInfo jankInfo;
         jankInfo.skippedFrameTime = static_cast<int64_t>(jank * SINGLE_FRAME_TIME);
         RecordBaseInfo(nullptr);
@@ -481,6 +486,9 @@ void PerfMonitor::FlushDataBase(SceneRecord* record, DataBase& data)
         data.endVsyncTime = data.beginVsyncTime;
     }
     data.maxFrameTime = record->maxFrameTime;
+    data.maxFrameTimeSinceStart = record->maxFrameTimeSinceStart;
+    data.maxHitchTime = record->maxHitchTime;
+    data.maxHitchTimeSinceStart = record->maxHitchTimeSinceStart;
     data.maxSuccessiveFrames = record->maxSuccessiveFrames;
     data.totalMissed = record->totalMissed;
     data.totalFrames = record->totalFrames;
@@ -523,9 +531,10 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
         PerfConstants::PC_SHORTCUT_RESTORE_DESKTOP, PerfConstants::PC_SHORTCUT_TO_RECENT,
         PerfConstants::PC_EXIT_RECENT, PerfConstants::PC_SHORTCUT_TO_APP_CENTER_ON_RECENT,
         PerfConstants::PC_SHORTCUT_TO_APP_CENTER, PerfConstants::PC_SHORTCUT_EXIT_APP_CENTER,
-        PerfConstants::WINDOW_TITLE_BAR_MINIMIZED,
-        PerfConstants::APP_EXIT_FROM_WINDOW_TITLE_BAR_CLOSED,
-        PerfConstants::LAUNCHER_APP_LAUNCH_FROM_OTHER
+        PerfConstants::WINDOW_TITLE_BAR_MINIMIZED, PerfConstants::WINDOW_RECT_MOVE,
+        PerfConstants::APP_EXIT_FROM_WINDOW_TITLE_BAR_CLOSED, PerfConstants::WINDOW_TITLE_BAR_RECOVER,
+        PerfConstants::LAUNCHER_APP_LAUNCH_FROM_OTHER, PerfConstants::WINDOW_RECT_RESIZE,
+        PerfConstants::WINDOW_TITLE_BAR_MAXIMIZED, PerfConstants::LAUNCHER_APP_LAUNCH_FROM_TRANSITION
     };
     if (exceptSceneSet.find(sceneId) != exceptSceneSet.end()) {
         return true;
@@ -540,11 +549,14 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
 // for jank frame app
 bool PerfMonitor::IsExclusionFrame()
 {
+    ACE_SCOPED_TRACE("IsExclusionFrame: isResponse(%d) isStartApp(%d) isBg(%d) isExcluWindow(%d) isExcAni(%d)",
+        isResponseExclusion, isStartAppFrame, isBackgroundApp, isExclusionWindow, isExceptAnimator);
     return isResponseExclusion || isStartAppFrame || isBackgroundApp || isExclusionWindow || isExceptAnimator;
 }
 
 void PerfMonitor::SetAppStartStatus()
 {
+    ACE_FUNCTION_TRACE();
     isStartAppFrame = true;
     startAppTime = GetCurrentRealTimeNs();
 }

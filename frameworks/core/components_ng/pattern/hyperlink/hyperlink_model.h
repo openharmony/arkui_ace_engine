@@ -32,6 +32,7 @@ public:
     virtual void Pop() = 0;
     virtual void SetColor(const Color& value) = 0;
     virtual void SetDraggable(bool draggable) = 0;
+    virtual void SetResponseRegion(bool isUserSetResponseRegion) {};
 
 private:
     static std::unique_ptr<HyperlinkModel> instance_;

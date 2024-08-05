@@ -126,6 +126,24 @@ public:
         return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
     }
 
+    size_t GetBindingSize() const
+    {
+        return bindingSize_;
+    }
+
+    void AddNativeRef()
+    {
+        ++nativeRefCount_;
+    }
+
+    void Release()
+    {
+        --nativeRefCount_;
+        if (nativeRefCount_ == 0) {
+            delete this;
+        }
+    }
+
     ACE_DISALLOW_COPY_AND_MOVE(JSRenderImage);
 private:
     napi_value OnClose();
@@ -162,6 +180,8 @@ private:
     double height_ = 0;
     int32_t instanceId_ = 0;
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
+    size_t bindingSize_ = 0;
+    uint32_t nativeRefCount_ = 0;
 };
 
 } // namespace OHOS::Ace::Framework

@@ -22,7 +22,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea)
+bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
 {
     // cutout regions adjacent to edges.
     auto cutoutArea = safeArea;
@@ -31,13 +31,15 @@ bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea)
         cutoutArea.top_.start = 0;
     }
     if (safeArea.bottom_.IsValid()) {
-        cutoutArea.bottom_.end = PipelineContext::GetCurrentRootHeight();
+        cutoutArea.bottom_.end = rootSize.Height().has_value() ? rootSize.Height().value()
+                                                               : PipelineContext::GetCurrentRootHeight();
     }
     if (cutoutArea.left_.IsValid()) {
         cutoutArea.left_.start = 0;
     }
     if (cutoutArea.right_.IsValid()) {
-        cutoutArea.right_.end = PipelineContext::GetCurrentRootWidth();
+        cutoutArea.right_.end = rootSize.Width().has_value() ? rootSize.Width().value()
+                                                             : PipelineContext::GetCurrentRootWidth();
     }
 
     if (cutoutSafeArea_ == cutoutArea) {
@@ -65,13 +67,13 @@ bool SafeAreaManager::UpdateNavArea(const SafeAreaInsets& safeArea)
     return true;
 }
 
-bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight)
+bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight, std::optional<uint32_t> rootHeight)
 {
     uint32_t bottom;
     if (systemSafeArea_.bottom_.IsValid()) {
         bottom = systemSafeArea_.bottom_.start;
     } else {
-        bottom = PipelineContext::GetCurrentRootHeight();
+        bottom = rootHeight.has_value() ? rootHeight.value() : PipelineContext::GetCurrentRootHeight();
     }
     SafeAreaInsets::Inset inset = { .start = bottom - keyboardHeight, .end = bottom };
     if (inset == keyboardInset_) {
@@ -84,15 +86,9 @@ bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight)
 SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& opts) const
 {
     SafeAreaInsets res;
-#ifdef PREVIEW
-    if (ignoreSafeArea_) {
-        return res;
+    if (!IsSafeAreaValid()) {
+        return {};
     }
-#else
-    if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
-        return res;
-    }
-#endif
     if (opts.type & SAFE_AREA_TYPE_CUTOUT) {
         res = res.Combine(cutoutSafeArea_);
     }
@@ -171,7 +167,7 @@ SafeAreaInsets SafeAreaManager::GetSystemSafeArea() const
 
 SafeAreaInsets SafeAreaManager::GetCutoutSafeArea() const
 {
-    if (ignoreSafeArea_ || !isFullScreen_) {
+    if (!IsSafeAreaValid()) {
         return {};
     }
     return cutoutSafeArea_;
@@ -179,16 +175,18 @@ SafeAreaInsets SafeAreaManager::GetCutoutSafeArea() const
 
 SafeAreaInsets SafeAreaManager::GetSafeArea() const
 {
-#ifdef PREVIEW
-    if (ignoreSafeArea_) {
+    if (!IsSafeAreaValid()) {
         return {};
     }
-#else
-    if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
-        return {};
-    }
-#endif
     return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
+}
+
+SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutCutout() const
+{
+    if (!IsSafeAreaValid()) {
+        return {};
+    }
+    return systemSafeArea_.Combine(navSafeArea_);
 }
 
 SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutProcess() const

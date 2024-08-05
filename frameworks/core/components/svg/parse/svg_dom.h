@@ -50,7 +50,7 @@ struct SvgRenderTree {
     RefPtr<RenderNode> svgRoot;
     Size svgSize;
     Size containerSize;
-    bool svgAnimate;
+    bool svgAnimate = false;
 
     void ClearRenderObject()
     {

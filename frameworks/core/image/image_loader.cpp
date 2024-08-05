@@ -279,9 +279,9 @@ bool NetworkImageLoader::DownloadImage(
     DownloadCallback&& downloadCallback, const std::string& src, bool sync, int32_t nodeId)
 {
     return sync ? DownloadManager::GetInstance()->DownloadSync(std::move(downloadCallback),
-                 src, Container::CurrentId(), nodeId)
+                                                               src, Container::CurrentId(), nodeId)
                 : DownloadManager::GetInstance()->DownloadAsync(std::move(downloadCallback),
-                src, Container::CurrentId(), nodeId);
+                                                                src, Container::CurrentId(), nodeId);
 }
 
 #ifndef USE_ROSEN_DRAWING
@@ -319,17 +319,13 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(
         return nullptr;
     }
     char realPath[PATH_MAX] = { 0x00 };
-    if (realpath(filePath.c_str(), realPath) == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "realpath fail! filePath: %{public}s, fail reason: %{public}s src:%{public}s",
-            filePath.c_str(), strerror(errno), src.c_str());
-        return nullptr;
-    }
+    realpath(filePath.c_str(), realPath);
     auto result = SkData::MakeFromFileName(realPath);
     if (!result) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "read data failed, filePath: %{public}s, src: %{public}s, fail reason: "
+            "read data failed, filePath: %{public}s, realPath: %{public}s, src: %{public}s, fail reason: "
             "%{public}s",
-            filePath.c_str(), src.c_str(), strerror(errno));
+            filePath.c_str(), src.c_str(), realPath, strerror(errno));
     }
 #ifndef USE_ROSEN_DRAWING
 #ifdef PREVIEW

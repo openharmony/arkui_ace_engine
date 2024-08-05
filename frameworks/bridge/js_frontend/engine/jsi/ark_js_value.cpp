@@ -181,7 +181,7 @@ bool ArkJSValue::GetPropertyNames(shared_ptr<JsRuntime> runtime, shared_ptr<JsVa
         return false;
     }
     Local<ArrayRef> names = obj->GetOwnPropertyNames(vm);
-    len = names->Length(vm);
+    len = static_cast<int32_t>(names->Length(vm));
     if (!propName) {
         propName = std::make_shared<ArkJSValue>(pandaRuntime, names);
     } else {
@@ -205,7 +205,7 @@ bool ArkJSValue::GetEnumerablePropertyNames(shared_ptr<JsRuntime> runtime, share
         return false;
     }
     Local<ArrayRef> names = obj->GetOwnEnumerablePropertyNames(vm);
-    len = names->Length(vm);
+    len = static_cast<int32_t>(names->Length(vm));
     if (!propName) {
         propName = std::make_shared<ArkJSValue>(pandaRuntime, names);
     } else {

@@ -97,7 +97,6 @@ static napi_value JSRegisterFont(napi_env env, napi_callback_info info)
     std::string moduleName = resourceInfo.moduleName.has_value() ? resourceInfo.moduleName.value() : "";
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        TAG_LOGW(AceLogTag::ACE_FONT, "can not get delegate.");
         return nullptr;
     }
     TAG_LOGI(AceLogTag::ACE_FONT, "begin to register font.");

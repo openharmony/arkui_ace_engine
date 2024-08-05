@@ -146,7 +146,8 @@ bool SelectContentOverlayPattern::UpdateHandleHotZoneWithPoint()
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, false);
     auto hotZone = theme->GetHandleHotZoneRadius().ConvertToPx();
-    auto radius = theme->GetHandleDiameter().ConvertToPx() / 2.0f;
+    auto radius =
+        (theme->GetHandleDiameter().ConvertToPx() + theme->GetHandleDiameterStrokeWidth().ConvertToPx()) / 2.0f;
     firstHandleRegion_.SetSize({ hotZone * 2, hotZone * 2 });
     secondHandleRegion_.SetSize({ hotZone * 2, hotZone * 2 });
     if (info_->isSingleHandle) {
@@ -208,5 +209,21 @@ OffsetF SelectContentOverlayPattern::GetHandleHotZoneOffset(bool isFirst, float 
     auto startPoint = isFirst ? info_->firstHandle.paintInfo.startPoint : info_->secondHandle.paintInfo.startPoint;
     auto endPoint = isFirst ? info_->firstHandle.paintInfo.endPoint : info_->secondHandle.paintInfo.endPoint;
     return SelectOverlayContentModifier::CalculateCenterPoint(startPoint, endPoint, raidus, handleOnTop);
+}
+
+void SelectContentOverlayPattern::UpdateViewPort(const std::optional<RectF>& viewPort)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    info_->ancestorViewPort = viewPort;
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void SelectContentOverlayPattern::UpdateSelectArea(const RectF& selectArea)
+{
+    SelectOverlayPattern::UpdateSelectArea(selectArea);
+    if (info_->menuInfo.menuIsShow && selectArea.IsEmpty()) {
+        UpdateMenuIsShow(false);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -31,11 +31,13 @@ public:
     static void SetOnSelectionChange(const JSCallbackInfo& args);
     static void SetAboutToIMEInput(const JSCallbackInfo& args);
     static void SetOnIMEInputComplete(const JSCallbackInfo& args);
+    static void SetOnDidIMEInput(const JSCallbackInfo& args);
     static void SetAboutToDelete(const JSCallbackInfo& args);
     static void SetOnDeleteComplete(const JSCallbackInfo& args);
     static void SetCustomKeyboard(const JSCallbackInfo& args);
     static JSRef<JSVal> CreateJsAboutToIMEInputObj(const NG::RichEditorInsertValue& insertValue);
     static JSRef<JSVal> CreateJsOnIMEInputComplete(const NG::RichEditorAbstractSpanResult& textSpanResult);
+    static JSRef<JSVal> CreateJsOnDidIMEInput(const TextRange& textRange);
     static JSRef<JSVal> CreateJsAboutToDelet(const NG::RichEditorDeleteValue& deleteValue);
     static void SetChangeTextSpans(
         JSRef<JSArray>& jsArray, const std::vector<NG::RichEditorAbstractSpanResult>& spanList);
@@ -76,6 +78,8 @@ public:
     static std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr);
     static CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj);
     static void EditMenuOptions(const JSCallbackInfo& info);
+    static std::optional<uint32_t> ParseColorResourceId(JSRef<JSVal> colorVal);
+    static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,
@@ -90,6 +94,9 @@ private:
         const NG::RichEditorAbstractSpanResult& spanResult);
     static void SetSymbolChangeSpanResult(JSRef<JSObject>& resultObj,
         const NG::RichEditorAbstractSpanResult& spanResult);
+    static void SetJSSpanResultObject(JSRef<JSObject>& resultObj, const ResultObject& resultObject);
+    static void SetJSDeleteSpan(JSRef<JSObject>& spanResultObj, const NG::RichEditorAbstractSpanResult& it);
+    static JSRef<JSArray> CreateJsTextShadowObjectArray(const TextStyleResult& textStyleResult);
 };
 
 class JSRichEditorBaseController : public Referenced {

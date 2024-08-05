@@ -17,7 +17,7 @@
 #
 
 from src.beans.base_bean import BaseBean
-from src.keywords import hittest_node_keyword, get_sample_key, get_sample_value
+from src.keywords import hittest_node_keyword, get_sample_key, get_sample_separator_count
 from src.utils.log_wrapper import log_info
 from src.utils.value_parser import get_value_as_int, get_value_as_str
 
@@ -40,22 +40,22 @@ class FrameNode(BaseBean):
         super().__init__()
         self.original_str = node_dump_str
         self.nodeId = get_value_as_int(node_dump_str, get_sample_key(hittest_node_keyword, 'nodeId'),
-                                       get_sample_value(hittest_node_keyword, 'nodeId'))
+                                       get_sample_separator_count(hittest_node_keyword, 'nodeId'))
         self.parentId = get_value_as_int(node_dump_str, get_sample_key(hittest_node_keyword, 'parentId'),
-                                         get_sample_value(hittest_node_keyword, 'parentId'))
+                                         get_sample_separator_count(hittest_node_keyword, 'parentId'))
         self.tag = get_value_as_str(node_dump_str, get_sample_key(hittest_node_keyword, 'tag'),
-                                    get_sample_value(hittest_node_keyword, 'tag'))
+                                    get_sample_separator_count(hittest_node_keyword, 'tag'))
         self.com_id = get_value_as_str(node_dump_str, get_sample_key(hittest_node_keyword, 'comId'),
-                                       get_sample_value(hittest_node_keyword, 'comId'))
+                                       get_sample_separator_count(hittest_node_keyword, 'comId'))
         self.monopolizeEvents = get_value_as_int(node_dump_str,
                                                  get_sample_key(hittest_node_keyword, 'monopolizeEvents'),
-                                                 get_sample_value(hittest_node_keyword, 'monopolizeEvents'))
+                                                 get_sample_separator_count(hittest_node_keyword, 'monopolizeEvents'))
         self.isHit = get_value_as_int(node_dump_str, get_sample_key(hittest_node_keyword, 'isHit'),
-                                      get_sample_value(hittest_node_keyword, 'isHit'))
+                                      get_sample_separator_count(hittest_node_keyword, 'isHit'))
         self.hitTestMode = get_value_as_int(node_dump_str, get_sample_key(hittest_node_keyword, 'hitTestMode'),
-                                            get_sample_value(hittest_node_keyword, 'hitTestMode'))
+                                            get_sample_separator_count(hittest_node_keyword, 'hitTestMode'))
         self.responseRegion = get_value_as_str(node_dump_str, get_sample_key(hittest_node_keyword, 'responseRegion'),
-                                               get_sample_value(hittest_node_keyword, 'responseRegion'), True)
+                                               get_sample_separator_count(hittest_node_keyword, 'responseRegion'), True)
         self.check_parse_result()
 
     def check_parse_result(self):
@@ -66,11 +66,20 @@ class FrameNode(BaseBean):
             self.parse_succeed()
 
     def to_string(self):
-        result_str = '  nodeId: ' + str(self.nodeId) + ', parentId: ' + str(self.parentId) + ', tag: ' + self.tag
+        result_str = 'nodeId: {}, parentId: {}, tag: {}'.format(self.nodeId, self.parentId, self.tag)
         if self.com_id is not None:
-            result_str += ', comId: ' + self.com_id
-        result_str += ', monopolizeEvents: ' + str(self.monopolizeEvents) + ', isHit: ' + str(
-            self.isHit) + ', hitTestMode: ' + str(self.hitTestMode) + ', responseRegion: ' + self.responseRegion
+            result_str += ', comId: {}'.format(self.com_id)
+        result_str += ', monopolizeEvents: {}, isHit: {}, hitTestMode: {}, responseRegion: {}'.format(
+            self.monopolizeEvents, self.isHit, self.hitTestMode, self.responseRegion)
+        return result_str
+
+    def get_summary_string(self):
+        result_str = '{}({}) , isHit: {}'.format(self.tag, self.nodeId, self.isHit)
+        return result_str
+
+    def get_showup_string(self):
+        result_str = ("{}({})\n\nisHit: {}\nhitTestMode: {}"
+                      .format(self.tag, self.nodeId, self.isHit, self.hitTestMode))
         return result_str
 
     def dump(self):

@@ -357,6 +357,8 @@ struct PaddingPropertyT {
     std::optional<T> right;
     std::optional<T> top;
     std::optional<T> bottom;
+    std::optional<T> start;
+    std::optional<T> end;
 
     void SetEdges(const T& padding)
     {
@@ -396,13 +398,27 @@ struct PaddingPropertyT {
         return false;
     }
 
+    bool UpdateStartAndEnd(const PaddingPropertyT& value)
+    {
+        bool hasStartOrEnd = false;
+        if (value.start.has_value()) {
+            start = value.start;
+            hasStartOrEnd = true;
+        }
+        if (value.end.has_value()) {
+            end = value.end;
+            hasStartOrEnd = true;
+        }
+        return hasStartOrEnd;
+    }
+
     std::string ToString() const
     {
         std::string str;
-        str.append("left: [").append(left.has_value() ? left->ToString() : "NA").append("]");
-        str.append("right: [").append(right.has_value() ? right->ToString() : "NA").append("]");
-        str.append("top: [").append(top.has_value() ? top->ToString() : "NA").append("]");
-        str.append("bottom: [").append(bottom.has_value() ? bottom->ToString() : "NA").append("]");
+        str.append("[").append(left.has_value() ? left->ToString() : "NA");
+        str.append(",").append(right.has_value() ? right->ToString() : "NA");
+        str.append(",").append(top.has_value() ? top->ToString() : "NA");
+        str.append(",").append(bottom.has_value() ? bottom->ToString() : "NA").append("]");
         return str;
     }
     std::string ToJsonString() const
@@ -488,10 +504,10 @@ struct PaddingPropertyT<float> {
     std::string ToString() const
     {
         std::string str;
-        str.append("left: [").append(left.has_value() ? std::to_string(left.value()) : "NA").append("]");
-        str.append("right: [").append(right.has_value() ? std::to_string(right.value()) : "NA").append("]");
-        str.append("top: [").append(top.has_value() ? std::to_string(top.value()) : "NA").append("]");
-        str.append("bottom: [").append(bottom.has_value() ? std::to_string(bottom.value()) : "NA").append("]");
+        str.append("[").append(left.has_value() ? std::to_string(left.value()) : "NA");
+        str.append(",").append(right.has_value() ? std::to_string(right.value()) : "NA");
+        str.append(",").append(top.has_value() ? std::to_string(top.value()) : "NA");
+        str.append(",").append(bottom.has_value() ? std::to_string(bottom.value()) : "NA").append("]");
         return str;
     }
 
@@ -528,6 +544,12 @@ struct PaddingPropertyT<float> {
     bool Empty()
     {
         return !left.has_value() && !right.has_value() && !top.has_value() && !bottom.has_value();
+    }
+
+    bool HasValue() const
+    {
+        return (left && !NearZero(left.value())) || (right && !NearZero(right.value())) ||
+            (top && !NearZero(top.value())) || (bottom && !NearZero(bottom.value()));
     }
 
     PaddingPropertyT<float> Plus(const PaddingPropertyT<float>& another, bool skipNullOpt = true)

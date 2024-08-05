@@ -41,11 +41,11 @@ public:
     void RegisterOnDestroy(const RefPtr<AceType>& node, DestroyEvent&& onDestroy) override;
     bool IsTexture() override;
     void SetDetachCallback(DetachCallback&& onDetach) override;
-    void EnableAnalyzer(bool enable) override;
-    void SetImageAIOptions(void* options) override;
     void SetControllerOnCreated(SurfaceCreatedEvent&& onCreated) override;
     void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) override;
     void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) override;
+    void EnableAnalyzer(bool enable) override;
+    void SetImageAIOptions(void* options) override;
 
     static bool IsTexture(FrameNode* frameNode);
     static XComponentType GetType(FrameNode* frameNode);
@@ -64,6 +64,7 @@ public:
     static void SetControllerOnDestroyed(FrameNode* frameNode, SurfaceDestroyedEvent&& onDestroyed);
     static void SetDetachCallback(FrameNode* frameNode, DetachCallback&& onDetach);
     static void SetImageAIOptions(FrameNode* frameNode, void* options);
+
 
 private:
     static XComponentType GetTypeImpl(const RefPtr<FrameNode>& frameNode);

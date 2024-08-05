@@ -85,7 +85,7 @@ public:
         return true;
     }
 
-    virtual bool StopExpandMark()
+    virtual bool ConsumeChildrenAdjustment(const OffsetF& /* offset */)
     {
         return false;
     }
@@ -96,7 +96,7 @@ public:
     {
         return false;
     }
-    
+
     virtual bool CheckCustomAvoidKeyboard() const
     {
         return false;
@@ -197,7 +197,7 @@ public:
             InitClickEventRecorder();
         }
 #endif
-        CheckLocalizedPosition();
+        CheckLocalized();
         auto* frameNode = GetUnsafeHostPtr();
         const auto& children = frameNode->GetChildren();
         if (children.empty()) {
@@ -276,6 +276,11 @@ public:
 
     virtual void OnSensitiveStyleChange(bool isSensitive) {}
 
+    virtual bool AllowVisibleAreaCheck() const
+    {
+        return false;
+    }
+
     virtual bool IsRootPattern() const
     {
         return false;
@@ -300,6 +305,7 @@ public:
     }
 
     virtual void BeforeSyncGeometryProperties(const DirtySwapConfig& config) {}
+    virtual void OnSyncGeometryNode(const DirtySwapConfig& config) {}
 
     // Called on main thread to check if need rerender of the content.
     virtual bool OnDirtyLayoutWrapperSwap(
@@ -378,7 +384,7 @@ public:
 
     virtual void DumpInfo() {}
     virtual void DumpAdvanceInfo() {}
-    virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
+    virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
     virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
     virtual void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) {}
@@ -502,6 +508,7 @@ public:
     virtual void OnDpiConfigurationUpdate() {}
     virtual void OnIconConfigurationUpdate() {}
     virtual void OnFontConfigurationUpdate() {}
+    virtual void OnFontScaleConfigurationUpdate() {}
 
     virtual bool ShouldDelayChildPressedState() const
     {
@@ -574,7 +581,7 @@ public:
     virtual void OnDetachContext(PipelineContext *context) {}
     virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
 
-    void CheckLocalizedPosition()
+    void CheckLocalized()
     {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -590,6 +597,15 @@ public:
         if (layoutProperty->IsOffsetLocalizedEdges()) {
             layoutProperty->CheckOffsetLocalizedEdges(layoutDirection);
         }
+        layoutProperty->CheckLocalizedPadding(layoutProperty, layoutDirection);
+        layoutProperty->CheckLocalizedMargin(layoutProperty, layoutDirection);
+        layoutProperty->CheckLocalizedEdgeWidths(layoutProperty, layoutDirection);
+        layoutProperty->CheckLocalizedEdgeColors(layoutDirection);
+        layoutProperty->CheckLocalizedBorderRadiuses(layoutDirection);
+        layoutProperty->CheckLocalizedOuterBorderColor(layoutDirection);
+        layoutProperty->CheckLocalizedBorderImageSlice(layoutDirection);
+        layoutProperty->CheckLocalizedBorderImageWidth(layoutDirection);
+        layoutProperty->CheckLocalizedBorderImageOutset(layoutDirection);
     }
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
@@ -597,6 +613,21 @@ public:
     virtual bool OnAccessibilityHoverEvent(const PointF& point)
     {
         return false;
+    }
+
+    virtual uint32_t GetWindowPatternType() const
+    {
+        return 0;
+    }
+    
+    virtual bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const
+    {
+        return false;
+    }
+
+    virtual RectF ExpandDefaultResponseRegion(RectF& rect)
+    {
+        return RectF();
     }
 
 protected:

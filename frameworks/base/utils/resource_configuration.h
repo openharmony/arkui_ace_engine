@@ -206,6 +206,16 @@ public:
     {
         return systemPackagePath_;
     }
+
+    void SetHmsPackagePath(const std::string& hmsPackagePath)
+    {
+        hmsPackagePath_ = hmsPackagePath;
+    }
+
+    const std::string& GetHmsPackagePath() const
+    {
+        return hmsPackagePath_;
+    }
 #endif
 
     void SetThemeId(uint32_t themeId)
@@ -225,6 +235,7 @@ private:
     std::string packagePath_;
 #if defined(PREVIEW)
     std::string systemPackagePath_;
+    std::string hmsPackagePath_;
 #endif
     int32_t themeId_ = -1;
 };

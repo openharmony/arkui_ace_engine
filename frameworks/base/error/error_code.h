@@ -87,6 +87,9 @@ constexpr int32_t ERROR_CODE_DIALOG_CONTENT_ERROR = 103301;
 constexpr int32_t ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST = 103302;
 constexpr int32_t ERROR_CODE_DIALOG_CONTENT_NOT_FOUND = 103303;
 
+// toast error code
+constexpr int32_t ERROR_CODE_TOAST_NOT_FOUND = 103401;
+
 // BindSheet error code
 constexpr int32_t ERROR_CODE_BIND_SHEET_CONTENT_ERROR = 120001;
 constexpr int32_t ERROR_CODE_BIND_SHEET_CONTENT_ALREADY_EXIST = 120002;
@@ -102,4 +105,7 @@ constexpr int32_t ERROR_CODE_NON_EXIST = 150003;
 
 // ComponentSnapshot error code
 constexpr int32_t ERROR_CODE_COMPONENT_SNAPSHOT_IMAGE_LOAD_ERROR = 160001;
+
+// FromHtml error code
+constexpr int32_t ERROR_CODE_FROM_HTML_CONVERT_ERROR = 170001;
 } // namespace OHOS::Ace

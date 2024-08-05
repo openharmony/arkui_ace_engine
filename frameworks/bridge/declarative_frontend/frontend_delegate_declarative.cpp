@@ -161,19 +161,16 @@ int32_t FrontendDelegateDeclarative::GetMinPlatformVersion()
 UIContentErrorCode FrontendDelegateDeclarative::RunPage(
     const std::string& url, const std::string& params, const std::string& profile, bool isNamedRouter)
 {
-    LOGI("FrontendDelegateDeclarative RunPage url=%{public}s", url.c_str());
+    LOGI("RunPage:%{public}s", url.c_str());
     std::string jsonContent;
     if (GetAssetContent(MANIFEST_JSON, jsonContent)) {
         manifestParser_->Parse(jsonContent);
         manifestParser_->Printer();
     } else if (!profile.empty() && GetAssetContent(profile, jsonContent)) {
-        LOGI("Parse profile %{public}s", profile.c_str());
         manifestParser_->Parse(jsonContent);
     } else if (GetAssetContent(PAGES_JSON, jsonContent)) {
-        LOGI("Parse main_pages.json");
         manifestParser_->Parse(jsonContent);
     } else {
-        LOGE("RunPage parse manifest.json failed");
         EventReport::SendPageRouterException(PageRouterExcepType::RUN_PAGE_ERR, url);
         return UIContentErrorCode::PARSE_MANIFEST_FAILED;
     }
@@ -1566,28 +1563,44 @@ Size FrontendDelegateDeclarative::MeasureTextSize(MeasureContext context)
     return MeasureUtil::MeasureTextSize(context);
 }
 
-void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
+void FrontendDelegateDeclarative::ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast enter");
-    int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
-    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    NG::ToastInfo updatedToastInfo = toastInfo;
+    updatedToastInfo.duration = std::clamp(toastInfo.duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
+    updatedToastInfo.isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::IsCurrentUseNewPipeline()) {
-        auto task = [durationTime, message, bottom, isRightToLeft, showMode, alignment, offset,
-                        containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        auto task = [updatedToastInfo, callbackParam = std::move(callback), containerId = Container::CurrentId()](
+                        const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
             ContainerScope scope(containerId);
-            overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode, alignment, offset);
+            overlayManager->ShowToast(
+                updatedToastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
         };
         MainWindowOverlay(std::move(task), "ArkUIOverlayShowToast");
         return;
     }
     auto pipeline = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     taskExecutor_->PostTask(
-        [durationTime, message, bottom, isRightToLeft, context = pipeline] {
-            ToastComponent::GetInstance().Show(context, message, durationTime, bottom, isRightToLeft);
+        [updatedToastInfo, context = pipeline] {
+            ToastComponent::GetInstance().Show(context, updatedToastInfo.message, updatedToastInfo.duration,
+                updatedToastInfo.bottom, updatedToastInfo.isRightToLeft);
         },
         TaskExecutor::TaskType::UI, "ArkUIShowToast");
+}
+
+void FrontendDelegateDeclarative::CloseToast(const int32_t toastId, std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "close toast enter");
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->CloseToast(toastId, std::move(callback));
 }
 
 void FrontendDelegateDeclarative::SetToastStopListenerCallback(std::function<void()>&& stopCallback)
@@ -1681,6 +1694,7 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = title,
         .content = message,
         .autoCancel = autoCancel,
@@ -1695,6 +1709,7 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter with status changed");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = title,
         .content = message,
         .autoCancel = autoCancel,
@@ -1709,6 +1724,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter with attr");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
@@ -1749,6 +1765,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter with attr for status changed");
     DialogProperties dialogProperties = {
+        .type = DialogType::ALERT_DIALOG,
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
@@ -1871,7 +1888,6 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const WeakPtr<NG::UINode>& n
         CHECK_NULL_VOID(overlayManager);
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
         overlayManager->CloseCustomDialog(node, std::move(callback));
-        SubwindowManager::GetInstance()->CloseCustomDialogNG(node, std::move(callback));
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog");
     return;
@@ -1881,9 +1897,9 @@ void FrontendDelegateDeclarative::UpdateCustomDialog(
     const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback)
 {
     DialogProperties dialogProperties = {
-        .isSysBlurStyle = false,
         .autoCancel = dialogAttr.autoCancel,
-        .maskColor = dialogAttr.maskColor
+        .maskColor = dialogAttr.maskColor,
+        .isSysBlurStyle = false
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
@@ -1891,12 +1907,11 @@ void FrontendDelegateDeclarative::UpdateCustomDialog(
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
     }
-    auto task = [dialogAttr, dialogProperties, node, callback]
+    auto task = [dialogProperties, node, callback]
         (const RefPtr<NG::OverlayManager>& overlayManager) mutable {
         CHECK_NULL_VOID(overlayManager);
         LOGI("begin to update custom dialog.");
         overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
-        SubwindowManager::GetInstance()->UpdateCustomDialogNG(node, dialogAttr, std::move(callback));
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayUpdateCustomDialog");
     return;

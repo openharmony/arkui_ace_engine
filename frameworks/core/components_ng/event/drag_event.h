@@ -151,7 +151,6 @@ public:
     void SetPixelMap(const RefPtr<DragEventActuator>& actuator);
     void SetEventColumn(const RefPtr<DragEventActuator>& actuator);
     void HideFilter();
-    void HideMenu(int32_t targetId);
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
     void BindClickEvent(const RefPtr<FrameNode>& columnNode);
@@ -247,6 +246,7 @@ public:
     const std::vector<GatherNodeChildInfo>& GetGatherNodeChildrenInfo() const;
     void ClearGatherNodeChildrenInfo();
     void PushBackGatherNodeChild(GatherNodeChildInfo& gatherNodeChild);
+    void AddTouchListener(const TouchRestrict& touchRestrict) override;
     void HandleTouchUpEvent();
     void HandleTouchMoveEvent();
     void HandleTouchCancelEvent();
@@ -271,6 +271,10 @@ public:
     void SetResponseRegionFull();
     void ResetResponseRegion();
     static void ResetDragStatus();
+    void PrepareFinalPixelMapForDragThroughTouch(RefPtr<PixelMap> pixelMap, bool immediately);
+    void DoPixelMapScaleForDragThroughTouch(RefPtr<PixelMap> pixelMap, float targetScale);
+    RefPtr<PixelMap> GetPreScaledPixelMapForDragThroughTouch(float& preScale);
+    void ResetPreScaledPixelMapForDragThroughTouch();
 
 private:
     void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
@@ -286,6 +290,7 @@ private:
         const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
     std::optional<EffectOption> BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
     float RadiusToSigma(float radius);
+    void RecordMenuWrapperNodeForDrag(int32_t targetId);
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
@@ -297,8 +302,10 @@ private:
     RefPtr<LongPressRecognizer> previewLongPressRecognizer_;
     RefPtr<SequencedRecognizer> SequencedRecognizer_;
     RefPtr<FrameNode> gatherNode_;
+    RefPtr<TouchEventImpl> touchListener_;
 
     RefPtr<PixelMap> textPixelMap_;
+    RefPtr<PixelMap> preScaledPixelMap_;
     std::function<void(GestureEvent&)> actionStart_;
     std::function<void(GestureEvent&)> longPressUpdate_;
     std::function<void()> actionCancel_;
@@ -319,6 +326,7 @@ private:
     PanDirection direction_;
     int32_t fingers_ = 1;
     float distance_ = 0.0f;
+    float preScaleValue_ = 1.0f;
     bool isRedragStart_ = false;
 };
 

@@ -25,6 +25,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/router_recover_record.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/render/snapshot_param.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/pipeline_base.h"
@@ -167,8 +168,8 @@ public:
     // ----------------
     // system.prompt
     // ----------------
-    virtual void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-        const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset) = 0;
+    virtual void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback) = 0;
+    virtual void CloseToast(const int32_t toastId, std::function<void(int32_t)>&& callback) {};
     virtual void SetToastStopListenerCallback(std::function<void()>&& stopCallback) {};
     virtual void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,

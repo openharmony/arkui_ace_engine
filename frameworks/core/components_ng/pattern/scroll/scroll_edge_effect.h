@@ -39,8 +39,6 @@ public:
     virtual void Paint(RSCanvas& canvas, const SizeF& viewPort, const OffsetF& offset) {}
 
     virtual void SetHandleOverScrollCallback(const HandleOverScrollCallback& callback) {}
-
-    virtual void SetScrollRtl(bool isRtl) {}
 };
 
 } // namespace OHOS::Ace::NG

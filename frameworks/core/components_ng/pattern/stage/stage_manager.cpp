@@ -33,6 +33,11 @@
 #include "core/common/ime/input_method_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+
+#if !defined(ACE_UNITTEST)
+#include "core/components_ng/base/transparent_node_detector.h"
+#endif
+
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
@@ -85,6 +90,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 CHECK_NULL_VOID(stageManager);
                 stageManager->SetStageInTrasition(false);
                 page->GetRenderContext()->RemoveClipWithRRect();
+                page->GetRenderContext()->ResetPageTransitionEffect();
             });
         return;
     }
@@ -172,7 +178,7 @@ void StageManager::PageChangeCloseKeyboard()
 #endif
 }
 
-bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition, bool  /*isPush*/)
+bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition)
 {
     CHECK_NULL_RETURN(stageNode_, false);
     CHECK_NULL_RETURN(node, false);
@@ -232,9 +238,17 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
             CHECK_NULL_VOID(stage);
             auto pageNode = weakNode.Upgrade();
             int64_t endTime = GetSysTimestamp();
-            stage->PerformanceCheck(pageNode, endTime - startTime);
+            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+            CHECK_NULL_VOID(pagePattern);
+            auto pageInfo = pagePattern->GetPageInfo();
+            CHECK_NULL_VOID(pageInfo);
+            auto pagePath = pageInfo->GetFullPath();
+            stage->PerformanceCheck(pageNode, endTime - startTime, pagePath);
         });
     }
+#if !defined(ACE_UNITTEST)
+    TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(node);
+#endif
 
     // close keyboard
     PageChangeCloseKeyboard();
@@ -254,7 +268,6 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     // flush layout task.
     if (!stageNode_->GetGeometryNode()->GetMarginFrameSize().IsPositive()) {
         // in first load case, wait for window size.
-        LOGI("waiting for window size");
         return true;
     }
     stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -295,12 +308,12 @@ bool StageManager::InsertPage(const RefPtr<FrameNode>& node, bool bellowTopOrBot
     return true;
 }
 
-void StageManager::PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout)
+void StageManager::PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout, std::string path)
 {
     CHECK_NULL_VOID(pageNode);
     PerformanceCheckNodeMap nodeMap;
     pageNode->GetPerformanceCheckData(nodeMap);
-    AceScopedPerformanceCheck::RecordPerformanceCheckData(nodeMap, vsyncTimeout);
+    AceScopedPerformanceCheck::RecordPerformanceCheckData(nodeMap, vsyncTimeout, path);
 }
 
 bool StageManager::PopPage(bool needShowNext, bool needTransition)
@@ -385,6 +398,7 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         FirePageShow(newPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
         inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
     }
+    PageChangeCloseKeyboard();
     AddPageTransitionTrace(outPageNode, inPageNode);
 
     FireAutoSave(outPageNode, inPageNode);
@@ -483,7 +497,7 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
     context->MarkNeedFlushMouseEvent();
 }
 
-void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType)
+void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType, bool needFocus)
 {
     auto pageNode = DynamicCast<FrameNode>(node);
     CHECK_NULL_VOID(pageNode);
@@ -491,7 +505,9 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
 
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    pagePattern->FocusViewShow();
+    if (needFocus) {
+        pagePattern->FocusViewShow();
+    }
     pagePattern->OnShow();
     // With or without a page transition, we need to make the coming page visible first
     pagePattern->ProcessShowState();
@@ -581,11 +597,12 @@ RefPtr<FrameNode> StageManager::GetLastPageWithTransition() const
     if (children.empty()) {
         return nullptr;
     }
-    if (stageInTrasition_) {
+    auto lastChildFrame = DynamicCast<FrameNode>(children.back());
+    auto pagePattern = lastChildFrame->GetPattern<PagePattern>();
+    if (pagePattern && pagePattern->GetPageInTransition()) {
         return DynamicCast<FrameNode>(destPageNode_.Upgrade());
-    } else {
-        return DynamicCast<FrameNode>(children.back());
     }
+    return lastChildFrame;
 }
 
 RefPtr<FrameNode> StageManager::GetPrevPageWithTransition() const
@@ -619,5 +636,29 @@ void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, cons
     auto destFullPath = destPageInfo->GetFullPath();
 
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page from %s to %s", srcFullPath.c_str(), destFullPath.c_str());
+}
+
+void StageManager::SyncPageSafeArea(bool keyboardSafeArea)
+{
+    auto changeType = keyboardSafeArea ? PROPERTY_UPDATE_LAYOUT : PROPERTY_UPDATE_MEASURE;
+    auto lastPage = GetLastPageWithTransition();
+    CHECK_NULL_VOID(lastPage);
+    lastPage->MarkDirtyNode(changeType);
+    auto lastPageOverlay = lastPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(lastPageOverlay);
+    lastPageOverlay->MarkDirtyOverlay();
+
+    auto prevPage = GetPrevPageWithTransition();
+    CHECK_NULL_VOID(prevPage);
+    auto prevPageOverlay = prevPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(prevPageOverlay);
+    prevPageOverlay->MarkDirtyOverlay();
+}
+
+bool StageManager::CheckPageFocus()
+{
+    auto pageNode = GetLastPage();
+    CHECK_NULL_RETURN(pageNode, true);
+    return pageNode->GetFocusHub() && pageNode->GetFocusHub()->IsCurrentFocus();
 }
 } // namespace OHOS::Ace::NG

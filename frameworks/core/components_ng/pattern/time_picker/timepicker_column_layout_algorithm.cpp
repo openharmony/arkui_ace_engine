@@ -160,7 +160,7 @@ void TimePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto children = layoutWrapper->GetAllChildrenWithBuild();
-    uint32_t halfCount = layoutWrapper->GetTotalChildCount() / 2;
+    uint32_t halfCount = static_cast<uint32_t>(layoutWrapper->GetTotalChildCount() / 2);
     float childStartCoordinate = static_cast<float>(
         pickerItemHeight_ / ITEM_HEIGHT_HALF -
         pickerTheme->GetGradientHeight().ConvertToPx() * gradientFontScale_ * halfCount -

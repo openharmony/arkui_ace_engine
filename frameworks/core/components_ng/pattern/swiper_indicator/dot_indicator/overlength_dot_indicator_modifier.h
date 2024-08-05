@@ -166,6 +166,11 @@ public:
         isSwiperTouchDown_ = isSwiperTouchDown;
     }
 
+    void SetIsHorizontalAndRTL(bool isHorizontalAndRTL)
+    {
+        isHorizontalAndRTL_ = isHorizontalAndRTL;
+    }
+
     void SetKeepStatus(bool keepStatus)
     {
         keepStatus_ = keepStatus;
@@ -192,9 +197,9 @@ private:
     void CalcTargetStatusOnAllPointMoveForward(const LinearVector<float>& itemHalfSizes);
     void CalcTargetStatusOnAllPointMoveBackward(const LinearVector<float>& itemHalfSizes);
     std::pair<LinearVector<float>, std::pair<float, float>> CalcIndicatorCenterX(
-        const LinearVector<float>& itemHalfSizes, int32_t selectedIndex, OverlongType overlongType, int32_t pageIndex);
+        const LinearVector<float>& itemHalfSizes, int32_t selectedIndex, OverlongType overlongType);
     LinearVector<float> CalcIndicatorSize(
-        const LinearVector<float>& itemHalfSizes, OverlongType overlongType, int32_t pageIndex, bool isWidth);
+        const LinearVector<float>& itemHalfSizes, OverlongType overlongType, bool isWidth);
     void UpdateSelectedCenterXOnDrag(const LinearVector<float>& itemHalfSizes);
     void UpdateUnselectedCenterXOnDrag();
     int32_t CalcTargetIndexOnDrag() const;
@@ -202,6 +207,8 @@ private:
     float GetMoveRateOnAllMove() const;
     int32_t GetBlackPointsAnimationDuration() const;
     void AdjustTargetStatus(int32_t targetPageIndex);
+    std::pair<float, float> GetTouchBottomCenterX(ContentProperty& contentProperty);
+    OverlongType RevertOverlongType(OverlongType overlongType) const;
 
     RefPtr<AnimatablePropertyUint8> firstPointOpacity_;
     RefPtr<AnimatablePropertyUint8> newPointOpacity_;
@@ -236,6 +243,7 @@ private:
     bool isSwiperTouchDown_ = false;
     bool keepStatus_ = false;
     bool blackPointsAnimEnd_ = true;
+    bool isHorizontalAndRTL_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(OverlengthDotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG

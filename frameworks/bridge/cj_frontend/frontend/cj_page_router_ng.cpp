@@ -708,6 +708,9 @@ void CJPageRouterNG::FlushReload()
 {
     for (const auto& viewId : viewStack_) {
         auto view = FFI::FFIData::GetData<NativeView>(viewId);
+        if (view == nullptr) {
+            continue;
+        }
         view->FlushReload();
     }
 }

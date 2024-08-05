@@ -811,15 +811,22 @@ HWTEST_F(GridScrollerTestNg, PositionController002, TestSize.Level1)
 
     /**
      * @tc.steps: step5. Test ScrollToEdge func.
-     * @tc.expected: Verify return value.
+     * @tc.expected: Verify return value. Animation should be stopped
      */
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, true);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, EMPTY_JUMP_INDEX);
+
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, true);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, EMPTY_JUMP_INDEX);
+
+    pattern_->isSmoothScrolling_ = true;
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    EXPECT_FALSE(pattern_->isSmoothScrolling_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, LAST_ITEM);
+
+    pattern_->isSmoothScrolling_ = true;
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
+    EXPECT_FALSE(pattern_->isSmoothScrolling_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, 0);
 
     /**
@@ -1649,34 +1656,6 @@ HWTEST_F(GridScrollerTestNg, ScrollBy001, TestSize.Level1)
      */
     pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false);
     EXPECT_FALSE(pattern_->isAnimationStop_);
-}
-
-/**
- * @tc.name: DumpAdvanceInfo001
- * @tc.desc: Test ScrollBy
- * @tc.type: FUNC
- */
-HWTEST_F(GridScrollerTestNg, DumpAdvanceInfo001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr");
-    CreateDone(frameNode_);
-    pattern_->DumpAdvanceInfo();
-    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::NONE;
-    pattern_->DumpAdvanceInfo();
-    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::CENTER;
-    pattern_->DumpAdvanceInfo();
-    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::END;
-    pattern_->DumpAdvanceInfo();
-    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::START;
-    pattern_->DumpAdvanceInfo();
-
-    ClearOldNodes();
-    model = CreateGrid();
-    model.SetColumnsTemplate("1fr");
-    CreateFixedItems(1);
-    CreateDone(frameNode_);
-    pattern_->DumpAdvanceInfo();
 }
 
 /**

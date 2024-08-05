@@ -72,6 +72,9 @@ int64_t FfiOHOSAceFrameworkNativeViewCtor(int64_t remoteId)
 {
     auto remoteView = RemoteData::Create<RemoteView>(remoteId);
     auto view = FFIData::Create<NativeView>(remoteView);
+    if (view == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return view->GetID();
 }
 
@@ -103,6 +106,16 @@ bool FfiOHOSAceFrameworkNativeViewNeedsUpdate(int64_t nativeViewId)
         return false;
     }
     return nativeView->NeedsUpdate();
+}
+
+bool FfiOHOSAceFrameworkNativeViewIsFirstRender(int64_t nativeViewId)
+{
+    auto nativeView = FFIData::GetData<NativeView>(nativeViewId);
+    if (!nativeView) {
+        LOGE("FfiOHOSAceFrameworkNativeViewIsFirstRender fail, no NativeView of %{public}" PRId64 ".", nativeViewId);
+        return false;
+    }
+    return nativeView->IsFirstRender();
 }
 
 void FfiOHOSAceFrameworkNativeViewMarkStatic(int64_t nativeViewId)

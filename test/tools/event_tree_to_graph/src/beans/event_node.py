@@ -21,15 +21,9 @@ from typing import List
 from src.beans.base_bean import BaseBean
 from src.beans.frame_node import FrameNode
 from src.beans.state_history import StateHistory
-# frameNodeId: 84, type: TouchEventActuator, depth: 0, id: 0xf072b240, parentId: 0x0
-#  stateHistory:
-#   procedure: HandleTouchDown, timestamp: 2017-08-25 15:00:22.247
-#   procedure: HandleTouchUp, timestamp: 2017-08-25 15:00:22.295
-
-from src.keywords import event_procedure_keyword, get_sample_key, get_sample_value
+from src.keywords import event_procedure_keyword, get_sample_key, get_sample_separator_count
 from src.utils.log_wrapper import log_info, log_error
 from src.utils.value_parser import get_value_as_int, get_value_as_str, get_value_as_float
-from typing import List
 
 
 # frameNodeId: 84, type: PanRecognizer, depth: 1, id: 0xf3d6bfc0, parentId: 0xf063eed0, customInfo: direction: 3,
@@ -68,29 +62,29 @@ class EventNode(BaseBean):
         # frameNodeId: 84, type: TouchEventActuator, depth: 0, id: 0xf072b240, parentId: 0x0
         frame_node_str = texts[0]
         self.frameNodeId = get_value_as_int(frame_node_str, get_sample_key(event_procedure_keyword, 'frameNodeId'),
-                                            get_sample_value(event_procedure_keyword, 'frameNodeId'))
+                                            get_sample_separator_count(event_procedure_keyword, 'frameNodeId'))
         self.type = get_value_as_str(frame_node_str, get_sample_key(event_procedure_keyword, 'type'),
-                                     get_sample_value(event_procedure_keyword, 'type'))
+                                     get_sample_separator_count(event_procedure_keyword, 'type'))
         self.depth = get_value_as_int(frame_node_str, get_sample_key(event_procedure_keyword, 'depth'),
-                                      get_sample_key(event_procedure_keyword, 'depth'))
+                                      get_sample_separator_count(event_procedure_keyword, 'depth'))
         self.address = get_value_as_str(frame_node_str, get_sample_key(event_procedure_keyword, 'id'),
-                                        get_sample_key(event_procedure_keyword, 'id'))
+                                        get_sample_separator_count(event_procedure_keyword, 'id'))
         self.parentId = get_value_as_str(frame_node_str, get_sample_key(event_procedure_keyword, 'parentId'),
-                                         get_sample_key(event_procedure_keyword, 'parentId'))
+                                         get_sample_separator_count(event_procedure_keyword, 'parentId'))
         self.duration = get_value_as_int(frame_node_str, get_sample_key(event_procedure_keyword, 'duration'),
-                                         get_sample_key(event_procedure_keyword, 'duration'))
+                                         get_sample_separator_count(event_procedure_keyword, 'duration'))
         self.custom_info = get_value_as_str(frame_node_str, get_sample_key(event_procedure_keyword, 'customInfo'),
-                                            get_sample_key(event_procedure_keyword, 'customInfo'))
+                                            get_sample_separator_count(event_procedure_keyword, 'customInfo'))
         self.direction = get_value_as_int(frame_node_str, get_sample_key(event_procedure_keyword, 'direction'),
-                                          get_sample_key(event_procedure_keyword, 'direction'))
+                                          get_sample_separator_count(event_procedure_keyword, 'direction'))
         self.distance = get_value_as_float(frame_node_str, get_sample_key(event_procedure_keyword, 'distance'),
-                                           get_sample_key(event_procedure_keyword, 'distance'))
+                                           get_sample_separator_count(event_procedure_keyword, 'distance'))
         self.isForDrag = get_value_as_int(frame_node_str, get_sample_key(event_procedure_keyword, 'isForDrag'),
-                                          get_sample_key(event_procedure_keyword, 'isForDrag'))
+                                          get_sample_separator_count(event_procedure_keyword, 'isForDrag'))
         self.repeat = get_value_as_int(frame_node_str, get_sample_key(event_procedure_keyword, 'repeat'),
-                                       get_sample_key(event_procedure_keyword, 'repeat'))
+                                       get_sample_separator_count(event_procedure_keyword, 'repeat'))
         self.fingers = get_value_as_int(frame_node_str, get_sample_key(event_procedure_keyword, 'fingers'),
-                                        get_sample_key(event_procedure_keyword, 'fingers'))
+                                        get_sample_separator_count(event_procedure_keyword, 'fingers'))
         # parse state history
         self.parse_state_history(texts, 1)
         self.check_parse_result()
@@ -128,7 +122,7 @@ class EventNode(BaseBean):
 
     def get_detailed_summary_string(self):
         return (self.tag + '(' + str(
-                self.frameNodeId) + ') ' + self.type + ' ' + self.address + '\n'
+            self.frameNodeId) + ') ' + self.type + ' ' + self.address + '\n'
                 + self.state_history.get_detailed_summary_string())
 
     def to_string(self):

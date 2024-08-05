@@ -736,6 +736,14 @@ bool WebClientImpl::RunQuickMenu(std::shared_ptr<NWeb::NWebQuickMenuParams> para
     return delegate->RunQuickMenu(params, callback);
 }
 
+void WebClientImpl::HideHandleAndQuickMenuIfNecessary(bool hide)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->HideHandleAndQuickMenuIfNecessary(hide);
+}
+
 void WebClientImpl::OnQuickMenuDismissed()
 {
     auto delegate = webDelegate_.Upgrade();
@@ -1214,5 +1222,13 @@ void WebClientImpl::OnCursorUpdate(double x, double y, double width, double heig
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnCursorUpdate(x, y, width, height);
+}
+
+void WebClientImpl::ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->ReportDynamicFrameLossEvent(sceneId, isStart);
 }
 } // namespace OHOS::Ace

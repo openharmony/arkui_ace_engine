@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
@@ -249,6 +250,22 @@ ArkUINativeModuleValue ImageBridge::ResetEdgeAntialiasing(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getImageModifier()->resetEdgeAntialiasing(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::SetResizableLattice(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        auto drawingLattice = Ace::Framework::CreateDrawingLattice(info[1]);
+        if (drawingLattice) {
+            Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(INDEX_0);
+            auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+            ImageModelNG::SetResizableLattice(reinterpret_cast<FrameNode*>(nativeNode), drawingLattice);
+        }
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -722,23 +739,31 @@ ArkUINativeModuleValue ImageBridge::SetBorderRadius(ArkUIRuntimeCallInfo *runtim
     CalcDimension bottomLeft;
     CalcDimension bottomRight;
 
-    ArkTSUtils::ParseAllBorder(vm, topLeftArgs, topLeft);
-    ArkTSUtils::ParseAllBorder(vm, topRightArgs, topRight);
-    ArkTSUtils::ParseAllBorder(vm, bottomLeftArgs, bottomLeft);
-    ArkTSUtils::ParseAllBorder(vm, bottomRightArgs, bottomRight);
-
+    bool isLengthMetrics = false;
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, topLeftArgs, topLeft) ||
+        ArkTSUtils::ParseJsLengthMetrics(vm, topRightArgs, topRight) ||
+        ArkTSUtils::ParseJsLengthMetrics(vm, bottomLeftArgs, bottomLeft) ||
+        ArkTSUtils::ParseJsLengthMetrics(vm, bottomRightArgs, bottomRight)) {
+        isLengthMetrics = true;
+    } else {
+        ArkTSUtils::ParseAllBorder(vm, topLeftArgs, topLeft);
+        ArkTSUtils::ParseAllBorder(vm, topRightArgs, topRight);
+        ArkTSUtils::ParseAllBorder(vm, bottomLeftArgs, bottomLeft);
+        ArkTSUtils::ParseAllBorder(vm, bottomRightArgs, bottomRight);
+    }
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto directionChanged = isRightToLeft && isLengthMetrics;
     uint32_t size = SIZE_OF_FOUR;
     ArkUI_Float32 values[size];
     int units[size];
-
-    values[INDEX_0] = topLeft.Value();
-    units[INDEX_0] = static_cast<int>(topLeft.Unit());
-    values[INDEX_1] = topRight.Value();
-    units[INDEX_1] = static_cast<int>(topRight.Unit());
-    values[INDEX_2] = bottomLeft.Value();
-    units[INDEX_2] = static_cast<int>(bottomLeft.Unit());
-    values[INDEX_3] = bottomRight.Value();
-    units[INDEX_3] = static_cast<int>(bottomRight.Unit());
+    values[INDEX_0] = directionChanged ? topRight.Value() : topLeft.Value();
+    units[INDEX_0] = directionChanged ? static_cast<int>(topRight.Unit()) : static_cast<int>(topLeft.Unit());
+    values[INDEX_1] = directionChanged ? topLeft.Value() : topRight.Value();
+    units[INDEX_1] = directionChanged ? static_cast<int>(topLeft.Unit()) : static_cast<int>(topRight.Unit());
+    values[INDEX_2] = directionChanged ? bottomRight.Value() : bottomLeft.Value();
+    units[INDEX_2] = directionChanged ? static_cast<int>(bottomRight.Unit()) : static_cast<int>(bottomLeft.Unit());
+    values[INDEX_3] = directionChanged ? bottomLeft.Value() : bottomRight.Value();
+    units[INDEX_3] = directionChanged ? static_cast<int>(bottomLeft.Unit()) : static_cast<int>(bottomRight.Unit());
 
     GetArkUINodeModifiers()->getImageModifier()->setImageBorderRadius(nativeNode, values, units, SIZE_OF_FOUR);
 

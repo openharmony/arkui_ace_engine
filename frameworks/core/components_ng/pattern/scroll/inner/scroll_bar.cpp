@@ -66,7 +66,7 @@ void ScrollBar::InitTheme()
 
 bool ScrollBar::InBarTouchRegion(const Point& point) const
 {
-    if (NeedScrollBar() && shapeMode_ == ShapeMode::RECT) {
+    if (NeedPaint() && shapeMode_ == ShapeMode::RECT) {
         return touchRegion_.IsInRegion(point);
     }
     return false;
@@ -74,7 +74,7 @@ bool ScrollBar::InBarTouchRegion(const Point& point) const
 
 bool ScrollBar::InBarHoverRegion(const Point& point) const
 {
-    if (NeedScrollBar() && shapeMode_ == ShapeMode::RECT) {
+    if (NeedPaint() && shapeMode_ == ShapeMode::RECT) {
         return hoverRegion_.IsInRegion(point);
     }
     return false;
@@ -82,7 +82,7 @@ bool ScrollBar::InBarHoverRegion(const Point& point) const
 
 bool ScrollBar::InBarRectRegion(const Point& point) const
 {
-    if (NeedScrollBar() && shapeMode_ == ShapeMode::RECT) {
+    if (NeedPaint() && shapeMode_ == ShapeMode::RECT) {
         return barRect_.IsInRegion(point);
     }
     return false;
@@ -407,8 +407,7 @@ void ScrollBar::SetMouseEvent()
             } else {
                 scrollBar->isMousePressed_ = false;
             }
-        } else if (!scrollBar->IsPressed()) {
-            scrollBar->ScheduleDisappearDelayTask();
+            scrollBar->isShowScrollBar_ = true;
         }
         if (inHoverRegion && !scrollBar->IsHover()) {
             if (!scrollBar->IsPressed()) {
@@ -421,6 +420,10 @@ void ScrollBar::SetMouseEvent()
             if (!scrollBar->IsPressed()) {
                 scrollBar->PlayScrollBarShrinkAnimation();
             }
+        }
+        if (!inBarRegion && !inHoverRegion && !scrollBar->IsPressed() && scrollBar->isShowScrollBar_) {
+            scrollBar->ScheduleDisappearDelayTask();
+            scrollBar->isShowScrollBar_ = false;
         }
         scrollBar->locationInfo_ = info.GetLocalLocation();
     });
@@ -539,6 +542,7 @@ void ScrollBar::HandleDragStart(const GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR,"inner scrollBar drag start, localLocation: %{public}s, "
         "globalLocation: %{public}s",
         info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
+    ACE_SCOPED_TRACE("inner scrollBar HandleDragStart");
     if (scrollPositionCallback_) {
         scrollPositionCallback_(0, SCROLL_FROM_START);
         if (dragFRCSceneCallback_) {
@@ -551,6 +555,16 @@ void ScrollBar::HandleDragStart(const GestureEvent& info)
 
 void ScrollBar::HandleDragUpdate(const GestureEvent& info)
 {
+    // if historical touch point slope is zero but delta is not zero, no need to update.
+    auto mainDelta = info.GetMainDelta();
+    if (info.IsInterpolated()) {
+        if (GetPanDirection() == Axis::VERTICAL && NearZero(info.GetInputYDeltaSlope()) && !NearZero(mainDelta)) {
+            return;
+        } else if (GetPanDirection() == Axis::HORIZONTAL && NearZero(info.GetInputXDeltaSlope()) &&
+                   !NearZero(mainDelta)) {
+            return;
+        }
+    }
     if (scrollPositionCallback_) {
         // The offset of the mouse wheel and gesture is opposite.
         auto offset = info.GetInputEventType() == InputEventType::AXIS ?
@@ -558,6 +572,7 @@ void ScrollBar::HandleDragUpdate(const GestureEvent& info)
         if (IsReverse()) {
             offset = -offset;
         }
+        ACE_SCOPED_TRACE("inner scrollBar HandleDragUpdate offset:%f", offset);
         scrollPositionCallback_(offset, SCROLL_FROM_BAR);
         if (dragFRCSceneCallback_) {
             dragFRCSceneCallback_(NearZero(info.GetMainDelta()) ? info.GetMainVelocity()
@@ -576,6 +591,7 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar drag end, position is %{public}f and %{public}f, "
         "velocity is %{public}f",
         info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), velocity);
+    ACE_SCOPED_TRACE("inner scrollBar HandleDragEnd velocity:%f", velocity);
     if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
         if (scrollEndCallback_) {
             scrollEndCallback_();
@@ -684,6 +700,15 @@ void ScrollBar::OnCollectLongPressTarget(const OffsetF& coordinateOffset, const 
         longPressRecognizer_->SetTargetComponent(targetComponent);
         longPressRecognizer_->SetIsSystemGesture(true);
         longPressRecognizer_->SetRecognizerType(GestureTypeName::LONG_PRESS_GESTURE);
+        longPressRecognizer_->SetSysGestureJudge([](const RefPtr<GestureInfo>& gestureInfo,
+                                                 const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
+            const auto &inputEventType = gestureInfo->GetInputEventType();
+            TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "input event type:%{public}d", inputEventType);
+            if (inputEventType == InputEventType::MOUSE_BUTTON) {
+                return GestureJudgeResult::CONTINUE;
+            }
+            return GestureJudgeResult::REJECT;
+        });
         result.emplace_front(longPressRecognizer_);
         responseLinkResult.emplace_back(longPressRecognizer_);
     }
@@ -880,5 +905,117 @@ void ScrollBar::DumpAdvanceInfo()
         DumpLog::GetInstance().AddDesc(info.ToString());
     }
     DumpLog::GetInstance().AddDesc("==========================innerScrollBarLayoutInfos==========================");
+}
+
+Color ScrollBar::GetForegroundColor() const
+{
+    return IsPressed() ? foregroundColor_.BlendColor(PRESSED_BLEND_COLOR) : foregroundColor_;
+}
+
+void ScrollBar::SetHoverWidth(const RefPtr<ScrollBarTheme>& theme)
+{
+    hoverWidth_ = theme->GetActiveWidth() + theme->GetScrollBarMargin() * 2;
+}
+
+void ScrollBar::SetNormalWidth(const Dimension& normalWidth)
+{
+    if (normalWidth_ != normalWidth) {
+        normalWidthUpdate_ = true;
+        normalWidth_ = normalWidth;
+        CalcReservedHeight();
+        MarkNeedRender();
+    }
+}
+
+void ScrollBar::SetScrollable(bool isScrollable)
+{
+    CHECK_NULL_VOID(isScrollable_ != isScrollable);
+    isScrollable_ = isScrollable;
+}
+
+void ScrollBar::SetPositionMode(PositionMode positionMode)
+{
+    if (positionMode_ != positionMode) {
+        positionModeUpdate_ = true;
+        positionMode_ = positionMode;
+        if (panRecognizer_) {
+            PanDirection panDirection;
+            panDirection.type =
+                positionMode_ == PositionMode::BOTTOM ? PanDirection::HORIZONTAL : PanDirection::VERTICAL;
+            panRecognizer_->SetDirection(panDirection);
+        }
+    }
+}
+
+void ScrollBar::SetDisplayMode(DisplayMode displayMode)
+{
+    CHECK_NULL_VOID(displayMode_ != displayMode);
+    displayMode_ = displayMode;
+}
+
+void ScrollBar::PlayScrollBarDisappearAnimation()
+{
+    if (displayMode_ == DisplayMode::AUTO && isScrollable_ && !isHover_ && !isPressed_) {
+        opacityAnimationType_ = OpacityAnimationType::DISAPPEAR;
+        MarkNeedRender();
+    }
+}
+
+void ScrollBar::PlayScrollBarAppearAnimation()
+{
+    if (displayMode_ == DisplayMode::AUTO && isScrollable_) {
+        disappearDelayTask_.Cancel();
+        opacityAnimationType_ = OpacityAnimationType::APPEAR;
+        MarkNeedRender();
+    }
+}
+
+void ScrollBar::PlayScrollBarGrowAnimation()
+{
+    PlayScrollBarAppearAnimation();
+    normalWidth_ = activeWidth_;
+    FlushBarWidth();
+    hoverAnimationType_ = HoverAnimationType::GROW;
+    MarkNeedRender();
+}
+
+void ScrollBar::PlayScrollBarShrinkAnimation()
+{
+    normalWidth_ = inactiveWidth_;
+    FlushBarWidth();
+    hoverAnimationType_ = HoverAnimationType::SHRINK;
+    MarkNeedRender();
+}
+
+void ScrollBar::PlayScrollBarAdaptAnimation()
+{
+    needAdaptAnimation_ = true;
+    MarkNeedRender();
+}
+
+void ScrollBar::MarkNeedRender()
+{
+    if (markNeedRenderFunc_) {
+        markNeedRenderFunc_();
+    }
+}
+
+float ScrollBar::GetMainOffset(const Offset& offset) const
+{
+    return positionMode_ == PositionMode::BOTTOM ? offset.GetX() : offset.GetY();
+}
+
+void ScrollBar::SetReverse(bool reverse)
+{
+    if (isReverse_ != reverse) {
+        isReverse_ = reverse;
+        isReverseUpdate_ = true;
+    }
+}
+
+Axis ScrollBar::GetPanDirection() const
+{
+    CHECK_NULL_RETURN(panRecognizer_, Axis::NONE);
+    return panRecognizer_->GetAxisDirection();
 }
 } // namespace OHOS::Ace::NG

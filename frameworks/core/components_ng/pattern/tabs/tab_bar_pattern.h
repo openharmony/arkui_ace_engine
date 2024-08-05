@@ -116,7 +116,7 @@ private:
     std::string icon_;
     std::optional<TabBarSymbol> symbol_;
     TabBarBuilderFunc builder_;
-    TabBarStyle tabBarStyle_;
+    TabBarStyle tabBarStyle_ = TabBarStyle::NOSTYLE;
     FrameNode* node_ = nullptr;
 };
 
@@ -155,6 +155,7 @@ public:
         }
         layoutAlgorithm->SetVisibleItemPosition(visibleItemPosition_);
         layoutAlgorithm->SetCanOverScroll(canOverScroll_);
+        layoutAlgorithm->SetLastFontScale(lastFontScale_);
         return layoutAlgorithm;
     }
 
@@ -203,7 +204,7 @@ public:
 
     void UpdateSymbolEffect(int32_t index);
 
-    void UpdateSubTabBoard();
+    void UpdateSubTabBoard(int32_t index);
 
     SelectedMode GetSelectedMode() const;
 
@@ -450,6 +451,20 @@ public:
         clickEvents_.erase(tabBarId);
     }
 
+    std::optional<float> GetThirdLargeFontHeight()
+    {
+        return thirdLargeFontHeight_;
+    }
+
+    void SetThirdLargeFontHeight(std::optional<float> thirdLargeFontHeight)
+    {
+        if (thirdLargeFontHeight.has_value()) {
+            thirdLargeFontHeight_ = thirdLargeFontHeight;
+        } else {
+            thirdLargeFontHeight_.reset();
+        }
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -536,8 +551,6 @@ private:
     void RemoveTabBarEventCallback();
     void AddTabBarEventCallback();
     void AddMaskItemClickEvent();
-    void TabBarSuitAging();
-    void SetMarginVP(MarginProperty& marginLeftOrRight, MarginProperty& marginTopOrBottom);
     bool CanScroll() const;
     bool ParseTabsIsRtl();
     bool IsValidIndex(int32_t index);
@@ -581,7 +594,7 @@ private:
     std::optional<int32_t> touchingIndex_;
     std::optional<int32_t> hoverIndex_;
     std::optional<int32_t> moveIndex_;
-    TabBarStyle tabBarStyle_;
+    TabBarStyle tabBarStyle_ = TabBarStyle::NOSTYLE;
     float currentIndicatorOffset_ = 0.0f;
     std::vector<SelectedMode> selectedModes_;
     std::vector<IndicatorStyle> indicatorStyles_;
@@ -615,9 +628,9 @@ private:
     float currentOffset_ = 0.0f;
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     bool canOverScroll_ = false;
+    float lastFontScale_ = 0.0f;
+    std::optional<float> thirdLargeFontHeight_;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
-    MarginProperty marginLeftOrRight_;
-    MarginProperty marginTopOrBottom_;
 };
 } // namespace OHOS::Ace::NG
 

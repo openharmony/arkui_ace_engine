@@ -18,6 +18,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_scrollable_base.h"
 #include "frameworks/core/components/grid_layout/grid_layout_component.h"
+#include "core/components_ng/pattern/grid/grid_model_ng.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -57,6 +58,7 @@ public:
     static void SetNestedScroll(const JSCallbackInfo& args);
     static void SetScrollEnabled(const JSCallbackInfo& args);
     static void SetFriction(const JSCallbackInfo& info);
+    static void SetAlignItems(const JSCallbackInfo& info);
 
     static void JsOnScroll(const JSCallbackInfo& args);
     static void JsOnReachStart(const JSCallbackInfo& args);

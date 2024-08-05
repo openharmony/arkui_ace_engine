@@ -41,7 +41,7 @@ public:
     void DispatchPointerEvent(const TouchEvent& touchEvent,
         SerializedGesture& serializedGesture);
 
-    void OnDetachFromMainTree(bool) override;
+    void OnDetachFromMainTree(bool, PipelineContext* = nullptr) override;
 
     OffsetF GetFormOffset() const;
 
@@ -65,6 +65,7 @@ public:
         return imageId_.value();
     }
 
+    void ClearAccessibilityChildTreeRegisterFlag();
 private:
     std::optional<int32_t> imageId_;
     std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;

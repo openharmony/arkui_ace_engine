@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -152,6 +151,7 @@ bool InputMethodManager::NeedSoftKeyboard() const
 
 void InputMethodManager::CloseKeyboard()
 {
+    ACE_LAYOUT_SCOPED_TRACE("CloseKeyboard");
     auto currentFocusNode = curFocusNode_.Upgrade();
     CHECK_NULL_VOID(currentFocusNode);
     auto pipeline = currentFocusNode->GetContext();
@@ -174,12 +174,23 @@ void InputMethodManager::CloseKeyboard()
 #endif
 }
 
+void InputMethodManager::CloseKeyboardInPipelineDestroy()
+{
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Pipeline Destroyed, Ready to close SoftKeyboard.");
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (inputMethod) {
+        inputMethod->Close();
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Pipelinne Destroyed, Close SoftKeyboard Successfully.");
+    }
+}
+
 void InputMethodManager::CloseKeyboard(const RefPtr<NG::FrameNode>& focusNode)
 {
 #if defined(ENABLE_STANDARD_INPUT)
     // If focus pattern does not need softkeyboard, close it, not in windowScene.
     auto curPattern = focusNode->GetPattern<NG::Pattern>();
     CHECK_NULL_VOID(curPattern);
+    ACE_LAYOUT_SCOPED_TRACE("CloseKeyboard[id:%d]", focusNode->GetId());
     bool isNeedKeyBoard = curPattern->NeedSoftKeyboard();
     if (!isNeedKeyBoard) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
@@ -206,6 +217,7 @@ void InputMethodManager::HideKeyboardAcrossProcesses()
 void InputMethodManager::ProcessModalPageScene()
 {
     auto currentFocusNode = curFocusNode_.Upgrade();
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "ProcessModalPageScene");
     if (currentFocusNode && currentFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
         HideKeyboardAcrossProcesses();
     } else {

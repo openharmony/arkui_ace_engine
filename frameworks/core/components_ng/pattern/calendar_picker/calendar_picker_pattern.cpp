@@ -158,8 +158,8 @@ void CalendarPickerPattern::UpdateEntryButtonBorderWidth()
     }
     addButtonNode->GetLayoutProperty()->UpdateBorderWidth(addBorderWidth);
     subButtonNode->GetLayoutProperty()->UpdateBorderWidth(subBorderWidth);
-    addButtonNode->MarkModifyDone();
-    subButtonNode->MarkModifyDone();
+    addButtonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    subButtonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void CalendarPickerPattern::UpdateEdgeAlign()
@@ -1196,7 +1196,7 @@ void CalendarPickerPattern::FlushTextStyle()
 
         if (selected_ != CalendarPickerSelectedType::YEAR && selected_ != CalendarPickerSelectedType::MONTH &&
             selected_ != CalendarPickerSelectedType::DAY && layoutProperty->HasColor()) {
-            textLayoutProperty->UpdateTextColor(layoutProperty->GetColor().value());
+            ResetTextStateByNode(textNode);
         } else {
             SetSelectedType(selected_);
         }

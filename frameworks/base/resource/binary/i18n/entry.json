@@ -50,13 +50,29 @@
         "navigation":{
             "back":"返回",
             "more":"更多"
+        },
+        "patternlock":{
+            "accessibilitypasspoint":"已连接圆点"
+        },
+        "calendar":{
+            "week":"星期",
+            "year":"年",
+            "month":"月",
+            "day":"日",
+            "pre_month":"上一月",
+            "pre_year":"上一年",
+            "next_year":"下一年",
+            "next_month":"下一月",
+            "today":"今天"
         }
     },
     "en-US":{
         "common":{
             "ok":"OK",
             "cancel":"Cancel",
-            "more":"More"
+            "more":"More",
+            "prev":"Prev",
+            "next":"Next"
         },
         "refresh":{
             "last_updated":"Last updated: %s",
@@ -710,7 +726,9 @@
     "bo-CN":{
         "common":{
             "ok":"གཏན་འཁེལ།",
-            "cancel":"འདོར་བ།"
+            "cancel":"འདོར་བ།",
+            "prev":"སྔོན་འགྲོ",
+            "next":"རྗེས་འགྲོ"
         },
         "textoverlay":{
             "paste":"སྦྱར་བ།",
@@ -1990,7 +2008,9 @@
     "ug":{
         "common":{
             "ok":"جەزملەش",
-            "cancel":"بىكار قىلىش"
+            "cancel":"بىكار قىلىش",
+            "prev":"ئالدىنقى قەدەم",
+            "next":"كېيىنكى قەدەم"
         },
         "textoverlay":{
             "paste":"چاپلاش",
@@ -2168,7 +2188,9 @@
     "zh-HK":{
         "common":{
             "ok":"確定",
-            "cancel":"取消"
+            "cancel":"取消",
+            "prev":"上一步",
+            "next":"下一步"
         },
         "textoverlay":{
             "paste":"貼上",
@@ -2196,12 +2218,17 @@
         "window":{
             "leftSide":"視窗顯示在屏幕左側",
             "rightSide":"視窗顯示在屏幕右側"
+        },
+        "datepicker":{
+            "lunarSwitch":"顯示農曆"
         }
     },
     "zh-TW":{
         "common":{
             "ok":"確定",
-            "cancel":"取消"
+            "cancel":"取消",
+            "prev":"上一步",
+            "next":"下一步"
         },
         "textoverlay":{
             "paste":"貼上",
@@ -2229,6 +2256,9 @@
         "window":{
             "leftSide":"視窗顯示在螢幕左側",
             "rightSide":"視窗顯示在螢幕右側"
+        },
+        "datepicker":{
+            "lunarSwitch":"顯示農曆"
         }
     },
     "hr":{

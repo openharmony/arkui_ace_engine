@@ -52,6 +52,8 @@ private:
     {
         switch (imageQuality) {
             case AIImageQuality::NONE:
+                return "NONE";
+            case AIImageQuality::LOW:
                 return "LOW";
             case AIImageQuality::NORMAL:
                 return "MEDIUM";

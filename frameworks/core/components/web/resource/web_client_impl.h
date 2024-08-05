@@ -163,6 +163,7 @@ public:
     bool OnFocus(OHOS::NWeb::NWebFocusSource source) override;
     void OnResourceLoadError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error) override;
+    void ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart) override;
     void OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response) override;
     void OnRenderExited(OHOS::NWeb::RenderExitReason reason) override;
@@ -197,6 +198,7 @@ public:
     bool RunQuickMenu(std::shared_ptr<NWeb::NWebQuickMenuParams> params,
                       std::shared_ptr<NWeb::NWebQuickMenuCallback> callback) override;
     void OnQuickMenuDismissed() override;
+    void HideHandleAndQuickMenuIfNecessary(bool hide) override;
     void OnTouchSelectionChanged(
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,

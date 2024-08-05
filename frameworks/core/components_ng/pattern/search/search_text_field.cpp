@@ -29,6 +29,7 @@ RefPtr<FocusHub> SearchTextFieldPattern::GetFocusHub() const
 
 void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard)
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Search PerformAction %{public}d", static_cast<int32_t>(action));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());

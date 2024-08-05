@@ -88,6 +88,8 @@ public:
     const RefPtr<SpanString>& GetController();
     void SetController(const RefPtr<SpanString>& spanString);
 
+    static void FromHtml(const JSCallbackInfo& info);
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(JSSpanString);
     RefPtr<SpanString> spanString_;

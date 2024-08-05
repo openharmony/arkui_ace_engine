@@ -55,7 +55,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation001, TestSize.Level1
     swiperItemInfo.endPos = -1.0f;
     pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
     pattern_->PlaySpringAnimation(dragVelocity);
-    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
 }
 
 /**
@@ -121,6 +121,8 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation004, TestSize.Level1
     pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
     pattern_->PlaySpringAnimation(dragVelocity);
     pattern_->StopSpringAnimation();
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    pattern_->StopSpringAnimationImmediately();
     EXPECT_FALSE(pattern_->springAnimationIsRunning_);
 }
 
@@ -163,29 +165,6 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation006, TestSize.Level1
     EXPECT_EQ(
         AceType::DynamicCast<NodeAnimatablePropertyFloat>(frameNode_->GetAnimatablePropertyFloat("spring"))->Get(),
         0.0f);
-}
-
-/**
- * @tc.name: SwiperPatternFinishAnimation001
- * @tc.desc: FinishAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternFinishAnimation001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-
-    /**
-     * @tc.steps: step2. call FinishAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->FinishAnimation();
-            pattern_->usePropertyAnimation_ = true;
-            pattern_->isUserFinish_ = true;
-        }
-        pattern_->swiperController_->SetFinishCallback([]() {});
-    }
 }
 
 /**
@@ -938,7 +917,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPattern0010, TestSize.Level1)
     CreateWithItem([](SwiperModelNG model) {});
     bool isCustomSize = true;
     pattern_->SetIsIndicatorCustomSize(isCustomSize);
-    EXPECT_TRUE(pattern_->IsCustomSize_);
+    EXPECT_TRUE(pattern_->isCustomSize_);
 }
 
 /**

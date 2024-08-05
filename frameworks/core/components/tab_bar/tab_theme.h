@@ -28,6 +28,12 @@ namespace OHOS::Ace {
  * TabTheme defines color and styles of tab. TabTheme should be built
  * using TabTheme::Builder.
  */
+namespace {
+constexpr double THIRDFONT_DEFAULT_VALUE = 1.45;
+constexpr double BIGFONT_DEFAULT_VALUE = 1.75;
+constexpr double LARGEFONT_DEFAULT_VALUE = 2.0;
+constexpr double MAXFONT_DEFAULT_VALUE = 3.2;
+} // namespace
 class TabTheme : public virtual Theme {
     DECLARE_ACE_TYPE(TabTheme, Theme);
 
@@ -54,6 +60,7 @@ public:
                 theme->subTabIndicatorHeight_ = pattern->GetAttr<Dimension>("subtab_indicator_height", 0.0_vp);
                 theme->subTabTextOnColor_ = pattern->GetAttr<Color>("subtab_text_on_color", Color::WHITE);
                 theme->subTabTextOffColor_ = pattern->GetAttr<Color>("subtab_text_off_color", Color::WHITE);
+                theme->subTabBoardTextOnColor_ = pattern->GetAttr<Color>("subtab_board_text_on_color", Color::WHITE);
                 theme->subTabIndicatorGap_ = pattern->GetAttr<Dimension>("subtab_indicator_gap", 0.0_vp);
                 theme->subTabHorizontalPadding_ = pattern->GetAttr<Dimension>("subtab_horizontal_padding", 0.0_vp);
                 theme->subTabTopPadding_ = pattern->GetAttr<Dimension>("subtab_top_padding", 0.0_vp);
@@ -83,6 +90,20 @@ public:
                 theme->horizontalBottomTabBarSpace_ =
                     pattern->GetAttr<Dimension>("horizontal_bottom_tab_bar_space", 0.0_vp);
                 theme->subTabBarHoverDuration_ = pattern->GetAttr<double>("sub_tab_bar_hover_duration", 0.0);
+                theme->subTabBarBigFontSizeScale_ =
+                    pattern->GetAttr<double>("sub_tab_bar_big_font_size_scale", BIGFONT_DEFAULT_VALUE);
+                theme->subTabBarLargeFontSizeScale_ =
+                    pattern->GetAttr<double>("sub_tab_bar_large_font_size_scale", LARGEFONT_DEFAULT_VALUE);
+                theme->subTabBarMaxFontSizeScale_ =
+                    pattern->GetAttr<double>("sub_tab_bar_max_font_size_scale", MAXFONT_DEFAULT_VALUE);
+                theme->subTabBarOriginFontSizeScale_ =
+                    pattern->GetAttr<double>("sub_tab_bar_origin_font_size_scale", 1.0);
+                theme->subTabBarLeftRightMargin_ =
+                    pattern->GetAttr<Dimension>("sub_tab_bar_left_right_margin", 12.0_vp);
+                theme->subTabBarIndicatorstyleMarginTop_ =
+                    pattern->GetAttr<Dimension>("sub_tab_bar_indicatorstyle_margin_top", 4.0_vp);
+                theme->subTabBarThirdLargeFontSizeScale_ =
+                    pattern->GetAttr<double>("sub_tab_bar_third_large_font_size_scale", THIRDFONT_DEFAULT_VALUE);
 
                 ParseAttribute(theme, pattern);
             } else {
@@ -217,6 +238,11 @@ public:
     const Color& GetSubTabTextOffColor() const
     {
         return subTabTextOffColor_;
+    }
+
+    const Color& GetSubTabBoardTextOnColor() const
+    {
+        return subTabBoardTextOnColor_;
     }
 
     const Dimension& GetSubTabIndicatorHeight() const
@@ -403,6 +429,11 @@ public:
         return tabBarColumnMargin_;
     }
 
+    float GetsubTabBarThirdLargeFontSizeScale() const
+    {
+        return subTabBarThirdLargeFontSizeScale_;
+    }
+
     const Dimension& GetHorizontalBottomTabMinWidth() const
     {
         return horizontalBottomTabMinWidth_;
@@ -422,6 +453,30 @@ public:
     const Color& GetDialogFontColor() const
     {
         return dialog_fontColor_;
+    }
+    float GetSubTabBarBigFontSizeScale() const
+    {
+        return subTabBarBigFontSizeScale_;
+    }
+    float GetSubTabBarLargeFontSizeScale() const
+    {
+        return subTabBarLargeFontSizeScale_;
+    }
+    float GetSubTabBarMaxFontSizeScale() const
+    {
+        return subTabBarMaxFontSizeScale_;
+    }
+    float GetSubTabBarOriginFontSizeScale() const
+    {
+        return subTabBarOriginFontSizeScale_;
+    }
+    const Dimension& GetSubTabBarLeftRightMargin() const
+    {
+        return subTabBarLeftRightMargin_;
+    }
+    const Dimension& GetSubTabBarIndicatorstyleMarginTop() const
+    {
+        return subTabBarIndicatorstyleMarginTop_;
     }
     
 protected:
@@ -445,6 +500,7 @@ private:
     Dimension focusIndicatorVerticalPadding_;
     Color subTabTextOnColor_;
     Color subTabTextOffColor_;
+    Color subTabBoardTextOnColor_;
     Dimension subTabIndicatorHeight_;
     Dimension subTabIndicatorGap_;
     Dimension subTabHorizontalPadding_;
@@ -487,6 +543,13 @@ private:
     Color dialog_iconColor_;
     Color dialog_fontColor_;
     int bottomTabBackgroundBlurStyle_;
+    float subTabBarBigFontSizeScale_ = 1.75f;
+    float subTabBarLargeFontSizeScale_ = 2.0f;
+    float subTabBarMaxFontSizeScale_ = 3.2f;
+    float subTabBarOriginFontSizeScale_ = 1.0f;
+    Dimension subTabBarLeftRightMargin_;
+    Dimension subTabBarIndicatorstyleMarginTop_;
+    float subTabBarThirdLargeFontSizeScale_ = 1.45f;
 };
 
 } // namespace OHOS::Ace

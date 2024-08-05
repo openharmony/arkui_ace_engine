@@ -1040,6 +1040,18 @@ typedef enum {
 } ArkUI_ColorMode;
 
 /**
+ * @brief Enumerates the system color modes.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Light color mode. */
+    ARKUI_SYSTEM_COLOR_MODE_LIGHT = 0,
+    /** Dark color mode. */
+    ARKUI_SYSTEM_COLOR_MODE_DARK,
+} ArkUI_SystemColorMode;
+
+/**
  * @brief Enumerates the blur styles.
  *
  * @since 12
@@ -1651,20 +1663,19 @@ typedef enum {
     ARKUI_FINISH_CALLBACK_LOGICALLY,
 } ArkUI_FinishCallbackType;
 
-
 /**
- * @brief 定义屏障线的方向。
+ * @brief defines the direction of the barrier line.
  *
  * @since 12
  */
 typedef enum {
-    /** 屏障在其所有referencedId的最左侧。*/
-    ARKUI_BARRIER_DIRECTION_LEFT = 0,
-    /** 屏障在其所有referencedId的最右侧。*/
-    ARKUI_BARRIER_DIRECTION_RIGHT,
-    /** 屏障在其所有referencedId的最上方。*/
+    /** The barrier is the leftmost of all its referencedIds. */
+    ARKUI_BARRIER_DIRECTION_START = 0,
+    /** The barrier is on the rightmost side of all its referencedIds. */
+    ARKUI_BARRIER_DIRECTION_END,
+    /** The barrier is at the top of all its referencedIds. */
     ARKUI_BARRIER_DIRECTION_TOP,
-    /** 屏障在其所有referencedId的最下方。*/
+    /** The barrier is at the bottom of all its referencedIds. */
     ARKUI_BARRIER_DIRECTION_BOTTOM
 } ArkUI_BarrierDirection;
 
@@ -2015,6 +2026,13 @@ typedef enum {
     ARKUI_SAFE_AREA_EDGE_END = 1 << 3,
 } ArkUI_SafeAreaEdge;
 
+/**
+ * @brief Defines parameter used by the system font style callback event.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_SystemFontStyleEvent ArkUI_SystemFontStyleEvent;
+
 typedef struct {
     float x;
     float y;
@@ -2039,6 +2057,27 @@ typedef struct {
     float centerZ;
     float perspective;
 } ArkUI_RotationOptions;
+
+/**
+ * @brief defines the measure info of the custom span.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_CustomSpanMeasureInfo ArkUI_CustomSpanMeasureInfo;
+
+/**
+ * @brief defines the metrics of the custom span.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_CustomSpanMetrics ArkUI_CustomSpanMetrics;
+
+/**
+ * @brief defines the draw info of the custom span.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_CustomSpanDrawInfo ArkUI_CustomSpanDrawInfo;
 
 /**
 * @brief Creates a size constraint.
@@ -3588,6 +3627,120 @@ int32_t OH_ArkUI_ListChildrenMainSizeOption_UpdateSize(ArkUI_ListChildrenMainSiz
  * @since 12
 */
 float OH_ArkUI_ListChildrenMainSizeOption_GetMainSize(ArkUI_ListChildrenMainSize* option, int32_t index);
+
+/**
+ * @brief 创建自定义段落组件测量信息。
+ *
+ * @return CustomSpanMeasureInfo实例。
+ * @since 12
+*/
+ArkUI_CustomSpanMeasureInfo* OH_ArkUI_CustomSpanMeasureInfo_Create();
+
+/**
+ * @brief 销毁自定义段落组件测量信息。
+ *
+ * @since 12
+*/
+void OH_ArkUI_CustomSpanMeasureInfo_Dispose(ArkUI_CustomSpanMeasureInfo* info);
+
+/**
+ * @brief 获取自定义段落组件的字体大小。
+ *
+ * @param info  自定义段落组件测量信息指针。
+ * @return 字体大小。若函数参数异常，返回-1.0f。
+ * @since 12
+*/
+float OH_ArkUI_CustomSpanMeasureInfo_GetFontSize(ArkUI_CustomSpanMeasureInfo* info);
+
+/**
+ * @brief 创建自定义段落组件度量信息。
+ *
+ * @return CustomSpanMetrics实例。
+ * @since 12
+*/
+ArkUI_CustomSpanMetrics* OH_ArkUI_CustomSpanMetrics_Create();
+
+/**
+ * @brief 销毁自定义段落组件度量信息。
+ *
+ * @since 12
+*/
+void OH_ArkUI_CustomSpanMetrics_Dispose(ArkUI_CustomSpanMetrics* metrics);
+
+/**
+ * @brief 设置自定义段落组件的宽度。
+ *
+ * @param metrics CustomSpanMetrics实例。
+ * @param width 宽度大小，单位为px。
+ * @return 错误码。
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} 函数参数异常。
+ * @since 12
+*/
+int32_t OH_ArkUI_CustomSpanMetrics_SetWidth(ArkUI_CustomSpanMetrics* metrics, float width);
+
+/**
+ * @brief 设置自定义段落组件的高度。
+ *
+ * @param metrics CustomSpanMetrics实例。
+ * @param height 高度大小，单位为px。
+ * @return 错误码。
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} 函数参数异常。
+ * @since 12
+*/
+int32_t OH_ArkUI_CustomSpanMetrics_SetHeight(ArkUI_CustomSpanMetrics* metrics, float height);
+
+/**
+ * @brief 创建自定义段落组件绘制信息。
+ *
+ * @return CustomSpanDrawInfo实例。
+ * @since 12
+*/
+ArkUI_CustomSpanDrawInfo* OH_ArkUI_CustomSpanDrawInfo_Create();
+
+/**
+ * @brief 销毁自定义段落组件绘制信息。
+ *
+ * @since 12
+*/
+void OH_ArkUI_CustomSpanDrawInfo_Dispose(ArkUI_CustomSpanDrawInfo* info);
+
+/**
+ * @brief 获取自定义段落组件相对于挂载组件的x轴偏移值。
+ *
+ * @param info  自定义段落组件绘制信息指针。
+ * @return x轴偏移值。若函数参数异常，返回0.0f。
+ * @since 12
+*/
+float OH_ArkUI_CustomSpanDrawInfo_GetXOffset(ArkUI_CustomSpanDrawInfo* info);
+
+/**
+ * @brief 获取自定义段落组件相对于挂载组件的上边距。
+ *
+ * @param info  自定义段落组件绘制信息指针。
+ * @return 上边距值。若函数参数异常，返回0.0f。
+ * @since 12
+*/
+float OH_ArkUI_CustomSpanDrawInfo_GetLineTop(ArkUI_CustomSpanDrawInfo* info);
+
+/**
+ * @brief 获取自定义段落组件相对于挂载组件的下边距。
+ *
+ * @param info  自定义段落组件绘制信息指针。
+ * @return 下边距值。若函数参数异常，返回0.0f。
+ * @since 12
+*/
+float OH_ArkUI_CustomSpanDrawInfo_GetLineBottom(ArkUI_CustomSpanDrawInfo* info);
+
+/**
+ * @brief 获取自定义段落组件相对于挂载组件的基线偏移量。
+ *
+ * @param info  自定义段落组件绘制信息指针。
+ * @return 基线偏移量值。若函数参数异常，返回0.0f。
+ * @since 12
+*/
+float OH_ArkUI_CustomSpanDrawInfo_GetBaseline(ArkUI_CustomSpanDrawInfo* info);
 #ifdef __cplusplus
 };
 #endif

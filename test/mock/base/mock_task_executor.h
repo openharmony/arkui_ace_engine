@@ -24,10 +24,16 @@
 namespace OHOS::Ace {
 class MockTaskExecutor : public TaskExecutor {
 public:
+    MockTaskExecutor() = default;
+    MockTaskExecutor(bool delayRun): delayRun_(delayRun) {}
+    
     bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
         PriorityType priorityType = PriorityType::LOW) const override
     {
         CHECK_NULL_RETURN(task, false);
+        if (delayRun_) {
+            return true;
+        }
         task();
         return true;
     }
@@ -52,9 +58,15 @@ public:
         PriorityType priorityType = PriorityType::LOW) const override
     {
         CHECK_NULL_RETURN(task, false);
+        if (delayRun_) {
+            return true;
+        }
         task();
         return true;
     }
+
+private:
+    bool delayRun_ = false;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_NG_TEST_MOCK_MOCK_TASK_EXECUTOR_H

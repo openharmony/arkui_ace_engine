@@ -60,11 +60,11 @@ var TextAlign;
 
 var TextDataDetectorType;
 (function (TextDataDetectorType) {
-  TextDataDetectorType[TextDataDetectorType["PHONE_NUMBER"] = 0] = "PHONE_NUMBER";
-  TextDataDetectorType[TextDataDetectorType["URL"] = 1] = "URL";
-  TextDataDetectorType[TextDataDetectorType["EMAIL"] = 2] = "EMAIL";
-  TextDataDetectorType[TextDataDetectorType["ADDRESS"] = 3] = "ADDRESS";
-  TextDataDetectorType[TextDataDetectorType["DATE_TIME"] = 4] = "DATE_TIME";
+  TextDataDetectorType[TextDataDetectorType.PHONE_NUMBER = 0] = 'PHONE_NUMBER';
+  TextDataDetectorType[TextDataDetectorType.URL = 1] = 'URL';
+  TextDataDetectorType[TextDataDetectorType.EMAIL = 2] = 'EMAIL';
+  TextDataDetectorType[TextDataDetectorType.ADDRESS = 3] = 'ADDRESS';
+  TextDataDetectorType[TextDataDetectorType.DATE_TIME = 4] = 'DATE_TIME';
 })(TextDataDetectorType || (TextDataDetectorType = {}));
 
 var DataPanelType;
@@ -1166,7 +1166,7 @@ var PlaybackSpeed;
 
 var MixedMode;
 (function (MixedMode) {
-  MixedMode[MixedMode["ALL"] = 0] = "All";
+  MixedMode[MixedMode["All"] = 0] = "All";
   MixedMode[MixedMode["Compatible"] = 1] = "Compatible";
   MixedMode[MixedMode["None"] = 2] = "None";
 })(MixedMode || (MixedMode = {}));
@@ -1307,11 +1307,11 @@ var EffectFillStyle;
   EffectFillStyle[EffectFillStyle["ITERATIVE"] = 1] = "ITERATIVE";
 })(EffectFillStyle || (EffectFillStyle = {}));
 
-var WebKeyboardAvoidMode;
+let WebKeyboardAvoidMode;
 (function (WebKeyboardAvoidMode) {
-  WebKeyboardAvoidMode[WebKeyboardAvoidMode["RESIZE_VISUAL"] = 0] = "RESIZE_VISUAL";
-  WebKeyboardAvoidMode[WebKeyboardAvoidMode["RESIZE_CONTENT"] = 1] = "RESIZE_CONTENT";
-  WebKeyboardAvoidMode[WebKeyboardAvoidMode["OVERLAYS_CONTENT"] = 2] = "OVERLAYS_CONTENT";
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode.RESIZE_VISUAL = 0] = 'RESIZE_VISUAL';
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode.RESIZE_CONTENT = 1] = 'RESIZE_CONTENT';
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode.OVERLAYS_CONTENT = 2] = 'OVERLAYS_CONTENT';
 })(WebKeyboardAvoidMode || (WebKeyboardAvoidMode = {}));
 
 class SymbolEffect {
@@ -1441,8 +1441,8 @@ var BlurStyle;
 var BlurStyleActivePolicy;
 (function (BlurStyleActivePolicy) {
   BlurStyleActivePolicy[BlurStyleActivePolicy["FOLLOWS_WINDOW_ACTIVE_STATE"] = 0] = "FOLLOWS_WINDOW_ACTIVE_STATE";
-  BlurStyleActivePolicy[BlurStyleActivePolicy["ALAWYS_ACTIVE"] = 1] = "ALAWYS_ACTIVE";
-  BlurStyleActivePolicy[BlurStyleActivePolicy["ALAWYS_INACTIVE"] = 2] = "ALAWYS_INACTIVE";
+  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_ACTIVE"] = 1] = "ALWAYS_ACTIVE";
+  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_INACTIVE"] = 2] = "ALWAYS_INACTIVE";
 })(BlurStyleActivePolicy || (BlurStyleActivePolicy = {}));
 
 var BlurType;
@@ -1982,7 +1982,7 @@ class TextMenuItemId {
   }
 
   equals(id) {
-    return id.id_ == this.id_;
+    return id.id_ === this.id_;
   }
 
   static get CUT() {
@@ -2072,10 +2072,10 @@ var MarqueeUpdateStrategy;
 
 var LaunchMode;
 (function (LaunchMode) {
-  LaunchMode[LaunchMode.STANDARD = 0] = "STANDARD";
-  LaunchMode[LaunchMode.MOVE_TO_TOP_SINGLETON = 1] = "MOVE_TO_TOP_SINGLETON";
-  LaunchMode[LaunchMode.POP_TO_SINGLETON = 2] = "POP_TO_SINGLETON";
-  LaunchMode[LaunchMode.NEW_INSTANCE = 3] = "NEW_INSTANCE";
+  LaunchMode[LaunchMode.STANDARD = 0] = 'STANDARD';
+  LaunchMode[LaunchMode.MOVE_TO_TOP_SINGLETON = 1] = 'MOVE_TO_TOP_SINGLETON';
+  LaunchMode[LaunchMode.POP_TO_SINGLETON = 2] = 'POP_TO_SINGLETON';
+  LaunchMode[LaunchMode.NEW_INSTANCE = 3] = 'NEW_INSTANCE';
 })(LaunchMode || (LaunchMode = {}));
 
 class NavPathInfo {
@@ -2086,6 +2086,7 @@ class NavPathInfo {
     this.index = -1;
     this.needUpdate = false;
     this.needBuildNewInstance = false;
+    this.navDestinationId = undefined;
   }
 }
 
@@ -2132,10 +2133,10 @@ class NavPathStack {
     for (let i = this.popArray.length - 1; i >= 0; i--) {
       if (name === this.popArray[i].name) {
         let info = this.popArray.splice(i, 1);
-        return info[0].index;
+        return [info[0].index, info[0].navDestinationId];
       }
     }
-    return -1; // add new navdestination
+    return [-1, undefined]; // add new navdestination
   }
   setNativeStack(stack) {
     this.nativeStack = stack;
@@ -2151,7 +2152,7 @@ class NavPathStack {
   }
   pushName(name, param) {
     let info = new NavPathInfo(name, param);
-    info.index = this.findInPopArray(name);
+    [info.index, info.navDestinationId] = this.findInPopArray(name);
     this.pathArray.push(info);
     this.isReplace = 0;
     this.nativeStack?.onStateChanged();
@@ -2166,7 +2167,7 @@ class NavPathStack {
     } else {
       info = new NavPathInfo(name, param, onPop);
     }
-    info.index = this.findInPopArray(name);
+    [info.index, info.navDestinationId] = this.findInPopArray(name);
     this.pathArray.push(info);
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
@@ -2200,7 +2201,7 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    info.index = this.findInPopArray(name);
+    [info.index, info.navDestinationId] = this.findInPopArray(name);
     this.pathArray.push(info);
     this.nativeStack?.onStateChanged();
     return promise;
@@ -2249,7 +2250,7 @@ class NavPathStack {
     if (ret) {
       return;
     }
-    info.index = this.findInPopArray(info.name);
+    [info.index, info.navDestinationId] = this.findInPopArray(info.name);
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
@@ -2272,7 +2273,7 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    info.index = this.findInPopArray(info.name);
+    [info.index, info.navDestinationId] = this.findInPopArray(info.name);
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
@@ -2475,6 +2476,16 @@ class NavPathStack {
     }
     return cnt;
   }
+  removeByNavDestinationId(navDestinationId) {
+    let index = this.pathArray.findIndex(element => element.navDestinationId === navDestinationId);
+    if (index === -1) {
+      return false;
+    }
+    this.pathArray.splice(index, 1);
+    this.isReplace = 0;
+    this.nativeStack?.onStateChanged();
+    return true;
+  }
   removeIndex(index) {
     if (index >= this.pathArray.length) {
       return;
@@ -2557,7 +2568,7 @@ class WaterFlowSections {
   }
 
   isNonNegativeInt32(input) {
-    return Number.isSafeInteger(input) && input > 0 && input <= 2147483647;
+    return Number.isSafeInteger(input) && input >= 0 && input <= 2147483647;
   }
 
   toArrayIndex(origin, limit) {
@@ -3175,19 +3186,6 @@ let TextResponseType;
   TextResponseType[TextResponseType['SELECT'] = 2] = 'SELECT';
 })(TextResponseType || (TextResponseType = {}));
 
-let MarqueeState;
-(function (MarqueeState) {
-  MarqueeState[MarqueeState['START'] = 0] = 'START';
-  MarqueeState[MarqueeState['BOUNCE'] = 1] = 'BOUNCE';
-  MarqueeState[MarqueeState['FINISH'] = 2] = 'FINISH';
-})(MarqueeState || (MarqueeState = {}));
-
-let MarqueeStartPolicy;
-(function (MarqueeStartPolicy) {
-  MarqueeStartPolicy[MarqueeStartPolicy['DEFAULT'] = 0] = 'DEFAULT';
-  MarqueeStartPolicy[MarqueeStartPolicy['ON_FOCUS'] = 1] = 'ON_FOCUS';
-})(MarqueeStartPolicy || (MarqueeStartPolicy = {}));
-
 let NativeEmbedStatus;
 (function (NativeEmbedStatus) {
   NativeEmbedStatus['CREATE'] = 0;
@@ -3296,6 +3294,12 @@ var GestureRecognizerState;
   GestureRecognizerState[GestureRecognizerState["SUCCESSFUL"] = 4] = "SUCCESSFUL";
   GestureRecognizerState[GestureRecognizerState["FAILED"] = 5] = "FAILED";
 })(GestureRecognizerState || (GestureRecognizerState = {}));
+
+let GridItemAlignment;
+(function (GridItemAlignment) {
+  GridItemAlignment[GridItemAlignment['DEFAULT'] = 0] = 'DEFAULT';
+  GridItemAlignment[GridItemAlignment['STRETCH'] = 1] = 'STRETCH';
+})(GridItemAlignment || (GridItemAlignment = {}));
 
 class ImageAnalyzerController {
   constructor() {

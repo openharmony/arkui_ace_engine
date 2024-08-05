@@ -213,6 +213,7 @@ void RadioModelNG::SetResponseRegion(FrameNode* frameNode, const std::vector<Dim
 
 void RadioModelNG::SetBuilderFunc(FrameNode* frameNode, NG::RadioMakeCallback&& makeFunc)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));

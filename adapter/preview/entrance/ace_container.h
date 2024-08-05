@@ -63,7 +63,8 @@ public:
 
     static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths);
     static void SetResourcesPathAndThemeStyle(int32_t instanceId, const std::string& systemResourcesPath,
-        const std::string& appResourcesPath, const int32_t& themeId, const ColorMode& colorMode);
+        const std::string& hmsResourcesPath, const std::string& appResourcesPath, const int32_t& themeId,
+        const ColorMode& colorMode);
 
 #ifndef ENABLE_ROSEN_BACKEND
     static void SetView(AceViewPreview* view, double density, int32_t width, int32_t height);

@@ -25,7 +25,9 @@ RefPtr<NGGestureRecognizer> TapGesture::CreateRecognizer()
     if (onActionId_) {
         clickRecognizer->SetOnAction(*onActionId_);
     }
-
+    if (gestureInfo_) {
+        gestureInfo_->SetDisposeTag(false);
+    }
     clickRecognizer->SetPriority(priority_);
     clickRecognizer->SetPriorityMask(gestureMask_);
     clickRecognizer->SetGestureInfo(gestureInfo_);

@@ -66,6 +66,9 @@ public:
         if (!patternLockModifier_) {
             patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
         }
+        if (!isInitVirtualNode_ && AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+            isInitVirtualNode_ = InitVirtualNode();
+        }
         CalculateCellCenter();
         auto paintMethod =
             MakeRefPtr<PatternLockPaintMethod>(cellCenter_, isMoveEventValid_, choosePoint_, patternLockModifier_);
@@ -112,6 +115,14 @@ private:
 
     void InitTouchEvent(RefPtr<GestureEventHub>& gestureHub, RefPtr<TouchEventImpl>& touchDownListener);
     void InitPatternLockController();
+    void InitAccessibilityHoverEvent();
+    void HandleAccessibilityHoverEvent(bool state, AccessibilityHoverInfo& info);
+    bool InitVirtualNode();
+    RefPtr<FrameNode> AddTextNodeIntoVirtual(int32_t x, int32_t y, float handleCircleRadius);
+    void HandleTextOnAccessibilityFocusCallback(int32_t x, int32_t y);
+    void ModifyAccessibilityVirtualNode();
+    bool GetHandleCircleRadius(float& handleCircleRadius);
+    void UpdateAccessibilityTextNode(RefPtr<FrameNode> frameNode, float handleCircleRadius, int32_t x, int32_t y);
     void HandleTouchEvent(const TouchEventInfo& info);
     void OnTouchDown(const TouchLocationInfo& info);
     void OnTouchMove(const TouchLocationInfo& info);
@@ -155,6 +166,9 @@ private:
     RefPtr<TouchEventImpl> touchMoveListener_;
     RefPtr<PanEvent> panEvent_;
     OffsetF screenTouchPoint_;
+    std::vector<RefPtr<AccessibilityProperty>> accessibilityPropertyVec_;
+    std::vector<RefPtr<FrameNode>> textAccessibilityNodeVec_;
+    bool isInitVirtualNode_ = false;
 
     bool isMoveEventValid_ = false;
     bool isOnKeyEventState_ = false;

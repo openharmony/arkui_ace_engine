@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
+import("//build/config/components/ets_frontend/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
@@ -23,11 +23,6 @@ es2abc_gen_abc("gen_atomicserviceweb_abc") {
   in_puts = [ "atomicserviceweb.js" ]
   out_puts = [ target_out_dir + "/atomicserviceweb.abc" ]
   extra_args = [ "--module" ]
-}
-
-gen_js_obj("atomicserviceweb_js") {
-  input = "atomicserviceweb.js"
-  output = target_out_dir + "/atomicserviceweb.o"
 }
 
 gen_js_obj("atomicserviceweb_abc") {
@@ -55,10 +50,7 @@ ohos_shared_library("atomicserviceweb") {
   if (use_mingw_win || use_mac || use_linux) {
     deps = [ ":gen_obj_src_atomicserviceweb_abc_preview" ]
   } else {
-    deps = [
-      ":atomicserviceweb_abc",
-      ":atomicserviceweb_js",
-    ]
+    deps = [ ":atomicserviceweb_abc" ]
   }
 
   external_deps = [

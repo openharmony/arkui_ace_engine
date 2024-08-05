@@ -46,6 +46,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DURATION = 800;
+constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 250;
 } // namespace
 
 void ViewAbstractModelNG::BindMenuGesture(
@@ -93,6 +94,7 @@ void ViewAbstractModelNG::BindMenu(
     CHECK_NULL_VOID(overlayManager);
     auto menuNode = overlayManager->GetMenuNode(targetId);
     if (menuNode) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
         auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
         wrapperPattern->SetHasTransitionEffect(menuParam.hasTransitionEffect);
         if (menuParam.hasTransitionEffect) {
@@ -101,6 +103,7 @@ void ViewAbstractModelNG::BindMenu(
             renderContext->UpdateChainedTransition(menuParam.transition);
         }
         if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
+            TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId);
             overlayManager->HideMenu(menuNode, targetId, false);
         }
     } else if (menuParam.isShow) {
@@ -188,9 +191,11 @@ void BindContextMenuSingle(
         CHECK_NULL_VOID(overlayManager);
         auto menuNode = overlayManager->GetMenuNode(targetId);
         if (menuNode) {
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
             auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
             CHECK_NULL_VOID(wrapperPattern);
             if (wrapperPattern->IsShow() && !menuParam.isShow) {
+                TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId);
                 SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetId);
             } else if (!wrapperPattern->IsShow() && menuParam.isShow) {
                 CreateCustomMenuWithPreview(buildFunc, menuParam, previewBuildFunc);
@@ -212,65 +217,39 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
-    auto pipelineContext = targetNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    auto expandDisplay = theme->GetExpandDisplay();
-    bool menuIsShowing = false;
-    auto containerId = pipelineContext->GetInstanceId();
-    RefPtr<Container> container = AceEngine::Get().GetContainer(containerId);
-    CHECK_NULL_VOID(container);
-    bool isUIExtensionWindow = container->IsUIExtensionWindow();
-
-    // contextMenu not use subWindow in such cases: not expandDisplay and not in UIExtendsion
-    if (!expandDisplay && !isUIExtensionWindow) {
-        auto overlayManager = pipelineContext->GetOverlayManager();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+    if (subwindow) {
+        auto childContainerId = subwindow->GetChildContainerId();
+        auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+        CHECK_NULL_VOID(childContainer);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         auto menuNode = overlayManager->GetMenuNode(targetId);
         if (menuNode) {
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
             auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
             CHECK_NULL_VOID(menuWrapperPattern);
             menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
-            menuIsShowing = true;
-        }
-    } else {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
-        if (subwindow) {
-            auto childContainerId = subwindow->GetChildContainerId();
-            auto childContainer = AceEngine::Get().GetContainer(childContainerId);
-            CHECK_NULL_VOID(childContainer);
-            auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
-            CHECK_NULL_VOID(pipelineContext);
-            auto overlayManager = pipelineContext->GetOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
-            auto menuNode = overlayManager->GetMenuNode(targetId);
-            if (menuNode) {
-                auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
-                CHECK_NULL_VOID(menuWrapperPattern);
-                menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
-                menuIsShowing = true;
-            }
         }
     }
-
     if (menuParam.contextMenuRegisterType == ContextMenuRegisterType::CUSTOM_TYPE) {
-        if (!menuIsShowing) {
-            BindContextMenuSingle(buildFunc, menuParam, previewBuildFunc);
-        }
+        BindContextMenuSingle(buildFunc, menuParam, previewBuildFunc);
     } else {
         auto hub = targetNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(hub);
         auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
         if (type == ResponseType::RIGHT_CLICK) {
             OnMouseEventFunc event = [builderF = buildFunc, weakTarget, menuParam](MouseInfo& info) mutable {
+                auto containerId = Container::CurrentId();
                 auto taskExecutor = Container::CurrentTaskExecutor();
                 CHECK_NULL_VOID(taskExecutor);
                 if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
                     info.SetStopPropagation(true);
                 }
                 taskExecutor->PostTask(
-                    [builder = builderF, weakTarget, menuParam, info]() mutable {
+                    [containerId, builder = builderF, weakTarget, menuParam, info]() mutable {
                         auto targetNode = weakTarget.Upgrade();
                         CHECK_NULL_VOID(targetNode);
                         NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
@@ -297,10 +276,13 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
             // create or show menu on long press
             auto event =
                 [builderF = buildFunc, weakTarget, menuParam, previewBuildFunc](const GestureEvent& info) mutable {
+                TAG_LOGI(AceLogTag::ACE_MENU, "Trigger longPress event for menu");
+                auto containerId = Container::CurrentId();
                 auto taskExecutor = Container::CurrentTaskExecutor();
                 CHECK_NULL_VOID(taskExecutor);
                 taskExecutor->PostTask(
-                    [builder = builderF, weakTarget, menuParam, previewBuildFunc, info]() mutable {
+                    [containerId, builder = builderF, weakTarget, menuParam, previewBuildFunc, info]() mutable {
+                        TAG_LOGI(AceLogTag::ACE_MENU, "Execute longPress task for menu");
                         auto targetNode = weakTarget.Upgrade();
                         CHECK_NULL_VOID(targetNode);
                         auto pipelineContext = NG::PipelineContext::GetCurrentContext();
@@ -308,6 +290,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
                         auto dragDropManager = pipelineContext->GetDragDropManager();
                         CHECK_NULL_VOID(dragDropManager);
                         if (dragDropManager->IsAboutToPreview() || dragDropManager->IsDragging()) {
+                            TAG_LOGI(AceLogTag::ACE_DRAG, "Drag is in progress, return");
                             return;
                         }
                         if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
@@ -329,7 +312,8 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
             };
             auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
             ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
-            hub->SetLongPressEvent(longPress, false, true, LONG_PRESS_DURATION);
+            auto longPressDuration = menuParam.isShowHoverImage ? HOVER_IMAGE_LONG_PRESS_DURATION : LONG_PRESS_DURATION;
+            hub->SetLongPressEvent(longPress, false, true, longPressDuration);
         } else {
             return;
         }
@@ -337,26 +321,17 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
     }
 
     // delete menu when target node destroy
-    auto destructor = [targetNode, containerId, expandDisplay, isUIExtensionWindow]() {
-        // contextMenu not use subWindow in such cases: not expandDisplay and not in UIExtendsion
-        if (!expandDisplay && !isUIExtensionWindow) {
-            auto pipelineContext = targetNode->GetContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto overlayManager = pipelineContext->GetOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
-            overlayManager->DeleteMenu(targetNode->GetId());
-        } else {
-            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
-            CHECK_NULL_VOID(subwindow);
-            auto childContainerId = subwindow->GetChildContainerId();
-            auto childContainer = AceEngine::Get().GetContainer(childContainerId);
-            CHECK_NULL_VOID(childContainer);
-            auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
-            CHECK_NULL_VOID(pipelineContext);
-            auto overlayManager = pipelineContext->GetOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
-            overlayManager->DeleteMenu(targetNode->GetId());
-        }
+    auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+        CHECK_NULL_VOID(subwindow);
+        auto childContainerId = subwindow->GetChildContainerId();
+        auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+        CHECK_NULL_VOID(childContainer);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->DeleteMenu(id);
     };
     targetNode->PushDestroyCallback(destructor);
 }
@@ -633,7 +608,10 @@ void ViewAbstractModelNG::SetAccessibilityVirtualNode(std::function<void()>&& bu
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
     CHECK_NULL_VOID(virtualFrameNode);
-    FrameNode::ProcessOffscreenNode(virtualFrameNode);
+    virtualFrameNode->SetAccessibilityNodeVirtual();
+    virtualFrameNode->SetAccessibilityVirtualNodeParent(AceType::Claim(AceType::DynamicCast<NG::UINode>(frameNode)));
+    virtualFrameNode->SetFirstAccessibilityVirtualNode();
+    frameNode->HasAccessibilityVirtualNode(true);
     accessibilityProperty->SaveAccessibilityVirtualNode(virtualNode);
 }
 

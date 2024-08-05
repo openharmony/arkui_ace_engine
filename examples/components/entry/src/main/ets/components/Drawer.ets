@@ -31,11 +31,10 @@ function IconButton(icon: Resource, action: () => void) {
 
 @Component
 export struct Drawer {
-  @Prop title: string;
+  @Prop @Require title: ResourceStr;
   @Link showParameters: boolean
   @BuilderParam content: () => void;
   @BuilderParam parameters: () => void;
-
   @Consume('router') router: NavPathStack
 
   build() {
@@ -86,7 +85,12 @@ export struct Drawer {
         .borderRadius({ topLeft: 30, topRight: 30 })
         .constraintSize({ maxWidth: 480, maxHeight: '70%', minHeight: '40%' })
         .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.BOTTOM])
-        .padding({ left: 16, right: 16, top: 8, bottom: 32 })
+        .padding({
+          left: 16,
+          right: 16,
+          top: 8,
+          bottom: 32
+        })
         .transition(TransitionEffect.move(TransitionEdge.BOTTOM))
         .width('100%')
       }

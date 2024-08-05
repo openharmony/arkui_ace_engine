@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
 #include "bridge/declarative_frontend/jsview/js_layout_manager.h"
+#include "bridge/declarative_frontend/jsview/js_mock.h"
 #include "bridge/declarative_frontend/jsview/js_node_container.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/style_string/js_span_object.h"
@@ -615,6 +616,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSSymbol::JSBind(globalObj);
     JSSymbolSpan::JSBind(globalObj);
     JSContainerSpan::JSBind(globalObj);
+    JsDragFunction::JSBind(globalObj);
 #ifdef USE_COMPONENTS_LIB
     JSBindLibs("arkui.qrcode", "QRCode");
     JSBindLibs("arkui.relativeContainer", "RelativeContainer");
@@ -628,7 +630,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 #endif
     // add missing binds to ng build
 #ifndef CROSS_PLATFORM
-    JsDragFunction::JSBind(globalObj);
     JSCalendarPicker::JSBind(globalObj);
     JSContextMenu::JSBind(globalObj);
 #ifdef EFFECT_COMPONENT_SUPPORTED
@@ -665,6 +666,7 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
     JSRenderingContextSettings::JSBind(globalObj);
     JSRenderImage::JSBind(globalObj, nativeEngine);
     JSPath2D::JSBind(globalObj);
+    JSMock::JSBind(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

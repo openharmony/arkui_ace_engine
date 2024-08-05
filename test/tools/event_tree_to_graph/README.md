@@ -4,7 +4,7 @@
 > 3. cmd中执行`python3 main.py -i ./resources/dumpfile/input.txt`;
 > 4. 生成的手势树 SVG 图像文件输出在制定`./output`目录中;
 > 5. 使用浏览器查看即可;
-> 6. 默认只展示简易内容，如果需要展示完整内容，请将`python main.py -m`;
+> 6. 默认只展示简易内容，如果需要展示完整内容，请将`python3 main.py -m`;
 
 【Note】：如果遇到提示 dot 可执行文件无法找到，则需要本地安装 [Graphviz](https://graphviz.org/download/)，
 并将其bin目录路径添加到环境变量中。

@@ -140,6 +140,7 @@ public:
         gridLayoutInfo_.endMainLineIndex_ = 0;
         gridLayoutInfo_.ResetPositionFlags();
         gridLayoutInfo_.irregularItemsPosition_.clear();
+        gridLayoutInfo_.clearStretch_ = true;
     }
 
     void SetIrregular(bool value)
@@ -169,7 +170,8 @@ public:
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const;
 
-    void ScrollPage(bool reverse, bool smooth = false) override;
+    void ScrollPage(bool reverse, bool smooth = false,
+        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
 
     bool UpdateStartIndex(int32_t index);
 
@@ -199,8 +201,8 @@ public:
 
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::AUTO,
         std::optional<float> extraOffset = std::nullopt) override;
-    void AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
-    bool AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
+    void AnimateToTarget(ScrollAlign align, const RefPtr<LayoutAlgorithmWrapper>& algo);
+    bool AnimateToTargetImpl(ScrollAlign align, const RefPtr<LayoutAlgorithmWrapper>& algo);
 
     int32_t GetOriginalIndex() const;
     int32_t GetCrossCount() const;
@@ -279,7 +281,6 @@ private:
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
-    void SetAccessibilityAction();
 
     void ProcessEvent(bool indexChanged, float finalOffset);
     void MarkDirtyNodeSelf();
@@ -300,6 +301,8 @@ private:
     double GetNearestDistanceFromChildToCurFocusItemInMainAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     void ResetAllDirectionsStep();
+
+    std::string GetIrregularIndexesString() const;
 
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;

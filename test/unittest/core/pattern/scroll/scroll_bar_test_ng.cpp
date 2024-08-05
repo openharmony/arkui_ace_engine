@@ -40,9 +40,8 @@ void ScrollBarTestNg::CreateWithBar()
 
 void ScrollBarTestNg::ClickBar(Offset point)
 {
-    GestureEvent info;
-    info.SetLocalLocation(point);
-    pattern_->HandleClickEvent(info); // will trigger CheckBarDirection
+    pattern_->locationInfo_ = Offset(point);
+    pattern_->HandleClickEvent(); // will trigger CheckBarDirection
 }
 
 void ScrollBarTestNg::UpdateOverlayModifier(RefPtr<PaintWrapper> paintWrapper)
@@ -1017,43 +1016,6 @@ HWTEST_F(ScrollBarTestNg, AttrScrollBarColorWidth001, TestSize.Level1)
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     EXPECT_EQ(paintProperty_->GetBarWidth(), Dimension(10));
-}
-
-/**
- * @tc.name: DumpAdvanceInfo001
- * @tc.desc: Test DumpAdvanceInfo001
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollBarTestNg, DumpAdvanceInfo001, TestSize.Level1)
-{
-    CreateScroll();
-    CreateContent(TOTAL_ITEM_NUMBER);
-    auto paintWrapper = CreateDone(frameNode_);
-    auto scrollBar = pattern_->GetScrollBar();
-    scrollBar->DumpAdvanceInfo();
-
-    scrollBar->SetShapeMode(ShapeMode::ROUND);
-    scrollBar->SetPositionMode(PositionMode::LEFT);
-    scrollBar->SetAxis(Axis::NONE);
-    PanDirection panDirection;
-    panDirection.type = 0;
-    scrollBar->panRecognizer_->direction_ = panDirection;
-    scrollBar->DumpAdvanceInfo();
-
-    scrollBar->SetShapeMode(ShapeMode::DEFAULT);
-    scrollBar->SetPositionMode(PositionMode::BOTTOM);
-    scrollBar->SetAxis(Axis::HORIZONTAL);
-    panDirection.type = 3;
-    scrollBar->panRecognizer_->direction_ = panDirection;
-    scrollBar->DumpAdvanceInfo();
-
-    scrollBar->SetAxis(Axis::FREE);
-    panDirection.type = 15;
-    scrollBar->panRecognizer_->direction_ = panDirection;
-    scrollBar->DumpAdvanceInfo();
-
-    scrollBar->panRecognizer_ = nullptr;
-    scrollBar->DumpAdvanceInfo();
 }
 
 /**

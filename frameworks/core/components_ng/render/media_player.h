@@ -25,6 +25,7 @@
 
 namespace OHOS::Ace::NG {
 using PositionUpdatedEvent = std::function<void(uint32_t)>;
+using SeekDoneEvent = std::function<void(uint32_t)>;
 using StateChangedEvent = std::function<void(PlaybackStatus)>;
 using CommonEvent = std::function<void()>;
 using TextureRefreshEnVent = std::function<void(uint32_t, uint64_t)>;
@@ -65,6 +66,8 @@ public:
         StateChangedEvent&& stateChangedEvent, CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent,
         CommonEvent&& startRenderFrameEvent)
     {}
+
+    virtual void RegisterMediaPlayerSeekDoneEvent(SeekDoneEvent&& seekDoneEvent) {}
 
     virtual void RegisterTextureEvent(TextureRefreshEnVent&& textureRefreshEvent) {}
 

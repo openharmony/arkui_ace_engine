@@ -26,11 +26,17 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
 
+namespace OHOS::Accessibility {
+class ExtraElementInfo;
+}
+
 namespace OHOS::Ace::NG {
 using ActionNoParam = std::function<void()>;
 using ActionSetTextImpl = std::function<void(const std::string&)>;
 using ActionScrollForwardImpl = ActionNoParam;
+using ActionScrollForwardWithParamImpl = std::function<void(AccessibilityScrollType scrollType)>;;
 using ActionScrollBackwardImpl = ActionNoParam;
+using ActionScrollBackwardWithParamImpl = std::function<void(AccessibilityScrollType scrollType)>;;
 using ActionSetSelectionImpl = std::function<void(int32_t start, int32_t end, bool isForward)>;
 using ActionCopyImpl = ActionNoParam;
 using ActionCutImpl = ActionNoParam;
@@ -43,6 +49,8 @@ using ActionGetCursorIndexImpl = std::function<int32_t(void)>;
 using ActionClickImpl = ActionNoParam;
 using ActionLongClickImpl = ActionNoParam;
 using ActionsImpl = std::function<void((uint32_t actionType))>;
+using GetRelatedElementInfoImpl = std::function<void(Accessibility::ExtraElementInfo& extraElementInfo)>;
+using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
 
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
@@ -291,10 +299,24 @@ public:
         actionScrollForwardImpl_ = actionScrollForwardImpl;
     }
 
-    bool ActActionScrollForward()
+    void SetActionScrollForward(const ActionScrollForwardWithParamImpl& actionScrollForwardImpl)
     {
-        if (actionScrollForwardImpl_) {
+        actionScrollForwardWithParamImpl_ = actionScrollForwardImpl;
+    }
+
+    bool ActActionScrollForward(AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_DEFAULT)
+    {
+        if (actionScrollForwardWithParamImpl_ == nullptr) {
+            scrollType = AccessibilityScrollType::SCROLL_DEFAULT;
+        }
+
+        if ((scrollType == AccessibilityScrollType::SCROLL_DEFAULT) && (actionScrollForwardImpl_)) {
             actionScrollForwardImpl_();
+            return true;
+        }
+
+        if (actionScrollForwardWithParamImpl_) {
+            actionScrollForwardWithParamImpl_(scrollType);
             return true;
         }
         return false;
@@ -305,10 +327,24 @@ public:
         actionScrollBackwardImpl_ = actionScrollBackwardImpl;
     }
 
-    bool ActActionScrollBackward()
+    void SetActionScrollBackward(const ActionScrollBackwardWithParamImpl& actionScrollBackwardImpl)
     {
-        if (actionScrollBackwardImpl_) {
+        actionScrollBackwardWithParamImpl_ = actionScrollBackwardImpl;
+    }
+
+    bool ActActionScrollBackward(AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_DEFAULT)
+    {
+        if (actionScrollBackwardWithParamImpl_ == nullptr) {
+            scrollType = AccessibilityScrollType::SCROLL_DEFAULT;
+        }
+
+        if ((scrollType == AccessibilityScrollType::SCROLL_DEFAULT) && (actionScrollBackwardImpl_)) {
             actionScrollBackwardImpl_();
+            return true;
+        }
+
+        if (actionScrollBackwardWithParamImpl_) {
+            actionScrollBackwardWithParamImpl_(scrollType);
             return true;
         }
         return false;
@@ -432,6 +468,18 @@ public:
         return false;
     }
 
+    void SetOnAccessibilityFocusCallback(const OnAccessibilityFocusCallbackImpl& onAccessibilityFocusCallbackImpl)
+    {
+        onAccessibilityFocusCallbackImpl_ = onAccessibilityFocusCallbackImpl;
+    }
+
+    void OnAccessibilityFocusCallback(bool isFocus)
+    {
+        if (onAccessibilityFocusCallbackImpl_) {
+            onAccessibilityFocusCallbackImpl_(isFocus);
+        }
+    }
+
     void SetAccessibilityGroup(bool accessibilityGroup)
     {
         accessibilityGroup_ = accessibilityGroup;
@@ -485,6 +533,11 @@ public:
     RefPtr<UINode> GetAccessibilityVirtualNode()
     {
         return accessibilityVirtualNode_;
+    }
+
+    NG::UINode* GetAccessibilityVirtualNodePtr()
+    {
+        return Referenced::RawPtr(accessibilityVirtualNode_);
     }
 
     bool HasAccessibilityVirtualNode() const
@@ -562,6 +615,21 @@ public:
     */
     static bool IsAccessibilityFocusableDebug(const RefPtr<FrameNode>& node, std::unique_ptr<JsonValue>& info);
 
+    virtual void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) {}
+
+    void SetRelatedElementInfoCallback(const GetRelatedElementInfoImpl& getRelatedElementInfoImpl)
+    {
+        getRelatedElementInfoImpl_ = getRelatedElementInfoImpl;
+    }
+    
+    void GetAllExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo)
+    {
+        if (getRelatedElementInfoImpl_) {
+            getRelatedElementInfoImpl_(extraElementInfo);
+        }
+        GetExtraElementInfo(extraElementInfo);
+    }
+
     void SetAccessibilityActions(uint32_t actions);
     void ResetAccessibilityActions();
     bool HasAccessibilityActions();
@@ -609,10 +677,21 @@ private:
         const PointF& parentPoint,
         const RefPtr<FrameNode>& node,
         AccessibilityHoverTestPath& path,
-        std::unique_ptr<HoverTestDebugTraceInfo>& debugInfo
+        std::unique_ptr<HoverTestDebugTraceInfo>& debugInfo,
+        bool& ancestorGroupFlag
     );
 
-    static std::unique_ptr<JsonValue> CreateNodeSearchInfo(const RefPtr<FrameNode>& node, const PointF& parentPoint);
+    struct RecursiveParam {
+        bool hitTarget;
+        bool ancestorGroupFlag;
+    };
+
+    static bool ProcessHoverTestRecursive(const PointF& noOffsetPoint, const RefPtr<FrameNode>& node,
+        AccessibilityHoverTestPath& path, std::unique_ptr<HoverTestDebugTraceInfo>& debugInfo,
+        RecursiveParam recursiveParam);
+
+    static std::unique_ptr<JsonValue> CreateNodeSearchInfo(const RefPtr<FrameNode>& node, const PointF& parentPoint,
+        bool& ancestorGroupFlag);
 
     /*
     * Get whether node and its children should be searched.
@@ -620,7 +699,7 @@ private:
     *         second: children of node should be searched.
     * param: {node} should be not-null
     */
-    static std::pair<bool, bool> GetSearchStrategy(const RefPtr<FrameNode>& node);
+    static std::tuple<bool, bool, bool> GetSearchStrategy(const RefPtr<FrameNode>& node, bool& ancestorGroupFlag);
 
     void GetGroupTextRecursive(bool forceGetChildren, std::string& text) const;
 
@@ -637,7 +716,9 @@ protected:
     ActionSetSelectionImpl actionSetSelectionImpl_;
     ActionMoveTextImpl actionMoveTextImpl_;
     ActionScrollForwardImpl actionScrollForwardImpl_;
+    ActionScrollForwardWithParamImpl actionScrollForwardWithParamImpl_;
     ActionScrollBackwardImpl actionScrollBackwardImpl_;
+    ActionScrollBackwardWithParamImpl actionScrollBackwardWithParamImpl_;
     ActionCopyImpl actionCopyImpl_;
     ActionCutImpl actionCutImpl_;
     ActionPasteImpl actionPasteImpl_;
@@ -648,6 +729,8 @@ protected:
     ActionClickImpl actionClickImpl_;
     ActionLongClickImpl actionLongClickImpl_;
     ActionsImpl actionsImpl_;
+    GetRelatedElementInfoImpl getRelatedElementInfoImpl_;
+    OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
     bool accessibilityGroup_ = false;
     int32_t childTreeId_ = -1;
     int32_t childWindowId_ = 0;

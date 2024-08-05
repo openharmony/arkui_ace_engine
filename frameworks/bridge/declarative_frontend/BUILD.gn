@@ -176,6 +176,7 @@ template("declarative_js_engine") {
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":gen_obj_src_js_uicontext",
+      ":mock",
       ":prefetcher",
       ":shape",
       ":statemanagement",
@@ -285,6 +286,8 @@ template("declarative_js_engine") {
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
+      "jsview/js_linear_indicator.cpp",
+      "jsview/js_linear_indicator_controller.cpp",
       "jsview/js_list.cpp",
       "jsview/js_list_item.cpp",
       "jsview/js_list_item_group.cpp",
@@ -295,6 +298,7 @@ template("declarative_js_engine") {
       "jsview/js_menu.cpp",
       "jsview/js_menu_item.cpp",
       "jsview/js_menu_item_group.cpp",
+      "jsview/js_mock.cpp",
       "jsview/js_nav_path_stack.cpp",
       "jsview/js_navdestination.cpp",
       "jsview/js_navdestination_context.cpp",
@@ -513,7 +517,6 @@ template("declarative_js_engine") {
     if (defined(vendor_configs.ace_engine_advanced)) {
       include_dirs += vendor_configs.ace_advance_dirs
       sources += vendor_configs.ace_engine_advanced_jsview
-      external_deps += vendor_configs.ace_engine_ext_jsview_deps
     } else {
       sources += [ "jsview/js_cached_image.cpp" ]
     }
@@ -700,6 +703,7 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":gen_obj_src_js_uicontext",
+      ":mock",
       ":prefetcher",
       ":shape",
       ":statemanagement",
@@ -824,6 +828,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_menu.cpp",
       "jsview/js_menu_item.cpp",
       "jsview/js_menu_item_group.cpp",
+      "jsview/js_mock.cpp",
       "jsview/js_nav_path_stack.cpp",
       "jsview/js_navdestination.cpp",
       "jsview/js_navdestination_context.cpp",
@@ -1114,6 +1119,15 @@ foreach(item, ace_platforms) {
 ohos_abc("statemanagement") {
   sources = [ "engine/jsStateManagement.js" ]
   output_name = "statemanagement"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("mock") {
+  sources = [ "engine/jsMock.js" ]
+  output_name = "mock"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem

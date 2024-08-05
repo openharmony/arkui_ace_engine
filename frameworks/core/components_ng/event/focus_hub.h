@@ -179,21 +179,12 @@ public:
     {
         focusPadding = padding;
     }
-    void SetFocusBoxGlow(bool focusBoxGlow)
-    {
-        focusBoxGlow_ = focusBoxGlow;
-    }
-    bool IsFocusBoxGlow() const
-    {
-        return focusBoxGlow_;
-    }
 
 private:
     std::optional<RoundRect> paintRect;
     std::optional<Color> paintColor;
     std::optional<Dimension> paintWidth;
     std::optional<Dimension> focusPadding;
-    bool focusBoxGlow_ = false;
 };
 
 class ACE_EXPORT FocusPattern : public virtual AceType {
@@ -223,7 +214,6 @@ public:
         if (paintParams.HasFocusPadding()) {
             paintParams_->SetFocusPadding(paintParams.GetFocusPadding());
         }
-        paintParams_->SetFocusBoxGlow(paintParams.IsFocusBoxGlow());
     }
     FocusPattern(const FocusPattern& focusPattern)
     {
@@ -285,7 +275,6 @@ public:
         if (paintParams.HasFocusPadding()) {
             paintParams_->SetFocusPadding(paintParams.GetFocusPadding());
         }
-        paintParams_->SetFocusBoxGlow(paintParams.IsFocusBoxGlow());
     }
 
     bool GetIsFocusActiveWhenFocused() const
@@ -418,7 +407,6 @@ public:
         if (paramsPtr->HasFocusPadding()) {
             focusPaintParamsPtr_->SetFocusPadding(paramsPtr->GetFocusPadding());
         }
-        focusPaintParamsPtr_->SetFocusBoxGlow(paramsPtr->IsFocusBoxGlow());
     }
 
     bool HasPaintRect() const
@@ -449,12 +437,6 @@ public:
     {
         CHECK_NULL_RETURN(focusPaintParamsPtr_, Dimension());
         return focusPaintParamsPtr_->GetPaintWidth();
-    }
-
-    bool IsFocusBoxGlow() const
-    {
-        CHECK_NULL_RETURN(focusPaintParamsPtr_, false);
-        return focusPaintParamsPtr_->IsFocusBoxGlow();
     }
 
     bool HasFocusPadding() const
@@ -516,14 +498,6 @@ public:
         focusPaintParamsPtr_->SetFocusPadding(padding);
     }
 
-    void SetFocusBoxGlow(bool isFocusBoxGlow)
-    {
-        if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
-        }
-        focusPaintParamsPtr_->SetFocusBoxGlow(isFocusBoxGlow);
-    }
-
     RefPtr<FocusManager> GetFocusManager() const;
     RefPtr<FrameNode> GetFrameNode() const;
     RefPtr<GeometryNode> GetGeometryNode() const;
@@ -566,6 +540,7 @@ public:
     bool IsFocusableScopeByTab();
 
     bool IsFocusableWholePath();
+    bool IsSelfFocusableWholePath();
     bool IsOnRootTree() const;
 
     bool IsFocusable();
@@ -581,8 +556,6 @@ public:
         return parentFocusable_;
     }
     void SetParentFocusable(bool parentFocusable);
-
-    void RefreshFocus();
 
     void SetFocusable(bool focusable, bool isExplicit = true);
     void SetShow(bool show);
@@ -934,10 +907,10 @@ public:
 
     std::optional<std::string> GetInspectorKey() const;
 
-    bool PaintFocusState(bool isNeedStateStyles = true);
+    bool PaintFocusState();
     bool PaintAllFocusState();
     bool PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate = false);
-    void ClearFocusState(bool isNeedStateStyles = true);
+    void ClearFocusState();
     void ClearAllFocusState();
 
     void SetInnerFocusPaintRectCallback(const std::function<void(RoundRect&)>& callback)
@@ -1053,6 +1026,7 @@ public:
     static void ToJsonValue(
         const RefPtr<FocusHub>& hub, std::unique_ptr<JsonValue>& json, const InspectorFilter& filter);
 
+    bool FocusToHeadOrTailChild(bool isHead);
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
@@ -1064,12 +1038,10 @@ protected:
     bool AcceptFocusOfLastFocus();
     bool AcceptFocusByRectOfLastFocus(const RectF& rect);
     bool AcceptFocusByRectOfLastFocusNode(const RectF& rect);
-    bool AcceptFocusByRectOfLastFocusScope(const RectF& rect);
     bool AcceptFocusByRectOfLastFocusFlex(const RectF& rect);
 
     bool CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) const;
     bool RequestNextFocus(FocusStep moveStep, const RectF& rect);
-    bool FocusToHeadOrTailChild(bool isHead);
 
     void OnFocus();
     void OnFocusNode();
@@ -1113,6 +1085,8 @@ private:
     void SetLastWeakFocusNodeWholeScope(const std::string &focusScopeId);
 
     void RaiseZIndex(); // Recover z-index in ClearFocusState
+
+    bool RequestFocusImmediatelyInner(bool isJudgeRootTree = false);
 
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;

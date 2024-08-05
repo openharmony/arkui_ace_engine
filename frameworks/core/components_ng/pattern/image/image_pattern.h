@@ -89,7 +89,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, false };
+        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
     }
 
     const RefPtr<CanvasImage>& GetCanvasImage()
@@ -295,6 +295,8 @@ public:
         return true;
     }
 
+    bool AllowVisibleAreaCheck() const override;
+
     void OnInActive() override
     {
         if (status_ == Animator::Status::RUNNING) {
@@ -362,7 +364,7 @@ public:
         return loadingCtx_->GetImageSize();
     }
 
-    void OnVisibleAreaChange(bool visible);
+    void OnVisibleAreaChange(bool visible = true, double ratio = 0.0);
 
     bool GetDefaultAutoResize()
     {
@@ -373,6 +375,12 @@ public:
     {
         InitDefaultValue();
         return interpolationDefault_;
+    }
+    void InitOnKeyEvent();
+
+    void SetIsComponentSnapshotNode(bool isComponentSnapshotNode = true)
+    {
+        isComponentSnapshotNode_ = isComponentSnapshotNode;
     }
 protected:
     void RegisterWindowStateChangedCallback();
@@ -385,6 +393,8 @@ private:
     class ObscuredImage : public CanvasImage {
         void DrawToRSCanvas(
             RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override
+        {}
+        void DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override
         {}
         int32_t GetWidth() const override
         {
@@ -427,7 +437,8 @@ private:
     void PrepareAnimation(const RefPtr<CanvasImage>& image);
     void SetRedrawCallback(const RefPtr<CanvasImage>& image);
     void SetOnFinishCallback(const RefPtr<CanvasImage>& image);
-    void RegisterVisibleAreaChange();
+    void RegisterVisibleAreaChange(bool isCalcClip = true);
+    void TriggerVisibleAreaChangeForChild(const RefPtr<UINode>& node, bool visible, double ratio);
 
     void InitCopy();
     void HandleCopy();
@@ -467,6 +478,8 @@ private:
     void ReleaseImageAnalyzer();
     bool IsSupportImageAnalyzerFeature();
     void InitDefaultValue();
+    void ClearAltData();
+    void UpdateSvgSmoothEdgeValue();
 
     //animation
     RefPtr<PictureAnimation<int32_t>> CreatePictureAnimation(int32_t size);
@@ -489,6 +502,7 @@ private:
     void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
     void ControlAnimation(int32_t index);
     void SetObscured();
+    void OnKeyEvent();
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
@@ -546,8 +560,9 @@ private:
     bool isFormAnimationEnd_ = false;
     bool isImageAnimator_ = false;
     bool hasSizeChanged = false;
-    bool isPixelMapChanged_ = true;
+    bool isPixelMapChanged_ = false;
     bool isSrcUndefined_ = false;
+    bool isComponentSnapshotNode_ = false;
 
     std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };

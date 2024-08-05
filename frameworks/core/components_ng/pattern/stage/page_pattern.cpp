@@ -171,8 +171,7 @@ void PagePattern::ProcessShowState()
     if (manager) {
         auto safeArea = manager->GetSafeArea();
         auto parentGlobalOffset = host->GetParentGlobalOffsetDuringLayout();
-        auto geometryNode = host->GetGeometryNode();
-        auto frame = geometryNode->GetFrameRect() + parentGlobalOffset;
+        auto frame = host->GetPaintRectWithTransform() + parentGlobalOffset;
         // if page's frameRect not fit current safeArea, need layout page again
         if (!NearEqual(frame.GetY(), safeArea.top_.end)) {
             host->MarkDirtyNode(manager->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT : PROPERTY_UPDATE_MEASURE);
@@ -187,6 +186,11 @@ void PagePattern::ProcessShowState()
 
 void PagePattern::OnAttachToMainTree()
 {
+#if defined(ENABLE_SPLIT_MODE)
+    if (!needFireObserver_) {
+        return;
+    }
+#endif
     int32_t index = INVALID_PAGE_INDEX;
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate) {
@@ -199,6 +203,11 @@ void PagePattern::OnAttachToMainTree()
 
 void PagePattern::OnDetachFromMainTree()
 {
+#if defined(ENABLE_SPLIT_MODE)
+    if (!needFireObserver_) {
+        return;
+    }
+#endif
     state_ = RouterPageState::ABOUT_TO_DISAPPEAR;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
 }
@@ -224,8 +233,15 @@ void PagePattern::OnShow()
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(true);
     isOnShow_ = true;
+#if defined(ENABLE_SPLIT_MODE)
+    if (needFireObserver_) {
+        state_ = RouterPageState::ON_PAGE_SHOW;
+        UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+    }
+#else
     state_ = RouterPageState::ON_PAGE_SHOW;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+#endif
     JankFrameReport::GetInstance().StartRecord(pageInfo_->GetPageUrl());
     auto pageUrlChecker = container->GetPageUrlChecker();
     if (pageUrlChecker != nullptr) {
@@ -264,8 +280,15 @@ void PagePattern::OnHide()
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(false);
     isOnShow_ = false;
+#if defined(ENABLE_SPLIT_MODE)
+    if (needFireObserver_) {
+        state_ = RouterPageState::ON_PAGE_HIDE;
+        UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+    }
+#else
     state_ = RouterPageState::ON_PAGE_HIDE;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+#endif
     auto container = Container::Current();
     if (container) {
         auto pageUrlChecker = container->GetPageUrlChecker();
@@ -304,8 +327,15 @@ bool PagePattern::OnBackPressed()
         return true;
     }
     // if in page transition, do not set to ON_BACK_PRESS
+#if defined(ENABLE_SPLIT_MODE)
+    if (needFireObserver_) {
+        state_ = RouterPageState::ON_BACK_PRESS;
+        UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+    }
+#else
     state_ = RouterPageState::ON_BACK_PRESS;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+#endif
     if (onBackPressed_) {
         return onBackPressed_();
     }

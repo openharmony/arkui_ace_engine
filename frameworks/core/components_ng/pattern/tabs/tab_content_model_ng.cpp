@@ -39,7 +39,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const uint8_t PIXEL_ROUND = 18;
+constexpr uint8_t PIXEL_ROUND = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
+                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
+                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
+                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
 constexpr uint32_t DEFAULT_RENDERING_STRATEGY = 2;
 }
 
@@ -227,7 +230,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     }
     tabBarPattern->SetSelectedMode(selectedMode, myIndex);
     tabBarPattern->SetIndicatorStyle(indicatorStyle, myIndex);
-    tabBarPattern->UpdateSubTabBoard();
 
     // Create tab bar with builder.
     if (tabBarParam.HasBuilder()) {
@@ -321,7 +323,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     if (indicator > totalCount - 1 || indicator < 0) {
         indicator = 0;
     }
-
+    tabBarPattern->UpdateSubTabBoard(indicator);
     // Update property of text.
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
@@ -331,7 +333,9 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             if (labelStyle.selectedColor.has_value()) {
                 textLayoutProperty->UpdateTextColor(labelStyle.selectedColor.value());
             } else {
-                textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOnColor());
+                selectedMode == SelectedMode::BOARD ?
+                    textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabBoardTextOnColor()) :
+                    textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOnColor());
             }
         } else {
             if (labelStyle.unselectedColor.has_value()) {

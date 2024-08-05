@@ -11,6 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_ext.gni")
+
 group("core_pattern_unittest") {
   testonly = true
   deps = [
@@ -35,6 +38,8 @@ group("core_pattern_unittest") {
     "divider:divider_test_ng",
     "flex:flex_test_ng",
     "folder_stack:folder_stack_test_ng",
+    "form:form_node_test",
+    "form:form_pattern_test",
     "form:form_test_ng",
     "form_link:form_link_test",
     "gauge:gauge_test_ng",
@@ -62,6 +67,7 @@ group("core_pattern_unittest") {
     "option:option_test_ng",
     "overlay:overlay_manager_test_ng",
     "panel:panel_test_ng",
+    "particle:particle_test_ng",
     "patternlock:patternlock_test_ng",
     "picker:date_picker_test_ng",
     "progress:progress_test_ng",
@@ -99,9 +105,15 @@ group("core_pattern_unittest") {
     "toggle:toggle_test_ng",
     "ui_extension:ui_extension_component_test_ng",
     "video:video_test_ng",
+    "view_context:view_context_test_ng",
     "waterflow:water_flow_test_original",
     "waterflow:water_flow_test_segmented",
     "waterflow:water_flow_test_sw",
     "xcomponent:xcomponent_test_ng",
   ]
+
+  if (ace_engine_feature_enable_split_mode &&
+      defined(vendor_configs.ace_engine_advanced_split_mode_pattern_test_ng)) {
+    deps += vendor_configs.ace_engine_advanced_split_mode_pattern_test_ng
+  }
 }

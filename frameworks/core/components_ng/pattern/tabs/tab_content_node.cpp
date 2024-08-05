@@ -34,9 +34,9 @@ void TabContentNode::OnAttachToMainTree(bool recursive)
     FrameNode::OnOffscreenProcess(recursive);
 }
 
-void TabContentNode::OnDetachFromMainTree(bool recursive)
+void TabContentNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 {
-    FrameNode::OnDetachFromMainTree(recursive);
+    FrameNode::OnDetachFromMainTree(recursive, context);
     auto tabs = TabContentModelNG::FindTabsNode(Referenced::Claim(this));
     CHECK_NULL_VOID(tabs);
 
@@ -169,8 +169,9 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     CHECK_NULL_VOID(tabTheme);
     label->Put("unselectedColor", labelStyle.unselectedColor.value_or(
         tabTheme->GetSubTabTextOffColor()).ColorToString().c_str());
-    label->Put("selectedColor", labelStyle.selectedColor.value_or(
-        tabTheme->GetSubTabTextOnColor()).ColorToString().c_str());
+    auto selectColor = tabContentPattern->GetSelectedMode() == SelectedMode::BOARD ?
+        tabTheme->GetSubTabBoardTextOnColor() : tabTheme->GetSubTabTextOnColor();
+    label->Put("selectedColor", labelStyle.selectedColor.value_or(selectColor).ColorToString().c_str());
     tabBar->Put("labelStyle", label);
 
     auto iconStyle = tabContentPattern->GetIconStyle();

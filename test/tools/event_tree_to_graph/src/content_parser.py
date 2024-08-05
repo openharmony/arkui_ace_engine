@@ -16,13 +16,12 @@
 # limitations under the License.
 #
 
-# 读取预处理后的文件，将内容解析为对象待用
 
 import os
 
 from src.beans.dump_result import DumpResult
 from src.keywords import keywords_dict, get_dict_value
-from src.utils.log_wrapper import  log_error
+from src.utils.log_wrapper import log_error
 
 
 class ContentParser:
@@ -38,11 +37,11 @@ class ContentParser:
     def do_parse(self):
         file_content = self.load_file()
         if file_content is None or file_content == '':
-            log_error('文件不存在')
+            log_error('file is not exist')
             return None
         event_tree_count = self.pre_check_event_tree_count(file_content)
         if event_tree_count == 0:
-            log_error('没有找到任何 event tree')
+            log_error('NO event tree found')
             return None
         self.parse_result = DumpResult(file_content)
         return self.parse_result

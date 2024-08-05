@@ -67,7 +67,7 @@ public:
     void OnRebuildFrame(RefPtr<RenderContext>& context);
     void OnAttachToFrameNode(const RefPtr<RenderContext>& context);
     void OnDirtyLayoutWrapperSwap(const Render3D::WindowChangeInfo& windowChangeInfo);
-    void Deinit();
+    std::shared_future<void> Deinit();
 
     OHOS::Render3D::SurfaceType GetSurfaceType()
     {

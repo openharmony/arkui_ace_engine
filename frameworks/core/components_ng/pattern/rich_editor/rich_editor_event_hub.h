@@ -69,7 +69,7 @@ public:
     const std::string& GetPreviewText() const;
 
 private:
-    int32_t insertOffset_;
+    int32_t insertOffset_ = 0;
     std::string insertValue_;
     std::string previewText_;
 };
@@ -215,7 +215,7 @@ public:
 
 private:
     int32_t offset_ = 0;
-    RichEditorDeleteDirection direction_;
+    RichEditorDeleteDirection direction_ = RichEditorDeleteDirection::BACKWARD;
     int32_t length_ = 0;
     std::list<RichEditorAbstractSpanResult> richEditorDeleteSpans_;
 };
@@ -295,7 +295,9 @@ public:
     void SetAboutToIMEInput(std::function<bool(const RichEditorInsertValue&)>&& func);
     bool FireAboutToIMEInput(const RichEditorInsertValue& info);
     void SetOnIMEInputComplete(std::function<void(const RichEditorAbstractSpanResult&)>&& func);
+    void SetOnDidIMEInput(std::function<void(const TextRange&)>&& func);
     void FireOnIMEInputComplete(const RichEditorAbstractSpanResult& info);
+    void FireOnDidIMEInput(const TextRange& info);
     void SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func);
     bool FireAboutToDelete(const RichEditorDeleteValue& info);
     void SetOnDeleteComplete(std::function<void()>&& func);
@@ -360,7 +362,7 @@ public:
     bool FireOnWillChange(const RichEditorChangeValue& info);
     bool HasOnWillChange() const;
     void SetOnDidChange(std::function<void(const RichEditorChangeValue&)> && func);
-    void FireOnDidChange(const RichEditorChangeValue& info);
+    void FireOnDidChange(const RichEditorChangeValue& range);
     bool HasOnDidChange() const;
     void SetOnCut(std::function<void(NG::TextCommonEvent&)> && func);
     void FireOnCut(NG::TextCommonEvent& value);
@@ -380,7 +382,8 @@ private:
     std::function<void(const BaseEventInfo*)> onSelect_;
     std::function<void(const BaseEventInfo*)> OnSelectionChange_;
     std::function<bool(const RichEditorInsertValue&)> aboutToIMEInput_;
-    std::function<void(const RichEditorAbstractSpanResult&)> onIMEIputComplete_;
+    std::function<void(const RichEditorAbstractSpanResult&)> onIMEInputComplete_;
+    std::function<void(const TextRange&)> onDidIMEInput_;
     std::function<bool(const RichEditorDeleteValue&)> aboutToDelete_;
     std::function<void()> onDeleteComplete_;
     std::function<void(const bool&)> onEditingChange_;

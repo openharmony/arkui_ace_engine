@@ -17,10 +17,6 @@
 #
 
 from src.beans.base_bean import BaseBean
-# stateHistory:
-#   procedure: HandleTouchDown, timestamp: 2017-08-25 15:00:22.247
-#   procedure: HandleTouchUp, timestamp: 2017-08-25 15:00:22.295
-
 from src.beans.procedure_step import ProcedureStep
 from src.utils.log_wrapper import log_info
 

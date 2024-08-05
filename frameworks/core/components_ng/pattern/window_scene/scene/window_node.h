@@ -33,7 +33,7 @@ public:
         int32_t nodeId, int32_t sessionId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
     void SetParent(const WeakPtr<UINode>& parent) override;
-    bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType) override;
+    bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent) override;
     std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType) override;
 
 private:

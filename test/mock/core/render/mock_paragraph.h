@@ -38,6 +38,7 @@ public:
     MOCK_METHOD0(GetMaxIntrinsicWidth, float());
     MOCK_METHOD0(DidExceedMaxLines, bool());
     MOCK_METHOD0(GetLongestLine, float());
+    MOCK_METHOD0(GetLongestLineWithIndent, float());
     MOCK_METHOD0(GetMaxWidth, float());
     MOCK_METHOD0(GetAlphabeticBaseline, float());
     MOCK_METHOD0(GetParagraphText, std::u16string());
@@ -60,6 +61,7 @@ public:
     MOCK_METHOD3(ComputeOffsetForCaretUpstream, bool(int32_t extent, CaretMetricsF& result,
         bool needLineHighest));
     MOCK_METHOD3(GetRectsForRange, void(int32_t start, int32_t end, std::vector<RectF>& selectedRects));
+    MOCK_METHOD3(GetTightRectsForRange, void(int32_t start, int32_t end, std::vector<RectF>& selectedRects));
     MOCK_METHOD3(Paint, void(RSCanvas& canvas, float x, float y));
 #ifndef USE_ROSEN_DRAWING
     MOCK_METHOD3(Paint, void(SkCanvas* skCanvas, float x, float y));
@@ -88,6 +90,8 @@ public:
     {
         return true;
     }
+
+    void UpdateColor(size_t from, size_t to, const Color& color) override;
 
     static RefPtr<MockParagraph> GetOrCreateMockParagraph();
     static void TearDown();

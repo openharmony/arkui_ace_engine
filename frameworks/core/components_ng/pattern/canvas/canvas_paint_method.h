@@ -38,7 +38,6 @@ public:
     void GetFastTaskPool();
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
     void UpdateRecordingCanvas(float width, float height);
-    void SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback);
 
 #ifndef USE_FAST_TASKPOOL
     void PushTask(const TaskFunc& task);
@@ -59,6 +58,15 @@ public:
     bool HasTask() const;
     void FlushTask();
 
+    void FlushUITasks()
+    {
+        CHECK_EQUAL_VOID(HasTask(), false);
+        auto context = context_.Upgrade();
+        if (context) {
+            context->FlushUITasks();
+        }
+    }
+
     double GetWidth()
     {
         return lastLayoutSize_.Width();
@@ -74,29 +82,41 @@ public:
         onModifierUpdate_ = std::move(func);
     }
 
+    void FireOnModifierUpdateFunc()
+    {
+        CHECK_NULL_VOID(onModifierUpdate_);
+        onModifierUpdate_();
+    }
+
+    void SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback)
+    {
+        canvasCallback_ = callback;
+    }
+    void FireRSCanvasCallback(double width, double height)
+    {
+        CHECK_NULL_VOID(canvasCallback_);
+        canvasCallback_(rsCanvas_.get(), width, height);
+    }
+
     void CloseImageBitmap(const std::string& src);
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
-    void DrawPixelMapWithoutGlobalState(const RefPtr<PixelMap>& pixelMap, const Ace::CanvasImage& canvasImage);
-    std::unique_ptr<Ace::ImageData> GetImageData(
-        RefPtr<RenderContext> renderContext, double left, double top, double width, double height);
-    void GetImageData(const RefPtr<RenderContext>& renderContext, const std::shared_ptr<Ace::ImageData>& imageData);
+    std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
+    void GetImageData(const std::shared_ptr<Ace::ImageData>& imageData);
 #ifdef PIXEL_MAP_SUPPORTED
     void TransferFromImageBitmap(const RefPtr<PixelMap>& pixelMap);
 #endif
-    std::string ToDataURL(RefPtr<RenderContext> renderContext, const std::string& args);
+    std::string ToDataURL(const std::string& type, const double quality);
     bool DrawBitmap(RefPtr<RenderContext> renderContext, RSBitmap& currentBitmap);
     std::string GetJsonData(const std::string& path);
 
-    void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth);
-    void StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth);
-    TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
     void Reset();
-
+    std::string GetDumpInfo();
 private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
-    bool UpdateParagraph(const std::string& text, bool isStroke, bool hasShadow = false);
-    void UpdateTextStyleForeground(bool isStroke, RSTextStyle& txtStyle, bool hasShadow);
+#ifndef ACE_UNITTEST
+    void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle) override;
+#endif
 #ifndef USE_FAST_TASKPOOL
     std::list<TaskFunc> tasks_;
 #else
@@ -108,6 +128,7 @@ private:
     RefPtr<Ace::ImageObject> imageObj_ = nullptr;
 #endif
     OnModifierUpdateFunc onModifierUpdate_;
+    std::function<void(RSCanvas*, double, double)> canvasCallback_ = nullptr;
     WeakPtr<FrameNode> frameNode_;
     bool needMarkDirty_ = true;
 

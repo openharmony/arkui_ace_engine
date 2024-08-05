@@ -753,26 +753,36 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
     manager->AddDragFrameNode(frameNode->GetId(), frameNode);
 
     /**
-     * @tc.steps2: Call the function OnDragEvent with isDragged_=true, currentId_=DEFAULT_INT1 and DRAG_EVENT_END.
+     * @tc.steps2: Call the function OnDragEvent with isDragged_=true, currentId_=DEFAULT_INT1 and
+     * DRAG_EVENT_START_FOR_CONTROLLER.
      * @tc.expected: The currentId_ is equal to DEFAULT_INT1.
      */
     manager->isDragged_ = true;
     manager->currentId_ = DEFAULT_INT1;
-    context_->OnDragEvent({ DEFAULT_INT1, DEFAULT_INT1 }, DragEventAction::DRAG_EVENT_END);
+    context_->OnDragEvent({ DEFAULT_INT1, DEFAULT_INT1 }, DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER);
     EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
 
     /**
-     * @tc.steps2: Call the function OnDragEvent with isDragged_=true, currentId_=DEFAULT_INT1 and DRAG_EVENT_MOVE.
+     * @tc.steps2: Call the function OnDragEvent with isDragged_=true, currentId_=DEFAULT_INT1 and DRAG_EVENT_OUT.
      * @tc.expected: The currentId_ is equal to DEFAULT_INT1.
      */
     manager->isDragged_ = true;
     manager->currentId_ = DEFAULT_INT1;
-    context_->OnDragEvent({ DEFAULT_INT1, DEFAULT_INT1 }, DragEventAction::DRAG_EVENT_MOVE);
+    context_->OnDragEvent({ DEFAULT_INT1, DEFAULT_INT1 }, DragEventAction::DRAG_EVENT_OUT);
     EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
 
     /**
-     * @tc.steps3: Call the function OnDragEvent with isDragged_=false, currentId_=DEFAULT_INT1 and DRAG_EVENT_END.
+     * @tc.steps3: Call the function OnDragEvent with isDragged_=false, currentId_=DEFAULT_INT1 and DRAG_EVENT_START.
      * @tc.expected: The currentId_ is equal to DEFAULT_INT1.
+     */
+    manager->isDragged_ = false;
+    manager->currentId_ = DEFAULT_INT1;
+    context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_START);
+    EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
+
+    /**
+     * @tc.steps4: Call the function OnDragEvent with isDragged_=false, currentId_=DEFAULT_INT1 and DRAG_EVENT_END.
+     * @tc.expected: The currentId_ is changed to DEFAULT_INT10.
      */
     manager->isDragged_ = false;
     manager->currentId_ = DEFAULT_INT1;
@@ -787,6 +797,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
     manager->currentId_ = DEFAULT_INT1;
     context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_MOVE);
     EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
+    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_MOVE);
     context_->SetIsDragging(false);
     EXPECT_FALSE(context_->IsDragging());
     context_->ResetDragging();
@@ -1238,7 +1250,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg025, TestSize.Level1)
         { "-multimodal" }, { "-rotation", "1", "2", "3" }, { "-animationscale", "1", "2", "3" },
         { "-velocityscale", "1", "2", "3" }, { "-scrollfriction", "1", "2", "3" }, { "-threadstuck", "1", "2", "3" },
         { "-rotation" }, { "-animationscale" }, { "-velocityscale" }, { "-scrollfriction" }, { "-threadstuck" },
-        { "test" } };
+        { "test" }, { "-navigation" }, { "-focuswindowscene" }, { "-focusmanager" }, { "-jsdump" }, { "-event" },
+        { "-imagecache" }, { "-imagefilecache" }, { "-allelements" }, { "-default" }, { "-overlay" }, { "--stylus" } };
     int turn = 0;
     for (; turn < params.size(); turn++) {
         EXPECT_TRUE(context_->OnDumpInfo(params[turn]));
@@ -1926,6 +1939,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg092, TestSize.Level1)
     ASSERT_NE(context_, nullptr);
     std::vector<Ace::RectF> rects;
     context_->TriggerOverlayNodePositionsUpdateCallback(rects);
+    context_->RegisterOverlayNodePositionsUpdateCallback([](std::vector<Ace::RectF> rect) {});
+    context_->TriggerOverlayNodePositionsUpdateCallback(rects);
     context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
     context_->windowModal_ = WindowModal::NORMAL;
     NG::RectF containerModal;
@@ -1952,12 +1967,17 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg093, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->GetWindow(), nullptr);
     EXPECT_FALSE(context_->PrintVsyncInfoIfNeed());
 
-    std::list<FrameInfo> dumpFrameInfos_;
+    std::list<FrameInfo> dumpFrameInfos;
     FrameInfo frameInfo;
-    dumpFrameInfos_.push_back(frameInfo);
+    dumpFrameInfos.push_back(frameInfo);
+    context_->dumpFrameInfos_ = dumpFrameInfos;
     EXPECT_FALSE(context_->PrintVsyncInfoIfNeed());
+    context_->dumpFrameInfos_.back().frameRecvTime_ = -1;
+    EXPECT_FALSE(context_->PrintVsyncInfoIfNeed());
+    context_->dumpFrameInfos_.clear();
 }
 
 /**
@@ -1974,6 +1994,20 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg094, TestSize.Level1)
     ASSERT_NE(context_, nullptr);
     context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
 
+    SystemProperties::SetColorMode(ColorMode::DARK);
+    context_->SetAppBgColor(Color::BLACK);
+    context_->ChangeDarkModeBrightness();
+    context_->SetIsJsCard(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsFormRender(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsDynamicRender(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsUIExtensionWindow(true);
+    context_->ChangeDarkModeBrightness();
+    context_->SetAppBgColor(Color::BLUE);
+    context_->ChangeDarkModeBrightness();
+    SystemProperties::SetColorMode(ColorMode::COLOR_MODE_UNDEFINED);
     context_->ChangeDarkModeBrightness();
     EXPECT_NE(context_->stageManager_, nullptr);
 }

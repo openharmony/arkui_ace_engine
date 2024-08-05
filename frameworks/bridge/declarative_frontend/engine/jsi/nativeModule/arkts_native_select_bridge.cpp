@@ -869,6 +869,7 @@ ArkUINativeModuleValue SelectBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCal
     CalcDimension dividerEndMargin;
     Color colorObj;
     auto context = reinterpret_cast<FrameNode*>(nativeNode)->GetContext();
+    CHECK_NULL_RETURN(context, panda::NativePointerRef::New(vm, nullptr));
     auto themeManager = context->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, panda::NativePointerRef::New(vm, nullptr));
     auto selectTheme = themeManager->GetTheme<SelectTheme>();

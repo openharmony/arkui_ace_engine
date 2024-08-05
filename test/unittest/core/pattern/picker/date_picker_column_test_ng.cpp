@@ -1790,6 +1790,7 @@ HWTEST_F(DatePickerColumnTest, DatePickerPatternTest017, TestSize.Level1)
      * @tc.cases: case2. pickerNode is not completed.
      */
     auto lunarDate = datePickerPattern->GetCurrentLunarDateByMonthDaysColumn(SELECTED_YEAR);
+    datePickerPattern->HandleAddLunarMonthDaysChange(0);
     datePickerPattern->LunarMonthDaysColumnBuilding(lunarDate);
     ASSERT_NE(datePickerPattern, nullptr);
 }
@@ -1811,9 +1812,21 @@ HWTEST_F(DatePickerColumnTest, DatePickerPatternTest018, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
+    auto year = frameNode->GetChildAtIndex(1);
+    ASSERT_NE(year, nullptr);
+    auto stackYear = AceType::DynamicCast<FrameNode>(year);
+    ASSERT_NE(stackYear, nullptr);
+    auto blendYear = AceType::DynamicCast<FrameNode>(stackYear->GetLastChild());
+    ASSERT_NE(blendYear, nullptr);
+    auto yearDaysNode = AceType::DynamicCast<FrameNode>(blendYear->GetLastChild());
+    ASSERT_NE(yearDaysNode, nullptr);
+    auto yearDatePickerColumnPattern = yearDaysNode->GetPattern<DatePickerColumnPattern>();
     /**
      * @tc.cases: case1. pickerNode is completed.
      */
+    yearDatePickerColumnPattern->SetCurrentIndex(0);
+    pickerPattern->HandleAddLunarMonthDaysChange(0);
+    pickerPattern->HandleAddLunarMonthDaysChange(1);
     auto lunarDate = pickerPattern->GetCurrentLunarDateByMonthDaysColumn(SELECTED_YEAR);
     pickerPattern->LunarMonthDaysColumnBuilding(lunarDate);
     ASSERT_NE(pickerPattern, nullptr);

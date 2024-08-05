@@ -102,6 +102,8 @@
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "bridge/declarative_frontend/jsview/js_line.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
+#include "bridge/declarative_frontend/jsview/js_linear_indicator.h"
+#include "bridge/declarative_frontend/jsview/js_linear_indicator_controller.h"
 #include "bridge/declarative_frontend/jsview/js_list.h"
 #include "bridge/declarative_frontend/jsview/js_list_item.h"
 #include "bridge/declarative_frontend/jsview/js_list_item_group.h"
@@ -112,6 +114,7 @@
 #include "bridge/declarative_frontend/jsview/js_menu.h"
 #include "bridge/declarative_frontend/jsview/js_menu_item.h"
 #include "bridge/declarative_frontend/jsview/js_menu_item_group.h"
+#include "bridge/declarative_frontend/jsview/js_mock.h"
 #include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination.h"
 #include "bridge/declarative_frontend/jsview/js_navigation.h"
@@ -843,7 +846,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "GestureRecognizer", JSGestureRecognizer::JSBind },
     { "EventTargetInfo", JSEventTargetInfo::JSBind },
     { "ScrollableTargetInfo", JSScrollableTargetInfo::JSBind },
-    { "PanRecognizer", JSPanRecognizer::JSBind }
+    { "PanRecognizer", JSPanRecognizer::JSBind },
+    { "LinearIndicator", JSLinearIndicator::JSBind },
+    { "LinearIndicatorController", JSLinearIndicatorController::JSBind }
 };
 
 void RegisterBindFuncs(BindingTarget globalObj)
@@ -1150,6 +1155,7 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
     JSRenderingContextSettings::JSBind(globalObj);
     JSRenderImage::JSBind(globalObj, nativeEngine);
     JSPath2D::JSBind(globalObj);
+    JSMock::JSBind(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

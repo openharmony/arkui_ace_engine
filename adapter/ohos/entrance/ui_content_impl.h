@@ -78,6 +78,7 @@ public:
     std::string GetContentInfo(ContentInfoType type) const override;
     void DestroyUIDirector() override;
     void SetUIContentType(UIContentType uIContentType) override;
+    void UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
     // UI content event process
     bool ProcessBackPressed() override;
@@ -227,7 +228,7 @@ public:
     bool DumpViewData(AbilityBase::ViewData& viewData, AbilityBase::AutoFillType& type) override;
     bool CheckNeedAutoSave() override;
     bool DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
-        bool skipSubAutoFillContainer = false);
+        bool skipSubAutoFillContainer = false, bool needsRecordData = false);
 
     void SearchElementInfoByAccessibilityId(
         int64_t elementId, int32_t mode,
@@ -326,7 +327,9 @@ public:
 
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
-    void SetForceSplitEnable(bool isForceSplit) override;
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override;
+
+    void UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
 private:
     UIContentErrorCode InitializeInner(
@@ -341,6 +344,8 @@ private:
 
     void InitializeSafeArea(const RefPtr<Platform::AceContainer>& container);
     void InitializeDisplayAvailableRect(const RefPtr<Platform::AceContainer>& container);
+
+    void InitDragSummaryMap(const RefPtr<Platform::AceContainer>& container);
 
     RefPtr<PopupParam> CreateCustomPopupParam(bool isShow, const CustomPopupUIExtensionConfig& config);
     void OnPopupStateChange(const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId);

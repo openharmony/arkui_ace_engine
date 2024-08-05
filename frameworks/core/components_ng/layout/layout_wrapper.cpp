@@ -201,6 +201,28 @@ RectF LayoutWrapper::GetFrameRectWithSafeArea(bool checkPosition) const
     return geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect();
 }
 
+void LayoutWrapper::AdjustNotExpandNode()
+{
+    auto host = GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    auto parent = host->GetAncestorNodeOfFrame();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto adjustedRect = geometryNode->GetFrameRect();
+    if (safeAreaManager->IsSafeAreaValid()) {
+        adjustedRect += geometryNode->GetParentAdjust();
+    }
+    geometryNode->SetSelfAdjust(adjustedRect - geometryNode->GetFrameRect());
+    renderContext->UpdatePaintRect(
+        adjustedRect + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
+}
+
 void LayoutWrapper::ExpandSafeArea()
 {
     auto host = GetHostNode();
@@ -212,23 +234,13 @@ void LayoutWrapper::ExpandSafeArea()
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
     auto selfExpansive = host->SelfExpansive();
     if (!selfExpansive) {
-        auto parent = host->GetAncestorNodeOfFrame();
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        auto geometryNode = GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto adjustedRect = geometryNode->GetFrameRect();
-        if (safeAreaManager->IsSafeAreaValid()) {
-            adjustedRect += geometryNode->GetParentAdjust();
-        }
-        geometryNode->SetSelfAdjust(adjustedRect - geometryNode->GetFrameRect());
-        renderContext->UpdatePaintRect(
-            adjustedRect + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
+        AdjustNotExpandNode();
         return;
     }
     CHECK_NULL_VOID(selfExpansive);
     opts->switchToNone = false;
     auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     OffsetF keyboardAdjust;
     if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
         keyboardAdjust = ExpandIntoKeyboard();
@@ -243,6 +255,33 @@ void LayoutWrapper::ExpandSafeArea()
     auto frame = geometryNode->GetFrameRect() + parentGlobalOffset + keyboardAdjust + parentAdjust.GetOffset();
     auto originGlobal = frame;
 
+    ExpandHelper(opts, frame);
+
+    AdjustFixedSizeNode(frame);
+    auto parent = host->GetAncestorNodeOfFrame();
+    auto parentScrollable = (parent && parent->GetPattern<ScrollablePattern>());
+    // restore to local offset
+    auto diff = originGlobal.GetOffset() - frame.GetOffset();
+    frame -= parentGlobalOffset;
+    // since adjustment is not accumulated and we did not track previous diff, diff need to be updated
+    AdjustChildren(diff, parentScrollable);
+
+    if (parentScrollable) {
+        AdjustNotExpandNode();
+        return;
+    }
+    auto selfAdjust = frame - geometryNode->GetFrameRect();
+    geometryNode->SetSelfAdjust(selfAdjust);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdatePaintRect(frame + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
+}
+
+void LayoutWrapper::ExpandHelper(const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame)
+{
+    CHECK_NULL_VOID(opts);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     auto safeArea = pipeline->GetSafeAreaManager()->GetCombinedSafeArea(*opts);
     if ((opts->edges & SAFE_AREA_EDGE_START) && safeArea.left_.IsOverlapped(frame.Left())) {
         frame.SetWidth(frame.Width() + frame.Left() - safeArea.left_.start);
@@ -259,9 +298,15 @@ void LayoutWrapper::ExpandSafeArea()
     if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && safeArea.bottom_.IsOverlapped(frame.Bottom())) {
         frame.SetHeight(frame.Height() + (safeArea.bottom_.end - frame.Bottom()));
     }
+}
 
+void LayoutWrapper::AdjustFixedSizeNode(RectF& frame)
+{
     // reset if User has fixed size
     auto layoutProperty = GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     if (layoutProperty->HasFixedWidth()) {
         frame.SetWidth(geometryNode->GetFrameRect().Width());
     }
@@ -271,21 +316,6 @@ void LayoutWrapper::ExpandSafeArea()
     if (layoutProperty->HasAspectRatio()) {
         frame.SetHeight(frame.Width() / layoutProperty->GetAspectRatio());
     }
-    // restore to local offset
-    auto diff = originGlobal.GetOffset() - frame.GetOffset();
-    frame -= parentGlobalOffset;
-    // since adjustment is not accumulated and we did not track previous diff, diff need to be updated
-    AdjustChildren(diff);
-
-    auto selfAdjust = frame - geometryNode->GetFrameRect();
-    geometryNode->SetSelfAdjust(selfAdjust);
-    auto parent = host->GetAncestorNodeOfFrame();
-    if (parent && parent->GetPattern<ScrollablePattern>()) {
-        return;
-    }
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->UpdatePaintRect(frame + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
 }
 
 void LayoutWrapper::ResetSafeAreaPadding()
@@ -370,70 +400,27 @@ void LayoutWrapper::GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, Exp
         auto innerSpaceLeftLength = parentInnerSpace.left.value_or(0.0f);
         // left side safeArea range is [border + padding, border + padding + safeAreaPadding]
         if (InRange(adjustingRect.Left(), innerSpaceLeftLength,
-                innerSpaceLeftLength + parentSafeAreaPadding.left.value_or(0.0f))) {
+            innerSpaceLeftLength + parentSafeAreaPadding.left.value_or(0.0f))) {
             rollingExpand.left = adjustingRect.Left() - innerSpaceLeftLength;
         }
     }
-    if (!NearZero(parentSafeAreaPadding.top.value_or(0.0f))) {
-        auto innerSpaceTopLength = parentInnerSpace.top.value_or(0.0f);
-        // top side safeArea padding range is [top border + padding, top border + padding + safeAreaPadding]
-        if (InRange(adjustingRect.Top(), innerSpaceTopLength,
-                innerSpaceTopLength + parentSafeAreaPadding.top.value_or(0.0f))) {
-            rollingExpand.top = adjustingRect.Top() - innerSpaceTopLength;
-        }
-    }
-    if (!NearZero(parentSafeAreaPadding.right.value_or(0.0f))) {
-        auto parentWidth = parentGeometryNode->GetFrameRect().Width();
-        auto innerSpaceRightLength = parentInnerSpace.right.value_or(0.0f);
-        // right side safeArea padding range is
-        // [parentWidth - (right border + padding) - right safeAreaPadding, parentWidth - (right border + padding)]
-        if (InRange(adjustingRect.Right(),
-                parentWidth - innerSpaceRightLength - parentSafeAreaPadding.right.value_or(0.0f),
-                parentWidth - innerSpaceRightLength)) {
-            rollingExpand.right = parentWidth - innerSpaceRightLength - adjustingRect.Right();
-        }
-    }
-    if (!NearZero(parentSafeAreaPadding.bottom.value_or(0.0f))) {
-        auto parentHeight = parentGeometryNode->GetFrameRect().Height();
-        // bottom side safeArea padding range is
-        // [parentHeight - (bottom border + padding) - bottom safeAreaPadding,
-        // parentHeight - (bottom border + padding)]
-        auto innerSpaceBottomLength = parentInnerSpace.bottom.value_or(0.0f);
-        if (InRange(adjustingRect.Bottom(),
-                parentHeight - innerSpaceBottomLength - parentSafeAreaPadding.bottom.value_or(0.0f),
-                parentHeight - innerSpaceBottomLength)) {
-            rollingExpand.bottom = parentHeight - innerSpaceBottomLength - adjustingRect.Bottom();
-        }
-    }
-    adjustingRect.SetLeft(adjustingRect.Left() - rollingExpand.left.value_or(0.0f));
-    adjustingRect.SetTop(adjustingRect.Top() - rollingExpand.top.value_or(0.0f));
-    adjustingRect.SetWidth(
-        adjustingRect.Width() + rollingExpand.left.value_or(0.0f) + rollingExpand.right.value_or(0.0f));
-    adjustingRect.SetHeight(
-        adjustingRect.Height() + rollingExpand.top.value_or(0.0f) + rollingExpand.bottom.value_or(0.0f));
-    // after expanding based on parent safeAreaPadding, adjust rect to parent's coordinate
-    adjustingRect.SetOffset(adjustingRect.GetOffset() + parentGeometryNode->GetFrameOffset());
-    totalExpand = totalExpand.Plus(rollingExpand);
-    // CreateMargin does get or create
-    auto margin = parentLayoutProperty->CreateMargin();
-    // if parent has all four sides of innerSpace included(padding and border) or margin, stop expanding.
-    if (parentInnerSpace.AllSidesFilled(true) || margin.AllSidesFilled(true) || parent->GetTag() == V2::STAGE_ETS_TAG) {
-        return;
-    }
-    if (parent->AccumulateExpandCacheHit(totalExpand)) {
-        return;
-    }
-    parent->GetAccumulatedSafeAreaExpandHelper(adjustingRect, totalExpand);
+    return;
 }
 
-void LayoutWrapper::AdjustChildren(const OffsetF& offset)
+void LayoutWrapper::AdjustChildren(const OffsetF& offset, bool parentScrollable)
 {
+    auto host = GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern();
+    if (pattern && pattern->ConsumeChildrenAdjustment(offset)) {
+        return;
+    }
     for (const auto& childUI : GetHostNode()->GetChildren()) {
-        AdjustChild(childUI, offset);
+        AdjustChild(childUI, offset, parentScrollable);
     }
 }
 
-void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset)
+void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset, bool parentScrollable)
 {
     auto child = DynamicCast<FrameNode>(childUI);
     if (!child) {
@@ -441,7 +428,7 @@ void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset)
             return;
         }
         for (const auto& syntaxChild : childUI->GetChildren()) {
-            AdjustChild(syntaxChild, offset);
+            AdjustChild(syntaxChild, offset, parentScrollable);
         }
         return;
     }
@@ -450,7 +437,9 @@ void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset)
     if (parentAdjust.GetOffset() != offset) {
         AddChildToExpandListIfNeeded(AceType::WeakClaim(AceType::RawPtr(child)));
     }
-    childGeo->SetParentAdjust(RectF(offset, SizeF()));
+    if (!parentScrollable) {
+        childGeo->SetParentAdjust(RectF(offset, SizeF()));
+    }
 }
 
 void LayoutWrapper::AddChildToExpandListIfNeeded(const WeakPtr<FrameNode>& node)
@@ -534,6 +523,13 @@ void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
     }
 
     layoutProperty->UpdateLayoutConstraint(constraint);
+}
+
+void LayoutWrapper::ApplyConstraintWithoutMeasure(const std::optional<LayoutConstraintF>& constraint)
+{
+    if (constraint) {
+        ApplyConstraint(*constraint);
+    }
 }
 
 void LayoutWrapper::CreateRootConstraint()

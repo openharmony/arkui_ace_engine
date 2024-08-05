@@ -41,7 +41,7 @@ public:
         auto value = MakeRefPtr<IndexerLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propArrayValue_ = CloneArrayValue();
-        value->propActualArrayValue_ = CloneArrayValue();
+        value->propActualArrayValue_ = CloneActualArrayValue();
         value->propSelected_ = CloneSelected();
         value->propColor_ = CloneColor();
         value->propSelectedColor_ = CloneSelectedColor();

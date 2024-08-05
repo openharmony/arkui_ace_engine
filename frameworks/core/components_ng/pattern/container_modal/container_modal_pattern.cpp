@@ -165,7 +165,9 @@ void ContainerModalPattern::InitContainerEvent()
     auto floatingContext = floatingTitleRow->GetRenderContext();
     CHECK_NULL_VOID(floatingContext);
 
-    auto titlePopupDistance = TITLE_POPUP_DISTANCE * containerNode->GetContext()->GetDensity();
+    auto containerNodeContext = containerNode->GetContext();
+    CHECK_NULL_VOID(containerNodeContext);
+    auto titlePopupDistance = TITLE_POPUP_DISTANCE * containerNodeContext->GetDensity();
     AnimationOption option;
     option.SetDuration(TITLE_POPUP_DURATION);
     option.SetCurve(Curves::EASE_IN_OUT);
@@ -535,6 +537,8 @@ void ContainerModalPattern::UpdateGestureRowVisible()
 
 void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
 {
+    LOGI("ContainerModal customTitleSettedShow=%{public}d, floatingTitleSettedShow=%{public}d", customTitleSettedShow,
+        floatingTitleSettedShow);
     customTitleSettedShow_ = customTitleSettedShow;
     auto customTitleRow = GetCustomTitleRow();
     CHECK_NULL_VOID(customTitleRow);
@@ -561,6 +565,7 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
 
 void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
 {
+    LOGI("ContainerModal SetContainerModalTitleHeight height=%{public}d", height);
     if (height < 0) {
         height = 0;
     }

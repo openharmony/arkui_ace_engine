@@ -61,6 +61,13 @@ public:
         SetElevation(elevation);
     };
 
+     // create shadow for hardware rending.
+    Shadow(double radius, Offset offset, Color spotColor, ShadowStyle style)
+        : offset_(offset), color_(spotColor), style_(style)
+    {
+        SetBlurRadius(radius);
+    };
+
     // create shadow for software rending.
     Shadow(double blurRadius, double spreadRadius, Offset offset, Color spotColor)
         : spreadRadius_(spreadRadius), offset_(offset), color_(spotColor)

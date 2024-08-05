@@ -21,7 +21,7 @@ from src.beans.event_procedures import EventProcedures
 from src.beans.frame_node import FrameNode
 from src.beans.touch_point import TouchPoint
 from src.utils.log_wrapper import log_info, log_error
-from src.utils.value_parser import pack_string_until_next_keyword, get_value_as_int
+from src.utils.value_parser import pack_string_until_next_keyword
 
 
 # includes touch points and frame nodes(hittest) and event procedures

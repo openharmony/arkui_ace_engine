@@ -40,7 +40,8 @@ public:
     void GetPixelMapData(
         const std::function<void(const RefPtr<PixelMap>&)>& callback, bool syncMode = false) override {};
     void HasData(const std::function<void(bool hasData)>& callback) override {};
-    void HasDataType(const std::function<void(bool hasData)>& callback, const std::string& mimeType) override {};
+    void HasDataType(
+        const std::function<void(bool hasData)>& callback, const std::vector<std::string>& mimeTypes) override {};
     void AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap) override {};
     void AddImageRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& uri) override {};
     void AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& selectedStr) override {};

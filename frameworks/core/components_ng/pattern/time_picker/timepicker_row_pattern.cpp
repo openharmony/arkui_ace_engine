@@ -72,13 +72,14 @@ void TimePickerRowPattern::SetButtonIdeaSize()
     CHECK_NULL_VOID(pickerTheme);
     auto children = host->GetChildren();
     auto height = pickerTheme->GetDividerSpacing();
-    CHECK_EQUAL_VOID(children.size(), 0);
-    auto width = host->GetGeometryNode()->GetFrameSize().Width() / static_cast<float>(children.size());
-    auto defaultWidth = height.ConvertToPx() * 2;
-    if (width > defaultWidth) {
-        width = static_cast<float>(defaultWidth);
-    }
     for (const auto& child : children) {
+        auto childNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(childNode);
+        auto width = childNode->GetGeometryNode()->GetFrameSize().Width();
+        auto defaultWidth = height.ConvertToPx() * 2;
+        if (width > defaultWidth) {
+            width = static_cast<float>(defaultWidth);
+        }
         auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
@@ -93,13 +94,35 @@ void TimePickerRowPattern::SetButtonIdeaSize()
     }
 }
 
+void TimePickerRowPattern::ColumnPatternInitHapticController()
+{
+    if (!isHapticChanged_) {
+        return;
+    }
+
+    isHapticChanged_ = false;
+    for (auto iter = allChildNode_.begin(); iter != allChildNode_.end(); iter++) {
+        auto columnNode = iter->second.Upgrade();
+        if (!columnNode) {
+            continue;
+        }
+        auto pattern = columnNode->GetPattern<TimePickerColumnPattern>();
+        if (!pattern) {
+            continue;
+        }
+        pattern->InitHapticController(columnNode);
+    }
+}
+
 void TimePickerRowPattern::OnModifyDone()
 {
     if (isFiredTimeChange_ && !isForceUpdate_ && !isDateTimeOptionUpdate_) {
         isFiredTimeChange_ = false;
+        ColumnPatternInitHapticController();
         return;
     }
 
+    isHapticChanged_ = false;
     isForceUpdate_ = false;
     isDateTimeOptionUpdate_ = false;
     auto host = GetHost();
@@ -503,18 +526,13 @@ void TimePickerRowPattern::UpdateNodePositionForUg()
 
 void TimePickerRowPattern::FlushAmPmFormatString()
 {
-    auto it = std::find(vecAmPm_.begin(), vecAmPm_.end(), "AM");
-    if (it != vecAmPm_.end()) {
+    auto amPmStrings = Localization::GetInstance()->GetAmPmStrings();
+    if (amPmStrings.size() > 1) {
         vecAmPm_.clear();
-        vecAmPm_ = Localization::GetInstance()->GetAmPmStrings();
-        std::string am = vecAmPm_[0];
+        std::string am = amPmStrings[0];
         vecAmPm_.emplace_back(am);
-        std::string pm = vecAmPm_[1];
+        std::string pm = amPmStrings[1];
         vecAmPm_.emplace_back(pm);
-    } else {
-        vecAmPm_.clear();
-        vecAmPm_.emplace_back("AM");
-        vecAmPm_.emplace_back("PM");
     }
 }
 

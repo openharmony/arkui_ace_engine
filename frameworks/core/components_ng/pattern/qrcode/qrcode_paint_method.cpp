@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t QRCODE_START_INDEX = 0;
-constexpr uint32_t QRCODE_VALUE_MAX_LENGTH = 256;
+constexpr uint32_t QRCODE_VALUE_MAX_LENGTH = 512;
 } // namespace
 
 void QRCodePaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)

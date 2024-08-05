@@ -1077,13 +1077,13 @@ HWTEST_F(RadioNodeTestNg, PreventDefault002, TestSize.Level1)
     pattern->InitTouchEvent();
     TouchEventInfo touchInfo("onTouch");
     TouchLocationInfo touchDownInfo(1);
-    touchDownInfo.SetTouchType(TouchType::DOWN);
+    touchDownInfo.SetTouchType(TouchType::CANCEL);
     touchInfo.SetPreventDefault(false);
     touchInfo.SetSourceDevice(SourceType::TOUCH);
     touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
     pattern->touchListener_->callback_(touchInfo);
     EXPECT_FALSE(pattern->isTouchPreventDefault_);
-    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::PRESS);
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::NONE);
     /**
      * @tc.steps: step3. Mock GestureEvent info and set preventDefault to false
      * @tc.expected: Check the param value
@@ -1092,6 +1092,50 @@ HWTEST_F(RadioNodeTestNg, PreventDefault002, TestSize.Level1)
     GestureEvent clickInfo;
     clickInfo.SetPreventDefault(false);
     clickInfo.SetSourceDevice(SourceType::TOUCH);
+    pattern->clickListener_->operator()(clickInfo);
+    EXPECT_FALSE(pattern->isTouchPreventDefault_);
+}
+
+/**
+ * @tc.name: PreventDefault003
+ * @tc.desc: test InitTouchEvent and InitClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioNodeTestNg, PreventDefault003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    /**
+     * @tc.steps: step2. Mock TouchEvent info and set preventDefault to false
+     * @tc.expected: Check the param value
+     */
+    pattern->InitTouchEvent();
+    TouchEventInfo touchInfo("onTouch");
+    TouchLocationInfo touchDownInfo(1);
+    touchDownInfo.SetTouchType(TouchType::UP);
+    touchInfo.SetPreventDefault(true);
+    touchInfo.SetSourceDevice(SourceType::MOUSE);
+    touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
+    pattern->touchListener_->callback_(touchInfo);
+    EXPECT_FALSE(pattern->isTouchPreventDefault_);
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::NONE);
+    /**
+     * @tc.steps: step3. Mock GestureEvent info and set preventDefault to false
+     * @tc.expected: Check the param value
+     */
+    pattern->InitClickEvent();
+    GestureEvent clickInfo;
+    clickInfo.SetPreventDefault(false);
+    clickInfo.SetSourceDevice(SourceType::MOUSE);
     pattern->clickListener_->operator()(clickInfo);
     EXPECT_FALSE(pattern->isTouchPreventDefault_);
 }

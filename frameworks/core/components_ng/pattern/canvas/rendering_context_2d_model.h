@@ -108,6 +108,7 @@ public:
     virtual void SaveLayer() {};
     virtual void RestoreLayer() {};
     virtual void Reset() {};
+    virtual void SetDensity(double density) {};
     virtual TextMetrics GetMeasureTextMetrics(const PaintState& state, const std::string& text)
     {
         return { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };

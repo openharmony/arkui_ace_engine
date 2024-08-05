@@ -94,7 +94,7 @@ void BubblePattern::OnModifyDone()
     RegisterButtonOnTouch();
 }
 
-void BubblePattern::OnAttachToFrameNode()
+void BubblePattern::AddPipelineCallBack()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -102,10 +102,19 @@ void BubblePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     pipelineContext->AddWindowStateChangedCallback(host->GetId());
+}
+
+void BubblePattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
 
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    hasOnAreaChange_ = pipelineContext->HasOnAreaChangeNode(targetNode->GetId());
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host)](const RectF& oldRect,
@@ -142,7 +151,9 @@ void BubblePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
-    pipeline->RemoveOnAreaChangeNode(targetNode->GetId());
+    if (!hasOnAreaChange_) {
+        pipeline->RemoveOnAreaChangeNode(targetNode->GetId());
+    }
 }
 
 void BubblePattern::InitTouchEvent()
@@ -185,7 +196,6 @@ void BubblePattern::HandleTouchDown(const Offset& clickPosition)
     auto bubbleRenderProp = host->GetPaintProperty<BubbleRenderProperty>();
     CHECK_NULL_VOID(bubbleRenderProp);
     if (touchRegion_.IsInRegion(PointF(clickPosition.GetX(), clickPosition.GetY()))) {
-        LOGI("Contains the touch region.");
         return;
     }
     auto autoCancel = bubbleRenderProp->GetAutoCancel().value_or(true);
@@ -361,7 +371,6 @@ RefPtr<FrameNode> BubblePattern::GetButtonRowNode()
 
 void BubblePattern::PopBubble()
 {
-    LOGI("BubblePattern::PopBubble from click");
     auto pipelineNg = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineNg);
     auto overlayManager = pipelineNg->GetOverlayManager();

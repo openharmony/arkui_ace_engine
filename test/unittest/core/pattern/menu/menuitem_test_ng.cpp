@@ -889,6 +889,125 @@ HWTEST_F(MenuItemTestNg, MenuItemViewTestNgSetSelectIconSrc002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MenuItemViewTestNg001
+ * @tc.desc: Verify MenuItemModelNG methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, MenuItemViewTestNg001, TestSize.Level1)
+{
+    MenuItemModelNG MneuItemModelInstance;
+    MenuItemProperties itemOption;
+    MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetFontSize(Dimension());
+    MneuItemModelInstance.SetSelectIconSymbol([](WeakPtr<NG::FrameNode> weakPtr) {});
+    MneuItemModelInstance.SetOnChange([](bool onChange) {});
+    std::vector<std::string> families = {"cursive"};
+    MneuItemModelInstance.SetFontFamily(families);
+    MneuItemModelInstance.SetLabelFontFamily(families);
+
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+
+    EXPECT_FALSE(itemProperty->GetFontSize().has_value());
+}
+
+/**
+ * @tc.name: MenuItemViewTestNg002
+ * @tc.desc: Verify MenuItemModelNG methods with frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, MenuItemViewTestNg002, TestSize.Level1)
+{
+    MenuItemModelNG MneuItemModelInstance;
+    MenuItemProperties itemOption;
+    MneuItemModelInstance.Create(itemOption);
+
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    FrameNode *frameNode = itemNode.GetRawPtr();
+    CHECK_NULL_VOID(frameNode);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+
+    MneuItemModelInstance.SetSelected(frameNode, true);
+    MneuItemModelInstance.SetSelectIconSymbol(frameNode, [](WeakPtr<NG::FrameNode> weakPtr) {});
+    std::vector<std::string> families = {"cursive"};
+    MneuItemModelInstance.SetFontFamily(frameNode, families);
+
+    MneuItemModelInstance.SetFontColor(frameNode, Color::RED);
+    EXPECT_EQ(itemProperty->GetFontColor().value(), Color::RED);
+
+    MneuItemModelInstance.SetFontColor(frameNode, std::nullopt);
+    ASSERT_FALSE(itemProperty->GetFontColor().has_value());
+
+    MneuItemModelInstance.SetFontSize(frameNode, Dimension(10));
+    EXPECT_EQ(itemProperty->GetFontSize().value(), Dimension(10));
+
+    MneuItemModelInstance.SetFontSize(frameNode, Dimension(0));
+    EXPECT_FALSE(itemProperty->GetFontSize().has_value());
+
+    MneuItemModelInstance.SetFontWeight(frameNode, FontWeight::BOLD);
+    EXPECT_EQ(itemProperty->GetFontWeight().value(), FontWeight::BOLD);
+
+    MneuItemModelInstance.SetFontStyle(frameNode, Ace::FontStyle::ITALIC);
+    EXPECT_EQ(itemProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+
+    MneuItemModelInstance.SetSelectIcon(frameNode, true);
+    EXPECT_EQ(itemProperty->GetSelectIcon().value_or(false), true);
+
+    MneuItemModelInstance.SetSelectIconSrc(frameNode, "selectIcon.png");
+    EXPECT_EQ(itemProperty->GetSelectIconSrc().value_or(""), "selectIcon.png");
+}
+
+/**
+ * @tc.name: MenuItemViewTestNg003
+ * @tc.desc: Verify MenuItemModelNG methods with frameNode about label.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, MenuItemViewTestNg003, TestSize.Level1)
+{
+    MenuItemModelNG MneuItemModelInstance;
+    MenuItemProperties itemOption;
+    MneuItemModelInstance.Create(itemOption);
+
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    FrameNode *frameNode = itemNode.GetRawPtr();
+    CHECK_NULL_VOID(frameNode);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+
+    std::vector<std::string> families = {"cursive"};
+    MneuItemModelInstance.SetLabelFontFamily(frameNode, families);
+
+    MneuItemModelInstance.SetLabelFontColor(frameNode, Color::RED);
+    EXPECT_EQ(itemProperty->GetLabelFontColor().value(), Color::RED);
+
+    MneuItemModelInstance.SetLabelFontColor(frameNode, std::nullopt);
+    ASSERT_FALSE(itemProperty->GetLabelFontColor().has_value());
+
+    MneuItemModelInstance.SetLabelFontSize(frameNode, Dimension(10));
+    EXPECT_EQ(itemProperty->GetLabelFontSize().value(), Dimension(10));
+
+    MneuItemModelInstance.SetLabelFontSize(frameNode, Dimension(0));
+    EXPECT_FALSE(itemProperty->GetLabelFontSize().has_value());
+
+    MneuItemModelInstance.SetLabelFontWeight(frameNode, FontWeight::BOLD);
+    EXPECT_EQ(itemProperty->GetLabelFontWeight().value(), FontWeight::BOLD);
+
+    MneuItemModelInstance.SetLabelFontStyle(frameNode, Ace::FontStyle::ITALIC);
+    EXPECT_EQ(itemProperty->GetLabelItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+}
+
+/**
  * @tc.name: MenuItemViewTestNgSetFontSize001
  * @tc.desc: Verify SetFontSize.
  * @tc.type: FUNC

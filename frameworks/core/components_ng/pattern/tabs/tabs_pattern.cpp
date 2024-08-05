@@ -108,10 +108,10 @@ void TabsPattern::FireTabContentStateCallback(int32_t oldIndex, int32_t nextInde
     CHECK_NULL_VOID(tabsNode);
     std::string id = tabsNode->GetInspectorId().value_or("");
     int32_t uniqueId = tabsNode->GetId();
-    auto swiperNode = tabsNode->GetTabs();
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
 
-    auto oldTabContent = swiperNode->GetChildAtIndex(oldIndex);
+    auto oldTabContent = AceType::DynamicCast<TabContentNode>(swiperNode->GetChildByIndex(oldIndex));
     if (oldTabContent) {
         std::string oldTabContentId = oldTabContent->GetInspectorId().value_or("");
         int32_t oldTabContentUniqueId = oldTabContent->GetId();
@@ -120,7 +120,7 @@ void TabsPattern::FireTabContentStateCallback(int32_t oldIndex, int32_t nextInde
         UIObserverHandler::GetInstance().NotifyTabContentStateUpdate(oldTabContentInfo);
     }
 
-    auto nextTabContent = swiperNode->GetChildAtIndex(nextIndex);
+    auto nextTabContent = AceType::DynamicCast<TabContentNode>(swiperNode->GetChildByIndex(nextIndex));
     if (nextTabContent) {
         std::string nextTabContentId = nextTabContent->GetInspectorId().value_or("");
         int32_t nextTabContentUniqueId = nextTabContent->GetId();

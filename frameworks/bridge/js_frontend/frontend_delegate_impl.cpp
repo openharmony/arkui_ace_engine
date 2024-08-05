@@ -958,16 +958,17 @@ Size FrontendDelegateImpl::MeasureTextSize(MeasureContext context)
     return MeasureUtil::MeasureTextSize(context);
 }
 
-void FrontendDelegateImpl::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-    const NG::ToastShowMode& /* showMode */, int32_t alignment, std::optional<DimensionOffset> offset)
+void FrontendDelegateImpl::ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
 {
-    int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
+    NG::ToastInfo updatedToastInfo = toastInfo;
+    updatedToastInfo.duration = std::clamp(toastInfo.duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
+    updatedToastInfo.isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
-    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContext));
     taskExecutor_->PostTask(
-        [durationTime, message, bottom, isRightToLeft, weak] {
-            ToastComponent::GetInstance().Show(weak.Upgrade(), message, durationTime, bottom, isRightToLeft);
+        [updatedToastInfo, weak] {
+            ToastComponent::GetInstance().Show(weak.Upgrade(), updatedToastInfo.message, updatedToastInfo.duration,
+                updatedToastInfo.bottom, updatedToastInfo.isRightToLeft);
         },
         TaskExecutor::TaskType::UI, "ArkUIShowToast");
 }

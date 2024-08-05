@@ -132,7 +132,8 @@ void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             auto childOffset = CalculateChildOffset(index, layoutWrapper);
             if (direction == TextDirection::RTL) {
                 childOffset.SetX(frameSize.CrossSize(Axis::VERTICAL) - childOffset.GetX() -
-                                 childWrapper->GetGeometryNode()->GetMarginFrameSize().Width());
+                                 childWrapper->GetGeometryNode()->GetMarginFrameSize().Width() +
+                                 padding.left.value_or(.0f) + padding.right.value_or(.0f));
             }
             childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset);
             childWrapper->Layout();

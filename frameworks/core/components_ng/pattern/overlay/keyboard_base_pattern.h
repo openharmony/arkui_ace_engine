@@ -56,6 +56,8 @@ public:
         safeHeight_ = safeHeight;
     }
 
+    float GetKeyboardHeight();
+
 private:
     int32_t targetId_ = -1;
     float keyboardHeight_ = 0.0f;

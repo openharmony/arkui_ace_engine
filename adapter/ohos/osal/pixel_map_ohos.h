@@ -33,6 +33,7 @@ public:
     static AlphaType AlphaTypeConverter(Media::AlphaType alphaType);
     int32_t GetWidth() const override;
     int32_t GetHeight() const override;
+    bool GetPixelsVec(std::vector<uint8_t>& data) const override;
     const uint8_t* GetPixels() const override;
     PixelFormat GetPixelFormat() const override;
     AlphaType GetAlphaType() const override;

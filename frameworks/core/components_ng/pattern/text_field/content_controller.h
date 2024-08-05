@@ -44,6 +44,7 @@ public:
     void FilterValue();
     void FilterValueType(std::string& value);
     std::string GetSelectedLimitValue(int32_t& index, int32_t& startIndex);
+    void FilterTextInputStyle(bool& textChanged, std::string& result);
 
     std::wstring GetWideText()
     {
@@ -89,7 +90,6 @@ public:
 
 private:
     void FormatIndex(int32_t& startIndex, int32_t& endIndex);
-    void FilterTextInputStyle(bool& textChanged, std::string& result);
     bool FilterWithEvent(const std::string& filter, std::string& result);
     std::string PreprocessString(int32_t startIndex, int32_t endIndex, const std::string& value);
     static std::string RemoveErrorTextFromValue(const std::string& value, const std::string& errorText);

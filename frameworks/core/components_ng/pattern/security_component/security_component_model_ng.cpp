@@ -25,6 +25,9 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#ifdef SECURITY_COMPONENT_ENABLE
+#include "core/components_ng/pattern/security_component/security_component_handler.h"
+#endif
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -147,12 +150,13 @@ void SecurityComponentModelNG::SetDefaultTextStyle(const RefPtr<FrameNode>& text
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateContent(text);
-    textLayoutProperty->UpdateMaxLines(1);
+    textLayoutProperty->UpdateMaxLines(secCompTheme->GetDefaultTextMaxLines());
     textLayoutProperty->UpdateFontSize(secCompTheme->GetFontSize());
     textLayoutProperty->UpdateItalicFontStyle(Ace::FontStyle::NORMAL);
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     std::vector<std::string> defaultFontFamily = { "HarmonyOS Sans" };
     textLayoutProperty->UpdateFontFamily(defaultFontFamily);
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
 
     if (isButtonVisible) {
         textLayoutProperty->UpdateTextColor(secCompTheme->GetFontColor());
@@ -300,8 +304,12 @@ void SecurityComponentModelNG::SetBackgroundColor(const Color& value)
         return;
     }
 
+    bool res = false;
+#ifdef SECURITY_COMPONENT_ENABLE
+    res = SecurityComponentHandler::IsSystemAppCalling();
+#endif
     Color resColor = value;
-    if (!IsInReleaseList(resColor.GetValue()) && !IsArkuiComponent() && IsBelowThreshold(value)) {
+    if (!res && !IsInReleaseList(resColor.GetValue()) && !IsArkuiComponent() && IsBelowThreshold(value)) {
         resColor = value.ChangeAlpha(FULL_TRANSPARENCY_VALUE);
     }
     ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, BackgroundColor, resColor);

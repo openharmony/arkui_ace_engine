@@ -32,7 +32,7 @@ namespace {
 constexpr int32_t MAX_RECOVER_BUTTON_INDEX = 0;
 constexpr int32_t MINIMIZE_BUTTON_INDEX = 1;
 constexpr int32_t CLOSE_BUTTON_INDEX = 2;
-constexpr int32_t TITLE_POPUP_DURATION = 200;
+constexpr int32_t TITLE_POPUP_DURATION = 400;
 } // namespace
 
 void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
@@ -108,6 +108,7 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     CHECK_NULL_VOID(controlButtonsContext);
     controlButtonsContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
     controlButtonsLayoutProperty->UpdateVisibility(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
+    SetControlButtonVisibleBeforeAnim(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
     auto gestureRow = GetGestureRow();
     CHECK_NULL_VOID(gestureRow);
     AddOrRemovePanEvent(customTitleRow);
@@ -168,6 +169,7 @@ void ContainerModalPatternEnhance::ChangeControlButtons(bool isFocus)
     auto maximizeButton =
         AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
     auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
     MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
     InternalResource::ResourceId maxId =
@@ -200,6 +202,14 @@ void ContainerModalPatternEnhance::ChangeFloatingTitle(bool isFocus)
         windowManager->SetCurrentWindowMaximizeMode(MaximizeMode::MODE_RECOVER);
     }
 
+    auto floatingTitleRow = GetFloatingTitleRow();
+    CHECK_NULL_VOID(floatingTitleRow);
+    auto floatingContext = floatingTitleRow->GetRenderContext();
+    CHECK_NULL_VOID(floatingContext);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
+    floatingContext->UpdateBackgroundColor(theme->GetBackGroundColor(isFocus));
     // update floating custom title label
     auto customFloatingTitleNode = GetFloatingTitleNode();
     CHECK_NULL_VOID(customFloatingTitleNode);
@@ -255,9 +265,10 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
     CHECK_NULL_VOID(buttonsContext);
 
     auto titlePopupDistance = titleHeight_.ConvertToPx();
+    auto cubicBezierCurve = AceType::MakeRefPtr<CubicCurve>(0.00, 0.00, 0.20, 1.00);
     AnimationOption option;
     option.SetDuration(TITLE_POPUP_DURATION);
-    option.SetCurve(Curves::EASE_IN_OUT);
+    option.SetCurve(cubicBezierCurve);
 
     if (isShow && CanShowFloatingTitle()) {
         floatingContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
@@ -285,9 +296,11 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
                 buttonsContext->OnTransformTranslateUpdate({ 0.0f,
                     beforeVisible == VisibleType::VISIBLE ? 0.0f : static_cast<float>(-titlePopupDistance), 0.0f });
             },
-            [floatingLayoutProperty, controlButtonsLayoutProperty, beforeVisible]() {
+            [floatingLayoutProperty, controlButtonsLayoutProperty, beforeVisible, weak = WeakClaim(this)]() {
+                auto containerModal = weak.Upgrade();
+                CHECK_NULL_VOID(containerModal);
                 floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
-                controlButtonsLayoutProperty->UpdateVisibility(beforeVisible);
+                controlButtonsLayoutProperty->UpdateVisibility(containerModal->GetControlButtonVisibleBeforeAnim());
             });
     }
 }

@@ -590,7 +590,7 @@ void LayoutProperty::ConstraintContentByBorder()
 {
     CHECK_NULL_VOID(borderWidth_);
     auto borderWidthF = ConvertToBorderWidthPropertyF(
-        *borderWidth_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
+        *borderWidth_, contentConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         contentConstraint_->MinusPaddingToNonNegativeSize(
             borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
@@ -859,10 +859,15 @@ void LayoutProperty::UpdateGeometryTransition(const std::string& id,
         // unregister node from old geometry transition
         geometryTransitionOld->Update(host_, nullptr);
         // register node into new geometry transition
-        if (geometryTransitionNew) {
-            geometryTransitionNew->Update(nullptr, host_);
+        if (geometryTransitionNew && !geometryTransitionNew->Update(nullptr, host_)) {
+            TAG_LOGE(AceLogTag::ACE_GEOMETRY_TRANSITION, "redundant node%{public}d has same geoid: %{public}s",
+                host->GetId(), id.c_str());
         }
     } else if (geometryTransitionNew) {
+        if (geometryTransitionNew->IsInAndOutValid()) {
+            TAG_LOGE(AceLogTag::ACE_GEOMETRY_TRANSITION, "redundant node%{public}d has same geoid: %{public}s",
+                host->GetId(), id.c_str());
+        }
         geometryTransitionNew->Build(host_, true);
     }
     geometryTransition_ = geometryTransitionNew;
@@ -943,6 +948,9 @@ void LayoutProperty::UpdateMargin(const MarginProperty& value)
     if (margin_->UpdateWithCheck(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
     }
+    if (margin_->UpdateStartAndEnd(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+    }
 }
 
 void LayoutProperty::UpdatePadding(const PaddingProperty& value)
@@ -951,6 +959,9 @@ void LayoutProperty::UpdatePadding(const PaddingProperty& value)
         padding_ = std::make_unique<PaddingProperty>();
     }
     if (padding_->UpdateWithCheck(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+    }
+    if (padding_->UpdateStartAndEnd(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
     }
 }
@@ -1434,5 +1445,373 @@ void LayoutProperty::CheckOffsetLocalizedEdges(TextDirection layoutDirection)
         }
     }
     target->UpdateOffsetEdges(edges);
+}
+
+void LayoutProperty::CheckLocalizedBorderRadiuses(const TextDirection& direction)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& target = host->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    BorderRadiusProperty borderRadius;
+    BorderRadiusProperty borderRadiusProperty = target->GetBorderRadiusValue(BorderRadiusProperty {});
+    if (!borderRadiusProperty.radiusTopStart.has_value() && !borderRadiusProperty.radiusTopEnd.has_value() &&
+        !borderRadiusProperty.radiusBottomStart.has_value() && !borderRadiusProperty.radiusBottomEnd.has_value()) {
+        return;
+    }
+    if (borderRadiusProperty.radiusTopStart.has_value()) {
+        borderRadius.radiusTopStart = borderRadiusProperty.radiusTopStart;
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusTopRight = borderRadiusProperty.radiusTopStart;
+        } else {
+            borderRadius.radiusTopLeft = borderRadiusProperty.radiusTopStart;
+        }
+    }
+    if (borderRadiusProperty.radiusTopEnd.has_value()) {
+        borderRadius.radiusTopEnd = borderRadiusProperty.radiusTopEnd;
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusTopLeft = borderRadiusProperty.radiusTopEnd;
+        } else {
+            borderRadius.radiusTopRight = borderRadiusProperty.radiusTopEnd;
+        }
+    }
+    if (borderRadiusProperty.radiusBottomStart.has_value()) {
+        borderRadius.radiusBottomStart = borderRadiusProperty.radiusBottomStart;
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusBottomRight = borderRadiusProperty.radiusBottomStart;
+        } else {
+            borderRadius.radiusBottomLeft = borderRadiusProperty.radiusBottomStart;
+        }
+    }
+    if (borderRadiusProperty.radiusBottomEnd.has_value()) {
+        borderRadius.radiusBottomEnd = borderRadiusProperty.radiusBottomEnd;
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusBottomLeft = borderRadiusProperty.radiusBottomEnd;
+        } else {
+            borderRadius.radiusBottomRight = borderRadiusProperty.radiusBottomEnd;
+        }
+    }
+    target->UpdateBorderRadius(borderRadius);
+}
+
+void LayoutProperty::CheckLocalizedOuterBorderColor(const TextDirection& direction)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& target = host->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    NG::BorderColorProperty borderColors;
+    borderColors.multiValued = true;
+    auto outerBorderColorProperty = target->GetOuterBorderColorValue(BorderColorProperty {});
+    if (!outerBorderColorProperty.startColor.has_value() && !outerBorderColorProperty.endColor.has_value()) {
+        return;
+    }
+    if (outerBorderColorProperty.startColor.has_value()) {
+        borderColors.startColor = outerBorderColorProperty.startColor;
+        if (direction == TextDirection::RTL) {
+            borderColors.rightColor = outerBorderColorProperty.startColor;
+        } else {
+            borderColors.leftColor = outerBorderColorProperty.startColor;
+        }
+    }
+    if (outerBorderColorProperty.endColor.has_value()) {
+        borderColors.endColor = outerBorderColorProperty.endColor;
+        if (direction == TextDirection::RTL) {
+            borderColors.leftColor = outerBorderColorProperty.endColor;
+        } else {
+            borderColors.rightColor = outerBorderColorProperty.endColor;
+        }
+    }
+    if (outerBorderColorProperty.topColor.has_value()) {
+        borderColors.topColor = outerBorderColorProperty.topColor;
+    }
+    if (outerBorderColorProperty.bottomColor.has_value()) {
+        borderColors.topColor = outerBorderColorProperty.bottomColor;
+    }
+    target->UpdateOuterBorderColor(borderColors);
+}
+
+void LayoutProperty::CheckLocalizedPadding(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& paddingProperty = layoutProperty->GetPaddingProperty();
+    CHECK_NULL_VOID(paddingProperty);
+    if (!paddingProperty->start.has_value() && !paddingProperty->end.has_value()) {
+        return;
+    }
+    PaddingProperty padding;
+    if (paddingProperty->start.has_value()) {
+        padding.start = paddingProperty->start;
+        if (direction == TextDirection::RTL) {
+            padding.right = paddingProperty->start;
+        } else {
+            padding.left = paddingProperty->start;
+        }
+    }
+    if (paddingProperty->end.has_value()) {
+        padding.end = paddingProperty->end;
+        if (direction == TextDirection::RTL) {
+            padding.left = paddingProperty->end;
+        } else {
+            padding.right = paddingProperty->end;
+        }
+    }
+    if (paddingProperty->top.has_value()) {
+        padding.top = paddingProperty->top;
+    }
+    if (paddingProperty->bottom.has_value()) {
+        padding.bottom = paddingProperty->bottom;
+    }
+    if (padding.left.has_value() && !padding.right.has_value()) {
+        padding.right = std::optional<CalcLength>(CalcLength(0));
+    }
+    if (!padding.left.has_value() && padding.right.has_value()) {
+        padding.left = std::optional<CalcLength>(CalcLength(0));
+    }
+    layoutProperty->UpdatePadding(padding);
+}
+
+void LayoutProperty::CheckLocalizedMargin(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& marginProperty = layoutProperty->GetMarginProperty();
+    CHECK_NULL_VOID(marginProperty);
+    if (!marginProperty->start.has_value() && !marginProperty->end.has_value()) {
+        return;
+    }
+    MarginProperty margin;
+    if (marginProperty->start.has_value()) {
+        margin.start = marginProperty->start;
+        if (direction == TextDirection::RTL) {
+            margin.right = marginProperty->start;
+        } else {
+            margin.left = marginProperty->start;
+        }
+    }
+    if (marginProperty->end.has_value()) {
+        margin.end = marginProperty->end;
+        if (direction == TextDirection::RTL) {
+            margin.left = marginProperty->end;
+        } else {
+            margin.right = marginProperty->end;
+        }
+    }
+    if (marginProperty->top.has_value()) {
+        margin.top = marginProperty->top;
+    }
+    if (marginProperty->bottom.has_value()) {
+        margin.bottom = marginProperty->bottom;
+    }
+    if (margin.left.has_value() && !margin.right.has_value()) {
+        margin.right = std::optional<CalcLength>(CalcLength(0));
+    }
+    if (!margin.left.has_value() && margin.right.has_value()) {
+        margin.left = std::optional<CalcLength>(CalcLength(0));
+    }
+    layoutProperty->UpdateMargin(margin);
+}
+
+void LayoutProperty::CheckLocalizedEdgeWidths(
+    const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& target = host->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    auto borderWidthProperty = target->GetBorderWidth();
+    CHECK_NULL_VOID(borderWidthProperty);
+    if (!borderWidthProperty->startDimen.has_value() && !borderWidthProperty->endDimen.has_value()) {
+        return;
+    }
+    BorderWidthProperty borderWidth;
+    if (borderWidthProperty->startDimen.has_value()) {
+        borderWidth.startDimen = borderWidthProperty->startDimen;
+        if (direction == TextDirection::RTL) {
+            borderWidth.rightDimen = borderWidthProperty->startDimen;
+        } else {
+            borderWidth.leftDimen = borderWidthProperty->startDimen;
+        }
+    }
+    if (borderWidthProperty->endDimen.has_value()) {
+        borderWidth.endDimen = borderWidthProperty->endDimen;
+        if (direction == TextDirection::RTL) {
+            borderWidth.leftDimen = borderWidthProperty->endDimen;
+        } else {
+            borderWidth.rightDimen = borderWidthProperty->endDimen;
+        }
+    }
+    if (borderWidthProperty->topDimen.has_value()) {
+        borderWidth.topDimen = borderWidthProperty->topDimen;
+    }
+    if (borderWidthProperty->bottomDimen.has_value()) {
+        borderWidth.bottomDimen = borderWidthProperty->bottomDimen;
+    }
+    if (borderWidth.leftDimen.has_value() && !borderWidth.rightDimen.has_value()) {
+        borderWidth.rightDimen = std::optional<Dimension>(Dimension(0));
+    }
+    if (!borderWidth.leftDimen.has_value() && borderWidth.rightDimen.has_value()) {
+        borderWidth.leftDimen = std::optional<Dimension>(Dimension(0));
+    }
+    borderWidth.multiValued = true;
+    layoutProperty->UpdateBorderWidth(borderWidth);
+    target->UpdateBorderWidth(borderWidth);
+}
+
+void LayoutProperty::CheckLocalizedEdgeColors(const TextDirection& direction)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& target = host->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    BorderColorProperty borderColors;
+    BorderColorProperty colorProperty = target->GetBorderColorValue(BorderColorProperty {});
+    if (!colorProperty.startColor.has_value() && !colorProperty.endColor.has_value()) {
+        return;
+    }
+    if (colorProperty.startColor.has_value()) {
+        borderColors.startColor = colorProperty.startColor;
+        if (direction == TextDirection::RTL) {
+            borderColors.rightColor = colorProperty.startColor;
+        } else {
+            borderColors.leftColor = colorProperty.startColor;
+        }
+    }
+    if (colorProperty.endColor.has_value()) {
+        borderColors.endColor = colorProperty.endColor;
+        if (direction == TextDirection::RTL) {
+            borderColors.leftColor = colorProperty.endColor;
+        } else {
+            borderColors.rightColor = colorProperty.endColor;
+        }
+    }
+    if (colorProperty.topColor.has_value()) {
+        borderColors.topColor = colorProperty.topColor;
+    }
+    if (colorProperty.bottomColor.has_value()) {
+        borderColors.topColor = colorProperty.bottomColor;
+    }
+    borderColors.multiValued = true;
+    target->UpdateBorderColor(borderColors);
+}
+
+void LayoutProperty::CheckLocalizedBorderImageSlice(const TextDirection& direction)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& target = host->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    auto borderImage = target->GetBorderImage();
+    CHECK_NULL_VOID(borderImage);
+    auto borderImageProperty = borderImage.value();
+    CHECK_NULL_VOID(borderImageProperty);
+    if (!borderImageProperty->borderImageStart_.has_value() && !borderImageProperty->borderImageEnd_.has_value()) {
+        return;
+    }
+    Dimension leftSlice;
+    Dimension rightSlice;
+    Dimension startSlice;
+    Dimension endSlice;
+    if (borderImageProperty->borderImageStart_.has_value()) {
+        startSlice = borderImageProperty->borderImageStart_->GetBorderImageSlice();
+        borderImageProperty->SetEdgeSlice(BorderImageDirection::START, startSlice);
+        if (direction == TextDirection::RTL) {
+            rightSlice = borderImageProperty->borderImageStart_->GetBorderImageSlice();
+        } else {
+            leftSlice = borderImageProperty->borderImageStart_->GetBorderImageSlice();
+        }
+    }
+    if (borderImageProperty->borderImageEnd_.has_value()) {
+        endSlice = borderImageProperty->borderImageEnd_->GetBorderImageSlice();
+        borderImageProperty->SetEdgeSlice(BorderImageDirection::END, endSlice);
+        if (direction == TextDirection::RTL) {
+            leftSlice = borderImageProperty->borderImageEnd_->GetBorderImageSlice();
+        } else {
+            rightSlice = borderImageProperty->borderImageEnd_->GetBorderImageSlice();
+        }
+    }
+    borderImageProperty->SetEdgeSlice(BorderImageDirection::LEFT, leftSlice);
+    borderImageProperty->SetEdgeSlice(BorderImageDirection::RIGHT, rightSlice);
+    target->UpdateBorderImage(borderImageProperty);
+}
+
+void LayoutProperty::CheckLocalizedBorderImageWidth(const TextDirection& direction)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& target = host->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    auto borderImage = target->GetBorderImage();
+    CHECK_NULL_VOID(borderImage);
+    auto borderImageProperty = borderImage.value();
+    CHECK_NULL_VOID(borderImageProperty);
+    if (!borderImageProperty->borderImageStart_.has_value() && !borderImageProperty->borderImageEnd_.has_value()) {
+        return;
+    }
+    Dimension leftWidth;
+    Dimension rightWidth;
+    Dimension startWidth;
+    Dimension endWidth;
+    if (borderImageProperty->borderImageStart_.has_value()) {
+        startWidth = borderImageProperty->borderImageStart_->GetBorderImageWidth();
+        borderImageProperty->SetEdgeWidth(BorderImageDirection::START, startWidth);
+        if (direction == TextDirection::RTL) {
+            rightWidth = borderImageProperty->borderImageStart_->GetBorderImageWidth();
+        } else {
+            leftWidth = borderImageProperty->borderImageStart_->GetBorderImageWidth();
+        }
+    }
+    if (borderImageProperty->borderImageEnd_.has_value()) {
+        endWidth = borderImageProperty->borderImageEnd_->GetBorderImageWidth();
+        borderImageProperty->SetEdgeWidth(BorderImageDirection::END, endWidth);
+        if (direction == TextDirection::RTL) {
+            leftWidth = borderImageProperty->borderImageEnd_->GetBorderImageWidth();
+        } else {
+            rightWidth = borderImageProperty->borderImageEnd_->GetBorderImageWidth();
+        }
+    }
+    borderImageProperty->SetEdgeWidth(BorderImageDirection::LEFT, leftWidth);
+    borderImageProperty->SetEdgeWidth(BorderImageDirection::RIGHT, rightWidth);
+    target->UpdateBorderImage(borderImageProperty);
+}
+
+void LayoutProperty::CheckLocalizedBorderImageOutset(const TextDirection& direction)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& target = host->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    auto borderImage = target->GetBorderImage();
+    CHECK_NULL_VOID(borderImage);
+    auto borderImageProperty = borderImage.value();
+    CHECK_NULL_VOID(borderImageProperty);
+    if (!borderImageProperty->borderImageStart_.has_value() && !borderImageProperty->borderImageEnd_.has_value()) {
+        return;
+    }
+    Dimension leftOutset;
+    Dimension rightOutset;
+    Dimension startOutset;
+    Dimension endOutset;
+    if (borderImageProperty->borderImageStart_.has_value()) {
+        startOutset = borderImageProperty->borderImageStart_->GetBorderImageOutset();
+        borderImageProperty->SetEdgeOutset(BorderImageDirection::START, startOutset);
+        if (direction == TextDirection::RTL) {
+            rightOutset = borderImageProperty->borderImageStart_->GetBorderImageOutset();
+        } else {
+            leftOutset = borderImageProperty->borderImageStart_->GetBorderImageOutset();
+        }
+    }
+    if (borderImageProperty->borderImageEnd_.has_value()) {
+        endOutset = borderImageProperty->borderImageEnd_->GetBorderImageOutset();
+        borderImageProperty->SetEdgeOutset(BorderImageDirection::END, endOutset);
+        if (direction == TextDirection::RTL) {
+            leftOutset = borderImageProperty->borderImageEnd_->GetBorderImageOutset();
+        } else {
+            rightOutset = borderImageProperty->borderImageEnd_->GetBorderImageOutset();
+        }
+    }
+    borderImageProperty->SetEdgeOutset(BorderImageDirection::LEFT, leftOutset);
+    borderImageProperty->SetEdgeOutset(BorderImageDirection::RIGHT, rightOutset);
+    target->UpdateBorderImage(borderImageProperty);
 }
 } // namespace OHOS::Ace::NG

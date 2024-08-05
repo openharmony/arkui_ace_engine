@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/picker/datepicker_column_layout_algorithm.h"
+#include <cstdint>
 
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/picker/picker_theme.h"
@@ -183,7 +184,7 @@ void DatePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
 
     auto children = layoutWrapper->GetAllChildrenWithBuild();
-    uint32_t halfCount = layoutWrapper->GetTotalChildCount() / 2;
+    int32_t halfCount = layoutWrapper->GetTotalChildCount() / 2;
     float childStartCoordinate = static_cast<float>(pickerItemHeight_ / ITEM_HEIGHT_HALF -
         pickerTheme->GetGradientHeight().ConvertToPx() * gradientFontScale_ * halfCount -
         pickerTheme->GetDividerSpacing().ConvertToPx() * dividerSpacingFontScale_ / ITEM_HEIGHT_HALF);

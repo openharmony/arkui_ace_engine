@@ -78,10 +78,10 @@ public:
     RefPtr<TextControllerBase> GetTextController() override;
     void SetClipEdge(bool clip) override;
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
-    void SetMarqueeOptions(const TextMarqueeOptions& options) override;
-    void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override;
     void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
+    void SetResponseRegion(bool isUserSetResponseRegion) override;
+    void SetHalfLeading(bool halfLeading) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
     static void InitText(FrameNode* frameNode, std::string& value);
@@ -124,7 +124,6 @@ public:
     static void SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
     static CopyOptions GetCopyOption(FrameNode* frameNode);
-    static TextMarqueeOptions GetMarqueeOptions(FrameNode* frameNode);
     static TextHeightAdaptivePolicy GetHeightAdaptivePolicy(FrameNode* frameNode);
     static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
     static Dimension GetAdaptMaxFontSize(FrameNode* frameNode);
@@ -164,6 +163,10 @@ public:
         FrameNode* frameNode, const std::string& value, std::function<void(const std::string&)>&& onResult);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
+    static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    static void SetHalfLeading(FrameNode* frameNode, bool halfLeading);
+    static bool GetHalfLeading(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

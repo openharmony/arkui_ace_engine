@@ -17,6 +17,7 @@ var NodeRenderType;
     NodeRenderType[NodeRenderType["RENDER_TYPE_DISPLAY"] = 0] = "RENDER_TYPE_DISPLAY";
     NodeRenderType[NodeRenderType["RENDER_TYPE_TEXTURE"] = 1] = "RENDER_TYPE_TEXTURE";
 })(NodeRenderType || (NodeRenderType = {}));
+
 class BaseNode extends __JSBaseNode__ {
     constructor(uiContext, options) {
         super(options);
@@ -64,8 +65,8 @@ class BuilderNode {
     update(params) {
         this._JSBuilderNode.update(params);
     }
-    build(builder, params) {
-        this._JSBuilderNode.build(builder, params);
+    build(builder, params, options) {
+        this._JSBuilderNode.build(builder, params, options);
         this.nodePtr_ = this._JSBuilderNode.getNodePtr();
     }
     getNodePtr() {
@@ -92,6 +93,9 @@ class BuilderNode {
     recycle() {
         this._JSBuilderNode.recycle();
     }
+    updateConfiguration() {
+        this._JSBuilderNode.updateConfiguration();
+    }
 }
 class JSBuilderNode extends BaseNode {
     constructor(uiContext, options) {
@@ -99,6 +103,7 @@ class JSBuilderNode extends BaseNode {
         this.childrenWeakrefMap_ = new Map();
         this.uiContext_ = uiContext;
         this.updateFuncByElmtId = new Map();
+        this._supportNestingBuilder = false;
     }
     reuse(param) {
         this.updateStart();
@@ -171,11 +176,36 @@ class JSBuilderNode extends BaseNode {
         }
         return nodeInfo;
     }
-    build(builder, params) {
+    isObject(param) {
+        const typeName = Object.prototype.toString.call(param);
+        const objectName = `[object Object]`;
+        if (typeName === objectName) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    buildWithNestingBuilder(builder) {
+        if (this._supportNestingBuilder && this.isObject(this.params_)) {
+            this._proxyObjectParam = new Proxy(this.params_, {
+                set(target, property, val) {
+                    throw Error(`@Builder : Invalid attempt to set(write to) parameter '${property.toString()}' error!`);
+                },
+                get: (target, property, receiver) => { return this.params_?.[property]; }
+            });
+            this.nodePtr_ = super.create(builder.builder, this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration);
+        }
+        else {
+            this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative, this.updateConfiguration);
+        }
+    }
+    build(builder, params, options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
         this.params_ = params;
         this.updateFuncByElmtId.clear();
-        this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative, this.updateConfiguration);
+        this.buildWithNestingBuilder(builder);
         this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
         if (this.frameNode_ === undefined || this.frameNode_ === null) {
             this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
@@ -203,6 +233,12 @@ class JSBuilderNode extends BaseNode {
         Array.from(this.updateFuncByElmtId.keys()).sort((a, b) => {
             return (a < b) ? -1 : (a > b) ? 1 : 0;
         }).forEach(elmtId => this.UpdateElement(elmtId));
+        for (const child of this.childrenWeakrefMap_.values()) {
+            const childView = child.deref();
+            if (childView) {
+                childView.forceCompleteRerender(true);
+            }
+        }
         this.updateEnd();
         __JSScopeUtil__.restoreInstanceId();
     }
@@ -255,7 +291,12 @@ class JSBuilderNode extends BaseNode {
         const updateFunc = (elmtId, isFirstRender) => {
             __JSScopeUtil__.syncInstanceId(this.instanceId_);
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-            compilerAssignedUpdateFunc(elmtId, isFirstRender, this.params_);
+            if (this._supportNestingBuilder) {
+                compilerAssignedUpdateFunc(elmtId, isFirstRender);
+            }
+            else {
+                compilerAssignedUpdateFunc(elmtId, isFirstRender, this.params_);
+            }
             if (!isFirstRender) {
                 _popFunc();
             }
@@ -393,6 +434,9 @@ class JSBuilderNode extends BaseNode {
         this.updateNodePtr(nodePtr);
         this.updateInstanceId(instanceId);
     }
+    observeRecycleComponentCreation(name, recycleUpdateFunc) {
+        throw new Error('custom component in @Builder used by BuilderNode does not support @Reusable');
+    }
 }
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
@@ -425,6 +469,9 @@ class NodeAdapter {
         this.nativePtr_ = null;
     }
     set totalNodeCount(count) {
+        if (count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.setTotalNodeCount(this.nativePtr_, count);
         this.count_ = count;
     }
@@ -435,15 +482,27 @@ class NodeAdapter {
         getUINativeModule().nodeAdapter.notifyItemReloaded(this.nativePtr_);
     }
     reloadItem(start, count) {
+        if (start < 0 || count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemChanged(this.nativePtr_, start, count);
     }
     removeItem(start, count) {
+        if (start < 0 || count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemRemoved(this.nativePtr_, start, count);
     }
     insertItem(start, count) {
+        if (start < 0 || count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemInserted(this.nativePtr_, start, count);
     }
     moveItem(from, to) {
+        if (from < 0 || to < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemMoved(this.nativePtr_, from, to);
     }
     getAllAvailableItems() {
@@ -520,9 +579,27 @@ class NodeAdapter {
         }
     }
     static attachNodeAdapter(adapter, node) {
+        if (node === null || node === undefined) {
+            return false;
+        }
+        if (!node.isModifiable()) {
+            return false;
+        }
+        if (node.hasOwnProperty('attribute_')) {
+            let frameeNode = node;
+            if (frameeNode.attribute_.allowChildCount !== undefined) {
+                const allowCount = frameeNode.attribute_.allowChildCount();
+                if (allowCount <= 1) {
+                    return false;
+                }
+            }
+        }
         return getUINativeModule().nodeAdapter.attachNodeAdapter(adapter.nativePtr_, node.getNodePtr());
     }
     static detachNodeAdapter(node) {
+        if (node === null || node === undefined) {
+            return;
+        }
         getUINativeModule().nodeAdapter.detachNodeAdapter(node.getNodePtr());
     }
 }
@@ -849,8 +926,8 @@ class FrameNode {
         __JSScopeUtil__.restoreInstanceId();
         this._childList.clear();
     }
-    getChild(index) {
-        const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index);
+    getChild(index, isExpanded) {
+        const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index, isExpanded);
         const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
@@ -861,8 +938,8 @@ class FrameNode {
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
-    getFirstChild() {
-        const result = getUINativeModule().frameNode.getFirst(this.getNodePtr());
+    getFirstChild(isExpanded) {
+        const result = getUINativeModule().frameNode.getFirst(this.getNodePtr(), isExpanded);
         const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
@@ -885,8 +962,8 @@ class FrameNode {
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
-    getNextSibling() {
-        const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr());
+    getNextSibling(isExpanded) {
+        const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr(), isExpanded);
         const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
@@ -909,8 +986,8 @@ class FrameNode {
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
-    getPreviousSibling() {
-        const result = getUINativeModule().frameNode.getPreviousSibling(this.getNodePtr());
+    getPreviousSibling(isExpanded) {
+        const result = getUINativeModule().frameNode.getPreviousSibling(this.getNodePtr(), isExpanded);
         const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
@@ -933,8 +1010,8 @@ class FrameNode {
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
-    getChildrenCount() {
-        return getUINativeModule().frameNode.getChildrenCount(this.nodePtr_);
+    getChildrenCount(isExpanded) {
+        return getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
     }
     getPositionToParent() {
         const position = getUINativeModule().frameNode.getPositionToParent(this.getNodePtr());
@@ -1201,127 +1278,127 @@ class TypedFrameNode extends FrameNode {
     }
 }
 const __creatorMap__ = new Map([
-    ["Text", (context) => {
-            return new TypedFrameNode(context, "Text", (node, type) => {
+    ['Text', (context) => {
+            return new TypedFrameNode(context, 'Text', (node, type) => {
                 return new ArkTextComponent(node, type);
             });
         }],
-    ["Column", (context) => {
-            return new TypedFrameNode(context, "Column", (node, type) => {
+    ['Column', (context) => {
+            return new TypedFrameNode(context, 'Column', (node, type) => {
                 return new ArkColumnComponent(node, type);
             });
         }],
-    ["Row", (context) => {
-            return new TypedFrameNode(context, "Row", (node, type) => {
+    ['Row', (context) => {
+            return new TypedFrameNode(context, 'Row', (node, type) => {
                 return new ArkRowComponent(node, type);
             });
         }],
-    ["Stack", (context) => {
-            return new TypedFrameNode(context, "Stack", (node, type) => {
+    ['Stack', (context) => {
+            return new TypedFrameNode(context, 'Stack', (node, type) => {
                 return new ArkStackComponent(node, type);
             });
         }],
-    ["GridRow", (context) => {
-            let node = new TypedFrameNode(context, "GridRow", (node, type) => {
+    ['GridRow', (context) => {
+            let node = new TypedFrameNode(context, 'GridRow', (node, type) => {
                 return new ArkGridRowComponent(node, type);
             });
             node.initialize();
             return node;
         }],
-    ["TextInput", (context) => {
-            return new TypedFrameNode(context, "TextInput", (node, type) => {
+    ['TextInput', (context) => {
+            return new TypedFrameNode(context, 'TextInput', (node, type) => {
                 return new ArkTextInputComponent(node, type);
             });
         }],
-    ["GridCol", (context) => {
-            let node = new TypedFrameNode(context, "GridCol", (node, type) => {
+    ['GridCol', (context) => {
+            let node = new TypedFrameNode(context, 'GridCol', (node, type) => {
                 return new ArkGridColComponent(node, type);
             });
             node.initialize();
             return node;
         }],
-    ["Blank", (context) => {
-            return new TypedFrameNode(context, "Blank", (node, type) => {
+    ['Blank', (context) => {
+            return new TypedFrameNode(context, 'Blank', (node, type) => {
                 return new ArkBlankComponent(node, type);
             });
         }],
-    ["Image", (context) => {
-            return new TypedFrameNode(context, "Image", (node, type) => {
+    ['Image', (context) => {
+            return new TypedFrameNode(context, 'Image', (node, type) => {
                 return new ArkImageComponent(node, type);
             });
         }],
-    ["Flex", (context) => {
-            return new TypedFrameNode(context, "Flex", (node, type) => {
+    ['Flex', (context) => {
+            return new TypedFrameNode(context, 'Flex', (node, type) => {
                 return new ArkFlexComponent(node, type);
             });
         }],
-    ["Swiper", (context) => {
-            return new TypedFrameNode(context, "Swiper", (node, type) => {
+    ['Swiper', (context) => {
+            return new TypedFrameNode(context, 'Swiper', (node, type) => {
                 return new ArkSwiperComponent(node, type);
             });
         }],
-    ["Progress", (context) => {
-            return new TypedFrameNode(context, "Progress", (node, type) => {
+    ['Progress', (context) => {
+            return new TypedFrameNode(context, 'Progress', (node, type) => {
                 return new ArkProgressComponent(node, type);
             });
         }],
-    ["Scroll", (context) => {
-            return new TypedFrameNode(context, "Scroll", (node, type) => {
+    ['Scroll', (context) => {
+            return new TypedFrameNode(context, 'Scroll', (node, type) => {
                 return new ArkScrollComponent(node, type);
             });
         }],
-    ["RelativeContainer", (context) => {
-            return new TypedFrameNode(context, "RelativeContainer", (node, type) => {
+    ['RelativeContainer', (context) => {
+            return new TypedFrameNode(context, 'RelativeContainer', (node, type) => {
                 return new ArkRelativeContainerComponent(node, type);
             });
         }],
-    ["List", (context) => {
-            return new TypedFrameNode(context, "List", (node, type) => {
+    ['List', (context) => {
+            return new TypedFrameNode(context, 'List', (node, type) => {
                 return new ArkListComponent(node, type);
             });
         }],
-    ["ListItem", (context) => {
-            return new TypedFrameNode(context, "ListItem", (node, type) => {
+    ['ListItem', (context) => {
+            return new TypedFrameNode(context, 'ListItem', (node, type) => {
                 return new ArkListItemComponent(node, type);
             });
         }],
-    ["Divider", (context) => {
-            return new TypedFrameNode(context, "Divider", (node, type) => {
+    ['Divider', (context) => {
+            return new TypedFrameNode(context, 'Divider', (node, type) => {
                 return new ArkDividerComponent(node, type);
             });
         }],
-    ["LoadingProgress", (context) => {
-            return new TypedFrameNode(context, "LoadingProgress", (node, type) => {
+    ['LoadingProgress', (context) => {
+            return new TypedFrameNode(context, 'LoadingProgress', (node, type) => {
                 return new ArkLoadingProgressComponent(node, type);
             });
         }],
-    ["Search", (context) => {
-            return new TypedFrameNode(context, "Search", (node, type) => {
+    ['Search', (context) => {
+            return new TypedFrameNode(context, 'Search', (node, type) => {
                 return new ArkSearchComponent(node, type);
             });
         }],
-    ["Button", (context) => {
-            return new TypedFrameNode(context, "Button", (node, type) => {
+    ['Button', (context) => {
+            return new TypedFrameNode(context, 'Button', (node, type) => {
                 return new ArkButtonComponent(node, type);
             });
         }],
-    ["XComponent", (context) => {
-            return new TypedFrameNode(context, "XComponent", (node, type) => {
+    ['XComponent', (context) => {
+            return new TypedFrameNode(context, 'XComponent', (node, type) => {
                 return new ArkXComponentComponent(node, type);
             });
         }],
-    ["ListItemGroup", (context) => {
-            return new TypedFrameNode(context, "ListItemGroup", (node, type) => {
+    ['ListItemGroup', (context) => {
+            return new TypedFrameNode(context, 'ListItemGroup', (node, type) => {
                 return new ArkListItemGroupComponent(node, type);
             });
         }],
-    ["WaterFlow", (context) => {
-            return new TypedFrameNode(context, "WaterFlow", (node, type) => {
+    ['WaterFlow', (context) => {
+            return new TypedFrameNode(context, 'WaterFlow', (node, type) => {
                 return new ArkWaterFlowComponent(node, type);
             });
         }],
-    ["FlowItem", (context) => {
-            return new TypedFrameNode(context, "FlowItem", (node, type) => {
+    ['FlowItem', (context) => {
+            return new TypedFrameNode(context, 'FlowItem', (node, type) => {
                 return new ArkFlowItemComponent(node, type);
             });
         }],
@@ -1599,8 +1676,8 @@ class BaseShape {
 class ShapeClip extends BaseShape {
 }
 class ShapeMask extends BaseShape {
-    constructor() {
-        super(...arguments);
+    constructor(...args) {
+        super(...args);
         this.fillColor = 0XFF000000;
         this.strokeColor = 0XFF000000;
         this.strokeWidth = 0;
@@ -2186,11 +2263,11 @@ class Content {
  * limitations under the License.
  */
 class ComponentContent extends Content {
-    constructor(uiContext, builder, params) {
+    constructor(uiContext, builder, params, options) {
         super();
         let builderNode = new BuilderNode(uiContext, {});
         this.builderNode_ = builderNode;
-        this.builderNode_.build(builder, params ?? undefined);
+        this.builderNode_.build(builder, params ?? undefined, options);
     }
     update(params) {
         this.builderNode_.update(params);
@@ -2237,6 +2314,9 @@ class ComponentContent extends Content {
             return result;
         }
         return node;
+    }
+    updateConfiguration() {
+        this.builderNode_.updateConfiguration();
     }
 }
 /*

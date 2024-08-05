@@ -164,9 +164,9 @@ struct CollapsibleMenuSection {
   @State isMoreIconOnClick: boolean = false
 
   getMoreIconFgColor() {
-    return this.isMoreIconOnClick
-      ? $r('sys.color.ohos_id_color_titlebar_icon_pressed')
-      : $r('sys.color.ohos_id_color_titlebar_icon')
+    return this.isMoreIconOnClick ?
+    $r('sys.color.ohos_id_color_titlebar_icon_pressed') :
+    $r('sys.color.ohos_id_color_titlebar_icon')
   }
 
   getMoreIconBgColor() {
@@ -182,7 +182,8 @@ struct CollapsibleMenuSection {
   aboutToAppear() {
     if (this.menuItems) {
       this.menuItems.forEach((item, index) => {
-        if (item.isEnabled && this.firstFocusableIndex == -1 && index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+        if (item.isEnabled && this.firstFocusableIndex == -1 &&
+          index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
           this.firstFocusableIndex = this.index * 1000 + index + 1
         }
       })
@@ -198,9 +199,10 @@ struct CollapsibleMenuSection {
               ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
             })
           } else {
-            ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), (item:ComposeTitleBarMenuItem, index:number) => {
-              ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
-            })
+            ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
+              (item:ComposeTitleBarMenuItem, index:number) => {
+                ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
+              })
 
             Row() {
               Image(PUBLIC_MORE)
@@ -235,7 +237,8 @@ struct CollapsibleMenuSection {
             .onBlur(() => this.isMoreIconOnFocus = false)
             .onHover((isOn) => this.isMoreIconOnHover = isOn)
             .onKeyEvent((event) => {
-              if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
+              if (event.keyCode !== KeyCode.KEYCODE_ENTER &&
+                event.keyCode !== KeyCode.KEYCODE_SPACE) {
                 return
               }
               if (event.type === KeyType.Down) {
@@ -279,15 +282,20 @@ struct CollapsibleMenuSection {
   popupBuilder() {
     Column() {
       if (this.menuItems) {
-        ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), (item:ComposeTitleBarMenuItem, index:number) => {
-          ImageMenuItem({ item: item, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + index })
-        })
+        ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1,
+          this.menuItems.length),
+          (item:ComposeTitleBarMenuItem, index:number) => {
+            ImageMenuItem({ item: item, index: this.index * 1000 +
+            CollapsibleMenuSection.maxCountOfVisibleItems + index })
+          })
       }
     }
-    .width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum)
+    .width(ImageMenuItem.imageHotZoneWidth +
+      CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum)
     .margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding })
     .onAppear(() => {
-      focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex)
+      focusControl.requestFocus(ImageMenuItem.focusablePrefix +
+      this.firstFocusableIndex)
     })
   }
 }
@@ -373,7 +381,8 @@ struct ImageMenuItem {
       if (!this.item?.isEnabled) {
         return
       }
-      if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
+      if (event.keyCode !== KeyCode.KEYCODE_ENTER &&
+        event.keyCode !== KeyCode.KEYCODE_SPACE) {
         return
       }
       if (event.type === KeyType.Down) {
@@ -402,4 +411,4 @@ struct ImageMenuItem {
   }
 }
 
-export  { ComposeTitleBar }
+export { ComposeTitleBar }

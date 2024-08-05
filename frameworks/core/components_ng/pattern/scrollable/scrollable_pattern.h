@@ -47,7 +47,7 @@ class InspectorFilter;
 constexpr double FRICTION = 0.6;
 constexpr double API11_FRICTION = 0.7;
 constexpr double API12_FRICTION = 0.75;
-constexpr double MAX_VELOCITY = 4200.0;
+constexpr double MAX_VELOCITY = 12000.0;
 #else
 constexpr double FRICTION = 0.9;
 constexpr double MAX_VELOCITY = 5000.0;
@@ -354,7 +354,7 @@ public:
     bool CanOverScroll(int32_t source)
     {
         auto canOverScroll = (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
-            IsScrollable() && (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_ || nestedScrolling_));
+            IsScrollable() && (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_));
         if (canOverScroll != lastCanOverScroll_) {
             lastCanOverScroll_ = canOverScroll;
             AddScrollableFrameInfo(source);
@@ -441,7 +441,7 @@ public:
         extraOffset_ = extraOffset;
     }
 
-    std::optional<float> GetExtraOffset() const
+    const std::optional<float>& GetExtraOffset() const
     {
         return extraOffset_;
     }
@@ -543,49 +543,26 @@ public:
         needLinked_ = needLinked;
     }
 
-    virtual std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems()
-    {
-        std::vector<RefPtr<FrameNode>> children;
-        return children;
-    }
-
     void SetAnimateCanOverScroll(bool animateCanOverScroll)
     {
         bool isScrollable = !(IsAtBottom() && IsAtTop() && !GetAlwaysEnabled());
         animateCanOverScroll_ = isScrollable && animateCanOverScroll;
     }
-    virtual void InitScrollBarClickEvent();
-    void HandleClickEvent(GestureEvent& info);
+
+    virtual std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems()
+    {
+        std::vector<RefPtr<FrameNode>> children;
+        return children;
+    }
     void InitScrollBarGestureEvent();
+    virtual void InitScrollBarClickEvent();
+    void HandleClickEvent();
     void InitScrollBarMouseEvent();
-    virtual void ScrollPage(bool reverse, bool smooth = false);
+    virtual void ScrollPage(
+        bool reverse, bool smooth = false, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
 
-    void SetScrollToSafeAreaHelper(bool isScrollToSafeAreaHelper)
-    {
-        isScrollToSafeAreaHelper_ = isScrollToSafeAreaHelper;
-    }
-
-    bool IsScrollToSafeAreaHelper() const
-    {
-        return isScrollToSafeAreaHelper_;
-    }
-
-    void ScrollAtFixedVelocity(float velocity);
-
-    PositionMode GetPositionMode();
-
-    virtual std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility()
-    {
-        return { nullptr, Axis::NONE };
-    }
-
-    virtual std::function<bool(int32_t)> GetScrollIndexAbility()
-    {
-        return nullptr;
-    }
-
-    void CheckRestartSpring(bool sizeDiminished);
+    void CheckRestartSpring(bool sizeDiminished, bool needNestedScrolling = true);
 
     Axis GetScrollablePanDirection()
     {
@@ -611,12 +588,51 @@ public:
 
     void DumpAdvanceInfo() override;
 
+    void SetScrollToSafeAreaHelper(bool isScrollToSafeAreaHelper)
+    {
+        isScrollToSafeAreaHelper_ = isScrollToSafeAreaHelper;
+    }
+
+    bool IsScrollToSafeAreaHelper() const
+    {
+        return isScrollToSafeAreaHelper_;
+    }
+
+    virtual std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility()
+    {
+        return { nullptr, Axis::NONE };
+    }
+
+    virtual std::function<bool(int32_t)> GetScrollIndexAbility()
+    {
+        return nullptr;
+    }
+
+    void ScrollAtFixedVelocity(float velocity);
+
+    PositionMode GetPositionMode();
+
     void HandleMoveEventInComp(const PointF& point);
     void HandleLeaveHotzoneEvent();
     void SetHotZoneScrollCallback(std::function<void(void)>&& func)
     {
         hotZoneScrollCallback_ = func;
     }
+
+    void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& responseLinkResult);
+
+    virtual void SetAccessibilityAction();
+
+    /**
+     * @brief Notify component the position and count when data has changed.
+     *        This function should not be implemented here.
+     *
+     * @param index the position of change.
+     * @param count the count of change. nagative/0/positive implies delete/change/add respectively.
+     */
+    virtual void NotifyDataChange(int32_t index, int32_t count) {};
 
 protected:
     void SuggestOpIncGroup(bool flag);
@@ -696,11 +712,6 @@ protected:
 
     void Register2DragDropManager();
 
-    bool StopExpandMark() override
-    {
-        return true;
-    }
-
 private:
     virtual void OnScrollEndCallback() {};
 
@@ -758,13 +769,14 @@ private:
     void OnScrollEndRecursiveInner(const std::optional<float>& velocity);
     void OnScrollStartRecursive(float position, float velocity = 0.f) override;
     void OnScrollStartRecursiveInner(float position, float velocity = 0.f);
+    void OnScrollDragEndRecursive() override;
 
     ScrollResult HandleScrollParentFirst(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollSelfFirst(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollSelfOnly(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollParallel(float& offset, int32_t source, NestedState state);
     bool HandleOutBoundary(float& offset, int32_t source, NestedState state, ScrollResult& result);
-    void HandleSelfOutBoundary(float& offset, int32_t source);
+    bool HandleSelfOutBoundary(float& offset, int32_t source, const float backOverOffset, float oppositeOverOffset);
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
 
@@ -802,6 +814,7 @@ private:
     ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
     bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
     void SetUiDvsyncSwitch(bool on);
+    void SetNestedScrolling(bool nestedScrolling);
 
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -881,7 +894,8 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
     bool lastCanOverScroll_ = false;
-    bool nestedScrolling_ = false;
+    RefPtr<ClickRecognizer> clickRecognizer_;
+    Offset locationInfo_;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

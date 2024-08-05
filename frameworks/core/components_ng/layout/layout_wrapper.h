@@ -149,6 +149,11 @@ public:
     virtual ChildrenListWithGuard GetAllChildrenWithBuild(bool addToRenderTree = true) = 0;
     virtual void RemoveChildInRenderTree(uint32_t index) = 0;
     virtual void RemoveAllChildInRenderTree() = 0;
+    /**
+     * @param cacheStart number of items to cache before @c start
+     * @param cacheEnd number of items to cache after @c end
+     * @note To deactivate all children, set @c start and @c end to -1
+     */
     virtual void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0) = 0;
     virtual void SetActiveChildRange(const std::optional<ActiveChildSets>& activeChildSets,
         const std::optional<ActiveChildRange>& activeChildRange = std::nullopt)
@@ -161,7 +166,7 @@ public:
     RefPtr<FrameNode> GetHostNode() const;
     virtual const std::string& GetHostTag() const = 0;
     virtual bool IsActive() const = 0;
-    virtual void SetActive(bool active = true) = 0;
+    virtual void SetActive(bool active = true, bool needRebuildRenderContext = false) = 0;
 
     bool IsRootMeasureNode() const
     {
@@ -226,6 +231,9 @@ public:
     bool AvoidKeyboard(bool isFocusOnPage = true);
     // expand the SafeArea of expansive nodes, which are previously recorded during Layout traversal
     void ExpandSafeArea();
+    void AdjustNotExpandNode();
+    void AdjustFixedSizeNode(RectF& frame);
+    void ExpandHelper(const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame);
     ExpandEdges GetAccumulatedSafeAreaExpand(bool includingSelf = false);
     void ResetSafeAreaPadding();
 
@@ -242,6 +250,7 @@ public:
     RectF GetFrameRectWithoutSafeArea() const;
     RectF GetFrameRectWithSafeArea(bool checkPosition = false) const;
     void AddChildToExpandListIfNeeded(const WeakPtr<FrameNode>& node);
+    void ApplyConstraintWithoutMeasure(const std::optional<LayoutConstraintF>& constraint);
 
 protected:
     void CreateRootConstraint();
@@ -268,8 +277,8 @@ protected:
     std::optional<bool> needForceMeasureAndLayout_;
 
 private:
-    void AdjustChildren(const OffsetF& offset);
-    void AdjustChild(RefPtr<UINode> node, const OffsetF& offset);
+    void AdjustChildren(const OffsetF& offset, bool parentScrollable);
+    void AdjustChild(RefPtr<UINode> node, const OffsetF& offset, bool parentScrollable);
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapper);
 };

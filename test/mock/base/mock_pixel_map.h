@@ -23,6 +23,7 @@ class MockPixelMap : public PixelMap {
 public:
     MOCK_METHOD(int32_t, GetWidth, (), (const override));
     MOCK_METHOD(int32_t, GetHeight, (), (const override));
+    MOCK_METHOD(bool, GetPixelsVec, (std::vector<uint8_t> & data), (const override));
     MOCK_METHOD(const uint8_t*, GetPixels, (), (const override));
     MOCK_METHOD(PixelFormat, GetPixelFormat, (), (const override));
     MOCK_METHOD(AlphaType, GetAlphaType, (), (const override));

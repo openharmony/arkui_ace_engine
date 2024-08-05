@@ -88,16 +88,19 @@ struct DismissTarget {
     bool targetIsSheet = false;
 };
 
+struct CustomKeyboardOffsetInfo {
+    float finalOffset = 0.0f;
+    float inAniStartOffset = 0.0f;
+    float outAniEndOffset = 0.0f;
+};
+
 // StageManager is the base class for root render node to perform page switch.
 class ACE_FORCE_EXPORT OverlayManager : public virtual AceType {
     DECLARE_ACE_TYPE(OverlayManager, AceType);
 
 public:
     explicit OverlayManager(const RefPtr<FrameNode>& rootNode) : rootNodeWeak_(rootNode) {}
-    ~OverlayManager() override
-    {
-        popupMap_.clear();
-    }
+    ~OverlayManager() override;
     void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);
     void RemoveIndexerPopupById(int32_t targetId);
     void RemoveIndexerPopup();
@@ -153,15 +156,17 @@ public:
     void HideMenuInSubWindow(bool showPreviewAnimation = true, bool startDrag = false);
     void CleanMenuInSubWindow(int32_t targetId);
     void CleanPreviewInSubWindow();
+    void CleanHoverImagePreviewInSubWindow(const RefPtr<FrameNode>& flexNode);
     void CleanPopupInSubWindow();
     void CleanMenuInSubWindowWithAnimation();
     void HideAllMenus();
 
     void ClearToastInSubwindow();
     void ClearToast();
-    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft,
-        const ToastShowMode& showMode = ToastShowMode::DEFAULT, int32_t alignment = -1,
-        std::optional<DimensionOffset> offset = std::nullopt);
+    void ShowToast(const NG::ToastInfo& toastInfo, const std::function<void(int32_t)>& callback);
+    void CloseToast(int32_t toastId, const std::function<void(int32_t)>& callback);
+
+    void FireAutoSave(const RefPtr<FrameNode>& ContainerNode);
 
     std::unordered_map<int32_t, RefPtr<FrameNode>> GetDialogMap()
     {
@@ -231,6 +236,12 @@ public:
     bool RemoveMenu(const RefPtr<FrameNode>& overlay);
     bool RemoveModalInOverlay();
     bool RemoveAllModalInOverlay();
+    bool RemoveAllModalInOverlayByStack();
+    bool RemoveAllModalInOverlayByList();
+    bool OnRemoveAllModalInOverlayByList();
+    void AfterRemoveAllModalInOverlayByList();
+    bool IsModalUiextensionNode(const RefPtr<FrameNode>& topModalNode);
+    bool IsProhibitedRemoveByRouter(const RefPtr<FrameNode>& topModalNode);
     bool RemoveOverlayInSubwindow();
 
     void RegisterOnHideDialog(std::function<void()> callback)
@@ -268,12 +279,19 @@ public:
         hasPixelMap_ = hasPixelMap;
     }
 
+    bool GetHasGatherNode()
+    {
+        return hasGatherNode_;
+    }
+
     RefPtr<FrameNode> GetPixelMapNode()
     {
         return pixmapColumnNodeWeak_.Upgrade();
     }
 
     RefPtr<FrameNode> GetPixelMapContentNode(bool isSubwindowOverlay = false) const;
+
+    RefPtr<FrameNode> GetPixelMapContentNodeForSubwindow() const;
 
     RefPtr<FrameNode> GetPixelMapBadgeNode() const;
 
@@ -324,9 +342,10 @@ public:
     void RemoveEventColumn();
     void UpdatePixelMapPosition(bool isSubwindowOverlay = false);
     void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset, float menuScale = 1.0f,
-	    bool isRedragStart = false);
+	    bool isRedragStart = false, int32_t menuWrapperId = -1);
     void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset);
+    bool GetMenuPreviewCenter(NG::OffsetF& offset);
 
     void ResetContextMenuDragHideFinished()
     {
@@ -438,18 +457,10 @@ public:
     {
         return dismissSheetId_;
     }
-    bool IsRootExpansive() const
-    {
-        auto rootNode = rootNodeWeak_.Upgrade();
-        CHECK_NULL_RETURN(rootNode, false);
-        auto layoutProp = DynamicCast<FrameNode>(rootNode)->GetLayoutProperty();
-        CHECK_NULL_RETURN(layoutProp, false);
-        const auto& opts = layoutProp->GetSafeAreaExpandOpts();
-        return opts && opts->Expansive();
-    }
     void RemoveSheetNode(const RefPtr<FrameNode>& sheetNode);
 
     void DestroySheet(const RefPtr<FrameNode>& sheetNode, const SheetKey& sheetKey);
+    void CleanSheet(const RefPtr<FrameNode>& sheetNode, const SheetKey& sheetKey);
 
     RefPtr<FrameNode> GetSheetMask(const RefPtr<FrameNode>& sheetNode);
 
@@ -478,19 +489,19 @@ public:
         const ModalUIExtensionConfig& config);
     void CloseModalUIExtension(int32_t sessionId);
 
-    RefPtr<FrameNode> BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,
-        const RefPtr<NG::FrameNode>& targetNode, const std::string& longestContent, int32_t menuSize);
-    SizeF CaculateMenuSize(const RefPtr<FrameNode>& menuNode, const std::string& longestContent, int32_t menuSize);
-    bool ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, const NG::RectF& aiRect,
-        const std::string& longestContent, int32_t menuSize, const RefPtr<NG::FrameNode>& targetNode);
-    void CloseUIExtensionMenu(int32_t targetId);
+    RefPtr<FrameNode> BuildAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions);
+    RefPtr<FrameNode> CreateAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
+        const RefPtr<FrameNode>& targetNode);
+    bool ShowAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
+        const RectF& aiRect, const RefPtr<FrameNode>& targetNode);
+    void CloseAIEntityMenu(int32_t targetId);
 
     void MarkDirty(PropertyChangeFlag flag);
     void MarkDirtyOverlay();
     float GetRootHeight() const;
     float GetRootWidth() const;
 
-    void PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool isTransitionIn, bool needTransparent = false);
+    void PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool isTransitionIn);
 
     void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true);
 
@@ -500,8 +511,7 @@ public:
 
     void ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
 
-    void CheckDeviceInLandscape(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode,
-        uint32_t& statusBarHeight);
+    void CheckDeviceInLandscape(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode, float& sheetTopSafeArea);
 
     void SetSheetHeight(float height)
     {
@@ -565,6 +575,8 @@ public:
             menuMap_.erase(targetId);
         }
     }
+
+    bool IsRootExpansive() const;
     void DumpOverlayInfo() const;
     void ReloadBuilderNodeConfig();
 
@@ -584,10 +596,13 @@ public:
     }
 
     void SetIsAllowedBeCovered(bool isAllowedBeCovered = true);
+    void ClearUIExtensionNode();
     void DeleteUIExtensionNode(int32_t sessionId);
     bool AddCurSessionId(int32_t curSessionId);
     void ResetRootNode(int32_t sessionId);
     void OnUIExtensionWindowSizeChange();
+
+    RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
 
 private:
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
@@ -611,6 +626,7 @@ private:
     void SaveSheePageNode(
         const RefPtr<FrameNode>& sheetPageNode, const RefPtr<FrameNode>& sheetContentNode,
         const RefPtr<FrameNode>& targetNode, bool isStartByUIContext);
+    bool CheckTargetIdIsValid(int32_t targetId);
     RefPtr<FrameNode> CreateSheetMask(const RefPtr<FrameNode>& sheetPageNode,
         const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle);
     void UpdateSheetRender(const RefPtr<FrameNode>& sheetPageNode, NG::SheetStyle& sheetStyle, bool isPartialUpdate);
@@ -626,6 +642,9 @@ private:
         std::function<void()>&& sheetSpringBack = nullptr);
     SheetStyle UpdateSheetStyle(
         const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle, bool isPartialUpdate);
+    void UpdateSheetProperty(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& currentStyle, bool isPartialUpdate);
+    void UpdateSheetMaskBackgroundColor(const RefPtr<FrameNode>& maskNode,
+        const RefPtr<RenderContext>& maskRenderContext, const SheetStyle& sheetStyle);
     void UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
         const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle, bool isPartialUpdate = false);
     void CleanViewContextMap(int32_t instanceId, int32_t sheetContentId)
@@ -662,6 +681,7 @@ private:
     void ShowMenuAnimation(const RefPtr<FrameNode>& menu);
     void SetPatternFirstShow(const RefPtr<FrameNode>& menu);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
+    void ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
     void ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper, AnimationOption& option,
         bool showPreviewAnimation, bool startDrag);
     bool IsContextMenuBindedOnOrigNode();
@@ -681,8 +701,6 @@ private:
     void FireModalPageHide();
 
     void SetSheetBackgroundBlurStyle(const RefPtr<FrameNode>& sheetNode, const BlurStyleOption& bgBlurStyle);
-    void SetSheetBorderWidth(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
-        const NG::SheetStyle& sheetStyle, bool isPartialUpdate = false);
     void SetSheetBackgroundColor(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
         const NG::SheetStyle& sheetStyle, bool isPartialUpdate = false);
 
@@ -733,10 +751,11 @@ private:
 
     int32_t ExceptComponent(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
         bool isBackPressed, bool isPageRouter);
+    int32_t RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
+        RefPtr<Pattern>& pattern, bool isBackPressed, bool isPageRouter);
     int32_t WebBackward(RefPtr<NG::FrameNode>& overlay);
     void FindWebNode(const RefPtr<NG::UINode>& node, RefPtr<NG::FrameNode>& webNode);
 
-    RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
     void RegisterDialogLifeCycleCallback(const RefPtr<FrameNode>& dialog, const DialogProperties& dialogProps);
     void CustomDialogRecordEvent(const DialogProperties& dialogProps);
     RefPtr<UINode> RebuildCustomBuilder(RefPtr<UINode>& contentNode);
@@ -752,10 +771,12 @@ private:
     void DumpModalListInfo() const;
     void DumpEntry(const RefPtr<FrameNode>& targetNode, int32_t targetId, const RefPtr<FrameNode>& node) const;
     std::string GetMapNodeLog(const RefPtr<FrameNode>& node, bool hasTarget = true) const;
-    void SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, const RefPtr<FrameNode>& node);
+    bool SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, const RefPtr<FrameNode>& node);
     RefPtr<FrameNode> GetOverlayFrameNode();
     void MountToParentWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     void RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
+    CustomKeyboardOffsetInfo CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard);
+    void SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
@@ -812,7 +833,7 @@ private:
 
     int32_t dismissPopupId_ = 0;
 
-    bool hasGatherNode_ {false};
+    bool hasGatherNode_ { false };
     WeakPtr<FrameNode> gatherNodeWeak_;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     bool isMenuShow_ = false;

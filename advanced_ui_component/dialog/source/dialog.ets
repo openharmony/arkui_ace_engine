@@ -158,7 +158,7 @@ export struct TipsDialog {
   checkBoxPart(): void {
     Row() {
       if (this.checkTips !== null) {
-        Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
+        Checkbox({ name: '', group: 'checkboxGroup' }).select(this.isChecked)
           .onChange((checked: boolean) => {
             this.isChecked = checked;
             if (this.checkAction) {
@@ -168,6 +168,7 @@ export struct TipsDialog {
               this.onCheckedChange(checked);
             }
           })
+          .accessibilityLevel('yes')
           .margin({ right: $r('sys.float.padding_level4') })
         Text(this.checkTips)
           .fontSize($r('sys.float.Body_L'))
@@ -177,14 +178,15 @@ export struct TipsDialog {
           .layoutWeight(1)
           .focusable(false)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .onClick(() => {
-            this.isChecked = !this.isChecked;
-            if (this.checkAction) {
-              this.checkAction(this.isChecked);
-            }
-          })
       }
     }
+    .accessibilityGroup(true)
+    .onClick(() => {
+      this.isChecked = !this.isChecked;
+      if (this.checkAction) {
+        this.checkAction(this.isChecked);
+      }
+    })
     .padding({ top: 8, bottom: 8 })
     .constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT })
     .width('100%')
@@ -412,7 +414,7 @@ export struct SelectDialog {
               .textOverflow({ overflow: TextOverflow.Ellipsis })
           }.paddingContentStyle().width('100%')
         }
-        List({ space: 1 }) {
+        List() {
           ForEach(this.radioContent, (item: SheetInfo, index: number) => {
             ListItem() {
               Column() {
@@ -429,6 +431,7 @@ export struct SelectDialog {
                       .hitTestBehavior(HitTestMode.None)
                       .id(String(index))
                       .focusable(false)
+                      .accessibilityLevel('no')
                       .onFocus(() => {
                         this.isFocus = true;
                         this.currentFocusIndex = index;
@@ -672,7 +675,7 @@ export struct ConfirmDialog {
   @Builder
   checkBoxBuilder(): void {
     Row() {
-      Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
+      Checkbox({ name: '', group: 'checkboxGroup' }).select(this.isChecked)
         .onChange((checked: boolean) => {
           this.isChecked = checked;
           if (this.onCheckedChange) {
@@ -680,6 +683,7 @@ export struct ConfirmDialog {
           }
         })
         .hitTestBehavior(HitTestMode.Block)
+        .accessibilityLevel('yes')
         .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) })
 
       Text(this.checkTips)
@@ -690,10 +694,11 @@ export struct ConfirmDialog {
         .focusable(false)
         .layoutWeight(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .onClick(() => {
-          this.isChecked = !this.isChecked;
-        })
     }
+    .accessibilityGroup(true)
+    .onClick(() => {
+      this.isChecked = !this.isChecked;
+    })
     .width('100%')
     .padding({ top: 8, bottom: 8 })
   }
@@ -1348,7 +1353,8 @@ struct CustomDialogContentComponent {
     if (this.buttons) {
       Column() {
         ForEach(this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), (item: ButtonOptions, index: number) => {
-          this.buildButtonWithDivider(index);
+          this.buildButtonWithDivider(this.buttons?.length === HORIZON_BUTTON_MAX_COUNT ?
+            HORIZON_BUTTON_MAX_COUNT - index - 1 : index);
         }, (item: ButtonOptions) => item.value.toString());
       }
     }
@@ -1400,7 +1406,8 @@ struct CustomDialogContentComponent {
         this.buildSingleButton(this.buttons[index]);
       }
 
-      if (index < Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
+      if ((this.buttons.length === HORIZON_BUTTON_MAX_COUNT ? HORIZON_BUTTON_MAX_COUNT - index - 1 : index) <
+        Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
         Row() {
         }
         .height($r('sys.float.alert_button_vertical_space'))
@@ -1445,6 +1452,8 @@ function setButtonProperties(buttonOptions: ButtonOptions, controller?: CustomDi
   .defaultFocus(true)
   .buttonStyle(buttonOptions.buttonStyle ?? ALERT_BUTTON_STYLE)
   .layoutWeight(BUTTON_LAYOUT_WEIGHT)
+  .type(ButtonType.Normal)
+  .borderRadius($r('sys.float.corner_radius_level10'))
 }
 
 /**

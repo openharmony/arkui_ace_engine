@@ -61,26 +61,24 @@ ModelAdapterWrapper::ModelAdapterWrapper(uint32_t key, const ModelViewContext& c
 #endif
 }
 
-void ModelAdapterWrapper::Deinit()
+std::shared_future<void> ModelAdapterWrapper::Deinit()
 {
     ACE_SCOPED_TRACE("ModelAdapterWrapper::Deinit");
 #if defined(KIT_3D_ENABLE)
     if (sceneAdapter_) {
         sceneAdapter_->Deinit();
-        return;
+        return std::shared_future<void>();
     }
 #endif
-    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this)] {
+    std::shared_ptr<Render3D::WidgetAdapter> widgetAdapter(widgetAdapter_);
+    std::shared_ptr<Render3D::TextureLayer> textureLayer(textureLayer_);
+    auto key = key_;
+    return Render3D::GraphicsTask::GetInstance().PushAsyncMessage([widgetAdapter, textureLayer, key] {
         ACE_SCOPED_TRACE("ModelAdapterWrapper::Deinit render");
-        auto adapter = weak.Upgrade();
-        CHECK_NULL_VOID(adapter);
-
-        CHECK_NULL_VOID(adapter->widgetAdapter_);
-        adapter->widgetAdapter_->DeInitEngine();
-
-        Render3D::GraphicsManager::GetInstance().UnRegister(adapter->GetKey());
-
-        auto& textureLayer = adapter->textureLayer_;
+        
+        CHECK_NULL_VOID(widgetAdapter);
+        widgetAdapter->DeInitEngine();
+        Render3D::GraphicsManager::GetInstance().UnRegister(key);
         CHECK_NULL_VOID(textureLayer);
         textureLayer->DestroyRenderTarget();
     });
@@ -93,7 +91,7 @@ void ModelAdapterWrapper::CreateTextureLayer()
         return;
     }
 #endif
-    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this)] {
+    Render3D::GraphicsTask::GetInstance().PushAsyncMessage([weak = WeakClaim(this)] {
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);
 
@@ -114,7 +112,7 @@ void ModelAdapterWrapper::CreateWidgetAdapter()
     auto key = GetKey();
     Render3D::HapInfo hapInfo = SetHapInfo();
     // init engine in async manager sometimes crash on screen rotation
-    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), key, &hapInfo] {
+    Render3D::GraphicsTask::GetInstance().PushAsyncMessage([weak = WeakClaim(this), key, hapInfo] {
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);
 
@@ -136,8 +134,6 @@ void ModelAdapterWrapper::OnAttachToFrameNode(const RefPtr<RenderContext>& conte
         return;
     }
 #endif
-    CreateTextureLayer();
-    CreateWidgetAdapter();
 
 #ifdef ENABLE_ROSEN_BACKEND
     auto rsContext = DynamicCast<NG::RosenRenderContext>(context);
@@ -146,6 +142,8 @@ void ModelAdapterWrapper::OnAttachToFrameNode(const RefPtr<RenderContext>& conte
     CHECK_NULL_VOID(rsNode);
     rsNode->SetFrameGravity(Rosen::Gravity::RESIZE);
 #endif
+    CreateTextureLayer();
+    CreateWidgetAdapter();
 }
 
 void ModelAdapterWrapper::OnDirtyLayoutWrapperSwap(const Render3D::WindowChangeInfo& windowChangeInfo)
@@ -157,7 +155,7 @@ void ModelAdapterWrapper::OnDirtyLayoutWrapperSwap(const Render3D::WindowChangeI
         return;
     }
 #endif
-    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &windowChangeInfo] {
+    Render3D::GraphicsTask::GetInstance().PushAsyncMessage([weak = WeakClaim(this), windowChangeInfo] {
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);
         CHECK_NULL_VOID(adapter->textureLayer_);
@@ -170,12 +168,24 @@ void ModelAdapterWrapper::OnDirtyLayoutWrapperSwap(const Render3D::WindowChangeI
 
 void ModelAdapterWrapper::OnRebuildFrame(RefPtr<RenderContext>& context)
 {
-    CHECK_NULL_VOID(textureLayer_);
-
 #ifdef ENABLE_ROSEN_BACKEND
-    CHECK_NULL_VOID(context);
-    auto rsNode = DynamicCast<NG::RosenRenderContext>(context)->GetRSNode();
-    textureLayer_->SetParent(rsNode);
+    auto rsContext = DynamicCast<NG::RosenRenderContext>(context);
+    CHECK_NULL_VOID(rsContext);
+    auto rsNode = rsContext->GetRSNode();
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        CHECK_NULL_VOID(textureLayer_);
+        textureLayer_->SetParent(rsNode);
+        return;
+    }
+#endif
+    Render3D::GraphicsTask::GetInstance().PushAsyncMessage([weak = WeakClaim(this), rsNode]() mutable {
+        auto adapter = weak.Upgrade();
+        CHECK_NULL_VOID(adapter);
+        CHECK_NULL_VOID(adapter->textureLayer_);
+
+        adapter->textureLayer_->SetParent(rsNode);
+    });
 #endif
 }
 

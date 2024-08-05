@@ -42,7 +42,7 @@ public:
 
     virtual void ClearArea() {}
 
-    virtual OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth) = 0;
+    virtual OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth);
 
     RectF GetAreaRect()
     {
@@ -54,6 +54,7 @@ public:
     SizeF GetFrameSize(bool withSafeArea = false);
 
 protected:
+    Alignment GetStackAlignment(const TextDirection& userDirection);
     void LayoutChild(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth);
     WeakPtr<Pattern> hostPattern_;
     RectF areaRect_;
@@ -75,8 +76,6 @@ public:
     SizeF Measure(LayoutWrapper* layoutWrapper, int32_t index) override;
 
     void Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth) override;
-
-    OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth) override;
 
     void AddEvent(const RefPtr<FrameNode>& node);
 
@@ -102,6 +101,7 @@ public:
         CHECK_NULL_VOID(stackNode_);
         host->RemoveChildAndReturnIndex(stackNode_);
         passwordNode_.Reset();
+        areaRect_.Reset();
     }
 
     const RefPtr<FrameNode> GetFrameNode() override;
@@ -145,8 +145,6 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth) override;
 
-    OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth) override;
-
     const RefPtr<FrameNode> GetFrameNode() override;
 
     void ClearArea() override
@@ -157,6 +155,7 @@ public:
         CHECK_NULL_VOID(host);
         CHECK_NULL_VOID(unitNode_);
         host->RemoveChildAndReturnIndex(unitNode_);
+        areaRect_.Reset();
     }
 
 private:
@@ -176,8 +175,6 @@ public:
     SizeF Measure(LayoutWrapper* layoutWrapper, int32_t index) override;
 
     void Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth) override;
-
-    OffsetF GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth) override;
 
     const RefPtr<FrameNode> GetFrameNode() override;
 

@@ -100,6 +100,15 @@ RefPtr<ResourceWrapper> CreateResourceWrapper(const ResourceInfo& info);
 std::optional<std::string> GetStringFromValueUtf8(napi_env env, napi_value value);
 bool ParseIntegerToString(const ResourceInfo& info, std::string& result);
 bool ParseColorFromResourceObject(napi_env env, napi_value value, Color& colorResult);
+
+napi_value GetReturnObject(napi_env env, std::string callbackString);
+bool HasProperty(napi_env env, napi_value value, const std::string& targetStr);
+bool ParseNapiDimension(napi_env env, CalcDimension& result, napi_value napiValue, DimensionUnit defaultUnit);
+bool ParseNapiDimensionNG(
+    napi_env env, CalcDimension& result, napi_value napiValue, DimensionUnit defaultUnit, bool isSupportPercent);
+bool ParseNapiColor(napi_env env, napi_value value, Color& result);
+bool ParseStyle(napi_env env, napi_value value, std::optional<BorderStyle>& style);
+bool ParseShadowColorStrategy(napi_env env, napi_value value, ShadowColorStrategy& strategy);
 } // namespace OHOS::Ace::Napi
 
 #endif // FOUNDATION_ACE_INTERFACES_NAPI_KITS_UTILS_H

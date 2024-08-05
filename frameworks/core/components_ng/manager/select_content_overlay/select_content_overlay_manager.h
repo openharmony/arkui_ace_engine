@@ -87,7 +87,6 @@ public:
     float GetHandleDiameter();
     void ConvertPointRelativeToNode(const RefPtr<FrameNode>& node, PointF& point);
     bool IsTouchAtHandle(const PointF& localPoint, const PointF& globalPoint);
-    void UpdateViewPort();
 
 private:
     void SetHolder(const RefPtr<SelectOverlayHolder>& holder);
@@ -98,7 +97,7 @@ private:
     void CreateHandleLevelSelectOverlay(SelectOverlayInfo& info, bool animation, HandleLevelMode mode);
     void UpdateExistOverlay(const SelectOverlayInfo& info, bool animation, int32_t requestCode);
     bool IsSameMouseSelectOverlay(const SelectOverlayInfo& info);
-    void CloseInternal(int32_t holderId, bool animation, CloseReason reason);
+    bool CloseInternal(int32_t holderId, bool animation, CloseReason reason);
     void DestroySelectOverlayNode(const RefPtr<FrameNode>& node);
     void DestroySelectOverlayNodeWithAnimation(const RefPtr<FrameNode>& node);
     void MountNodeToRoot(const RefPtr<FrameNode>& overlayNode, bool animation);
@@ -117,6 +116,8 @@ private:
     void ClearAllStatus();
     bool IsEnableHandleLevel();
     void NotifySelectOverlayShow(bool isCreated);
+    std::list<RefPtr<UINode>>::const_iterator FindSelectOverlaySlot(
+        const RefPtr<FrameNode>& root, const std::list<RefPtr<UINode>>& children);
 
     RefPtr<SelectOverlayHolder> selectOverlayHolder_;
     WeakPtr<FrameNode> selectOverlayNode_;

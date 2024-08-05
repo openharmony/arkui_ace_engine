@@ -61,6 +61,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
     onVsyncCallback_ = [weakTask = taskExecutor_, id = id_, refreshPeriod](
                            int64_t timeStampNanos, int64_t frameCount, void* data) {
         auto taskExecutor = weakTask.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
         auto onVsync = [id, timeStampNanos, frameCount, refreshPeriod] {
             int64_t ts = GetSysTimestamp();
             ContainerScope scope(id);
@@ -82,9 +83,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
             return;
         }
 
-        uiTaskRunner.PostTask([callback = std::move(onVsync)]() {
-            callback();
-        }, "ArkUIFormRenderWindowVsync");
+        taskExecutor->PostTask(onVsync, TaskExecutor::TaskType::UI, "ArkUIFormRenderWindowVsync", PriorityType::VIP);
     };
 
     frameCallback_.userData_ = nullptr;

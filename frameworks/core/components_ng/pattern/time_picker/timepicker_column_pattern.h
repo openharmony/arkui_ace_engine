@@ -303,6 +303,8 @@ public:
         clickBreak_ = value;
     }
 
+    void InitHapticController(const RefPtr<FrameNode>& host);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -366,7 +368,6 @@ private:
     DimensionRect CalculateHotZone(int32_t index, int32_t midSize, float middleChildHeight, float otherChildHeight);
     void AddHotZoneRectToText();
     void InitTextFontFamily();
-    void InitHapticController(const RefPtr<FrameNode>& host);
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
     void OnWindowHide() override;
@@ -375,8 +376,8 @@ private:
     float localDownDistance_ = 0.0f;
     Color pressColor_;
     Color hoverColor_;
-    FontWeight SelectedWeight_;
-    FontWeight DisappearWeight_;
+    FontWeight SelectedWeight_ = FontWeight::MEDIUM;
+    FontWeight DisappearWeight_ = FontWeight::REGULAR;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
     bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
@@ -387,7 +388,7 @@ private:
     uint32_t currentIndex_ = 0;
     double yLast_ = 0.0;
     double yOffset_ = 0.0;
-    double jumpInterval_;
+    double jumpInterval_ = 0.0;
     uint32_t showCount_ = 0;
     bool isVertical_ = true;
     float gradientHeight_ = 0.0f;
@@ -421,6 +422,7 @@ private:
     bool hasUserDefinedNormalFontFamily_ = false;
     bool hasUserDefinedSelectedFontFamily_ = false;
     bool isShow_ = true;
+    bool isEnableHaptic_ = true;
     std::shared_ptr<ITimepickerAudioHaptic> hapticController_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);
 };

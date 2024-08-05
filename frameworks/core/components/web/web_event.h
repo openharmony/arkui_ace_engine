@@ -329,13 +329,13 @@ public:
 private:
     std::map<std::string, std::string> headers_;
     std::string data_;
-    int32_t fd_;
+    int32_t fd_ = 0;
     std::string resourceUrl_;
     WebResponseDataType dataType_ = WebResponseDataType::STRING_TYPE;
     std::string encoding_;
     std::string mimeType_;
     std::string reason_;
-    int32_t statusCode_;
+    int32_t statusCode_ = 0;
     bool isReady_ = true;
     std::shared_ptr<WebResponseAsyncHandle> handle_;
     char* buffer_ = nullptr;

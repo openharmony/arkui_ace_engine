@@ -544,9 +544,6 @@ class SelectItem extends ViewPU {
                             y: this.zoomScaleArray[this.selectedIndexes[0]]
                         });
                         Stack.shadow(ShadowStyle.OUTER_DEFAULT_XS);
-                        Stack.pixelRound({
-                            top: PixelRoundCalcPolicy.FORCE_FLOOR
-                        });
                     }, Stack);
                     Stack.pop();
                 });
@@ -1470,7 +1467,8 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                                     this.buttonItemsPosition[s37] = {
                                                         start: LengthMetrics.vp(Number.parseFloat(this.options.componentPadding.toString()) +
                                                             (Number.parseFloat(i39.width.toString()) + 1) * s37),
-                                                        top: LengthMetrics.vp(Number.parseFloat(this.options.componentPadding.toString()))
+                                                        top: LengthMetrics.px(Math.floor(this.getUIContext()
+                                                            .vp2px(Number.parseFloat(this.options.componentPadding.toString()))))
                                                     };
                                                 }
                                             });
@@ -2094,7 +2092,7 @@ export class SegmentButton extends ViewPU {
             TapGesture.pop();
             SwipeGesture.create();
             SwipeGesture.onAction((p34) => {
-                if (this.options === void 0 || this.options.buttons === void 0) {
+                if (this.options === void 0 || this.options.buttons === void 0 || p34.sourceTool === SourceTool.TOUCHPAD) {
                     return;
                 }
                 if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
@@ -2346,8 +2344,10 @@ export class SegmentButton extends ViewPU {
                     If.pop();
                     this.observeComponentCreation2((u31, v31) => {
                         Stack.create();
+                        Context.animation({ duration: 0 });
                         Stack.direction(this.options.direction);
                         Stack.size(ObservedObject.GetRawObject(this.componentSize));
+                        Context.animation(null);
                         Stack.borderRadius((this.options.type === 'capsule' && (this.options.multiply ?? false) ?
                         this.options.iconTextRadius : this.options.iconTextBackgroundRadius) ??
                             this.componentSize.height / 2);

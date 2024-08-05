@@ -42,6 +42,7 @@ const OffsetF COORDINATE_OFFSET(WIDTH, HEIGHT);
 constexpr bool HOVER_VALUE = true;
 const std::string RESULT_SUCCESS_ONE = "sucess1";
 const std::string RESULT_SUCCESS_TWO = "sucess2";
+bool accessibilityHover = false;
 } // namespace
 
 class InputEventHubTestNg : public testing::Test {
@@ -419,6 +420,50 @@ HWTEST_F(InputEventHubTestNg, InputEventHubBindContextMenuTest007, TestSize.Leve
     inputEventHub->BindContextMenu(std::move(onMouse1));
     inputEventHub->BindContextMenu(std::move(onMouse2));
     EXPECT_NE(inputEventHub->mouseEventActuator_, nullptr);
+}
+
+/**
+ * @tc.name: InputEventHubProcessMouseTest008
+ * @tc.desc: Create InputEventHub and invoke ProcessMouseTestHit functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create InputEventHub.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(inputEventHub, nullptr);
+    TouchTestResult mouseResult;
+
+    /**
+     * @tc.steps: step2. Set HoverEvent and hoverEventActuator_ and userCallback_ will be initialized.
+     */
+    const OnAccessibilityHoverFunc onHover = [](bool, AccessibilityHoverInfo) { accessibilityHover = true; };
+    OnAccessibilityHoverFunc onHover1 = onHover;
+    inputEventHub->SetAccessibilityHoverEvent(std::move(onHover1));
+    EXPECT_NE(inputEventHub->accessibilityHoverEventActuator_->userCallback_, nullptr);
+
+    /**
+     * @tc.steps: step3. Invoke ProcessMouseTestHit when the userCallback_ has already been
+     * initialized.
+     * @tc.expected: ProcessMouseTestHit return false, mouse and hover result size has been increased one.
+     */
+    EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, mouseResult));
+    EXPECT_EQ(inputEventHub->accessibilityHoverEventActuator_->accessibilityHoverEventTarget_->GetCoordinateOffset(),
+        Offset(COORDINATE_OFFSET.GetX(), COORDINATE_OFFSET.GetY()));
+    EXPECT_EQ(mouseResult.size(), INPUT_EVENTS_SIZE);
+
+    /**
+     * @tc.steps: step11. Handle mouse and hover event when the events and userCallback is nullptr or not.
+     */
+    TouchEvent event;
+    inputEventHub->accessibilityHoverEventActuator_->accessibilityHoverEventTarget_->HandleAccessibilityHoverEvent(
+        HOVER_VALUE, event);
+    EXPECT_EQ(accessibilityHover, true);
 }
 
 /**

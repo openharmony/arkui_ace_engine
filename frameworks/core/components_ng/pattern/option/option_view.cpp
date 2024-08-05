@@ -52,7 +52,11 @@ RefPtr<FrameNode> Create(int32_t index)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
     BorderRadiusProperty border;
-    border.SetRadius(theme->GetInnerBorderRadius());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        border.SetRadius(theme->GetMenuDefaultInnerRadius());
+    } else {
+        border.SetRadius(theme->GetInnerBorderRadius());
+    }
     renderContext->UpdateBorderRadius(border);
 
     auto props = node->GetPaintProperty<OptionPaintProperty>();
@@ -158,9 +162,16 @@ RefPtr<FrameNode> OptionView::CreateSymbol(const std::function<void(WeakPtr<NG::
 void OptionView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,
     const std::function<void()>& onClickFunc, const std::string& icon)
 {
-    auto pasteNode =
-        PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
-            static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::NORMAL), true);
+    RefPtr<FrameNode> pasteNode;
+    if (optionsHasIcon) {
+        pasteNode =
+            PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
+                static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE), static_cast<int32_t>(ButtonType::NORMAL), true);
+    } else {
+        pasteNode =
+            PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
+                static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::NORMAL), true);
+    }
     CHECK_NULL_VOID(pasteNode);
     auto pattern = option->GetPattern<OptionPattern>();
     CHECK_NULL_VOID(pattern);
@@ -173,16 +184,17 @@ void OptionView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>&
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    if (optionsHasIcon) {
-        auto left = theme->GetIconSideLength().ConvertToPx() + theme->GetIconContentPadding().ConvertToPx();
-        pasteLayoutProperty->UpdateLeftSpace(Dimension(left));
-    }
 
     pasteLayoutProperty->UpdateFontSize(theme->GetMenuFontSize());
     pasteLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
     pastePaintProperty->UpdateFontColor(theme->GetMenuFontColor());
     pastePaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
     pasteLayoutProperty->UpdateBackgroundBorderRadius(theme->GetInnerBorderRadius());
+    pasteLayoutProperty->UpdateIconSize(theme->GetIconSideLength());
+    pastePaintProperty->UpdateIconColor(theme->GetMenuIconColor());
+    if (optionsHasIcon) {
+        pasteLayoutProperty->UpdateTextIconSpace(theme->GetIconContentPadding());
+    }
     pasteNode->MountToParent(row);
     pasteNode->MarkModifyDone();
 
@@ -260,7 +272,7 @@ RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, std::vector<
     return option;
 }
 
-RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const std::string& value,
+RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const OptionValueInfo& value,
     const std::function<void()>& onClickFunc, int32_t index, const std::string& icon)
 {
     auto option = Create(index);
@@ -270,13 +282,13 @@ RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const std::s
 
 #ifdef OHOS_PLATFORM
     constexpr char BUTTON_PASTE[] = "textoverlay.paste";
-    if (value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
+    if (value.value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
         CreatePasteButton(optionsHasIcon, option, row, onClickFunc, icon);
     } else {
-        CreateOption(optionsHasIcon, value, icon, row, option, onClickFunc);
+        CreateOption(optionsHasIcon, value.value, icon, row, option, onClickFunc);
     }
 #else
-    CreateOption(optionsHasIcon, value, icon, row, option, onClickFunc);
+    CreateOption(optionsHasIcon, value.value, icon, row, option, onClickFunc);
 #endif
     return option;
 }

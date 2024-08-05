@@ -55,7 +55,7 @@ public:
 
     void DrawToRSCanvas(
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override;
-
+    void DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override;
     bool IsStatic() override;
     void SetRedrawCallback(std::function<void()>&& callback) override;
     void SetOnFinishCallback(std::function<void()>&& callback) override;

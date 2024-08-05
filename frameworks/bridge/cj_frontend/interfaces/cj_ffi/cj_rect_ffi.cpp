@@ -29,7 +29,12 @@ extern "C" {
 void FfiOHOSAceFrameworkRectCreate(double width, int32_t widthUnit, double height, int32_t heightUnit)
 {
     RectModel::GetInstance()->Create();
-    FfiOHOSAceFrameworkShapeSetSize(width, widthUnit, height, heightUnit);
+    if (width > 0.0) {
+        FfiOHOSAceFrameworkShapeSetWidth(width, widthUnit);
+    }
+    if (height > 0.0) {
+        FfiOHOSAceFrameworkShapeSetHeight(height, heightUnit);
+    }
 }
 
 int64_t FfiOHOSAceFrameworkRectInsCreate(double width, int32_t widthUnit, double height, int32_t heightUnit)
@@ -37,6 +42,9 @@ int64_t FfiOHOSAceFrameworkRectInsCreate(double width, int32_t widthUnit, double
     OHOS::Ace::Dimension dWidth(width, static_cast<OHOS::Ace::DimensionUnit>(widthUnit));
     OHOS::Ace::Dimension dHeight(height, static_cast<OHOS::Ace::DimensionUnit>(heightUnit));
     auto ret_ = OHOS::FFI::FFIData::Create<OHOS::Ace::Framework::NativeRect>(dWidth, dHeight);
+    if (ret_ == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return ret_->GetID();
 }
 

@@ -1197,7 +1197,8 @@ HWTEST_F(TitleBarTestNg, OnWindowSizeChanged001, TestSize.Level1)
     auto buttonNode = AceType::MakeRefPtr<FrameNode>(FRAME_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(buttonNode, nullptr);
     buttonNode->MountToParent(menuNode);
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(FRAME_ITEM_ETS_TAG, nodeId);
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
     ASSERT_NE(barItemNode, nullptr);
     barItemNode->MountToParent(buttonNode);
     barItemNode->SetIsMoreItemNode(true);
@@ -1355,7 +1356,9 @@ HWTEST_F(TitleBarTestNg, OnWindowSizeChanged002, TestSize.Level1)
         MAX_MENU_NUM_LARGE : MAX_MENU_NUM_SMALL;
     titleBarNode->menu_ = FrameNode::CreateFrameNode("Menu", 101, AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto buttonNode = FrameNode::CreateFrameNode("Button", 201, AceType::MakeRefPtr<ButtonPattern>());
-    buttonNode->children_.emplace_back(AceType::MakeRefPtr<BarItemNode>("BarItem", 301));
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 301, []() { return AceType::MakeRefPtr<Pattern>(); });
+    buttonNode->children_.emplace_back(barItemNode);
     titleBarNode->menu_->children_.emplace_back(buttonNode);
     EXPECT_EQ(titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR),
         TitleBarParentType::NAV_DESTINATION);
@@ -1383,7 +1386,8 @@ HWTEST_F(TitleBarTestNg, OnWindowSizeChanged003, TestSize.Level1)
     WindowSizeChangeReason type = WindowSizeChangeReason::RESIZE;
     titleBarNode->menu_ = FrameNode::CreateFrameNode("Menu", 101, AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto buttonNode = FrameNode::CreateFrameNode("Button", 201, AceType::MakeRefPtr<ButtonPattern>());
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>("BarItem", 301);
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 301, []() { return AceType::MakeRefPtr<Pattern>(); });
     buttonNode->children_.emplace_back(barItemNode);
     titleBarNode->menu_->children_.emplace_back(buttonNode);
     EXPECT_EQ(titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR),

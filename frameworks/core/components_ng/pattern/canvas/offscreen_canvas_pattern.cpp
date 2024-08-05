@@ -22,13 +22,7 @@
 namespace OHOS::Ace::NG {
 OffscreenCanvasPattern::OffscreenCanvasPattern(int32_t width, int32_t height)
 {
-    if (width < 0) {
-        width = 0;
-    }
-    if (height < 0) {
-        height = 0;
-    }
-    offscreenPaintMethod_ = MakeRefPtr<OffscreenCanvasPaintMethod>(width, height);
+    offscreenPaintMethod_ = MakeRefPtr<OffscreenCanvasPaintMethod>(std::max(width, 0), std::max(height, 0));
 }
 
 void OffscreenCanvasPattern::UpdateSize(int32_t width, int32_t height)
@@ -138,18 +132,16 @@ void OffscreenCanvasPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
     offscreenPaintMethod_->QuadraticCurveTo(param);
 }
 
-void OffscreenCanvasPattern::FillText(
-    const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state)
+void OffscreenCanvasPattern::FillText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
     UpdateTextDefaultDirection();
-    offscreenPaintMethod_->FillText(text, x, y, maxWidth, state);
+    offscreenPaintMethod_->FillText(text, x, y, maxWidth);
 }
 
-void OffscreenCanvasPattern::StrokeText(
-    const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state)
+void OffscreenCanvasPattern::StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
     UpdateTextDefaultDirection();
-    offscreenPaintMethod_->StrokeText(text, x, y, maxWidth, state);
+    offscreenPaintMethod_->StrokeText(text, x, y, maxWidth);
 }
 
 TextMetrics OffscreenCanvasPattern::MeasureTextMetrics(const std::string& text, const PaintState& state)
@@ -449,5 +441,10 @@ void OffscreenCanvasPattern::UpdateTextDefaultDirection()
 RefPtr<PixelMap> OffscreenCanvasPattern::TransferToImageBitmap()
 {
     return offscreenPaintMethod_->TransferToImageBitmap();
+}
+
+void OffscreenCanvasPattern::SetDensity(double density)
+{
+    offscreenPaintMethod_->SetDensity(density);
 }
 } // namespace OHOS::Ace::NG

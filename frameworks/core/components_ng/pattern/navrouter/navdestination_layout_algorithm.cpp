@@ -208,8 +208,8 @@ float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGr
     auto geometryNode = titleBarWrapper->GetGeometryNode();
     auto titleBarOffset = OffsetT<float>(0.0f, 0.0f);
     const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
-    titleBarOffset.AddX(padding.left.value_or(0));
-    titleBarOffset.AddY(padding.top.value_or(0));
+    titleBarOffset.AddX(padding.left.value_or(0.0f));
+    titleBarOffset.AddY(padding.top.value_or(0.0f));
     geometryNode->SetMarginFrameOffset(titleBarOffset);
     titleBarWrapper->Layout();
     return geometryNode->GetFrameSize().Height();
@@ -270,6 +270,14 @@ void LayoutSheet(const RefPtr<NavDestinationGroupNode>& hostNode)
     if (sheetWrapper->GetHostNode()->GetTag() != V2::SHEET_WRAPPER_TAG) {
         return;
     }
+    auto navdestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navdestinationLayoutProperty);
+    auto geometryNode = sheetWrapper->GetGeometryNode();
+    auto paddingOffset = OffsetT<float>(0.0f, 0.0f);
+    const auto& padding = navdestinationLayoutProperty->CreatePaddingAndBorder();
+    paddingOffset.AddX(padding.left.value_or(0.0f));
+    paddingOffset.AddY(padding.top.value_or(0.0f));
+    geometryNode->SetMarginFrameOffset(paddingOffset);
     sheetWrapper->Layout();
 }
 

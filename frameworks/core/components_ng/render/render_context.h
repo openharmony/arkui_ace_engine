@@ -68,16 +68,6 @@ class FrameNode;
 class InspectorFilter;
 class Modifier;
 
-struct PaintFocusExtraInfo final {
-    PaintFocusExtraInfo() = default;
-    PaintFocusExtraInfo(bool isAccessibilityFocus, bool isFocusBoxGlow)
-        : isAccessibilityFocus(isAccessibilityFocus), isFocusBoxGlow(isFocusBoxGlow)
-    {}
-    ~PaintFocusExtraInfo() = default;
-    bool isAccessibilityFocus { false };
-    bool isFocusBoxGlow { false };
-};
-
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 using TransitionFinishCallback = std::function<void(bool)>;
 
@@ -216,15 +206,14 @@ public:
 
     // Paint focus state by component's setting. It will paint along the paintRect
     virtual void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth,
-        bool isAccessibilityFocus = false, bool isFocusBoxGlow = false)
+        bool isAccessibilityFocus = false)
     {}
     // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
     virtual void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
-        const Dimension& paintWidth, const PaintFocusExtraInfo& paintFocusExtraInfo)
+        const Dimension& paintWidth, bool isAccessibilityFocus = false)
     {}
     // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
-    virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth,
-        bool isFocusBoxGlow = false)
+    virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
     {}
 
     virtual void ClearFocusState() {}
@@ -306,6 +295,7 @@ public:
     virtual void ClipWithCircle(const Circle& circle) {}
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
     virtual void RemoveClipWithRRect() {}
+    virtual void UpdateWindowFocusState(bool isFocused) {}
 
     // visual
     virtual void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) {}
@@ -461,7 +451,8 @@ public:
 
     virtual void ClearAccessibilityFocus() {};
 
-    virtual void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) {};
+    virtual void OnAccessibilityFocusUpdate(
+        bool isAccessibilityFocus, const int64_t accessibilityIdForVirtualNode = -2100000) {};
     virtual void OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibilityFocusRect) {};
 
     virtual void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) {}
@@ -540,6 +531,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, HasBorderImageOutset, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, HasBorderImageRepeat, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderImageGradient, Gradient);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderSourceFromImage, bool);
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
@@ -568,6 +560,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontHueRotate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontColorBlend, Color);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, LinearGradientBlur, NG::LinearGradientBlurPara);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, Magnifier, MagnifierParams);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, DynamicLightUpRate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, DynamicLightUpDegree, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BgDynamicBrightnessOption, BrightnessOption);
@@ -640,7 +633,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Motion, MotionPath, MotionPathOption)
 
     // accessibility
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocus, bool);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP_FOR_VIRTUAL_NODE(AccessibilityFocus, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocusRect, RectT<int32_t>);
 
     // useEffect
@@ -705,6 +698,16 @@ public:
     // The additional opacity will be multiplied with the base opacity.
     virtual void SetOpacityMultiplier(float opacity) {}
 
+    void SetNeedAnimateFlag(bool isNeedAnimate)
+    {
+        isNeedAnimate_ = isNeedAnimate;
+    }
+
+    virtual uint64_t GetNodeId() const
+    {
+        return 0;
+    }
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
@@ -713,6 +716,7 @@ protected:
     bool isSynced_ = false;
     bool isNeedRebuildRSTree_ = true;
     bool handleChildBounds_ = false;
+    bool isNeedAnimate_ = true;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
@@ -734,6 +738,7 @@ protected:
     virtual void OnHasBorderImageOutsetUpdate(bool tag) {}
     virtual void OnHasBorderImageRepeatUpdate(bool tag) {}
     virtual void OnBorderImageGradientUpdate(const Gradient& gradient) {}
+    virtual void OnBorderSourceFromImageUpdate(bool sourceFromImage) {}
 
     virtual void OnBorderWidthUpdate(const BorderWidthProperty& value) {}
     virtual void OnBorderRadiusUpdate(const BorderRadiusProperty& value) {}
@@ -779,6 +784,7 @@ protected:
     virtual void OnFrontHueRotateUpdate(float value) {}
     virtual void OnFrontColorBlendUpdate(const Color& value) {}
     virtual void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) {}
+    virtual void OnMagnifierUpdate(const MagnifierParams& magnifierParams) {}
     virtual void OnDynamicLightUpRateUpdate(const float rate) {}
     virtual void OnDynamicLightUpDegreeUpdate(const float degree) {}
     virtual void OnBgDynamicBrightnessOptionUpdate(const std::optional<BrightnessOption>& brightnessOption) {}

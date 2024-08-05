@@ -101,6 +101,8 @@ public:
         navigationMode_ = navigationMode;
     }
 
+    bool JudgeFoldStateChangeAndUpdateState();
+
     void SetNavigationStack(const RefPtr<NavigationStack>& navigationStack);
 
     const RefPtr<NavigationStack>& GetNavigationStack()
@@ -405,6 +407,7 @@ private:
     bool ApplyTopNavPathSystemBarStyleOrRestore(const RefPtr<WindowManager>& windowManager,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& topNavPath);
     void InitPageNode(const RefPtr<FrameNode>& host);
+    void InitFoldState();
 
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
@@ -505,6 +508,10 @@ private:
     bool isInDividerDrag_ = false;
     bool isDividerDraggable_ = true;
     bool isAnimated_ = false;
+#if defined(ENABLE_NAV_SPLIT_MODE)
+    bool isBackPage_ = false;
+#endif
+    FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;  // only used for mode-switch animation
     bool isReplace_ = false;
     bool isFinishInteractiveAnimation_ = true;
     int32_t lastPreIndex_ = false;

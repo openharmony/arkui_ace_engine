@@ -49,7 +49,7 @@ public:
     static void SetPopupUnselectedColor(const JSCallbackInfo& args);
     static void SetPopupItemFont(const JSCallbackInfo& args);
     static void SetPopupItemBackgroundColor(const JSCallbackInfo& args);
-    static void SetAutoCollapse(bool state);
+    static void SetAutoCollapse(const JSCallbackInfo& args);
     static void SetPopupItemBorderRadius(const JSCallbackInfo& args);
     static void SetItemBorderRadius(const JSCallbackInfo& args);
     static void SetPopupBackgroundBlurStyle(const JSCallbackInfo& args);

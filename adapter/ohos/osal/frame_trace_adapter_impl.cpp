@@ -20,23 +20,16 @@
 #include "parameters.h"
 
 namespace OHOS::Ace {
-#if (defined(__aarch64__) || defined(__x86_64__))
-const char* FRAME_TRACE_SO_PATH = "/system/lib64/platformsdk/libframe_trace_intf.z.so";
-#else
-const char* FRAME_TRACE_SO_PATH = "/system/lib/platformsdk/libframe_trace_intf.z.so";
-#endif
 
-static bool g_judgeFrameTrace = false;
-static bool g_accessFrameTrace = false;
 constexpr char INTERVAL_LIMIT[] = "ffrt.interval.limit";
 
 bool FrameTraceAdapterImpl::AccessFrameTrace()
 {
-    if (!g_judgeFrameTrace) {
-        g_judgeFrameTrace = true;
-        g_accessFrameTrace = access(FRAME_TRACE_SO_PATH, F_OK) ? false : true;
-    }
-    return g_accessFrameTrace;
+#ifdef FRAME_TRACE_ENABLE
+    return true;
+#else
+    return false;
+#endif
 }
 
 void FrameTraceAdapterImpl::QuickExecute(std::function<void()> && func)

@@ -125,9 +125,10 @@ inline constexpr SelectOverlayDirtyFlag DIRTY_SELECT_AREA = 1 << 2;
 inline constexpr SelectOverlayDirtyFlag DIRTY_ALL_MENU_ITEM = 1 << 3;
 inline constexpr SelectOverlayDirtyFlag DIRTY_COPY_ALL_ITEM = 1 << 4;
 inline constexpr SelectOverlayDirtyFlag DIRTY_SELECT_TEXT = 1 << 5;
+inline constexpr SelectOverlayDirtyFlag DIRTY_VIEWPORT = 1 << 6;
 inline constexpr SelectOverlayDirtyFlag DIRTY_DOUBLE_HANDLE = DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE;
 inline constexpr SelectOverlayDirtyFlag DIRTY_ALL =
-    DIRTY_DOUBLE_HANDLE | DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AREA | DIRTY_SELECT_TEXT;
+    DIRTY_DOUBLE_HANDLE | DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AREA | DIRTY_SELECT_TEXT | DIRTY_VIEWPORT;
 
 inline constexpr int32_t REQUEST_RECREATE = 1;
 
@@ -270,6 +271,7 @@ struct SelectOverlayInfo {
     std::function<void(const TouchEventInfo&)> onTouchDown;
     std::function<void(const TouchEventInfo&)> onTouchUp;
     std::function<void(const TouchEventInfo&)> onTouchMove;
+    std::function<void(const GestureEvent&, bool isClickCaret)> onClick;
 
     // handle move callback.
     std::function<void(bool isFirst)> onHandleMoveStart;

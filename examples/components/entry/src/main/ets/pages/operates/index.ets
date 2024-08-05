@@ -13,21 +13,25 @@
  * limitations under the License.
  */
 
-import { RouteGroup } from '../../common/route';
+import { Route, RouteGroup } from '../../common/route';
 import { ButtonBootcamp } from './ButtonBootcamp';
+import { ChipBootcamp } from './ChipBootcamp';
 
 export const operatesRoute: RouteGroup = {
   name: 'operates',
   label: '操作类',
   children: [
     { name: 'button', label: '按钮/Button' },
+    { name: 'chip', label: '操作块/Chip' },
   ]
 };
 
 @Builder
-export function OperatesDestination(name: string) {
+export function OperatesDestination(name: string, route: Route) {
   if (name === 'operates/button') {
-    ButtonBootcamp()
+    ButtonBootcamp({ title: route.label })
+  } else if (name === 'operates/chip') {
+    ChipBootcamp({ title: route.label })
   }
 }
 

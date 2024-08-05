@@ -274,6 +274,36 @@ public:
     {
         verticalAxis_ = axis;
     }
+
+    float GetInputXDeltaSlope() const
+    {
+        return inputXDeltaSlope_;
+    }
+
+    float GetInputYDeltaSlope() const
+    {
+        return inputYDeltaSlope_;
+    }
+
+    bool IsInterpolated() const
+    {
+        return isInterpolated_;
+    }
+
+    void SetInputXDeltaSlope(float inputXDeltaSlope)
+    {
+        inputXDeltaSlope_ = inputXDeltaSlope;
+    }
+
+    void SetInputYDeltaSlope(float inputYDeltaSlope)
+    {
+        inputYDeltaSlope_ = inputYDeltaSlope;
+    }
+
+    void SetIsInterpolated(bool isInterpolated)
+    {
+        isInterpolated_ = isInterpolated;
+    }
 #ifdef SECURITY_COMPONENT_ENABLE
     void SetDisplayX(double displayX)
     {
@@ -341,6 +371,11 @@ private:
     InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
     float horizontalAxis_ = 0.0;
     float verticalAxis_ = 0.0;
+
+    // Save historical touch point slope.
+    bool isInterpolated_ = false;
+    float inputXDeltaSlope_ = 0.0f;
+    float inputYDeltaSlope_ = 0.0f;
 };
 
 using GestureEventFunc = std::function<void(GestureEvent& info)>;

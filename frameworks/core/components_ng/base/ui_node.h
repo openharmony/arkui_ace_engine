@@ -35,9 +35,11 @@
 #include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
+class AccessibilityProperty;
 
 struct ExtraInfo {
     std::string page;
@@ -84,7 +86,8 @@ public:
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false);
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
-    void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
+    void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode,
+        bool addModalUiextension = false);
 
     std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child, bool allowTransition = false);
     int32_t RemoveChildAndReturnIndex(const RefPtr<UINode>& child);
@@ -107,7 +110,7 @@ public:
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     [[deprecated]] void AttachToMainTree(bool recursive = false);
     void AttachToMainTree(bool recursive, PipelineContext* context);
-    void DetachFromMainTree(bool recursive = false);
+    virtual void DetachFromMainTree(bool recursive = false);
     void UpdateConfigurationUpdate(const ConfigurationChange& configurationChange);
     virtual void OnConfigurationUpdate(const ConfigurationChange& configurationChange) {}
 
@@ -133,7 +136,7 @@ public:
     // int32_t second - index of the node
     std::pair<bool, int32_t> GetChildFlatIndex(int32_t id);
 
-    virtual const std::list<RefPtr<UINode>>& GetChildren() const
+    virtual const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const
     {
         return children_;
     }
@@ -179,17 +182,18 @@ public:
     // Tree operation end.
 
     // performance.
-    PipelineContext* GetContext();
+    PipelineContext* GetContext() const;
     PipelineContext* GetContextWithCheck();
 
-    RefPtr<PipelineContext> GetContextRefPtr();
+    RefPtr<PipelineContext> GetContextRefPtr() const;
 
     // When FrameNode creates a layout task, the corresponding LayoutWrapper tree is created, and UINode needs to update
     // the corresponding LayoutWrapper tree node at this time like add self wrapper to wrapper tree.
     virtual void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout);
 
     bool IsAutoFillContainerNode();
-    void DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer = false);
+    void DumpViewDataPageNodes(
+        RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer = false, bool needsRecordData = false);
     bool NeedRequestAutoSave();
     // DFX info.
     void DumpTree(int32_t depth);
@@ -344,7 +348,7 @@ public:
 
     virtual void OnNotifyMemoryLevel(int32_t level) {}
 
-    virtual void SetActive(bool active);
+    virtual void SetActive(bool active, bool needRebuildRenderContext = false);
 
     virtual void SetJSViewActive(bool active, bool isLazyForEachNode = false);
 
@@ -602,6 +606,11 @@ public:
     static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
     static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
 
+    virtual RefPtr<NG::AccessibilityProperty> GetVirtualAccessibilityProperty()
+    {
+        return nullptr;
+    }
+
     void AddFlag(uint32_t flag)
     {
         nodeFlag_ |= flag;
@@ -610,6 +619,42 @@ public:
     bool IsNodeHasFlag(uint32_t flag) const
     {
         return (flag & nodeFlag_) == flag;
+    }
+
+    void SetAccessibilityNodeVirtual()
+    {
+        isAccessibilityVirtualNode_ = true;
+        for (auto& it : GetChildren()) {
+            it->SetAccessibilityNodeVirtual();
+        }
+    }
+
+    bool IsAccessibilityVirtualNode() const
+    {
+        return isAccessibilityVirtualNode_;
+    }
+
+    void SetAccessibilityVirtualNodeParent(const RefPtr<UINode>& parent)
+    {
+        parentForAccessibilityVirtualNode_ = parent;
+        for (auto& it : GetChildren()) {
+            it->SetAccessibilityVirtualNodeParent(parent);
+        }
+    }
+
+    WeakPtr<UINode> GetVirtualNodeParent() const
+    {
+        return parentForAccessibilityVirtualNode_;
+    }
+
+    bool IsFirstVirtualNode() const
+    {
+        return isFirstAccessibilityVirtualNode_;
+    }
+
+    void SetFirstAccessibilityVirtualNode()
+    {
+        isFirstAccessibilityVirtualNode_ = true;
     }
 
     void SetRootNodeId(int32_t rootNodeId)
@@ -735,14 +780,14 @@ protected:
     // dump self info.
     virtual void DumpInfo() {}
     virtual void DumpAdvanceInfo() {}
-    virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
+    virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
     virtual bool CheckAutoSave()
     {
         return false;
     }
     // Mount to the main tree to display.
     virtual void OnAttachToMainTree(bool recursive = false);
-    virtual void OnDetachFromMainTree(bool recursive = false);
+    virtual void OnDetachFromMainTree(bool recursive = false, PipelineContext* context = nullptr);
     virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
     // run offscreen process.
     virtual void OnOffscreenProcess(bool recursive) {}
@@ -765,6 +810,8 @@ protected:
     bool layoutSeperately_ = false;
 
     virtual void PaintDebugBoundary(bool flag) {}
+
+    void TraversingCheck(RefPtr<UINode> node = nullptr, bool withAbort = false);
 
     PipelineContext* context_ = nullptr;
 private:
@@ -792,6 +839,7 @@ private:
     bool isBuildByJS_ = false;
     bool isRootBuilderNode_ = false;
     bool isArkTsFrameNode_ = false;
+    bool isTraversing_ = false;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RootNodeType rootNodeType_ = RootNodeType::PAGE_ETS_TAG;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
@@ -816,6 +864,9 @@ private:
     // except for the modal uiextension
     // Used to mark modal uiextension count below the root node
     int32_t modalUiextensionCount_ = 0;
+    bool isAccessibilityVirtualNode_ = false;
+    WeakPtr<UINode> parentForAccessibilityVirtualNode_;
+    bool isFirstAccessibilityVirtualNode_ = false;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

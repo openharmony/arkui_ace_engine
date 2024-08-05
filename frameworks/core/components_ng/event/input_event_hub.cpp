@@ -15,6 +15,7 @@
 
 #include "core/components_ng/event/input_event_hub.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -42,6 +43,12 @@ bool InputEventHub::ProcessMouseTestHit(const OffsetF& coordinateOffset, TouchTe
     }
     if (hoverEffectActuator_) {
         hoverEffectActuator_->OnCollectHoverEffect(coordinateOffset, getEventTargetImpl, result);
+    }
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, false);
+    if (accessibilityHoverEventActuator_) {
+        accessibilityHoverEventActuator_->OnCollectAccessibilityHoverEvent(
+            coordinateOffset, getEventTargetImpl, result, host);
     }
     return false;
 }

@@ -34,7 +34,6 @@ public:
     CalendarDialogPattern() : LinearLayoutPattern(true) {};
     ~CalendarDialogPattern() override = default;
 
-    void OnFontConfigurationUpdate() override;
     bool IsAtomicNode() const override
     {
         return true;
@@ -93,15 +92,38 @@ public:
         return hoverState_;
     }
 
-    void updateFontConfigurationEvent(const std::function<void()>& closeDialogEvent)
-    {
-        closeDialogEvent_ = closeDialogEvent;
-    }
-
     void GetCalendarMonthData(int32_t year, int32_t month, ObtainedMonth& calendarMonthData);
     CalendarMonth GetNextMonth(const CalendarMonth& calendarMonth);
     CalendarMonth GetLastMonth(const CalendarMonth& calendarMonth);
     void SetOptionsButtonUpdateColorFlags(size_t index, bool isUpdate);
+
+    void SetCurrentButtonInfo(const std::vector<ButtonInfo>& buttonInfos)
+    {
+        currentButtonInfos_ = buttonInfos;
+    }
+
+    void SetCurrentSettingData(const CalendarSettingData& settingData)
+    {
+        currentSettingData_ = settingData;
+    }
+
+    void OnLanguageConfigurationUpdate() override;
+
+    void UpdateCaretInfoToController();
+
+    bool HasSurfaceChangedCallback()
+    {
+        return surfaceChangedCallbackId_.has_value();
+    }
+
+    void UpdateSurfaceChangedCallbackId(int32_t id)
+    {
+        surfaceChangedCallbackId_ = id;
+    }
+
+    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
+
+    void InitSurfaceChangedCallback();
 
 private:
     void OnModifyDone() override;
@@ -166,7 +188,9 @@ private:
     RefPtr<InputEvent> hoverListener_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(CalendarDialogPattern);
     bool hasTabKeyDown_ = false;
-    std::function<void()> closeDialogEvent_;
+    std::vector<ButtonInfo> currentButtonInfos_;
+    CalendarSettingData currentSettingData_;
+    std::optional<int32_t> surfaceChangedCallbackId_;
 };
 } // namespace OHOS::Ace::NG
 

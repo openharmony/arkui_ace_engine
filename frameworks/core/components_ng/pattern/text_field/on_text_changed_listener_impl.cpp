@@ -321,9 +321,9 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
         keyboardInfo.keyBoardType = KeyBoardType::STATUS_BAR;
     }
     keyboardInfo.visible = info.visible;
-    auto textclient = pattern_.Upgrade();
-    CHECK_NULL_VOID(textclient);
-    auto pattern = AceType::DynamicCast<Pattern>(textclient);
+    auto textClient = pattern_.Upgrade();
+    CHECK_NULL_VOID(textClient);
+    auto pattern = AceType::DynamicCast<Pattern>(textClient);
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
@@ -334,6 +334,7 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
         ContainerScope scope(id);
         auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
         CHECK_NULL_VOID(textFieldManager);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo SetImeShow:%d", keyboardInfo.visible);
         textFieldManager->SetImeShow(keyboardInfo.visible);
     };
     PostTaskToUI(task, "ArkUITextFieldSetImeShow");
@@ -367,8 +368,8 @@ void OnTextChangedListenerImpl::AutoFillReceivePrivateCommand(
 
 int32_t OnTextChangedListenerImpl::SetPreviewText(const std::u16string &text, const MiscServices::Range &range)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetPreviewText value %{private}s in range (%{public}d, %{public}d)",
-        StringUtils::Str16ToStr8(text).c_str(), range.start, range.end);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetPreviewText length :%{public}d in range (%{public}d, %{public}d)",
+        static_cast<int32_t>(text.length()), range.start, range.end);
     int32_t ret = CheckPreviewTextParams(text, {range.start, range.end});
     if (ret != MiscServices::ErrorCode::NO_ERROR) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetPreviewText result is %{public}d}", ret);
