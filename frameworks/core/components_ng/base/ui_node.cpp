@@ -227,6 +227,12 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
         AddDisappearingChild(child, std::distance(children_.begin(), iter));
     }
     MarkNeedSyncRenderTree(true);
+    // Iter maybe lost in OnRemoveFromParent, needs reacquire.
+    iter = std::find(children_.begin(), children_.end(), child);
+    if (iter == children_.end()) {
+        LOGW("Iter is qeual to children end");
+        return children_.end();
+    }
     TraversingCheck(*iter);
     auto result = children_.erase(iter);
     return result;
