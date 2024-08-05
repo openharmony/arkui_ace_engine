@@ -654,6 +654,7 @@ private:
             cleanViewContextMapCallback_(instanceId, sheetContentId);
         }
     }
+    void CleanInvalidModalNode(const WeakPtr<FrameNode>& invalidNode);
     void PopToast(int32_t targetId);
 
     // toast should contain id to avoid multiple delete.
