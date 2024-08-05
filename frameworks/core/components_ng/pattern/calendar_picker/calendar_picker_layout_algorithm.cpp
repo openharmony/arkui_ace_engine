@@ -51,6 +51,11 @@ void CalendarPickerLayoutAlgorithm::CalendarPickerContentMeasure(LayoutWrapper* 
     if (contentLayoutProperty->GetPaddingProperty() != nullptr) {
         currentPadding = *(contentLayoutProperty->GetPaddingProperty());
     }
+
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->Measure(layoutConstraint);
+    }
     float widthTotal = 0.0f;
     float height = 0.0f;
     for (int32_t i = 0; i < CHILDREN_SIZE; i++) {
@@ -74,10 +79,6 @@ void CalendarPickerLayoutAlgorithm::CalendarPickerContentMeasure(LayoutWrapper* 
     }
     height = std::max(height, constraint->selfIdealSize.Height().value_or(0));
 
-    auto contentLayoutConstraint = layoutProperty->CreateChildConstraint();
-    CalcSize cancelButtonCalcSize((CalcLength(widthTotal)), CalcLength(height));
-    contentLayoutProperty->UpdateUserDefinedIdealSize(cancelButtonCalcSize);
-    contentWrapper->Measure(contentLayoutConstraint);
     contentMeasure_ = SizeF(widthTotal, height);
     contentGeometryNode->SetFrameSize(contentMeasure_);
 }
