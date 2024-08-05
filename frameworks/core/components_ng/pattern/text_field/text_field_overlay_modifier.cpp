@@ -221,6 +221,11 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
 
 void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
 {
+    float cursorWidth = static_cast<float>(cursorWidth_->Get());
+    if (NearZero(cursorWidth)) {
+        return; // will not draw cursor
+    }
+
     auto& canvas = context.canvas;
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
@@ -233,7 +238,6 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
 
     RSPen pen;
     pen.SetAntiAlias(true);
-    float cursorWidth = static_cast<float>(cursorWidth_->Get());
     pen.SetWidth(cursorWidth);
     pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     pen.SetColor(ToRSColor(cursorColor_->Get()));
