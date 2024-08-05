@@ -457,14 +457,6 @@ void ListModelNG::AddDragFrameNodeToManager() const
     dragDropManager->AddListDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 
-DisplayMode ListModelNG::GetDisplayMode() const
-{
-    auto list = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ListPattern>();
-    CHECK_NULL_RETURN(list, DisplayMode::AUTO);
-    return list->GetDefaultScrollBarDisplayMode();
-}
-
-
 void ListModelNG::SetInitialIndex(FrameNode* frameNode, int32_t initialIndex)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, initialIndex, frameNode);
@@ -704,6 +696,13 @@ void ListModelNG::SetChainAnimationOptions(FrameNode* frameNode, const ChainAnim
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetChainAnimationOptions(options);
+}
+
+DisplayMode ListModelNG::GetDisplayMode() const
+{
+    auto list = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ListPattern>();
+    CHECK_NULL_RETURN(list, DisplayMode::AUTO);
+    return list->GetDefaultScrollBarDisplayMode();
 }
 
 void ListModelNG::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
