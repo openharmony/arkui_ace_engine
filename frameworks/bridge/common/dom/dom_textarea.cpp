@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_textarea.h"
 
-#include <iostream>
-
 #include "frameworks/bridge/common/dom/input/dom_textfield_util.h"
 #include "frameworks/bridge/common/utils/utils.h"
 

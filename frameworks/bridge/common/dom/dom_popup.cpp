@@ -15,15 +15,8 @@
 
 #include "frameworks/bridge/common/dom/dom_popup.h"
 
-#include <string>
-
-#include "base/utils/linear_map.h"
-#include "base/utils/utils.h"
-#include "core/components/box/box_component.h"
-#include "core/components/common/properties/color.h"
 #include "core/components/focus_collaboration/focus_collaboration_component.h"
 #include "core/components/popup/popup_theme.h"
-#include "core/components/theme/theme_manager.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {

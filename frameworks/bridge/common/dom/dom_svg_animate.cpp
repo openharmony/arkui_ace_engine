@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_svg_animate.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_animate_declaration.h"
 
 namespace OHOS::Ace::Framework {

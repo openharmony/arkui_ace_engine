@@ -15,10 +15,7 @@
 
 #include "frameworks/bridge/common/manifest/manifest_router.h"
 
-#include <algorithm>
-
 #include "base/log/event_report.h"
-#include "base/log/log.h"
 
 namespace OHOS::Ace::Framework {
 
