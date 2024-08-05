@@ -342,7 +342,7 @@ public:
     void RemoveEventColumn();
     void UpdatePixelMapPosition(bool isSubwindowOverlay = false);
     void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset, float menuScale = 1.0f,
-	    bool isRedragStart = false);
+	    bool isRedragStart = false, int32_t menuWrapperId = -1);
     void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset);
     bool GetMenuPreviewCenter(NG::OffsetF& offset);

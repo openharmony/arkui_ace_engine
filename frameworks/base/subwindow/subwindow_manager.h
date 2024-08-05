@@ -68,7 +68,7 @@ public:
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId);
     void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false);
     void UpdateHideMenuOffsetNG(const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f), float menuScale = 1.0f,
-        bool isRedragStart = false);
+        bool isRedragStart = false, int32_t menuWrapperId = -1);
     void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f));
     void UpdatePreviewPosition();
@@ -145,7 +145,7 @@ public:
     RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
 
 private:
-    RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
+    RefPtr<Subwindow> GetOrCreateSubWindow();
     RefPtr<Subwindow> GetOrCreateSystemSubWindow();
     RefPtr<Subwindow> GetOrCreateToastWindow(int32_t containerId, const NG::ToastShowMode& showMode);
     static std::mutex instanceMutex_;

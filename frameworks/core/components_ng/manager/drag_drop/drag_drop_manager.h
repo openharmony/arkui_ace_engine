@@ -487,6 +487,16 @@ public:
     }
     static double GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& pipeline);
 
+    RefPtr<FrameNode> GetMenuWrapperNode()
+    {
+        return menuWrapperNode_.Upgrade();
+    }
+
+    void SetMenuWrapperNode(const RefPtr<FrameNode>& frameNode)
+    {
+        menuWrapperNode_ = frameNode;
+    }
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -589,6 +599,7 @@ private:
     uint32_t dampingOverflowCount_ = 0;
     std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction_;
     RefPtr<GridColumnInfo> columnInfo_;
+    WeakPtr<FrameNode> menuWrapperNode_;
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };
 } // namespace OHOS::Ace::NG
