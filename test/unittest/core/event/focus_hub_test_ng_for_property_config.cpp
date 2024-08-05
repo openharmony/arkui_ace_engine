@@ -16,6 +16,7 @@
 #include "test/unittest/core/event/focus_hub_test_ng.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/ui_node.h"
@@ -1529,5 +1530,196 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest022, TestSize.Level1)
 
     EXPECT_TRUE(parentFocusHub->AcceptFocusOfPriorityChild());
     parentFocusHub->SetLastWeakFocusToPreviousInFocusView();
+}
+
+/**
+ * @tc.name: FocusHubTestNgtest023
+ * @tc.desc: Test the function IsFocusAbleChildOf.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNgtest023, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto frameNodeFir = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNodeFir, nullptr);
+    auto frameNodeSec = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNodeSec, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto eventHubFir = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHubFir, nullptr);
+    eventHub->AttachHost(frameNode);
+    eventHubFir->AttachHost(frameNodeFir);
+    frameNode->eventHub_ = eventHub;
+    frameNodeFir->eventHub_ = eventHubFir;
+    frameNode->MountToParent(frameNodeFir);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    auto focusHubFir = frameNodeFir->GetOrCreateFocusHub();
+    auto focusHubSec = frameNodeSec->GetOrCreateFocusHub();
+    bool result = true;
+    focusHubFir->focusType_ = FocusType::SCOPE;
+    focusHubFir->SetFocusScopeId("scope2", true);
+    focusHub->SetFocusScopePriority("scope2", 2000);
+    focusHub->IsFocusAbleChildOf(focusHubFir);
+    focusHub->IsFocusAbleChildOf(focusHubSec);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: FocusHubTestNgtest024
+ * @tc.desc: Test the function SetLastWeakFocusNodeWholeScope.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNgtest024, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto frameNodeFir = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNodeFir, nullptr);
+    auto frameNodeSec = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNodeSec, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto eventHubFir = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHubFir, nullptr);
+    eventHub->AttachHost(frameNode);
+    eventHubFir->AttachHost(frameNodeFir);
+    frameNode->eventHub_ = eventHub;
+    frameNodeFir->eventHub_ = eventHubFir;
+    frameNode->MountToParent(frameNodeFir);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    auto focusHubFir = frameNodeFir->GetOrCreateFocusHub();
+    auto focusHubSec = frameNodeSec->GetOrCreateFocusHub();
+    bool result = true;
+    focusHubFir->focusType_ = FocusType::SCOPE;
+    focusHubFir->SetFocusScopeId("scope2", true);
+    focusHub->SetFocusScopePriority("scope2", 2000);
+    focusHub->SetLastWeakFocusNodeWholeScope("scope2");
+    focusHub->SetLastWeakFocusNodeWholeScope("scope");
+    focusHubFir->isFocusScope_ = false;
+    focusHub->SetLastWeakFocusNodeWholeScope("scope");
+    focusHub->SetLastWeakFocusNodeWholeScope("scope2");
+    focusHubSec->SetLastWeakFocusNodeWholeScope("scope2");
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: FocusHubTestNgtest025
+ * @tc.desc: Test the function SetFocusScopePriority.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNgtest025, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->AttachHost(frameNode);
+    frameNode->eventHub_ = eventHub;
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    bool result = true;
+    focusHub->focusScopeId_ = "123";
+    focusHub->SetFocusScopePriority("", 2000);
+    focusHub->focusScopeId_ = "123";
+    focusHub->SetFocusScopePriority("scope2", 2000);
+    focusHub->focusScopeId_.clear();
+    focusHub->SetFocusScopePriority("scope2", 3000);
+    focusHub->SetFocusScopePriority("scope2", 0);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: FocusHubTestNgtest026
+ * @tc.desc: Test the function IsInFocusGroup.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNgtest026, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->AttachHost(frameNode);
+    frameNode->eventHub_ = eventHub;
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    bool result = true;
+    focusHub->isGroup_ = true;
+    focusHub->IsInFocusGroup();
+    auto frameNodeFir = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNodeFir, nullptr);
+    frameNodeFir->GetOrCreateFocusHub();
+    frameNode->SetParent(frameNodeFir);
+    auto focusHubSec = frameNodeFir->GetFocusHub();
+    ASSERT_NE(focusHubSec, nullptr);
+    focusHubSec->focusType_ = FocusType::SCOPE;
+    focusHubSec->isGroup_ = true;
+    focusHub->IsInFocusGroup();
+    focusHub->isGroup_ = false;
+    focusHub->IsInFocusGroup();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: FocusHubTestNgtest027
+ * @tc.desc: Test the function ScrollByOffsetToParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNgtest027, TestSize.Level1)
+{
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 102, AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    auto listNode = FrameNodeOnTree::CreateFrameNode("frameNode", 104, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(listNode, nullptr);
+    listNode->GetOrCreateFocusHub();
+    auto listFocusHub = listNode->GetFocusHub();
+    ASSERT_NE(listFocusHub, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    auto mockRenderContextSec = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContextSec, nullptr);
+    mockRenderContext->rect_ = RectF(10, 10, 10, 0);
+    frameNode->renderContext_ = mockRenderContextSec;
+    listNode->renderContext_ = mockRenderContext;
+    mockRenderContext->rect_ = RectF(5, 5, 10, 0);
+    ASSERT_TRUE(focusHub->ScrollByOffsetToParent(listNode));
+}
+
+/**
+ * @tc.name: FocusHubTestNgtest028
+ * @tc.desc: Test the function ScrollByOffsetToParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNgtest028, TestSize.Level1)
+{
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 102, AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    auto listNode = FrameNodeOnTree::CreateFrameNode("frameNode", 104, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(listNode, nullptr);
+    listNode->GetOrCreateFocusHub();
+    auto listFocusHub = listNode->GetFocusHub();
+    ASSERT_NE(listFocusHub, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    auto mockRenderContext2 = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext2, nullptr);
+    mockRenderContext->rect_ = RectF(10, 10, 10, 0);
+    frameNode->renderContext_ = mockRenderContext2;
+    listNode->renderContext_ = mockRenderContext;
+    mockRenderContext->rect_ = RectF(-5, -5, 10, 5);
+    ASSERT_TRUE(focusHub->ScrollByOffsetToParent(listNode));
+    frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
+    frameNode->geometryNode_->SetFrameSize(SizeF(5, 5));
+    listNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
+    listNode->geometryNode_->SetFrameSize(SizeF(10, 10));
+    EXPECT_FALSE(focusHub->ScrollByOffsetToParent(listNode));
 }
 } // namespace OHOS::Ace::NG123456
