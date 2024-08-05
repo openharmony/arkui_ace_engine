@@ -23,7 +23,8 @@ namespace OHOS::Ace {
 namespace {
 constexpr int64_t NANOS_TO_MILLS = 1000000;
 constexpr int32_t CHAIN_NODE_NUMBER = 15;
-constexpr double DEFAULT_CHAIN_VALUE_ACCURACY = 0.1;
+constexpr double DEFAULT_CHAIN_VALUE_ACCURACY = 0.5;
+constexpr double DEFAULT_CHAIN_VALUE_VELOCITY_ACCURACY = 1000.0;
 } // namespace
 
 ChainAnimationNode::ChainAnimationNode(
@@ -33,6 +34,7 @@ ChainAnimationNode::ChainAnimationNode(
 {
     spring_ = AceType::MakeRefPtr<SpringMotion>(space, space, 0.0, springProperty_);
     spring_->SetAccuracy(DEFAULT_CHAIN_VALUE_ACCURACY);
+    spring_->SetVelocityAccuracy(DEFAULT_CHAIN_VALUE_VELOCITY_ACCURACY);
 }
 
 bool ChainAnimationNode::TickAnimation(float duration)
