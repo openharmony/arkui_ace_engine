@@ -31,7 +31,6 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/pattern/symbol/constants.h"
-#include "core/components_ng/pattern/text/text_layout_adapter.h"
 
 namespace OHOS::Ace::Constants {
 namespace {
