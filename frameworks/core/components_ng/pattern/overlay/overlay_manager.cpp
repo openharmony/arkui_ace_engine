@@ -4097,6 +4097,22 @@ void OverlayManager::InitSheetMask(
     }
 }
 
+void OverlayManager::CleanInvalidModalNode(const WeakPtr<FrameNode>& invalidNode)
+{
+    // When a modalNode.Upgrade() == nullptr, the modalNode is invalid
+    modalList_.remove(invalidNode);
+    std::vector<WeakPtr<FrameNode>> sheetVector;
+    while (!modalStack_.empty()) {
+        if (modalStack_.top() != invalidNode) {
+            sheetVector.push_back(modalStack_.top());
+        }
+        modalStack_.pop();
+    }
+    for (auto iter : sheetVector) {
+        modalStack_.push(iter);
+    }
+}
+
 void OverlayManager::CloseSheet(const SheetKey& sheetKey)
 {
     if (modalStack_.empty()) {
@@ -4108,7 +4124,14 @@ void OverlayManager::CloseSheet(const SheetKey& sheetKey)
         return;
     }
     auto sheetNode = iter->second.Upgrade();
-    CHECK_NULL_VOID(sheetNode);
+    if (sheetNode == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "The sheetNode is null, clean it.");
+        CleanViewContextMap(Container::CurrentId(), sheetKey.contentId);
+        CleanInvalidModalNode(iter->second);
+        sheetMap_.erase(sheetKey);
+        SaveLastModalNode();
+        return;
+    }
     sheetNode->GetPattern<SheetPresentationPattern>()->SetShowState(false);
     auto scrollNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(1));
     CHECK_NULL_VOID(scrollNode);
