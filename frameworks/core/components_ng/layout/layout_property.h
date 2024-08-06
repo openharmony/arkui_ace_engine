@@ -141,6 +141,7 @@ public:
         return measureType_.value_or(defaultType);
     }
 
+    void LocalizedPaddingOrMarginChange(const PaddingProperty& value, std::unique_ptr<PaddingProperty>& padding);
     void UpdatePadding(const PaddingProperty& value);
     void UpdateSafeAreaPadding(const PaddingProperty& value);
     void ResetSafeAreaPadding();
