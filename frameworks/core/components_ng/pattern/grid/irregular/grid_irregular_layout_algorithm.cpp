@@ -64,11 +64,11 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     wrapper_ = layoutWrapper;
-
-    LayoutChildren(info.currentOffset_);
-
     auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     CHECK_NULL_VOID(props);
+
+    LayoutChildren(info.currentOffset_, props->GetCachedCountValue(1));
+
     const int32_t cacheCnt = props->GetCachedCountValue(1) * info.crossCount_;
     wrapper_->SetActiveChildRange(std::min(info.startIndex_, info.endIndex_), info.endIndex_, cacheCnt, cacheCnt);
     wrapper_->SetCacheCount(cacheCnt);
@@ -364,7 +364,7 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
     }
 }
 
-void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
+void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cacheLine)
 {
     const auto& info = gridLayoutInfo_;
     Alignment align = info.axis_ == Axis::VERTICAL ? Alignment::TOP_CENTER : Alignment::CENTER_LEFT;
@@ -381,9 +381,13 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
     auto frameSize = wrapper_->GetGeometryNode()->GetFrameSize();
     MinusPaddingToSize(padding, frameSize);
     const bool isRtl = props->GetNonAutoLayoutDirection() == TextDirection::RTL;
-
-    auto endIt = info.gridMatrix_.upper_bound(std::max(info.endMainLineIndex_, info.startMainLineIndex_));
-    for (auto it = info.gridMatrix_.lower_bound(info.startMainLineIndex_); it != endIt; ++it) {
+    auto cacheStart = info.lineHeightMap_.lower_bound(info.startMainLineIndex_ - cacheLine);
+    auto startLine = info.lineHeightMap_.lower_bound(info.startMainLineIndex_);
+    for (auto it = cacheStart; it != startLine; ++it) {
+        mainOffset -= mainGap_ + it->second;
+    }
+    auto endIt = info.gridMatrix_.upper_bound(std::max(info.endMainLineIndex_ + cacheLine, info.startMainLineIndex_));
+    for (auto it = info.gridMatrix_.lower_bound(info.startMainLineIndex_ - cacheLine); it != endIt; ++it) {
         auto lineHeightIt = info.lineHeightMap_.find(it->first);
         if (lineHeightIt == info.lineHeightMap_.end()) {
             continue;
