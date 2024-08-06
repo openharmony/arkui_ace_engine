@@ -25,6 +25,7 @@ void RelativeContainerModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::RELATIVE_CONTAINER_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
