@@ -230,7 +230,8 @@ void TextPickerColumnPattern::ParseTouchListener()
             pattern->OnMiddleButtonTouchDown();
             return;
         }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
+            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
             pattern->OnMiddleButtonTouchUp();
             pattern->SetLocalDownDistance(0.0f);
             return;

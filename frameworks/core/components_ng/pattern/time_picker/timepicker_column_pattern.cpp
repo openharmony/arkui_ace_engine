@@ -209,7 +209,8 @@ void TimePickerColumnPattern::ParseTouchListener()
             pattern->OnTouchDown();
             pattern->SetLocalDownDistance(info.GetTouches().front().GetLocalLocation().GetDistance());
         }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
+            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
             pattern->OnTouchUp();
             pattern->SetLocalDownDistance(0.0f);
         }
