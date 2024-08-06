@@ -17,8 +17,8 @@
 #include "interfaces/native/node/event_converter.h"
 #include "interfaces/native/node/node_model.h"
 #include "ndk_data_conversion.h"
+#include "pixelmap_native_impl.h"
 #include "securec.h"
-
 
 #ifdef __cplusplus
 extern "C" {

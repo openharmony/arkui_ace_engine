@@ -14,9 +14,6 @@
  */
 
 #include "napi_utils.h"
-
-
-
 #include "core/common/resource/resource_manager.h"
 
 namespace OHOS::Ace::Napi {

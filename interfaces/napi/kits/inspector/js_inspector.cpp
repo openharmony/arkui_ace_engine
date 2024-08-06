@@ -14,9 +14,6 @@
  */
 #include "js_inspector.h"
 
-
-
-
 namespace OHOS::Ace::Napi {
 namespace {
 constexpr size_t STR_BUFFER_SIZE = 1024;
