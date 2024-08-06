@@ -303,7 +303,6 @@ bool TextLayoutAlgorithm::CreateParagraph(
     }
     auto useExternalParagraph = pattern->GetExternalParagraph() && !pattern->NeedShowAIDetect();
     auto externalParagraphStyle = pattern->GetExternalParagraphStyle();
-    // default paragraph style
     auto paraStyle = GetParagraphStyle(textStyle, content, layoutWrapper);
     if (pattern->GetExternalParagraph()) {
         if (!useExternalParagraph && externalParagraphStyle) {
@@ -315,7 +314,6 @@ bool TextLayoutAlgorithm::CreateParagraph(
             textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     }
     paraStyle.leadingMarginAlign = Alignment::CENTER;
-
     // SymbolGlyph
     if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
         return UpdateSymbolTextStyle(textStyle, paraStyle, layoutWrapper, frameNode);
@@ -606,21 +604,14 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     textStyle.SetTextOverflow(TextOverflow::CLIP);
     textStyle.SetMaxLines(1);
     textStyle.SetTextIndent(Dimension(0.0f));
-
     std::string content = layoutProperty->GetContent().value_or("");
     std::replace(content.begin(), content.end(), '\n', ' ');
-    if (!textStyle.GetAdaptTextSize()) {
-        if (!CreateParagraph(textStyle, content, layoutWrapper)) {
-            return std::nullopt;
-        }
-    } else {
-        if (!AdaptMinTextSize(textStyle, content, contentConstraint, layoutWrapper)) {
-            return std::nullopt;
-        }
+    if (!CreateParagraph(textStyle, content, layoutWrapper)) {
+        return std::nullopt;
     }
+ 
     textStyle_ = textStyle;
     auto paragraph = GetSingleParagraph();
-
     // layout the paragraph to the width of text
     paragraph->Layout(std::numeric_limits<float>::max());
     float paragraphWidth = paragraph->GetLongestLine();
@@ -662,11 +653,6 @@ bool TextLayoutAlgorithm::AdaptMaxTextSize(TextStyle& textStyle, const std::stri
     return AdaptMaxFontSize(textStyle, content, step, contentConstraint, layoutWrapper);
 }
 
-std::optional<TextStyle> TextLayoutAlgorithm::GetTextStyle() const
-{
-    return textStyle_;
-}
-
 void TextLayoutAlgorithm::UpdateSensitiveContent(std::string& content)
 {
     auto wContent = StringUtils::ToWstring(content);
@@ -676,6 +662,11 @@ void TextLayoutAlgorithm::UpdateSensitiveContent(std::string& content)
             return ch != L'\n';
         }, L'-');
     content = StringUtils::ToString(wContent);
+}
+
+std::optional<TextStyle> TextLayoutAlgorithm::GetTextStyle() const
+{
+    return textStyle_;
 }
 
 size_t TextLayoutAlgorithm::GetLineCount() const

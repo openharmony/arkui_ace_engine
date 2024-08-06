@@ -354,7 +354,7 @@ TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(
 {
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, TextDirection::LTR);
-
+    
     auto direction = textLayoutProperty->GetLayoutDirection();
     if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
         return direction;
@@ -429,7 +429,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
     currentParagraphPlaceholderCount_ = 0;
     paragraphFontSize_ = paraStyle.fontSize;
     auto maxLines = static_cast<int32_t>(paraStyle.maxLines);
-    for (auto && group : spans_) {
+    for (auto&& group : spans_) {
         ParagraphStyle spanParagraphStyle = paraStyle;
         RefPtr<SpanItem> paraStyleSpanItem = GetParagraphStyleSpanItem(group);
         if (paraStyleSpanItem) {
@@ -548,15 +548,14 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
     placeholderStyle.width = geometryNode->GetMarginFrameSize().Width();
     placeholderStyle.height = geometryNode->GetMarginFrameSize().Height();
     placeholderStyle.paragraphFontSize = Dimension(paragraphFontSize_);
-    auto parentNode = frameNode->GetParentFrameNode();
     if (NearZero(baselineOffset.Value())) {
         imageSpanItem->placeholderIndex =
-            imageSpanItem->UpdateParagraph(parentNode, paragraph, isSpanStringMode_, placeholderStyle);
+            imageSpanItem->UpdateParagraph(frameNode, paragraph, isSpanStringMode_, placeholderStyle);
     } else {
         placeholderStyle.baselineOffset = baselineOffset.ConvertToPxDistribute(
             textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         imageSpanItem->placeholderIndex =
-            imageSpanItem->UpdateParagraph(parentNode, paragraph, isSpanStringMode_, placeholderStyle);
+            imageSpanItem->UpdateParagraph(frameNode, paragraph, isSpanStringMode_, placeholderStyle);
     }
     currentParagraphPlaceholderCount_++;
     imageSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
