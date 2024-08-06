@@ -609,6 +609,8 @@ public:
         return false;
     }
 
+    virtual void NotifyDataChange(int32_t index, int32_t count) {};
+    
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

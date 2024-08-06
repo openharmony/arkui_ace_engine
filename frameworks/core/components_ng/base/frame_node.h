@@ -986,6 +986,8 @@ public:
         layoutAlgorithm_.Reset();
     }
 
+    void NotifyDataChange(int32_t index, int32_t count, int64_t id) const override;
+
 protected:
     void DumpInfo() override;
 

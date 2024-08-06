@@ -1479,4 +1479,22 @@ void UINode::GetContainerComponentText(std::string& text)
         child->GetContainerComponentText(text);
     }
 }
+
+void UINode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
+{
+    int32_t updateFrom = 0;
+    for (const auto& child : GetChildren()) {
+        if (child->GetAccessibilityId() == id) {
+            updateFrom += index;
+            break;
+        }
+        int32_t count = child->FrameCount();
+        updateFrom += count;
+    }
+    auto accessibilityId = GetAccessibilityId();
+    auto parent = GetParent();
+    if (parent) {
+        parent->NotifyDataChange(updateFrom, count, accessibilityId);
+    }
+}
 } // namespace OHOS::Ace::NG

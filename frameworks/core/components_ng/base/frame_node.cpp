@@ -4932,4 +4932,19 @@ void FrameNode::NotifyWebPattern(bool isRegister)
 #endif
     UINode::NotifyWebPattern(isRegister);
 }
+
+void FrameNode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
+{
+    int32_t updateFrom = 0;
+    for (const auto& child : GetChildren()) {
+        if (child->GetAccessibilityId() == id) {
+            updateFrom += index;
+            break;
+        }
+        int32_t count = child->FrameCount();
+        updateFrom += count;
+    }
+    auto pattern = GetPattern();
+    pattern->NotifyDataChange(updateFrom, count);
+}
 } // namespace OHOS::Ace::NG
