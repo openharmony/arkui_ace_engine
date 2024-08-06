@@ -15,19 +15,12 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 
-#include <cinttypes>
 
 #include "cj_lambda.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/matrix4/cj_matrix4_ffi.h"
 #include "bridge/common/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/overlay/modal_style.h"
-#include "bridge/cj_frontend/cppview/view_abstract.h"
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
 
 using namespace OHOS::Ace;

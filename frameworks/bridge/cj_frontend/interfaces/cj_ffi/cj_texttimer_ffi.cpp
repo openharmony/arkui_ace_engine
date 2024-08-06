@@ -16,8 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_texttimer_ffi.h"
 
 #include "cj_lambda.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "bridge/common/utils/utils.h"
 
 using namespace OHOS::Ace;

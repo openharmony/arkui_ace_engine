@@ -15,7 +15,6 @@
 
 #include "foundation/multimedia/image_framework/frameworks/kits/cj/include/pixel_map_impl.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_richeditor_controller_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "bridge/common/utils/utils.h"
 
 using namespace OHOS::Ace;

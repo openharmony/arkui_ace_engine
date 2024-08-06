@@ -15,17 +15,11 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_interactable_view_ffi.h"
 
-#include <cinttypes>
 
 #include "cj_lambda.h"
 
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/event/ace_event_handler.h"
-#include "core/gestures/click_recognizer.h"
 #ifndef _NON_OHOS_
 #include "foundation/multimedia/image_framework/frameworks/kits/cj/include/pixel_map_impl.h"
 
