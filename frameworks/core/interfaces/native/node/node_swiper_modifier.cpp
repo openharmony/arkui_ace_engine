@@ -1001,6 +1001,7 @@ void GetSwiperIndicator(ArkUINodeHandle node, ArkUISwiperIndicator* props)
     int32_t type = SwiperModelNG::GetIndicatorType(frameNode);
     props->type = static_cast<ArkUISwiperIndicatorType>(type);
     auto params = SwiperModelNG::GetDotIndicator(frameNode);
+    CHECK_NULL_VOID(params);
     bool hasValue = false;
     float value = ZERO_F;
     ParseIndicatorAttribute(params->dimLeft, hasValue, value);
