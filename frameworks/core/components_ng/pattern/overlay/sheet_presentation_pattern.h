@@ -326,11 +326,6 @@ public:
         currentOffset_ = currentOffset;
     }
 
-    void SetIsDirectionUp(bool isDirectionUp)
-    {
-        isDirectionUp_ = isDirectionUp;
-    }
-
     void SetCurrentHeight(float currentHeight)
     {
         if (height_ != currentHeight) {

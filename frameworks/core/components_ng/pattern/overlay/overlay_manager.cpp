@@ -3171,7 +3171,6 @@ bool OverlayManager::RemoveModalInOverlay()
     if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG) {
         auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_RETURN(sheetPattern, false);
-        sheetPattern->SetIsDirectionUp(false);
         sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::BACK_PRESSED);
         return true;
     } else if (topModalNode->GetTag() == V2::MODAL_PAGE_TAG) {
@@ -4069,7 +4068,6 @@ void OverlayManager::InitSheetMask(
                 if (sheetPattern->IsDragging()) {
                     return;
                 }
-                sheetPattern->SetIsDirectionUp(false);
                 sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::TOUCH_OUTSIDE);
             });
         auto maskNodeId = maskNode->GetId();
