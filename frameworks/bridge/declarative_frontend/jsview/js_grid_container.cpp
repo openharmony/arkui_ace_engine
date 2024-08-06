@@ -22,18 +22,22 @@
 
 namespace OHOS::Ace {
 std::unique_ptr<GridContainerModel> GridContainerModel::instance_;
+std::mutex GridContainerModel::mutex_;
 GridContainerModel* GridContainerModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-        instance_.reset(new NG::GridContainerModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::GridContainerModelNG());
-        } else {
-            instance_.reset(new Framework::GridContainerModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::GridContainerModelNG());
+            } else {
+                instance_.reset(new Framework::GridContainerModelImpl());
+            }
 #endif
+        }
     }
     return instance_.get();
 }

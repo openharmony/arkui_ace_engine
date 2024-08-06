@@ -16,19 +16,39 @@
 #if defined(ENABLE_ROSEN_BACKEND) && defined(OHOS_PLATFORM)
 #include "core/components_ng/render/adapter/rosen_render_surface.h"
 #endif
+#ifdef RENDER_EXTRACT_SUPPORTED
+#include "core/components_ng/render/adapter/render_texture_impl.h"
+#endif
 #include "core/components_ng/render/adapter/render_surface_impl.h"
 #include "core/components_ng/render/render_surface.h"
 
 namespace OHOS::Ace::NG {
+// under the condition of supporting cross platform and texture rendering
+#ifdef RENDER_EXTRACT_SUPPORTED
+RefPtr<RenderSurface> RenderSurface::Create(const RenderSurfaceTpye& type)
+{
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        switch (type) {
+            case RenderSurfaceTpye::SURFACE:
+                return MakeRefPtr<RenderSurfaceImpl>();
+            case RenderSurfaceTpye::TEXTURE:
+                return MakeRefPtr<RenderTextureImpl>();
+            default:
+                break;
+        }
+    }
+    return MakeRefPtr<RenderSurface>();
+}
+#else
+// under the condition of supporting ohos platform
 RefPtr<RenderSurface> RenderSurface::Create()
 {
     if (SystemProperties::GetRosenBackendEnabled()) {
 #if defined(OHOS_PLATFORM) && defined(ENABLE_ROSEN_BACKEND)
         return MakeRefPtr<RosenRenderSurface>();
-#else
-    return MakeRefPtr<RenderSurfaceImpl>();
 #endif
     }
     return MakeRefPtr<RenderSurface>();
 }
+#endif
 } // namespace OHOS::Ace::NG

@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 
+
 namespace OHOS::Ace::NG {
 
 RenderSurfaceImpl::~RenderSurfaceImpl()
@@ -62,13 +63,20 @@ void RenderSurfaceImpl::InitSurface()
         CHECK_NULL_VOID(callback);
         callback->ProcessSurfaceChange(width, height);
     });
+    extSurface_->SetSurfaceDestroyed([weak = WeakClaim(this)]() {
+        auto surfaceImpl = weak.Upgrade();
+        CHECK_NULL_VOID(surfaceImpl);
+        auto callback = surfaceImpl->extSurfaceCallback_;
+        CHECK_NULL_VOID(callback);
+        callback->ProcessSurfaceDestroy();
+    });
 }
 
 void RenderSurfaceImpl::UpdateSurfaceConfig() {}
 
 void* RenderSurfaceImpl::GetNativeWindow()
 {
-    return nullptr;
+    return nativeWindow_;
 }
 
 void RenderSurfaceImpl::SetRenderContext(const RefPtr<RenderContext>& renderContext)
@@ -76,14 +84,34 @@ void RenderSurfaceImpl::SetRenderContext(const RefPtr<RenderContext>& renderCont
     renderContext_ = WeakClaim(RawPtr(renderContext));
 }
 
-void RenderSurfaceImpl::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight) {}
+void RenderSurfaceImpl::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight)
+{
+    if (!extSurface_) {
+        return;
+    }
+    isSetConfigSurface_ = true;
+
+    double x = (lastRect_.Width() - surfaceWidth) / 2 + lastRect_.Left();
+    double y = (lastRect_.Height() - surfaceHeight) / 2 + lastRect_.Top();
+
+    extSurface_->SetBounds(surfaceId_, x, y, surfaceWidth, surfaceHeight);
+
+    lastRect_.SetHeight(surfaceHeight);
+    lastRect_.SetWidth(surfaceWidth);
+}
 
 bool RenderSurfaceImpl::IsSurfaceValid() const
 {
     return extSurface_ != nullptr;
 }
 
-void RenderSurfaceImpl::CreateNativeWindow() {}
+void RenderSurfaceImpl::CreateNativeWindow()
+{
+    if (extSurface_) {
+        LOGI("RenderSurfaceImpl::CreateNativeWindow called");
+        nativeWindow_ = extSurface_->AttachNativeWindow();
+    }
+}
 
 void RenderSurfaceImpl::AdjustNativeWindowSize(uint32_t width, uint32_t height) {}
 
