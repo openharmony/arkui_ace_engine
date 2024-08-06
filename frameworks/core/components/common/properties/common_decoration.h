@@ -67,7 +67,7 @@ struct EffectOption {
     AdaptiveColor adaptiveColor = AdaptiveColor::DEFAULT;
     BlurOption blurOption;
     BlurType blurType = BlurType::WITHIN_WINDOW;
-    BlurStyleActivePolicy policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
+    BlurStyleActivePolicy policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
     Color inactiveColor { Color::TRANSPARENT };
     bool isValidColor = false;
     bool isWindowFocused = true;
