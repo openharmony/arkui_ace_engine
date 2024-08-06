@@ -1441,9 +1441,8 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea)
     }
 }
 
-void PipelineContext::CheckAndUpdateKeyboardInset()
+void PipelineContext::CheckAndUpdateKeyboardInset(uint32_t keyboardHeight)
 {
-    uint32_t keyboardHeight = safeAreaManager_->GetKeyboardInset().Length();
     safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
 }
 
@@ -1633,7 +1632,7 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
     const float safeHeight, const bool supportAvoidance)
 {
     auto func = [this, keyboardHeight, safeHeight, supportAvoidance]() mutable {
-        safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
+        safeAreaManager_->UpdateKeyboardSafeArea(static_cast<uint32_t>(keyboardHeight));
         keyboardHeight += safeAreaManager_->GetSafeHeight();
         float positionY = 0.0f;
         float textfieldHeight = 0.0f;
@@ -1683,7 +1682,7 @@ void PipelineContext::OriginalAvoidanceLogic(
     float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     auto func = [this, keyboardHeight]() mutable {
-        safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
+        safeAreaManager_->UpdateKeyboardSafeArea(static_cast<uint32_t>(keyboardHeight));
         if (keyboardHeight > 0) {
             // add height of navigation bar
             keyboardHeight += safeAreaManager_->GetSystemSafeArea().bottom_.Length();
@@ -1734,7 +1733,7 @@ void PipelineContext::OriginalAvoidanceLogic(
     DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
 }
 
-void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
+void PipelineContext::OnVirtualKeyboardHeightChange(uint32_t keyboardHeight, double positionY, double height,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {
     CHECK_RUN_ON(UI);
@@ -1818,7 +1817,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         }
 
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-            "keyboardHeight: %{public}f, positionY: %{public}f, textHeight: %{public}f, "
+            "keyboardHeight: %{public}d, positionY: %{public}f, textHeight: %{public}f, "
             "rootSize.Height() %{public}f final calculate keyboard offset is %{public}f",
             keyboardHeight, positionY, height, rootSize.Height(), context->safeAreaManager_->GetKeyboardOffset());
         context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);

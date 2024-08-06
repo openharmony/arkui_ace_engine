@@ -96,7 +96,7 @@ public:
      * @param keyboardHeight The height of the keyboard in pixels.
      * @return true if the safe area was modified, false otherwise.
      */
-    bool UpdateKeyboardSafeArea(float keyboardHeight);
+    bool UpdateKeyboardSafeArea(uint32_t keyboardHeight);
 
     /**
      * @brief Retrieves the inset of the safe area caused by the keyboard.
