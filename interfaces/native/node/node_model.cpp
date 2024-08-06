@@ -15,21 +15,14 @@
 
 #include "node_model.h"
 
-#include <cstdint>
-#include <set>
-#include <unordered_map>
 
 #include "event_converter.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
-#include "native_node.h"
-#include "native_type.h"
 #include "node_extened.h"
 #include "style_modifier.h"
 
 #include "base/error/error_code.h"
-#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {

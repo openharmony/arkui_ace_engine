@@ -15,12 +15,9 @@
 
 #include "waterflow_section_option.h"
 
-#include <cstdint>
-#include <vector>
 
 #include "native_type.h"
 
-#include "base/utils/utils.h"
 
 #ifdef __cplusplus
 extern "C" {

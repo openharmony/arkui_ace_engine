@@ -15,10 +15,7 @@
 
 #include "interfaces/native/event/ui_input_event_impl.h"
 
-#include "base/utils/type_definition.h"
 #include "core/event/touch_event.h"
-#include "core/event/axis_event.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 #include "interfaces/native/node/event_converter.h"
 #include "base/error/error_code.h"
 
