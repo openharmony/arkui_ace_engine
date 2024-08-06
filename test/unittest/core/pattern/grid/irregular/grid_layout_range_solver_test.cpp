@@ -563,6 +563,8 @@ HWTEST_F(GridLayoutRangeTest, Cache001, TestSize.Level1)
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
     for (const int32_t i : preloadList) {
         EXPECT_TRUE(frameNode_->GetChildByIndex(i));
+        EXPECT_EQ(GetChildWidth(frameNode_, i), (GRID_WIDTH - 20.0f) / 3.0f);
+        EXPECT_EQ(GetChildHeight(frameNode_, i), 200.0f);
     }
     pattern_->ScrollToIndex(49);
     FlushLayoutTask(frameNode_);

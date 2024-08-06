@@ -144,6 +144,8 @@ private:
 
     bool IsIrregularLine(int32_t lineIndex) const override;
 
+    void PreloadItems(int32_t cacheCnt);
+
     GridLayoutInfo& info_;
     LayoutWrapper* wrapper_ = nullptr;
 

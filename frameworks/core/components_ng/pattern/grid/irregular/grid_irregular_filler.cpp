@@ -198,21 +198,19 @@ bool GridIrregularFiller::UpdateLength(float& len, float targetLen, int32_t& row
     return false;
 }
 
-void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row)
+LayoutConstraintF GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row)
 {
-    auto child = wrapper_->GetOrCreateChildByIndex(itemIdx);
-    CHECK_NULL_VOID(child);
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     auto constraint = props->CreateChildConstraint();
+    auto child = wrapper_->GetOrCreateChildByIndex(itemIdx);
+    CHECK_NULL_RETURN(child, constraint);
 
     const auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx);
-    // should cache child constraint result
     float crossLen = 0.0f;
     for (int32_t i = 0; i < itemSize.columns; ++i) {
         crossLen += params.crossLens[i + col];
     }
     crossLen += params.crossGap * (itemSize.columns - 1);
-
     constraint.percentReference.SetCrossSize(crossLen, info_->axis_);
     if (info_->axis_ == Axis::VERTICAL) {
         constraint.maxSize = SizeF { crossLen, Infinity<float>() };
@@ -231,6 +229,7 @@ void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t item
     for (int32_t i = 0; i < itemSize.rows; ++i) {
         info_->lineHeightMap_[row + i] = std::max(info_->lineHeightMap_[row + i], heightPerRow);
     }
+    return constraint;
 }
 
 int32_t GridIrregularFiller::InitPosToLastItem(int32_t lineIdx)
