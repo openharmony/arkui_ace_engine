@@ -665,7 +665,6 @@ private:
     float sheetTopSafeArea_ = .0f;
     bool isExecuteOnDisappear_ = false;
     bool windowRotate_ = false;
-    bool firstMeasure_ = true;
     bool isScrolling_ = false;
     float builderHeight_ = 0.0f;
     float sheetMaxHeight_ = 0.0f; // start from the bottom, pageHeight - sheetTopSafeArea
