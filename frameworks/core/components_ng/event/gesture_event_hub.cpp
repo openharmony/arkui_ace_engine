@@ -1773,6 +1773,7 @@ bool GestureEventHub::IsDragForbidden()
 bool GestureEventHub::IsNeedSwitchToSubWindow() const
 {
     auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
     auto focusHub = frameNode->GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     if (IsPixelMapNeedScale()) {
