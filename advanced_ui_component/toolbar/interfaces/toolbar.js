@@ -94,7 +94,9 @@ export { ToolBarOptions };
 export class ToolBarModifier {
   constructor() {
     this.backgroundColorValue = {
-      'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_toolbar_bg'],
+      'id': -1,
+      'type': 10001,
+      params: ['sys.color.ohos_id_color_toolbar_bg'],
       'bundleName': '',
       'moduleName': '',
     };
@@ -191,9 +193,7 @@ export class ToolBar extends ViewPU {
     }
     if (y3.moreText === undefined) {
       this.__moreText.set({
-        'id': -1,
-        'type': 10003,
-        params: ['sys.string.ohos_toolbar_more'],
+        'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'],
         'bundleName': '',
         'moduleName': '',
       });
@@ -556,7 +556,7 @@ export class ToolBar extends ViewPU {
   }
 
   getToolBarSymbolModifier(z1) {
-    if (this.activateIndex === z1) {
+    if (this.activateIndex === z1 && !(this.toolBarList[z1]?.state === 2)) {
       return this.toolBarList[z1]?.toolBarSymbolOptions?.activated;
     }
     return this.toolBarList[z1]?.toolBarSymbolOptions?.normal;

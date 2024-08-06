@@ -227,7 +227,7 @@ export struct ToolBar {
   }
 
   private getToolBarSymbolModifier(index: number): SymbolGlyphModifier | undefined {
-    if (this.activateIndex === index) {
+    if (this.activateIndex === index && !(this.toolBarList[index]?.state === 2)) {
       return this.toolBarList[index]?.toolBarSymbolOptions?.activated;
     }
     return this.toolBarList[index]?.toolBarSymbolOptions?.normal;
