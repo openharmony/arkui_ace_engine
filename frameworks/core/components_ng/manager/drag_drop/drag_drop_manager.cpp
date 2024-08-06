@@ -349,7 +349,8 @@ void DragDropManager::UpdateDragAllowDrop(
     const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior, const int32_t eventId, bool isCapi)
 {
     if (!IsDropAllowed(dragFrameNode)) {
-        UpdateDragStyle(DragCursorStyleCore::FORBIDDEN, eventId);
+        // simplified specifications for drag cursor style, no longer showing forbidden drag cursor
+        UpdateDragStyle(DragCursorStyleCore::MOVE, eventId);
         return;
     }
     
@@ -1127,7 +1128,8 @@ void DragDropManager::FireOnDragEvent(
             UpdateDragStyle(DragCursorStyleCore::COPY, pointerEvent.pointerEventId);
         }
     } else if (event->GetResult() == DragRet::DISABLE_DROP) {
-        UpdateDragStyle(DragCursorStyleCore::FORBIDDEN, pointerEvent.pointerEventId);
+        // simplified specifications for drag cursor style, no longer showing forbidden drag cursor
+        UpdateDragStyle(DragCursorStyleCore::MOVE, pointerEvent.pointerEventId);
     } else {
         UpdateDragAllowDrop(frameNode, event->GetDragBehavior(), pointerEvent.pointerEventId, event->IsCapi());
     }
