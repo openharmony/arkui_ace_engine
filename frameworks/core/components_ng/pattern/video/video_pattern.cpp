@@ -26,7 +26,10 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine.h"
+#include "core/common/ace_view.h"
 #include "core/common/ai/image_analyzer_manager.h"
+#include "core/common/container.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -421,7 +424,42 @@ void VideoPattern::RegisterMediaPlayerEvent()
             "ArkUIVideoSeekDone");
     };
     mediaPlayer_->RegisterMediaPlayerSeekDoneEvent(std::move(seekDoneEvent));
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+    auto&& textureRefreshEvent = [videoPattern, uiTaskExecutor](int32_t instanceId, int64_t textureId) {
+        uiTaskExecutor.PostSyncTask([&videoPattern, instanceId, textureId] {
+            auto video = videoPattern.Upgrade();
+            CHECK_NULL_VOID(video);
+            void* nativeWindow = video->GetNativeWindow(instanceId, textureId);
+            if (!nativeWindow) {
+                LOGE("the native window is nullptr.");
+                return;
+            }
+            video->OnTextureRefresh(nativeWindow);
+        }, "ArkUIVideoTextureRefresh");
+    };
+    mediaPlayer_->RegisterTextureEvent(textureRefreshEvent);
+#endif
 }
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+void* VideoPattern::GetNativeWindow(int32_t instanceId, int64_t textureId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, nullptr);
+    auto nativeView = container->GetAceView();
+    CHECK_NULL_RETURN(nativeView, nullptr);
+    return const_cast<void*>(nativeView->GetNativeWindowById(textureId));
+}
+
+void VideoPattern::OnTextureRefresh(void* surface)
+{
+    CHECK_NULL_VOID(surface);
+    auto renderContextForMediaPlayer = renderContextForMediaPlayerWeakPtr_.Upgrade();
+    CHECK_NULL_VOID(renderContextForMediaPlayer);
+    renderContextForMediaPlayer->MarkNewFrameAvailable(surface);
+}
+#endif
 
 void VideoPattern::PrintPlayerStatus(PlaybackStatus status)
 {
@@ -802,9 +840,23 @@ void VideoPattern::OnAttachToFrameNode()
     pipeline->AddWindowStateChangedCallback(host->GetId());
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+    CHECK_NULL_VOID(renderSurface_);
+    auto contextType = renderSurface_->IsTexture() ?
+        RenderContext::ContextType::HARDWARE_TEXTURE : RenderContext::ContextType::HARDWARE_SURFACE;
+    static RenderContext::ContextParam param = { contextType, "MediaPlayerSurface",
+                                                 RenderContext::PatternType::VIDEO };
+#else
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
                                                  RenderContext::PatternType::VIDEO };
+#endif
     renderContextForMediaPlayer_->InitContext(false, param);
+
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        RegisterRenderContextCallBack();
+    }
+
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
     renderContext->SetClipToBounds(true);
@@ -887,8 +939,12 @@ void VideoPattern::OnModifyDone()
 
     // src has changed
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+#ifdef RENDER_EXTRACT_SUPPORTED
+    if ((layoutProperty && layoutProperty->HasVideoSource() && layoutProperty->GetVideoSource().value() != src_)) {
+#else
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
         (layoutProperty && layoutProperty->HasVideoSource() && layoutProperty->GetVideoSource().value() != src_)) {
+#endif
         ResetStatus();
     }
 
@@ -1129,7 +1185,12 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 
 void VideoPattern::OnAreaChangedInner()
 {
+#ifndef RENDER_EXTRACT_SUPPORTED
+    auto isFullScreen = IsFullScreen();
+    if (SystemProperties::GetExtSurfaceEnabled() && isFullScreen) {
+#else
     if (SystemProperties::GetExtSurfaceEnabled()) {
+#endif
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto geometryNode = host->GetGeometryNode();
@@ -1724,6 +1785,9 @@ void VideoPattern::EnableDrag()
 
 VideoPattern::~VideoPattern()
 {
+    if (renderContextForMediaPlayer_) {
+        renderContextForMediaPlayer_->RemoveSurfaceChangedCallBack();
+    }
     if (IsSupportImageAnalyzer()) {
         DestroyAnalyzerOverlay();
     }
@@ -1844,8 +1908,7 @@ bool VideoPattern::IsSupportImageAnalyzer()
     return isEnableAnalyzer_ && !needControlBar && imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
 }
 
-bool VideoPattern::ShouldUpdateImageAnalyzer()
-{
+bool VideoPattern::ShouldUpdateImageAnalyzer() {
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     const auto& constraint = layoutProperty->GetCalcLayoutConstraint();
@@ -1883,7 +1946,7 @@ void VideoPattern::StartImageAnalyzer()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->CreateAnalyzerOverlay();
-        }, ANALYZER_DELAY_TIME, "ArkUIVideoCreateAnalyzerOverlay");
+    }, ANALYZER_DELAY_TIME, "ArkUIVideoCreateAnalyzerOverlay");
 }
 
 void VideoPattern::CreateAnalyzerOverlay()
@@ -1928,7 +1991,7 @@ void VideoPattern::StartUpdateImageAnalyzer()
         }
         pattern->UpdateAnalyzerOverlay();
         pattern->isContentSizeChanged_ = false;
-        }, ANALYZER_CAPTURE_DELAY_TIME, "ArkUIVideoUpdateAnalyzerOverlay");
+    }, ANALYZER_CAPTURE_DELAY_TIME, "ArkUIVideoUpdateAnalyzerOverlay");
     isContentSizeChanged_ = true;
 }
 
