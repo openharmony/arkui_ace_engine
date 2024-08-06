@@ -21,6 +21,7 @@ import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 import window from '@ohos.window';
+import { Context } from '@ohos.arkui.UIContext';
 
 export enum EditableLeftIconType {
   Back,
@@ -497,17 +498,31 @@ struct ImageMenuItem {
     }
   }
 
+  private getAccessibilityReadText(): Resource | undefined {
+    if (this.item.value === PUBLIC_OK) {
+      return $r('sys.string.icon_save');
+    } else if (this.item.value === PUBLIC_CANCEL) {
+      return $r('sys.string.icon_cancel');
+    } else if (this.item.value === PUBLIC_BACK) {
+      return $r('sys.string.icon_back');
+    } else if (this.item.label) {
+      return this.item.label as Resource;
+    }
+    return undefined;
+  }
+
   @Builder
   IconBuilder(): void {
     Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
       Image(this.item.value)
+        .fillColor(this.editableTitleBarTheme.iconColor)
+        .matchTextDirection(this.item.value === PUBLIC_BACK ? true : false)
         .width($r('sys.float.titlebar_icon_width'))
         .height($r('sys.float.titlebar_icon_height'))
-        .fillColor(this.editableTitleBarTheme.iconColor)
         .focusable(this.item.isEnabled)
         .enabled(this.item.isEnabled)
-        .matchTextDirection(this.item.value === PUBLIC_BACK ? true : false)
         .draggable(false)
+        .accessibilityText(this.getAccessibilityReadText())
     }
     .backgroundButtonStyle()
     .borderRadius($r('sys.float.titlebar_icon_background_shape'))
