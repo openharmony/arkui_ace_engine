@@ -357,6 +357,7 @@ bool WebPattern::NeedSoftKeyboard() const
 void WebPattern::OnAttachToMainTree()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "OnAttachToMainTree");
+    InitSlideUpdateListener();
     // report component is in foreground.
     delegate_->OnRenderToForeground();
 }
@@ -1738,12 +1739,8 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     CHECK_NULL_RETURN(delegate_, false);
     CHECK_NULL_RETURN(dirty, false);
 
-    auto frameNode = GetHost();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
-    auto rect = renderContext->GetPaintRectWithoutTransform();
-    auto drawSize = Size(rect.Width(), rect.Height());
+    auto geometryNode = dirty->GetGeometryNode();
+    auto drawSize = Size(geometryNode->GetContentSize().Width(), geometryNode->GetContentSize().Height());
     if (drawSize.IsInfinite() || drawSize.IsEmpty()) {
         return false;
     }
@@ -1809,8 +1806,10 @@ void WebPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
     }
 
     TAG_LOGD(AceLogTag::ACE_WEB, "BeforeSync, drawsize_ : %{public}s", drawSize.ToString().c_str());
-    drawSize_ = drawSize;
-    drawSizeCache_ = drawSize_;
+    if (layoutMode_ != WebLayoutMode::FIT_CONTENT) {
+        drawSize_ = drawSize;
+        drawSizeCache_ = drawSize_;
+    }
 }
 
 void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight)
