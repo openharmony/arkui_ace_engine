@@ -2126,6 +2126,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     if (!focusHub->IsFocusable()) {
         return;
     }
+    focusIndex_ = FocuseIndex::TEXT;
     auto firstGetFocus = false;
     if (!HasFocus()) {
         auto host = GetHost();
@@ -6959,9 +6960,19 @@ bool TextFieldPattern::HasInputOperation()
     return !deleteBackwardOperations_.empty() || !deleteForwardOperations_.empty() || !insertValueOperations_.empty();
 }
 
+void TextFieldPattern::FocusForwardStopTwinkling()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    UpdateSelection(selectController_->GetCaretIndex());
+    StopTwinkling();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 bool TextFieldPattern::UpdateFocusForward()
 {
     if (focusIndex_ == FocuseIndex::TEXT && HasFocus()) {
+        FocusForwardStopTwinkling();
         if (!CancelNodeIsShow()) {
             if (responseArea_ == nullptr || (!IsShowUnit() && !IsShowPasswordIcon())) {
                 return false;
@@ -6975,6 +6986,7 @@ bool TextFieldPattern::UpdateFocusForward()
         return true;
     }
     if (focusIndex_ == FocuseIndex::CANCEL && HasFocus()) {
+        FocusForwardStopTwinkling();
         if (responseArea_ == nullptr) {
             return false;
         }
@@ -7041,7 +7053,7 @@ void TextFieldPattern::GetIconPaintRect(const RefPtr<TextInputResponseArea>& res
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
     CHECK_NULL_VOID(imageFrameNode);
     auto imageRect = imageFrameNode->GetGeometryNode()->GetFrameRect();
-    RectF rect(stackRect.GetX(), imageRect.GetY(), imageRect.Width(), imageRect.Height());
+    RectF rect(stackRect.GetX(), stackRect.GetY(), imageRect.Width(), imageRect.Height());
     paintRect.SetRect(rect);
 }
 
@@ -7092,6 +7104,8 @@ void TextFieldPattern::PaintPasswordRect()
 {
     RoundRect focusRect;
     GetInnerFocusPaintRect(focusRect);
+    float cornerRadius = focusRect.GetRect().Width() / 2;
+    focusRect.SetCornerRadius(cornerRadius);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
