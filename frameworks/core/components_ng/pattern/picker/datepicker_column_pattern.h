@@ -33,6 +33,7 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
+#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
 #endif
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 
@@ -324,7 +325,7 @@ private:
 #ifdef SUPPORT_DIGITAL_CROWN
     void HandleCrownBeginEvent(const CrownEvent& event) override;
     void HandleCrownMoveEvent(const CrownEvent& event) override;
-    void HandleCrownEndEvent() override;
+    void HandleCrownEndEvent(const CrownEvent& event) override;
 #endif
     void CreateAnimation();
     void CreateAnimation(double from, double to);

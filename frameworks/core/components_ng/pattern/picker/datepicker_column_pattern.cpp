@@ -1133,6 +1133,9 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     if (GreatOrEqual(std::abs(dragDelta), std::abs(shiftDistance))) {
         InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true, false);
         dragDelta = dragDelta % static_cast<int>(std::abs(shiftDistance));
+#ifdef SUPPORT_DIGITAL_CROWN
+        VibratorImpl::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1, OHOS::Ace::NG::VIBRATOR_TYPE_ONE);
+#endif
     }
     // update selected option
     ScrollOption(dragDelta);
@@ -1340,6 +1343,7 @@ void DatePickerColumnPattern::HandleCrownMoveEvent(const CrownEvent& event)
 {
     LOGD("DatePickerColumnPattern::HandleCrownMoveEvent event.degree=%{public}lf,Velocity=%{public}lf",
         event.degree, event.angularVelocity);
+    SetMainVelocity(event.angularVelocity);
     animationBreak_ = false;
     CHECK_NULL_VOID(pressed_);
     auto toss = GetToss();
@@ -1355,8 +1359,9 @@ void DatePickerColumnPattern::HandleCrownMoveEvent(const CrownEvent& event)
     frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, event.angularVelocity, SceneStatus::RUNNING);
 }
 
-void DatePickerColumnPattern::HandleCrownEndEvent()
+void DatePickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
 {
+    SetMainVelocity(event.angularVelocity);
     pressed_ = false;
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -1376,6 +1381,9 @@ void DatePickerColumnPattern::HandleCrownEndEvent()
     if (std::abs(scrollDelta_) >= std::abs(shiftThreshold)) {
         InnerHandleScroll(LessNotEqual(scrollDelta_, 0.0), true, false);
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == DatePickerScrollDirection::UP ? -1 : 1);
+#ifdef SUPPORT_DIGITAL_CROWN
+        VibratorImpl::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1, OHOS::Ace::NG::VIBRATOR_TYPE_ONE);
+#endif
     }
     CreateAnimation(scrollDelta_, 0.0);
     frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::END);
