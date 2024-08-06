@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,13 +14,16 @@
  */
 
 let __decorate = (this && this.__decorate) || function (m4, n4, o4, p4) {
-  let q4 = arguments.length, r4 = q4 < 3 ? n4 : p4 === null ? p4 = Object.getOwnPropertyDescriptor(n4, o4) : p4, s4;
-  if (typeof Reflect === 'object' && typeof Reflect.decorate === 'function')
+  let q4 = arguments.length;
+  let r4 = q4 < 3 ? n4 : p4 === null ? p4 = Object.getOwnPropertyDescriptor(n4, o4) : p4;
+  let s4;
+  if (typeof Reflect === 'object' && typeof Reflect.decorate === 'function') {
     r4 = Reflect.decorate(m4, n4, o4, p4);
-  else
-    for (let t4 = m4.length - 1; t4 >= 0; t4--)
-      if (s4 = m4[t4])
-        r4 = (q4 < 3 ? s4(r4) : q4 > 3 ? s4(n4, o4, r4) : s4(n4, o4)) || r4;
+  } else {
+    for (let t4 = m4.length - 1; t4 >= 0; t4--) {
+      (s4 = m4[t4]) && (r4 = (q4 < 3 ? s4(r4) : q4 > 3 ? s4(n4, o4, r4) : s4(n4, o4)) || r4);
+    }
+  }
   return q4 > 3 && r4 && Object.defineProperty(n4, o4, r4), r4;
 };
 if (!('finalizeConstruction' in ViewPU.prototype)) {
@@ -31,10 +34,10 @@ const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const DividerModifier = requireNapi('arkui.modifier').DividerModifier;
 
 export let ItemState;
-(function (k4) {
-  k4[k4['ENABLE'] = 1] = 'ENABLE';
-  k4[k4['DISABLE'] = 2] = 'DISABLE';
-  k4[k4['ACTIVATE'] = 3] = 'ACTIVATE';
+(function (j3) {
+  j3[j3['ENABLE'] = 1] = 'ENABLE';
+  j3[j3['DISABLE'] = 2] = 'DISABLE';
+  j3[j3['ACTIVATE'] = 3] = 'ACTIVATE';
 })(ItemState || (ItemState = {}));
 
 const PUBLIC_MORE = { id: -1, type: 20000, params: ['sys.media.ohos_ic_public_more'], bundleName: '', moduleName: '' };
@@ -185,13 +188,12 @@ export class ToolBar extends ViewPU {
       this.__toolBarModifier.set(new ToolBarModifier()
         .padding(LengthMetrics.vp(24))
         .stateEffect(true)
-        .height(LengthMetrics.vp(56)))
+        .height(LengthMetrics.vp(56))
+        .backgroundColor('sys.color.ohos_id_color_toolbar_bg'));
     }
     if (y3.moreText === undefined) {
       this.__moreText.set({
-        'id': -1,
-        'type': 10003,
-        params: ['sys.string.ohos_toolbar_more'],
+        'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'],
         'bundleName': '',
         'moduleName': '',
       });
@@ -554,21 +556,21 @@ export class ToolBar extends ViewPU {
   }
 
   getToolBarSymbolModifier(z1) {
-    if (this.activateIndex === z1) {
+    if (this.activateIndex === z1 && (this.toolBarList[z1]?.state === ItemState.ACTIVATE)) {
       return this.toolBarList[z1]?.toolBarSymbolOptions?.activated;
     }
     return this.toolBarList[z1]?.toolBarSymbolOptions?.normal;
   }
 
   getIconColor(y1) {
-    if (this.activateIndex === y1 && !(this.toolBarList[y1]?.state === 2)) {
+    if (this.activateIndex === y1 && (this.toolBarList[y1]?.state === ItemState.ACTIVATE)) {
       return this.toolBarList[y1]?.activatedIconColor ?? this.iconActivePrimaryColor;
     }
     return this.toolBarList[y1]?.iconColor ?? this.iconPrimaryColor;
   }
 
   getTextColor(x1) {
-    if (this.activateIndex === x1 && !(this.toolBarList[x1]?.state === 2)) {
+    if (this.activateIndex === x1 && (this.toolBarList[x1]?.state === ItemState.ACTIVATE)) {
       return this.toolBarList[x1]?.activatedTextColor ?? this.fontActivatedPrimaryColor;
     }
     return this.toolBarList[x1]?.textColor ?? this.fontPrimaryColor;
