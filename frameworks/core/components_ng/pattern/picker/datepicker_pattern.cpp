@@ -2142,6 +2142,8 @@ const std::string DatePickerPattern::GetFormatString(PickerDateF date)
         OrderResult orderResult = sequence.GetDateOrder(language);
         if (language == "ug") {
             return date.month.has_value() ? (dayStr + "-" + monthStr) : dayStr;
+        } else if (language == "en") {
+            return date.month.has_value() ? (monthStr + " " + dayStr) : dayStr;
         } else {
             return date.month.has_value() ? (monthStr + dayStr) : dayStr;
         }
