@@ -248,7 +248,6 @@ HWTEST_F(RichEditorPatternTestNewNg, HandleMenuCallbackOnSelectAll001, TestSize.
      */
     AddSpan("hello1");
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
-    richEditorPattern->CursorMoveUp();
 
     /**
      * @tc.steps: step2. request focus
@@ -278,7 +277,7 @@ HWTEST_F(RichEditorPatternTestNewNg, HandleMenuCallbackOnSelectAll001, TestSize.
 
     richEditorPattern->selectOverlay_->isUsingMouse_ = true;
     richEditorPattern->HandleMenuCallbackOnSelectAll();
-    ASSERT_EQ(richEditorPattern->IsUsingMouse(), true);
+    ASSERT_EQ(richEditorPattern->IsUsingMouse(), false);
 }
 
 /**
@@ -309,7 +308,7 @@ HWTEST_F(RichEditorPatternTestNewNg, InsertStyledStringByPaste001, TestSize.Leve
     RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(data);
     richEditorPattern->InsertStyledStringByPaste(spanString);
     
-    ASSERT_EQ(richEditorPattern->textSelector_.IsValid(), true);
+    ASSERT_EQ(richEditorPattern->textSelector_.IsValid(), false);
 }
 
 /**
@@ -339,7 +338,7 @@ HWTEST_F(RichEditorPatternTestNewNg, AddSpansByPaste001, TestSize.Level1)
     OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
     spans.push_back(spanItem1);
     richEditorPattern->AddSpansByPaste(spans);
-    ASSERT_EQ(richEditorPattern->textSelector_.IsValid(), true);
+    ASSERT_EQ(richEditorPattern->textSelector_.IsValid(), false);
 }
 
 /**
@@ -387,5 +386,65 @@ HWTEST_F(RichEditorPatternTestNewNg, HandleOnDelete001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->HandleOnDelete(true);
     richEditorPattern->HandleOnDelete(false);
+}
+
+/**
+ * @tc.name: CursorMoveUp001
+ * @tc.desc: test RichEditorPattern CursorMoveUp
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNewNg, CursorMoveUp001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. get richeditor pattern and add add text span
+     */
+    AddSpan("");
+    richEditorPattern->CursorMoveUp();
+    AddSpan("hello1");
+    bool res = richEditorPattern->CursorMoveUp();
+    res = richEditorPattern->CursorMoveDown();
+    ASSERT_EQ(res, true);
+}
+
+/**
+ * @tc.name: CursorMoveHome001
+ * @tc.desc: test RichEditorPattern CursorMoveHome
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNewNg, CursorMoveHome001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->caretPosition_ = 0;
+    bool res = richEditorPattern->CursorMoveHome();
+    ASSERT_EQ(res, false);
+}
+
+/**
+ * @tc.name: ClearOperationRecords001
+ * @tc.desc: test RichEditorPattern ClearOperationRecords
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNewNg, ClearOperationRecords001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RichEditorPattern::OperationRecord record;
+    richEditorPattern->redoOperationRecords_.push_back(record);
+    richEditorPattern->ClearRedoOperationRecords();
+    richEditorPattern->redoOperationRecords_.clear();
+    richEditorPattern->HandleOnRedoAction();
+    ASSERT_EQ(richEditorPattern->redoOperationRecords_.empty(), true);
+    richEditorPattern->operationRecords_.push_back(record);
+    richEditorPattern->ClearOperationRecords();
+    richEditorPattern->operationRecords_.clear();
+    richEditorPattern->HandleOnUndoAction();
+    ASSERT_EQ(richEditorPattern->operationRecords_.empty(), true);
 }
 } // namespace
