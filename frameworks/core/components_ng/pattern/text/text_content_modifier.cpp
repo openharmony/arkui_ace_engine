@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/text_content_modifier.h"
+#include <cstdint>
 
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
@@ -111,7 +112,7 @@ void TextContentModifier::SetDefaultAnimatablePropertyValue(const TextStyle& tex
 void TextContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 {
     float fontSizeValue = textStyle.GetFontSize().ConvertToPxDistribute(
-        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     fontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
     AttachProperty(fontSizeFloat_);
 }
@@ -122,7 +123,7 @@ void TextContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         fontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     }
 
     adaptMinFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
@@ -135,7 +136,7 @@ void TextContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         fontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     }
 
     adaptMaxFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
@@ -205,7 +206,7 @@ void TextContentModifier::SetDefaultBaselineOffset(const TextStyle& textStyle)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         baselineOffset = textStyle.GetBaselineOffset().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     }
 
     baselineOffsetFloat_ = MakeRefPtr<AnimatablePropertyFloat>(baselineOffset);
@@ -346,8 +347,6 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
 {
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPattern);
-    bool ifPaintObscuration = std::any_of(obscuredReasons_.begin(), obscuredReasons_.end(),
-        [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
     auto pManager = textPattern->GetParagraphManager();
     CHECK_NULL_VOID(pManager);
     CHECK_NULL_VOID(!pManager->GetParagraphs().empty());
@@ -355,7 +354,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f]", host->GetId(), paintOffset_.GetX(), paintOffset_.GetY());
 
-    if (!ifPaintObscuration || ifHaveSpanItemChildren_) {
+    if (!ifPaintObscuration_) {
         auto& canvas = drawingContext.canvas;
         auto contentSize = contentSize_->Get();
         auto contentOffset = contentOffset_->Get();
@@ -367,7 +366,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
                 contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
             canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         }
-        if (!textRacing_) {
+        if (!CheckMarqueeState(MarqueeState::RUNNING)) {
             auto paintOffsetY = paintOffset_.GetY();
             auto paragraphs = pManager->GetParagraphs();
             for (auto&& info : paragraphs) {
@@ -435,7 +434,7 @@ void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)
     for (auto i = 0U; i < drawObscuredRects_.size(); i++) {
         if (!NearEqual(drawObscuredRects_[i].Width(), 0.0f) && !NearEqual(drawObscuredRects_[i].Height(), 0.0f)) {
             currentLineWidth += drawObscuredRects_[i].Width();
-            if (i == (drawObscuredRects_.size() ? drawObscuredRects_.size() - 1 : 0)) {
+            if (i == (!drawObscuredRects_.empty() ? drawObscuredRects_.size() - 1 : 0)) {
                 textLineWidth.push_back(currentLineWidth);
                 maxLineCount += LessOrEqual(drawObscuredRects_[i].Bottom(), contentSize_->Get().Height()) ? 1 : 0;
             } else if (!NearEqual(drawObscuredRects_[i].Bottom(), drawObscuredRects_[i + 1].Bottom())) {
@@ -653,7 +652,8 @@ void TextContentModifier::SetFontFamilies(const std::vector<std::string>& value)
 
 void TextContentModifier::SetFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    auto fontSizeValue = value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+    auto fontSizeValue =
+        value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     fontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(fontSizeFloat_);
     fontSizeFloat_->Set(fontSizeValue);
@@ -661,7 +661,8 @@ void TextContentModifier::SetFontSize(const Dimension& value, TextStyle& textSty
 
 void TextContentModifier::SetAdaptMinFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    auto fontSizeValue = value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+    auto fontSizeValue =
+        value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     adaptMinFontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(adaptMinFontSizeFloat_);
     adaptMinFontSizeFloat_->Set(fontSizeValue);
@@ -669,7 +670,8 @@ void TextContentModifier::SetAdaptMinFontSize(const Dimension& value, TextStyle&
 
 void TextContentModifier::SetAdaptMaxFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    auto fontSizeValue = value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+    auto fontSizeValue =
+        value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     adaptMaxFontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(adaptMaxFontSizeFloat_);
     adaptMaxFontSizeFloat_->Set(fontSizeValue);
@@ -772,11 +774,10 @@ void TextContentModifier::SetContentSize(SizeF& value)
 
 void TextContentModifier::StartTextRace()
 {
-    if (textRacing_) {
+    if (!CheckMarqueeState(MarqueeState::IDLE) && !CheckMarqueeState(MarqueeState::STOPPED)) {
         return;
     }
 
-    textRacing_ = true;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         UpdateImageNodeVisible(VisibleType::VISIBLE);
     }
@@ -794,14 +795,14 @@ void TextContentModifier::StartTextRace()
     option.SetIteration(-1);
     option.SetTempo(RACE_TEMPO);
     raceAnimation_ = AnimationUtils::StartAnimation(option, [&]() { racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX); });
+    SetMarqueeState(MarqueeState::RUNNING);
 }
 
 void TextContentModifier::StopTextRace()
 {
-    if (!textRacing_) {
+    if (!CheckMarqueeState(MarqueeState::RUNNING) && !CheckMarqueeState(MarqueeState::PAUSED)) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_TEXT, "StartTextRace:%{public}d", textRacing_);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         UpdateImageNodeVisible(VisibleType::VISIBLE);
     }
@@ -809,28 +810,28 @@ void TextContentModifier::StopTextRace()
         AnimationUtils::StopAnimation(raceAnimation_);
     }
 
-    textRacing_ = false;
+    SetMarqueeState(MarqueeState::STOPPED);
     racePercentFloat_->Set(RACE_MOVE_PERCENT_MIN);
 }
 
 void TextContentModifier::ResumeAnimation()
 {
     CHECK_NULL_VOID(raceAnimation_);
-    if (textRacing_) {
+    if (!CheckMarqueeState(MarqueeState::PAUSED)) {
         return;
     }
     AnimationUtils::ResumeAnimation(raceAnimation_);
-    textRacing_ = true;
+    SetMarqueeState(MarqueeState::RUNNING);
 }
 
 void TextContentModifier::PauseAnimation()
 {
     CHECK_NULL_VOID(raceAnimation_);
-    if (!textRacing_) {
+    if (!CheckMarqueeState(MarqueeState::RUNNING)) {
         return;
     }
     AnimationUtils::PauseAnimation(raceAnimation_);
-    textRacing_ = false;
+    SetMarqueeState(MarqueeState::PAUSED);
 }
 
 float TextContentModifier::GetTextRacePercent()
@@ -861,5 +862,17 @@ void TextContentModifier::AddDefaultShadow()
     AttachProperty(offsetX);
     AttachProperty(offsetY);
     AttachProperty(color);
+}
+
+void TextContentModifier::SetMarqueeState(MarqueeState state)
+{
+    auto prevState = marqueeState_;
+    marqueeState_ = state;
+    auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    TAG_LOGI(AceLogTag::ACE_TEXT, "SetMarqueeState: id %{public}d, from state %{public}d to state %{public}d",
+        host->GetId(), prevState, state);
 }
 } // namespace OHOS::Ace::NG

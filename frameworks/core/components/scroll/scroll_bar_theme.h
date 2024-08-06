@@ -54,6 +54,7 @@ public:
                 LOGW("find pattern of scroll_bar fail");
                 return;
             }
+            auto blendOpacity = pattern->GetAttr<double>("scroll_bar_foreground_opacity", 0.4f);
             theme->shapeMode_ = static_cast<ShapeMode>(pattern->GetAttr<double>("scroll_bar_shape_mode", 0.0));
             theme->normalWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_width", 0.0_vp);
             theme->activeWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_width", 0.0_vp);
@@ -62,7 +63,6 @@ public:
             theme->reservedHeight_ = pattern->GetAttr<Dimension>("scroll_bar_reserved_height", 0.0_vp);
             theme->touchWidth_ = pattern->GetAttr<Dimension>("scroll_bar_touch_width", 0.0_vp);
             theme->backgroundColor_ = pattern->GetAttr<Color>("scroll_bar_background_color", Color());
-            auto blendOpacity = pattern->GetAttr<double>("scroll_bar_foreground_opacity", 0.4f);
             theme->foregroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,
                 Color::TRANSPARENT).BlendOpacity(blendOpacity);
             auto padding = pattern->GetAttr<Dimension>("scroll_bar_margin", Dimension(4.0, DimensionUnit::VP));

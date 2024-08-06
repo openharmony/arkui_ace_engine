@@ -1206,14 +1206,26 @@ void CustomPaintPaintMethod::Path2DSetTransform(const PathArgs& args)
 void CustomPaintPaintMethod::Save()
 {
     saveStates_.push_back(state_);
+    saveColorFilter_.push_back(colorFilter_);
+    saveBlurFilter_.push_back(blurFilter_);
     rsCanvas_->Save();
 }
 
 void CustomPaintPaintMethod::Restore()
 {
-    if (rsCanvas_->GetSaveCount() > DEFAULT_SAVE_COUNT && !saveStates_.empty()) {
-        state_ = saveStates_.back();
-        saveStates_.pop_back();
+    if (rsCanvas_->GetSaveCount() > DEFAULT_SAVE_COUNT) {
+        if (!saveStates_.empty()) {
+            state_ = saveStates_.back();
+            saveStates_.pop_back();
+        }
+        if (!saveColorFilter_.empty()) {
+            colorFilter_ = saveColorFilter_.back();
+            saveColorFilter_.pop_back();
+        }
+        if (!saveBlurFilter_.empty()) {
+            blurFilter_ = saveBlurFilter_.back();
+            saveBlurFilter_.pop_back();
+        }
         rsCanvas_->Restore();
     }
 }
@@ -1243,6 +1255,20 @@ void CustomPaintPaintMethod::Transform(const TransformParam& param)
 void CustomPaintPaintMethod::Translate(double x, double y)
 {
     rsCanvas_->Translate(x, y);
+}
+
+void CustomPaintPaintMethod::FillText(const std::string& text, double x, double y, std::optional<double> maxWidth)
+{
+    auto success = UpdateParagraph(text, false, HasShadow());
+    CHECK_NULL_VOID(success);
+    PaintText(lastLayoutSize_.Width(), x, y, maxWidth, false, HasShadow());
+}
+
+void CustomPaintPaintMethod::StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth)
+{
+    auto success = UpdateParagraph(text, true, HasShadow());
+    CHECK_NULL_VOID(success);
+    PaintText(lastLayoutSize_.Width(), x, y, maxWidth, true, HasShadow());
 }
 
 void CustomPaintPaintMethod::PaintText(const float width, double x, double y,
@@ -1423,42 +1449,59 @@ void CustomPaintPaintMethod::ClearPaintImage(RSPen* pen, RSBrush* brush)
 
 void CustomPaintPaintMethod::SetPaintImage(RSPen* pen, RSBrush* brush)
 {
-    std::vector<FilterProperty> filters;
-    if (GetFilterType(filters)) {
-        lastFilters_ = filters;
-    } else {
-        filters = lastFilters_;
+    if (pen) {
+        auto filter = pen->GetFilter();
+        filter.SetColorFilter(colorFilter_);
+        filter.SetImageFilter(blurFilter_);
+        pen->SetFilter(filter);
     }
+    if (brush) {
+        auto filter = brush->GetFilter();
+        filter.SetColorFilter(colorFilter_);
+        filter.SetImageFilter(blurFilter_);
+        brush->SetFilter(filter);
+    }
+}
+
+void CustomPaintPaintMethod::SetFilterParam(const std::string& filterStr)
+{
+    std::vector<FilterProperty> filters;
+    if (!GetFilterType(filterStr, filters)) {
+        return;
+    }
+    colorMatrix_ = RSColorMatrix();
+    colorFilter_ = RSColorFilter::CreateMatrixColorFilter(colorMatrix_);
+    blurFilter_ = RSImageFilter::CreateBlurImageFilter(0, 0, RSTileMode::DECAL, nullptr);
     for (FilterProperty filter : filters) {
         switch (filter.filterType_) {
             case FilterType::NONE:
                 break;
             case FilterType::GRAYSCALE:
-                SetGrayFilter(filter.filterParam_, pen, brush);
+                SetGrayFilter(filter.filterParam_);
                 break;
             case FilterType::SEPIA:
-                SetSepiaFilter(filter.filterParam_, pen, brush);
+                SetSepiaFilter(filter.filterParam_);
                 break;
             case FilterType::SATURATE:
-                SetSaturateFilter(filter.filterParam_, pen, brush);
+                SetSaturateFilter(filter.filterParam_);
                 break;
             case FilterType::HUE_ROTATE:
-                SetHueRotateFilter(filter.filterParam_, pen, brush);
+                SetHueRotateFilter(filter.filterParam_);
                 break;
             case FilterType::INVERT:
-                SetInvertFilter(filter.filterParam_, pen, brush);
+                SetInvertFilter(filter.filterParam_);
                 break;
             case FilterType::OPACITY:
-                SetOpacityFilter(filter.filterParam_, pen, brush);
+                SetOpacityFilter(filter.filterParam_);
                 break;
             case FilterType::BRIGHTNESS:
-                SetBrightnessFilter(filter.filterParam_, pen, brush);
+                SetBrightnessFilter(filter.filterParam_);
                 break;
             case FilterType::CONTRAST:
-                SetContrastFilter(filter.filterParam_, pen, brush);
+                SetContrastFilter(filter.filterParam_);
                 break;
             case FilterType::BLUR:
-                SetBlurFilter(filter.filterParam_, pen, brush);
+                SetBlurFilter(filter.filterParam_);
                 break;
             case FilterType::DROP_SHADOW:
                 break;
@@ -1466,11 +1509,11 @@ void CustomPaintPaintMethod::SetPaintImage(RSPen* pen, RSBrush* brush)
                 break;
         }
     }
-    SetColorFilter(pen, brush);
+    colorFilter_ = RSColorFilter::CreateMatrixColorFilter(colorMatrix_);
 }
 
 // https://drafts.fxtf.org/filter-effects/#grayscaleEquivalent
-void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent, RSPen* pen, RSBrush* brush)
+void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent)
 {
     float percentNum = 1.0f;
     if (!CheckNumberAndPercentage(percent, true, percentNum)) {
@@ -1499,7 +1542,7 @@ void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent, RSPen* pe
 }
 
 // https://drafts.fxtf.org/filter-effects/#sepiaEquivalent
-void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent, RSPen* pen, RSBrush* brush)
+void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent)
 {
     float percentNum = 1.0f;
     if (!CheckNumberAndPercentage(percent, true, percentNum)) {
@@ -1525,7 +1568,7 @@ void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent, RSPen* p
 }
 
 // https://drafts.fxtf.org/filter-effects/#saturateEquivalent
-void CustomPaintPaintMethod::SetSaturateFilter(const std::string& percent, RSPen* pen, RSBrush* brush)
+void CustomPaintPaintMethod::SetSaturateFilter(const std::string& percent)
 {
     float percentNum = 1.0f;
     if (!CheckNumberAndPercentage(percent, false, percentNum)) {
@@ -1552,7 +1595,7 @@ void CustomPaintPaintMethod::SetSaturateFilter(const std::string& percent, RSPen
 }
 
 // https://drafts.fxtf.org/filter-effects/#huerotateEquivalent
-void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam, RSPen* pen, RSBrush* brush)
+void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam)
 {
     std::string percent = filterParam;
     float rad = 0.0f;
@@ -1602,7 +1645,7 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam, 
  * If R==1, R' = v1 = 1 - percentNum = percentNum + (1 - 2 * percentNum) * R
  * so R' = funcR(R) = percentNum + (1 - 2 * percentNum) * R, where 0 <= R <= 1.
  */
-void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent, RSPen* pen, RSBrush* brush)
+void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent)
 {
     float percentNum = 1.0f;
     if (!CheckNumberAndPercentage(percent, true, percentNum)) {
@@ -1626,7 +1669,7 @@ void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent, RSPen* 
  * If A==1, A' = v1 = percentNum = percentNum * A
  * so A' = funcR(A) = percentNum * A, where 0 <= A <= 1.
  */
-void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent, RSPen* pen, RSBrush* brush)
+void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent)
 {
     float percentNum = 1.0f;
     if (!CheckNumberAndPercentage(percent, true, percentNum)) {
@@ -1646,7 +1689,7 @@ void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent, RSPen*
  * R' = funcR(R) = slope * R + intercept
  * where: slope = percentNum, intercept = 0
  */
-void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent, RSPen* pen, RSBrush* brush)
+void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent)
 {
     float percentNum = 1.0f;
     if (!CheckNumberAndPercentage(percent, false, percentNum)) {
@@ -1666,7 +1709,7 @@ void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent, RSP
  * R' = funcR(R) = slope * R + intercept
  * where: slope = percentNum, intercept = 0.5 * (1 - percentNum)
  */
-void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent, RSPen* pen, RSBrush* brush)
+void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent)
 {
     float percentNum = 1.0f;
     if (!CheckNumberAndPercentage(percent, false, percentNum)) {
@@ -1682,45 +1725,20 @@ void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent, RSPen
 }
 
 // https://drafts.fxtf.org/filter-effects/#blurEquivalent
-void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent, RSPen* pen, RSBrush* brush)
+void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent)
 {
     float blurNum = 0.0f;
     blurNum = BlurStrToDouble(percent);
     if (Negative(blurNum)) {
         return;
     }
-    auto imageFilter =
+    blurFilter_ =
         RSImageFilter::CreateBlurImageFilter(blurNum * density_, blurNum * density_, RSTileMode::DECAL, nullptr);
-    if (pen) {
-        auto filter = pen->GetFilter();
-        filter.SetImageFilter(imageFilter);
-        pen->SetFilter(filter);
-    }
-    if (brush) {
-        auto filter = brush->GetFilter();
-        filter.SetImageFilter(imageFilter);
-        brush->SetFilter(filter);
-    }
 }
 
-void CustomPaintPaintMethod::SetColorFilter(RSPen* pen, RSBrush* brush)
+bool CustomPaintPaintMethod::GetFilterType(const std::string& filterStr, std::vector<FilterProperty>& filters)
 {
-    auto colorFilter = RSColorFilter::CreateMatrixColorFilter(colorMatrix_);
-    if (pen) {
-        auto filter = pen->GetFilter();
-        filter.SetColorFilter(colorFilter);
-        pen->SetFilter(filter);
-    }
-    if (brush) {
-        auto filter = brush->GetFilter();
-        filter.SetColorFilter(colorFilter);
-        brush->SetFilter(filter);
-    }
-}
-
-bool CustomPaintPaintMethod::GetFilterType(std::vector<FilterProperty>& filters)
-{
-    std::string paramData = filterParam_;
+    std::string paramData = filterStr;
     std::transform(paramData.begin(), paramData.end(), paramData.begin(), ::tolower);
     paramData.erase(paramData.find_last_not_of(' ') + 1);
     paramData.erase(0, paramData.find_first_not_of(' '));
@@ -1949,7 +1967,6 @@ void CustomPaintPaintMethod::ResetStates()
 {
     smoothingEnabled_ = true;
     smoothingQuality_ = "low";
-    filterParam_ = "";
     state_.fillState = PaintState();
     state_.strokeState = StrokePaintState();
     state_.globalState = GlobalPaintState();
@@ -1957,12 +1974,15 @@ void CustomPaintPaintMethod::ResetStates()
     SetFontSize(DEFAULT_FONT_SIZE);
     state_.shadow = Shadow();
     imageBrush_ = RSBrush();
-    lastFilters_.clear();
     rsPath_.Reset();
     rsPath2d_.Reset();
     std::vector<PaintHolder>().swap(saveStates_);
     std::vector<RSMatrix>().swap(matrixStates_);
+    std::vector<std::shared_ptr<RSColorFilter>>().swap(saveColorFilter_);
+    std::vector<std::shared_ptr<RSImageFilter>>().swap(saveBlurFilter_);
     colorMatrix_ = RSColorMatrix();
+    colorFilter_ = RSColorFilter::CreateMatrixColorFilter(colorMatrix_);
+    blurFilter_ = RSImageFilter::CreateBlurImageFilter(0, 0, RSTileMode::DECAL, nullptr);
 }
 
 void CustomPaintPaintMethod::PaintShadow(
@@ -2060,11 +2080,8 @@ bool CustomPaintPaintMethod::UpdateParagraph(const std::string& text, bool isStr
 {
 #ifndef ACE_UNITTEST
     RSParagraphStyle style;
-    if (isStroke) {
-        style.textAlign = Constants::ConvertTxtTextAlign(state_.strokeState.GetTextAlign());
-    } else {
-        style.textAlign = Constants::ConvertTxtTextAlign(state_.fillState.GetTextAlign());
-    }
+    TextAlign textAlign = (isStroke ? state_.strokeState.GetTextAlign() : state_.fillState.GetTextAlign());
+    style.textAlign = Constants::ConvertTxtTextAlign(textAlign);
     style.textDirection = Constants::ConvertTxtTextDirection(state_.fillState.GetOffTextDirection());
     style.textAlign = GetEffectiveAlign(style.textAlign, style.textDirection);
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
@@ -2081,7 +2098,8 @@ bool CustomPaintPaintMethod::UpdateParagraph(const std::string& text, bool isStr
     }
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     UpdateFontFamilies();
-    UpdateTextStyleForeground(isStroke, txtStyle, hasShadow);
+    isStroke ? UpdateStrokeTextStyleForeground(txtStyle, hasShadow)
+             : UpdateFillTextStyleForeground(txtStyle, hasShadow);
     builder->PushStyle(txtStyle);
     builder->AppendText(StringUtils::Str8ToStr16(text));
     paragraph_ = builder->CreateTypography();
@@ -2091,55 +2109,58 @@ bool CustomPaintPaintMethod::UpdateParagraph(const std::string& text, bool isStr
 #endif
 }
 
-void CustomPaintPaintMethod::UpdateTextStyleForeground(bool isStroke, RSTextStyle& txtStyle, bool hasShadow)
+void CustomPaintPaintMethod::UpdateStrokeTextStyleForeground(RSTextStyle& txtStyle, bool hasShadow)
 {
 #ifndef ACE_UNITTEST
-    if (!isStroke) {
-        txtStyle.foregroundPen = std::nullopt;
-        txtStyle.color = Constants::ConvertSkColor(state_.fillState.GetColor());
-        txtStyle.fontSize = state_.fillState.GetTextStyle().GetFontSize().Value();
-        ConvertTxtStyle(state_.fillState.GetTextStyle(), txtStyle);
-        if (state_.fillState.GetGradient().IsValid() && state_.fillState.GetPaintStyle() == PaintStyle::Gradient) {
+    // use foreground to draw stroke
+    txtStyle.foregroundPen = std::nullopt;
+    RSPen pen;
+    RSSamplingOptions options;
+    GetStrokePaint(pen, options);
+    InitPaintBlend(pen);
+    ConvertTxtStyle(state_.strokeState.GetTextStyle(), txtStyle);
+    txtStyle.fontSize = state_.strokeState.GetTextStyle().GetFontSize().Value();
+    if (state_.strokeState.GetGradient().IsValid() && state_.strokeState.GetPaintStyle() == PaintStyle::Gradient) {
+        UpdatePaintShader(&pen, nullptr, state_.strokeState.GetGradient());
+    }
+    if (hasShadow) {
+        pen.SetColor(state_.shadow.GetColor().GetValue());
+        RSFilter filter;
+        filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL,
+            RosenDecorationPainter::ConvertRadiusToSigma(state_.shadow.GetBlurRadius())));
+        pen.SetFilter(filter);
+    }
+    txtStyle.foregroundPen = pen;
+#endif
+}
+
+void CustomPaintPaintMethod::UpdateFillTextStyleForeground(RSTextStyle& txtStyle, bool hasShadow)
+{
+#ifndef ACE_UNITTEST
+    txtStyle.foregroundPen = std::nullopt;
+    txtStyle.color = Constants::ConvertSkColor(state_.fillState.GetColor());
+    txtStyle.fontSize = state_.fillState.GetTextStyle().GetFontSize().Value();
+    ConvertTxtStyle(state_.fillState.GetTextStyle(), txtStyle);
+    if (state_.fillState.GetGradient().IsValid() && state_.fillState.GetPaintStyle() == PaintStyle::Gradient) {
+        RSBrush brush;
+        RSSamplingOptions options;
+        InitImagePaint(nullptr, &brush, options);
+        UpdatePaintShader(nullptr, &brush, state_.fillState.GetGradient());
+        txtStyle.foregroundBrush = brush;
+    }
+    if (state_.globalState.HasGlobalAlpha()) {
+        if (txtStyle.foregroundBrush.has_value()) {
+            txtStyle.foregroundBrush->SetColor(state_.fillState.GetColor().GetValue());
+            txtStyle.foregroundBrush->SetAlphaF(state_.globalState.GetAlpha()); // set alpha after color
+        } else {
             RSBrush brush;
             RSSamplingOptions options;
             InitImagePaint(nullptr, &brush, options);
-            UpdatePaintShader(nullptr, &brush, state_.fillState.GetGradient());
+            brush.SetColor(state_.fillState.GetColor().GetValue());
+            brush.SetAlphaF(state_.globalState.GetAlpha()); // set alpha after color
+            InitPaintBlend(brush);
             txtStyle.foregroundBrush = brush;
         }
-        if (state_.globalState.HasGlobalAlpha()) {
-            if (txtStyle.foregroundBrush.has_value()) {
-                txtStyle.foregroundBrush->SetColor(state_.fillState.GetColor().GetValue());
-                txtStyle.foregroundBrush->SetAlphaF(state_.globalState.GetAlpha()); // set alpha after color
-            } else {
-                RSBrush brush;
-                RSSamplingOptions options;
-                InitImagePaint(nullptr, &brush, options);
-                brush.SetColor(state_.fillState.GetColor().GetValue());
-                brush.SetAlphaF(state_.globalState.GetAlpha()); // set alpha after color
-                InitPaintBlend(brush);
-                txtStyle.foregroundBrush = brush;
-            }
-        }
-    } else {
-        // use foreground to draw stroke
-        txtStyle.foregroundPen = std::nullopt;
-        RSPen pen;
-        RSSamplingOptions options;
-        GetStrokePaint(pen, options);
-        InitPaintBlend(pen);
-        ConvertTxtStyle(state_.strokeState.GetTextStyle(), txtStyle);
-        txtStyle.fontSize = state_.strokeState.GetTextStyle().GetFontSize().Value();
-        if (state_.strokeState.GetGradient().IsValid() && state_.strokeState.GetPaintStyle() == PaintStyle::Gradient) {
-            UpdatePaintShader(&pen, nullptr, state_.strokeState.GetGradient());
-        }
-        if (hasShadow) {
-            pen.SetColor(state_.shadow.GetColor().GetValue());
-            RSFilter filter;
-            filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL,
-                RosenDecorationPainter::ConvertRadiusToSigma(state_.shadow.GetBlurRadius())));
-            pen.SetFilter(filter);
-        }
-        txtStyle.foregroundPen = pen;
     }
 #endif
 }

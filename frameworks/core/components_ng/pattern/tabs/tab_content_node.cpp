@@ -53,6 +53,10 @@ void TabContentNode::OnDetachFromMainTree(bool recursive, PipelineContext* conte
 
     auto deletedIdx = swiper->GetChildFlatIndex(GetId()).second;
     auto currentIdx = swiperPattern->GetCurrentShownIndex();
+    // Removing currently shown tab, focus on first after that
+    if (currentIdx == deletedIdx) {
+        swiperPattern->GetSwiperController()->SwipeToWithoutAnimation(0);
+    }
     TabContentModelNG::RemoveTabBarItem(Referenced::Claim(this));
 
     // Removing tab before current, re-focus on the same tab with new index
@@ -165,8 +169,9 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     CHECK_NULL_VOID(tabTheme);
     label->Put("unselectedColor", labelStyle.unselectedColor.value_or(
         tabTheme->GetSubTabTextOffColor()).ColorToString().c_str());
-    label->Put("selectedColor", labelStyle.selectedColor.value_or(
-        tabTheme->GetSubTabTextOnColor()).ColorToString().c_str());
+    auto selectColor = tabContentPattern->GetSelectedMode() == SelectedMode::BOARD ?
+        tabTheme->GetSubTabBoardTextOnColor() : tabTheme->GetSubTabTextOnColor();
+    label->Put("selectedColor", labelStyle.selectedColor.value_or(selectColor).ColorToString().c_str());
     tabBar->Put("labelStyle", label);
 
     auto iconStyle = tabContentPattern->GetIconStyle();

@@ -87,7 +87,7 @@ int32_t GridIrregularFiller::FitItem(const decltype(GridLayoutInfo::gridMatrix_)
         return 0;
     }
 
-    if (it->second.size() + itemWidth > info_->crossCount_) {
+    if (static_cast<int32_t>(it->second.size()) + itemWidth > info_->crossCount_) {
         // not enough space
         return -1;
     }

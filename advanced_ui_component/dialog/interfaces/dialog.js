@@ -19,9 +19,6 @@ const measure = requireNapi('measure');
 const resourceManager = requireNapi('resourceManager');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
-if (!globalThis.__hasUIFramework__) {
-    globalThis.requireNapi('arkui.mock');
-}
 
 if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {

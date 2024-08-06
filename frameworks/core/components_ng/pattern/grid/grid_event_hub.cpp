@@ -207,7 +207,7 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
     };
     SnapshotParam param;
     param.delay = CREATE_PIXELMAP_TIME;
-    NG::ComponentSnapshot::Create(customNode, std::move(callback), false, param);
+    NG::ComponentSnapshot::Create(customNode, std::move(callback), true, param);
 #else
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);

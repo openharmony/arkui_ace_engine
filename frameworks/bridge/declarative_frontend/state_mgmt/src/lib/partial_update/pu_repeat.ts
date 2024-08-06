@@ -160,7 +160,7 @@ class __Repeat<T> implements RepeatAPI<T> {
         this.config.arr = arr ?? [];
         this.config.itemGenFuncs = {};
         this.config.keyGenFunc = __RepeatDefaultKeyGen.funcWithIndex;
-        this.config.typeGenFunc = (() => '');
+        this.config.typeGenFunc = ((): string => '');
         this.config.totalCountSpecified = false;
         this.config.totalCount = this.config.arr.length;
         this.config.templateOptions = {};

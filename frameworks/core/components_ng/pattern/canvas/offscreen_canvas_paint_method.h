@@ -34,9 +34,6 @@ public:
     void GetImageData(const std::shared_ptr<Ace::ImageData>& imageData);
     std::string ToDataURL(const std::string& type, const double quality);
 
-    void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state);
-    void StrokeText(
-        const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state);
     TransformParam GetTransform() const override;
     LineDashParam GetLineDash() const override;
     void UpdateSize(int32_t width, int32_t height);

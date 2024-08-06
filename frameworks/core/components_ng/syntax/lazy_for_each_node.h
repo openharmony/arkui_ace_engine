@@ -114,7 +114,7 @@ public:
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
     void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
 
-    const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = true) const override;
+    const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override
     {
         itemConstraint_ = itemConstraint;
@@ -163,7 +163,22 @@ public:
     int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true) override;
     void InitDragManager(const RefPtr<FrameNode>& childNode);
     void InitAllChilrenDragManager(bool init);
+
+    /**
+     * @brief Notify the change of dataSource to component.
+     *
+     * @param index the last position of change.
+     * @param count the count of change in [index].
+     */
     void NotifyCountChange(int32_t index, int32_t count);
+
+    /**
+     * @brief Parse OnDatasetChange for NotifyCountChange.
+     *
+     * @param dataOperations bulk change operations.
+     */
+    void ParseOperations(const std::list<V2::Operation>& dataOperations);
+
 private:
     void OnAttachToMainTree(bool recursive) override
     {
@@ -201,7 +216,7 @@ private:
     {
         // LazyForEachNode::GetChildren() may add some children to disappearingChildren_, execute earlier to ensure
         // disappearingChildren_ is correct before calling GenerateOneDepthVisibleFrameWithTransition.
-        GetChildren(false);
+        GetChildren();
         UINode::GenerateOneDepthVisibleFrameWithTransition(visibleList);
     }
 

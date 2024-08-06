@@ -56,10 +56,10 @@ void BorderStyleProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, std::uni
 std::string BorderWidthPropertyT<Dimension>::ToString() const
 {
     std::string str;
-    str.append("leftDimen: [").append(leftDimen.has_value() ? leftDimen->ToString() : "NA").append("]");
-    str.append("rightDimen: [").append(rightDimen.has_value() ? rightDimen->ToString() : "NA").append("]");
-    str.append("topDimen: [").append(topDimen.has_value() ? topDimen->ToString() : "NA").append("]");
-    str.append("bottomDimen: [").append(bottomDimen.has_value() ? bottomDimen->ToString() : "NA").append("]");
+    str.append("[").append(leftDimen.has_value() ? leftDimen->ToString() : "NA");
+    str.append(",").append(rightDimen.has_value() ? rightDimen->ToString() : "NA");
+    str.append(",").append(topDimen.has_value() ? topDimen->ToString() : "NA");
+    str.append(",").append(bottomDimen.has_value() ? bottomDimen->ToString() : "NA").append("]");
     return str;
 }
 
@@ -74,6 +74,8 @@ void BorderWidthPropertyT<Dimension>::ToJsonValue(std::unique_ptr<JsonValue>& js
         auto res = JsonUtil::Create(true);
         res->Put("left", leftDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
         res->Put("top", topDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
+        res->Put("start", startDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
+        res->Put("end", endDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
         res->Put("right", rightDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
         res->Put("bottom", bottomDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
 
@@ -97,6 +99,8 @@ void BorderWidthPropertyT<Dimension>::ToDashJsonValue(std::unique_ptr<JsonValue>
         auto res = JsonUtil::Create(true);
         res->Put("left", leftDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
         res->Put("top", topDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
+        res->Put("start", startDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
+        res->Put("end", endDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
         res->Put("right", rightDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
         res->Put("bottom", bottomDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
 

@@ -99,6 +99,7 @@ Scrollable::Scrollable()
     velocityScale_ =
         Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
 }
+
 Scrollable::Scrollable(ScrollPositionCallback&& callback, Axis axis) : callback_(std::move(callback)), axis_(axis)
 {
     friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
@@ -106,6 +107,7 @@ Scrollable::Scrollable(ScrollPositionCallback&& callback, Axis axis) : callback_
     velocityScale_ =
         Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
 }
+
 Scrollable::Scrollable(const ScrollPositionCallback& callback, Axis axis) : callback_(callback), axis_(axis)
 {
     friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
@@ -1141,14 +1143,25 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSpringProperty()
     auto propertyCallback = [weak = AceType::WeakClaim(this)](float position) {
         auto scroll = weak.Upgrade();
         CHECK_NULL_VOID(scroll);
-        if (!scroll->isSpringAnimationStop_) {
-            if (NearEqual(scroll->finalPosition_, position, SPRING_ACCURACY)) {
-                scroll->ProcessSpringMotion(scroll->finalPosition_);
-                scroll->StopSpringAnimation();
-            } else {
-                scroll->ProcessSpringMotion(position);
+        if (scroll->isSpringAnimationStop_) {
+            return;
+        }
+        if (!NearEqual(scroll->finalPosition_, position, SPRING_ACCURACY)) {
+            scroll->ProcessSpringMotion(position);
+            return;
+        }
+        /*
+         * In order to prevent accumulation errors, the current position is re obtained to ensure that
+         * the last frame can accurately stop at the top and bottom positions.
+         */
+        if (scroll->currentPositionCallback_) {
+            double currPos = scroll->currentPositionCallback_();
+            if (NearEqual(currPos, scroll->currentPos_, 0.5)) {
+                scroll->currentPos_ = currPos;
             }
         }
+        scroll->ProcessSpringMotion(scroll->finalPosition_);
+        scroll->StopSpringAnimation();
     };
     springOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     return springOffsetProperty_;

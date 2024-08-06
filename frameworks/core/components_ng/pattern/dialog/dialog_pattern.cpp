@@ -788,18 +788,10 @@ RefPtr<FrameNode> DialogPattern::CreateDivider(
     CHECK_NULL_RETURN(dividerPaintProps, nullptr);
     dividerPaintProps->UpdateDividerColor(color);
     // add divider margin
-    MarginProperty margin;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        margin = {
-            .left = CalcLength((space + space - Dimension(dividerWidth.ConvertToVp(), DimensionUnit::VP)) / 2),
-            .right = CalcLength((space + space - Dimension(dividerWidth.ConvertToVp(), DimensionUnit::VP)) / 2),
-        };
-    } else {
-        margin = {
-            .left = CalcLength((space - dividerWidth) / 2),
-            .right = CalcLength((space - dividerWidth) / 2),
-        };
-    }
+    MarginProperty margin = {
+        .left = CalcLength((space - dividerWidth) / 2),
+        .right = CalcLength((space - dividerWidth) / 2),
+    };
     dividerProps->UpdateMargin(margin);
     return dividerNode;
 }
@@ -1033,9 +1025,10 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
         V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(true));
     menuNode_ = menu;
     // column -> button
-    for (size_t i = 0; i < buttons.size(); ++i) {
+    const size_t size = buttons.size();
+    for (size_t i = 0; i < size; ++i) {
         RefPtr<FrameNode> button;
-        uint32_t val = buttons.size() > 0 ? buttons.size() - 1 : 0;
+        uint32_t val = size > 0 ? size - 1 : 0;
         if (i != val) {
             button = CreateButton(buttons[i], i);
         } else {

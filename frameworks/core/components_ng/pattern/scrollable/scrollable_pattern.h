@@ -47,7 +47,7 @@ class InspectorFilter;
 constexpr double FRICTION = 0.6;
 constexpr double API11_FRICTION = 0.7;
 constexpr double API12_FRICTION = 0.75;
-constexpr double MAX_VELOCITY = 4200.0;
+constexpr double MAX_VELOCITY = 12000.0;
 #else
 constexpr double FRICTION = 0.9;
 constexpr double MAX_VELOCITY = 5000.0;
@@ -441,7 +441,7 @@ public:
         extraOffset_ = extraOffset;
     }
 
-    std::optional<float> GetExtraOffset() const
+    const std::optional<float>& GetExtraOffset() const
     {
         return extraOffset_;
     }
@@ -543,48 +543,24 @@ public:
         needLinked_ = needLinked;
     }
 
-    virtual std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems()
-    {
-        std::vector<RefPtr<FrameNode>> children;
-        return children;
-    }
-
     void SetAnimateCanOverScroll(bool animateCanOverScroll)
     {
         bool isScrollable = !(IsAtBottom() && IsAtTop() && !GetAlwaysEnabled());
         animateCanOverScroll_ = isScrollable && animateCanOverScroll;
     }
-    virtual void InitScrollBarClickEvent();
-    void HandleClickEvent(GestureEvent& info);
+
+    virtual std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems()
+    {
+        std::vector<RefPtr<FrameNode>> children;
+        return children;
+    }
     void InitScrollBarGestureEvent();
+    virtual void InitScrollBarClickEvent();
+    void HandleClickEvent();
     void InitScrollBarMouseEvent();
     virtual void ScrollPage(
         bool reverse, bool smooth = false, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
-
-    void SetScrollToSafeAreaHelper(bool isScrollToSafeAreaHelper)
-    {
-        isScrollToSafeAreaHelper_ = isScrollToSafeAreaHelper;
-    }
-
-    bool IsScrollToSafeAreaHelper() const
-    {
-        return isScrollToSafeAreaHelper_;
-    }
-
-    void ScrollAtFixedVelocity(float velocity);
-
-    PositionMode GetPositionMode();
-
-    virtual std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility()
-    {
-        return { nullptr, Axis::NONE };
-    }
-
-    virtual std::function<bool(int32_t)> GetScrollIndexAbility()
-    {
-        return nullptr;
-    }
 
     void CheckRestartSpring(bool sizeDiminished, bool needNestedScrolling = true);
 
@@ -612,12 +588,40 @@ public:
 
     void DumpAdvanceInfo() override;
 
+    void SetScrollToSafeAreaHelper(bool isScrollToSafeAreaHelper)
+    {
+        isScrollToSafeAreaHelper_ = isScrollToSafeAreaHelper;
+    }
+
+    bool IsScrollToSafeAreaHelper() const
+    {
+        return isScrollToSafeAreaHelper_;
+    }
+
+    virtual std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility()
+    {
+        return { nullptr, Axis::NONE };
+    }
+
+    virtual std::function<bool(int32_t)> GetScrollIndexAbility()
+    {
+        return nullptr;
+    }
+
+    void ScrollAtFixedVelocity(float velocity);
+
+    PositionMode GetPositionMode();
+
     void HandleMoveEventInComp(const PointF& point);
     void HandleLeaveHotzoneEvent();
     void SetHotZoneScrollCallback(std::function<void(void)>&& func)
     {
         hotZoneScrollCallback_ = func;
     }
+
+    void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& responseLinkResult);
 
     virtual void SetAccessibilityAction();
 
@@ -890,6 +894,8 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
     bool lastCanOverScroll_ = false;
+    RefPtr<ClickRecognizer> clickRecognizer_;
+    Offset locationInfo_;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

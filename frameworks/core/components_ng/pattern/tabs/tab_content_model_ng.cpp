@@ -230,7 +230,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     }
     tabBarPattern->SetSelectedMode(selectedMode, myIndex);
     tabBarPattern->SetIndicatorStyle(indicatorStyle, myIndex);
-    tabBarPattern->UpdateSubTabBoard();
 
     // Create tab bar with builder.
     if (tabBarParam.HasBuilder()) {
@@ -324,7 +323,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     if (indicator > totalCount - 1 || indicator < 0) {
         indicator = 0;
     }
-
+    tabBarPattern->UpdateSubTabBoard(indicator);
     // Update property of text.
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
@@ -334,7 +333,9 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             if (labelStyle.selectedColor.has_value()) {
                 textLayoutProperty->UpdateTextColor(labelStyle.selectedColor.value());
             } else {
-                textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOnColor());
+                selectedMode == SelectedMode::BOARD ?
+                    textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabBoardTextOnColor()) :
+                    textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOnColor());
             }
         } else {
             if (labelStyle.unselectedColor.has_value()) {

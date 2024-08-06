@@ -1098,11 +1098,11 @@ HWTEST_F(TextFieldModifyTest, OnScrollEndMenuVisibile001, TestSize.Level1)
      * tc.expected: step2. Check if the Menu Visibile.
     */
     pattern_->selectOverlay_->SetUsingMouse(false);
-    auto selectArea = pattern_->selectOverlay_->GetSelectArea();
+    pattern_->isTextSelectionMenuShow_ = true;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::SHOW;
+    pattern_->SetSelectionFlag(5.0f, 5.0f, options);
 
-    pattern_->SetSelectionFlag(0.0f, 10.0f);
-    selectArea.SetWidth(8.0f);
-    selectArea.SetHeight(2.0f);
     pattern_->OnScrollEndCallback();
     EXPECT_TRUE(pattern_->selectOverlay_->IsCurrentMenuVisibile());
 

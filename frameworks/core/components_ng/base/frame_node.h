@@ -73,6 +73,7 @@ struct CacheVisibleRectResult {
     RectF innerVisibleRect = RectF();
     VectorF cumulativeScale = {1.0f, 1.0f};
     RectF frameRect = RectF();
+    RectF innerBoundaryRect = RectF();
 };
 
 // FrameNode will display rendering region in the screen.
@@ -439,6 +440,10 @@ public:
 
     OffsetF GetPaintRectOffsetNG(bool excludeSelf = false) const;
 
+    bool GetRectPointToParentWithTransform(std::vector<Point>& pointList, const RefPtr<FrameNode>& parent) const;
+
+    RectF GetPaintRectToWindowWithTransform();
+
     OffsetF GetPaintRectCenter(bool checkWindowBoundary = true) const;
 
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
@@ -496,6 +501,16 @@ public:
     void SetColorModeUpdateCallback(const std::function<void()>&& callback)
     {
         colorModeUpdateCallback_ = callback;
+    }
+
+    void SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback)
+    {
+        ndkColorModeUpdateCallback_ = callback;
+    }
+
+    void SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback)
+    {
+        ndkFontUpdateCallback_ = callback;
     }
 
     bool MarkRemoving() override;
@@ -936,6 +951,13 @@ public:
         return false;
     }
 
+    void HasAccessibilityVirtualNode(bool hasAccessibilityVirtualNode)
+    {
+        hasAccessibilityVirtualNode_ = hasAccessibilityVirtualNode;
+    }
+
+    void ProcessAccessibilityVirtualNode();
+
     RectF GetVirtualNodeTransformRectRelativeToWindow()
     {
         auto parentUinode = GetVirtualNodeParent().Upgrade();
@@ -1006,6 +1028,16 @@ public:
     void ResetLayoutAlgorithm()
     {
         layoutAlgorithm_.Reset();
+    }
+
+    bool GetDragHitTestBlock() const
+    {
+        return dragHitTestBlock_;
+    }
+
+    void SetDragHitTestBlock(bool dragHitTestBlock)
+    {
+        dragHitTestBlock_ = dragHitTestBlock;
     }
 
 protected:
@@ -1120,14 +1152,18 @@ private:
     CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
         const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
 
+    bool AllowVisibleAreaCheck() const;
+
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
     std::list<std::function<void()>> destroyCallbacks_;
     std::function<void()> colorModeUpdateCallback_;
-
+    std::function<void(int32_t)> ndkColorModeUpdateCallback_;
+    std::function<void(float, float)> ndkFontUpdateCallback_;
     RefPtr<AccessibilityProperty> accessibilityProperty_;
+    bool hasAccessibilityVirtualNode_ = false;
     RefPtr<LayoutProperty> layoutProperty_;
     RefPtr<PaintProperty> paintProperty_;
     RefPtr<RenderContext> renderContext_ = RenderContext::Create();
@@ -1206,6 +1242,7 @@ private:
     bool isGeometryTransitionIn_ = false;
     bool isLayoutNode_ = false;
     bool isCalculateInnerVisibleRectClip_ = false;
+    bool dragHitTestBlock_ = false;
 
     bool isUseTransitionAnimator_ = false;
 

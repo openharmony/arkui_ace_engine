@@ -230,7 +230,8 @@ void TextPickerColumnPattern::ParseTouchListener()
             pattern->OnMiddleButtonTouchDown();
             return;
         }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
+            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
             pattern->OnMiddleButtonTouchUp();
             pattern->SetLocalDownDistance(0.0f);
             return;
@@ -657,25 +658,24 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
 
 void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
 {
-    if (!animationProperties_.size()) {
+    const size_t size = animationProperties_.size();
+    if (size == 0) {
         return;
     }
     if (isDown) {
-        for (size_t i = 0; i < animationProperties_.size(); i++) {
+        for (size_t i = 0; i < size; i++) {
             if (i > 0) {
                 animationProperties_[i - 1].upFontSize = animationProperties_[i].upFontSize;
                 animationProperties_[i - 1].fontSize = animationProperties_[i].fontSize;
                 animationProperties_[i - 1].downFontSize = animationProperties_[i].downFontSize;
-
                 animationProperties_[i - 1].upColor = animationProperties_[i].upColor;
                 animationProperties_[i - 1].currentColor = animationProperties_[i].currentColor;
                 animationProperties_[i - 1].downColor = animationProperties_[i].downColor;
             }
-            if (i + 1 == animationProperties_.size()) {
+            if (i + 1 == size) {
                 animationProperties_[i].upFontSize = animationProperties_[i].fontSize;
                 animationProperties_[i].fontSize = animationProperties_[i].fontSize * 0.5;
                 animationProperties_[i].downFontSize = Dimension();
-
                 animationProperties_[i].upColor = animationProperties_[i].currentColor;
                 auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
                 animationProperties_[i].currentColor =
@@ -684,12 +684,11 @@ void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
             }
         }
     } else {
-        for (size_t i = animationProperties_.size() ? animationProperties_.size() - 1 : 0;; i--) {
+        for (size_t i = size - 1;; i--) {
             if (i == 0) {
                 animationProperties_[i].upFontSize = Dimension();
                 animationProperties_[i].downFontSize = animationProperties_[i].fontSize;
                 animationProperties_[i].fontSize = animationProperties_[i].fontSize * 0.5;
-
                 animationProperties_[i].upColor = Color();
                 animationProperties_[i].downColor = animationProperties_[i].currentColor;
                 auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
@@ -700,7 +699,6 @@ void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
                 animationProperties_[i].upFontSize = animationProperties_[i - 1].upFontSize;
                 animationProperties_[i].fontSize = animationProperties_[i - 1].fontSize;
                 animationProperties_[i].downFontSize = animationProperties_[i - 1].downFontSize;
-
                 animationProperties_[i].upColor = animationProperties_[i - 1].upColor;
                 animationProperties_[i].currentColor = animationProperties_[i - 1].currentColor;
                 animationProperties_[i].downColor = animationProperties_[i - 1].downColor;

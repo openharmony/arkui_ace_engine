@@ -465,6 +465,12 @@ void UpdateHoverImagePreviewScale(const RefPtr<FrameNode>& hoverImageStackNode,
     if (isScaleNearEqual) {
         scaleOption.SetDelay(menuTheme->GetHoverImageDelayDuration());
     }
+    previewPattern->SetIsHoverImageScalePlaying(true);
+    scaleOption.SetOnFinishEvent([weak = WeakPtr<MenuPreviewPattern>(previewPattern)] {
+        auto previewPattern = weak.Upgrade();
+        CHECK_NULL_VOID(previewPattern);
+        previewPattern->SetIsHoverImageScalePlaying(false);
+    });
     AnimationUtils::Animate(
         scaleOption, [stackContext, scaleTo]() {
             CHECK_NULL_VOID(stackContext);

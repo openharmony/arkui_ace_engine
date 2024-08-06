@@ -32,6 +32,9 @@ extern "C" {
 void FfiOHOSAceFrameworkLazyForEachCreate(int64_t viewID, int64_t parentViewID, int64_t lazyForEachFuncsID)
 {
     auto nativeParentView = FFIData::GetData<NativeView>(parentViewID);
+    if (nativeParentView == nullptr) {
+        return;
+    }
     auto lazyForeachFunc = LazyForEachFuncs::Create<LazyForEachFuncs>(lazyForEachFuncsID);
     ViewStackModel::GetInstance()->ProcessViewId(std::to_string(viewID));
     auto builder = AceType::MakeRefPtr<CJLazyForEachBuilder>(std::move(lazyForeachFunc));

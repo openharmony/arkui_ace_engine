@@ -89,6 +89,9 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pinch %{public}d down, begin to detect pinch,"
         "state: %{public}d", event.touchEventId, event.id, refereeState_);
+    if (touchPoints_.size() == 1 && refereeState_ == RefereeState::FAIL) {
+        refereeState_ = RefereeState::READY;
+    }
     touchPoints_[event.id] = event;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
@@ -415,11 +418,12 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
             info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
             info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
             info.SetSourceTool(lastAxisEvent_.sourceTool);
+            info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
         } else {
             info.SetSourceTool(lastTouchEvent_.sourceTool);
+            info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         }
         info.SetPointerEvent(lastPointEvent_);
-        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
@@ -445,6 +449,7 @@ GestureJudgeResult PinchRecognizer::TriggerGestureJudgeCallback()
     info->SetSourceDevice(deviceType_);
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
     info->SetForce(lastTouchEvent_.force);
+    gestureInfo_->SetInputEventType(inputEventType_);
     if (lastTouchEvent_.tiltX.has_value()) {
         info->SetTiltX(lastTouchEvent_.tiltX.value());
     }

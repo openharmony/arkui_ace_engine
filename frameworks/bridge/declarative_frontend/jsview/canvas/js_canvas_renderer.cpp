@@ -276,16 +276,16 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
         if (FONT_WEIGHTS.find(fontProp) != FONT_WEIGHTS.end()) {
             updateFontweight = true;
             auto weight = ConvertStrToFontWeight(fontProp);
-            style_.SetFontWeight(weight);
+            paintState_.SetFontWeight(weight);
             renderingContext2DModel_->SetFontWeight(weight);
         } else if (FONT_STYLES.find(fontProp) != FONT_STYLES.end()) {
             updateFontStyle = true;
             auto fontStyle = ConvertStrToFontStyle(fontProp);
-            style_.SetFontStyle(fontStyle);
+            paintState_.SetFontStyle(fontStyle);
             renderingContext2DModel_->SetFontStyle(fontStyle);
         } else if (FONT_FAMILIES.find(fontProp) != FONT_FAMILIES.end()) {
             auto families = ConvertStrToFontFamilies(fontProp);
-            style_.SetFontFamilies(families);
+            paintState_.SetFontFamilies(families);
             renderingContext2DModel_->SetFontFamilies(families);
         } else if (fontProp.find("px") != std::string::npos || fontProp.find("vp") != std::string::npos) {
             Dimension size;
@@ -295,7 +295,7 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
                 std::string fontSize = fontProp.substr(0, fontProp.size() - 2);
                 size = Dimension(StringToDouble(fontProp));
             }
-            style_.SetFontSize(size);
+            paintState_.SetFontSize(size);
             renderingContext2DModel_->SetFontSize(size);
         }
     }
@@ -1251,12 +1251,17 @@ void JSCanvasRenderer::JsClosePath(const JSCallbackInfo& info)
 // restore(): void
 void JSCanvasRenderer::JsRestore(const JSCallbackInfo& info)
 {
+    if (!savePaintState_.empty()) {
+        paintState_ = savePaintState_.back();
+        savePaintState_.pop_back();
+    }
     renderingContext2DModel_->Restore();
 }
 
 // save(): void
 void JSCanvasRenderer::JsSave(const JSCallbackInfo& info)
 {
+    savePaintState_.push_back(paintState_);
     renderingContext2DModel_->CanvasRendererSave();
 }
 
@@ -1430,7 +1435,7 @@ void JSCanvasRenderer::JsSetTextBaseline(const JSCallbackInfo& info)
     if (info.GetStringArg(0, textBaseline)) {
         auto baseline =
             ConvertStrToEnum(textBaseline.c_str(), BASELINE_TABLE, ArraySize(BASELINE_TABLE), TextBaseline::ALPHABETIC);
-        style_.SetTextBaseline(baseline);
+        paintState_.SetTextBaseline(baseline);
         renderingContext2DModel_->SetTextBaseline(baseline);
     }
 }
@@ -1439,7 +1444,6 @@ void JSCanvasRenderer::JsSetTextBaseline(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
 {
     std::string text;
-    paintState_.SetTextStyle(style_);
     double density = GetDensity();
     if (Positive(density) && info.GetStringArg(0, text)) {
         TextMetrics textMetrics = renderingContext2DModel_->GetMeasureTextMetrics(paintState_, text);
@@ -1523,7 +1527,6 @@ void JSCanvasRenderer::JsRestoreLayer(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsReset(const JSCallbackInfo& info)
 {
     paintState_ = PaintState();
-    style_ = TextStyle();
     anti_ = false;
     isInitializeShadow_ = false;
     isOffscreenInitializeShadow_ = false;

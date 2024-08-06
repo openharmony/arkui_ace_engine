@@ -192,7 +192,7 @@ void MenuItemGroupPattern::OnIntItemPressed(int32_t index, bool press)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto children = host->GetChildren();
+    const size_t size = host->GetChildren().size();
     auto parent = host->GetParent();
     CHECK_NULL_VOID(parent);
     auto currentIndex = parent->GetChildIndex(host);
@@ -205,7 +205,7 @@ void MenuItemGroupPattern::OnIntItemPressed(int32_t index, bool press)
             pattern->OnExtItemPressed(press, false); // hide common divider for 2 group if another group before
         }
     }
-    if (index == static_cast<int32_t>(children.size() - 1) && footerContent_ == nullptr) {
+    if (size > 0 && index == static_cast<int32_t>(size - 1) && footerContent_ == nullptr) {
         OnExtItemPressed(press, false); // beforeGroup=false just to hide footer divider
         auto nextNode = parent->GetChildAtIndex(currentIndex + 1);
         if (nextNode != nullptr && nextNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {

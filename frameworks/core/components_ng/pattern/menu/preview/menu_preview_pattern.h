@@ -202,6 +202,16 @@ public:
 
     RefPtr<FrameNode> GetMenuWrapper() const;
 
+    void SetIsHoverImageScalePlaying(bool isPlay)
+    {
+        isHoverImageScalePlaying_ = isPlay;
+    }
+
+    bool IsHoverImageScalePlaying()
+    {
+        return isHoverImageScalePlaying_;
+    }
+
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -214,6 +224,7 @@ private:
     bool isHoverImageScaleNearEqual_ = false;
     bool isHoverImageAnimationPlaying_ = false;
     bool isWidthDistLarge_ = false;
+    bool isHoverImageScalePlaying_ = false;
     OffsetF stackCenterOffset_;
     OffsetF hoverImageAfterScaleOffset_;
     float hoverImageAfterScaleWidth_ = 0.0f;

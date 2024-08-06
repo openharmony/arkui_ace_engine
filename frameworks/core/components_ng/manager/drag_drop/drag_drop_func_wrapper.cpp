@@ -137,7 +137,7 @@ void EnvelopedDragData(
     CHECK_NULL_VOID(container);
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_VOID(displayInfo);
-    dragAction->displayId = displayInfo->GetDisplayId();
+    dragAction->displayId = static_cast<int32_t>(displayInfo->GetDisplayId());
 
     std::vector<ShadowInfoCore> shadowInfos;
     GetShadowInfoArray(dragAction, shadowInfos);
@@ -479,6 +479,15 @@ std::optional<EffectOption> DragDropFuncWrapper::BrulStyleToEffection(
     auto pipeline = Container::GetContainer(containerId)->GetPipelineContext();
     CHECK_NULL_RETURN(pipeline, -1.0f);
     return DragDropManager::GetMaxWidthBaseOnGridSystem(pipeline);
+}
+
+void DragDropFuncWrapper::SetExtraInfo(int32_t containerId, std::string extraInfo)
+{
+    auto pipelineContext = PipelineContext::GetContextByContainerId(containerId);
+    CHECK_NULL_VOID(pipelineContext);
+    auto manager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+    manager->SetExtraInfo(extraInfo);
 }
 
 } // namespace OHOS::Ace

@@ -78,6 +78,12 @@ void TextBackgroundStyle::ToJsonValue(std::unique_ptr<JsonValue>& json,
     json->PutExtAttr("textBackgroundStyle", styleJson, filter);
 }
 
+void TextStyle::UpdateColorByResourceId()
+{
+    textColor_.UpdateColorByResourceId();
+    textDecorationColor_.UpdateColorByResourceId();
+}
+
 std::string TextStyle::ToString() const
 {
     auto jsonValue = JsonUtil::Create(true);

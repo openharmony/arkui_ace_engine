@@ -641,14 +641,6 @@ bool ListPattern::IsScrollSnapAlignCenter() const
     return false;
 }
 
-void ListPattern::UpdateScrollSnap()
-{
-    if (!AnimateStoped()) {
-        return;
-    }
-    predictSnapOffset_ = 0.0f;
-}
-
 bool ListPattern::NeedScrollSnapAlignEffect() const
 {
     auto host = GetHost();
@@ -786,8 +778,9 @@ float ListPattern::GetEndOverScrollOffset(float offset, float endMainPos, float 
     float ChainDelta = chainAnimation_ ? chainAnimation_->GetValuePredict(endIndex_, -offset) : 0.f;
     auto endPos = endMainPos + ChainDelta - currentDelta_;
     auto contentEndPos = contentMainSize_ - contentEndOffset_;
-    if (GreatNotEqual(contentEndPos, endMainPos - startMainPos)) {
-        endPos = startMainPos + contentEndPos;
+    auto contentMainSize = contentMainSize_ - contentEndOffset_ - contentStartOffset_;
+    if (GreatNotEqual(contentMainSize, endMainPos - startMainPos)) {
+        endPos = startMainPos + contentMainSize;
     }
     auto newEndPos = endPos + offset;
     if (endPos < contentEndPos && newEndPos < contentEndPos) {
@@ -2181,7 +2174,7 @@ void ListPattern::RefreshLanesItemRange()
         if (it->second < updatePos) {
             it++;
         } else if (it->first >= updatePos) {
-            lanesItemRange_.erase(it++);
+            it = lanesItemRange_.erase(it);
         } else {
             it->second = updatePos - 1;
             it++;

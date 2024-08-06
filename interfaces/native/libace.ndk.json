@@ -1765,11 +1765,35 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_RegisterSystemColorModeChangeEvent"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_UnregisterSystemColorModeChangeEvent"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_RegisterSystemFontStyleChangeEvent"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_UnregisterSystemFontStyleChangeEvent"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_SystemFontStyleEvent_GetFontSize"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_SystemFontStyleEvent_GetFontWeight"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_ArkUI_NodeEvent_GetDragEvent"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_NodeEvent_GetPreviewDragStatus"
+        "name": "OH_ArkUI_NodeEvent_GetPreDragStatus"
     },
     {
         "first_introduced": "12",
@@ -1778,6 +1802,10 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_DragEvent_SetSuggestedDropOperation"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DragEvent_GetDropOperation"
     },
     {
         "first_introduced": "12",
@@ -2045,6 +2073,6 @@
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_CustomSpanDrawInfo_GetBaseLine"
+        "name": "OH_ArkUI_CustomSpanDrawInfo_GetBaseline"
     }
 ]

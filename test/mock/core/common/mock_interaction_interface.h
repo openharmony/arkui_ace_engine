@@ -31,6 +31,8 @@ public:
 
     MOCK_METHOD(int32_t, SetDragWindowVisible, (bool visible), (override));
 
+    MOCK_METHOD(int32_t, SetMouseDragMonitorState, (bool state), (override));
+
     MOCK_METHOD(int32_t, StartDrag, (const DragDataCore& dragData,
         std::function<void(const OHOS::Ace::DragNotifyMsg&)> callback), (override));
 

@@ -40,9 +40,8 @@ void ScrollBarTestNg::CreateWithBar()
 
 void ScrollBarTestNg::ClickBar(Offset point)
 {
-    GestureEvent info;
-    info.SetLocalLocation(point);
-    pattern_->HandleClickEvent(info); // will trigger CheckBarDirection
+    pattern_->locationInfo_ = Offset(point);
+    pattern_->HandleClickEvent(); // will trigger CheckBarDirection
 }
 
 void ScrollBarTestNg::UpdateOverlayModifier(RefPtr<PaintWrapper> paintWrapper)

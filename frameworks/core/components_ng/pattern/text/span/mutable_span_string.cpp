@@ -221,7 +221,7 @@ void MutableSpanString::ProcessSpanBaseList(std::list<RefPtr<SpanBase>>& spans, 
             auto wOther = StringUtils::ToWstring(other);
             auto newLength = wOther.length();
             if (end < spanEnd) {
-                newLength += spanEnd - end;
+                newLength += static_cast<size_t>(spanEnd - end);
             }
             (*it)->UpdateEndIndex(newLength + spanStart);
             ++it;

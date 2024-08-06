@@ -730,6 +730,7 @@ void SelectModelNG::SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle)
 
 void SelectModelNG::ResetBuilderFunc(FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     auto menuNode = pattern->GetMenuNode();

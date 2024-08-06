@@ -428,6 +428,7 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     FillBlank();
 
     icon_.DoMeasure();
+    securityComponentLayoutProperty->UpdateIsTextLimitExceeded(text_.GetTextLimitExceededFlag(componentHeight_));
     MeasureButton(layoutWrapper, securityComponentLayoutProperty);
     layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(componentWidth_, componentHeight_));
 }

@@ -274,6 +274,7 @@ private:
     void InitBackButtonLongPressEvent(RefPtr<NavDestinationGroupNode>& hostNode);
     void HandleLongPress();
     void HandleLongPressActionEnd();
+    void OnFontScaleConfigurationUpdate() override;
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;

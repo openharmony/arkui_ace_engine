@@ -47,11 +47,13 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_UnregisterUIEventObserver(const std::s
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetNodeProperty(
     const std::string& pageUrl, std::unordered_map<std::string, std::string>& nodeProperties)
 {
+    TAG_LOGI(AceLogTag::ACE_UIEVENT, "GetNodeProperty.");
     Recorder::NodeDataCache::Get().GetNodeData(pageUrl, nodeProperties);
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTree(std::string& tree)
 {
+    TAG_LOGD(AceLogTag::ACE_UIEVENT, "GetSimplifiedInspectorTree.");
     auto containerId = Recorder::EventRecorder::Get().GetContainerId();
     auto container = Container::GetContainer(containerId);
     if (!container) {
@@ -81,6 +83,14 @@ void InitHandler()
             HA_CLIENT_SO_PATH, dlerror());
         return;
     }
+
+    auto func = reinterpret_cast<void(*)()>(dlsym(handle, "OnAceLoaded"));
+    if (func == nullptr) {
+        TAG_LOGI(AceLogTag::ACE_UIEVENT, "Failed to find func, reason: %{public}sn", dlerror());
+        dlclose(handle);
+        return;
+    }
+    func();
     g_handle = handle;
 }
 

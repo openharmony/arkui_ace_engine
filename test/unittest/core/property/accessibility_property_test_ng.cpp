@@ -1018,9 +1018,9 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest030, TestSize.Lev
  * @tc.desc: GetSearchStrategy
  * @tc.type: FUNC
  */
-HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest032, TestSize.Level1)
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest031, TestSize.Level1)
 {
-    bool ancestorGroupFlag = false;
+    bool ancestorGroupFlag = true;
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, 14, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto vNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -1036,5 +1036,25 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest032, TestSize.Lev
     auto result = accessibilityProperty->GetSearchStrategy(frameNode, ancestorGroupFlag);
     EXPECT_EQ(accessibilityProperty->HasAccessibilityVirtualNode(), true);
     EXPECT_EQ(result, std::make_tuple(true, true, true));
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest032
+ * @tc.desc: ProcessHoverTestRecursive
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest032, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    AccessibilityHoverTestPath path;
+    auto root = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 13, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    NG::PointF hoverPoint(0, 0);
+    auto debugInfo = std::make_unique<AccessibilityProperty::HoverTestDebugTraceInfo>();
+    AccessibilityProperty::RecursiveParam recursiveParam;
+    recursiveParam.hitTarget = true;
+    recursiveParam.ancestorGroupFlag = true;
+    auto result = accessibilityProperty.ProcessHoverTestRecursive(hoverPoint, root, path, debugInfo, recursiveParam);
+    EXPECT_EQ(result, true);
 }
 } // namespace OHOS::Ace::NG

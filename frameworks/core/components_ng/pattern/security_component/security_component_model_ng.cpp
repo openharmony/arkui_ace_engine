@@ -150,12 +150,13 @@ void SecurityComponentModelNG::SetDefaultTextStyle(const RefPtr<FrameNode>& text
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateContent(text);
-    textLayoutProperty->UpdateMaxLines(1);
+    textLayoutProperty->UpdateMaxLines(secCompTheme->GetDefaultTextMaxLines());
     textLayoutProperty->UpdateFontSize(secCompTheme->GetFontSize());
     textLayoutProperty->UpdateItalicFontStyle(Ace::FontStyle::NORMAL);
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     std::vector<std::string> defaultFontFamily = { "HarmonyOS Sans" };
     textLayoutProperty->UpdateFontFamily(defaultFontFamily);
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
 
     if (isButtonVisible) {
         textLayoutProperty->UpdateTextColor(secCompTheme->GetFontColor());

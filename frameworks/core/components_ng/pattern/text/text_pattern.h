@@ -148,6 +148,7 @@ public:
 
     void DumpAdvanceInfo() override;
     void DumpInfo() override;
+    void DumpScaleInfo();
 
     TextSelector GetTextSelector() const
     {
@@ -338,16 +339,6 @@ public:
     ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     std::string GetFontInJson() const;
 
-    std::optional<SelectHandleInfo> GetFirstHandleInfo() const
-    {
-        return selectOverlay_->GetFirstHandleInfo();
-    }
-
-    std::optional<SelectHandleInfo> GetSecondHandleInfo() const
-    {
-        return selectOverlay_->GetSecondHandleInfo();
-    }
-
     const std::vector<std::string>& GetDragContents() const
     {
         return dragContents_;
@@ -533,7 +524,6 @@ public:
     bool IsSelectAll();
     void HandleOnCopy();
     void HandleOnCopySpanString();
-    virtual CopyOptions HandleOnCopyOptions();
     virtual void HandleOnSelectAll();
     void SetTextSelectableMode(TextSelectableMode value);
 
@@ -641,9 +631,10 @@ public:
         isUserSetResponseRegion_ = isUserSetResponseRegion;
     }
 
-    void UnregisterNodeChangeListenerWithoutSelect();
     void UpdateFontColor(const Color& value);
     void BeforeCreatePaintWrapper() override;
+
+    void OnTextOverflowChanged();
 
 protected:
     void OnAttachToFrameNode() override;
@@ -693,7 +684,13 @@ protected:
 
     virtual bool CanStartAITask()
     {
-        return textDetectEnable_ && enabled_ && dataDetectorAdapter_;
+        auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+        if (textLayoutProperty) {
+            return textDetectEnable_ && enabled_ &&
+                   textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE;
+        } else {
+            return textDetectEnable_ && enabled_;
+        }
     };
 
     void OnAttachToMainTree() override
@@ -803,10 +800,10 @@ private:
     void ProcessOverlayAfterLayout();
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     Offset ConvertLocalOffsetToParagraphOffset(const Offset& offset);
-    void RegisterMarqueeNodeChangeListener();
-    void UnregisterMarqueeNodeChangeListener();
-    void HandleMarqueeWithIsVisible(FrameNodeChangeInfoFlag flag);
+    void ProcessMarqueeVisibleAreaCallback();
     void ParseOriText(const std::string& currentText);
+    bool IsMarqueeOverflow() const;
+    virtual void ResetAfterTextChange();
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;

@@ -337,6 +337,16 @@ public:
         return preFrameSize_;
     }
 
+    void SetHasCustomPadding(bool hasCustomPadding)
+    {
+        hasCustomPadding_ = hasCustomPadding;
+    }
+
+    bool GetHasCustomPadding()
+    {
+        return hasCustomPadding_;
+    }
+
 protected:
     bool IsNeedInitClickEventRecorder() const override
     {
@@ -393,6 +403,7 @@ private:
 
     bool isColorUpdateFlag_ = false;
     SizeF preFrameSize_;
+    bool hasCustomPadding_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);
 };
 } // namespace OHOS::Ace::NG

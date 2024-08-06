@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG {
 ArkUI_Bool IsModifiable(ArkUINodeHandle node)
@@ -448,6 +449,49 @@ ArkUI_Float32* GetLayoutPositionWithoutMargin(ArkUINodeHandle node)
     return ret;
 }
 
+ArkUI_Int32 SetSystemColorModeChangeEvent(ArkUINodeHandle node, void* userData, void* onColorModeChange)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto onColorChange = [userData, onColorModeChange](int32_t colorMode) {
+        using FuncType = float (*)(int32_t, void*);
+        FuncType func = reinterpret_cast<FuncType>(onColorModeChange);
+        func(colorMode, userData);
+    };
+    ViewAbstract::SetSystemColorModeChangeEvent(frameNode, onColorChange);
+    return 1;
+}
+
+void ResetSystemColorModeChangeEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetSystemColorModeChangeEvent(frameNode, nullptr);
+}
+
+ArkUI_Int32 SetSystemFontStyleChangeEvent(ArkUINodeHandle node, void* userData, void* onFontStyleChange)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto onFontChange = [userData, onFontStyleChange](float fontSize, float fontWeight) {
+        ArkUISystemFontStyleEvent fontStyle = new ArkUI_SystemFontStyleEvent();
+        fontStyle->fontSize = fontSize;
+        fontStyle->fontWeight = fontWeight;
+        using FuncType = float (*)(ArkUISystemFontStyleEvent, void*);
+        FuncType func = reinterpret_cast<FuncType>(onFontStyleChange);
+        func(fontStyle, userData);
+    };
+    ViewAbstract::SetSystemFontChangeEvent(frameNode, onFontChange);
+    return 1;
+}
+
+void ResetSystemFontStyleChangeEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetSystemFontChangeEvent(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -457,7 +501,9 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         GetPositionToParent, GetPositionToScreen, GetPositionToWindow, GetPositionToParentWithTransform,
         GetPositionToScreenWithTransform, GetPositionToWindowWithTransform, GetMeasuredSize, GetLayoutPosition,
         GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo, GetFrameNodeById, GetFrameNodeByUniqueId,
-        GetFrameNodeByKey, PropertyUpdate, GetLast, GetFirstUINode, GetLayoutSize, GetLayoutPositionWithoutMargin };
+        GetFrameNodeByKey, PropertyUpdate, GetLast, GetFirstUINode, GetLayoutSize, GetLayoutPositionWithoutMargin,
+        SetSystemColorModeChangeEvent, ResetSystemColorModeChangeEvent, SetSystemFontStyleChangeEvent,
+        ResetSystemFontStyleChangeEvent };
     return &modifier;
 }
 } // namespace NodeModifier

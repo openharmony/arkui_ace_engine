@@ -2790,7 +2790,9 @@ public:
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
         auto delegate = delegate_.Upgrade();
         CHECK_NULL_VOID(delegate);
-        delegate->HandleAutoFillEvent(result);
+        bool ret = delegate->HandleAutoFillEvent(result);
+        result->SetType(NWebValue::Type::BOOLEAN);
+        result->SetBoolean(ret);
     }
 
 private:
@@ -5874,11 +5876,25 @@ void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebNotifyAutoFillViewData");
 }
 
-void WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
+void WebDelegate::AutofillCancel(const std::string& fillContent)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), fillContent]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            delegate->nweb_->OnAutofillCancel(fillContent);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIWebAutofillCancel");
+}
+
+bool WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
 {
     auto pattern = webPattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    pattern->HandleAutoFillEvent(viewDataJson);
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->HandleAutoFillEvent(viewDataJson);
 }
 
 #endif
@@ -6572,17 +6588,25 @@ void WebDelegate::SetAccessibilityState(bool state)
     if (state == accessibilityState_) {
         return;
     }
-    CHECK_NULL_VOID(nweb_);
     accessibilityState_ = state;
-    nweb_->SetAccessibilityState(state);
-    if (state) {
-        auto accessibilityEventListenerImpl =
-            std::make_shared<AccessibilityEventListenerImpl>();
-        CHECK_NULL_VOID(accessibilityEventListenerImpl);
-        accessibilityEventListenerImpl->SetWebDelegate(WeakClaim(this));
-        nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
-        nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), state]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            delegate->nweb_->SetAccessibilityState(state);
+            if (state) {
+                auto accessibilityEventListenerImpl =
+                    std::make_shared<AccessibilityEventListenerImpl>();
+                CHECK_NULL_VOID(accessibilityEventListenerImpl);
+                accessibilityEventListenerImpl->SetWebDelegate(weak);
+                delegate->nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
+                delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetAccessibilityState");
 }
 
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAccessibilityNodeInfo(

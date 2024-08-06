@@ -47,7 +47,7 @@ public:
     static TapGestureModel* GetInstance();
     virtual ~TapGestureModel() = default;
 
-    virtual void Create(int32_t countNum, int32_t fingersNum) = 0;
+    virtual void Create(int32_t countNum, int32_t fingersNum, double distanceThreshold) = 0;
 
 private:
     static std::unique_ptr<TapGestureModel> instance_;

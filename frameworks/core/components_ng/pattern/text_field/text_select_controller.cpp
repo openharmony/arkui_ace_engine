@@ -162,7 +162,6 @@ void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset)
     auto index = ConvertTouchOffsetToPosition(localOffset);
     AdjustCursorPosition(index, localOffset);
     UpdateCaretIndex(index);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "now caret index = [%{public}d]", index);
     if (!contentController_->IsEmpty()) {
         UpdateCaretRectByPositionNearTouchOffset(index, localOffset);
         MoveHandleToContentRect(caretInfo_.rect, 0.0f);

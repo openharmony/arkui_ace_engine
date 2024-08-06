@@ -307,9 +307,13 @@ bool StylusDetectorMgr::CheckTextEditable(const RefPtr<NG::FrameNode> frameNode)
     if (NearZero(opacity.value_or(1.0f))) {
         return false;
     }
-    auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
-    CHECK_NULL_RETURN(pattern, false);
-    return !pattern->IsInPasswordMode();
+    // if frameNode is textfield, need to check password mode.
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
+        CHECK_NULL_RETURN(pattern, false);
+        return !pattern->IsInPasswordMode();
+    }
+    return true;
 }
 
 bool StylusDetectorMgr::IsStylusTouchEvent(const TouchEvent& touchEvent) const

@@ -57,6 +57,7 @@ typedef long long ArkUI_Int64;
 typedef float ArkUI_Float32;
 typedef double ArkUI_Float64;
 typedef const char* ArkUI_CharPtr;
+typedef unsigned long long ArkUI_Uint64;
 
 // Several opaque struct declarations.
 struct _ArkUIVMContext;
@@ -69,6 +70,7 @@ struct _ArkUIFont;
 struct _ArkUIXComponentController;
 struct _ArkUINodeAdapter;
 struct _ArkUINodeContent;
+struct ArkUI_SystemFontStyleEvent;
 struct ArkUI_WaterFlowSectionOption;
 struct ArkUI_ListItemSwipeActionOption;
 struct ArkUI_ListItemSwipeActionItem;
@@ -84,6 +86,7 @@ typedef _ArkUIFont* ArkUIFontHandle;
 typedef _ArkUIXComponentController* ArkUIXComponentControllerHandle;
 typedef _ArkUINodeAdapter* ArkUINodeAdapterHandle;
 typedef _ArkUINodeContent* ArkUINodeContentHandle;
+
 
 struct ArkUICanvasArcOptions {
     ArkUI_Float32 x;
@@ -222,6 +225,7 @@ struct ArkUIMouseEvent {
 struct ArkUIDragEvent {
     void* unifiedData;
     void* unifiedDataSummary;
+    bool isSuitGetData;
     ArkUI_Int32 dragResult;
     ArkUI_Float64 touchPointX;
     ArkUI_Float64 touchPointY;
@@ -236,7 +240,7 @@ struct ArkUIDragEvent {
     ArkUI_Float64 displayY;
     ArkUI_Float64 screenX;
     ArkUI_Float64 screenY;
-    ArkUI_Int64 modifierKeyState;
+    ArkUI_Uint64 modifierKeyState;
     ArkUI_Int32 dragBehavior;
     bool useCustomDropAnimation;
     ArkUI_Int32 subKind;
@@ -698,10 +702,10 @@ enum ArkUIEventCategory {
     TEXT_INPUT = 5,
     GESTURE_ASYNC_EVENT = 6,
     TOUCH_EVENT = 7,
-    TEXT_ARRAY = 8,
     MOUSE_INPUT_EVENT = 9,
-    MIXED_EVENT = 10,
-    DRAG_EVENT = 11,
+    TEXT_ARRAY = 10,
+    MIXED_EVENT = 11,
+    DRAG_EVENT = 12,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -1362,7 +1366,13 @@ struct ArkUIDragAction {
     DragStatusCallback listener;
     void* unifiedData;
     bool hasTouchPoint = false;
+    void** pixelmapNativeList;
 };
+struct ArkUI_SystemFontStyleEvent {
+    ArkUI_Float64 fontSize;
+    ArkUI_Float64 fontWeight;
+};
+typedef ArkUI_SystemFontStyleEvent* ArkUISystemFontStyleEvent;
 
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
@@ -2247,9 +2257,9 @@ struct ArkUIListModifier {
     void (*setListChildrenMainSize)(ArkUINodeHandle node, ArkUIListChildrenMainSize option, ArkUI_Int32 unit);
     void (*resetListChildrenMainSize)(ArkUINodeHandle node);
     void (*setListCloseAllSwipeActions)(ArkUINodeHandle node, void* userData, void(onFinish)(void* userData));
-    ArkUI_Int32 (*getInitialIndex)(ArkUINodeHandle node);
     void (*setListFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 maxSpeed);
     void (*resetListFlingSpeedLimit)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getInitialIndex)(ArkUINodeHandle node);
     void (*getlistDivider)(ArkUINodeHandle node, ArkUIdividerOptions* option, ArkUI_Int32 unit);
     void (*setInitialScroller)(ArkUINodeHandle node, ArkUINodeHandle controller, ArkUINodeHandle proxy);
     void (*resetInitialScroller)(ArkUINodeHandle node);
@@ -2695,6 +2705,8 @@ struct ArkUIGestureInterruptInfo {
 
 struct ArkUIGestureModifier {
     ArkUIGesture* (*createTapGesture)(ArkUI_Int32 count, ArkUI_Int32 fingers, void* userData);
+    ArkUIGesture* (*createTapGestureWithDistanceThreshold)(
+        ArkUI_Int32 count, ArkUI_Int32 fingers, ArkUI_Float64 distanceThreshold, void* userData);
     ArkUIGesture* (*createLongPressGesture)(ArkUI_Int32 fingers, bool repeat, ArkUI_Int32 duration, void* userData);
     ArkUIGesture* (*createPanGesture)(
         ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 distance, void* userData);
@@ -4428,6 +4440,10 @@ struct ArkUIFrameNodeModifier {
     ArkUINodeHandle (*getFirstUINode)(ArkUINodeHandle node);
     void (*getLayoutSize)(ArkUINodeHandle node, ArkUI_Int32* size);
     ArkUI_Float32* (*getLayoutPositionWithoutMargin)(ArkUINodeHandle node);
+    ArkUI_Int32 (*setSystemColorModeChangeEvent)(ArkUINodeHandle node, void* userData, void* onColorModeChange);
+    void (*resetSystemColorModeChangeEvent)(ArkUINodeHandle node);
+    ArkUI_Int32 (*setSystemFontStyleChangeEvent)(ArkUINodeHandle node, void* userData, void* onFontStyleChange);
+    void (*resetSystemFontStyleChangeEvent)(ArkUINodeHandle node);
 };
 
 struct ArkUINodeContentEvent {

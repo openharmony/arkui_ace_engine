@@ -326,12 +326,10 @@ struct BorderWidthPropertyT<float> {
     std::string ToString() const
     {
         std::string str;
-        str.append("leftDimen: [").append(leftDimen.has_value() ? std::to_string(leftDimen.value()) : "NA").append("]");
-        str.append("rightDimen: [")
-            .append(rightDimen.has_value() ? std::to_string(rightDimen.value()) : "NA")
-            .append("]");
-        str.append("topDimen: [").append(topDimen.has_value() ? std::to_string(topDimen.value()) : "NA").append("]");
-        str.append("bottomDimen: [")
+        str.append("[").append(leftDimen.has_value() ? std::to_string(leftDimen.value()) : "NA");
+        str.append(",").append(rightDimen.has_value() ? std::to_string(rightDimen.value()) : "NA");
+        str.append(",").append(topDimen.has_value() ? std::to_string(topDimen.value()) : "NA");
+        str.append(",")
             .append(bottomDimen.has_value() ? std::to_string(bottomDimen.value()) : "NA")
             .append("]");
         return str;

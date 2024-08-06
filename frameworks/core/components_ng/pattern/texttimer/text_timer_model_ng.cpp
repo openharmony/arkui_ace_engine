@@ -140,6 +140,7 @@ void TextTimerModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Sha
 
 void TextTimerModelNG::SetBuilderFunc(FrameNode* frameNode, TextTimerMakeCallback&& makeFunc)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));

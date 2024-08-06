@@ -1279,6 +1279,17 @@ std::optional<uint32_t> JSRichEditor::ParseColorResourceId(JSRef<JSVal> colorVal
     return resId->ToNumber<uint32_t>();
 }
 
+void JSRichEditor::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info.Length() > 0);
+    auto jsValue = info[0];
+    if (jsValue->IsUndefined() || !jsValue->IsBoolean()) {
+        RichEditorModel::GetInstance()->SetRequestKeyboardOnFocus(true);
+        return;
+    }
+    RichEditorModel::GetInstance()->SetRequestKeyboardOnFocus(jsValue->ToBoolean());
+}
+
 void JSRichEditor::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditor>::Declare("RichEditor");
@@ -1319,6 +1330,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("onCut", &JSRichEditor::SetOnCut);
     JSClass<JSRichEditor>::StaticMethod("onCopy", &JSRichEditor::SetOnCopy);
     JSClass<JSRichEditor>::StaticMethod("editMenuOptions", &JSRichEditor::EditMenuOptions);
+    JSClass<JSRichEditor>::StaticMethod("enableKeyboardOnFocus", &JSRichEditor::SetEnableKeyboardOnFocus);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1386,7 +1398,6 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     if (!fontColor->IsNull() && JSContainerBase::ParseJsSymbolColor(fontColor, symbolColor)) {
         updateSpanStyle.updateSymbolColor = symbolColor;
         style.SetSymbolColorList(symbolColor);
-        updateSpanStyle.hasResourceFontColor = false;
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
@@ -1655,8 +1666,8 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
             ParseJsTextStyle(styleObject, style, updateSpanStyle_);
             options.style = style;
-            options.hasResourceFontColor = updateSpanStyle_.hasResourceFontColor;
-            options.hasResourceDecorationColor = updateSpanStyle_.hasResourceDecorationColor;
+            options.useThemeFontColor = updateSpanStyle_.useThemeFontColor;
+            options.useThemeDecorationColor = updateSpanStyle_.useThemeDecorationColor;
         }
         auto paraStyleObj = JSObjectCast(spanObject->GetProperty("paragraphStyle"));
         if (!paraStyleObj->IsUndefined()) {
@@ -2019,12 +2030,6 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
             CalcDimension height;
             JSContainerBase::ParseJsDimensionVp(widthVal, width);
             JSContainerBase::ParseJsDimensionVp(heightVal, height);
-            if (width.Unit() == DimensionUnit::PERCENT) {
-                width = Dimension(0.0);
-            }
-            if (height.Unit() == DimensionUnit::PERCENT) {
-                height = Dimension(0.0);
-            }
             style.leadingMargin->size = NG::LeadingMarginSize(width, height);
         } else if (sizeVal->IsUndefined()) {
             std::string resWidthStr;
@@ -2228,6 +2233,7 @@ void JSRichEditorBaseController::ParseJsTextStyle(
         DynamicColor dynamicColor = DynamicColor(textColor, JSRichEditor::ParseColorResourceId(fontColor));
         style.SetTextColor(dynamicColor);
         updateSpanStyle.updateTextColor = dynamicColor;
+        updateSpanStyle.useThemeFontColor = false;
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
@@ -2347,6 +2353,7 @@ void JSRichEditorBaseController::ParseTextDecoration(
             DynamicColor dynamicColor = DynamicColor(decorationColor, JSRichEditor::ParseColorResourceId(color));
             updateSpanStyle.updateTextDecorationColor = dynamicColor;
             style.SetTextDecorationColor(dynamicColor);
+            updateSpanStyle.useThemeDecorationColor = false;
         }
         JSRef<JSVal> textDecorationStyle = decorationObject->GetProperty("style");
         if (!textDecorationStyle->IsNull() && !textDecorationStyle->IsUndefined()) {

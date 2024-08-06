@@ -86,7 +86,7 @@ ohos_shared_library("ace_uicontent") {
   ]
   external_deps = [ "hilog:libhilog" ]
   if (!use_mingw_win && !use_mac && !use_linux &&
-      defined(uicast_configs.uicast_enable)) {
+      defined(uicast_configs.uicast_enable) && uicast_configs.uicast_enable) {
     sources +=
         [ "${ace_root}/interfaces/inner_api/ace/uicast/uicast_subscriber.cpp" ]
     external_deps += [

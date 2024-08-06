@@ -540,6 +540,7 @@ public:
     bool IsFocusableScopeByTab();
 
     bool IsFocusableWholePath();
+    bool IsSelfFocusableWholePath();
     bool IsOnRootTree() const;
 
     bool IsFocusable();
@@ -906,10 +907,10 @@ public:
 
     std::optional<std::string> GetInspectorKey() const;
 
-    bool PaintFocusState(bool isNeedStateStyles = true);
+    bool PaintFocusState();
     bool PaintAllFocusState();
     bool PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate = false);
-    void ClearFocusState(bool isNeedStateStyles = true);
+    void ClearFocusState();
     void ClearAllFocusState();
 
     void SetInnerFocusPaintRectCallback(const std::function<void(RoundRect&)>& callback)
@@ -1084,6 +1085,8 @@ private:
     void SetLastWeakFocusNodeWholeScope(const std::string &focusScopeId);
 
     void RaiseZIndex(); // Recover z-index in ClearFocusState
+
+    bool RequestFocusImmediatelyInner(bool isJudgeRootTree = false);
 
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;

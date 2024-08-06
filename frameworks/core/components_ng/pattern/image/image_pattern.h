@@ -295,6 +295,8 @@ public:
         return true;
     }
 
+    bool AllowVisibleAreaCheck() const override;
+
     void OnInActive() override
     {
         if (status_ == Animator::Status::RUNNING) {
@@ -366,12 +368,11 @@ public:
 
     bool GetDefaultAutoResize()
     {
-        InitDefaultValue();
         return autoResizeDefault_;
     }
+
     ImageInterpolation GetDefaultInterpolation()
     {
-        InitDefaultValue();
         return interpolationDefault_;
     }
     void InitOnKeyEvent();
@@ -526,6 +527,7 @@ private:
     RefPtr<SelectOverlayProxy> selectOverlay_;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
+    std::function<bool(const KeyEvent& event)> keyEventCallback_ = nullptr;
     bool syncLoad_ = false;
     bool needBorderRadius_ = false;
     bool loadInVipChannel_ = false;
@@ -535,6 +537,7 @@ private:
     bool autoResizeDefault_ = true;
     bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
+    Color selectedColor_;
     OffsetF parentGlobalOffset_;
     bool isSelected_ = false;
 

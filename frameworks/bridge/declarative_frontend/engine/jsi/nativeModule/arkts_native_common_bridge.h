@@ -264,8 +264,8 @@ public:
     static Local<panda::ObjectRef> CreateAreaObject(EcmaVM* vm, const RectF& rect, const OffsetF& origin);
     static void GetGestureCommonValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& priority, int32_t& mask);
     static void SetGestureTag(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t argNumber, ArkUIGesture* gesture);
-    static void GetTapGestureValue(
-        ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& count, uint32_t argNumber);
+    static void GetTapGestureValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers,
+        int32_t& count, double& distanceThreshold, uint32_t argNumber);
     static void GetLongPressGestureValue(
         ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, bool& repeat, int32_t& duration, uint32_t argNumber);
     static void GetPanGestureValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction,

@@ -105,6 +105,7 @@ public:
 
     void SetAttributes(const std::unordered_map<std::string, ResValueWrapper>& attributes)
     {
+        std::unique_lock<std::shared_mutex> lock(attributesMutex_);
         attributes_ = attributes;
     }
 

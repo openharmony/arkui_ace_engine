@@ -327,6 +327,9 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     ContainerScope scope(childContainerId_);
     overlayManager->HidePopup(targetId == -1 ? popupTargetId_ : targetId, popupInfo);
     context->FlushPipelineImmediately();
+    HideEventColumn();
+    HidePixelMap();
+    HideFilter(false);
 }
 
 void SubwindowOhos::GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo)
@@ -527,16 +530,15 @@ void SubwindowOhos::ClearMenu()
 #endif
 }
 
-bool SubwindowOhos::ShowDragPreviewWindowNG()
+bool SubwindowOhos::ShowPreviewNG()
 {
     CHECK_NULL_RETURN(window_, false);
     ShowWindow(false);
     ResizeWindow();
-    window_->SetTouchable(false);
     return true;
 }
 
-void SubwindowOhos::HideDragPreviewWindowNG()
+void SubwindowOhos::HidePreviewNG()
 {
     auto overlayManager = GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -676,7 +678,8 @@ bool SubwindowOhos::GetMenuPreviewCenter(NG::OffsetF& offset)
     return overlay->GetMenuPreviewCenter(offset);
 }
 
-void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float menuScale, bool isRedragStart)
+void SubwindowOhos::UpdateHideMenuOffsetNG(
+    const NG::OffsetF& offset, float menuScale, bool isRedragStart, int32_t menuWrapperId)
 {
     ContainerScope scope(childContainerId_);
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
@@ -686,7 +689,7 @@ void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float menu
     if (overlay->IsContextMenuDragHideFinished()) {
         return;
     }
-    overlay->UpdateContextMenuDisappearPosition(offset, menuScale, isRedragStart);
+    overlay->UpdateContextMenuDisappearPosition(offset, menuScale, isRedragStart, menuWrapperId);
 }
 
 void SubwindowOhos::ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::FrameNode>& dragPreviewNode,

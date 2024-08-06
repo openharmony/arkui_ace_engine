@@ -110,6 +110,11 @@ public:
         return hoverState_;
     }
 
+    void UpdateColRowSpace()
+    {
+        SetColRowSpace();
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

@@ -312,7 +312,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest001,
     ASSERT_NE(textNode, nullptr);
     auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textProp, nullptr);
-    EXPECT_EQ(textProp->GetMaxLines().value_or(0), static_cast<uint32_t>(1));
+    EXPECT_EQ(textProp->GetMaxLines().value_or(0), static_cast<uint32_t>(1000000));
     EXPECT_EQ(textProp->GetFontSize().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_FONT_SIZE);
     EXPECT_EQ(textProp->GetItalicFontStyle().value_or(Ace::FontStyle::ITALIC), Ace::FontStyle::NORMAL);
     EXPECT_EQ(textProp->GetFontWeight().value_or(FontWeight::NORMAL), FontWeight::MEDIUM);
@@ -760,7 +760,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest001, Tes
     ASSERT_NE(textNode, nullptr);
     auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textProp, nullptr);
-    EXPECT_EQ(textProp->GetMaxLines().value_or(0), 1);
+    EXPECT_EQ(textProp->GetMaxLines().value_or(0), 1000000);
     EXPECT_EQ(textProp->GetFontSize().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_FONT_SIZE);
     EXPECT_EQ(textProp->GetItalicFontStyle().value_or(Ace::FontStyle::ITALIC), Ace::FontStyle::NORMAL);
     EXPECT_EQ(textProp->GetFontWeight().value_or(FontWeight::NORMAL), FontWeight::MEDIUM);
@@ -1188,7 +1188,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest001, Te
     ASSERT_NE(textNode, nullptr);
     auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textProp, nullptr);
-    EXPECT_EQ(textProp->GetMaxLines().value_or(0), 1);
+    EXPECT_EQ(textProp->GetMaxLines().value_or(0), 1000000);
     EXPECT_EQ(textProp->GetFontSize().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_FONT_SIZE);
     EXPECT_EQ(textProp->GetItalicFontStyle().value_or(Ace::FontStyle::ITALIC), Ace::FontStyle::NORMAL);
     EXPECT_EQ(textProp->GetFontWeight().value_or(FontWeight::NORMAL), FontWeight::MEDIUM);
