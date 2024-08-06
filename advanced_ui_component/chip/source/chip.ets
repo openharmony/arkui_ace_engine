@@ -24,13 +24,21 @@ import componentUtils from '@ohos.arkui.componentUtils';
 import hilog from '@ohos.hilog';
 
 const resourceFn = resourceManager.getSystemResourceManager();
-const iconTypeList: string[] = ['prefixIcon', 'suffixIcon'];
 const shadowRange: number = 6;
-const fontWeightRangeList: number[] = [100, 900];
 
 export enum ChipSize {
   NORMAL = "NORMAL",
   SMALL = "SMALL"
+}
+
+enum FontWeightRange {
+  MIN = 100,
+  MAX = 900,
+}
+
+enum IconType {
+  PREFIX_ICON = "PREFIXICON",
+  SUFFIX_ICON = "SUFFIXICON",
 }
 
 enum BreakPointsType {
@@ -517,7 +525,7 @@ export struct ChipComponent {
   private getLabelFontWeight(): FontWeight | number {
     if (this.getChipActive()) {
       let index = LengthMetrics.resource(this.theme.label.activatedFontWeight as Resource).value;
-      return (index >= fontWeightRangeList[0] && index <= fontWeightRangeList[1]) ?
+      return (index >= FontWeightRange.MIN && index <= FontWeightRange.MAX) ?
         index : FontWeight.Medium;
     }
     return FontWeight.Regular;
@@ -786,7 +794,7 @@ export struct ChipComponent {
   }
 
   private getFillIconColor(iconType: string): ResourceColor {
-    if (iconType === iconTypeList[0]) {
+    if (iconType === IconType.PREFIX_ICON) {
       if (this.prefixIcon?.fillColor) {
         return this.prefixIcon.fillColor;
       }
@@ -800,7 +808,7 @@ export struct ChipComponent {
   }
 
   private getActiveIconColorArray(iconType: string): ResourceColor[] {
-    if (iconType === iconTypeList[0]) {
+    if (iconType === IconType.PREFIX_ICON) {
       return this.getColorArray(this.prefixIcon?.activatedFillColor,
         this.theme.prefixIcon.focusActivatedColor, this.theme.prefixIcon.activatedFillColor);
     } else {
@@ -831,14 +839,14 @@ export struct ChipComponent {
     if (this.getChipActive()) {
       return this.prefixIcon?.activatedFillColor ?? this.getActiveIconColor();
     }
-    return this.prefixIcon?.fillColor ?? this.getFillIconColor(iconTypeList[0]);
+    return this.prefixIcon?.fillColor ?? this.getFillIconColor(IconType.PREFIX_ICON);
   }
 
   private getSuffixIconFilledColor(): ResourceColor {
     if (this.getChipActive()) {
       return this.suffixIcon?.activatedFillColor ?? this.getActiveIconColor();
     }
-    return this.suffixIcon?.fillColor ?? this.getFillIconColor(iconTypeList[1]);
+    return this.suffixIcon?.fillColor ?? this.getFillIconColor(IconType.SUFFIX_ICON);
   }
 
   private getDefaultSymbolColor(iconType: string): Array<ResourceColor> {
@@ -1243,7 +1251,7 @@ export struct ChipComponent {
         if (this.prefixSymbol?.normal || this.prefixSymbol?.activated) {
           SymbolGlyph()
             .fontSize(this.defaultSymbolFontsize())
-            .fontColor(this.getDefaultSymbolColor(iconTypeList[0]))
+            .fontColor(this.getDefaultSymbolColor(IconType.PREFIX_ICON))
             .attributeModifier(this.getPrefixSymbolModifier())
             .onSizeChange((oldValue, newValue) => {
               this.prefixSymbolWidth = newValue?.width
@@ -1280,11 +1288,12 @@ export struct ChipComponent {
           .textAlign(TextAlign.Center)
           .visibility(this.getVisibility())
           .draggable(false)
+          .backgroundColor('#51ef1313')
 
         if (this.suffixSymbol?.normal || this.suffixSymbol?.activated) {
           SymbolGlyph()
             .fontSize(this.defaultSymbolFontsize())
-            .fontColor(this.getDefaultSymbolColor(iconTypeList[1]))
+            .fontColor(this.getDefaultSymbolColor(IconType.SUFFIX_ICON))
             .attributeModifier(this.getSuffixSymbolModifier())
             .onSizeChange((oldValue, newValue) => {
               this.suffixSymbolWidth = newValue?.width;
@@ -1327,7 +1336,7 @@ export struct ChipComponent {
         } else if (this.allowClose) {
           SymbolGlyph($r('sys.symbol.xmark'))
             .fontSize(this.defaultSymbolFontsize())
-            .fontColor(this.getDefaultSymbolColor(iconTypeList[1]))
+            .fontColor(this.getDefaultSymbolColor(IconType.SUFFIX_ICON))
             .onClick(() => {
               if (!this.getChipEnable()) {
                 return;
