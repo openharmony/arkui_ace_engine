@@ -1152,6 +1152,7 @@ public:
         showSelect_ = true;
     }
 
+    void FocusForwardStopTwinkling();
     bool UpdateFocusForward();
 
     bool UpdateFocusBackward();
