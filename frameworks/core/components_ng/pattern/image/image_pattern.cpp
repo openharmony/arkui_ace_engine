@@ -36,6 +36,7 @@
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
+#include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -528,7 +529,7 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
         sensitive = host->IsPrivacySensitive();
     }
     if (!overlayMod_) {
-        overlayMod_ = MakeRefPtr<ImageOverlayModifier>();
+        overlayMod_ = MakeRefPtr<ImageOverlayModifier>(selectedColor_);
     }
     if (image_) {
         return MakeRefPtr<ImagePaintMethod>(image_, isSelected_, overlayMod_, sensitive, interpolationDefault_);
@@ -1075,6 +1076,8 @@ void ImagePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto renderCtx = host->GetRenderContext();
     CHECK_NULL_VOID(renderCtx);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     if (GetIsAnimation()) {
         renderCtx->SetClipToFrame(true);
     } else {
@@ -1083,11 +1086,12 @@ void ImagePattern::OnAttachToFrameNode()
 
         // register image frame node to pipeline context to receive memory level notification and window state change
         // notification
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
         pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
         pipeline->AddWindowStateChangedCallback(host->GetId());
     }
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    selectedColor_ = theme->GetSelectedColor();
 }
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
