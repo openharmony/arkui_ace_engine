@@ -561,11 +561,28 @@ HWTEST_F(GridLayoutRangeTest, Cache001, TestSize.Level1)
     EXPECT_EQ(pattern_->preloadItemList_, preloadList);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
+    constexpr float itemWidth = (GRID_WIDTH - 20.0f) / 3.0f;
     for (const int32_t i : preloadList) {
         EXPECT_TRUE(frameNode_->GetChildByIndex(i));
-        EXPECT_EQ(GetChildWidth(frameNode_, i), (GRID_WIDTH - 20.0f) / 3.0f);
+        EXPECT_EQ(GetChildWidth(frameNode_, i), itemWidth);
         EXPECT_EQ(GetChildHeight(frameNode_, i), 200.0f);
     }
+
+    // re-layout to trigger cache item layout
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 12), 0.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 13), itemWidth + 10.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 14), (itemWidth + 10.0f) * 2);
+    EXPECT_EQ(GetChildX(frameNode_, 15), 0.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 16), itemWidth + 10.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 17), (itemWidth + 10.0f) * 2);
+    EXPECT_EQ(GetChildY(frameNode_, 12), 840.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 13), 840.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 14), 840.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 15), 1050.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 16), 1050.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 17), 1050.0f);
     pattern_->ScrollToIndex(49);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info.startIndex_, 39);
