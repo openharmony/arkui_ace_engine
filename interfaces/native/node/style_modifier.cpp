@@ -2812,10 +2812,6 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
             g_numberValues[NUM_3].u32 = options.color;
             break;
     }
-    if (!InRegion(static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_RECTANGLE),
-        static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_PATH), g_numberValues[NUM_3].i32)) {
-        return nullptr;
-    }
     return &g_attributeItem;
 }
 
