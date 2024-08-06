@@ -910,8 +910,8 @@ int32_t RichEditorPattern::AddTextSpanOperation(
     auto spanItem = spanNode->GetSpanItem();
     spanItem->content = options.value;
     spanItem->SetTextStyle(options.style);
-    spanItem->hasResourceFontColor = options.hasResourceFontColor;
-    spanItem->hasResourceDecorationColor = options.hasResourceDecorationColor;
+    spanItem->useThemeFontColor = options.useThemeFontColor;
+    spanItem->useThemeDecorationColor = options.useThemeDecorationColor;
     AddSpanItem(spanItem, offset);
     if (!options.style.has_value()) {
         SetDefaultColor(spanNode);
@@ -1323,6 +1323,8 @@ void RichEditorPattern::CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<S
     COPY_SPAN_STYLE_IF_PRESENT(source, target, LetterSpacing, PropertyInfo::LETTERSPACE);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, FontFeature, PropertyInfo::FONTFEATURE);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, TextShadow, PropertyInfo::TEXTSHADOW);
+    target->GetSpanItem()->useThemeFontColor = source->GetSpanItem()->useThemeFontColor;
+    target->GetSpanItem()->useThemeDecorationColor = source->GetSpanItem()->useThemeDecorationColor;
 }
 
 void RichEditorPattern::CopyTextSpanLineStyle(
@@ -1615,6 +1617,7 @@ void RichEditorPattern::UpdateTextStyle(
     UpdateFontFeatureTextStyle(spanNode, updateSpanStyle, textStyle);
     if (updateSpanStyle.updateTextColor.has_value()) {
         spanNode->UpdateTextColor(textStyle.GetDynamicTextColor());
+        spanNode->GetSpanItem()->useThemeFontColor = false;
         spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
     }
     if (updateSpanStyle.updateLineHeight.has_value()) {
@@ -1655,6 +1658,7 @@ void RichEditorPattern::UpdateDecoration(
 {
     if (updateSpanStyle.updateTextDecoration.has_value()) {
         spanNode->UpdateTextDecoration(textStyle.GetTextDecoration());
+        spanNode->GetSpanItem()->useThemeDecorationColor = false;
         spanNode->AddPropertyInfo(PropertyInfo::TEXTDECORATION);
     }
     if (updateSpanStyle.updateTextDecorationColor.has_value()) {
@@ -4066,22 +4070,36 @@ void RichEditorPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    const auto& spans = host->GetChildren();
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<TextTheme>();
+    auto theme = GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(theme);
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    const Color& themeTextColor = theme->GetTextStyle().GetTextColor();
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "themeTextColor=%{public}s", themeTextColor.ToString().c_str());
+    const auto& themeTextStyle = theme->GetTextStyle();
+    auto themeTextColor = themeTextStyle.GetTextColor();
+    auto themeTextDecorationColor = themeTextStyle.GetTextDecorationColor();
     textLayoutProperty->UpdateTextColor(themeTextColor);
-    textLayoutProperty->UpdateTextDecorationColor(themeTextColor);
-    for (auto span : spans) {
-        auto spanNode = DynamicCast<SpanNode>(span);
-        if (spanNode) {
-            spanNode->UpdateColorByResourceId();
+    textLayoutProperty->UpdateTextDecorationColor(themeTextDecorationColor);
+
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "theme, TextColor=%{public}s, DecorationColor=%{public}s",
+        themeTextColor.ToString().c_str(), themeTextDecorationColor.ToString().c_str());
+
+    const auto& spans = host->GetChildren();
+    for (const auto& uiNode : spans) {
+        auto spanNode = DynamicCast<SpanNode>(uiNode);
+        if (!spanNode) {
+            continue;
         }
+        auto spanItem = spanNode->GetSpanItem();
+        if (!spanItem) {
+            continue;
+        }
+        if (spanItem->useThemeFontColor) {
+            spanNode->UpdateTextColor(themeTextColor);
+        }
+        if (spanItem->useThemeDecorationColor) {
+            spanNode->UpdateTextDecorationColor(themeTextDecorationColor);
+        }
+        spanNode->UpdateColorByResourceId();
     }
     if (typingTextStyle_) {
         typingTextStyle_->UpdateColorByResourceId();
@@ -4540,8 +4558,8 @@ void RichEditorPattern::InsertDiffStyleValueInSpan(
     options.value = insertValue;
     options.offset = caretPosition_;
     options.style = typingTextStyle_;
-    options.hasResourceFontColor = typingStyle_->hasResourceFontColor;
-    options.hasResourceDecorationColor = typingStyle_->hasResourceDecorationColor;
+    options.useThemeFontColor = typingStyle_->useThemeFontColor;
+    options.useThemeDecorationColor = typingStyle_->useThemeDecorationColor;
     auto newSpanIndex = AddTextSpanOperation(options, false, -1,  true, false);
     auto newSpanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(newSpanIndex));
     CopyTextSpanLineStyle(spanNode, newSpanNode, true);
@@ -4649,8 +4667,8 @@ RefPtr<SpanNode> RichEditorPattern::InsertValueToBeforeSpan(
             CopyTextSpanStyle(spanNodeBefore, spanNodeAfter);
             auto spanItemAfter = spanNodeAfter->GetSpanItem();
             spanItemAfter->position = static_cast<int32_t>(textTemp.length());
-            spanItemAfter->hasResourceFontColor = spanItem->hasResourceFontColor;
-            spanItemAfter->hasResourceDecorationColor = spanItem->hasResourceDecorationColor;
+            spanItemAfter->useThemeFontColor = spanItem->useThemeFontColor;
+            spanItemAfter->useThemeDecorationColor = spanItem->useThemeDecorationColor;
             AddSpanItem(spanItemAfter, host->GetChildIndex(spanNodeBefore) + 1);
             SpanNodeFission(spanNodeAfter);
             return spanNodeAfter;
@@ -4672,12 +4690,10 @@ void RichEditorPattern::CreateTextSpanNode(
     spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
     spanNode->MountToParent(host, info.GetSpanIndex());
     auto spanItem = spanNode->GetSpanItem();
-    spanItem->hasResourceFontColor = true;
-    spanItem->hasResourceDecorationColor = true;
     spanNode->UpdateContent(insertValue);
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
-        spanItem->hasResourceFontColor = typingStyle_->hasResourceFontColor;
-        spanItem->hasResourceDecorationColor = typingStyle_->hasResourceDecorationColor;
+        spanItem->useThemeFontColor = typingStyle_->useThemeFontColor;
+        spanItem->useThemeDecorationColor = typingStyle_->useThemeDecorationColor;
         UpdateTextStyle(spanNode, typingStyle_.value(), typingTextStyle_.value());
         auto spanItem = spanNode->GetSpanItem();
         spanItem->SetTextStyle(typingTextStyle_);
@@ -8186,6 +8202,9 @@ bool RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>&
     }
     if (layoutProperty->HasPlaceholderTextColor()) {
         placeholderNode->UpdateTextColor(layoutProperty->GetPlaceholderTextColor().value());
+    } else {
+        auto theme = GetTheme<RichEditorTheme>();
+        placeholderNode->UpdateTextColor(theme ? theme->GetPlaceholderColor() : Color());
     }
 
     auto spanItem = placeholderNode->GetSpanItem();
