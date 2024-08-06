@@ -190,7 +190,7 @@ struct GridLayoutInfo {
 
     /**
      * @param itemIdx
-     * @return position [col, row] of the item. [-1, -1] if item is not in matrix. 
+     * @return position [col, row] of the item. [-1, -1] if item is not in matrix.
      */
     std::pair<int32_t, int32_t> GetItemPos(int32_t itemIdx) const;
 
