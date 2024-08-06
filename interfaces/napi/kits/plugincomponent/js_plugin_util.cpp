@@ -14,11 +14,7 @@
  */
 #include "js_plugin_util.h"
 
-#include <cinttypes>
-#include <cstring>
 
-#include "native_value.h"
-#include "securec.h"
 
 #include "core/common/container.h"
 

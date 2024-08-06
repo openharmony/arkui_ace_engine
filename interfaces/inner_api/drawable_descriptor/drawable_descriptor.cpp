@@ -18,18 +18,12 @@
 #endif
 #include "drawable_descriptor.h"
 
-#include <cstddef>
-#include <memory>
-#include <string>
 
-#include "include/core/SkSamplingOptions.h"
 #include "third_party/cJSON/cJSON.h"
 
 #ifndef PREVIEW
 #include "image_source.h"
 #endif
-#include "include/core/SkImage.h"
-#include "include/core/SkRect.h"
 
 #ifdef PREVIEW
 #ifdef WINDOWS_PLATFORM

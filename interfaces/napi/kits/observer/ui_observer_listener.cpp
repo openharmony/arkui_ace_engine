@@ -14,14 +14,7 @@
  */
 
 #include "ui_observer_listener.h"
-#include <cstdint>
 
-#include "core/pipeline/pipeline_base.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
-#include "core/interfaces/native/node/node_api.h"
-#include "core/components_ng/common_napi_utils/common_napi_utils.h"
-#include "frameworks/base/geometry/dimension.h"
 
 namespace OHOS::Ace::Napi {
 namespace {

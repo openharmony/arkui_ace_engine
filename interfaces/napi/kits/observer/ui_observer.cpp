@@ -17,7 +17,6 @@
 
 #include "bridge/common/utils/engine_helper.h"
 
-#include <algorithm>
 
 namespace OHOS::Ace::Napi {
 std::list<std::shared_ptr<UIObserverListener>> UIObserver::unspecifiedNavigationListeners_;

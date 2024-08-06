@@ -16,19 +16,12 @@
 #include "js_component_snapshot.h"
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
-#include "js_native_api.h"
-#include "js_native_api_types.h"
-#include "napi/native_common.h"
-#include "node_api_types.h"
-#include "base/utils/utils.h"
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
 #endif
 
-#include "node_api.h"
 
-#include "bridge/common/utils/utils.h"
 #include "core/common/ace_engine.h"
 
 #include "frameworks/bridge/common/utils/engine_helper.h"

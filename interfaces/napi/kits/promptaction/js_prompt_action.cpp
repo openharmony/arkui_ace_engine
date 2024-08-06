@@ -14,9 +14,6 @@
  */
 
 #include "interfaces/napi/kits/promptaction/prompt_action.h"
-#include "napi/native_api.h"
-#include "napi/native_engine/native_value.h"
-#include "napi/native_node_api.h"
 
 namespace OHOS::Ace::Napi {
 static constexpr uint32_t DEFAULT = 0;
