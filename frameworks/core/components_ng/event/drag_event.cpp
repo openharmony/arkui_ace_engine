@@ -202,7 +202,7 @@ void DragEventActuator::RestartDragTask(const GestureEvent& info)
 }
 
 void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, TouchTestResult& responseLinkResult)
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, ResponseLinkResult& responseLinkResult)
 {
     CHECK_NULL_VOID(userCallback_);
     isDragUserReject_ = false;

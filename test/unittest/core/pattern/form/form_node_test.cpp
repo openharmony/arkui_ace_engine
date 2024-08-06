@@ -79,7 +79,7 @@ HWTEST_F(FormNodeTest, FormNodeTest_001, TestSize.Level1)
     touchRestrict.hitTestType = SourceType::MOUSE;
     TouchTestResult result;
     int32_t touchId = 0;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     bool isDispatch = false;
     auto formNode = CreateFromNode();
     auto res = formNode->TouchTest(globalPoint, parentLocalPoint,

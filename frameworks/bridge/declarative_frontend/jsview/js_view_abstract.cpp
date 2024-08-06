@@ -9698,8 +9698,8 @@ void JSViewAbstract::JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo&
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto shouldBuiltInRecognizerParallelWithFunc =
         [execCtx = info.GetExecutionContext(), func = jsParallelInnerGestureToFunc, node = frameNode](
-            const RefPtr<TouchEventTarget>& current,
-            const std::vector<RefPtr<TouchEventTarget>>& others) -> RefPtr<NG::NGGestureRecognizer> {
+            const RefPtr<NG::NGGestureRecognizer>& current,
+            const std::vector<RefPtr<NG::NGGestureRecognizer>>& others) -> RefPtr<NG::NGGestureRecognizer> {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
         ACE_SCORING_EVENT("shouldBuiltInRecognizerParallelWith");
         PipelineContext::SetCallBackNode(node);

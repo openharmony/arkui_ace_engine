@@ -1795,6 +1795,32 @@ class OnGestureJudgeBeginModifier extends ModifierWithKey {
   }
 }
 OnGestureJudgeBeginModifier.identity = Symbol('onGestureJudgeBegin');
+class OnGestureRecognizerJudgeBeginModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnGestureRecognizerJudgeBegin(node);
+    } else {
+      getUINativeModule().common.setOnGestureRecognizerJudgeBegin(node, this.value);
+    }
+  }
+}
+OnGestureRecognizerJudgeBeginModifier.identity = Symbol('onGestureRecognizerJudgeBegin');
+class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetShouldBuiltInRecognizerParallelWith(node);
+    } else {
+      getUINativeModule().common.setShouldBuiltInRecognizerParallelWith(node, this.value);
+    }
+  }
+}
+ShouldBuiltInRecognizerParallelWithModifier.identity = Symbol('shouldBuiltInRecognizerParallelWith');
 class MotionPathModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3076,6 +3102,14 @@ class ArkComponent {
   }
   onGestureJudgeBegin(callback) {
     modifierWithKey(this._modifiersWithKeys, OnGestureJudgeBeginModifier.identity, OnGestureJudgeBeginModifier, callback);
+    return this;
+  }
+  onGestureRecognizerJudgeBegin(callback) {
+    modifierWithKey(this._modifiersWithKeys, OnGestureRecognizerJudgeBeginModifier.identity, OnGestureRecognizerJudgeBeginModifier, callback);
+    return this;
+  }
+  shouldBuiltInRecognizerParallelWith(callback) {
+    modifierWithKey(this._modifiersWithKeys, ShouldBuiltInRecognizerParallelWithModifier.identity, ShouldBuiltInRecognizerParallelWithModifier, callback);
     return this;
   }
   onSizeChange(callback) {

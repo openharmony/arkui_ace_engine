@@ -28,7 +28,7 @@ LongPressEventActuator::LongPressEventActuator(const WeakPtr<GestureEventHub>& g
 {}
 
 void LongPressEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, TouchTestResult& responseLinkResult)
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, ResponseLinkResult& responseLinkResult)
 {
     CHECK_NULL_VOID(longPressEvent_);
     auto gestureHub = gestureEventHub_.Upgrade();

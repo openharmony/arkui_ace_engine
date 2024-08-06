@@ -21,5 +21,6 @@
 namespace OHOS::Ace::NG::NodeModifier {
     const ArkUIGestureModifier* GetGestureModifier();
     const CJUIGestureModifier* GetCJUIGestureModifier();
+    ArkUIGestureRecognizer* CreateGestureRecognizer(const RefPtr<NG::NGGestureRecognizer>& recognizer);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif

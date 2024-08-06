@@ -42,7 +42,7 @@ PanEventActuator::PanEventActuator(const WeakPtr<GestureEventHub>& gestureEventH
 }
 
 void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, TouchTestResult& responseLinkResult)
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, ResponseLinkResult& responseLinkResult)
 {
     if (panEvents_.empty() && !userCallback_) {
         return;

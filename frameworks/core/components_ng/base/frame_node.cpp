@@ -2355,7 +2355,7 @@ void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetCompone
 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
-    TouchTestResult& responseLinkResult, bool isDispatch)
+    ResponseLinkResult& responseLinkResult, bool isDispatch)
 {
     if (!isActive_ || !eventHub_->IsEnabled()) {
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test", GetTag().c_str());
@@ -2538,7 +2538,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             auto gestureHub = eventHub_->GetGestureEventHub();
             if (gestureHub) {
                 TouchTestResult finalResult;
-                TouchTestResult newComingResponseLinkTargets;
+                ResponseLinkResult newComingResponseLinkTargets;
                 const auto coordinateOffset = globalPoint - localPoint - localTransformOffset;
                 preventBubbling = gestureHub->ProcessTouchTestHit(coordinateOffset, touchRestrict, newComingTargets,
                     finalResult, touchId, localPoint, targetComponent, newComingResponseLinkTargets);
@@ -4981,13 +4981,13 @@ int FrameNode::GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t th
 }
 
 void FrameNode::TriggerShouldParallelInnerWith(
-    const TouchTestResult& currentRecognizers, const TouchTestResult& responseLinkRecognizers)
+    const ResponseLinkResult& currentRecognizers, const ResponseLinkResult& responseLinkRecognizers)
 {
     auto gestureHub = eventHub_->GetGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     auto shouldBuiltInRecognizerParallelWithFunc = gestureHub->GetParallelInnerGestureToFunc();
     CHECK_NULL_VOID(shouldBuiltInRecognizerParallelWithFunc);
-    std::map<GestureTypeName, std::vector<RefPtr<TouchEventTarget>>> sortedResponseLinkRecognizers;
+    std::map<GestureTypeName, std::vector<RefPtr<NGGestureRecognizer>>> sortedResponseLinkRecognizers;
 
     for (const auto& item : responseLinkRecognizers) {
         auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
@@ -4999,23 +4999,21 @@ void FrameNode::TriggerShouldParallelInnerWith(
     }
 
     for (const auto& item : currentRecognizers) {
-        auto currentRecognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
-        if (!currentRecognizer || !currentRecognizer->IsSystemGesture() ||
-            currentRecognizer->GetRecognizerType() != GestureTypeName::PAN_GESTURE) {
+        if (!item->IsSystemGesture() || item->GetRecognizerType() != GestureTypeName::PAN_GESTURE) {
             continue;
         }
         auto multiRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(item);
         if (!multiRecognizer || multiRecognizer->GetTouchPointsSize() > 1) {
             continue;
         }
-        auto iter = sortedResponseLinkRecognizers.find(currentRecognizer->GetRecognizerType());
+        auto iter = sortedResponseLinkRecognizers.find(item->GetRecognizerType());
         if (iter == sortedResponseLinkRecognizers.end() || iter->second.empty()) {
             continue;
         }
         auto result = shouldBuiltInRecognizerParallelWithFunc(item, iter->second);
-        if (result && currentRecognizer != result) {
-            currentRecognizer->SetBridgeMode(true);
-            result->AddBridgeObj(currentRecognizer);
+        if (result && item != result) {
+            item->SetBridgeMode(true);
+            result->AddBridgeObj(item);
         }
     }
 }

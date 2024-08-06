@@ -505,15 +505,15 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event, bool isRealT
     return result;
 }
 
-void NGGestureRecognizer::SetResponseLinkRecognizers(const std::list<RefPtr<TouchEventTarget>>& responseLinkResult)
+void NGGestureRecognizer::SetResponseLinkRecognizers(const ResponseLinkResult& responseLinkResult)
 {
-    responseLinkRecognizer_.clear();
-    for (const auto& item : responseLinkResult) {
-        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
-        if (recognizer) {
-            responseLinkRecognizer_.emplace_back(recognizer);
-        }
-    }
+    responseLinkRecognizer_ = responseLinkResult;
+}
+
+bool NGGestureRecognizer::IsInResponseLinkRecognizers()
+{
+    return std::any_of(responseLinkRecognizer_.begin(), responseLinkRecognizer_.end(),
+        [recognizer = Claim(this)](const RefPtr<NGGestureRecognizer>& item) { return item == recognizer; });
 }
 
 bool NGGestureRecognizer::AboutToAddCurrentFingers(int32_t touchId)
