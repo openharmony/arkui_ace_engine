@@ -212,6 +212,17 @@ ArkUI_GestureRecognizer* CreateTapGesture(int32_t count, int32_t fingers)
     return ndkGesture;
 }
 
+ArkUI_GestureRecognizer* CreateTapGestureWithDistanceThreshold(int32_t count, int32_t fingers, double distanceThreshold)
+{
+    count = std::max(count, DEFAULT_TAP_COUNT);
+    fingers = std::clamp(fingers, DEFAULT_TAP_FINGERS, MAX_TAP_FINGERS);
+    auto* ndkGesture = new ArkUI_GestureRecognizer{ TAP_GESTURE, nullptr, nullptr, nullptr };
+    auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->
+        createTapGestureWithDistanceThreshold(count, fingers, distanceThreshold, ndkGesture);
+    ndkGesture->gesture = gesture;
+    return ndkGesture;
+}
+
 ArkUI_GestureRecognizer* CreateLongPressGesture(int32_t fingers, bool repeatResult, int32_t duration)
 {
     auto* ndkGesture = new ArkUI_GestureRecognizer{ LONG_PRESS_GESTURE, nullptr, nullptr, nullptr };

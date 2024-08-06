@@ -73,7 +73,16 @@ ArkUIGesture* createPanGesture(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI
 
 ArkUIGesture* createTapGesture(ArkUI_Int32 count, ArkUI_Int32 fingers, void* userData)
 {
-    auto tapGestureObject = AceType::MakeRefPtr<TapGesture>(count, fingers);
+    auto tapGestureObject = AceType::MakeRefPtr<TapGesture>(count, fingers, std::numeric_limits<double>::infinity());
+    tapGestureObject->SetUserData(userData);
+    tapGestureObject->IncRefCount();
+    return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(tapGestureObject));
+}
+
+ArkUIGesture* createTapGestureWithDistanceThreshold(
+    ArkUI_Int32 count, ArkUI_Int32 fingers, double distanceThreshold, void* userData)
+{
+    auto tapGestureObject = AceType::MakeRefPtr<TapGesture>(count, fingers, distanceThreshold);
     tapGestureObject->SetUserData(userData);
     tapGestureObject->IncRefCount();
     return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(tapGestureObject));
@@ -429,6 +438,7 @@ const ArkUIGestureModifier* GetGestureModifier()
 {
     static const ArkUIGestureModifier modifier = {
         createTapGesture,
+        createTapGestureWithDistanceThreshold,
         createLongPressGesture,
         createPanGesture,
         createPinchGesture,

@@ -32,7 +32,8 @@ class ACE_EXPORT TapGesture : public Gesture {
 
 public:
     TapGesture() = default;
-    TapGesture(int32_t count, int32_t fingers) : Gesture(fingers), count_(count) {}
+    TapGesture(int32_t count, int32_t fingers, double distanceThreshold = std::numeric_limits<double>::infinity())
+        : Gesture(fingers), count_(count), distanceThreshold_(distanceThreshold) {}
     ~TapGesture() override = default;
 
 protected:
@@ -40,6 +41,7 @@ protected:
 
 private:
     int32_t count_ = 1;
+    double distanceThreshold_ = std::numeric_limits<double>::infinity();
 };
 
 } // namespace OHOS::Ace

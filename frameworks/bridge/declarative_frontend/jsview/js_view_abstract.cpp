@@ -9636,7 +9636,15 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
         JSInteractableView::ReportClickEvent(node);
 #endif
     };
-    ViewAbstractModel::GetInstance()->SetOnClick(std::move(tmpOnTap), std::move(onClick));
+
+    double distanceThreshold = std::numeric_limits<double>::infinity();
+    if (info.Length() > 1 && info[1]->IsNumber()) {
+        distanceThreshold = info[1]->ToNumber<double>();
+        if (distanceThreshold < 0) {
+            distanceThreshold = std::numeric_limits<double>::infinity();
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetOnClick(std::move(tmpOnTap), std::move(onClick), distanceThreshold);
 }
 
 void JSViewAbstract::JsOnGestureJudgeBegin(const JSCallbackInfo& info)
