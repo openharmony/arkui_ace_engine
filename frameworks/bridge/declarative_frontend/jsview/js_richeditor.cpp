@@ -1398,7 +1398,6 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     if (!fontColor->IsNull() && JSContainerBase::ParseJsSymbolColor(fontColor, symbolColor)) {
         updateSpanStyle.updateSymbolColor = symbolColor;
         style.SetSymbolColorList(symbolColor);
-        updateSpanStyle.hasResourceFontColor = false;
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
@@ -1667,8 +1666,8 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
             ParseJsTextStyle(styleObject, style, updateSpanStyle_);
             options.style = style;
-            options.hasResourceFontColor = updateSpanStyle_.hasResourceFontColor;
-            options.hasResourceDecorationColor = updateSpanStyle_.hasResourceDecorationColor;
+            options.useThemeFontColor = updateSpanStyle_.useThemeFontColor;
+            options.useThemeDecorationColor = updateSpanStyle_.useThemeDecorationColor;
         }
         auto paraStyleObj = JSObjectCast(spanObject->GetProperty("paragraphStyle"));
         if (!paraStyleObj->IsUndefined()) {
@@ -2234,6 +2233,7 @@ void JSRichEditorBaseController::ParseJsTextStyle(
         DynamicColor dynamicColor = DynamicColor(textColor, JSRichEditor::ParseColorResourceId(fontColor));
         style.SetTextColor(dynamicColor);
         updateSpanStyle.updateTextColor = dynamicColor;
+        updateSpanStyle.useThemeFontColor = false;
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
@@ -2353,6 +2353,7 @@ void JSRichEditorBaseController::ParseTextDecoration(
             DynamicColor dynamicColor = DynamicColor(decorationColor, JSRichEditor::ParseColorResourceId(color));
             updateSpanStyle.updateTextDecorationColor = dynamicColor;
             style.SetTextDecorationColor(dynamicColor);
+            updateSpanStyle.useThemeDecorationColor = false;
         }
         JSRef<JSVal> textDecorationStyle = decorationObject->GetProperty("style");
         if (!textDecorationStyle->IsNull() && !textDecorationStyle->IsUndefined()) {
