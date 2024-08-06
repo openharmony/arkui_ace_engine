@@ -223,6 +223,11 @@ bool SubwindowOhos::InitContainer()
     subPipelineContext->SetupSubRootElement();
     subPipelineContext->SetKeyboardAnimationConfig(parentPipeline->GetKeyboardAnimationConfig());
     subPipelineContext->SetDragNodeGrayscale(parentPipeline->GetDragNodeGrayscale());
+    subPipelineContext->SetMaxAppFontScale(parentPipeline->GetMaxAppFontScale());
+    subPipelineContext->SetFollowSystem(parentPipeline->IsFollowSystem());
+    if (!parentPipeline->IsFollowSystem()) {
+        subPipelineContext->SetFontScale(1.0f);
+    }
     return true;
 }
 
