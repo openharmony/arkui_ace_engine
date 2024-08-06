@@ -225,13 +225,13 @@ HWTEST_F(IndexerTestNg, IndexerTouch001, TestSize.Level1)
      * @tc.expected: Selected index is correct.
      */
     pattern_->OnHover(true);
-    // EXPECT_TRUE(Touch(TouchType::DOWN, 50.f, static_cast<int32_t>(50.f / pattern_->itemHeight_)));
+    EXPECT_TRUE(Touch(TouchType::DOWN, 50.f, static_cast<int32_t>(50.f / pattern_->itemHeight_)));
 
     /**
      * @tc.steps: step2. OnTouchUp, different location.
      * @tc.expected: Selected index is correct.
      */
-    // EXPECT_TRUE(Touch(TouchType::UP, 20.f, static_cast<int32_t>(50.f / pattern_->itemHeight_)));
+    EXPECT_TRUE(Touch(TouchType::UP, 20.f, static_cast<int32_t>(50.f / pattern_->itemHeight_)));
 }
 
 /**
@@ -251,13 +251,13 @@ HWTEST_F(IndexerTestNg, IndexerTouch002, TestSize.Level1)
      * @tc.expected: Selected index is correct.
      */
     pattern_->OnHover(false);
-    // EXPECT_TRUE(Touch(TouchType::DOWN, 50.f, static_cast<int32_t>(50.f / pattern_->itemHeight_)));
+    EXPECT_TRUE(Touch(TouchType::DOWN, 50.f, static_cast<int32_t>(50.f / pattern_->itemHeight_)));
 
     /**
      * @tc.steps: step2. OnTouchUp, same location.
      * @tc.expected: Selected index is correct.
      */
-    // EXPECT_TRUE(Touch(TouchType::UP, 50.f, static_cast<int32_t>(50.f / pattern_->itemHeight_)));
+    EXPECT_TRUE(Touch(TouchType::UP, 50.f, static_cast<int32_t>(50.f / pattern_->itemHeight_)));
 }
 
 /**
@@ -1226,6 +1226,7 @@ HWTEST_F(IndexerTestNg, OnModifyDone003, TestSize.Level1)
     IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
     model.SetAutoCollapse(true);
     model.SetItemSize(Dimension(10, DimensionUnit::VP));
+    pattern_->maxContentHeight_ = 100.f;
     CreateDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
@@ -1259,6 +1260,7 @@ HWTEST_F(IndexerTestNg, OnModifyDone004, TestSize.Level1)
     IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
     model.SetAutoCollapse(true);
     model.SetItemSize(Dimension(6, DimensionUnit::VP));
+    pattern_->maxContentHeight_ = 60.f;
     CreateDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
@@ -1292,6 +1294,7 @@ HWTEST_F(IndexerTestNg, OnModifyDone005, TestSize.Level1)
     IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
     model.SetAutoCollapse(true);
     model.SetItemSize(Dimension(2000, DimensionUnit::VP));
+    pattern_->maxContentHeight_ = 100.f;
     CreateDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
@@ -1369,6 +1372,7 @@ HWTEST_F(IndexerTestNg, OnModifyDone008, TestSize.Level1)
     IndexerModelNG model = CreateIndexer(CREATE_ARRAY_2, 0);
     model.SetAutoCollapse(true);
     model.SetItemSize(Dimension(10, DimensionUnit::VP));
+    pattern_->maxContentHeight_ = 100.f;
     CreateDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;

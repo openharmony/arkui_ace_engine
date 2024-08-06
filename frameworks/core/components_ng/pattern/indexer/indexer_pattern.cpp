@@ -250,7 +250,8 @@ void IndexerPattern::CollapseArrayValue()
         maxItemsCount = static_cast<int32_t>(height / itemSize);
     }
     int32_t fullArraySize = static_cast<int32_t>(fullArrayValue_.size());
-    if (maxItemsCount >= fullArraySize || fullArraySize - sharpItemCount_ <= INDEXER_NINE_CHARACTERS_CHECK) {
+    if (NearZero(height) || maxItemsCount >= fullArraySize ||
+        fullArraySize - sharpItemCount_ <= INDEXER_NINE_CHARACTERS_CHECK) {
         if (lastCollapsingMode_ != IndexerCollapsingMode::NONE) {
             lastCollapsingMode_ = IndexerCollapsingMode::NONE;
             BuildFullArrayValue();
