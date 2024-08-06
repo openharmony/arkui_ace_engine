@@ -735,7 +735,7 @@ HWTEST_F(NodeContainerTestNg, PaintWrapperTest003, TestSize.Level1)
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty);
     paintWrapper->extensionHandler_ = AceType::MakeRefPtr<ExtensionHandler>();
     auto imageModifier = imageMethod->GetOverlayModifier(AceType::RawPtr(paintWrapper));
-    imageModifier = AceType::MakeRefPtr<ImageOverlayModifier>();
+    imageModifier = AceType::MakeRefPtr<ImageOverlayModifier>(Color::BLACK);
 
     /**
      * @tc.steps: step2. call the function SetNodePaintMethod.
@@ -835,7 +835,7 @@ HWTEST_F(NodeContainerTestNg, PaintWrapperTest006, TestSize.Level1)
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty);
     paintWrapper->extensionHandler_ = nullptr;
     auto imageModifier = imageMethod->GetOverlayModifier(AceType::RawPtr(paintWrapper));
-    imageModifier = AceType::MakeRefPtr<ImageOverlayModifier>();
+    imageModifier = AceType::MakeRefPtr<ImageOverlayModifier>(Color::BLACK);
 
     /**
      * @tc.steps: step2. call the function SetNodePaintMethod.
