@@ -7896,6 +7896,10 @@ void RichEditorPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& n
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (HasFocus()) {
+        if (!isCursorAlwaysDisplayed_) {
+            isCursorAlwaysDisplayed_ = true;
+            StartTwinkling();
+        }
         if (SystemProperties::GetDebugEnabled()) {
             TAG_LOGD(AceLogTag::ACE_TEXT_FIELD,
                 "In OnDragMoved, the cursor has always Displayed in the textField, id:%{public}d", host->GetId());
