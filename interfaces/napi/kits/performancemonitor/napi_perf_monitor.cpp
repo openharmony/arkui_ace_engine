@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "base/perfmonitor/perf_monitor.h"
 #include "napi_perf_monitor.h"
 

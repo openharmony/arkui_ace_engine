@@ -15,7 +15,6 @@
 
 #include "ui_observer_listener.h"
 
-
 namespace OHOS::Ace::Napi {
 namespace {
 constexpr char NAV_BAR[] = "navBar";

@@ -16,7 +16,6 @@
 
 #include "animator_option.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
-
 #include "base/thread/frame_trace_adapter.h"
 
 namespace OHOS::Ace::Napi {
