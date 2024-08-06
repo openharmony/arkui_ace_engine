@@ -449,7 +449,7 @@ HWTEST_F(ImageTestFourNg, ImagePaintMethodTest003, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    RefPtr<ImageOverlayModifier> imageOverlayModifier = AceType::MakeRefPtr<ImageOverlayModifier>();
+    RefPtr<ImageOverlayModifier> imageOverlayModifier = AceType::MakeRefPtr<ImageOverlayModifier>(Color::BLACK);
     ASSERT_NE(imageOverlayModifier, nullptr);
     ImagePaintMethod imagePaintMethod(imagePattern->image_, true, imageOverlayModifier);
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
