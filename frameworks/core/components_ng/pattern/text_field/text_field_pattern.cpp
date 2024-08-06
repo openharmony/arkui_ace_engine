@@ -1989,6 +1989,14 @@ void TextFieldPattern::InitDragDropCallBack()
                            const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->GetIsPreviewText()) {
+#if defined(ENABLE_STANDARD_INPUT)
+            MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
+                StringUtils::Str8ToStr16(""), 0, 0);
+#endif
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield onDragEnter when has previewText");
+            pattern->FinishTextPreview();
+        }
         pattern->showSelect_ = false;
         if (pattern->dragStatus_ == DragStatus::ON_DROP) {
             pattern->dragStatus_ = DragStatus::NONE;
