@@ -381,13 +381,17 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cach
     auto frameSize = wrapper_->GetGeometryNode()->GetFrameSize();
     MinusPaddingToSize(padding, frameSize);
     const bool isRtl = props->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    auto cacheStart = info.lineHeightMap_.lower_bound(info.startMainLineIndex_ - cacheLine);
-    auto startLine = info.lineHeightMap_.lower_bound(info.startMainLineIndex_);
-    for (auto it = cacheStart; it != startLine; ++it) {
-        mainOffset -= mainGap_ + it->second;
+    const int32_t cacheStartLine = info.startMainLineIndex_ - cacheLine;
+    {
+        // adjust mainOffset to the first cache line
+        auto startLine = info.lineHeightMap_.lower_bound(info.startMainLineIndex_);
+        for (auto it = info.lineHeightMap_.lower_bound(cacheStartLine); it != startLine; ++it) {
+            mainOffset -= mainGap_ + it->second;
+        }
     }
+
     auto endIt = info.gridMatrix_.upper_bound(std::max(info.endMainLineIndex_ + cacheLine, info.startMainLineIndex_));
-    for (auto it = info.gridMatrix_.lower_bound(info.startMainLineIndex_ - cacheLine); it != endIt; ++it) {
+    for (auto it = info.gridMatrix_.lower_bound(cacheStartLine); it != endIt; ++it) {
         auto lineHeightIt = info.lineHeightMap_.find(it->first);
         if (lineHeightIt == info.lineHeightMap_.end()) {
             continue;
@@ -604,8 +608,8 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
             auto& info = pattern->GetMutableLayoutInfo();
             GridIrregularFiller filler(&info, RawPtr(host));
             const auto pos = info.GetItemPos(itemIdx);
-            auto constraint = filler.MeasureItem(GridIrregularFiller::FillParameters { crossLens, crossGap, mainGap }, itemIdx,
-                    pos.first, pos.second);
+            auto constraint = filler.MeasureItem(
+                GridIrregularFiller::FillParameters { crossLens, crossGap, mainGap }, itemIdx, pos.first, pos.second);
 
             auto item = DynamicCast<FrameNode>(host->GetChildByIndex(itemIdx));
             CHECK_NULL_RETURN(item, false);
