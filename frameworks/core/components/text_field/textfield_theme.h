@@ -48,6 +48,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
+            theme->height_ = themeConstants->GetDimension(THEME_TEXTFIELD_HEIGHT);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }

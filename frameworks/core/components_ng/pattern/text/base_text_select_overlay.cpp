@@ -363,6 +363,7 @@ bool BaseTextSelectOverlay::CheckHandleIsVisibleWithTransform(
     auto pattern = GetPattern<Pattern>();
     CHECK_NULL_RETURN(pattern, true);
     auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, true);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, true);
     auto contentRect = geometryNode->GetContentRect();

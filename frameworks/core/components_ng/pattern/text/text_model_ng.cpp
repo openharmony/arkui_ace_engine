@@ -901,13 +901,6 @@ FONT_FEATURES_LIST TextModelNG::GetFontFeature(FrameNode* frameNode)
     return value;
 }
 
-LineBreakStrategy TextModelNG::GetLineBreakStrategy(FrameNode* frameNode)
-{
-    LineBreakStrategy value = LineBreakStrategy::GREEDY;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, LineBreakStrategy, value, frameNode, value);
-    return value;
-}
-
 TextSelectableMode TextModelNG::GetTextSelectableMode(FrameNode* frameNode)
 {
     TextSelectableMode value = TextSelectableMode::SELECTABLE_UNFOCUSABLE;
@@ -939,6 +932,13 @@ void TextModelNG::ResetSelectedBackgroundColor(FrameNode* frameNode)
     if (textLayoutProperty) {
         textLayoutProperty->ResetSelectedBackgroundColor();
     }
+}
+
+LineBreakStrategy TextModelNG::GetLineBreakStrategy(FrameNode* frameNode)
+{
+    LineBreakStrategy value = LineBreakStrategy::GREEDY;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, LineBreakStrategy, value, frameNode, value);
+    return value;
 }
 
 void TextModelNG::SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value)
