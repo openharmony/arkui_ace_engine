@@ -1390,7 +1390,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest004, TestSize.Level1
             ASSERT_NE(pointNodeProperty, nullptr);
 
             std::string text, description;
-            EXPECT_EQ(pointAccessibilityProperty->accessibilityLevel_, AccessibilityProperty::Level::YES);
+            EXPECT_EQ(pointAccessibilityProperty->accessibilityLevel_, AccessibilityProperty::Level::YES_STR);
             if (i == 0) {
                 text = selected + pointNodeProperty->GetContent().value_or("");
                 description = " ";
@@ -1476,7 +1476,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest006, TestSize.Level1
     accessibilityProperty->OnAccessibilityFocusCallback(true);
     auto sliderAccessibilityProperty = sliderNode->GetAccessibilityProperty<AccessibilityProperty>();
     ASSERT_NE(sliderAccessibilityProperty, nullptr);
-    EXPECT_EQ(sliderAccessibilityProperty->accessibilityLevel_, AccessibilityProperty::Level::NO);
+    EXPECT_EQ(sliderAccessibilityProperty->accessibilityLevel_, AccessibilityProperty::Level::NO_STR);
 }
 
 /**
@@ -1565,11 +1565,11 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest008, TestSize.Level1
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
         ASSERT_NE(accessibilityProperty, nullptr);
         if (!item.first) {
-            EXPECT_EQ(accessibilityProperty->GetAccessibilityLevel(), AccessibilityProperty::Level::YES);
-            checkFunc(sliderPattern->pointAccessibilityNodeVec_, AccessibilityProperty::Level::NO);
+            EXPECT_EQ(accessibilityProperty->GetAccessibilityLevel(), AccessibilityProperty::Level::YES_STR);
+            checkFunc(sliderPattern->pointAccessibilityNodeVec_, AccessibilityProperty::Level::NO_STR);
         } else if (item.second == AccessibilityHoverAction::HOVER_ENTER ||
                    item.second == AccessibilityHoverAction::HOVER_MOVE) {
-            checkFunc(sliderPattern->pointAccessibilityNodeVec_, AccessibilityProperty::Level::YES);
+            checkFunc(sliderPattern->pointAccessibilityNodeVec_, AccessibilityProperty::Level::YES_STR);
         }
     }
 }
