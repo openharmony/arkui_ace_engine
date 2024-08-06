@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_COL_MODEL_H
 
 #include <memory>
+#include <mutex>
 
 #include "frameworks/core/components_v2/grid_layout/grid_container_util_class.h"
 
@@ -35,6 +36,7 @@ public:
 
 private:
     static std::unique_ptr<GridColModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 
