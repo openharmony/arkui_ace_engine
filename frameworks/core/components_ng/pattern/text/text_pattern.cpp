@@ -2701,12 +2701,6 @@ void TextPattern::DumpAdvanceInfo()
 
     DumpLog::GetInstance().AddDesc(
         std::string("BindSelectionMenu: ").append(std::to_string(selectionMenuMap_.empty())));
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipeline);
-    auto fontScale = pipeline->GetFontScale();
-    auto fontWeightScale = pipeline->GetFontWeightScale();
-    DumpLog::GetInstance().AddDesc(std::string("fontScale: ").append(std::to_string(fontScale)));
-    DumpLog::GetInstance().AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -2763,9 +2757,28 @@ void TextPattern::DumpInfo()
         dumpLog.AddDesc(std::string("Paragraphs num: ").append(std::to_string(num)));
         dumpLog.AddDesc(std::string("PaintInfo: ").append(paintInfo_));
     }
+    DumpScaleInfo();
     if (SystemProperties::GetDebugEnabled()) {
         DumpAdvanceInfo();
     }
+}
+
+void TextPattern::DumpScaleInfo()
+{
+    auto& dumpLog = DumpLog::GetInstance();
+    dumpLog.AddDesc(std::string("-----DumpScaleInfo-----"));
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto fontScale = pipeline->GetFontScale();
+    auto fontWeightScale = pipeline->GetFontWeightScale();
+    auto followSystem = pipeline->IsFollowSystem();
+    float maxFontScale = pipeline->GetMaxAppFontScale();
+    auto halfLeading = pipeline->GetHalfLeading();
+    dumpLog.AddDesc(std::string("fontScale: ").append(std::to_string(fontScale)));
+    dumpLog.AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
+    dumpLog.AddDesc(std::string("IsFollowSystem: ").append(std::to_string(followSystem)));
+    dumpLog.AddDesc(std::string("maxFontScale: ").append(std::to_string(maxFontScale)));
+    dumpLog.AddDesc(std::string("halfLeading: ").append(std::to_string(halfLeading)));
 }
 
 void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
