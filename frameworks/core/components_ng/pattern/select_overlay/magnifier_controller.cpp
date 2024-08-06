@@ -44,10 +44,13 @@ bool MagnifierController::UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, 
     float left = basePaintOffset.GetX() + localOffset_.GetX() - magnifierNodeWidth_.ConvertToPx() / 2;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, false);
-    auto window = pipelineContext->GetWindow();
-    CHECK_NULL_RETURN(window, false);
-    float windowRight = window->GetCurrentWindowRect().Right();
-    auto magnifierX = std::clamp(left, 0.f, static_cast<float>(windowRight - magnifierNodeWidth_.ConvertToPx()));
+    auto rootUINode = pipelineContext->GetRootElement();
+    CHECK_NULL_RETURN(rootUINode, false);
+    auto rootGeometryNode = rootUINode->GetGeometryNode();
+    CHECK_NULL_RETURN(rootGeometryNode, false);
+    auto rootFrameSize = rootGeometryNode->GetFrameSize();
+    auto magnifierX =
+        std::clamp(left, 0.f, static_cast<float>(rootFrameSize.Width() - magnifierNodeWidth_.ConvertToPx()));
     magnifierPaintOffset.SetX(magnifierX);
     magnifierOffset.x = MAGNIFIER_OFFSETX.ConvertToPx();
     return true;
@@ -75,12 +78,12 @@ bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, 
         UpdateShowMagnifier();
         return false;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto window = pipelineContext->GetWindow();
-    CHECK_NULL_RETURN(window, false);
-    float windowBottom = window->GetCurrentWindowRect().Bottom();
-    magnifierY = std::clamp(magnifierY, 0.f, static_cast<float>(windowBottom - menuHeight));
+    auto rootUINode = pipeline->GetRootElement();
+    CHECK_NULL_RETURN(rootUINode, false);
+    auto rootGeometryNode = rootUINode->GetGeometryNode();
+    CHECK_NULL_RETURN(rootGeometryNode, false);
+    auto rootFrameSize = rootGeometryNode->GetFrameSize();
+    magnifierY = std::clamp(magnifierY, 0.f, static_cast<float>(rootFrameSize.Height() - menuHeight));
     offsetY_ = std::clamp(magnifierY, 0.f, static_cast<float>(MAGNIFIER_OFFSETY.ConvertToPx()));
     magnifierPaintOffset.SetY(magnifierY - offsetY_);
     magnifierOffset.y = offsetY_;
