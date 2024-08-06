@@ -556,21 +556,21 @@ export class ToolBar extends ViewPU {
   }
 
   getToolBarSymbolModifier(z1) {
-    if (this.activateIndex === z1 && !(this.toolBarList[z1]?.state === 2)) {
+    if (this.activateIndex === z1 && (this.toolBarList[z1]?.state === ItemState.ACTIVATE)) {
       return this.toolBarList[z1]?.toolBarSymbolOptions?.activated;
     }
     return this.toolBarList[z1]?.toolBarSymbolOptions?.normal;
   }
 
   getIconColor(y1) {
-    if (this.activateIndex === y1 && !(this.toolBarList[y1]?.state === 2)) {
+    if (this.activateIndex === y1 && (this.toolBarList[y1]?.state === ItemState.ACTIVATE)) {
       return this.toolBarList[y1]?.activatedIconColor ?? this.iconActivePrimaryColor;
     }
     return this.toolBarList[y1]?.iconColor ?? this.iconPrimaryColor;
   }
 
   getTextColor(x1) {
-    if (this.activateIndex === x1 && !(this.toolBarList[x1]?.state === 2)) {
+    if (this.activateIndex === x1 && (this.toolBarList[x1]?.state === ItemState.ACTIVATE)) {
       return this.toolBarList[x1]?.activatedTextColor ?? this.fontActivatedPrimaryColor;
     }
     return this.toolBarList[x1]?.textColor ?? this.fontPrimaryColor;

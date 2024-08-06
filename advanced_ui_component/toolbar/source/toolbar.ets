@@ -227,21 +227,21 @@ export struct ToolBar {
   }
 
   private getToolBarSymbolModifier(index: number): SymbolGlyphModifier | undefined {
-    if (this.activateIndex === index && !(this.toolBarList[index]?.state === 2)) {
+    if (this.activateIndex === index && (this.toolBarList[index]?.state === ItemState.ACTIVATE)) {
       return this.toolBarList[index]?.toolBarSymbolOptions?.activated;
     }
     return this.toolBarList[index]?.toolBarSymbolOptions?.normal;
   }
 
   private getIconColor(index: number): ResourceColor {
-    if (this.activateIndex === index && !(this.toolBarList[index]?.state === 2)) {
+    if (this.activateIndex === index && (this.toolBarList[index]?.state === ItemState.ACTIVATE)) {
       return this.toolBarList[index]?.activatedIconColor ?? this.iconActivePrimaryColor;
     }
     return this.toolBarList[index]?.iconColor ?? this.iconPrimaryColor;
   }
 
   private getTextColor(index: number): ResourceColor {
-    if (this.activateIndex === index && !(this.toolBarList[index]?.state === 2)) {
+    if (this.activateIndex === index && (this.toolBarList[index]?.state === ItemState.ACTIVATE)) {
       return this.toolBarList[index]?.activatedTextColor ?? this.fontActivatedPrimaryColor;
     }
     return this.toolBarList[index]?.textColor ?? this.fontPrimaryColor;
