@@ -2257,9 +2257,9 @@ struct ArkUIListModifier {
     void (*setListChildrenMainSize)(ArkUINodeHandle node, ArkUIListChildrenMainSize option, ArkUI_Int32 unit);
     void (*resetListChildrenMainSize)(ArkUINodeHandle node);
     void (*setListCloseAllSwipeActions)(ArkUINodeHandle node, void* userData, void(onFinish)(void* userData));
-    ArkUI_Int32 (*getInitialIndex)(ArkUINodeHandle node);
     void (*setListFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 maxSpeed);
     void (*resetListFlingSpeedLimit)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getInitialIndex)(ArkUINodeHandle node);
     void (*getlistDivider)(ArkUINodeHandle node, ArkUIdividerOptions* option, ArkUI_Int32 unit);
     void (*setInitialScroller)(ArkUINodeHandle node, ArkUINodeHandle controller, ArkUINodeHandle proxy);
     void (*resetInitialScroller)(ArkUINodeHandle node);
