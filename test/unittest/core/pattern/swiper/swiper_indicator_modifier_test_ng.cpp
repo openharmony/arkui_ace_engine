@@ -1605,4 +1605,167 @@ HWTEST_F(SwiperIndicatorModifierTestNg, UpdateShrinkPaintProperty002, TestSize.L
     modifier->UpdateShrinkPaintProperty(offset, normalItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
     EXPECT_FALSE(modifier->longPointLeftAnimEnd_ && modifier->longPointRightAnimEnd_);
 }
+
+/**
+ * @tc.name: DotIndicatorModifier006
+ * @tc.desc: Test onDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create dotIndicatorModifier and set isOverlong_ = true
+     */
+    DotIndicatorModifier dotIndicatorModifier;
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, 100.f, 100.f };
+    dotIndicatorModifier.isOverlong_ = true;
+    /**
+     * @tc.steps: step2.Call onDraw
+     * @tc.expected: isOverlong_ false
+     */
+    dotIndicatorModifier.onDraw(context);
+    EXPECT_FALSE(dotIndicatorModifier.isOverlong_);
+}
+
+/**
+ * @tc.name: DotIndicatorModifier007
+ * @tc.desc: Test PaintBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create dotIndicatorModifier and ContentProperty attributes
+     */
+    DotIndicatorModifier::ContentProperty contentProperty;
+    contentProperty.vectorBlackPointCenterX = { 100.0f, 200.0f, 300.0f };
+    LinearVector<float> itemHalfSizes = { 20.f, 30.f, 40.f, 50.f };
+
+    contentProperty.itemHalfSizes = itemHalfSizes;
+    DotIndicatorModifier dotIndicatorModifier;
+    contentProperty.backgroundColor.colorValue_.value = 0xff000000;
+    dotIndicatorModifier.backgroundWidthDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(10.0f);
+    dotIndicatorModifier.backgroundHeightDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(20.0f);
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, 100.f, 100.f };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DetachBrush()).Times(AtLeast(1)).WillRepeatedly(ReturnRef(canvas));
+    /**
+     * @tc.steps: step2.Call PaintBackground
+     * @tc.expected: The PaintBackground executed successfuly
+     */
+    dotIndicatorModifier.axis_ = Axis::VERTICAL;
+    dotIndicatorModifier.touchBottomType_ = TouchBottomType::START;
+    dotIndicatorModifier.isCustomSize_ = true;
+    dotIndicatorModifier.PaintBackground(context, contentProperty);
+}
+
+/**
+ * @tc.name: DotIndicatorModifier008
+ * @tc.desc: Test GetTouchBottomCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create dotIndicatorModifier and ContentProperty attributes
+     */
+    DotIndicatorModifier::ContentProperty contentProperty;
+    DotIndicatorModifier dotIndicatorModifier;
+    contentProperty.longPointLeftCenterX = 10.0f;
+    contentProperty.longPointRightCenterX = 30.0f;
+    contentProperty.vectorBlackPointCenterX = { 40.0f, 50.0f, 60.0f };
+    dotIndicatorModifier.isCustomSize_ = false;
+    dotIndicatorModifier.currentIndex_ = 2;
+    float radius = (contentProperty.longPointRightCenterX - contentProperty.longPointLeftCenterX) / 2.0f;
+    /**
+     * @tc.steps: step2.Call GetTouchBottomCenterX with STAGE_SHRINKT_TO_BLACK_POINT && isLeftTouchBottom
+     * @tc.expected: The GetTouchBottomCenterX executed successfuly
+     */
+    dotIndicatorModifier.animationState_ = TouchBottomAnimationStage::STAGE_SHRINKT_TO_BLACK_POINT;
+    auto result = dotIndicatorModifier.GetTouchBottomCenterX(contentProperty);
+    EXPECT_NEAR(result.first, contentProperty.vectorBlackPointCenterX[0] - radius, 0.001f);
+    EXPECT_NEAR(result.second, contentProperty.vectorBlackPointCenterX[0] + radius, 0.001f);
+    /**
+     * @tc.steps: step3.Call GetTouchBottomCenterX with TouchBottomAnimationStage::STAGE_EXPAND_TO_LONG_POINT &&
+     * isLeftTouchBottom
+     * @tc.expected: The GetTouchBottomCenterX executed successfuly
+     */
+    dotIndicatorModifier.animationState_ = TouchBottomAnimationStage::STAGE_EXPAND_TO_LONG_POINT;
+    result = dotIndicatorModifier.GetTouchBottomCenterX(contentProperty);
+    EXPECT_NEAR(result.first, contentProperty.vectorBlackPointCenterX[2] - radius, 0.001f);
+    EXPECT_NEAR(result.second, contentProperty.vectorBlackPointCenterX[2] + radius, 0.001f);
+}
+
+/**
+ * @tc.name: DotIndicatorModifier009
+ * @tc.desc: Test UpdateLongPointDilateRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call the UpdateLongPointDilateRatio interface to convert longPointIsHover_ Set to false
+     * @tc.expected: LongPointIsHover_ Equal to false
+     */
+    DotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.longPointIsHover_ = false;
+    dotIndicatorModifier.UpdateLongPointDilateRatio();
+    EXPECT_FALSE(dotIndicatorModifier.longPointIsHover_);
+}
+
+/**
+ * @tc.name: DotIndicatorModifier010
+ * @tc.desc: Test StopAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call the StopAnimation with ifImmediately false
+     * @tc.expected: ifNeedFinishCallback_ Equal to false
+     */
+    DotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.ifNeedFinishCallback_ = false;
+    dotIndicatorModifier.StopAnimation(true);
+    EXPECT_FALSE(dotIndicatorModifier.ifNeedFinishCallback_);
+}
+
+/**
+ * @tc.name: DotIndicatorModifier011
+ * @tc.desc: Test GetLoopTranslateDuration
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call the GetLoopTranslateDuration
+     * @tc.expected: result Equal to defaultTouchBottomAnimationDuration
+     */
+    DotIndicatorModifier dotIndicatorModifier;
+    int32_t defaultTouchBottomAnimationDuration = 200;
+    dotIndicatorModifier.headCurve_ = AceType::MakeRefPtr<InterpolatingSpring>(0.1f, 0.1f, 0.1f, 0.1f);
+    auto result = dotIndicatorModifier.GetLoopTranslateDuration();
+    EXPECT_EQ(result, defaultTouchBottomAnimationDuration);
+}
+
+/**
+ * @tc.name: DotIndicatorModifier012
+ * @tc.desc: Test GetLoopOpacityDuration
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call the GetLoopTranslateDuration
+     * @tc.expected: result Equal to defaultOpacityAnimationDuration
+     */
+    DotIndicatorModifier dotIndicatorModifier;
+    int32_t defaultOpacityAnimationDuration = 100;
+    dotIndicatorModifier.headCurve_ = AceType::MakeRefPtr<InterpolatingSpring>(0.1f, 0.1f, 0.1f, 0.1f);
+    auto result = dotIndicatorModifier.GetLoopOpacityDuration();
+    EXPECT_EQ(result, defaultOpacityAnimationDuration);
+}
 } // namespace OHOS::Ace::NG
