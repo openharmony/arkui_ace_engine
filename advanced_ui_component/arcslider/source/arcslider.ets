@@ -46,6 +46,7 @@ const ACTIVE_TRACK_THICKNESS_DEFAULT = 24;
 const TRACK_COLOR_DEFAULT = '#33FFFFFF';
 const TRACK_BLUR_DEFAULT = 20;
 const SELECTED_COLOR_DEFAULT = '#FF5EA1FF';
+const BLUR_COLOR_DEFAULT = '#00ffffff';
 
 const MIN_STATUS = 'min';
 const MAX_STATUS = 'max';
@@ -410,6 +411,9 @@ export struct ArcSlider {
   private isFocus: boolean = false;
   private needVibrate: boolean = true;
   private crownEventCounter: number = 0;
+  @State clipPath: string = '';
+  @State sweepFlag: boolean = false;
+  @State largeArcFlag: boolean = false;
 
   aboutToAppear() {
     this.updateArcSlider();
@@ -535,6 +539,7 @@ export struct ArcSlider {
     }
     this.normalRadius = this.options.layoutOptions!.radius! - (this.lineWidth / 2) -
       this.options.layoutOptions!.padding!;
+    this.calBlurNormal();
   }
 
   setSelected() {
@@ -554,6 +559,151 @@ export struct ArcSlider {
       }
     }
     this.normalRadius = this.options.layoutOptions!.radius! - (this.lineWidth / 2);
+    this.calBlurSelected();
+  }
+
+  calBlurNormal() {
+    if (this.parameters.reverse) {
+      if (this.trackStart > this.end) {
+        if (this.trackStart - this.end > Math.PI) {
+          this.largeArcFlag = true
+          this.sweepFlag = false
+        } else {
+          this.largeArcFlag = false
+          this.sweepFlag = false
+        }
+      } else {
+        if (2 * Math.PI + this.trackStart - this.end > Math.PI) {
+          this.largeArcFlag = true
+          this.sweepFlag = false
+        } else {
+          this.largeArcFlag = false
+          this.sweepFlag = false
+        }
+      }
+    } else {
+      if (this.trackStart > this.end) {
+        if (2 * Math.PI + this.end - this.trackStart > Math.PI) {
+          this.largeArcFlag = true
+          this.sweepFlag = true
+        } else {
+          this.largeArcFlag = false
+          this.sweepFlag = true
+        }
+      } else {
+        if (this.end - this.trackStart > Math.PI) {
+          this.largeArcFlag = true
+          this.sweepFlag = true
+        } else {
+          this.largeArcFlag = false
+          this.sweepFlag = true
+        }
+      }
+    }
+    if (this.parameters.uiContext!) {
+      this.clipPath = 'M' + JSON.stringify(1.5 * (this.parameters.x + (this.parameters.normalRadius -
+        this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' + JSON.stringify(1.5 *
+        (this.parameters.y + (this.parameters.normalRadius - this.parameters.lineWidth / 2) *
+        Math.sin(this.parameters.trackStart))) + ' A' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' ' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' 0' + ' 1' + ' ' +
+      JSON.stringify(Number(this.sweepFlag)) + ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x +
+        (this.parameters.normalRadius + this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius +
+        this.parameters.lineWidth / 2) * Math.sin(this.parameters.trackStart))) + ' A' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius + this.parameters.lineWidth / 2)) +
+        ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius + this.parameters.lineWidth /
+        2)) + ' 0' + ' ' + JSON.stringify(Number(this.largeArcFlag)) + ' ' + JSON.stringify(Number(this.sweepFlag)) +
+        ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x + (this.parameters.normalRadius +
+        this.parameters.lineWidth / 2) * Math.cos(this.parameters.end))) + ' ' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius +
+        this.parameters.lineWidth / 2) * Math.sin(this.parameters.end))) + ' A' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' ' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' 0' + ' 1' + ' ' +
+      JSON.stringify(Number(this.sweepFlag)) + ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x +
+        (this.parameters.normalRadius - this.parameters.lineWidth / 2) * Math.cos(this.parameters.end))) + ' ' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
+        this.parameters.lineWidth / 2) * Math.sin(this.parameters.end))) + ' A' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius - this.parameters.lineWidth / 2)) +
+        ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius - this.parameters.lineWidth /
+        2)) + ' 180' + ' ' + JSON.stringify(Number(this.largeArcFlag)) + ' ' + JSON.stringify(Number(!this.sweepFlag)) +
+        ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x + (this.parameters.normalRadius -
+        this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
+        this.parameters.lineWidth / 2) * Math.sin(this.parameters.trackStart)))
+    }
+  }
+
+  calBlurSelected() {
+    if (this.parameters.reverse) {
+      if (this.trackStart > this.end) {
+        if (this.trackStart - this.end > Math.PI) {
+          this.largeArcFlag = true
+          this.sweepFlag = false
+        } else {
+          this.largeArcFlag = false
+          this.sweepFlag = false
+        }
+      } else {
+        if (2 * Math.PI + this.trackStart - this.end > Math.PI) {
+          this.largeArcFlag = true
+          this.sweepFlag = false
+        } else {
+          this.largeArcFlag = false
+          this.sweepFlag = false
+        }
+      }
+    } else {
+      if (this.trackStart > this.end) {
+        if (2 * Math.PI + this.end - this.trackStart > Math.PI) {
+          this.largeArcFlag = true
+          this.sweepFlag = true
+        } else {
+          this.largeArcFlag = false
+          this.sweepFlag = true
+        }
+      } else {
+        if (this.end - this.trackStart > Math.PI) {
+          this.largeArcFlag = true
+          this.sweepFlag = true
+        } else {
+          this.largeArcFlag = false
+          this.sweepFlag = true
+        }
+      }
+    }
+    if (this.parameters.uiContext!) {
+      this.clipPath = 'M' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x +
+        (this.parameters.normalRadius - this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
+        this.parameters.lineWidth / 2) * Math.sin(this.parameters.trackStart))) + ' A' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth) / 2) + ' ' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth) / 2) + ' 0' + ' 1' + ' ' +
+      JSON.stringify(Number(this.sweepFlag)) + ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x +
+        (this.parameters.normalRadius + this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius +
+        this.parameters.lineWidth / 2) * Math.sin(this.parameters.trackStart))) + ' A' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius + this.parameters.lineWidth / 2)) +
+        ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius +
+        this.parameters.lineWidth / 2)) + ' 0' + ' ' + JSON.stringify(Number(this.largeArcFlag)) + ' ' +
+      JSON.stringify(Number(this.sweepFlag)) + ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x +
+        (this.parameters.normalRadius + this.parameters.lineWidth / 2) * Math.cos(this.parameters.end))) + ' ' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius +
+        this.parameters.lineWidth / 2) * Math.sin(this.parameters.end))) + ' A' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth) / 2) + ' ' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth) / 2) + ' 0' + ' 0' + ' ' +
+      JSON.stringify(Number(this.sweepFlag)) + ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x +
+        (this.parameters.normalRadius - this.parameters.lineWidth / 2) * Math.cos(this.parameters.end))) + ' ' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
+        this.parameters.lineWidth / 2) * Math.sin(this.parameters.end))) + ' A' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius - this.parameters.lineWidth / 2)) +
+        ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius - this.parameters.lineWidth /
+        2)) + ' 180' + ' ' + JSON.stringify(Number(this.largeArcFlag)) + ' ' + JSON.stringify(Number(!this.sweepFlag)) +
+        ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x + (this.parameters.normalRadius -
+        this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
+      JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
+        this.parameters.lineWidth / 2) * Math.sin(this.parameters.trackStart)))
+    }
   }
 
   startTouchAnimator() {
@@ -576,6 +726,7 @@ export struct ArcSlider {
       this.setSelected();
       this.updateModifier();
       this.fullModifier.invalidate();
+      this.calBlurNormal();
     }
     this.touchAnimator.onFinish = () => {
       this.isTouchAnimatorFinished = true;
@@ -604,6 +755,7 @@ export struct ArcSlider {
       this.end = this.selectArc;
       this.updateModifier();
       this.fullModifier.invalidate();
+      this.calBlurSelected();
     }
     if (this.maxRestoreAnimator) {
       this.maxRestoreAnimator.play();
@@ -628,6 +780,7 @@ export struct ArcSlider {
       this.trackStartCurrent;
       this.updateModifier();
       this.fullModifier.invalidate();
+      this.calBlurSelected();
     }
     if (this.minRestoreAnimator) {
       this.minRestoreAnimator.play();
@@ -655,6 +808,7 @@ export struct ArcSlider {
       this.setNormal();
       this.updateModifier();
       this.fullModifier.invalidate();
+      this.calBlurNormal();
     }
     if (this.restoreAnimator) {
       this.restoreAnimator.play();
@@ -874,6 +1028,7 @@ export struct ArcSlider {
     this.updateModifier();
     this.fullModifier.invalidate();
     this.touchY = moveY;
+    this.calBlurSelected();
   }
 
   calcMinValueDeltaIsNegative() {
@@ -948,6 +1103,7 @@ export struct ArcSlider {
     this.updateModifier();
     this.fullModifier.invalidate();
     this.touchY = moveY;
+    this.calBlurNormal();
   }
 
   isHotRegion(touchX: number, touchY: number): boolean {
@@ -1020,214 +1176,231 @@ export struct ArcSlider {
 
   build() {
     Column() {
-      Slider()
-        .drawModifier(this.fullModifier)
-        .width(this.updateArcSlider())
-        .height(this.totalHeight)
-        .hitTestBehavior(HitTestMode.Transparent)
-        .onTouch((event?: TouchEvent) => {
-          if (event) {
-            if (event.type === TouchType.Down && !this.isEnlarged) {
-              this.touchY = event.touches[0].y;
-              if (this.meter !== INVALID_TIMEOUT_ID) {
-                clearTimeout(this.meter);
-                this.meter = INVALID_TIMEOUT_ID
-              }
-              if (this.isHotRegion(event.touches[0].x, event.touches[0].y)) {
-                this.options.onTouch?.(event);
-                this.isEnlarged = true;
-                this.startTouchAnimator();
-              }
-            } else if (event.type === TouchType.Down && this.isEnlarged) {
-              this.touchY = event.touches[0].y;
-              if (this.isHotRegion(event.touches[0].x, event.touches[0].y)) {
+      Stack() {
+        Circle({ width: TOTAL_LENGTH, height: TOTAL_LENGTH })
+          .width(this.updateArcSlider())
+          .fill(BLUR_COLOR_DEFAULT)
+          .clipShape(new Path({ commands: this.clipPath }))
+          .backdropBlur(TRACK_BLUR_DEFAULT)
+        Button()
+          .backgroundColor(BLUR_COLOR_DEFAULT)
+          .drawModifier(this.fullModifier)
+          .width(this.updateArcSlider())
+          .height(this.totalHeight)
+          .onTouch((event?: TouchEvent) => {
+            if (event) {
+              if (event.type === TouchType.Down && !this.isEnlarged) {
+                this.touchY = event.touches[0].y;
+                if (this.meter !== INVALID_TIMEOUT_ID) {
+                  clearTimeout(this.meter);
+                  this.meter = INVALID_TIMEOUT_ID
+                }
+                if (this.isHotRegion(event.touches[0].x, event.touches[0].y)) {
+                  this.options.onTouch?.(event);
+                  this.isEnlarged = true;
+                  this.startTouchAnimator();
+                  this.calBlurSelected();
+                }
+              } else if (event.type === TouchType.Down && this.isEnlarged) {
+                this.touchY = event.touches[0].y;
+                if (this.isHotRegion(event.touches[0].x, event.touches[0].y)) {
+                  this.options.onTouch?.(event);
+                  if (this.meter !== INVALID_TIMEOUT_ID) {
+                    clearTimeout(this.meter);
+                    this.meter = INVALID_TIMEOUT_ID
+                  }
+                  if (this.isTouchAnimatorFinished) {
+                    this.sliderValue = this.options.valueOptions!.value!;
+                    this.calcClickValue(event.touches[0].x, event.touches[0].y);
+                    this.startClickAnimator();
+                  }
+                  if (this.isClickAnimatorFinished) {
+                    if (this.meter !== INVALID_TIMEOUT_ID) {
+                      clearTimeout(this.meter);
+                      this.meter = INVALID_TIMEOUT_ID
+                    }
+                    this.touchY = event.touches[0].y;
+                    this.calcValue(event.touches[0].y);
+                    this.setSelected();
+                    this.updateModifier();
+                    this.fullModifier.invalidate();
+                  }
+                }
+              } else if (this.isEnlarged && event.type === TouchType.Up) {
+                this.options.onChange?.(this.options.valueOptions!.value!);
                 this.options.onTouch?.(event);
                 if (this.meter !== INVALID_TIMEOUT_ID) {
                   clearTimeout(this.meter);
                   this.meter = INVALID_TIMEOUT_ID
                 }
-                if (this.isTouchAnimatorFinished) {
-                  this.sliderValue = this.options.valueOptions!.value!;
-                  this.calcClickValue(event.touches[0].x, event.touches[0].y);
-                  this.startClickAnimator();
-                }
-                if (this.isClickAnimatorFinished) {
-                  if (this.meter !== INVALID_TIMEOUT_ID) {
-                    clearTimeout(this.meter);
-                    this.meter = INVALID_TIMEOUT_ID
+                this.meter = setTimeout(() => {
+                  if (this.isEnlarged) {
+                    this.isTouchAnimatorFinished = false;
+                    this.isClickAnimatorFinished = false;
+                    this.isEnlarged = false;
+                    this.startRestoreAnimator();
+                    this.calBlurNormal();
                   }
-                  this.touchY = event.touches[0].y;
-                  this.calcValue(event.touches[0].y);
-                  this.setSelected();
-                  this.updateModifier();
-                  this.fullModifier.invalidate();
-                }
-              }
-            } else if (this.isEnlarged && event.type === TouchType.Up) {
-              this.options.onChange?.(this.options.valueOptions!.value!);
-              this.options.onTouch?.(event);
-              if (this.meter !== INVALID_TIMEOUT_ID) {
-                clearTimeout(this.meter);
-                this.meter = INVALID_TIMEOUT_ID
-              }
-              this.meter = setTimeout(() => {
-                if (this.isEnlarged) {
-                  this.isTouchAnimatorFinished = false;
-                  this.isClickAnimatorFinished = false;
-                  this.isEnlarged = false;
-                  this.startRestoreAnimator();
-                }
-              }, RESTORE_TIMEOUT)
-              if (this.options.layoutOptions!.reverse!) {
-                if (this.selectedMaxOrMin === MAX_STATUS && this.selectArc < this.endCurrent) {
-                  this.lineWidthCurrent = this.lineWidth;
-                  this.selectArcCurrent = this.selectArc;
-                  this.startMaxRestoreAnimator();
-                }
-                if (this.selectedMaxOrMin === MIN_STATUS && this.trackStart > this.start) {
-                  this.lineWidthCurrent = this.lineWidth;
-                  this.trackStartCurrent = this.trackStart;
-                  this.startMinRestoreAnimator();
-                }
-              } else {
-                if (this.selectedMaxOrMin === MAX_STATUS && this.selectArc > this.endCurrent) {
-                  this.lineWidthCurrent = this.lineWidth;
-                  this.selectArcCurrent = this.selectArc;
-                  this.startMaxRestoreAnimator();
-                }
-                if (this.selectedMaxOrMin === MIN_STATUS && this.trackStart < this.start) {
-                  this.lineWidthCurrent = this.lineWidth;
-                  this.trackStartCurrent = this.trackStart;
-                  this.startMinRestoreAnimator();
-                }
-              }
-            } else if ((this.isEnlarged) && (this.isTouchAnimatorFinished) &&
-              (event.type === TouchType.Move)) {
-              this.options.onTouch?.(event);
-              if (this.meter !== INVALID_TIMEOUT_ID) {
-                clearTimeout(this.meter);
-                this.meter = INVALID_TIMEOUT_ID
-              }
-              if (this.options.layoutOptions!.reverse!) {
-                if (((this.selectArc < this.endCurrent) || (checkApprox(this.selectArc, this.endCurrent))) &&
-                  (this.delta >= 0)) {
-                  this.selectedMaxOrMin = MAX_STATUS;
-                  this.calcMaxValue(event.touches[0].y);
-                } else if ((this.selectArc < this.endCurrent) && (this.delta <= 0)) {
-                  this.selectedMaxOrMin = MAX_STATUS;
-                  this.calcMaxValue(event.touches[0].y);
-                } else if ((this.trackStart >= this.start) && (checkApprox(this.options.valueOptions!.value!,
-                  this.options.valueOptions!.min!)) && (this.delta <= 0)) {
-                  this.selectedMaxOrMin = MIN_STATUS;
-                  this.calcMinValue(event.touches[0].y);
-                } else if ((this.trackStart > this.start) && (this.delta >= 0)) {
-                  this.selectedMaxOrMin = MIN_STATUS;
-                  this.calcMinValue(event.touches[0].y);
+                }, RESTORE_TIMEOUT)
+                if (this.options.layoutOptions!.reverse!) {
+                  if (this.selectedMaxOrMin === MAX_STATUS && this.selectArc < this.endCurrent) {
+                    this.lineWidthCurrent = this.lineWidth;
+                    this.selectArcCurrent = this.selectArc;
+                    this.startMaxRestoreAnimator();
+                  }
+                  if (this.selectedMaxOrMin === MIN_STATUS && this.trackStart > this.start) {
+                    this.lineWidthCurrent = this.lineWidth;
+                    this.trackStartCurrent = this.trackStart;
+                    this.startMinRestoreAnimator();
+                    this.calBlurSelected();
+                  }
                 } else {
-                  this.calcValue(event.touches[0].y);
-                  this.selectedMaxOrMin = NORMAL_STATUS;
+                  if (this.selectedMaxOrMin === MAX_STATUS && this.selectArc > this.endCurrent) {
+                    this.lineWidthCurrent = this.lineWidth;
+                    this.selectArcCurrent = this.selectArc;
+                    this.startMaxRestoreAnimator();
+                  }
+                  if (this.selectedMaxOrMin === MIN_STATUS && this.trackStart < this.start) {
+                    this.lineWidthCurrent = this.lineWidth;
+                    this.trackStartCurrent = this.trackStart;
+                    this.startMinRestoreAnimator();
+                    this.calBlurSelected();
+                  }
                 }
-              } else {
-                if (((this.selectArc > this.endCurrent) || (checkApprox(this.selectArc, this.endCurrent))) &&
-                  (this.delta <= 0)) {
-                  this.selectedMaxOrMin = MAX_STATUS;
-                  this.calcMaxValue(event.touches[0].y);
-                } else if ((this.selectArc > this.endCurrent) && (this.delta >= 0)) {
-                  this.selectedMaxOrMin = MAX_STATUS;
-                  this.calcMaxValue(event.touches[0].y);
-                } else if ((checkApprox(this.options.valueOptions!.value!, this.options.valueOptions!.min!)) &&
-                  (this.delta >= 0) && ((this.trackStart <= this.start) ||
-                  (checkApprox(this.selectArc, this.endCurrent)))) {
-                  this.selectedMaxOrMin = MIN_STATUS;
-                  this.calcMinValue(event.touches[0].y);
-                } else if ((this.trackStart < this.start) && (this.delta <= 0)) {
-                  this.selectedMaxOrMin = MIN_STATUS;
-                  this.calcMinValue(event.touches[0].y);
+              } else if ((this.isEnlarged) && (this.isTouchAnimatorFinished) &&
+                (event.type === TouchType.Move)) {
+                this.options.onTouch?.(event);
+                if (this.meter !== INVALID_TIMEOUT_ID) {
+                  clearTimeout(this.meter);
+                  this.meter = INVALID_TIMEOUT_ID
+                }
+                if (this.options.layoutOptions!.reverse!) {
+                  if (((this.selectArc < this.endCurrent) || (checkApprox(this.selectArc, this.endCurrent))) &&
+                    (this.delta >= 0)) {
+                    this.selectedMaxOrMin = MAX_STATUS;
+                    this.calcMaxValue(event.touches[0].y);
+                  } else if ((this.selectArc < this.endCurrent) && (this.delta <= 0)) {
+                    this.selectedMaxOrMin = MAX_STATUS;
+                    this.calcMaxValue(event.touches[0].y);
+                  } else if ((this.trackStart >= this.start) && (checkApprox(this.options.valueOptions!.value!,
+                    this.options.valueOptions!.min!)) && (this.delta <= 0)) {
+                    this.selectedMaxOrMin = MIN_STATUS;
+                    this.calcMinValue(event.touches[0].y);
+                    this.calBlurSelected();
+                  } else if ((this.trackStart > this.start) && (this.delta >= 0)) {
+                    this.selectedMaxOrMin = MIN_STATUS;
+                    this.calcMinValue(event.touches[0].y);
+                    this.calBlurSelected();
+                  } else {
+                    this.calcValue(event.touches[0].y);
+                    this.selectedMaxOrMin = NORMAL_STATUS;
+                  }
                 } else {
-                  this.calcValue(event.touches[0].y);
-                  this.selectedMaxOrMin = NORMAL_STATUS;
+                  if (((this.selectArc > this.endCurrent) || (checkApprox(this.selectArc, this.endCurrent))) &&
+                    (this.delta <= 0)) {
+                    this.selectedMaxOrMin = MAX_STATUS;
+                    this.calcMaxValue(event.touches[0].y);
+                  } else if ((this.selectArc > this.endCurrent) && (this.delta >= 0)) {
+                    this.selectedMaxOrMin = MAX_STATUS;
+                    this.calcMaxValue(event.touches[0].y);
+                  } else if ((checkApprox(this.options.valueOptions!.value!, this.options.valueOptions!.min!)) &&
+                    (this.delta >= 0) && ((this.trackStart <= this.start) ||
+                    (checkApprox(this.selectArc, this.endCurrent)))) {
+                    this.selectedMaxOrMin = MIN_STATUS;
+                    this.calcMinValue(event.touches[0].y);
+                    this.calBlurSelected();
+                  } else if ((this.trackStart < this.start) && (this.delta <= 0)) {
+                    this.selectedMaxOrMin = MIN_STATUS;
+                    this.calcMinValue(event.touches[0].y);
+                    this.calBlurSelected();
+                  } else {
+                    this.calcValue(event.touches[0].y);
+                    this.selectedMaxOrMin = NORMAL_STATUS;
+                  }
                 }
               }
             }
-          }
-        })
-        .focusable(true)
-        .focusOnTouch(true)
-        .onDigitalCrown((event: CrownEvent) => {
-          if (event && this.isFocus) {
-            this.crownEventCounter += 1;
-            if (this.crownEventCounter % CROWN_EVENT_FLAG === 0) {
-              try {
-                let ret = vibrator.isSupportEffectSync(VIBRATOR_TYPE_TWO);
-                if (ret) {
-                  vibrator.startVibration({
-                    type: 'preset',
-                    effectId: VIBRATOR_TYPE_TWO,
-                    count: 1,
-                  }, {
-                    usage: 'unknown'
-                  }, (error: BusinessError) => {
-                    if (error) {
-                      hilog.error(0x3900, 'ArcSlider', `Failed to start vibration.
-                          Code: ${error.code}, message: ${error.message}`);
-                      this.crownEventCounter = 0;
-                      return;
-                    }
-                    hilog.info(0x3900, 'ArcSlider', 'Succeed in starting vibration');
-                  });
-                } else {
-                  hilog.error(0x3900, 'ArcSlider', `watchhaptic.crown.strength2 is not supported`);
+          })
+          .focusable(true)
+          .focusOnTouch(true)
+          .onDigitalCrown((event: CrownEvent) => {
+            if (event && this.isFocus) {
+              this.crownEventCounter += 1;
+              if (this.crownEventCounter % CROWN_EVENT_FLAG === 0) {
+                try {
+                  let ret = vibrator.isSupportEffectSync(VIBRATOR_TYPE_TWO);
+                  if (ret) {
+                    vibrator.startVibration({
+                      type: 'preset',
+                      effectId: VIBRATOR_TYPE_TWO,
+                      count: 1,
+                    }, {
+                      usage: 'unknown'
+                    }, (error: BusinessError) => {
+                      if (error) {
+                        hilog.error(0x3900, 'ArcSlider', `Failed to start vibration.
+                            Code: ${error.code}, message: ${error.message}`);
+                        this.crownEventCounter = 0;
+                        return;
+                      }
+                      hilog.info(0x3900, 'ArcSlider', 'Succeed in starting vibration');
+                    });
+                  } else {
+                    hilog.error(0x3900, 'ArcSlider', `watchhaptic.crown.strength2 is not supported`);
+                  }
+                } catch (error) {
+                  let e: BusinessError = error as BusinessError;
+                  hilog.error(0x3900, 'ArcSlider', `An unexpected error occurred in starting vibration.
+                      Code: ${e.code}, message: ${e.message}`);
                 }
-              } catch (error) {
-                let e: BusinessError = error as BusinessError;
-                hilog.error(0x3900, 'ArcSlider', `An unexpected error occurred in starting vibration.
-                    Code: ${e.code}, message: ${e.message}`);
+                this.crownEventCounter = 0;
               }
-              this.crownEventCounter = 0;
-            }
-            if (event.action === CrownAction.BEGIN && !this.isEnlarged) {
-              if (this.meter !== INVALID_TIMEOUT_ID) {
-                clearTimeout(this.meter);
-                this.meter = INVALID_TIMEOUT_ID
-              }
-              this.isEnlarged = true;
-              this.startTouchAnimator();
-              this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
-              this.calcDisplayControlRatio(this.options.digitalCrownSensitivity!)) / this.normalRadius;
-              this.calcCrownValue(this.crownDeltaAngle);
-            } else if (event.action === CrownAction.BEGIN && this.isEnlarged) {
-              if (this.meter !== INVALID_TIMEOUT_ID) {
-                clearTimeout(this.meter);
-                this.meter = INVALID_TIMEOUT_ID
-              }
-              this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
-              this.calcDisplayControlRatio(this.options.digitalCrownSensitivity!)) / this.normalRadius;
-              this.calcCrownValue(this.crownDeltaAngle);
-            } else if ((this.isEnlarged) && (this.isTouchAnimatorFinished) &&
-              (event.action === CrownAction.UPDATE)) {
-              if (this.meter !== INVALID_TIMEOUT_ID) {
-                clearTimeout(this.meter);
-                this.meter = INVALID_TIMEOUT_ID
-              }
-              this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
-              this.calcDisplayControlRatio(this.options.digitalCrownSensitivity!)) / this.normalRadius;
-              this.calcCrownValue(this.crownDeltaAngle);
-            } else if (this.isEnlarged && event.action === CrownAction.END) {
-              if (this.meter !== INVALID_TIMEOUT_ID) {
-                clearTimeout(this.meter);
-                this.meter = INVALID_TIMEOUT_ID
-              }
-              this.meter = setTimeout(() => {
-                if (this.isEnlarged) {
-                  this.isTouchAnimatorFinished = false;
-                  this.isClickAnimatorFinished = false;
-                  this.isEnlarged = false;
-                  this.startRestoreAnimator();
+              if (event.action === CrownAction.BEGIN && !this.isEnlarged) {
+                if (this.meter !== INVALID_TIMEOUT_ID) {
+                  clearTimeout(this.meter);
+                  this.meter = INVALID_TIMEOUT_ID
                 }
-              }, RESTORE_TIMEOUT)
+                this.isEnlarged = true;
+                this.startTouchAnimator();
+                this.calBlurSelected();
+                this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
+                this.calcDisplayControlRatio(this.options.digitalCrownSensitivity!)) / this.normalRadius;
+                this.calcCrownValue(this.crownDeltaAngle);
+              } else if (event.action === CrownAction.BEGIN && this.isEnlarged) {
+                if (this.meter !== INVALID_TIMEOUT_ID) {
+                  clearTimeout(this.meter);
+                  this.meter = INVALID_TIMEOUT_ID
+                }
+                this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
+                this.calcDisplayControlRatio(this.options.digitalCrownSensitivity!)) / this.normalRadius;
+                this.calcCrownValue(this.crownDeltaAngle);
+              } else if ((this.isEnlarged) && (this.isTouchAnimatorFinished) &&
+                (event.action === CrownAction.UPDATE)) {
+                if (this.meter !== INVALID_TIMEOUT_ID) {
+                  clearTimeout(this.meter);
+                  this.meter = INVALID_TIMEOUT_ID
+                }
+                this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
+                this.calcDisplayControlRatio(this.options.digitalCrownSensitivity!)) / this.normalRadius;
+                this.calcCrownValue(this.crownDeltaAngle);
+              } else if (this.isEnlarged && event.action === CrownAction.END) {
+                if (this.meter !== INVALID_TIMEOUT_ID) {
+                  clearTimeout(this.meter);
+                  this.meter = INVALID_TIMEOUT_ID
+                }
+                this.meter = setTimeout(() => {
+                  if (this.isEnlarged) {
+                    this.isTouchAnimatorFinished = false;
+                    this.isClickAnimatorFinished = false;
+                    this.isEnlarged = false;
+                    this.startRestoreAnimator();
+                    this.calBlurNormal();
+                  }
+                }, RESTORE_TIMEOUT)
+              }
             }
-          }
-        })
-    }
+          })
+      }
+    }.hitTestBehavior(HitTestMode.Transparent)
   }
 }

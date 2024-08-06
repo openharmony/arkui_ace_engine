@@ -55,6 +55,7 @@ const ACTIVE_TRACK_THICKNESS_DEFAULT = 24;
 const TRACK_COLOR_DEFAULT = '#33FFFFFF';
 const TRACK_BLUR_DEFAULT = 20;
 const SELECTED_COLOR_DEFAULT = '#FF5EA1FF';
+const BLUR_COLOR_DEFAULT = '#00ffffff';
 const MIN_STATUS = 'min';
 const MAX_STATUS = 'max';
 const NORMAL_STATUS = 'normal';
@@ -429,6 +430,9 @@ export class ArcSlider extends ViewPU {
         this.isFocus = false;
         this.needVibrate = true;
         this.crownEventCounter = 0;
+        this.__clipPath = new ObservedPropertySimplePU('', this, "clipPath");
+        this.__sweepFlag = new ObservedPropertySimplePU(false, this, "sweepFlag");
+        this.__largeArcFlag = new ObservedPropertySimplePU(false, this, "largeArcFlag");
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
@@ -548,17 +552,56 @@ export class ArcSlider extends ViewPU {
         if (params.crownEventCounter !== undefined) {
             this.crownEventCounter = params.crownEventCounter;
         }
+        if (params.clipPath !== undefined) {
+            this.clipPath = params.clipPath;
+        }
+        if (params.sweepFlag !== undefined) {
+            this.sweepFlag = params.sweepFlag;
+        }
+        if (params.largeArcFlag !== undefined) {
+            this.largeArcFlag = params.largeArcFlag;
+        }
     }
 
     updateStateVars(params) {
     }
 
     purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__clipPath.purgeDependencyOnElmtId(rmElmtId);
+        this.__sweepFlag.purgeDependencyOnElmtId(rmElmtId);
+        this.__largeArcFlag.purgeDependencyOnElmtId(rmElmtId);
     }
 
     aboutToBeDeleted() {
+        this.__clipPath.aboutToBeDeleted();
+        this.__sweepFlag.aboutToBeDeleted();
+        this.__largeArcFlag.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
+    }
+
+    get clipPath() {
+        return this.__clipPath.get();
+    }
+
+    set clipPath(newValue) {
+        this.__clipPath.set(newValue);
+    }
+
+    get sweepFlag() {
+        return this.__sweepFlag.get();
+    }
+
+    set sweepFlag(newValue) {
+        this.__sweepFlag.set(newValue);
+    }
+
+    get largeArcFlag() {
+        return this.__largeArcFlag.get();
+    }
+
+    set largeArcFlag(newValue) {
+        this.__largeArcFlag.set(newValue);
     }
 
     aboutToAppear() {
@@ -689,6 +732,7 @@ export class ArcSlider extends ViewPU {
         }
         this.normalRadius = this.options.layoutOptions.radius - (this.lineWidth / 2) -
         this.options.layoutOptions.padding;
+        this.calBlurNormal();
     }
 
     setSelected() {
@@ -711,6 +755,165 @@ export class ArcSlider extends ViewPU {
             }
         }
         this.normalRadius = this.options.layoutOptions.radius - (this.lineWidth / 2);
+        this.calBlurSelected();
+    }
+
+    calBlurNormal() {
+        if (this.parameters.reverse) {
+            if (this.trackStart > this.end) {
+                if (this.trackStart - this.end > Math.PI) {
+                    this.largeArcFlag = true;
+                    this.sweepFlag = false;
+                }
+                else {
+                    this.largeArcFlag = false;
+                    this.sweepFlag = false;
+                }
+            }
+            else {
+                if (2 * Math.PI + this.trackStart - this.end > Math.PI) {
+                    this.largeArcFlag = true;
+                    this.sweepFlag = false;
+                }
+                else {
+                    this.largeArcFlag = false;
+                    this.sweepFlag = false;
+                }
+            }
+        }
+        else {
+            if (this.trackStart > this.end) {
+                if (2 * Math.PI + this.end - this.trackStart > Math.PI) {
+                    this.largeArcFlag = true;
+                    this.sweepFlag = true;
+                }
+                else {
+                    this.largeArcFlag = false;
+                    this.sweepFlag = true;
+                }
+            }
+            else {
+                if (this.end - this.trackStart > Math.PI) {
+                    this.largeArcFlag = true;
+                    this.sweepFlag = true;
+                }
+                else {
+                    this.largeArcFlag = false;
+                    this.sweepFlag = true;
+                }
+            }
+        }
+        if (this.parameters.uiContext) {
+            this.clipPath = 'M' + JSON.stringify(1.5 * (this.parameters.x + (this.parameters.normalRadius -
+                this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' + JSON.stringify(1.5 *
+                (this.parameters.y + (this.parameters.normalRadius - this.parameters.lineWidth / 2) *
+                Math.sin(this.parameters.trackStart))) + ' A' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' ' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' 0' + ' 1' + ' ' +
+            JSON.stringify(Number(this.sweepFlag)) + ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x +
+                (this.parameters.normalRadius + this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius +
+                this.parameters.lineWidth / 2) * Math.sin(this.parameters.trackStart))) + ' A' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius + this.parameters.lineWidth / 2)) +
+                ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius + this.parameters.lineWidth /
+                2)) + ' 0' + ' ' + JSON.stringify(Number(this.largeArcFlag)) + ' ' + JSON.stringify(Number(this.sweepFlag)) +
+                ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x + (this.parameters.normalRadius +
+                this.parameters.lineWidth / 2) * Math.cos(this.parameters.end))) + ' ' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius +
+                this.parameters.lineWidth / 2) * Math.sin(this.parameters.end))) + ' A' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' ' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' 0' + ' 1' + ' ' +
+            JSON.stringify(Number(this.sweepFlag)) + ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x +
+                (this.parameters.normalRadius - this.parameters.lineWidth / 2) * Math.cos(this.parameters.end))) + ' ' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
+                this.parameters.lineWidth / 2) * Math.sin(this.parameters.end))) + ' A' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius - this.parameters.lineWidth / 2)) +
+                ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius - this.parameters.lineWidth /
+                2)) + ' 180' + ' ' + JSON.stringify(Number(this.largeArcFlag)) + ' ' + JSON.stringify(Number(!this.sweepFlag)) +
+                ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x + (this.parameters.normalRadius -
+                this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
+                this.parameters.lineWidth / 2) * Math.sin(this.parameters.trackStart)));
+        }
+    }
+
+    calBlurSelected() {
+        if (this.parameters.reverse) {
+            if (this.trackStart > this.end) {
+                if (this.trackStart - this.end > Math.PI) {
+                    this.largeArcFlag = true;
+                    this.sweepFlag = false;
+                }
+                else {
+                    this.largeArcFlag = false;
+                    this.sweepFlag = false;
+                }
+            }
+            else {
+                if (2 * Math.PI + this.trackStart - this.end > Math.PI) {
+                    this.largeArcFlag = true;
+                    this.sweepFlag = false;
+                }
+                else {
+                    this.largeArcFlag = false;
+                    this.sweepFlag = false;
+                }
+            }
+        }
+        else {
+            if (this.trackStart > this.end) {
+                if (2 * Math.PI + this.end - this.trackStart > Math.PI) {
+                    this.largeArcFlag = true;
+                    this.sweepFlag = true;
+                }
+                else {
+                    this.largeArcFlag = false;
+                    this.sweepFlag = true;
+                }
+            }
+            else {
+                if (this.end - this.trackStart > Math.PI) {
+                    this.largeArcFlag = true;
+                    this.sweepFlag = true;
+                }
+                else {
+                    this.largeArcFlag = false;
+                    this.sweepFlag = true;
+                }
+            }
+        }
+        if (this.parameters.uiContext) {
+            this.clipPath = 'M' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x +
+                (this.parameters.normalRadius - this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
+                this.parameters.lineWidth / 2) * Math.sin(this.parameters.trackStart))) + ' A' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth) / 2) + ' ' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth) / 2) + ' 0' + ' 1' + ' ' +
+            JSON.stringify(Number(this.sweepFlag)) + ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x +
+                (this.parameters.normalRadius + this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius +
+                this.parameters.lineWidth / 2) * Math.sin(this.parameters.trackStart))) + ' A' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius + this.parameters.lineWidth / 2)) +
+                ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius +
+                this.parameters.lineWidth / 2)) + ' 0' + ' ' + JSON.stringify(Number(this.largeArcFlag)) + ' ' +
+            JSON.stringify(Number(this.sweepFlag)) + ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x +
+                (this.parameters.normalRadius + this.parameters.lineWidth / 2) * Math.cos(this.parameters.end))) + ' ' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius +
+                this.parameters.lineWidth / 2) * Math.sin(this.parameters.end))) + ' A' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth) / 2) + ' ' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.lineWidth) / 2) + ' 0' + ' 0' + ' ' +
+            JSON.stringify(Number(this.sweepFlag)) + ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x +
+                (this.parameters.normalRadius - this.parameters.lineWidth / 2) * Math.cos(this.parameters.end))) + ' ' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
+                this.parameters.lineWidth / 2) * Math.sin(this.parameters.end))) + ' A' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius - this.parameters.lineWidth / 2)) +
+                ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.normalRadius - this.parameters.lineWidth /
+                2)) + ' 180' + ' ' + JSON.stringify(Number(this.largeArcFlag)) + ' ' + JSON.stringify(Number(!this.sweepFlag)) +
+                ' ' + JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.x + (this.parameters.normalRadius -
+                this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
+            JSON.stringify(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
+                this.parameters.lineWidth / 2) * Math.sin(this.parameters.trackStart)));
+        }
     }
 
     startTouchAnimator() {
@@ -733,6 +936,7 @@ export class ArcSlider extends ViewPU {
             this.setSelected();
             this.updateModifier();
             this.fullModifier.invalidate();
+            this.calBlurNormal();
         };
         this.touchAnimator.onFinish = () => {
             this.isTouchAnimatorFinished = true;
@@ -761,6 +965,7 @@ export class ArcSlider extends ViewPU {
             this.end = this.selectArc;
             this.updateModifier();
             this.fullModifier.invalidate();
+            this.calBlurSelected();
         };
         if (this.maxRestoreAnimator) {
             this.maxRestoreAnimator.play();
@@ -785,6 +990,7 @@ export class ArcSlider extends ViewPU {
             this.trackStartCurrent;
             this.updateModifier();
             this.fullModifier.invalidate();
+            this.calBlurSelected();
         };
         if (this.minRestoreAnimator) {
             this.minRestoreAnimator.play();
@@ -812,6 +1018,7 @@ export class ArcSlider extends ViewPU {
             this.setNormal();
             this.updateModifier();
             this.fullModifier.invalidate();
+            this.calBlurNormal();
         };
         if (this.restoreAnimator) {
             this.restoreAnimator.play();
@@ -1045,6 +1252,7 @@ export class ArcSlider extends ViewPU {
         this.updateModifier();
         this.fullModifier.invalidate();
         this.touchY = moveY;
+        this.calBlurSelected();
     }
 
     calcMinValueDeltaIsNegative() {
@@ -1122,6 +1330,7 @@ export class ArcSlider extends ViewPU {
         this.updateModifier();
         this.fullModifier.invalidate();
         this.touchY = moveY;
+        this.calBlurNormal();
     }
 
     isHotRegion(touchX, touchY) {
@@ -1206,14 +1415,25 @@ export class ArcSlider extends ViewPU {
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
+            Column.hitTestBehavior(HitTestMode.Transparent);
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Slider.create();
-            Slider.drawModifier(this.fullModifier);
-            Slider.width(this.updateArcSlider());
-            Slider.height(this.totalHeight);
-            Slider.hitTestBehavior(HitTestMode.Transparent);
-            Slider.onTouch((event) => {
+            Stack.create();
+        }, Stack);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Circle.create({ width: TOTAL_LENGTH, height: TOTAL_LENGTH });
+            Circle.width(this.updateArcSlider());
+            Circle.fill(BLUR_COLOR_DEFAULT);
+            Circle.clipShape(new Path({ commands: this.clipPath }));
+            Circle.backdropBlur(TRACK_BLUR_DEFAULT);
+        }, Circle);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Button.createWithLabel();
+            Button.backgroundColor(BLUR_COLOR_DEFAULT);
+            Button.drawModifier(this.fullModifier);
+            Button.width(this.updateArcSlider());
+            Button.height(this.totalHeight);
+            Button.onTouch((event) => {
                 if (event) {
                     if (event.type === TouchType.Down && !this.isEnlarged) {
                         this.touchY = event.touches[0].y;
@@ -1225,6 +1445,7 @@ export class ArcSlider extends ViewPU {
                             this.options.onTouch?.(event);
                             this.isEnlarged = true;
                             this.startTouchAnimator();
+                            this.calBlurSelected();
                         }
                     }
                     else if (event.type === TouchType.Down && this.isEnlarged) {
@@ -1266,6 +1487,7 @@ export class ArcSlider extends ViewPU {
                                 this.isClickAnimatorFinished = false;
                                 this.isEnlarged = false;
                                 this.startRestoreAnimator();
+                                this.calBlurNormal();
                             }
                         }, RESTORE_TIMEOUT);
                         if (this.options.layoutOptions.reverse) {
@@ -1278,6 +1500,7 @@ export class ArcSlider extends ViewPU {
                                 this.lineWidthCurrent = this.lineWidth;
                                 this.trackStartCurrent = this.trackStart;
                                 this.startMinRestoreAnimator();
+                                this.calBlurSelected();
                             }
                         }
                         else {
@@ -1290,6 +1513,7 @@ export class ArcSlider extends ViewPU {
                                 this.lineWidthCurrent = this.lineWidth;
                                 this.trackStartCurrent = this.trackStart;
                                 this.startMinRestoreAnimator();
+                                this.calBlurSelected();
                             }
                         }
                     }
@@ -1313,10 +1537,12 @@ export class ArcSlider extends ViewPU {
                             else if ((this.trackStart >= this.start) && (checkApprox(this.options.valueOptions.value, this.options.valueOptions.min)) && (this.delta <= 0)) {
                                 this.selectedMaxOrMin = MIN_STATUS;
                                 this.calcMinValue(event.touches[0].y);
+                                this.calBlurSelected();
                             }
                             else if ((this.trackStart > this.start) && (this.delta >= 0)) {
                                 this.selectedMaxOrMin = MIN_STATUS;
                                 this.calcMinValue(event.touches[0].y);
+                                this.calBlurSelected();
                             }
                             else {
                                 this.calcValue(event.touches[0].y);
@@ -1338,10 +1564,12 @@ export class ArcSlider extends ViewPU {
                                 (checkApprox(this.selectArc, this.endCurrent)))) {
                                 this.selectedMaxOrMin = MIN_STATUS;
                                 this.calcMinValue(event.touches[0].y);
+                                this.calBlurSelected();
                             }
                             else if ((this.trackStart < this.start) && (this.delta <= 0)) {
                                 this.selectedMaxOrMin = MIN_STATUS;
                                 this.calcMinValue(event.touches[0].y);
+                                this.calBlurSelected();
                             }
                             else {
                                 this.calcValue(event.touches[0].y);
@@ -1351,9 +1579,9 @@ export class ArcSlider extends ViewPU {
                     }
                 }
             });
-            Slider.focusable(true);
-            Slider.focusOnTouch(true);
-            Slider.onDigitalCrown((event) => {
+            Button.focusable(true);
+            Button.focusOnTouch(true);
+            Button.onDigitalCrown((event) => {
                 if (event && this.isFocus) {
                     this.crownEventCounter += 1;
                     if (this.crownEventCounter % CROWN_EVENT_FLAG === 0) {
@@ -1369,7 +1597,7 @@ export class ArcSlider extends ViewPU {
                                 }, (error) => {
                                     if (error) {
                                         hilog.error(0x3900, 'ArcSlider', `Failed to start vibration.
-                          Code: ${error.code}, message: ${error.message}`);
+                            Code: ${error.code}, message: ${error.message}`);
                                         this.crownEventCounter = 0;
                                         return;
                                     }
@@ -1383,7 +1611,7 @@ export class ArcSlider extends ViewPU {
                         catch (error) {
                             let e = error;
                             hilog.error(0x3900, 'ArcSlider', `An unexpected error occurred in starting vibration.
-                    Code: ${e.code}, message: ${e.message}`);
+                      Code: ${e.code}, message: ${e.message}`);
                         }
                         this.crownEventCounter = 0;
                     }
@@ -1394,6 +1622,7 @@ export class ArcSlider extends ViewPU {
                         }
                         this.isEnlarged = true;
                         this.startTouchAnimator();
+                        this.calBlurSelected();
                         this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
                         this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.normalRadius;
                         this.calcCrownValue(this.crownDeltaAngle);
@@ -1428,12 +1657,15 @@ export class ArcSlider extends ViewPU {
                                 this.isClickAnimatorFinished = false;
                                 this.isEnlarged = false;
                                 this.startRestoreAnimator();
+                                this.calBlurNormal();
                             }
                         }, RESTORE_TIMEOUT);
                     }
                 }
             });
-        }, Slider);
+        }, Button);
+        Button.pop();
+        Stack.pop();
         Column.pop();
     }
 
