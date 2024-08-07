@@ -557,9 +557,6 @@ bool DialogContainer::ShowToastDialogWindow(
     auto window = container->GetUIWindowInner();
     CHECK_NULL_RETURN(window, false);
     window->SetTransparent(true);
-    if (isToast) {
-        window->SetTouchable(false);
-    }
     window->SetNeedDefaultAnimation(false);
     OHOS::Rosen::WMError ret = window->MoveTo(posX, posY);
     if (ret != OHOS::Rosen::WMError::WM_OK) {
