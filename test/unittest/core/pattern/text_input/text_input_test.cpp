@@ -1331,6 +1331,107 @@ HWTEST_F(TextFieldUXTest, testShowPasswordIcon001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: testShowPasswordSymbol001
+ * @tc.desc: test testInput showPasswordSymbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testShowPasswordSymbol001, TestSize.Level1)
+{
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: showPasswordSymbol is true
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+
+    /**
+     * @tc.step: step2. Set showPasswordSymbol
+     */
+    frameNode_->MarkModifyDone();
+    auto passwordResponseArea = AceType::DynamicCast<PasswordResponseArea>(pattern_->responseArea_);
+    ASSERT_NE(passwordResponseArea, nullptr);
+    auto stackNode = passwordResponseArea->stackNode_;
+    ASSERT_NE(stackNode, nullptr);
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
+    ASSERT_NE(iconFrameNode, nullptr);
+    EXPECT_EQ(iconFrameNode->GetTag(), V2::SYMBOL_ETS_TAG);
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
+}
+
+/**
+ * @tc.name: testShowPasswordSymbol002
+ * @tc.desc: test testInput showPasswordSymbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testShowPasswordSymbol002, TestSize.Level1)
+{
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: showPasswordSymbol is false
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+
+    /**
+     * @tc.step: step2. Set showPasswordSymbol
+     */
+    frameNode_->MarkModifyDone();
+    auto passwordResponseArea = AceType::DynamicCast<PasswordResponseArea>(pattern_->responseArea_);
+    ASSERT_NE(passwordResponseArea, nullptr);
+    auto stackNode = passwordResponseArea->stackNode_;
+    ASSERT_NE(stackNode, nullptr);
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
+    ASSERT_NE(iconFrameNode, nullptr);
+    EXPECT_EQ(iconFrameNode->GetTag(), V2::IMAGE_ETS_TAG);
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
+}
+
+/**
+ * @tc.name: testShowPasswordSymbol003
+ * @tc.desc: test testInput showPasswordSymbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testShowPasswordSymbol003, TestSize.Level1)
+{
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: showPasswordSymbol is false
+     */
+    PasswordIcon passwordIcon;
+    CreateTextField(DEFAULT_TEXT, "", [passwordIcon](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetPasswordIcon(passwordIcon);
+    });
+
+    /**
+     * @tc.step: step2. Set showPasswordSymbol
+     */
+    frameNode_->MarkModifyDone();
+    auto passwordResponseArea = AceType::DynamicCast<PasswordResponseArea>(pattern_->responseArea_);
+    ASSERT_NE(passwordResponseArea, nullptr);
+    auto stackNode = passwordResponseArea->stackNode_;
+    ASSERT_NE(stackNode, nullptr);
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
+    ASSERT_NE(iconFrameNode, nullptr);
+    EXPECT_EQ(iconFrameNode->GetTag(), V2::IMAGE_ETS_TAG);
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
+}
+
+/**
  * @tc.name: testType001
  * @tc.desc: test testInput type
  * @tc.type: FUNC
