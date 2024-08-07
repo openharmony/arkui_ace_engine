@@ -396,6 +396,7 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cach
         if (lineHeightIt == info.lineHeightMap_.end()) {
             continue;
         }
+        const bool isCache = it->first < info.startMainLineIndex_ || it->first > info.endMainLineIndex_;
         const auto& row = it->second;
         for (const auto& [c, itemIdx] : row) {
             if (itemIdx < 0) {
@@ -405,7 +406,7 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cach
             if (itemIdx == 0 && (it->first > 0 || c > 0)) {
                 continue;
             }
-            auto child = wrapper_->GetChildByIndex(itemIdx);
+            auto child = wrapper_->GetChildByIndex(itemIdx, isCache);
             if (!child) {
                 continue;
             }
@@ -587,11 +588,11 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
     std::list<int32_t> itemsToPreload;
     for (int32_t i = 1; i <= cacheCnt; ++i) {
         const int32_t l = info_.startIndex_ - i;
-        if (l >= 0 && !wrapper_->GetChildByIndex(l)) {
+        if (l >= 0 && !wrapper_->GetChildByIndex(l, true)) {
             itemsToPreload.push_back(l);
         }
         const int32_t r = info_.endIndex_ + i;
-        if (r < info_.childrenCount_ && !wrapper_->GetChildByIndex(r)) {
+        if (r < info_.childrenCount_ && !wrapper_->GetChildByIndex(r, true)) {
             itemsToPreload.push_back(r);
         }
     }
