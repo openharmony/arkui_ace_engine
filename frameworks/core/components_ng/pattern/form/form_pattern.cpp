@@ -684,7 +684,8 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
 #else
     formManagerBridge_->AddForm(host->GetContextRefPtr(), info);
 #endif
-    if (CheckFormBundleForbidden(info.bundleName)) {
+
+    if (!formInfo.transparencyEnabled && CheckFormBundleForbidden(info.bundleName)) {
         LoadDisableFormStyle(info);
     }
 }
