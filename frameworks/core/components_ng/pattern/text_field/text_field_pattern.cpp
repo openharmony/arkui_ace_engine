@@ -3587,7 +3587,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
         textFieldManager->SetImeAttached(true);
     }
     inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
-    UpdateCaretInfoToController();
+    UpdateCaretInfoToController(true);
     if (!fillContentMap_.empty()) {
         inputMethod->SendPrivateCommand(fillContentMap_);
         fillContentMap_.clear();
