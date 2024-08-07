@@ -613,6 +613,20 @@ class UIContext {
         __JSScopeUtil__.restoreInstanceId();
         return [];
     }
+
+    isFollowingSystemFontScale() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let isFollowing = Context.isFollowingSystemFontScale();
+        __JSScopeUtil__.restoreInstanceId();
+        return isFollowing;
+    }
+
+    getMaxFontScale() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let maxFontScale = Context.getMaxFontScale();
+        __JSScopeUtil__.restoreInstanceId();
+        return maxFontScale;
+    }
 }
 
 class DynamicSyncScene {
