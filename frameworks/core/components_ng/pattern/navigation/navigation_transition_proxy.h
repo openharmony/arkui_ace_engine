@@ -164,9 +164,6 @@ public:
     void UpdateTransition(float progress)
     {
         if (!interactive_ || hasFinished_) {
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-                "update transition failed interactive: %{public}d, hasFinished: %{public}d",
-                interactive_, hasFinished_);
             return;
         }
         AnimationUtils::UpdateInteractiveAnimation(interactiveAnimation_, progress);
