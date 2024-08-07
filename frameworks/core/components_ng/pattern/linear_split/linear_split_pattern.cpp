@@ -29,6 +29,7 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr std::size_t DEFAULT_DRAG_INDEX = -1;
+constexpr std::size_t SPLIT_INDEX_INC_ONE = 1;
 constexpr std::size_t SPLIT_INDEX_INC_TWO = 2;
 const std::string SPLIT_DRAG_SCENE = "split_drag_scene";
 } // namespace
@@ -175,10 +176,10 @@ float LinearSplitPattern::GetMaxPosFromIndex(std::size_t index)
 {
     auto curMin = childrenConstrains_[index + 1];
     auto max = Infinity<float>();
-    if (index + SPLIT_INDEX_INC_TWO < static_cast<int32_t>(childrenDragPos_.size()) - 1) {
+    if (index + SPLIT_INDEX_INC_TWO < childrenDragPos_.size() - SPLIT_INDEX_INC_ONE) {
         max = childrenDragPos_[index + SPLIT_INDEX_INC_TWO] - static_cast<float>(DEFAULT_SPLIT_HEIGHT) - curMin;
     }
-    if (index + SPLIT_INDEX_INC_TWO == static_cast<int32_t>(childrenDragPos_.size()) - 1) {
+    if (index + SPLIT_INDEX_INC_TWO == childrenDragPos_.size() - SPLIT_INDEX_INC_ONE) {
         max = childrenDragPos_[index + SPLIT_INDEX_INC_TWO] - curMin;
     }
     return max;
