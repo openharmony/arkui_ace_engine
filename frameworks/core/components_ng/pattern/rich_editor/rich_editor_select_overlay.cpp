@@ -159,12 +159,7 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
 
     float x = localOffset.GetX();
     float y = localOffset.GetY();
-    auto diameter = GetHandleDiameter();
-    if (isFirst) {
-        y -= (diameter / 2); // 2: get the radius
-    } else {
-        y += handleRect.Height() + (diameter / 2); // 2: get the radius
-    }
+    y += handleRect.Height() / 2; // 2: Half the height of the handle
     auto magnifierLocalOffset = OffsetF(x, y);
     GetLocalPointWithTransform(magnifierLocalOffset); // do affine transformation
     pattern->magnifierController_->SetLocalOffset(magnifierLocalOffset);
