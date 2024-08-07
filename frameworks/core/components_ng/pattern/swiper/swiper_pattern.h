@@ -958,7 +958,7 @@ private:
     bool isInit_ = true;
     bool hasVisibleChangeRegistered_ = false;
     bool isVisible_ = true;
-    bool isVisibleArea_ = true;
+    bool isVisibleArea_ = false;
     bool isWindowShow_ = true;
     bool isCustomSize_ = false;
     bool indicatorIsBoolean_ = true;
