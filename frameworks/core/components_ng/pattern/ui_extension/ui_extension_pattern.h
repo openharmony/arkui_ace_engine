@@ -250,6 +250,9 @@ private:
     int32_t callbackId_ = 0;
     RectF displayArea_;
     bool isKeyAsync_ = false;
+    // StartUIExtension should after mountToParent
+    bool hasMountToParent_ = false;
+    bool needReNotifyForeground_ = false;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);

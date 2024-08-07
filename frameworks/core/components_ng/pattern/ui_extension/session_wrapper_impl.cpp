@@ -60,6 +60,7 @@ constexpr char OCCUPIED_AREA_CHANGE_KEY[] = "ability.want.params.IsNotifyOccupie
 // Set the UIExtension type of the EmbeddedComponent.
 constexpr char UI_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
 const std::string EMBEDDED_UI("embeddedUI");
+constexpr int32_t INVALID_WINDOW_ID = -1;
 } // namespace
 
 class UIExtensionLifecycleListener : public Rosen::ILifecycleListener {
@@ -437,13 +438,33 @@ bool SessionWrapperImpl::NotifyAxisEventAsync(const std::shared_ptr<OHOS::MMI::A
 /************************************************ Begin: The lifecycle interface **************************************/
 void SessionWrapperImpl::NotifyCreate() {}
 
+int32_t SessionWrapperImpl::GetWindowSceneId()
+{
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, INVALID_WINDOW_ID);
+    auto hostWindowNode = WindowSceneHelper::FindWindowScene(pattern->GetHost());
+    CHECK_NULL_RETURN(hostWindowNode, INVALID_WINDOW_ID);
+    auto hostNode = AceType::DynamicCast<FrameNode>(hostWindowNode);
+    CHECK_NULL_RETURN(hostNode, INVALID_WINDOW_ID);
+    auto hostPattern = hostNode->GetPattern<SystemWindowScene>();
+    CHECK_NULL_RETURN(hostPattern, INVALID_WINDOW_ID);
+    auto hostSession = hostPattern->GetSession();
+    CHECK_NULL_RETURN(hostSession, INVALID_WINDOW_ID);
+    return hostSession->GetPersistentId();
+}
+
 void SessionWrapperImpl::NotifyForeground()
 {
     CHECK_NULL_VOID(session_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto hostWindowId = pipeline->GetFocusWindowId();
-    UIEXT_LOGI("NotifyForeground, persistentid = %{public}d.", session_->GetPersistentId());
+    int32_t windowSceneId = GetWindowSceneId();
+    UIEXT_LOGI("NotifyForeground, persistentid = %{public}d, hostWindowId = %{public}u,"
+        " windowSceneId = %{public}d, IsScenceBoardWindow: %{public}d.",
+        session_->GetPersistentId(), hostWindowId, windowSceneId, container->IsScenceBoardWindow());
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
         session_, hostWindowId, std::move(foregroundCallback_));
 }
