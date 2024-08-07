@@ -55,8 +55,13 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        if (!isInitVirtualNode_ && AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-            isInitVirtualNode_ = InitCalendarVirtualNode();
+        if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+            if ((!isInitVirtualNode_ || buttonAccessibilityNodeVec_.size() != obtainedMonth_.days.size()) &&
+                monthState_ == MonthState::CUR_MONTH) {
+                isInitVirtualNode_ = InitCalendarVirtualNode();
+            } else {
+                FireModifyAccessibilityVirtualNode(obtainedMonth_);
+            }
         }
         return MakeRefPtr<CalendarPaintMethod>(obtainedMonth_, calendarDay_, isCalendarDialog_);
     }

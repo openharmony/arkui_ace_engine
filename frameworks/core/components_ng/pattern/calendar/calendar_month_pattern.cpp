@@ -123,7 +123,6 @@ void CalendarMonthPattern::OnModifyDone()
     InitTouchEvent();
     InitHoverEvent();
     InitAccessibilityHoverEvent();
-    FireModifyAccessibilityVirtualNode(obtainedMonth_);
 }
 
 void CalendarMonthPattern::SetVirtualNodeUserSelected(int32_t index)
@@ -131,8 +130,16 @@ void CalendarMonthPattern::SetVirtualNodeUserSelected(int32_t index)
     if (accessibilityPropertyVec_.size() < 1) {
         return;
     }
-    for (int i = 0; i < static_cast<int>(accessibilityPropertyVec_.size()); i++) {
-        if (i == index &&
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto textDirection = layoutProperty->GetNonAutoLayoutDirection();
+    auto remainderWeek = index % CALENDAR_WEEK_DAYS;
+    int32_t selectedIndex = (textDirection == TextDirection::RTL ?
+        CALENDAR_WEEK_DAYS - remainderWeek * 2 + index - 1 : index);
+    for (int i = 0; i < static_cast<int32_t>(accessibilityPropertyVec_.size()); i++) {
+        if (i == selectedIndex &&
             obtainedMonth_.days[i].month.month == obtainedMonth_.month &&
             obtainedMonth_.days[i].month.year == obtainedMonth_.year) {
             accessibilityPropertyVec_[i]->SetUserSelected(true);
@@ -146,17 +153,15 @@ void CalendarMonthPattern::SetVirtualNodeUserSelected(int32_t index)
         }
         auto calendarEventHub = GetEventHub<CalendarEventHub>();
         CHECK_NULL_VOID(calendarEventHub);
-        if (index >= 0 && index < static_cast<int32_t>(obtainedMonth_.days.size())) {
-            obtainedMonth_.days[index].focused = true;
+        if (selectedIndex >= 0 && selectedIndex < static_cast<int32_t>(obtainedMonth_.days.size())) {
+            obtainedMonth_.days[selectedIndex].focused = true;
             auto json = JsonUtil::Create(true);
-            json->Put("day", obtainedMonth_.days[index].day);
-            json->Put("month", obtainedMonth_.days[index].month.month);
-            json->Put("year", obtainedMonth_.days[index].month.year);
+            json->Put("day", obtainedMonth_.days[selectedIndex].day);
+            json->Put("month", obtainedMonth_.days[selectedIndex].month.month);
+            json->Put("year", obtainedMonth_.days[selectedIndex].month.year);
             calendarEventHub->UpdateSelectedChangeEvent(json->ToString());
         }
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
@@ -387,11 +392,11 @@ bool CalendarMonthPattern::InitCalendarVirtualNode()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    if (buttonAccessibilityNodeVec_.size() > 0) {
-        FireModifyAccessibilityVirtualNode(obtainedMonth_);
-        return true;
-    }
-
+    buttonAccessibilityNodeVec_.clear();
+    accessibilityPropertyVec_.clear();
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    accessibilityProperty->SaveAccessibilityVirtualNode(nullptr);
     auto lineNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     for (auto& day : obtainedMonth_.days) {
@@ -400,7 +405,6 @@ bool CalendarMonthPattern::InitCalendarVirtualNode()
         buttonAccessibilityNodeVec_.emplace_back(buttonNode);
         ChangeVirtualNodeContent(day);
     }
-    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     accessibilityProperty->SetAccessibilityText(" ");
     auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(lineNode);
     CHECK_NULL_RETURN(virtualFrameNode, false);
@@ -431,7 +435,6 @@ RefPtr<FrameNode> CalendarMonthPattern::AddButtonNodeIntoVirtual(const CalendarD
     UpdateAccessibilityButtonNode(buttonNode, calendarDay.index);
     accessibilityPropertyVec_.emplace_back(buttonAccessibilityProperty);
     InitVirtualButtonClickEvent(buttonNode, calendarDay.index);
-    buttonAccessibilityProperty->SetUserDisabled(calendarDay.month.month != obtainedMonth_.month ? true : false);
     buttonAccessibilityProperty->SetOnAccessibilityFocusCallback([weak = WeakClaim(this)](bool focus) {
         if (focus) {
             auto calendar = weak.Upgrade();
@@ -535,28 +538,31 @@ void CalendarMonthPattern::UpdateAccessibilityButtonNode(RefPtr<FrameNode> frame
     auto colSpace = paintProperty->GetColSpaceValue({}).ConvertToPx() <= 0
                     ? theme->GetCalendarTheme().colSpace.ConvertToPx()
                     : paintProperty->GetColSpaceValue({}).ConvertToPx();
-    Dimension buttonOffsetX = Dimension(colSpace / 2 + (colSpace + dayWidth) * pos.first);
+    Dimension buttonOffsetX = Dimension(colSpace / 2 + (colSpace + dayWidth) * pos.first - 1);
     auto topPadding = isCalendarDialog_ ? 0.0 : theme->GetCalendarTheme().topPadding.ConvertToPx();
     auto weekHeight = paintProperty->GetWeekHeight().value_or(theme->GetCalendarTheme().weekHeight).ConvertToPx();
     auto rowSpace = GetRowSpace(paintProperty, theme, obtainedMonth_.days.size());
     auto weekAndDayRowSpace =
         paintProperty->GetWeekAndDayRowSpace().value_or(theme->GetCalendarTheme().weekAndDayRowSpace).ConvertToPx();
     auto browHeight = weekHeight + topPadding + weekAndDayRowSpace;
-    Dimension buttonOffsetY = Dimension(browHeight + (dayHeight + rowSpace) * pos.second - 1);
+    Dimension buttonOffsetY = Dimension(browHeight + (dayHeight + rowSpace) * pos.second);
     renderContext->UpdatePosition(OffsetT(buttonOffsetX, buttonOffsetY));
-    DimensionRect hotZoneRegion;
-    hotZoneRegion.SetSize(DimensionSize(Dimension(dayWidth + colSpace), Dimension(dayHeight + rowSpace)));
-    hotZoneRegion.SetOffset(DimensionOffset(Dimension(buttonOffsetX), Dimension(buttonOffsetY)));
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    std::vector<DimensionRect> hotZoneRegions;
-    hotZoneRegions.emplace_back(hotZoneRegion);
-    gestureHub->SetResponseRegion(hotZoneRegions);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarDay)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto textDirection = layoutProperty->GetNonAutoLayoutDirection();
+    auto remainderWeek = calendarDay.index % CALENDAR_WEEK_DAYS;
+    int32_t index = (textDirection == TextDirection::RTL ?
+        CALENDAR_WEEK_DAYS - remainderWeek * 2 + calendarDay.index - 1 : calendarDay.index);
+    if (index >= buttonAccessibilityNodeVec_.size()) {
+        return;
+    }
     std::string message;
     if (calendarDay.month.year == calendarDay_.month.year && calendarDay.month.month == calendarDay_.month.month &&
                       calendarDay.day == calendarDay_.day) {
@@ -567,12 +573,11 @@ void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarD
     std::string day = Localization::GetInstance()->GetEntryLetters("calendar.day");
     message += std::to_string(calendarDay.day) + day;
     std::string week = Localization::GetInstance()->GetEntryLetters("calendar.week");
-    message += week + (calendarDay.index % CALENDAR_WEEK_DAYS == 0 ? day :
-        std::to_string(calendarDay.index % CALENDAR_WEEK_DAYS));
-    auto node = buttonAccessibilityNodeVec_[calendarDay.index];
-    CHECK_NULL_VOID(node);
+    message += week + (remainderWeek == 0 ? day : std::to_string(remainderWeek));
+    auto node = buttonAccessibilityNodeVec_[index];
     auto buttonAccessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(buttonAccessibilityProperty);
+    buttonAccessibilityProperty->SetUserDisabled(calendarDay.month.month != obtainedMonth_.month ? true : false);
     buttonAccessibilityProperty->SetAccessibilityText(message);
 }
 
