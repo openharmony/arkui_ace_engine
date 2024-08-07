@@ -264,7 +264,7 @@ export class AtomicServiceWebController {
     if (!this.webViewController) {
       const error: BusinessError<string> = {
         name: '',
-        message: "Init error. The AtomicServiceWebController must be associated with a AtomicServiceWeb component.",
+        message:'Init error. The AtomicServiceWebController must be associated with a AtomicServiceWeb component.',
         code: 17100001,
       }
       throw error as Error;

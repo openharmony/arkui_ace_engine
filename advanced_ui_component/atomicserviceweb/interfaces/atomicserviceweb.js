@@ -384,7 +384,7 @@ let AtomicServiceWebController = class AtomicServiceWebController {
         if (!this.webViewController) {
             const d5 = {
                 name: '',
-                message: "Init error. The AtomicServiceWebController must be associated with a AtomicServiceWeb component.",
+                message: 'Init error. The AtomicServiceWebController must be associated with a AtomicServiceWeb component.',
                 code: 17100001,
             };
             throw d5;
