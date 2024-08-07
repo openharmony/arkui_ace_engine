@@ -66,6 +66,9 @@ void _setButtonOptions_ResourceStr_ButtonOptionsImpl(Ark_NativePointer node, con
 
 namespace ButtonAttributeModifier
 {
+constexpr int32_t DEFAULT_FONT_SIZE = 12;
+constexpr int32_t DEFAULT_MAX_LINES = 100;
+
 void TypeImpl(Ark_NativePointer node, Ark_Int32 value) {
   auto frameNode = reinterpret_cast<FrameNode *>(node);
   CHECK_NULL_VOID(frameNode);
@@ -138,7 +141,7 @@ void LabelStyleImpl(Ark_NativePointer node, const Ark_LabelStyle *value) {
   ButtonParameters parameters;
   parameters.textOverflow =
       Converter::ConvertOrDefault(value->overflow, TextOverflow::ELLIPSIS);
-  parameters.maxLines = Converter::ConvertOrDefault(value->maxLines, 100);
+  parameters.maxLines = Converter::ConvertOrDefault(value->maxLines, DEFAULT_MAX_LINES);
   parameters.heightAdaptivePolicy = Converter::ConvertOrDefault(
       value->heightAdaptivePolicy, TextHeightAdaptivePolicy::MAX_LINES_FIRST);
   parameters.minFontSize =
@@ -146,7 +149,7 @@ void LabelStyleImpl(Ark_NativePointer node, const Ark_LabelStyle *value) {
   parameters.maxFontSize =
       Converter::ConvertOrDefault(value->maxFontSize, Dimension());
 
-  parameters.fontSize = Dimension(12, DimensionUnit::VP);
+  parameters.fontSize = Dimension(DEFAULT_FONT_SIZE, DimensionUnit::VP);
   parameters.fontStyle = Ace::FontStyle::NORMAL;
   parameters.fontWeight = FontWeight::NORMAL;
   parameters.fontFamily = std::vector<std::string>();

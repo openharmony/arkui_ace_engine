@@ -54,7 +54,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -67,7 +68,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -78,7 +80,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -89,7 +92,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -102,7 +106,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -113,7 +118,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -124,7 +130,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -135,7 +142,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -147,7 +155,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -158,7 +167,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -170,7 +180,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -182,7 +193,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -193,7 +205,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -204,7 +217,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -215,7 +229,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -226,7 +241,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -237,7 +253,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -248,7 +265,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -259,7 +277,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -270,7 +289,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -285,7 +305,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_4: AssignTo(dst, src.value4); break;
             case SELECTOR_ID_5: AssignTo(dst, src.value5); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -299,7 +320,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
             case SELECTOR_ID_4: AssignTo(dst, src.value4); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -311,7 +333,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -324,7 +347,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -335,7 +359,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -347,7 +372,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -358,7 +384,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -370,7 +397,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -381,7 +409,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -392,7 +421,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -404,7 +434,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -415,7 +446,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -426,7 +458,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -437,7 +470,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -448,7 +482,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -459,7 +494,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -470,7 +506,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -483,7 +520,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -494,7 +532,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -514,7 +553,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_9: AssignTo(dst, src.value9); break;
             case SELECTOR_ID_10: AssignTo(dst, src.value10); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -525,7 +565,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -536,7 +577,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -548,7 +590,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -559,7 +602,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -570,7 +614,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -584,7 +629,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
             case SELECTOR_ID_4: AssignTo(dst, src.value4); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -597,7 +643,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -608,7 +655,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -619,7 +667,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -630,7 +679,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -642,7 +692,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -653,7 +704,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -664,7 +716,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -675,7 +728,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -686,7 +740,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -697,7 +752,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -708,7 +764,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -720,7 +777,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -732,7 +790,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -743,7 +802,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -754,7 +814,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -765,7 +826,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -776,7 +838,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -787,7 +850,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -799,7 +863,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -810,7 +875,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -821,7 +887,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -833,7 +900,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -845,7 +913,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -857,7 +926,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -868,7 +938,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -880,7 +951,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -892,7 +964,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -903,7 +976,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -916,7 +990,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -928,7 +1003,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -940,7 +1016,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -951,7 +1028,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -962,7 +1040,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -973,7 +1052,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -984,7 +1064,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -995,7 +1076,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1006,7 +1088,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1018,7 +1101,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1029,7 +1113,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1040,7 +1125,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1051,7 +1137,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1064,7 +1151,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1076,7 +1164,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1087,7 +1176,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1099,7 +1189,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1110,7 +1201,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1121,7 +1213,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1132,7 +1225,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1143,7 +1237,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1155,7 +1250,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1166,7 +1262,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1177,7 +1274,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1188,7 +1286,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1199,7 +1298,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1210,7 +1310,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1221,7 +1322,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1234,7 +1336,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1247,7 +1350,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1259,7 +1363,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1272,7 +1377,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1284,7 +1390,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1295,7 +1402,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1306,7 +1414,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1319,7 +1428,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1331,7 +1441,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1342,7 +1453,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1353,7 +1465,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1364,7 +1477,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1375,7 +1489,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1386,7 +1501,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1398,7 +1514,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1411,7 +1528,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1423,7 +1541,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1434,7 +1553,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1445,7 +1565,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1457,7 +1578,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1468,7 +1590,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1479,7 +1602,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1490,7 +1614,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1503,7 +1628,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1517,7 +1643,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
             case SELECTOR_ID_4: AssignTo(dst, src.value4); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1531,7 +1658,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
             case SELECTOR_ID_4: AssignTo(dst, src.value4); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1543,7 +1671,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1555,7 +1684,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1566,7 +1696,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1577,7 +1708,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1588,7 +1720,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1599,7 +1732,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1611,7 +1745,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1627,7 +1762,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_5: AssignTo(dst, src.value5); break;
             case SELECTOR_ID_6: AssignTo(dst, src.value6); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1638,7 +1774,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1649,7 +1786,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1660,7 +1798,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1672,7 +1811,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1683,7 +1823,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1694,7 +1835,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1705,7 +1847,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
@@ -1716,7 +1859,8 @@ namespace OHOS::Ace::NG::Converter {
             case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
             case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
             {
-                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector); abort(); 
+                default: LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+                return;
             }
         }
     }
