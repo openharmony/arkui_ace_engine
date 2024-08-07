@@ -67,7 +67,7 @@ bool SafeAreaManager::UpdateNavArea(const SafeAreaInsets& safeArea)
     return true;
 }
 
-bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight, std::optional<uint32_t> rootHeight)
+bool SafeAreaManager::UpdateKeyboardSafeArea(uint32_t keyboardHeight, std::optional<uint32_t> rootHeight)
 {
     uint32_t bottom;
     if (systemSafeArea_.bottom_.IsValid()) {

@@ -356,7 +356,7 @@ public:
 
     virtual void GetBoundingRectData(int32_t nodeId, Rect& rect) {}
 
-    virtual void CheckAndUpdateKeyboardInset() {}
+    virtual void CheckAndUpdateKeyboardInset(uint32_t keyboardHeight) {}
 
     virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const;
 
@@ -1347,7 +1347,7 @@ protected:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
         const bool supportAvoidance = false, bool forceChange = false)
     {}
-    virtual void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
+    virtual void OnVirtualKeyboardHeightChange(uint32_t keyboardHeight, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false)
     {}
 
