@@ -321,6 +321,7 @@ protected:
     {
         return ScrollAlign::AUTO;
     }
+    virtual void OnMidIndexChanged(int32_t lastIndex, int32_t curIndex) {}
 
     bool isFadingEdge_ = false;
 
