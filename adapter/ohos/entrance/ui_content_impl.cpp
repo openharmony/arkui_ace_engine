@@ -2110,7 +2110,7 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
 {
     TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
         "KeyEvent Process to ui_content, eventInfo: id:%{public}d, "
-        "keyEvent info: keyCode is %{public}d, "
+        "keyEvent info: keyCode is %{private}d, "
         "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
         touchEvent->GetId(), touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
     auto container = AceEngine::Get().GetContainer(instanceId_);
