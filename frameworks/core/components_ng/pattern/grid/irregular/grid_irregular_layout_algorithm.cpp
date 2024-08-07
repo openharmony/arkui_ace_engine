@@ -608,13 +608,14 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
             auto& info = pattern->GetMutableLayoutInfo();
             GridIrregularFiller filler(&info, RawPtr(host));
             const auto pos = info.GetItemPos(itemIdx);
-            auto constraint = filler.MeasureItem(
-                GridIrregularFiller::FillParameters { crossLens, crossGap, mainGap }, itemIdx, pos.first, pos.second);
+            auto constraint = filler.MeasureItem(GridIrregularFiller::FillParameters { crossLens, crossGap, mainGap },
+                itemIdx, pos.first, pos.second, true);
 
-            auto item = DynamicCast<FrameNode>(host->GetChildByIndex(itemIdx));
+            auto item = DynamicCast<FrameNode>(host->GetChildByIndex(itemIdx, true));
             CHECK_NULL_RETURN(item, false);
             item->GetGeometryNode()->SetParentLayoutConstraint(constraint);
-            FrameNode::ProcessOffscreenNode(item);
+            item->Layout();
+            item->SetActive(false);
             return false;
         });
 }

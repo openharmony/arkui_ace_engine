@@ -52,7 +52,7 @@ Result GridIrregularFiller::Fill(const FillParameters& params, float targetLen, 
             return { len, row, idx - 1 };
         }
 
-        MeasureItem(params, idx, posX_, posY_);
+        MeasureItem(params, idx, posX_, posY_, false);
     }
 
     if (info_->lineHeightMap_.empty()) {
@@ -76,7 +76,7 @@ void GridIrregularFiller::FillToTarget(const FillParameters& params, int32_t tar
         if (!FindNextItem(++idx)) {
             FillOne(idx);
         }
-        MeasureItem(params, idx, posX_, posY_);
+        MeasureItem(params, idx, posX_, posY_, false);
     }
 }
 
@@ -199,11 +199,11 @@ bool GridIrregularFiller::UpdateLength(float& len, float targetLen, int32_t& row
 }
 
 LayoutConstraintF GridIrregularFiller::MeasureItem(
-    const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row)
+    const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row, bool isCache)
 {
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     auto constraint = props->CreateChildConstraint();
-    auto child = wrapper_->GetOrCreateChildByIndex(itemIdx);
+    auto child = wrapper_->GetOrCreateChildByIndex(itemIdx, !isCache, isCache);
     CHECK_NULL_RETURN(child, constraint);
 
     const auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx);
@@ -340,7 +340,7 @@ void GridIrregularFiller::BackwardImpl(std::unordered_set<int32_t>& measured, co
         }
 
         const int32_t topRow = FindItemTopRow(posY_, c);
-        MeasureItem(params, itemIdx, c, topRow);
+        MeasureItem(params, itemIdx, c, topRow, false);
         // measure irregular items only once from the bottom-left tile
         measured.insert(itemIdx);
     }
