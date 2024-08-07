@@ -1391,6 +1391,8 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
     CHECK_RUN_ON(UI);
     UpdateRootSizeAndScale(width, height);
     CHECK_NULL_VOID(rootNode_);
+    ACE_SCOPED_TRACE("SetRootRect: origin:%s,set width:%f, height:%f, offset:%f",
+        rootNode_->GetGeometryNode()->GetFrameRect().ToString().c_str(), width, height, offset);
     if (Container::CurrentId() < MIN_SUBCONTAINER_ID) {
         ScreenSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
         ScreenSystemManager::GetInstance().OnSurfaceChanged(width);
