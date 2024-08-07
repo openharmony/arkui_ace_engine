@@ -115,6 +115,8 @@ public:
     void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
 
     const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
+    void LoadChildren(bool notDetach) const;
+
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override
     {
         itemConstraint_ = itemConstraint;
