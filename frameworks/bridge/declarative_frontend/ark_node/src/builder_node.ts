@@ -152,7 +152,7 @@ class JSBuilderNode extends BaseNode {
     }
     return nodeInfo;
   }
-  private isObject(param: any): boolean {
+  private isObject(param: Object): boolean {
     const typeName = Object.prototype.toString.call(param);
     const objectName = `[object Object]`;
     if (typeName === objectName) {
@@ -167,7 +167,7 @@ class JSBuilderNode extends BaseNode {
         set(target, property, val): boolean {
           throw Error(`@Builder : Invalid attempt to set(write to) parameter '${property.toString()}' error!`);
         },
-        get: (target, property, receiver) => { return this.params_?.[property] }
+        get: (target, property, receiver): Object => { return this.params_?.[property] }
       });
       this.nodePtr_ = super.create(builder.builder, this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration);
     } else {
