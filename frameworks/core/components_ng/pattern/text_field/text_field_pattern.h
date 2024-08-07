@@ -1700,7 +1700,7 @@ private:
     bool colorModeChange_ = false;
     Offset clickLocation_;
     bool isKeyboardClosedByUser_ = false;
-    bool isFillRequestFinish_ = false;
+    bool isFillRequestFinish_ = true;
     bool keyboardAvoidance_ = false;
     bool hasMousePressed_ = false;
     bool showCountBorderStyle_ = false;
