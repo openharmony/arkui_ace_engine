@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier();
+const CJUIFrameNodeModifier* GetCJUIFrameNodeModifier();
 } // namespace OHOS::Ace::NG
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_FRAME_NODE_MODIFIER_H

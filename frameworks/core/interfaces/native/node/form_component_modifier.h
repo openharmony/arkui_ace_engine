@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIFormComponentModifier* GetFormComponentModifier();
+const CJUIFormComponentModifier* GetCJUIFormComponentModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_FORM_COMPONENT_MODIFIER_H

@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
     const ArkUITextInputModifier* GetTextInputModifier();
+    const CJUITextInputModifier* GetCJUITextInputModifier();
     void SetOnTextInputChange(ArkUINodeHandle node, void* extraParam);
     void SetTextInputOnSubmit(ArkUINodeHandle node, void* extraParam);
     void SetOnTextInputCut(ArkUINodeHandle node, void* extraParam);

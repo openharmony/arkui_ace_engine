@@ -52,5 +52,15 @@ const ArkUISwiperControllerModifier* GetSwiperControllerModifier()
     };
     return &modifier;
 }
+
+const CJUISwiperControllerModifier* GetCJUISwiperControllerModifier()
+{
+    static const CJUISwiperControllerModifier modifier = {
+        GetSwiperController,
+        ShowNext,
+        ShowPrevious
+    };
+    return &modifier;
+}
 }
 }

@@ -626,6 +626,22 @@ const ArkUISelectModifier* GetSelectModifier()
     return &modifier;
 }
 
+const CJUISelectModifier* GetCJUISelectModifier()
+{
+    static const CJUISelectModifier modifier = { SetSpace, SetValue, SetSelected, SetSelectFontColor,
+        SetSelectedOptionBgColor, SetOptionBgColor, SetOptionFontColor, SetSelectedOptionFontColor, SetArrowPosition,
+        SetMenuAlign, SetFont, SetOptionFont, SetSelectedOptionFont, ResetSpace, ResetValue, ResetSelected,
+        ResetSelectFontColor, ResetSelectedOptionBgColor, ResetOptionBgColor, ResetOptionFontColor,
+        ResetSelectedOptionFontColor, ResetArrowPosition, ResetMenuAlign, ResetFont, ResetOptionFont,
+        ResetSelectedOptionFont, SetSelectWidth, ResetSelectWidth, SetSelectHeight, ResetSelectHeight, SetSelectSize,
+        ResetSelectSize, SetSelectOptionWidthFitTrigger, SetSelectOptionWidth, ResetSelectOptionWidth,
+        SetSelectOptionHeight, ResetSelectOptionHeight, SetControlSize, ResetControlSize, SetMenuBgColor,
+        ResetMenuBgColor, SetMenuBgBlurStyle, ResetMenuBgBlurStyle, SetSelectValue, ResetSelectValue, SetSelectDivider,
+        ResetSelectDivider, ResetSelectDividerNull };
+
+    return &modifier;
+}
+
 void SetOnSelectSelect(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

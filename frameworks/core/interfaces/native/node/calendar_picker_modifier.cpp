@@ -262,6 +262,16 @@ const ArkUICalendarPickerModifier* GetCalendarPickerModifier()
     return &modifier;
 }
 
+const CJUICalendarPickerModifier* GetCJUICalendarPickerModifier()
+{
+    static const CJUICalendarPickerModifier modifier = { SetHintRadius, SetSelectedDate, ResetSelectedDate,
+        SetTextStyleWithWeightEnum, SetTextStyle, ResetTextStyle, SetEdgeAlign, ResetEdgeAlign,
+        SetCalendarPickerPadding, ResetCalendarPickerPadding, SetCalendarPickerBorder, ResetCalendarPickerBorder,
+        GetHintRadius, GetSelectedDate, GetTextStyle, GetEdgeAlign };
+
+    return &modifier;
+}
+
 void ParseDateByStr(const std::string& date, ArkUISelectedDateType& selectedDate)
 {
     auto json = JsonUtil::ParseJsonString(date);

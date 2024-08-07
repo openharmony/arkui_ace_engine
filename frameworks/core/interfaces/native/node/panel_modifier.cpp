@@ -186,5 +186,16 @@ const ArkUIPanelModifier* GetPanelModifier()
 
     return &modifier;
 }
+
+const CJUIPanelModifier* GetCJUIPanelModifier()
+{
+    static const CJUIPanelModifier modifier = { SetPanelMode, ResetPanelMode, SetPanelFullHeight,
+        ResetPanelFullHeight, SetPanelHalfHeight, ResetPanelHalfHeight, SetPanelMiniHeight, ResetPanelMiniHeight,
+        SetPanelBackgroundMask, ResetPanelBackgroundMask, SetPanelType, ResetPanelType, SetPanelCustomHeight,
+        SetPanelCustomHeightByString, ResetPanelCustomHeight, SetShowCloseIcon, ResetShowCloseIcon, SetDragBar,
+        ResetDragBar, SetShow, ResetShow };
+
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

@@ -136,5 +136,25 @@ const ArkUIVideoModifier* GetVideoModifier()
 
     return &modifier;
 }
+
+const CJUIVideoModifier* GetCJUIVideoModifier()
+{
+    static const CJUIVideoModifier modifier = {
+        SetAutoPlay,
+        ResetAutoPlay,
+        SetVideoObjectFit,
+        ResetVideoObjectFit,
+        SetVideoControls,
+        ResetVideoControls,
+        SetVideoLoop,
+        ResetVideoLoop,
+        SetVideoMuted,
+        ResetVideoMuted,
+        SetVideoOpacity,
+        ResetVideoOpacity
+    };
+
+    return &modifier;
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

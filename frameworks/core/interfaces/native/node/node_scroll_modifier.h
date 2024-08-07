@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIScrollModifier* GetScrollModifier();
+const CJUIScrollModifier* GetCJUIScrollModifier();
 
 void SetOnScroll(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollFrameBegin(ArkUINodeHandle node, void* extraParam);

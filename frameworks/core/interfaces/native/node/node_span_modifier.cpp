@@ -461,6 +461,20 @@ const ArkUISpanModifier* GetSpanModifier()
     return &modifier;
 }
 
+const CJUISpanModifier* GetCJUISpanModifier()
+{
+    static const CJUISpanModifier modifier = { SetSpanSrc, SetSpanContent, SetSpanTextCase, ResetSpanTextCase,
+        SetSpanFontWeight, ResetSpanFontWeight, SetSpanLineHeight, ResetSpanLineHeight, SetSpanFontStyle,
+        ResetSpanFontStyle, SetSpanFontSize, ResetSpanFontSize, SetSpanFontFamily, ResetSpanFontFamily,
+        SetSpanDecoration, ResetSpanDecoration, SetSpanFontColor, ResetSpanFontColor, SetSpanLetterSpacing,
+        ResetSpanLetterSpacing, SetSpanBaselineOffset, ResetSpanBaselineOffset, SetSpanFont, ResetSpanFont,
+        SetSpanFontWeightStr, GetSpanContent, GetSpanDecoration, GetSpanFontColor, GetSpanFontSize, GetSpanFontStyle,
+        GetSpanFontWeight, GetSpanLineHeight, GetSpanTextCase, GetSpanLetterSpacing, GetSpanBaselineOffset,
+        SetSpanTextBackgroundStyle, ResetSpanTextBackgroundStyle, GetSpanTextBackgroundStyle, SetTextTextShadow,
+        ResetTextTextShadow, GetTextShadow };
+    return &modifier;
+}
+
 void SetCustomSpanOnMeasure(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<CustomSpanNode*>(node);

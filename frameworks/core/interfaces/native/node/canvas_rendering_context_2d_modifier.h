@@ -19,5 +19,6 @@
 #include "core/interfaces/native/node/node_api.h"
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUICanvasRenderingContext2DModifier* GetCanvasRenderingContext2DModifier();
+const CJUICanvasRenderingContext2DModifier* GetCJUICanvasRenderingContext2DModifier();
 }
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_CANVAS_RENDERING_CONTEXT_2D_MODIFIER_H

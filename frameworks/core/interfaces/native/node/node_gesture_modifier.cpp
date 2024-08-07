@@ -458,5 +458,29 @@ const ArkUIGestureModifier* GetGestureModifier()
         };
     return &modifier;
 }
+
+const CJUIGestureModifier* GetCJUIGestureModifier()
+{
+    static const CJUIGestureModifier modifier = {
+        createTapGesture,
+        createLongPressGesture,
+        createPanGesture,
+        createPinchGesture,
+        createRotationGesture,
+        createSwipeGesture,
+        createSwipeGestureByModifier,
+        createGestureGroup,
+        addGestureToGestureGroup,
+        removeGestureFromGestureGroup,
+        dispose,
+        registerGestureEvent,
+        addGestureToNode,
+        removeGestureFromNode,
+        removeGestureFromNodeByTag,
+        clearGestures,
+        setGestureInterrupterToNode,
+    };
+    return &modifier;
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

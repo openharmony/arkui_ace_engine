@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIPatternLockModifier* GetPatternLockModifier();
+const CJUIPatternLockModifier* GetCJUIPatternLockModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_PATTERN_MODIFIER_H

@@ -87,5 +87,13 @@ const ArkUINavigatorModifier* GetNavigatorModifier()
 
     return &modifier;
 }
+
+const CJUINavigatorModifier* GetCJUINavigatorModifier()
+{
+    static const CJUINavigatorModifier modifier = {SetTarget, ResetTarget, SetType, ResetType, SetActive,
+        ResetActive, SetParams, ResetParams };
+
+    return &modifier;
+}
 }
 } // namespace OHOS::Ace::NG

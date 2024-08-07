@@ -506,5 +506,18 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         ResetSystemFontStyleChangeEvent };
     return &modifier;
 }
+
+const CJUIFrameNodeModifier* GetCJUIFrameNodeModifier()
+{
+    static const CJUIFrameNodeModifier modifier = { IsModifiable, CreateFrameNode, InvalidateInFrameNode,
+        AppendChildInFrameNode, InsertChildAfterInFrameNode, RemoveChildInFrameNode, ClearChildrenInFrameNode,
+        GetChildrenCount, GetChild, GetFirst, GetNextSibling, GetPreviousSibling, GetParent, GetIdByNodePtr,
+        PropertyUpdate, GetLast, GetPositionToParent, GetPositionToScreen, GetPositionToWindow,
+        GetPositionToParentWithTransform, GetPositionToScreenWithTransform, GetPositionToWindowWithTransform,
+        GetMeasuredSize, GetLayoutPosition, GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo,
+        GetFrameNodeById, GetFrameNodeByUniqueId, GetFrameNodeByKey, GetFirstUINode, GetLayoutSize,
+        GetLayoutPositionWithoutMargin };
+    return &modifier;
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

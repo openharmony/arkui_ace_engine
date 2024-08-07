@@ -464,6 +464,22 @@ const ArkUIGridModifier* GetGridModifier()
     return &modifier;
 }
 
+const CJUIGridModifier* GetCJUIGridModifier()
+{
+    static const CJUIGridModifier modifier = {
+        SetGridColumnsTemplate, ResetGridColumnsTemplate, SetGridRowsTemplate, ResetGridRowsTemplate,
+        SetGridColumnsGap, ResetGridColumnsGap, SetGridRowsGap, ResetGridRowsGap,
+        SetGridScrollBar, ResetGridScrollBar, SetGridScrollBarWidth, ResetGridScrollBarWidth, SetGridScrollBarColor,
+        ResetGridScrollBarColor, SetGridCachedCount, ResetGridCachedCount, SetGridEditMode, ResetGridEditMode,
+        SetGridMultiSelectable, ResetGridMultiSelectable, SetGridMaxCount, ResetGridMaxCount, SetGridMinCount,
+        ResetGridMinCount, SetGridCellLength, ResetGridCellLength, SetGridLayoutDirection, ResetGridLayoutDirection,
+        SetGridSupportAnimation, ResetGridSupportAnimation, SetEdgeEffect, ResetEdgeEffect, SetNestedScroll,
+        ResetNestedScroll, SetEnableScroll, ResetEnableScroll, SetFriction, ResetFriction, GetColumnsTemplate,
+        GetRowsTemplate, GetColumnsGap, GetRowsGap, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, SetCachedCount,
+        ResetCachedCount, GetCachedCount, SetFlingSpeedLimit, ResetFlingSpeedLimit };
+    return &modifier;
+}
+
 void SetOnGridScrollIndex(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
