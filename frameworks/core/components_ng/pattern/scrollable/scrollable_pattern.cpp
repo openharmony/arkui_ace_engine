@@ -2785,15 +2785,19 @@ void ScrollablePattern::OnCollectClickTarget(const OffsetF& coordinateOffset,
         clickRecognizer_->SetTargetComponent(targetComponent);
         clickRecognizer_->SetIsSystemGesture(true);
         clickRecognizer_->SetRecognizerType(GestureTypeName::CLICK);
-        clickRecognizer_->SetSysGestureJudge([](const RefPtr<GestureInfo>& gestureInfo,
-                                                 const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
-            const auto &inputEventType = gestureInfo->GetInputEventType();
-            TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "input event type:%{public}d", inputEventType);
-            if (inputEventType == InputEventType::MOUSE_BUTTON) {
-                return GestureJudgeResult::CONTINUE;
-            }
-            return GestureJudgeResult::REJECT;
-        });
+        clickRecognizer_->SetSysGestureJudge(
+            [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_)), this](const RefPtr<GestureInfo>& gestureInfo,
+                const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
+                const auto& inputEventType = gestureInfo->GetInputEventType();
+                TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "input event type:%{public}d", inputEventType);
+                auto scrollBar = weak.Upgrade();
+                CHECK_NULL_RETURN(scrollBar, GestureJudgeResult::REJECT);
+                Point point(locationInfo_.GetX(), locationInfo_.GetY());
+                if (inputEventType == InputEventType::MOUSE_BUTTON && scrollBar->InBarRectRegion(point)) {
+                    return GestureJudgeResult::CONTINUE;
+                }
+                return GestureJudgeResult::REJECT;
+            });
         result.emplace_front(clickRecognizer_);
         responseLinkResult.emplace_back(clickRecognizer_);
     }
