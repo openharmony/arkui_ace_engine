@@ -14,7 +14,8 @@
  */
 
 import { Theme } from '@ohos.arkui.theme';
-import { LengthMetrics } from '@ohos.arkui.node';
+import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
+import { DividerModifier, SymbolGlyphModifier } from '@ohos.arkui.modifier';
 
 export enum ItemState {
   ENABLE = 1,
@@ -30,31 +31,80 @@ interface MenuController {
   enabled?: boolean;
 }
 
+export interface ToolBarSymbolGlyphOptions {
+  normal?: SymbolGlyphModifier;
+  activated?: SymbolGlyphModifier;
+}
+
 @Observed
 export class ToolBarOption {
   public content: string = '';
   public action?: () => void = undefined;
   public icon?: Resource = undefined;
   public state?: ItemState = 1;
+  public iconColor?: ResourceColor = $r('sys.color.icon_primary');
+  public activatedIconColor?: ResourceColor = $r('sys.color.icon_emphasize');
+  public textColor?: ResourceColor = $r('sys.color.font_primary');
+  public activatedTextColor?: ResourceColor = $r('sys.color.font_emphasize');
+  public toolBarSymbolOptions?: ToolBarSymbolGlyphOptions = undefined;
 }
 
 @Observed
 export class ToolBarOptions extends Array<ToolBarOption> {
 }
 
+export class ToolBarModifier implements AttributeModifier<ColumnAttribute> {
+  public backgroundColorValue?: ResourceColor = $r('sys.color.ohos_id_color_toolbar_bg');
+  public heightValue?: LengthMetrics = LengthMetrics.vp(56);
+  public stateEffectValue?: boolean = true;
+  public paddingValue?: LengthMetrics = LengthMetrics.vp(24);
+
+  applyNormalAttribute(instance: ColumnAttribute):void {
+    instance.backgroundColor(this.backgroundColorValue);
+  }
+
+  public backgroundColor(backgroundColor: ResourceColor): ToolBarModifier {
+    this.backgroundColorValue = backgroundColor;
+    return this;
+  }
+
+  public height(height: LengthMetrics): ToolBarModifier {
+    this.heightValue = height;
+    return this;
+  }
+
+  public stateEffect(stateEffect: boolean): ToolBarModifier {
+    this.stateEffectValue = stateEffect;
+    return this;
+  }
+
+  public padding(padding: LengthMetrics): ToolBarModifier {
+    this.paddingValue = padding;
+    return this;
+  }
+}
+
 @Component
 export struct ToolBar {
-  @ObjectLink toolBarList: ToolBarOptions
+  @ObjectLink toolBarList: ToolBarOptions;
   controller: TabsController = new TabsController();
-  @Prop activateIndex: number = -1
+  @Prop activateIndex: number = -1;
+  @Prop dividerModifier: DividerModifier = new DividerModifier();
+  @Prop toolBarModifier: ToolBarModifier =
+  new ToolBarModifier()
+    .padding(LengthMetrics.vp(24))
+    .stateEffect(true)
+    .height(LengthMetrics.vp(56))
+    .backgroundColor('sys.color.ohos_id_color_toolbar_bg');
   @Prop moreText: ResourceStr = $r('sys.string.ohos_toolbar_more');
   @State menuContent: MenuController[] = [];
-  toolBarItemBackground: Resource[] = []
-  @State itemBackground: Resource = $r('sys.color.ohos_id_color_toolbar_bg')
+  toolBarItemBackground: ResourceColor[] = [];
+  @State itemBackground: ResourceColor = Color.Transparent;
   @State iconPrimaryColor: ResourceColor = $r('sys.color.icon_primary');
   @State iconActivePrimaryColor: ResourceColor = $r('sys.color.icon_emphasize');
   @State fontPrimaryColor: ResourceColor = $r('sys.color.font_primary');
   @State fontActivatedPrimaryColor: ResourceColor = $r('sys.color.font_emphasize');
+  @State symbolEffect: SymbolEffect = new SymbolEffect();
 
   onWillApplyTheme(theme: Theme) {
     this.iconPrimaryColor = theme.colors.iconPrimary;
@@ -69,41 +119,73 @@ export struct ToolBar {
         .width(24)
         .height(24)
         .fillColor(this.iconPrimaryColor)
-        .margin({ top: 8, bottom: 2 })
+        .margin({ bottom: 2 })
         .objectFit(ImageFit.Contain)
         .draggable(false)
       Text(this.moreText)
         .fontColor(this.fontPrimaryColor)
         .fontSize($r('sys.float.ohos_id_text_size_caption'))
         .fontWeight(FontWeight.Medium)
+        .maxLines(1)
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .textAlign(TextAlign.Center)
     }.width('100%').height('100%')
+    .justifyContent(FlexAlign.Center)
     .bindMenu(this.menuContent, { placement: Placement.TopRight, offset: { x: -12, y : -10 } })
     .padding({ start: LengthMetrics.vp(4), end: LengthMetrics.vp(4) })
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
+    .backgroundColor(this.itemBackground)
+    .onHover((isHover: boolean) => {
+      if (isHover) {
+        this.toolBarItemBackground[index] = $r('sys.color.ohos_id_color_hover');
+      } else {
+        this.toolBarItemBackground[index] = Color.Transparent;
+      }
+      this.itemBackground = this.toolBarItemBackground[index];
+    })
+    .stateStyles({
+      pressed: {
+        .backgroundColor((!this.toolBarModifier.stateEffectValue) ?
+        this.toolBarItemBackground[index] : $r('sys.color.ohos_id_color_click_effect'))
+      },
+      normal: {
+        .backgroundColor(this.toolBarItemBackground[index])
+      }
+    })
   }
 
   @Builder TabBuilder(index: number) {
     Column() {
-      Image(this.toolBarList[index]?.icon)
-        .width(24)
-        .height(24)
-        .fillColor(this.activateIndex === index && !(this.toolBarList[index]?.state === 2)
-          ? this.iconActivePrimaryColor : this.iconPrimaryColor)
-        .opacity((this.toolBarList[index]?.state === 2) ? 0.4 : 1)
-        .margin({ top: 8, bottom: 2 })
-        .objectFit(ImageFit.Contain)
-        .draggable(false)
+      if (this.toolBarList[index]?.toolBarSymbolOptions?.normal ||
+        this.toolBarList[index]?.toolBarSymbolOptions?.activated) {
+        SymbolGlyph()
+          .fontSize('24vp')
+          .symbolEffect(this.symbolEffect, false)
+          .attributeModifier(this.getToolBarSymbolModifier(index))
+          .opacity((this.toolBarList[index]?.state === 2) ? 0.4 : 1)
+          .margin({ bottom: 2 })
+      } else {
+        Image(this.toolBarList[index]?.icon)
+          .width(24)
+          .height(24)
+          .fillColor(this.getIconColor(index))
+          .opacity((this.toolBarList[index]?.state === 2) ? 0.4 : 1)
+          .margin({ bottom: 2 })
+          .objectFit(ImageFit.Contain)
+          .draggable(false)
+      }
       Text(this.toolBarList[index]?.content)
-        .fontColor(this.activateIndex === index && !(this.toolBarList[index]?.state === 2)
-          ? this.fontActivatedPrimaryColor : this.fontPrimaryColor)
+        .fontColor(this.getTextColor(index))
         .fontSize($r('sys.float.ohos_id_text_size_caption'))
         .maxFontSize($r('sys.float.ohos_id_text_size_caption'))
         .minFontSize(9)
         .fontWeight(FontWeight.Medium)
-        .maxLines(2)
+        .maxLines(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .opacity((this.toolBarList[index]?.state === 2) ? 0.4 : 1)
+        .textAlign(TextAlign.Center)
     }
+    .justifyContent(FlexAlign.Center)
     .width('100%').height('100%')
     .focusable(!(this.toolBarList[index]?.state === 2))
     .focusOnTouch(!(this.toolBarList[index]?.state === 2))
@@ -126,15 +208,16 @@ export struct ToolBar {
     .onHover((isHover: boolean) => {
       if (isHover) {
         this.toolBarItemBackground[index] = (this.toolBarList[index]?.state === ItemState.DISABLE)
-          ? $r('sys.color.ohos_id_color_toolbar_bg') : $r('sys.color.ohos_id_color_hover')
+          ? Color.Transparent : $r('sys.color.ohos_id_color_hover');
       } else {
-        this.toolBarItemBackground[index] = $r('sys.color.ohos_id_color_toolbar_bg')
+        this.toolBarItemBackground[index] = Color.Transparent;
       }
-      this.itemBackground = this.toolBarItemBackground[index]
+      this.itemBackground = this.toolBarItemBackground[index];
     })
     .stateStyles({
       pressed: {
-        .backgroundColor((this.toolBarList[index]?.state === ItemState.DISABLE) ?
+        .backgroundColor((this.toolBarList[index]?.state === ItemState.DISABLE) ||
+          (!this.toolBarModifier.stateEffectValue) ?
         this.toolBarItemBackground[index] : $r('sys.color.ohos_id_color_click_effect'))
       },
       normal: {
@@ -143,8 +226,58 @@ export struct ToolBar {
     })
   }
 
+  private getToolBarSymbolModifier(index: number): SymbolGlyphModifier | undefined {
+    if (this.activateIndex === index && (this.toolBarList[index]?.state === ItemState.ACTIVATE)) {
+      return this.toolBarList[index]?.toolBarSymbolOptions?.activated;
+    }
+    return this.toolBarList[index]?.toolBarSymbolOptions?.normal;
+  }
+
+  private getIconColor(index: number): ResourceColor {
+    if (this.activateIndex === index && (this.toolBarList[index]?.state === ItemState.ACTIVATE)) {
+      return this.toolBarList[index]?.activatedIconColor ?? this.iconActivePrimaryColor;
+    }
+    return this.toolBarList[index]?.iconColor ?? this.iconPrimaryColor;
+  }
+
+  private getTextColor(index: number): ResourceColor {
+    if (this.activateIndex === index && (this.toolBarList[index]?.state === ItemState.ACTIVATE)) {
+      return this.toolBarList[index]?.activatedTextColor ?? this.fontActivatedPrimaryColor;
+    }
+    return this.toolBarList[index]?.textColor ?? this.fontPrimaryColor;
+  }
+
+  private toLengthString(value: LengthMetrics | undefined): string {
+    if (value === void (0)) {
+      return '';
+    }
+    const length: number = value.value;
+    let lengthString: string = '';
+    switch (value.unit) {
+      case LengthUnit.PX:
+        lengthString = `${length}px`;
+        break;
+      case LengthUnit.FP:
+        lengthString = `${length}fp`;
+        break;
+      case LengthUnit.LPX:
+        lengthString = `${length}lpx`;
+        break;
+      case LengthUnit.PERCENT:
+        lengthString = `${length * 100}%`;
+        break;
+      case LengthUnit.VP:
+        lengthString = `${length}vp`;
+        break;
+      default:
+        lengthString = `${length}vp`;
+        break;
+    }
+    return lengthString;
+  }
+
   refreshData() {
-    this.menuContent = []
+    this.menuContent = [];
     for (let i = 0; i < this.toolBarList.length; i++) {
       if (i >= 4 && this.toolBarList.length > 5) {
         this.menuContent[i - 4] = {
@@ -153,19 +286,21 @@ export struct ToolBar {
           enabled: this.toolBarList[i].state !== ItemState.DISABLE,
         }
       } else {
-        this.toolBarItemBackground[i] = $r('sys.color.ohos_id_color_toolbar_bg')
-        this.menuContent = []
+        this.toolBarItemBackground[i] = Color.Transparent;
+        this.menuContent = [];
       }
     }
-    return true
+    return true;
   }
 
   aboutToAppear() {
-    this.refreshData()
+    this.refreshData();
   }
   build() {
     Column() {
-      Divider().width('100%').height(1)
+      Divider()
+        .width('100%').height(1)
+        .attributeModifier(this.dividerModifier)
       Column() {
         Tabs({ barPosition: BarPosition.End, controller: this.controller}) {
           ForEach(this.toolBarList, (item: ToolBarOption, index: number) => {
@@ -187,17 +322,24 @@ export struct ToolBar {
           }
         }
         .vertical(false)
-        .constraintSize({ minHeight: 56, maxHeight: 56})
+        .constraintSize({
+          minHeight: this.toLengthString(this.toolBarModifier.heightValue),
+          maxHeight: this.toLengthString(this.toolBarModifier.heightValue),
+        })
+        .barHeight(this.toLengthString(this.toolBarModifier.heightValue))
         .barMode(BarMode.Fixed)
         .onChange((index: number) => {
         })
         .width('100%')
+        .height(this.toLengthString(this.toolBarModifier.heightValue))
         .padding({
-          start: LengthMetrics.vp(this.toolBarList.length < 5 ? 24 : 0),
-          end: LengthMetrics.vp(this.toolBarList.length < 5 ? 24 : 0)
+          start: this.toolBarList.length < 5 ? this.toolBarModifier.paddingValue : LengthMetrics.vp(0),
+          end: this.toolBarList.length < 5 ? this.toolBarModifier.paddingValue : LengthMetrics.vp(0),
         })
-        .backgroundColor($r('sys.color.ohos_id_color_toolbar_bg'))
-      }.width('100%')
+      }
+      .justifyContent(FlexAlign.Center)
+      .width('100%')
     }
+    .attributeModifier(this.toolBarModifier)
   }
 }
