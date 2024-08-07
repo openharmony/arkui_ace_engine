@@ -77,15 +77,6 @@ private:
     static float GetNearScale(float pos);
     void GenerateItemOffset(LayoutWrapper* layoutWrapper);
 
-    static void LayoutConstraintApplyScale(LayoutConstraintF& layoutConstraint, float scale)
-    {
-        layoutConstraint.minSize.ApplyScale(scale);
-        layoutConstraint.maxSize.ApplyScale(scale);
-        layoutConstraint.percentReference.ApplyScale(scale);
-        layoutConstraint.parentIdealSize.ApplyScale(scale);
-        layoutConstraint.selfIdealSize.ApplyScale(scale);
-    }
-
     void MeasureHeader(LayoutWrapper* layoutWrapper) override;
     void SetActiveChildRange(LayoutWrapper* layoutWrapper) override;
     void LayoutHeader(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize) override;

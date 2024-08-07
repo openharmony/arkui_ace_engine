@@ -43,17 +43,16 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float ARC_LIST_ITER_SCALE = 0.92f;
-constexpr float ARC_LIST_ONE_PERCENT = 0.01f;
+constexpr float ARC_LIST_ITEM_SCALE = 0.92f;
 constexpr float ARC_LIST_MAIN_POS_OFFSET = 200.f;
 constexpr float ARC_LIST_ITEM_SNAP_SIZE = 72.5f;
 constexpr float FLOAT_TWO = 2.0f;
 } // namespace
 
 // map data from UX, mark for scale ratio according to distance between item center and list center
-ArcListLayoutAlgorithm::CenterPos2ScaleMap ArcListLayoutAlgorithm::centerPos2ScaleMap_ = { { 141, 78 }, { 118, 88 },
-    { 94, 97 }, { 70.6, 103 }, { 47, 107 }, { 23.5, 107.5 }, { 0, 108 }, { -23, 107.5 }, { -45, 107 }, { -66, 103 },
-    { -89, 98 }, { -112, 90 }, { -132, 82 } };
+ArcListLayoutAlgorithm::CenterPos2ScaleMap ArcListLayoutAlgorithm::centerPos2ScaleMap_ = { { 141, 0.78 }, { 118, 0.88 },
+    { 94, 0.97 }, { 70.6, 1.03 }, { 47, 1.07 }, { 23.5, 1.075 }, { 0, 1.08 }, { -23, 1.075 }, { -45, 1.07 },
+    { -66, 1.03 }, { -89, 0.98 }, { -112, 0.9 }, { -132, 0.82 } };
 
 float ArcListLayoutAlgorithm::GetNearScale(float pos)
 {
@@ -62,16 +61,16 @@ float ArcListLayoutAlgorithm::GetNearScale(float pos)
     }
 
     if (LessOrEqual(pos, centerPos2ScaleMap_.begin()->first)) {
-        return centerPos2ScaleMap_.begin()->second * ARC_LIST_ONE_PERCENT;
+        return centerPos2ScaleMap_.begin()->second;
     }
     if (GreatOrEqual(pos, (--centerPos2ScaleMap_.end())->first)) {
-        return (--centerPos2ScaleMap_.end())->second * ARC_LIST_ONE_PERCENT;
+        return (--centerPos2ScaleMap_.end())->second;
     }
 
     for (auto it = centerPos2ScaleMap_.begin(); it != centerPos2ScaleMap_.end(); ++it) {
         if (GreatNotEqual(it->first, pos)) {
             float t = std::abs(pos - it->first) / std::abs(it->first - std::prev(it, 1)->first);
-            return GetLerpValue(it->second, std::prev(it, 1)->second, t) * ARC_LIST_ONE_PERCENT;
+            return GetLerpValue(it->second, std::prev(it, 1)->second, t);
         }
     }
 
@@ -182,9 +181,7 @@ int32_t ArcListLayoutAlgorithm::LayoutALineForward(
     ++currentIndex;
     ACE_SCOPED_TRACE("ArcListLayoutAlgorithm::MeasureListItem:%d, %f", currentIndex, startPos);
 
-    auto layoutConstraint = childLayoutConstraint_;
-    LayoutConstraintApplyScale(layoutConstraint, ARC_LIST_ITER_SCALE);
-    wrapper->Measure(layoutConstraint);
+    wrapper->Measure(childLayoutConstraint_);
 
     float mainLen = childrenSize_ ? childrenSize_->GetChildSize(currentIndex)
                                   : GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
@@ -209,9 +206,7 @@ int32_t ArcListLayoutAlgorithm::LayoutALineBackward(
     --currentIndex;
     ACE_SCOPED_TRACE("ArcListLayoutAlgorithm::MeasureListItem:%d, %f", currentIndex, endPos);
 
-    auto layoutConstraint = childLayoutConstraint_;
-    LayoutConstraintApplyScale(layoutConstraint, ARC_LIST_ITER_SCALE);
-    wrapper->Measure(layoutConstraint);
+    wrapper->Measure(childLayoutConstraint_);
 
     float mainLen = childrenSize_ ? childrenSize_->GetChildSize(currentIndex)
                                   : GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
@@ -322,7 +317,7 @@ void ArcListLayoutAlgorithm::GenerateItemOffset(LayoutWrapper* layoutWrapper)
         auto contentCenterPos = contentMainSize_ / FLOAT_TWO;
         if (autoScale) {
             auto itemCenterPos = (pos.second.startPos + pos.second.endPos) / FLOAT_TWO;
-            scale = GetNearScale(itemCenterPos - contentCenterPos);
+            scale = GetNearScale(itemCenterPos - contentCenterPos) * ARC_LIST_ITEM_SCALE;
         }
 
         pos.second.scale = scale;
