@@ -966,7 +966,8 @@ HWTEST_F(TextClockTestNG, GetAmPm, TestSize.Level1)
      * @tc.steps: step3. ParseDateTimeValue function is called..
      * @tc.expected: step3. check whether the properties is correct.
      */
-    pattern->GetAmPm("");
+    pattern->GetAmPm(0);
+    pattern->GetAmPm(12);
 }
 
 /**
