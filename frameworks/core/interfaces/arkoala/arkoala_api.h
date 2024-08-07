@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 121
+#define ARKUI_FULL_API_VERSION 122
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 121
+#define ARKUI_NODE_API_VERSION 122
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -4227,6 +4227,24 @@ struct ArkUIRichEditorControllerModifier {
     ArkUINodeHandle (*getRichEditorController)(ArkUINodeHandle node);
 };
 
+struct ArkUILinearIndicatorModifier {
+    void (*setLinearIndicatorIndicatorStyleSpace)(ArkUINodeHandle node, ArkUI_Float32 space);
+    void (*resetLinearIndicatorIndicatorStyleSpace)(ArkUINodeHandle node);
+    void (*setLinearIndicatorIndicatorStyleStrokeWidth)(ArkUINodeHandle node, ArkUI_Float32 strokeWidth);
+    void (*resetLinearIndicatorIndicatorStyleStrokeWidth)(ArkUINodeHandle node);
+    void (*setLinearIndicatorIndicatorStyleStrokeRadius)(ArkUINodeHandle node, ArkUI_Float32 strokeRadius);
+    void (*resetLinearIndicatorIndicatorStyleStrokeRadius)(ArkUINodeHandle node);
+    void (*setLinearIndicatorIndicatorStyleTrackBackgroundColor)(
+        ArkUINodeHandle node, ArkUI_Uint32 trackBackgroundColor);
+    void (*resetLinearIndicatorIndicatorStyleTrackBackgroundColor)(ArkUINodeHandle node);
+    void (*setLinearIndicatorIndicatorStyleTrackColor)(ArkUINodeHandle node, ArkUI_Uint32 trackColor);
+    void (*resetLinearIndicatorIndicatorStyleTrackColor)(ArkUINodeHandle node);
+    void (*setLinearIndicatorIndicatorLoop)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetLinearIndicatorIndicatorLoop)(ArkUINodeHandle node);
+    void (*setLinearIndicatorOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetLinearIndicatorOnChange)(ArkUINodeHandle node);
+};
+
 struct ArkUIDataPanelModifier {
     void (*setCloseEffect)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetCloseEffect)(ArkUINodeHandle node);
@@ -4695,6 +4713,7 @@ struct ArkUINodeModifiers {
     const ArkUISymbolSpanModifier* (*getSymbolSpanModifier)();
     const ArkUIComponent3DModifier* (*getComponent3DModifier)();
     const ArkUIContainerSpanModifier* (*getContainerSpanModifier)();
+    const ArkUILinearIndicatorModifier* (*getLinearIndicatorModifier)();
 };
 
 // same as inner defines in property.h
