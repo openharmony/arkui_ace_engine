@@ -517,4 +517,29 @@ CJ_EXPORT void FfiOHOSAceFrameworkWebJavaScriptProxy(
     }
 #endif
 }
+
+void FfiOHOSAceFrameworkWebDarkMode(int32_t darkMode)
+{
+    auto mode = WebDarkMode::Off;
+    switch (darkMode) {
+        case 0:
+            mode = WebDarkMode::Off;
+            break;
+        case 1:
+            mode = WebDarkMode::On;
+            break;
+        case 2:
+            mode = WebDarkMode::Auto;
+            break;
+        default:
+            mode = WebDarkMode::Off;
+            break;
+    }
+    WebModel::GetInstance()->SetDarkMode(mode);
+}
+
+void FfiOHOSAceFrameworkWebForceDarkAccess(bool access)
+{
+    WebModel::GetInstance()->SetForceDarkAccess(access);
+}
 }

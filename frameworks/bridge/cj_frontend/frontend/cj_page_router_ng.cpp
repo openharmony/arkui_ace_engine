@@ -711,7 +711,7 @@ void CJPageRouterNG::FlushReload()
         if (view == nullptr) {
             continue;
         }
-        view->FlushReload();
+        view->MarkNeedUpdate();
     }
 }
 } // namespace OHOS::Ace::Framework
