@@ -15,56 +15,80 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace SliderInterfaceModifier {
-        void _setSliderOptionsImpl(Ark_NativePointer node, const Opt_SliderOptions* options) {
+        void _setSliderOptionsImpl(Ark_NativePointer node, const Opt_SliderOptions* options)
+        {
         }
     } // SliderInterfaceModifier
     namespace SliderAttributeModifier {
-        void BlockColorImpl(Ark_NativePointer node, const ResourceColor* value) {
+        void BlockColorImpl(Ark_NativePointer node, const ResourceColor* value)
+        {
         }
-        void TrackColorImpl(Ark_NativePointer node, const Type_SliderAttribute_trackColor_Arg0* value) {
+        void TrackColorImpl(Ark_NativePointer node, const Type_SliderAttribute_trackColor_Arg0* value)
+        {
         }
-        void SelectedColorImpl(Ark_NativePointer node, const ResourceColor* value) {
+        void SelectedColorImpl(Ark_NativePointer node, const ResourceColor* value)
+        {
         }
-        void MinLabelImpl(Ark_NativePointer node, const Ark_String* value) {
+        void MinLabelImpl(Ark_NativePointer node, const Ark_String* value)
+        {
         }
-        void MaxLabelImpl(Ark_NativePointer node, const Ark_String* value) {
+        void MaxLabelImpl(Ark_NativePointer node, const Ark_String* value)
+        {
         }
-        void ShowStepsImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void ShowStepsImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
-        void ShowTipsImpl(Ark_NativePointer node, Ark_Boolean value, const Opt_ResourceStr* content) {
+        void ShowTipsImpl(Ark_NativePointer node, Ark_Boolean value, const Opt_ResourceStr* content)
+        {
         }
-        void TrackThicknessImpl(Ark_NativePointer node, const Ark_Length* value) {
+        void TrackThicknessImpl(Ark_NativePointer node, const Ark_Length* value)
+        {
         }
-        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void BlockBorderColorImpl(Ark_NativePointer node, const ResourceColor* value) {
+        void BlockBorderColorImpl(Ark_NativePointer node, const ResourceColor* value)
+        {
         }
-        void BlockBorderWidthImpl(Ark_NativePointer node, const Ark_Length* value) {
+        void BlockBorderWidthImpl(Ark_NativePointer node, const Ark_Length* value)
+        {
         }
-        void StepColorImpl(Ark_NativePointer node, const ResourceColor* value) {
+        void StepColorImpl(Ark_NativePointer node, const ResourceColor* value)
+        {
         }
-        void TrackBorderRadiusImpl(Ark_NativePointer node, const Ark_Length* value) {
+        void TrackBorderRadiusImpl(Ark_NativePointer node, const Ark_Length* value)
+        {
         }
-        void SelectedBorderRadiusImpl(Ark_NativePointer node, const Ark_Length* value) {
+        void SelectedBorderRadiusImpl(Ark_NativePointer node, const Ark_Length* value)
+        {
         }
-        void BlockSizeImpl(Ark_NativePointer node, const Ark_SizeOptions* value) {
+        void BlockSizeImpl(Ark_NativePointer node, const Ark_SizeOptions* value)
+        {
         }
-        void BlockStyleImpl(Ark_NativePointer node, const Ark_SliderBlockStyle* value) {
+        void BlockStyleImpl(Ark_NativePointer node, const Ark_SliderBlockStyle* value)
+        {
         }
-        void StepSizeImpl(Ark_NativePointer node, const Ark_Length* value) {
+        void StepSizeImpl(Ark_NativePointer node, const Ark_Length* value)
+        {
         }
-        void SliderInteractionModeImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void SliderInteractionModeImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void MinResponsiveDistanceImpl(Ark_NativePointer node, const Ark_Number* value) {
+        void MinResponsiveDistanceImpl(Ark_NativePointer node, const Ark_Number* value)
+        {
         }
-        void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier) {
+        void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
+        {
         }
-        void SlideRangeImpl(Ark_NativePointer node, const Ark_SlideRange* value) {
+        void SlideRangeImpl(Ark_NativePointer node, const Ark_SlideRange* value)
+        {
         }
     } // SliderAttributeModifier
-    const GENERATED_ArkUISliderModifier* GetSliderModifier() {
+    const GENERATED_ArkUISliderModifier* GetSliderModifier()
+    {
         static const GENERATED_ArkUISliderModifier ArkUISliderModifierImpl {
             SliderInterfaceModifier::_setSliderOptionsImpl,
             SliderAttributeModifier::BlockColorImpl,

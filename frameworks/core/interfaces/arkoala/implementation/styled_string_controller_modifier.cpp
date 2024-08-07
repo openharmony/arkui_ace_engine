@@ -15,21 +15,27 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace StyledStringControllerModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void SetStyledStringImpl(StyledStringControllerPeer* peer, const Ark_Materialized* styledString) {
+        void SetStyledStringImpl(StyledStringControllerPeer* peer, const Ark_Materialized* styledString)
+        {
         }
-        Ark_NativePointer GetStyledStringImpl(StyledStringControllerPeer* peer) {
+        Ark_NativePointer GetStyledStringImpl(StyledStringControllerPeer* peer)
+        {
             return 0;
         }
     } // StyledStringControllerModifier
-    const GENERATED_ArkUIStyledStringControllerAccessor* GetStyledStringControllerAccessor() {
+    const GENERATED_ArkUIStyledStringControllerAccessor* GetStyledStringControllerAccessor()
+    {
         static const GENERATED_ArkUIStyledStringControllerAccessor StyledStringControllerAccessorImpl {
             StyledStringControllerModifier::CtorImpl,
             StyledStringControllerModifier::GetFinalizerImpl,

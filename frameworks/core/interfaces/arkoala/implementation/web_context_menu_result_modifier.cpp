@@ -15,28 +15,38 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace WebContextMenuResultModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void CloseContextMenuImpl(WebContextMenuResultPeer* peer) {
+        void CloseContextMenuImpl(WebContextMenuResultPeer* peer)
+        {
         }
-        void CopyImageImpl(WebContextMenuResultPeer* peer) {
+        void CopyImageImpl(WebContextMenuResultPeer* peer)
+        {
         }
-        void CopyImpl(WebContextMenuResultPeer* peer) {
+        void CopyImpl(WebContextMenuResultPeer* peer)
+        {
         }
-        void PasteImpl(WebContextMenuResultPeer* peer) {
+        void PasteImpl(WebContextMenuResultPeer* peer)
+        {
         }
-        void CutImpl(WebContextMenuResultPeer* peer) {
+        void CutImpl(WebContextMenuResultPeer* peer)
+        {
         }
-        void SelectAllImpl(WebContextMenuResultPeer* peer) {
+        void SelectAllImpl(WebContextMenuResultPeer* peer)
+        {
         }
     } // WebContextMenuResultModifier
-    const GENERATED_ArkUIWebContextMenuResultAccessor* GetWebContextMenuResultAccessor() {
+    const GENERATED_ArkUIWebContextMenuResultAccessor* GetWebContextMenuResultAccessor()
+    {
         static const GENERATED_ArkUIWebContextMenuResultAccessor WebContextMenuResultAccessorImpl {
             WebContextMenuResultModifier::CtorImpl,
             WebContextMenuResultModifier::GetFinalizerImpl,

@@ -15,32 +15,44 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace VideoControllerModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void StartImpl(VideoControllerPeer* peer) {
+        void StartImpl(VideoControllerPeer* peer)
+        {
         }
-        void PauseImpl(VideoControllerPeer* peer) {
+        void PauseImpl(VideoControllerPeer* peer)
+        {
         }
-        void StopImpl(VideoControllerPeer* peer) {
+        void StopImpl(VideoControllerPeer* peer)
+        {
         }
-        void SetCurrentTime_numberImpl(VideoControllerPeer* peer, const Ark_Number* value) {
+        void SetCurrentTime_numberImpl(VideoControllerPeer* peer, const Ark_Number* value)
+        {
         }
-        void RequestFullscreenImpl(VideoControllerPeer* peer, Ark_Boolean value) {
+        void RequestFullscreenImpl(VideoControllerPeer* peer, Ark_Boolean value)
+        {
         }
-        void ExitFullscreenImpl(VideoControllerPeer* peer) {
+        void ExitFullscreenImpl(VideoControllerPeer* peer)
+        {
         }
-        void SetCurrentTime_number_SeekModeImpl(VideoControllerPeer* peer, const Ark_Number* value, Ark_Int32 seekMode) {
+        void SetCurrentTime_number_SeekModeImpl(VideoControllerPeer* peer, const Ark_Number* value, Ark_Int32 seekMode)
+        {
         }
-        void ResetImpl(VideoControllerPeer* peer) {
+        void ResetImpl(VideoControllerPeer* peer)
+        {
         }
     } // VideoControllerModifier
-    const GENERATED_ArkUIVideoControllerAccessor* GetVideoControllerAccessor() {
+    const GENERATED_ArkUIVideoControllerAccessor* GetVideoControllerAccessor()
+    {
         static const GENERATED_ArkUIVideoControllerAccessor VideoControllerAccessorImpl {
             VideoControllerModifier::CtorImpl,
             VideoControllerModifier::GetFinalizerImpl,

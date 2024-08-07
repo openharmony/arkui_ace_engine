@@ -15,18 +15,23 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace SaveButtonInterfaceModifier {
-        void _setSaveButtonOptions_Impl(Ark_NativePointer node) {
+        void _setSaveButtonOptions_Impl(Ark_NativePointer node)
+        {
         }
-        void _setSaveButtonOptions_SaveButtonOptionsImpl(Ark_NativePointer node, const Ark_SaveButtonOptions* options) {
+        void _setSaveButtonOptions_SaveButtonOptionsImpl(Ark_NativePointer node, const Ark_SaveButtonOptions* options)
+        {
         }
     } // SaveButtonInterfaceModifier
     namespace SaveButtonAttributeModifier {
-        void OnClickImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnClickImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
     } // SaveButtonAttributeModifier
-    const GENERATED_ArkUISaveButtonModifier* GetSaveButtonModifier() {
+    const GENERATED_ArkUISaveButtonModifier* GetSaveButtonModifier()
+    {
         static const GENERATED_ArkUISaveButtonModifier ArkUISaveButtonModifierImpl {
             SaveButtonInterfaceModifier::_setSaveButtonOptions_Impl,
             SaveButtonInterfaceModifier::_setSaveButtonOptions_SaveButtonOptionsImpl,

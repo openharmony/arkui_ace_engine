@@ -15,20 +15,26 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace ChildrenMainSizeModifier {
-        Ark_NativePointer CtorImpl(const Ark_Number* childDefaultSize) {
+        Ark_NativePointer CtorImpl(const Ark_Number* childDefaultSize)
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void SpliceImpl(ChildrenMainSizePeer* peer, const Ark_Number* start, const Opt_Number* deleteCount, const Opt_Array_Number* childrenSize) {
+        void SpliceImpl(ChildrenMainSizePeer* peer, const Ark_Number* start, const Opt_Number* deleteCount, const Opt_Array_Number* childrenSize)
+        {
         }
-        void UpdateImpl(ChildrenMainSizePeer* peer, const Ark_Number* index, const Ark_Number* childSize) {
+        void UpdateImpl(ChildrenMainSizePeer* peer, const Ark_Number* index, const Ark_Number* childSize)
+        {
         }
     } // ChildrenMainSizeModifier
-    const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor() {
+    const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor()
+    {
         static const GENERATED_ArkUIChildrenMainSizeAccessor ChildrenMainSizeAccessorImpl {
             ChildrenMainSizeModifier::CtorImpl,
             ChildrenMainSizeModifier::GetFinalizerImpl,

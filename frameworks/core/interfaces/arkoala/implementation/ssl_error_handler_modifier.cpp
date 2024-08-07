@@ -15,20 +15,26 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace SslErrorHandlerModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void HandleConfirmImpl(SslErrorHandlerPeer* peer) {
+        void HandleConfirmImpl(SslErrorHandlerPeer* peer)
+        {
         }
-        void HandleCancelImpl(SslErrorHandlerPeer* peer) {
+        void HandleCancelImpl(SslErrorHandlerPeer* peer)
+        {
         }
     } // SslErrorHandlerModifier
-    const GENERATED_ArkUISslErrorHandlerAccessor* GetSslErrorHandlerAccessor() {
+    const GENERATED_ArkUISslErrorHandlerAccessor* GetSslErrorHandlerAccessor()
+    {
         static const GENERATED_ArkUISslErrorHandlerAccessor SslErrorHandlerAccessorImpl {
             SslErrorHandlerModifier::CtorImpl,
             SslErrorHandlerModifier::GetFinalizerImpl,

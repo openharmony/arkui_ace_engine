@@ -15,31 +15,40 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace WaterFlowSectionsModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        Ark_Boolean SpliceImpl(WaterFlowSectionsPeer* peer, const Ark_Number* start, const Opt_Number* deleteCount, const Opt_Array_SectionOptions* sections) {
+        Ark_Boolean SpliceImpl(WaterFlowSectionsPeer* peer, const Ark_Number* start, const Opt_Number* deleteCount, const Opt_Array_SectionOptions* sections)
+        {
             return 0;
         }
-        Ark_Boolean PushImpl(WaterFlowSectionsPeer* peer, const Ark_SectionOptions* section) {
+        Ark_Boolean PushImpl(WaterFlowSectionsPeer* peer, const Ark_SectionOptions* section)
+        {
             return 0;
         }
-        Ark_Boolean UpdateImpl(WaterFlowSectionsPeer* peer, const Ark_Number* sectionIndex, const Ark_SectionOptions* section) {
+        Ark_Boolean UpdateImpl(WaterFlowSectionsPeer* peer, const Ark_Number* sectionIndex, const Ark_SectionOptions* section)
+        {
             return 0;
         }
-        Ark_NativePointer ValuesImpl(WaterFlowSectionsPeer* peer) {
+        Ark_NativePointer ValuesImpl(WaterFlowSectionsPeer* peer)
+        {
             return 0;
         }
-        Ark_Int32 LengthImpl(WaterFlowSectionsPeer* peer) {
+        Ark_Int32 LengthImpl(WaterFlowSectionsPeer* peer)
+        {
             return 0;
         }
     } // WaterFlowSectionsModifier
-    const GENERATED_ArkUIWaterFlowSectionsAccessor* GetWaterFlowSectionsAccessor() {
+    const GENERATED_ArkUIWaterFlowSectionsAccessor* GetWaterFlowSectionsAccessor()
+    {
         static const GENERATED_ArkUIWaterFlowSectionsAccessor WaterFlowSectionsAccessorImpl {
             WaterFlowSectionsModifier::CtorImpl,
             WaterFlowSectionsModifier::GetFinalizerImpl,

@@ -15,12 +15,15 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace MenuItemGroupInterfaceModifier {
-        void _setMenuItemGroupOptionsImpl(Ark_NativePointer node, const Opt_MenuItemGroupOptions* value) {
+        void _setMenuItemGroupOptionsImpl(Ark_NativePointer node, const Opt_MenuItemGroupOptions* value)
+        {
         }
     } // MenuItemGroupInterfaceModifier
-    const GENERATED_ArkUIMenuItemGroupModifier* GetMenuItemGroupModifier() {
+    const GENERATED_ArkUIMenuItemGroupModifier* GetMenuItemGroupModifier()
+    {
         static const GENERATED_ArkUIMenuItemGroupModifier ArkUIMenuItemGroupModifierImpl {
             MenuItemGroupInterfaceModifier::_setMenuItemGroupOptionsImpl,
         };

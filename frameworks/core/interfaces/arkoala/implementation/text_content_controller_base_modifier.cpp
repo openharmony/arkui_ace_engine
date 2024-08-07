@@ -15,25 +15,32 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace TextContentControllerBaseModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetCaretOffsetImpl(TextContentControllerBasePeer* peer) {
+        Ark_NativePointer GetCaretOffsetImpl(TextContentControllerBasePeer* peer)
+        {
             return 0;
         }
-        Ark_NativePointer GetTextContentRectImpl(TextContentControllerBasePeer* peer) {
+        Ark_NativePointer GetTextContentRectImpl(TextContentControllerBasePeer* peer)
+        {
             return 0;
         }
-        Ark_Int32 GetTextContentLineCountImpl(TextContentControllerBasePeer* peer) {
+        Ark_Int32 GetTextContentLineCountImpl(TextContentControllerBasePeer* peer)
+        {
             return 0;
         }
     } // TextContentControllerBaseModifier
-    const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor() {
+    const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor()
+    {
         static const GENERATED_ArkUITextContentControllerBaseAccessor TextContentControllerBaseAccessorImpl {
             TextContentControllerBaseModifier::CtorImpl,
             TextContentControllerBaseModifier::GetFinalizerImpl,

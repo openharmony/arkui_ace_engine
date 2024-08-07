@@ -15,40 +15,56 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace ImageAnimatorInterfaceModifier {
-        void _setImageAnimatorOptionsImpl(Ark_NativePointer node) {
+        void _setImageAnimatorOptionsImpl(Ark_NativePointer node)
+        {
         }
     } // ImageAnimatorInterfaceModifier
     namespace ImageAnimatorAttributeModifier {
-        void ImagesImpl(Ark_NativePointer node, const Array_ImageFrameInfo* value) {
+        void ImagesImpl(Ark_NativePointer node, const Array_ImageFrameInfo* value)
+        {
         }
-        void StateImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void StateImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void DurationImpl(Ark_NativePointer node, const Ark_Number* value) {
+        void DurationImpl(Ark_NativePointer node, const Ark_Number* value)
+        {
         }
-        void ReverseImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void ReverseImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
-        void FixedSizeImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void FixedSizeImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
-        void PreDecodeImpl(Ark_NativePointer node, const Ark_Number* value) {
+        void PreDecodeImpl(Ark_NativePointer node, const Ark_Number* value)
+        {
         }
-        void FillModeImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void FillModeImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void IterationsImpl(Ark_NativePointer node, const Ark_Number* value) {
+        void IterationsImpl(Ark_NativePointer node, const Ark_Number* value)
+        {
         }
-        void OnStartImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnStartImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
-        void OnPauseImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnPauseImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
-        void OnRepeatImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnRepeatImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
-        void OnCancelImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnCancelImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
-        void OnFinishImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnFinishImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
     } // ImageAnimatorAttributeModifier
-    const GENERATED_ArkUIImageAnimatorModifier* GetImageAnimatorModifier() {
+    const GENERATED_ArkUIImageAnimatorModifier* GetImageAnimatorModifier()
+    {
         static const GENERATED_ArkUIImageAnimatorModifier ArkUIImageAnimatorModifierImpl {
             ImageAnimatorInterfaceModifier::_setImageAnimatorOptionsImpl,
             ImageAnimatorAttributeModifier::ImagesImpl,

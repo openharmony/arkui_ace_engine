@@ -15,32 +15,44 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace TextTimerInterfaceModifier {
-        void _setTextTimerOptionsImpl(Ark_NativePointer node, const Opt_TextTimerOptions* options) {
+        void _setTextTimerOptionsImpl(Ark_NativePointer node, const Opt_TextTimerOptions* options)
+        {
         }
     } // TextTimerInterfaceModifier
     namespace TextTimerAttributeModifier {
-        void FormatImpl(Ark_NativePointer node, const Ark_String* value) {
+        void FormatImpl(Ark_NativePointer node, const Ark_String* value)
+        {
         }
-        void FontColorImpl(Ark_NativePointer node, const ResourceColor* value) {
+        void FontColorImpl(Ark_NativePointer node, const ResourceColor* value)
+        {
         }
-        void FontSizeImpl(Ark_NativePointer node, const Ark_Length* value) {
+        void FontSizeImpl(Ark_NativePointer node, const Ark_Length* value)
+        {
         }
-        void FontStyleImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void FontStyleImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void FontWeightImpl(Ark_NativePointer node, const Type_TextTimerAttribute_fontWeight_Arg0* value) {
+        void FontWeightImpl(Ark_NativePointer node, const Type_TextTimerAttribute_fontWeight_Arg0* value)
+        {
         }
-        void FontFamilyImpl(Ark_NativePointer node, const ResourceStr* value) {
+        void FontFamilyImpl(Ark_NativePointer node, const ResourceStr* value)
+        {
         }
-        void OnTimerImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnTimerImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
-        void TextShadowImpl(Ark_NativePointer node, const Type_TextTimerAttribute_textShadow_Arg0* value) {
+        void TextShadowImpl(Ark_NativePointer node, const Type_TextTimerAttribute_textShadow_Arg0* value)
+        {
         }
-        void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier) {
+        void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
+        {
         }
     } // TextTimerAttributeModifier
-    const GENERATED_ArkUITextTimerModifier* GetTextTimerModifier() {
+    const GENERATED_ArkUITextTimerModifier* GetTextTimerModifier()
+    {
         static const GENERATED_ArkUITextTimerModifier ArkUITextTimerModifierImpl {
             TextTimerInterfaceModifier::_setTextTimerOptionsImpl,
             TextTimerAttributeModifier::FormatImpl,

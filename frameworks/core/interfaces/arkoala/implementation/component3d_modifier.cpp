@@ -15,28 +15,38 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace Component3DInterfaceModifier {
-        void _setComponent3DOptionsImpl(Ark_NativePointer node, const Opt_SceneOptions* sceneOptions) {
+        void _setComponent3DOptionsImpl(Ark_NativePointer node, const Opt_SceneOptions* sceneOptions)
+        {
         }
     } // Component3DInterfaceModifier
     namespace Component3DAttributeModifier {
-        void EnvironmentImpl(Ark_NativePointer node, const Ark_Resource* uri) {
+        void EnvironmentImpl(Ark_NativePointer node, const Ark_Resource* uri)
+        {
         }
-        void CustomRenderImpl(Ark_NativePointer node, const Ark_Resource* uri, Ark_Boolean selfRenderUpdate) {
+        void CustomRenderImpl(Ark_NativePointer node, const Ark_Resource* uri, Ark_Boolean selfRenderUpdate)
+        {
         }
-        void ShaderImpl(Ark_NativePointer node, const Ark_Resource* uri) {
+        void ShaderImpl(Ark_NativePointer node, const Ark_Resource* uri)
+        {
         }
-        void ShaderImageTextureImpl(Ark_NativePointer node, const Ark_Resource* uri) {
+        void ShaderImageTextureImpl(Ark_NativePointer node, const Ark_Resource* uri)
+        {
         }
-        void ShaderInputBufferImpl(Ark_NativePointer node, const Array_Number* buffer) {
+        void ShaderInputBufferImpl(Ark_NativePointer node, const Array_Number* buffer)
+        {
         }
-        void RenderWidthImpl(Ark_NativePointer node, const Ark_Length* value) {
+        void RenderWidthImpl(Ark_NativePointer node, const Ark_Length* value)
+        {
         }
-        void RenderHeightImpl(Ark_NativePointer node, const Ark_Length* value) {
+        void RenderHeightImpl(Ark_NativePointer node, const Ark_Length* value)
+        {
         }
     } // Component3DAttributeModifier
-    const GENERATED_ArkUIComponent3DModifier* GetComponent3DModifier() {
+    const GENERATED_ArkUIComponent3DModifier* GetComponent3DModifier()
+    {
         static const GENERATED_ArkUIComponent3DModifier ArkUIComponent3DModifierImpl {
             Component3DInterfaceModifier::_setComponent3DOptionsImpl,
             Component3DAttributeModifier::EnvironmentImpl,

@@ -15,32 +15,44 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace MarqueeInterfaceModifier {
-        void _setMarqueeOptionsImpl(Ark_NativePointer node, const Type_MarqueeInterface__setMarqueeOptions_Arg0* value) {
+        void _setMarqueeOptionsImpl(Ark_NativePointer node, const Type_MarqueeInterface__setMarqueeOptions_Arg0* value)
+        {
         }
     } // MarqueeInterfaceModifier
     namespace MarqueeAttributeModifier {
-        void FontColorImpl(Ark_NativePointer node, const ResourceColor* value) {
+        void FontColorImpl(Ark_NativePointer node, const ResourceColor* value)
+        {
         }
-        void FontSizeImpl(Ark_NativePointer node, const Ark_Length* value) {
+        void FontSizeImpl(Ark_NativePointer node, const Ark_Length* value)
+        {
         }
-        void AllowScaleImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void AllowScaleImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
-        void FontWeightImpl(Ark_NativePointer node, const Type_MarqueeAttribute_fontWeight_Arg0* value) {
+        void FontWeightImpl(Ark_NativePointer node, const Type_MarqueeAttribute_fontWeight_Arg0* value)
+        {
         }
-        void FontFamilyImpl(Ark_NativePointer node, const Type_MarqueeAttribute_fontFamily_Arg0* value) {
+        void FontFamilyImpl(Ark_NativePointer node, const Type_MarqueeAttribute_fontFamily_Arg0* value)
+        {
         }
-        void MarqueeUpdateStrategyImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void MarqueeUpdateStrategyImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void OnStartImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnStartImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
-        void OnBounceImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnBounceImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
-        void OnFinishImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnFinishImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
     } // MarqueeAttributeModifier
-    const GENERATED_ArkUIMarqueeModifier* GetMarqueeModifier() {
+    const GENERATED_ArkUIMarqueeModifier* GetMarqueeModifier()
+    {
         static const GENERATED_ArkUIMarqueeModifier ArkUIMarqueeModifierImpl {
             MarqueeInterfaceModifier::_setMarqueeOptionsImpl,
             MarqueeAttributeModifier::FontColorImpl,

@@ -21,7 +21,8 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "node_api.h"
 
-namespace OHOS::Ace::NG {
+namespace OHOS::Ace::NG
+{
 
     Ark_Float32 GetDensity(Ark_Int32 deviceId);
     Ark_Float32 GetFontScale(Ark_Int32 deviceId);
@@ -104,7 +105,8 @@ namespace OHOS::Ace::NG {
 
 }
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
 
     void SetAppendGroupedLog(void* pFunc) {}
 
@@ -293,7 +295,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIXComponentControllerAccessor* GetXComponentControllerAccessor();
     const GENERATED_ArkUIWaterFlowSectionsAccessor* GetWaterFlowSectionsAccessor();
     const GENERATED_ArkUILinearIndicatorControllerAccessor* GetLinearIndicatorControllerAccessor();
-    const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers() {
+    const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
+    {
         static const GENERATED_ArkUINodeModifiers modifiersImpl = {
             GetAbilityComponentModifier,
             GetAlphabetIndexerModifier,
@@ -410,7 +413,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &modifiersImpl;
     }
-    const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors() {
+    const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
+    {
         static const GENERATED_ArkUIAccessors accessorsImpl = {
             GetDrawModifierAccessor,
             GetPanGestureOptionsAccessor,
@@ -577,8 +581,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     EXTERN_C IDLIZE_API_EXPORT const GENERATED_ArkUIAnyAPI* GENERATED_GetArkAnyAPI(
         GENERATED_Ark_APIVariantKind kind, int version)
     {
-        switch (kind)
-        {
+        switch (kind) {
             case GENERATED_FULL:
                 if (version == GENERATED_ARKUI_FULL_API_VERSION)   {
                     return reinterpret_cast<const GENERATED_ArkUIAnyAPI*>(GENERATED_GetFullAPI());

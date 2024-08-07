@@ -15,24 +15,32 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace LinearIndicatorControllerModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void SetProgressImpl(LinearIndicatorControllerPeer* peer, const Ark_Number* index, const Ark_Number* progress) {
+        void SetProgressImpl(LinearIndicatorControllerPeer* peer, const Ark_Number* index, const Ark_Number* progress)
+        {
         }
-        void StartImpl(LinearIndicatorControllerPeer* peer, const Opt_LinearIndicatorStartOptions* options) {
+        void StartImpl(LinearIndicatorControllerPeer* peer, const Opt_LinearIndicatorStartOptions* options)
+        {
         }
-        void PauseImpl(LinearIndicatorControllerPeer* peer) {
+        void PauseImpl(LinearIndicatorControllerPeer* peer)
+        {
         }
-        void StopImpl(LinearIndicatorControllerPeer* peer) {
+        void StopImpl(LinearIndicatorControllerPeer* peer)
+        {
         }
     } // LinearIndicatorControllerModifier
-    const GENERATED_ArkUILinearIndicatorControllerAccessor* GetLinearIndicatorControllerAccessor() {
+    const GENERATED_ArkUILinearIndicatorControllerAccessor* GetLinearIndicatorControllerAccessor()
+    {
         static const GENERATED_ArkUILinearIndicatorControllerAccessor LinearIndicatorControllerAccessorImpl {
             LinearIndicatorControllerModifier::CtorImpl,
             LinearIndicatorControllerModifier::GetFinalizerImpl,

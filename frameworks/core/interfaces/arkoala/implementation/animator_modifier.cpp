@@ -15,42 +15,59 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace AnimatorInterfaceModifier {
-        void _setAnimatorOptionsImpl(Ark_NativePointer node, const Ark_String* value) {
+        void _setAnimatorOptionsImpl(Ark_NativePointer node, const Ark_String* value)
+        {
         }
     } // AnimatorInterfaceModifier
     namespace AnimatorAttributeModifier {
-        void StateImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void StateImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void DurationImpl(Ark_NativePointer node, const Ark_Number* value) {
+        void DurationImpl(Ark_NativePointer node, const Ark_Number* value)
+        {
         }
-        void CurveImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void CurveImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void DelayImpl(Ark_NativePointer node, const Ark_Number* value) {
+        void DelayImpl(Ark_NativePointer node, const Ark_Number* value)
+        {
         }
-        void FillModeImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void FillModeImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void IterationsImpl(Ark_NativePointer node, const Ark_Number* value) {
+        void IterationsImpl(Ark_NativePointer node, const Ark_Number* value)
+        {
         }
-        void PlayModeImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void PlayModeImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void MotionImpl(Ark_NativePointer node, const Type_AnimatorAttribute_motion_Arg0* value) {
+        void MotionImpl(Ark_NativePointer node, const Type_AnimatorAttribute_motion_Arg0* value)
+        {
         }
-        void OnStartImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnStartImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
-        void OnPauseImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnPauseImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
-        void OnRepeatImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnRepeatImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
-        void OnCancelImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnCancelImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
-        void OnFinishImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnFinishImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
-        void OnFrameImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnFrameImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
     } // AnimatorAttributeModifier
-    const GENERATED_ArkUIAnimatorModifier* GetAnimatorModifier() {
+    const GENERATED_ArkUIAnimatorModifier* GetAnimatorModifier()
+    {
         static const GENERATED_ArkUIAnimatorModifier ArkUIAnimatorModifierImpl {
             AnimatorInterfaceModifier::_setAnimatorOptionsImpl,
             AnimatorAttributeModifier::StateImpl,

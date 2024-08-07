@@ -15,18 +15,23 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace LocationButtonInterfaceModifier {
-        void _setLocationButtonOptions_Impl(Ark_NativePointer node) {
+        void _setLocationButtonOptions_Impl(Ark_NativePointer node)
+        {
         }
-        void _setLocationButtonOptions_LocationButtonOptionsImpl(Ark_NativePointer node, const Ark_LocationButtonOptions* options) {
+        void _setLocationButtonOptions_LocationButtonOptionsImpl(Ark_NativePointer node, const Ark_LocationButtonOptions* options)
+        {
         }
     } // LocationButtonInterfaceModifier
     namespace LocationButtonAttributeModifier {
-        void OnClickImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnClickImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
     } // LocationButtonAttributeModifier
-    const GENERATED_ArkUILocationButtonModifier* GetLocationButtonModifier() {
+    const GENERATED_ArkUILocationButtonModifier* GetLocationButtonModifier()
+    {
         static const GENERATED_ArkUILocationButtonModifier ArkUILocationButtonModifierImpl {
             LocationButtonInterfaceModifier::_setLocationButtonOptions_Impl,
             LocationButtonInterfaceModifier::_setLocationButtonOptions_LocationButtonOptionsImpl,

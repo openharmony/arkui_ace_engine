@@ -15,18 +15,23 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace GridRowInterfaceModifier {
-        void _setGridRowOptionsImpl(Ark_NativePointer node, const Opt_GridRowOptions* option) {
+        void _setGridRowOptionsImpl(Ark_NativePointer node, const Opt_GridRowOptions* option)
+        {
         }
     } // GridRowInterfaceModifier
     namespace GridRowAttributeModifier {
-        void OnBreakpointChangeImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnBreakpointChangeImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void AlignItemsImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void AlignItemsImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
     } // GridRowAttributeModifier
-    const GENERATED_ArkUIGridRowModifier* GetGridRowModifier() {
+    const GENERATED_ArkUIGridRowModifier* GetGridRowModifier()
+    {
         static const GENERATED_ArkUIGridRowModifier ArkUIGridRowModifierImpl {
             GridRowInterfaceModifier::_setGridRowOptionsImpl,
             GridRowAttributeModifier::OnBreakpointChangeImpl,

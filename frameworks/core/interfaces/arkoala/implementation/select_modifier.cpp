@@ -15,56 +15,80 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace SelectInterfaceModifier {
-        void _setSelectOptionsImpl(Ark_NativePointer node, const Array_SelectOption* options) {
+        void _setSelectOptionsImpl(Ark_NativePointer node, const Array_SelectOption* options)
+        {
         }
     } // SelectInterfaceModifier
     namespace SelectAttributeModifier {
-        void SelectedImpl(Ark_NativePointer node, const Type_SelectAttribute_selected_Arg0* value) {
+        void SelectedImpl(Ark_NativePointer node, const Type_SelectAttribute_selected_Arg0* value)
+        {
         }
-        void ValueImpl(Ark_NativePointer node, const ResourceStr* value) {
+        void ValueImpl(Ark_NativePointer node, const ResourceStr* value)
+        {
         }
-        void FontImpl(Ark_NativePointer node, const Ark_Font* value) {
+        void FontImpl(Ark_NativePointer node, const Ark_Font* value)
+        {
         }
-        void FontColorImpl(Ark_NativePointer node, const ResourceColor* value) {
+        void FontColorImpl(Ark_NativePointer node, const ResourceColor* value)
+        {
         }
-        void SelectedOptionBgColorImpl(Ark_NativePointer node, const ResourceColor* value) {
+        void SelectedOptionBgColorImpl(Ark_NativePointer node, const ResourceColor* value)
+        {
         }
-        void SelectedOptionFontImpl(Ark_NativePointer node, const Ark_Font* value) {
+        void SelectedOptionFontImpl(Ark_NativePointer node, const Ark_Font* value)
+        {
         }
-        void SelectedOptionFontColorImpl(Ark_NativePointer node, const ResourceColor* value) {
+        void SelectedOptionFontColorImpl(Ark_NativePointer node, const ResourceColor* value)
+        {
         }
-        void OptionBgColorImpl(Ark_NativePointer node, const ResourceColor* value) {
+        void OptionBgColorImpl(Ark_NativePointer node, const ResourceColor* value)
+        {
         }
-        void OptionFontImpl(Ark_NativePointer node, const Ark_Font* value) {
+        void OptionFontImpl(Ark_NativePointer node, const Ark_Font* value)
+        {
         }
-        void OptionFontColorImpl(Ark_NativePointer node, const ResourceColor* value) {
+        void OptionFontColorImpl(Ark_NativePointer node, const ResourceColor* value)
+        {
         }
-        void OnSelectImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnSelectImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void SpaceImpl(Ark_NativePointer node, const Ark_Length* value) {
+        void SpaceImpl(Ark_NativePointer node, const Ark_Length* value)
+        {
         }
-        void ArrowPositionImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void ArrowPositionImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void MenuAlignImpl(Ark_NativePointer node, Ark_Int32 alignType, const Opt_Offset* offset) {
+        void MenuAlignImpl(Ark_NativePointer node, Ark_Int32 alignType, const Opt_Offset* offset)
+        {
         }
-        void OptionWidthImpl(Ark_NativePointer node, const Type_SelectAttribute_optionWidth_Arg0* value) {
+        void OptionWidthImpl(Ark_NativePointer node, const Type_SelectAttribute_optionWidth_Arg0* value)
+        {
         }
-        void OptionHeightImpl(Ark_NativePointer node, const Ark_Length* value) {
+        void OptionHeightImpl(Ark_NativePointer node, const Ark_Length* value)
+        {
         }
-        void MenuBackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value) {
+        void MenuBackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value)
+        {
         }
-        void MenuBackgroundBlurStyleImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void MenuBackgroundBlurStyleImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void ControlSizeImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void ControlSizeImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void MenuItemContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier) {
+        void MenuItemContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
+        {
         }
-        void DividerImpl(Ark_NativePointer node, const Type_SelectAttribute_divider_Arg0* options) {
+        void DividerImpl(Ark_NativePointer node, const Type_SelectAttribute_divider_Arg0* options)
+        {
         }
     } // SelectAttributeModifier
-    const GENERATED_ArkUISelectModifier* GetSelectModifier() {
+    const GENERATED_ArkUISelectModifier* GetSelectModifier()
+    {
         static const GENERATED_ArkUISelectModifier ArkUISelectModifierImpl {
             SelectInterfaceModifier::_setSelectOptionsImpl,
             SelectAttributeModifier::SelectedImpl,

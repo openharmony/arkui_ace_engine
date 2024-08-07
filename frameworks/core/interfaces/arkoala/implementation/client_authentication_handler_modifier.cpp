@@ -15,24 +15,32 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace ClientAuthenticationHandlerModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void Confirm_string_stringImpl(ClientAuthenticationHandlerPeer* peer, const Ark_String* priKeyFile, const Ark_String* certChainFile) {
+        void Confirm_string_stringImpl(ClientAuthenticationHandlerPeer* peer, const Ark_String* priKeyFile, const Ark_String* certChainFile)
+        {
         }
-        void Confirm_stringImpl(ClientAuthenticationHandlerPeer* peer, const Ark_String* authUri) {
+        void Confirm_stringImpl(ClientAuthenticationHandlerPeer* peer, const Ark_String* authUri)
+        {
         }
-        void CancelImpl(ClientAuthenticationHandlerPeer* peer) {
+        void CancelImpl(ClientAuthenticationHandlerPeer* peer)
+        {
         }
-        void IgnoreImpl(ClientAuthenticationHandlerPeer* peer) {
+        void IgnoreImpl(ClientAuthenticationHandlerPeer* peer)
+        {
         }
     } // ClientAuthenticationHandlerModifier
-    const GENERATED_ArkUIClientAuthenticationHandlerAccessor* GetClientAuthenticationHandlerAccessor() {
+    const GENERATED_ArkUIClientAuthenticationHandlerAccessor* GetClientAuthenticationHandlerAccessor()
+    {
         static const GENERATED_ArkUIClientAuthenticationHandlerAccessor ClientAuthenticationHandlerAccessorImpl {
             ClientAuthenticationHandlerModifier::CtorImpl,
             ClientAuthenticationHandlerModifier::GetFinalizerImpl,

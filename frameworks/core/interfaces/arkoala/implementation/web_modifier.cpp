@@ -15,248 +15,368 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace WebInterfaceModifier {
-        void _setWebOptionsImpl(Ark_NativePointer node, const Ark_WebOptions* value) {
+        void _setWebOptionsImpl(Ark_NativePointer node, const Ark_WebOptions* value)
+        {
         }
     } // WebInterfaceModifier
     namespace WebAttributeModifier {
-        void JavaScriptAccessImpl(Ark_NativePointer node, Ark_Boolean javaScriptAccess) {
+        void JavaScriptAccessImpl(Ark_NativePointer node, Ark_Boolean javaScriptAccess)
+        {
         }
-        void FileAccessImpl(Ark_NativePointer node, Ark_Boolean fileAccess) {
+        void FileAccessImpl(Ark_NativePointer node, Ark_Boolean fileAccess)
+        {
         }
-        void OnlineImageAccessImpl(Ark_NativePointer node, Ark_Boolean onlineImageAccess) {
+        void OnlineImageAccessImpl(Ark_NativePointer node, Ark_Boolean onlineImageAccess)
+        {
         }
-        void DomStorageAccessImpl(Ark_NativePointer node, Ark_Boolean domStorageAccess) {
+        void DomStorageAccessImpl(Ark_NativePointer node, Ark_Boolean domStorageAccess)
+        {
         }
-        void ImageAccessImpl(Ark_NativePointer node, Ark_Boolean imageAccess) {
+        void ImageAccessImpl(Ark_NativePointer node, Ark_Boolean imageAccess)
+        {
         }
-        void MixedModeImpl(Ark_NativePointer node, Ark_Int32 mixedMode) {
+        void MixedModeImpl(Ark_NativePointer node, Ark_Int32 mixedMode)
+        {
         }
-        void ZoomAccessImpl(Ark_NativePointer node, Ark_Boolean zoomAccess) {
+        void ZoomAccessImpl(Ark_NativePointer node, Ark_Boolean zoomAccess)
+        {
         }
-        void GeolocationAccessImpl(Ark_NativePointer node, Ark_Boolean geolocationAccess) {
+        void GeolocationAccessImpl(Ark_NativePointer node, Ark_Boolean geolocationAccess)
+        {
         }
-        void JavaScriptProxyImpl(Ark_NativePointer node, const Ark_JavaScriptProxy* javaScriptProxy) {
+        void JavaScriptProxyImpl(Ark_NativePointer node, const Ark_JavaScriptProxy* javaScriptProxy)
+        {
         }
-        void PasswordImpl(Ark_NativePointer node, Ark_Boolean password) {
+        void PasswordImpl(Ark_NativePointer node, Ark_Boolean password)
+        {
         }
-        void CacheModeImpl(Ark_NativePointer node, Ark_Int32 cacheMode) {
+        void CacheModeImpl(Ark_NativePointer node, Ark_Int32 cacheMode)
+        {
         }
-        void DarkModeImpl(Ark_NativePointer node, Ark_Int32 mode) {
+        void DarkModeImpl(Ark_NativePointer node, Ark_Int32 mode)
+        {
         }
-        void ForceDarkAccessImpl(Ark_NativePointer node, Ark_Boolean access) {
+        void ForceDarkAccessImpl(Ark_NativePointer node, Ark_Boolean access)
+        {
         }
-        void MediaOptionsImpl(Ark_NativePointer node, const Ark_WebMediaOptions* options) {
+        void MediaOptionsImpl(Ark_NativePointer node, const Ark_WebMediaOptions* options)
+        {
         }
-        void TableDataImpl(Ark_NativePointer node, Ark_Boolean tableData) {
+        void TableDataImpl(Ark_NativePointer node, Ark_Boolean tableData)
+        {
         }
-        void WideViewModeAccessImpl(Ark_NativePointer node, Ark_Boolean wideViewModeAccess) {
+        void WideViewModeAccessImpl(Ark_NativePointer node, Ark_Boolean wideViewModeAccess)
+        {
         }
-        void OverviewModeAccessImpl(Ark_NativePointer node, Ark_Boolean overviewModeAccess) {
+        void OverviewModeAccessImpl(Ark_NativePointer node, Ark_Boolean overviewModeAccess)
+        {
         }
-        void OverScrollModeImpl(Ark_NativePointer node, Ark_Int32 mode) {
+        void OverScrollModeImpl(Ark_NativePointer node, Ark_Int32 mode)
+        {
         }
-        void TextZoomAtioImpl(Ark_NativePointer node, const Ark_Number* textZoomAtio) {
+        void TextZoomAtioImpl(Ark_NativePointer node, const Ark_Number* textZoomAtio)
+        {
         }
-        void TextZoomRatioImpl(Ark_NativePointer node, const Ark_Number* textZoomRatio) {
+        void TextZoomRatioImpl(Ark_NativePointer node, const Ark_Number* textZoomRatio)
+        {
         }
-        void DatabaseAccessImpl(Ark_NativePointer node, Ark_Boolean databaseAccess) {
+        void DatabaseAccessImpl(Ark_NativePointer node, Ark_Boolean databaseAccess)
+        {
         }
-        void InitialScaleImpl(Ark_NativePointer node, const Ark_Number* percent) {
+        void InitialScaleImpl(Ark_NativePointer node, const Ark_Number* percent)
+        {
         }
-        void UserAgentImpl(Ark_NativePointer node, const Ark_String* userAgent) {
+        void UserAgentImpl(Ark_NativePointer node, const Ark_String* userAgent)
+        {
         }
-        void MetaViewportImpl(Ark_NativePointer node, Ark_Boolean enabled) {
+        void MetaViewportImpl(Ark_NativePointer node, Ark_Boolean enabled)
+        {
         }
-        void OnPageEndImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnPageEndImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnPageBeginImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnPageBeginImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnProgressChangeImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnProgressChangeImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnTitleReceiveImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnTitleReceiveImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnGeolocationHideImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnGeolocationHideImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnGeolocationShowImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnGeolocationShowImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnRequestSelectedImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnRequestSelectedImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnAlertImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnAlertImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnBeforeUnloadImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnBeforeUnloadImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnConfirmImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnConfirmImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnPromptImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnPromptImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnConsoleImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnConsoleImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnErrorReceiveImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnErrorReceiveImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnHttpErrorReceiveImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnHttpErrorReceiveImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnDownloadStartImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnDownloadStartImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnRefreshAccessedHistoryImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnRefreshAccessedHistoryImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnUrlLoadInterceptImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnUrlLoadInterceptImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnSslErrorReceiveImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnSslErrorReceiveImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnRenderExited_CallbackOnRenderExitedEventImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnRenderExited_CallbackOnRenderExitedEventImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnShowFileSelectorImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnShowFileSelectorImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnRenderExited_eventdetailObjectbooleanImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnRenderExited_eventdetailObjectbooleanImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnFileSelectorShowImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnFileSelectorShowImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnResourceLoadImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnResourceLoadImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnFullScreenExitImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnFullScreenExitImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnFullScreenEnterImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnFullScreenEnterImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnScaleChangeImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnScaleChangeImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnHttpAuthRequestImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnHttpAuthRequestImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnInterceptRequestImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnInterceptRequestImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnPermissionRequestImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnPermissionRequestImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnScreenCaptureRequestImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnScreenCaptureRequestImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnContextMenuShowImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnContextMenuShowImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnContextMenuHideImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnContextMenuHideImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void MediaPlayGestureAccessImpl(Ark_NativePointer node, Ark_Boolean access) {
+        void MediaPlayGestureAccessImpl(Ark_NativePointer node, Ark_Boolean access)
+        {
         }
-        void OnSearchResultReceiveImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnSearchResultReceiveImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnScrollImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnScrollImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnSslErrorEventReceiveImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnSslErrorEventReceiveImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnSslErrorEventImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnSslErrorEventImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnClientAuthenticationRequestImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnClientAuthenticationRequestImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnWindowNewImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnWindowNewImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnWindowExitImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnWindowExitImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void MultiWindowAccessImpl(Ark_NativePointer node, Ark_Boolean multiWindow) {
+        void MultiWindowAccessImpl(Ark_NativePointer node, Ark_Boolean multiWindow)
+        {
         }
-        void OnInterceptKeyEventImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnInterceptKeyEventImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void WebStandardFontImpl(Ark_NativePointer node, const Ark_String* family) {
+        void WebStandardFontImpl(Ark_NativePointer node, const Ark_String* family)
+        {
         }
-        void WebSerifFontImpl(Ark_NativePointer node, const Ark_String* family) {
+        void WebSerifFontImpl(Ark_NativePointer node, const Ark_String* family)
+        {
         }
-        void WebSansSerifFontImpl(Ark_NativePointer node, const Ark_String* family) {
+        void WebSansSerifFontImpl(Ark_NativePointer node, const Ark_String* family)
+        {
         }
-        void WebFixedFontImpl(Ark_NativePointer node, const Ark_String* family) {
+        void WebFixedFontImpl(Ark_NativePointer node, const Ark_String* family)
+        {
         }
-        void WebFantasyFontImpl(Ark_NativePointer node, const Ark_String* family) {
+        void WebFantasyFontImpl(Ark_NativePointer node, const Ark_String* family)
+        {
         }
-        void WebCursiveFontImpl(Ark_NativePointer node, const Ark_String* family) {
+        void WebCursiveFontImpl(Ark_NativePointer node, const Ark_String* family)
+        {
         }
-        void DefaultFixedFontSizeImpl(Ark_NativePointer node, const Ark_Number* size) {
+        void DefaultFixedFontSizeImpl(Ark_NativePointer node, const Ark_Number* size)
+        {
         }
-        void DefaultFontSizeImpl(Ark_NativePointer node, const Ark_Number* size) {
+        void DefaultFontSizeImpl(Ark_NativePointer node, const Ark_Number* size)
+        {
         }
-        void MinFontSizeImpl(Ark_NativePointer node, const Ark_Number* size) {
+        void MinFontSizeImpl(Ark_NativePointer node, const Ark_Number* size)
+        {
         }
-        void MinLogicalFontSizeImpl(Ark_NativePointer node, const Ark_Number* size) {
+        void MinLogicalFontSizeImpl(Ark_NativePointer node, const Ark_Number* size)
+        {
         }
-        void DefaultTextEncodingFormatImpl(Ark_NativePointer node, const Ark_String* textEncodingFormat) {
+        void DefaultTextEncodingFormatImpl(Ark_NativePointer node, const Ark_String* textEncodingFormat)
+        {
         }
-        void ForceDisplayScrollBarImpl(Ark_NativePointer node, Ark_Boolean enabled) {
+        void ForceDisplayScrollBarImpl(Ark_NativePointer node, Ark_Boolean enabled)
+        {
         }
-        void BlockNetworkImpl(Ark_NativePointer node, Ark_Boolean block) {
+        void BlockNetworkImpl(Ark_NativePointer node, Ark_Boolean block)
+        {
         }
-        void HorizontalScrollBarAccessImpl(Ark_NativePointer node, Ark_Boolean horizontalScrollBar) {
+        void HorizontalScrollBarAccessImpl(Ark_NativePointer node, Ark_Boolean horizontalScrollBar)
+        {
         }
-        void VerticalScrollBarAccessImpl(Ark_NativePointer node, Ark_Boolean verticalScrollBar) {
+        void VerticalScrollBarAccessImpl(Ark_NativePointer node, Ark_Boolean verticalScrollBar)
+        {
         }
-        void OnTouchIconUrlReceivedImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnTouchIconUrlReceivedImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnFaviconReceivedImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnFaviconReceivedImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnPageVisibleImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnPageVisibleImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnDataResubmittedImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnDataResubmittedImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void PinchSmoothImpl(Ark_NativePointer node, Ark_Boolean isEnabled) {
+        void PinchSmoothImpl(Ark_NativePointer node, Ark_Boolean isEnabled)
+        {
         }
-        void AllowWindowOpenMethodImpl(Ark_NativePointer node, Ark_Boolean flag) {
+        void AllowWindowOpenMethodImpl(Ark_NativePointer node, Ark_Boolean flag)
+        {
         }
-        void OnAudioStateChangedImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnAudioStateChangedImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnFirstContentfulPaintImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnFirstContentfulPaintImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnFirstMeaningfulPaintImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnFirstMeaningfulPaintImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnLargestContentfulPaintImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnLargestContentfulPaintImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnLoadInterceptImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnLoadInterceptImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnControllerAttachedImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnControllerAttachedImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnOverScrollImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnOverScrollImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnSafeBrowsingCheckResultImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnSafeBrowsingCheckResultImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnNavigationEntryCommittedImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnNavigationEntryCommittedImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnIntelligentTrackingPreventionResultImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnIntelligentTrackingPreventionResultImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void JavaScriptOnDocumentStartImpl(Ark_NativePointer node, const Array_ScriptItem* scripts) {
+        void JavaScriptOnDocumentStartImpl(Ark_NativePointer node, const Array_ScriptItem* scripts)
+        {
         }
-        void JavaScriptOnDocumentEndImpl(Ark_NativePointer node, const Array_ScriptItem* scripts) {
+        void JavaScriptOnDocumentEndImpl(Ark_NativePointer node, const Array_ScriptItem* scripts)
+        {
         }
-        void LayoutModeImpl(Ark_NativePointer node, Ark_Int32 mode) {
+        void LayoutModeImpl(Ark_NativePointer node, Ark_Int32 mode)
+        {
         }
-        void NestedScrollImpl(Ark_NativePointer node, const Ark_NestedScrollOptions* value) {
+        void NestedScrollImpl(Ark_NativePointer node, const Ark_NestedScrollOptions* value)
+        {
         }
-        void EnableNativeEmbedModeImpl(Ark_NativePointer node, Ark_Boolean mode) {
+        void EnableNativeEmbedModeImpl(Ark_NativePointer node, Ark_Boolean mode)
+        {
         }
-        void RegisterNativeEmbedRuleImpl(Ark_NativePointer node, const Ark_String* tag, const Ark_String* type) {
+        void RegisterNativeEmbedRuleImpl(Ark_NativePointer node, const Ark_String* tag, const Ark_String* type)
+        {
         }
-        void OnNativeEmbedLifecycleChangeImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnNativeEmbedLifecycleChangeImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnNativeEmbedGestureEventImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnNativeEmbedGestureEventImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void CopyOptionsImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void CopyOptionsImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void OnOverrideUrlLoadingImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnOverrideUrlLoadingImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void TextAutosizingImpl(Ark_NativePointer node, Ark_Boolean textAutosizing) {
+        void TextAutosizingImpl(Ark_NativePointer node, Ark_Boolean textAutosizing)
+        {
         }
-        void EnableNativeMediaPlayerImpl(Ark_NativePointer node, const Ark_NativeMediaPlayerConfig* config) {
+        void EnableNativeMediaPlayerImpl(Ark_NativePointer node, const Ark_NativeMediaPlayerConfig* config)
+        {
         }
-        void EnableSmoothDragResizeImpl(Ark_NativePointer node, Ark_Boolean mode) {
+        void EnableSmoothDragResizeImpl(Ark_NativePointer node, Ark_Boolean mode)
+        {
         }
-        void OnRenderProcessNotRespondingImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnRenderProcessNotRespondingImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnRenderProcessRespondingImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnRenderProcessRespondingImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void SelectionMenuOptionsImpl(Ark_NativePointer node, const Array_ExpandedMenuItemOptions* expandedMenuOptions) {
+        void SelectionMenuOptionsImpl(Ark_NativePointer node, const Array_ExpandedMenuItemOptions* expandedMenuOptions)
+        {
         }
-        void OnViewportFitChangedImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnViewportFitChangedImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnInterceptKeyboardAttachImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnInterceptKeyboardAttachImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnAdsBlockedImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnAdsBlockedImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void KeyboardAvoidModeImpl(Ark_NativePointer node, Ark_Int32 mode) {
+        void KeyboardAvoidModeImpl(Ark_NativePointer node, Ark_Int32 mode)
+        {
         }
     } // WebAttributeModifier
-    const GENERATED_ArkUIWebModifier* GetWebModifier() {
+    const GENERATED_ArkUIWebModifier* GetWebModifier()
+    {
         static const GENERATED_ArkUIWebModifier ArkUIWebModifierImpl {
             WebInterfaceModifier::_setWebOptionsImpl,
             WebAttributeModifier::JavaScriptAccessImpl,

@@ -15,23 +15,30 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace TextBaseControllerModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void SetSelectionImpl(TextBaseControllerPeer* peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd, const Opt_SelectionOptions* options) {
+        void SetSelectionImpl(TextBaseControllerPeer* peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd, const Opt_SelectionOptions* options)
+        {
         }
-        void CloseSelectionMenuImpl(TextBaseControllerPeer* peer) {
+        void CloseSelectionMenuImpl(TextBaseControllerPeer* peer)
+        {
         }
-        Ark_NativePointer GetLayoutManagerImpl(TextBaseControllerPeer* peer) {
+        Ark_NativePointer GetLayoutManagerImpl(TextBaseControllerPeer* peer)
+        {
             return 0;
         }
     } // TextBaseControllerModifier
-    const GENERATED_ArkUITextBaseControllerAccessor* GetTextBaseControllerAccessor() {
+    const GENERATED_ArkUITextBaseControllerAccessor* GetTextBaseControllerAccessor()
+    {
         static const GENERATED_ArkUITextBaseControllerAccessor TextBaseControllerAccessorImpl {
             TextBaseControllerModifier::CtorImpl,
             TextBaseControllerModifier::GetFinalizerImpl,

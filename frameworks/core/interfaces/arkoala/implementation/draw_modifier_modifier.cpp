@@ -15,24 +15,32 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace DrawModifierModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void DrawBehindImpl(DrawModifierPeer* peer, const Ark_CustomObject* drawContext) {
+        void DrawBehindImpl(DrawModifierPeer* peer, const Ark_CustomObject* drawContext)
+        {
         }
-        void DrawContentImpl(DrawModifierPeer* peer, const Ark_CustomObject* drawContext) {
+        void DrawContentImpl(DrawModifierPeer* peer, const Ark_CustomObject* drawContext)
+        {
         }
-        void DrawFrontImpl(DrawModifierPeer* peer, const Ark_CustomObject* drawContext) {
+        void DrawFrontImpl(DrawModifierPeer* peer, const Ark_CustomObject* drawContext)
+        {
         }
-        void InvalidateImpl(DrawModifierPeer* peer) {
+        void InvalidateImpl(DrawModifierPeer* peer)
+        {
         }
     } // DrawModifierModifier
-    const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor() {
+    const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor()
+    {
         static const GENERATED_ArkUIDrawModifierAccessor DrawModifierAccessorImpl {
             DrawModifierModifier::CtorImpl,
             DrawModifierModifier::GetFinalizerImpl,

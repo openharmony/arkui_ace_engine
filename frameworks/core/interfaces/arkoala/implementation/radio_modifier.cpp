@@ -15,22 +15,29 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace RadioInterfaceModifier {
-        void _setRadioOptionsImpl(Ark_NativePointer node, const Ark_RadioOptions* options) {
+        void _setRadioOptionsImpl(Ark_NativePointer node, const Ark_RadioOptions* options)
+        {
         }
     } // RadioInterfaceModifier
     namespace RadioAttributeModifier {
-        void CheckedImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void CheckedImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
-        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void RadioStyleImpl(Ark_NativePointer node, const Opt_RadioStyle* value) {
+        void RadioStyleImpl(Ark_NativePointer node, const Opt_RadioStyle* value)
+        {
         }
-        void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier) {
+        void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
+        {
         }
     } // RadioAttributeModifier
-    const GENERATED_ArkUIRadioModifier* GetRadioModifier() {
+    const GENERATED_ArkUIRadioModifier* GetRadioModifier()
+    {
         static const GENERATED_ArkUIRadioModifier ArkUIRadioModifierImpl {
             RadioInterfaceModifier::_setRadioOptionsImpl,
             RadioAttributeModifier::CheckedImpl,

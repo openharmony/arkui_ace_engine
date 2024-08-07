@@ -15,26 +15,35 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace WebKeyboardControllerModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void InsertTextImpl(WebKeyboardControllerPeer* peer, const Ark_String* text) {
+        void InsertTextImpl(WebKeyboardControllerPeer* peer, const Ark_String* text)
+        {
         }
-        void DeleteForwardImpl(WebKeyboardControllerPeer* peer, const Ark_Number* length) {
+        void DeleteForwardImpl(WebKeyboardControllerPeer* peer, const Ark_Number* length)
+        {
         }
-        void DeleteBackwardImpl(WebKeyboardControllerPeer* peer, const Ark_Number* length) {
+        void DeleteBackwardImpl(WebKeyboardControllerPeer* peer, const Ark_Number* length)
+        {
         }
-        void SendFunctionKeyImpl(WebKeyboardControllerPeer* peer, const Ark_Number* key) {
+        void SendFunctionKeyImpl(WebKeyboardControllerPeer* peer, const Ark_Number* key)
+        {
         }
-        void CloseImpl(WebKeyboardControllerPeer* peer) {
+        void CloseImpl(WebKeyboardControllerPeer* peer)
+        {
         }
     } // WebKeyboardControllerModifier
-    const GENERATED_ArkUIWebKeyboardControllerAccessor* GetWebKeyboardControllerAccessor() {
+    const GENERATED_ArkUIWebKeyboardControllerAccessor* GetWebKeyboardControllerAccessor()
+    {
         static const GENERATED_ArkUIWebKeyboardControllerAccessor WebKeyboardControllerAccessorImpl {
             WebKeyboardControllerModifier::CtorImpl,
             WebKeyboardControllerModifier::GetFinalizerImpl,

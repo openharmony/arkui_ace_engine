@@ -15,27 +15,35 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace FileSelectorParamModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void GetTitleImpl(FileSelectorParamPeer* peer) {
+        void GetTitleImpl(FileSelectorParamPeer* peer)
+        {
         }
-        Ark_NativePointer GetModeImpl(FileSelectorParamPeer* peer) {
+        Ark_NativePointer GetModeImpl(FileSelectorParamPeer* peer)
+        {
             return 0;
         }
-        Ark_NativePointer GetAcceptTypeImpl(FileSelectorParamPeer* peer) {
+        Ark_NativePointer GetAcceptTypeImpl(FileSelectorParamPeer* peer)
+        {
             return 0;
         }
-        Ark_Boolean IsCaptureImpl(FileSelectorParamPeer* peer) {
+        Ark_Boolean IsCaptureImpl(FileSelectorParamPeer* peer)
+        {
             return 0;
         }
     } // FileSelectorParamModifier
-    const GENERATED_ArkUIFileSelectorParamAccessor* GetFileSelectorParamAccessor() {
+    const GENERATED_ArkUIFileSelectorParamAccessor* GetFileSelectorParamAccessor()
+    {
         static const GENERATED_ArkUIFileSelectorParamAccessor FileSelectorParamAccessorImpl {
             FileSelectorParamModifier::CtorImpl,
             FileSelectorParamModifier::GetFinalizerImpl,

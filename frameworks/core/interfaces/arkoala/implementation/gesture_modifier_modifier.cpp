@@ -15,18 +15,23 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace GestureModifierModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void ApplyGestureImpl(GestureModifierPeer* peer, const Ark_UIGestureEvent* event) {
+        void ApplyGestureImpl(GestureModifierPeer* peer, const Ark_UIGestureEvent* event)
+        {
         }
     } // GestureModifierModifier
-    const GENERATED_ArkUIGestureModifierAccessor* GetGestureModifierAccessor() {
+    const GENERATED_ArkUIGestureModifierAccessor* GetGestureModifierAccessor()
+    {
         static const GENERATED_ArkUIGestureModifierAccessor GestureModifierAccessorImpl {
             GestureModifierModifier::CtorImpl,
             GestureModifierModifier::GetFinalizerImpl,

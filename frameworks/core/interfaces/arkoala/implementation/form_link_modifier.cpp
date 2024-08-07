@@ -15,12 +15,15 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace FormLinkInterfaceModifier {
-        void _setFormLinkOptionsImpl(Ark_NativePointer node, const Ark_FormLinkOptions* options) {
+        void _setFormLinkOptionsImpl(Ark_NativePointer node, const Ark_FormLinkOptions* options)
+        {
         }
     } // FormLinkInterfaceModifier
-    const GENERATED_ArkUIFormLinkModifier* GetFormLinkModifier() {
+    const GENERATED_ArkUIFormLinkModifier* GetFormLinkModifier()
+    {
         static const GENERATED_ArkUIFormLinkModifier ArkUIFormLinkModifierImpl {
             FormLinkInterfaceModifier::_setFormLinkOptionsImpl,
         };

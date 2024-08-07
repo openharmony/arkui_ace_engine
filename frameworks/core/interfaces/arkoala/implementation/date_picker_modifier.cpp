@@ -15,26 +15,35 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace DatePickerInterfaceModifier {
-        void _setDatePickerOptionsImpl(Ark_NativePointer node, const Opt_DatePickerOptions* options) {
+        void _setDatePickerOptionsImpl(Ark_NativePointer node, const Opt_DatePickerOptions* options)
+        {
         }
     } // DatePickerInterfaceModifier
     namespace DatePickerAttributeModifier {
-        void LunarImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void LunarImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
-        void DisappearTextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value) {
+        void DisappearTextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value)
+        {
         }
-        void TextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value) {
+        void TextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value)
+        {
         }
-        void SelectedTextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value) {
+        void SelectedTextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value)
+        {
         }
-        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnDateChangeImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnDateChangeImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
     } // DatePickerAttributeModifier
-    const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier() {
+    const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier()
+    {
         static const GENERATED_ArkUIDatePickerModifier ArkUIDatePickerModifierImpl {
             DatePickerInterfaceModifier::_setDatePickerOptionsImpl,
             DatePickerAttributeModifier::LunarImpl,

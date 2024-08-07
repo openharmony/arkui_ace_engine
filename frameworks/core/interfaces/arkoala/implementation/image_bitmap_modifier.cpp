@@ -15,24 +15,31 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace ImageBitmapModifier {
-        Ark_NativePointer CtorImpl(const Ark_String* src) {
+        Ark_NativePointer CtorImpl(const Ark_String* src)
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void CloseImpl(ImageBitmapPeer* peer) {
+        void CloseImpl(ImageBitmapPeer* peer)
+        {
         }
-        Ark_Int32 GetHeightImpl(ImageBitmapPeer* peer) {
+        Ark_Int32 GetHeightImpl(ImageBitmapPeer* peer)
+        {
             return 0;
         }
-        Ark_Int32 GetWidthImpl(ImageBitmapPeer* peer) {
+        Ark_Int32 GetWidthImpl(ImageBitmapPeer* peer)
+        {
             return 0;
         }
     } // ImageBitmapModifier
-    const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor() {
+    const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor()
+    {
         static const GENERATED_ArkUIImageBitmapAccessor ImageBitmapAccessorImpl {
             ImageBitmapModifier::CtorImpl,
             ImageBitmapModifier::GetFinalizerImpl,

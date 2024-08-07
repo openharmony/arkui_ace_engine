@@ -15,42 +15,56 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace RichEditorBaseControllerModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        Ark_Int32 GetCaretOffsetImpl(RichEditorBaseControllerPeer* peer) {
+        Ark_Int32 GetCaretOffsetImpl(RichEditorBaseControllerPeer* peer)
+        {
             return 0;
         }
-        Ark_Boolean SetCaretOffsetImpl(RichEditorBaseControllerPeer* peer, const Ark_Number* offset) {
+        Ark_Boolean SetCaretOffsetImpl(RichEditorBaseControllerPeer* peer, const Ark_Number* offset)
+        {
             return 0;
         }
-        void CloseSelectionMenuImpl(RichEditorBaseControllerPeer* peer) {
+        void CloseSelectionMenuImpl(RichEditorBaseControllerPeer* peer)
+        {
         }
-        Ark_NativePointer GetTypingStyleImpl(RichEditorBaseControllerPeer* peer) {
+        Ark_NativePointer GetTypingStyleImpl(RichEditorBaseControllerPeer* peer)
+        {
             return 0;
         }
-        void SetTypingStyleImpl(RichEditorBaseControllerPeer* peer, const Ark_RichEditorTextStyle* value) {
+        void SetTypingStyleImpl(RichEditorBaseControllerPeer* peer, const Ark_RichEditorTextStyle* value)
+        {
         }
-        void SetSelectionImpl(RichEditorBaseControllerPeer* peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd, const Opt_SelectionOptions* options) {
+        void SetSelectionImpl(RichEditorBaseControllerPeer* peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd, const Opt_SelectionOptions* options)
+        {
         }
-        Ark_Boolean IsEditingImpl(RichEditorBaseControllerPeer* peer) {
+        Ark_Boolean IsEditingImpl(RichEditorBaseControllerPeer* peer)
+        {
             return 0;
         }
-        void StopEditingImpl(RichEditorBaseControllerPeer* peer) {
+        void StopEditingImpl(RichEditorBaseControllerPeer* peer)
+        {
         }
-        Ark_NativePointer GetLayoutManagerImpl(RichEditorBaseControllerPeer* peer) {
+        Ark_NativePointer GetLayoutManagerImpl(RichEditorBaseControllerPeer* peer)
+        {
             return 0;
         }
-        Ark_NativePointer GetPreviewTextImpl(RichEditorBaseControllerPeer* peer) {
+        Ark_NativePointer GetPreviewTextImpl(RichEditorBaseControllerPeer* peer)
+        {
             return 0;
         }
     } // RichEditorBaseControllerModifier
-    const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor() {
+    const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor()
+    {
         static const GENERATED_ArkUIRichEditorBaseControllerAccessor RichEditorBaseControllerAccessorImpl {
             RichEditorBaseControllerModifier::CtorImpl,
             RichEditorBaseControllerModifier::GetFinalizerImpl,

@@ -15,18 +15,23 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace PasteButtonInterfaceModifier {
-        void _setPasteButtonOptions_Impl(Ark_NativePointer node) {
+        void _setPasteButtonOptions_Impl(Ark_NativePointer node)
+        {
         }
-        void _setPasteButtonOptions_PasteButtonOptionsImpl(Ark_NativePointer node, const Ark_PasteButtonOptions* options) {
+        void _setPasteButtonOptions_PasteButtonOptionsImpl(Ark_NativePointer node, const Ark_PasteButtonOptions* options)
+        {
         }
     } // PasteButtonInterfaceModifier
     namespace PasteButtonAttributeModifier {
-        void OnClickImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnClickImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
     } // PasteButtonAttributeModifier
-    const GENERATED_ArkUIPasteButtonModifier* GetPasteButtonModifier() {
+    const GENERATED_ArkUIPasteButtonModifier* GetPasteButtonModifier()
+    {
         static const GENERATED_ArkUIPasteButtonModifier ArkUIPasteButtonModifierImpl {
             PasteButtonInterfaceModifier::_setPasteButtonOptions_Impl,
             PasteButtonInterfaceModifier::_setPasteButtonOptions_PasteButtonOptionsImpl,

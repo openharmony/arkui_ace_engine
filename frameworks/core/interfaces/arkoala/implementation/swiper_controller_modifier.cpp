@@ -15,24 +15,32 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace SwiperControllerModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void ShowNextImpl(SwiperControllerPeer* peer) {
+        void ShowNextImpl(SwiperControllerPeer* peer)
+        {
         }
-        void ShowPreviousImpl(SwiperControllerPeer* peer) {
+        void ShowPreviousImpl(SwiperControllerPeer* peer)
+        {
         }
-        void ChangeIndexImpl(SwiperControllerPeer* peer, const Ark_Number* index, const Opt_Boolean* useAnimation) {
+        void ChangeIndexImpl(SwiperControllerPeer* peer, const Ark_Number* index, const Opt_Boolean* useAnimation)
+        {
         }
-        void FinishAnimationImpl(SwiperControllerPeer* peer, const Opt_Function* callback) {
+        void FinishAnimationImpl(SwiperControllerPeer* peer, const Opt_Function* callback)
+        {
         }
     } // SwiperControllerModifier
-    const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor() {
+    const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()
+    {
         static const GENERATED_ArkUISwiperControllerAccessor SwiperControllerAccessorImpl {
             SwiperControllerModifier::CtorImpl,
             SwiperControllerModifier::GetFinalizerImpl,

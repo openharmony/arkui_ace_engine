@@ -15,18 +15,23 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace FileSelectorResultModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void HandleFileListImpl(FileSelectorResultPeer* peer, const Array_String* fileList) {
+        void HandleFileListImpl(FileSelectorResultPeer* peer, const Array_String* fileList)
+        {
         }
     } // FileSelectorResultModifier
-    const GENERATED_ArkUIFileSelectorResultAccessor* GetFileSelectorResultAccessor() {
+    const GENERATED_ArkUIFileSelectorResultAccessor* GetFileSelectorResultAccessor()
+    {
         static const GENERATED_ArkUIFileSelectorResultAccessor FileSelectorResultAccessorImpl {
             FileSelectorResultModifier::CtorImpl,
             FileSelectorResultModifier::GetFinalizerImpl,

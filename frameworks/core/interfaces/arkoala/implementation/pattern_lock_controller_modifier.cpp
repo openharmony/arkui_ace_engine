@@ -15,20 +15,26 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace PatternLockControllerModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void ResetImpl(PatternLockControllerPeer* peer) {
+        void ResetImpl(PatternLockControllerPeer* peer)
+        {
         }
-        void SetChallengeResultImpl(PatternLockControllerPeer* peer, Ark_Int32 result) {
+        void SetChallengeResultImpl(PatternLockControllerPeer* peer, Ark_Int32 result)
+        {
         }
     } // PatternLockControllerModifier
-    const GENERATED_ArkUIPatternLockControllerAccessor* GetPatternLockControllerAccessor() {
+    const GENERATED_ArkUIPatternLockControllerAccessor* GetPatternLockControllerAccessor()
+    {
         static const GENERATED_ArkUIPatternLockControllerAccessor PatternLockControllerAccessorImpl {
             PatternLockControllerModifier::CtorImpl,
             PatternLockControllerModifier::GetFinalizerImpl,

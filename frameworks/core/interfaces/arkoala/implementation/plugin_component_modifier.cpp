@@ -15,18 +15,23 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace PluginComponentInterfaceModifier {
-        void _setPluginComponentOptionsImpl(Ark_NativePointer node, const Type_PluginComponentInterface__setPluginComponentOptions_Arg0* value) {
+        void _setPluginComponentOptionsImpl(Ark_NativePointer node, const Type_PluginComponentInterface__setPluginComponentOptions_Arg0* value)
+        {
         }
     } // PluginComponentInterfaceModifier
     namespace PluginComponentAttributeModifier {
-        void OnCompleteImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnCompleteImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnErrorImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnErrorImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
     } // PluginComponentAttributeModifier
-    const GENERATED_ArkUIPluginComponentModifier* GetPluginComponentModifier() {
+    const GENERATED_ArkUIPluginComponentModifier* GetPluginComponentModifier()
+    {
         static const GENERATED_ArkUIPluginComponentModifier ArkUIPluginComponentModifierImpl {
             PluginComponentInterfaceModifier::_setPluginComponentOptionsImpl,
             PluginComponentAttributeModifier::OnCompleteImpl,

@@ -15,31 +15,42 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace NavigationTransitionProxyModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void FinishTransitionImpl(NavigationTransitionProxyPeer* peer) {
+        void FinishTransitionImpl(NavigationTransitionProxyPeer* peer)
+        {
         }
-        void CancelTransitionImpl(NavigationTransitionProxyPeer* peer) {
+        void CancelTransitionImpl(NavigationTransitionProxyPeer* peer)
+        {
         }
-        void UpdateTransitionImpl(NavigationTransitionProxyPeer* peer, const Ark_Number* progress) {
+        void UpdateTransitionImpl(NavigationTransitionProxyPeer* peer, const Ark_Number* progress)
+        {
         }
-        void SetFromImpl(NavigationTransitionProxyPeer* peer, const Ark_NavContentInfo* from) {
+        void SetFromImpl(NavigationTransitionProxyPeer* peer, const Ark_NavContentInfo* from)
+        {
         }
-        void SetToImpl(NavigationTransitionProxyPeer* peer, const Ark_NavContentInfo* to) {
+        void SetToImpl(NavigationTransitionProxyPeer* peer, const Ark_NavContentInfo* to)
+        {
         }
-        Ark_Boolean GetIsInteractiveImpl(NavigationTransitionProxyPeer* peer) {
+        Ark_Boolean GetIsInteractiveImpl(NavigationTransitionProxyPeer* peer)
+        {
             return 0;
         }
-        void SetIsInteractiveImpl(NavigationTransitionProxyPeer* peer, Ark_Boolean isInteractive) {
+        void SetIsInteractiveImpl(NavigationTransitionProxyPeer* peer, Ark_Boolean isInteractive)
+        {
         }
     } // NavigationTransitionProxyModifier
-    const GENERATED_ArkUINavigationTransitionProxyAccessor* GetNavigationTransitionProxyAccessor() {
+    const GENERATED_ArkUINavigationTransitionProxyAccessor* GetNavigationTransitionProxyAccessor()
+    {
         static const GENERATED_ArkUINavigationTransitionProxyAccessor NavigationTransitionProxyAccessorImpl {
             NavigationTransitionProxyModifier::CtorImpl,
             NavigationTransitionProxyModifier::GetFinalizerImpl,

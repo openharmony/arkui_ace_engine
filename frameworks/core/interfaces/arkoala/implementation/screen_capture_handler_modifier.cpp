@@ -15,22 +15,29 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace ScreenCaptureHandlerModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void GetOriginImpl(ScreenCaptureHandlerPeer* peer) {
+        void GetOriginImpl(ScreenCaptureHandlerPeer* peer)
+        {
         }
-        void GrantImpl(ScreenCaptureHandlerPeer* peer, const Ark_ScreenCaptureConfig* config) {
+        void GrantImpl(ScreenCaptureHandlerPeer* peer, const Ark_ScreenCaptureConfig* config)
+        {
         }
-        void DenyImpl(ScreenCaptureHandlerPeer* peer) {
+        void DenyImpl(ScreenCaptureHandlerPeer* peer)
+        {
         }
     } // ScreenCaptureHandlerModifier
-    const GENERATED_ArkUIScreenCaptureHandlerAccessor* GetScreenCaptureHandlerAccessor() {
+    const GENERATED_ArkUIScreenCaptureHandlerAccessor* GetScreenCaptureHandlerAccessor()
+    {
         static const GENERATED_ArkUIScreenCaptureHandlerAccessor ScreenCaptureHandlerAccessorImpl {
             ScreenCaptureHandlerModifier::CtorImpl,
             ScreenCaptureHandlerModifier::GetFinalizerImpl,

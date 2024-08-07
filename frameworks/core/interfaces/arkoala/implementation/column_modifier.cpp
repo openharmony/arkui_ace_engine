@@ -20,10 +20,12 @@
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
 namespace ColumnInterface
 {
-void _setColumnOptionsImpl(Ark_NativePointer node, const Opt_Type_ColumnInterface__setColumnOptions_Arg0 *value) {
+void _setColumnOptionsImpl(Ark_NativePointer node, const Opt_Type_ColumnInterface__setColumnOptions_Arg0 *value)
+{
   auto frameNode = reinterpret_cast<FrameNode *>(node);
   std::tuple<Ark_Float32, Ark_Int32> space = Converter::ConvertOrDefault(
       *value, std::make_tuple(0.0f, (int)DimensionUnit::PX));
@@ -33,8 +35,10 @@ void _setColumnOptionsImpl(Ark_NativePointer node, const Opt_Type_ColumnInterfac
 }
 } // ColumnInterface
 
-namespace ColumnAttribute {
-void AlignItemsImpl(Ark_NativePointer node, Ark_Int32 value) {
+namespace ColumnAttribute
+{
+void AlignItemsImpl(Ark_NativePointer node, Ark_Int32 value)
+{
   auto frameNode = reinterpret_cast<FrameNode *>(node);
   if ((value == static_cast<int32_t>(FlexAlign::FLEX_START)) ||
       (value == static_cast<int32_t>(FlexAlign::FLEX_END)) ||
@@ -48,12 +52,14 @@ void AlignItemsImpl(Ark_NativePointer node, Ark_Int32 value) {
   ColumnModelNG::SetAlignItems(frameNode, value_flexAlign);
 }
 
-void JustifyContentImpl(Ark_NativePointer node, Ark_Int32 value) {
+void JustifyContentImpl(Ark_NativePointer node, Ark_Int32 value)
+{
   auto frameNode = reinterpret_cast<FrameNode *>(node);
   ColumnModelNG::SetJustifyContent(frameNode, static_cast<FlexAlign>(value));
 }
 
-void PointLightImpl(Ark_NativePointer node, const Ark_PointLightStyle *value) {
+void PointLightImpl(Ark_NativePointer node, const Ark_PointLightStyle *value)
+{
   LOGE("ARKOALA ColumnAttribute_PointLightImpl -> Method is not FULLY "
        "implemented.");
   auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -65,7 +71,8 @@ void PointLightImpl(Ark_NativePointer node, const Ark_PointLightStyle *value) {
 }
 } // ColumnAttribute
 
-const GENERATED_ArkUIColumnModifier *GetColumnModifier() {
+const GENERATED_ArkUIColumnModifier *GetColumnModifier()
+{
     static GENERATED_ArkUIColumnModifier ArkUIColumnModifierImpl {
           ColumnInterface::_setColumnOptionsImpl,
           ColumnAttribute::AlignItemsImpl,

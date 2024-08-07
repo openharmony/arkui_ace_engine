@@ -15,48 +15,64 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace WebContextMenuParamModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        Ark_Int32 XImpl(WebContextMenuParamPeer* peer) {
+        Ark_Int32 XImpl(WebContextMenuParamPeer* peer)
+        {
             return 0;
         }
-        Ark_Int32 YImpl(WebContextMenuParamPeer* peer) {
+        Ark_Int32 YImpl(WebContextMenuParamPeer* peer)
+        {
             return 0;
         }
-        void GetLinkUrlImpl(WebContextMenuParamPeer* peer) {
+        void GetLinkUrlImpl(WebContextMenuParamPeer* peer)
+        {
         }
-        void GetUnfilteredLinkUrlImpl(WebContextMenuParamPeer* peer) {
+        void GetUnfilteredLinkUrlImpl(WebContextMenuParamPeer* peer)
+        {
         }
-        void GetSourceUrlImpl(WebContextMenuParamPeer* peer) {
+        void GetSourceUrlImpl(WebContextMenuParamPeer* peer)
+        {
         }
-        Ark_Boolean ExistsImageContentsImpl(WebContextMenuParamPeer* peer) {
+        Ark_Boolean ExistsImageContentsImpl(WebContextMenuParamPeer* peer)
+        {
             return 0;
         }
-        Ark_NativePointer GetMediaTypeImpl(WebContextMenuParamPeer* peer) {
+        Ark_NativePointer GetMediaTypeImpl(WebContextMenuParamPeer* peer)
+        {
             return 0;
         }
-        void GetSelectionTextImpl(WebContextMenuParamPeer* peer) {
+        void GetSelectionTextImpl(WebContextMenuParamPeer* peer)
+        {
         }
-        Ark_NativePointer GetSourceTypeImpl(WebContextMenuParamPeer* peer) {
+        Ark_NativePointer GetSourceTypeImpl(WebContextMenuParamPeer* peer)
+        {
             return 0;
         }
-        Ark_NativePointer GetInputFieldTypeImpl(WebContextMenuParamPeer* peer) {
+        Ark_NativePointer GetInputFieldTypeImpl(WebContextMenuParamPeer* peer)
+        {
             return 0;
         }
-        Ark_Boolean IsEditableImpl(WebContextMenuParamPeer* peer) {
+        Ark_Boolean IsEditableImpl(WebContextMenuParamPeer* peer)
+        {
             return 0;
         }
-        Ark_Int32 GetEditStateFlagsImpl(WebContextMenuParamPeer* peer) {
+        Ark_Int32 GetEditStateFlagsImpl(WebContextMenuParamPeer* peer)
+        {
             return 0;
         }
     } // WebContextMenuParamModifier
-    const GENERATED_ArkUIWebContextMenuParamAccessor* GetWebContextMenuParamAccessor() {
+    const GENERATED_ArkUIWebContextMenuParamAccessor* GetWebContextMenuParamAccessor()
+    {
         static const GENERATED_ArkUIWebContextMenuParamAccessor WebContextMenuParamAccessorImpl {
             WebContextMenuParamModifier::CtorImpl,
             WebContextMenuParamModifier::GetFinalizerImpl,

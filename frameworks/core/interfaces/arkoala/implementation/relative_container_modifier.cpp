@@ -15,20 +15,26 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace RelativeContainerInterfaceModifier {
-        void _setRelativeContainerOptionsImpl(Ark_NativePointer node) {
+        void _setRelativeContainerOptionsImpl(Ark_NativePointer node)
+        {
         }
     } // RelativeContainerInterfaceModifier
     namespace RelativeContainerAttributeModifier {
-        void GuideLineImpl(Ark_NativePointer node, const Array_GuideLineStyle* value) {
+        void GuideLineImpl(Ark_NativePointer node, const Array_GuideLineStyle* value)
+        {
         }
-        void Barrier_ArrayBarrierStyleImpl(Ark_NativePointer node, const Array_BarrierStyle* value) {
+        void Barrier_ArrayBarrierStyleImpl(Ark_NativePointer node, const Array_BarrierStyle* value)
+        {
         }
-        void Barrier_ArrayLocalizedBarrierStyleImpl(Ark_NativePointer node, const Array_LocalizedBarrierStyle* barrierStyle) {
+        void Barrier_ArrayLocalizedBarrierStyleImpl(Ark_NativePointer node, const Array_LocalizedBarrierStyle* barrierStyle)
+        {
         }
     } // RelativeContainerAttributeModifier
-    const GENERATED_ArkUIRelativeContainerModifier* GetRelativeContainerModifier() {
+    const GENERATED_ArkUIRelativeContainerModifier* GetRelativeContainerModifier()
+    {
         static const GENERATED_ArkUIRelativeContainerModifier ArkUIRelativeContainerModifierImpl {
             RelativeContainerInterfaceModifier::_setRelativeContainerOptionsImpl,
             RelativeContainerAttributeModifier::GuideLineImpl,

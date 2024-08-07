@@ -15,30 +15,39 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace StyledStringModifier {
-        Ark_NativePointer CtorImpl(const Union_String_ImageAttachment_CustomSpan* value, const Opt_Array_StyleOptions* styles) {
+        Ark_NativePointer CtorImpl(const Union_String_ImageAttachment_CustomSpan* value, const Opt_Array_StyleOptions* styles)
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void GetStringImpl(StyledStringPeer* peer) {
+        void GetStringImpl(StyledStringPeer* peer)
+        {
         }
-        Ark_NativePointer GetStylesImpl(StyledStringPeer* peer, const Ark_Number* start, const Ark_Number* length, const Opt_StyledStringKey* styledKey) {
+        Ark_NativePointer GetStylesImpl(StyledStringPeer* peer, const Ark_Number* start, const Ark_Number* length, const Opt_StyledStringKey* styledKey)
+        {
             return 0;
         }
-        Ark_Boolean EqualsImpl(StyledStringPeer* peer, const Ark_Materialized* other) {
+        Ark_Boolean EqualsImpl(StyledStringPeer* peer, const Ark_Materialized* other)
+        {
             return 0;
         }
-        Ark_NativePointer SubStyledStringImpl(StyledStringPeer* peer, const Ark_Number* start, const Opt_Number* length) {
+        Ark_NativePointer SubStyledStringImpl(StyledStringPeer* peer, const Ark_Number* start, const Opt_Number* length)
+        {
             return 0;
         }
-        Ark_Int32 GetLengthImpl(StyledStringPeer* peer) {
+        Ark_Int32 GetLengthImpl(StyledStringPeer* peer)
+        {
             return 0;
         }
     } // StyledStringModifier
-    const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor() {
+    const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
+    {
         static const GENERATED_ArkUIStyledStringAccessor StyledStringAccessorImpl {
             StyledStringModifier::CtorImpl,
             StyledStringModifier::GetFinalizerImpl,

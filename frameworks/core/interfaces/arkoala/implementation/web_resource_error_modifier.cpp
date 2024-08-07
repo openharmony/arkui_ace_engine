@@ -15,21 +15,27 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace WebResourceErrorModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void GetErrorInfoImpl(WebResourceErrorPeer* peer) {
+        void GetErrorInfoImpl(WebResourceErrorPeer* peer)
+        {
         }
-        Ark_Int32 GetErrorCodeImpl(WebResourceErrorPeer* peer) {
+        Ark_Int32 GetErrorCodeImpl(WebResourceErrorPeer* peer)
+        {
             return 0;
         }
     } // WebResourceErrorModifier
-    const GENERATED_ArkUIWebResourceErrorAccessor* GetWebResourceErrorAccessor() {
+    const GENERATED_ArkUIWebResourceErrorAccessor* GetWebResourceErrorAccessor()
+    {
         static const GENERATED_ArkUIWebResourceErrorAccessor WebResourceErrorAccessorImpl {
             WebResourceErrorModifier::CtorImpl,
             WebResourceErrorModifier::GetFinalizerImpl,

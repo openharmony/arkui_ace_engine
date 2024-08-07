@@ -15,18 +15,23 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace StackInterfaceModifier {
-        void _setStackOptionsImpl(Ark_NativePointer node, const Opt_Type_StackInterface__setStackOptions_Arg0* value) {
+        void _setStackOptionsImpl(Ark_NativePointer node, const Opt_Type_StackInterface__setStackOptions_Arg0* value)
+        {
         }
     } // StackInterfaceModifier
     namespace StackAttributeModifier {
-        void AlignContentImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void AlignContentImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void PointLightImpl(Ark_NativePointer node, const Ark_PointLightStyle* value) {
+        void PointLightImpl(Ark_NativePointer node, const Ark_PointLightStyle* value)
+        {
         }
     } // StackAttributeModifier
-    const GENERATED_ArkUIStackModifier* GetStackModifier() {
+    const GENERATED_ArkUIStackModifier* GetStackModifier()
+    {
         static const GENERATED_ArkUIStackModifier ArkUIStackModifierImpl {
             StackInterfaceModifier::_setStackOptionsImpl,
             StackAttributeModifier::AlignContentImpl,

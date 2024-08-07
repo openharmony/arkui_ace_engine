@@ -15,22 +15,29 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace DividerInterfaceModifier {
-        void _setDividerOptionsImpl(Ark_NativePointer node) {
+        void _setDividerOptionsImpl(Ark_NativePointer node)
+        {
         }
     } // DividerInterfaceModifier
     namespace DividerAttributeModifier {
-        void VerticalImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void VerticalImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
-        void ColorImpl(Ark_NativePointer node, const ResourceColor* value) {
+        void ColorImpl(Ark_NativePointer node, const ResourceColor* value)
+        {
         }
-        void StrokeWidthImpl(Ark_NativePointer node, const Type_DividerAttribute_strokeWidth_Arg0* value) {
+        void StrokeWidthImpl(Ark_NativePointer node, const Type_DividerAttribute_strokeWidth_Arg0* value)
+        {
         }
-        void LineCapImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void LineCapImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
     } // DividerAttributeModifier
-    const GENERATED_ArkUIDividerModifier* GetDividerModifier() {
+    const GENERATED_ArkUIDividerModifier* GetDividerModifier()
+    {
         static const GENERATED_ArkUIDividerModifier ArkUIDividerModifierImpl {
             DividerInterfaceModifier::_setDividerOptionsImpl,
             DividerAttributeModifier::VerticalImpl,

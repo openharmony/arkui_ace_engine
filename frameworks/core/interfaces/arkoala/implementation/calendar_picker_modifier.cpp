@@ -15,20 +15,26 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace CalendarPickerInterfaceModifier {
-        void _setCalendarPickerOptionsImpl(Ark_NativePointer node, const Opt_CalendarOptions* options) {
+        void _setCalendarPickerOptionsImpl(Ark_NativePointer node, const Opt_CalendarOptions* options)
+        {
         }
     } // CalendarPickerInterfaceModifier
     namespace CalendarPickerAttributeModifier {
-        void EdgeAlignImpl(Ark_NativePointer node, Ark_Int32 alignType, const Opt_Offset* offset) {
+        void EdgeAlignImpl(Ark_NativePointer node, Ark_Int32 alignType, const Opt_Offset* offset)
+        {
         }
-        void TextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value) {
+        void TextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value)
+        {
         }
-        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
     } // CalendarPickerAttributeModifier
-    const GENERATED_ArkUICalendarPickerModifier* GetCalendarPickerModifier() {
+    const GENERATED_ArkUICalendarPickerModifier* GetCalendarPickerModifier()
+    {
         static const GENERATED_ArkUICalendarPickerModifier ArkUICalendarPickerModifierImpl {
             CalendarPickerInterfaceModifier::_setCalendarPickerOptionsImpl,
             CalendarPickerAttributeModifier::EdgeAlignImpl,

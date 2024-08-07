@@ -15,25 +15,33 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace PermissionRequestModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void DenyImpl(PermissionRequestPeer* peer) {
+        void DenyImpl(PermissionRequestPeer* peer)
+        {
         }
-        void GetOriginImpl(PermissionRequestPeer* peer) {
+        void GetOriginImpl(PermissionRequestPeer* peer)
+        {
         }
-        Ark_NativePointer GetAccessibleResourceImpl(PermissionRequestPeer* peer) {
+        Ark_NativePointer GetAccessibleResourceImpl(PermissionRequestPeer* peer)
+        {
             return 0;
         }
-        void GrantImpl(PermissionRequestPeer* peer, const Array_String* resources) {
+        void GrantImpl(PermissionRequestPeer* peer, const Array_String* resources)
+        {
         }
     } // PermissionRequestModifier
-    const GENERATED_ArkUIPermissionRequestAccessor* GetPermissionRequestAccessor() {
+    const GENERATED_ArkUIPermissionRequestAccessor* GetPermissionRequestAccessor()
+    {
         static const GENERATED_ArkUIPermissionRequestAccessor PermissionRequestAccessorImpl {
             PermissionRequestModifier::CtorImpl,
             PermissionRequestModifier::GetFinalizerImpl,

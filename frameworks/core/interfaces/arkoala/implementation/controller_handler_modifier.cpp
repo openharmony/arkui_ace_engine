@@ -15,18 +15,23 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace ControllerHandlerModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void SetWebControllerImpl(ControllerHandlerPeer* peer, const Ark_CustomObject* controller) {
+        void SetWebControllerImpl(ControllerHandlerPeer* peer, const Ark_CustomObject* controller)
+        {
         }
     } // ControllerHandlerModifier
-    const GENERATED_ArkUIControllerHandlerAccessor* GetControllerHandlerAccessor() {
+    const GENERATED_ArkUIControllerHandlerAccessor* GetControllerHandlerAccessor()
+    {
         static const GENERATED_ArkUIControllerHandlerAccessor ControllerHandlerAccessorImpl {
             ControllerHandlerModifier::CtorImpl,
             ControllerHandlerModifier::GetFinalizerImpl,

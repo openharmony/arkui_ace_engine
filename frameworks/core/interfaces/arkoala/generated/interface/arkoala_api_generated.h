@@ -11669,8 +11669,9 @@ struct Ark_AnyAPI {
 /*
   For debug purpose:
   Current commit of idlize
-  2024/06/06 11:20:20 5fb9afcc0596dd12a614ff298e2610c8ed5e382e Use generated arkoala_api.h
+  2024/08/07 15:19:12 6c153bbf9bc75b6349ac5a45110e442e1b52a1a6 Reduce severe errors
 
-Signed-off-by: Anton Tarasov <tarasov.anton1@huawei.com>
+Signed-off-by: Kirill Kirichenko <kirichenko.kirill@huawei.com>
+Change-Id: I7c6af5b5b745f72c5599fc173a103d39d73a8ea4
  */
 

@@ -15,26 +15,35 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace RefreshInterfaceModifier {
-        void _setRefreshOptionsImpl(Ark_NativePointer node, const Ark_RefreshOptions* value) {
+        void _setRefreshOptionsImpl(Ark_NativePointer node, const Ark_RefreshOptions* value)
+        {
         }
     } // RefreshInterfaceModifier
     namespace RefreshAttributeModifier {
-        void OnStateChangeImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnStateChangeImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnRefreshingImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnRefreshingImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void RefreshOffsetImpl(Ark_NativePointer node, const Ark_Number* value) {
+        void RefreshOffsetImpl(Ark_NativePointer node, const Ark_Number* value)
+        {
         }
-        void PullToRefreshImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void PullToRefreshImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
-        void OnOffsetChangeImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnOffsetChangeImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void PullDownRatioImpl(Ark_NativePointer node, const Opt_Number* ratio) {
+        void PullDownRatioImpl(Ark_NativePointer node, const Opt_Number* ratio)
+        {
         }
     } // RefreshAttributeModifier
-    const GENERATED_ArkUIRefreshModifier* GetRefreshModifier() {
+    const GENERATED_ArkUIRefreshModifier* GetRefreshModifier()
+    {
         static const GENERATED_ArkUIRefreshModifier ArkUIRefreshModifierImpl {
             RefreshInterfaceModifier::_setRefreshOptionsImpl,
             RefreshAttributeModifier::OnStateChangeImpl,

@@ -15,18 +15,23 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace ColumnSplitInterfaceModifier {
-        void _setColumnSplitOptionsImpl(Ark_NativePointer node) {
+        void _setColumnSplitOptionsImpl(Ark_NativePointer node)
+        {
         }
     } // ColumnSplitInterfaceModifier
     namespace ColumnSplitAttributeModifier {
-        void ResizeableImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void ResizeableImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
-        void DividerImpl(Ark_NativePointer node, const Type_ColumnSplitAttribute_divider_Arg0* value) {
+        void DividerImpl(Ark_NativePointer node, const Type_ColumnSplitAttribute_divider_Arg0* value)
+        {
         }
     } // ColumnSplitAttributeModifier
-    const GENERATED_ArkUIColumnSplitModifier* GetColumnSplitModifier() {
+    const GENERATED_ArkUIColumnSplitModifier* GetColumnSplitModifier()
+    {
         static const GENERATED_ArkUIColumnSplitModifier ArkUIColumnSplitModifierImpl {
             ColumnSplitInterfaceModifier::_setColumnSplitOptionsImpl,
             ColumnSplitAttributeModifier::ResizeableImpl,

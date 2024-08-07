@@ -15,20 +15,26 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace NavRouterInterfaceModifier {
-        void _setNavRouterOptions_Impl(Ark_NativePointer node) {
+        void _setNavRouterOptions_Impl(Ark_NativePointer node)
+        {
         }
-        void _setNavRouterOptions_RouteInfoImpl(Ark_NativePointer node, const Ark_RouteInfo* value) {
+        void _setNavRouterOptions_RouteInfoImpl(Ark_NativePointer node, const Ark_RouteInfo* value)
+        {
         }
     } // NavRouterInterfaceModifier
     namespace NavRouterAttributeModifier {
-        void OnStateChangeImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnStateChangeImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void ModeImpl(Ark_NativePointer node, Ark_Int32 mode) {
+        void ModeImpl(Ark_NativePointer node, Ark_Int32 mode)
+        {
         }
     } // NavRouterAttributeModifier
-    const GENERATED_ArkUINavRouterModifier* GetNavRouterModifier() {
+    const GENERATED_ArkUINavRouterModifier* GetNavRouterModifier()
+    {
         static const GENERATED_ArkUINavRouterModifier ArkUINavRouterModifierImpl {
             NavRouterInterfaceModifier::_setNavRouterOptions_Impl,
             NavRouterInterfaceModifier::_setNavRouterOptions_RouteInfoImpl,

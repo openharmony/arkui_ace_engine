@@ -15,26 +15,34 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace RichEditorStyledStringControllerModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void SetStyledStringImpl(RichEditorStyledStringControllerPeer* peer, const Ark_Materialized* styledString) {
+        void SetStyledStringImpl(RichEditorStyledStringControllerPeer* peer, const Ark_Materialized* styledString)
+        {
         }
-        Ark_NativePointer GetStyledStringImpl(RichEditorStyledStringControllerPeer* peer) {
+        Ark_NativePointer GetStyledStringImpl(RichEditorStyledStringControllerPeer* peer)
+        {
             return 0;
         }
-        Ark_NativePointer GetSelectionImpl(RichEditorStyledStringControllerPeer* peer) {
+        Ark_NativePointer GetSelectionImpl(RichEditorStyledStringControllerPeer* peer)
+        {
             return 0;
         }
-        void OnContentChangedImpl(RichEditorStyledStringControllerPeer* peer, const Ark_StyledStringChangedListener* listener) {
+        void OnContentChangedImpl(RichEditorStyledStringControllerPeer* peer, const Ark_StyledStringChangedListener* listener)
+        {
         }
     } // RichEditorStyledStringControllerModifier
-    const GENERATED_ArkUIRichEditorStyledStringControllerAccessor* GetRichEditorStyledStringControllerAccessor() {
+    const GENERATED_ArkUIRichEditorStyledStringControllerAccessor* GetRichEditorStyledStringControllerAccessor()
+    {
         static const GENERATED_ArkUIRichEditorStyledStringControllerAccessor RichEditorStyledStringControllerAccessorImpl {
             RichEditorStyledStringControllerModifier::CtorImpl,
             RichEditorStyledStringControllerModifier::GetFinalizerImpl,

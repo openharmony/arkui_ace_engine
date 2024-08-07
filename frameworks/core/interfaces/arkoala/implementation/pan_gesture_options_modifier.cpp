@@ -15,25 +15,33 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace PanGestureOptionsModifier {
-        Ark_NativePointer CtorImpl(const Opt_Literal_fingers_Opt_Number_direction_PanDirection_distance_Opt_Number* value) {
+        Ark_NativePointer CtorImpl(const Opt_Literal_fingers_Opt_Number_direction_PanDirection_distance_Opt_Number* value)
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void SetDirectionImpl(PanGestureOptionsPeer* peer, Ark_Int32 value) {
+        void SetDirectionImpl(PanGestureOptionsPeer* peer, Ark_Int32 value)
+        {
         }
-        void SetDistanceImpl(PanGestureOptionsPeer* peer, const Ark_Number* value) {
+        void SetDistanceImpl(PanGestureOptionsPeer* peer, const Ark_Number* value)
+        {
         }
-        void SetFingersImpl(PanGestureOptionsPeer* peer, const Ark_Number* value) {
+        void SetFingersImpl(PanGestureOptionsPeer* peer, const Ark_Number* value)
+        {
         }
-        Ark_NativePointer GetDirectionImpl(PanGestureOptionsPeer* peer) {
+        Ark_NativePointer GetDirectionImpl(PanGestureOptionsPeer* peer)
+        {
             return 0;
         }
     } // PanGestureOptionsModifier
-    const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor() {
+    const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor()
+    {
         static const GENERATED_ArkUIPanGestureOptionsAccessor PanGestureOptionsAccessorImpl {
             PanGestureOptionsModifier::CtorImpl,
             PanGestureOptionsModifier::GetFinalizerImpl,

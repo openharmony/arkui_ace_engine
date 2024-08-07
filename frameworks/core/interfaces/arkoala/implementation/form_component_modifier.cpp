@@ -15,34 +15,47 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace FormComponentInterfaceModifier {
-        void _setFormComponentOptionsImpl(Ark_NativePointer node, const Ark_FormInfo* value) {
+        void _setFormComponentOptionsImpl(Ark_NativePointer node, const Ark_FormInfo* value)
+        {
         }
     } // FormComponentInterfaceModifier
     namespace FormComponentAttributeModifier {
-        void SizeImpl(Ark_NativePointer node, const Type_FormComponentAttribute_size_Arg0* value) {
+        void SizeImpl(Ark_NativePointer node, const Type_FormComponentAttribute_size_Arg0* value)
+        {
         }
-        void ModuleNameImpl(Ark_NativePointer node, const Ark_String* value) {
+        void ModuleNameImpl(Ark_NativePointer node, const Ark_String* value)
+        {
         }
-        void DimensionImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void DimensionImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void AllowUpdateImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void AllowUpdateImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
-        void VisibilityImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void VisibilityImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void OnAcquiredImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnAcquiredImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnErrorImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnErrorImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnRouterImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnRouterImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnUninstallImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnUninstallImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnLoadImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnLoadImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
     } // FormComponentAttributeModifier
-    const GENERATED_ArkUIFormComponentModifier* GetFormComponentModifier() {
+    const GENERATED_ArkUIFormComponentModifier* GetFormComponentModifier()
+    {
         static const GENERATED_ArkUIFormComponentModifier ArkUIFormComponentModifierImpl {
             FormComponentInterfaceModifier::_setFormComponentOptionsImpl,
             FormComponentAttributeModifier::SizeImpl,

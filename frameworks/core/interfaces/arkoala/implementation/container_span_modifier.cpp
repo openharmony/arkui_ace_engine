@@ -15,16 +15,20 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace ContainerSpanInterfaceModifier {
-        void _setContainerSpanOptionsImpl(Ark_NativePointer node) {
+        void _setContainerSpanOptionsImpl(Ark_NativePointer node)
+        {
         }
     } // ContainerSpanInterfaceModifier
     namespace ContainerSpanAttributeModifier {
-        void TextBackgroundStyleImpl(Ark_NativePointer node, const Ark_TextBackgroundStyle* style) {
+        void TextBackgroundStyleImpl(Ark_NativePointer node, const Ark_TextBackgroundStyle* style)
+        {
         }
     } // ContainerSpanAttributeModifier
-    const GENERATED_ArkUIContainerSpanModifier* GetContainerSpanModifier() {
+    const GENERATED_ArkUIContainerSpanModifier* GetContainerSpanModifier()
+    {
         static const GENERATED_ArkUIContainerSpanModifier ArkUIContainerSpanModifierImpl {
             ContainerSpanInterfaceModifier::_setContainerSpanOptionsImpl,
             ContainerSpanAttributeModifier::TextBackgroundStyleImpl,

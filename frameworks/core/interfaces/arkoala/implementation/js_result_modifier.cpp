@@ -15,22 +15,29 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace JsResultModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void HandleCancelImpl(JsResultPeer* peer) {
+        void HandleCancelImpl(JsResultPeer* peer)
+        {
         }
-        void HandleConfirmImpl(JsResultPeer* peer) {
+        void HandleConfirmImpl(JsResultPeer* peer)
+        {
         }
-        void HandlePromptConfirmImpl(JsResultPeer* peer, const Ark_String* result) {
+        void HandlePromptConfirmImpl(JsResultPeer* peer, const Ark_String* result)
+        {
         }
     } // JsResultModifier
-    const GENERATED_ArkUIJsResultAccessor* GetJsResultAccessor() {
+    const GENERATED_ArkUIJsResultAccessor* GetJsResultAccessor()
+    {
         static const GENERATED_ArkUIJsResultAccessor JsResultAccessorImpl {
             JsResultModifier::CtorImpl,
             JsResultModifier::GetFinalizerImpl,

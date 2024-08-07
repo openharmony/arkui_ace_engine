@@ -15,16 +15,20 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace WindowSceneInterfaceModifier {
-        void _setWindowSceneOptionsImpl(Ark_NativePointer node, const Ark_Number* persistentId) {
+        void _setWindowSceneOptionsImpl(Ark_NativePointer node, const Ark_Number* persistentId)
+        {
         }
     } // WindowSceneInterfaceModifier
     namespace WindowSceneAttributeModifier {
-        void AttractionEffectImpl(Ark_NativePointer node, const Ark_Position* destination, const Ark_Number* fraction) {
+        void AttractionEffectImpl(Ark_NativePointer node, const Ark_Position* destination, const Ark_Number* fraction)
+        {
         }
     } // WindowSceneAttributeModifier
-    const GENERATED_ArkUIWindowSceneModifier* GetWindowSceneModifier() {
+    const GENERATED_ArkUIWindowSceneModifier* GetWindowSceneModifier()
+    {
         static const GENERATED_ArkUIWindowSceneModifier ArkUIWindowSceneModifierImpl {
             WindowSceneInterfaceModifier::_setWindowSceneOptionsImpl,
             WindowSceneAttributeModifier::AttractionEffectImpl,

@@ -22,9 +22,12 @@
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
-namespace ButtonInterfaceModifier {
-void _setButtonOptions_Impl(Ark_NativePointer node) {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
+namespace ButtonInterfaceModifier
+{
+void _setButtonOptions_Impl(Ark_NativePointer node)
+{
   auto frameNode = reinterpret_cast<FrameNode *>(node);
   CHECK_NULL_VOID(frameNode);
   ButtonModelNG::SetType(frameNode, (ArkUI_Int32)ButtonType::CAPSULE);
@@ -34,7 +37,8 @@ void _setButtonOptions_Impl(Ark_NativePointer node) {
   ButtonModelNG::SetButtonStyle(frameNode, ButtonStyleMode::EMPHASIZE);
 }
 
-void _setButtonOptions_ButtonOptionsImpl(Ark_NativePointer node, const Ark_ButtonOptions *options) {
+void _setButtonOptions_ButtonOptionsImpl(Ark_NativePointer node, const Ark_ButtonOptions *options)
+{
   auto frameNode = reinterpret_cast<FrameNode *>(node);
   CHECK_NULL_VOID(frameNode);
   ButtonModelNG::SetType(frameNode, (ArkUI_Int32)Converter::ConvertOrDefault(
@@ -52,7 +56,8 @@ void _setButtonOptions_ButtonOptionsImpl(Ark_NativePointer node, const Ark_Butto
 }
 
 void _setButtonOptions_ResourceStr_ButtonOptionsImpl(Ark_NativePointer node, const ResourceStr *label,
-                                                     const Opt_ButtonOptions *options) {
+                                                     const Opt_ButtonOptions *options)
+{
   if (options->tag == ARK_TAG_UNDEFINED) {
     _setButtonOptions_Impl(node);
   } else {
@@ -69,73 +74,85 @@ namespace ButtonAttributeModifier
 constexpr int32_t DEFAULT_FONT_SIZE = 12;
 constexpr int32_t DEFAULT_MAX_LINES = 100;
 
-void TypeImpl(Ark_NativePointer node, Ark_Int32 value) {
+void TypeImpl(Ark_NativePointer node, Ark_Int32 value)
+{
   auto frameNode = reinterpret_cast<FrameNode *>(node);
   CHECK_NULL_VOID(frameNode);
   ButtonModelNG::SetType(frameNode, (ArkUI_Int32)Converter::ConvertOrDefault(value, ButtonType::CAPSULE));
 }
 
-void StateEffectImpl(Ark_NativePointer node, Ark_Boolean value) {
+void StateEffectImpl(Ark_NativePointer node, Ark_Boolean value)
+{
   auto frameNode = reinterpret_cast<FrameNode *>(node);
   CHECK_NULL_VOID(frameNode);
   ButtonModelNG::SetStateEffect(frameNode, Converter::ConvertOrDefault(value, true));
 }
 
-void ButtonStyleImpl(Ark_NativePointer node, Ark_Int32 value) {
+void ButtonStyleImpl(Ark_NativePointer node, Ark_Int32 value)
+{
   auto frameNode = reinterpret_cast<FrameNode *>(node);
   CHECK_NULL_VOID(frameNode);
   ButtonModelNG::SetButtonStyle(frameNode, Converter::ConvertOrDefault(value, ButtonStyleMode::EMPHASIZE));
 }
 
-void ControlSizeImpl(Ark_NativePointer node, Ark_Int32 value) {
+void ControlSizeImpl(Ark_NativePointer node, Ark_Int32 value)
+{
   auto frameNode = reinterpret_cast<FrameNode *>(node);
   CHECK_NULL_VOID(frameNode);
   ButtonModelNG::SetControlSize(frameNode, Converter::ConvertOrDefault(value, ControlSize::NORMAL));
 }
 
-void RoleImpl(Ark_NativePointer node, Ark_Int32 value) {
+void RoleImpl(Ark_NativePointer node, Ark_Int32 value)
+{
   auto frameNode = reinterpret_cast<FrameNode *>(node);
   CHECK_NULL_VOID(frameNode);
   ButtonModelNG::SetRole(frameNode, Converter::ConvertOrDefault(value, ButtonRole::NORMAL));
 }
 
-void FontColorImpl(Ark_NativePointer node, const ResourceColor *value) {
+void FontColorImpl(Ark_NativePointer node, const ResourceColor *value)
+{
   auto frameNode = reinterpret_cast<FrameNode *>(node);
   CHECK_NULL_VOID(frameNode);
   ButtonModelNG::SetFontColor(frameNode, Converter::ConvertOrDefault(*value, Color()));
 }
 
-void FontSizeImpl(Ark_NativePointer node, const Ark_Length *value) {
+void FontSizeImpl(Ark_NativePointer node, const Ark_Length *value)
+{
   auto frameNode = reinterpret_cast<FrameNode *>(node);
   CHECK_NULL_VOID(frameNode);
   ButtonModelNG::SetFontSize(frameNode, CalcDimension(value->value, (DimensionUnit)value->unit));
 }
 
-void FontWeightImpl(Ark_NativePointer node, const Type_ButtonAttribute_fontWeight_Arg0* value) {
+void FontWeightImpl(Ark_NativePointer node, const Type_ButtonAttribute_fontWeight_Arg0* value)
+{
   auto frameNode = reinterpret_cast<FrameNode *>(node);
   CHECK_NULL_VOID(frameNode);
   ButtonModelNG::SetFontWeight(frameNode, Converter::ConvertOrDefault(*value, FontWeight::NORMAL));
 }
 
-void FontStyleImpl(Ark_NativePointer node, Ark_Int32 value) {
+void FontStyleImpl(Ark_NativePointer node, Ark_Int32 value)
+{
   auto frameNode = reinterpret_cast<FrameNode *>(node);
   CHECK_NULL_VOID(frameNode);
   ButtonModelNG::SetFontStyle(frameNode, (Ace::FontStyle)value);
 }
 
-void FontFamilyImpl(Ark_NativePointer node, const Type_ButtonAttribute_fontFamily_Arg0* value) {
+void FontFamilyImpl(Ark_NativePointer node, const Type_ButtonAttribute_fontFamily_Arg0* value)
+{
   auto frameNode = reinterpret_cast<FrameNode *>(node);
   CHECK_NULL_VOID(frameNode);
   ButtonModelNG::SetFontFamily(frameNode,
                                Framework::ConvertStrToFontFamilies(Converter::ConvertOrDefault(*value, "")));
 }
 
-void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject *modifier) {
+void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject *modifier)
+{
   LOGE("ARKOALA ButtonAttribute::ContentModifierImpl -> Method is not "
        "implemented.");
 }
 
-void LabelStyleImpl(Ark_NativePointer node, const Ark_LabelStyle *value) {
+void LabelStyleImpl(Ark_NativePointer node, const Ark_LabelStyle *value)
+{
   auto frameNode = reinterpret_cast<FrameNode *>(node);
   CHECK_NULL_VOID(frameNode);
   ButtonParameters parameters;
@@ -167,8 +184,9 @@ void LabelStyleImpl(Ark_NativePointer node, const Ark_LabelStyle *value) {
 }
 } // ButtonAttributeModifier
 
-const GENERATED_ArkUIButtonModifier *GetButtonModifier() {
-    static GENERATED_ArkUIButtonModifier ArkUIButtonModifierImpl{
+const GENERATED_ArkUIButtonModifier *GetButtonModifier()
+{
+    static GENERATED_ArkUIButtonModifier ArkUIButtonModifierImpl {
         ButtonInterfaceModifier::_setButtonOptions_Impl,
         ButtonInterfaceModifier::_setButtonOptions_ButtonOptionsImpl,
         ButtonInterfaceModifier::_setButtonOptions_ResourceStr_ButtonOptionsImpl,

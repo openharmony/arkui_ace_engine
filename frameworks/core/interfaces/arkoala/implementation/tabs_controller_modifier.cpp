@@ -15,21 +15,27 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace TabsControllerModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void ChangeIndexImpl(TabsControllerPeer* peer, const Ark_Number* value) {
+        void ChangeIndexImpl(TabsControllerPeer* peer, const Ark_Number* value)
+        {
         }
-        Ark_NativePointer PreloadItemsImpl(TabsControllerPeer* peer, const Opt_Array_Number* indices) {
+        Ark_NativePointer PreloadItemsImpl(TabsControllerPeer* peer, const Opt_Array_Number* indices)
+        {
             return 0;
         }
     } // TabsControllerModifier
-    const GENERATED_ArkUITabsControllerAccessor* GetTabsControllerAccessor() {
+    const GENERATED_ArkUITabsControllerAccessor* GetTabsControllerAccessor()
+    {
         static const GENERATED_ArkUITabsControllerAccessor TabsControllerAccessorImpl {
             TabsControllerModifier::CtorImpl,
             TabsControllerModifier::GetFinalizerImpl,

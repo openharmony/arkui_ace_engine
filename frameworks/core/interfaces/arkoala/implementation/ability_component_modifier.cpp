@@ -15,18 +15,23 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace AbilityComponentInterfaceModifier {
-        void _setAbilityComponentOptionsImpl(Ark_NativePointer node, const Type_AbilityComponentInterface__setAbilityComponentOptions_Arg0* value) {
+        void _setAbilityComponentOptionsImpl(Ark_NativePointer node, const Type_AbilityComponentInterface__setAbilityComponentOptions_Arg0* value)
+        {
         }
     } // AbilityComponentInterfaceModifier
     namespace AbilityComponentAttributeModifier {
-        void OnConnectImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnConnectImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnDisconnectImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnDisconnectImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
     } // AbilityComponentAttributeModifier
-    const GENERATED_ArkUIAbilityComponentModifier* GetAbilityComponentModifier() {
+    const GENERATED_ArkUIAbilityComponentModifier* GetAbilityComponentModifier()
+    {
         static const GENERATED_ArkUIAbilityComponentModifier ArkUIAbilityComponentModifierImpl {
             AbilityComponentInterfaceModifier::_setAbilityComponentOptionsImpl,
             AbilityComponentAttributeModifier::OnConnectImpl,

@@ -15,24 +15,32 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace XComponentInterfaceModifier {
-        void _setXComponentOptions_idstringtypestringlibrarynamestringcontrollerXComponentControllerImpl(Ark_NativePointer node, const Type_XComponentInterface__setXComponentOptions_Arg0* value) {
+        void _setXComponentOptions_idstringtypestringlibrarynamestringcontrollerXComponentControllerImpl(Ark_NativePointer node, const Type_XComponentInterface__setXComponentOptions_Arg0* value)
+        {
         }
-        void _setXComponentOptions_idstringtypeXComponentTypelibrarynamestringcontrollerXComponentControllerImpl(Ark_NativePointer node, const Type_XComponentInterface__setXComponentOptions1_Arg0* value) {
+        void _setXComponentOptions_idstringtypeXComponentTypelibrarynamestringcontrollerXComponentControllerImpl(Ark_NativePointer node, const Type_XComponentInterface__setXComponentOptions1_Arg0* value)
+        {
         }
-        void _setXComponentOptions_XComponentOptionsImpl(Ark_NativePointer node, const Ark_XComponentOptions* options) {
+        void _setXComponentOptions_XComponentOptionsImpl(Ark_NativePointer node, const Ark_XComponentOptions* options)
+        {
         }
     } // XComponentInterfaceModifier
     namespace XComponentAttributeModifier {
-        void OnLoadImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnLoadImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnDestroyImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnDestroyImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
-        void EnableAnalyzerImpl(Ark_NativePointer node, Ark_Boolean enable) {
+        void EnableAnalyzerImpl(Ark_NativePointer node, Ark_Boolean enable)
+        {
         }
     } // XComponentAttributeModifier
-    const GENERATED_ArkUIXComponentModifier* GetXComponentModifier() {
+    const GENERATED_ArkUIXComponentModifier* GetXComponentModifier()
+    {
         static const GENERATED_ArkUIXComponentModifier ArkUIXComponentModifierImpl {
             XComponentInterfaceModifier::_setXComponentOptions_idstringtypestringlibrarynamestringcontrollerXComponentControllerImpl,
             XComponentInterfaceModifier::_setXComponentOptions_idstringtypeXComponentTypelibrarynamestringcontrollerXComponentControllerImpl,

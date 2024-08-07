@@ -15,66 +15,95 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace SwiperInterfaceModifier {
-        void _setSwiperOptionsImpl(Ark_NativePointer node, const Opt_SwiperController* controller) {
+        void _setSwiperOptionsImpl(Ark_NativePointer node, const Opt_SwiperController* controller)
+        {
         }
     } // SwiperInterfaceModifier
     namespace SwiperAttributeModifier {
-        void IndexImpl(Ark_NativePointer node, const Ark_Number* value) {
+        void IndexImpl(Ark_NativePointer node, const Ark_Number* value)
+        {
         }
-        void AutoPlayImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void AutoPlayImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
-        void IntervalImpl(Ark_NativePointer node, const Ark_Number* value) {
+        void IntervalImpl(Ark_NativePointer node, const Ark_Number* value)
+        {
         }
-        void IndicatorImpl(Ark_NativePointer node, const Type_SwiperAttribute_indicator_Arg0* value) {
+        void IndicatorImpl(Ark_NativePointer node, const Type_SwiperAttribute_indicator_Arg0* value)
+        {
         }
-        void DisplayArrowImpl(Ark_NativePointer node, const Type_SwiperAttribute_displayArrow_Arg0* value, const Opt_Boolean* isHoverShow) {
+        void DisplayArrowImpl(Ark_NativePointer node, const Type_SwiperAttribute_displayArrow_Arg0* value, const Opt_Boolean* isHoverShow)
+        {
         }
-        void LoopImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void LoopImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
-        void DurationImpl(Ark_NativePointer node, const Ark_Number* value) {
+        void DurationImpl(Ark_NativePointer node, const Ark_Number* value)
+        {
         }
-        void VerticalImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void VerticalImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
-        void ItemSpaceImpl(Ark_NativePointer node, const Type_SwiperAttribute_itemSpace_Arg0* value) {
+        void ItemSpaceImpl(Ark_NativePointer node, const Type_SwiperAttribute_itemSpace_Arg0* value)
+        {
         }
-        void DisplayModeImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void DisplayModeImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void CachedCountImpl(Ark_NativePointer node, const Ark_Number* value) {
+        void CachedCountImpl(Ark_NativePointer node, const Ark_Number* value)
+        {
         }
-        void DisplayCountImpl(Ark_NativePointer node, const Type_SwiperAttribute_displayCount_Arg0* value, const Opt_Boolean* swipeByGroup) {
+        void DisplayCountImpl(Ark_NativePointer node, const Type_SwiperAttribute_displayCount_Arg0* value, const Opt_Boolean* swipeByGroup)
+        {
         }
-        void EffectModeImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void EffectModeImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void DisableSwipeImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void DisableSwipeImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
-        void CurveImpl(Ark_NativePointer node, const Type_SwiperAttribute_curve_Arg0* value) {
+        void CurveImpl(Ark_NativePointer node, const Type_SwiperAttribute_curve_Arg0* value)
+        {
         }
-        void OnChangeImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnChangeImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
-        void IndicatorStyleImpl(Ark_NativePointer node, const Opt_IndicatorStyle* value) {
+        void IndicatorStyleImpl(Ark_NativePointer node, const Opt_IndicatorStyle* value)
+        {
         }
-        void PrevMarginImpl(Ark_NativePointer node, const Ark_Length* value, const Opt_Boolean* ignoreBlank) {
+        void PrevMarginImpl(Ark_NativePointer node, const Ark_Length* value, const Opt_Boolean* ignoreBlank)
+        {
         }
-        void NextMarginImpl(Ark_NativePointer node, const Ark_Length* value, const Opt_Boolean* ignoreBlank) {
+        void NextMarginImpl(Ark_NativePointer node, const Ark_Length* value, const Opt_Boolean* ignoreBlank)
+        {
         }
-        void OnAnimationStartImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnAnimationStartImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
-        void OnAnimationEndImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnAnimationEndImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
-        void OnGestureSwipeImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnGestureSwipeImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
-        void NestedScrollImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void NestedScrollImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void CustomContentTransitionImpl(Ark_NativePointer node, const Ark_SwiperContentAnimatedTransition* transition) {
+        void CustomContentTransitionImpl(Ark_NativePointer node, const Ark_SwiperContentAnimatedTransition* transition)
+        {
         }
-        void OnContentDidScrollImpl(Ark_NativePointer node, Ark_Function handler) {
+        void OnContentDidScrollImpl(Ark_NativePointer node, Ark_Function handler)
+        {
         }
-        void IndicatorInteractiveImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void IndicatorInteractiveImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
     } // SwiperAttributeModifier
-    const GENERATED_ArkUISwiperModifier* GetSwiperModifier() {
+    const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
+    {
         static const GENERATED_ArkUISwiperModifier ArkUISwiperModifierImpl {
             SwiperInterfaceModifier::_setSwiperOptionsImpl,
             SwiperAttributeModifier::IndexImpl,

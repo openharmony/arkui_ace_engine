@@ -15,20 +15,26 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace CanvasInterfaceModifier {
-        void _setCanvasOptions_CanvasRenderingContextDDrawingRenderingContextImpl(Ark_NativePointer node, const Opt_Type_CanvasInterface__setCanvasOptions_Arg0* context) {
+        void _setCanvasOptions_CanvasRenderingContextDDrawingRenderingContextImpl(Ark_NativePointer node, const Opt_Type_CanvasInterface__setCanvasOptions_Arg0* context)
+        {
         }
-        void _setCanvasOptions_CanvasRenderingContextDDrawingRenderingContext_ImageAIOptionsImpl(Ark_NativePointer node, const Type_CanvasInterface__setCanvasOptions1_Arg0* context, const Ark_ImageAIOptions* imageAIOptions) {
+        void _setCanvasOptions_CanvasRenderingContextDDrawingRenderingContext_ImageAIOptionsImpl(Ark_NativePointer node, const Type_CanvasInterface__setCanvasOptions1_Arg0* context, const Ark_ImageAIOptions* imageAIOptions)
+        {
         }
     } // CanvasInterfaceModifier
     namespace CanvasAttributeModifier {
-        void OnReadyImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnReadyImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
-        void EnableAnalyzerImpl(Ark_NativePointer node, Ark_Boolean enable) {
+        void EnableAnalyzerImpl(Ark_NativePointer node, Ark_Boolean enable)
+        {
         }
     } // CanvasAttributeModifier
-    const GENERATED_ArkUICanvasModifier* GetCanvasModifier() {
+    const GENERATED_ArkUICanvasModifier* GetCanvasModifier()
+    {
         static const GENERATED_ArkUICanvasModifier ArkUICanvasModifierImpl {
             CanvasInterfaceModifier::_setCanvasOptions_CanvasRenderingContextDDrawingRenderingContextImpl,
             CanvasInterfaceModifier::_setCanvasOptions_CanvasRenderingContextDDrawingRenderingContext_ImageAIOptionsImpl,

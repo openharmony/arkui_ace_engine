@@ -15,39 +15,53 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace ScrollerModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void ScrollToImpl(ScrollerPeer* peer, const Literal_xOffset_Union_Number_String_yOffset_Union_Number_String_animation_Opt_Union_Opt_ScrollAnimationOptions_Opt_Boolean* value) {
+        void ScrollToImpl(ScrollerPeer* peer, const Literal_xOffset_Union_Number_String_yOffset_Union_Number_String_animation_Opt_Union_Opt_ScrollAnimationOptions_Opt_Boolean* value)
+        {
         }
-        void ScrollEdgeImpl(ScrollerPeer* peer, Ark_Int32 value, const Opt_ScrollEdgeOptions* options) {
+        void ScrollEdgeImpl(ScrollerPeer* peer, Ark_Int32 value, const Opt_ScrollEdgeOptions* options)
+        {
         }
-        void FlingImpl(ScrollerPeer* peer, const Ark_Number* velocity) {
+        void FlingImpl(ScrollerPeer* peer, const Ark_Number* velocity)
+        {
         }
-        void ScrollPage_ScrollPageOptionsImpl(ScrollerPeer* peer, const Ark_ScrollPageOptions* value) {
+        void ScrollPage_ScrollPageOptionsImpl(ScrollerPeer* peer, const Ark_ScrollPageOptions* value)
+        {
         }
-        void ScrollPage_nextbooleandirectionAxisImpl(ScrollerPeer* peer, const Literal_next_Boolean_direction_Axis* value) {
+        void ScrollPage_nextbooleandirectionAxisImpl(ScrollerPeer* peer, const Literal_next_Boolean_direction_Axis* value)
+        {
         }
-        Ark_NativePointer CurrentOffsetImpl(ScrollerPeer* peer) {
+        Ark_NativePointer CurrentOffsetImpl(ScrollerPeer* peer)
+        {
             return 0;
         }
-        void ScrollToIndexImpl(ScrollerPeer* peer, const Ark_Number* value, const Opt_Boolean* smooth, const Opt_ScrollAlign* align, const Opt_ScrollToIndexOptions* options) {
+        void ScrollToIndexImpl(ScrollerPeer* peer, const Ark_Number* value, const Opt_Boolean* smooth, const Opt_ScrollAlign* align, const Opt_ScrollToIndexOptions* options)
+        {
         }
-        void ScrollByImpl(ScrollerPeer* peer, const Ark_Length* dx, const Ark_Length* dy) {
+        void ScrollByImpl(ScrollerPeer* peer, const Ark_Length* dx, const Ark_Length* dy)
+        {
         }
-        Ark_Boolean IsAtEndImpl(ScrollerPeer* peer) {
+        Ark_Boolean IsAtEndImpl(ScrollerPeer* peer)
+        {
             return 0;
         }
-        Ark_NativePointer GetItemRectImpl(ScrollerPeer* peer, const Ark_Number* index) {
+        Ark_NativePointer GetItemRectImpl(ScrollerPeer* peer, const Ark_Number* index)
+        {
             return 0;
         }
     } // ScrollerModifier
-    const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor() {
+    const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()
+    {
         static const GENERATED_ArkUIScrollerAccessor ScrollerAccessorImpl {
             ScrollerModifier::CtorImpl,
             ScrollerModifier::GetFinalizerImpl,

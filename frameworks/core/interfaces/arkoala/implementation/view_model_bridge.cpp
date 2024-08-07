@@ -22,7 +22,8 @@
 #include "base/utils/utils.h"
 #include "core/pipeline/base/element_register.h"
 
-namespace OHOS::Ace::NG {
+namespace OHOS::Ace::NG
+{
     namespace ViewModel {
         Ark_NodeHandle createTextNode(Ark_Int32 nodeId);
         Ark_NodeHandle createSpanNode(Ark_Int32 nodeId);

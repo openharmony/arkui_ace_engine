@@ -15,28 +15,38 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace ListItemInterfaceModifier {
-        void _setListItemOptions_ListItemOptionsImpl(Ark_NativePointer node, const Opt_ListItemOptions* value) {
+        void _setListItemOptions_ListItemOptionsImpl(Ark_NativePointer node, const Opt_ListItemOptions* value)
+        {
         }
-        void _setListItemOptions_stringImpl(Ark_NativePointer node, const Opt_String* value) {
+        void _setListItemOptions_stringImpl(Ark_NativePointer node, const Opt_String* value)
+        {
         }
     } // ListItemInterfaceModifier
     namespace ListItemAttributeModifier {
-        void StickyImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void StickyImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void EditableImpl(Ark_NativePointer node, const Type_ListItemAttribute_editable_Arg0* value) {
+        void EditableImpl(Ark_NativePointer node, const Type_ListItemAttribute_editable_Arg0* value)
+        {
         }
-        void SelectableImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void SelectableImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
-        void SelectedImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void SelectedImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
-        void SwipeActionImpl(Ark_NativePointer node, const Ark_SwipeActionOptions* value) {
+        void SwipeActionImpl(Ark_NativePointer node, const Ark_SwipeActionOptions* value)
+        {
         }
-        void OnSelectImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnSelectImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
     } // ListItemAttributeModifier
-    const GENERATED_ArkUIListItemModifier* GetListItemModifier() {
+    const GENERATED_ArkUIListItemModifier* GetListItemModifier()
+    {
         static const GENERATED_ArkUIListItemModifier ArkUIListItemModifierImpl {
             ListItemInterfaceModifier::_setListItemOptions_ListItemOptionsImpl,
             ListItemInterfaceModifier::_setListItemOptions_stringImpl,

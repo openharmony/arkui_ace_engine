@@ -15,30 +15,39 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace TextEditControllerExModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        Ark_Boolean IsEditingImpl(TextEditControllerExPeer* peer) {
+        Ark_Boolean IsEditingImpl(TextEditControllerExPeer* peer)
+        {
             return 0;
         }
-        void StopEditingImpl(TextEditControllerExPeer* peer) {
+        void StopEditingImpl(TextEditControllerExPeer* peer)
+        {
         }
-        Ark_Boolean SetCaretOffsetImpl(TextEditControllerExPeer* peer, const Ark_Number* offset) {
+        Ark_Boolean SetCaretOffsetImpl(TextEditControllerExPeer* peer, const Ark_Number* offset)
+        {
             return 0;
         }
-        Ark_Int32 GetCaretOffsetImpl(TextEditControllerExPeer* peer) {
+        Ark_Int32 GetCaretOffsetImpl(TextEditControllerExPeer* peer)
+        {
             return 0;
         }
-        Ark_NativePointer GetPreviewTextImpl(TextEditControllerExPeer* peer) {
+        Ark_NativePointer GetPreviewTextImpl(TextEditControllerExPeer* peer)
+        {
             return 0;
         }
     } // TextEditControllerExModifier
-    const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccessor() {
+    const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccessor()
+    {
         static const GENERATED_ArkUITextEditControllerExAccessor TextEditControllerExAccessorImpl {
             TextEditControllerExModifier::CtorImpl,
             TextEditControllerExModifier::GetFinalizerImpl,

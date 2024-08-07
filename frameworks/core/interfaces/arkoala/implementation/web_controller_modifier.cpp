@@ -15,59 +15,82 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace WebControllerModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void OnInactiveImpl(WebControllerPeer* peer) {
+        void OnInactiveImpl(WebControllerPeer* peer)
+        {
         }
-        void OnActiveImpl(WebControllerPeer* peer) {
+        void OnActiveImpl(WebControllerPeer* peer)
+        {
         }
-        void ZoomImpl(WebControllerPeer* peer, const Ark_Number* factor) {
+        void ZoomImpl(WebControllerPeer* peer, const Ark_Number* factor)
+        {
         }
-        void ClearHistoryImpl(WebControllerPeer* peer) {
+        void ClearHistoryImpl(WebControllerPeer* peer)
+        {
         }
-        void RunJavaScriptImpl(WebControllerPeer* peer, const Literal_script_String_callback_Opt_Function* options) {
+        void RunJavaScriptImpl(WebControllerPeer* peer, const Literal_script_String_callback_Opt_Function* options)
+        {
         }
-        void LoadDataImpl(WebControllerPeer* peer, const Literal_data_String_mimeType_String_encoding_String_baseUrl_Opt_String_historyUrl_Opt_String* options) {
+        void LoadDataImpl(WebControllerPeer* peer, const Literal_data_String_mimeType_String_encoding_String_baseUrl_Opt_String_historyUrl_Opt_String* options)
+        {
         }
-        void LoadUrlImpl(WebControllerPeer* peer, const Literal_url_Union_String_Resource_headers_Opt_Array_Header* options) {
+        void LoadUrlImpl(WebControllerPeer* peer, const Literal_url_Union_String_Resource_headers_Opt_Array_Header* options)
+        {
         }
-        void RefreshImpl(WebControllerPeer* peer) {
+        void RefreshImpl(WebControllerPeer* peer)
+        {
         }
-        void StopImpl(WebControllerPeer* peer) {
+        void StopImpl(WebControllerPeer* peer)
+        {
         }
-        void RegisterJavaScriptProxyImpl(WebControllerPeer* peer, const Literal_object_CustomObject_name_String_methodList_Array_String* options) {
+        void RegisterJavaScriptProxyImpl(WebControllerPeer* peer, const Literal_object_CustomObject_name_String_methodList_Array_String* options)
+        {
         }
-        void DeleteJavaScriptRegisterImpl(WebControllerPeer* peer, const Ark_String* name) {
+        void DeleteJavaScriptRegisterImpl(WebControllerPeer* peer, const Ark_String* name)
+        {
         }
-        Ark_NativePointer GetHitTestImpl(WebControllerPeer* peer) {
+        Ark_NativePointer GetHitTestImpl(WebControllerPeer* peer)
+        {
             return 0;
         }
-        void RequestFocusImpl(WebControllerPeer* peer) {
+        void RequestFocusImpl(WebControllerPeer* peer)
+        {
         }
-        Ark_Boolean AccessBackwardImpl(WebControllerPeer* peer) {
+        Ark_Boolean AccessBackwardImpl(WebControllerPeer* peer)
+        {
             return 0;
         }
-        Ark_Boolean AccessForwardImpl(WebControllerPeer* peer) {
+        Ark_Boolean AccessForwardImpl(WebControllerPeer* peer)
+        {
             return 0;
         }
-        Ark_Boolean AccessStepImpl(WebControllerPeer* peer, const Ark_Number* step) {
+        Ark_Boolean AccessStepImpl(WebControllerPeer* peer, const Ark_Number* step)
+        {
             return 0;
         }
-        void BackwardImpl(WebControllerPeer* peer) {
+        void BackwardImpl(WebControllerPeer* peer)
+        {
         }
-        void ForwardImpl(WebControllerPeer* peer) {
+        void ForwardImpl(WebControllerPeer* peer)
+        {
         }
-        Ark_NativePointer GetCookieManagerImpl(WebControllerPeer* peer) {
+        Ark_NativePointer GetCookieManagerImpl(WebControllerPeer* peer)
+        {
             return 0;
         }
     } // WebControllerModifier
-    const GENERATED_ArkUIWebControllerAccessor* GetWebControllerAccessor() {
+    const GENERATED_ArkUIWebControllerAccessor* GetWebControllerAccessor()
+    {
         static const GENERATED_ArkUIWebControllerAccessor WebControllerAccessorImpl {
             WebControllerModifier::CtorImpl,
             WebControllerModifier::GetFinalizerImpl,

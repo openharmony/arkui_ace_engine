@@ -15,24 +15,32 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace FolderStackInterfaceModifier {
-        void _setFolderStackOptionsImpl(Ark_NativePointer node, const Opt_Type_FolderStackInterface__setFolderStackOptions_Arg0* value) {
+        void _setFolderStackOptionsImpl(Ark_NativePointer node, const Opt_Type_FolderStackInterface__setFolderStackOptions_Arg0* value)
+        {
         }
     } // FolderStackInterfaceModifier
     namespace FolderStackAttributeModifier {
-        void AlignContentImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void AlignContentImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void OnFolderStateChangeImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnFolderStateChangeImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void OnHoverStatusChangeImpl(Ark_NativePointer node, Ark_Function handler) {
+        void OnHoverStatusChangeImpl(Ark_NativePointer node, Ark_Function handler)
+        {
         }
-        void EnableAnimationImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void EnableAnimationImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
-        void AutoHalfFoldImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void AutoHalfFoldImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
     } // FolderStackAttributeModifier
-    const GENERATED_ArkUIFolderStackModifier* GetFolderStackModifier() {
+    const GENERATED_ArkUIFolderStackModifier* GetFolderStackModifier()
+    {
         static const GENERATED_ArkUIFolderStackModifier ArkUIFolderStackModifierImpl {
             FolderStackInterfaceModifier::_setFolderStackOptionsImpl,
             FolderStackAttributeModifier::AlignContentImpl,

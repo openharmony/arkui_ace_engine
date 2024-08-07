@@ -15,18 +15,23 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace JsGeolocationModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void InvokeImpl(JsGeolocationPeer* peer, const Ark_String* origin, Ark_Boolean allow, Ark_Boolean retain) {
+        void InvokeImpl(JsGeolocationPeer* peer, const Ark_String* origin, Ark_Boolean allow, Ark_Boolean retain)
+        {
         }
     } // JsGeolocationModifier
-    const GENERATED_ArkUIJsGeolocationAccessor* GetJsGeolocationAccessor() {
+    const GENERATED_ArkUIJsGeolocationAccessor* GetJsGeolocationAccessor()
+    {
         static const GENERATED_ArkUIJsGeolocationAccessor JsGeolocationAccessorImpl {
             JsGeolocationModifier::CtorImpl,
             JsGeolocationModifier::GetFinalizerImpl,

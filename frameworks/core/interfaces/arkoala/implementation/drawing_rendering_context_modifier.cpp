@@ -15,18 +15,23 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace DrawingRenderingContextModifier {
-        Ark_NativePointer CtorImpl(const Opt_LengthMetricsUnit* unit) {
+        Ark_NativePointer CtorImpl(const Opt_LengthMetricsUnit* unit)
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void InvalidateImpl(DrawingRenderingContextPeer* peer) {
+        void InvalidateImpl(DrawingRenderingContextPeer* peer)
+        {
         }
     } // DrawingRenderingContextModifier
-    const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor() {
+    const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor()
+    {
         static const GENERATED_ArkUIDrawingRenderingContextAccessor DrawingRenderingContextAccessorImpl {
             DrawingRenderingContextModifier::CtorImpl,
             DrawingRenderingContextModifier::GetFinalizerImpl,

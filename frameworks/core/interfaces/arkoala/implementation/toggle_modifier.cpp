@@ -15,24 +15,32 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace ToggleInterfaceModifier {
-        void _setToggleOptionsImpl(Ark_NativePointer node, const Type_ToggleInterface__setToggleOptions_Arg0* options) {
+        void _setToggleOptionsImpl(Ark_NativePointer node, const Type_ToggleInterface__setToggleOptions_Arg0* options)
+        {
         }
     } // ToggleInterfaceModifier
     namespace ToggleAttributeModifier {
-        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier) {
+        void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
+        {
         }
-        void SelectedColorImpl(Ark_NativePointer node, const ResourceColor* value) {
+        void SelectedColorImpl(Ark_NativePointer node, const ResourceColor* value)
+        {
         }
-        void SwitchPointColorImpl(Ark_NativePointer node, const ResourceColor* color) {
+        void SwitchPointColorImpl(Ark_NativePointer node, const ResourceColor* color)
+        {
         }
-        void SwitchStyleImpl(Ark_NativePointer node, const Ark_SwitchStyle* value) {
+        void SwitchStyleImpl(Ark_NativePointer node, const Ark_SwitchStyle* value)
+        {
         }
     } // ToggleAttributeModifier
-    const GENERATED_ArkUIToggleModifier* GetToggleModifier() {
+    const GENERATED_ArkUIToggleModifier* GetToggleModifier()
+    {
         static const GENERATED_ArkUIToggleModifier ArkUIToggleModifierImpl {
             ToggleInterfaceModifier::_setToggleOptionsImpl,
             ToggleAttributeModifier::OnChangeImpl,

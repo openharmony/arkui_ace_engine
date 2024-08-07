@@ -15,26 +15,35 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace AttributeModifierModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void ApplyNormalAttributeImpl(AttributeModifierPeer* peer, const Ark_CustomObject* instance) {
+        void ApplyNormalAttributeImpl(AttributeModifierPeer* peer, const Ark_CustomObject* instance)
+        {
         }
-        void ApplyPressedAttributeImpl(AttributeModifierPeer* peer, const Ark_CustomObject* instance) {
+        void ApplyPressedAttributeImpl(AttributeModifierPeer* peer, const Ark_CustomObject* instance)
+        {
         }
-        void ApplyFocusedAttributeImpl(AttributeModifierPeer* peer, const Ark_CustomObject* instance) {
+        void ApplyFocusedAttributeImpl(AttributeModifierPeer* peer, const Ark_CustomObject* instance)
+        {
         }
-        void ApplyDisabledAttributeImpl(AttributeModifierPeer* peer, const Ark_CustomObject* instance) {
+        void ApplyDisabledAttributeImpl(AttributeModifierPeer* peer, const Ark_CustomObject* instance)
+        {
         }
-        void ApplySelectedAttributeImpl(AttributeModifierPeer* peer, const Ark_CustomObject* instance) {
+        void ApplySelectedAttributeImpl(AttributeModifierPeer* peer, const Ark_CustomObject* instance)
+        {
         }
     } // AttributeModifierModifier
-    const GENERATED_ArkUIAttributeModifierAccessor* GetAttributeModifierAccessor() {
+    const GENERATED_ArkUIAttributeModifierAccessor* GetAttributeModifierAccessor()
+    {
         static const GENERATED_ArkUIAttributeModifierAccessor AttributeModifierAccessorImpl {
             AttributeModifierModifier::CtorImpl,
             AttributeModifierModifier::GetFinalizerImpl,

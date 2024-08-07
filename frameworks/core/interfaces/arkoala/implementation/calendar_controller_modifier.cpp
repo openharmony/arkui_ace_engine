@@ -15,20 +15,26 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace CalendarControllerModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void BackToTodayImpl(CalendarControllerPeer* peer) {
+        void BackToTodayImpl(CalendarControllerPeer* peer)
+        {
         }
-        void GoToImpl(CalendarControllerPeer* peer, const Literal_year_Number_month_Number_day_Number* value) {
+        void GoToImpl(CalendarControllerPeer* peer, const Literal_year_Number_month_Number_day_Number* value)
+        {
         }
     } // CalendarControllerModifier
-    const GENERATED_ArkUICalendarControllerAccessor* GetCalendarControllerAccessor() {
+    const GENERATED_ArkUICalendarControllerAccessor* GetCalendarControllerAccessor()
+    {
         static const GENERATED_ArkUICalendarControllerAccessor CalendarControllerAccessorImpl {
             CalendarControllerModifier::CtorImpl,
             CalendarControllerModifier::GetFinalizerImpl,

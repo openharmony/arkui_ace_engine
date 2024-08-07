@@ -15,22 +15,29 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace TabContentInterfaceModifier {
-        void _setTabContentOptionsImpl(Ark_NativePointer node) {
+        void _setTabContentOptionsImpl(Ark_NativePointer node)
+        {
         }
     } // TabContentInterfaceModifier
     namespace TabContentAttributeModifier {
-        void TabBar_stringResourceCustomBuildericonstringResourcetextstringResourceImpl(Ark_NativePointer node, const Type_TabContentAttribute_tabBar_Arg0* value) {
+        void TabBar_stringResourceCustomBuildericonstringResourcetextstringResourceImpl(Ark_NativePointer node, const Type_TabContentAttribute_tabBar_Arg0* value)
+        {
         }
-        void TabBar_SubTabBarStyleBottomTabBarStyleImpl(Ark_NativePointer node, const Type_TabContentAttribute_tabBar1_Arg0* value) {
+        void TabBar_SubTabBarStyleBottomTabBarStyleImpl(Ark_NativePointer node, const Type_TabContentAttribute_tabBar1_Arg0* value)
+        {
         }
-        void OnWillShowImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnWillShowImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
-        void OnWillHideImpl(Ark_NativePointer node, Ark_Function event) {
+        void OnWillHideImpl(Ark_NativePointer node, Ark_Function event)
+        {
         }
     } // TabContentAttributeModifier
-    const GENERATED_ArkUITabContentModifier* GetTabContentModifier() {
+    const GENERATED_ArkUITabContentModifier* GetTabContentModifier()
+    {
         static const GENERATED_ArkUITabContentModifier ArkUITabContentModifierImpl {
             TabContentInterfaceModifier::_setTabContentOptionsImpl,
             TabContentAttributeModifier::TabBar_stringResourceCustomBuildericonstringResourcetextstringResourceImpl,

@@ -15,28 +15,38 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace SymbolGlyphInterfaceModifier {
-        void _setSymbolGlyphOptionsImpl(Ark_NativePointer node, const Opt_Resource* value) {
+        void _setSymbolGlyphOptionsImpl(Ark_NativePointer node, const Opt_Resource* value)
+        {
         }
     } // SymbolGlyphInterfaceModifier
     namespace SymbolGlyphAttributeModifier {
-        void FontSizeImpl(Ark_NativePointer node, const Type_SymbolGlyphAttribute_fontSize_Arg0* value) {
+        void FontSizeImpl(Ark_NativePointer node, const Type_SymbolGlyphAttribute_fontSize_Arg0* value)
+        {
         }
-        void FontColorImpl(Ark_NativePointer node, const Array_ResourceColor* value) {
+        void FontColorImpl(Ark_NativePointer node, const Array_ResourceColor* value)
+        {
         }
-        void FontWeightImpl(Ark_NativePointer node, const Type_SymbolGlyphAttribute_fontWeight_Arg0* value) {
+        void FontWeightImpl(Ark_NativePointer node, const Type_SymbolGlyphAttribute_fontWeight_Arg0* value)
+        {
         }
-        void EffectStrategyImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void EffectStrategyImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void RenderingStrategyImpl(Ark_NativePointer node, Ark_Int32 value) {
+        void RenderingStrategyImpl(Ark_NativePointer node, Ark_Int32 value)
+        {
         }
-        void SymbolEffect_SymbolEffect_booleanImpl(Ark_NativePointer node, const Ark_SymbolEffect* symbolEffect, const Opt_Boolean* isActive) {
+        void SymbolEffect_SymbolEffect_booleanImpl(Ark_NativePointer node, const Ark_SymbolEffect* symbolEffect, const Opt_Boolean* isActive)
+        {
         }
-        void SymbolEffect_SymbolEffect_numberImpl(Ark_NativePointer node, const Ark_SymbolEffect* symbolEffect, const Opt_Number* triggerValue) {
+        void SymbolEffect_SymbolEffect_numberImpl(Ark_NativePointer node, const Ark_SymbolEffect* symbolEffect, const Opt_Number* triggerValue)
+        {
         }
     } // SymbolGlyphAttributeModifier
-    const GENERATED_ArkUISymbolGlyphModifier* GetSymbolGlyphModifier() {
+    const GENERATED_ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
+    {
         static const GENERATED_ArkUISymbolGlyphModifier ArkUISymbolGlyphModifierImpl {
             SymbolGlyphInterfaceModifier::_setSymbolGlyphOptionsImpl,
             SymbolGlyphAttributeModifier::FontSizeImpl,

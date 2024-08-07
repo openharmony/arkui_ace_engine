@@ -15,14 +15,18 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace BaseSpanModifier {
-        void TextBackgroundStyleImpl(Ark_NativePointer node, const Ark_TextBackgroundStyle* style) {
+        void TextBackgroundStyleImpl(Ark_NativePointer node, const Ark_TextBackgroundStyle* style)
+        {
         }
-        void BaselineOffsetImpl(Ark_NativePointer node, const Ark_CustomObject* value) {
+        void BaselineOffsetImpl(Ark_NativePointer node, const Ark_CustomObject* value)
+        {
         }
     } // BaseSpanModifier
-    const GENERATED_ArkUIBaseSpanModifier* GetBaseSpanModifier() {
+    const GENERATED_ArkUIBaseSpanModifier* GetBaseSpanModifier()
+    {
         static const GENERATED_ArkUIBaseSpanModifier ArkUIBaseSpanModifierImpl {
             BaseSpanModifier::TextBackgroundStyleImpl,
             BaseSpanModifier::BaselineOffsetImpl,

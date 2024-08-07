@@ -15,28 +15,38 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace MenuItemInterfaceModifier {
-        void _setMenuItemOptionsImpl(Ark_NativePointer node, const Opt_Type_MenuItemInterface__setMenuItemOptions_Arg0* value) {
+        void _setMenuItemOptionsImpl(Ark_NativePointer node, const Opt_Type_MenuItemInterface__setMenuItemOptions_Arg0* value)
+        {
         }
     } // MenuItemInterfaceModifier
     namespace MenuItemAttributeModifier {
-        void SelectedImpl(Ark_NativePointer node, Ark_Boolean value) {
+        void SelectedImpl(Ark_NativePointer node, Ark_Boolean value)
+        {
         }
-        void SelectIconImpl(Ark_NativePointer node, const Type_MenuItemAttribute_selectIcon_Arg0* value) {
+        void SelectIconImpl(Ark_NativePointer node, const Type_MenuItemAttribute_selectIcon_Arg0* value)
+        {
         }
-        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback) {
+        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
+        {
         }
-        void ContentFontImpl(Ark_NativePointer node, const Ark_Font* value) {
+        void ContentFontImpl(Ark_NativePointer node, const Ark_Font* value)
+        {
         }
-        void ContentFontColorImpl(Ark_NativePointer node, const ResourceColor* value) {
+        void ContentFontColorImpl(Ark_NativePointer node, const ResourceColor* value)
+        {
         }
-        void LabelFontImpl(Ark_NativePointer node, const Ark_Font* value) {
+        void LabelFontImpl(Ark_NativePointer node, const Ark_Font* value)
+        {
         }
-        void LabelFontColorImpl(Ark_NativePointer node, const ResourceColor* value) {
+        void LabelFontColorImpl(Ark_NativePointer node, const ResourceColor* value)
+        {
         }
     } // MenuItemAttributeModifier
-    const GENERATED_ArkUIMenuItemModifier* GetMenuItemModifier() {
+    const GENERATED_ArkUIMenuItemModifier* GetMenuItemModifier()
+    {
         static const GENERATED_ArkUIMenuItemModifier ArkUIMenuItemModifierImpl {
             MenuItemInterfaceModifier::_setMenuItemOptionsImpl,
             MenuItemAttributeModifier::SelectedImpl,

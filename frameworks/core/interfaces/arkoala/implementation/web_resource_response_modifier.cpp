@@ -15,44 +15,61 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace WebResourceResponseModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void GetResponseDataImpl(WebResourceResponsePeer* peer) {
+        void GetResponseDataImpl(WebResourceResponsePeer* peer)
+        {
         }
-        void GetResponseEncodingImpl(WebResourceResponsePeer* peer) {
+        void GetResponseEncodingImpl(WebResourceResponsePeer* peer)
+        {
         }
-        void GetResponseMimeTypeImpl(WebResourceResponsePeer* peer) {
+        void GetResponseMimeTypeImpl(WebResourceResponsePeer* peer)
+        {
         }
-        void GetReasonMessageImpl(WebResourceResponsePeer* peer) {
+        void GetReasonMessageImpl(WebResourceResponsePeer* peer)
+        {
         }
-        Ark_NativePointer GetResponseHeaderImpl(WebResourceResponsePeer* peer) {
+        Ark_NativePointer GetResponseHeaderImpl(WebResourceResponsePeer* peer)
+        {
             return 0;
         }
-        Ark_Int32 GetResponseCodeImpl(WebResourceResponsePeer* peer) {
+        Ark_Int32 GetResponseCodeImpl(WebResourceResponsePeer* peer)
+        {
             return 0;
         }
-        void SetResponseDataImpl(WebResourceResponsePeer* peer, const Union_String_Number_Resource_ArrayBuffer* data) {
+        void SetResponseDataImpl(WebResourceResponsePeer* peer, const Union_String_Number_Resource_ArrayBuffer* data)
+        {
         }
-        void SetResponseEncodingImpl(WebResourceResponsePeer* peer, const Ark_String* encoding) {
+        void SetResponseEncodingImpl(WebResourceResponsePeer* peer, const Ark_String* encoding)
+        {
         }
-        void SetResponseMimeTypeImpl(WebResourceResponsePeer* peer, const Ark_String* mimeType) {
+        void SetResponseMimeTypeImpl(WebResourceResponsePeer* peer, const Ark_String* mimeType)
+        {
         }
-        void SetReasonMessageImpl(WebResourceResponsePeer* peer, const Ark_String* reason) {
+        void SetReasonMessageImpl(WebResourceResponsePeer* peer, const Ark_String* reason)
+        {
         }
-        void SetResponseHeaderImpl(WebResourceResponsePeer* peer, const Array_Header* header) {
+        void SetResponseHeaderImpl(WebResourceResponsePeer* peer, const Array_Header* header)
+        {
         }
-        void SetResponseCodeImpl(WebResourceResponsePeer* peer, const Ark_Number* code) {
+        void SetResponseCodeImpl(WebResourceResponsePeer* peer, const Ark_Number* code)
+        {
         }
-        void SetResponseIsReadyImpl(WebResourceResponsePeer* peer, Ark_Boolean IsReady) {
+        void SetResponseIsReadyImpl(WebResourceResponsePeer* peer, Ark_Boolean IsReady)
+        {
         }
     } // WebResourceResponseModifier
-    const GENERATED_ArkUIWebResourceResponseAccessor* GetWebResourceResponseAccessor() {
+    const GENERATED_ArkUIWebResourceResponseAccessor* GetWebResourceResponseAccessor()
+    {
         static const GENERATED_ArkUIWebResourceResponseAccessor WebResourceResponseAccessorImpl {
             WebResourceResponseModifier::CtorImpl,
             WebResourceResponseModifier::GetFinalizerImpl,

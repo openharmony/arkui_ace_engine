@@ -15,22 +15,29 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace TextTimerControllerModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void StartImpl(TextTimerControllerPeer* peer) {
+        void StartImpl(TextTimerControllerPeer* peer)
+        {
         }
-        void PauseImpl(TextTimerControllerPeer* peer) {
+        void PauseImpl(TextTimerControllerPeer* peer)
+        {
         }
-        void ResetImpl(TextTimerControllerPeer* peer) {
+        void ResetImpl(TextTimerControllerPeer* peer)
+        {
         }
     } // TextTimerControllerModifier
-    const GENERATED_ArkUITextTimerControllerAccessor* GetTextTimerControllerAccessor() {
+    const GENERATED_ArkUITextTimerControllerAccessor* GetTextTimerControllerAccessor()
+    {
         static const GENERATED_ArkUITextTimerControllerAccessor TextTimerControllerAccessorImpl {
             TextTimerControllerModifier::CtorImpl,
             TextTimerControllerModifier::GetFinalizerImpl,

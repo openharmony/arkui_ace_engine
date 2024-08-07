@@ -15,49 +15,65 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace RichEditorControllerModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        Ark_Int32 AddTextSpanImpl(RichEditorControllerPeer* peer, const Ark_String* value, const Opt_RichEditorTextSpanOptions* options) {
+        Ark_Int32 AddTextSpanImpl(RichEditorControllerPeer* peer, const Ark_String* value, const Opt_RichEditorTextSpanOptions* options)
+        {
             return 0;
         }
-        Ark_Int32 AddImageSpanImpl(RichEditorControllerPeer* peer, const Union_PixelMap_ResourceStr* value, const Opt_RichEditorImageSpanOptions* options) {
+        Ark_Int32 AddImageSpanImpl(RichEditorControllerPeer* peer, const Union_PixelMap_ResourceStr* value, const Opt_RichEditorImageSpanOptions* options)
+        {
             return 0;
         }
-        Ark_Int32 AddBuilderSpanImpl(RichEditorControllerPeer* peer, const CustomBuilder* value, const Opt_RichEditorBuilderSpanOptions* options) {
+        Ark_Int32 AddBuilderSpanImpl(RichEditorControllerPeer* peer, const CustomBuilder* value, const Opt_RichEditorBuilderSpanOptions* options)
+        {
             return 0;
         }
-        Ark_Int32 AddSymbolSpanImpl(RichEditorControllerPeer* peer, const Ark_Resource* value, const Opt_RichEditorSymbolSpanOptions* options) {
+        Ark_Int32 AddSymbolSpanImpl(RichEditorControllerPeer* peer, const Ark_Resource* value, const Opt_RichEditorSymbolSpanOptions* options)
+        {
             return 0;
         }
-        void UpdateSpanStyleImpl(RichEditorControllerPeer* peer, const Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions* value) {
+        void UpdateSpanStyleImpl(RichEditorControllerPeer* peer, const Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions* value)
+        {
         }
-        void UpdateParagraphStyleImpl(RichEditorControllerPeer* peer, const Ark_RichEditorParagraphStyleOptions* value) {
+        void UpdateParagraphStyleImpl(RichEditorControllerPeer* peer, const Ark_RichEditorParagraphStyleOptions* value)
+        {
         }
-        void DeleteSpansImpl(RichEditorControllerPeer* peer, const Opt_RichEditorRange* value) {
+        void DeleteSpansImpl(RichEditorControllerPeer* peer, const Opt_RichEditorRange* value)
+        {
         }
-        Ark_NativePointer GetSpansImpl(RichEditorControllerPeer* peer, const Opt_RichEditorRange* value) {
+        Ark_NativePointer GetSpansImpl(RichEditorControllerPeer* peer, const Opt_RichEditorRange* value)
+        {
             return 0;
         }
-        Ark_NativePointer GetParagraphsImpl(RichEditorControllerPeer* peer, const Opt_RichEditorRange* value) {
+        Ark_NativePointer GetParagraphsImpl(RichEditorControllerPeer* peer, const Opt_RichEditorRange* value)
+        {
             return 0;
         }
-        Ark_NativePointer GetSelectionImpl(RichEditorControllerPeer* peer) {
+        Ark_NativePointer GetSelectionImpl(RichEditorControllerPeer* peer)
+        {
             return 0;
         }
-        Ark_NativePointer FromStyledStringImpl(RichEditorControllerPeer* peer, const Ark_Materialized* value) {
+        Ark_NativePointer FromStyledStringImpl(RichEditorControllerPeer* peer, const Ark_Materialized* value)
+        {
             return 0;
         }
-        Ark_NativePointer ToStyledStringImpl(RichEditorControllerPeer* peer, const Ark_RichEditorRange* value) {
+        Ark_NativePointer ToStyledStringImpl(RichEditorControllerPeer* peer, const Ark_RichEditorRange* value)
+        {
             return 0;
         }
     } // RichEditorControllerModifier
-    const GENERATED_ArkUIRichEditorControllerAccessor* GetRichEditorControllerAccessor() {
+    const GENERATED_ArkUIRichEditorControllerAccessor* GetRichEditorControllerAccessor()
+    {
         static const GENERATED_ArkUIRichEditorControllerAccessor RichEditorControllerAccessorImpl {
             RichEditorControllerModifier::CtorImpl,
             RichEditorControllerModifier::GetFinalizerImpl,

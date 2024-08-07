@@ -15,12 +15,15 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace FlowItemInterfaceModifier {
-        void _setFlowItemOptionsImpl(Ark_NativePointer node) {
+        void _setFlowItemOptionsImpl(Ark_NativePointer node)
+        {
         }
     } // FlowItemInterfaceModifier
-    const GENERATED_ArkUIFlowItemModifier* GetFlowItemModifier() {
+    const GENERATED_ArkUIFlowItemModifier* GetFlowItemModifier()
+    {
         static const GENERATED_ArkUIFlowItemModifier ArkUIFlowItemModifierImpl {
             FlowItemInterfaceModifier::_setFlowItemOptionsImpl,
         };

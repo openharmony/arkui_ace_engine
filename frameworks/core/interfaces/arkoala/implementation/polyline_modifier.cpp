@@ -15,16 +15,20 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace PolylineInterfaceModifier {
-        void _setPolylineOptionsImpl(Ark_NativePointer node, const Opt_Type_PolylineInterface__setPolylineOptions_Arg0* value) {
+        void _setPolylineOptionsImpl(Ark_NativePointer node, const Opt_Type_PolylineInterface__setPolylineOptions_Arg0* value)
+        {
         }
     } // PolylineInterfaceModifier
     namespace PolylineAttributeModifier {
-        void PointsImpl(Ark_NativePointer node, const Array_CustomObject* value) {
+        void PointsImpl(Ark_NativePointer node, const Array_CustomObject* value)
+        {
         }
     } // PolylineAttributeModifier
-    const GENERATED_ArkUIPolylineModifier* GetPolylineModifier() {
+    const GENERATED_ArkUIPolylineModifier* GetPolylineModifier()
+    {
         static const GENERATED_ArkUIPolylineModifier ArkUIPolylineModifierImpl {
             PolylineInterfaceModifier::_setPolylineOptionsImpl,
             PolylineAttributeModifier::PointsImpl,

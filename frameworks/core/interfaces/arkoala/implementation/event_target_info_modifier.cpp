@@ -15,18 +15,23 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace EventTargetInfoModifier {
-        Ark_NativePointer CtorImpl() {
+        Ark_NativePointer CtorImpl()
+        {
             return 0;
         }
-        Ark_NativePointer GetFinalizerImpl() {
+        Ark_NativePointer GetFinalizerImpl()
+        {
             return 0;
         }
-        void GetIdImpl(EventTargetInfoPeer* peer) {
+        void GetIdImpl(EventTargetInfoPeer* peer)
+        {
         }
     } // EventTargetInfoModifier
-    const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor() {
+    const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor()
+    {
         static const GENERATED_ArkUIEventTargetInfoAccessor EventTargetInfoAccessorImpl {
             EventTargetInfoModifier::CtorImpl,
             EventTargetInfoModifier::GetFinalizerImpl,

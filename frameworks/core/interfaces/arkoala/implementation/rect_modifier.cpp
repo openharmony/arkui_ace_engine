@@ -15,20 +15,26 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier
+{
     namespace RectInterfaceModifier {
-        void _setRectOptionsImpl(Ark_NativePointer node, const Opt_Type_RectInterface__setRectOptions_Arg0* value) {
+        void _setRectOptionsImpl(Ark_NativePointer node, const Opt_Type_RectInterface__setRectOptions_Arg0* value)
+        {
         }
     } // RectInterfaceModifier
     namespace RectAttributeModifier {
-        void RadiusWidthImpl(Ark_NativePointer node, const Type_RectAttribute_radiusWidth_Arg0* value) {
+        void RadiusWidthImpl(Ark_NativePointer node, const Type_RectAttribute_radiusWidth_Arg0* value)
+        {
         }
-        void RadiusHeightImpl(Ark_NativePointer node, const Type_RectAttribute_radiusHeight_Arg0* value) {
+        void RadiusHeightImpl(Ark_NativePointer node, const Type_RectAttribute_radiusHeight_Arg0* value)
+        {
         }
-        void RadiusImpl(Ark_NativePointer node, const Type_RectAttribute_radius_Arg0* value) {
+        void RadiusImpl(Ark_NativePointer node, const Type_RectAttribute_radius_Arg0* value)
+        {
         }
     } // RectAttributeModifier
-    const GENERATED_ArkUIRectModifier* GetRectModifier() {
+    const GENERATED_ArkUIRectModifier* GetRectModifier()
+    {
         static const GENERATED_ArkUIRectModifier ArkUIRectModifierImpl {
             RectInterfaceModifier::_setRectOptionsImpl,
             RectAttributeModifier::RadiusWidthImpl,
