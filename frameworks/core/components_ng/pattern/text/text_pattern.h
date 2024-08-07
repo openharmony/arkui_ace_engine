@@ -636,6 +636,8 @@ public:
 
     void OnTextOverflowChanged();
 
+    void MarkDirtyNodeRender();
+
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;

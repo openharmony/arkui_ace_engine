@@ -30,6 +30,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
@@ -188,6 +189,8 @@ public:
     int32_t rangeStart = -1;
     int32_t position = -1;
     int32_t imageNodeId = -1;
+    int32_t paragraphIndex = -1;
+    uint32_t length = 0;
     std::string inspectId;
     std::string description;
     std::string content;
@@ -281,10 +284,18 @@ public:
     virtual bool EncodeTlv(std::vector<uint8_t>& buff);
     static RefPtr<SpanItem> DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor);
 
+    void SetTextPattern(const RefPtr<Pattern>& pattern)
+    {
+        pattern_ = pattern;
+    }
+
+    bool UpdateSpanTextColor(Color color);
+
 private:
     std::optional<TextStyle> textStyle_;
     bool isParentText = false;
     RefPtr<ResourceObject> resourceObject_;
+    WeakPtr<Pattern> pattern_;
 };
 
 enum class PropertyInfo {
@@ -480,6 +491,21 @@ public:
     }
 
     std::set<PropertyInfo> CalculateInheritPropertyInfo();
+
+
+    void UpdateSpanTextColor(Color color)
+    {
+        if (!spanItem_->fontStyle) {
+            spanItem_->fontStyle = std::make_unique<FontStyle>();
+        }
+        if (spanItem_->fontStyle->CheckTextColor(color)) {
+            return;
+        }
+        spanItem_->fontStyle->UpdateTextColor(color);
+        if (!spanItem_->UpdateSpanTextColor(color)) {
+            RequestTextFlushDirty();
+        }
+    }
 
 protected:
     void DumpInfo() override;
