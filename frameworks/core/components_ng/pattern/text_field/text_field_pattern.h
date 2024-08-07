@@ -1363,6 +1363,17 @@ public:
         isTextChangedAtCreation_ = changed;
     }
 
+    void SetIsPasswordSymbol(bool isPasswordSymbol)
+    {
+        isPasswordSymbol_ = isPasswordSymbol;
+    }
+
+    bool IsShowPasswordSymbol() const
+    {
+        return isPasswordSymbol_ &&
+            AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN);
+    }
+
     bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const override;
 
     RectF ExpandDefaultResponseRegion(RectF& rect) override;
@@ -1796,6 +1807,7 @@ private:
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;
     bool isTextChangedAtCreation_ = false;
+    bool isPasswordSymbol_ = true;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
 };
 } // namespace OHOS::Ace::NG
