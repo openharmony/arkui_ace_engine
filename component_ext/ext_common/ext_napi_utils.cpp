@@ -73,6 +73,13 @@ int32_t ExtNapiUtils::GetCInt32(napi_env env, napi_value value)
     return num;
 }
 
+int64_t ExtNapiUtils::GetCInt64(napi_env env, napi_value value)
+{
+    int64_t num;
+    napi_get_value_int64(env, value, &num);
+    return num;
+}
+
 napi_value ExtNapiUtils::CreateNull(napi_env env)
 {
     napi_value jsNull = nullptr;

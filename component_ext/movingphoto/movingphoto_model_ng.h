@@ -32,11 +32,15 @@ public:
     void SetImageSrcByPixelMap(RefPtr<PixelMap>& pixMap);
     void SetMuted(bool muted);
     void SetObjectFit(ImageFit objectFit);
+    void SetOnComplete(MovingPhotoEventFunc&& onComplete);
     void SetOnStart(MovingPhotoEventFunc&& onStart);
     void SetOnStop(MovingPhotoEventFunc&& onStop);
     void SetOnPause(MovingPhotoEventFunc&& onPause);
     void SetOnFinish(MovingPhotoEventFunc&& onFinish);
     void SetOnError(MovingPhotoEventFunc&& onError);
+    void AutoPlayPeriod(int64_t startTime, int64_t endTime);
+    void AutoPlay(bool isAutoPlay);
+    void RepeatPlay(bool isRepeatPlay);
 
 private:
     static std::unique_ptr<MovingPhotoModelNG> instance_;
