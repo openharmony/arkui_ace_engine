@@ -34,7 +34,7 @@ void _setButtonOptions_Impl(Ark_NativePointer node) {
   ButtonModelNG::SetButtonStyle(frameNode, ButtonStyleMode::EMPHASIZE);
 }
 
-void _setButtonOptions_ButtonOptionsImpl(Ark_NativePointer node, const ButtonOptions *options) {
+void _setButtonOptions_ButtonOptionsImpl(Ark_NativePointer node, const Ark_ButtonOptions *options) {
   auto frameNode = reinterpret_cast<FrameNode *>(node);
   CHECK_NULL_VOID(frameNode);
   ButtonModelNG::SetType(frameNode, (ArkUI_Int32)Converter::ConvertOrDefault(
@@ -132,7 +132,7 @@ void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject *modifie
        "implemented.");
 }
 
-void LabelStyleImpl(Ark_NativePointer node, const LabelStyle *value) {
+void LabelStyleImpl(Ark_NativePointer node, const Ark_LabelStyle *value) {
   auto frameNode = reinterpret_cast<FrameNode *>(node);
   CHECK_NULL_VOID(frameNode);
   ButtonParameters parameters;
@@ -150,7 +150,7 @@ void LabelStyleImpl(Ark_NativePointer node, const LabelStyle *value) {
   parameters.fontStyle = Ace::FontStyle::NORMAL;
   parameters.fontWeight = FontWeight::NORMAL;
   parameters.fontFamily = std::vector<std::string>();
-  Converter::WithOptional(value->font, [&](const Font &font) {
+  Converter::WithOptional(value->font, [&](const Ark_Font &font) {
     parameters.fontSize =
         Converter::ConvertOrDefault(font.size, parameters.fontSize.value());
     parameters.fontStyle =

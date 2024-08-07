@@ -17,9 +17,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace RichEditorInterfaceModifier {
-        void _setRichEditorOptions_RichEditorOptionsImpl(Ark_NativePointer node, const RichEditorOptions* value) {
+        void _setRichEditorOptions_RichEditorOptionsImpl(Ark_NativePointer node, const Ark_RichEditorOptions* value) {
         }
-        void _setRichEditorOptions_RichEditorStyledStringOptionsImpl(Ark_NativePointer node, const RichEditorStyledStringOptions* options) {
+        void _setRichEditorOptions_RichEditorStyledStringOptionsImpl(Ark_NativePointer node, const Ark_RichEditorStyledStringOptions* options) {
         }
     } // RichEditorInterfaceModifier
     namespace RichEditorAttributeModifier {
@@ -49,7 +49,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void EnablePreviewTextImpl(Ark_NativePointer node, Ark_Boolean enable) {
         }
-        void DataDetectorConfigImpl(Ark_NativePointer node, const TextDataDetectorConfig* config) {
+        void DataDetectorConfigImpl(Ark_NativePointer node, const Ark_TextDataDetectorConfig* config) {
         }
         void PlaceholderImpl(Ark_NativePointer node, const ResourceStr* value, const Opt_PlaceholderStyle* style) {
         }

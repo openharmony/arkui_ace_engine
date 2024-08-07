@@ -23,20 +23,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         Ark_NativePointer GetFinalizerImpl() {
             return 0;
         }
-        void ScrollToImpl(ScrollerPeer* peer, const Literal_xOffset_Union_Ark_Number_Ark_String_yOffset_Union_Ark_Number_Ark_String_animation_Opt_Union_Opt_ScrollAnimationOptions_Opt_Ark_Boolean* value) {
+        void ScrollToImpl(ScrollerPeer* peer, const Literal_xOffset_Union_Number_String_yOffset_Union_Number_String_animation_Opt_Union_Opt_ScrollAnimationOptions_Opt_Boolean* value) {
         }
         void ScrollEdgeImpl(ScrollerPeer* peer, Ark_Int32 value, const Opt_ScrollEdgeOptions* options) {
         }
         void FlingImpl(ScrollerPeer* peer, const Ark_Number* velocity) {
         }
-        void ScrollPage_ScrollPageOptionsImpl(ScrollerPeer* peer, const ScrollPageOptions* value) {
+        void ScrollPage_ScrollPageOptionsImpl(ScrollerPeer* peer, const Ark_ScrollPageOptions* value) {
         }
-        void ScrollPage_nextbooleandirectionAxisImpl(ScrollerPeer* peer, const Literal_next_Ark_Boolean_direction_Ark_Axis* value) {
+        void ScrollPage_nextbooleandirectionAxisImpl(ScrollerPeer* peer, const Literal_next_Boolean_direction_Axis* value) {
         }
         Ark_NativePointer CurrentOffsetImpl(ScrollerPeer* peer) {
             return 0;
         }
-        void ScrollToIndexImpl(ScrollerPeer* peer, const Ark_Number* value, const Opt_Ark_Boolean* smooth, const Opt_Ark_ScrollAlign* align, const Opt_ScrollToIndexOptions* options) {
+        void ScrollToIndexImpl(ScrollerPeer* peer, const Ark_Number* value, const Opt_Boolean* smooth, const Opt_ScrollAlign* align, const Opt_ScrollToIndexOptions* options) {
         }
         void ScrollByImpl(ScrollerPeer* peer, const Ark_Length* dx, const Ark_Length* dy) {
         }

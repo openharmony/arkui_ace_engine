@@ -34,6 +34,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         Ark_Int32 GetCaretOffsetImpl(TextEditControllerExPeer* peer) {
             return 0;
         }
+        Ark_NativePointer GetPreviewTextImpl(TextEditControllerExPeer* peer) {
+            return 0;
+        }
     } // TextEditControllerExModifier
     const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccessor() {
         static const GENERATED_ArkUITextEditControllerExAccessor TextEditControllerExAccessorImpl {
@@ -43,6 +46,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextEditControllerExModifier::StopEditingImpl,
             TextEditControllerExModifier::SetCaretOffsetImpl,
             TextEditControllerExModifier::GetCaretOffsetImpl,
+            TextEditControllerExModifier::GetPreviewTextImpl,
         };
         return &TextEditControllerExAccessorImpl;
     }

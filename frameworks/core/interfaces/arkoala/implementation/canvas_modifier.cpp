@@ -19,7 +19,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     namespace CanvasInterfaceModifier {
         void _setCanvasOptions_CanvasRenderingContextDDrawingRenderingContextImpl(Ark_NativePointer node, const Opt_Type_CanvasInterface__setCanvasOptions_Arg0* context) {
         }
-        void _setCanvasOptions_CanvasRenderingContextDDrawingRenderingContext_ImageAIOptionsImpl(Ark_NativePointer node, const Type_CanvasInterface__setCanvasOptions1_Arg0* context, const ImageAIOptions* imageAIOptions) {
+        void _setCanvasOptions_CanvasRenderingContextDDrawingRenderingContext_ImageAIOptionsImpl(Ark_NativePointer node, const Type_CanvasInterface__setCanvasOptions1_Arg0* context, const Ark_ImageAIOptions* imageAIOptions) {
         }
     } // CanvasInterfaceModifier
     namespace CanvasAttributeModifier {

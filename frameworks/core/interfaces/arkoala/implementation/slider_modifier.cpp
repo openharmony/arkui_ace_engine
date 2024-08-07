@@ -49,9 +49,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void SelectedBorderRadiusImpl(Ark_NativePointer node, const Ark_Length* value) {
         }
-        void BlockSizeImpl(Ark_NativePointer node, const SizeOptions* value) {
+        void BlockSizeImpl(Ark_NativePointer node, const Ark_SizeOptions* value) {
         }
-        void BlockStyleImpl(Ark_NativePointer node, const SliderBlockStyle* value) {
+        void BlockStyleImpl(Ark_NativePointer node, const Ark_SliderBlockStyle* value) {
         }
         void StepSizeImpl(Ark_NativePointer node, const Ark_Length* value) {
         }
@@ -61,7 +61,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier) {
         }
-        void SlideRangeImpl(Ark_NativePointer node, const SlideRange* value) {
+        void SlideRangeImpl(Ark_NativePointer node, const Ark_SlideRange* value) {
         }
     } // SliderAttributeModifier
     const GENERATED_ArkUISliderModifier* GetSliderModifier() {

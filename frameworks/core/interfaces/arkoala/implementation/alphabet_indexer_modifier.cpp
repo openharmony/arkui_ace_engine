@@ -41,15 +41,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void UsingPopupImpl(Ark_NativePointer node, Ark_Boolean value) {
         }
-        void SelectedFontImpl(Ark_NativePointer node, const Font* value) {
+        void SelectedFontImpl(Ark_NativePointer node, const Ark_Font* value) {
         }
-        void PopupFontImpl(Ark_NativePointer node, const Font* value) {
+        void PopupFontImpl(Ark_NativePointer node, const Ark_Font* value) {
         }
-        void PopupItemFontImpl(Ark_NativePointer node, const Font* value) {
+        void PopupItemFontImpl(Ark_NativePointer node, const Ark_Font* value) {
         }
         void ItemSizeImpl(Ark_NativePointer node, const Type_AlphabetIndexerAttribute_itemSize_Arg0* value) {
         }
-        void FontImpl(Ark_NativePointer node, const Font* value) {
+        void FontImpl(Ark_NativePointer node, const Ark_Font* value) {
         }
         void AlignStyleImpl(Ark_NativePointer node, Ark_Int32 value, const Opt_Length* offset) {
         }
@@ -61,7 +61,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void SelectedImpl(Ark_NativePointer node, const Ark_Number* index) {
         }
-        void PopupPositionImpl(Ark_NativePointer node, const Position* value) {
+        void PopupPositionImpl(Ark_NativePointer node, const Ark_Position* value) {
         }
         void AutoCollapseImpl(Ark_NativePointer node, Ark_Boolean value) {
         }

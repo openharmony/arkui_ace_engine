@@ -23,10 +23,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         Ark_NativePointer GetFinalizerImpl() {
             return 0;
         }
-        Ark_NativePointer OnMeasureImpl(CustomSpanPeer* peer, const CustomSpanMeasureInfo* measureInfo) {
+        Ark_NativePointer OnMeasureImpl(CustomSpanPeer* peer, const Ark_CustomSpanMeasureInfo* measureInfo) {
             return 0;
         }
-        void OnDrawImpl(CustomSpanPeer* peer, const Ark_CustomObject* context, const CustomSpanDrawInfo* drawInfo) {
+        void OnDrawImpl(CustomSpanPeer* peer, const Ark_CustomObject* context, const Ark_CustomSpanDrawInfo* drawInfo) {
         }
     } // CustomSpanModifier
     const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor() {

@@ -25,12 +25,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void FinishTransitionImpl(TabContentTransitionProxyPeer* peer) {
         }
+        Ark_Int32 GetFromImpl(TabContentTransitionProxyPeer* peer) {
+            return 0;
+        }
+        void SetFromImpl(TabContentTransitionProxyPeer* peer, const Ark_Number* from) {
+        }
+        Ark_Int32 GetToImpl(TabContentTransitionProxyPeer* peer) {
+            return 0;
+        }
+        void SetToImpl(TabContentTransitionProxyPeer* peer, const Ark_Number* to) {
+        }
     } // TabContentTransitionProxyModifier
     const GENERATED_ArkUITabContentTransitionProxyAccessor* GetTabContentTransitionProxyAccessor() {
         static const GENERATED_ArkUITabContentTransitionProxyAccessor TabContentTransitionProxyAccessorImpl {
             TabContentTransitionProxyModifier::CtorImpl,
             TabContentTransitionProxyModifier::GetFinalizerImpl,
             TabContentTransitionProxyModifier::FinishTransitionImpl,
+            TabContentTransitionProxyModifier::GetFromImpl,
+            TabContentTransitionProxyModifier::SetFromImpl,
+            TabContentTransitionProxyModifier::GetToImpl,
+            TabContentTransitionProxyModifier::SetToImpl,
         };
         return &TabContentTransitionProxyAccessorImpl;
     }

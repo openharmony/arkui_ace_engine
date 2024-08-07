@@ -29,6 +29,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void UpdateTransitionImpl(NavigationTransitionProxyPeer* peer, const Ark_Number* progress) {
         }
+        void SetFromImpl(NavigationTransitionProxyPeer* peer, const Ark_NavContentInfo* from) {
+        }
+        void SetToImpl(NavigationTransitionProxyPeer* peer, const Ark_NavContentInfo* to) {
+        }
+        Ark_Boolean GetIsInteractiveImpl(NavigationTransitionProxyPeer* peer) {
+            return 0;
+        }
+        void SetIsInteractiveImpl(NavigationTransitionProxyPeer* peer, Ark_Boolean isInteractive) {
+        }
     } // NavigationTransitionProxyModifier
     const GENERATED_ArkUINavigationTransitionProxyAccessor* GetNavigationTransitionProxyAccessor() {
         static const GENERATED_ArkUINavigationTransitionProxyAccessor NavigationTransitionProxyAccessorImpl {
@@ -37,6 +46,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavigationTransitionProxyModifier::FinishTransitionImpl,
             NavigationTransitionProxyModifier::CancelTransitionImpl,
             NavigationTransitionProxyModifier::UpdateTransitionImpl,
+            NavigationTransitionProxyModifier::SetFromImpl,
+            NavigationTransitionProxyModifier::SetToImpl,
+            NavigationTransitionProxyModifier::GetIsInteractiveImpl,
+            NavigationTransitionProxyModifier::SetIsInteractiveImpl,
         };
         return &NavigationTransitionProxyAccessorImpl;
     }

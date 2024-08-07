@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace WebInterfaceModifier {
-        void _setWebOptionsImpl(Ark_NativePointer node, const WebOptions* value) {
+        void _setWebOptionsImpl(Ark_NativePointer node, const Ark_WebOptions* value) {
         }
     } // WebInterfaceModifier
     namespace WebAttributeModifier {
@@ -37,7 +37,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void GeolocationAccessImpl(Ark_NativePointer node, Ark_Boolean geolocationAccess) {
         }
-        void JavaScriptProxyImpl(Ark_NativePointer node, const JavaScriptProxy* javaScriptProxy) {
+        void JavaScriptProxyImpl(Ark_NativePointer node, const Ark_JavaScriptProxy* javaScriptProxy) {
         }
         void PasswordImpl(Ark_NativePointer node, Ark_Boolean password) {
         }
@@ -47,7 +47,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void ForceDarkAccessImpl(Ark_NativePointer node, Ark_Boolean access) {
         }
-        void MediaOptionsImpl(Ark_NativePointer node, const WebMediaOptions* options) {
+        void MediaOptionsImpl(Ark_NativePointer node, const Ark_WebMediaOptions* options) {
         }
         void TableDataImpl(Ark_NativePointer node, Ark_Boolean tableData) {
         }
@@ -221,7 +221,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void LayoutModeImpl(Ark_NativePointer node, Ark_Int32 mode) {
         }
-        void NestedScrollImpl(Ark_NativePointer node, const NestedScrollOptions* value) {
+        void NestedScrollImpl(Ark_NativePointer node, const Ark_NestedScrollOptions* value) {
         }
         void EnableNativeEmbedModeImpl(Ark_NativePointer node, Ark_Boolean mode) {
         }
@@ -237,7 +237,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void TextAutosizingImpl(Ark_NativePointer node, Ark_Boolean textAutosizing) {
         }
-        void EnableNativeMediaPlayerImpl(Ark_NativePointer node, const NativeMediaPlayerConfig* config) {
+        void EnableNativeMediaPlayerImpl(Ark_NativePointer node, const Ark_NativeMediaPlayerConfig* config) {
         }
         void EnableSmoothDragResizeImpl(Ark_NativePointer node, Ark_Boolean mode) {
         }

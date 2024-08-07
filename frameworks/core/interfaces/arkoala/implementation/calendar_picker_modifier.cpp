@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     namespace CalendarPickerAttributeModifier {
         void EdgeAlignImpl(Ark_NativePointer node, Ark_Int32 alignType, const Opt_Offset* offset) {
         }
-        void TextStyleImpl(Ark_NativePointer node, const PickerTextStyle* value) {
+        void TextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value) {
         }
         void OnChangeImpl(Ark_NativePointer node, Ark_Function callback) {
         }

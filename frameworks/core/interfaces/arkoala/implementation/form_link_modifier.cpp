@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace FormLinkInterfaceModifier {
-        void _setFormLinkOptionsImpl(Ark_NativePointer node, const FormLinkOptions* options) {
+        void _setFormLinkOptionsImpl(Ark_NativePointer node, const Ark_FormLinkOptions* options) {
         }
     } // FormLinkInterfaceModifier
     const GENERATED_ArkUIFormLinkModifier* GetFormLinkModifier() {

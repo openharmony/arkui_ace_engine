@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void _setXComponentOptions_idstringtypeXComponentTypelibrarynamestringcontrollerXComponentControllerImpl(Ark_NativePointer node, const Type_XComponentInterface__setXComponentOptions1_Arg0* value) {
         }
-        void _setXComponentOptions_XComponentOptionsImpl(Ark_NativePointer node, const XComponentOptions* options) {
+        void _setXComponentOptions_XComponentOptionsImpl(Ark_NativePointer node, const Ark_XComponentOptions* options) {
         }
     } // XComponentInterfaceModifier
     namespace XComponentAttributeModifier {

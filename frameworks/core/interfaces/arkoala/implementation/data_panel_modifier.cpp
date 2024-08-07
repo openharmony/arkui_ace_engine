@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace DataPanelInterfaceModifier {
-        void _setDataPanelOptionsImpl(Ark_NativePointer node, const DataPanelOptions* options) {
+        void _setDataPanelOptionsImpl(Ark_NativePointer node, const Ark_DataPanelOptions* options) {
         }
     } // DataPanelInterfaceModifier
     namespace DataPanelAttributeModifier {
@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void StrokeWidthImpl(Ark_NativePointer node, const Ark_Length* value) {
         }
-        void TrackShadowImpl(Ark_NativePointer node, const DataPanelShadowOptions* value) {
+        void TrackShadowImpl(Ark_NativePointer node, const Ark_DataPanelShadowOptions* value) {
         }
         void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier) {
         }

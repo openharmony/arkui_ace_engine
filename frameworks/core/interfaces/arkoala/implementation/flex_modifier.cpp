@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
     } // FlexInterfaceModifier
     namespace FlexAttributeModifier {
-        void PointLightImpl(Ark_NativePointer node, const PointLightStyle* value) {
+        void PointLightImpl(Ark_NativePointer node, const Ark_PointLightStyle* value) {
         }
     } // FlexAttributeModifier
     const GENERATED_ArkUIFlexModifier* GetFlexModifier() {

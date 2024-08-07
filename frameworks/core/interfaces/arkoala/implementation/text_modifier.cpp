@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
     } // TextInterfaceModifier
     namespace TextAttributeModifier {
-        void FontImpl(Ark_NativePointer node, const Font* value) {
+        void FontImpl(Ark_NativePointer node, const Ark_Font* value) {
         }
         void FontColorImpl(Ark_NativePointer node, const ResourceColor* value) {
         }
@@ -30,6 +30,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void MinFontSizeImpl(Ark_NativePointer node, const Type_TextAttribute_minFontSize_Arg0* value) {
         }
         void MaxFontSizeImpl(Ark_NativePointer node, const Type_TextAttribute_maxFontSize_Arg0* value) {
+        }
+        void MinFontScaleImpl(Ark_NativePointer node, const Type_TextAttribute_minFontScale_Arg0* scale) {
+        }
+        void MaxFontScaleImpl(Ark_NativePointer node, const Type_TextAttribute_maxFontScale_Arg0* scale) {
         }
         void FontStyleImpl(Ark_NativePointer node, Ark_Int32 value) {
         }
@@ -47,7 +51,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void MaxLinesImpl(Ark_NativePointer node, const Ark_Number* value) {
         }
-        void DecorationImpl(Ark_NativePointer node, const DecorationStyleInterface* value) {
+        void DecorationImpl(Ark_NativePointer node, const Ark_DecorationStyleInterface* value) {
         }
         void LetterSpacingImpl(Ark_NativePointer node, const Type_TextAttribute_letterSpacing_Arg0* value) {
         }
@@ -77,7 +81,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void EnableDataDetectorImpl(Ark_NativePointer node, Ark_Boolean enable) {
         }
-        void DataDetectorConfigImpl(Ark_NativePointer node, const TextDataDetectorConfig* config) {
+        void DataDetectorConfigImpl(Ark_NativePointer node, const Ark_TextDataDetectorConfig* config) {
         }
         void BindSelectionMenuImpl(Ark_NativePointer node, Ark_Int32 spanType, const CustomBuilder* content, Ark_Int32 responseType, const Opt_SelectionMenuOptions* options) {
         }
@@ -104,6 +108,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAttributeModifier::FontSizeImpl,
             TextAttributeModifier::MinFontSizeImpl,
             TextAttributeModifier::MaxFontSizeImpl,
+            TextAttributeModifier::MinFontScaleImpl,
+            TextAttributeModifier::MaxFontScaleImpl,
             TextAttributeModifier::FontStyleImpl,
             TextAttributeModifier::FontWeightImpl,
             TextAttributeModifier::LineSpacingImpl,

@@ -65,9 +65,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void CustomNavContentTransitionImpl(Ark_NativePointer node, Ark_Function delegate) {
         }
-        void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node, const Opt_Array_Ark_LayoutSafeAreaType* types, const Opt_Array_Ark_LayoutSafeAreaEdge* edges) {
+        void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node, const Opt_Array_LayoutSafeAreaType* types, const Opt_Array_LayoutSafeAreaEdge* edges) {
         }
-        void SystemBarStyleImpl(Ark_NativePointer node, const Opt_Ark_CustomObject* style) {
+        void SystemBarStyleImpl(Ark_NativePointer node, const Opt_CustomObject* style) {
         }
     } // NavigationAttributeModifier
     const GENERATED_ArkUINavigationModifier* GetNavigationModifier() {

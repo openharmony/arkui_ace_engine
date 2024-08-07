@@ -25,19 +25,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void ValueImpl(Ark_NativePointer node, const ResourceStr* value) {
         }
-        void FontImpl(Ark_NativePointer node, const Font* value) {
+        void FontImpl(Ark_NativePointer node, const Ark_Font* value) {
         }
         void FontColorImpl(Ark_NativePointer node, const ResourceColor* value) {
         }
         void SelectedOptionBgColorImpl(Ark_NativePointer node, const ResourceColor* value) {
         }
-        void SelectedOptionFontImpl(Ark_NativePointer node, const Font* value) {
+        void SelectedOptionFontImpl(Ark_NativePointer node, const Ark_Font* value) {
         }
         void SelectedOptionFontColorImpl(Ark_NativePointer node, const ResourceColor* value) {
         }
         void OptionBgColorImpl(Ark_NativePointer node, const ResourceColor* value) {
         }
-        void OptionFontImpl(Ark_NativePointer node, const Font* value) {
+        void OptionFontImpl(Ark_NativePointer node, const Ark_Font* value) {
         }
         void OptionFontColorImpl(Ark_NativePointer node, const ResourceColor* value) {
         }

@@ -31,7 +31,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void StrokeDashOffsetImpl(Ark_NativePointer node, const Type_ShapeAttribute_strokeDashOffset_Arg0* value) {
         }
-        void StrokeDashArrayImpl(Ark_NativePointer node, const Array_Ark_CustomObject* value) {
+        void StrokeDashArrayImpl(Ark_NativePointer node, const Array_CustomObject* value) {
         }
         void StrokeLineCapImpl(Ark_NativePointer node, Ark_Int32 value) {
         }
@@ -47,7 +47,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void AntiAliasImpl(Ark_NativePointer node, Ark_Boolean value) {
         }
-        void MeshImpl(Ark_NativePointer node, const Array_Ark_CustomObject* value, const Ark_Number* column, const Ark_Number* row) {
+        void MeshImpl(Ark_NativePointer node, const Array_CustomObject* value, const Ark_Number* column, const Ark_Number* row) {
         }
     } // ShapeAttributeModifier
     const GENERATED_ArkUIShapeModifier* GetShapeModifier() {

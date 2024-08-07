@@ -33,15 +33,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void DirectionImpl(Ark_NativePointer node, Ark_Int32 value) {
         }
-        void CurrentDayStyleImpl(Ark_NativePointer node, const CurrentDayStyle* value) {
+        void CurrentDayStyleImpl(Ark_NativePointer node, const Ark_CurrentDayStyle* value) {
         }
-        void NonCurrentDayStyleImpl(Ark_NativePointer node, const NonCurrentDayStyle* value) {
+        void NonCurrentDayStyleImpl(Ark_NativePointer node, const Ark_NonCurrentDayStyle* value) {
         }
-        void TodayStyleImpl(Ark_NativePointer node, const TodayStyle* value) {
+        void TodayStyleImpl(Ark_NativePointer node, const Ark_TodayStyle* value) {
         }
-        void WeekStyleImpl(Ark_NativePointer node, const WeekStyle* value) {
+        void WeekStyleImpl(Ark_NativePointer node, const Ark_WeekStyle* value) {
         }
-        void WorkStateStyleImpl(Ark_NativePointer node, const WorkStateStyle* value) {
+        void WorkStateStyleImpl(Ark_NativePointer node, const Ark_WorkStateStyle* value) {
         }
         void OnSelectChangeImpl(Ark_NativePointer node, Ark_Function event) {
         }

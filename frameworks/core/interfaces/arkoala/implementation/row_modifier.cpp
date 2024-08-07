@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void JustifyContentImpl(Ark_NativePointer node, Ark_Int32 value) {
         }
-        void PointLightImpl(Ark_NativePointer node, const PointLightStyle* value) {
+        void PointLightImpl(Ark_NativePointer node, const Ark_PointLightStyle* value) {
         }
     } // RowAttributeModifier
     const GENERATED_ArkUIRowModifier* GetRowModifier() {

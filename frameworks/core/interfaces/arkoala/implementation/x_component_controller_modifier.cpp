@@ -28,25 +28,25 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         Ark_NativePointer GetXComponentContextImpl(XComponentControllerPeer* peer) {
             return 0;
         }
-        void SetXComponentSurfaceSizeImpl(XComponentControllerPeer* peer, const Literal_surfaceWidth_Ark_Number_surfaceHeight_Ark_Number* value) {
+        void SetXComponentSurfaceSizeImpl(XComponentControllerPeer* peer, const Literal_surfaceWidth_Number_surfaceHeight_Number* value) {
         }
-        void SetXComponentSurfaceRectImpl(XComponentControllerPeer* peer, const SurfaceRect* rect) {
+        void SetXComponentSurfaceRectImpl(XComponentControllerPeer* peer, const Ark_SurfaceRect* rect) {
         }
         Ark_NativePointer GetXComponentSurfaceRectImpl(XComponentControllerPeer* peer) {
             return 0;
         }
-        void SetXComponentSurfaceRotationImpl(XComponentControllerPeer* peer, const SurfaceRotationOptions* rotationOptions) {
+        void SetXComponentSurfaceRotationImpl(XComponentControllerPeer* peer, const Ark_SurfaceRotationOptions* rotationOptions) {
         }
         Ark_NativePointer GetXComponentSurfaceRotationImpl(XComponentControllerPeer* peer) {
             return 0;
         }
         void OnSurfaceCreatedImpl(XComponentControllerPeer* peer, const Ark_String* surfaceId) {
         }
-        void OnSurfaceChangedImpl(XComponentControllerPeer* peer, const Ark_String* surfaceId, const SurfaceRect* rect) {
+        void OnSurfaceChangedImpl(XComponentControllerPeer* peer, const Ark_String* surfaceId, const Ark_SurfaceRect* rect) {
         }
         void OnSurfaceDestroyedImpl(XComponentControllerPeer* peer, const Ark_String* surfaceId) {
         }
-        Ark_NativePointer StartImageAnalyzerImpl(XComponentControllerPeer* peer, const ImageAnalyzerConfig* config) {
+        Ark_NativePointer StartImageAnalyzerImpl(XComponentControllerPeer* peer, const Ark_ImageAnalyzerConfig* config) {
             return 0;
         }
         void StopImageAnalyzerImpl(XComponentControllerPeer* peer) {

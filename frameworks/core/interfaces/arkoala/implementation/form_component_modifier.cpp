@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace FormComponentInterfaceModifier {
-        void _setFormComponentOptionsImpl(Ark_NativePointer node, const FormInfo* value) {
+        void _setFormComponentOptionsImpl(Ark_NativePointer node, const Ark_FormInfo* value) {
         }
     } // FormComponentInterfaceModifier
     namespace FormComponentAttributeModifier {

@@ -27,11 +27,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void OnChangeImpl(Ark_NativePointer node, Ark_Function callback) {
         }
-        void ContentFontImpl(Ark_NativePointer node, const Font* value) {
+        void ContentFontImpl(Ark_NativePointer node, const Ark_Font* value) {
         }
         void ContentFontColorImpl(Ark_NativePointer node, const ResourceColor* value) {
         }
-        void LabelFontImpl(Ark_NativePointer node, const Font* value) {
+        void LabelFontImpl(Ark_NativePointer node, const Ark_Font* value) {
         }
         void LabelFontColorImpl(Ark_NativePointer node, const ResourceColor* value) {
         }

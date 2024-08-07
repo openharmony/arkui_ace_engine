@@ -29,9 +29,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void RemoveStringImpl(MutableStyledStringPeer* peer, const Ark_Number* start, const Ark_Number* length) {
         }
-        void ReplaceStyleImpl(MutableStyledStringPeer* peer, const SpanStyle* spanStyle) {
+        void ReplaceStyleImpl(MutableStyledStringPeer* peer, const Ark_SpanStyle* spanStyle) {
         }
-        void SetStyleImpl(MutableStyledStringPeer* peer, const SpanStyle* spanStyle) {
+        void SetStyleImpl(MutableStyledStringPeer* peer, const Ark_SpanStyle* spanStyle) {
         }
         void RemoveStyleImpl(MutableStyledStringPeer* peer, const Ark_Number* start, const Ark_Number* length, Ark_Int32 styledKey) {
         }

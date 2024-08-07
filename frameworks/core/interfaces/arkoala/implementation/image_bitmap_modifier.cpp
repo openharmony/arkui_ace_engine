@@ -25,12 +25,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void CloseImpl(ImageBitmapPeer* peer) {
         }
+        Ark_Int32 GetHeightImpl(ImageBitmapPeer* peer) {
+            return 0;
+        }
+        Ark_Int32 GetWidthImpl(ImageBitmapPeer* peer) {
+            return 0;
+        }
     } // ImageBitmapModifier
     const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor() {
         static const GENERATED_ArkUIImageBitmapAccessor ImageBitmapAccessorImpl {
             ImageBitmapModifier::CtorImpl,
             ImageBitmapModifier::GetFinalizerImpl,
             ImageBitmapModifier::CloseImpl,
+            ImageBitmapModifier::GetHeightImpl,
+            ImageBitmapModifier::GetWidthImpl,
         };
         return &ImageBitmapAccessorImpl;
     }

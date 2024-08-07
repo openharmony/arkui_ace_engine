@@ -37,7 +37,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         Ark_Int32 GetResponseCodeImpl(WebResourceResponsePeer* peer) {
             return 0;
         }
-        void SetResponseDataImpl(WebResourceResponsePeer* peer, const Union_Ark_String_Ark_Number_Ark_Resource_ArrayBuffer* data) {
+        void SetResponseDataImpl(WebResourceResponsePeer* peer, const Union_String_Number_Resource_ArrayBuffer* data) {
         }
         void SetResponseEncodingImpl(WebResourceResponsePeer* peer, const Ark_String* encoding) {
         }

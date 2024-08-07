@@ -23,12 +23,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         Ark_NativePointer GetFinalizerImpl() {
             return 0;
         }
-        void ToDataURLImpl(CanvasRenderingContext2DPeer* peer, const Opt_Ark_String* type, const Opt_Ark_CustomObject* quality) {
+        void ToDataURLImpl(CanvasRenderingContext2DPeer* peer, const Opt_String* type, const Opt_CustomObject* quality) {
         }
-        Ark_NativePointer StartImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer, const ImageAnalyzerConfig* config) {
+        Ark_NativePointer StartImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer, const Ark_ImageAnalyzerConfig* config) {
             return 0;
         }
         void StopImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer) {
+        }
+        Ark_Int32 GetHeightImpl(CanvasRenderingContext2DPeer* peer) {
+            return 0;
+        }
+        Ark_Int32 GetWidthImpl(CanvasRenderingContext2DPeer* peer) {
+            return 0;
         }
     } // CanvasRenderingContext2DModifier
     const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext2DAccessor() {
@@ -38,6 +44,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CanvasRenderingContext2DModifier::ToDataURLImpl,
             CanvasRenderingContext2DModifier::StartImageAnalyzerImpl,
             CanvasRenderingContext2DModifier::StopImageAnalyzerImpl,
+            CanvasRenderingContext2DModifier::GetHeightImpl,
+            CanvasRenderingContext2DModifier::GetWidthImpl,
         };
         return &CanvasRenderingContext2DAccessorImpl;
     }

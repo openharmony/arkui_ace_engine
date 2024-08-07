@@ -34,7 +34,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         Ark_NativePointer GetTypingStyleImpl(RichEditorBaseControllerPeer* peer) {
             return 0;
         }
-        void SetTypingStyleImpl(RichEditorBaseControllerPeer* peer, const RichEditorTextStyle* value) {
+        void SetTypingStyleImpl(RichEditorBaseControllerPeer* peer, const Ark_RichEditorTextStyle* value) {
         }
         void SetSelectionImpl(RichEditorBaseControllerPeer* peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd, const Opt_SelectionOptions* options) {
         }
@@ -44,6 +44,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void StopEditingImpl(RichEditorBaseControllerPeer* peer) {
         }
         Ark_NativePointer GetLayoutManagerImpl(RichEditorBaseControllerPeer* peer) {
+            return 0;
+        }
+        Ark_NativePointer GetPreviewTextImpl(RichEditorBaseControllerPeer* peer) {
             return 0;
         }
     } // RichEditorBaseControllerModifier
@@ -60,6 +63,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorBaseControllerModifier::IsEditingImpl,
             RichEditorBaseControllerModifier::StopEditingImpl,
             RichEditorBaseControllerModifier::GetLayoutManagerImpl,
+            RichEditorBaseControllerModifier::GetPreviewTextImpl,
         };
         return &RichEditorBaseControllerAccessorImpl;
     }

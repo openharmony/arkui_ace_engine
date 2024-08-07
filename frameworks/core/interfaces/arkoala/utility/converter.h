@@ -29,6 +29,8 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/utility/generated/converter_generated.h"
 
@@ -37,6 +39,49 @@ namespace OHOS::Ace::NG::Converter
     template<typename To, typename From>
     To Convert(const From& src) = delete;
 
+    template<typename T, typename P>
+    void AssignCast(std::optional<T>& dst, const P& src) {
+        dst = Convert<T, P>(src);
+    }
+
+    template<typename T, typename P>
+    void AssignLiteralTo(std::optional<T>& dst, const P& src) {
+        AssignCast(dst, src);
+    }
+
+    template<typename T, typename P>
+    void AssignUnionTo(std::optional<T>& dst, const P& src) {
+        AssignLiteralTo(dst, src);
+    }
+
+    template<typename T, typename P>
+    void AssignOptionalTo(std::optional<T>& dst, const P& src) {
+        AssignUnionTo(dst, src);
+    }
+
+    template<typename T, typename P>
+    void AssignTo(std::optional<T>& dst, const P& src) {
+        AssignOptionalTo(dst, src);
+    }
+
+    template<typename To, typename From>
+    std::optional<To> OptConvert(const From& value) {
+        std::optional<To> opt;
+        AssignTo(opt, value);
+        return std::move(opt);
+    }
+
+    template<typename To, typename From>
+    To ConvertOrDefault(const From& value, To defaultValue) {
+        return OptConvert<To, From>(value).value_or(defaultValue);
+    }
+
+    // Implementation is in cpp
+    Color Convert(const Ark_Color& src);
+    void ParseDimension(const Ark_String &string, Ark_Length *result);
+    Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo &info);
+
+    // Converter implementations
     template<>
     inline TextOverflow Convert(const Ark_TextOverflow& src) {
         return static_cast<TextOverflow>(src);
@@ -91,7 +136,7 @@ namespace OHOS::Ace::NG::Converter
 
     template<>
     inline Dimension Convert(const Ark_Length& src) {
-        return src.type == Ark_Tag::ARK_TAG_INT32 ? CalcDimension(src.value, (DimensionUnit)src.unit) : CalcDimension();
+        return src.type == Ark_Tag::ARK_TAG_RESOURCE ? CalcDimension() : CalcDimension(src.value, (DimensionUnit)src.unit);
     }
 
     template<>
@@ -140,19 +185,27 @@ namespace OHOS::Ace::NG::Converter
     }
 
     template<>
+    inline std::vector<std::string> Convert(const Ark_Resource& src) {
+        return {};
+    }
+
+    template<>
     inline std::vector<std::string> Convert(const Ark_CustomObject& src) {
         return {};
     }
 
     template<>
     inline Color Convert(const Ark_Number& src) {
-        return src.tag == ARK_TAG_FLOAT32 ? Color(static_cast<int>(src.f32)) : Color(src.i32);
+        uint32_t value = src.tag == ARK_TAG_FLOAT32 ? static_cast<int>(src.f32) : src.i32;
+        if (value <= 0xFFFFFF && value > 0) {
+            return Color((unsigned) value + 0xFF000000U);
+        }
+        return Color(value);
     }
 
     template<>
     inline Color Convert(const Ark_String& src) {
-        LOGE("ARKOALA Converter -> Need converter from String to Color.");
-        return Color();
+        return Color::FromString(src.chars);
     }
     
     template<>
@@ -162,9 +215,15 @@ namespace OHOS::Ace::NG::Converter
     }
 
     template<>
-    inline const char* Convert(const Ark_Resource& src) {
+    inline Ark_CharPtr Convert(const Ark_Resource& src) {
         LOGE("ARKOALA Converter -> Resource support (String) is not implemented.");
         return "ResUns";
+    }
+
+    template<>
+    inline float Convert(const Ark_Resource& src) {
+        LOGE("ARKOALA Converter -> Resource support (float) is not implemented.");
+        return 1.0f;
     }
 
     template<>
@@ -173,9 +232,19 @@ namespace OHOS::Ace::NG::Converter
         return std::make_tuple(value, static_cast<Ark_Int32>(DimensionUnit::VP));
     }
 
-    // Implementation is in cpp
-    Color Convert(const Ark_Color& src);
-    void ParseDimension(const Ark_String &string, Ark_Length *result);
+    template<>
+    inline CalcLength Convert(const Ark_Length& src) {
+        if (src.type == Ark_Tag::ARK_TAG_RESOURCE) {
+            LOGE("Convert [Ark_Length] to [CalcLength] is not supported.");
+            return CalcLength();
+        }
+        auto unit = static_cast<OHOS::Ace::DimensionUnit>(src.unit);
+        auto value = src.value;
+        if (unit == OHOS::Ace::DimensionUnit::PERCENT) {
+            value /= 100.0f; // percent is normalized [0..1]
+        }
+        return CalcLength(value, unit);
+    }
 
     template<>
     inline std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_String& src) {
@@ -185,41 +254,38 @@ namespace OHOS::Ace::NG::Converter
     }
 
     template<>
-    inline const char* Convert(const Ark_String& src) {
+    inline Ark_CharPtr Convert(const Ark_String& src) {
         return src.chars;
     }
 
-    template<typename T, typename P>
-    void AssignCast(std::optional<T>& dst, const P& src) {
-        dst = Convert<T, P>(src);
+    template<>
+    inline EdgesParam Convert(const Ark_Edges& src) {
+        EdgesParam edges;
+        edges.left = OptConvert<Dimension>(src.left);
+        edges.top = OptConvert<Dimension>(src.top);
+        edges.right = OptConvert<Dimension>(src.right);
+        edges.bottom = OptConvert<Dimension>(src.bottom);
+        return edges;
     }
 
-    template<typename T, typename P>
-    void AssignLiteralTo(std::optional<T>& dst, const P& src) {
-        AssignCast(dst, src);
+    template<>
+    inline PaddingProperty Convert(const Ark_Length& src) {
+        PaddingProperty padding;
+        auto value = OptConvert<CalcLength>(src);
+        padding.left = value;
+        padding.top = value;
+        padding.right = value;
+        padding.bottom = value;
+        return padding;
     }
 
-    template<typename T, typename P>
-    void AssignUnionTo(std::optional<T>& dst, const P& src) {
-        AssignLiteralTo(dst, src);
+    template<>
+    inline PaddingProperty Convert(const Ark_LocalizedPadding& src) {
+        LOGE("Convert [Ark_LocalizedPadding] to [PaddingProperty] is not supported.");
+        PaddingProperty padding;
+        return padding;
     }
 
-    template<typename T, typename P>
-    void AssignOptionalTo(std::optional<T>& dst, const P& src) {
-        AssignUnionTo(dst, src);
-    }
-
-    template<typename T, typename P>
-    void AssignTo(std::optional<T>& dst, const P& src) {
-        AssignOptionalTo(dst, src);
-    }
-
-    template<typename To, typename From>
-    To ConvertOrDefault(const From& value, To defaultValue) {
-        std::optional<To> opt;
-        AssignTo(opt, value);
-        return opt.value_or(defaultValue);
-    };
 } // namespace OHOS::Ace::NG::Converter
 
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_CONVERTER_H

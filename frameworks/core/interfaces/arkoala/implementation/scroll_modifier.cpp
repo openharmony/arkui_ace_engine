@@ -47,17 +47,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void OnScrollFrameBeginImpl(Ark_NativePointer node, Ark_Function event) {
         }
-        void NestedScrollImpl(Ark_NativePointer node, const NestedScrollOptions* value) {
+        void NestedScrollImpl(Ark_NativePointer node, const Ark_NestedScrollOptions* value) {
         }
         void EnableScrollInteractionImpl(Ark_NativePointer node, Ark_Boolean value) {
         }
         void FrictionImpl(Ark_NativePointer node, const Type_ScrollAttribute_friction_Arg0* value) {
         }
-        void ScrollSnapImpl(Ark_NativePointer node, const ScrollSnapOptions* value) {
+        void ScrollSnapImpl(Ark_NativePointer node, const Ark_ScrollSnapOptions* value) {
         }
         void EnablePagingImpl(Ark_NativePointer node, Ark_Boolean value) {
         }
-        void InitialOffsetImpl(Ark_NativePointer node, const OffsetOptions* value) {
+        void InitialOffsetImpl(Ark_NativePointer node, const Ark_OffsetOptions* value) {
         }
     } // ScrollAttributeModifier
     const GENERATED_ArkUIScrollModifier* GetScrollModifier() {

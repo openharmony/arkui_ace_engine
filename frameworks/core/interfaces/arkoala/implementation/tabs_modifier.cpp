@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void BarMode_BarModeFixedImpl(Ark_NativePointer node, Ark_Int32 value) {
         }
-        void BarMode_BarModeScrollable_ScrollableBarModeOptionsImpl(Ark_NativePointer node, Ark_Int32 value, const ScrollableBarModeOptions* options) {
+        void BarMode_BarModeScrollable_ScrollableBarModeOptionsImpl(Ark_NativePointer node, Ark_Int32 value, const Ark_ScrollableBarModeOptions* options) {
         }
         void BarMode_BarMode_ScrollableBarModeOptionsImpl(Ark_NativePointer node, Ark_Int32 value, const Opt_ScrollableBarModeOptions* options) {
         }
@@ -39,9 +39,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void AnimationDurationImpl(Ark_NativePointer node, const Ark_Number* value) {
         }
-        void AnimationModeImpl(Ark_NativePointer node, const Opt_Ark_AnimationMode* mode) {
+        void AnimationModeImpl(Ark_NativePointer node, const Opt_AnimationMode* mode) {
         }
-        void EdgeEffectImpl(Ark_NativePointer node, const Opt_Ark_EdgeEffect* edgeEffect) {
+        void EdgeEffectImpl(Ark_NativePointer node, const Opt_EdgeEffect* edgeEffect) {
         }
         void OnChangeImpl(Ark_NativePointer node, Ark_Function event) {
         }
@@ -61,7 +61,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void BarBackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value) {
         }
-        void BarGridAlignImpl(Ark_NativePointer node, const BarGridColumnOptions* value) {
+        void BarGridAlignImpl(Ark_NativePointer node, const Ark_BarGridColumnOptions* value) {
         }
         void CustomContentTransitionImpl(Ark_NativePointer node, Ark_Function delegate) {
         }

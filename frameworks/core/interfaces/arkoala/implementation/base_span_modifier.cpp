@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace BaseSpanModifier {
-        void TextBackgroundStyleImpl(Ark_NativePointer node, const TextBackgroundStyle* style) {
+        void TextBackgroundStyleImpl(Ark_NativePointer node, const Ark_TextBackgroundStyle* style) {
         }
         void BaselineOffsetImpl(Ark_NativePointer node, const Ark_CustomObject* value) {
         }

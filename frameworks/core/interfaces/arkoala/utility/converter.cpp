@@ -23,79 +23,38 @@ void ParseDimension(const Ark_String &string, Ark_Length *result) {
 
     if (!suffixPtr || suffixPtr == string.chars)
     {
-      // not a numeric value
-      result->unit = -1;
-      return;
+        // not a numeric value
+        result->unit = static_cast<Ark_Int32>(DimensionUnit::NONE);
+        return;
     }
     result->value = value;
+
+    DimensionUnit unit;
     if (suffixPtr[0] == '\0' || (suffixPtr[0] == 'v' && suffixPtr[1] == 'p'))
     {
-      result->unit = 1;
+        unit = DimensionUnit::VP;
     }
     else if (suffixPtr[0] == '%')
     {
-      result->unit = 3;
+        unit = DimensionUnit::PERCENT;
     }
     else if (suffixPtr[0] == 'p' && suffixPtr[1] == 'x')
     {
-      result->unit = 0;
+        unit = DimensionUnit::PX;
     }
     else if (suffixPtr[0] == 'l' && suffixPtr[1] == 'p' && suffixPtr[2] == 'x')
     {
-      result->unit = 4;
+        unit = DimensionUnit::LPX;
     }
     else if (suffixPtr[0] == 'f' && suffixPtr[1] == 'p')
     {
-      result->unit = 2;
+        unit = DimensionUnit::FP;
     }
     else
     {
-      result->unit = -1;
+        unit = DimensionUnit::NONE;
     }
-}
-
-Color Convert(const Ark_Color& src) {
-    switch (src) {
-        case 0: { // White
-            return Color(0xffffffff);
-        }
-        case 1: { // Black
-            return Color(0xff000000);
-        }
-        case 2: { // Blue
-            return Color(0xff0000ff);
-        }
-        case 3: { // Brown
-            return Color(0xffa52a2a);
-        }
-        case 4: { // Gray
-            return Color(0xffc0c0c0);
-        }
-        case 5: { // Green
-            return Color(0xff00ff00);
-        }
-        case 6: { // Grey
-            return Color(0xffc0c0c0);
-        }
-        case 7: { // Orange
-            return Color(0xffffa500);
-        }
-        case 8: { // Pink
-            return Color(0xffffc0cb);
-        }
-        case 9: { // Red
-            return Color(0xffff0000);
-        }
-        case 10: { // Yellow
-            return Color(0xffffff00);
-        }
-        case 11: { // Transparent
-            return Color(0x00000000);
-        }
-        default: {
-            return Color(0x000000);
-        }
-    }
+    result->unit = static_cast<Ark_Int32>(unit);
 }
 
 } // namespace OHOS::Ace::NG::Converter

@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace VideoInterfaceModifier {
-        void _setVideoOptionsImpl(Ark_NativePointer node, const VideoOptions* value) {
+        void _setVideoOptionsImpl(Ark_NativePointer node, const Ark_VideoOptions* value) {
         }
     } // VideoInterfaceModifier
     namespace VideoAttributeModifier {
@@ -53,7 +53,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void EnableAnalyzerImpl(Ark_NativePointer node, Ark_Boolean enable) {
         }
-        void AnalyzerConfigImpl(Ark_NativePointer node, const ImageAnalyzerConfig* config) {
+        void AnalyzerConfigImpl(Ark_NativePointer node, const Ark_ImageAnalyzerConfig* config) {
         }
     } // VideoAttributeModifier
     const GENERATED_ArkUIVideoModifier* GetVideoModifier() {

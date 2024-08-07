@@ -31,7 +31,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         Ark_NativePointer GetSelectionImpl(RichEditorStyledStringControllerPeer* peer) {
             return 0;
         }
-        void OnContentChangedImpl(RichEditorStyledStringControllerPeer* peer, const StyledStringChangedListener* listener) {
+        void OnContentChangedImpl(RichEditorStyledStringControllerPeer* peer, const Ark_StyledStringChangedListener* listener) {
         }
     } // RichEditorStyledStringControllerModifier
     const GENERATED_ArkUIRichEditorStyledStringControllerAccessor* GetRichEditorStyledStringControllerAccessor() {

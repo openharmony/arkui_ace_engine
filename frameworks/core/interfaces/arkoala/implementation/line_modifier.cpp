@@ -21,9 +21,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
     } // LineInterfaceModifier
     namespace LineAttributeModifier {
-        void StartPointImpl(Ark_NativePointer node, const Array_Ark_CustomObject* value) {
+        void StartPointImpl(Ark_NativePointer node, const Array_CustomObject* value) {
         }
-        void EndPointImpl(Ark_NativePointer node, const Array_Ark_CustomObject* value) {
+        void EndPointImpl(Ark_NativePointer node, const Array_CustomObject* value) {
         }
     } // LineAttributeModifier
     const GENERATED_ArkUILineModifier* GetLineModifier() {

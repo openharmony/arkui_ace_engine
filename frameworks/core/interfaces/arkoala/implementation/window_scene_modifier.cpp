@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
     } // WindowSceneInterfaceModifier
     namespace WindowSceneAttributeModifier {
-        void AttractionEffectImpl(Ark_NativePointer node, const Position* destination, const Ark_Number* fraction) {
+        void AttractionEffectImpl(Ark_NativePointer node, const Ark_Position* destination, const Ark_Number* fraction) {
         }
     } // WindowSceneAttributeModifier
     const GENERATED_ArkUIWindowSceneModifier* GetWindowSceneModifier() {

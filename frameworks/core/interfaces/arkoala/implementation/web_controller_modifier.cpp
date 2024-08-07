@@ -31,17 +31,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         void ClearHistoryImpl(WebControllerPeer* peer) {
         }
-        void RunJavaScriptImpl(WebControllerPeer* peer, const Literal_script_Ark_String_callback_Opt_Ark_Function* options) {
+        void RunJavaScriptImpl(WebControllerPeer* peer, const Literal_script_String_callback_Opt_Function* options) {
         }
-        void LoadDataImpl(WebControllerPeer* peer, const Literal_data_Ark_String_mimeType_Ark_String_encoding_Ark_String_baseUrl_Opt_Ark_String_historyUrl_Opt_Ark_String* options) {
+        void LoadDataImpl(WebControllerPeer* peer, const Literal_data_String_mimeType_String_encoding_String_baseUrl_Opt_String_historyUrl_Opt_String* options) {
         }
-        void LoadUrlImpl(WebControllerPeer* peer, const Literal_url_Union_Ark_String_Ark_Resource_headers_Opt_Array_Header* options) {
+        void LoadUrlImpl(WebControllerPeer* peer, const Literal_url_Union_String_Resource_headers_Opt_Array_Header* options) {
         }
         void RefreshImpl(WebControllerPeer* peer) {
         }
         void StopImpl(WebControllerPeer* peer) {
         }
-        void RegisterJavaScriptProxyImpl(WebControllerPeer* peer, const Literal_object_Ark_CustomObject_name_Ark_String_methodList_Array_Ark_String* options) {
+        void RegisterJavaScriptProxyImpl(WebControllerPeer* peer, const Literal_object_CustomObject_name_String_methodList_Array_String* options) {
         }
         void DeleteJavaScriptRegisterImpl(WebControllerPeer* peer, const Ark_String* name) {
         }
