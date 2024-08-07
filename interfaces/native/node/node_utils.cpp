@@ -145,7 +145,14 @@ int32_t OH_ArkUI_RegisterSystemFontStyleChangeEvent(
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
-void OH_ArkUI_UnregisterSystemFontStyleChangeEvent(ArkUI_NodeHandle node) {}
+void OH_ArkUI_UnregisterSystemFontStyleChangeEvent(ArkUI_NodeHandle node)
+{
+    if (node == nullptr) {
+        return;
+    }
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->resetSystemFontStyleChangeEvent(node->uiNodeHandle);
+}
 
 int32_t OH_ArkUI_SystemFontStyleEvent_GetFontSize(const ArkUI_SystemFontStyleEvent* event)
 {
