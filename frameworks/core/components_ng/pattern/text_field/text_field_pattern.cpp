@@ -162,6 +162,8 @@ constexpr int32_t PREVIEW_NO_ERROR = 0;
 constexpr int32_t PREVIEW_NULL_POINTER = 1;
 constexpr int32_t PREVIEW_BAD_PARAMETERS = -1;
 constexpr double MINIMAL_OFFSET = 0.01f;
+constexpr float RICH_DEFAULT_SHADOW_COLOR = 0x33000000;
+constexpr float RICH_DEFAULT_ELEVATION = 120.0f;
 
 static std::unordered_map<TextContentType, std::pair<AceAutoFillType, std::string>> contentTypeMap_ = {
     {TextContentType::VISIBLE_PASSWORD,
@@ -1813,6 +1815,14 @@ std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
         CHECK_NULL_VOID(frameNode);
         if (pattern->BetweenSelectedPosition(point)) {
             pattern->dragNode_ = TextDragPattern::CreateDragNode(frameNode);
+            auto textDragPattern = pattern->dragNode_->GetPattern<TextDragPattern>();
+            if (textDragPattern) {
+                auto option = pattern->GetHost()->GetDragPreviewOption();
+                option.options.shadowPath = textDragPattern->GetBackgroundPath()->ConvertToSVGString();
+                option.options.shadow = Shadow(RICH_DEFAULT_ELEVATION, {0.0, 0.0}, Color(RICH_DEFAULT_SHADOW_COLOR),
+                    ShadowStyle::OuterFloatingSM);
+                pattern->GetHost()->SetDragPreviewOptions(option);
+            }
             FrameNode::ProcessOffscreenNode(pattern->dragNode_);
         }
         auto gestureHub = frameNode->GetOrCreateGestureEventHub();

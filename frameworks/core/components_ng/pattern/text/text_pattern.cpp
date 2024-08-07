@@ -71,6 +71,8 @@ constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
 const std::u16string SYMBOL_TRANS = u"\uF0001";
 const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
+constexpr float RICH_DEFAULT_SHADOW_COLOR = 0x33000000;
+constexpr float RICH_DEFAULT_ELEVATION = 120.0f;
 }; // namespace
 
 TextPattern::~TextPattern()
@@ -1740,6 +1742,14 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
             info.firstHandle = pattern->textSelector_.firstHandle;
             info.secondHandle = pattern->textSelector_.secondHandle;
             pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(pattern->GetHost(), imageChildren, info);
+            auto textDragPattern = pattern->dragNode_->GetPattern<TextDragPattern>();
+            if (textDragPattern) {
+                auto option = pattern->GetHost()->GetDragPreviewOption();
+                option.options.shadowPath = textDragPattern->GetBackgroundPath()->ConvertToSVGString();
+                option.options.shadow = Shadow(RICH_DEFAULT_ELEVATION, {0.0, 0.0}, Color(RICH_DEFAULT_SHADOW_COLOR),
+                ShadowStyle::OuterFloatingSM);
+                pattern->GetHost()->SetDragPreviewOptions(option);
+            }
             FrameNode::ProcessOffscreenNode(pattern->dragNode_);
         }
     };
