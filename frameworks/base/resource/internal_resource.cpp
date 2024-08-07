@@ -15,9 +15,7 @@
 
 #include "base/resource/internal_resource.h"
 
-#include <functional>
 #include <map>
-#include <utility>
 
 // binary/errorcode.json
 // Use objcopy transform to compiled object file.

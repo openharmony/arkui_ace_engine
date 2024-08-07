@@ -16,8 +16,6 @@
 #include "base/utils/string_expression.h"
 
 #include <regex>
-
-#include "base/log/log.h"
 #include "base/utils/string_utils.h"
 
 namespace OHOS::Ace::StringExpression {

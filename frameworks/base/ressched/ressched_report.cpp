@@ -12,10 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <cmath>
 
-#include "core/common/ace_application_info.h"
-#include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
 
 #define LIKELY(x) __builtin_expect(!!(x), 1)

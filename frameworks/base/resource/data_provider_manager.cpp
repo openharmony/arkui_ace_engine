@@ -15,11 +15,8 @@
 
 #include "base/resource/data_provider_manager.h"
 
-#include <shared_mutex>
 #include <sys/stat.h>
 #include <unistd.h>
-
-#include "base/log/log.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
