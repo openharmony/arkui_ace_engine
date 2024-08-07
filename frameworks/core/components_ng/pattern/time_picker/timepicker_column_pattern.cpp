@@ -226,6 +226,7 @@ void TimePickerColumnPattern::HandleCrownMoveEvent(const CrownEvent& event)
 {
     LOGD("TimePickerColumnPattern::HandleCrownMoveEvent event.degree=%{public}lf,Velocity=%{public}lf",
         event.degree, event.angularVelocity);
+    SetMainVelocity(event.angularVelocity);
     animationBreak_ = false;
     auto toss = GetToss();
     CHECK_NULL_VOID(toss);
@@ -240,8 +241,9 @@ void TimePickerColumnPattern::HandleCrownMoveEvent(const CrownEvent& event)
     frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, event.angularVelocity, SceneStatus::RUNNING);
 }
 
-void TimePickerColumnPattern::HandleCrownEndEvent()
+void TimePickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
 {
+    SetMainVelocity(event.angularVelocity);
     pressed_ = false;
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -262,6 +264,9 @@ void TimePickerColumnPattern::HandleCrownEndEvent()
     if (std::abs(scrollDelta_) >= std::abs(shiftThreshold)) {
         InnerHandleScroll(LessNotEqual(scrollDelta_, 0.0), true);
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == TimePickerScrollDirection::UP ? -1 : 1);
+#ifdef SUPPORT_DIGITAL_CROWN
+        VibratorImpl::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1, OHOS::Ace::NG::VIBRATOR_TYPE_ONE);
+#endif
     }
     CreateAnimation(scrollDelta_, 0.0);
     frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::END);
@@ -451,6 +456,10 @@ void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
         }
         textNode->MarkModifyDone();
         textNode->MarkDirtyNode();
+#ifdef SUPPORT_DIGITAL_CROWN
+        VibratorImpl::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1,
+            OHOS::Ace::NG::VIBRATOR_TYPE_ONE);
+#endif
     }
 }
 
@@ -1198,6 +1207,9 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     if (GreatOrEqual(std::abs(dragDelta), std::abs(shiftDistance))) {
         InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true);
         dragDelta = dragDelta % static_cast<int>(std::abs(shiftDistance));
+#ifdef SUPPORT_DIGITAL_CROWN
+        VibratorImpl::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1, OHOS::Ace::NG::VIBRATOR_TYPE_ONE);
+#endif
         if (!NearZero(dragDelta) && !CanMove(LessNotEqual(dragDelta, 0))) {
             dragDelta = 0.0;
             auto toss = GetToss();

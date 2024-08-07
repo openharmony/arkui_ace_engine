@@ -15,6 +15,7 @@
 
 #ifndef FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_VIBRATOR_VIBRATOR_IMPL_H
 #define FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_VIBRATOR_VIBRATOR_IMPL_H
+#include <stdint.h>
 namespace OHOS::Ace::NG {
 class VibratorImpl {
 public:
@@ -23,6 +24,7 @@ public:
 
     static void StartVibraFeedback();
     static bool StartVibraFeedback(const char* effectId);
+    static bool StartVibraFeedback(const char* effectId, int32_t usage);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_VIBRATOR_VIBRATOR_IMPL_H

@@ -346,13 +346,13 @@ void TextPickerColumnPattern::HandleCrownBeginEvent(const CrownEvent& event)
 
 void TextPickerColumnPattern::HandleCrownMoveEvent(const CrownEvent& event)
 {
+    SetMainVelocity(event.angularVelocity);
     animationBreak_ = false;
     CHECK_NULL_VOID(pressed_);
     auto toss = GetToss();
     CHECK_NULL_VOID(toss);
     auto offsetY = GetCrownRotatePx(event);
     offsetY += yLast_;
-    SetMainVelocity(event.angularVelocity);
     if (NearEqual(offsetY, yLast_, MOVE_THRESHOLD)) { // if changing less than MOVE_THRESHOLD, no need to handle
         LOGD("TextPickerColumnPattern::HandleCrownMoveEvent in.");
         return;
@@ -365,9 +365,9 @@ void TextPickerColumnPattern::HandleCrownMoveEvent(const CrownEvent& event)
     frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::RUNNING);
 }
 
-void TextPickerColumnPattern::HandleCrownEndEvent()
+void TextPickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
 {
-    LOGD("TextPickerColumnPattern::HandleCrownEndEvent");
+    SetMainVelocity(event.angularVelocity);
     pressed_ = false;
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -1533,6 +1533,10 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
         for (int32_t i = 0; i < shiftDistanceCount; i++) {
             ScrollOption(shiftDistance);
             InnerHandleScroll(dragDelta < 0, true, false);
+#ifdef SUPPORT_DIGITAL_CROWN
+            VibratorImpl::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1,
+                OHOS::Ace::NG::VIBRATOR_TYPE_ONE);
+#endif
         }
         dragDelta = additionalShift;
     }
@@ -1542,6 +1546,11 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
                 overscroller_.IsBackOverScroll() ? overscroller_.GetBackScroll() : overscroller_.GetOverScroll();
         }
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (isOverScroll) {
+        VibratorImpl::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH5);
+    }
+#endif
 
     // Set options position
     ScrollOption(dragDelta);
