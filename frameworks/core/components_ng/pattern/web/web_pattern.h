@@ -741,7 +741,7 @@ private:
     void OnOverScrollModeUpdate(const int32_t value);
     void OnCopyOptionModeUpdate(const int32_t value);
     void OnMetaViewportUpdate(bool value);
-    void OnNativeEmbedModeEnabledUpdate(bool value) {};
+    void OnNativeEmbedModeEnabledUpdate(bool value);
     void OnNativeEmbedRuleTagUpdate(const std::string& tag);
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
     void OnTextAutosizingUpdate(bool isTextAutosizing);
