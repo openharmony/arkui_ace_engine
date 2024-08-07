@@ -217,6 +217,7 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
 {
     CreateNode(placeholder, value, false);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     auto focusHub = pattern->GetFocusHub();
@@ -231,6 +232,7 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextArea(
 {
     CreateNode(placeholder, value, true);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetTextFieldController();

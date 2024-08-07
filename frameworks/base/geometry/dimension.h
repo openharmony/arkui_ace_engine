@@ -158,6 +158,8 @@ public:
 
     double ConvertToPxByAppFontScale(float minFontScale) const;
 
+    double ConvertToVpByAppFontScale() const;
+
     double GetNativeValue(DimensionUnit unit) const
     {
         if (unit_ == unit || unit == DimensionUnit::PERCENT) {
