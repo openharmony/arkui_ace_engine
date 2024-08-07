@@ -210,8 +210,8 @@ void SwiperPattern::OnIndexChange()
 
 void SwiperPattern::StopAndResetSpringAnimation()
 {
-    if (springAnimationIsRunning_) {
-        StopSpringAnimationImmediately();
+    if (springAnimationIsRunning_ && !isTouchDownSpringAnimation_) {
+        StopSpringAnimation();
         currentDelta_ = 0.0f;
         itemPosition_.clear();
         isVoluntarilyClear_ = true;
