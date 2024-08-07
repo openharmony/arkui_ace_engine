@@ -87,7 +87,15 @@ void JSVideo::Create(const JSCallbackInfo& info)
 
     auto aiOptions = videoObj->GetProperty("imageAIOptions");
     if (aiOptions->IsObject()) {
-        ParseImageAIOptions(aiOptions);
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        CHECK_NULL_VOID(nativeEngine);
+        panda::Local<JsiValue> value = aiOptions.Get().GetLocalHandle();
+        JSValueWrapper valueWrapper = value;
+        ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+        napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
+        VideoModel::GetInstance()->SetImageAIOptions(optionsValue);
     }
 
     std::string previewUri;
@@ -110,19 +118,6 @@ void JSVideo::Create(const JSCallbackInfo& info)
         VideoModel::GetInstance()->SetPosterSourceByPixelMap(pixMap);
 #endif
     }
-}
-
-void JSVideo::ParseImageAIOptions(const JSRef<JSVal>& jsValue)
-{
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_VOID(engine);
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    CHECK_NULL_VOID(nativeEngine);
-    panda::Local<JsiValue> value = jsValue.Get().GetLocalHandle();
-    JSValueWrapper valueWrapper = value;
-    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
-    napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
-    VideoModel::GetInstance()->SetImageAIOptions(optionsValue);
 }
 
 void JSVideo::JsMuted(const JSCallbackInfo& info)
@@ -242,7 +237,7 @@ void JSVideo::JsOnStop(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onStop = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                         const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

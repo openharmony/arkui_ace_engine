@@ -169,9 +169,11 @@ void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
             pattern->OnFolderStateChangeSend(currentFoldStatus);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
+        pattern->hasFoldStatusDelayTask_ = false;
     });
     lastFoldStatus_ = currentFoldStatus_;
     TAG_LOGD(AceLogTag::ACE_FOLDER_STACK, "the last folding state was:%{public}d", lastFoldStatus_);
+    hasFoldStatusDelayTask_ = true;
     taskExecutor->PostDelayedTask(
         foldStatusDelayTask_, TaskExecutor::TaskType::UI, DELAY_TIME, "ArkUIFolderStackStatusChange");
 }
@@ -181,6 +183,7 @@ void FolderStackPattern::OnFolderStateChangeSend(FoldStatus foldStatus)
     FolderEventInfo event(foldStatus);
     auto eventHub = GetEventHub<FolderStackEventHub>();
     if (eventHub) {
+        needCallBack_ = true;
         eventHub->OnFolderStateChange(event);
     }
 }
