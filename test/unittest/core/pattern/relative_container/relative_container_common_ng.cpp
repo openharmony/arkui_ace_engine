@@ -20,10 +20,11 @@ namespace OHOS::Ace {
 void RelativeContainerTestUtilsNG::AddAlignRule(const std::string& id, const AlignDirection& direction,
     const HorizontalAlign& horizontalRule, std::map<AlignDirection, AlignRule>& alignRules)
 {
+    auto alignDirection = AlignDirectionRtl(direction);
     AlignRule alignRule;
     alignRule.anchor = id;
     alignRule.horizontal = horizontalRule;
-    alignRules[direction] = alignRule;
+    alignRules[alignDirection] = alignRule;
 }
 
 void RelativeContainerTestUtilsNG::AddAlignRule(const std::string& id, const AlignDirection& direction,
@@ -33,5 +34,16 @@ void RelativeContainerTestUtilsNG::AddAlignRule(const std::string& id, const Ali
     alignRule.anchor = id;
     alignRule.vertical = verticalRule;
     alignRules[direction] = alignRule;
+}
+
+AlignDirection RelativeContainerTestUtilsNG::AlignDirectionRtl(const AlignDirection& direction)
+{
+    if (direction == AlignDirection::START) {
+        return AlignDirection::LEFT;
+    } else if (direction == AlignDirection::END) {
+        return AlignDirection::RIGHT;
+    } else {
+        return direction;
+    }
 }
 } // namespace OHOS::Ace
