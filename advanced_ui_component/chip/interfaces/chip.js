@@ -29,16 +29,13 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 
 const resourceFn = resourceManager.getSystemResourceManager();
 const shadowRange = 6;
+const fontWeightMin = 100;
+const fontWeightMax = 900;
 export var ChipSize;
 (function (ChipSize) {
     ChipSize["NORMAL"] = "NORMAL";
     ChipSize["SMALL"] = "SMALL";
 })(ChipSize || (ChipSize = {}));
-var FontWeightRange;
-(function (FontWeightRange) {
-    FontWeightRange[FontWeightRange["MIN"] = 100] = "MIN";
-    FontWeightRange[FontWeightRange["MAX"] = 900] = "MAX";
-})(FontWeightRange || (FontWeightRange = {}));
 var IconType;
 (function (IconType) {
     IconType["PREFIX_ICON"] = "PREFIXICON";
@@ -211,7 +208,7 @@ export function Chip(options, parent = null) {
                     chipDirection: options.direction,
                     onClose: options.onClose,
                     onClicked: options.onClicked,
-                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/chip.ets", line: 348, col: 3 });
+                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/chip.ets", line: 344, col: 3 });
                 ViewPU.create(componentCall);
                 let paramsLambda = () => {
                     return {
@@ -804,8 +801,8 @@ export class ChipComponent extends ViewPU {
     }
     getLabelFontWeight() {
         if (this.getChipActive()) {
-            let index = Number(LengthMetrics.resource(this.theme.label.activatedFontWeight).value);
-            return (index >= FontWeightRange.MIN && index <= FontWeightRange.MAX) ?
+            let index = LengthMetrics.resource(this.theme.label.activatedFontWeight).value;
+            return (index >= fontWeightMin && index <= fontWeightMax) ?
                 index : FontWeight.Medium;
         }
         return FontWeight.Regular;
@@ -922,14 +919,14 @@ export class ChipComponent extends ViewPU {
         if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) ||
             this.prefixIcon?.src) {
             labelMargin.left = (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) ?
-                this.sizeToVp(this.theme.label.smallDefaultMargin.left) :
-                this.sizeToVp(this.theme.label.normalDefaultMargin.left);
+            this.sizeToVp(this.theme.label.smallDefaultMargin.left) :
+            this.sizeToVp(this.theme.label.normalDefaultMargin.left);
         }
         if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
             this.suffixIcon?.src || this.useDefaultSuffixIcon || this.allowClose) {
             labelMargin.right = (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) ?
-                this.sizeToVp(this.theme.label.smallDefaultMargin.right) :
-                this.sizeToVp(this.theme.label.normalDefaultMargin.right);
+            this.sizeToVp(this.theme.label.smallDefaultMargin.right) :
+            this.sizeToVp(this.theme.label.normalDefaultMargin.right);
         }
         return labelMargin;
     }
@@ -942,8 +939,8 @@ export class ChipComponent extends ViewPU {
         else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) ||
             this.prefixIcon?.src) {
             labelMargin.left = (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) ?
-                this.sizeToVp(this.theme.label.smallMargin.left) :
-                this.sizeToVp(this.theme.label.smallMargin.left);
+            this.sizeToVp(this.theme.label.smallMargin.left) :
+            this.sizeToVp(this.theme.label.smallMargin.left);
         }
         if (this.label?.labelMargin?.right !== void (0) &&
             this.toVp(this.label.labelMargin.right) >= 0) {
@@ -952,8 +949,8 @@ export class ChipComponent extends ViewPU {
         else if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
             this.suffixIcon?.src || this.useDefaultSuffixIcon || this.allowClose) {
             labelMargin.right = (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) ?
-                this.sizeToVp(this.theme.label.smallMargin.right) :
-                this.sizeToVp(this.theme.label.smallMargin.right);
+            this.sizeToVp(this.theme.label.smallMargin.right) :
+            this.sizeToVp(this.theme.label.smallMargin.right);
         }
         return labelMargin;
     }
@@ -1079,7 +1076,7 @@ export class ChipComponent extends ViewPU {
     }
     getActiveIconColor() {
         return this.chipNodeOnFocus ? this.theme.prefixIcon.focusActivatedColor :
-            this.theme.prefixIcon.activatedFillColor;
+        this.theme.prefixIcon.activatedFillColor;
     }
     getFillIconColor(iconType) {
         if (iconType === IconType.PREFIX_ICON) {
@@ -1161,15 +1158,15 @@ export class ChipComponent extends ViewPU {
         }
         else {
             return ((this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) ?
-                this.sizeToVp(this.theme.chipNode.smallBorderRadius) :
-                this.sizeToVp(this.theme.chipNode.normalBorderRadius));
+            this.sizeToVp(this.theme.chipNode.smallBorderRadius) :
+            this.sizeToVp(this.theme.chipNode.normalBorderRadius));
         }
     }
     getChipNodeBackGroundColor() {
         let currentColor;
         if (this.chipNodeOnFocus && !this.isSetbackgroundColor()) {
             currentColor = this.getChipActive() ? this.theme.chipNode.focusActivatedBgColor :
-                this.theme.chipNode.focusBgColor;
+            this.theme.chipNode.focusBgColor;
             return currentColor;
         }
         if (this.getChipActive()) {
@@ -1185,7 +1182,7 @@ export class ChipComponent extends ViewPU {
         catch (err) {
             hilog.error(0x3900, 'Ace', `Chip resourceColor, error: ${err.toString()}`);
             sourceColor = ColorMetrics.resourceColor(this.getChipActive() ?
-                this.theme.chipNode.activatedBackgroundColor : this.theme.chipNode.backgroundColor);
+            this.theme.chipNode.activatedBackgroundColor : this.theme.chipNode.backgroundColor);
         }
         if (this.isShowPressedBackGroundColor) {
             return sourceColor
@@ -1210,7 +1207,7 @@ export class ChipComponent extends ViewPU {
         else {
             this.chipNodeSize = this.chipSize;
             return (this.chipNodeSize?.height !== void (0) && this.toVp(this.chipNodeSize?.height) >= 0) ?
-                this.toVp(this.chipNodeSize?.height) : this.theme.chipNode.normalHeight;
+            this.toVp(this.chipNodeSize?.height) : this.theme.chipNode.normalHeight;
         }
     }
     getLabelWidth() {
@@ -1264,7 +1261,7 @@ export class ChipComponent extends ViewPU {
     }
     getReserveChipNodeWidth() {
         return this.getCalculateChipNodeWidth() - this.getLabelWidth() +
-            this.theme.chipNode.minLabelWidth;
+        this.theme.chipNode.minLabelWidth;
     }
     getChipEnable() {
         return this.chipEnabled || this.chipEnabled === void (0);
@@ -1319,8 +1316,8 @@ export class ChipComponent extends ViewPU {
             this.chipBlendColor = Color.Transparent;
         });
         Context.animateTo({ duration: 150, curve: Curve.FastOutLinearIn, onFinish: () => {
-                this.deleteChip = true;
-            } }, () => {
+            this.deleteChip = true;
+        } }, () => {
             this.chipScale = {
                 x: 0.85,
                 y: 0.85
@@ -1471,8 +1468,8 @@ export class ChipComponent extends ViewPU {
         });
         this.callbackId = this.getUIContext()
             .getHostContext()
-            ?.getApplicationContext()
-            ?.on('environment', this.callbacks);
+        ?.getApplicationContext()
+        ?.on('environment', this.callbacks);
     }
     getVisibility() {
         if (this.toVp(this.getChipNodeHeight()) > 0) {
@@ -1500,8 +1497,8 @@ export class ChipComponent extends ViewPU {
         if (this.callbackId) {
             this.getUIContext()
                 .getHostContext()
-                ?.getApplicationContext()
-                ?.off('environment', this.callbackId);
+            ?.getApplicationContext()
+            ?.off('environment', this.callbackId);
             this.callbackId = void (0);
         }
     }

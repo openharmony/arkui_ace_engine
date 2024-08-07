@@ -25,15 +25,12 @@ import hilog from '@ohos.hilog';
 
 const resourceFn = resourceManager.getSystemResourceManager();
 const shadowRange: number = 6;
+const fontWeightMin: number = 100;
+const fontWeightMax: number = 900;
 
 export enum ChipSize {
   NORMAL = "NORMAL",
   SMALL = "SMALL"
-}
-
-enum FontWeightRange {
-  MIN = 100,
-  MAX = 900,
 }
 
 enum IconType {
@@ -525,7 +522,7 @@ export struct ChipComponent {
   private getLabelFontWeight(): FontWeight | number {
     if (this.getChipActive()) {
       let index = LengthMetrics.resource(this.theme.label.activatedFontWeight as Resource).value;
-      return (index >= FontWeightRange.MIN && index <= FontWeightRange.MAX) ?
+      return (index >= fontWeightMin && index <= fontWeightMax) ?
         index : FontWeight.Medium;
     }
     return FontWeight.Regular;
@@ -818,7 +815,7 @@ export struct ChipComponent {
   }
 
   private getColorArray(userDefined: ResourceColor | undefined, focusColor: ResourceColor,
-    normalColor: ResourceColor): ResourceColor[] {
+                        normalColor: ResourceColor): ResourceColor[] {
     if (userDefined) {
       return [userDefined];
     }
