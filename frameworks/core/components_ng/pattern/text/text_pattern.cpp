@@ -3615,7 +3615,7 @@ void TextPattern::UpdateFontColor(const Color& value)
         for (auto &&info : paragraphs) {
             auto paragraph = info.paragraph;
             CHECK_NULL_VOID(paragraph);
-            int32_t length = paragraph->GetParagraphText().length();
+            auto length = paragraph->GetParagraphText().length();
             paragraph->UpdateColor(0, length, value);
         }
     } else {
