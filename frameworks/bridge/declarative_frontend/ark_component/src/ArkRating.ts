@@ -48,7 +48,7 @@ class RatingStarStyleModifier extends ModifierWithKey<ArkStarStyle> {
     super(value);
   }
   static identity: Symbol = Symbol('ratingStarStyle');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().rating.resetStarStyle(node);
     } else {
@@ -146,7 +146,7 @@ globalThis.Rating.attributeModifier = function (modifier: ArkComponent): void {
 };
 
 // @ts-ignore
-globalThis.Rating.contentModifier = function (modifier) {
+globalThis.Rating.contentModifier = function (modifier): void {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {

@@ -28,6 +28,7 @@ constexpr Dimension TEXT_DRAG_DEFAULT_OFFSET = 8.0_vp;
 
 class TextDragPattern;
 enum class DragAnimType { FLOATING, FLOATING_CANCEL, DEFAULT };
+
 class TextDragOverlayModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(TextDragOverlayModifier, OverlayModifier);
 
@@ -49,22 +50,22 @@ public:
         CHECK_NULL_VOID(modifier);
         modifier->SetAnimateFlag(false);
         };
+        SetShadowOpacity(0.0);
         option.SetOnFinishEvent(finishFuc);
         auto propertyCallback = [weakModifier = WeakClaim(this)]() {
             auto modifier = weakModifier.Upgrade();
             CHECK_NULL_VOID(modifier);
             modifier->SetBackgroundOffset(TEXT_DRAG_DEFAULT_OFFSET.ConvertToPx());
+            modifier->SetShadowOpacity(1.0);
         };
         AnimationUtils::Animate(option, propertyCallback, option.GetOnFinishEvent());
     }
-    Color GetDragBackgroundColor(const Color& defaultColor);
-    DragAnimType type_ = DragAnimType::DEFAULT;
+
     bool IsHandlesShow()
     {
         return isHandlesShow_;
     }
-    void PaintBackground(const RSPath& path, RSCanvas& canvas, RefPtr<TextDragPattern> textDragPattern);
-    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas);
+
     void UpdateHandlesShowFlag(bool isHandlesShow)
     {
         isHandlesShow_ = isHandlesShow;
@@ -75,28 +76,27 @@ public:
         isAnimating_ = isAnimate;
     }
 
-    void onDraw(DrawingContext& context) override;
-    void SetBackgroundOffset(float offset);
-    void SetSelectedBackgroundOpacity(float opacity);
-    void SetSelectedColor(uint32_t selectedColor)
-    {
-        CHECK_NULL_VOID(selectedColor_);
-        selectedColor_->Set(static_cast<int32_t>(selectedColor));
-    }
-        void SetShadowOpacity(float opacity)
+    void SetShadowOpacity(float opacity)
     {
         CHECK_NULL_VOID(shadowOpacity_);
         shadowOpacity_->Set(opacity);
     }
+
+    void PaintBackground(const RSPath& path, RSCanvas& canvas, RefPtr<TextDragPattern> textDragPattern);
+    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas);
+    void onDraw(DrawingContext& context) override;
+    void SetBackgroundOffset(float offset);
+    void SetSelectedBackgroundOpacity(float opacity);
+
 protected:
     WeakPtr<Pattern> pattern_;
     bool isAnimating_ = false;
     bool isHandlesShow_ = false;
-    RefPtr<PropertyInt> selectedColor_;
-    RefPtr<AnimatablePropertyFloat> handleOpacity_;
-    RefPtr<AnimatablePropertyFloat> shadowOpacity_;
     RefPtr<AnimatablePropertyFloat> backgroundOffset_;
     RefPtr<AnimatablePropertyFloat> selectedBackgroundOpacity_;
+private:
+    DragAnimType type_ = DragAnimType::DEFAULT;
+    RefPtr<AnimatablePropertyFloat> shadowOpacity_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextDragOverlayModifier);
 };

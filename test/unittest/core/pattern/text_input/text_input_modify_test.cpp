@@ -29,7 +29,6 @@
 
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_data_detector_mgr.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
@@ -1098,11 +1097,11 @@ HWTEST_F(TextFieldModifyTest, OnScrollEndMenuVisibile001, TestSize.Level1)
      * tc.expected: step2. Check if the Menu Visibile.
     */
     pattern_->selectOverlay_->SetUsingMouse(false);
-    auto selectArea = pattern_->selectOverlay_->GetSelectArea();
+    pattern_->isTextSelectionMenuShow_ = true;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::SHOW;
+    pattern_->SetSelectionFlag(5.0f, 5.0f, options);
 
-    pattern_->SetSelectionFlag(0.0f, 10.0f);
-    selectArea.SetWidth(8.0f);
-    selectArea.SetHeight(2.0f);
     pattern_->OnScrollEndCallback();
     EXPECT_TRUE(pattern_->selectOverlay_->IsCurrentMenuVisibile());
 
@@ -1570,7 +1569,7 @@ HWTEST_F(TextFieldModifyTest, CreateFrameNode001, TestSize.Level1)
      */
     auto frameNode1 = TextFieldModelNG::CreateFrameNode(ID, "", "", false);
     EXPECT_NE(frameNode1, nullptr);
-
+ 
     /**
      * @tc.steps: step2. Set CustomerDraggable true. Call function OnModifyDone.
      * @tc.expected: Check if the text draggable.
@@ -1578,7 +1577,7 @@ HWTEST_F(TextFieldModifyTest, CreateFrameNode001, TestSize.Level1)
     auto frameNode2 = TextFieldModelNG::CreateFrameNode(ID, "", HELLO_TEXT, true);
     EXPECT_NE(frameNode2, nullptr);
 }
-
+ 
 /**
  * @tc.name: ProcessDefaultStyleAndBehaviors001
  * @tc.desc: Test the OnModifyDone.
@@ -1595,7 +1594,7 @@ HWTEST_F(TextFieldModifyTest, ProcessDefaultStyleAndBehaviors001, TestSize.Level
         model.ProcessDefaultStyleAndBehaviors(frameNode);
         ASSERT_NE(frameNode, nullptr);
     });
-
+ 
     /**
      * @tc.steps: step2. Set CustomerDraggable true. Call function OnModifyDone.
      * @tc.expected: Check if the text draggable.
@@ -1608,7 +1607,7 @@ HWTEST_F(TextFieldModifyTest, ProcessDefaultStyleAndBehaviors001, TestSize.Level
         ASSERT_NE(frameNode, nullptr);
     });
 }
-
+ 
 /**
  * @tc.name: SetBackgroundColor001
  * @tc.desc: Test the OnModifyDone.
@@ -1630,7 +1629,7 @@ HWTEST_F(TextFieldModifyTest, SetBackgroundColor001, TestSize.Level1)
         model.SetBackgroundColor(BUBBLE_PAINT_PROPERTY_MASK_COLOR, false);
     });
 }
-
+ 
 /**
  * @tc.name: SetPadding001
  * @tc.desc: Test the OnModifyDone.
@@ -1650,7 +1649,7 @@ HWTEST_F(TextFieldModifyTest, SetPadding001, TestSize.Level1)
         padding.bottom = CalcLength(PADDING_FIVE);
         model.SetPadding(padding, edge, true);
     });
-
+ 
     /**
      * @tc.steps: step2. Set CustomerDraggable true. Call function OnModifyDone.
      * @tc.expected: Check if the text draggable.
@@ -1665,7 +1664,7 @@ HWTEST_F(TextFieldModifyTest, SetPadding001, TestSize.Level1)
         model.SetPadding(padding, edge, false);
     });
 }
-
+ 
 /**
  * @tc.name: SetInputStyle001
  * @tc.desc: Test the OnModifyDone.
@@ -1682,7 +1681,7 @@ HWTEST_F(TextFieldModifyTest, SetInputStyle001, TestSize.Level1)
         frameNode->GetPattern<TextFieldPattern>()->isTextInput_ = true;
         model.SetInputStyle(frameNode, InputStyle::DEFAULT);
     });
-
+ 
     /**
      * @tc.steps: step2. Set CustomerDraggable true. Call function OnModifyDone.
      * @tc.expected: Check if the text draggable.
@@ -1692,7 +1691,7 @@ HWTEST_F(TextFieldModifyTest, SetInputStyle001, TestSize.Level1)
         ASSERT_NE(frameNode, nullptr);
         model.SetInputStyle(frameNode, InputStyle::DEFAULT);
     });
-
+ 
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         ASSERT_NE(frameNode, nullptr);
@@ -1700,7 +1699,7 @@ HWTEST_F(TextFieldModifyTest, SetInputStyle001, TestSize.Level1)
         model.SetInputStyle(frameNode, InputStyle::INLINE);
     });
 }
-
+ 
 /**
  * @tc.name: SetTextAlign001
  * @tc.desc: Test the SetTextAlign.
@@ -1718,7 +1717,7 @@ HWTEST_F(TextFieldModifyTest, SetTextAlign001, TestSize.Level1)
         ASSERT_NE(pattern, nullptr);
         model.SetTextAlign(frameNode, TextAlign::JUSTIFY);
     });
-
+ 
     /**
      * @tc.steps: step2. Initialize text input.
      */
@@ -1730,7 +1729,7 @@ HWTEST_F(TextFieldModifyTest, SetTextAlign001, TestSize.Level1)
         model.SetTextAlign(frameNode, TextAlign::START);
     });
 }
-
+ 
 /**
  * @tc.name: ResetMaxLength001
  * @tc.desc: Test the ResetMaxLength.
@@ -1749,7 +1748,7 @@ HWTEST_F(TextFieldModifyTest, ResetMaxLength001, TestSize.Level1)
         model.ResetMaxLength(frameNode);
     });
 }
-
+ 
 /**
  * @tc.name: SetEnterKeyType001
  * @tc.desc: Test the OnModifyDone.
@@ -1779,7 +1778,7 @@ HWTEST_F(TextFieldModifyTest, SetEnterKeyType001, TestSize.Level1)
         model.SetEnterKeyType(frameNode, TextInputAction::NONE);
     });
 }
-
+ 
 /**
  * @tc.name: GetTextSelectionIndex001
  * @tc.desc: Test the OnModifyDone.
@@ -1829,7 +1828,7 @@ HWTEST_F(TextFieldModifyTest, SetPlaceholderFont001, TestSize.Level1)
         model.SetPlaceholderFont(font);
     });
 }
-
+ 
 /**
  * @tc.name: SetShowCounter001
  * @tc.desc: Test the OnModifyDone.
@@ -1851,7 +1850,7 @@ HWTEST_F(TextFieldModifyTest, SetShowCounter001, TestSize.Level1)
         model.SetShowCounter(false);
     });
 }
-
+ 
 /**
  * @tc.name: SetBackBorder001
  * @tc.desc: Test the OnModifyDone.
@@ -1874,7 +1873,7 @@ HWTEST_F(TextFieldModifyTest, SetBackBorder001, TestSize.Level1)
         EXPECT_FALSE(renderContext->HasBorderStyle());
     });
 }
-
+ 
 /**
  * @tc.name: SetCustomKeyboard001
  * @tc.desc: Test the OnModifyDone.
@@ -1892,7 +1891,7 @@ HWTEST_F(TextFieldModifyTest, SetCustomKeyboard001, TestSize.Level1)
         EXPECT_TRUE(frameNode->GetPattern<TextFieldPattern>());
     });
 }
-
+ 
 /**
  * @tc.name: SetCaretStyle001
  * @tc.desc: Test the OnModifyDone.
@@ -1909,7 +1908,7 @@ HWTEST_F(TextFieldModifyTest, SetCaretStyle001, TestSize.Level1)
         caretStyle.caretWidth = STROKE_DASH_1;
         model.SetCaretStyle(frameNode, caretStyle);
     });
-
+ 
     /**
      * @tc.steps: step2. Initialize text input.
      */
@@ -1919,7 +1918,7 @@ HWTEST_F(TextFieldModifyTest, SetCaretStyle001, TestSize.Level1)
         model.SetCaretStyle(frameNode, caretStyle);
     });
 }
-
+ 
 /**
  * @tc.name: SetTextFieldText001
  * @tc.desc: Test the OnModifyDone.

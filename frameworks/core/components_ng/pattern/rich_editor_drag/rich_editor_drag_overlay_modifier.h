@@ -26,6 +26,7 @@
 
 namespace OHOS::Ace::NG {
 class TextDragPattern;
+
 class RichEditorDragOverlayModifier : public TextDragOverlayModifier {
     DECLARE_ACE_TYPE(RichEditorDragOverlayModifier, TextDragOverlayModifier);
 

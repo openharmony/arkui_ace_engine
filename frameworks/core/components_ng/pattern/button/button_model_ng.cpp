@@ -308,6 +308,11 @@ RefPtr<FrameNode> ButtonModelNG::CreateFrameNode(int32_t nodeId)
 void ButtonModelNG::Padding(const PaddingProperty& paddingNew, const Edge& paddingOld)
 {
     NG::ViewAbstract::SetPadding(paddingNew);
+    auto button = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(button);
+    auto pattern = button->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHasCustomPadding(true);
 }
 
 void ButtonModelNG::OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc)

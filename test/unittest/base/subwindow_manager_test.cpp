@@ -32,11 +32,11 @@ public:
 };
 
 /**
- * @tc.name: SubwindowManagerTest_ShowDragPreviewWindowNG001
- * @tc.desc: Test frame node method ShowDragPreviewWindowNG
+ * @tc.name: SubwindowManagerTest_ShowPreviewNG001
+ * @tc.desc: Test frame node method ShowPreviewNG
  * @tc.type: FUNC
  */
-HWTEST_F(SubwindowManagerTest, ShowDragPreviewWindowNG001, TestSize.Level1)
+HWTEST_F(SubwindowManagerTest, ShowPreviewNG001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. get subwindowManager.
@@ -46,30 +46,30 @@ HWTEST_F(SubwindowManagerTest, ShowDragPreviewWindowNG001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. 
-     * @tc.expected: expect ShowDragPreviewWindowNG return nullptr.
+     * @tc.expected: expect ShowPreviewNG return nullptr.
      */
-    EXPECT_EQ(manager->ShowDragPreviewWindowNG(), nullptr);
+    EXPECT_EQ(manager->ShowPreviewNG(), nullptr);
 }
 
 /**
- * @tc.name: SubwindowManagerTest_HideDragPreviewWindowNG001
- * @tc.desc: Test frame node method HideDragPreviewWindowNG
+ * @tc.name: SubwindowManagerTest_HidePreviewNG001
+ * @tc.desc: Test frame node method HidePreviewNG
  * @tc.type: FUNC
  */
-HWTEST_F(SubwindowManagerTest, HideDragPreviewWindowNG001, TestSize.Level1)
+HWTEST_F(SubwindowManagerTest, HidePreviewNG001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. get subwindowManager, and initialize parameters.
      */
     auto manager = SubwindowManager::GetInstance();
     ASSERT_NE(manager, nullptr);
-    auto subwindow = manager->ShowDragPreviewWindowNG();
+    auto subwindow = manager->ShowPreviewNG();
     ASSERT_EQ(subwindow, nullptr);
 
     /**
-     * @tc.steps: step2. call HideDragPreviewWindowNG.
-     * @tc.expected: HideDragPreviewWindowNG return void.
+     * @tc.steps: step2. call HidePreviewNG.
+     * @tc.expected: HidePreviewNG return void.
      */
-    manager->HideDragPreviewWindowNG();
+    manager->HidePreviewNG();
 }
 }

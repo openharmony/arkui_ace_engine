@@ -75,6 +75,7 @@ constexpr int32_t BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN = 1000;
 constexpr SharedTransitionEffectType DEFAULT_SHARED_EFFECT = SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE;
 constexpr int32_t DEFAULT_TAP_FINGER = 1;
 constexpr int32_t DEFAULT_TAP_COUNT = 1;
+constexpr double DEFAULT_TAP_DISTANCE = std::numeric_limits<double>::infinity();
 constexpr int32_t DEFAULT_LONG_PRESS_FINGER = 1;
 constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 500;
 constexpr int32_t DEFAULT_PINCH_FINGER = 2;
@@ -4984,11 +4985,11 @@ ArkUINativeModuleValue CommonBridge::SetDragPreview(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> inspectorId = runtimeCallInfo->GetCallArgRef(NUM_1);
- 
+
     struct ArkUIDragPreview dragPreview = { "" };
-    
+    std::string stringValue;
     if (inspectorId->IsString(vm)) {
-        std::string stringValue = inspectorId->ToString(vm)->ToString(vm);
+        stringValue = inspectorId->ToString(vm)->ToString(vm);
         dragPreview.inspectorId = stringValue.c_str();
     }
 
@@ -5968,8 +5969,8 @@ void CommonBridge::SetGestureTag(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t
     }
 }
 
-void CommonBridge::GetTapGestureValue(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& count, uint32_t argNumber)
+void CommonBridge::GetTapGestureValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers,
+    int32_t& count, double& distanceThreshold, uint32_t argNumber)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
@@ -5983,6 +5984,11 @@ void CommonBridge::GetTapGestureValue(
     if (!countArg.IsNull() && !countArg->IsUndefined()) {
         auto countValue = static_cast<int32_t>(countArg->ToNumber(vm)->Value());
         count = countValue < DEFAULT_TAP_COUNT ? DEFAULT_TAP_COUNT : countValue;
+    }
+    Local<JSValueRef> distanceArg = runtimeCallInfo->GetCallArgRef(argNumber + 2);
+    if (!distanceArg.IsNull() && !distanceArg->IsUndefined()) {
+        auto distanceValue = static_cast<int32_t>(distanceArg->ToNumber(vm)->Value());
+        distanceThreshold = distanceValue < 0 ? DEFAULT_TAP_DISTANCE : distanceValue;
     }
 }
 
@@ -6838,8 +6844,10 @@ ArkUINativeModuleValue CommonBridge::AddTapGesture(ArkUIRuntimeCallInfo* runtime
     GetGestureCommonValue(runtimeCallInfo, priority, mask);
     int32_t fingers = DEFAULT_TAP_FINGER;
     int32_t count = DEFAULT_TAP_COUNT;
-    GetTapGestureValue(runtimeCallInfo, fingers, count, NUM_4);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createTapGesture(count, fingers, nullptr);
+    double distanceThreshold = DEFAULT_TAP_DISTANCE;
+    GetTapGestureValue(runtimeCallInfo, fingers, count, distanceThreshold, NUM_4);
+    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->
+        createTapGestureWithDistanceThreshold(count, fingers, distanceThreshold, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_3, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_6, gesture);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToNode(nativeNode, gesture, priority, mask);
@@ -6986,8 +6994,10 @@ ArkUINativeModuleValue CommonBridge::AddTapGestureToGroup(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     int32_t fingers = DEFAULT_TAP_FINGER;
     int32_t count = DEFAULT_TAP_COUNT;
-    GetTapGestureValue(runtimeCallInfo, fingers, count, NUM_1);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createTapGesture(count, fingers, nullptr);
+    double distanceThreshold = DEFAULT_TAP_DISTANCE;
+    GetTapGestureValue(runtimeCallInfo, fingers, count, distanceThreshold, NUM_1);
+    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->
+        createTapGestureWithDistanceThreshold(count, fingers, distanceThreshold, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_0, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_3, gesture);
     auto* group = GetGestureGroup(runtimeCallInfo, NUM_4);

@@ -1176,6 +1176,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     if (isFormRender_) {
         Platform::AceViewOhos::SurfaceChanged(aceView, round(formWidth_), round(formHeight_),
             deviceHeight >= deviceWidth ? 0 : 1);
+        container->CheckAndSetFontFamily();
         SetFontScaleAndWeightScale(container, instanceId_);
         // Set sdk version in module json mode for form
         auto pipeline = container->GetPipelineContext();
@@ -2196,10 +2197,23 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_]() {
+    RefPtr<NG::SafeAreaManager> safeAreaManager = nullptr;
+    auto pipelineContext = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (context) {
+        safeAreaManager = context->GetSafeAreaManager();
+    }
+    auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_, safeAreaManager]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
+            if (safeAreaManager) {
+                uint32_t keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
+                safeAreaManager->UpdateKeyboardSafeArea(keyboardHeight, config.Width());
+                safeAreaManager->UpdateCutoutSafeArea(
+                    container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT),
+                    NG::OptionalSize<uint32_t>(config.Width(), config.Height()));
+            }
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
             TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect to : %{public}s",
@@ -2223,20 +2237,17 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
             static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
-        if (pipelineContext) {
-            // KeyboardInset and cutoutInset depend on rootHeight, need calculate again
-            pipelineContext->CheckAndUpdateKeyboardInset();
-            pipelineContext->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
-        }
         SubwindowManager::GetInstance()->OnWindowSizeChanged(container->GetInstanceId(),
             Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())),
             static_cast<WindowSizeChangeReason>(reason));
     };
-
-    auto pipelineContext = container->GetPipelineContext();
-    if (pipelineContext) {
-        pipelineContext->ChangeDarkModeBrightness();
-    }
+    auto changeBrightnessTask = [container]() {
+        auto pipelineContext = container->GetPipelineContext();
+        if (pipelineContext) {
+            pipelineContext->ChangeDarkModeBrightness();
+        }
+    };
+    taskExecutor->PostTask(std::move(changeBrightnessTask), TaskExecutor::TaskType::UI, "ArkUIUpdateBrightness");
     AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
     if (container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
         reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) {
@@ -2803,9 +2814,9 @@ int32_t UIContentImpl::CreateModalUIExtension(
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
         "[%{public}s][%{public}s][%{public}d]: create modal page, "
         "sessionId=%{public}d, isProhibitBack=%{public}d, isAsyncModalBinding=%{public}d, "
-        "isAllowedBeCovered=%{public}d",
+        "isAllowedBeCovered=%{public}d, prohibitedRemoveByRouter=%{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, sessionId, config.isProhibitBack,
-        config.isAsyncModalBinding, config.isAllowedBeCovered);
+        config.isAsyncModalBinding, config.isAllowedBeCovered, config.prohibitedRemoveByRouter);
     return sessionId;
 }
 

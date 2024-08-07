@@ -52,6 +52,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
+#include "core/common/font_change_observer.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/stylus/stylus_detector_default.h"
@@ -339,7 +340,7 @@ void PipelineContext::FlushDirtyNodeUpdate()
         node->ProcessPropertyDiff();
     }
 
-    if (!ViewStackProcessor::GetInstance()->IsEmpty()) {
+    if (!ViewStackProcessor::GetInstance()->IsEmpty() && !dirtyNodes_.empty()) {
         ACE_SCOPED_TRACE("Error update, node stack non-empty");
         LOGW("stack is not empty when call FlushDirtyNodeUpdate, node may be mounted to incorrect pos!");
     }
@@ -591,6 +592,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     taskScheduler_->StartRecordFrameInfo(GetCurrentFrameInfo(recvTime_, nanoTimestamp));
     taskScheduler_->FlushTask();
     UIObserverHandler::GetInstance().HandleLayoutDoneCallBack();
+    // flush correct rect again
+    taskScheduler_->FlushPersistAfterLayoutTask();
     taskScheduler_->FinishRecordFrameInfo();
     FlushNodeChangeFlag();
     FlushAnimationClosure();
@@ -866,8 +869,17 @@ void PipelineContext::FlushFocusScroll()
 void PipelineContext::FlushPipelineImmediately()
 {
     CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE();
-    FlushPipelineWithoutAnimation();
+    ACE_SCOPED_TRACE("PipelineContext::FlushPipelineImmediately, isLayouting_ %d", taskScheduler_->IsLayouting());
+    if (!taskScheduler_->IsLayouting()) {
+        FlushPipelineWithoutAnimation();
+        return;
+    }
+    auto task = [weak = WeakClaim(this)]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->FlushPipelineWithoutAnimation();
+    };
+    AddAfterLayoutTask(task);
 }
 
 void PipelineContext::RebuildFontNode()
@@ -1028,6 +1040,7 @@ void PipelineContext::SetupRootElement()
         DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
+    fontManager_->AddFontObserver(selectOverlayManager_);
     if (!privacySensitiveManager_) {
         privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
     }
@@ -1097,6 +1110,7 @@ void PipelineContext::SetupSubRootElement()
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
+    fontManager_->AddFontObserver(selectOverlayManager_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
     focusManager_ = GetOrCreateFocusManager();
     postEventManager_ = MakeRefPtr<PostEventManager>();
@@ -1747,6 +1761,15 @@ void PipelineContext::OnVirtualKeyboardHeightChange(uint32_t keyboardHeight, dou
             AceLogTag::ACE_KEYBOARD, "KeyboardHeight as same as last time, don't need to calculate keyboardOffset");
         return;
     }
+
+    if (!forceChange && (NearEqual(keyboardHeight + 1, safeAreaManager_->GetKeyboardInset().Length()) ||
+        NearEqual(keyboardHeight - 1, safeAreaManager_->GetKeyboardInset().Length())) &&
+        prevKeyboardAvoidMode_ == safeAreaManager_->KeyboardSafeAreaEnabled() && manager->PrevHasTextFieldPattern()) {
+        TAG_LOGI(
+            AceLogTag::ACE_KEYBOARD, "Ignore ileagal keyboard height change");
+        return;
+    }
+
     manager->UpdatePrevHasTextFieldPattern();
     prevKeyboardAvoidMode_ = safeAreaManager_->KeyboardSafeAreaEnabled();
 
@@ -1775,9 +1798,12 @@ void PipelineContext::OnVirtualKeyboardHeightChange(uint32_t keyboardHeight, dou
             "origin positionY: %{public}f, height %{public}f", positionY, height);
 
         float positionYWithOffset = positionY;
-        float currentPos = manager->GetClickPosition().GetY() - context->GetRootRect().GetOffset().GetY() +
-            context->GetCurrentWindowRect().Top() - context->GetSafeAreaManager()->GetKeyboardOffset();
-        if (manager->GetIfFocusTextFieldIsInline()) {
+        float currentPos = manager->GetClickPosition().GetY() - context->GetRootRect().GetOffset().GetY() -
+            context->GetSafeAreaManager()->GetKeyboardOffset();
+
+        if (!manager->GetOnFocusTextField().Upgrade()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "use origin arg from the window");
+        } else if (manager->GetIfFocusTextFieldIsInline()) {
             manager->GetInlineTextFieldAvoidPositionYAndHeight(positionY, height);
             positionYWithOffset = positionY;
         } else if (!NearEqual(positionY, currentPos) && !context->IsEnableKeyBoardAvoidMode()) {
@@ -2318,9 +2344,13 @@ bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<Vie
     }
     CHECK_NULL_RETURN(dumpNode, false);
     dumpNode->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer, needsRecordData);
-    if (node && node->GetTag() == V2::DIALOG_ETS_TAG) {
-        viewDataWrap->SetPageUrl(node->GetTag());
-        return true;
+    // The page path may not be obtained in the container, use the node tag as the page path.
+    if (node) {
+        const auto& nodeTag = node->GetTag();
+        if (nodeTag == V2::DIALOG_ETS_TAG || nodeTag == V2::SHEET_PAGE_TAG || nodeTag == V2::MODAL_PAGE_TAG) {
+            viewDataWrap->SetPageUrl(nodeTag);
+            return true;
+        }
     }
     CHECK_NULL_RETURN(pageNode, false);
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
@@ -2376,6 +2406,13 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     ACE_DCHECK(!params.empty());
     if (window_) {
         DumpLog::GetInstance().Print(1, "LastRequestVsyncTime: " + std::to_string(window_->GetLastRequestVsyncTime()));
+#ifdef ENABLE_ROSEN_BACKEND
+        auto rsUIDirector = window_->GetRSUIDirector();
+        if (rsUIDirector) {
+            DumpLog::GetInstance().Print(1, "transactionFlags: [" + std::to_string(getpid()) + "," +
+                std::to_string(rsUIDirector->GetIndex()) + "]");
+        }
+#endif
     }
     DumpLog::GetInstance().Print(1, "last vsyncId: " + std::to_string(GetFrameCount()));
     if (params[0] == "-element") {
@@ -2412,7 +2449,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         if (focusManager_) {
             focusManager_->DumpFocusManager();
         }
-    } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
+    } else if (params[0] == "-accessibility" || params[0] == "-inspector" || params[0] == "-simplify") {
         auto accessibilityManager = GetAccessibilityManager();
         if (accessibilityManager) {
             accessibilityManager->OnDumpInfoNG(params, windowId_);
@@ -2536,9 +2573,6 @@ void PipelineContext::FlushTouchEvents()
                 auto stamp =
                     std::chrono::duration_cast<std::chrono::nanoseconds>(idIter.second.time.time_since_epoch()).count();
                 if (targetTimeStamp > static_cast<uint64_t>(stamp)) {
-                    LOGI("Skip interpolation when there is no touch event after interpolation time point. "
-                         "(last stamp:%{public}" PRIu64 ", target stamp:%{public}" PRIu64 ")",
-                        static_cast<uint64_t>(stamp), targetTimeStamp);
                     continue;
                 }
                 TouchEvent newTouchEvent =
@@ -3231,6 +3265,9 @@ void PipelineContext::Destroy()
     rootNode_.Reset();
     accessibilityManagerNG_.Reset();
     stageManager_.Reset();
+    if (overlayManager_) {
+        overlayManager_->ClearUIExtensionNode();
+    }
     overlayManager_.Reset();
     sharedTransitionManager_.Reset();
     dragDropManager_.Reset();
@@ -3248,7 +3285,7 @@ void PipelineContext::Destroy()
     needRenderNode_.clear();
     dirtyRequestFocusNode_.Reset();
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PipelineContext::Destroy Check If need to close Keyboard");
-    if (textFieldManager_->GetImeShow()) {
+    if (textFieldManager_ && textFieldManager_->GetImeShow()) {
         InputMethodManager::GetInstance()->CloseKeyboardInPipelineDestroy();
     }
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -3411,6 +3448,7 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
     }
 
     if (action == DragEventAction::DRAG_EVENT_START) {
+        manager->EnsureStatusForPullIn();
         manager->RequireSummary();
         manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
         TAG_LOGI(AceLogTag::ACE_DRAG, "start drag, current windowId is %{public}d", container->GetWindowId());

@@ -1857,6 +1857,9 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart001, TestSize.Level1)
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     DragDropInfo dragDropInfo;
     dragDropInfo.customNode = customNode;
+    event->SetResult(DragRet::DRAG_FAIL);
+    guestureEventHub->OnDragStart(info, pipline, frameNode, dragDropInfo, event);
+    event->SetResult(DragRet::DRAG_CANCEL);
     guestureEventHub->OnDragStart(info, pipline, frameNode, dragDropInfo, event);
     EXPECT_TRUE(EventHub->dragDropProxy_ == false);
 }

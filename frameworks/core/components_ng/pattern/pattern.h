@@ -276,6 +276,11 @@ public:
 
     virtual void OnSensitiveStyleChange(bool isSensitive) {}
 
+    virtual bool AllowVisibleAreaCheck() const
+    {
+        return false;
+    }
+
     virtual bool IsRootPattern() const
     {
         return false;
@@ -503,6 +508,7 @@ public:
     virtual void OnDpiConfigurationUpdate() {}
     virtual void OnIconConfigurationUpdate() {}
     virtual void OnFontConfigurationUpdate() {}
+    virtual void OnFontScaleConfigurationUpdate() {}
 
     virtual bool ShouldDelayChildPressedState() const
     {

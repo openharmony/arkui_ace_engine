@@ -1723,25 +1723,6 @@ HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg005, TestSize.Level1)
 }
 
 /**
- * @tc.name: RichEditorOverlayTestNg006
- * @tc.desc: test CheckEditorTypeChange
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg006, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->ShowSelectOverlay(
-    richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
-
-    SelectOverlayInfo selectInfo;
-    richEditorPattern->selectOverlay_->CheckEditorTypeChange(selectInfo, TextSpanType::TEXT);
-    EXPECT_EQ(selectInfo.recreateOverlay, true);
-}
-
-/**
  * @tc.name: RichEditorOverlayTestNg007
  * @tc.desc: test OnMenuItemAction
  * @tc.type: FUNC

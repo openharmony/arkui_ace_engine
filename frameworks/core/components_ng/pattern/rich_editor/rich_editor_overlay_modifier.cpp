@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/progress/progress_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
-#include "core/components_ng/pattern/select_overlay/magnifier_painter.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -57,7 +56,6 @@ RichEditorOverlayModifier::RichEditorOverlayModifier(const WeakPtr<OHOS::Ace::NG
     AttachProperty(previewTextUnderlineWidth_);
     showPreviewTextDecoration_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(showPreviewTextDecoration_);
-    magnifierPainter_ = AceType::MakeRefPtr<MagnifierPainter>(pattern);
 }
 
 void RichEditorOverlayModifier::SetPreviewTextDecorationColor(const Color& value)
@@ -241,8 +239,6 @@ void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
     drawingContext.canvas.Restore();
     PaintScrollBar(drawingContext);
     PaintEdgeEffect(frameSize_->Get(), drawingContext.canvas);
-    CHECK_NULL_VOID(magnifierPainter_);
-    magnifierPainter_->PaintMagnifier(drawingContext.canvas);
 }
 
 void RichEditorOverlayModifier::UpdateScrollBar(PaintWrapper* paintWrapper)

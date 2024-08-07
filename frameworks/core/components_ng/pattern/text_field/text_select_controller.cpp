@@ -42,9 +42,7 @@ void TextSelectController::UpdateCaretIndex(int32_t index)
 {
     auto newIndex = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
     caretInfo_.index = newIndex;
-    if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "newIndex change to %{public}d", newIndex);
-    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "newIndex change to %{public}d", newIndex);
     firstHandleInfo_.index = newIndex;
     secondHandleInfo_.index = newIndex;
 }
@@ -164,7 +162,6 @@ void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset)
     auto index = ConvertTouchOffsetToPosition(localOffset);
     AdjustCursorPosition(index, localOffset);
     UpdateCaretIndex(index);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "now caret index = [%{public}d]", index);
     if (!contentController_->IsEmpty()) {
         UpdateCaretRectByPositionNearTouchOffset(index, localOffset);
         MoveHandleToContentRect(caretInfo_.rect, 0.0f);

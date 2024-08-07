@@ -27,7 +27,7 @@
 namespace OHOS::Ace::NG {
 TextFieldOverlayModifier::TextFieldOverlayModifier(
     const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, WeakPtr<ScrollEdgeEffect>&& edgeEffect)
-    : pattern_(pattern), edgeEffect_(edgeEffect), magnifierPainter_(pattern)
+    : pattern_(pattern), edgeEffect_(edgeEffect)
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
@@ -111,7 +111,6 @@ void TextFieldOverlayModifier::onDraw(DrawingContext& context)
     PaintEdgeEffect(frameSize_->Get(), context.canvas);
     PaintUnderline(context.canvas);
     PaintPreviewTextDecoration(context);
-    magnifierPainter_.PaintMagnifier(context.canvas);
 }
 
 void TextFieldOverlayModifier::GetFrameRectClip(RSRect& clipRect, std::vector<RSPoint>& clipRadius)
@@ -151,12 +150,24 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     if (textFieldPattern->IsNormalInlineState() && textFieldPattern->HasFocus()) {
         return;
     }
-
+    auto contentRect = textFieldPattern->GetContentRect();
     auto textFrameRect = textFieldPattern->GetFrameRect();
+    auto responseArea = textFieldPattern->GetResponseArea();
+    auto responseAreaWidth = responseArea ? responseArea->GetAreaRect().Width() : 0.0f;
+    auto clearNodeResponseArea = textFieldPattern->GetCleanNodeResponseArea();
+    responseAreaWidth += clearNodeResponseArea ? clearNodeResponseArea->GetAreaRect().Width() : 0.0f;
+    auto hasResponseArea = GreatNotEqual(responseAreaWidth, 0.0f);
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     Point leftPoint, rightPoint;
-    leftPoint.SetX(textFrameRect.Left());
+    if (isRTL) {
+        leftPoint.SetX(hasResponseArea ? 0.0 : contentRect.Left());
+        rightPoint.SetX(contentRect.Right());
+    } else {
+        leftPoint.SetX(contentRect.Left());
+        rightPoint.SetX(hasResponseArea ? textFrameRect.Width() : contentRect.Right());
+    }
+
     leftPoint.SetY(textFrameRect.Height());
-    rightPoint.SetX(textFrameRect.Right());
     rightPoint.SetY(textFrameRect.Height());
 
     RSPen pen;

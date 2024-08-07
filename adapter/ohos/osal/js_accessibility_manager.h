@@ -162,7 +162,7 @@ protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId) override;
     void DumpHandleEvent(const std::vector<std::string>& params) override;
     void DumpProperty(const std::vector<std::string>& params) override;
-    void DumpTree(int32_t depth, int64_t nodeID) override;
+    void DumpTree(int32_t depth, int64_t nodeID, bool isDumpSimplify = false) override;
 
 private:
     static constexpr int32_t INVALID_PARENT_ID = -2100000;
@@ -296,11 +296,18 @@ private:
         std::map<std::string, std::string>& paramsMap);
 
     RefPtr<NG::PipelineContext> GetPipelineByWindowId(uint32_t windowId);
-    void DumpTreeNG(bool useWindowId, uint32_t windowId, int64_t rootId);
+    void DumpTreeNG(bool useWindowId, uint32_t windowId, int64_t rootId, bool isDumpSimplify = false);
     void DumpTreeNG(const RefPtr<NG::FrameNode>& parent, int32_t depth,
-        int64_t nodeID, const CommonProperty& commonProperty);
+        int64_t nodeID, const CommonProperty& commonProperty, bool isDumpSimplify = false);
+    void DumpTreeNodeSafeAreaInfoNg(const RefPtr<NG::FrameNode>& node);
+    void DumpPadding(const std::unique_ptr<NG::PaddingProperty>& padding, std::string label);
+    void DumpBorder(const std::unique_ptr<NG::BorderWidthProperty>& border, std::string label);
+    void DumpTreeNodeCommonInfoNg(const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty);
+    void DumpTreeNodeSimplifyInfoNG(
+        const RefPtr<NG::FrameNode>& node, int32_t depth, const CommonProperty& commonProperty, int32_t childSize);
     void DumpTreeAccessibilityNodeNG(const RefPtr<NG::UINode>& uiNodeParent,
         int32_t depth, int64_t nodeID, const CommonProperty& commonProperty);
+    bool CheckDumpInfoParams(const std::vector<std::string> &params);
 
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
         const RefPtr<PipelineBase>& mainContext);

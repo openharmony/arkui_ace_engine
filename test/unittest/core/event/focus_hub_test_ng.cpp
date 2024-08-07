@@ -1678,8 +1678,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0032, TestSize.Level1)
     std::list<RefPtr<FocusHub>> focusNodes;
     auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
     EXPECT_EQ(itNewFocusNode, focusNodes.end());
-    EXPECT_FALSE(focusHub->PaintFocusState(true));
-    EXPECT_FALSE(focusHub->PaintFocusState(false));
+    EXPECT_FALSE(focusHub->PaintFocusState());
 }
 
 /**
@@ -1735,8 +1734,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0034, TestSize.Level1)
     auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
     EXPECT_EQ(itNewFocusNode, focusNodes.end());
     focusHub->onClearFocusStateCallback_ = []() {};
-    focusHub->ClearFocusState(true);
-    focusHub->ClearFocusState(false);
+    focusHub->ClearFocusState();
     EXPECT_NE(focusHub->focusStyleType_, FocusStyleType::NONE);
 }
 

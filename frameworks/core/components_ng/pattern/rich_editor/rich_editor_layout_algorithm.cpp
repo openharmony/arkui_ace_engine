@@ -96,34 +96,38 @@ void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<Sp
     }
 }
 
+std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureEmptyContent(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, {});
+    auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+    CHECK_NULL_RETURN(richEditorTheme, {});
+    auto defaultCaretHeight = richEditorTheme->GetDefaultCaretHeight().ConvertToPx();
+    auto width = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, {});
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, {});
+    auto presetParagraph = pattern->GetPresetParagraph();
+    if (!presetParagraph) {
+        pattern->PreferredParagraph();
+    }
+    auto contentHeight = defaultCaretHeight;
+    presetParagraph = pattern->GetPresetParagraph();
+    if (presetParagraph) {
+        contentHeight = presetParagraph->GetHeight();
+    }
+    return SizeF(width, static_cast<float>(contentHeight));
+}
+
 std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     ACE_SCOPED_TRACE("RichEditorMeasureContent");
     pManager_->Reset();
     SetPlaceholder(layoutWrapper);
-    if (spans_.empty()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, std::nullopt);
-        auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
-        CHECK_NULL_RETURN(richEditorTheme, std::nullopt);
-        auto defaultCaretHeight = richEditorTheme->GetDefaultCaretHeight().ConvertToPx();
-        auto width = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
-        auto host = layoutWrapper->GetHostNode();
-        CHECK_NULL_RETURN(host, std::nullopt);
-        auto pattern = host->GetPattern<RichEditorPattern>();
-        CHECK_NULL_RETURN(pattern, std::nullopt);
-        auto presetParagraph = pattern->GetPresetParagraph();
-        if (!presetParagraph) {
-            pattern->PreferredParagraph();
-        }
-        auto contentHeight = defaultCaretHeight;
-        presetParagraph = pattern->GetPresetParagraph();
-        if (presetParagraph) {
-            contentHeight = presetParagraph->GetHeight();
-        }
-        return SizeF(width, static_cast<float>(contentHeight));
-    }
+    CHECK_NULL_RETURN(!spans_.empty(), MeasureEmptyContent(contentConstraint, layoutWrapper));
 
     auto layoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
@@ -200,13 +204,13 @@ void RichEditorLayoutAlgorithm::UpdateRichTextRect(
     }
 }
 
-void RichEditorLayoutAlgorithm::SetPlaceholder(LayoutWrapper* layoutWrapper)
+bool RichEditorLayoutAlgorithm::SetPlaceholder(LayoutWrapper* layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, false);
     auto pattern = host->GetPattern<RichEditorPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetPlaceholder(spans_);
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->SetPlaceholder(spans_);
 }
 
 float RichEditorLayoutAlgorithm::GetShadowOffset(const std::list<RefPtr<SpanItem>>& group)

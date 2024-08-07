@@ -42,6 +42,15 @@ void TextFieldManagerNG::ClearOnFocusTextField(int32_t id)
     }
 }
 
+bool TextFieldManagerNG::OnBackPressed()
+{
+    auto pattern = onFocusTextField_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto textBasePattern = AceType::DynamicCast<TextBase>(pattern);
+    CHECK_NULL_RETURN(textBasePattern, false);
+    return textBasePattern->OnBackPressed();
+}
+
 void TextFieldManagerNG::SetClickPosition(const Offset& position)
 {
     auto pipeline =  PipelineContext::GetCurrentContext();
@@ -51,19 +60,10 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
         return;
     }
     auto rootWidth = pipeline->GetRootWidth();
-    if (GreatOrEqual(position.GetX(), rootWidth) || LessOrEqual(position.GetX(), 0.0f)) {
+    if (GreatOrEqual(position.GetX(), rootWidth) || LessNotEqual(position.GetX(), 0.0f)) {
         return;
     }
     position_ = position;
-}
-
-bool TextFieldManagerNG::OnBackPressed()
-{
-    auto pattern = onFocusTextField_.Upgrade();
-    CHECK_NULL_RETURN(pattern, false);
-    auto textBasePattern = AceType::DynamicCast<TextBase>(pattern);
-    CHECK_NULL_RETURN(textBasePattern, false);
-    return textBasePattern->OnBackPressed();
 }
 
 RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField)
@@ -155,7 +155,7 @@ bool TextFieldManagerNG::ScrollTextFieldToSafeArea()
         return ScrollToSafeAreaHelper(bottomInset, isShowKeyboard);
     } else if (pipeline->GetSafeAreaManager()->KeyboardSafeAreaEnabled()) {
         // hide keyboard only scroll when keyboard avoid mode is resize
-        return ScrollToSafeAreaHelper({ 0, 0 }, isShowKeyboard);
+        return ScrollToSafeAreaHelper({0, 0}, isShowKeyboard);
     }
     return false;
 }

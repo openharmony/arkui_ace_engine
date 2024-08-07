@@ -1087,8 +1087,6 @@ bool TabBarLayoutAlgorithm::IsSetMinMaxFontSize(LayoutWrapper* layoutWrapper, Re
         }
         if (tabBarPattern->GetBottomTabLabelStyle(index).minFontSize.value_or(0.0_vp).IsValid() ||
         tabBarPattern->GetBottomTabLabelStyle(index).maxFontSize.value_or(0.0_vp).IsValid()) {
-            pipelineContext->SetFontScale(originFontSizeScale_);
-            fontscale_ = originFontSizeScale_;
             return true;
         }
     }

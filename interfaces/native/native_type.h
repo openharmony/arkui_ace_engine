@@ -1040,6 +1040,18 @@ typedef enum {
 } ArkUI_ColorMode;
 
 /**
+ * @brief Enumerates the system color modes.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Light color mode. */
+    ARKUI_SYSTEM_COLOR_MODE_LIGHT = 0,
+    /** Dark color mode. */
+    ARKUI_SYSTEM_COLOR_MODE_DARK,
+} ArkUI_SystemColorMode;
+
+/**
  * @brief Enumerates the blur styles.
  *
  * @since 12
@@ -2013,6 +2025,13 @@ typedef enum {
     /** Tail area. */
     ARKUI_SAFE_AREA_EDGE_END = 1 << 3,
 } ArkUI_SafeAreaEdge;
+
+/**
+ * @brief Defines parameter used by the system font style callback event.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_SystemFontStyleEvent ArkUI_SystemFontStyleEvent;
 
 typedef struct {
     float x;
@@ -3615,7 +3634,7 @@ float OH_ArkUI_ListChildrenMainSizeOption_GetMainSize(ArkUI_ListChildrenMainSize
  * @return CustomSpanMeasureInfo实例。
  * @since 12
 */
-ArkUI_CustomSpanMeasureInfo* OH_ArkUI_CustomSpanMeasureInfo_Create();
+ArkUI_CustomSpanMeasureInfo* OH_ArkUI_CustomSpanMeasureInfo_Create(void);
 
 /**
  * @brief 销毁自定义段落组件测量信息。
@@ -3639,7 +3658,7 @@ float OH_ArkUI_CustomSpanMeasureInfo_GetFontSize(ArkUI_CustomSpanMeasureInfo* in
  * @return CustomSpanMetrics实例。
  * @since 12
 */
-ArkUI_CustomSpanMetrics* OH_ArkUI_CustomSpanMetrics_Create();
+ArkUI_CustomSpanMetrics* OH_ArkUI_CustomSpanMetrics_Create(void);
 
 /**
  * @brief 销毁自定义段落组件度量信息。
@@ -3678,7 +3697,7 @@ int32_t OH_ArkUI_CustomSpanMetrics_SetHeight(ArkUI_CustomSpanMetrics* metrics, f
  * @return CustomSpanDrawInfo实例。
  * @since 12
 */
-ArkUI_CustomSpanDrawInfo* OH_ArkUI_CustomSpanDrawInfo_Create();
+ArkUI_CustomSpanDrawInfo* OH_ArkUI_CustomSpanDrawInfo_Create(void);
 
 /**
  * @brief 销毁自定义段落组件绘制信息。
@@ -3721,7 +3740,7 @@ float OH_ArkUI_CustomSpanDrawInfo_GetLineBottom(ArkUI_CustomSpanDrawInfo* info);
  * @return 基线偏移量值。若函数参数异常，返回0.0f。
  * @since 12
 */
-float OH_ArkUI_CustomSpanDrawInfo_GetBaseLine(ArkUI_CustomSpanDrawInfo* info);
+float OH_ArkUI_CustomSpanDrawInfo_GetBaseline(ArkUI_CustomSpanDrawInfo* info);
 #ifdef __cplusplus
 };
 #endif

@@ -60,7 +60,7 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const ToastInfo& toastInfo)
     CHECK_NULL_RETURN(pattern, nullptr);
     pattern->SetToastInfo(toastInfo);
     pattern->SetTextNode(textNode);
-    UpdateTextLayoutProperty(textNode, toastInfo.message, toastInfo.isRightToLeft);
+    UpdateTextLayoutProperty(textNode, toastInfo.message, toastInfo.isRightToLeft, toastInfo.textColor);
     UpdateToastContext(toastNode);
     textNode->MountToParent(toastNode);
     auto align = Alignment::ParseAlignment(toastInfo.alignment);
@@ -83,7 +83,8 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const ToastInfo& toastInfo)
 }
 
 void ToastView::UpdateTextLayoutProperty(
-    const RefPtr<FrameNode>& textNode, const std::string& message, bool isRightToLeft)
+    const RefPtr<FrameNode>& textNode, const std::string& message,
+    bool isRightToLeft, const std::optional<Color>& textColor)
 {
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
@@ -94,7 +95,7 @@ void ToastView::UpdateTextLayoutProperty(
     auto fontSize = toastTheme->GetTextStyle().GetFontSize();
     auto padding = toastTheme->GetPadding();
     auto fontWeight = toastTheme->GetTextStyle().GetFontWeight();
-    auto textColor = toastTheme->GetTextStyle().GetTextColor();
+    auto defaultColor = toastTheme->GetTextStyle().GetTextColor();
     textLayoutProperty->UpdateMaxFontScale(MAX_TOAST_SCALE);
     PaddingProperty paddings;
     paddings.top = NG::CalcLength(padding.Top());
@@ -107,7 +108,7 @@ void ToastView::UpdateTextLayoutProperty(
     textLayoutProperty->UpdateFontSize(fontSize);
     textLayoutProperty->UpdateLayoutDirection((isRightToLeft ? TextDirection::RTL : TextDirection::LTR));
     textLayoutProperty->UpdatePadding(paddings);
-    textLayoutProperty->UpdateTextColor(textColor);
+    textLayoutProperty->UpdateTextColor(textColor.value_or(defaultColor));
     textLayoutProperty->UpdateFontWeight(fontWeight);
     auto textContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textContext);
@@ -119,26 +120,12 @@ void ToastView::UpdateTextLayoutProperty(
     }
 }
 
-bool ToastView::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
-{
-    auto colorMode = SystemProperties::GetColorMode();
-    if (shadowStyle == ShadowStyle::None) {
-        return true;
-    }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
-    if (!shadowTheme) {
-        return false;
-    }
-    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
-    return true;
-}
-
 void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
 {
     auto toastContext = toastNode->GetRenderContext();
     CHECK_NULL_VOID(toastContext);
+    auto pattern = toastNode->GetPattern<ToastPattern>();
+    CHECK_NULL_VOID(pattern);
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
@@ -164,14 +151,13 @@ void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
         outerColorProp.SetColor(toastTheme->GetToastOuterBorderColor());
         toastContext->UpdateOuterBorderColor(outerColorProp);
     }
-    Shadow shadow;
-    if (GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow)) {
-        toastContext->UpdateBackShadow(shadow);
-    }
+    auto toastInfo = pattern->GetToastInfo();
+    toastContext->UpdateBackShadow(toastInfo.shadow.value());
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        toastContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        toastContext->UpdateBackgroundColor(toastInfo.backgroundColor.value_or(Color::TRANSPARENT));
         BlurStyleOption styleOption;
-        styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+        styleOption.blurStyle = static_cast<BlurStyle>(
+            toastInfo.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
         styleOption.policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
         toastContext->UpdateBackBlurStyle(styleOption);
     } else {

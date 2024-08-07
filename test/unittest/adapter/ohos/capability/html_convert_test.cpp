@@ -373,4 +373,27 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert009, TestSize.Level1)
         "#000000FF;font-family: HarmonyOS Sans;\">向下到底</span></div>";
     EXPECT_EQ(out, result);
 }
+
+HWTEST_F(HtmlConvertTestNg, HtmlConvert010, TestSize.Level1)
+{
+    const std::string multiHtml =
+        "<html>"
+        "<body>"
+        "<p style=\"font-size:50px\"><span style=\"font-size:100px\">100fontsize</span>dddd当地经的123456<span "
+        "style=\"font-size:30px\">30fontsize</span>1232132</p>"
+        "</body>"
+        "</html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(multiHtml);
+    std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
+    EXPECT_EQ(spans.size(), 4);
+
+    SpanToHtml convert;
+    auto dstHtml = convert.ToHtml(*dstSpan);
+    HtmlToSpan toSpan1;
+    auto dstSpan1 = toSpan1.ToSpanString(dstHtml);
+    EXPECT_EQ(IsSpanItemSame(dstSpan->GetSpanItems(), dstSpan1->GetSpanItems()), true);
+    auto secondHtml = convert.ToHtml(*dstSpan1);
+    EXPECT_EQ(secondHtml, dstHtml);
+}
 } // namespace OHOS::Ace::NG

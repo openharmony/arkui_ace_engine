@@ -25,15 +25,13 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/badge/badge_layout_property.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr double DEVICE_HEIGHT_LIMIT = 640.0;
-} // namespace
 void CalendarPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -422,8 +420,7 @@ void CalendarPattern::UpdateTitleNode()
     CHECK_NULL_VOID(theme);
     auto fontSizeScale = pipelineContext->GetFontScale();
     auto fontSize = theme->GetCalendarTitleFontSize();
-    if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
-        Dimension(pipelineContext->GetRootHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange()) {
         textLayoutProperty->UpdateFontSize(fontSize);
     } else {
         textLayoutProperty->UpdateMaxLines(2);

@@ -44,7 +44,6 @@ protected:
 
     void OnActivation() override;
     void OnConnect() override;
-    void OnForeground() override;
     void OnBackground() override;
     void OnDisconnect() override;
     void OnDrawingCompleted() override;
@@ -56,9 +55,11 @@ private:
     void BufferAvailableCallbackForBlank();
     void BufferAvailableCallbackForSnapshot();
     void OnBoundsChanged(const Rosen::Vector4f& bounds);
+    void RegisterResponseRegionCallback();
     void RegisterFocusCallback();
     void DisposeSnapShotAndBlankWindow();
-    void CleanBlankOrSnapshotWindow();
+    void CleanBlankWindow();
+    void SetSubWinowBufferAvailableCallback(std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode);
 
     bool destroyed_ = false;
     OHOS::Rosen::WindowMode initWindowMode_ = OHOS::Rosen::WindowMode::WINDOW_MODE_UNDEFINED;

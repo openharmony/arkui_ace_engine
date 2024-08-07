@@ -877,7 +877,7 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent005, TestSize.Level1)
 
 /**
  * @tc.name: MarginIgnoreBlankTest001
- * @tc.desc: Test Swiper PrevMargin IgnoreBlank
+ * @tc.desc: Test Swiper IgnoreBlank in jumpIndex case
  * @tc.type: FUNC
  */
 HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest001, TestSize.Level1)
@@ -902,11 +902,10 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest001, TestSize.Level1)
      */
     ChangeIndex(0);
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
-    EXPECT_EQ(GetChildX(frameNode_, 0), itemWidth * 0);
-    EXPECT_EQ(GetChildX(frameNode_, 1), itemWidth * 1);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), itemWidth);
     EXPECT_EQ(GetChildX(frameNode_, 2), itemWidth * 2);
     EXPECT_EQ(GetChildX(frameNode_, 3), itemWidth * 3);
-    EXPECT_EQ(GetChildX(frameNode_, 4), 0.f); // out of view
 
     /**
      * @tc.steps: step3. ChangeIndex to 1
@@ -916,20 +915,19 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest001, TestSize.Level1)
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
     EXPECT_EQ(GetChildX(frameNode_, 0), PRE_MARGIN - itemWidth);
     EXPECT_EQ(GetChildX(frameNode_, 1), PRE_MARGIN);
-    EXPECT_EQ(GetChildX(frameNode_, 2), PRE_MARGIN + itemWidth * 1);
+    EXPECT_EQ(GetChildX(frameNode_, 2), PRE_MARGIN + itemWidth);
     EXPECT_EQ(GetChildX(frameNode_, 3), PRE_MARGIN + itemWidth * 2);
     EXPECT_EQ(GetChildX(frameNode_, 4), PRE_MARGIN + itemWidth * 3);
 
     /**
      * @tc.steps: step4. ChangeIndex to 2
-     * @tc.expected: Verify ignoreBlank is not effective
+     * @tc.expected: Verify ignoreBlank on the endpage is effective
      */
     ChangeIndex(2);
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
-    EXPECT_EQ(GetChildX(frameNode_, 0), PRE_MARGIN - itemWidth); // out of view
     EXPECT_EQ(GetChildX(frameNode_, 1), PRE_MARGIN + NEXT_MARGIN - itemWidth);
     EXPECT_EQ(GetChildX(frameNode_, 2), PRE_MARGIN + NEXT_MARGIN);
-    EXPECT_EQ(GetChildX(frameNode_, 3), PRE_MARGIN + NEXT_MARGIN + itemWidth * 1);
+    EXPECT_EQ(GetChildX(frameNode_, 3), PRE_MARGIN + NEXT_MARGIN + itemWidth);
     EXPECT_EQ(GetChildX(frameNode_, 4), PRE_MARGIN + NEXT_MARGIN + itemWidth * 2);
 }
 

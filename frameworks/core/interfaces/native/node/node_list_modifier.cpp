@@ -594,13 +594,6 @@ void SetListCloseAllSwipeActions(ArkUINodeHandle node, void* userData, void (onF
     }
 }
 
-ArkUI_Int32 GetInitialIndex(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, 0);
-    return ListModelNG::GetInitialIndex(frameNode);
-}
-
 void SetListFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 maxSpeed)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -613,6 +606,13 @@ void ResetListFlingSpeedLimit(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetFlingSpeedLimit(frameNode, -1.0);
+}
+
+ArkUI_Int32 GetInitialIndex(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return ListModelNG::GetInitialIndex(frameNode);
 }
 
 void GetlistDivider(ArkUINodeHandle node, ArkUIdividerOptions* option, ArkUI_Int32 unit)
@@ -652,16 +652,17 @@ const ArkUIListModifier* GetListModifier()
         SetMultiSelectable, ResetMultiSelectable, SetChainAnimation, ResetChainAnimation, SetCachedCount,
         ResetCachedCount, GetEnableScrollInteraction, SetEnableScrollInteraction, ResetEnableScrollInteraction,
         GetSticky, SetSticky, ResetSticky, GetListEdgeEffect, SetListEdgeEffect, ResetListEdgeEffect, GetListDirection,
-        SetListDirection, ResetListDirection, GetListFriction, SetListFriction, ResetListFriction, GetListNestedScroll,
-        SetListNestedScroll, ResetListNestedScroll, GetListScrollBar, SetListScrollBar, ResetListScrollBar,
-        GetListScrollBarWidth, SetListScrollBarWidth, ResetListScrollBarWidth, GetListScrollBarColor,
-        SetListScrollBarColor, ResetListScrollBarColor, GetAlignListItem, SetAlignListItem, ResetAlignListItem,
-        SetScrollSnapAlign, ResetScrollSnapAlign, SetContentStartOffset, ResetContentStartOffset, SetContentEndOffset,
-        ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions,
-        GetListSpace, SetListSpace, ResetListSpace, SetNodeAdapter, ResetNodeAdapter,
+        SetListDirection, ResetListDirection, GetListFriction, SetListFriction, ResetListFriction,
+        GetListNestedScroll, SetListNestedScroll, ResetListNestedScroll, GetListScrollBar, SetListScrollBar,
+        ResetListScrollBar, GetListScrollBarWidth, SetListScrollBarWidth, ResetListScrollBarWidth,
+        GetListScrollBarColor, SetListScrollBarColor, ResetListScrollBarColor, GetAlignListItem, SetAlignListItem,
+        ResetAlignListItem, SetScrollSnapAlign, ResetScrollSnapAlign, SetContentStartOffset, ResetContentStartOffset,
+        SetContentEndOffset, ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions,
+        ResetChainAnimationOptions, GetListSpace, SetListSpace, ResetListSpace, SetNodeAdapter, ResetNodeAdapter,
         GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy, SetInitialIndex, ResetInitialIndex,
-        SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions, GetInitialIndex,
-        SetListFlingSpeedLimit, ResetListFlingSpeedLimit, GetlistDivider, SetInitialScroller, ResetInitialScroller };
+        SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions,
+        SetListFlingSpeedLimit, ResetListFlingSpeedLimit, GetInitialIndex, GetlistDivider,
+        SetInitialScroller, ResetInitialScroller };
     return &modifier;
 }
 

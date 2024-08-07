@@ -180,7 +180,7 @@ class CheckBoxContentModifier extends ModifierWithKey<ContentModifier<CheckBoxCo
     super(value);
   }
   static identity: Symbol = Symbol('checkBoxContentModifier');
-  applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
+  applyPeer(node: KNode, reset: boolean, component: ArkComponent): void {
     let checkboxComponent = component as ArkCheckboxComponent;
     checkboxComponent.setContentModifier(this.value);
   }
@@ -366,7 +366,7 @@ globalThis.Checkbox.attributeModifier = function (modifier: ArkComponent): void 
 };
 
 // @ts-ignore
-globalThis.Checkbox.contentModifier = function (modifier): void {
+globalThis.Checkbox.contentModifier = function (modifier: ContentModifier<CheckBoxConfiguration>): void {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {

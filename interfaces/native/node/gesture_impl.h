@@ -25,6 +25,9 @@ namespace OHOS::Ace::GestureModel {
 
 ArkUI_GestureRecognizer* CreateTapGesture(int32_t count, int32_t fingers);
 
+ArkUI_GestureRecognizer* CreateTapGestureWithDistanceThreshold(
+    int32_t count, int32_t fingers, double distanceThreshold);
+
 ArkUI_GestureRecognizer* CreateLongPressGesture(int32_t fingers, bool repeatResult, int32_t duration);
 
 ArkUI_GestureRecognizer* CreatePanGesture(int32_t fingersNum, ArkUI_GestureDirectionMask mask, double distanceNum);

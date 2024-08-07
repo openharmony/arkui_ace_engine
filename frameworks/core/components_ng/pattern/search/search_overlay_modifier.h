@@ -72,7 +72,7 @@ private:
 
     WeakPtr<Pattern> pattern_;
     SizeF buttonSize_;
-    double searchDividerWidth_;
+    double searchDividerWidth_ = 0.0;
     ACE_DISALLOW_COPY_AND_MOVE(SearchOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

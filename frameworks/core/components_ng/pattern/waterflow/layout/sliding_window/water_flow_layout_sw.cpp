@@ -72,7 +72,7 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
 
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper->GetLayoutProperty());
     auto padding = props->CreatePaddingAndBorder();
-    OffsetF paddingOffset { padding.top.value_or(0.0f), padding.top.value_or(0.0f) };
+    OffsetF paddingOffset { padding.left.value_or(0.0f), padding.top.value_or(0.0f) };
 
     bool reverse = props->IsReverse();
     bool rtl = props->GetNonAutoLayoutDirection() == TextDirection::RTL && axis_ == Axis::VERTICAL;

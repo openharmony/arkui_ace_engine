@@ -415,10 +415,10 @@ struct PaddingPropertyT {
     std::string ToString() const
     {
         std::string str;
-        str.append("left: [").append(left.has_value() ? left->ToString() : "NA").append("]");
-        str.append("right: [").append(right.has_value() ? right->ToString() : "NA").append("]");
-        str.append("top: [").append(top.has_value() ? top->ToString() : "NA").append("]");
-        str.append("bottom: [").append(bottom.has_value() ? bottom->ToString() : "NA").append("]");
+        str.append("[").append(left.has_value() ? left->ToString() : "NA");
+        str.append(",").append(right.has_value() ? right->ToString() : "NA");
+        str.append(",").append(top.has_value() ? top->ToString() : "NA");
+        str.append(",").append(bottom.has_value() ? bottom->ToString() : "NA").append("]");
         return str;
     }
     std::string ToJsonString() const
@@ -504,10 +504,10 @@ struct PaddingPropertyT<float> {
     std::string ToString() const
     {
         std::string str;
-        str.append("left: [").append(left.has_value() ? std::to_string(left.value()) : "NA").append("]");
-        str.append("right: [").append(right.has_value() ? std::to_string(right.value()) : "NA").append("]");
-        str.append("top: [").append(top.has_value() ? std::to_string(top.value()) : "NA").append("]");
-        str.append("bottom: [").append(bottom.has_value() ? std::to_string(bottom.value()) : "NA").append("]");
+        str.append("[").append(left.has_value() ? std::to_string(left.value()) : "NA");
+        str.append(",").append(right.has_value() ? std::to_string(right.value()) : "NA");
+        str.append(",").append(top.has_value() ? std::to_string(top.value()) : "NA");
+        str.append(",").append(bottom.has_value() ? std::to_string(bottom.value()) : "NA").append("]");
         return str;
     }
 

@@ -58,10 +58,11 @@ private:
     float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group) override;
     void UpdateRichTextRect(const SizeF& res, const float& textHeight, LayoutWrapper* layoutWrapper);
 
-    void SetPlaceholder(LayoutWrapper* layoutWrapper);
+    bool SetPlaceholder(LayoutWrapper* layoutWrapper);
 
     void CopySpanStyle(RefPtr<SpanItem> source, RefPtr<SpanItem> target);
     void AppendNewLineSpan();
+    std::optional<SizeF> MeasureEmptyContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 
     const std::list<RefPtr<SpanItem>>& GetSpans() const
     {

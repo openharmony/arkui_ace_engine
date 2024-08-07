@@ -172,6 +172,13 @@ void ModelAdapterWrapper::OnRebuildFrame(RefPtr<RenderContext>& context)
     auto rsContext = DynamicCast<NG::RosenRenderContext>(context);
     CHECK_NULL_VOID(rsContext);
     auto rsNode = rsContext->GetRSNode();
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        CHECK_NULL_VOID(textureLayer_);
+        textureLayer_->SetParent(rsNode);
+        return;
+    }
+#endif
     Render3D::GraphicsTask::GetInstance().PushAsyncMessage([weak = WeakClaim(this), rsNode]() mutable {
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);

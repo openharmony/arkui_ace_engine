@@ -111,6 +111,9 @@ void CJLazyForEachBuilder::RegisterDataChangeListener(const RefPtr<V2::DataChang
     auto listenerManager = weakListenerManager_.promote();
     if (!listenerManager) {
         listenerManager = FFIData::Create<CJDataChangeListener>();
+        if (listenerManager == nullptr) {
+            return;
+        }
         weakListenerManager_ = listenerManager;
         cjBuilder_->RegisterListenerFunc(listenerManager);
     }

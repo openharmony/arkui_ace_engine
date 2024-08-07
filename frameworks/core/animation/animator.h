@@ -262,6 +262,7 @@ private:
     bool isReverse_ = false;
     bool isResume_ = false;
     bool isCurDirection_ = false;
+    bool isOddRound_ = true;
     bool toggleDirectionPending_ = false;
     bool allowRunningAsynchronously_ = false;
     bool needFrameJankReport_ = true;

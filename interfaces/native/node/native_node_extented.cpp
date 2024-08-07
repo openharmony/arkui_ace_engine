@@ -148,7 +148,7 @@ int32_t OH_ArkUI_NodeCustomEvent_GetCustomSpanDrawInfo(
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_CustomSpanMeasureInfo* OH_ArkUI_CustomSpanMeasureInfo_Create()
+ArkUI_CustomSpanMeasureInfo* OH_ArkUI_CustomSpanMeasureInfo_Create(void)
 {
     ArkUI_CustomSpanMeasureInfo* info = new ArkUI_CustomSpanMeasureInfo { 0 };
     return info;
@@ -171,7 +171,7 @@ float OH_ArkUI_CustomSpanMeasureInfo_GetFontSize(ArkUI_CustomSpanMeasureInfo* in
     return info->fontSize;
 }
 
-ArkUI_CustomSpanMetrics* OH_ArkUI_CustomSpanMetrics_Create()
+ArkUI_CustomSpanMetrics* OH_ArkUI_CustomSpanMetrics_Create(void)
 {
     ArkUI_CustomSpanMetrics* metrics = new ArkUI_CustomSpanMetrics { 0, 0 };
     return metrics;
@@ -204,7 +204,7 @@ int32_t OH_ArkUI_CustomSpanMetrics_SetHeight(ArkUI_CustomSpanMetrics* metrics, f
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_CustomSpanDrawInfo* OH_ArkUI_CustomSpanDrawInfo_Create()
+ArkUI_CustomSpanDrawInfo* OH_ArkUI_CustomSpanDrawInfo_Create(void)
 {
     ArkUI_CustomSpanDrawInfo* info = new ArkUI_CustomSpanDrawInfo { 0, 0, 0, 0 };
     return info;
@@ -243,7 +243,7 @@ float OH_ArkUI_CustomSpanDrawInfo_GetLineBottom(ArkUI_CustomSpanDrawInfo* info)
     return info->optionsLineBottom;
 }
 
-float OH_ArkUI_CustomSpanDrawInfo_GetBaseLine(ArkUI_CustomSpanDrawInfo* info)
+float OH_ArkUI_CustomSpanDrawInfo_GetBaseline(ArkUI_CustomSpanDrawInfo* info)
 {
     if (!info) {
         return 0.0f;

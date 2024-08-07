@@ -75,10 +75,10 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
     CHECK_NULL_RETURN(dragNode, nullptr);
     auto dragPattern = dragNode->GetPattern<RichEditorDragPattern>();
     CHECK_NULL_RETURN(dragPattern, nullptr);
-    auto richEditor = hostNode->GetPattern<TextPattern>();
-    CHECK_NULL_RETURN(richEditor, dragNode);
-    auto placeholderIndex = richEditor->GetPlaceHolderIndex();
-    auto rectsForPlaceholders = richEditor->GetRectsForPlaceholders();
+    auto textPattern = hostNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, nullptr);
+    auto placeholderIndex = textPattern->GetPlaceHolderIndex();
+    auto rectsForPlaceholders = textPattern->GetRectsForPlaceholders();
 
     size_t index = 0;
     std::vector<RectF> realRectsForPlaceholders;

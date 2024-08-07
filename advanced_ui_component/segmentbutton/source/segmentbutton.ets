@@ -398,9 +398,6 @@ struct SelectItem {
         .position(this.selectedItemPosition)
         .scale({ x: this.zoomScaleArray[this.selectedIndexes[0]], y: this.zoomScaleArray[this.selectedIndexes[0]] })
         .shadow(ShadowStyle.OUTER_DEFAULT_XS)
-        .pixelRound({
-          top: PixelRoundCalcPolicy.FORCE_FLOOR
-        })
     }
   }
 }
@@ -799,7 +796,8 @@ struct SegmentButtonItemArrayComponent {
                 this.buttonItemsPosition[index] = {
                   start: LengthMetrics.vp(Number.parseFloat(this.options.componentPadding.toString()) +
                     (Number.parseFloat(newValue.width.toString()) + 1) * index),
-                  top: LengthMetrics.vp(Number.parseFloat(this.options.componentPadding.toString()))
+                  top: LengthMetrics.px(Math.floor(this.getUIContext()
+                    .vp2px(Number.parseFloat(this.options.componentPadding.toString()))))
                 }
               }
             })
@@ -1089,6 +1087,7 @@ export struct SegmentButton {
         }
         .direction(this.options.direction)
         .size(this.componentSize)
+        .animation({ duration: 0 })
         .borderRadius((this.options.type === 'capsule' && (this.options.multiply ?? false) ?
         this.options.iconTextRadius : this.options.iconTextBackgroundRadius) ??
           this.componentSize.height as number / 2)

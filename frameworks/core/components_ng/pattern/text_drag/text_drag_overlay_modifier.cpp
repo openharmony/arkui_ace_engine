@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
+
 #include <variant>
 
 #include "base/geometry/rect.h"
@@ -22,32 +23,23 @@
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components/text/text_theme.h"
 
+namespace OHOS::Ace::NG {
 constexpr float DEFAULT_LIGHT_HEIGHT = 600.0f;
 constexpr uint32_t DEFAULT_AMBIENT_COLOR = 0X0A000000;
 constexpr float DEFAULT_SHADOW_COLOR = 0x33000000;
 constexpr float DEFAULT_LIGHT_RADIUS = 800.0f;
 constexpr float DEFAULT_ELEVATION = 120.0f;
-namespace OHOS::Ace::NG {
+
 TextDragOverlayModifier::TextDragOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern) : pattern_(pattern)
 {
     backgroundOffset_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(TEXT_DRAG_OFFSET.ConvertToPx());
     selectedBackgroundOpacity_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
-    selectedColor_ = AceType::MakeRefPtr<PropertyInt>(0);
     shadowOpacity_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
     AttachProperty(backgroundOffset_);
     AttachProperty(selectedBackgroundOpacity_);
-    AttachProperty(selectedColor_);
     AttachProperty(shadowOpacity_);
-}
-
-Color TextDragOverlayModifier::GetDragBackgroundColor(const Color& defaultColor)
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, defaultColor);
-    auto textTheme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_RETURN(textTheme, defaultColor);
-    return textTheme->GetDragBackgroundColor();
 }
 
 void TextDragOverlayModifier::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas)
@@ -76,7 +68,9 @@ void TextDragOverlayModifier::PaintBackground(const RSPath& path, RSCanvas& canv
 {
     auto shadow = Shadow(DEFAULT_ELEVATION, {0.0, 0.0}, Color(DEFAULT_SHADOW_COLOR), ShadowStyle::OuterFloatingSM);
     PaintShadow(path, shadow, canvas);
-    Color color = GetDragBackgroundColor(Color::WHITE);
+    auto pattern = DynamicCast<TextDragPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    Color color = pattern->GetDragBackgroundColor();
     RSBrush brush;
     brush.SetColor(ToRSColor(color));
     brush.SetAntiAlias(true);
@@ -107,19 +101,13 @@ void TextDragOverlayModifier::onDraw(DrawingContext& context)
     auto pattern = DynamicCast<TextDragPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
     auto& canvas = context.canvas;
-    Color color = pattern->GetDragBackgroundColor();
-    RSBrush brush;
-    brush.SetColor(ToRSColor(color));
-    brush.SetAntiAlias(true);
-    canvas.AttachBrush(brush);
     std::shared_ptr<RSPath> path;
     if (!isAnimating_) {
-        canvas.DrawPath(*pattern->GetBackgroundPath());
+        path = pattern->GetBackgroundPath();
     } else {
         path = pattern->GenerateBackgroundPath(backgroundOffset_->Get(), 1 - selectedBackgroundOpacity_->Get());
     }
     PaintBackground(*path, canvas, pattern);
-    canvas.DetachBrush();
     canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
     auto paragraph = pattern->GetParagraph().Upgrade();
     if (paragraph) {

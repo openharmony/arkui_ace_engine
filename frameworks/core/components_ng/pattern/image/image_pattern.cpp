@@ -36,6 +36,7 @@
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
+#include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -528,7 +529,7 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
         sensitive = host->IsPrivacySensitive();
     }
     if (!overlayMod_) {
-        overlayMod_ = MakeRefPtr<ImageOverlayModifier>();
+        overlayMod_ = MakeRefPtr<ImageOverlayModifier>(selectedColor_);
     }
     if (image_) {
         return MakeRefPtr<ImagePaintMethod>(image_, isSelected_, overlayMod_, sensitive, interpolationDefault_);
@@ -722,19 +723,23 @@ void ImagePattern::OnModifyDone()
 
 void ImagePattern::InitOnKeyEvent()
 {
+    if (keyEventCallback_) {
+        return;
+    }
+    
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto focusHub = hub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto onKeyEvent = [weak = WeakClaim(this)](const KeyEvent& event) -> bool {
+    keyEventCallback_ = [weak = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
         pattern->OnKeyEvent();
         return false;
     };
-    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+    focusHub->SetOnKeyEventInternal(std::move(keyEventCallback_));
 }
 
 void ImagePattern::OnKeyEvent()
@@ -743,7 +748,7 @@ void ImagePattern::OnKeyEvent()
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->PaintFocusState(true);
+    focusHub->PaintFocusState();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -1075,6 +1080,8 @@ void ImagePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto renderCtx = host->GetRenderContext();
     CHECK_NULL_VOID(renderCtx);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     if (GetIsAnimation()) {
         renderCtx->SetClipToFrame(true);
     } else {
@@ -1083,11 +1090,12 @@ void ImagePattern::OnAttachToFrameNode()
 
         // register image frame node to pipeline context to receive memory level notification and window state change
         // notification
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
         pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
         pipeline->AddWindowStateChangedCallback(host->GetId());
     }
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    selectedColor_ = theme->GetSelectedColor();
 }
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -1632,6 +1640,21 @@ void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geomet
 {
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
+}
+
+bool ImagePattern::AllowVisibleAreaCheck() const
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    RefPtr<FrameNode> parentUi = frameNode->GetAncestorNodeOfFrame(true);
+    while (parentUi) {
+        auto layoutProperty = parentUi->GetLayoutProperty();
+        if (layoutProperty && layoutProperty->IsOverlayNode()) {
+            return true;
+        }
+        parentUi = parentUi->GetAncestorNodeOfFrame(true);
+    }
+    return false;
 }
 
 void ImagePattern::InitDefaultValue()

@@ -117,6 +117,8 @@ private:
     void InitTextShadow(
         const std::string& key, const std::string& value, const std::string& index, StyleValues& values);
     bool IsTextShadowAttr(const std::string& key);
+    std::pair<std::string, double> GetUnitAndSize(const std::string& str);
+    void InitLineHeight(const std::string& key, const std::string& value, StyleValues& values);
     Dimension FromString(const std::string& str);
     TextAlign StringToTextAlign(const std::string& value);
     WordBreak StringToWordBreak(const std::string& value);
@@ -157,6 +159,8 @@ private:
         xmlNodePtr node, size_t& pos, std::string& allContent, size_t paragraphPos, std::vector<SpanInfo>& spanInfos);
     void ToSpan(xmlNodePtr curNode, size_t& pos, std::string& allContent, size_t paragraphPos,
         std::vector<SpanInfo>& spanInfos);
+    void GetContent(
+        xmlNodePtr curNode, std::string& allContent, size_t& contentLen, size_t& curNodeLen, size_t& childLen);
     void PrintSpanInfos(const std::vector<SpanInfo>& spanInfos);
     bool IsValidNode(const std::string& name);
 
@@ -172,6 +176,8 @@ private:
     std::string GetHtmlContent(xmlNodePtr node);
     RefPtr<MutableSpanString> GenerateSpans(const std::string& allContent, const std::vector<SpanInfo>& spanInfos);
     std::vector<SpanInfo> spanInfos_;
+    static constexpr double PT_TO_PX = 1.3;
+    static constexpr double ROUND_TO_INT = 0.5;
 };
 } // namespace OHOS::Ace
 

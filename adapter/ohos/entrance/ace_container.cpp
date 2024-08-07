@@ -104,6 +104,8 @@ constexpr uint32_t POPUPSIZE_HEIGHT = 0;
 constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
+constexpr int32_t POPUP_EDGE_INTERVAL = 48;
+std::mutex g_mutexFormRenderFontFamily;
 
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
@@ -1172,7 +1174,7 @@ UIContentErrorCode AceContainer::RunPage(
         isStageModel && !CheckUrlValid(content, container->GetHapPath())) {
         return UIContentErrorCode::INVALID_URL;
     }
-    
+
     if (isNamedRouter) {
         return front->RunPageByNamedRouter(content, params);
     }
@@ -1281,7 +1283,7 @@ public:
 
     void onPopupConfigWillUpdate(AbilityRuntime::AutoFill::AutoFillCustomConfig& config) override
     {
-        // Non-native component like web/xcomponent, popup always displayed in the center of the hap
+        // Non-native component like web/xcomponent
         // The offset needs to be calculated based on the placement
         if (isNative_ || !config.targetSize.has_value() || !config.placement.has_value()) {
             return;
@@ -1292,33 +1294,52 @@ public:
         AbilityRuntime::AutoFill::PopupOffset offset;
         AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
         AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
-        // only support BOTTOM_XXX AND TOP_XXX
-        if (placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
-            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
-            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
-            offset.deltaY = rect_.top + rect_.height -
-                ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO);
+        if ((windowRect_.height_ - rectf.Height()) > (size.height + POPUP_EDGE_INTERVAL)) {
+            // popup will display at the bottom of the container
+            offset.deltaY = rect_.top + rect_.height - rectf.Height();
         } else {
-            offset.deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO);
+            // popup will display in the middle of the container
+            if (placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
+                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
+                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
+                offset.deltaY = rect_.top + rect_.height -
+                    ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO);
+            } else {
+                offset.deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO);
+            }
         }
 
         if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_LEFT ||
             placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT) {
-            offset.deltaX = rect_.left - ((rectf.Width() - size.width) / POPUP_CALCULATE_RATIO);
+            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
+            offset.deltaX = rect_.left - edgeDist;
+            if (offset.deltaX > edgeDist) {
+                offset.deltaX = edgeDist;
+            }
         }
 
         if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_RIGHT ||
             placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
-            offset.deltaX = rect_.left + rect_.width - ((rectf.Width() + size.width) / POPUP_CALCULATE_RATIO);
+            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
+            offset.deltaX = edgeDist + rect_.left + rect_.width - rectf.Width();
+            if ((offset.deltaX < -DBL_EPSILON) && (std::fabs(offset.deltaX) > edgeDist)) {
+                offset.deltaX = -edgeDist;
+            }
         }
 
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "PopupOffset x:%{public}f,y:%{public}f", offset.deltaX, offset.deltaY);
         config.targetOffset = offset;
+        config.placement = AbilityRuntime::AutoFill::PopupPlacement::BOTTOM;
     }
 
     void SetFocusedRect(AbilityBase::Rect rect)
     {
         rect_ = rect;
+    }
+
+    void SetWindowRect(Rosen::Rect rect)
+    {
+        windowRect_ = rect;
     }
 private:
     WeakPtr<NG::PipelineContext> pipelineContext_ = nullptr;
@@ -1326,6 +1347,7 @@ private:
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
     bool isNative_ = true;
     AbilityBase::Rect rect_;
+    Rosen::Rect windowRect_;
 };
 
 bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
@@ -1444,10 +1466,11 @@ void AceContainer::OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode,
         nodeInfos.emplace_back(node);
     }
     viewData.nodes = nodeInfos;
+    viewData.pageUrl = viewDataWrap->GetPageUrl();
 }
 
 void FillAutoFillCustomConfig(const RefPtr<NG::FrameNode>& node,
-    AbilityRuntime::AutoFill::AutoFillCustomConfig& customConfig)
+    AbilityRuntime::AutoFill::AutoFillCustomConfig& customConfig, bool isNative)
 {
     CHECK_NULL_VOID(node);
     AbilityRuntime::AutoFill::PopupSize popupSize;
@@ -1457,6 +1480,10 @@ void FillAutoFillCustomConfig(const RefPtr<NG::FrameNode>& node,
     customConfig.isShowInSubWindow = false;
     customConfig.nodeId = node->GetId();
     customConfig.isEnableArrow = false;
+    if (!isNative) {
+        // web component will manually destroy the popup
+        customConfig.isAutoCancel = false;
+    }
 }
 
 void GetFocusedElementRect(const AbilityBase::ViewData& viewData, AbilityBase::Rect& rect)
@@ -1500,9 +1527,10 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
         AbilityBase::Rect rect;
         GetFocusedElementRect(viewData, rect);
         callback->SetFocusedRect(rect);
+        callback->SetWindowRect(uiWindow_->GetRect());
     }
     AbilityRuntime::AutoFill::AutoFillCustomConfig customConfig;
-    FillAutoFillCustomConfig(node, customConfig);
+    FillAutoFillCustomConfig(node, customConfig, isNative);
     AbilityRuntime::AutoFill::AutoFillRequest autoFillRequest;
     autoFillRequest.config = customConfig;
     autoFillRequest.autoFillType = static_cast<AbilityBase::AutoFillType>(autoFillType);
@@ -2349,7 +2377,13 @@ void AceContainer::CheckAndSetFontFamily()
         return;
     }
     path = path.append(familyName);
-    fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+    if (isFormRender_) {
+        // Resolve garbled characters caused by FRS multi-thread async
+        std::lock_guard<std::mutex> lock(g_mutexFormRenderFontFamily);
+        fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+    } else {
+        fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+    }
 }
 
 bool AceContainer::IsFontFileExistInPath(std::string path)

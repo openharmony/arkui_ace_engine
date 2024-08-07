@@ -115,6 +115,7 @@ public:
     void OnDragMoveOut(const PointerEvent& pointerEvent);
     void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
+    void EnsureStatusForPullIn();
     void OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
     void OnItemDragMove(float globalX, float globalY, int32_t draggedIndex, DragType dragType);
     void OnItemDragEnd(float globalX, float globalY, int32_t draggedIndex, DragType dragType);
@@ -130,8 +131,8 @@ public:
     float GetWindowScale() const;
     void UpdateDragStyle(
         const DragCursorStyleCore& dragCursorStyleCore = DragCursorStyleCore::DEFAULT, const int32_t eventId = -1);
-    void UpdateDragAllowDrop(
-        const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior, const int32_t eventId = -1);
+    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior,
+        const int32_t eventId = -1, bool isCapi = false);
     void RequireSummary();
     void ClearSummary();
     void SetSummaryMap(const std::map<std::string, int64_t>& summaryMap)
@@ -320,10 +321,11 @@ public:
     } DragPreviewInfo;
     bool IsNeedScaleDragPreview();
     void DoDragMoveAnimate(const PointerEvent& pointerEvent);
-    void DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager,
-        const GestureEvent& event, bool isSubwindowOverlay = false);
-    void DragStartAnimation(
-        const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager, const OffsetF& gatherNodeCenter);
+    void DragMoveAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager, Point point);
+    void DoDragStartAnimation(
+        const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event, bool isSubwindowOverlay = false);
+    void DragStartAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager,
+        const OffsetF& gatherNodeCenter, Point point = { 1, 1 });
     void SetDragResult(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void SetDragBehavior(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void ResetDragPreviewInfo()
@@ -486,6 +488,16 @@ public:
     }
     static double GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& pipeline);
 
+    RefPtr<FrameNode> GetMenuWrapperNode()
+    {
+        return menuWrapperNode_.Upgrade();
+    }
+
+    void SetMenuWrapperNode(const RefPtr<FrameNode>& frameNode)
+    {
+        menuWrapperNode_ = frameNode;
+    }
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -497,6 +509,7 @@ private:
     bool GetDragPreviewInfo(const OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager>& overlayManager,
         DragPreviewInfo& dragPreviewInfo);
     bool IsNeedDoDragMoveAnimate(const PointerEvent& pointerEvent);
+    const RefPtr<NG::OverlayManager> GetDragAnimationOverlayManager(int32_t containerId);
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY,
         const RefPtr<FrameNode>& node = nullptr);
     void FireOnDragEvent(
@@ -587,6 +600,7 @@ private:
     uint32_t dampingOverflowCount_ = 0;
     std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction_;
     RefPtr<GridColumnInfo> columnInfo_;
+    WeakPtr<FrameNode> menuWrapperNode_;
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };
 } // namespace OHOS::Ace::NG

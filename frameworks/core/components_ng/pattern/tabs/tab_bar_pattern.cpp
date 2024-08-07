@@ -650,10 +650,11 @@ void TabBarPattern::FocusIndexChange(int32_t index)
     if (!ContentWillChange(tabBarLayoutProperty->GetIndicatorValue(0), index)) {
         return;
     }
+    SetSwiperCurve(DurationCubicCurve);
     if (tabsPattern->GetIsCustomAnimation()) {
         OnCustomContentTransition(indicator_, index);
         tabBarLayoutProperty->UpdateIndicator(index);
-        PaintFocusState(false);
+        PaintFocusState();
     } else {
         UpdateAnimationDuration();
         if (GetAnimationDuration().has_value()
@@ -668,6 +669,7 @@ void TabBarPattern::FocusIndexChange(int32_t index)
         PaintFocusState();
     }
     UpdateTextColorAndFontWeight(index);
+    UpdateSubTabBoard(index);
 }
 
 void TabBarPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
@@ -765,7 +767,7 @@ void TabBarPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     SetAccessibilityAction();
-    UpdateSubTabBoard();
+    UpdateSubTabBoard(indicator_);
     StopTranslateAnimation();
     jumpIndex_ = layoutProperty->GetIndicatorValue(0);
 
@@ -872,7 +874,6 @@ void TabBarPattern::UpdatePaintIndicator(int32_t indicator, bool needMarkDirty)
     if (indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
     }
-
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (tabBarPattern->IsContainsBuilder() || layoutProperty->GetAxis() == Axis::VERTICAL ||
@@ -897,9 +898,6 @@ void TabBarPattern::UpdatePaintIndicator(int32_t indicator, bool needMarkDirty)
         if (needMarkDirty) {
             tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
-    }
-    if (tabBarStyles_[indicator] == TabBarStyle::SUBTABBATSTYLE) {
-        UpdateSubTabBoard();
     }
 }
 
@@ -935,6 +933,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(pipelineContext, false);
     lastFontScale_ = pipelineContext->GetFontScale();
     if (swiperPattern->IsUseCustomAnimation()) {
+        UpdateSubTabBoard(indicator);
         UpdatePaintIndicator(indicator, false);
     }
 
@@ -959,6 +958,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             prevRootSize_.second != PipelineContext::GetCurrentRootHeight()) {
             StopTranslateAnimation();
             jumpIndex_ = indicator_;
+            UpdateSubTabBoard(indicator_);
             UpdateIndicator(indicator_);
             windowSizeChangeReason_.reset();
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
@@ -1498,7 +1498,7 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
     swiperStartIndex_ = indicator;
     animationTargetIndex_ = index;
     UpdateTextColorAndFontWeight(index);
-
+    UpdateSubTabBoard(index);
     layoutProperty->UpdateIndicator(index);
 }
 
@@ -1675,6 +1675,7 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
         tabBarPattern->SetMaskAnimationByCreate(false);
         tabBarPattern->SetIndicator(index);
         tabBarPattern->UpdateIndicator(index);
+        tabBarPattern->UpdateSubTabBoard(index);
         tabBarPattern->UpdateTextColorAndFontWeight(index);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
             tabBarPattern->UpdateAnimationDuration();
@@ -1703,6 +1704,7 @@ void TabBarPattern::UpdateCurrentOffset(float offset)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     currentDelta_ = offset;
+    UpdateSubTabBoard(indicator_);
     UpdateIndicator(indicator_);
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
@@ -1778,8 +1780,10 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
         auto isSelected = columnNode->GetId() == selectedColumnId;
         if (index >= 0 && index < static_cast<int32_t>(labelStyles_.size())) {
             if (isSelected) {
+                auto selectColor = selectedModes_[index] == SelectedMode::BOARD ?
+                    tabTheme->GetSubTabBoardTextOnColor() : tabTheme->GetSubTabTextOnColor();
                 textLayoutProperty->UpdateTextColor(labelStyles_[index].selectedColor.has_value() ?
-                    labelStyles_[index].selectedColor.value() : tabTheme->GetSubTabTextOnColor());
+                    labelStyles_[index].selectedColor.value() : selectColor);
             } else {
                 textLayoutProperty->UpdateTextColor(labelStyles_[index].unselectedColor.has_value() ?
                     labelStyles_[index].unselectedColor.value() : tabTheme->GetSubTabTextOffColor());
@@ -1928,34 +1932,37 @@ void TabBarPattern::UpdateSymbolEffect(int32_t index)
     }
 }
 
-void TabBarPattern::UpdateSubTabBoard()
+void TabBarPattern::UpdateSubTabBoard(int32_t index)
 {
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
 
-    if (indicator_ >= static_cast<int32_t>(indicatorStyles_.size()) ||
-        indicator_ >= static_cast<int32_t>(selectedModes_.size())) {
+    if (index >= static_cast<int32_t>(indicatorStyles_.size()) ||
+        index >= static_cast<int32_t>(selectedModes_.size())) {
         return;
     }
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
     auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indicator_));
+    auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(index));
     CHECK_NULL_VOID(columnNode);
     auto selectedColumnId = columnNode->GetId();
     auto pipelineContext = GetHost()->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     for (auto& iter : visibleItemPosition_) {
+        if (iter.first < 0 || iter.first >= tabBarStyles_.size()) {
+            break;
+        }
         auto columnFrameNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(iter.first));
         CHECK_NULL_VOID(columnFrameNode);
         auto renderContext = columnFrameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        if (tabBarStyles_[indicator_] == TabBarStyle::SUBTABBATSTYLE) {
-            if (selectedModes_[indicator_] == SelectedMode::BOARD && columnFrameNode->GetId() == selectedColumnId &&
+        if (tabBarStyles_[iter.first] == TabBarStyle::SUBTABBATSTYLE) {
+            if (selectedModes_[index] == SelectedMode::BOARD && columnFrameNode->GetId() == selectedColumnId &&
                 axis == Axis::HORIZONTAL) {
-                renderContext->UpdateBackgroundColor(indicatorStyles_[indicator_].color);
+                renderContext->UpdateBackgroundColor(indicatorStyles_[index].color);
             } else {
                 renderContext->UpdateBackgroundColor(Color::BLACK.BlendOpacity(0.0f));
             }

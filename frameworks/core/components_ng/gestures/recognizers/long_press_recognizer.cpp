@@ -214,6 +214,7 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
+    lastTouchEvent_.pressedKeyCodes_ = event.pressedKeyCodes_;
     if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         return;
     }
@@ -462,6 +463,7 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
     info->SetSourceDevice(deviceType_);
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
     info->SetForce(trackPoint.force);
+    gestureInfo_->SetInputEventType(inputEventType_);
     if (trackPoint.tiltX.has_value()) {
         info->SetTiltX(trackPoint.tiltX.value());
     }
