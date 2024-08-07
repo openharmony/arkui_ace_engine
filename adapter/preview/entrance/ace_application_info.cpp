@@ -62,7 +62,7 @@ void AceApplicationInfoImpl::SetLocale(const std::string& language, const std::s
 {
     language_ = language;
     countryOrRegion_ = countryOrRegion;
-    script_ = script;
+    script_ = (!script.empty()) ? script : Localization::ComputeScript(language, countryOrRegion);
     keywordsAndValues_ = keywordsAndValues;
 
     localeTag_ = language;
@@ -78,7 +78,7 @@ void AceApplicationInfoImpl::SetLocale(const std::string& language, const std::s
 
     auto languageList = Localization::GetLanguageList(language_);
     Localization::SetLocale(
-        language_, countryOrRegion_, script, languageList.front(), keywordsAndValues_);
+        language_, countryOrRegion_, script_, languageList.front(), keywordsAndValues_);
 }
 
 bool AceApplicationInfoImpl::GetBundleInfo(const std::string& packageName, AceBundleInfo& bundleInfo)
