@@ -933,6 +933,7 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
+    void HandleTouchUpAfterLongPress();
     void HandleTouchMove(const Offset& offset);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void UseHostToUpdateTextFieldManager();
@@ -1102,7 +1103,6 @@ private:
     void ShowCaretNoTwinkling(const Offset& textOffset);
     bool CheckTripClickEvent(GestureEvent& info);
     void HandleSelect(GestureEvent& info, int32_t selectStart, int32_t selectEnd);
-    void SwitchState();
     TextStyleResult GetTextStyleBySpanItem(const RefPtr<SpanItem>& spanItem);
     ImageStyleResult GetImageStyleBySpanItem(const RefPtr<SpanItem>& spanItem);
     void SetSubSpans(RefPtr<SpanString>& spanString, int32_t start, int32_t end);

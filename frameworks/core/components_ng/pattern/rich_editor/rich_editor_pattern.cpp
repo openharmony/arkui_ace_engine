@@ -3053,21 +3053,6 @@ void RichEditorPattern::HandleSelect(GestureEvent& info, int32_t selectStart, in
     selectionMenuOffset_ = info.GetGlobalLocation();
 }
 
-void RichEditorPattern::SwitchState()
-{
-    if (previewLongPress_ && !IsSelected()) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "long press at the line end, shall enter edit state.set 1");
-        HandleOnEditChanged(true);
-        RequestKeyboard(false, true, true);
-    } else if (caretUpdateType_ == CaretUpdateType::DOUBLE_CLICK) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "double click. shall enter edit state.set 1");
-        HandleOnEditChanged(true);
-        RequestKeyboard(false, true, true);
-    } else {
-        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "exception state");
-    }
-}
-
 void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host)
 {
     auto focusHub = host->GetOrCreateFocusHub();
@@ -3080,39 +3065,34 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { localOffset.GetX() - textPaintOffset.GetX(), localOffset.GetY() - textPaintOffset.GetY() };
     if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
-        if (isEditing_) {
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "LONG_PRESSED and editing, so set editingLongPress_ = true");
-            if (textSelector_.IsValid()) {
-                CloseSelectOverlay();
-                ResetSelection();
-            }
-            editingLongPress_ = true;
-        } else {
-            TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "LONG_PRESSED and preview, so set previewLongPress_=1");
-            previewLongPress_ = true;
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "LONG_PRESSED and isEditing=%{public}d", isEditing_);
+        if (textSelector_.IsValid()) {
+            CloseSelectOverlay();
+            ResetSelection();
         }
+        editingLongPress_ = isEditing_;
+        previewLongPress_ = !isEditing_;
     }
+    focusHub->RequestFocusImmediately();
     InitSelection(textOffset);
     auto selectEnd = textSelector_.GetTextEnd();
     auto selectStart = textSelector_.GetTextStart();
     HandleSelect(info, selectStart, selectEnd);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    focusHub->RequestFocusImmediately();
-    if (overlayMod_) {
-        SwitchState();
+    if (overlayMod_ && caretUpdateType_ == CaretUpdateType::DOUBLE_CLICK) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "double click. shall enter edit state.set 1");
+        HandleOnEditChanged(true);
+        RequestKeyboard(false, true, true);
     }
-    bool isShowSelectOverlay = !editingLongPress_
-        && (info.GetSourceDevice() != SourceType::MOUSE || caretUpdateType_ != CaretUpdateType::DOUBLE_CLICK);
+    bool isDoubleClickByMouse =
+        info.GetSourceDevice() == SourceType::MOUSE && caretUpdateType_ == CaretUpdateType::DOUBLE_CLICK;
+    bool isShowSelectOverlay = !isDoubleClickByMouse && caretUpdateType_ != CaretUpdateType::LONG_PRESSED;
     if (isShowSelectOverlay) {
-        int32_t requestCode = (selectOverlay_->SelectOverlayIsOn() && caretUpdateType_ == CaretUpdateType::LONG_PRESSED)
-            ? REQUEST_RECREATE : 0;
-        selectOverlay_->ProcessOverlay({.menuIsShow = caretUpdateType_ != CaretUpdateType::LONG_PRESSED,
-            .animation = true, .requestCode = requestCode});
-        FireOnSelectionChange(selectStart, selectEnd);
+        selectOverlay_->ProcessOverlay({ .animation = true });
         if (selectOverlay_->IsSingleHandle()) {
             StartTwinkling();
         }
-    } else if (selectStart == selectEnd) {
+    } else if (selectStart == selectEnd && isDoubleClickByMouse) {
         StartTwinkling();
     } else {
         StopTwinkling();
@@ -6002,24 +5982,9 @@ void RichEditorPattern::HandleTouchDown(const Offset& offset)
 
 void RichEditorPattern::HandleTouchUp()
 {
-    if (editingLongPress_ && isEditing_) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "after long press textSelector=[%{public}d, %{public}d]",
-            textSelector_.GetTextStart(), textSelector_.GetTextEnd());
-        FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
-        SetCaretPosition(textSelector_.GetTextEnd());
-        caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
-        CalculateHandleOffsetAndShowOverlay();
-        selectOverlay_->ProcessOverlay({ .animation = true });
-        if (selectOverlay_->IsSingleHandle()) {
-            StartTwinkling();
-        }
-    }
+    HandleTouchUpAfterLongPress();
     if (isTouchCaret_ && selectOverlay_->IsSingleHandleShow()) {
         CreateAndShowSingleHandle();
-    }
-    if (previewLongPress_) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "show menu, previewLongPress_=%{public}d", previewLongPress_);
-        selectOverlay_->ShowMenu();
     }
     isMoveCaretAnywhere_ = false;
     editingLongPress_ = false;
@@ -6031,6 +5996,27 @@ void RichEditorPattern::HandleTouchUp()
         isLongPress_ = false;
     }
 #endif
+}
+
+void RichEditorPattern::HandleTouchUpAfterLongPress()
+{
+    CHECK_NULL_VOID(editingLongPress_ || previewLongPress_);
+    auto selectStart = textSelector_.GetTextStart();
+    auto selectEnd = textSelector_.GetTextEnd();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "after long press textSelector=[%{public}d, %{public}d] isEditing=%{public}d",
+        selectStart, selectEnd, isEditing_);
+    if (!isEditing_ && !IsSelected()) {
+        HandleOnEditChanged(true);
+        RequestKeyboard(false, true, true);
+    }
+    FireOnSelect(selectStart, selectEnd);
+    SetCaretPosition(selectEnd);
+    caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
+    CalculateHandleOffsetAndShowOverlay();
+    selectOverlay_->ProcessOverlay({ .animation = true });
+    if (selectOverlay_->IsSingleHandle()) {
+        StartTwinkling();
+    }
 }
 
 void RichEditorPattern::HandleTouchMove(const Offset& offset)
@@ -9707,12 +9693,6 @@ void RichEditorPattern::UpdateSelectionByTouchMove(const Offset& touchOffset)
     int32_t start = std::min(initSelectStart, currentPosition);
     int32_t end = std::max(initSelectEnd, currentPosition);
     HandleSelectionChange(start, end);
-    if (!isEditing_) {
-        isShowMenu_ = false;
-        CalculateHandleOffsetAndShowOverlay();
-        selectOverlay_->ProcessOverlay({ .menuIsShow = false, .hideHandle = false, .animation = false });
-        selectOverlay_->HideMenu(); // preview + longpress and move, shall also hide menu
-    }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 

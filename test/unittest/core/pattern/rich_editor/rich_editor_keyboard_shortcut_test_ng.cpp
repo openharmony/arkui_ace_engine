@@ -1312,6 +1312,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchMove001, TestSize.Level1)
      */
     Offset offset4(10.0f, 20.0f);
     richEditorPattern->isLongPress_ = false;
+    richEditorPattern->selectOverlay_->ProcessOverlay({ .animation = false });
     auto manager = richEditorPattern->selectOverlay_->GetManager<SelectContentOverlayManager>();
     ASSERT_NE(manager, nullptr);
     SelectOverlayInfo info;
