@@ -14,10 +14,8 @@
  */
 
 #include "cj_web_ffi.h"
-
 #include "application_context.h"
 #include "cj_lambda.h"
-
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
 using namespace OHOS::Ace;
