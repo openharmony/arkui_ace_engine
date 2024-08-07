@@ -37,6 +37,9 @@
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
+constexpr float INDEXER_HEIGHT = INDEXER_ITEM_SIZE * 26 + INDEXER_PADDING_TOP * 2;
+constexpr float LONG_INDEXER_HEIGHT = INDEXER_ITEM_SIZE * INDEXER_THIRTEEN_CHARACTERS_CHECK + INDEXER_PADDING_TOP * 2;
+constexpr float SHORT_INDEXER_HEIGHT = INDEXER_ITEM_SIZE * INDEXER_NINE_CHARACTERS_CHECK + INDEXER_PADDING_TOP * 2;
 
 class IndexerTestNg : public TestNG {
 public:
@@ -47,11 +50,19 @@ public:
     void GetIndexer();
 
     IndexerModelNG CreateIndexer(std::vector<std::string> arrayValue, int32_t selected = 0);
+    void OnPopupTouchDown(TouchType touchType);
+    RefPtr<FrameNode> GetListItemNode(int32_t listItemIndex);
+    void ListItemClick(int32_t clickIndex, TouchType touchType);
 
     std::vector<std::string> GetLongArrayValue()
     {
         return { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
             "U", "V", "W", "X", "Y", "Z" };
+    }
+
+    std::vector<std::string> GetMidArrayValue()
+    {
+        return { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M" };
     }
 
     std::vector<std::string> GetShortArrayValue()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,10 +74,8 @@ public:
         if (NearEqual(actual.start, expected.start) && NearEqual(actual.end, expected.end)) {
             return AssertionSuccess();
         }
-        return AssertionFailure() << "Actual: "
-                                  << "{ " << actual.start << " , " << actual.end << " }"
-                                  << " Expected: "
-                                  << "{ " << expected.start << " , " << expected.end << " }";
+        return AssertionFailure() << "Actual: " << "{ " << actual.start << " , " << actual.end << " }"
+                                  << " Expected: " << "{ " << expected.start << " , " << expected.end << " }";
     }
 
     AssertionResult IsEqual(const Offset& actual, const Offset& expected)
@@ -118,12 +116,17 @@ public:
             actual.indexInGroup == expected.indexInGroup) {
             return AssertionSuccess();
         }
-        return AssertionFailure() << "Actual: "
-                                  << "{ " << actual.index << " , " << actual.area << " , " << actual.indexInGroup
-                                  << " }"
-                                  << " Expected: "
-                                  << "{ " << expected.index << " , " << expected.area << " , " << expected.indexInGroup
-                                  << " }";
+        return AssertionFailure() << "Actual: " << "{ " << actual.index << " , " << actual.area << " , "
+                                  << actual.indexInGroup << " }" << " Expected: " << "{ " << expected.index << " , "
+                                  << expected.area << " , " << expected.indexInGroup << " }";
+    }
+
+    AssertionResult IsEqual(const BorderRadiusProperty& actual, const BorderRadiusProperty& expected)
+    {
+        if (NearEqual(actual, expected)) {
+            return AssertionSuccess();
+        }
+        return AssertionFailure() << "Actual: " << actual.ToString() << " Expected: " << expected.ToString();
     }
 
     template<typename T>

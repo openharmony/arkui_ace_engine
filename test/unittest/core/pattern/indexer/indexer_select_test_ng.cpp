@@ -20,14 +20,6 @@
 namespace OHOS::Ace::NG {
 class IndexerSelectTestNg : public IndexerTestNg {
 public:
-    void OnPopupTouchDown(TouchType touchType)
-    {
-        auto gesture = pattern_->popupNode_->GetOrCreateGestureEventHub();
-        auto onPopupTouchDown = gesture->touchEventActuator_->touchEvents_.front()->GetTouchEventCallback();
-        TouchEventInfo touchEventInfo = CreateTouchEventInfo(touchType, Offset());
-        onPopupTouchDown(touchEventInfo);
-    }
-
     void MoveIndex(GestureEvent gestureEvent)
     {
         auto start = pattern_->panEvent_->GetActionStartEventFunc();
@@ -45,23 +37,6 @@ public:
         TouchEventInfo touchEventInfo = CreateTouchEventInfo(touchType, Offset(0.f, locationY + firstOffsetY));
         auto touchFuc = pattern_->touchListener_->GetTouchEventCallback();
         touchFuc(touchEventInfo);
-    }
-
-    RefPtr<FrameNode> GetListItemNode(int32_t listItemIndex)
-    {
-        auto listUINode = pattern_->popupNode_->GetLastChild()->GetFirstChild();
-        auto listNode = AceType::DynamicCast<FrameNode>(listUINode);
-        auto listItemNode = GetChildFrameNode(listNode, listItemIndex);
-        return listItemNode;
-    }
-
-    void ListItemClick(int32_t clickIndex, TouchType touchType)
-    {
-        auto listItemNode = GetListItemNode(clickIndex);
-        auto gesture = listItemNode->GetOrCreateGestureEventHub();
-        auto touchEvent = gesture->touchEventActuator_->touchEvents_.front()->GetTouchEventCallback();
-        TouchEventInfo touchEventInfo = CreateTouchEventInfo(touchType, Offset());
-        touchEvent(touchEventInfo);
     }
 };
 
@@ -165,10 +140,48 @@ HWTEST_F(IndexerSelectTestNg, SelectByPanEvent002, TestSize.Level1)
 
 /**
  * @tc.name: SelectByPanEvent003
- * @tc.desc: Test MoveIndexByOffset
+ * @tc.desc: Test MoveIndexByStep, change selected by panEvent_ in Short fold
  * @tc.type: FUNC
  */
 HWTEST_F(IndexerSelectTestNg, SelectByPanEvent003, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
+    model.SetUsingPopup(true);
+    model.SetOnRequestPopupData(GetPopupData());
+    model.SetAutoCollapse(true);
+    ViewAbstract::SetHeight(CalcLength(SHORT_INDEXER_HEIGHT));
+    CreateDone();
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "A");
+
+    /**
+     * @tc.steps: step1. Move down
+     * @tc.expected: Selected changed
+     */
+    GestureEvent gestureEvent;
+    gestureEvent.SetInputEventType(InputEventType::AXIS);
+    gestureEvent.SetMainDelta(-1.f);
+    MoveIndex(gestureEvent);
+    EXPECT_EQ(pattern_->GetSelected(), 1);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "B");
+
+    /**
+     * @tc.steps: step2. Move down
+     * @tc.expected: Selected changed.
+     */
+    gestureEvent.SetMainDelta(-1.f);
+    MoveIndex(gestureEvent);
+    EXPECT_EQ(pattern_->GetSelected(), 2);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "G");
+}
+
+/**
+ * @tc.name: SelectByPanEvent004
+ * @tc.desc: Test MoveIndexByOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerSelectTestNg, SelectByPanEvent004, TestSize.Level1)
 {
     CreateIndexer(GetLongArrayValue(), 0);
     CreateDone();
@@ -199,14 +212,22 @@ HWTEST_F(IndexerSelectTestNg, SelectByPanEvent003, TestSize.Level1)
     gestureEvent.SetLocalLocation(Offset(0.f, locationY + 50.f));
     MoveIndex(gestureEvent);
     EXPECT_EQ(pattern_->GetSelected(), 6);
+
+    /**
+     * @tc.steps: step4. Location at the out of indexer
+     * @tc.expected: Selected unchanged
+     */
+    gestureEvent.SetLocalLocation(Offset(0.f, -1.f));
+    MoveIndex(gestureEvent);
+    EXPECT_EQ(pattern_->GetSelected(), 6);
 }
 
 /**
- * @tc.name: SelectByPanEvent004
+ * @tc.name: SelectByPanEvent005
  * @tc.desc: Test MoveIndexByOffset with empty array
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerSelectTestNg, SelectByPanEvent004, TestSize.Level1)
+HWTEST_F(IndexerSelectTestNg, SelectByPanEvent005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Test with empty array.
@@ -223,6 +244,62 @@ HWTEST_F(IndexerSelectTestNg, SelectByPanEvent004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SelectByPanEvent006
+ * @tc.desc: Test MoveIndexByOffset, trigger event
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerSelectTestNg, SelectByPanEvent006, TestSize.Level1)
+{
+    int32_t selected = -1;
+    int32_t changeSelected = -1;
+    int32_t creatChangeSelected = -1;
+    OnSelectedEvent onSelected = [&selected](int32_t selectedIndex) { selected = selectedIndex; };
+    OnSelectedEvent changeEvent = [&changeSelected](int32_t selectedIndex) { changeSelected = selectedIndex; };
+    OnSelectedEvent creatChangeEvent = [&creatChangeSelected](
+                                           int32_t selectedIndex) { creatChangeSelected = selectedIndex; };
+    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
+    model.SetOnSelected(std::move(onSelected));
+    model.SetChangeEvent(std::move(changeEvent));
+    model.SetCreatChangeEvent(std::move(creatChangeEvent));
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Location is at out
+     * @tc.expected: Selected unchanged, not trigger event
+     */
+    GestureEvent gestureEvent;
+    gestureEvent.SetInputEventType(InputEventType::KEYBOARD);
+    gestureEvent.SetLocalLocation(Offset(0.f, -1.f));
+    MoveIndex(gestureEvent);
+    EXPECT_EQ(selected, -1);
+    EXPECT_EQ(changeSelected, -1);
+    EXPECT_EQ(creatChangeSelected, -1);
+
+    /**
+     * @tc.steps: step2. Location is at item
+     * @tc.expected: Selected changed, trigger event
+     */
+    gestureEvent.SetLocalLocation(Offset(0.f, 50.f));
+    MoveIndex(gestureEvent);
+    EXPECT_EQ(selected, 3);
+    EXPECT_EQ(changeSelected, 3);
+    EXPECT_EQ(creatChangeSelected, 3);
+
+    /**
+     * @tc.steps: step2. Location is at same item
+     * @tc.expected: Selected unchanged, not trigger event
+     */
+    selected = -1;
+    changeSelected = -1;
+    creatChangeSelected = -1;
+    gestureEvent.SetLocalLocation(Offset(0.f, 50.f));
+    MoveIndex(gestureEvent);
+    EXPECT_EQ(selected, -1);
+    EXPECT_EQ(changeSelected, -1);
+    EXPECT_EQ(creatChangeSelected, -1);
+}
+
+/**
  * @tc.name: Hover001
  * @tc.desc: Test Hover
  * @tc.type: FUNC
@@ -231,26 +308,66 @@ HWTEST_F(IndexerSelectTestNg, Hover001, TestSize.Level1)
 {
     IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
     model.SetUsingPopup(true);
+    model.SetOnRequestPopupData(GetPopupData());
     CreateDone();
 
-    pattern_->OnChildHover(1, true);
-    EXPECT_EQ(pattern_->childHoverIndex_, 1);
-    pattern_->OnChildHover(1, false);
-    EXPECT_EQ(pattern_->childHoverIndex_, -1);
-
-    pattern_->OnHover(false);
-    EXPECT_FALSE(pattern_->isHover_);
+    /**
+     * @tc.steps: step1. Enter indexer
+     * @tc.expected: Trigger IndexerHoverInAnimation
+     */
     pattern_->OnHover(true);
     EXPECT_TRUE(pattern_->isHover_);
+    auto renderContext = frameNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), indexerTheme_->GetSlipHoverBackgroundColor());
+
+    /**
+     * @tc.steps: step2. Enter item(index:1)
+     * @tc.expected: Show popup
+     */
+    pattern_->OnHover(true);
+    pattern_->OnChildHover(1, true);
+    EXPECT_EQ(pattern_->childHoverIndex_, 1);
+    EXPECT_NE(pattern_->popupNode_, nullptr);
+    auto listUINode = pattern_->popupNode_->GetLastChild()->GetFirstChild();
+    EXPECT_EQ(listUINode->TotalChildCount(), 2);
+
+    /**
+     * @tc.steps: step3. Leave item(index:1), Enter item(index:2)
+     * @tc.expected: Change popup listData by OnRequestPopupData
+     */
+    pattern_->OnHover(true);
+    pattern_->OnChildHover(1, false);
+    EXPECT_EQ(pattern_->childHoverIndex_, -1);
+    pattern_->OnHover(true);
+    pattern_->OnChildHover(2, true);
+    EXPECT_EQ(pattern_->childHoverIndex_, 2);
+    EXPECT_NE(pattern_->popupNode_, nullptr);
+    EXPECT_EQ(listUINode->TotalChildCount(), 2); // GetPopupData need return diff data
+
+    /**
+     * @tc.steps: step4. Leave indexer
+     * @tc.expected: Trigger IndexerHoverOutAnimation
+     */
+    pattern_->OnHover(true);
+    pattern_->OnChildHover(2, false);
+    EXPECT_EQ(pattern_->childHoverIndex_, -1);
     pattern_->OnHover(false);
     EXPECT_FALSE(pattern_->isHover_);
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::TRANSPARENT);
+}
 
+/**
+ * @tc.name: Hover002
+ * @tc.desc: Test Hover with empty arrayValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerSelectTestNg, Hover002, TestSize.Level1)
+{
     /**
      * @tc.steps: step1. Set empty arrayValue and trigger OnHover
      * @tc.expected: isHover_ is still be false
      */
-    ClearOldNodes();
-    model = CreateIndexer(std::vector<std::string>(), 0);
+    IndexerModelNG model = CreateIndexer(std::vector<std::string>(), 0);
     model.SetUsingPopup(true);
     CreateDone();
     pattern_->OnHover(true);
@@ -259,33 +376,45 @@ HWTEST_F(IndexerSelectTestNg, Hover001, TestSize.Level1)
 
 /**
  * @tc.name: SelectByTouch001
- * @tc.desc: Test touchListener_ func with hover and touchDown touchUp in different location.
+ * @tc.desc: Test touchListener_ func with hover, hover than touch
  * @tc.type: FUNC
  */
 HWTEST_F(IndexerSelectTestNg, SelectByTouch001, TestSize.Level1)
 {
-    CreateIndexer(GetLongArrayValue(), 0);
+    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
+    model.SetUsingPopup(true);
+    model.SetOnRequestPopupData(GetPopupData());
     CreateDone();
 
     /**
-     * @tc.steps: step1. OnTouchDown.
+     * @tc.steps: step1. OnTouchDown item(index:3)
      * @tc.expected: Selected index is correct.
      */
     pattern_->OnHover(true);
+    pattern_->OnChildHover(3, true);
     Touch(TouchType::DOWN, 50.f);
     EXPECT_EQ(pattern_->GetSelected(), 3);
 
     /**
-     * @tc.steps: step2. OnTouchUp, different location.
+     * @tc.steps: step2. Touch move to item(index:1)
+     * @tc.expected: Selected index not change
+     */
+    pattern_->OnChildHover(3, false);
+    pattern_->OnChildHover(1, true);
+    Touch(TouchType::MOVE, 20.f);
+    EXPECT_EQ(pattern_->GetSelected(), 3);
+
+    /**
+     * @tc.steps: step3. OnTouchUp
      * @tc.expected: Selected index is correct.
      */
-    Touch(TouchType::UP, 50.f);
+    Touch(TouchType::UP, 20.f);
     EXPECT_EQ(pattern_->GetSelected(), 3);
 }
 
 /**
  * @tc.name: SelectByTouch002
- * @tc.desc: Test touchListener_ func with hover and touchDown touchUp in different location.
+ * @tc.desc: Test touchListener_ func without hover, only touch
  * @tc.type: FUNC
  */
 HWTEST_F(IndexerSelectTestNg, SelectByTouch002, TestSize.Level1)
@@ -297,7 +426,6 @@ HWTEST_F(IndexerSelectTestNg, SelectByTouch002, TestSize.Level1)
      * @tc.steps: step1. OnTouchDown.
      * @tc.expected: Selected index is correct.
      */
-    pattern_->OnHover(false);
     Touch(TouchType::DOWN, 50.f);
     EXPECT_EQ(pattern_->GetSelected(), 3);
 
@@ -317,19 +445,9 @@ HWTEST_F(IndexerSelectTestNg, SelectByTouch002, TestSize.Level1)
 HWTEST_F(IndexerSelectTestNg, SelectByTouch003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. TouchType::MOVE.
+     * @tc.steps: step1. Empty array
      * @tc.expected: Selected unchanged.
      */
-    CreateIndexer(GetLongArrayValue(), 0);
-    CreateDone();
-    Touch(TouchType::MOVE, 20.f);
-    EXPECT_EQ(pattern_->GetSelected(), 0);
-
-    /**
-     * @tc.steps: step2. Empty array
-     * @tc.expected: Selected unchanged.
-     */
-    ClearOldNodes();
     CreateIndexer(std::vector<std::string>(), 0);
     CreateDone();
     Touch(TouchType::DOWN, 20.f);
@@ -338,7 +456,7 @@ HWTEST_F(IndexerSelectTestNg, SelectByTouch003, TestSize.Level1)
     EXPECT_EQ(pattern_->GetSelected(), 0);
 
     /**
-     * @tc.steps: step3. Touch -1.f
+     * @tc.steps: step2. Touch -1.f
      * @tc.expected: Selected index 0.
      */
     ClearOldNodes();
@@ -516,55 +634,6 @@ HWTEST_F(IndexerSelectTestNg, PopupSelectByClick001, TestSize.Level1)
 }
 
 /**
- * @tc.name: PopupSelectByClick002
- * @tc.desc: Test ChangeListItemsSelectedStyle, the text color will change with click
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerSelectTestNg, PopupSelectByClick002, TestSize.Level1)
-{
-    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
-    model.SetUsingPopup(true);
-    model.SetOnRequestPopupData(GetPopupData());
-    model.SetPopupSelectedColor(Color::GREEN);
-    model.SetPopupUnselectedColor(Color::BLUE);
-    model.SetPopupItemBackground(Color::GRAY);
-    CreateDone();
-
-    /**
-     * @tc.steps: step1. Show popupNode_
-     */
-    pattern_->MoveIndexByStep(1);
-    auto firstListItemNode = GetListItemNode(0);
-    auto firstTextLayoutProperty = GetChildLayoutProperty<TextLayoutProperty>(firstListItemNode, 0);
-    auto secondListItemNode = GetListItemNode(1);
-    auto secondTextLayoutProperty = GetChildLayoutProperty<TextLayoutProperty>(secondListItemNode, 0);
-
-    /**
-     * @tc.steps: step2. Click popupNode_ first item
-     * @tc.expected: The first item color changed
-     */
-    float clickIndex = 0;
-    ListItemClick(clickIndex, TouchType::DOWN);
-    EXPECT_EQ(firstTextLayoutProperty->GetTextColor().value(), Color::GREEN);
-    EXPECT_EQ(secondTextLayoutProperty->GetTextColor().value(), Color::BLUE);
-    ListItemClick(clickIndex, TouchType::UP);
-    EXPECT_EQ(firstTextLayoutProperty->GetTextColor().value(), Color::BLUE);
-    EXPECT_EQ(secondTextLayoutProperty->GetTextColor().value(), Color::BLUE);
-
-    /**
-     * @tc.steps: step3. Click popupNode_ second item
-     * @tc.expected: The second item color changed
-     */
-    clickIndex = 1;
-    ListItemClick(clickIndex, TouchType::DOWN);
-    EXPECT_EQ(firstTextLayoutProperty->GetTextColor().value(), Color::BLUE);
-    EXPECT_EQ(secondTextLayoutProperty->GetTextColor().value(), Color::GREEN);
-    ListItemClick(clickIndex, TouchType::UP);
-    EXPECT_EQ(firstTextLayoutProperty->GetTextColor().value(), Color::BLUE);
-    EXPECT_EQ(secondTextLayoutProperty->GetTextColor().value(), Color::BLUE);
-}
-
-/**
  * @tc.name: PopupSelectByClick003
  * @tc.desc: Test OnListItemClick, when Popup is long that can scroll, scroll down than Selected by click
  * @tc.type: FUNC
@@ -616,55 +685,6 @@ HWTEST_F(IndexerSelectTestNg, PopupSelectByClick003, TestSize.Level1)
 }
 
 /**
- * @tc.name: PopupSelectByClick004
- * @tc.desc: Test DrawPopupListGradient, when Popup is long that can scroll,
- * the popup will change color in diff position
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerSelectTestNg, PopupSelectByClick004, TestSize.Level1)
-{
-    int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
-    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
-    model.SetUsingPopup(true);
-    model.SetOnRequestPopupData(GetMorePopupData2());
-    CreateDone();
-
-    /**
-     * @tc.steps: step1. Show popupNode_, list at top
-     * @tc.expected: Colors.size is 3
-     */
-    pattern_->MoveIndexByOffset(Offset(0, 10));
-    FlushLayoutTask(frameNode_);
-    auto stackNode = AceType::DynamicCast<FrameNode>(pattern_->popupNode_->GetLastChild());
-    auto stackRenderContext = stackNode->GetRenderContext();
-    auto listNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
-    auto listPattern = listNode->GetPattern<ListPattern>();
-    EXPECT_TRUE(listPattern->IsAtTop());
-    EXPECT_EQ(stackRenderContext->GetLinearGradientValue(Gradient()).GetColors().size(), 3);
-
-    /**
-     * @tc.steps: step2. list scroll to middle
-     * @tc.expected: Colors.size is 4
-     */
-    listPattern->ScrollTo(20);
-    FlushLayoutTask(listNode);
-    EXPECT_FALSE(listPattern->IsAtTop());
-    EXPECT_FALSE(listPattern->IsAtBottom());
-    EXPECT_EQ(stackRenderContext->GetLinearGradientValue(Gradient()).GetColors().size(), 4);
-
-    /**
-     * @tc.steps: step4. list scroll to bottom
-     * @tc.expected: Colors.size is 3
-     */
-    listPattern->ScrollTo(100);
-    FlushLayoutTask(listNode);
-    EXPECT_TRUE(listPattern->IsAtBottom());
-    EXPECT_EQ(stackRenderContext->GetLinearGradientValue(Gradient()).GetColors().size(), 3);
-    Container::Current()->SetApiTargetVersion(apiTargetVersion);
-}
-
-/**
  * @tc.name: PopupTouch001
  * @tc.desc: Test OnPopupTouchDown.
  * @tc.type: FUNC
@@ -673,6 +693,7 @@ HWTEST_F(IndexerSelectTestNg, PopupTouch001, TestSize.Level1)
 {
     IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
     model.SetUsingPopup(true);
+    model.SetOnRequestPopupData(GetPopupData());
     CreateDone();
     pattern_->MoveIndexByStep(1);
 
@@ -683,31 +704,21 @@ HWTEST_F(IndexerSelectTestNg, PopupTouch001, TestSize.Level1)
     EXPECT_TRUE(pattern_->isTouch_);
 
     /**
-     * @tc.steps: step2. Touch up popup
+     * @tc.steps: step2. Touch move popup
      */
-    OnPopupTouchDown(TouchType::UP);
-    EXPECT_FALSE(pattern_->isTouch_);
-
-    /**
-     * @tc.steps: step3. Hover and Touch down popup
-     */
-    pattern_->OnPopupHover(true);
-    EXPECT_TRUE(pattern_->isPopupHover_);
-    OnPopupTouchDown(TouchType::DOWN); // trigger OnPopupTouchDown
+    OnPopupTouchDown(TouchType::MOVE);
     EXPECT_TRUE(pattern_->isTouch_);
 
     /**
-     * @tc.steps: step4. Touch cancel popup
+     * @tc.steps: step3. Touch up popup
      */
-    OnPopupTouchDown(TouchType::CANCEL);
+    OnPopupTouchDown(TouchType::UP);
     EXPECT_FALSE(pattern_->isTouch_);
-    pattern_->OnPopupHover(false);
-    EXPECT_FALSE(pattern_->isPopupHover_);
 }
 
 /**
  * @tc.name: PopupTouch002
- * @tc.desc: Test UpdateBubbleSize function.
+ * @tc.desc: Test OnPopupTouchDown with hover
  * @tc.type: FUNC
  */
 HWTEST_F(IndexerSelectTestNg, PopupTouch002, TestSize.Level1)
@@ -716,60 +727,22 @@ HWTEST_F(IndexerSelectTestNg, PopupTouch002, TestSize.Level1)
     model.SetUsingPopup(true);
     model.SetOnRequestPopupData(GetPopupData());
     CreateDone();
-
-    /**
-     * @tc.steps: step1. childPressIndex_ less than 0.
-     * @tc.expected: verify size.
-     */
     pattern_->MoveIndexByStep(1);
-    OnPopupTouchDown(TouchType::DOWN); // trigger UpdateBubbleSize
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(
-        IsEqual(pattern_->popupNode_->GetGeometryNode()->GetFrameSize(), SizeF(BUBBLE_BOX_SIZE, BUBBLE_BOX_SIZE * 3)));
 
     /**
-     * @tc.steps: step2. VERSION_TWELVE
+     * @tc.steps: step1. Hover and Touch down popup
      */
-    int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
-    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    OnPopupTouchDown(TouchType::DOWN); // trigger UpdateBubbleSize
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(pattern_->popupNode_->GetGeometryNode()->GetFrameSize(),
-        SizeF(BUBBLE_BOX_SIZE, BUBBLE_ITEM_SIZE * 3 + BUBBLE_DIVIDER_SIZE * 4)));
-    Container::Current()->SetApiTargetVersion(apiTargetVersion);
-}
-
-/**
- * @tc.name: PopupTouch003
- * @tc.desc: Test UpdateBubbleSize function.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerSelectTestNg, PopupTouch003, TestSize.Level1)
-{
-    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
-    model.SetUsingPopup(true);
-    model.SetOnRequestPopupData(GetMorePopupData()); // GetMorePopupData.
-    CreateDone();
+    pattern_->OnPopupHover(true);
+    EXPECT_TRUE(pattern_->isPopupHover_);
+    OnPopupTouchDown(TouchType::DOWN); // trigger OnPopupTouchDown
+    EXPECT_TRUE(pattern_->isTouch_);
 
     /**
-     * @tc.steps: step1. has popListData and popListData size equal INDEXER_BUBBLE_MAXSIZE.
-     * @tc.expected: verify size.
+     * @tc.steps: step2. Touch cancel popup
      */
-    pattern_->MoveIndexBySearch("C");
-    OnPopupTouchDown(TouchType::DOWN); // trigger UpdateBubbleSize
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(
-        IsEqual(pattern_->popupNode_->GetGeometryNode()->GetFrameSize(), SizeF(BUBBLE_BOX_SIZE, BUBBLE_BOX_SIZE * 6)));
-
-    /**
-     * @tc.steps: step2. VERSION_TWELVE
-     */
-    int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
-    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    OnPopupTouchDown(TouchType::DOWN); // trigger UpdateBubbleSize
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(pattern_->popupNode_->GetGeometryNode()->GetFrameSize(),
-        SizeF(BUBBLE_BOX_SIZE, BUBBLE_ITEM_SIZE * 6 + BUBBLE_DIVIDER_SIZE * 7)));
-    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+    OnPopupTouchDown(TouchType::CANCEL);
+    EXPECT_FALSE(pattern_->isTouch_);
+    pattern_->OnPopupHover(false);
+    EXPECT_FALSE(pattern_->isPopupHover_);
 }
 } // namespace OHOS::Ace::NG

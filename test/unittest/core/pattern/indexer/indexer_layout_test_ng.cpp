@@ -15,6 +15,8 @@
 
 #include "indexer_test_ng.h"
 
+#include "core/components_ng/pattern/list/list_pattern.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float INDEXER_WIDTH = 40.0f;
@@ -22,14 +24,6 @@ constexpr float INDEXER_WIDTH = 40.0f;
 
 class IndexerLayoutTestNg : public IndexerTestNg {
 public:
-    AssertionResult IsEqual(const BorderRadiusProperty& actual, const BorderRadiusProperty& expected)
-    {
-        if (NearEqual(actual, expected)) {
-            return AssertionSuccess();
-        }
-        return AssertionFailure() << "Actual: " << actual.ToString() << " Expected: " << expected.ToString();
-    }
-
     void GetRenderContext()
     {
         auto itemNode = GetChildFrameNode(frameNode_, 0);
@@ -47,12 +41,12 @@ public:
 
     std::string GetArrayValueTexts()
     {
-        std::string arrayValueTexts = "";
+        std::string arrayValueTexts;
         int32_t totalChildCount = frameNode_->GetTotalChildCount();
         for (int32_t index = 0; index < totalChildCount; index++) {
             auto textLayoutProperty = GetChildLayoutProperty<TextLayoutProperty>(frameNode_, index);
-            std::string text = textLayoutProperty->GetContent().value();
-            arrayValueTexts += text == "•" ? "." : text;
+            std::string text = textLayoutProperty->GetContent().value_or("");
+            arrayValueTexts += text == "•" ? "." : text; // avoid EXPECT error
         }
         return arrayValueTexts;
     }
@@ -203,6 +197,80 @@ HWTEST_F(IndexerLayoutTestNg, Style004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Font001
+ * @tc.desc: Test SelectedFont/PopupFont/Font default theme
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerLayoutTestNg, Font001, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
+    model.SetUsingPopup(true);
+    model.SetOnRequestPopupData(GetPopupData());
+    CreateDone();
+    // defaultFont
+    auto defaultFont = indexerTheme_->GetDefaultTextStyle();
+    auto itemLayoutProperty = GetChildLayoutProperty<TextLayoutProperty>(frameNode_, 0);
+    EXPECT_EQ(itemLayoutProperty->GetFontSize(), defaultFont.GetFontSize());
+    EXPECT_EQ(itemLayoutProperty->GetFontFamily(), defaultFont.GetFontFamilies());
+    EXPECT_EQ(itemLayoutProperty->GetFontWeight(), defaultFont.GetFontWeight());
+    EXPECT_EQ(itemLayoutProperty->GetItalicFontStyle(), defaultFont.GetFontStyle());
+    // selectedFont
+    pattern_->OnChildHover(0, true);
+    auto selectedFont = indexerTheme_->GetSelectTextStyle();
+    EXPECT_EQ(itemLayoutProperty->GetFontSize(), selectedFont.GetFontSize());
+    EXPECT_EQ(itemLayoutProperty->GetFontFamily(), selectedFont.GetFontFamilies());
+    EXPECT_EQ(itemLayoutProperty->GetFontWeight(), selectedFont.GetFontWeight());
+    EXPECT_EQ(itemLayoutProperty->GetItalicFontStyle(), selectedFont.GetFontStyle());
+    // popupTextFont
+    auto popupTextFont = indexerTheme_->GetPopupTextStyle();
+    auto letterNode = pattern_->GetLetterNode();
+    auto letterLayoutProperty = letterNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(letterLayoutProperty->GetFontSize(), popupTextFont.GetFontSize());
+    EXPECT_EQ(letterLayoutProperty->GetFontFamily(), popupTextFont.GetFontFamilies());
+    EXPECT_EQ(letterLayoutProperty->GetFontWeight(), popupTextFont.GetFontWeight());
+    EXPECT_EQ(letterLayoutProperty->GetItalicFontStyle(), popupTextFont.GetFontStyle());
+}
+
+/**
+ * @tc.name: Font002
+ * @tc.desc: Test SelectedFont/PopupFont/Font
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerLayoutTestNg, Font002, TestSize.Level1)
+{
+    std::optional<Dimension> fontSize = Dimension(10);
+    std::optional<FontWeight> fontWeight = FontWeight::W200;
+    std::optional<std::vector<std::string>> fontFamily = std::vector<std::string>({ "abc" });
+    std::optional<OHOS::Ace::FontStyle> fontStyle = OHOS::Ace::FontStyle::ITALIC;
+    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
+    model.SetUsingPopup(true);
+    model.SetOnRequestPopupData(GetPopupData());
+    model.SetSelectedFont(fontSize, fontWeight, fontFamily, fontStyle);
+    model.SetPopupFont(fontSize, fontWeight, fontFamily, fontStyle);
+    model.SetFont(fontSize, fontWeight, fontFamily, fontStyle);
+    CreateDone();
+    // defaultFont
+    auto itemLayoutProperty = GetChildLayoutProperty<TextLayoutProperty>(frameNode_, 0);
+    EXPECT_EQ(itemLayoutProperty->GetFontSize(), fontSize);
+    EXPECT_EQ(itemLayoutProperty->GetFontFamily(), fontFamily);
+    EXPECT_EQ(itemLayoutProperty->GetFontWeight(), fontWeight);
+    EXPECT_EQ(itemLayoutProperty->GetItalicFontStyle(), fontStyle);
+    // selectedFont
+    pattern_->OnChildHover(0, true);
+    EXPECT_EQ(itemLayoutProperty->GetFontSize(), fontSize);
+    EXPECT_EQ(itemLayoutProperty->GetFontFamily(), fontFamily);
+    EXPECT_EQ(itemLayoutProperty->GetFontWeight(), fontWeight);
+    EXPECT_EQ(itemLayoutProperty->GetItalicFontStyle(), fontStyle);
+    // popupTextFont
+    auto letterNode = pattern_->GetLetterNode();
+    auto letterLayoutProperty = letterNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(letterLayoutProperty->GetFontSize(), fontSize);
+    EXPECT_EQ(letterLayoutProperty->GetFontFamily(), fontFamily);
+    EXPECT_EQ(letterLayoutProperty->GetFontWeight(), fontWeight);
+    EXPECT_EQ(letterLayoutProperty->GetItalicFontStyle(), fontStyle);
+}
+
+/**
  * @tc.name: IndexerModelNGTest001
  * @tc.desc: Test Create func with special arg
  * @tc.type: FUNC
@@ -243,6 +311,10 @@ HWTEST_F(IndexerLayoutTestNg, IndexerModelNGTest001, TestSize.Level1)
  */
 HWTEST_F(IndexerLayoutTestNg, IndexerModelNGTest002, TestSize.Level1)
 {
+    std::optional<Dimension> fontSize = Dimension(10);
+    std::optional<FontWeight> fontWeight = FontWeight::W200;
+    std::optional<std::vector<std::string>> fontFamily = std::vector<std::string>({ "abc", "def" });
+    std::optional<OHOS::Ace::FontStyle> fontStyle = OHOS::Ace::FontStyle::ITALIC;
     IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
     model.SetSelectedColor(Color(0x00000000));
     model.SetColor(Color(0x00000000));
@@ -261,34 +333,53 @@ HWTEST_F(IndexerLayoutTestNg, IndexerModelNGTest002, TestSize.Level1)
     model.SetPopupUnselectedColor(Color(0x00000000));
     model.SetFontSize(Dimension(24));
     model.SetFontWeight(FontWeight::MEDIUM);
+    model.SetSelectedFont(fontSize, fontWeight, fontFamily, fontStyle);
+    model.SetPopupFont(fontSize, fontWeight, fontFamily, fontStyle);
+    model.SetFont(fontSize, fontWeight, fontFamily, fontStyle);
     CreateDone();
 
-    /**
-     * @tc.steps: step1. Get properties.
-     * @tc.expected: Properties are correct.
-     */
-    EXPECT_EQ(layoutProperty_->GetArrayValueValue(), GetLongArrayValue());
-    EXPECT_EQ(layoutProperty_->GetSelectedColorValue(), Color(0x00000000));
-    EXPECT_EQ(layoutProperty_->GetColorValue(), Color(0x00000000));
-    EXPECT_EQ(layoutProperty_->GetPopupColorValue(), Color(0x00000000));
-    EXPECT_EQ(paintProperty_->GetSelectedBackgroundColorValue(), Color(0x00000000));
-    EXPECT_EQ(paintProperty_->GetPopupBackgroundValue(), Color(0x00000000));
-    EXPECT_TRUE(layoutProperty_->GetUsingPopupValue());
-    EXPECT_EQ(layoutProperty_->GetItemSizeValue(), Dimension(24));
-    EXPECT_EQ(layoutProperty_->GetAlignStyleValue(), AlignStyle::LEFT);
-    EXPECT_EQ(layoutProperty_->GetPopupHorizontalSpaceValue(), Dimension(50));
-    EXPECT_EQ(layoutProperty_->GetSelectedValue(), 0);
-    EXPECT_EQ(layoutProperty_->GetPopupPositionXValue(), Dimension(-96.f, DimensionUnit::VP));
-    EXPECT_EQ(layoutProperty_->GetPopupPositionYValue(), Dimension(48.f, DimensionUnit::VP));
-    EXPECT_EQ(paintProperty_->GetPopupItemBackgroundValue(), Color(0x00000000));
-    EXPECT_EQ(paintProperty_->GetPopupSelectedColorValue(), Color(0x00000000));
-    EXPECT_EQ(paintProperty_->GetPopupUnselectedColorValue(), Color(0x00000000));
-    EXPECT_EQ(layoutProperty_->GetFontSizeValue(), Dimension(24));
-    EXPECT_EQ(layoutProperty_->GetFontWeightValue(), FontWeight::MEDIUM);
-    auto json = JsonUtil::Create(true);
     InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json, filter);
-    EXPECT_NE(json, nullptr);
+    EXPECT_EQ(json->GetString("selected"), "0");
+    EXPECT_EQ(json->GetString("color"), "#00000000");
+    EXPECT_EQ(json->GetString("selectedColor"), "#00000000");
+    EXPECT_EQ(json->GetString("popupColor"), "#00000000");
+    EXPECT_EQ(json->GetString("usingPopup"), "true");
+    EXPECT_EQ(json->GetString("itemSize"), "24.00px");
+    EXPECT_EQ(json->GetString("alignStyle"), "IndexerAlign.Left");
+    EXPECT_EQ(json->GetString("popupPosition"), "");
+    EXPECT_EQ(json->GetString("arrayValue"), "");
+    EXPECT_EQ(json->GetString("font"), "");
+    EXPECT_EQ(json->GetString("selectedFont"), "");
+    EXPECT_EQ(json->GetString("popupFont"), "");
+    EXPECT_EQ(json->GetString("popupItemFontSize"), "24.00px");
+    EXPECT_EQ(json->GetString("popupItemFontWeight"), "FontWeight.Medium");
+    EXPECT_EQ(json->GetString("autoCollapse"), "false");
+    EXPECT_EQ(json->GetString("popupHorizontalSpace"), "50.00px");
+    EXPECT_EQ(json->GetString("adaptiveWidth"), "false");
+    EXPECT_EQ(json->GetString("enableHapticFeedback"), "true");
+
+    model.SetAlignStyle(AceType::RawPtr(frameNode_), 1);
+    json = JsonUtil::Create(true);
+    layoutProperty_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("alignStyle"), "IndexerAlign.Right");
+
+    model.SetAlignStyle(AceType::RawPtr(frameNode_), 2);
+    json = JsonUtil::Create(true);
+    layoutProperty_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("alignStyle"), "IndexerAlign.Start");
+
+    model.SetAlignStyle(AceType::RawPtr(frameNode_), 3);
+    json = JsonUtil::Create(true);
+    layoutProperty_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("alignStyle"), "IndexerAlign.End");
+
+    std::string attr = "editable";
+    filter.AddFilterAttr(attr);
+    json = JsonUtil::Create(true);
+    layoutProperty_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->ToString(), "{}");
 }
 
 /**
@@ -410,6 +501,7 @@ HWTEST_F(IndexerLayoutTestNg, IndexerModelNGTest006, TestSize.Level1)
     model.SetItemSize(AceType::RawPtr(frameNode_), Dimension(-1));
     model.SetPopupPositionX(AceType::RawPtr(frameNode_), std::nullopt);
     model.SetPopupPositionY(AceType::RawPtr(frameNode_), std::nullopt);
+    model.SetPopupTitleBackground(AceType::RawPtr(frameNode_), std::nullopt);
 
     EXPECT_FALSE(layoutProperty_->GetSelectedColor().has_value());
     EXPECT_FALSE(layoutProperty_->GetColor().has_value());
@@ -425,6 +517,7 @@ HWTEST_F(IndexerLayoutTestNg, IndexerModelNGTest006, TestSize.Level1)
     EXPECT_FALSE(paintProperty_->GetPopupItemBackground().has_value());
     EXPECT_FALSE(layoutProperty_->GetPopupHorizontalSpace().has_value());
     EXPECT_FALSE(layoutProperty_->GetFontSize().has_value());
+    EXPECT_FALSE(paintProperty_->GetPopupTitleBackground().has_value());
 }
 
 /**
@@ -456,6 +549,7 @@ HWTEST_F(IndexerLayoutTestNg, IndexerModelNGTest007, TestSize.Level1)
     model.SetPopupUnselectedColor(AceType::RawPtr(frameNode_), Color::WHITE);
     model.SetFontSize(AceType::RawPtr(frameNode_), Dimension(24));
     model.SetFontWeight(AceType::RawPtr(frameNode_), FontWeight::MEDIUM);
+    model.SetPopupTitleBackground(AceType::RawPtr(frameNode_), Color::WHITE);
 
     EXPECT_EQ(layoutProperty_->GetArrayValueValue(), GetLongArrayValue());
     EXPECT_EQ(layoutProperty_->GetSelectedColorValue(), Color::WHITE);
@@ -475,24 +569,51 @@ HWTEST_F(IndexerLayoutTestNg, IndexerModelNGTest007, TestSize.Level1)
     EXPECT_EQ(paintProperty_->GetPopupUnselectedColorValue(), Color::WHITE);
     EXPECT_EQ(layoutProperty_->GetFontSizeValue(), Dimension(24));
     EXPECT_EQ(layoutProperty_->GetFontWeightValue(), FontWeight::MEDIUM);
+    EXPECT_EQ(paintProperty_->GetPopupTitleBackground(), Color::WHITE);
 }
 
 /**
- * @tc.name: IndexerModelNGTest008
- * @tc.desc: Test newly added properties of indexer.
+ * @tc.name: AdaptiveWidth001
+ * @tc.desc: Test AdaptiveWidth
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerLayoutTestNg, IndexerModelNGTest008, TestSize.Level1)
+HWTEST_F(IndexerLayoutTestNg, AdaptiveWidth001, TestSize.Level1)
 {
     IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
     model.SetAdaptiveWidth(true);
     CreateDone();
+    const float padding = INDEXER_PADDING_LEFT * 2;
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameRect().Width(), INDEXER_ITEM_SIZE + padding);
 
     /**
-     * @tc.steps: step1. Get properties.
-     * @tc.expected: Properties are correct.
+     * @tc.steps: step1. Set bigger itemSize
      */
-    EXPECT_TRUE(layoutProperty_->GetAdaptiveWidthValue());
+    float itemSize = INDEXER_ITEM_SIZE + 10.f;
+    model.SetItemSize(AceType::RawPtr(frameNode_), Dimension(itemSize));
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameRect().Width(), itemSize + padding);
+
+    /**
+     * @tc.steps: step2. Set smaller itemSize
+     */
+    itemSize = INDEXER_ITEM_SIZE - 10.f;
+    model.SetItemSize(AceType::RawPtr(frameNode_), Dimension(itemSize));
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameRect().Width(), itemSize + padding);
+
+    /**
+     * @tc.steps: step3. Show popup
+     */
+    model.SetUsingPopup(AceType::RawPtr(frameNode_), true);
+    model.SetOnRequestPopupData(AceType::RawPtr(frameNode_), GetPopupData());
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    pattern_->MoveIndexByStep(1);
+    FlushLayoutTask(frameNode_);
+    EXPECT_NE(pattern_->popupNode_, nullptr);
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameRect().Width(), itemSize + padding);
 }
 
 /**
@@ -517,115 +638,359 @@ HWTEST_F(IndexerLayoutTestNg, OnModifyDone001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnModifyDone002
- * @tc.desc: Test OnModifyDone when autoCollapse is close
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerLayoutTestNg, OnModifyDone002, TestSize.Level1)
-{
-    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
-    model.SetAutoCollapse(false);
-    CreateDone();
-    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::INVALID);
-    EXPECT_EQ(GetArrayValueTexts(), "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-}
-
-/**
- * @tc.name: OnModifyDone003
- * @tc.desc: Test OnModifyDone when autoCollapse is open, and mode is 5+1
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerLayoutTestNg, OnModifyDone003, TestSize.Level1)
-{
-    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
-    model.SetAutoCollapse(true);
-    model.SetItemSize(Dimension(10, DimensionUnit::VP));
-    pattern_->maxContentHeight_ = 100.f;
-    CreateDone();
-    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
-    EXPECT_EQ(GetArrayValueTexts(), "A.G.M.S.Z");
-}
-
-/**
  * @tc.name: AutoCollapse001
- * @tc.desc: Test OnModifyDone when autoCollapse is open, and mode is 7+1
+ * @tc.desc: Test autoCollapse with long arrayValue
  * @tc.type: FUNC
  */
 HWTEST_F(IndexerLayoutTestNg, AutoCollapse001, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
-    model.SetAutoCollapse(true);
-    model.SetItemSize(Dimension(6, DimensionUnit::VP));
-    pattern_->maxContentHeight_ = 60.f;
+    /**
+     * @tc.steps: step1. AutoCollapse is false
+     * @tc.expected: Not fold
+     */
+    std::vector arrayValue = GetLongArrayValue();
+    IndexerModelNG model = CreateIndexer(arrayValue, 0);
+    model.SetAutoCollapse(false);
     CreateDone();
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::INVALID);
+    EXPECT_EQ(GetArrayValueTexts(), "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+
+    /**
+     * @tc.steps: step2. AutoCollapse is true, Set Height enough to contain short fold mode items
+     * @tc.expected: Short fold
+     */
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(SHORT_INDEXER_HEIGHT));
+    model.SetAutoCollapse(AceType::RawPtr(frameNode_), true);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
     EXPECT_EQ(GetArrayValueTexts(), "A.G.M.S.Z");
+
+    /**
+     * @tc.steps: step3. Set Height enough to contain long fold mode items
+     * @tc.expected: Long fold
+     */
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(LONG_INDEXER_HEIGHT));
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::SEVEN);
+    EXPECT_EQ(GetArrayValueTexts(), "A.E.I.M.Q.U.Z");
+
+    /**
+     * @tc.steps: step4. Set Height enough to contain all items
+     * @tc.expected: Not fold
+     */
+    ViewAbstract::SetHeight(
+        AceType::RawPtr(frameNode_), CalcLength(INDEXER_ITEM_SIZE * arrayValue.size() + INDEXER_PADDING_TOP * 2));
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
+    EXPECT_EQ(GetArrayValueTexts(), "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 }
 
 /**
  * @tc.name: AutoCollapse002
- * @tc.desc: Test OnModifyDone when autoCollapse is open, item size is larger than pattern height
+ * @tc.desc: Test autoCollapse with long arrayValue and "#"
  * @tc.type: FUNC
  */
 HWTEST_F(IndexerLayoutTestNg, AutoCollapse002, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
-    model.SetAutoCollapse(true);
-    model.SetItemSize(Dimension(2000, DimensionUnit::VP));
-    pattern_->maxContentHeight_ = 100.f;
+    /**
+     * @tc.steps: step1. AutoCollapse is false
+     * @tc.expected: Not fold
+     */
+    std::vector arrayValue = GetLongArrayValue();
+    arrayValue.insert(arrayValue.begin(), "#");
+    IndexerModelNG model = CreateIndexer(arrayValue, 0);
+    model.SetAutoCollapse(false);
     CreateDone();
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::INVALID);
+    EXPECT_EQ(GetArrayValueTexts(), "#ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+
+    /**
+     * @tc.steps: step2. AutoCollapse is true
+     * @tc.expected: Short fold
+     */
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(SHORT_INDEXER_HEIGHT + INDEXER_ITEM_SIZE));
+    model.SetAutoCollapse(AceType::RawPtr(frameNode_), true);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
-    EXPECT_EQ(GetArrayValueTexts(), "A.G.M.S.Z");
+    EXPECT_EQ(GetArrayValueTexts(), "#A.G.M.S.Z");
+
+    /**
+     * @tc.steps: step3. Set Height enough to contain long fold mode items
+     * @tc.expected: Long fold
+     */
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(LONG_INDEXER_HEIGHT + INDEXER_ITEM_SIZE));
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::SEVEN);
+    EXPECT_EQ(GetArrayValueTexts(), "#A.E.I.M.Q.U.Z");
+
+    /**
+     * @tc.steps: step4. Set Height enough to contain all items
+     * @tc.expected: Not fold
+     */
+    ViewAbstract::SetHeight(
+        AceType::RawPtr(frameNode_), CalcLength(INDEXER_ITEM_SIZE * arrayValue.size() + INDEXER_PADDING_TOP * 2));
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
+    EXPECT_EQ(GetArrayValueTexts(), "#ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 }
 
 /**
  * @tc.name: AutoCollapse003
- * @tc.desc: Test OnModifyDone when autoCollapse is open, and created arrayValue size is less than 9
+ * @tc.desc: Test autoCollapse with mid arrayValue
  * @tc.type: FUNC
  */
 HWTEST_F(IndexerLayoutTestNg, AutoCollapse003, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(GetShortArrayValue(), 0);
+    /**
+     * @tc.steps: step1. AutoCollapse is true
+     * @tc.expected: Not fold
+     */
+    std::vector arrayValue = GetMidArrayValue();
+    IndexerModelNG model = CreateIndexer(arrayValue, 0);
     model.SetAutoCollapse(true);
-    model.SetItemSize(Dimension(10, DimensionUnit::VP));
-    pattern_->maxContentHeight_ = 100.f;
     CreateDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
-    EXPECT_EQ(GetArrayValueTexts(), "ABCDEFGHI");
+    EXPECT_EQ(GetArrayValueTexts(), "ABCDEFGHIJKLM");
+
+    /**
+     * @tc.steps: step2. Set Height enough to contain short fold mode items
+     * @tc.expected: Short fold
+     */
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(SHORT_INDEXER_HEIGHT));
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
+    EXPECT_EQ(GetArrayValueTexts(), "A.D.G.J.M");
 }
 
 /**
  * @tc.name: AutoCollapse004
- * @tc.desc: Test OnModifyDone when autoCollapse is open, and arrayValue size is more than 9,
- *           pattern height is enough to contain all items
+ * @tc.desc: Test autoCollapse with short arrayValue
  * @tc.type: FUNC
  */
 HWTEST_F(IndexerLayoutTestNg, AutoCollapse004, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(GetShortArrayValue(), 0);
+    /**
+     * @tc.steps: step1. AutoCollapse is true
+     * @tc.expected: Not fold
+     */
+    std::vector arrayValue = GetShortArrayValue();
+    IndexerModelNG model = CreateIndexer(arrayValue, 0);
     model.SetAutoCollapse(true);
-    model.SetItemSize(Dimension(10, DimensionUnit::VP));
-    pattern_->maxContentHeight_ = 100.f;
     CreateDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
     EXPECT_EQ(GetArrayValueTexts(), "ABCDEFGHI");
 }
 
 /**
- * @tc.name: AutoCollapse005
- * @tc.desc: Test OnModifyDone when autoCollapse is open, and arrayValue size is more than 9,
- *           pattern height is not enough to contain all items
+ * @tc.name: InitializingSelected001
+ * @tc.desc: Test the initializing Selected in diff IndexerCollapsingMode
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerLayoutTestNg, AutoCollapse005, TestSize.Level1)
+HWTEST_F(IndexerLayoutTestNg, InitializingSelected001, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(GetAutoCollapseArrayValue(), 0);
-    model.SetAutoCollapse(true);
-    model.SetItemSize(Dimension(10, DimensionUnit::VP));
-    pattern_->maxContentHeight_ = 100.f;
+    /**
+     * @tc.steps: step1. AutoCollapse is false
+     * @tc.expected: Not fold, the initializing Selected is correct
+     */
+    std::vector arrayValue = GetLongArrayValue();
+    IndexerModelNG model = CreateIndexer(arrayValue, 0);
+    model.SetAutoCollapse(false);
     CreateDone();
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::INVALID);
+    EXPECT_EQ(pattern_->GetSelected(), 0);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "A");
+
+    model.SetSelected(AceType::RawPtr(frameNode_), 1);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetSelected(), 1);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "B");
+
+    /**
+     * @tc.steps: step2. AutoCollapse is true
+     * @tc.expected: Short fold, the initializing Selected is correct
+     */
+    // "A•G•M•S•Z"
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(SHORT_INDEXER_HEIGHT));
+    model.SetAutoCollapse(AceType::RawPtr(frameNode_), true);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
-    EXPECT_EQ(GetArrayValueTexts(), "#A.C.F.I.L");
+    EXPECT_EQ(pattern_->GetSelected(), 1);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "B");
+    // select A
+    model.SetSelected(AceType::RawPtr(frameNode_), 0);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetSelected(), 0);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "A");
+    // select •
+    model.SetSelected(AceType::RawPtr(frameNode_), 2);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetSelected(), 1);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "B");
+    // select •
+    model.SetSelected(AceType::RawPtr(frameNode_), 5);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetSelected(), 1);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "B");
+
+    /**
+     * @tc.steps: step3. Set Height enough to contain long fold mode items
+     * @tc.expected: Long fold, the initializing Selected is correct
+     */
+    // "A.E.I.M.Q.U.Z"
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(LONG_INDEXER_HEIGHT));
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::SEVEN);
+    EXPECT_EQ(pattern_->GetSelected(), 3);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "F");
+
+    model.SetSelected(AceType::RawPtr(frameNode_), 0);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetSelected(), 0);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "A");
+
+    model.SetSelected(AceType::RawPtr(frameNode_), 1);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetSelected(), 1);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "B");
+}
+
+/**
+ * @tc.name: InitializingSelected002
+ * @tc.desc: Test the initializing Selected in diff IndexerCollapsingMode with "#"
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerLayoutTestNg, InitializingSelected002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. AutoCollapse is false
+     * @tc.expected: Not fold, the initializing Selected is correct
+     */
+    std::vector arrayValue = GetLongArrayValue();
+    arrayValue.insert(arrayValue.begin(), "#");
+    IndexerModelNG model = CreateIndexer(arrayValue, 0);
+    model.SetAutoCollapse(false);
+    CreateDone();
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::INVALID);
+    EXPECT_EQ(pattern_->GetSelected(), 0);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "#");
+
+    model.SetSelected(AceType::RawPtr(frameNode_), 1);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetSelected(), 1);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "A");
+
+    /**
+     * @tc.steps: step2. AutoCollapse is true
+     * @tc.expected: Short fold, the initializing Selected is correct
+     */
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(SHORT_INDEXER_HEIGHT));
+    model.SetAutoCollapse(AceType::RawPtr(frameNode_), true);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
+    EXPECT_EQ(pattern_->GetSelected(), 1);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "A");
+
+    model.SetSelected(AceType::RawPtr(frameNode_), 0);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetSelected(), 0);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "#");
+
+    model.SetSelected(AceType::RawPtr(frameNode_), 2);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetSelected(), 2);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "B");
+
+    /**
+     * @tc.steps: step3. Set Height enough to contain long fold mode items
+     * @tc.expected: Long fold, the initializing Selected is correct
+     */
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(LONG_INDEXER_HEIGHT + INDEXER_ITEM_SIZE));
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::SEVEN);
+    EXPECT_EQ(pattern_->GetSelected(), 2);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "B");
+
+    model.SetSelected(AceType::RawPtr(frameNode_), 0);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetSelected(), 0);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "#");
+
+    model.SetSelected(AceType::RawPtr(frameNode_), 1);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetSelected(), 1);
+    EXPECT_EQ(accessibilityProperty_->GetText(), "A");
+}
+
+/**
+ * @tc.name: ArrayValue001
+ * @tc.desc: Test the initializing ArrayValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerLayoutTestNg, ArrayValue001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Change ArrayValue
+     * @tc.expected: The items number changed
+     */
+    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
+    model.SetUsingPopup(true);
+    model.SetOnRequestPopupData(GetPopupData());
+    CreateDone();
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 26);
+
+    model.SetArrayValue(AceType::RawPtr(frameNode_), GetShortArrayValue());
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 9);
+
+    /**
+     * @tc.steps: step1. Change ArrayValue when show popup
+     * @tc.expected: The items number changed
+     */
+    pattern_->MoveIndexByStep(1);
+    EXPECT_EQ(pattern_->GetSelected(), 1);
+    EXPECT_NE(pattern_->popupNode_, nullptr);
+    EXPECT_TRUE(layoutProperty_->GetIsPopupValue(false));
+    model.SetArrayValue(AceType::RawPtr(frameNode_), GetMidArrayValue());
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->GetSelected(), 0);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 14); // items + popup
+    EXPECT_TRUE(layoutProperty_->GetIsPopupValue(false));
 }
 
 /**
@@ -783,5 +1148,311 @@ HWTEST_F(IndexerLayoutTestNg, PopUpLayout003, TestSize.Level1)
     indexerLayoutProperty1->UpdateLayoutDirection(TextDirection::LTR);
     offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, INDEXER_WIDTH);
     EXPECT_EQ(offset.GetX(), Dimension(userDefinePositionRightX));
+}
+
+/**
+ * @tc.name: BubbleSize001
+ * @tc.desc: Test UpdateBubbleSize function, the Bubble size will change in diff PlatformVersion
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerLayoutTestNg, BubbleSize001, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
+    model.SetUsingPopup(true);
+    model.SetOnRequestPopupData(GetPopupData());
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. childPressIndex_ less than 0.
+     * @tc.expected: verify size.
+     */
+    const int32_t popupDataSize = 2;
+    const int32_t popupSize = popupDataSize + 1;
+    pattern_->MoveIndexByStep(1);
+    OnPopupTouchDown(TouchType::DOWN); // trigger UpdateBubbleSize
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(
+        pattern_->popupNode_->GetGeometryNode()->GetFrameSize(), SizeF(BUBBLE_BOX_SIZE, BUBBLE_BOX_SIZE * popupSize)));
+
+    /**
+     * @tc.steps: step2. VERSION_TWELVE
+     */
+    int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    pattern_->MoveIndexByStep(1);
+    OnPopupTouchDown(TouchType::DOWN); // trigger UpdateBubbleSize
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(pattern_->popupNode_->GetGeometryNode()->GetFrameSize(),
+        SizeF(BUBBLE_BOX_SIZE, (BUBBLE_ITEM_SIZE + BUBBLE_DIVIDER_SIZE) * popupSize + BUBBLE_DIVIDER_SIZE)));
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: BubbleSize002
+ * @tc.desc: Test UpdateBubbleSize function, the BubbleSize would less than maxSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerLayoutTestNg, BubbleSize002, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
+    model.SetUsingPopup(true);
+    // PopupData size greater than maxItemsSize
+    model.SetOnRequestPopupData(GetMorePopupData2());
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. has popListData and popListData size equal INDEXER_BUBBLE_MAXSIZE.
+     * @tc.expected: verify size.
+     */
+    pattern_->MoveIndexByStep(1);
+    OnPopupTouchDown(TouchType::DOWN); // trigger UpdateBubbleSize
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(pattern_->popupNode_->GetGeometryNode()->GetFrameSize(),
+        SizeF(BUBBLE_BOX_SIZE, BUBBLE_BOX_SIZE * (INDEXER_BUBBLE_MAXSIZE + 1))));
+
+    /**
+     * @tc.steps: step2. VERSION_TWELVE
+     */
+    int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    pattern_->MoveIndexByStep(1);
+    OnPopupTouchDown(TouchType::DOWN); // trigger UpdateBubbleSize
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(
+        pattern_->popupNode_->GetGeometryNode()->GetFrameSize(), SizeF(BUBBLE_BOX_SIZE, BUBBLE_COLUMN_MAX_SIZE)));
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: BubbleSize003
+ * @tc.desc: Test UpdateBubbleSize function with AutoCollapse, the maxItemsSize is different
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerLayoutTestNg, BubbleSize003, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
+    model.SetUsingPopup(true);
+    model.SetOnRequestPopupData(GetMorePopupData());
+    model.SetAutoCollapse(true);
+    ViewAbstract::SetHeight(CalcLength(SHORT_INDEXER_HEIGHT));
+    CreateDone();
+    frameNode_->MarkModifyDone();
+
+    /**
+     * @tc.steps: step1. has popListData and popListData size equal INDEXER_BUBBLE_MAXSIZE.
+     * @tc.expected: verify size.
+     */
+    pattern_->MoveIndexByStep(1);
+    OnPopupTouchDown(TouchType::DOWN); // trigger UpdateBubbleSize
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(pattern_->popupNode_->GetGeometryNode()->GetFrameSize(),
+        SizeF(BUBBLE_BOX_SIZE, BUBBLE_BOX_SIZE * INDEXER_BUBBLE_MAXSIZE_COLLAPSED)));
+
+    /**
+     * @tc.steps: step2. VERSION_TWELVE
+     */
+    int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    pattern_->MoveIndexByStep(1);
+    OnPopupTouchDown(TouchType::DOWN); // trigger UpdateBubbleSize
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(pattern_->popupNode_->GetGeometryNode()->GetFrameSize(),
+        SizeF(BUBBLE_BOX_SIZE, BUBBLE_COLLAPSE_COLUMN_MAX_SIZE)));
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: DrawPopupListGradient001
+ * @tc.desc: Test DrawPopupListGradient, when Popup is long that can scroll,
+ * the popup will change color in diff position
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerLayoutTestNg, DrawPopupListGradient001, TestSize.Level1)
+{
+    int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
+    model.SetUsingPopup(true);
+    model.SetOnRequestPopupData(GetMorePopupData2());
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Show popupNode_, list at top
+     * @tc.expected: Colors.size is 3
+     */
+    pattern_->MoveIndexByOffset(Offset(0, 10));
+    FlushLayoutTask(frameNode_);
+    auto stackNode = AceType::DynamicCast<FrameNode>(pattern_->popupNode_->GetLastChild());
+    auto stackRenderContext = stackNode->GetRenderContext();
+    auto listNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    EXPECT_TRUE(listPattern->IsAtTop());
+    EXPECT_EQ(stackRenderContext->GetLinearGradientValue(Gradient()).GetColors().size(), 3);
+
+    /**
+     * @tc.steps: step2. list scroll to middle
+     * @tc.expected: Colors.size is 4
+     */
+    listPattern->ScrollTo(20);
+    FlushLayoutTask(listNode);
+    EXPECT_FALSE(listPattern->IsAtTop());
+    EXPECT_FALSE(listPattern->IsAtBottom());
+    EXPECT_EQ(stackRenderContext->GetLinearGradientValue(Gradient()).GetColors().size(), 4);
+
+    /**
+     * @tc.steps: step3. list scroll to bottom
+     * @tc.expected: Colors.size is 3
+     */
+    listPattern->ScrollTo(100);
+    FlushLayoutTask(listNode);
+    EXPECT_TRUE(listPattern->IsAtBottom());
+    EXPECT_EQ(stackRenderContext->GetLinearGradientValue(Gradient()).GetColors().size(), 3);
+
+    /**
+     * @tc.steps: step4. list scroll back to top
+     * @tc.expected: Colors.size is 3
+     */
+    listPattern->ScrollTo(0);
+    FlushLayoutTask(listNode);
+    EXPECT_TRUE(listPattern->IsAtTop());
+    EXPECT_EQ(stackRenderContext->GetLinearGradientValue(Gradient()).GetColors().size(), 3);
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: PopupClickStyle001
+ * @tc.desc: Test ChangeListItemsSelectedStyle, the text color will change by click
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerLayoutTestNg, PopupClickStyle001, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
+    model.SetUsingPopup(true);
+    model.SetOnRequestPopupData(GetPopupData());
+    model.SetPopupSelectedColor(Color::GREEN);
+    model.SetPopupUnselectedColor(Color::BLUE);
+    model.SetPopupItemBackground(Color::GRAY);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Show popupNode_
+     */
+    pattern_->MoveIndexByStep(1);
+    auto firstListItemNode = GetListItemNode(0);
+    auto firstTextLayoutProperty = GetChildLayoutProperty<TextLayoutProperty>(firstListItemNode, 0);
+    auto secondListItemNode = GetListItemNode(1);
+    auto secondTextLayoutProperty = GetChildLayoutProperty<TextLayoutProperty>(secondListItemNode, 0);
+
+    /**
+     * @tc.steps: step2. Click popupNode_ first item
+     * @tc.expected: The first item color changed
+     */
+    float clickIndex = 0;
+    ListItemClick(clickIndex, TouchType::DOWN);
+    EXPECT_EQ(firstTextLayoutProperty->GetTextColor().value(), Color::GREEN);
+    EXPECT_EQ(secondTextLayoutProperty->GetTextColor().value(), Color::BLUE);
+    ListItemClick(clickIndex, TouchType::MOVE);
+    EXPECT_EQ(firstTextLayoutProperty->GetTextColor().value(), Color::GREEN);
+    EXPECT_EQ(secondTextLayoutProperty->GetTextColor().value(), Color::BLUE);
+    ListItemClick(clickIndex, TouchType::UP);
+    EXPECT_EQ(firstTextLayoutProperty->GetTextColor().value(), Color::BLUE);
+    EXPECT_EQ(secondTextLayoutProperty->GetTextColor().value(), Color::BLUE);
+
+    /**
+     * @tc.steps: step3. Click popupNode_ second item
+     * @tc.expected: The second item color changed
+     */
+    clickIndex = 1;
+    ListItemClick(clickIndex, TouchType::DOWN);
+    EXPECT_EQ(firstTextLayoutProperty->GetTextColor().value(), Color::BLUE);
+    EXPECT_EQ(secondTextLayoutProperty->GetTextColor().value(), Color::GREEN);
+    ListItemClick(clickIndex, TouchType::MOVE);
+    EXPECT_EQ(firstTextLayoutProperty->GetTextColor().value(), Color::BLUE);
+    EXPECT_EQ(secondTextLayoutProperty->GetTextColor().value(), Color::GREEN);
+    ListItemClick(clickIndex, TouchType::UP);
+    EXPECT_EQ(firstTextLayoutProperty->GetTextColor().value(), Color::BLUE);
+    EXPECT_EQ(secondTextLayoutProperty->GetTextColor().value(), Color::BLUE);
+}
+
+/**
+ * @tc.name: PopupClickStyle002
+ * @tc.desc: Test ChangeListItemsSelectedStyle with AutoCollapse,
+ * the text color will change by click except first item
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerLayoutTestNg, PopupClickStyle002, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
+    model.SetUsingPopup(true);
+    model.SetOnRequestPopupData(GetPopupData());
+    model.SetPopupSelectedColor(Color::GREEN);
+    model.SetPopupUnselectedColor(Color::BLUE);
+    model.SetPopupItemBackground(Color::GRAY);
+    model.SetAutoCollapse(true);
+    ViewAbstract::SetHeight(CalcLength(SHORT_INDEXER_HEIGHT));
+    CreateDone();
+    frameNode_->MarkModifyDone();
+
+    /**
+     * @tc.steps: step1. Show popupNode_
+     * @tc.expected: The first item is letter, has no clickListener
+     */
+    pattern_->MoveIndexByStep(1);
+    auto firstListItemNode = GetListItemNode(0);
+    auto gesture = firstListItemNode->GetOrCreateGestureEventHub();
+    EXPECT_EQ(gesture->touchEventActuator_, nullptr);
+
+    /**
+     * @tc.steps: step2. Click popupNode_ second item
+     * @tc.expected: The second item color changed
+     */
+    float clickIndex = 1;
+    auto secondListItemNode = GetListItemNode(clickIndex);
+    auto secondTextLayoutProperty = GetChildLayoutProperty<TextLayoutProperty>(secondListItemNode, 0);
+    ListItemClick(clickIndex, TouchType::DOWN);
+    EXPECT_EQ(secondTextLayoutProperty->GetTextColor().value(), Color::GREEN);
+    ListItemClick(clickIndex, TouchType::UP);
+    EXPECT_EQ(secondTextLayoutProperty->GetTextColor().value(), Color::BLUE);
+}
+
+/**
+ * @tc.name: OnPopupHoverStyle001
+ * @tc.desc: Test OnPopupHover, visibility will change by hover
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerLayoutTestNg, OnPopupHoverStyle001, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 0);
+    model.SetUsingPopup(true);
+    model.SetOnRequestPopupData(GetPopupData());
+    CreateDone();
+    pattern_->MoveIndexByStep(1);
+    GetRenderContext();
+
+    /**
+     * @tc.steps: step1. Hover
+     * @tc.expected: Show
+     */
+    pattern_->OnPopupHover(true);
+    EXPECT_EQ(popupRenderContext_->GetOpacityValue(), 1.f);
+    auto layoutProperty = pattern_->popupNode_->GetLayoutProperty<LinearLayoutProperty>();
+    EXPECT_FALSE(layoutProperty->GetVisibility().has_value());
+
+    /**
+     * @tc.steps: step2. No hover
+     * @tc.expected: Hide
+     */
+    pattern_->OnPopupHover(false);
+    pattern_->StartBubbleDisappearAnimation();
+    EXPECT_EQ(popupRenderContext_->GetOpacityValue(), 0.f);
+    EXPECT_EQ(layoutProperty->GetVisibility(), VisibleType::GONE);
+
+    /**
+     * @tc.steps: step3. Hover
+     * @tc.expected: Show
+     */
+    pattern_->OnPopupHover(true);
+    EXPECT_EQ(popupRenderContext_->GetOpacityValue(), 1.f);
+    EXPECT_EQ(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
 }
 } // namespace OHOS::Ace::NG
