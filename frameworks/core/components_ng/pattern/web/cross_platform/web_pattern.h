@@ -70,6 +70,13 @@ struct TouchHandleState {
 enum WebOverlayType { INSERT_OVERLAY, SELECTION_OVERLAY, INVALID_OVERLAY };
 } // namespace
 
+enum class WebInfoType : int32_t {
+    TYPE_MOBILE,
+    TYPE_TABLET,
+    TYPE_2IN1,
+    TYPE_UNKNOWN
+};
+
 class WebPattern : public Pattern, public SelectionHost {
     DECLARE_ACE_TYPE(WebPattern, Pattern, SelectionHost);
 
@@ -78,6 +85,9 @@ public:
     using SetHapPathCallback = std::function<void(const std::string&)>;
     using JsProxyCallback = std::function<void()>;
     using OnControllerAttachedCallback = std::function<void()>;
+    using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+    using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+    using OnOpenAppLinkCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
                RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
@@ -109,8 +119,6 @@ public:
     {
         return true;
     }
-
-    void UpdateSlideOffset() override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -236,6 +244,11 @@ public:
         permissionClipboardCallback_ = std::move(Callback);
     }
 
+    PermissionClipboardCallback GetPermissionClipboardCallback() const
+    {
+        return permissionClipboardCallback_;
+    }
+
     OnControllerAttachedCallback GetOnControllerAttachedCallback()
     {
         return onControllerAttachedCallback_;
@@ -346,6 +359,10 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollBarColor, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverScrollMode, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
+    using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SmoothDragResizeEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MetaViewport, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CopyOptionMode, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedModeEnabled, bool);
@@ -364,6 +381,7 @@ public:
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
     bool OnBackPressed() const;
+    bool OnBackPressedForFullScreen() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
     void UpdateJavaScriptOnDocumentStart();
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
@@ -403,6 +421,32 @@ public:
     {
         // cross platform is not support now;
         return false;
+    }
+
+    SizeF GetDragPixelMapSize() const;
+    bool Backward();
+    void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
+    WebInfoType GetWebInfoType();
+    void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callabck);
+
+    void SetDefaultFileSelectorShowCallback(DefaultFileSelectorShowCallback&& Callback)
+    {
+        defaultFileSelectorShowCallback_ = std::move(Callback);
+    }
+
+    DefaultFileSelectorShowCallback GetDefaultFileSelectorShowCallback()
+    {
+        return defaultFileSelectorShowCallback_;
+    }
+
+    void SetOnOpenAppLinkCallback(OnOpenAppLinkCallback&& callback)
+    {
+        onOpenAppLinkCallback_ = std::move(callback);
+    }
+
+    OnOpenAppLinkCallback GetOnOpenAppLinkCallback() const
+    {
+        return onOpenAppLinkCallback_;
     }
 
 private:
@@ -465,6 +509,8 @@ private:
     void OnScrollBarColorUpdate(const std::string& value);
     void OnOverScrollModeUpdate(const int32_t value);
     void OnTextAutosizingUpdate(bool isTextAutosizing);
+    void OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& config);
+    void OnSmoothDragResizeEnabledUpdate(bool value);
     void OnMetaViewportUpdate(bool value);
     void OnOverlayScrollbarEnabledUpdate(bool value);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
@@ -487,9 +533,10 @@ private:
     void ResetDragAction();
     void UpdateRelativeOffset();
     void InitSlideUpdateListener();
-    void CalculateHorizontalDrawRect(const SizeF frameSize);
-    void CalculateVerticalDrawRect(const SizeF frameSize);
-    void OnNativeEmbedModeEnabledUpdate(bool value);
+    void CalculateHorizontalDrawRect();
+    void CalculateVerticalDrawRect();
+    void UpdateSlideOffset(bool isNeedReset = false);
+    void OnNativeEmbedModeEnabledUpdate(bool value) {};
     void OnNativeEmbedRuleTagUpdate(const std::string& tag);
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
     void OnCopyOptionModeUpdate(const int32_t value);
@@ -534,6 +581,8 @@ private:
     JsProxyCallback jsProxyCallback_ = nullptr;
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
+    OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
+    DefaultFileSelectorShowCallback defaultFileSelectorShowCallback_ = nullptr;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
@@ -568,6 +617,7 @@ private:
     bool isMemoryLevelEnable_ = true;
     bool isParentHasScroll_ = false;
     OffsetF relativeOffsetOfScroll_;
+    std::function<void(int32_t)> updateInstanceIdCallback_;
     RefPtr<WebDelegateInterface> delegate_ = nullptr;
     std::optional<std::string> sharedRenderProcessToken_;
 
