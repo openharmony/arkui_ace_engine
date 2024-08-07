@@ -16,16 +16,10 @@
 #include "core/components_ng/render/adapter/txt_paragraph.h"
 
 #include "base/log/ace_performance_monitor.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/utils.h"
-#include "base/geometry/dimension.h"
 #include "core/components/font/constants_converter.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/txt_font_collection.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components/common/properties/text_layout_info.h"
 
 namespace OHOS::Ace::NG {
 namespace {
