@@ -7062,11 +7062,13 @@ bool TextFieldPattern::UpdateFocusBackward()
     if (focusIndex_ == FocuseIndex::CANCEL && HasFocus()) {
         focusIndex_ = FocuseIndex::TEXT;
         PaintTextRect();
+        StartTwinkling();
         return true;
     } else if (focusIndex_ == FocuseIndex::UNIT && HasFocus()) {
         if (!CancelNodeIsShow()) {
             focusIndex_ = FocuseIndex::TEXT;
             PaintTextRect();
+            StartTwinkling();
             return true;
         }
         focusIndex_ = FocuseIndex::CANCEL;
