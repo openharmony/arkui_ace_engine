@@ -747,6 +747,12 @@ void IndexerPattern::ApplyIndexChanged(
         childRenderContext->SetClipToBounds(true);
         auto nodeStr = autoCollapse_ && arrayValue_[index].second ?
             StringUtils::Str16ToStr8(INDEXER_STR_DOT) : arrayValue_[index].first;
+        nodeLayoutProperty->UpdateContent(nodeStr);
+        nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+        nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
+        nodeLayoutProperty->UpdateMinFontScale(1.0f);
+        nodeLayoutProperty->UpdateMaxFontScale(1.0f);
+        nodeLayoutProperty->UpdateMaxLines(1);
         if (index == childHoverIndex_ || index == childPressIndex_) {
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 auto radiusSize = paintProperty->GetItemBorderRadius().has_value()
@@ -762,11 +768,6 @@ void IndexerPattern::ApplyIndexChanged(
                 childRenderContext->UpdateBackgroundColor(indexerTheme->GetHoverBgAreaColor());
             }
         } else if (index == childFocusIndex_ || index == selected_) {
-            nodeLayoutProperty->UpdateContent(nodeStr);
-            nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-            nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
-            nodeLayoutProperty->UpdateMinFontScale(1.0f);
-            nodeLayoutProperty->UpdateMaxFontScale(1.0f);
             if (index == childFocusIndex_) {
                 auto borderWidth = indexerTheme->GetFocusBgOutlineSize();
                 nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
@@ -830,11 +831,6 @@ void IndexerPattern::ApplyIndexChanged(
             }
         }
         Dimension borderWidth;
-        nodeLayoutProperty->UpdateContent(nodeStr);
-        nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-        nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
-        nodeLayoutProperty->UpdateMinFontScale(1.0f);
-        nodeLayoutProperty->UpdateMaxFontScale(1.0f);
         nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
         childRenderContext->ResetBlendBorderColor();
         auto defaultFont = layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle());
@@ -2052,6 +2048,7 @@ void IndexerPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("PopupPositionY: ",
         layoutProperty->GetPopupPositionYValue(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP)).ToString());
     DumpLog::GetInstance().AddDesc("AutoCollapse: ", autoCollapse_ ? "true" : "false");
+    DumpLog::GetInstance().AddDesc("IsPopup: ", isPopup_ ? "true" : "false");
     DumpLog::GetInstance().AddDesc(std::string("EnableHapticFeedback: ").append(std::to_string(enableHapticFeedback_)));
 }
 } // namespace OHOS::Ace::NG
