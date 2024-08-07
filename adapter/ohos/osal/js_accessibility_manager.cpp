@@ -2340,10 +2340,17 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
     CHECK_NULL_RETURN(uiExtensionManager, false);
     auto container = Container::GetContainer(ngPipeline->GetInstanceId());
-    if (!IsRegister() && !(container && container->IsDynamicRender())) {
+    bool isDynamicRender = container && container->IsDynamicRender();
+    if (!IsRegister() && !isDynamicRender) {
         return false;
     }
     AccessibilityEventInfo eventInfoNew = eventInfo;
+    if (isDynamicRender) {
+        auto focusedContainer = Container::GetFoucsed();
+        if (focusedContainer) {
+            eventInfoNew.SetWindowId(focusedContainer->GetWindowId());
+        }
+    }
     eventInfoNew.SetSource(uiExtensionOffset + eventInfo.GetViewId());
     AccessibilityElementInfo elementInfo;
     FillElementInfo(eventInfoNew.GetAccessibilityId(), elementInfo, pipeline, Claim(this),
