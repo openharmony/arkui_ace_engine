@@ -185,8 +185,6 @@ void WindowPattern::OnAttachToFrameNode()
         surfaceNode->SetBufferAvailableCallback(coldStartCallback_);
         return;
     }
-    CreateSnapshotWindow();
-    AddChild(host, snapshotWindow_, snapshotWindowName_);
     attachToFrameNodeFlag_ = true;
 }
 
@@ -218,7 +216,7 @@ void WindowPattern::CreateAppWindow()
         auto context = AceType::DynamicCast<NG::RosenRenderContext>(appWindow_->GetRenderContext());
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
-        context->SetOpacity(1);
+        surfaceNode->SetVisible(true);
     }
 }
 
