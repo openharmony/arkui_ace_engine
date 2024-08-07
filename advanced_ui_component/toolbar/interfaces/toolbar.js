@@ -41,6 +41,9 @@ export let ItemState;
 })(ItemState || (ItemState = {}));
 
 const PUBLIC_MORE = { id: -1, type: 20000, params: ['sys.media.ohos_ic_public_more'], bundleName: '', moduleName: '' };
+const IMAGE_SIZE = '24vp';
+const DEFAULT_TOOLBAR_HEIGHT = 56;
+const TOOLBAR_MAX_LENGTH = 5;
 
 let ToolBarOption = class ToolBarOption {
   constructor() {
@@ -100,9 +103,15 @@ export class ToolBarModifier {
       'bundleName': '',
       'moduleName': '',
     };
-    this.heightValue = LengthMetrics.vp(56);
+    this.heightValue = LengthMetrics.vp(DEFAULT_TOOLBAR_HEIGHT);
     this.stateEffectValue = true;
-    this.paddingValue = LengthMetrics.vp(24);
+    this.paddingValue = LengthMetrics.resource({
+      'id': -1,
+      'type': 10002,
+      params: ['sys.float.padding_level12'],
+      'bundleName': '',
+      'moduleName': '',
+    });
   }
   applyNormalAttribute(j4) {
     j4.backgroundColor(this.backgroundColorValue);
@@ -186,16 +195,16 @@ export class ToolBar extends ViewPU {
     }
     if (y3.toolBarModifier === undefined) {
       this.__toolBarModifier.set(new ToolBarModifier()
-        .padding(LengthMetrics.vp(24))
+        .padding(LengthMetrics.resource({
+          'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '', 'moduleName': '' }))
         .stateEffect(true)
-        .height(LengthMetrics.vp(56))
+        .height(LengthMetrics.vp(DEFAULT_TOOLBAR_HEIGHT))
         .backgroundColor('sys.color.ohos_id_color_toolbar_bg'));
     }
     if (y3.moreText === undefined) {
       this.__moreText.set({
         'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'],
-        'bundleName': '',
-        'moduleName': '',
+        'bundleName': '', 'moduleName': '',
       });
     }
     if (y3.menuContent !== undefined) {
@@ -369,8 +378,22 @@ export class ToolBar extends ViewPU {
       Column.width('100%');
       Column.height('100%');
       Column.justifyContent(FlexAlign.Center);
-      Column.bindMenu(ObservedObject.GetRawObject(this.menuContent), { placement: Placement.TopRight, offset: { x: -12, y: -10 } });
-      Column.padding({ start: LengthMetrics.vp(4), end: LengthMetrics.vp(4) });
+      Column.bindMenu(ObservedObject.GetRawObject(this.menuContent),
+        { placement: Placement.TopRight, offset: { x: -12, y: -10 } });
+      Column.padding({
+        start: LengthMetrics.resource({
+          'id': -1,
+          'type': 10002,
+          params: ['sys.float.padding_level2'],
+          'bundleName': '',
+          'moduleName': '' }),
+        end: LengthMetrics.resource({
+          'id': -1,
+          'type': 10002,
+          params: ['sys.float.padding_level2'],
+          'bundleName': '',
+          'moduleName': '' }),
+      });
       Column.borderRadius({
         'id': -1,
         'type': 10002,
@@ -409,10 +432,16 @@ export class ToolBar extends ViewPU {
     }, Column);
     this.observeComponentCreation2((e3, f3) => {
       Image.create(PUBLIC_MORE);
-      Image.width(24);
-      Image.height(24);
+      Image.width(IMAGE_SIZE);
+      Image.height(IMAGE_SIZE);
       Image.fillColor(ObservedObject.GetRawObject(this.iconPrimaryColor));
-      Image.margin({ bottom: 2 });
+      Image.margin({ bottom: {
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.padding_level1'],
+        'bundleName': '',
+        'moduleName': '',
+      } });
       Image.objectFit(ImageFit.Contain);
       Image.draggable(false);
     }, Image);
@@ -441,9 +470,22 @@ export class ToolBar extends ViewPU {
       Column.justifyContent(FlexAlign.Center);
       Column.width('100%');
       Column.height('100%');
-      Column.focusable(!(this.toolBarList[a2]?.state === 2));
-      Column.focusOnTouch(!(this.toolBarList[a2]?.state === 2));
-      Column.padding({ start: LengthMetrics.vp(4), end: LengthMetrics.vp(4) });
+      Column.focusable(!(this.toolBarList[a2]?.state === ItemState.DISABLE));
+      Column.focusOnTouch(!(this.toolBarList[a2]?.state === ItemState.DISABLE));
+      Column.padding({
+        start: LengthMetrics.resource({
+          'id': -1,
+          'type': 10002,
+          params: ['sys.float.padding_level2'],
+          'bundleName': '',
+          'moduleName': '' }),
+        end: LengthMetrics.resource({
+          'id': -1,
+          'type': 10002,
+          params: ['sys.float.padding_level2'],
+          'bundleName': '',
+          'moduleName': '' }),
+      });
       Column.borderRadius({
         'id': -1,
         'type': 10002,
@@ -503,11 +545,20 @@ export class ToolBar extends ViewPU {
         this.ifElseBranchUpdateFunction(0, () => {
           this.observeComponentCreation2((p2, q2) => {
             SymbolGlyph.create();
-            SymbolGlyph.fontSize('24vp');
+            SymbolGlyph.fontSize(IMAGE_SIZE);
             SymbolGlyph.symbolEffect(ObservedObject.GetRawObject(this.symbolEffect), false);
             SymbolGlyph.attributeModifier.bind(this)(this.getToolBarSymbolModifier(a2));
-            SymbolGlyph.opacity((this.toolBarList[a2]?.state === 2) ? 0.4 : 1);
-            SymbolGlyph.margin({ bottom: 2 });
+            SymbolGlyph.opacity((this.toolBarList[a2]?.state === ItemState.DISABLE) ?
+              { 'id': -1, 'type': 10002,
+                params: ['sys.float.interactive_disable'],
+                'bundleName': '', 'moduleName': '' } : 1);
+            SymbolGlyph.margin({ bottom: {
+              'id': -1,
+              'type': 10002,
+              params: ['sys.float.padding_level1'],
+              'bundleName': '',
+              'moduleName': '',
+            } });
           }, SymbolGlyph);
         });
       }
@@ -515,11 +566,20 @@ export class ToolBar extends ViewPU {
         this.ifElseBranchUpdateFunction(1, () => {
           this.observeComponentCreation2((l2, m2) => {
             Image.create(this.toolBarList[a2]?.icon);
-            Image.width(24);
-            Image.height(24);
+            Image.width(IMAGE_SIZE);
+            Image.height(IMAGE_SIZE);
             Image.fillColor(this.getIconColor(a2));
-            Image.opacity((this.toolBarList[a2]?.state === 2) ? 0.4 : 1);
-            Image.margin({ bottom: 2 });
+            Image.opacity((this.toolBarList[a2]?.state === ItemState.DISABLE) ?
+              { 'id': -1, 'type': 10002,
+                params: ['sys.float.interactive_disable'],
+                'bundleName': '', 'moduleName': '' } : 1);
+            Image.margin({ bottom: {
+              'id': -1,
+              'type': 10002,
+              params: ['sys.float.padding_level1'],
+              'bundleName': '',
+              'moduleName': '',
+            } });
             Image.objectFit(ImageFit.Contain);
             Image.draggable(false);
           }, Image);
@@ -548,7 +608,10 @@ export class ToolBar extends ViewPU {
       Text.fontWeight(FontWeight.Medium);
       Text.maxLines(1);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-      Text.opacity((this.toolBarList[a2]?.state === 2) ? 0.4 : 1);
+      Text.opacity((this.toolBarList[a2]?.state === ItemState.DISABLE) ?
+        { 'id': -1, 'type': 10002,
+          params: ['sys.float.interactive_disable'],
+          'bundleName': '', 'moduleName': '' } : 1);
       Text.textAlign(TextAlign.Center);
     }, Text);
     Text.pop();
@@ -608,7 +671,7 @@ export class ToolBar extends ViewPU {
   refreshData() {
     this.menuContent = [];
     for (let q1 = 0; q1 < this.toolBarList.length; q1++) {
-      if (q1 >= 4 && this.toolBarList.length > 5) {
+      if (q1 >= 4 && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
         this.menuContent[q1 - 4] = {
           value: this.toolBarList[q1].content,
           action: this.toolBarList[q1].action,
@@ -657,8 +720,18 @@ export class ToolBar extends ViewPU {
       Tabs.width('100%');
       Tabs.height(this.toLengthString(this.toolBarModifier.heightValue));
       Tabs.padding({
-        start: this.toolBarList.length < 5 ? this.toolBarModifier.paddingValue : LengthMetrics.vp(0),
-        end: this.toolBarList.length < 5 ? this.toolBarModifier.paddingValue : LengthMetrics.vp(0),
+        start: this.toolBarList.length < TOOLBAR_MAX_LENGTH ? this.toolBarModifier.paddingValue :
+        LengthMetrics.resource({
+          'id': -1, 'type': 10002,
+          params: ['sys.float.padding_level0'],
+          'bundleName': '',
+          'moduleName': '' }),
+        end: this.toolBarList.length < TOOLBAR_MAX_LENGTH ? this.toolBarModifier.paddingValue :
+        LengthMetrics.resource({
+          'id': -1, 'type': 10002,
+          params: ['sys.float.padding_level0'],
+          'bundleName': '',
+          'moduleName': '' }),
       });
     }, Tabs);
     this.observeComponentCreation2((n, o) => {
@@ -667,15 +740,15 @@ export class ToolBar extends ViewPU {
         const t = r;
         this.observeComponentCreation2((v, w) => {
           If.create();
-          if (this.toolBarList.length <= 5) {
+          if (this.toolBarList.length <= TOOLBAR_MAX_LENGTH) {
             this.ifElseBranchUpdateFunction(0, () => {
               this.observeComponentCreation2((e1, f1) => {
                 TabContent.create();
                 TabContent.tabBar({ builder: () => {
                   this.TabBuilder.call(this, s);
                 } });
-                TabContent.enabled(!(this.toolBarList[s]?.state === 2));
-                TabContent.focusOnTouch(!(this.toolBarList[s]?.state === 2));
+                TabContent.enabled(!(this.toolBarList[s]?.state === ItemState.DISABLE));
+                TabContent.focusOnTouch(!(this.toolBarList[s]?.state === ItemState.DISABLE));
               }, TabContent);
               TabContent.pop();
             });
@@ -687,8 +760,8 @@ export class ToolBar extends ViewPU {
                 TabContent.tabBar({ builder: () => {
                   this.TabBuilder.call(this, s);
                 } });
-                TabContent.enabled(!(this.toolBarList[s]?.state === 2));
-                TabContent.focusOnTouch(!(this.toolBarList[s]?.state === 2));
+                TabContent.enabled(!(this.toolBarList[s]?.state === ItemState.DISABLE));
+                TabContent.focusOnTouch(!(this.toolBarList[s]?.state === ItemState.DISABLE));
               }, TabContent);
               TabContent.pop();
             });
@@ -705,7 +778,7 @@ export class ToolBar extends ViewPU {
     ForEach.pop();
     this.observeComponentCreation2((g, h) => {
       If.create();
-      if (this.refreshData() && this.toolBarList.length > 5) {
+      if (this.refreshData() && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
         this.ifElseBranchUpdateFunction(0, () => {
           this.observeComponentCreation2((l, m) => {
             TabContent.create();

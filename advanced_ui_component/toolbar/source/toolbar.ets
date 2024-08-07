@@ -24,6 +24,9 @@ export enum ItemState {
 }
 
 const PUBLIC_MORE: Resource = $r('sys.media.ohos_ic_public_more');
+const IMAGE_SIZE: string = '24vp';
+const DEFAULT_TOOLBAR_HEIGHT: number = 56;
+const TOOLBAR_MAX_LENGTH: number = 5;
 
 interface MenuController {
   value: string;
@@ -55,9 +58,9 @@ export class ToolBarOptions extends Array<ToolBarOption> {
 
 export class ToolBarModifier implements AttributeModifier<ColumnAttribute> {
   public backgroundColorValue?: ResourceColor = $r('sys.color.ohos_id_color_toolbar_bg');
-  public heightValue?: LengthMetrics = LengthMetrics.vp(56);
+  public heightValue?: LengthMetrics = LengthMetrics.vp(DEFAULT_TOOLBAR_HEIGHT);
   public stateEffectValue?: boolean = true;
-  public paddingValue?: LengthMetrics = LengthMetrics.vp(24);
+  public paddingValue?: LengthMetrics = LengthMetrics.resource($r('sys.float.padding_level12'));
 
   applyNormalAttribute(instance: ColumnAttribute):void {
     instance.backgroundColor(this.backgroundColorValue);
@@ -92,9 +95,9 @@ export struct ToolBar {
   @Prop dividerModifier: DividerModifier = new DividerModifier();
   @Prop toolBarModifier: ToolBarModifier =
   new ToolBarModifier()
-    .padding(LengthMetrics.vp(24))
+    .padding(LengthMetrics.resource($r('sys.float.padding_level12')))
     .stateEffect(true)
-    .height(LengthMetrics.vp(56))
+    .height(LengthMetrics.vp(DEFAULT_TOOLBAR_HEIGHT))
     .backgroundColor('sys.color.ohos_id_color_toolbar_bg');
   @Prop moreText: ResourceStr = $r('sys.string.ohos_toolbar_more');
   @State menuContent: MenuController[] = [];
@@ -116,10 +119,10 @@ export struct ToolBar {
   @Builder MoreTabBuilder(index: number) {
     Column() {
       Image(PUBLIC_MORE)
-        .width(24)
-        .height(24)
+        .width(IMAGE_SIZE)
+        .height(IMAGE_SIZE)
         .fillColor(this.iconPrimaryColor)
-        .margin({ bottom: 2 })
+        .margin({ bottom: $r('sys.float.padding_level1') })
         .objectFit(ImageFit.Contain)
         .draggable(false)
       Text(this.moreText)
@@ -132,7 +135,10 @@ export struct ToolBar {
     }.width('100%').height('100%')
     .justifyContent(FlexAlign.Center)
     .bindMenu(this.menuContent, { placement: Placement.TopRight, offset: { x: -12, y : -10 } })
-    .padding({ start: LengthMetrics.vp(4), end: LengthMetrics.vp(4) })
+    .padding({
+      start: LengthMetrics.resource($r('sys.float.padding_level2')),
+      end: LengthMetrics.resource($r('sys.float.padding_level2')),
+    })
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .backgroundColor(this.itemBackground)
     .onHover((isHover: boolean) => {
@@ -159,18 +165,18 @@ export struct ToolBar {
       if (this.toolBarList[index]?.toolBarSymbolOptions?.normal ||
         this.toolBarList[index]?.toolBarSymbolOptions?.activated) {
         SymbolGlyph()
-          .fontSize('24vp')
+          .fontSize(IMAGE_SIZE)
           .symbolEffect(this.symbolEffect, false)
           .attributeModifier(this.getToolBarSymbolModifier(index))
-          .opacity((this.toolBarList[index]?.state === 2) ? 0.4 : 1)
-          .margin({ bottom: 2 })
+          .opacity((this.toolBarList[index]?.state === ItemState.DISABLE) ? $r('sys.float.interactive_disable') : 1)
+          .margin({ bottom: $r('sys.float.padding_level1') })
       } else {
         Image(this.toolBarList[index]?.icon)
-          .width(24)
-          .height(24)
+          .width(IMAGE_SIZE)
+          .height(IMAGE_SIZE)
           .fillColor(this.getIconColor(index))
-          .opacity((this.toolBarList[index]?.state === 2) ? 0.4 : 1)
-          .margin({ bottom: 2 })
+          .opacity((this.toolBarList[index]?.state === ItemState.DISABLE) ? $r('sys.float.interactive_disable') : 1)
+          .margin({ bottom: $r('sys.float.padding_level1') })
           .objectFit(ImageFit.Contain)
           .draggable(false)
       }
@@ -182,14 +188,17 @@ export struct ToolBar {
         .fontWeight(FontWeight.Medium)
         .maxLines(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .opacity((this.toolBarList[index]?.state === 2) ? 0.4 : 1)
+        .opacity((this.toolBarList[index]?.state === ItemState.DISABLE) ? $r('sys.float.interactive_disable') : 1)
         .textAlign(TextAlign.Center)
     }
     .justifyContent(FlexAlign.Center)
     .width('100%').height('100%')
-    .focusable(!(this.toolBarList[index]?.state === 2))
-    .focusOnTouch(!(this.toolBarList[index]?.state === 2))
-    .padding({ start: LengthMetrics.vp(4), end: LengthMetrics.vp(4) })
+    .focusable(!(this.toolBarList[index]?.state === ItemState.DISABLE))
+    .focusOnTouch(!(this.toolBarList[index]?.state === ItemState.DISABLE))
+    .padding({
+      start: LengthMetrics.resource($r('sys.float.padding_level2')),
+      end: LengthMetrics.resource($r('sys.float.padding_level2')),
+    })
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .backgroundColor(this.itemBackground)
     .onClick(() => {
@@ -279,7 +288,7 @@ export struct ToolBar {
   refreshData() {
     this.menuContent = [];
     for (let i = 0; i < this.toolBarList.length; i++) {
-      if (i >= 4 && this.toolBarList.length > 5) {
+      if (i >= 4 && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
         this.menuContent[i - 4] = {
           value: this.toolBarList[i].content,
           action: this.toolBarList[i].action as () => void,
@@ -304,19 +313,19 @@ export struct ToolBar {
       Column() {
         Tabs({ barPosition: BarPosition.End, controller: this.controller}) {
           ForEach(this.toolBarList, (item: ToolBarOption, index: number) => {
-            if (this.toolBarList.length <= 5) {
+            if (this.toolBarList.length <= TOOLBAR_MAX_LENGTH) {
               TabContent() {
               }.tabBar(this.TabBuilder(index))
-              .enabled(!(this.toolBarList[index]?.state === 2))
-              .focusOnTouch(!(this.toolBarList[index]?.state === 2))
+              .enabled(!(this.toolBarList[index]?.state === ItemState.DISABLE))
+              .focusOnTouch(!(this.toolBarList[index]?.state === ItemState.DISABLE))
             } else if (index < 4){
               TabContent() {
               }.tabBar(this.TabBuilder(index))
-              .enabled(!(this.toolBarList[index]?.state === 2))
-              .focusOnTouch(!(this.toolBarList[index]?.state === 2))
+              .enabled(!(this.toolBarList[index]?.state === ItemState.DISABLE))
+              .focusOnTouch(!(this.toolBarList[index]?.state === ItemState.DISABLE))
             }
           })
-          if (this.refreshData() && this.toolBarList.length > 5) {
+          if (this.refreshData() && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
             TabContent() {
             }.tabBar(this.MoreTabBuilder(4))
           }
@@ -333,8 +342,10 @@ export struct ToolBar {
         .width('100%')
         .height(this.toLengthString(this.toolBarModifier.heightValue))
         .padding({
-          start: this.toolBarList.length < 5 ? this.toolBarModifier.paddingValue : LengthMetrics.vp(0),
-          end: this.toolBarList.length < 5 ? this.toolBarModifier.paddingValue : LengthMetrics.vp(0),
+          start: this.toolBarList.length < TOOLBAR_MAX_LENGTH ?
+          this.toolBarModifier.paddingValue : LengthMetrics.resource($r('sys.float.padding_level0')),
+          end: this.toolBarList.length < TOOLBAR_MAX_LENGTH ?
+          this.toolBarModifier.paddingValue : LengthMetrics.resource($r('sys.float.padding_level0')),
         })
       }
       .justifyContent(FlexAlign.Center)
