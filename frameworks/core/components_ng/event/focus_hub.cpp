@@ -654,7 +654,8 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
     if (!isBypassInner && !onKeyEventsInternal_.empty()) {
         retInternal = ProcessOnKeyEventInternal(keyEvent);
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "OnKeyEventInteral: Node %{public}s/%{public}d handle KeyEvent(%{public}d, %{public}d) return: %{public}d",
+            "OnKeyEventInteral: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) "
+            "return: %{public}d",
             GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
     }
 
@@ -665,7 +666,7 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
         retCallback = info.IsStopPropagation();
         auto eventManager = pipeline->GetEventManager();
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "OnKeyEventUser: Node %{public}s/%{public}d handle KeyEvent(%{public}d, %{public}d) return: %{public}d",
+            "OnKeyEventUser: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) return: %{public}d",
             GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retCallback);
     }
 
@@ -674,7 +675,7 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
         onJSFrameNodeKeyCallback(info);
         retCallback = info.IsStopPropagation();
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "OnKeyEventUser: Node %{public}s/%{public}d handle KeyEvent(%{public}d, %{public}d) return: %{public}d",
+            "OnKeyEventUser: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) return: %{public}d",
             GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retCallback);
     }
 
@@ -686,7 +687,7 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
             case KeyCode::KEY_NUMPAD_ENTER:
                 ret = OnClick(keyEvent);
                 TAG_LOGI(AceLogTag::ACE_FOCUS,
-                    "OnClick: Node %{public}s/%{public}d handle KeyEvent(%{public}d, %{public}d) return: %{public}d",
+                    "OnClick: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) return: %{public}d",
                     GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, ret);
                 break;
             default:;
@@ -703,7 +704,7 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
     if (lastFocusNode && lastFocusNode->HandleKeyEvent(keyEvent)) {
         TAG_LOGD(AceLogTag::ACE_FOCUS,
-            "OnKeyEvent: Node %{public}s/%{public}d will not handle KeyEvent(code:%{public}d, action:%{public}d). "
+            "OnKeyEvent: Node %{public}s/%{public}d will not handle KeyEvent(code:%{private}d, action:%{public}d). "
             "Because its child %{public}s/%{public}d already has consumed this event.",
             GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, lastFocusNode->GetFrameName().c_str(),
             lastFocusNode->GetFrameId());
