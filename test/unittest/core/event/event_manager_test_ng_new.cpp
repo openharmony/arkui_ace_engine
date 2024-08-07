@@ -1642,9 +1642,9 @@ HWTEST_F(EventManagerTestNg, EventManagerTest082, TestSize.Level1)
     touchPoint.id = 1;
     touchPoint.type = TouchType::DOWN;
     eventManager->CheckDownEvent(touchPoint);
-    eventManager->downFingerIds_.insert(1);
-    eventManager->downFingerIds_.insert(2);
-    eventManager->downFingerIds_.insert(3);
+    eventManager->downFingerIds_[1] = 1;
+    eventManager->downFingerIds_[2] = 2;
+    eventManager->downFingerIds_[3] = 3;
     eventManager->CheckDownEvent(touchPoint);
     touchPoint.type = TouchType::UP;
     eventManager->CheckDownEvent(touchPoint);
