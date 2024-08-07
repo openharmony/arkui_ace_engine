@@ -2131,12 +2131,12 @@ const ArkUI_AttributeItem* GetCustomShadow(ArkUI_NodeHandle node)
 {
     ArkUICustomShadowOptions options;
     GetFullImpl()->getNodeModifiers()->getCommonModifier()->getCustomShadow(node->uiNodeHandle, &options);
-    g_numberValues[NUM_0].i32 = options.radius;
-    g_numberValues[NUM_1].f32 = options.offsetX;
-    g_numberValues[NUM_2].f32 = options.offsetY;
-    g_numberValues[NUM_3].i32 = options.shadowType;
-    g_numberValues[NUM_4].u32 = options.color;
-    g_numberValues[NUM_5].i32 = options.colorStrategy;
+    g_numberValues[NUM_0].f32 = options.radius;
+    g_numberValues[NUM_1].i32 = options.colorStrategy;
+    g_numberValues[NUM_2].f32 = options.offsetX;
+    g_numberValues[NUM_3].f32 = options.offsetY;
+    g_numberValues[NUM_4].i32 = options.shadowType;
+    g_numberValues[NUM_5].u32 = options.color;
     g_numberValues[NUM_6].i32 = options.fill;
     return &g_attributeItem;
 }
