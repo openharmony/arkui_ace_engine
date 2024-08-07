@@ -83,7 +83,10 @@ void SpanModelNG::SetFontSize(const Dimension& value)
 
 void SpanModelNG::SetTextColor(const Color& value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(TextColor, value, PropertyInfo::FONTCOLOR);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateSpanTextColor(value);
+    spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
 }
 
 void SpanModelNG::SetItalicFontStyle(Ace::FontStyle value)
@@ -248,7 +251,7 @@ void SpanModelNG::SetTextColor(UINode* uiNode, const Color& value)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
     CHECK_NULL_VOID(spanNode);
-    spanNode->UpdateTextColor(value);
+    spanNode->UpdateSpanTextColor(value);
     spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
 }
 

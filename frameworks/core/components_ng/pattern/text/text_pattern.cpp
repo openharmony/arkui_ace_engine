@@ -3626,6 +3626,13 @@ void TextPattern::UpdateFontColor(const Color& value)
     }
 }
 
+void TextPattern::MarkDirtyNodeRender()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void TextPattern::BeforeCreatePaintWrapper()
 {
     // mark content dirty

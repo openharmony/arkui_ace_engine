@@ -453,6 +453,8 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
             if (!child) {
                 continue;
             }
+            child->paragraphIndex = paragraphIndex;
+            child->SetTextPattern(pattern);
             auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(child);
             if (imageSpanItem) {
                 if (iterItems == children.end() || !(*iterItems)) {
@@ -514,6 +516,7 @@ void MultipleParagraphLayoutAlgorithm::AddSymbolSpanToParagraph(const RefPtr<Spa
     child->SetIsParentText(frameNode->GetTag() == V2::TEXT_ETS_TAG);
     child->UpdateSymbolSpanParagraph(frameNode, paragraph);
     spanTextLength += SYMBOL_SPAN_LENGTH;
+    child->length = SYMBOL_SPAN_LENGTH;
     child->position = spanTextLength;
     child->content = "  ";
 }
@@ -521,7 +524,8 @@ void MultipleParagraphLayoutAlgorithm::AddSymbolSpanToParagraph(const RefPtr<Spa
 void MultipleParagraphLayoutAlgorithm::AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
     const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph)
 {
-    spanTextLength += static_cast<int32_t>(StringUtils::ToWstring(child->content).length());
+    child->length = static_cast<int32_t>(StringUtils::ToWstring(child->content).length());
+    spanTextLength += child->length;
     child->position = spanTextLength;
     child->UpdateParagraph(frameNode, paragraph, isSpanStringMode_, PlaceholderStyle(), isMarquee_);
 }
@@ -563,6 +567,7 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
     imageSpanItem->content = " ";
     spanTextLength += 1;
     imageSpanItem->position = spanTextLength;
+    imageSpanItem->length = 1;
 }
 
 void MultipleParagraphLayoutAlgorithm::AddPlaceHolderToParagraph(RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
@@ -588,6 +593,7 @@ void MultipleParagraphLayoutAlgorithm::AddPlaceHolderToParagraph(RefPtr<Placehol
     placeholderSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
     placeholderSpanItem->content = " ";
     spanTextLength += 1;
+    placeholderSpanItem->length = 1;
     placeholderSpanItem->position = spanTextLength;
 }
 
@@ -627,6 +633,7 @@ void MultipleParagraphLayoutAlgorithm::UpdateParagraphByCustomSpan(RefPtr<Custom
     customSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
     customSpanItem->content = " ";
     spanTextLength += 1;
+    customSpanItem->length = 1;
     customSpanItem->position = spanTextLength;
     if (customSpanItem->onDraw.has_value()) {
         customSpanPlaceholder.onDraw = customSpanItem->onDraw.value();

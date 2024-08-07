@@ -1032,6 +1032,27 @@ ResultObject CustomSpanItem::GetSpanResultObject(int32_t start, int32_t end)
     return resultObject;
 }
 
+bool SpanItem::UpdateSpanTextColor(Color color)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto textPattern = DynamicCast<TextPattern>(pattern);
+    CHECK_NULL_RETURN(textPattern, false);
+    auto paragraphManager = textPattern->GetParagraphManager();
+    CHECK_NULL_RETURN(paragraphManager, false);
+    auto paragraphInfos = paragraphManager->GetParagraphs();
+    if (paragraphIndex != 0 || paragraphInfos.size() != 1) {
+        return false;
+    }
+    auto iter = paragraphInfos.begin();
+    auto paragraphInfo = *iter;
+    auto paragraph = paragraphInfo.paragraph;
+    CHECK_NULL_RETURN(paragraph, false);
+    paragraph->UpdateColor(position - length, position, color);
+    textPattern->MarkDirtyNodeRender();
+    return true;
+}
+
 void SpanItem::GetIndex(int32_t& start, int32_t& end) const
 {
     auto contentLen = StringUtils::ToWstring(content).length();
