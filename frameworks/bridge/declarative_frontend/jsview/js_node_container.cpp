@@ -85,6 +85,7 @@ NodeContainerModel* NodeContainerModel::GetInstance()
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::NodeContainerModelNG());
             } else {
+                LOGE("NodeContainerModelNG is not supported in OldPipeline.");
                 return nullptr;
             }
 #endif
@@ -97,7 +98,9 @@ NodeContainerModel* NodeContainerModel::GetInstance()
 namespace OHOS::Ace::Framework {
 void JSNodeContainer::Create(const JSCallbackInfo& info)
 {
-    NodeContainerModel::GetInstance()->Create();
+    NodeContainerModel* nodeContainerModelInstance = NodeContainerModel::GetInstance();
+    CHECK_NULL_VOID(nodeContainerModelInstance);
+    nodeContainerModelInstance->Create();
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     if (info.Length() < 1 || !info[0]->IsObject() || info[0]->IsNull()) {
@@ -123,7 +126,7 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
         }
     }
     // clear the _nodeContainerId in pre controller;
-    NodeContainerModel::GetInstance()->ResetController();
+    nodeContainerModelInstance->ResetController();
 
     BindFunc(info, AceType::Claim(frameNode));
     AddToNodeControllerMap(info.GetVm(), frameNode->GetId(), object);
@@ -136,7 +139,7 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
         auto obj = JSRef<JSObject>::Cast(internalField);
         obj->SetProperty(INTERNAL_FIELD_VALUE, INVALID_NODE_CONTAINER_ID);
     };
-    NodeContainerModel::GetInstance()->BindController(std::move(resetFunc));
+    nodeContainerModelInstance->BindController(std::move(resetFunc));
     auto execCtx = info.GetExecutionContext();
 
     SetNodeController(object, execCtx);
@@ -145,7 +148,7 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
         auto obj = JSRef<JSObject>::Cast(internalField);
         obj->SetProperty(INTERNAL_FIELD_VALUE, nodeContainerId);
     }
-    NodeContainerModel::GetInstance()->FireMakeNode();
+    nodeContainerModelInstance->FireMakeNode();
 }
 
 void JSNodeContainer::SetNodeController(const JSRef<JSObject>& object, JsiExecutionContext execCtx)
@@ -156,11 +159,13 @@ void JSNodeContainer::SetNodeController(const JSRef<JSObject>& object, JsiExecut
         ResetNodeController();
         return;
     }
+    NodeContainerModel* nodeContainerModelInstance = NodeContainerModel::GetInstance();
+    CHECK_NULL_VOID(nodeContainerModelInstance);
 
     auto jsFunc = JSRef<JSFunc>::Cast(jsMakeNodeFunc);
     auto containerId = Container::CurrentId();
     RefPtr<JsFunction> jsMake = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), jsFunc);
-    NodeContainerModel::GetInstance()->SetMakeFunction(
+    nodeContainerModelInstance->SetMakeFunction(
         [func = std::move(jsMake), containerId, execCtx]() -> RefPtr<NG::UINode> {
             JAVASCRIPT_EXECUTION_SCOPE(execCtx);
             ContainerScope scope(containerId);
@@ -192,12 +197,14 @@ void JSNodeContainer::SetNodeController(const JSRef<JSObject>& object, JsiExecut
 
 void JSNodeContainer::ResetNodeController()
 {
-    NodeContainerModel::GetInstance()->ResetController();
-    NodeContainerModel::GetInstance()->SetMakeFunction(nullptr);
-    NodeContainerModel::GetInstance()->SetOnTouchEvent(nullptr);
-    NodeContainerModel::GetInstance()->SetOnResize(nullptr);
-    NodeContainerModel::GetInstance()->SetOnAppear(nullptr);
-    NodeContainerModel::GetInstance()->SetOnDisAppear(nullptr);
+    NodeContainerModel* nodeContainerModelInstance = NodeContainerModel::GetInstance();
+    CHECK_NULL_VOID(nodeContainerModelInstance);
+    nodeContainerModelInstance->ResetController();
+    nodeContainerModelInstance->SetMakeFunction(nullptr);
+    nodeContainerModelInstance->SetOnTouchEvent(nullptr);
+    nodeContainerModelInstance->SetOnResize(nullptr);
+    nodeContainerModelInstance->SetOnAppear(nullptr);
+    nodeContainerModelInstance->SetOnDisAppear(nullptr);
     ViewAbstractModel::GetInstance()->SetOnAttach(nullptr);
     ViewAbstractModel::GetInstance()->SetOnDetach(nullptr);
 }
@@ -206,26 +213,30 @@ void JSNodeContainer::SetOnAppearFunc(const JSRef<JSObject>& object, JsiExecutio
 {
     auto showCallback = object->GetProperty("aboutToAppear");
     CHECK_NULL_VOID(showCallback->IsFunction());
+    NodeContainerModel* nodeContainerModelInstance = NodeContainerModel::GetInstance();
+    CHECK_NULL_VOID(nodeContainerModelInstance);
     RefPtr<JsFunction> jsAppearFunc =
         AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(showCallback));
     auto onAppear = [func = std::move(jsAppearFunc), execCtx]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         func->Execute();
     };
-    NodeContainerModel::GetInstance()->SetOnAppear(onAppear);
+    nodeContainerModelInstance->SetOnAppear(onAppear);
 }
 
 void JSNodeContainer::SetOnDisappearFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx)
 {
     auto dismissCallback = object->GetProperty("aboutToDisappear");
     CHECK_NULL_VOID(dismissCallback->IsFunction());
+    NodeContainerModel* nodeContainerModelInstance = NodeContainerModel::GetInstance();
+    CHECK_NULL_VOID(nodeContainerModelInstance);
     RefPtr<JsFunction> jsDisappearFunc =
         AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(dismissCallback));
     auto onDisappear = [func = std::move(jsDisappearFunc), execCtx]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         func->Execute();
     };
-    NodeContainerModel::GetInstance()->SetOnDisAppear(onDisappear);
+    nodeContainerModelInstance->SetOnDisAppear(onDisappear);
 }
 
 void JSNodeContainer::SetOnAttachFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx)
@@ -258,6 +269,8 @@ void JSNodeContainer::SetOnTouchEventFunc(const JSRef<JSObject>& object, JsiExec
 {
     auto onTouchEventCallback = object->GetProperty("onTouchEvent");
     CHECK_NULL_VOID(onTouchEventCallback->IsFunction());
+    NodeContainerModel* nodeContainerModelInstance = NodeContainerModel::GetInstance();
+    CHECK_NULL_VOID(nodeContainerModelInstance);
     RefPtr<JsTouchFunction> jsOnTouchFunc =
         AceType::MakeRefPtr<JsTouchFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(onTouchEventCallback));
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -266,13 +279,15 @@ void JSNodeContainer::SetOnTouchEventFunc(const JSRef<JSObject>& object, JsiExec
         PipelineContext::SetCallBackNode(node);
         func->Execute(info);
     };
-    NodeContainerModel::GetInstance()->SetOnTouchEvent(std::move(onTouch));
+    nodeContainerModelInstance->SetOnTouchEvent(std::move(onTouch));
 }
 
 void JSNodeContainer::SetOnResizeFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx)
 {
     auto aboutToResize = object->GetProperty("aboutToResize");
     CHECK_NULL_VOID(aboutToResize->IsFunction());
+    NodeContainerModel* nodeContainerModelInstance = NodeContainerModel::GetInstance();
+    CHECK_NULL_VOID(nodeContainerModelInstance);
     RefPtr<JsFunction> jsAboutToResizeFunc =
         AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(aboutToResize));
     auto onResize = [func = std::move(jsAboutToResizeFunc), execCtx](const NG::SizeF& size) {
@@ -285,7 +300,7 @@ void JSNodeContainer::SetOnResizeFunc(const JSRef<JSObject>& object, JsiExecutio
         JSRef<JSVal> param = JSRef<JSVal>::Cast(obj);
         func->ExecuteJS(1, &param);
     };
-    NodeContainerModel::GetInstance()->SetOnResize(onResize);
+    nodeContainerModelInstance->SetOnResize(onResize);
 }
 
 JSRef<JSVal> JSNodeContainer::GetCurrentContext()
