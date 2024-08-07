@@ -383,6 +383,7 @@ private:
     uint32_t parentWindowId_ = 0;
     int32_t parentTreeId_ = 0;
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;
+    const int32_t shiftBits = 16;
 };
 
 } // namespace OHOS::Ace::Framework

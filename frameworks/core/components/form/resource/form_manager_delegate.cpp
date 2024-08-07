@@ -214,6 +214,7 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
     newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, isRecover);
     newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, needHandleCachedClick);
 
+    std::lock_guard<std::mutex> lock(accessibilityChildTreeRegisterMutex_);
     onFormSurfaceNodeCallback_(rsSurfaceNode, newWant);
 
     sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
@@ -854,6 +855,7 @@ void FormManagerDelegate::SetObscured(bool isObscured)
 
 void FormManagerDelegate::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
 {
+    std::lock_guard<std::mutex> lock(accessibilityChildTreeRegisterMutex_);
     CHECK_NULL_VOID(formRendererDispatcher_);
     formRendererDispatcher_->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
 }
