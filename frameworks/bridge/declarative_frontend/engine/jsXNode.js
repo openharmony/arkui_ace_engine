@@ -869,7 +869,7 @@ class FrameNode {
         if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() == undefined) {
             return;
         }
-        if (!this.checkValid()) {
+        if (!this.checkValid() || !this.isModifiable()) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
