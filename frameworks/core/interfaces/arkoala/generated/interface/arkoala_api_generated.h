@@ -11704,13 +11704,3 @@ struct Ark_AnyAPI {
 /* clang-format on */
 
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_API_H
-
-/*
-  For debug purpose:
-  Current commit of idlize
-  2024/08/08 12:49:52 bb60f61a79f1a376169163f0f7b91244675cfd5d Fix some braces and more cleanup
-
-Signed-off-by: Kirill Kirichenko <kirichenko.kirill@huawei.com>
-Change-Id: I2fab18ccadbe35bf90d1708aba26789a1cadac6c
- */
-
