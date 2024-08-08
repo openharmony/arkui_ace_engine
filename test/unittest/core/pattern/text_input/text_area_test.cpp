@@ -711,7 +711,7 @@ HWTEST_F(TextFieldUXTest, OnHandleMove005, TestSize.Level1)
      * @tc.steps: step5. move firstHandle to index 0
      */
     RectF handleRect(5, 5, 1, 1);
-    int32_t position = pattern_->selectOverlay_->GetCaretPositionOnHandleMove(handleRect.GetOffset());
+    int32_t position = pattern_->selectOverlay_->GetCaretPositionOnHandleMove(handleRect.GetOffset(), true);
     pattern_->selectOverlay_->OnHandleMove(handleRect, true);
     EXPECT_EQ(pattern_->selectController_->GetStartIndex(), 2);
     EXPECT_EQ(pattern_->selectController_->GetEndIndex(), 10);
@@ -760,7 +760,7 @@ HWTEST_F(TextFieldUXTest, OnHandleMove006, TestSize.Level1)
      * @tc.steps: step5. move secondIndex to index 8
      */
     RectF handleRect(5, 5, 1, 1);
-    int32_t position = pattern_->selectOverlay_->GetCaretPositionOnHandleMove(handleRect.GetOffset());
+    int32_t position = pattern_->selectOverlay_->GetCaretPositionOnHandleMove(handleRect.GetOffset(), false);
     pattern_->selectOverlay_->OnHandleMove(handleRect, false);
     EXPECT_EQ(pattern_->selectController_->GetStartIndex(), 5);
     EXPECT_EQ(pattern_->selectController_->GetEndIndex(), 8);
@@ -813,7 +813,7 @@ HWTEST_F(TextFieldUXTest, OnHandleMove007, TestSize.Level1)
      * @tc.steps: step5. move secondIndex to index 2
      */
     RectF handleRect(5, 5, 1, 1);
-    int32_t position = pattern_->selectOverlay_->GetCaretPositionOnHandleMove(handleRect.GetOffset());
+    int32_t position = pattern_->selectOverlay_->GetCaretPositionOnHandleMove(handleRect.GetOffset(), false);
     pattern_->selectOverlay_->OnHandleMove(handleRect, false);
     EXPECT_EQ(pattern_->selectController_->GetStartIndex(), 2);
     EXPECT_EQ(pattern_->selectController_->GetEndIndex(), 5);
