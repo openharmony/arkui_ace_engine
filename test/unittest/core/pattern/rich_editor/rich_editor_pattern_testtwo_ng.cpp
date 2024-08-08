@@ -44,7 +44,6 @@ void RichEditorPatternTestTwoNg::SetUp()
         V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    richEditorPattern->InitScrollablePattern();
     richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
     richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->CreateNodePaintMethod();
@@ -261,5 +260,24 @@ HWTEST_F(RichEditorPatternTestTwoNg, AdjustWordSelection001, TestSize.Level1)
     bool ret = true;
     ret = richEditorPattern->AdjustWordSelection(start, end);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: InitScrollablePattern003
+ * @tc.desc: test InitScrollablePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, InitScrollablePattern003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+    richEditorPattern->overlayMod_ = nullptr;
+    richEditorPattern->InitScrollablePattern();
+    EXPECT_EQ(richEditorPattern->GetScrollBar(), true);
 }
 } // namespace OHOS::Ace::NG
