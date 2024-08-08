@@ -82,6 +82,7 @@ public:
     static std::vector<Shadow> GetTextShadow(UINode* uiNode);
     static void SetOnClick(UINode* uiNode, GestureEventFunc&& click);
     static void ClearOnClick(UINode* uiNode);
+    static std::vector<std::string> GetSpanFontFamily(UINode* uiNode);
 #ifdef USE_GRAPHIC_TEXT_GINE
     // impl in render/adapter/span_model_adapter.cpp
     static RefPtr<SpanItem> CreateSpanItem(ArkUI_SpanItem* item);
