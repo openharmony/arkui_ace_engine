@@ -208,7 +208,7 @@ float SubMenuLayoutAlgorithm::HorizontalLayoutSubMenu(
     const SizeF& size, float position, const SizeF& menuItemSize)
 {
     float wrapperWidth = wrapperSize_.Width();
-    float rightSpace = wrapperWidth - position;
+    float rightSpace = wrapperWidth - position - paddingEnd_;
     float leftSpace = position - menuItemSize.Width();
     // can fit subMenu on the right side of menuItem
     if (rightSpace >= size.Width()) {
