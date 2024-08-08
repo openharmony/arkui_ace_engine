@@ -70,7 +70,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t TEXT_MAX_LINES_TWO = 2;
 RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
 {
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -847,7 +846,6 @@ bool NavigationModelNG::ParseCommonTitle(
         if (mainTitle) {
             // update main title
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
-            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TEXT_MAX_LINES_TWO);
             textLayoutProperty->UpdateContent(title);
             break;
         }
@@ -855,18 +853,7 @@ bool NavigationModelNG::ParseCommonTitle(
         mainTitle = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
-        auto theme = NavigationGetTheme();
-        Color mainTitleColor = theme->GetTitleColor();
-        FontWeight mainTitleWeight = FontWeight::MEDIUM;
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            mainTitleColor = theme->GetMainTitleFontColor();
-            mainTitleWeight = FontWeight::BOLD;
-        }
-        textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TEXT_MAX_LINES_TWO);
         textLayoutProperty->UpdateContent(title);
-        textLayoutProperty->UpdateTextColor(mainTitleColor);
-        textLayoutProperty->UpdateFontWeight(mainTitleWeight);
-        textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
         titleBarNode->SetTitle(mainTitle);
         titleBarNode->AddChild(mainTitle);
     } while (false);
@@ -890,20 +877,7 @@ bool NavigationModelNG::ParseCommonTitle(
         subTitle = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
-        auto theme = NavigationGetTheme();
-        Color subTitleColor = theme->GetSubTitleColor();
-        auto subTitleSize = theme->GetSubTitleFontSize();
-        FontWeight subTitleWeight = FontWeight::REGULAR; // ohos_id_text_font_family_regular
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            subTitleSize = theme->GetSubTitleFontSizeS();
-            subTitleColor = theme->GetSubTitleFontColor();
-        }
         textLayoutProperty->UpdateContent(subtitle);
-        textLayoutProperty->UpdateFontSize(subTitleSize);
-        textLayoutProperty->UpdateTextColor(subTitleColor);
-        textLayoutProperty->UpdateFontWeight(subTitleWeight);
-        textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
         titleBarNode->SetSubtitle(subTitle);
         titleBarNode->AddChild(subTitle);
     }
@@ -1769,13 +1743,7 @@ void NavigationModelNG::SetSubtitle(FrameNode* frameNode, const std::string& sub
         subTitle = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
-        auto theme = NavigationGetTheme();
         textLayoutProperty->UpdateContent(subtitle);
-        textLayoutProperty->UpdateFontSize(theme->GetSubTitleFontSize());
-        textLayoutProperty->UpdateTextColor(theme->GetSubTitleColor());
-        textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR); // ohos_id_text_font_family_regular
-        textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
         titleBarNode->SetSubtitle(subTitle);
         titleBarNode->AddChild(subTitle);
     }

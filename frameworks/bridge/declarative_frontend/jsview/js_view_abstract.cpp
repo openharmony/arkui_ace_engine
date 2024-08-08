@@ -10795,4 +10795,35 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ParseJsMedia(void* value, void* resour
     res->bundleName = bundleName;
     res->moduleName = moduleName;
 }
+
+void JSViewAbstract::SetTextStyleApply(const JSCallbackInfo& info,
+    std::function<void(WeakPtr<NG::FrameNode>)>& textStyleApply, const JSRef<JSVal>& modifierObj)
+{
+    if (!modifierObj->IsObject()) {
+        textStyleApply = nullptr;
+        return;
+    }
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyTextModifierToNode"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    if (!globalFuncRef->IsFunction()) {
+        textStyleApply = nullptr;
+        return;
+    }
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+    auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                    modifierParam = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        JSRef<JSVal> params[2];
+        params[0] = modifierParam;
+        params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+        PipelineContext::SetCallBackNode(node);
+        func->ExecuteJS(2, params);
+    };
+    textStyleApply = onApply;
+}
 } // namespace OHOS::Ace::Framework
