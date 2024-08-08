@@ -222,7 +222,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     bool hasContextMenuUsingGesture = focusHub == nullptr
                               ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
     dragDropManager->SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
-    auto actionStart = [weak = WeakClaim(this), this](GestureEvent& info) {
+    auto actionStart = [containerId = Container::CurrentId(), weak = WeakClaim(this), this](GestureEvent& info) {
         auto actuator = weak.Upgrade();
         if (!actuator) {
             DragEventActuator::ResetDragStatus();
@@ -246,6 +246,14 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto renderContext = frameNode->GetRenderContext();
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+        if (subwindow) {
+            auto overlayManager = subwindow->GetOverlayManager();
+            if (overlayManager) {
+                auto menuWrapperNode = overlayManager->GetMenuNode(frameNode->GetId());
+                dragDropManager->SetMenuWrapperNode(menuWrapperNode);
+            }
+        }
         if (info.GetSourceDevice() != SourceType::MOUSE) {
             if (gestureHub->GetTextDraggable()) {
                 auto pattern = frameNode->GetPattern<TextBase>();

@@ -747,7 +747,6 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
             return;
         }
     }
-    HideDragPreviewOverlay();
     if (isDragCancel_) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager is dragCancel, finish drag. WindowId is %{public}d, "
             "pointerEventId is %{public}d.",
@@ -916,11 +915,15 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
     CHECK_NULL_VOID(container);
     auto windowId = container->GetWindowId();
     pipeline->AddAfterRenderTask([dragResult, useCustomAnimation, windowId, dragBehavior,
-                                    pointerEventId = pointerEvent.pointerEventId]() {
+                                     pointerEventId = pointerEvent.pointerEventId, weak = WeakClaim(this)]() {
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "Stop drag, start do drop animation. UseCustomAnimation is %{public}d,"
             "WindowId is %{public}d, pointerEventId is %{public}d.",
             useCustomAnimation, windowId, pointerEventId);
+        auto manager = weak.Upgrade();
+        if (manager) {
+            manager->HideDragPreviewOverlay();
+        }
         InteractionInterface::GetInstance()->SetDragWindowVisible(!useCustomAnimation);
         DragDropRet dragDropRet { dragResult, useCustomAnimation, windowId, dragBehavior };
         InteractionInterface::GetInstance()->StopDrag(dragDropRet);
@@ -1977,6 +1980,7 @@ void DragDropManager::GetGatherPixelMap(DragDataCore& dragData, float scale, flo
 void DragDropManager::ResetDragDrop(int32_t windowId, const Point& point)
 {
     DragDropRet dragDropRet { DragRet::DRAG_FAIL, isMouseDragged_, windowId, DragBehavior::UNKNOWN };
+    HideDragPreviewOverlay();
     ResetDragDropStatus(point, dragDropRet, windowId);
     dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
 }
