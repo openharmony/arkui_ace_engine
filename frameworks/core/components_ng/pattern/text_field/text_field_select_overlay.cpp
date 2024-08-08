@@ -290,6 +290,7 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
 
 void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode)
 {
+    overlayInfo.clipHandleDrawRect = IsClipHandleWithViewPort();
     BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
     auto textFieldPattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);

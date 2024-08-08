@@ -88,6 +88,10 @@ public:
     }
 
     int32_t GetCaretPositionOnHandleMove(const OffsetF& localOffset, bool isFirst);
+    bool IsClipHandleWithViewPort() override
+    {
+        return !HasRenderTransform();
+    }
 
 private:
     std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);
