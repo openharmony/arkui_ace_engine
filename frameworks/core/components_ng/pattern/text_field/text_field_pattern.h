@@ -1792,7 +1792,7 @@ private:
     bool initTextRect_ = false;
     bool colorModeChange_ = false;
     bool isKeyboardClosedByUser_ = false;
-    bool isFillRequestFinish_ = false;
+    bool isFillRequestFinish_ = true;
     bool keyboardAvoidance_ = false;
     bool hasMousePressed_ = false;
     bool showCountBorderStyle_ = false;
