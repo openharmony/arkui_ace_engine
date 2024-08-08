@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
+
 #include <numeric>
 
 #include "base/utils/utils.h"
@@ -701,6 +702,20 @@ MatIter GridLayoutInfo::FindInMatrix(int32_t index) const
     return SearchInReverse(gridMatrix_, index, crossCount_);
 }
 
+std::pair<int32_t, int32_t> GridLayoutInfo::GetItemPos(int32_t itemIdx) const
+{
+    auto it = FindInMatrix(itemIdx);
+    if (it == gridMatrix_.end()) {
+        return { -1, -1 };
+    }
+    for (auto col : it->second) {
+        if (col.second == itemIdx) {
+            return { col.first, it->first };
+        }
+    }
+    return { -1, -1 };
+}
+
 GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
 {
     if (gridMatrix_.find(endLine) == gridMatrix_.end()) {
@@ -714,9 +729,7 @@ GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
             }
         }
     }
-    return {
-        .itemIdx = 0, .y = 0, .x = 0
-    };
+    return { .itemIdx = 0, .y = 0, .x = 0 };
 }
 
 void GridLayoutInfo::ClearMapsToEnd(int32_t idx)

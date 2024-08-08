@@ -542,7 +542,7 @@ HWTEST_F(GridLayoutRangeTest, MeasureToTarget002, TestSize.Level1)
  */
 HWTEST_F(GridLayoutRangeTest, Cache001, TestSize.Level1)
 {
-    GridModelNG model = CreateRepeatGrid(50, 200.0f);
+    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 200.0f; });
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetRowsGap(Dimension(10));
     model.SetColumnsGap(Dimension(10));
@@ -561,9 +561,28 @@ HWTEST_F(GridLayoutRangeTest, Cache001, TestSize.Level1)
     EXPECT_EQ(pattern_->preloadItemList_, preloadList);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
+    constexpr float itemWidth = (GRID_WIDTH - 20.0f) / 3.0f;
     for (const int32_t i : preloadList) {
         EXPECT_TRUE(frameNode_->GetChildByIndex(i));
+        EXPECT_EQ(GetChildWidth(frameNode_, i), itemWidth);
+        EXPECT_EQ(GetChildHeight(frameNode_, i), 200.0f);
     }
+
+    // re-layout to trigger cache item layout
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 12), 0.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 13), itemWidth + 10.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 14), (itemWidth + 10.0f) * 2);
+    EXPECT_EQ(GetChildX(frameNode_, 15), 0.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 16), itemWidth + 10.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 17), (itemWidth + 10.0f) * 2);
+    EXPECT_EQ(GetChildY(frameNode_, 12), 840.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 13), 840.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 14), 840.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 15), 1050.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 16), 1050.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 17), 1050.0f);
     pattern_->ScrollToIndex(49);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info.startIndex_, 39);
@@ -573,5 +592,52 @@ HWTEST_F(GridLayoutRangeTest, Cache001, TestSize.Level1)
     PipelineContext::GetCurrentContext()->OnIdle(time - 1);
     // no time to execute
     EXPECT_EQ(pattern_->preloadItemList_, preloadList2);
+}
+
+/**
+ * @tc.name: Cache002
+ * @tc.desc: Test Grid preload items
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, Cache002, TestSize.Level1)
+{
+    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) {
+        if (idx == 0 || idx == 2) {
+            return 410.0f;
+        }
+        if (idx == 22) {
+            return 1250.0f;
+        }
+        return 200.0f;
+    });
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    model.SetLayoutOptions(GetOptionDemo14());
+    model.SetCachedCount(3); // 2 lines
+    CreateDone(frameNode_);
+    pattern_->ScrollToIndex(20, false, ScrollAlign::END);
+    FlushLayoutTask(frameNode_);
+    const auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.currentOffset_, -30.0f);
+    EXPECT_EQ(info.startIndex_, 9);
+    EXPECT_EQ(info.endIndex_, 20);
+    const std::list<int32_t> preloadList = { 8, 21, 7, 22, 6, 23, 5, 24, 4, 25, 3, 26, 27, 28, 29 };
+    for (const int32_t i : preloadList) {
+        EXPECT_FALSE(frameNode_->GetChildByIndex(i));
+    }
+    EXPECT_EQ(pattern_->preloadItemList_, preloadList);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_EQ(GetChildHeight(frameNode_, 22), 1250.0f);
+
+    // re-layout to trigger cache item layout
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 8), -240.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 7), -240.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 6), -240.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 22), 810.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 23), 1020.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 24), 1230.0f);
 }
 } // namespace OHOS::Ace::NG

@@ -1654,7 +1654,7 @@ HWTEST_F(GridLayoutTestNg, LayoutWithAutoStretch003, TestSize.Level1)
  */
 HWTEST_F(GridLayoutTestNg, Cache001, TestSize.Level1)
 {
-    GridModelNG model = CreateRepeatGrid(50, 200.0f);
+    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 200.0f; });
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetRowsGap(Dimension(10));
     model.SetColumnsGap(Dimension(10));

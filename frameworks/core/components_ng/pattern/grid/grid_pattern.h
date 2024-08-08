@@ -127,7 +127,13 @@ public:
         return false;
     }
 
-    GridLayoutInfo GetGridLayoutInfo() const
+    const GridLayoutInfo& GetGridLayoutInfo() const
+    {
+        return gridLayoutInfo_;
+    }
+
+    /* caution when using mutable reference */
+    GridLayoutInfo& GetMutableLayoutInfo()
     {
         return gridLayoutInfo_;
     }
