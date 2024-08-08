@@ -25,7 +25,9 @@ namespace OHOS::Ace::NG {
  */
 HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest002, TestSize.Level1)
 {
-    CreateWithItem([](WaterFlowModelNG model) {});
+    CreateWaterFlow();
+    CreateWaterFlowItems();
+    CreateDone();
 
     /**
      * @tc.steps: Test GetStartMainPos and GetMainHeight
@@ -48,7 +50,9 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest002, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest003, TestSize.Level1)
 {
-    CreateWithItem([](WaterFlowModelNG model) {});
+    CreateWaterFlow();
+    CreateWaterFlowItems();
+    CreateDone();
 
     /**
      * @tc.steps: Test GetMainCount function
@@ -79,7 +83,9 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest003, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest004, TestSize.Level1)
 {
-    CreateWithItem([](WaterFlowModelNG model) {});
+    CreateWaterFlow();
+    CreateWaterFlowItems();
+    CreateDone();
 
     /**
      * @tc.steps: Test Reset function
@@ -102,7 +108,9 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest004, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest005, TestSize.Level1)
 {
-    CreateWithItem([](WaterFlowModelNG model) {});
+    CreateWaterFlow();
+    CreateWaterFlowItems();
+    CreateDone();
 
     /**
      * @tc.steps: Test GetMaxMainHeight function
@@ -134,11 +142,12 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest005, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, WaterFlowTest007, TestSize.Level1)
 {
-    CreateWithItem([](WaterFlowModelNG model) {
-        ViewAbstract::SetWidth(CalcLength(WATERFLOW_WIDTH));
-        ViewAbstract::SetHeight(CalcLength(200.f));
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(WATER_FLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(200.f));
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    CreateWaterFlowItems();
+    CreateDone();
     pattern_->UpdateStartIndex(8);
     FlushLayoutTask(frameNode_);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 3)->IsActive());
@@ -159,11 +168,11 @@ HWTEST_F(WaterFlowTestNg, UpdateCurrentOffset003, TestSize.Level1)
      * @tc.steps: step2. scroll up to a remote position
      * @tc.expected: startIndex_ = 0 endIndex_ = 0.
      */
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetEdgeEffect(EdgeEffect::SPRING, true);
-        CreateItem(TOTAL_LINE_NUMBER * 2);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER * 2);
+    CreateDone();
     pattern_->SetAnimateCanOverScroll(true);
     pattern_->UpdateCurrentOffset(10000, SCROLL_FROM_UPDATE);
     FlushLayoutTask(frameNode_);
@@ -220,7 +229,10 @@ HWTEST_F(WaterFlowTestNg, OnWillScrollAndOnDidScroll001, TestSize.Level1)
         isOnDidScrollCallBack = true;
     };
 
-    CreateWithItem([onScroll](WaterFlowModelNG model) { model.SetOnScroll(onScroll); });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetOnScroll(onScroll);
+    CreateWaterFlowItems();
+    CreateDone();
     eventHub_->SetOnWillScroll(std::move(onWillScroll));
     eventHub_->SetOnDidScroll(std::move(onDidScroll));
 
@@ -228,14 +240,14 @@ HWTEST_F(WaterFlowTestNg, OnWillScrollAndOnDidScroll001, TestSize.Level1)
      * @tc.steps: step1. finger moves down at top
      * @tc.expected: Trigger onWillScroll and onDidScroll with SCROLL state
      */
-    pattern_->ScrollTo(ITEM_HEIGHT * 5);
+    pattern_->ScrollTo(ITEM_MAIN_SIZE * 5);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_TRUE(isOnWillScrollCallBack);
     EXPECT_TRUE(isOnDidScrollCallBack);
-    EXPECT_EQ(offsetY.Value(), ITEM_HEIGHT * 5);
-    EXPECT_EQ(willScrollOffset.Value(), ITEM_HEIGHT * 5);
-    EXPECT_EQ(didScrollOffset.Value(), ITEM_HEIGHT * 5);
+    EXPECT_EQ(offsetY.Value(), ITEM_MAIN_SIZE * 5);
+    EXPECT_EQ(willScrollOffset.Value(), ITEM_MAIN_SIZE * 5);
+    EXPECT_EQ(didScrollOffset.Value(), ITEM_MAIN_SIZE * 5);
     EXPECT_EQ(scrollState, willScrollState);
     EXPECT_EQ(scrollState, didScrollState);
 }
@@ -278,10 +290,11 @@ HWTEST_F(WaterFlowTestNg, OnWillScrollAndOnDidScroll002, TestSize.Level1)
         isOnDidScrollCallBack = true;
     };
 
-    CreateWithItem([onScroll](WaterFlowModelNG model) {
-        model.SetOnScroll(onScroll);
-        model.SetLayoutDirection(FlexDirection::ROW);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetOnScroll(onScroll);
+    model.SetLayoutDirection(FlexDirection::ROW);
+    CreateWaterFlowItems();
+    CreateDone();
     eventHub_->SetOnWillScroll(std::move(onWillScroll));
     eventHub_->SetOnDidScroll(std::move(onDidScroll));
 
@@ -289,14 +302,14 @@ HWTEST_F(WaterFlowTestNg, OnWillScrollAndOnDidScroll002, TestSize.Level1)
      * @tc.steps: step1. finger moves down at top
      * @tc.expected: Trigger onScroll with SCROLL state
      */
-    pattern_->ScrollTo(ITEM_HEIGHT * 5);
+    pattern_->ScrollTo(ITEM_MAIN_SIZE * 5);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_TRUE(isOnWillScrollCallBack);
     EXPECT_TRUE(isOnDidScrollCallBack);
-    EXPECT_EQ(offsetY.Value(), ITEM_HEIGHT * 5);
-    EXPECT_EQ(willScrollOffset.Value(), ITEM_HEIGHT * 5);
-    EXPECT_EQ(didScrollOffset.Value(), ITEM_HEIGHT * 5);
+    EXPECT_EQ(offsetY.Value(), ITEM_MAIN_SIZE * 5);
+    EXPECT_EQ(willScrollOffset.Value(), ITEM_MAIN_SIZE * 5);
+    EXPECT_EQ(didScrollOffset.Value(), ITEM_MAIN_SIZE * 5);
     EXPECT_EQ(scrollState, willScrollState);
     EXPECT_EQ(scrollState, didScrollState);
 }
@@ -312,10 +325,10 @@ HWTEST_F(WaterFlowTestNg, ModifyItem002, TestSize.Level1)
      * @tc.steps: step1. Calling the ScrollToIndex interface to set values to 20 and true.
      * @tc.expected: pattern_->targetIndex_ is 20
      */
-    CreateWithItem([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateItem(80);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(80);
+    CreateDone();
     auto info = pattern_->layoutInfo_;
 
     pattern_->ScrollToIndex(50, false, ScrollAlign::CENTER);
@@ -342,12 +355,12 @@ HWTEST_F(WaterFlowTestNg, OverScroll001, TestSize.Level1)
      * @tc.steps: step1. create waterFlow
      * @tc.expected: startIndex_ = 0 endIndex_ = 10.
      */
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetFooter(GetDefaultHeaderBuilder());
-        model.SetEdgeEffect(EdgeEffect::SPRING, true);
-        CreateItem(50);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateWaterFlowItems(50);
+    CreateDone();
     pattern_->SetAnimateCanOverScroll(true);
     auto info = pattern_->layoutInfo_;
     for (int i = 0; i < 50; ++i) {
@@ -376,26 +389,26 @@ HWTEST_F(WaterFlowTestNg, OverScroll001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest001, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetRowsTemplate("1fr 1fr");
-        model.SetRowsGap(Dimension(5));
-        for (int32_t i = 0; i < TOTAL_LINE_NUMBER; i++) {
-            WaterFlowItemModelNG waterFlowItemModel;
-            waterFlowItemModel.Create();
-            ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-            ViewAbstract::SetHeight(CalcLength(Dimension(ITEM_HEIGHT)));
-            ViewStackProcessor::GetInstance()->Pop();
-        }
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetRowsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(5));
+    for (int32_t i = 0; i < TOTAL_LINE_NUMBER; i++) {
+        WaterFlowItemModelNG waterFlowItemModel;
+        waterFlowItemModel.Create();
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+        ViewAbstract::SetHeight(CalcLength(Dimension(ITEM_MAIN_SIZE)));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    CreateDone();
 
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     /**
      * @tc.steps: Test IsAllCrossReachEnd function
      * @tc.expected: step1. Check whether the return value is correct.
      */
-    auto reached = info->IsAllCrossReachEnd(ITEM_HEIGHT);
+    auto reached = info->IsAllCrossReachEnd(ITEM_MAIN_SIZE);
     EXPECT_TRUE(reached);
-    reached = info->IsAllCrossReachEnd(WATERFLOW_HEIGHT);
+    reached = info->IsAllCrossReachEnd(WATER_FLOW_HEIGHT);
     EXPECT_TRUE(reached);
 
     /**
@@ -419,10 +432,10 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest012, TestSize.Level1)
      * @tc.steps: step1. create waterFlow that is less than one screen
      * @tc.expected: itemStart_ = true  itemEnd_ = true.
      */
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateItem(TOTAL_LINE_NUMBER);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER);
+    CreateDone();
     EXPECT_TRUE(pattern_->layoutInfo_->itemStart_);
     EXPECT_TRUE(pattern_->layoutInfo_->itemEnd_);
     EXPECT_TRUE(pattern_->layoutInfo_->offsetEnd_);
@@ -432,8 +445,8 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest012, TestSize.Level1)
     }
     EXPECT_EQ(pattern_->layoutInfo_->lastMainSize_, 800);
 
-    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { 100, 0 }));
-    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(3 * ITEM_HEIGHT), { 300, 0 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE), { 100, 0 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(3 * ITEM_MAIN_SIZE), { 300, 0 }));
 }
 
 /**
@@ -446,10 +459,10 @@ HWTEST_F(WaterFlowTestNg, PositionController100, TestSize.Level1)
     /**
      * @tc.steps: step1. Create List Item
      */
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateItem(TOTAL_LINE_NUMBER * 2);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER * 2);
+    CreateDone();
     auto controller = pattern_->positionController_;
     /**
      * @tc.steps: step8. Test AnimateTo function
@@ -476,7 +489,7 @@ HWTEST_F(WaterFlowTestNg, PositionController100, TestSize.Level1)
     };
 
     eventHub_->SetOnWillScroll(std::move(onWillScroll));
-    pattern_->ScrollTo(ITEM_HEIGHT * 5);
+    pattern_->ScrollTo(ITEM_MAIN_SIZE * 5);
     EXPECT_TRUE(isOnWillScrollCallBack);
 }
 
@@ -487,10 +500,10 @@ HWTEST_F(WaterFlowTestNg, PositionController100, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, EstimateContentHeight001, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateItem(TOTAL_LINE_NUMBER * 4);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER * 4);
+    CreateDone();
     FlushLayoutTask(frameNode_);
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     EXPECT_EQ(info->startIndex_, 0);
@@ -516,10 +529,10 @@ HWTEST_F(WaterFlowTestNg, EstimateContentHeight001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, ScrollToIndex004, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateItem(30);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(30);
+    CreateDone();
 
     /**
      * @tc.steps: step1. scrollToIndex without animation
@@ -564,10 +577,10 @@ HWTEST_F(WaterFlowTestNg, ScrollToIndex004, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, ScrollToIndex005, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateItem(30);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(30);
+    CreateDone();
 
     /**
      * @tc.steps: step1. scrollToIndex with animation
