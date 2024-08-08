@@ -690,6 +690,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     // parse button text color and background color
     std::string textColor;
     std::optional<Color> bgColor;
+    isFirstDefaultFocus_ = true;
     ParseButtonFontColorAndBgColor(params, textColor, bgColor);
 
     // append text inside button
