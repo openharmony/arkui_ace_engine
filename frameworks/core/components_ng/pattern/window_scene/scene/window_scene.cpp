@@ -51,13 +51,14 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
     coldStartCallback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
-        auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self);
         auto session = weakSession.promote();
         CHECK_NULL_VOID(session);
         session->SetBufferAvailable(true);
-        self->BufferAvailableCallback();
         Rosen::SceneSessionManager::GetInstance().NotifyCompleteFirstFrameDrawing(session->GetPersistentId());
+        // In a locked screen scenario, the lifetime of the session is larger than the lifetime of the object self
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->BufferAvailableCallback();
     };
     hotStartCallback_ = [weakThis = WeakClaim(this)]() {
         auto self = weakThis.Upgrade();
