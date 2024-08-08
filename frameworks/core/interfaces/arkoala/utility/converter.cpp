@@ -15,8 +15,8 @@
 
 #include "converter.h"
 
-namespace OHOS::Ace::NG::Converter
-{
+namespace OHOS::Ace::NG::Converter {
+
 constexpr int32_t OFFSET_0 = 0;
 constexpr int32_t OFFSET_1 = 1;
 constexpr int32_t OFFSET_2 = 2;

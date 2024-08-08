@@ -2289,7 +2289,7 @@ ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_
 
 #ifdef INCLUDE_GENERATED_SOURCES
 // GENERATED API
-    switch(static_cast<GENERATED_Ark_APIVariantKind>(kind)) {
+    switch (static_cast<GENERATED_Ark_APIVariantKind>(kind)) {
         case GENERATED_Ark_APIVariantKind::GENERATED_BASIC: {
             if (version == GENERATED_ARKUI_BASIC_NODE_API_VERSION) {
                 return reinterpret_cast<const ArkUIAnyAPI*>(OHOS::Ace::NG::GeneratedModifier::GENERATED_GetBasicAPI());

@@ -24,7 +24,8 @@ extern "C" {
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers();
-    inline const struct GENERATED_ArkUINodeModifiers* GetGeneratedNodeModifiers() {
+    inline const struct GENERATED_ArkUINodeModifiers* GetGeneratedNodeModifiers()
+    {
         return GENERATED_GetArkUINodeModifiers();
     };
 }
