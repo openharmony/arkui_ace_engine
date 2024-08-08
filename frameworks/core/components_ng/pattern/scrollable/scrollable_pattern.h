@@ -712,6 +712,16 @@ protected:
 
     void Register2DragDropManager();
 
+    void SetScrollOriginChild(const WeakPtr<NestableScrollContainer>& scrollOriginChild)
+    {
+        scrollOriginChild_ = scrollOriginChild;
+    }
+
+    RefPtr<NestableScrollContainer> GetScrollOriginChild()
+    {
+        return scrollOriginChild_.Upgrade();
+    }
+
 private:
     virtual void OnScrollEndCallback() {};
 
@@ -896,6 +906,7 @@ private:
     bool lastCanOverScroll_ = false;
     RefPtr<ClickRecognizer> clickRecognizer_;
     Offset locationInfo_;
+    WeakPtr<NestableScrollContainer> scrollOriginChild_;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;
