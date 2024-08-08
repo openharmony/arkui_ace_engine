@@ -75,7 +75,7 @@ void WaterFlowLayoutBase::PostIdleTask(const RefPtr<FrameNode>& frameNode)
         CHECK_NULL_VOID(algo);
         algo->StartCacheLayout();
 
-        const auto& items = pattern->MovePreloadList();
+        auto items = pattern->MovePreloadList();
         bool needMarkDirty = false;
         for (auto it = items.begin(); it != items.end(); ++it) {
             if (GetSysTimestamp() > deadline) {

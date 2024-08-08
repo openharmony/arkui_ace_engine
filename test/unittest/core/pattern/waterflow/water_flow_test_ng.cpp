@@ -18,6 +18,8 @@
 #include <map>
 #include <memory>
 
+#include "base/utils/time_util.h"
+
 #ifndef TEST_SEGMENTED_WATER_FLOW
 #include "test/mock/base/mock_system_properties.h"
 #endif
@@ -35,7 +37,6 @@
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
-#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
@@ -45,6 +46,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #undef private
 #undef protected
@@ -122,6 +124,31 @@ void WaterFlowTestNg::CreateWaterFlowItems(int32_t itemNumber)
     }
 }
 
+WaterFlowModelNG WaterFlowTestNg::CreateRepeatWaterFlow(int32_t itemNumber, std::function<float(uint32_t)>&& getSize)
+{
+    auto model = CreateWaterFlow();
+    RepeatVirtualScrollModelNG repeatModel;
+    std::function<void(uint32_t)> createFunc = [this, getSize](uint32_t idx) { CreateItemWithHeight(getSize(idx)); };
+    std::function<void(const std::string&, uint32_t)> updateFunc =
+        [this, getSize](const std::string& value, uint32_t idx) { CreateItemWithHeight(getSize(idx)); };
+    std::function<std::list<std::string>(uint32_t, uint32_t)> getKeys = [](uint32_t start, uint32_t end) {
+        std::list<std::string> keys;
+        for (uint32_t i = start; i <= end; ++i) {
+            keys.emplace_back(std::to_string(i));
+        }
+        return keys;
+    };
+    std::function<std::list<std::string>(uint32_t, uint32_t)> getTypes = [](uint32_t start, uint32_t end) {
+        std::list<std::string> keys;
+        for (uint32_t i = start; i <= end; ++i) {
+            keys.emplace_back("0");
+        }
+        return keys;
+    };
+    repeatModel.Create(itemNumber, {}, createFunc, updateFunc, getKeys, getTypes);
+    return model;
+}
+
 WaterFlowItemModelNG WaterFlowTestNg::CreateWaterFlowItem(float mainSize)
 {
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
@@ -189,7 +216,7 @@ void WaterFlowTestNg::AddItemsAtSlot(int32_t itemNumber, float height, int32_t s
     }
 }
 
-void WaterFlowTestNg::CreateWaterFlowItemWithHeight(float height)
+void WaterFlowTestNg::CreateItemWithHeight(float height)
 {
     CreateWaterFlowItem(height);
     ViewStackProcessor::GetInstance()->Pop();
@@ -219,7 +246,8 @@ AssertionResult WaterFlowTestNg::IsEqualTotalOffset(float expectOffset)
     if (NearEqual(currentOffset, expectOffset)) {
         return testing::AssertionSuccess();
     }
-    return AssertionFailure() << "currentOffset: " << currentOffset << " != " << "expectOffset: " << expectOffset;
+    return AssertionFailure() << "currentOffset: " << currentOffset << " != "
+                              << "expectOffset: " << expectOffset;
 }
 
 void WaterFlowTestNg::HandleDrag(float offset)
@@ -1755,6 +1783,44 @@ HWTEST_F(WaterFlowTestNg, MeasureForAnimation001, TestSize.Level1)
      */
     auto crossIndex = pattern_->layoutInfo_->GetCrossIndex(10);
     EXPECT_FALSE(IsEqual(crossIndex, -1));
+}
+
+/**
+ * @tc.name: Cache001
+ * @tc.desc: Test cache item preload
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Cache001, TestSize.Level1)
+{
+    auto model = CreateRepeatWaterFlow(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
+
+    model.SetCachedCount(3);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateDone();
+    auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 10);
+
+    const std::list<int32_t> preloadList = { 11, 12, 13 };
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 11));
+    EXPECT_EQ(pattern_->preloadItems_, preloadList);
+    EXPECT_TRUE(pattern_->cacheLayout_);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(pattern_->preloadItems_.empty());
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 11));
+    EXPECT_EQ(GetChildHeight(frameNode_, 12), 200.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 13), (WATER_FLOW_WIDTH - 10.0f) / 2.0f);
+    EXPECT_EQ(layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_LAYOUT);
+
+    UpdateCurrentOffset(-500.0f);
+    EXPECT_EQ(info->startIndex_, 4);
+    EXPECT_EQ(info->endIndex_, 17);
+    const std::list<int32_t> preloadList2 = { 18, 19, 20 };
+    EXPECT_EQ(pattern_->preloadItems_, preloadList2);
+    PipelineContext::GetCurrentContext()->OnIdle(GetSysTimestamp());
+    EXPECT_EQ(pattern_->preloadItems_, preloadList2);
 }
 
 /**
