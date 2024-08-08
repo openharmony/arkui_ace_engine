@@ -116,8 +116,12 @@ private:
         RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph, const std::list<RefPtr<SpanItem>>& spans);
     void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     void UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle);
-    void SetPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty, RefPtr<TextContentModifier> modifier,
-        TextStyle& textStyle);
+    void SetPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
+        const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle);
+    void SetDecorationPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
+        const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle);
+    void SetFontSizePropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
+        const RefPtr<TextContentModifier>&, const TextStyle& textStyle);
 
     void AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem, const RefPtr<LayoutWrapper>& iterItem,
         const LayoutConstraintF& layoutConstrain, const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength,
