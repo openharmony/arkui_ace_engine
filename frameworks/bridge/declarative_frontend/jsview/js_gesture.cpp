@@ -296,6 +296,7 @@ void JSTapGesture::Create(const JSCallbackInfo& args)
         if (distanceThreshold->IsNumber()) {
             double distanceThresholdNumber = distanceThreshold->ToNumber<double>();
             distanceThresholdNum = distanceThresholdNumber < 0? DEFAULT_TAP_DISTANCE : distanceThresholdNumber;
+            distanceThresholdNum = Dimension(distanceThresholdNum, DimensionUnit::VP).ConvertToPx();
         }
     }
 

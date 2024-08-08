@@ -9644,6 +9644,7 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
             distanceThreshold = std::numeric_limits<double>::infinity();
         }
     }
+    distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
     ViewAbstractModel::GetInstance()->SetOnClick(std::move(tmpOnTap), std::move(onClick), distanceThreshold);
 }
 
