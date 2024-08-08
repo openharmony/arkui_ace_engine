@@ -4154,7 +4154,7 @@ void SwiperPattern::RegisterVisibleAreaChange()
     CHECK_NULL_VOID(host);
     pipeline->AddWindowStateChangedCallback(host->GetId());
 
-    if (hasVisibleChangeRegistered_ || !IsAutoPlay()) {
+    if (hasVisibleChangeRegistered_) {
         return;
     }
 
