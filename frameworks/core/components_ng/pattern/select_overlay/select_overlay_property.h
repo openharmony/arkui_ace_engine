@@ -79,6 +79,7 @@ struct SelectHandleInfo {
     bool isShow = true;
     bool needLayout = false;
     bool isPaintHandleWithPoints = false;
+    bool isCircleShow = true;
     // in Global coordinates.
     RectF paintRect;
     RectF localPaintRect;
@@ -271,7 +272,7 @@ struct SelectOverlayInfo {
     std::function<void(const TouchEventInfo&)> onTouchDown;
     std::function<void(const TouchEventInfo&)> onTouchUp;
     std::function<void(const TouchEventInfo&)> onTouchMove;
-    std::function<void(const GestureEvent&, bool isClickCaret)> onClick;
+    std::function<void(const GestureEvent&, bool isFirst)> onClick;
 
     // handle move callback.
     std::function<void(bool isFirst)> onHandleMoveStart;
@@ -290,6 +291,7 @@ struct SelectOverlayInfo {
     std::function<void(bool)> onClose;
 
     std::function<bool(const PointF&)> checkIsTouchInHostArea;
+    std::function<void()> onHandleIsHidden;
 
     OHOS::Ace::WeakPtr<FrameNode> callerFrameNode;
     std::optional<CallerFrameNodeInfo> callerNodeInfo;

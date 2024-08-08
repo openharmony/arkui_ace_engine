@@ -1256,7 +1256,9 @@ void TextFieldPattern::HandleBlurEvent()
     ProcBorderAndUnderlineInBlurEvent();
     ProcNormalInlineStateInBlurEvent();
     ModifyInnerStateInBlurEvent();
-    magnifierController_->UpdateShowMagnifier();
+    if (magnifierController_) {
+        magnifierController_->RemoveMagnifierFrameNode();
+    }
     CloseSelectOverlay(!isKeyboardClosedByUser_ && blurReason_ == BlurReason::FOCUS_SWITCH);
     StopTwinkling();
     if (((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_)) {
@@ -1682,6 +1684,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (selectOverlay_->IsTouchAtHandle(info)) {
         return;
     }
+    DoGestureSelection(info);
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
@@ -1700,7 +1703,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
             selectOverlay_->SetIsSingleHandle(false);
             return;
         }
-        if (SelectOverlayIsOn() && !isTouchCaret_) {
+        if (SelectOverlayIsOn() && !moveCaretState_.isTouchCaret) {
             return;
         }
         if (!IsUsingMouse()) {
@@ -1711,32 +1714,32 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void TextFieldPattern::HandleTouchDown(const Offset& offset)
 {
+    moveCaretState_.touchDownOffset = offset;
     if (HasStateStyle(UI_STATE_PRESSED)) {
         return;
     }
 
     if (enableTouchAndHoverEffect_ && !isMousePressed_) {
-        auto lastCaretIndex = selectController_->GetCaretIndex();
         auto lastCaretRect = selectController_->GetCaretRect();
-        isTouchCaret_ = !IsSelected() && RepeatClickCaret(offset, lastCaretIndex, lastCaretRect);
+        moveCaretState_.isTouchCaret = !IsSelected() && RepeatClickCaret(offset, lastCaretRect);
         isTouchPreviewText_ = GetTouchInnerPreviewText(offset);
-        if (isTouchCaret_) {
-            CloseSelectOverlay(true);
-        }
     }
 }
 
 void TextFieldPattern::HandleTouchUp()
 {
-    if (isTouchCaret_) {
-        isTouchCaret_ = false;
-        CloseSelectOverlay(true);
+    if (moveCaretState_.isTouchCaret) {
+        moveCaretState_.isTouchCaret = false;
         CheckScrollable();
+    }
+    if (moveCaretState_.isMoveCaret) {
+        moveCaretState_.isMoveCaret = false;
+        StartTwinkling();
     }
     if (isMousePressed_) {
         isMousePressed_ = false;
     }
-    if (magnifierController_ && !GetIsPreviewText()) {
+    if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
     ScheduleDisappearDelayTask();
@@ -1744,7 +1747,16 @@ void TextFieldPattern::HandleTouchUp()
 
 void TextFieldPattern::HandleTouchMove(const TouchEventInfo& info)
 {
-    if (isTouchCaret_ || (GetIsPreviewText() && isTouchPreviewText_)) {
+    if (moveCaretState_.isTouchCaret && !moveCaretState_.isMoveCaret) {
+        auto offset = info.GetTouches().front().GetLocalLocation();
+        auto moveDistance = (offset - moveCaretState_.touchDownOffset).GetDistance();
+        moveCaretState_.isMoveCaret = GreatNotEqual(moveDistance, moveCaretState_.minDinstance.ConvertToPx());
+    }
+    if (SelectOverlayIsOn() && moveCaretState_.isMoveCaret) {
+        CloseSelectOverlay(false);
+    }
+    if (moveCaretState_.isMoveCaret || (GetIsPreviewText() && isTouchPreviewText_)) {
+        ShowCaretAndStopTwinkling();
         UpdateCaretByTouchMove(info);
     }
 }
@@ -1755,6 +1767,9 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
     SetScrollEnabled(scrollable_);
     // limit move when preview text is shown
     auto touchOffset = info.GetTouches().front().GetLocalLocation();
+    if (magnifierController_) {
+        magnifierController_->SetLocalOffset({ touchOffset.GetX(), touchOffset.GetY() });
+    }
     int32_t preCaretIndex = selectController_->GetCaretIndex();
     if (GetIsPreviewText()) {
         TAG_LOGI(ACE_TEXT_FIELD, "UpdateCaretByTouchMove when has previewText");
@@ -2204,7 +2219,6 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
     CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     auto lastCaretIndex = selectController_->GetCaretIndex();
-    auto lastCaretRect = selectController_->GetCaretRect();
     if (mouseStatus_ != MouseStatus::MOVE) {
         selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
     }
@@ -2212,24 +2226,22 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
     SetIsSingleHandle(true);
     bool needCloseOverlay = true;
     bool isRepeatClickCaret =
-        RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex, lastCaretRect) && !firstGetFocus;
+        RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex) && !firstGetFocus;
     bool isInlineSelectAllOrEmpty = inlineSelectAllFlag_ || contentController_->IsEmpty();
+    auto clickBlank = contentController_->IsEmpty() || selectController_->IsTouchAtLineEnd(info.GetLocalLocation());
+    auto closeHandleAtBlank =
+        clickBlank && isRepeatClickCaret && SelectOverlayIsOn() && selectOverlay_->IsSingleHandle();
     do {
         if (info.GetSourceDevice() == SourceType::MOUSE || (!isRepeatClickCaret && isInlineSelectAllOrEmpty) ||
-            IsContentRectNonPositive()) {
+            IsContentRectNonPositive() || closeHandleAtBlank) {
             break;
         }
-        if (GetNakedCharPosition() >= 0) {
+        if (isRepeatClickCaret) {
+            StopTwinkling();
+            ProcessOverlay({ .animation = true });
             needCloseOverlay = false;
-            DelayProcessOverlay({ .menuIsShow = false, .animation = true });
         } else if (needSelectAll_) {
             HandleOnSelectAll(false);
-        } else {
-            needCloseOverlay = false;
-            ProcessOverlay({ .menuIsShow = isRepeatClickCaret,
-                .hideHandle = isRepeatClickCaret && contentController_->IsEmpty(),
-                .animation = true,
-                .hideHandleLine = true });
         }
     } while (false);
     if (needCloseOverlay || GetIsPreviewText()) {
@@ -2385,7 +2397,6 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
 
     if (showSelect_) {
         SetIsSingleHandle(true);
-        CloseSelectOverlay();
     }
     if (RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
@@ -2397,7 +2408,7 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
         StopTwinkling();
         SetIsSingleHandle(false);
     }
-    if (info.GetSourceDevice() != SourceType::MOUSE && !contentController_->IsEmpty() && !IsContentRectNonPositive()) {
+    if (info.GetSourceDevice() != SourceType::MOUSE && !IsContentRectNonPositive()) {
         ProcessOverlay({ .animation = true });
     }
     auto host = GetHost();
@@ -2991,13 +3002,11 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     if (!focusHub->IsFocusable() || IsOnUnitByPosition(info.GetGlobalLocation()) || GetIsPreviewText()) {
         return;
     }
-    isTouchCaret_ = false;
+    moveCaretState_.isTouchCaret = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleLongPress %{public}d", host->GetId());
-    bool shouldProcessOverlayAfterLayout = false;
     if (ResetObscureTickCountDown()) {
-        shouldProcessOverlayAfterLayout = true;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     if (info.GetSourceDevice() == SourceType::MOUSE) {
@@ -3018,28 +3027,19 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
         focusHub->RequestFocusImmediately();
     }
     auto localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
-    if (selectController_->IsTouchAtLineEnd(localOffset)) {
-        selectController_->UpdateCaretInfoByOffset(localOffset);
-    } else if (CanChangeSelectState()) {
+    if (CanChangeSelectState()) {
         selectController_->UpdateSelectByOffset(localOffset);
     }
-    ShowSelectOverlayForLongPress(shouldProcessOverlayAfterLayout);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void TextFieldPattern::ShowSelectOverlayForLongPress(bool shouldProcessOverlayAfterLayout)
-{
-    if (IsSelected()) {
-        StopTwinkling();
-    }
+    StopTwinkling();
     SetIsSingleHandle(!IsSelected());
-    if (!IsContentRectNonPositive()) {
-        if (shouldProcessOverlayAfterLayout) {
-            DelayProcessOverlay({ .menuIsShow = true, .animation = true,  });
-        } else {
-            ProcessOverlay({ .animation = true });
-        }
+    auto start = selectController_->GetStartIndex();
+    auto end = selectController_->GetEndIndex();
+    CloseSelectOverlay();
+    if (magnifierController_) {
+        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
     }
+    StartGestureSelection(start, end);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool TextFieldPattern::CanChangeSelectState()
@@ -3224,12 +3224,17 @@ void TextFieldPattern::InitPanEvent()
             gestureInfo->GetInputEventType() == InputEventType::MOUSE_BUTTON) {
             return GestureJudgeResult::REJECT;
         }
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, GestureJudgeResult::CONTINUE);
+        if (gestureInfo->GetType() == GestureTypeName::TEXTFIELD_BOXSELECT &&
+            gestureInfo->GetInputEventType() == InputEventType::TOUCH_SCREEN &&
+            pattern->moveCaretState_.isMoveCaret) {
+            return GestureJudgeResult::CONTINUE;
+        }
         if (gestureInfo->GetType() == GestureTypeName::TEXTFIELD_BOXSELECT &&
             gestureInfo->GetInputEventType() != InputEventType::MOUSE_BUTTON) {
             return GestureJudgeResult::REJECT;
         }
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_RETURN(pattern, GestureJudgeResult::CONTINUE);
         auto host = pattern->GetHost();
         CHECK_NULL_RETURN(host, GestureJudgeResult::CONTINUE);
         if (gestureInfo->GetType() == GestureTypeName::TEXTFIELD_BOXSELECT &&
@@ -5212,7 +5217,7 @@ void TextFieldPattern::SetSelectionFlag(
     auto length = static_cast<int32_t>(contentController_->GetWideText().length());
     selectionStart = std::clamp(selectionStart, 0, length);
     selectionEnd = std::clamp(selectionEnd, 0, length);
-    isTouchCaret_ = false;
+    moveCaretState_.isTouchCaret = false;
     isTouchPreviewText_ = false;
     if (selectionStart == selectionEnd) {
         selectController_->MoveCaretToContentRect(selectionEnd, TextAffinity::DOWNSTREAM);
@@ -6756,13 +6761,14 @@ void TextFieldPattern::UpdateSelectController()
     selectController_->UpdateParagraph(paragraph_);
 }
 
-bool TextFieldPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex, const RectF& lastCaretRect)
+bool TextFieldPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex)
 {
     auto touchDownIndex = selectController_->ConvertTouchOffsetToPosition(offset);
-    if (!selectController_->CaretAtLast()) {
-        return lastCaretIndex == touchDownIndex && HasFocus();
-    }
-    // Increase the cursor area if there is no text
+    return lastCaretIndex == touchDownIndex && HasFocus();
+}
+
+bool TextFieldPattern::RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect)
+{
     auto caretRect = lastCaretRect;
     caretRect.SetLeft(caretRect.GetX() - caretRect.Height() / 2);
     caretRect.SetWidth(caretRect.Height());
@@ -7876,5 +7882,42 @@ void TextFieldPattern::ReportEvent()
         UiSessionManager::GetInstance().ReportSearchEvent(data->ToString());
     }
 #endif
+}
+
+int32_t TextFieldPattern::GetTouchIndex(const OffsetF& offset)
+{
+    return selectOverlay_->GetCaretPositionOnHandleMove(offset);
+}
+
+void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info)
+{
+    auto localOffset = info.GetTouches().front().GetLocalLocation();
+    if (magnifierController_) {
+        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
+    }
+    auto firstIndex = selectController_->GetFirstHandleIndex();
+    auto secondIndex = selectController_->GetSecondHandleIndex();
+    bool changed = false;
+    if (start != firstIndex) {
+        selectController_->MoveFirstHandleToContentRect(start, false);
+        changed = true;
+    }
+    if (secondIndex != end) {
+        selectController_->MoveSecondHandleToContentRect(end, false);
+        changed = true;
+    }
+    if (!changed) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextFieldPattern::OnTextGenstureSelectionEnd()
+{
+    if (!IsContentRectNonPositive()) {
+        ProcessOverlay({ .animation = true });
+    }
 }
 } // namespace OHOS::Ace::NG

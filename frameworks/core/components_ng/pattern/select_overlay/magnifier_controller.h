@@ -19,7 +19,6 @@
 #include "base/memory/type_info_base.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
-#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/pattern.h"

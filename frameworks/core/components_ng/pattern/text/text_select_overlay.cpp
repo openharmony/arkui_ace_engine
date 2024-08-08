@@ -181,9 +181,13 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     CHECK_NULL_VOID(renderContext);
     auto contentRect = textPattern->GetTextContentRect();
     auto contentOffset = contentRect.GetOffset();
+    auto localHandleOffset = handleRect.GetOffset();
     if (IsOverlayMode()) {
         contentOffset = contentOffset + GetPaintOffsetWithoutTransform();
+        localHandleOffset -= GetPaintOffsetWithoutTransform();
     }
+    localHandleOffset.SetY(localHandleOffset.GetY() + handleRect.Height() / 2.0f);
+    textPattern->GetMagnifierController()->SetLocalOffset(localHandleOffset);
     auto handleOffset = handleRect.GetOffset();
     if (!selectTextUseTopHandle) {
         bool isUseHandleTop = (isFirst != IsHandleReverse());
@@ -233,6 +237,9 @@ void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     BaseTextSelectOverlay::OnHandleMoveDone(rect, isFirst);
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
+    if (textPattern->GetMagnifierController()) {
+        textPattern->GetMagnifierController()->RemoveMagnifierFrameNode();
+    }
     textPattern->SetTextResponseType(TextResponseType::LONG_PRESS);
     auto textSelector = textPattern->GetTextSelector();
     textPattern->UpdateSelectionSpanType(textSelector.GetTextStart(), textSelector.GetTextEnd());
@@ -246,6 +253,7 @@ void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         ProcessOverlay({ .animation = true });
     }
     overlayManager->ShowOptionMenu();
+    overlayManager->SetHandleCircleIsShow(isFirst, true);
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -391,5 +399,12 @@ void TextSelectOverlay::OnHandleLevelModeChanged(HandleLevelMode mode)
         UpdateAllHandlesOffset();
     }
     BaseTextSelectOverlay::OnHandleLevelModeChanged(mode);
+}
+
+void TextSelectOverlay::OnHandleMoveStart(bool isFirst)
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->SetHandleCircleIsShow(isFirst, false);
 }
 } // namespace OHOS::Ace::NG
