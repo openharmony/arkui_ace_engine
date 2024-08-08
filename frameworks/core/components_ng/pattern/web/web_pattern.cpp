@@ -2203,6 +2203,13 @@ void WebPattern::OnOverlayScrollbarEnabledUpdate(bool enable)
     }
 }
 
+void WebPattern::OnNativeEmbedModeEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateNativeEmbedModeEnabled(value);
+    }
+}
+
 void WebPattern::OnNativeEmbedRuleTagUpdate(const std::string& tag)
 {
     if (delegate_) {
