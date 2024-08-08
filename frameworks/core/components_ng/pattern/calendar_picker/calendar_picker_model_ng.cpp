@@ -173,7 +173,7 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateCalendarNodeChild(int32_t content
     auto linearLayoutProperty = contentNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(linearLayoutProperty, nullptr);
 
-    linearLayoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    linearLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
     linearLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     contentNode->GetRenderContext()->SetClipToFrame(true);
     linearLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
