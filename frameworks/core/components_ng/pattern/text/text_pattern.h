@@ -316,6 +316,7 @@ public:
     DragDropInfo OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     void InitDragEvent();
     void UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool IsDragging);
+    void OnDragMove(const RefPtr<Ace::DragEvent>& event);
     virtual std::function<void(Offset)> GetThumbnailCallback();
     std::list<ResultObject> dragResultObjects_;
     std::list<ResultObject> recoverDragResultObjects_;
@@ -323,7 +324,6 @@ public:
     void OnDragEnd(const RefPtr<Ace::DragEvent>& event);
     void OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event);
     void CloseOperate();
-    void OnDragMove(const RefPtr<Ace::DragEvent>& event);
     virtual void AddUdmfData(const RefPtr<Ace::DragEvent>& event);
     void ProcessNormalUdmfData(const RefPtr<UnifiedData>& unifiedData);
     void AddPixelMapToUdmfData(const RefPtr<PixelMap>& pixelMap, const RefPtr<UnifiedData>& unifiedData);
@@ -551,15 +551,15 @@ public:
         return sourceType_ == SourceType::MOUSE;
     }
 
-    void CopySelectionMenuParams(SelectOverlayInfo& selectInfo)
-    {
-        CopySelectionMenuParams(selectInfo, textResponseType_.value_or(TextResponseType::NONE));
-    }
-
     void OnSensitiveStyleChange(bool isSensitive) override;
 
     bool IsSetObscured();
     bool IsSensitiveEnalbe();
+
+    void CopySelectionMenuParams(SelectOverlayInfo& selectInfo)
+    {
+        CopySelectionMenuParams(selectInfo, textResponseType_.value_or(TextResponseType::NONE));
+    }
 
     void InitCustomSpanPlaceholderInfo(const std::vector<CustomSpanPlaceholderInfo>& customSpanPlaceholder)
     {
@@ -672,6 +672,7 @@ protected:
     bool CalculateClickedSpanPosition(const PointF& textOffset);
     void HiddenMenu();
     std::shared_ptr<SelectionMenuParams> GetMenuParams(TextSpanType type, TextResponseType responseType);
+    void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
     void InitKeyEvent();
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     void HandleOnSelect(KeyCode code);
@@ -681,7 +682,6 @@ protected:
     double GetTextHeight(int32_t index, bool isNextLine);
     int32_t GetActualTextLength();
     bool IsSelectableAndCopy();
-    void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
     void SetResponseRegion(const SizeF& frameSize, const SizeF& boundsSize);
 
     virtual bool CanStartAITask()
@@ -705,11 +705,11 @@ protected:
         isDetachFromMainTree_ = true;
     }
 
+    bool enabled_ = true;
     Status status_ = Status::NONE;
     bool contChange_ = false;
     int32_t recoverStart_ = 0;
     int32_t recoverEnd_ = 0;
-    bool enabled_ = true;
     bool mouseEventInitialized_ = false;
     bool panEventInitialized_ = false;
     bool clickEventInitialized_ = false;
@@ -779,6 +779,7 @@ private:
     bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
     bool DidExceedMaxLines() const override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void ProcessOverlayAfterLayout();
     // SpanString
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
     ImageSourceInfo CreateImageSourceInfo(const ImageSpanOptions& options);
@@ -799,7 +800,6 @@ private:
         return lastDragTool_;
     }
 
-    void ProcessOverlayAfterLayout();
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     Offset ConvertLocalOffsetToParagraphOffset(const Offset& offset);
     void ProcessMarqueeVisibleAreaCallback();
@@ -835,8 +835,8 @@ private:
     bool isShowMenu_ = true;
     RefPtr<TextSelectOverlay> selectOverlay_;
     std::vector<WeakPtr<FrameNode>> imageNodeList_;
-    std::vector<CustomSpanPlaceholderInfo> customSpanPlaceholder_;
     bool isDetachFromMainTree_ = false;
+    std::vector<CustomSpanPlaceholderInfo> customSpanPlaceholder_;
     std::optional<void*> externalParagraph_;
     std::optional<ParagraphStyle> externalParagraphStyle_;
     bool isUserSetResponseRegion_ = false;
