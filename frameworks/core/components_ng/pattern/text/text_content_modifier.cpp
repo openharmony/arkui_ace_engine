@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include <cstdint>
+#include <optional>
 
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
@@ -650,43 +651,63 @@ void TextContentModifier::SetFontFamilies(const std::vector<std::string>& value)
     fontFamilyString_->Set(V2::ConvertFontFamily(value));
 }
 
-void TextContentModifier::SetFontSize(const Dimension& value, TextStyle& textStyle)
+void TextContentModifier::SetFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset)
 {
     auto fontSizeValue =
         value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
-    fontSize_ = Dimension(fontSizeValue);
+    if (!isReset) {
+        fontSize_ = Dimension(fontSizeValue);
+    } else {
+        fontSize_ = std::nullopt;
+    }
     CHECK_NULL_VOID(fontSizeFloat_);
     fontSizeFloat_->Set(fontSizeValue);
 }
 
-void TextContentModifier::SetAdaptMinFontSize(const Dimension& value, TextStyle& textStyle)
+void TextContentModifier::SetAdaptMinFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset)
 {
     auto fontSizeValue =
         value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
-    adaptMinFontSize_ = Dimension(fontSizeValue);
+    if (!isReset) {
+        adaptMinFontSize_ = Dimension(fontSizeValue);
+    } else {
+        adaptMinFontSize_ = std::nullopt;
+    }
     CHECK_NULL_VOID(adaptMinFontSizeFloat_);
     adaptMinFontSizeFloat_->Set(fontSizeValue);
 }
 
-void TextContentModifier::SetAdaptMaxFontSize(const Dimension& value, TextStyle& textStyle)
+void TextContentModifier::SetAdaptMaxFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset)
 {
     auto fontSizeValue =
         value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
-    adaptMaxFontSize_ = Dimension(fontSizeValue);
+    if (!isReset) {
+        adaptMaxFontSize_ = Dimension(fontSizeValue);
+    } else {
+        adaptMaxFontSize_ = std::nullopt;
+    }
     CHECK_NULL_VOID(adaptMaxFontSizeFloat_);
     adaptMaxFontSizeFloat_->Set(fontSizeValue);
 }
 
-void TextContentModifier::SetFontWeight(const FontWeight& value)
+void TextContentModifier::SetFontWeight(const FontWeight& value, bool isReset)
 {
-    fontWeight_ = ConvertFontWeight(value);
+    if (!isReset) {
+        fontWeight_ = ConvertFontWeight(value);
+    } else {
+        fontWeight_ = std::nullopt;
+    }
     CHECK_NULL_VOID(fontWeightFloat_);
     fontWeightFloat_->Set(static_cast<int>(ConvertFontWeight(value)));
 }
 
-void TextContentModifier::SetTextColor(const Color& value)
+void TextContentModifier::SetTextColor(const Color& value, bool isReset)
 {
-    textColor_ = value;
+    if (!isReset) {
+        textColor_ = value;
+    } else {
+        textColor_ = std::nullopt;
+    }
     CHECK_NULL_VOID(animatableTextColor_);
     animatableTextColor_->Set(LinearColor(value));
 }
@@ -715,7 +736,7 @@ void TextContentModifier::SetTextShadow(const std::vector<Shadow>& value)
     }
 }
 
-void TextContentModifier::SetTextDecoration(const TextDecoration& type)
+void TextContentModifier::SetTextDecoration(const TextDecoration& type, bool isReset)
 {
     auto oldTextDecoration = textDecoration_.value_or(TextDecoration::NONE);
     if (oldTextDecoration == type) {
@@ -724,29 +745,39 @@ void TextContentModifier::SetTextDecoration(const TextDecoration& type)
 
     textDecorationAnimatable_ = (oldTextDecoration == TextDecoration::NONE && type == TextDecoration::UNDERLINE) ||
                                 (oldTextDecoration == TextDecoration::UNDERLINE && type == TextDecoration::NONE);
-
-    textDecoration_ = type;
+    if (!isReset) {
+        textDecoration_ = type;
+    } else {
+        textDecoration_ = std::nullopt;
+    }
     CHECK_NULL_VOID(textDecorationColorAlpha_);
 
-    oldColorAlpha_ = textDecorationColorAlpha_->Get();
-    if (textDecoration_ == TextDecoration::NONE) {
+    if (textDecoration_.has_value() && textDecoration_.value() == TextDecoration::NONE) {
         textDecorationColorAlpha_->Set(0.0f);
-    } else {
+    } else if (textDecorationColor_.has_value()) {
         textDecorationColorAlpha_->Set(static_cast<float>(textDecorationColor_.value().GetAlpha()));
     }
 }
 
-void TextContentModifier::SetTextDecorationStyle(const TextDecorationStyle textDecorationStyle)
+void TextContentModifier::SetTextDecorationStyle(const TextDecorationStyle& textDecorationStyle, bool isReset)
 {
-    textDecorationStyle_ = textDecorationStyle;
+    if (!isReset) {
+        textDecorationStyle_ = textDecorationStyle;
+    } else {
+        textDecorationColor_ = std::nullopt;
+    }
 }
 
-void TextContentModifier::SetTextDecorationColor(const Color& color)
+void TextContentModifier::SetTextDecorationColor(const Color& color, bool isReset)
 {
-    textDecorationColor_ = color;
+    if (!isReset) {
+        textDecorationColor_ = color;
+    } else {
+        textDecorationColor_ = std::nullopt;
+    }
 }
 
-void TextContentModifier::SetBaselineOffset(const Dimension& value)
+void TextContentModifier::SetBaselineOffset(const Dimension& value, bool isReset)
 {
     float baselineOffsetValue;
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -755,7 +786,11 @@ void TextContentModifier::SetBaselineOffset(const Dimension& value)
     } else {
         baselineOffsetValue = value.Value();
     }
-    baselineOffset_ = Dimension(baselineOffsetValue);
+    if (!isReset) {
+        baselineOffset_ = Dimension(baselineOffsetValue);
+    } else {
+        baselineOffset_ = std::nullopt;
+    }
     CHECK_NULL_VOID(baselineOffsetFloat_);
     baselineOffsetFloat_->Set(baselineOffsetValue);
 }

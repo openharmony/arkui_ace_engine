@@ -43,16 +43,16 @@ public:
     void onDraw(DrawingContext& drawingContext) override;
 
     void SetFontFamilies(const std::vector<std::string>& value);
-    void SetFontSize(const Dimension& value, TextStyle& textStyle);
-    void SetAdaptMinFontSize(const Dimension& value, TextStyle& textStyle);
-    void SetAdaptMaxFontSize(const Dimension& value, TextStyle& textStyle);
-    void SetFontWeight(const FontWeight& value);
-    void SetTextColor(const Color& value);
+    void SetFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
+    void SetAdaptMinFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
+    void SetAdaptMaxFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
+    void SetFontWeight(const FontWeight& value, bool isReset = false);
+    void SetTextColor(const Color& value, bool isReset = false);
     void SetTextShadow(const std::vector<Shadow>& value);
-    void SetTextDecoration(const TextDecoration& value);
-    void SetTextDecorationStyle(const TextDecorationStyle value);
-    void SetTextDecorationColor(const Color& value);
-    void SetBaselineOffset(const Dimension& value);
+    void SetTextDecoration(const TextDecoration& value, bool isReset = false);
+    void SetTextDecorationStyle(const TextDecorationStyle& value, bool isReset = false);
+    void SetTextDecorationColor(const Color& value, bool isReset = false);
+    void SetBaselineOffset(const Dimension& value, bool isReset = false);
     void SetContentOffset(OffsetF& value);
     void SetContentSize(SizeF& value);
 
@@ -167,7 +167,6 @@ private:
     };
     std::vector<ShadowProp> shadows_;
 
-    float oldColorAlpha_ { 0.0f };
     std::optional<TextDecoration> textDecoration_;
     std::optional<TextDecorationStyle> textDecorationStyle_;
     std::optional<Color> textDecorationColor_;
