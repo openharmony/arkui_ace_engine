@@ -28,19 +28,19 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 }
 
 const resourceFn = resourceManager.getSystemResourceManager();
-const shadowStyleList = [
-    ShadowStyle.OUTER_DEFAULT_XS,
-    ShadowStyle.OUTER_DEFAULT_SM,
-    ShadowStyle.OUTER_DEFAULT_MD,
-    ShadowStyle.OUTER_DEFAULT_LG,
-    ShadowStyle.OUTER_FLOATING_SM,
-    ShadowStyle.OUTER_FLOATING_MD,
-];
+const shadowRange = 6;
+const fontWeightMin = 100;
+const fontWeightMax = 900;
 export var ChipSize;
 (function (ChipSize) {
     ChipSize["NORMAL"] = "NORMAL";
     ChipSize["SMALL"] = "SMALL";
 })(ChipSize || (ChipSize = {}));
+var IconType;
+(function (IconType) {
+    IconType["PREFIX_ICON"] = "PREFIXICON";
+    IconType["SUFFIX_ICON"] = "SUFFIXICON";
+})(IconType || (IconType = {}));
 var BreakPointsType;
 (function (BreakPointsType) {
     BreakPointsType["SM"] = "SM";
@@ -48,27 +48,18 @@ var BreakPointsType;
     BreakPointsType["LG"] = "LG";
 })(BreakPointsType || (BreakPointsType = {}));
 function getShadowStyle(resourceNum) {
-    let index = 6;
-    try {
-        let resourceToIndex = resourceFn.getNumberByName((resourceNum
-            .params[0]).split('.')[2]);
-        index = resourceToIndex;
-    }
-    catch (error) {
-        index = 6;
-    }
-    if (index < shadowStyleList.length) {
-        return shadowStyleList[index];
-    }
-    else {
-        return undefined;
-    }
+    let index = LengthMetrics.resource(resourceNum).value;
+    return index < shadowRange ? index : undefined;
 }
 export const defaultTheme = {
     prefixIcon: {
-        size: {
-            width: { "id": -1, "type": 10002, params: ['sys.float.chip_suffix_icon_size_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-            height: { "id": -1, "type": 10002, params: ['sys.float.chip_suffix_icon_size_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+        normalSize: {
+            width: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_suffix_icon_size_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+            height: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_suffix_icon_size_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+        },
+        smallSize: {
+            width: { "id": -1, "type": 10002, params: ['sys.float.chip_small_suffix_icon_size_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+            height: { "id": -1, "type": 10002, params: ['sys.float.chip_small_suffix_icon_size_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
         },
         fillColor: { "id": -1, "type": 10001, params: ['sys.color.chip_usually_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         activatedFillColor: { "id": -1, "type": 10001, params: ['sys.color.chip_active_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
@@ -82,7 +73,8 @@ export const defaultTheme = {
         smallFocusFontSize: { "id": -1, "type": 10002, params: ['sys.float.chip_small_focused_fontsize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         focusFontColor: { "id": -1, "type": 10001, params: ['sys.color.chip_focus_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         fontColor: { "id": -1, "type": 10001, params: ['sys.color.chip_font_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        activatedFontColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        activatedFontWeight: { "id": -1, "type": 10002, params: ['sys.float.chip_activated_fontweight'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        activatedFontColor: { "id": -1, "type": 10001, params: ['sys.color.chip_activated_fontcolor'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         fontFamily: "HarmonyOS Sans",
         normalDefaultMargin: {
             left: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_text_margin_left'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
@@ -123,9 +115,13 @@ export const defaultTheme = {
         }
     },
     suffixIcon: {
-        size: {
-            width: { "id": -1, "type": 10002, params: ['sys.float.chip_suffix_icon_size_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-            height: { "id": -1, "type": 10002, params: ['sys.float.chip_suffix_icon_size_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+        normalSize: {
+            width: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_suffix_icon_size_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+            height: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_suffix_icon_size_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+        },
+        smallSize: {
+            width: { "id": -1, "type": 10002, params: ['sys.float.chip_small_suffix_icon_size_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+            height: { "id": -1, "type": 10002, params: ['sys.float.chip_small_suffix_icon_size_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
         },
         fillColor: { "id": -1, "type": 10001, params: ['sys.color.chip_usually_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         activatedFillColor: { "id": -1, "type": 10001, params: ['sys.color.chip_active_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
@@ -137,7 +133,8 @@ export const defaultTheme = {
     defaultSymbol: {
         normalFontColor: [{ "id": -1, "type": 10001, params: ['sys.color.chip_usually_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }],
         activatedFontColor: [{ "id": -1, "type": 10001, params: ['sys.color.chip_active_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }],
-        fontSize: { "id": -1, "type": 10002, params: ['sys.float.chip_suffix_icon_size_default'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        normalFontSize: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_suffix_icon_size_default'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        smallFontSize: { "id": -1, "type": 10002, params: ['sys.float.chip_small_suffix_icon_size_default'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
     },
     chipNode: {
         suitAgeScale: 1.75,
@@ -147,12 +144,14 @@ export const defaultTheme = {
         enabled: true,
         activated: false,
         backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.chip_background_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        activatedBackgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_emphasize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        activatedBackgroundColor: { "id": -1, "type": 10001, params: ['sys.color.chip_activated_background_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         focusOutlineColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         normalBorderColor: { "id": -1, "type": 10001, params: ['sys.color.chip_normal_border_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         smallBorderColor: { "id": -1, "type": 10001, params: ['sys.color.chip_small_border_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         normalBorderWidth: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_border_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         smallBorderWidth: { "id": -1, "type": 10002, params: ['sys.float.chip_small_border_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        normalActivatedBorderColor: { "id": -1, "type": 10001, params: ['sys.color.chip_normal_activated_border_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        smallActivatedBorderColor: { "id": -1, "type": 10001, params: ['sys.color.chip_small_activated_border_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         normalBorderRadius: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         smallBorderRadius: { "id": -1, "type": 10002, params: ['sys.float.chip_small_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         borderWidth: 2,
@@ -174,7 +173,7 @@ export const defaultTheme = {
         hoverBlendColor: { "id": -1, "type": 10001, params: ['sys.color.chip_hover_fg'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         pressedBlendColor: { "id": -1, "type": 10001, params: ['sys.color.chip_press_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         focusBgColor: { "id": -1, "type": 10001, params: ['sys.color.chip_focus_bg'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        focusActivatedBgColor: { "id": -1, "type": 10001, params: ['sys.color.chip_focus_bg'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        focusActivatedBgColor: { "id": -1, "type": 10001, params: ['sys.color.chip_focus_activated_bg'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         opacity: { normal: 1, hover: 0.95, pressed: 0.9, disabled: 0.4 },
         normalShadowStyle: getShadowStyle({ "id": -1, "type": 10002, params: ['sys.float.chip_normal_shadow_style'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
         smallShadowStyle: getShadowStyle({ "id": -1, "type": 10002, params: ['sys.float.chip_small_shadow_style'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
@@ -209,7 +208,7 @@ export function Chip(options, parent = null) {
                     chipDirection: options.direction,
                     onClose: options.onClose,
                     onClicked: options.onClicked,
-                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/chip.ets", line: 338, col: 3 });
+                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/chip.ets", line: 344, col: 3 });
                 ViewPU.create(componentCall);
                 let paramsLambda = () => {
                     return {
@@ -691,6 +690,30 @@ export class ChipComponent extends ViewPU {
     isChipSizeEnum() {
         return typeof (this.chipSize) === 'string';
     }
+    getIconSizeWidth() {
+        if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
+            return this.theme.prefixIcon.smallSize.width;
+        }
+        else {
+            return this.theme.prefixIcon.normalSize.width;
+        }
+    }
+    defaultSymbolFontsize() {
+        if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
+            return this.theme.defaultSymbol.smallFontSize;
+        }
+        else {
+            return this.theme.defaultSymbol.normalFontSize;
+        }
+    }
+    getIconSizeHeight() {
+        if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
+            return this.theme.prefixIcon.smallSize.height;
+        }
+        else {
+            return this.theme.prefixIcon.normalSize.height;
+        }
+    }
     sizeToVp(sizeResource) {
         let getUIContext = this.getUIContext();
         let metrics = LengthMetrics.resource(sizeResource);
@@ -708,6 +731,7 @@ export class ChipComponent extends ViewPU {
         else if (unit === LengthUnit.LPX) {
             return getUIContext.px2vp(getUIContext.lpx2px((value)));
         }
+        return value;
     }
     getFocusFontSize() {
         if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
@@ -767,7 +791,7 @@ export class ChipComponent extends ViewPU {
         return this.chipNodeOnFocus ? this.theme.label.focusFontColor : this.theme.label.fontColor;
     }
     getLabelFontColor() {
-        if (this.getChipActive()) {
+        if (this.getChipActive() && !this.chipNodeOnFocus) {
             return this.label?.activatedFontColor ?? this.theme.label.activatedFontColor;
         }
         return this.label?.fontColor ?? this.getFontColor();
@@ -777,7 +801,9 @@ export class ChipComponent extends ViewPU {
     }
     getLabelFontWeight() {
         if (this.getChipActive()) {
-            return FontWeight.Medium;
+            let index = LengthMetrics.resource(this.theme.label.activatedFontWeight).value;
+            return (index >= fontWeightMin && index <= fontWeightMax) ?
+                index : FontWeight.Medium;
         }
         return FontWeight.Regular;
     }
@@ -863,7 +889,21 @@ export class ChipComponent extends ViewPU {
             return 0;
         }
     }
+    getActivatedChipNodeBorderColor() {
+        if (this.chipSize === ChipSize.NORMAL && !this.isSetbackgroundColor()) {
+            return this.theme.chipNode.normalActivatedBorderColor;
+        }
+        else if (this.chipSize === ChipSize.SMALL && !this.isSetbackgroundColor()) {
+            return this.theme.chipNode.smallActivatedBorderColor;
+        }
+        else {
+            return this.theme.chipNode.activatedBackgroundColor;
+        }
+    }
     getChipNodeBorderColor() {
+        if (this.getChipActive() && !this.chipNodeOnFocus) {
+            return this.getActivatedChipNodeBorderColor();
+        }
         if (this.chipSize === ChipSize.NORMAL && !this.isSetbackgroundColor()) {
             return this.theme.chipNode.normalBorderColor;
         }
@@ -878,21 +918,15 @@ export class ChipComponent extends ViewPU {
         let labelMargin = { left: 0, right: 0 };
         if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) ||
             this.prefixIcon?.src) {
-            if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
-                labelMargin.left = this.sizeToVp(this.theme.label.smallDefaultMargin.left);
-            }
-            else {
-                labelMargin.left = this.sizeToVp(this.theme.label.normalDefaultMargin.left);
-            }
+            labelMargin.left = (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) ?
+            this.sizeToVp(this.theme.label.smallDefaultMargin.left) :
+            this.sizeToVp(this.theme.label.normalDefaultMargin.left);
         }
         if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
             this.suffixIcon?.src || this.useDefaultSuffixIcon || this.allowClose) {
-            if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
-                labelMargin.right = this.sizeToVp(this.theme.label.smallDefaultMargin.right);
-            }
-            else {
-                labelMargin.right = this.sizeToVp(this.theme.label.normalDefaultMargin.right);
-            }
+            labelMargin.right = (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) ?
+            this.sizeToVp(this.theme.label.smallDefaultMargin.right) :
+            this.sizeToVp(this.theme.label.normalDefaultMargin.right);
         }
         return labelMargin;
     }
@@ -904,12 +938,9 @@ export class ChipComponent extends ViewPU {
         }
         else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) ||
             this.prefixIcon?.src) {
-            if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
-                labelMargin.left = this.theme.label.smallMargin.left;
-            }
-            else {
-                labelMargin.left = this.theme.label.normalMargin.left;
-            }
+            labelMargin.left = (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) ?
+            this.sizeToVp(this.theme.label.smallMargin.left) :
+            this.sizeToVp(this.theme.label.smallMargin.left);
         }
         if (this.label?.labelMargin?.right !== void (0) &&
             this.toVp(this.label.labelMargin.right) >= 0) {
@@ -917,12 +948,9 @@ export class ChipComponent extends ViewPU {
         }
         else if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
             this.suffixIcon?.src || this.useDefaultSuffixIcon || this.allowClose) {
-            if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
-                labelMargin.right = this.theme.label.smallMargin.right;
-            }
-            else {
-                labelMargin.right = this.theme.label.normalMargin.right;
-            }
+            labelMargin.right = (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) ?
+            this.sizeToVp(this.theme.label.smallMargin.right) :
+            this.sizeToVp(this.theme.label.smallMargin.right);
         }
         return labelMargin;
     }
@@ -999,7 +1027,7 @@ export class ChipComponent extends ViewPU {
         }
         else {
             if (this.getSuffixIconSrc()) {
-                suffixIconSize.width = this.sizeToVp(this.theme.suffixIcon.size.width);
+                suffixIconSize.width = this.sizeToVp(this.getIconSizeWidth());
             }
             else {
                 suffixIconSize.width = 0;
@@ -1011,7 +1039,7 @@ export class ChipComponent extends ViewPU {
         }
         else {
             if (this.getSuffixIconSrc()) {
-                suffixIconSize.height = this.theme.suffixIcon.size.height;
+                suffixIconSize.height = this.getIconSizeHeight();
             }
             else {
                 suffixIconSize.height = 0;
@@ -1026,7 +1054,7 @@ export class ChipComponent extends ViewPU {
         }
         else {
             if (this.prefixIcon?.src) {
-                prefixIconSize.width = this.sizeToVp(this.theme.prefixIcon.size.width);
+                prefixIconSize.width = this.sizeToVp(this.getIconSizeWidth());
             }
             else {
                 prefixIconSize.width = 0;
@@ -1038,7 +1066,7 @@ export class ChipComponent extends ViewPU {
         }
         else {
             if (this.prefixIcon?.src) {
-                prefixIconSize.height = this.theme.prefixIcon.size.height;
+                prefixIconSize.height = this.getIconSizeHeight();
             }
             else {
                 prefixIconSize.height = 0;
@@ -1051,7 +1079,7 @@ export class ChipComponent extends ViewPU {
         this.theme.prefixIcon.activatedFillColor;
     }
     getFillIconColor(iconType) {
-        if (iconType === 'prefixIcon') {
+        if (iconType === IconType.PREFIX_ICON) {
             if (this.prefixIcon?.fillColor) {
                 return this.prefixIcon.fillColor;
             }
@@ -1065,46 +1093,38 @@ export class ChipComponent extends ViewPU {
         }
     }
     getActiveIconColorArray(iconType) {
-        if (iconType === 'prefixIcon') {
-            if (this.prefixIcon?.activatedFillColor) {
-                return [this.prefixIcon.activatedFillColor];
-            }
-            return this.chipNodeOnFocus ? [this.theme.prefixIcon.focusActivatedColor] :
-                [this.theme.prefixIcon.activatedFillColor];
+        if (iconType === IconType.PREFIX_ICON) {
+            return this.getColorArray(this.prefixIcon?.activatedFillColor, this.theme.prefixIcon.focusActivatedColor, this.theme.prefixIcon.activatedFillColor);
         }
         else {
-            if (this.suffixIcon?.activatedFillColor) {
-                return [this.suffixIcon.activatedFillColor];
-            }
-            return this.chipNodeOnFocus ? [this.theme.suffixIcon.focusActivatedColor] :
-                [this.theme.suffixIcon.activatedFillColor];
+            return this.getColorArray(this.suffixIcon?.activatedFillColor, this.theme.suffixIcon.focusActivatedColor, this.theme.suffixIcon.activatedFillColor);
         }
+    }
+    getColorArray(userDefined, focusColor, normalColor) {
+        if (userDefined) {
+            return [userDefined];
+        }
+        return this.chipNodeOnFocus ? [focusColor] : [normalColor];
     }
     getFillIconColorArray(iconType) {
         if (iconType === 'prefixIcon') {
-            if (this.prefixIcon?.fillColor) {
-                return [this.prefixIcon.fillColor];
-            }
-            return this.chipNodeOnFocus ? [this.theme.prefixIcon.focusFillColor] : [this.theme.prefixIcon.fillColor];
+            return this.getColorArray(this.prefixIcon?.fillColor, this.theme.prefixIcon.focusFillColor, this.theme.prefixIcon.fillColor);
         }
         else {
-            if (this.suffixIcon?.fillColor) {
-                return [this.suffixIcon.fillColor];
-            }
-            return this.chipNodeOnFocus ? [this.theme.suffixIcon.focusFillColor] : [this.theme.suffixIcon.fillColor];
+            return this.getColorArray(this.suffixIcon?.fillColor, this.theme.suffixIcon.focusFillColor, this.theme.suffixIcon.fillColor);
         }
     }
     getPrefixIconFilledColor() {
         if (this.getChipActive()) {
             return this.prefixIcon?.activatedFillColor ?? this.getActiveIconColor();
         }
-        return this.prefixIcon?.fillColor ?? this.getFillIconColor('prefixIcon');
+        return this.prefixIcon?.fillColor ?? this.getFillIconColor(IconType.PREFIX_ICON);
     }
     getSuffixIconFilledColor() {
         if (this.getChipActive()) {
             return this.suffixIcon?.activatedFillColor ?? this.getActiveIconColor();
         }
-        return this.suffixIcon?.fillColor ?? this.getFillIconColor('suffixIcon');
+        return this.suffixIcon?.fillColor ?? this.getFillIconColor(IconType.SUFFIX_ICON);
     }
     getDefaultSymbolColor(iconType) {
         if (this.getChipActive()) {
@@ -1161,12 +1181,8 @@ export class ChipComponent extends ViewPU {
         }
         catch (err) {
             hilog.error(0x3900, 'Ace', `Chip resourceColor, error: ${err.toString()}`);
-            if (this.getChipActive()) {
-                sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor);
-            }
-            else {
-                sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor);
-            }
+            sourceColor = ColorMetrics.resourceColor(this.getChipActive() ?
+            this.theme.chipNode.activatedBackgroundColor : this.theme.chipNode.backgroundColor);
         }
         if (this.isShowPressedBackGroundColor) {
             return sourceColor
@@ -1237,7 +1253,7 @@ export class ChipComponent extends ViewPU {
             return this.getSuffixIconSize().width;
         }
         else if (!this.suffixIcon?.src && this.allowClose) {
-            return this.sizeToVp(this.theme.defaultSymbol.fontSize);
+            return this.sizeToVp(this.defaultSymbolFontsize());
         }
         else {
             return 0;
@@ -1524,6 +1540,9 @@ export class ChipComponent extends ViewPU {
                     !this.suffixIconOnFocus) {
                     this.deleteChipNodeAnimate();
                 }
+                if (event && event.keyCode === KeyCode.KEYCODE_DPAD_CENTER && this.allowClose && !this.suffixIcon?.src) {
+                    this.deleteChipNodeAnimate();
+                }
             });
             Button.onClick(this.onClicked === noop ? undefined : this.onClicked.bind(this));
         }, Button);
@@ -1541,8 +1560,8 @@ export class ChipComponent extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         SymbolGlyph.create();
-                        SymbolGlyph.fontSize(this.theme.defaultSymbol.fontSize);
-                        SymbolGlyph.fontColor(this.getDefaultSymbolColor('prefixIcon'));
+                        SymbolGlyph.fontSize(this.defaultSymbolFontsize());
+                        SymbolGlyph.fontColor(this.getDefaultSymbolColor(IconType.PREFIX_ICON));
                         SymbolGlyph.attributeModifier.bind(this)(this.getPrefixSymbolModifier());
                         SymbolGlyph.onSizeChange((oldValue, newValue) => {
                             this.prefixSymbolWidth = newValue?.width;
@@ -1592,6 +1611,7 @@ export class ChipComponent extends ViewPU {
             Text.textAlign(TextAlign.Center);
             Text.visibility(this.getVisibility());
             Text.draggable(false);
+            Text.backgroundColor('#51ef1313');
         }, Text);
         Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1600,8 +1620,8 @@ export class ChipComponent extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         SymbolGlyph.create();
-                        SymbolGlyph.fontSize(this.theme.defaultSymbol.fontSize);
-                        SymbolGlyph.fontColor(this.getDefaultSymbolColor('suffixIcon'));
+                        SymbolGlyph.fontSize(this.defaultSymbolFontsize());
+                        SymbolGlyph.fontColor(this.getDefaultSymbolColor(IconType.SUFFIX_ICON));
                         SymbolGlyph.attributeModifier.bind(this)(this.getSuffixSymbolModifier());
                         SymbolGlyph.onSizeChange((oldValue, newValue) => {
                             this.suffixSymbolWidth = newValue?.width;
@@ -1653,8 +1673,8 @@ export class ChipComponent extends ViewPU {
                 this.ifElseBranchUpdateFunction(2, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         SymbolGlyph.create({ "id": -1, "type": 40000, params: ['sys.symbol.xmark'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        SymbolGlyph.fontSize(this.theme.defaultSymbol.fontSize);
-                        SymbolGlyph.fontColor(this.getDefaultSymbolColor('suffixIcon'));
+                        SymbolGlyph.fontSize(this.defaultSymbolFontsize());
+                        SymbolGlyph.fontColor(this.getDefaultSymbolColor(IconType.SUFFIX_ICON));
                         SymbolGlyph.onClick(() => {
                             if (!this.getChipEnable()) {
                                 return;
