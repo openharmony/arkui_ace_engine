@@ -200,6 +200,7 @@ bool ArcListPattern::OnScrollCallback(float offset, int32_t source)
         scrollStartMidIndex_ = GetMidIndex();
     }
 
+    offset = FixScrollOffset(offset, source);
     return ListPattern::OnScrollCallback(offset, source);
 }
 
@@ -341,6 +342,49 @@ void ArcListPattern::SetFriction(double friction)
     }
 
     ScrollablePattern::SetFriction(friction);
+}
+
+void ArcListPattern::HandleScrollBarOutBoundary()
+{
+    if (itemPosition_.empty()) {
+        return;
+    }
+    if (!GetScrollBar() && !GetScrollBarProxy()) {
+        return;
+    }
+    if (!IsOutOfBoundary(false) || !isScrollable_) {
+        ScrollablePattern::HandleScrollBarOutBoundary(0);
+        return;
+    }
+
+    float overScroll = 0.0f;
+    float itemHeight = itemPosition_[centerIndex_].endPos - itemPosition_[centerIndex_].startPos;
+    float snapSize = ArcListLayoutAlgorithm::GetItemSnapSize();
+    float snapHeight = LessOrEqual(itemHeight, snapSize) ? itemHeight : snapSize;
+    if (startIndex_ == 0 && Positive(startMainPos_ + snapHeight / FLOAT_TWO - contentMainSize_ / FLOAT_TWO)) {
+        overScroll = startMainPos_ + snapHeight / FLOAT_TWO - contentMainSize_ / FLOAT_TWO;
+    } else if ((endIndex_ == maxListItemIndex_) &&
+                LessNotEqual(endMainPos_ - snapHeight / FLOAT_TWO, contentMainSize_ / FLOAT_TWO)) {
+        overScroll = endMainPos_ - snapHeight / FLOAT_TWO - contentMainSize_ / FLOAT_TWO;
+    }
+    ScrollablePattern::HandleScrollBarOutBoundary(overScroll);
+}
+
+float ArcListPattern::GetSnapCenterOverScrollPos(float startPos, float prevScroll)
+{
+    float overScroll = prevScroll;
+    float itemHeight = itemPosition_[centerIndex_].endPos - itemPosition_[centerIndex_].startPos;
+    float snapSize = ArcListLayoutAlgorithm::GetItemSnapSize();
+    float snapHeight = LessOrEqual(itemHeight, snapSize) ? itemHeight : snapSize;
+    auto endPos = endMainPos_ - currentDelta_;
+    if (startIndex_ == 0 && Positive(startPos + snapHeight / FLOAT_TWO - contentMainSize_ / FLOAT_TWO)) {
+        overScroll = startPos + snapHeight / FLOAT_TWO - contentMainSize_ / FLOAT_TWO;
+    } else if ((endIndex_ == maxListItemIndex_) &&
+               LessNotEqual(endPos - snapHeight / FLOAT_TWO, contentMainSize_ / FLOAT_TWO)) {
+        overScroll = endPos - snapHeight / FLOAT_TWO - contentMainSize_ / FLOAT_TWO;
+    }
+
+    return overScroll;
 }
 
 bool ArcListPattern::GetOneItemSnapPosByFinalPos(float mainPos, float finalPos, float& snapPos)
@@ -507,6 +551,58 @@ float ArcListPattern::FixScrollOffset(float offset, int32_t source)
 float ArcListPattern::GetScrollUpdateFriction(float overScroll)
 {
     return ARC_LIST_DRAG_OVER_FRICTION;
+}
+
+float ArcListPattern::GetStartOverScrollOffset(float offset) const
+{
+    float startOffset = 0.0f;
+    auto startPos = startMainPos_ + GetChainDelta(0);
+    auto newStartPos = startPos + offset;
+    if (startPos > contentStartOffset_ && newStartPos > contentStartOffset_) {
+        startOffset = offset;
+    }
+    if (startPos > contentStartOffset_ && newStartPos <= contentStartOffset_) {
+        startOffset = contentStartOffset_ - startPos;
+    }
+    if (startPos <= contentStartOffset_ && newStartPos > contentStartOffset_) {
+        startOffset = newStartPos - contentStartOffset_;
+    }
+    if (!itemPosition_.empty()) {
+        float startItemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+        float snapSize = ArcListLayoutAlgorithm::GetItemSnapSize();
+        float snapHeight = LessOrEqual(startItemHeight, snapSize) ? startItemHeight : snapSize;
+        if (GreatNotEqual(newStartPos, ((contentMainSize_ - snapHeight - spaceWidth_) / FLOAT_TWO))) {
+            startOffset = newStartPos - ((contentMainSize_ - snapHeight - spaceWidth_) / FLOAT_TWO);
+        }
+    }
+    return startOffset;
+}
+
+float ArcListPattern::GetEndOverScrollOffset(float offset) const
+{
+    float endOffset = 0.0f;
+    auto endPos = endMainPos_ + GetChainDelta(endIndex_);
+    auto contentEndPos = contentMainSize_ - contentEndOffset_;
+
+    auto newEndPos = endPos + offset;
+    if (endPos < contentEndPos && newEndPos < contentEndPos) {
+        endOffset = offset;
+    }
+    if (endPos < contentEndPos && newEndPos >= contentEndPos) {
+        endOffset = contentEndPos - endPos;
+    }
+    if (endPos >= contentEndPos && newEndPos < contentEndPos) {
+        endOffset = newEndPos - contentEndPos;
+    }
+    if (!itemPosition_.empty()) {
+        float endItemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+        float snapSize = ArcListLayoutAlgorithm::GetItemSnapSize();
+        float snapHeight = LessOrEqual(endItemHeight, snapSize) ? endItemHeight : snapSize;
+        if (LessNotEqual(newEndPos, ((contentMainSize_ + snapHeight + spaceWidth_) / FLOAT_TWO))) {
+            endOffset = newEndPos - ((contentMainSize_ + snapHeight + spaceWidth_) / FLOAT_TWO);
+        }
+    }
+    return endOffset;
 }
 
 } // namespace OHOS::Ace::NG

@@ -52,6 +52,7 @@ constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 constexpr float LIST_FADINGEDGE_DEFAULT = 32.0f;
 constexpr float LIST_START_MAIN_POS = 0.0f;
 constexpr float LIST_FADE_ERROR_RANGE = 1.0f;
+static constexpr float FLOAT_TWO = 2.0f;
 } // namespace
 
 void ListPattern::OnModifyDone()
@@ -946,7 +947,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         }
         return false;
     }
-    offset = FixScrollOffset(offset, source);
+
     SetScrollSource(source);
     FireAndCleanScrollingListener();
     auto lastDelta = currentDelta_;
@@ -973,14 +974,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         overScroll = contentMainSize_ - contentEndOffset_ - (endMainPos_ - currentDelta_);
     }
     if (IsScrollSnapAlignCenter()) {
-        auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
-        auto endPos = endMainPos_ - currentDelta_;
-        if (startIndex_ == 0 && Positive(startPos + itemHeight / 2.0f - contentMainSize_ / 2.0f)) {
-            overScroll = startPos + itemHeight / 2.0f - contentMainSize_ / 2.0f;
-        } else if ((endIndex_ == maxListItemIndex_) &&
-                   LessNotEqual(endPos - itemHeight / 2.0f, contentMainSize_ / 2.0f)) {
-            overScroll = endPos - itemHeight / 2.0f - contentMainSize_ / 2.0f;
-        }
+        overScroll = GetSnapCenterOverScrollPos(startPos, overScroll);
     }
 
     if (GetScrollSource() == SCROLL_FROM_UPDATE) {
@@ -1003,6 +997,24 @@ void ListPattern::MarkDirtyNodeSelf()
     } else {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     }
+}
+
+float ListPattern::GetSnapCenterOverScrollPos(float startPos, float prevScroll)
+{
+    if (!IsScrollSnapAlignCenter()) {
+        return prevScroll;
+    }
+
+    float overScroll = prevScroll;
+    auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+    auto endPos = endMainPos_ - currentDelta_;
+    if (startIndex_ == 0 && Positive(startPos + itemHeight / FLOAT_TWO - contentMainSize_ / FLOAT_TWO)) {
+        overScroll = startPos + itemHeight / FLOAT_TWO - contentMainSize_ / FLOAT_TWO;
+    } else if ((endIndex_ == maxListItemIndex_) &&
+                LessNotEqual(endPos - itemHeight / FLOAT_TWO, contentMainSize_ / FLOAT_TWO)) {
+        overScroll = endPos - itemHeight / FLOAT_TWO - contentMainSize_ / FLOAT_TWO;
+    }
+    return overScroll;
 }
 
 void ListPattern::OnScrollEndCallback()

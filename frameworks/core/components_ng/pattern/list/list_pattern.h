@@ -109,7 +109,7 @@ public:
     bool OutBoundaryCallback() override;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     float GetOffsetWithLimit(float offset) const override;
-    void HandleScrollBarOutBoundary();
+    virtual void HandleScrollBarOutBoundary();
 
     FocusPattern GetFocusPattern() const override
     {
@@ -311,20 +311,21 @@ protected:
     void SetAccessibilityAction();
 
     virtual void ReadThemeToFadingEdge();
-    virtual float FixScrollOffset(float offset, int32_t source)
-    {
-        return offset;
-    }
     virtual void OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listEventHub, bool indexChanged);
     virtual float GetScrollUpdateFriction(float overScroll);
     virtual ScrollAlign GetScrollToNodeAlign()
     {
         return ScrollAlign::AUTO;
     }
+    virtual float GetStartOverScrollOffset(float offset) const;
+    virtual float GetEndOverScrollOffset(float offset) const;
+    virtual float GetSnapCenterOverScrollPos(float startPos, float overScroll);
 
     bool isFadingEdge_ = false;
 
+    int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;
+    int32_t centerIndex_ = -1;
     int32_t endIndex_ = -1;
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
@@ -342,6 +343,7 @@ protected:
     std::optional<float> predictSnapEndPos_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
     bool isNeedCheckOffset_ = false;
+    bool isScrollable_ = true;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
     RefPtr<ListPositionMap> posMap_;
@@ -400,8 +402,6 @@ private:
     void UpdateListDirectionInCardStyle();
     bool UpdateStartListItemIndex();
     bool UpdateEndListItemIndex();
-    float GetStartOverScrollOffset(float offset) const;
-    float GetEndOverScrollOffset(float offset) const;
     RefPtr<ListContentModifier> listContentModifier_;
 
     void UpdateFadingEdge(const RefPtr<ListPaintMethod> paint);
@@ -414,8 +414,6 @@ private:
     float startPercent_ = 0.0f;
     float endPercent_ = 1.0f;
 
-    int32_t maxListItemIndex_ = 0;
-    int32_t centerIndex_ = -1;
     float currentOffset_ = 0.0f;
 
     bool crossMatchChild_ = false;
@@ -424,7 +422,6 @@ private:
 
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndexInGroup_;
-    bool isScrollable_ = true;
     bool paintStateFlag_ = false;
     bool isFramePaintStateValid_ = false;
 

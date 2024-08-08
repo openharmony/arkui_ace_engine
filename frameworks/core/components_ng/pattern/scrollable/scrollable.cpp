@@ -664,7 +664,8 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
         }
     }
 
-    if (scrollSnapCallback_ && scrollSnapCallback_(GetFinalPosition() - mainPosition, correctVelocity)) {
+    if (scrollSnapCallback_ && !NearZero(correctVelocity) &&
+        scrollSnapCallback_(GetFinalPosition() - mainPosition, correctVelocity)) {
         currentVelocity_ = 0.0;
         return;
     }
@@ -957,6 +958,7 @@ void Scrollable::StartSpringMotion(
         "%{public}f, maxExtent is %{public}f, initMinExtent is %{public}f, initMaxExtent is %{public}f",
         mainPosition, mainVelocity, extent.Leading(), extent.Trailing(), initExtent.Leading(), initExtent.Trailing());
     if (!isSpringAnimationStop_ || (skipRestartSpring_ && NearEqual(mainVelocity, 0.0f, 0.001f))) {
+        OnAnimateStop();
         return;
     }
     currentPos_ = mainPosition;
@@ -965,6 +967,7 @@ void Scrollable::StartSpringMotion(
     } else if (mainPosition <  initExtent.Leading() || NearEqual(mainPosition, initExtent.Leading(), 0.01f)) {
         finalPosition_ = extent.Leading();
     } else {
+        OnAnimateStop();
         return;
     }
 

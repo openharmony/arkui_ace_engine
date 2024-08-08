@@ -422,7 +422,7 @@ protected:
     int32_t FindPredictSnapEndIndexInItemPositions(float predictEndPos, V2::ScrollSnapAlign scrollSnapAlign);
     bool IsUniformHeightProbably();
     float CalculatePredictSnapEndPositionByIndex(uint32_t index, V2::ScrollSnapAlign scrollSnapAlign);
-    void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper);
+    virtual void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper);
 
     inline RefPtr<LayoutWrapper> GetListItem(LayoutWrapper* layoutWrapper, int32_t index) const
     {
