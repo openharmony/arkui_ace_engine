@@ -532,14 +532,28 @@ void HandleNodeEvent(ArkUI_NodeEvent* event)
     }
     if (event->node && event->node->eventListeners) {
         auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeEvent*)>*>(event->node->eventListeners);
-        if (eventListenersSet) {
-            for (const auto& eventListener : *eventListenersSet) {
-                (*eventListener)(event);
-            }
-        }
+        TriggerNodeEvent(event, eventListenersSet);
     }
     if (g_eventReceiver) {
         g_eventReceiver(event);
+    }
+}
+
+void TriggerNodeEvent(ArkUI_NodeEvent* event, std::set<void (*)(ArkUI_NodeEvent*)>* eventListenersSet)
+{
+    if (!eventListenersSet) {
+        return;
+    }
+    if (eventListenersSet->size() == 1) {
+        auto eventListener = eventListenersSet->begin();
+        (*eventListener)(event);
+    } else if (eventListenersSet->size() > 1) {
+        for (const auto& eventListener : *eventListenersSet) {
+            (*eventListener)(event);
+            if (!IsValidArkUINode(event->node)) {
+                break;
+            }
+        }
     }
 }
 
