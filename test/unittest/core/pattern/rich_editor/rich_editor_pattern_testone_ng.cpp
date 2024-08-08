@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#define private public
+#define protected public
 
 using namespace testing;
 using namespace testing::ext;
@@ -130,6 +132,15 @@ HWTEST_F(RichEditorPatternTestOneNg, HandleSingleClickEvent001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+
+    RichEditorPattern::OperationRecord record;
+    richEditorPattern->DeleteSelectOperation(&record);
+
+    RectF rect(0, 0, 5, 5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, 5);
+    richEditorPattern->selectOverlay_->OnHandleMoveDone(rect, true);
+
     GestureEvent info;
     info.localLocation_ = Offset(0, 0);
     ParagraphStyle paragraphStyle;
@@ -137,7 +148,21 @@ HWTEST_F(RichEditorPatternTestOneNg, HandleSingleClickEvent001, TestSize.Level1)
     richEditorPattern->pManager_->AddParagraph({ .paragraph = paragraph, .paragraphStyle = paragraphStyle });
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
+    richEditorPattern->isMousePressed_ = true;
+
     richEditorPattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
+    richEditorPattern->dataDetectorAdapter_->pressedByLeftMouse_ = true;
+    richEditorPattern->HandleSingleClickEvent(info);
+
+    richEditorPattern->dataDetectorAdapter_->hasClickedAISpan_ = false;
+    richEditorPattern->dataDetectorAdapter_->pressedByLeftMouse_ = false;
+    richEditorPattern->HandleSingleClickEvent(info);
+
+    richEditorPattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
+    richEditorPattern->dataDetectorAdapter_->pressedByLeftMouse_ = false;
+    richEditorPattern->HandleSingleClickEvent(info);
+
+    richEditorPattern->dataDetectorAdapter_->hasClickedAISpan_ = false;
     richEditorPattern->dataDetectorAdapter_->pressedByLeftMouse_ = true;
     richEditorPattern->HandleSingleClickEvent(info);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
@@ -708,7 +733,6 @@ HWTEST_F(RichEditorPatternTestOneNg, InsertValueInStyledString001, TestSize.Leve
     style.SetFontFeatures(TEXT_FONTFEATURE);
 
     UpdateSpanStyle updateSpanStyle;
-    updateSpanStyle.hasResourceFontColor = false;
 
     std::string content = "TEST123";
     richEditorPattern->isSpanStringMode_ = true;
