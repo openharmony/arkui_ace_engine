@@ -60,7 +60,7 @@ const std::vector<TextSelectableMode> TEXT_SELECTABLE_MODE = { TextSelectableMod
 constexpr bool DEFAULT_ENABLE_TEXT_DETECTOR = false;
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location" };
 
-std::map<TextHeightAdaptivePolicy, int> TEXT_HEIGHT_ADAPTIVE_POLICY_MAP = { 
+std::map<TextHeightAdaptivePolicy, int> TEXT_HEIGHT_ADAPTIVE_POLICY_MAP = {
     { TextHeightAdaptivePolicy::MAX_LINES_FIRST, 0 },
     { TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, 1 },
     { TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST, 2 } };
