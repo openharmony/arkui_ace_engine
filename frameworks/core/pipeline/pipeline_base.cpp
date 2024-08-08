@@ -751,7 +751,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {
     auto currentContainer = Container::Current();
-    auto keyboardHeight = static_cast<uint32_t>(keyboardArea.Height());
+    float keyboardHeight = keyboardArea.Height();
     if (currentContainer && !currentContainer->IsSubContainer()) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
         if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && !CheckNeedAvoidInSubWindow()) {
@@ -762,7 +762,6 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
         }
     }
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
-        CheckAndUpdateKeyboardInset(keyboardHeight);
         return;
     }
     OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height, rsTransaction, forceChange);
