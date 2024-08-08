@@ -7360,8 +7360,13 @@ int32_t SetTextFontFamily(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
 
 const ArkUI_AttributeItem* GetTextFontFamily(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getTextModifier()->getFontFamily(node->uiNodeHandle);
-    g_attributeItem.string = resultValue;
+    if (node->type == ARKUI_NODE_SPAN) {
+        auto resultValue = GetFullImpl()->getNodeModifiers()->getSpanModifier()->getSpanFontFamily(node->uiNodeHandle);
+        g_attributeItem.string = resultValue;
+    } else {
+        auto resultValue = GetFullImpl()->getNodeModifiers()->getTextModifier()->getFontFamily(node->uiNodeHandle);
+        g_attributeItem.string = resultValue;
+    }
     g_attributeItem.size = 0;
     return &g_attributeItem;
 }

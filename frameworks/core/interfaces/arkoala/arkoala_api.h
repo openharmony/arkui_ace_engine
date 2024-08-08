@@ -4005,6 +4005,7 @@ struct ArkUISpanModifier {
     void (*setTextShadow)(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, ArkUI_Uint32 length);
     void (*resetTextShadow)(ArkUINodeHandle node);
     void (*getTextShadows)(ArkUINodeHandle node, ArkUITextShadowStruct* textShadow, ArkUI_Uint32 size);
+    ArkUI_CharPtr (*getSpanFontFamily)(ArkUINodeHandle node);
 };
 
 struct ArkUISelectModifier {

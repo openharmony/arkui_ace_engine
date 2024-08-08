@@ -432,4 +432,12 @@ std::vector<Shadow> SpanModelNG::GetTextShadow(UINode* uiNode)
     CHECK_NULL_RETURN(uiNode, defaultShadow);
     return spanNode->GetTextShadow().value_or(defaultShadow);
 }
+
+std::vector<std::string> SpanModelNG::GetSpanFontFamily(UINode* uiNode)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    std::vector<std::string> value;
+    CHECK_NULL_RETURN(spanNode, value);
+    return spanNode->GetFontFamily().value_or(value);
+}
 } // namespace OHOS::Ace::NG
