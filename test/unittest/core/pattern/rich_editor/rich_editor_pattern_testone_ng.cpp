@@ -664,4 +664,200 @@ HWTEST_F(RichEditorPatternTestOneNg, HandleSelectOverlayWithOptions001, TestSize
     richEditorPattern->HandleSelectOverlayWithOptions(options);
     ASSERT_NE(richEditorPattern->SelectOverlayIsOn(), false);
 }
+
+/**
+ * @tc.name: CalcDragSpeed001
+ * @tc.desc: test CalcDragSpeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, CalcDragSpeed001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    float speed = 0.0f;
+    float hotAreaStart = 1.1f;
+    float hotAreaEnd = 101.1f;
+    float point = 50.1f;
+    float ret = 17.472723f;
+    speed = richEditorPattern->CalcDragSpeed(hotAreaStart, hotAreaEnd, point);
+    EXPECT_EQ(ret, speed);
+}
+
+/**
+ * @tc.name: CalcMoveDownPos001
+ * @tc.desc: test CalcMoveDownPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, CalcMoveDownPos001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->overlayMod_ = nullptr;
+    int32_t ret = 1;
+    float leadingMarginOffset = 10.0f;
+    ret = richEditorPattern->CalcMoveDownPos(leadingMarginOffset);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: CalcMoveDownPos002
+ * @tc.desc: test CalcMoveDownPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, CalcMoveDownPos002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ASSERT_NE(richEditorPattern->overlayMod_, nullptr);
+    int32_t ret = 1;
+    float leadingMarginOffset = 10.0f;
+    ret = richEditorPattern->CalcMoveDownPos(leadingMarginOffset);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: CalcLineBeginPosition001
+ * @tc.desc: test CalcLineBeginPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, CalcLineBeginPosition001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    int32_t ret = 1;
+    ret = richEditorPattern->CalcLineBeginPosition();
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: OnSelectionMenuOptionsUpdate001
+ * @tc.desc: test OnSelectionMenuOptionsUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, OnSelectionMenuOptionsUpdate001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    OnCreateMenuCallback onCreateMenuCallback;
+    OnMenuItemClickCallback onMenuItemClick;
+    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+
+/**
+ * @tc.name: RequestKeyboardToEdit001
+ * @tc.desc: test RequestKeyboardToEdit
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, RequestKeyboardToEdit001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->previewLongPress_ = true;
+    richEditorPattern->RequestKeyboardToEdit();
+    EXPECT_FALSE(richEditorPattern->previewLongPress_);
+}
+
+/**
+ * @tc.name: RequestKeyboardToEdit002
+ * @tc.desc: test RequestKeyboardToEdit
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, RequestKeyboardToEdit002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->RequestKeyboardToEdit();
+}
+
+/**
+ * @tc.name: IsResponseRegionExpandingNeededForStylus001
+ * @tc.desc: test IsResponseRegionExpandingNeededForStylus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, IsResponseRegionExpandingNeededForStylus001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEvent touchEvent;
+    touchEvent.sourceTool = SourceTool::UNKNOWN;
+    bool ret = true;
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsResponseRegionExpandingNeededForStylus002
+ * @tc.desc: test IsResponseRegionExpandingNeededForStylus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, IsResponseRegionExpandingNeededForStylus002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::UNKNOWN;
+    bool ret = true;
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsResponseRegionExpandingNeededForStylus003
+ * @tc.desc: test IsResponseRegionExpandingNeededForStylus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, IsResponseRegionExpandingNeededForStylus003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEvent touchEvent;
+    touchEvent.sourceTool = SourceTool::PEN;
+    touchEvent.type = TouchType::DOWN;
+    bool ret = false;
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ExpandDefaultResponseRegion001
+ * @tc.desc: test ExpandDefaultResponseRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, ExpandDefaultResponseRegion001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RectF rect(0, 0, 5, 5);
+    RectF retRect;
+    retRect = richEditorPattern->ExpandDefaultResponseRegion(rect);
+    EXPECT_EQ(rect.Width(), retRect.Width());
+}
+
+/**
+ * @tc.name: AdjustWordSelection001
+ * @tc.desc: test AdjustWordSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, AdjustWordSelection001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    int32_t start = 100;
+    int32_t end = 200;
+    bool ret = true;
+    ret = richEditorPattern->AdjustWordSelection(start, end);
+    EXPECT_FALSE(ret);
+}
 } // namespace OHOS::Ace::NG
