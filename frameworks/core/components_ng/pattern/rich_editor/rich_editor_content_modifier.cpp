@@ -72,7 +72,7 @@ void RichEditorContentModifier::PaintCustomSpan(DrawingContext& drawingContext)
     const auto& rectsForPlaceholders = richEditorPattern->GetRectsForPlaceholders();
     auto customSpanPlaceholderInfo = richEditorPattern->GetCustomSpanPlaceholderInfo();
     for (auto& customSpanPlaceholder : customSpanPlaceholderInfo) {
-        if (!customSpanPlaceholder.onDraw) {
+        if (!customSpanPlaceholder.onDraw || pManager_->GetParagraphs.empty()) {
             continue;
         }
         auto index = customSpanPlaceholder.customSpanIndex;
