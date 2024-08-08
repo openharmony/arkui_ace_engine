@@ -1952,7 +1952,7 @@ void TabBarPattern::UpdateSubTabBoard(int32_t index)
     auto pipelineContext = GetHost()->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     for (auto& iter : visibleItemPosition_) {
-        if (iter.first < 0 || iter.first >= tabBarStyles_.size()) {
+        if (iter.first < 0 || iter.first >= static_cast<int32_t>(tabBarStyles_.size())) {
             break;
         }
         auto columnFrameNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(iter.first));
