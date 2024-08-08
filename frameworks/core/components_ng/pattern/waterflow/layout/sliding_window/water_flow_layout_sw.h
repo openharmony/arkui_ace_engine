@@ -37,6 +37,10 @@ public:
         overScroll_ = value;
     }
 
+    void StartCacheLayout() override;
+    void AppendCacheItem(LayoutWrapper* host, int32_t itemIdx) override;
+    void EndCacheLayout() override;
+
 private:
     void Init(const SizeF& frameSize);
     /* init WaterFlow without Sections */
@@ -162,6 +166,7 @@ private:
     float mainLen_ = 0.0f;
 
     bool overScroll_ = true;
+    bool isCache_ = false; // true if during cache layout
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_SW_LAYOUT_H

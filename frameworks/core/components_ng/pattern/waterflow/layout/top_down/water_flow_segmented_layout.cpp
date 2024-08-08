@@ -444,7 +444,7 @@ void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
 RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
     const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, int32_t crossIdx, float userDefMainSize) const
 {
-    auto item = wrapper_->GetOrCreateChildByIndex(idx);
+    auto item = wrapper_->GetOrCreateChildByIndex(idx, !isCache_, isCache_);
     CHECK_NULL_RETURN(item, nullptr);
     // override user-defined main size
     if (userDefMainSize >= 0.0f) {
@@ -452,6 +452,10 @@ RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
     }
     item->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
         { itemsCrossSize_[info_->GetSegment(idx)][crossIdx], mainSize_, axis_, userDefMainSize >= 0.0f }, props, item));
+    if (isCache_) {
+        item->Layout();
+        item->SetActive(false);
+    }
     return item;
 }
 
@@ -473,7 +477,7 @@ void WaterFlowSegmentedLayout::LayoutItem(int32_t idx, float crossPos, const Off
     }
 
     OffsetF offset = (axis_ == Axis::VERTICAL) ? OffsetF(crossPos, mainOffset) : OffsetF(mainOffset, crossPos);
-    auto wrapper = wrapper_->GetOrCreateChildByIndex(idx);
+    auto wrapper = wrapper_->GetChildByIndex(idx);
     CHECK_NULL_VOID(wrapper);
     wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + padding);
     if (wrapper->CheckNeedForceMeasureAndLayout()) {

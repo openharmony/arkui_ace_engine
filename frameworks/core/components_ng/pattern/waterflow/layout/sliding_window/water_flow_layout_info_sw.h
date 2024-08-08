@@ -118,6 +118,14 @@ public:
     void Sync(int32_t itemCnt, float mainSize, const std::vector<float>& mainGap);
 
     /**
+     * @brief special function to mark synced after cache item layout
+     */
+    void EndCacheUpdate()
+    {
+        synced_ = true;
+    }
+
+    /**
      * @brief Calculates distance from the item's top edge to the top of the viewport.
      *
      * @param item index

@@ -31,6 +31,15 @@ public:
         LayoutConstraintF layoutConstraint;
     };
 
+    virtual void StartCacheLayout() {}
+    /**
+     * @brief Measure the cache item and append it to a lane.
+     *
+     * @param itemIdx index of the cache item to add.
+     */
+    virtual void AppendCacheItem(LayoutWrapper* host, int32_t itemIdx) = 0;
+    virtual void EndCacheLayout() {}
+
 protected:
     void PreBuildItems(LayoutWrapper* layoutWrapper, const RefPtr<WaterFlowLayoutInfoBase>& info,
         const LayoutConstraintF& constraint, int32_t cachedCount);

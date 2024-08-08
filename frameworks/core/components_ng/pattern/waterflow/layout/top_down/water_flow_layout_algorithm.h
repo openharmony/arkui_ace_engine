@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_ALGORITHM_H
 
-#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -37,9 +37,17 @@ public:
         canOverScroll_ = canOverScroll;
     }
 
+    void AppendCacheItem(LayoutWrapper* host, int32_t itemIdx) override
+    {
+        auto sub = layoutInfo_->targetIndex_;
+        layoutInfo_->targetIndex_ = itemIdx;
+        MeasureToTarget(host, true);
+        std::swap(sub, layoutInfo_->targetIndex_);
+    }
+
 private:
     FlowItemPosition GetItemPosition(int32_t index);
-    void MeasureForAnimation(LayoutWrapper* layoutWrapper);
+    void MeasureToTarget(LayoutWrapper* layoutWrapper, bool isCache);
     void FillViewport(float mainSize, LayoutWrapper* layoutWrapper);
     void ModifyCurrentOffsetWhenReachEnd(float mainSize, LayoutWrapper* layoutWrapper);
     float ComputeCrossPosition(int32_t crossIndex) const;

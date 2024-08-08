@@ -578,7 +578,7 @@ void WaterFlowLayoutSW::AdjustOverScroll()
 
 float WaterFlowLayoutSW::MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane)
 {
-    auto child = wrapper_->GetOrCreateChildByIndex(nodeIdx(idx));
+    auto child = wrapper_->GetOrCreateChildByIndex(nodeIdx(idx), !isCache_, isCache_);
     CHECK_NULL_RETURN(child, 0.0f);
     float userHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(idx), idx);
     if (NonNegative(userHeight)) {
@@ -586,6 +586,10 @@ float WaterFlowLayoutSW::MeasureChild(const RefPtr<WaterFlowLayoutProperty>& pro
     }
     child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
         { itemsCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, props, child));
+    if (isCache_) {
+        child->Layout();
+        child->SetActive(false);
+    }
     return child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
 }
 
@@ -612,7 +616,7 @@ void WaterFlowLayoutSW::LayoutSection(
         const auto& lane = info_->lanes_[idx][i];
         float mainPos = lane.startPos;
         for (const auto& item : lane.items_) {
-            auto child = wrapper_->GetOrCreateChildByIndex(nodeIdx(item.idx));
+            auto child = wrapper_->GetChildByIndex(nodeIdx(item.idx));
             if (!child) {
                 continue;
             }
@@ -642,7 +646,7 @@ void WaterFlowLayoutSW::LayoutFooter(const OffsetF& paddingOffset, bool reverse)
     if (info_->footerIndex_ != 0 || GreatOrEqual(mainPos, mainLen_)) {
         return;
     }
-    auto footer = wrapper_->GetOrCreateChildByIndex(0);
+    auto footer = wrapper_->GetChildByIndex(0);
     if (reverse) {
         mainPos = mainLen_ - info_->footerHeight_ - mainPos;
     }
@@ -663,5 +667,27 @@ void WaterFlowLayoutSW::PostMeasureSelf(float selfCrossLen)
 inline int32_t WaterFlowLayoutSW::nodeIdx(int32_t idx) const
 {
     return idx + info_->footerIndex_ + 1;
+}
+
+void WaterFlowLayoutSW::AppendCacheItem(LayoutWrapper* host, int32_t itemIdx)
+{
+    wrapper_ = host;
+    const int32_t start = info_->StartIndex();
+    const int32_t end = info_->EndIndex();
+    if (itemIdx < start) {
+        FillFront(-FLT_MAX, start - 1, itemIdx);
+    } else if (itemIdx > end) {
+        FillBack(FLT_MAX, end + 1, itemIdx);
+    }
+}
+void WaterFlowLayoutSW::StartCacheLayout()
+{
+    info_->BeginUpdate();
+    isCache_ = true;
+}
+void WaterFlowLayoutSW::EndCacheLayout()
+{
+    isCache_ = false;
+    info_->EndCacheUpdate();
 }
 } // namespace OHOS::Ace::NG

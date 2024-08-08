@@ -67,6 +67,20 @@ public:
         overScroll_ = value;
     }
 
+    void StartCacheLayout() override
+    {
+        isCache_ = true;
+    }
+    void AppendCacheItem(LayoutWrapper* host, int32_t itemIdx) override
+    {
+        wrapper_ = host;
+        MeasureToTarget(itemIdx);
+    }
+    void EndCacheLayout() override
+    {
+        isCache_ = false;
+    }
+
 private:
     /**
      * @brief Initialize member variables from LayoutProperty.
@@ -162,6 +176,7 @@ private:
 
     // true if WaterFlow can be overScrolled
     bool overScroll_ = false;
+    bool isCache_ = false; // true if during cache item layout
 
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowSegmentedLayout);
 };

@@ -128,7 +128,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     FillViewport(mainSize_, layoutWrapper);
     if (layoutInfo_->targetIndex_.has_value()) {
-        MeasureForAnimation(layoutWrapper);
+        MeasureToTarget(layoutWrapper, false);
     }
     if (layoutInfo_->jumpIndex_ != EMPTY_JUMP_INDEX) {
         if (layoutInfo_->extraOffset_.has_value() && Negative(layoutInfo_->extraOffset_.value())) {
@@ -147,7 +147,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->SetCacheCount(layoutProperty->GetCachedCountValue(1));
 }
 
-void WaterFlowLayoutAlgorithm::MeasureForAnimation(LayoutWrapper* layoutWrapper)
+void WaterFlowLayoutAlgorithm::MeasureToTarget(LayoutWrapper* layoutWrapper, bool isCache)
 {
     if (layoutInfo_->targetIndex_.value() > layoutInfo_->childrenCount_) {
         layoutInfo_->targetIndex_.reset();
@@ -160,7 +160,8 @@ void WaterFlowLayoutAlgorithm::MeasureForAnimation(LayoutWrapper* layoutWrapper)
         layoutInfo_->targetIndex_ = layoutInfo_->childrenCount_ - 1;
     }
     while (layoutInfo_->targetIndex_.has_value() && (layoutInfo_->endIndex_ < layoutInfo_->targetIndex_.value())) {
-        auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(currentIndex));
+        auto itemWrapper =
+            layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(currentIndex), !isCache, isCache);
         if (!itemWrapper) {
             layoutInfo_->targetIndex_.reset();
             break;

@@ -151,11 +151,12 @@ public:
 
     void DumpAdvanceInfo() override;
 
-    void SetPredictLayoutParam(std::optional<WaterFlowLayoutBase::PredictLayoutParam> param)
+    using PredictLayoutParam = std::optional<WaterFlowLayoutBase::PredictLayoutParam>;
+    void SetPredictLayoutParam(PredictLayoutParam param)
     {
         predictLayoutParam_ = param;
     }
-    std::optional<WaterFlowLayoutBase::PredictLayoutParam> GetPredictLayoutParam() const
+    const PredictLayoutParam& GetPredictLayoutParam() const
     {
         return predictLayoutParam_;
     }
@@ -217,7 +218,7 @@ private:
     // clip padding of WaterFlow
     RefPtr<WaterFlowContentModifier> contentModifier_;
 
-    std::optional<WaterFlowLayoutBase::PredictLayoutParam> predictLayoutParam_;
+    PredictLayoutParam predictLayoutParam_;
 
     std::vector<int32_t> sectionChangeStartPos_;
 };
