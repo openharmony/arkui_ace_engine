@@ -161,6 +161,9 @@ void FocusManager::PaintFocusState()
     CHECK_NULL_VOID(rootNode);
     auto rootFocusHub = rootNode->GetFocusHub();
     CHECK_NULL_VOID(rootFocusHub);
+    if (!pipeline->GetIsFocusActive()) {
+        return;
+    }
     rootFocusHub->ClearAllFocusState();
     rootFocusHub->PaintAllFocusState();
 }

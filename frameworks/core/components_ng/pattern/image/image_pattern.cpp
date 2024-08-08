@@ -748,7 +748,7 @@ void ImagePattern::OnKeyEvent()
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->PaintFocusState();
+    focusHub->PaintFocusState(true);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
