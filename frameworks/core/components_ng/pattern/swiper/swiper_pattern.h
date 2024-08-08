@@ -430,7 +430,7 @@ public:
     void AdjustCurrentIndexOnSwipePage(int32_t index);
     void OnCustomContentTransition(int32_t toIndex);
     void OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, bool hasOnChanged);
-    void OnSwiperCustomAnimationFinish(std::pair<int32_t, SwiperItemInfo> item);
+    void OnSwiperCustomAnimationFinish(CancelableCallback<void()>& task, int32_t index, bool isFinishAnimation);
 
     void SetCustomAnimationToIndex(int32_t toIndex)
     {
@@ -901,6 +901,8 @@ private:
     void UpdateIgnoreBlankOffsetWithIndex();
     // overSrollDirection is true means over start boundary, false means over end boundary.
     void UpdateIgnoreBlankOffsetWithDrag(bool overSrollDirection);
+
+    std::set<int32_t> CalcVisibleIndex(float offset = 0.0f) const;
 
     friend class SwiperHelper;
 
