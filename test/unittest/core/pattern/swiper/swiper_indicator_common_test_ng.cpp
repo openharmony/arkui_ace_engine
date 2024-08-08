@@ -846,4 +846,32 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern019, TestSize.Level1)
     EXPECT_EQ(overlongPaintMethod->gestureState_, GestureState::GESTURE_STATE_NONE);
     EXPECT_TRUE(modifier->longPointLeftAnimEnd_);
 }
+
+/**
+ * @tc.name: SwiperIndicatorPattern020
+ * @tc.desc: Test HandleLongDragUpdate when SwipeByGroup is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern020, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayCount(2);
+        model.SetSwipeByGroup(true);
+    });
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    TouchEventInfo touchEventInfo("default");
+    TouchLocationInfo touchLocationInfo("down", 0);
+    touchLocationInfo.SetLocalLocation(Offset(18.0f, 1.0f));
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+
+    GestureEvent info;
+    info.SetLocalLocation(Offset(0.0f, 1.0f));
+    indicatorPattern->HandleTouchDown();
+    indicatorPattern->HandleDragStart(info);
+    indicatorPattern->HandleTouchEvent(touchEventInfo);
+    EXPECT_EQ(pattern_->jumpIndex_.value(), 2);
+}
 } // namespace OHOS::Ace::NG
