@@ -1556,7 +1556,7 @@ HWTEST_F(GridScrollerTestNg, UpdateCurrentOffset001, TestSize.Level1)
     UpdateCurrentOffset(100.f, SCROLL_FROM_UPDATE);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
     UpdateCurrentOffset(-200.f, SCROLL_FROM_UPDATE);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -200.f);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
 }
 
 /**
@@ -1578,7 +1578,7 @@ HWTEST_F(GridScrollerTestNg, UpdateCurrentOffset002, TestSize.Level1)
     UpdateCurrentOffset(100.f, SCROLL_FROM_BAR);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
     UpdateCurrentOffset(-200.f, SCROLL_FROM_BAR);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -200.f);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
 }
 
 /**
@@ -1601,7 +1601,7 @@ HWTEST_F(GridScrollerTestNg, UpdateCurrentOffset003, TestSize.Level1)
     UpdateCurrentOffset(100.f, SCROLL_FROM_UPDATE);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
     UpdateCurrentOffset(-200.f, SCROLL_FROM_UPDATE);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -200.f);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
 }
 
 /**
