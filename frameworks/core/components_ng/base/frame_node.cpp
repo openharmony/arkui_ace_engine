@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include "base/geometry/ng/rect_t.h"
+#include "core/pipeline/base/element_register.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "core/common/layout_inspector.h"
@@ -4141,6 +4142,7 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheS
 void FrameNode::OnInspectorIdUpdate(const std::string& id)
 {
     renderContext_->UpdateNodeName(id);
+    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(id, AceType::WeakClaim(this));
     auto parent = GetAncestorNodeOfFrame();
     if (parent && parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

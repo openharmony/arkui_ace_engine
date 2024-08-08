@@ -79,6 +79,9 @@ UINode::~UINode()
     } else {
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId_);
     }
+    if (propInspectorId_.has_value()) {
+        ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(propInspectorId_.value_or(""), nodeId_);
+    }
     if (!onMainTree_) {
         return;
     }
