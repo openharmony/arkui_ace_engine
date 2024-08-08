@@ -352,7 +352,7 @@ int32_t ContentController::GetDeleteLength(int32_t startIndex, int32_t length, b
     auto content = content_;
     return TextEmojiProcessor::Delete(startIndex, length, content, isBackward);
 }
-
+ 
 bool ContentController::IsIndexBeforeOrInEmoji(int32_t index)
 {
     int32_t startIndex = index - EMOJI_RANGE_LEFT;
