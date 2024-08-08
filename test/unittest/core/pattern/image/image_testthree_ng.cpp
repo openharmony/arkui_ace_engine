@@ -1772,4 +1772,339 @@ HWTEST_F(ImageTestThreeNg, ImagePatternMethods, TestSize.Level1)
     ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ImagePatternMethods01();
 }
+
+/**
+ * @tc.name: ImagePatternIsSupportImageAnalyzerFeature0045
+ * @tc.desc: call IsSupportImageAnalyzerFeature.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternIsSupportImageAnalyzerFeature0045, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->UpdateAnalyzerOverlayLayout();
+    imagePattern->EnableAnalyzer(true);
+    imagePattern->UpdateAnalyzerOverlay();
+    EXPECT_TRUE(!imagePattern->IsSupportImageAnalyzerFeature());
+}
+
+/**
+ * @tc.name: ImagePatternResetFormAnimationStartTime0046
+ * @tc.desc: call ResetFormAnimationStartTime.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternResetFormAnimationStartTime0046, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->isFormAnimationStart_ = false;
+    imagePattern->ResetFormAnimationStartTime();
+    EXPECT_FALSE(imagePattern->isFormAnimationStart_);
+}
+
+/**
+ * @tc.name: ImagePatternUpdateFormDurationByRemainder0047
+ * @tc.desc: call UpdateFormDurationByRemainder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternUpdateFormDurationByRemainder0047, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    RefPtr<PixelMap> pixelMap = nullptr;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    pipeline->SetIsFormRender(true);
+    imagePattern->UpdateFormDurationByRemainder();
+    imagePattern->isFormAnimationStart_ = false;
+    imagePattern->UpdateFormDurationByRemainder();
+    EXPECT_NE(imagePattern->formAnimationRemainder_, 0);
+}
+
+/**
+ * @tc.name:  ImagePatternhasSceneChanged0048
+ * @tc.desc: call hasSceneChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternhasSceneChanged0048, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_ = nullptr;
+    bool b = imagePattern->hasSceneChanged();
+    EXPECT_TRUE(b);
+}
+
+/**
+ * @tc.name: ImagePatternOnAreaChangedInner0049
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternOnAreaChangedInner111, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->OpenSelectOverlay();
+    imagePattern->OnAreaChangedInner();
+    EXPECT_NE(imagePattern->selectOverlay_.GetRawPtr(), nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternCreateNodePaintMethod0050
+ * @tc.desc: Test Image related method calls.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternCreateNodePaintMethod0050, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    imagePattern->isSensitive_ = true;
+    EXPECT_NE(imagePattern->CreateNodePaintMethod(), nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternOnDirtyLayoutWrapperSwap0051
+ * @tc.desc: Test Image related method calls.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternOnDirtyLayoutWrapperSwap0051, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(WIDTH, HEIGHT));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, imageLayoutProperty);
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(nullptr);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    imagePattern->isLayouted_ = false;
+    imagePattern->imageType_ = ImagePattern::ImageType::ANIMATION;
+    imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_TRUE(imagePattern->isLayouted_);
+    imagePattern->isLayouted_ = false;
+    imagePattern->imageType_ = ImagePattern::ImageType::BASE;
+    imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(imagePattern->isLayouted_);
+    imagePattern->isLayouted_ = true;
+    imagePattern->imageType_ = ImagePattern::ImageType::ANIMATION;
+    imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_TRUE(imagePattern->isLayouted_);
+}
+/**
+ * @tc.name: ImagePatternOnImageModifyDone0052
+ * @tc.desc: Test Image related method calls.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternOnImageModifyDone0052, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    imagePattern->imageType_ = ImagePattern::ImageType::UNDEFINED;
+    imagePattern->OnModifyDone();
+    imagePattern->OnImageModifyDone();
+    EXPECT_FALSE(imagePattern->isSelected_);
+}
+
+/**
+ * @tc.name: ImagePatternControlAnimation0053
+ * @tc.desc: Test Image related method calls.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternControlAnimation0053, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    imagePattern->status_ = Animator::Status::IDLE;
+    imagePattern->ControlAnimation(2);
+    EXPECT_TRUE(imagePattern->isFormAnimationStart_);
+    imagePattern->status_ = Animator::Status::PAUSED;
+    imagePattern->ControlAnimation(2);
+    EXPECT_TRUE(imagePattern->isFormAnimationStart_);
+    imagePattern->status_ = Animator::Status::RUNNING;
+    imagePattern->isFormAnimationEnd_ = true;
+    imagePattern->ControlAnimation(2);
+    EXPECT_FALSE(imagePattern->isFormAnimationEnd_);
+}
+
+/**
+ * @tc.name: ImagePatternOnAreaChangedInner0054
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternOnAreaChangedInner0054, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->parentGlobalOffset_ = OffsetF(1, 1);
+    imagePattern->OpenSelectOverlay();
+    imagePattern->OnAreaChangedInner();
+    EXPECT_NE(imagePattern->selectOverlay_.GetRawPtr(), nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternIsSupportImageAnalyzerFeature0055
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternIsSupportImageAnalyzerFeature0055, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->isEnableAnalyzer_ = true;
+
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    ASSERT_NE(imagePattern->image_, nullptr);
+    EXPECT_FALSE(imagePattern->loadingCtx_->GetSourceInfo().IsSvg());
+    EXPECT_TRUE(imagePattern->loadingCtx_->GetFrameCount() <= 1);
+
+    imagePattern->DestroyAnalyzerOverlay();
+    imagePattern->EnableAnalyzer(true);
+    imagePattern->DestroyAnalyzerOverlay();
+    EXPECT_TRUE(imagePattern->imageAnalyzerManager_);
+    EXPECT_FALSE(imagePattern->IsSupportImageAnalyzerFeature());
+}
+
+/**
+ * @tc.name: ImagePatternSetImageAIOptions0056
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternSetImageAIOptions0056, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->imageAnalyzerManager_ = nullptr;
+    imagePattern->SetImageAIOptions(nullptr);
+    ASSERT_NE(imagePattern->imageAnalyzerManager_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternEnableAnalyzer0057
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternEnableAnalyzer0057, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->CreateAnalyzerOverlay();
+    imagePattern->isEnableAnalyzer_ = true;
+    imagePattern->EnableAnalyzer(false);
+    EXPECT_FALSE(imagePattern->imageAnalyzerManager_);
+}
+
+/**
+ * @tc.name: ImagePatternGetImageColorFilterStr0058
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternGetImageColorFilterStr0058, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    std::vector<float> testColorFilter;
+    testColorFilter.push_back(1.0f);
+    testColorFilter.clear();
+    std::string str = imagePattern->GetImageColorFilterStr(testColorFilter);
+    EXPECT_EQ(str, "");
+}
+
+/**
+ * @tc.name: ImagePatternOnLanguageConfigurationUpdate0059
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternOnLanguageConfigurationUpdate0059, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    RectF testRectF = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->srcRect_ = testRectF;
+    imagePattern->loadingCtx_->dstRect_ = testRectF;
+    EXPECT_NE(imagePattern->loadingCtx_, nullptr);
+    imagePattern->loadingCtx_->src_.srcType_ = SrcType::RESOURCE;
+    imagePattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternOnAttachToFrameNode0060
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternOnAttachToFrameNode0060, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->imageType_ = ImagePattern::ImageType::ANIMATION;
+    imagePattern->OnAttachToFrameNode();
+    EXPECT_TRUE(imagePattern->GetIsAnimation());
+}
+
+/**
+ * @tc.name: ImagePatternUpdateDragEvent0061
+ * @tc.desc: call OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternUpdateDragEvent0061, TestSize.Level1)
+{
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    ASSERT_NE(imagePattern->image_, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    imagePattern->loadingCtx_->src_.srcType_ = SrcType::DATA_ABILITY_DECODED;
+    imagePattern->UpdateDragEvent(dragEvent);
+    EXPECT_EQ(dragEvent->unifiedData_, nullptr);
+    imagePattern->OnRecycle();
+    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
+    imagePattern->UpdateDragEvent(dragEvent);
+    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
+}
 } // namespace OHOS::Ace::NG
