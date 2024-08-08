@@ -7862,7 +7862,7 @@ void ResetTimePickerUseMilitaryTime(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetTimePickerDisappearTextStyle(ArkUI_NodeHandle node)
 {
     auto value =
-        GetFullImpl()->getNodeModifiers()->getTimepickerModifier()->getTimepickerSelectedTextStyle(node->uiNodeHandle);
+        GetFullImpl()->getNodeModifiers()->getTimepickerModifier()->getTimepickerDisappearTextStyle(node->uiNodeHandle);
     g_attributeItem.string = value;
     return &g_attributeItem;
 }
