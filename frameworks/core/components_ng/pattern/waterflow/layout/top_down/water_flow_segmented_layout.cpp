@@ -114,10 +114,7 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
 
     // for compatibility
     info_->firstIndex_ = info_->startIndex_;
-    PreBuildItems(wrapper_, info_,
-        WaterFlowLayoutUtils::CreateChildConstraint(
-            { itemsCrossSize_[info_->GetSegment(info_->endIndex_ + 1)][0], mainSize_, axis_ }, props, nullptr),
-        cachedCount);
+    PreloadItems(wrapper_, info_, cachedCount);
 }
 
 namespace {

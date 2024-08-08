@@ -258,10 +258,7 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto cachedCount = layoutProperty->GetCachedCountValue(1);
     layoutWrapper->SetActiveChildRange(layoutInfo_->NodeIdx(layoutInfo_->FirstIdx()),
         layoutInfo_->NodeIdx(layoutInfo_->endIndex_), cachedCount, cachedCount);
-    PreBuildItems(layoutWrapper, layoutInfo_,
-        WaterFlowLayoutUtils::CreateChildConstraint(
-            { itemsCrossSize_.find(0)->second, mainSize_, axis_ }, layoutProperty, nullptr),
-        cachedCount);
+    PreloadItems(layoutWrapper, layoutInfo_, cachedCount);
 
     LayoutFooter(layoutWrapper, childFrameOffset, layoutProperty->IsReverse());
 }
@@ -406,5 +403,14 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
     } else {
         layoutInfo_->offsetEnd_ = false;
     }
+}
+
+bool WaterFlowLayoutAlgorithm::AppendCacheItem(LayoutWrapper* host, int32_t itemIdx)
+{
+    auto sub = layoutInfo_->targetIndex_;
+    layoutInfo_->targetIndex_ = itemIdx;
+    MeasureToTarget(host, true);
+    std::swap(sub, layoutInfo_->targetIndex_);
+    return true;
 }
 } // namespace OHOS::Ace::NG

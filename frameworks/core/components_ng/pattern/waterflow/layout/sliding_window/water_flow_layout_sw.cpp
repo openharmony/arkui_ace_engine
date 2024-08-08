@@ -57,7 +57,6 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     }
 
     info_->Sync(itemCnt_, mainLen_, mainGaps_);
-    wrapper->SetCacheCount(props->GetCachedCountValue(1));
 }
 
 void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
@@ -82,11 +81,10 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
         LayoutSection(idx, paddingOffset, selfCrossLen, reverse, rtl);
     }
 
-    auto cachedCount = props->GetCachedCountValue(1);
-    wrapper->SetActiveChildRange(nodeIdx(info_->startIndex_), nodeIdx(info_->endIndex_), cachedCount, cachedCount);
-    PreBuildItems(wrapper_, info_,
-        WaterFlowLayoutUtils::CreateChildConstraint({ itemsCrossSize_[0][0], mainLen_, axis_ }, props, nullptr),
-        cachedCount);
+    const int32_t cacheCount = props->GetCachedCountValue(1);
+    wrapper->SetCacheCount(cacheCount);
+    wrapper->SetActiveChildRange(nodeIdx(info_->startIndex_), nodeIdx(info_->endIndex_), cacheCount, cacheCount);
+    PreloadItems(wrapper_, info_, cacheCount);
 
     if (info_->itemEnd_) {
         LayoutFooter(paddingOffset, reverse);
@@ -669,7 +667,7 @@ inline int32_t WaterFlowLayoutSW::nodeIdx(int32_t idx) const
     return idx + info_->footerIndex_ + 1;
 }
 
-void WaterFlowLayoutSW::AppendCacheItem(LayoutWrapper* host, int32_t itemIdx)
+bool WaterFlowLayoutSW::AppendCacheItem(LayoutWrapper* host, int32_t itemIdx)
 {
     wrapper_ = host;
     const int32_t start = info_->StartIndex();
@@ -678,7 +676,10 @@ void WaterFlowLayoutSW::AppendCacheItem(LayoutWrapper* host, int32_t itemIdx)
         FillFront(-FLT_MAX, start - 1, itemIdx);
     } else if (itemIdx > end) {
         FillBack(FLT_MAX, end + 1, itemIdx);
+    } else {
+        return false;
     }
+    return true;
 }
 void WaterFlowLayoutSW::StartCacheLayout()
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,13 +37,7 @@ public:
         canOverScroll_ = canOverScroll;
     }
 
-    void AppendCacheItem(LayoutWrapper* host, int32_t itemIdx) override
-    {
-        auto sub = layoutInfo_->targetIndex_;
-        layoutInfo_->targetIndex_ = itemIdx;
-        MeasureToTarget(host, true);
-        std::swap(sub, layoutInfo_->targetIndex_);
-    }
+    bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx) override;
 
 private:
     FlowItemPosition GetItemPosition(int32_t index);

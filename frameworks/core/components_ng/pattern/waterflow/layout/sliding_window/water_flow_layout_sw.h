@@ -38,7 +38,7 @@ public:
     }
 
     void StartCacheLayout() override;
-    void AppendCacheItem(LayoutWrapper* host, int32_t itemIdx) override;
+    bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx) override;
     void EndCacheLayout() override;
 
 private:
