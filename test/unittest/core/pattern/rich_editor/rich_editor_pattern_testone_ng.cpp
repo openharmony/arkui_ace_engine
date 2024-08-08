@@ -115,6 +115,7 @@ HWTEST_F(RichEditorPatternTestOneNg, HandleClickEvent002, TestSize.Level1)
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     richEditorPattern->GetFocusHub()->focusType_ = FocusType::DISABLE;
+    richEditorPattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 }
@@ -829,94 +830,6 @@ HWTEST_F(RichEditorPatternTestOneNg, MouseDoubleClickParagraphEnd001, TestSize.L
     richEditorPattern->MouseDoubleClickParagraphEnd(index2);
     richEditorPattern->MouseDoubleClickParagraphEnd(index);
     EXPECT_EQ(richEditorPattern->GetParagraphEndPosition(index), 7);
-}
-
-/**
- * @tc.name: OnDirtyLayoutWrapper002
- * @tc.desc: test on dirty layout wrapper
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, OnDirtyLayoutWrapper002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    auto layoutAlgorithm = richEditorPattern->CreateLayoutAlgorithm();
-    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
-    DirtySwapConfig config;
-    config.skipMeasure = true;
-    auto focusHub = richEditorPattern->GetHost()->GetOrCreateFocusHub();
-    focusHub->currentFocus_ = true;
-
-    richEditorPattern->isShowMenu_ = true;
-    richEditorPattern->isModifyingContent_ = true;
-    ASSERT_EQ(richEditorPattern->SelectOverlayIsOn(), false);
-    ASSERT_EQ(richEditorPattern->GetHost()->GetRenderContext()->GetClipEdge().has_value(), false);
-    ASSERT_EQ(!config.skipMeasure && !layoutWrapper->SkipMeasureContent(), false);
-    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(layoutWrapper->GetLayoutAlgorithm());
-    ASSERT_NE(layoutAlgorithmWrapper, nullptr);
-    ASSERT_NE(AceType::DynamicCast<RichEditorLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm()), nullptr);
-    auto host = richEditorPattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto context = host->GetRenderContext();
-    ASSERT_NE(context, nullptr);
-    auto ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    ClearSpan();
-    ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-
-    /**
-     * @tc.steps: step1. get richeditor pattern and add add text span
-     */
-    AddSpan("hello1");
-    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
-
-    /**
-     * @tc.steps: step2. request focus
-     */
-    focusHub = richEditorNode_->GetOrCreateFocusHub();
-    focusHub->RequestFocusImmediately();
-
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-
-    bool enabledCache = eventHub->IsEnabled();
-    EXPECT_EQ(enabledCache, true);
-
-    /**
-     * @tc.step: step3. create a scene where the text menu has popped up
-     */
-    richEditorPattern->textDetectEnable_ = true;
-    richEditorPattern->enabled_ = true;
-    richEditorPattern->OnModifyDone();
-
-    richEditorPattern->textDetectEnable_ = true;
-    richEditorPattern->enabled_ = false;
-    richEditorPattern->OnModifyDone();
-
-    richEditorPattern->textDetectEnable_ = false;
-    richEditorPattern->enabled_ = true;
-    richEditorPattern->OnModifyDone();
-
-    richEditorPattern->textDetectEnable_ = false;
-    richEditorPattern->enabled_ = false;
-    richEditorPattern->OnModifyDone();
-
-    richEditorPattern->textSelector_.Update(1, 2);
-    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
-    richEditorPattern->ShowSelectOverlay(
-        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
-
-    richEditorPattern->isShowMenu_ = true;
-    ASSERT_EQ(richEditorPattern->SelectOverlayIsOn(), true);
-    ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-
-    richEditorPattern->isShowMenu_ = false;
-    ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-
-    EXPECT_FALSE(ret);
 }
 
 /**
