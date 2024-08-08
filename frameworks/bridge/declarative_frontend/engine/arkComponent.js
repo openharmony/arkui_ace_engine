@@ -25837,13 +25837,13 @@ class SwiperIndicatorModifier extends ModifierWithKey {
       let mask;
       let color;
       let selectedColor;
-      let maxDisplayCount;
       let fontColor;
       let selectedFontColor;
       let digitFontSize;
       let digitFontWeight;
       let selectedDigitFontSize;
       let selectedDigitFontWeight;
+      let maxDisplayCount;
       if (typeof this.value === 'boolean') {
         getUINativeModule().swiper.setSwiperIndicator(node, 'boolean', this.value);
       }
@@ -25861,7 +25861,7 @@ class SwiperIndicatorModifier extends ModifierWithKey {
         selectedColor = this.value.selectedColorValue;
         maxDisplayCount = this.value.maxDisplayCountValue;
         getUINativeModule().swiper.setSwiperIndicator(node, 'ArkDotIndicator', itemWidth, itemHeight, selectedItemWidth,
-          selectedItemHeight, mask, color, selectedColor, maxDisplayCount, left, top, right, bottom);
+          selectedItemHeight, mask, color, selectedColor, left, top, right, bottom, maxDisplayCount);
       }
       else if (typeof this.value === 'object' && this.value.type === 'DigitIndicator') {
         left = this.value.leftValue;
