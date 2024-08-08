@@ -1457,7 +1457,7 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea)
     }
 }
 
-void PipelineContext::CheckAndUpdateKeyboardInset(uint32_t keyboardHeight)
+void PipelineContext::CheckAndUpdateKeyboardInset(float keyboardHeight)
 {
     safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
 }
@@ -1749,7 +1749,7 @@ void PipelineContext::OriginalAvoidanceLogic(
     DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
 }
 
-void PipelineContext::OnVirtualKeyboardHeightChange(uint32_t keyboardHeight, double positionY, double height,
+void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {
     CHECK_RUN_ON(UI);
@@ -1845,7 +1845,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(uint32_t keyboardHeight, dou
         }
 
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-            "keyboardHeight: %{public}d, positionY: %{public}f, textHeight: %{public}f, "
+            "keyboardHeight: %{public}f, positionY: %{public}f, textHeight: %{public}f, "
             "rootSize.Height() %{public}f final calculate keyboard offset is %{public}f",
             keyboardHeight, positionY, height, rootSize.Height(), context->safeAreaManager_->GetKeyboardOffset());
         context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
