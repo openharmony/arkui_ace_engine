@@ -359,6 +359,7 @@ private:
     bool UpdateEndListItemIndex();
     float GetStartOverScrollOffset(float offset, float startMainPos) const;
     float GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const;
+    float UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, bool isJump);
     RefPtr<ListContentModifier> listContentModifier_;
 
     int32_t maxListItemIndex_ = 0;

@@ -130,7 +130,6 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     itemPosition_ = listLayoutAlgorithm->GetItemPosition();
     maxListItemIndex_ = listLayoutAlgorithm->GetMaxListItemIndex();
     spaceWidth_ = listLayoutAlgorithm->GetSpaceWidth();
-    float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
     auto predictSnapOffset = listLayoutAlgorithm->GetPredictSnapOffset();
     auto predictSnapEndPos = listLayoutAlgorithm->GetPredictSnapEndPosition();
     bool isJump = listLayoutAlgorithm->NeedEstimateOffset();
@@ -149,21 +148,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     } else {
         lanes_ = listLayoutAlgorithm->GetLanes();
     }
-    if (childrenSize_) {
-        listTotalHeight_ = posMap_->GetTotalHeight();
-        currentOffset_ = itemPosition_.empty() ? 0.0f :
-            posMap_->GetPos(itemPosition_.begin()->first, itemPosition_.begin()->second.startPos);
-    } else {
-        if (isJump || needReEstimateOffset_) {
-            auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis());
-            calculate.GetEstimateHeightAndOffset(GetHost());
-            currentOffset_ = calculate.GetEstimateOffset();
-            relativeOffset = 0.0f;
-            needReEstimateOffset_ = false;
-            posMap_->ClearPosMap();
-        }
-        CalculateCurrentOffset(relativeOffset, listLayoutAlgorithm->GetRecycledItemPosition());
-    }
+    float relativeOffset = UpdateTotalOffset(listLayoutAlgorithm, isJump);
     if (targetIndex_) {
         AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
         targetIndex_.reset();
@@ -1689,6 +1674,28 @@ Rect ListPattern::GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
     return Rect(itemGroupGeometry->GetFrameRect().GetX() + groupItemGeometry->GetFrameRect().GetX(),
         itemGroupGeometry->GetFrameRect().GetY() + groupItemGeometry->GetFrameRect().GetY(),
         groupItemGeometry->GetFrameRect().Width(), groupItemGeometry->GetFrameRect().Height());
+}
+
+float ListPattern::UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, bool isJump)
+{
+    float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
+    float prevOffset = currentOffset_;
+    if (childrenSize_) {
+        listTotalHeight_ = posMap_->GetTotalHeight();
+        currentOffset_ = itemPosition_.empty() ? 0.0f :
+            posMap_->GetPos(itemPosition_.begin()->first, itemPosition_.begin()->second.startPos);
+    } else {
+        if (isJump || needReEstimateOffset_) {
+            auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis());
+            calculate.GetEstimateHeightAndOffset(GetHost());
+            currentOffset_ = calculate.GetEstimateOffset();
+            relativeOffset = 0;
+            needReEstimateOffset_ = false;
+            posMap_->ClearPosMap();
+        }
+        CalculateCurrentOffset(relativeOffset, listLayoutAlgorithm->GetRecycledItemPosition());
+    }
+    return currentOffset_ - prevOffset;
 }
 
 void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm::PositionMap& recycledItemPosition)
