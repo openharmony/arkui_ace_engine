@@ -902,6 +902,8 @@ private:
     // overSrollDirection is true means over start boundary, false means over end boundary.
     void UpdateIgnoreBlankOffsetWithDrag(bool overSrollDirection);
 
+    bool IsItemOverlay() const;
+
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
