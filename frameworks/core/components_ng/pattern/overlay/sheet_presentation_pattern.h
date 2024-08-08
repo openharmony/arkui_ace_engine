@@ -271,6 +271,7 @@ public:
         }
     }
 
+    void OverlaySheetSpringBack();
     void OverlayDismissSheet();
     void DismissSheet()
     {
