@@ -362,10 +362,16 @@ void DragDropManager::UpdateDragAllowDrop(
 void DragDropManager::UpdateDragStyle(const DragCursorStyleCore& dragStyle, int32_t eventId)
 {
     if (dragStyle != dragCursorStyleCore_) {
-        dragCursorStyleCore_ = dragStyle;
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Update DragStyle to %{public}d, pointerEventId: %{public}d.",
-            dragCursorStyleCore_, eventId);
-        InteractionInterface::GetInstance()->UpdateDragStyle(dragCursorStyleCore_, eventId);
+        TAG_LOGI(
+            AceLogTag::ACE_DRAG, "Update DragStyle to %{public}d, pointerEventId: %{public}d.", dragStyle, eventId);
+        auto ret = InteractionInterface::GetInstance()->UpdateDragStyle(dragStyle, eventId);
+        if (ret != 0) {
+            TAG_LOGI(AceLogTag::ACE_DRAG,
+                "Update DragStyle to %{public}d failed, keep %{public}d. pointerEventId: %{public}d. ret = %{public}d",
+                dragStyle, dragCursorStyleCore_, eventId, ret);
+        } else {
+            dragCursorStyleCore_ = dragStyle;
+        }
     }
 }
 
