@@ -247,6 +247,7 @@ void MenuWrapperPattern::HideSubMenu()
     auto innerMenu = GetMenuChild(focusMenu);
     if (!innerMenu) {
         UpdateMenuAnimation(host);
+        SendToAccessibility(subMenu, false);
         host->RemoveChild(subMenu);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         return;
@@ -264,9 +265,20 @@ void MenuWrapperPattern::HideSubMenu()
         HideStackExpandMenu(subMenu);
     } else {
         UpdateMenuAnimation(host);
+        SendToAccessibility(subMenu, false);
         host->RemoveChild(subMenu);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     }
+}
+
+void MenuWrapperPattern::SendToAccessibility(const RefPtr<UINode>& subMenu, bool isShow)
+{
+    auto subMenuNode = AceType::DynamicCast<FrameNode>(subMenu);
+    CHECK_NULL_VOID(subMenuNode);
+    auto accessibilityProperty = subMenuNode->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityIsShow(isShow);
+    subMenuNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE);
 }
 
 bool MenuWrapperPattern::HasStackSubMenu()

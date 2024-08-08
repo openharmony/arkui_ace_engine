@@ -445,6 +445,7 @@ private:
     void HideMenu(const RefPtr<FrameNode>& menu);
     void HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu, const OffsetF& position);
     void SetExitAnimation(const RefPtr<FrameNode>& host);
+    void SendToAccessibility(const RefPtr<UINode>& subMenu, bool isShow);
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;
     std::function<void()> aboutToAppearCallback_ = nullptr;
