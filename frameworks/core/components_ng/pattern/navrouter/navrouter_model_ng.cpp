@@ -40,6 +40,7 @@ void NavRouterModelNG::Create()
 void NavRouterModelNG::SetOnStateChange(std::function<void(bool isActivated)>&& onStateChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navRouterEventHub = AceType::DynamicCast<NavRouterEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navRouterEventHub);
     navRouterEventHub->SetOnStateChange(std::move(onStateChange));
@@ -48,6 +49,7 @@ void NavRouterModelNG::SetOnStateChange(std::function<void(bool isActivated)>&& 
 void NavRouterModelNG::SetNavRouteMode(int32_t mode)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navRouterGroupNode = AceType::DynamicCast<NavRouterGroupNode>(frameNode);
     CHECK_NULL_VOID(navRouterGroupNode);
     auto navRouterPattern = navRouterGroupNode->GetPattern<NavRouterPattern>();
