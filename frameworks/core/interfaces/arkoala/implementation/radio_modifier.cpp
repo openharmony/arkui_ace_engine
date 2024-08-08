@@ -14,42 +14,60 @@
  */
 
 #include "arkoala_api_generated.h"
+#include "core/components_ng/pattern/radio/radio_model_ng.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace RadioInterfaceModifier {
-void SetRadioOptionsImpl(Ark_NativePointer node,
-                         const Ark_RadioOptions* options)
-{
-}
-} // RadioInterfaceModifier
-namespace RadioAttributeModifier {
-void CheckedImpl(Ark_NativePointer node,
-                 Ark_Boolean value)
-{
-}
-void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
-{
-}
-void RadioStyleImpl(Ark_NativePointer node,
-                    const Opt_RadioStyle* value)
-{
-}
-void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* modifier)
-{
-}
-} // RadioAttributeModifier
-const GENERATED_ArkUIRadioModifier* GetRadioModifier()
-{
-    static const GENERATED_ArkUIRadioModifier ArkUIRadioModifierImpl {
-        RadioInterfaceModifier::SetRadioOptionsImpl,
-        RadioAttributeModifier::CheckedImpl,
-        RadioAttributeModifier::OnChangeImpl,
-        RadioAttributeModifier::RadioStyleImpl,
-        RadioAttributeModifier::ContentModifierImpl,
-    };
-    return &ArkUIRadioModifierImpl;
-}
+    namespace RadioInterfaceModifier {
+        void _setRadioOptionsImpl(Ark_NativePointer node, const Ark_RadioOptions* options) {
+        }
+    } // RadioInterfaceModifier
+    namespace RadioAttributeModifier {
+        void CheckedImpl(Ark_NativePointer node, Ark_Boolean value) {
+            auto frameNode = reinterpret_cast<FrameNode*>(node);
+            CHECK_NULL_VOID(frameNode);
+            RadioModelNG::SetChecked(frameNode, value);
+        }
+        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback) {
+            auto frameNode = reinterpret_cast<FrameNode*>(node);
+            CHECK_NULL_VOID(frameNode);
+            auto onEvent = [frameNode](const bool value) {
+                GetFullAPI()->getEventsAPI()->getRadioEventsReceiver()->onChange(frameNode->GetId(), value);
+            };
+            RadioModelNG::SetOnChange(frameNode, onEvent);
+        }
+        void RadioStyleImpl(Ark_NativePointer node, const Opt_RadioStyle* value) {
+            auto frameNode = reinterpret_cast<FrameNode*>(node);
+            CHECK_NULL_VOID(frameNode);
+            CHECK_NULL_VOID(value);
+            if (auto checkedBackgroundColor = Converter::OptConvert<Color>(value->value.checkedBackgroundColor); 
+                checkedBackgroundColor) {
+                RadioModelNG::SetCheckedBackgroundColor(frameNode, checkedBackgroundColor.value());
+            }
+            if (auto uncheckedBorderColor = Converter::OptConvert<Color>(value->value.uncheckedBorderColor); 
+                uncheckedBorderColor) {
+                RadioModelNG::SetUncheckedBorderColor(frameNode, uncheckedBorderColor.value());
+            }
+            if (auto indicatorColor = Converter::OptConvert<Color>(value->value.indicatorColor); 
+                indicatorColor) {
+                RadioModelNG::SetIndicatorColor(frameNode, indicatorColor.value());
+            }
+        }
+        void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier) {
+            LOGE("ARKOALA RadioAttributeModifier::ContentModifierImpl -> Method is not "
+                "implemented.");
+        }
+    } // RadioAttributeModifier
+    const GENERATED_ArkUIRadioModifier* GetRadioModifier() {
+        static const GENERATED_ArkUIRadioModifier ArkUIRadioModifierImpl {
+            RadioInterfaceModifier::_setRadioOptionsImpl,
+            RadioAttributeModifier::CheckedImpl,
+            RadioAttributeModifier::OnChangeImpl,
+            RadioAttributeModifier::RadioStyleImpl,
+            RadioAttributeModifier::ContentModifierImpl,
+        };
+        return &ArkUIRadioModifierImpl;
+    }
 
 }
