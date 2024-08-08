@@ -80,6 +80,11 @@ Gradient GradientStyleModifier::GetGradient() const
     auto size = colors.size();
     gradient.ClearColors();
     GradientColor color;
+    if (size > stops.size()) {
+        TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "illegal param stops size:%{public}zu, color size:%{public}zu",
+            stops.size(), colors.size());
+        return gradient;
+    }
     for (size_t index = 0; index < size; index++) {
         color.SetColor(colors[index]);
         auto colorStop =
