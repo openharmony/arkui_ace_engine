@@ -364,7 +364,7 @@ void RichEditorPattern::DeleteForwardInStyledString(int32_t length, bool isIME)
     DeleteValueInStyledString(caretPosition_, length, isIME);
 }
 
-void RichEditorPattern::DeleteValueInStyledString(int32_t start, int32_t length, bool isIME)
+void RichEditorPattern::DeleteValueInStyledString(int32_t start, int32_t length, bool isIME, bool isUpdateCaret)
 {
     CHECK_NULL_VOID(styledString_);
     if (!textSelector_.SelectNothing()) {
@@ -383,7 +383,9 @@ void RichEditorPattern::DeleteValueInStyledString(int32_t start, int32_t length,
         ResetSelection();
     }
     styledString_->RemoveString(start, length);
-    SetCaretPosition(start);
+    if (isUpdateCaret) {
+        SetCaretPosition(start);
+    }
     if (!caretVisible_) {
         StartTwinkling();
         if (previewLongPress_ && isIME) {
@@ -3136,7 +3138,9 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll()
     CHECK_NULL_VOID(host);
     FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     showSelect_ = true;
-    selectOverlay_->ProcessOverlay({.animation = true, .requestCode = REQUEST_RECREATE});
+    if (!selectOverlay_->IsUsingMouse()) {
+        selectOverlay_->ProcessOverlay({.animation = true, .requestCode = REQUEST_RECREATE});
+    }
     SetCaretPosition(textSize);
     MoveCaretToContentRect();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -3744,6 +3748,36 @@ void RichEditorPattern::InsertStyledStringByPaste(const RefPtr<SpanString>& span
     styledString_->InsertSpanString(changeStart, spanString);
     SetCaretPosition(caretPosition_ + spanString->GetLength());
     AfterStyledStringChange(changeStart, changeLength, spanString->GetString());
+}
+
+void RichEditorPattern::HandleOnDragInsertStyledString(const RefPtr<SpanString>& spanString)
+{
+    CHECK_NULL_VOID(spanString);
+    int currentCaretPosition = caretPosition_;
+    auto strLength = spanString->GetLength();
+    if (isDragSponsor_) {
+        bool isInsertForward = currentCaretPosition < dragRange_.first;
+        bool isInsertBackward = currentCaretPosition > dragRange_.second;
+        CHECK_NULL_VOID(isInsertForward || isInsertBackward);
+        CHECK_NULL_VOID(BeforeStyledStringChange(currentCaretPosition, 0, spanString));
+        styledString_->InsertSpanString(currentCaretPosition, spanString);
+        AfterStyledStringChange(currentCaretPosition, 0, spanString->GetString());
+        if (isInsertForward) {
+            SetCaretPosition(currentCaretPosition + strLength);
+            dragRange_.first += strLength;
+            dragRange_.second += strLength;
+        }
+        DeleteValueInStyledString(dragRange_.first, strLength, true, false);
+    } else {
+        CHECK_NULL_VOID(BeforeStyledStringChange(currentCaretPosition, 0, spanString));
+        styledString_->InsertSpanString(currentCaretPosition, spanString);
+        SetCaretPosition(currentCaretPosition + strLength);
+        AfterStyledStringChange(currentCaretPosition, 0, spanString->GetString());
+    }
+    StartTwinkling();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void RichEditorPattern::AddSpansByPaste(const std::list<RefPtr<NG::SpanItem>>& spans)
@@ -8244,6 +8278,10 @@ void RichEditorPattern::HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::Dra
     if (!arr.empty()) {
         auto spanStr = SpanString::DecodeTlv(arr);
         if (!spanStr->GetSpanItems().empty()) {
+            if (isSpanStringMode_) {
+                HandleOnDragInsertStyledString(spanStr);
+                return;
+            }
             AddSpanByPasteData(spanStr);
             return;
         }
