@@ -38,6 +38,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
     direction_ = textFieldLayoutProperty->GetLayoutDirection();
 
     // Create paragraph.
+    pattern->SetAdaptFontSize(std::nullopt);
     auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder_ && !isInlineStyle;
     textFieldContentConstraint_ = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
     auto contentConstraintWithoutResponseArea =
@@ -47,6 +48,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
             textStyle, textFieldLayoutProperty, contentConstraintWithoutResponseArea, layoutWrapper)) {
             return std::nullopt;
         }
+        pattern->SetAdaptFontSize(textStyle.GetFontSize());
     } else {
         CreateParagraphEx(textStyle, textContent_, contentConstraint, layoutWrapper);
     }

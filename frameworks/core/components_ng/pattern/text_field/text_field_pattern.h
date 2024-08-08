@@ -1410,6 +1410,11 @@ public:
         return multipleClickRecognizer_;
     }
 
+    void SetAdaptFontSize(const std::optional<Dimension>& adaptFontSize)
+    {
+        adaptFontSize_ = adaptFontSize;
+    }
+
     void ShowCaretAndStopTwinkling();
     bool IsLTRLayout()
     {
@@ -1845,6 +1850,7 @@ private:
     bool isEnableHapticFeedback_ = true;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
+    std::optional<Dimension> adaptFontSize_;
 };
 } // namespace OHOS::Ace::NG
 
