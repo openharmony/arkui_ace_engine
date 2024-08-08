@@ -1705,6 +1705,7 @@ void DragDropManager::DoDragStartAnimation(
     auto deviceId = static_cast<int32_t>(event.GetDeviceId());
     if (deviceId == RESERVED_DEVICEID) {
         isDragFwkShow_ = false;
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Do not need animation.");
         TransDragWindowToDragFwk(containerId);
         return;
     }
