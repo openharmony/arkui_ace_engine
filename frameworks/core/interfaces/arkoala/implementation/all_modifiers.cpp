@@ -420,6 +420,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &modifiersImpl;
     }
+
     const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
     {
         static const GENERATED_ArkUIAccessors accessorsImpl = {
@@ -500,7 +501,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &accessorsImpl;
     }
-    const GENERATED_Ark_UtilsModifier* GENERATED_GetUtilsModifier() {
+
+    const GENERATED_Ark_UtilsModifier* GENERATED_GetUtilsModifier()
+    {
         static const GENERATED_Ark_UtilsModifier utilsImpl = {
             OHOS::Ace::NG::GetDensity,
             OHOS::Ace::NG::GetFontScale,
@@ -508,7 +511,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &utilsImpl;
     }
-    const GENERATED_ArkUIBasicNodeAPI* GENERATED_GetBasicAPI() {
+
+    const GENERATED_ArkUIBasicNodeAPI* GENERATED_GetBasicAPI()
+    {
         static const GENERATED_ArkUIBasicNodeAPI basicNodeAPIImpl = {
             GENERATED_ARKUI_BASIC_NODE_API_VERSION, // version
             OHOS::Ace::NG::Bridge::CreateNode,
@@ -527,7 +532,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &basicNodeAPIImpl;
     }
 
-    const GENERATED_ArkUIExtendedNodeAPI* GENERATED_GetExtendedAPI() {
+    const GENERATED_ArkUIExtendedNodeAPI* GENERATED_GetExtendedAPI()
+    {
         static const GENERATED_ArkUIExtendedNodeAPI extendedNodeAPIImpl = {
             GENERATED_ARKUI_EXTENDED_NODE_API_VERSION, // version
             SetAppendGroupedLog,
@@ -571,7 +577,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &extendedNodeAPIImpl;
     }
 
-    const GENERATED_ArkUIFullNodeAPI* GENERATED_GetFullAPI() {
+    const GENERATED_ArkUIFullNodeAPI* GENERATED_GetFullAPI()
+    {
         static const GENERATED_ArkUIFullNodeAPI fullAPIImpl = {
             GENERATED_ARKUI_FULL_API_VERSION, // version
             GENERATED_GetArkUINodeModifiers,

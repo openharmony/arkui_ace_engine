@@ -21,7 +21,8 @@ constexpr int32_t OFFSET_0 = 0;
 constexpr int32_t OFFSET_1 = 1;
 constexpr int32_t OFFSET_2 = 2;
 
-void ParseDimension(const Ark_String &string, Ark_Length *result) {
+void ParseDimension(const Ark_String &string, Ark_Length *result)
+{
     char *suffixPtr = nullptr;
     float value = std::strtof(string.chars, &suffixPtr);
 
@@ -53,9 +54,7 @@ void ParseDimension(const Ark_String &string, Ark_Length *result) {
     else if (suffixPtr[OFFSET_0] == 'f' && suffixPtr[OFFSET_1] == 'p')
     {
         unit = DimensionUnit::FP;
-    }
-    else
-    {
+    } else {
         unit = DimensionUnit::NONE;
     }
     result->unit = static_cast<Ark_Int32>(unit);

@@ -11605,7 +11605,7 @@ typedef struct GENERATED_ArkUIExtendedNodeAPI {
 
     void (*setCallbackMethod)(GENERATED_Ark_APICallbackMethod* method);
 
-    // for ndk side, the custom node is not set in create.
+    // the custom node is not set in create.
     void (*setCustomMethodFlag)(Ark_NodeHandle node, Ark_Int32 flag);
     Ark_Int32 (*getCustomMethodFlag)(Ark_NodeHandle node);
 

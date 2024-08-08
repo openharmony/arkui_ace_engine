@@ -134,7 +134,7 @@ namespace OHOS::Ace::NG::Converter
     template<>
     inline Dimension Convert(const Ark_Number& src)
     {
-        return src.tag == Ark_Tag::ARK_TAG_INT32 ? 
+        return src.tag == Ark_Tag::ARK_TAG_INT32 ?
             CalcDimension(src.i32, DimensionUnit::VP) : CalcDimension(src.i32, DimensionUnit::VP);
     }
 

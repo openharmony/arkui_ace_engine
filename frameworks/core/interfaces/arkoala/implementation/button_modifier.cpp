@@ -44,11 +44,11 @@ void _setButtonOptions_ButtonOptionsImpl(Ark_NativePointer node, const Ark_Butto
     ButtonModelNG::SetStateEffect(frameNode, Converter::ConvertOrDefault(options->stateEffect, true));
     ButtonModelNG::SetControlSize(frameNode, Converter::ConvertOrDefault(options->controlSize, ControlSize::NORMAL));
     ButtonModelNG::SetButtonStyle(frameNode, Converter::ConvertOrDefault(options->buttonStyle,
-                                                                        ButtonStyleMode::EMPHASIZE));
+                                                                         ButtonStyleMode::EMPHASIZE));
 }
 
 void _setButtonOptions_ResourceStr_ButtonOptionsImpl(Ark_NativePointer node, const ResourceStr *label,
-                                                        const Opt_ButtonOptions *options)
+                                                     const Opt_ButtonOptions *options)
 {
     if (options->tag == ARK_TAG_UNDEFINED) {
         _setButtonOptions_Impl(node);
