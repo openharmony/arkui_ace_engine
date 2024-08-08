@@ -224,7 +224,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest, TestSize.Level1)
     TouchRestrict touchRestrict = { TouchRestrict::NONE };
     auto globalPoint = PointF(10, 10);
     auto touchTestResult = std::list<RefPtr<TouchEventTarget>>();
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
 
     mockRenderContext->rect_ = RectF(0, 0, 100, 100);
     EXPECT_CALL(*mockRenderContext, GetPointWithTransform(_)).WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
@@ -952,7 +952,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest0026, TestSize.Level1)
     PointF parentLocalPoint;
     TouchRestrict touchRestrict;
     TouchTestResult result;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     SystemProperties::debugEnabled_ = true;
     FRAME_NODE2->TouchTest(
         globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);

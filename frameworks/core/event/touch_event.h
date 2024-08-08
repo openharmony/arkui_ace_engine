@@ -905,6 +905,7 @@ protected:
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;
+using ResponseLinkResult = std::list<RefPtr<NG::NGGestureRecognizer>>;
 
 class TouchEventInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(TouchEventInfo, BaseEventInfo);

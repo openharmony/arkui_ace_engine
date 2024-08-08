@@ -1246,7 +1246,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest012, TestSize.Level1)
     OffsetF coordinateOffset;
     GetEventTargetImpl getEventTargetImpl;
     TouchTestResult result;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     const int32_t size = result.size();
     EXPECT_EQ(pattern_->scrollableEvent_->InBarRegion(localPoint, source), true);
 
@@ -1794,7 +1794,7 @@ HWTEST_F(ScrollBarTestNg, BarCollectLongPressTarget001, TestSize.Level1)
     OffsetF coordinateOffset;
     GetEventTargetImpl getEventTargetImpl;
     TouchTestResult result;
-    TouchTestResult responseLinkResult;
+    ResponseLinkResult responseLinkResult;
     const int32_t size = result.size();
     EXPECT_EQ(pattern_->scrollableEvent_->InBarRectRegion(localPoint, source), true);
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
@@ -2776,7 +2776,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest084, TestSize.Level1)
     EXPECT_EQ(scrollBar->displayMode_, DisplayMode::ON);
 
     GetEventTargetImpl GetEventTargetImpl;
-    TouchTestResult result, responseLinkResult;
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
     scrollableEvent->BarCollectTouchTarget(
         OffsetF(1.f, 1.f), GetEventTargetImpl, result, frameNode_, nullptr, responseLinkResult);
     EXPECT_EQ(result.size(), 1);
