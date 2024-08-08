@@ -213,6 +213,7 @@ public:
             paintParam.SetPaintColor(theme->GetFocusBorderColor());
             paintParam.SetPaintWidth(theme->GetFocusBorderWidth());
             paintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
+            paintParam.SetFocusPadding(swiperTheme->GetIndicatorFocusedPadding());
         }
         return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, paintParam };
     }

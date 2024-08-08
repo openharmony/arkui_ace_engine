@@ -48,9 +48,13 @@ constexpr float INDICATOR_TOUCH_BOTTOM_MAX_ANGLE = 120.0;
 
 void SwiperIndicatorPattern::OnAttachToFrameNode()
 {
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperTheme);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToBounds(true);
+    host->GetRenderContext()->SetClipToBounds(swiperTheme->GetClipToBounds());
 }
 
 void SwiperIndicatorPattern::OnModifyDone()
