@@ -139,8 +139,9 @@ HWTEST_F(WaterFlowSWTest, Reset002, TestSize.Level1)
     EXPECT_TRUE(info_->offsetEnd_);
     EXPECT_EQ(GetChildY(frameNode_, 96), -50.0f);
     EXPECT_EQ(GetChildY(frameNode_, 0), 750.0f);
-    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -150.000000 EndPos: 750.000000 Items [96 98 100 103 104 ] }");
-    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -50.000000 EndPos: 550.000000 Items [95 97 99 101 102 ] }");
+    EXPECT_EQ(
+        info_->lanes_[0][0].ToString(), "{StartPos: -50.000000 EndPos: 750.000000 Items [95 97 99 100 103 104 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -150.000000 EndPos: 550.000000 Items [96 98 101 102 ] }");
 
     // delete start index
     frameNode_->RemoveChildAtIndex(96);
@@ -152,9 +153,8 @@ HWTEST_F(WaterFlowSWTest, Reset002, TestSize.Level1)
     EXPECT_TRUE(info_->offsetEnd_);
     EXPECT_EQ(GetChildY(frameNode_, 96), -50.0f);
     // triggered adjustOverScroll
-    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -50.000000 EndPos: 650.000000 Items [95 97 100 101 ] }");
-    EXPECT_EQ(
-        info_->lanes_[0][1].ToString(), "{StartPos: -150.000000 EndPos: 750.000000 Items [94 96 98 99 102 103 ] }");
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -150.000000 EndPos: 650.000000 Items [94 96 97 100 101 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -50.000000 EndPos: 750.000000 Items [95 98 99 102 103 ] }");
 }
 
 /**
@@ -266,15 +266,15 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 80), 550.0f);
     EXPECT_EQ(info_->startIndex_, 69);
     EXPECT_EQ(GetChildY(frameNode_, 70), -150.0f);
-    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -50.000000 EndPos: 750.000000 Items [71 72 75 76 79 ] }");
-    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -150.000000 EndPos: 750.000000 Items [69 70 73 74 77 78 ] }");
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -150.000000 EndPos: 750.000000 Items [69 70 73 74 77 78 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -50.000000 EndPos: 750.000000 Items [71 72 75 76 79 ] }");
 
     child = GetChildFrameNode(frameNode_, 0);
     child->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(1.0)));
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -50.000000 EndPos: 850.000000 Items [70 71 74 75 78 79 ] }");
-    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -150.000000 EndPos: 650.000000 Items [69 72 73 76 77 ] }");
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -150.000000 EndPos: 850.000000 Items [69 71 74 75 78 79 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -50.000000 EndPos: 650.000000 Items [70 72 73 76 77 ] }");
     EXPECT_EQ(GetChildY(frameNode_, 80), 650.0f);
     EXPECT_EQ(info_->startIndex_, 69);
     EXPECT_EQ(GetChildY(frameNode_, 70), -150.0f);
@@ -564,7 +564,7 @@ HWTEST_F(WaterFlowSWTest, Misaligned001, TestSize.Level1)
     EXPECT_EQ(info_->jumpIndex_, 0);
     EXPECT_EQ(info_->delta_, -49.0f);
     EXPECT_EQ(GetChildY(frameNode_, 1), -49.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 1), 240.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 0.0f);
     UpdateCurrentOffset(2.0f);
     EXPECT_EQ(GetChildRect(frameNode_, 1).Bottom(), 53.0f);
     EXPECT_FALSE(info_->IsMisaligned());
@@ -604,9 +604,9 @@ HWTEST_F(WaterFlowSWTest, Misaligned002, TestSize.Level1)
     UpdateCurrentOffset(550.0f);
 
     EXPECT_EQ(GetChildY(frameNode_, 15), -25.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 15), 320.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 15), 0.0f);
     EXPECT_EQ(GetChildY(frameNode_, 16), -62.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 16), 0.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 16), 320.0f);
     EXPECT_EQ(GetChildY(frameNode_, 17), -96.0f);
     EXPECT_EQ(GetChildX(frameNode_, 17), 160.0f);
     EXPECT_EQ(info_->startIndex_, 15);
