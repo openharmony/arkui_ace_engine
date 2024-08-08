@@ -170,6 +170,11 @@ public:
         }
     }
 
+    void SetFocusPointColor(Color color)
+    {
+        pointColor_ = color;
+    }
+
     void SetHotZoneOffset(OffsetF& hotZoneOffset)
     {
         hotZoneOffset_ = hotZoneOffset;
@@ -275,8 +280,10 @@ private:
     Color inactiveColor_;
     Color userActiveColor_;
     Color pointColorUnchecked_;
+    Color pointColor_;
     Dimension hoverRadius_ = 8.0_vp;
     Dimension focusRadius_ = 8.0_vp;
+    bool isDiffPointColor_ = false;
     float hoverDuration_ = 0.0f;
     float hoverToTouchDuration_ = 0.0f;
     float touchDuration_ = 0.0f;
