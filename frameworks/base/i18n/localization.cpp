@@ -621,9 +621,15 @@ LunarDate Localization::GetLunarDate(Date date)
     CHECK_RETURN(status, dateRet);
 
     // Sexagenary cycle years convert to Western years
+    bool repeatCalc = false;
+    if ((static_cast<uint32_t>(date.year) - GUIHAI_YEAR_RECENT) % SEXAGENARY_CYCLE_SIZE == 0 ||
+        static_cast<uint32_t>(lunarYear) == SEXAGENARY_CYCLE_SIZE) {
+        repeatCalc = true;
+    }
     dateRet.year = static_cast<uint32_t>(lunarYear) + GUIHAI_YEAR_RECENT;
     dateRet.year +=
-        ((static_cast<uint32_t>(date.year) - GUIHAI_YEAR_RECENT) / SEXAGENARY_CYCLE_SIZE) * SEXAGENARY_CYCLE_SIZE;
+        ((static_cast<uint32_t>(date.year) - GUIHAI_YEAR_RECENT) / SEXAGENARY_CYCLE_SIZE - (repeatCalc ? 1 : 0)) *
+        SEXAGENARY_CYCLE_SIZE;
     // 0 means January,  1 means February, so month + 1
     dateRet.month = static_cast<uint32_t>(lunarMonth) + 1;
     dateRet.day = static_cast<uint32_t>(lunarDate);
