@@ -131,6 +131,7 @@ generated_sources = [
     "../arkoala/implementation/ui_extension_component_modifier.cpp",
     "../arkoala/implementation/linear_indicator_modifier.cpp",
     "../arkoala/implementation/draw_modifier_modifier.cpp",
+    "../arkoala/implementation/i_curve_modifier.cpp",
     "../arkoala/implementation/pan_gesture_options_modifier.cpp",
     "../arkoala/implementation/progress_mask_modifier.cpp",
     "../arkoala/implementation/attribute_modifier_modifier.cpp",

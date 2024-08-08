@@ -223,6 +223,7 @@ namespace OHOS::Ace::NG::GeneratedModifier
     const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifier();
     const GENERATED_ArkUILinearIndicatorModifier* GetLinearIndicatorModifier();
     const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor();
+    const GENERATED_ArkUIICurveAccessor* GetICurveAccessor();
     const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor();
     const GENERATED_ArkUIProgressMaskAccessor* GetProgressMaskAccessor();
     const GENERATED_ArkUIAttributeModifierAccessor* GetAttributeModifierAccessor();
@@ -417,6 +418,7 @@ namespace OHOS::Ace::NG::GeneratedModifier
     {
         static const GENERATED_ArkUIAccessors accessorsImpl = {
             GetDrawModifierAccessor,
+            GetICurveAccessor,
             GetPanGestureOptionsAccessor,
             GetProgressMaskAccessor,
             GetAttributeModifierAccessor,

@@ -19,10 +19,8 @@
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
-namespace BlankInterface
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
+namespace BlankInterface {
 void _setBlankOptionsImpl(Ark_NativePointer node, const Opt_Type_BlankInterface__setBlankOptions_Arg0 *min)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -32,8 +30,7 @@ void _setBlankOptionsImpl(Ark_NativePointer node, const Opt_Type_BlankInterface_
 }
 } // BlankInterface
 
-namespace BlankAttribute
-{
+namespace BlankAttribute {
 void ColorImpl(Ark_NativePointer node, const ResourceColor *value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

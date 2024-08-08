@@ -22,10 +22,8 @@
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
-namespace ButtonInterfaceModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ButtonInterfaceModifier {
 void _setButtonOptions_Impl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -63,8 +61,8 @@ void _setButtonOptions_ResourceStr_ButtonOptionsImpl(Ark_NativePointer node, con
 }
 } // namespace ButtonInterfaceModifier
 
-namespace ButtonAttributeModifier
-{
+namespace ButtonAttributeModifier {
+
 constexpr int32_t DEFAULT_FONT_SIZE = 12;
 constexpr int32_t DEFAULT_MAX_LINES = 100;
 

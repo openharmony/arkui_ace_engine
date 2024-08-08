@@ -366,8 +366,7 @@ typedef struct Opt_ShadowOptions {
     enum Ark_Tag tag;
     Ark_ShadowOptions value;
 } Opt_ShadowOptions;
-typedef struct Ark_ICurve {
-} Ark_ICurve;
+typedef Ark_Materialized Ark_ICurve;
 typedef struct Opt_ICurve {
     enum Ark_Tag tag;
     Ark_ICurve value;
@@ -400,6 +399,7 @@ typedef struct Opt_Union_FontWeight_Number_String {
     Union_FontWeight_Number_String value;
 } Opt_Union_FontWeight_Number_String;
 typedef struct Ark_CommonMethod {
+    void *handle;
 } Ark_CommonMethod;
 typedef struct Opt_CommonMethod {
     enum Ark_Tag tag;
@@ -619,7 +619,7 @@ typedef struct Union_Curve_ICurve {
     Ark_Int32 selector;
     union {
         Ark_Curve value0;
-        struct Ark_ICurve value1;
+        Ark_ICurve value1;
     };
 } Union_Curve_ICurve;
 typedef struct Opt_Union_Curve_ICurve {
@@ -660,6 +660,7 @@ typedef struct Opt_Union_Number_Union_String_Resource {
     Union_Number_Union_String_Resource value;
 } Opt_Union_Number_Union_String_Resource;
 typedef struct Ark_CommonShapeMethod {
+    void *handle;
 } Ark_CommonShapeMethod;
 typedef struct Opt_CommonShapeMethod {
     enum Ark_Tag tag;
@@ -787,6 +788,7 @@ typedef struct Opt_Union_SheetSize_Length {
     Union_SheetSize_Length value;
 } Opt_Union_SheetSize_Length;
 typedef struct Ark_TransitionEffect {
+    void *handle;
 } Ark_TransitionEffect;
 typedef struct Opt_TransitionEffect {
     enum Ark_Tag tag;
@@ -899,6 +901,7 @@ typedef struct Opt_RichEditorTextStyleResult {
     Ark_RichEditorTextStyleResult value;
 } Opt_RichEditorTextStyleResult;
 typedef struct Ark_UserDataSpan {
+    void *handle;
 } Ark_UserDataSpan;
 typedef struct Opt_UserDataSpan {
     enum Ark_Tag tag;
@@ -940,6 +943,7 @@ typedef struct Opt_ImageAttachment {
     Ark_ImageAttachment value;
 } Opt_ImageAttachment;
 typedef struct Ark_GestureStyle {
+    void *handle;
 } Ark_GestureStyle;
 typedef struct Opt_GestureStyle {
     enum Ark_Tag tag;
@@ -1208,24 +1212,28 @@ typedef struct Opt_Indicator {
     Ark_Indicator value;
 } Opt_Indicator;
 typedef struct Ark_RectAttribute {
+    void *handle;
 } Ark_RectAttribute;
 typedef struct Opt_RectAttribute {
     enum Ark_Tag tag;
     Ark_RectAttribute value;
 } Opt_RectAttribute;
 typedef struct Ark_PathAttribute {
+    void *handle;
 } Ark_PathAttribute;
 typedef struct Opt_PathAttribute {
     enum Ark_Tag tag;
     Ark_PathAttribute value;
 } Opt_PathAttribute;
 typedef struct Ark_EllipseAttribute {
+    void *handle;
 } Ark_EllipseAttribute;
 typedef struct Opt_EllipseAttribute {
     enum Ark_Tag tag;
     Ark_EllipseAttribute value;
 } Opt_EllipseAttribute;
 typedef struct Ark_CircleAttribute {
+    void *handle;
 } Ark_CircleAttribute;
 typedef struct Opt_CircleAttribute {
     enum Ark_Tag tag;
@@ -1547,6 +1555,7 @@ typedef struct Opt_Literal_span_Number_offset_Number {
     Literal_span_Number_offset_Number value;
 } Opt_Literal_span_Number_offset_Number;
 typedef struct Ark_GestureInterface {
+    void *handle;
 } Ark_GestureInterface;
 typedef struct Opt_GestureInterface {
     enum Ark_Tag tag;
@@ -1830,6 +1839,7 @@ typedef struct Opt_Array_Union_RichEditorTextSpanResult_RichEditorImageSpanResul
 typedef Ark_Int32 Ark_RichEditorDeleteDirection;
 typedef struct Opt_RichEditorDeleteDirection { enum Ark_Tag tag; Ark_RichEditorDeleteDirection value; } Opt_RichEditorDeleteDirection;
 typedef struct Ark_Object {
+    void *handle;
 } Ark_Object;
 typedef struct Opt_Object {
     enum Ark_Tag tag;
@@ -1880,6 +1890,7 @@ typedef struct Opt_SelectStatus { enum Ark_Tag tag; Ark_SelectStatus value; } Op
 typedef Ark_Int32 Ark_WebCaptureMode;
 typedef struct Opt_WebCaptureMode { enum Ark_Tag tag; Ark_WebCaptureMode value; } Opt_WebCaptureMode;
 typedef struct Ark_ArrayBuffer {
+    void *handle;
 } Ark_ArrayBuffer;
 typedef struct Opt_ArrayBuffer {
     enum Ark_Tag tag;
@@ -1953,6 +1964,7 @@ typedef struct Opt_RichEditorGesture {
     Ark_RichEditorGesture value;
 } Opt_RichEditorGesture;
 typedef struct Ark_TextMenuItemId {
+    void *handle;
 } Ark_TextMenuItemId;
 typedef struct Opt_TextMenuItemId {
     enum Ark_Tag tag;
@@ -1974,6 +1986,7 @@ typedef struct Opt_Union_ScrollAnimationOptions_Boolean {
     Union_ScrollAnimationOptions_Boolean value;
 } Opt_Union_ScrollAnimationOptions_Boolean;
 typedef struct Ark_Uint8ClampedArray {
+    void *handle;
 } Ark_Uint8ClampedArray;
 typedef struct Opt_Uint8ClampedArray {
     enum Ark_Tag tag;
@@ -2584,6 +2597,7 @@ typedef struct Opt_Literal_minLength_Length_maxLength_Length {
     Literal_minLength_Length_maxLength_Length value;
 } Opt_Literal_minLength_Length_maxLength_Length;
 typedef struct Ark_ColorFilter {
+    void *handle;
 } Ark_ColorFilter;
 typedef struct Opt_ColorFilter {
     enum Ark_Tag tag;
@@ -2794,18 +2808,21 @@ typedef struct Opt_BadgeParam {
     Ark_BadgeParam value;
 } Opt_BadgeParam;
 typedef struct Ark_ScrollMotion {
+    void *handle;
 } Ark_ScrollMotion;
 typedef struct Opt_ScrollMotion {
     enum Ark_Tag tag;
     Ark_ScrollMotion value;
 } Opt_ScrollMotion;
 typedef struct Ark_FrictionMotion {
+    void *handle;
 } Ark_FrictionMotion;
 typedef struct Opt_FrictionMotion {
     enum Ark_Tag tag;
     Ark_FrictionMotion value;
 } Opt_FrictionMotion;
 typedef struct Ark_SpringMotion {
+    void *handle;
 } Ark_SpringMotion;
 typedef struct Opt_SpringMotion {
     enum Ark_Tag tag;
@@ -3114,7 +3131,7 @@ typedef struct Union_Curve_String_ICurve {
     union {
         Ark_Curve value0;
         Ark_String value1;
-        struct Ark_ICurve value2;
+        Ark_ICurve value2;
     };
 } Union_Curve_String_ICurve;
 typedef struct Opt_Union_Curve_String_ICurve {
@@ -3148,42 +3165,49 @@ typedef struct Opt_Array_Tuple_Number_Number {
     Array_Tuple_Number_Number value;
 } Opt_Array_Tuple_Number_Number;
 typedef struct Ark_GestureGroupInterface {
+    void *handle;
 } Ark_GestureGroupInterface;
 typedef struct Opt_GestureGroupInterface {
     enum Ark_Tag tag;
     Ark_GestureGroupInterface value;
 } Opt_GestureGroupInterface;
 typedef struct Ark_RotationGestureInterface {
+    void *handle;
 } Ark_RotationGestureInterface;
 typedef struct Opt_RotationGestureInterface {
     enum Ark_Tag tag;
     Ark_RotationGestureInterface value;
 } Opt_RotationGestureInterface;
 typedef struct Ark_SwipeGestureInterface {
+    void *handle;
 } Ark_SwipeGestureInterface;
 typedef struct Opt_SwipeGestureInterface {
     enum Ark_Tag tag;
     Ark_SwipeGestureInterface value;
 } Opt_SwipeGestureInterface;
 typedef struct Ark_PinchGestureInterface {
+    void *handle;
 } Ark_PinchGestureInterface;
 typedef struct Opt_PinchGestureInterface {
     enum Ark_Tag tag;
     Ark_PinchGestureInterface value;
 } Opt_PinchGestureInterface;
 typedef struct Ark_PanGestureInterface {
+    void *handle;
 } Ark_PanGestureInterface;
 typedef struct Opt_PanGestureInterface {
     enum Ark_Tag tag;
     Ark_PanGestureInterface value;
 } Opt_PanGestureInterface;
 typedef struct Ark_LongPressGestureInterface {
+    void *handle;
 } Ark_LongPressGestureInterface;
 typedef struct Opt_LongPressGestureInterface {
     enum Ark_Tag tag;
     Ark_LongPressGestureInterface value;
 } Opt_LongPressGestureInterface;
 typedef struct Ark_TapGestureInterface {
+    void *handle;
 } Ark_TapGestureInterface;
 typedef struct Opt_TapGestureInterface {
     enum Ark_Tag tag;
@@ -4687,6 +4711,7 @@ typedef struct Opt_RenderingContextSettings {
     Ark_RenderingContextSettings value;
 } Opt_RenderingContextSettings;
 typedef struct Ark_UIGestureEvent {
+    void *handle;
 } Ark_UIGestureEvent;
 typedef struct Opt_UIGestureEvent {
     enum Ark_Tag tag;
@@ -5123,6 +5148,7 @@ typedef struct Opt_Literal_barPosition_Opt_BarPosition_index_Opt_Number_controll
     Literal_barPosition_Opt_BarPosition_index_Opt_Number_controller_Opt_TabsController value;
 } Opt_Literal_barPosition_Opt_BarPosition_index_Opt_Number_controller_Opt_TabsController;
 typedef struct Ark_SymbolEffect {
+    void *handle;
 } Ark_SymbolEffect;
 typedef struct Opt_SymbolEffect {
     enum Ark_Tag tag;
@@ -5400,6 +5426,7 @@ typedef struct Opt_Literal_space_Opt_Union_String_Number {
     Literal_space_Opt_Union_String_Number value;
 } Opt_Literal_space_Opt_Union_String_Number;
 typedef struct Ark_RootSceneSession {
+    void *handle;
 } Ark_RootSceneSession;
 typedef struct Opt_RootSceneSession {
     enum Ark_Tag tag;
@@ -9554,6 +9581,13 @@ typedef struct GENERATED_ArkUIDrawModifierAccessor {
     void (*invalidate)(DrawModifierPeer* peer);
 } GENERATED_ArkUIDrawModifierAccessor;
 
+typedef struct ICurvePeer ICurvePeer;
+typedef struct GENERATED_ArkUIICurveAccessor {
+    Ark_NativePointer (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_Int32 (*interpolate)(ICurvePeer* peer, const Ark_Number* fraction);
+} GENERATED_ArkUIICurveAccessor;
+
 typedef struct PanGestureOptionsPeer PanGestureOptionsPeer;
 typedef struct GENERATED_ArkUIPanGestureOptionsAccessor {
     Ark_NativePointer (*ctor)(const Opt_Literal_fingers_Opt_Number_direction_PanDirection_distance_Opt_Number* value);
@@ -11022,6 +11056,7 @@ typedef struct GENERATED_ArkUINodeModifiers {
 
 typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIDrawModifierAccessor* (*getDrawModifierAccessor)();
+    const GENERATED_ArkUIICurveAccessor* (*getICurveAccessor)();
     const GENERATED_ArkUIPanGestureOptionsAccessor* (*getPanGestureOptionsAccessor)();
     const GENERATED_ArkUIProgressMaskAccessor* (*getProgressMaskAccessor)();
     const GENERATED_ArkUIAttributeModifierAccessor* (*getAttributeModifierAccessor)();
@@ -11669,9 +11704,9 @@ struct Ark_AnyAPI {
 /*
   For debug purpose:
   Current commit of idlize
-  2024/08/07 16:04:12 5976d062afd1b505f909b5f3eebc81a67870113b Fix braces
+  2024/08/07 17:23:49 084f551b62f0b3286df1447e38a88c469ebb5166 More changes
 
 Signed-off-by: Kirill Kirichenko <kirichenko.kirill@huawei.com>
-Change-Id: I0da94f79f0348c6fc29323ada3140cd66fa564dd
+Change-Id: Ib60a147fb02dc7ebdc5c4352d267f6faa6afc361
  */
 

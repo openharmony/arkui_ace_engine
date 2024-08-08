@@ -20,10 +20,8 @@
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
-namespace ColumnInterface
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ColumnInterface {
 void _setColumnOptionsImpl(Ark_NativePointer node, const Opt_Type_ColumnInterface__setColumnOptions_Arg0 *value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -33,8 +31,7 @@ void _setColumnOptionsImpl(Ark_NativePointer node, const Opt_Type_ColumnInterfac
 }
 } // ColumnInterface
 
-namespace ColumnAttribute
-{
+namespace ColumnAttribute {
 void AlignItemsImpl(Ark_NativePointer node, Ark_Int32 value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
