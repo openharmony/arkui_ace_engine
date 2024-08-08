@@ -15,14 +15,11 @@
 
 #include "indexer_test_ng.h"
 
+#include "test/mock/core/common/mock_font_manager.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
-
-#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
-
 void IndexerTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
@@ -31,6 +28,9 @@ void IndexerTestNg::SetUpTestSuite()
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_INDEXER);
     auto indexerTheme = IndexerTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(indexerTheme));
+
+    auto fontManager = AceType::MakeRefPtr<MockFontManager>();
+    MockPipelineContext::GetCurrent()->fontManager_ = fontManager;
 }
 
 void IndexerTestNg::TearDownTestSuite()
@@ -61,6 +61,7 @@ IndexerModelNG IndexerTestNg::CreateIndexer(std::vector<std::string> arrayValue,
     IndexerModelNG model;
     model.Create(arrayValue, selected);
     model.SetAutoCollapse(false);
+    ViewAbstract::SetHeight(CalcLength(INDEXER_HEIGHT));
     GetIndexer();
     return model;
 }
@@ -74,6 +75,31 @@ void IndexerTestNg::GetIndexer()
     layoutProperty_ = frameNode_->GetLayoutProperty<IndexerLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<IndexerPaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<IndexerAccessibilityProperty>();
+}
+
+void IndexerTestNg::OnPopupTouchDown(TouchType touchType)
+{
+    auto gesture = pattern_->popupNode_->GetOrCreateGestureEventHub();
+    auto onPopupTouchDown = gesture->touchEventActuator_->touchEvents_.front()->GetTouchEventCallback();
+    TouchEventInfo touchEventInfo = CreateTouchEventInfo(touchType, Offset());
+    onPopupTouchDown(touchEventInfo);
+}
+
+RefPtr<FrameNode> IndexerTestNg::GetListItemNode(int32_t listItemIndex)
+{
+    auto listUINode = pattern_->popupNode_->GetLastChild()->GetFirstChild();
+    auto listNode = AceType::DynamicCast<FrameNode>(listUINode);
+    auto listItemNode = GetChildFrameNode(listNode, listItemIndex);
+    return listItemNode;
+}
+
+void IndexerTestNg::ListItemClick(int32_t clickIndex, TouchType touchType)
+{
+    auto listItemNode = GetListItemNode(clickIndex);
+    auto gesture = listItemNode->GetOrCreateGestureEventHub();
+    auto touchEvent = gesture->touchEventActuator_->touchEvents_.front()->GetTouchEventCallback();
+    TouchEventInfo touchEventInfo = CreateTouchEventInfo(touchType, Offset());
+    touchEvent(touchEventInfo);
 }
 
 /**
