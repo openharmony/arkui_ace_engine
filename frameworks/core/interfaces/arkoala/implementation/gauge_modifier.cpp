@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace GaugeInterfaceModifier {
         void _setGaugeOptionsImpl(Ark_NativePointer node, const Type_GaugeInterface__setGaugeOptions_Arg0* options)
         {

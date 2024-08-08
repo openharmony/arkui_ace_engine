@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace NavigationInterfaceModifier {
         void _setNavigationOptions_Impl(Ark_NativePointer node)
         {

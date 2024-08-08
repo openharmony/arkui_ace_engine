@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace HyperlinkInterfaceModifier {
         void _setHyperlinkOptionsImpl(Ark_NativePointer node, const Type_HyperlinkInterface__setHyperlinkOptions_Arg0* address, const Opt_Type_HyperlinkInterface__setHyperlinkOptions_Arg1* content)
         {

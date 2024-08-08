@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace StackInterfaceModifier {
         void _setStackOptionsImpl(Ark_NativePointer node, const Opt_Type_StackInterface__setStackOptions_Arg0* value)
         {

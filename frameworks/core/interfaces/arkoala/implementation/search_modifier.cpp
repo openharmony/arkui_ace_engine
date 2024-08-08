@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace SearchInterfaceModifier {
         void _setSearchOptionsImpl(Ark_NativePointer node, const Opt_Type_SearchInterface__setSearchOptions_Arg0* options)
         {

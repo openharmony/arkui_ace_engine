@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace ListInterfaceModifier {
         void _setListOptionsImpl(Ark_NativePointer node, const Opt_Type_ListInterface__setListOptions_Arg0* value)
         {

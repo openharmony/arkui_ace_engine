@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace CommonMethodModifier {
         void WidthImpl(Ark_NativePointer node, const Ark_Length* value)
         {

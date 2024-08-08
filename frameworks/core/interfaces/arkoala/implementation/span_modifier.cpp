@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace SpanInterfaceModifier {
         void _setSpanOptionsImpl(Ark_NativePointer node, const Type_SpanInterface__setSpanOptions_Arg0* value)
         {

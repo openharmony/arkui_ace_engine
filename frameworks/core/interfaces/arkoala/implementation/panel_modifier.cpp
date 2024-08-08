@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace PanelInterfaceModifier {
         void _setPanelOptionsImpl(Ark_NativePointer node, Ark_Boolean show)
         {

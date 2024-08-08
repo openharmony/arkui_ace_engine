@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace SelectInterfaceModifier {
         void _setSelectOptionsImpl(Ark_NativePointer node, const Array_SelectOption* options)
         {

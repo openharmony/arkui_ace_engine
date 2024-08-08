@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace MarqueeInterfaceModifier {
         void _setMarqueeOptionsImpl(Ark_NativePointer node, const Type_MarqueeInterface__setMarqueeOptions_Arg0* value)
         {

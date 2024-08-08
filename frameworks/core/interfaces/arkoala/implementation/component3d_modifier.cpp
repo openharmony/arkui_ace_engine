@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace Component3DInterfaceModifier {
         void _setComponent3DOptionsImpl(Ark_NativePointer node, const Opt_SceneOptions* sceneOptions)
         {

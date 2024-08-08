@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace XComponentInterfaceModifier {
         void _setXComponentOptions_idstringtypestringlibrarynamestringcontrollerXComponentControllerImpl(Ark_NativePointer node, const Type_XComponentInterface__setXComponentOptions_Arg0* value)
         {

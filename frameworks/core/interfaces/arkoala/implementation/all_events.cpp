@@ -16,10 +16,8 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedEvents
-{
-    namespace AbilityComponent
-    {
+namespace OHOS::Ace::NG::GeneratedEvents {
+    namespace AbilityComponent {
         void onConnectImpl(Ark_Int32 nodeId)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -29,8 +27,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace AlphabetIndexer
-    {
+    namespace AlphabetIndexer {
         void onSelectedImpl(Ark_Int32 nodeId, const Ark_Number index)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -48,8 +45,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Animator
-    {
+    namespace Animator {
         void onStartImpl(Ark_Int32 nodeId)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -75,8 +71,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Calendar
-    {
+    namespace Calendar {
         void onSelectChangeImpl(Ark_Int32 nodeId, const Ark_CalendarSelectedDate event)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -86,36 +81,31 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace CalendarPicker
-    {
+    namespace CalendarPicker {
         void onChangeImpl(Ark_Int32 nodeId, const Ark_CustomObject value)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Canvas
-    {
+    namespace Canvas {
         void onReadyImpl(Ark_Int32 nodeId)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Checkbox
-    {
+    namespace Checkbox {
         void onChangeImpl(Ark_Int32 nodeId, const Ark_Boolean value)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace CheckboxGroup
-    {
+    namespace CheckboxGroup {
         void onChangeImpl(Ark_Int32 nodeId, const Ark_CheckboxGroupResult event)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace CommonMethod
-    {
+    namespace CommonMethod {
         void onChildTouchTestImpl(Ark_Int32 nodeId, const Array_TouchTestInfo value)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -233,8 +223,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace ScrollableCommonMethod
-    {
+    namespace ScrollableCommonMethod {
         void onScrollImpl(Ark_Int32 nodeId, const Ark_Number scrollOffset, const Ark_Int32 scrollState)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -260,8 +249,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Counter
-    {
+    namespace Counter {
         void onIncImpl(Ark_Int32 nodeId)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -271,8 +259,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace DatePicker
-    {
+    namespace DatePicker {
         void onChangeImpl(Ark_Int32 nodeId, const Ark_DatePickerResult value)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -282,8 +269,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace FolderStack
-    {
+    namespace FolderStack {
         void onFolderStateChangeImpl(Ark_Int32 nodeId, const Literal_foldStatus_FoldStatus event)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -293,8 +279,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace FormComponent
-    {
+    namespace FormComponent {
         void onAcquiredImpl(Ark_Int32 nodeId, const Ark_FormCallbackInfo data)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -316,8 +301,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Grid
-    {
+    namespace Grid {
         void onScrollBarUpdateImpl(Ark_Int32 nodeId, const Ark_Number index, const Ark_Number offset)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -371,22 +355,19 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace GridItem
-    {
+    namespace GridItem {
         void onSelectImpl(Ark_Int32 nodeId, const Ark_Boolean isSelected)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace GridRow
-    {
+    namespace GridRow {
         void onBreakpointChangeImpl(Ark_Int32 nodeId, const Ark_String breakpoints)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Image
-    {
+    namespace Image {
         void onCompleteImpl(Ark_Int32 nodeId, const Opt_Literal_width_Number_height_Number_componentWidth_Number_componentHeight_Number_loadingStatus_Number_contentWidth_Number_contentHeight_Number_contentOffsetX_Number_contentOffsetY_Number event)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -400,8 +381,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace ImageAnimator
-    {
+    namespace ImageAnimator {
         void onStartImpl(Ark_Int32 nodeId)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -423,8 +403,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace ImageSpan
-    {
+    namespace ImageSpan {
         void onCompleteImpl(Ark_Int32 nodeId, const Ark_ImageLoadResult result)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -434,8 +413,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace List
-    {
+    namespace List {
         void onScrollImpl(Ark_Int32 nodeId, const Ark_Number scrollOffset, const Ark_Int32 scrollState)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -497,22 +475,19 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace ListItem
-    {
+    namespace ListItem {
         void onSelectImpl(Ark_Int32 nodeId, const Ark_Boolean isSelected)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace LocationButton
-    {
+    namespace LocationButton {
         void onClickImpl(Ark_Int32 nodeId, const Ark_ClickEvent event, const Ark_Int32 result)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Marquee
-    {
+    namespace Marquee {
         void onStartImpl(Ark_Int32 nodeId)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -526,15 +501,13 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace MenuItem
-    {
+    namespace MenuItem {
         void onChangeImpl(Ark_Int32 nodeId, const Ark_Boolean selected)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace NavDestination
-    {
+    namespace NavDestination {
         void onShownImpl(Ark_Int32 nodeId)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -564,15 +537,13 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace NavRouter
-    {
+    namespace NavRouter {
         void onStateChangeImpl(Ark_Int32 nodeId, const Ark_Boolean isActivated)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Navigation
-    {
+    namespace Navigation {
         void onTitleModeChangeImpl(Ark_Int32 nodeId, const Ark_Int32 titleMode)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -594,8 +565,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Panel
-    {
+    namespace Panel {
         void onChangeImpl(Ark_Int32 nodeId, const Ark_Number width, const Ark_Number height, const Ark_Int32 mode)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -605,22 +575,19 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace PasteButton
-    {
+    namespace PasteButton {
         void onClickImpl(Ark_Int32 nodeId, const Ark_ClickEvent event, const Ark_Int32 result)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace PatternLock
-    {
+    namespace PatternLock {
         void onPatternCompleteImpl(Ark_Int32 nodeId, const Array_Number input)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace PluginComponent
-    {
+    namespace PluginComponent {
         void onCompleteImpl(Ark_Int32 nodeId)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -630,22 +597,19 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Radio
-    {
+    namespace Radio {
         void onChangeImpl(Ark_Int32 nodeId, const Ark_Boolean isChecked)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Rating
-    {
+    namespace Rating {
         void onChangeImpl(Ark_Int32 nodeId, const Ark_Number value)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Refresh
-    {
+    namespace Refresh {
         void onStateChangeImpl(Ark_Int32 nodeId, const Ark_Int32 state)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -659,8 +623,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace RichEditor
-    {
+    namespace RichEditor {
         void onReadyImpl(Ark_Int32 nodeId)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -718,8 +681,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace RichText
-    {
+    namespace RichText {
         void onStartImpl(Ark_Int32 nodeId)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -729,15 +691,13 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace SaveButton
-    {
+    namespace SaveButton {
         void onClickImpl(Ark_Int32 nodeId, const Ark_ClickEvent event, const Ark_Int32 result)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Scroll
-    {
+    namespace Scroll {
         void onScrollImpl(Ark_Int32 nodeId, const Ark_Number xOffset, const Ark_Number yOffset)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -767,8 +727,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Search
-    {
+    namespace Search {
         void inputFilterImpl(Ark_Int32 nodeId, const Ark_String data)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -822,22 +781,19 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Select
-    {
+    namespace Select {
         void onSelectImpl(Ark_Int32 nodeId, const Ark_Number index, const Ark_String value)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Slider
-    {
+    namespace Slider {
         void onChangeImpl(Ark_Int32 nodeId, const Ark_Number value, const Ark_Int32 mode)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Stepper
-    {
+    namespace Stepper {
         void onFinishImpl(Ark_Int32 nodeId)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -859,8 +815,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Swiper
-    {
+    namespace Swiper {
         void onChangeImpl(Ark_Int32 nodeId, const Ark_Number index)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -882,8 +837,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Tabs
-    {
+    namespace Tabs {
         void onChangeImpl(Ark_Int32 nodeId, const Ark_Number index)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -913,8 +867,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace TabContent
-    {
+    namespace TabContent {
         void onWillShowImpl(Ark_Int32 nodeId)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -924,8 +877,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Text
-    {
+    namespace Text {
         void onCopyImpl(Ark_Int32 nodeId, const Ark_String value)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -939,8 +891,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace TextArea
-    {
+    namespace TextArea {
         void inputFilterImpl(Ark_Int32 nodeId, const Ark_String value)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -994,15 +945,13 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace TextClock
-    {
+    namespace TextClock {
         void onDateChangeImpl(Ark_Int32 nodeId, const Ark_Number value)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace TextInput
-    {
+    namespace TextInput {
         void onEditChangedImpl(Ark_Int32 nodeId, const Ark_Boolean isEditing)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -1064,8 +1013,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace TextPicker
-    {
+    namespace TextPicker {
         void onAcceptImpl(Ark_Int32 nodeId, const Ark_String value, const Ark_Number index)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -1079,29 +1027,25 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace TextTimer
-    {
+    namespace TextTimer {
         void onTimerImpl(Ark_Int32 nodeId, const Ark_Number utc, const Ark_Number elapsedTime)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace TimePicker
-    {
+    namespace TimePicker {
         void onChangeImpl(Ark_Int32 nodeId, const Ark_TimePickerResult value)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Toggle
-    {
+    namespace Toggle {
         void onChangeImpl(Ark_Int32 nodeId, const Ark_Boolean isOn)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Video
-    {
+    namespace Video {
         void onStartImpl(Ark_Int32 nodeId)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -1143,8 +1087,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace Web
-    {
+    namespace Web {
         void onPageEndImpl(Ark_Int32 nodeId, const Ark_OnPageEndEvent data)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -1386,8 +1329,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace XComponent
-    {
+    namespace XComponent {
         void onLoadImpl(Ark_Int32 nodeId, const Opt_CustomObject event)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -1397,15 +1339,13 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace SideBarContainer
-    {
+    namespace SideBarContainer {
         void onChangeImpl(Ark_Int32 nodeId, const Ark_Boolean value)
         {
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace WaterFlow
-    {
+    namespace WaterFlow {
         void onReachStartImpl(Ark_Int32 nodeId)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -1423,8 +1363,7 @@ namespace OHOS::Ace::NG::GeneratedEvents
             // GENERATED EMPTY IMPLEMENTATION
         }
     }
-    namespace UIExtensionComponent
-    {
+    namespace UIExtensionComponent {
         void onTerminatedImpl(Ark_Int32 nodeId, const Ark_TerminationInfo data)
         {
             // GENERATED EMPTY IMPLEMENTATION
@@ -2159,10 +2098,12 @@ namespace OHOS::Ace::NG::GeneratedEvents
         return &GENERATED_ArkUIUIExtensionComponentEventsReceiverImpl;
     }
     const GENERATED_ArkUIEventsAPI* g_OverriddenEventsImpl = nullptr;
-    void GENERATED_SetArkUiEventsAPI(const GENERATED_ArkUIEventsAPI* api) {
+    void GENERATED_SetArkUiEventsAPI(const GENERATED_ArkUIEventsAPI* api)
+    {
         g_OverriddenEventsImpl = api;
     }
-    const GENERATED_ArkUIEventsAPI* GENERATED_GetArkUiEventsAPI() {
+    const GENERATED_ArkUIEventsAPI* GENERATED_GetArkUiEventsAPI()
+    {
         static const GENERATED_ArkUIEventsAPI eventsImpl = {
             GetAbilityComponentEventsReceiver,
             GetAlphabetIndexerEventsReceiver,

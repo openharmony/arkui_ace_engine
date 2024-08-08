@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace RowInterfaceModifier {
         void _setRowOptionsImpl(Ark_NativePointer node, const Opt_Type_RowInterface__setRowOptions_Arg0* value)
         {

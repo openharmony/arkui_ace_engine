@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace ShapeInterfaceModifier {
         void _setShapeOptions_PixelMapImpl(Ark_NativePointer node, const Ark_CustomObject* value)
         {

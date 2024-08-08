@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace NavRouterInterfaceModifier {
         void _setNavRouterOptions_Impl(Ark_NativePointer node)
         {

@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace CalendarPickerInterfaceModifier {
         void _setCalendarPickerOptionsImpl(Ark_NativePointer node, const Opt_CalendarOptions* options)
         {

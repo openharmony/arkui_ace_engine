@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace RatingInterfaceModifier {
         void _setRatingOptionsImpl(Ark_NativePointer node, const Opt_Type_RatingInterface__setRatingOptions_Arg0* options)
         {

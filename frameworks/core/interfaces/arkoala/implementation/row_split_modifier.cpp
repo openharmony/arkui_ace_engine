@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace RowSplitInterfaceModifier {
         void _setRowSplitOptionsImpl(Ark_NativePointer node)
         {

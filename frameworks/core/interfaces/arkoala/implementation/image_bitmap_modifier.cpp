@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace ImageBitmapModifier {
         Ark_NativePointer CtorImpl(const Ark_String* src)
         {

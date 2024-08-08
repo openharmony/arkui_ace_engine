@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace LocationButtonInterfaceModifier {
         void _setLocationButtonOptions_Impl(Ark_NativePointer node)
         {

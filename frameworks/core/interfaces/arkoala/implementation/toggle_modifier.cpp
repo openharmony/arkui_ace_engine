@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace ToggleInterfaceModifier {
         void _setToggleOptionsImpl(Ark_NativePointer node, const Type_ToggleInterface__setToggleOptions_Arg0* options)
         {

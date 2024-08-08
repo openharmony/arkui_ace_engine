@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace RootSceneInterfaceModifier {
         void _setRootSceneOptionsImpl(Ark_NativePointer node, const Ark_RootSceneSession* session)
         {

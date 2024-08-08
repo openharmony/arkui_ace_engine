@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace EffectComponentInterfaceModifier {
         void _setEffectComponentOptionsImpl(Ark_NativePointer node)
         {

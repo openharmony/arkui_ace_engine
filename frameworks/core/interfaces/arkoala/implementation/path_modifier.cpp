@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace PathInterfaceModifier {
         void _setPathOptionsImpl(Ark_NativePointer node, const Opt_Type_PathInterface__setPathOptions_Arg0* value)
         {

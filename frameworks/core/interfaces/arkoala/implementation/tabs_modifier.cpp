@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace TabsInterfaceModifier {
         void _setTabsOptionsImpl(Ark_NativePointer node, const Opt_Type_TabsInterface__setTabsOptions_Arg0* value)
         {

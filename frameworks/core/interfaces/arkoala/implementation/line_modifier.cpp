@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace LineInterfaceModifier {
         void _setLineOptionsImpl(Ark_NativePointer node, const Opt_Type_LineInterface__setLineOptions_Arg0* value)
         {

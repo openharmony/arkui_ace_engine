@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace PluginComponentInterfaceModifier {
         void _setPluginComponentOptionsImpl(Ark_NativePointer node, const Type_PluginComponentInterface__setPluginComponentOptions_Arg0* value)
         {

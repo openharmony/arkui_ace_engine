@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace DatePickerInterfaceModifier {
         void _setDatePickerOptionsImpl(Ark_NativePointer node, const Opt_DatePickerOptions* options)
         {

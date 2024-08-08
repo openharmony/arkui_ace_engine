@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace StepperInterfaceModifier {
         void _setStepperOptionsImpl(Ark_NativePointer node, const Opt_Type_StepperInterface__setStepperOptions_Arg0* value)
         {

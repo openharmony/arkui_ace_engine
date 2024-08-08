@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace RichEditorInterfaceModifier {
         void _setRichEditorOptions_RichEditorOptionsImpl(Ark_NativePointer node, const Ark_RichEditorOptions* value)
         {

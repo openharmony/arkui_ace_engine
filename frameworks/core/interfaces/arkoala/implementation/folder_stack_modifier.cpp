@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace FolderStackInterfaceModifier {
         void _setFolderStackOptionsImpl(Ark_NativePointer node, const Opt_Type_FolderStackInterface__setFolderStackOptions_Arg0* value)
         {

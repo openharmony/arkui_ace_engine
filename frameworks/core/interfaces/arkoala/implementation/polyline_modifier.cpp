@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace PolylineInterfaceModifier {
         void _setPolylineOptionsImpl(Ark_NativePointer node, const Opt_Type_PolylineInterface__setPolylineOptions_Arg0* value)
         {

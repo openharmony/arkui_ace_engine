@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace TextTimerInterfaceModifier {
         void _setTextTimerOptionsImpl(Ark_NativePointer node, const Opt_TextTimerOptions* options)
         {

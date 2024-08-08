@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace CanvasInterfaceModifier {
         void _setCanvasOptions_CanvasRenderingContextDDrawingRenderingContextImpl(Ark_NativePointer node, const Opt_Type_CanvasInterface__setCanvasOptions_Arg0* context)
         {

@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace LinearIndicatorInterfaceModifier {
         void _setLinearIndicatorOptionsImpl(Ark_NativePointer node, const Opt_Number* count, const Opt_LinearIndicatorController* controller)
         {

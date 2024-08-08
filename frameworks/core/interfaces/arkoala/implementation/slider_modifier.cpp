@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace SliderInterfaceModifier {
         void _setSliderOptionsImpl(Ark_NativePointer node, const Opt_SliderOptions* options)
         {

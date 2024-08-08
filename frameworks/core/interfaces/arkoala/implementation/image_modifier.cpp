@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace ImageInterfaceModifier {
         void _setImageOptions_PixelMapResourceStrDrawableDescriptorImpl(Ark_NativePointer node, const Type_ImageInterface__setImageOptions_Arg0* src)
         {

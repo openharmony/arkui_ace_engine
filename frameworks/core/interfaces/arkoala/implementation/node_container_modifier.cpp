@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace NodeContainerInterfaceModifier {
         void _setNodeContainerOptionsImpl(Ark_NativePointer node, const Ark_CustomObject* controller)
         {

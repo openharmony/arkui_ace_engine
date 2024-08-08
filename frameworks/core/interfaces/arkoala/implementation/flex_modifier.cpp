@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace FlexInterfaceModifier {
         void _setFlexOptionsImpl(Ark_NativePointer node, const Opt_FlexOptions* value)
         {

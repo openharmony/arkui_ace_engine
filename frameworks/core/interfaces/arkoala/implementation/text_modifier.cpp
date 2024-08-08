@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace TextInterfaceModifier {
         void _setTextOptionsImpl(Ark_NativePointer node, const Opt_Type_TextInterface__setTextOptions_Arg0* content, const Opt_TextOptions* value)
         {

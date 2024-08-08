@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace ScrollBarInterfaceModifier {
         void _setScrollBarOptionsImpl(Ark_NativePointer node, const Ark_ScrollBarOptions* value)
         {

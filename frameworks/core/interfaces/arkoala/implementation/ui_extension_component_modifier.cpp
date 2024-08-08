@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace UIExtensionComponentInterfaceModifier {
         void _setUIExtensionComponentOptionsImpl(Ark_NativePointer node, const Ark_CustomObject* want, const Opt_UIExtensionOptions* options)
         {

@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace RectInterfaceModifier {
         void _setRectOptionsImpl(Ark_NativePointer node, const Opt_Type_RectInterface__setRectOptions_Arg0* value)
         {

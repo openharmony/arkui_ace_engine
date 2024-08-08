@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace TextClockInterfaceModifier {
         void _setTextClockOptionsImpl(Ark_NativePointer node, const Opt_Type_TextClockInterface__setTextClockOptions_Arg0* options)
         {

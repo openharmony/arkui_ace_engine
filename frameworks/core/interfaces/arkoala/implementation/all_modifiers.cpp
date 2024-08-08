@@ -21,8 +21,7 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "node_api.h"
 
-namespace OHOS::Ace::NG
-{
+namespace OHOS::Ace::NG {
 
     Ark_Float32 GetDensity(Ark_Int32 deviceId);
     Ark_Float32 GetFontScale(Ark_Int32 deviceId);
@@ -105,8 +104,7 @@ namespace OHOS::Ace::NG
 
 }
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
 
     void SetAppendGroupedLog(void* pFunc) {}
 

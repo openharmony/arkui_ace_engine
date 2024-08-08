@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace CheckboxInterfaceModifier {
         void _setCheckboxOptionsImpl(Ark_NativePointer node, const Opt_CheckboxOptions* options)
         {

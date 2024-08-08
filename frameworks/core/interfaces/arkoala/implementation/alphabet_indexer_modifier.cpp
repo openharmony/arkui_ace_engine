@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace AlphabetIndexerInterfaceModifier {
         void _setAlphabetIndexerOptionsImpl(Ark_NativePointer node, const Type_AlphabetIndexerInterface__setAlphabetIndexerOptions_Arg0* value)
         {

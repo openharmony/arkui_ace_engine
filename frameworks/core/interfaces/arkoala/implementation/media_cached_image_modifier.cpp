@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace MediaCachedImageInterfaceModifier {
         void _setMediaCachedImageOptionsImpl(Ark_NativePointer node, const Type_MediaCachedImageInterface__setMediaCachedImageOptions_Arg0* src)
         {

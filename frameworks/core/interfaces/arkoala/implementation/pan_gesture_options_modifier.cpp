@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace PanGestureOptionsModifier {
         Ark_NativePointer CtorImpl(const Opt_Literal_fingers_Opt_Number_direction_PanDirection_distance_Opt_Number* value)
         {

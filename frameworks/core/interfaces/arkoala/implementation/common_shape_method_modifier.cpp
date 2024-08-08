@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace CommonShapeMethodModifier {
         void StrokeImpl(Ark_NativePointer node, const ResourceColor* value)
         {

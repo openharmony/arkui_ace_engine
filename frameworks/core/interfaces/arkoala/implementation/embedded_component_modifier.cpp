@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace EmbeddedComponentInterfaceModifier {
         void _setEmbeddedComponentOptionsImpl(Ark_NativePointer node, const Ark_CustomObject* loader, Ark_Int32 type)
         {

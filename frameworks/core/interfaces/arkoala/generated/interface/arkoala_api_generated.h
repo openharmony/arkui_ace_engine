@@ -11704,9 +11704,9 @@ struct Ark_AnyAPI {
 /*
   For debug purpose:
   Current commit of idlize
-  2024/08/07 17:23:49 084f551b62f0b3286df1447e38a88c469ebb5166 More changes
+  2024/08/08 12:49:52 bb60f61a79f1a376169163f0f7b91244675cfd5d Fix some braces and more cleanup
 
 Signed-off-by: Kirill Kirichenko <kirichenko.kirill@huawei.com>
-Change-Id: Ib60a147fb02dc7ebdc5c4352d267f6faa6afc361
+Change-Id: I2fab18ccadbe35bf90d1708aba26789a1cadac6c
  */
 

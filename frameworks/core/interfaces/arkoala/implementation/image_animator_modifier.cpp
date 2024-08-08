@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace ImageAnimatorInterfaceModifier {
         void _setImageAnimatorOptionsImpl(Ark_NativePointer node)
         {

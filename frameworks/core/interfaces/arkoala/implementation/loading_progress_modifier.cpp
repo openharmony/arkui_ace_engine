@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace LoadingProgressInterfaceModifier {
         void _setLoadingProgressOptionsImpl(Ark_NativePointer node)
         {

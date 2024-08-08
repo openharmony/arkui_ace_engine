@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace VideoInterfaceModifier {
         void _setVideoOptionsImpl(Ark_NativePointer node, const Ark_VideoOptions* value)
         {

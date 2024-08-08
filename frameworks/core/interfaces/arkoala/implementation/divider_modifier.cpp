@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace DividerInterfaceModifier {
         void _setDividerOptionsImpl(Ark_NativePointer node)
         {

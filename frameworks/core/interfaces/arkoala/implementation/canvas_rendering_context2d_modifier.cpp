@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace CanvasRenderingContext2DModifier {
         Ark_NativePointer CtorImpl(const Opt_RenderingContextSettings* settings)
         {

@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace GridColInterfaceModifier {
         void _setGridColOptionsImpl(Ark_NativePointer node, const Opt_GridColOptions* option)
         {

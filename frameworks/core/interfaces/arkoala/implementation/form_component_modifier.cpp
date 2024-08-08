@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace FormComponentInterfaceModifier {
         void _setFormComponentOptionsImpl(Ark_NativePointer node, const Ark_FormInfo* value)
         {

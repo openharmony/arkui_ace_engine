@@ -38,8 +38,7 @@
 #define SELECTOR_ID_10 10
 #define SELECTOR_ID_11 11
 
-namespace OHOS::Ace::NG::Converter
-{
+namespace OHOS::Ace::NG::Converter {
     template<typename T, typename P>
     void AssignTo(std::optional<T>& dst, const P& src);
 

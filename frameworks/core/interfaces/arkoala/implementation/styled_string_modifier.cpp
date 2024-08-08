@@ -15,8 +15,7 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier
-{
+namespace OHOS::Ace::NG::GeneratedModifier {
     namespace StyledStringModifier {
         Ark_NativePointer CtorImpl(const Union_String_ImageAttachment_CustomSpan* value, const Opt_Array_StyleOptions* styles)
         {
