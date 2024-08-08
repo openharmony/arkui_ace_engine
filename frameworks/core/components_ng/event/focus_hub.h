@@ -907,10 +907,10 @@ public:
 
     std::optional<std::string> GetInspectorKey() const;
 
-    bool PaintFocusState();
+    bool PaintFocusState(bool isNeedStateStyles = true);
     bool PaintAllFocusState();
     bool PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate = false);
-    void ClearFocusState();
+    void ClearFocusState(bool isNeedStateStyles = true);
     void ClearAllFocusState();
 
     void SetInnerFocusPaintRectCallback(const std::function<void(RoundRect&)>& callback)

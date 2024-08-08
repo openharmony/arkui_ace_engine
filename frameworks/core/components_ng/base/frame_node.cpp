@@ -1289,7 +1289,13 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         builderFunc_ = nullptr;
         backgroundNode_ = columnNode;
     }
-    UpdateFocusState();
+
+    // update focus state
+    auto focusHub = GetFocusHub();
+    if (focusHub && focusHub->IsCurrentFocus()) {
+        focusHub->ClearFocusState(false);
+        focusHub->PaintFocusState(false);
+    }
 
     // rebuild child render node.
     RebuildRenderContextTree();
@@ -3745,8 +3751,8 @@ void FrameNode::UpdateFocusState()
 {
     auto focusHub = GetFocusHub();
     if (focusHub && focusHub->IsCurrentFocus()) {
-        focusHub->ClearFocusState();
-        focusHub->PaintFocusState();
+        focusHub->ClearFocusState(false);
+        focusHub->PaintFocusState(false);
     }
 }
 
