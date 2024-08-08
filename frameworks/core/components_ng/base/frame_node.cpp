@@ -3186,7 +3186,7 @@ bool FrameNode::MarkRemoving()
         pendingRemove = true;
     }
 
-    const auto& children = GetChildren();
+    const auto children = GetChildren();
     for (const auto& child : children) {
         pendingRemove = child->MarkRemoving() || pendingRemove;
     }
