@@ -2151,10 +2151,6 @@ void DragEventActuator::PrepareShadowParametersForDragData(const RefPtr<FrameNod
     CHECK_NULL_VOID(gestureHub);
     if (gestureHub->IsTextCategoryComponent(frameTag) && gestureHub->GetTextDraggable() &&
         gestureHub->GetIsTextDraggable()) {
-        if (frameTag != V2::RICH_EDITOR_ETS_TAG) {
-            arkExtraInfoJson->Put("shadow_enable", false);
-            return;
-        }
         auto stringPath = dragPreviewOption.options.shadowPath;
         RSPath path;
         if (path.BuildFromSVGString(stringPath)) {
