@@ -101,6 +101,8 @@ public:
         return extraInfos_;
     }
 
+    void DetachFromMainTree(bool recursive) override;
+    
 private:
     std::string viewKey_;
     RenderFunction renderFunction_;
