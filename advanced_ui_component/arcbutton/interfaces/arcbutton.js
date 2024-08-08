@@ -38,6 +38,7 @@ export var ArcButtonStyleMode;
     ArcButtonStyleMode[ArcButtonStyleMode["EMPHASIZED_DEEP"] = 1] = "EMPHASIZED_DEEP";
     ArcButtonStyleMode[ArcButtonStyleMode["NORMAL_LIGHT"] = 2] = "NORMAL_LIGHT";
     ArcButtonStyleMode[ArcButtonStyleMode["NORMAL_DEEP"] = 3] = "NORMAL_DEEP";
+    ArcButtonStyleMode[ArcButtonStyleMode["CUSTOM_MODE"] = 4] = "CUSTOM_MODE";
 })(ArcButtonStyleMode || (ArcButtonStyleMode = {}));
 export var ArcButtonStatus;
 (function (ArcButtonStatus) {
@@ -76,6 +77,8 @@ let ArcButtonOptions = class ArcButtonOptions {
             end: new LengthMetrics(Constants.TEXT_HORIZONTAL_MARGIN, LengthUnit.VP),
             bottom: new LengthMetrics(Constants.TEXT_MARGIN_BOTTOM, LengthUnit.VP)
         };
+        this.onClickEvent = options.onClickEvent ?? (() => { });
+        this.touchCallback = options.touchCallback ?? (() => { });
     }
 };
 __decorate([
@@ -126,6 +129,12 @@ __decorate([
 __decorate([
     Trace
 ], ArcButtonOptions.prototype, "textMargin", void 0);
+__decorate([
+    Trace
+], ArcButtonOptions.prototype, "touchCallback", void 0);
+__decorate([
+    Trace
+], ArcButtonOptions.prototype, "onClickEvent", void 0);
 ArcButtonOptions = __decorate([
     ObservedV2
 ], ArcButtonOptions);
@@ -159,12 +168,11 @@ export class ArcButton extends ViewV2 {
         this.circularCrossPointUtil = new CircularCrossPointUtil();
         this.upperArcCircleR = 0;
         this.upperArcCircleY = 0;
+        this.textPressColor = ColorMetrics.resourceColor(Color.White);
         this.finalizeConstruction();
     }
     optionsChange() {
         this.judgeTextWidth();
-        this.btnColor = this.options.backgroundColor;
-        this.textColor = this.options.textColor;
         this.changeStatus();
     }
     changeStatus() {
@@ -175,6 +183,7 @@ export class ArcButton extends ViewV2 {
                 this.btnPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_PRESSED_BTN_COLOR);
                 this.btnDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_BTN_COLOR);
                 this.textDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_TEXT_COLOR);
+                this.textPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_TEXT_COLOR);
                 break;
             case ArcButtonStyleMode.NORMAL_LIGHT:
                 this.btnNormalColor = ColorMetrics.resourceColor(Constants.NORMAL01_NORMAL_BTN_COLOR);
@@ -182,6 +191,7 @@ export class ArcButton extends ViewV2 {
                 this.btnPressColor = ColorMetrics.resourceColor(Constants.NORMAL01_PRESSED_BTN_COLOR);
                 this.btnDisableColor = ColorMetrics.resourceColor(Constants.NORMAL01_DISABLE_BTN_COLOR);
                 this.textDisableColor = ColorMetrics.resourceColor(Constants.NORMAL01_DISABLE_TEXT_COLOR);
+                this.textPressColor = ColorMetrics.resourceColor(Constants.NORMAL01_TEXT_COLOR);
                 break;
             case ArcButtonStyleMode.NORMAL_DEEP:
                 this.btnNormalColor = ColorMetrics.resourceColor(Constants.NORMAL02_NORMAL_BTN_COLOR);
@@ -189,6 +199,7 @@ export class ArcButton extends ViewV2 {
                 this.btnPressColor = ColorMetrics.resourceColor(Constants.NORMAL02_PRESSED_BTN_COLOR);
                 this.btnDisableColor = ColorMetrics.resourceColor(Constants.NORMAL02_DISABLE_BTN_COLOR);
                 this.textDisableColor = ColorMetrics.resourceColor(Constants.NORMAL02_DISABLE_TEXT_COLOR);
+                this.textPressColor = ColorMetrics.resourceColor(Constants.NORMAL02_TEXT_COLOR);
                 break;
             case ArcButtonStyleMode.EMPHASIZED_DEEP:
                 this.btnNormalColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_NORMAL_BTN_COLOR);
@@ -196,8 +207,13 @@ export class ArcButton extends ViewV2 {
                 this.btnPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_PRESSED_BTN_COLOR);
                 this.btnDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_DISABLE_BTN_COLOR);
                 this.textDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_DISABLE_TEXT_COLOR);
+                this.textPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_TEXT_COLOR);
                 break;
             default:
+                this.btnNormalColor = this.options.backgroundColor;
+                this.textNormalColor = this.options.textColor;
+                this.btnPressColor = this.options.backgroundColor;
+                this.textPressColor = this.options.pressedTextColor;
                 break;
         }
         if (this.options.status === ArcButtonStatus.DISABLED) {
@@ -251,51 +267,54 @@ export class ArcButton extends ViewV2 {
             this.options.height.value;
         this.circularCrossPointUtil.initData(this.upperArcCircleR, this.upperArcCircleY);
         this.circularCrossPointUtil.calculate().then((data) => {
-            if (data == null) {
-                return;
-            }
-            this.btnWidth = data.width + Constants.SHADOW_BLUR * 2;
-            if (this.isUp) {
-                this.btnHeight = data.height + Constants.SHADOW_BLUR + Constants.SHADOW_OFFSET_Y;
-            }
-            else {
-                this.btnHeight = data.height + Constants.DISTANCE_FROM_BORDER * 2;
-            }
-            let margin = this.options.textMargin;
-            let start = margin?.start?.value ?? 0;
-            let end = margin?.end?.value ?? 0;
-            let top = margin?.top?.value ?? 0;
-            let bottom = margin?.bottom?.value ?? 0;
-            this.textWidth = data.width - start - end;
-            this.textHeight = data.height - top - bottom;
-            this.judgeTextWidth();
-            let leftTopPoint = data.leftTopPoint;
-            let rightTopPoint = data.rightTopPoint;
-            let leftBottomPoint = data.leftBottomPoint;
-            let rightBottomPoint = data.rightBottomPoint;
-            let canvasLeftTopPoint = data.canvasLeftTop;
-            canvasLeftTopPoint.x -= Constants.SHADOW_BLUR;
-            canvasLeftTopPoint.y -= Constants.DISTANCE_FROM_BORDER;
-            let pathStr = `M ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}
+            this.generatePath(data);
+        });
+    }
+    generatePath(data) {
+        if (data == null) {
+            return;
+        }
+        this.btnWidth = data.width + Constants.SHADOW_BLUR * 2;
+        if (this.isUp) {
+            this.btnHeight = data.height + Constants.SHADOW_BLUR + Constants.SHADOW_OFFSET_Y;
+        }
+        else {
+            this.btnHeight = data.height + Constants.DISTANCE_FROM_BORDER * 2;
+        }
+        let margin = this.options.textMargin;
+        let start = margin?.start?.value ?? 0;
+        let end = margin?.end?.value ?? 0;
+        let top = margin?.top?.value ?? 0;
+        let bottom = margin?.bottom?.value ?? 0;
+        this.textWidth = data.width - start - end;
+        this.textHeight = data.height - top - bottom;
+        this.judgeTextWidth();
+        let leftTopPoint = data.leftTopPoint;
+        let rightTopPoint = data.rightTopPoint;
+        let leftBottomPoint = data.leftBottomPoint;
+        let rightBottomPoint = data.rightBottomPoint;
+        let canvasLeftTopPoint = data.canvasLeftTop;
+        canvasLeftTopPoint.x -= Constants.SHADOW_BLUR;
+        canvasLeftTopPoint.y -= Constants.DISTANCE_FROM_BORDER;
+        let pathStr = `M ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}
         A ${vp2px(Constants.UPPER_ARC_CIRCLE_R)} ${vp2px(Constants.UPPER_ARC_CIRCLE_R)},
         0, 0, 0, ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)} ` +
-                `M ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)}
+            `M ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)}
           A ${vp2px(Constants.CHAMFER_CIRCLE_R)} ${vp2px(Constants.CHAMFER_CIRCLE_R)}, 0, 0, 0,
           ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)} ` +
-                `M ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)}
+            `M ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)}
           A ${vp2px(Constants.LOWER_ARC_CIRCLE_R)} ${vp2px(Constants.LOWER_ARC_CIRCLE_R)},
           0, 0, 0, ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)} ` +
-                `M ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)}
+            `M ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)}
           A ${vp2px(Constants.CHAMFER_CIRCLE_R)} ${vp2px(Constants.CHAMFER_CIRCLE_R)}, 0, 0, 0,
           ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)} ` +
-                `M ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}
+            `M ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}
           L ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)}
           L ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)}
           L ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)}
           L ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}`;
-            this.path2D = new Path2D(pathStr);
-            this.doDraw();
-        });
+        this.path2D = new Path2D(pathStr);
+        this.doDraw();
     }
     doDraw() {
         if (!this.isReady || this.path2D === undefined) {
@@ -306,6 +325,7 @@ export class ArcButton extends ViewV2 {
             this.context.shadowOffsetY = -Constants.SHADOW_OFFSET_Y;
             this.context.shadowColor = this.options.shadowColor.color;
         }
+        this.context.clearRect(0, 0, this.btnWidth, this.btnHeight);
         this.context.beginPath();
         this.context.fillStyle = this.btnColor.color;
         this.context.fill(this.path2D);
@@ -367,29 +387,7 @@ export class ArcButton extends ViewV2 {
             Stack.scale({ x: this.scaleX, y: this.scaleY, centerY: this.isUp ? 0 : this.btnHeight });
             Stack.translate({ y: this.translateY });
             Stack.onTouch((event) => {
-                if (this.options.touchCallback) {
-                    this.options.touchCallback(event);
-                }
-                let x = event.touches[0].windowX;
-                let y = event.touches[0].windowY;
-                switch (event.type) {
-                    case TouchType.Down:
-                        let isInPath = this.circularCrossPointUtil.isPointInPath(x, y, this.isUp);
-                        if (!isInPath) {
-                            return;
-                        }
-                        this.scaleX = this.scaleValue;
-                        this.scaleY = this.scaleValue;
-                        this.btnColor = this.btnPressColor;
-                        break;
-                    case TouchType.Up:
-                        this.scaleX = 1;
-                        this.scaleY = 1;
-                        this.btnColor = this.btnNormalColor;
-                        break;
-                    default:
-                        break;
-                }
+                this.dealTouchEvent(event);
             });
             Stack.onClick((event) => {
                 if (this.options.onClickEvent) {
@@ -435,6 +433,33 @@ export class ArcButton extends ViewV2 {
         }, If);
         If.pop();
         Stack.pop();
+    }
+    dealTouchEvent(event) {
+        if (this.options.touchCallback) {
+            this.options.touchCallback(event);
+        }
+        let x = event.touches[0].windowX;
+        let y = event.touches[0].windowY;
+        switch (event.type) {
+            case TouchType.Down:
+                let isInPath = this.circularCrossPointUtil.isPointInPath(x, y, this.isUp);
+                if (!isInPath) {
+                    return;
+                }
+                this.scaleX = this.scaleValue;
+                this.scaleY = this.scaleValue;
+                this.btnColor = this.btnPressColor;
+                this.textColor = this.textPressColor;
+                break;
+            case TouchType.Up:
+                this.scaleX = 1;
+                this.scaleY = 1;
+                this.btnColor = this.btnNormalColor;
+                this.textColor = this.textNormalColor;
+                break;
+            default:
+                break;
+        }
     }
     updateStateVars(params) {
         if (params === undefined) {
@@ -482,7 +507,7 @@ __decorate([
     Local
 ], ArcButton.prototype, "isExceed", void 0);
 __decorate([
-    Monitor('options.resourceText', 'options.textSize', 'options.styleMode', 'options.status', 'options.backgroundColor', 'options.textColor')
+    Monitor('options.resourceText', 'options.type', 'options.textSize', 'options.styleMode', 'options.status', 'options.backgroundColor', 'options.textColor')
 ], ArcButton.prototype, "optionsChange", null);
 __decorate([
     Monitor('btnColor')
@@ -723,14 +748,14 @@ Constants.EMPHASIZED_TEXT_COLOR = '#FFFFFF';
 Constants.EMPHASIZED_PRESSED_BTN_COLOR = '#2B6EC2';
 Constants.EMPHASIZED_DISABLE_BTN_COLOR = '#991F71FF';
 Constants.EMPHASIZED_DISABLE_TEXT_COLOR = '#99FFFFFF';
-Constants.NORMAL01_NORMAL_BTN_COLOR = '#132230';
+Constants.NORMAL01_NORMAL_BTN_COLOR = '#182840';
 Constants.NORMAL01_TEXT_COLOR = '#5EA1FF';
-Constants.NORMAL01_PRESSED_BTN_COLOR = '#25353E';
+Constants.NORMAL01_PRESSED_BTN_COLOR = '#2F3D53';
 Constants.NORMAL01_DISABLE_BTN_COLOR = '#132230';
 Constants.NORMAL01_DISABLE_TEXT_COLOR = '#995ea1ff';
 Constants.NORMAL02_NORMAL_BTN_COLOR = '#1D201C';
 Constants.NORMAL02_TEXT_COLOR = '#5EA1FF';
-Constants.NORMAL02_PRESSED_BTN_COLOR = '#30342D';
+Constants.NORMAL02_PRESSED_BTN_COLOR = '#3C3C3C';
 Constants.NORMAL02_DISABLE_BTN_COLOR = '#1E211D';
 Constants.NORMAL02_DISABLE_TEXT_COLOR = '#995ea1ff';
 Constants.EMPHASIZEWARN_NORMAL_BTN_COLOR = '#BF2629';
