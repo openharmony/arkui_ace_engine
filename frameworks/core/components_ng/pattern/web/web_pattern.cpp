@@ -865,7 +865,11 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 {
     CHECK_NULL_VOID(delegate_);
     auto localLocation = info.GetLocalLocation();
-    if ((mouseHoveredX_ != localLocation.GetX()) || (mouseHoveredY_ != localLocation.GetY())) {
+    if ((mouseHoveredX_ != localLocation.GetX()) ||
+        (mouseHoveredY_ != localLocation.GetY()) ||
+        (info.GetAction() == MouseAction::PRESS) ||
+        (info.GetButton() == MouseButton::LEFT_BUTTON) ||
+        (info.GetButton() == MouseButton::RIGHT_BUTTON)) {
         OnTooltip("");
     }
     if (info.GetAction() == MouseAction::PRESS) {
