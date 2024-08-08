@@ -242,7 +242,7 @@ HWTEST_F(RichEditorPatternTestOneNg, HandleMenuCallbackOnSelectAll001, TestSize.
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    
+
     /**
      * @tc.steps: step1. get richeditor pattern and add add text span
      */
@@ -254,17 +254,38 @@ HWTEST_F(RichEditorPatternTestOneNg, HandleMenuCallbackOnSelectAll001, TestSize.
      */
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
-	
+
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    bool enabledCache = eventHub->IsEnabled();
+    EXPECT_EQ(enabledCache, true);
+
     /**
      * @tc.step: step3. create a scene where the text menu has popped up
      */
+    richEditorPattern->textDetectEnable_ = true;
+    richEditorPattern->enabled_ = true;
     richEditorPattern->OnModifyDone();
+
+    richEditorPattern->textDetectEnable_ = true;
+    richEditorPattern->enabled_ = false;
+    richEditorPattern->OnModifyDone();
+
+    richEditorPattern->textDetectEnable_ = false;
+    richEditorPattern->enabled_ = true;
+    richEditorPattern->OnModifyDone();
+
+    richEditorPattern->textDetectEnable_ = false;
+    richEditorPattern->enabled_ = false;
+    richEditorPattern->OnModifyDone();
+
     richEditorPattern->textSelector_.Update(1, 2);
     richEditorPattern->CalculateHandleOffsetAndShowOverlay();
     richEditorPattern->ShowSelectOverlay(
         richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
     EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
-	
+
     /**
      * @tc.step: step4. test OnMenuItemAction
      */
@@ -662,6 +683,151 @@ HWTEST_F(RichEditorPatternTestOneNg, HandleSelectOverlayWithOptions001, TestSize
     richEditorPattern->HandleSelectOverlayWithOptions(options);
     options.menuPolicy = MenuPolicy::DEFAULT;
     richEditorPattern->HandleSelectOverlayWithOptions(options);
-    ASSERT_NE(richEditorPattern->SelectOverlayIsOn(), false);
+    options.menuPolicy = MenuPolicy::HIDE;
+    richEditorPattern->HandleSelectOverlayWithOptions(options);
+    ClearSpan();
+    richEditorPattern->HandleSelectOverlayWithOptions(options);
+    ASSERT_EQ(richEditorPattern->SelectOverlayIsOn(), false);
+}
+
+/**
+ * @tc.name: InsertValueInStyledString001
+ * @tc.desc: test RichEditorPattern InsertValueInStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, InsertValueInStyledString001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    TextStyle style;
+    style.SetLineHeight(LINE_HEIGHT_VALUE);
+    style.SetLetterSpacing(LETTER_SPACING);
+    style.SetFontFeatures(TEXT_FONTFEATURE);
+
+    UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.hasResourceFontColor = false;
+
+    std::string content = "TEST123";
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(content);
+
+    richEditorPattern->typingStyle_ = std::nullopt;
+    richEditorPattern->typingTextStyle_ = std::nullopt;
+    richEditorPattern->InsertValueInStyledString("abc");
+
+    richEditorPattern->typingStyle_ = std::nullopt;
+    richEditorPattern->typingTextStyle_ = style;
+    richEditorPattern->InsertValueInStyledString("abc");
+
+    richEditorPattern->typingStyle_ = updateSpanStyle;
+    richEditorPattern->typingTextStyle_ = std::nullopt;
+    richEditorPattern->InsertValueInStyledString("abc");
+
+    richEditorPattern->typingStyle_ = updateSpanStyle;
+    richEditorPattern->typingTextStyle_ = style;
+    richEditorPattern->InsertValueInStyledString("abc");
+
+    ASSERT_EQ(richEditorPattern->typingTextStyle_.has_value(), true);
+}
+
+/**
+ * @tc.name: InsertValueInStyledString002
+ * @tc.desc: test RichEditorPattern InsertValueInStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, InsertValueInStyledString002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    auto host = richEditorPattern->GetHost();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    TextSpanOptions options2;
+    options2.value = INIT_VALUE_1;
+    richEditorController->AddTextSpan(options2);
+    focusHub->RequestFocusImmediately();
+    richEditorPattern->FireOnSelectionChange(-1, 0);
+    richEditorPattern->FireOnSelectionChange(0, -1);
+    richEditorPattern->FireOnSelectionChange(-1, -1);
+    ASSERT_EQ(richEditorPattern->HasFocus(), true);
+}
+
+/**
+ * @tc.name: CreateDecorationSpanByTextStyle001
+ * @tc.desc: test RichEditorPattern CreateDecorationSpanByTextStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, CreateDecorationSpanByTextStyle001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::DASHED;
+    TextStyle style;
+    style.SetLineHeight(LINE_HEIGHT_VALUE);
+    style.SetLetterSpacing(LETTER_SPACING);
+    style.SetFontFeatures(TEXT_FONTFEATURE);
+    RefPtr<DecorationSpan> span = richEditorPattern->CreateDecorationSpanByTextStyle(updateSpanStyle, style, 0);
+    ASSERT_NE(span, nullptr);
+}
+
+/**
+ * @tc.name: DeleteValueInStyledString001
+ * @tc.desc: test RichEditorPattern DeleteValueInStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, DeleteValueInStyledString001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>("abc");
+    richEditorPattern->caretVisible_ = false;
+    richEditorPattern->previewLongPress_ = true;
+    richEditorPattern->DeleteValueInStyledString(0, 10, true);
+    richEditorPattern->previewLongPress_ = false;
+    richEditorPattern->DeleteValueInStyledString(0, 10, true);
+    richEditorPattern->previewLongPress_ = true;
+    richEditorPattern->DeleteValueInStyledString(0, 10, false);
+    richEditorPattern->previewLongPress_ = false;
+    richEditorPattern->DeleteValueInStyledString(0, 10, false);
+    ASSERT_EQ(!richEditorPattern->BeforeStyledStringChange(0, 10, ""), false);
+}
+
+/**
+ * @tc.name: MouseDoubleClickParagraphEnd001
+ * @tc.desc: test RichEditorPattern MouseDoubleClickParagraphEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, MouseDoubleClickParagraphEnd001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    AddSpan("TEST123");
+    std::string content = "TEST123";
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(content);
+
+    richEditorPattern->typingStyle_ = std::nullopt;
+    richEditorPattern->typingTextStyle_ = std::nullopt;
+    richEditorPattern->InsertValueInStyledString("TEST123");
+
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
+    richEditorPattern->sourceType_ = SourceType::MOUSE;
+    int32_t index = 7;
+    int32_t index2 = 2;
+    richEditorPattern->MouseDoubleClickParagraphEnd(index2);
+    richEditorPattern->MouseDoubleClickParagraphEnd(index);
+    EXPECT_EQ(richEditorPattern->GetParagraphEndPosition(index), 7);
 }
 } // namespace OHOS::Ace::NG
