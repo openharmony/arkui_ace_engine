@@ -58,10 +58,6 @@ public:
     {
         return focusedBGColorUnselected_;
     }
-    const Color& GetPointColorUnchecked() const
-    {
-        return pointColorUnchecked_;
-    }
     const Dimension& GetWidth() const
     {
         return width_;
@@ -231,7 +227,6 @@ protected:
     Color focusBoardColor_;
     Color borderFocusedColor_;
     Color focusedBGColorUnselected_;
-    Color pointColorUnchecked_;
     Color focusedBgColor_;
     Dimension sizeFocusBg_;
     Dimension sizeHoverBg_;
@@ -406,6 +401,11 @@ public:
         return focusedPointColorUnselected_;
     }
 
+    const Color& GetPointColorUnchecked() const
+    {
+        return pointColorUnchecked_;
+    }
+
     const Dimension& GetFocusBoardWidth() const
     {
         return focusBoardWidth_;
@@ -436,10 +436,17 @@ public:
         return pointAnimationDuration_;
     }
 
+    bool GetSwitchDifferentPointColor() const
+    {
+        return isDiffPointColor_;
+    }
+
 private:
     double colorAnimationDuration_ = 0.0;
     double pointAnimationDuration_ = 0.0;
+    bool isDiffPointColor_ = false;
     Color focusedPointColorUnselected_;
+    Color pointColorUnchecked_;
     Dimension focusBoardWidth_;
     Dimension focusBoardHeight_;
     Dimension focusBoardRadius_;

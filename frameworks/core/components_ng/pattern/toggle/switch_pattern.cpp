@@ -153,6 +153,7 @@ void SwitchPattern::UpdateSwitchStyle()
     CHECK_NULL_VOID(pipeline);
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
+    CHECK_NULL_VOID(switchModifier_);
 
     Color bgColor = switchTheme->GetInactiveColor();
     if (!isOn_.value_or(false)  && isFocus_) {
@@ -161,21 +162,12 @@ void SwitchPattern::UpdateSwitchStyle()
             Color focusedBGColor = switchTheme->GetFocusedBGColorUnselected();
             switchPaintProperty->UpdateUnselectedColor(focusedBGColor);
         }
-        Color pointColor = switchTheme->GetPointColor();
-        if (!switchPaintProperty->HasSwitchPointColor() || switchPaintProperty->GetSwitchPointColor() == pointColor) {
-            isPointColorUnselectFocus_ = true;
-            Color focusPointColor = switchTheme->GetPointColorUnselectedFocus();
-            switchPaintProperty->UpdateSwitchPointColor(focusPointColor);
-        }
+        switchModifier_->SetFocusPointColor(switchTheme->GetPointColorUnselectedFocus());
     }
     if (!isFocus_) {
         if (isBgColorUnselectFocus_) {
             isBgColorUnselectFocus_ = false;
             switchPaintProperty->UpdateUnselectedColor(switchTheme->GetInactiveColor());
-        }
-        if (isPointColorUnselectFocus_) {
-            isPointColorUnselectFocus_ = false;
-            switchPaintProperty->UpdateSwitchPointColor(switchTheme->GetPointColor());
         }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -404,37 +396,11 @@ void SwitchPattern::UpdateColorWhenIsOn(bool isOn)
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
 
-    Color onPointColor = switchTheme->GetPointColor();
     Color onBgColor = switchTheme->GetActiveColor();
-    Color offPointColor;
-    Color switchColor;
-    Color offBgColor;
-    if (isFocus_) {
-        offPointColor = switchTheme->GetPointColorUnselectedFocus();
-        switchColor = isOn ? offPointColor : onPointColor;
-        if (!switchPaintProperty->HasSwitchPointColor() || switchPaintProperty->GetSwitchPointColor() == switchColor) {
-            isPointColorUnselectFocus_ = true;
-            switchPaintProperty->UpdateSwitchPointColor(isOn ? onPointColor : switchTheme->GetPointColorUnchecked());
-        }
-
-        offBgColor = switchTheme->GetFocusedBGColorUnselected();
-        switchColor = isOn ? offBgColor : onBgColor;
-        if (!switchPaintProperty->HasUnselectedColor() || switchPaintProperty->GetUnselectedColor() == switchColor) {
-            isBgColorUnselectFocus_ = true;
-            switchPaintProperty->UpdateUnselectedColor(isOn ? onBgColor : switchTheme->GetInactiveColor());
-        }
-    } else {
-        offPointColor = switchTheme->GetPointColorUnchecked();
-        switchColor = isOn ? offPointColor : onPointColor;
-        if (!switchPaintProperty->HasSwitchPointColor() || switchPaintProperty->GetSwitchPointColor() == switchColor) {
-            switchPaintProperty->UpdateSwitchPointColor(isOn ? onPointColor : offPointColor);
-        }
-
-        offBgColor = switchTheme->GetInactiveColor();
-        switchColor = isOn ? offBgColor : onBgColor;
-        if (!switchPaintProperty->HasUnselectedColor() || switchPaintProperty->GetUnselectedColor() == switchColor) {
-            switchPaintProperty->UpdateUnselectedColor(isOn ? onBgColor : offBgColor);
-        }
+    Color offBgColor = switchTheme->GetInactiveColor();
+    Color bgColor = isOn ? offBgColor : onBgColor;
+    if (!switchPaintProperty->HasUnselectedColor() || switchPaintProperty->GetUnselectedColor() == bgColor) {
+        switchPaintProperty->UpdateUnselectedColor(isOn ? onBgColor : offBgColor);
     }
 }
 
