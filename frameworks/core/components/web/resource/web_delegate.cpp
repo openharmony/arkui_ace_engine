@@ -2116,8 +2116,10 @@ void WebDelegate::RegisterConfigObserver()
             CHECK_NULL_VOID(delegate->nweb_);
             auto abilityContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
             CHECK_NULL_VOID(abilityContext);
-            delegate->configChangeObserver_.reset(new (std::nothrow) WebConfigurationObserver(delegate));
-            abilityContext->RegisterEnvironmentCallback(delegate->configChangeObserver_);
+            delegate->configChangeObserver_ = std::make_shared<WebConfigurationObserver>(delegate);
+            if (delegate->configChangeObserver_) {
+                abilityContext->RegisterEnvironmentCallback(delegate->configChangeObserver_);
+            }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebAddConfigObserver");
 }
