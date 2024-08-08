@@ -18117,7 +18117,7 @@ class TextpickerDividerModifier extends ModifierWithKey {
     applyPeer(node, reset) {
         var _a, _b, _c, _d;
         if (reset) {
-            getUINativeModule().textpicker.resetDivider(node);
+            getUINativeModule().textpicker.resetDivider(node, this.value);
         }
         else {
             getUINativeModule().textpicker.setDivider(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.strokeWidth, (_b = this.value) === null || _b === void 0 ? void 0 : _b.color, (_c = this.value) === null || _c === void 0 ? void 0 : _c.startMargin, (_d = this.value) === null || _d === void 0 ? void 0 : _d.endMargin);
