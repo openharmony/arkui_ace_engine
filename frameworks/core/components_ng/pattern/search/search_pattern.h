@@ -72,7 +72,7 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         if (!searchOverlayModifier_) {
-            searchOverlayModifier_ = AceType::MakeRefPtr<SearchOverlayModifier>(WeakClaim(this), buttonSize_);
+            searchOverlayModifier_ = AceType::MakeRefPtr<SearchOverlayModifier>(WeakClaim(this));
         }
         auto paintMethod =
             MakeRefPtr<SearchPaintMethod>(searchOverlayModifier_, buttonSize_, searchButton_, isSearchButtonEnabled_);
@@ -181,6 +181,11 @@ public:
     bool GetIsSearchButtonEnabled() const
     {
         return isSearchButtonEnabled_;
+    }
+
+    const SizeF GetButtonSize() const
+    {
+        return buttonSize_;
     }
 
     void ResetDragOption() override;

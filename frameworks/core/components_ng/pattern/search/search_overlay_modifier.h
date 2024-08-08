@@ -43,7 +43,7 @@ class SearchOverlayModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(SearchOverlayModifier, OverlayModifier)
 
 public:
-    SearchOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, const SizeF& buttonSize);
+    SearchOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern);
     ~SearchOverlayModifier() override = default;
 
     void onDraw(DrawingContext& drawingContext) override;
@@ -53,6 +53,7 @@ public:
     void SetIsSearchButtonEnabled(bool value);
     void SetSearchDividerColor(Color value);
     void SetSearchDividerWidth(double value);
+    void SetButtonSize(SizeF buttonSize);
     std::tuple<float, float, float, float> GetPaddingOffsets() const;
     std::tuple<float, float, float> CalculateDividerOffsets(const SearchDividerOffsetsParams& params) const;
     std::tuple<OHOS::Ace::Dimension, double, double, double, OHOS::Ace::Color> GetThemeAttributes(

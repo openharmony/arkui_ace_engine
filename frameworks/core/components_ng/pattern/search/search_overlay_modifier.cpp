@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/search/search_overlay_modifier.h"
+
 #include "base/utils/utils.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
@@ -21,8 +22,7 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
-SearchOverlayModifier::SearchOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, const SizeF& buttonSize)
-    : pattern_(pattern), buttonSize_(buttonSize)
+SearchOverlayModifier::SearchOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern) : pattern_(pattern)
 {
     InitModifierProperty();
     AttachModifierProperty();
@@ -58,6 +58,11 @@ void SearchOverlayModifier::SetSearchDividerWidth(double value)
     searchDividerWidth_ = value;
 }
 
+void SearchOverlayModifier::SetButtonSize(SizeF value)
+{
+    buttonSize_ = value;
+}
+
 void SearchOverlayModifier::InitModifierProperty()
 {
     auto searchPattern = DynamicCast<SearchPattern>(pattern_.Upgrade());
@@ -71,6 +76,8 @@ void SearchOverlayModifier::InitModifierProperty()
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
+    auto btnSize = searchPattern->GetButtonSize();
+    SetButtonSize(btnSize);
 
     auto [iconHeight, dividerSpace, searchSpace, searchDividerWidth, searchDividerColor] =
         GetThemeAttributes(searchTheme);
