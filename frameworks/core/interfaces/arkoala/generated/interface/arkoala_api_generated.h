@@ -32,6 +32,8 @@
 #define GENERATED_ARKUI_NODE_MODIFIERS_API_VERSION 6
 #define GENERATED_ARKUI_AUTO_GENERATE_NODE_ID (-2)
 
+/* clang-format off */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -11698,6 +11700,8 @@ struct Ark_AnyAPI {
 #ifdef __cplusplus
 };
 #endif
+
+/* clang-format on */
 
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_API_H
 
