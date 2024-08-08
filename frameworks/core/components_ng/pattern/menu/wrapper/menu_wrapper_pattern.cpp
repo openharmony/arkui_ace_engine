@@ -128,7 +128,6 @@ void MenuWrapperPattern::HandleInteraction(const TouchEventInfo& info)
     CHECK_NULL_VOID(host);
     auto position = OffsetF(
         static_cast<float>(touch.GetGlobalLocation().GetX()), static_cast<float>(touch.GetGlobalLocation().GetY()));
-    position -= host->GetPaintRectOffset();
     RefPtr<UINode> innerMenuNode = nullptr;
     auto menuZone = GetMenuZone(innerMenuNode);
     CHECK_NULL_VOID(innerMenuNode);
