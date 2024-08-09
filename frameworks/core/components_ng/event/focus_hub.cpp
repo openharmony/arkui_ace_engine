@@ -43,6 +43,8 @@
 #endif
 
 namespace OHOS::Ace::NG {
+constexpr uint32_t DELAY_TIME_FOR_RESET_UEC = 50;
+
 RefPtr<FocusManager> FocusHub::GetFocusManager() const
 {
     auto frameNode = GetFrameNode();
@@ -782,7 +784,23 @@ bool FocusHub::RequestNextFocusOfKeyTab(const KeyEvent& keyEvent)
         if (!ret && isCurrentHandledByFocusView) {
             auto container = Container::GetContainer(context->GetInstanceId());
             auto isDynamicRender = container == nullptr ? false : container->IsDynamicRender();
-            if (context->IsFocusWindowIdSetted() || isDynamicRender) {
+            bool isFocusWindowIdSetted = context->IsFocusWindowIdSetted();
+            if (isFocusWindowIdSetted) {
+                // Delay focus transfer to avoid focusbox twinkling when USC lost focus.
+                // UEC should inherit common FocusHub to handle such case in the future.
+                auto taskExecutor = context->GetTaskExecutor();
+                CHECK_NULL_RETURN(taskExecutor, false);
+                auto instanceId = context->GetInstanceId();
+                taskExecutor->PostDelayedTask(
+                    [weak = WeakClaim(this), instanceId] {
+                        ContainerScope scope(instanceId);
+                        auto focusHub = weak.Upgrade();
+                        CHECK_NULL_VOID(focusHub);
+                        focusHub->FocusToHeadOrTailChild(true);
+                    }, TaskExecutor::TaskType::UI,
+                    DELAY_TIME_FOR_RESET_UEC, "FocusToHeadOrTailChildInUEC");
+                return false;
+            } else if (isDynamicRender) {
                 FocusToHeadOrTailChild(true);
                 return false;
             }
