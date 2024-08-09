@@ -333,9 +333,12 @@ public:
         return eventHub_->GetFocusHub();
     }
 
-    RefPtr<AccessibilityProperty> GetVirtualAccessibilityProperty() override
+    bool HasVirtualNodeAccessibilityProperty() override
     {
-        return accessibilityProperty_;
+        if (accessibilityProperty_ && accessibilityProperty_->GetAccessibilityVirtualNodePtr()) {
+            return true;
+        }
+        return false;
     }
 
     FocusType GetFocusType() const

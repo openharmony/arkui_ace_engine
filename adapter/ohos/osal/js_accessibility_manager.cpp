@@ -922,19 +922,15 @@ RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>&
 #endif
     std::queue<NG::UINode*> nodes;
     nodes.push(Referenced::RawPtr(root));
-    NG::UINode* virtualNode = nullptr;
     RefPtr<NG::FrameNode> frameNodeResult = nullptr;
 
     while (!nodes.empty()) {
         auto current = nodes.front();
         nodes.pop();
-        virtualNode = nullptr;
-        auto fnode = current->GetVirtualAccessibilityProperty();
-        if (fnode != nullptr) {
-            virtualNode = fnode->GetAccessibilityVirtualNodePtr();
-        }
-        if (virtualNode) {
-            const auto& children = std::list<RefPtr<NG::UINode>> { fnode->GetAccessibilityVirtualNode() };
+        if (current->HasVirtualNodeAccessibilityProperty()) {
+            auto fnode = AceType::DynamicCast<NG::FrameNode>(current);
+            auto property = fnode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+            const auto& children = std::list<RefPtr<NG::UINode>> { property->GetAccessibilityVirtualNode() };
             if (FindFrameNodeByAccessibilityId(id, children, nodes, frameNodeResult)) {
                 return frameNodeResult;
             }

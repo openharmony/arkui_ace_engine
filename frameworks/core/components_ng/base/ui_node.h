@@ -606,9 +606,9 @@ public:
     static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
     static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
 
-    virtual RefPtr<NG::AccessibilityProperty> GetVirtualAccessibilityProperty()
+    virtual bool HasVirtualNodeAccessibilityProperty()
     {
-        return nullptr;
+        return false;
     }
 
     void AddFlag(uint32_t flag)
