@@ -517,6 +517,7 @@ public:
     void SetStyledString(const RefPtr<SpanString>& value);
     // select overlay
     virtual int32_t GetHandleIndex(const Offset& offset) const;
+    bool IsCustomSpanNode(const RefPtr<SpanItem>& span) const;
     std::string GetSelectedText(int32_t start, int32_t end) const;
     void UpdateSelectionSpanType(int32_t selectStart, int32_t selectEnd);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
