@@ -1343,7 +1343,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto context = PipelineBase::GetCurrentContext();
     auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
     CHECK_NULL_VOID(theme);
-    UpdateTexOverflow(textProperty);
+    UpdateTextOverflow(textProperty);
     auto layoutDirection = itemProperty->GetNonAutoLayoutDirection();
     TextAlign textAlign = static_cast<TextAlign>(theme->GetMenuItemContentAlign());
     if (layoutDirection == TextDirection::RTL) {
@@ -1387,27 +1387,20 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void MenuItemPattern::UpdateTexOverflow(RefPtr<TextLayoutProperty>& textProperty)
+void MenuItemPattern::UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty)
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto deviceType = SystemProperties::GetDeviceType();
-        if (deviceType == DeviceType::TV || deviceType == DeviceType::TWO_IN_ONE) {
-            textProperty->UpdateMaxLines(1);
-        }
-    } else {
-        textProperty->UpdateMaxLines(1);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto pipeline = host->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-        CHECK_NULL_VOID(menuTheme);
-        auto fontScale = pipeline->GetFontScale();
-        if (NearEqual(fontScale, menuTheme->GetBigFontSizeScale()) ||
-            NearEqual(fontScale, menuTheme->GetLargeFontSizeScale()) ||
-            NearEqual(fontScale, menuTheme->GetMaxFontSizeScale())) {
-            textProperty->UpdateMaxLines(menuTheme->GetTextMaxLines());
-        }
+    textProperty->UpdateMaxLines(1);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto fontScale = pipeline->GetFontScale();
+    if (NearEqual(fontScale, menuTheme->GetBigFontSizeScale()) ||
+        NearEqual(fontScale, menuTheme->GetLargeFontSizeScale()) ||
+        NearEqual(fontScale, menuTheme->GetMaxFontSizeScale())) {
+        textProperty->UpdateMaxLines(menuTheme->GetTextMaxLines());
     }
 }
 
