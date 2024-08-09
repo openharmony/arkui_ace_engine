@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_CLICK_RECOGNIZER_H
 
 #include <functional>
+#include <limits>
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/point_t.h"
@@ -64,6 +65,9 @@ public:
     void SetDistanceThreshold(double distanceThreshold)
     {
         distanceThreshold_ = distanceThreshold;
+        if (distanceThreshold_ < 0) {
+            distanceThreshold_ = std::numeric_limits<double>::infinity();
+        }
     }
 
     int GetCount()

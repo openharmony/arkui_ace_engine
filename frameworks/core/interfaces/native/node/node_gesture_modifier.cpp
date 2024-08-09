@@ -89,6 +89,7 @@ ArkUIGesture* createTapGesture(ArkUI_Int32 count, ArkUI_Int32 fingers, void* use
 ArkUIGesture* createTapGestureWithDistanceThreshold(
     ArkUI_Int32 count, ArkUI_Int32 fingers, double distanceThreshold, void* userData)
 {
+    distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
     auto tapGestureObject = AceType::MakeRefPtr<TapGesture>(count, fingers, distanceThreshold);
     tapGestureObject->SetUserData(userData);
     tapGestureObject->IncRefCount();
