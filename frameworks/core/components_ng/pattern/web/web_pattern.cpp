@@ -1854,7 +1854,7 @@ void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, do
 
 void WebPattern::OnAreaChangedInner()
 {
-    auto offset = OffsetF(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
+    auto offset = GetCoordinatePoint().value_or(OffsetF());
     auto resizeOffset = Offset(offset.GetX(), offset.GetY());
 
     auto frameNode = GetHost();
@@ -2268,6 +2268,7 @@ bool WebPattern::IsRootNeedExportTexture()
 
 void WebPattern::OnAttachContext(PipelineContext *context)
 {
+    nodeAttach_ = true;
     auto pipelineContext = Claim(context);
     int32_t newId = pipelineContext->GetInstanceId();
     if (delegate_) {
@@ -2305,6 +2306,7 @@ void WebPattern::OnAttachContext(PipelineContext *context)
 
 void WebPattern::OnDetachContext(PipelineContext *contextPtr)
 {
+    nodeAttach_ = false;
     auto context = AceType::Claim(contextPtr);
     CHECK_NULL_VOID(context);
 
@@ -2331,7 +2333,10 @@ void WebPattern::OnDetachContext(PipelineContext *contextPtr)
         dragDropManager->RemoveDragFrameNode(nodeId);
     }
 
+    scrollableParentInfo_.hasParent = true;
+    scrollableParentInfo_.parentIds.clear();
     if (selectOverlayProxy_) {
+        StopListenSelectOverlayParentScroll(host);
         auto selectOverlayManager = context->GetSelectOverlayManager();
         if (selectOverlayManager) {
             selectOverlayManager->DestroySelectOverlay(selectOverlayProxy_);
@@ -2582,7 +2587,9 @@ void WebPattern::OnModifyDone()
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-
+    if (nodeAttach_) {
+        pipelineContext->AddOnAreaChangeNode(host->GetId());
+    }
     // offline mode
     if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
         InitInOfflineMode();
@@ -2938,18 +2945,32 @@ bool WebPattern::IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleS
     return (handle != nullptr) && (handle->IsEnable());
 }
 
-bool WebPattern::IsTouchHandleShow(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)
+void WebPattern::CheckHandles(SelectHandleInfo& handleInfo,
+    const std::shared_ptr<OHOS::NWeb::NWebTouchHandleState>& handle)
 {
-    CHECK_NULL_RETURN(handle, false);
+    CHECK_NULL_VOID(handle);
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
+    CHECK_NULL_VOID(pipeline);
     int y = static_cast<int32_t>(handle->GetY() / pipeline->GetDipScale());
     int edgeHeight = static_cast<int32_t>(handle->GetEdgeHeight() / pipeline->GetDipScale()) - 1;
-    if (handle->GetAlpha() > 0 && y >= edgeHeight &&
-        GreatNotEqual(GetHostFrameSize().value_or(SizeF()).Height(), handle->GetY())) {
-        return true;
+    if (handle->GetAlpha() <= 0 || y < edgeHeight) {
+        handleInfo.isShow = false;
+        return;
     }
-    return false;
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    float viewPortY = handle->GetViewPortY();
+    RectF visibleRect;
+    RectF visibleInnerRect;
+    RectF frameRect;
+    host->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
+    visibleInnerRect.SetRect(visibleInnerRect.GetX(), visibleInnerRect.GetY() + viewPortY,
+        visibleInnerRect.Width(), visibleInnerRect.Height() - viewPortY);
+    auto paintRect = handleInfo.paintRect;
+    PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() };
+    PointF topPoint = { paintRect.Left(), paintRect.Top() };
+    handleInfo.isShow = (visibleInnerRect.IsInRegion(bottomPoint) && visibleInnerRect.IsInRegion(topPoint));
 }
 
 WebOverlayType WebPattern::GetTouchHandleOverlayType(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
@@ -3024,9 +3045,11 @@ void WebPattern::CloseSelectOverlay()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     selectTemporarilyHidden_ = false;
+    selectTemporarilyHiddenByScroll_ = false;
     if (selectOverlayProxy_) {
         TAG_LOGI(AceLogTag::ACE_WEB, "Close Select Overlay Now");
         SetSelectOverlayDragging(false);
+        StopListenSelectOverlayParentScroll(GetHost());
         selectOverlayProxy_->Close();
         pipeline->GetSelectOverlayManager()->DestroySelectOverlay(selectOverlayProxy_);
         selectOverlayProxy_ = nullptr;
@@ -3038,6 +3061,95 @@ void WebPattern::CloseSelectOverlay()
         }
         touchOverlayInfo_.clear();
     }
+}
+
+void WebPattern::OnParentScrollStartOrEndCallback(bool isEnd)
+{
+    CHECK_NULL_VOID(selectOverlayProxy_);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSelectOverlayManager();
+    CHECK_NULL_VOID(manager);
+    auto overlayId = selectOverlayProxy_->GetSelectOverlayId();
+    if (!manager->HasSelectOverlay(overlayId)) {
+        return;
+    }
+
+    if (selectOverlayProxy_->IsSingleHandle()) {
+        if (!isEnd) {
+            selectOverlayProxy_->UpdateSelectMenuInfo([isEnd](SelectMenuInfo& menuInfo) {
+                menuInfo.menuIsShow = false;
+            });
+        }
+        return;
+    }
+    selectTemporarilyHiddenByScroll_ = !isEnd;
+    if (selectTemporarilyHidden_) {
+        return;
+    }
+    HideHandleAndQuickMenuIfNecessary(selectTemporarilyHiddenByScroll_, true);
+}
+
+void WebPattern::RegisterSelectOverlayParentScrollCallback(int32_t parentId, int32_t callbackId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto manager = context->GetSelectOverlayManager();
+    CHECK_NULL_VOID(manager);
+    auto scrollCallback = [weak = WeakClaim(this)](Axis axis, float offset, int32_t source) {
+        auto client = weak.Upgrade();
+        CHECK_NULL_VOID(client);
+        if (source == SCROLL_FROM_START) {
+            client->OnParentScrollStartOrEndCallback(false);
+        } else if (source == -1) {
+            client->OnParentScrollStartOrEndCallback(true);
+        }
+    };
+    manager->RegisterScrollCallback(parentId, callbackId, scrollCallback);
+}
+
+void WebPattern::StartListenSelectOverlayParentScroll(const RefPtr<FrameNode>& host)
+{
+    if (!scrollableParentInfo_.hasParent) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "has no scrollable parent");
+        return;
+    }
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto hostId = host->GetId();
+    if (!scrollableParentInfo_.parentIds.empty()) {
+        for (const auto& scrollId : scrollableParentInfo_.parentIds) {
+            RegisterSelectOverlayParentScrollCallback(scrollId, hostId);
+        }
+        return;
+    }
+    auto parent = host->GetParent();
+    while (parent && parent->GetTag() != V2::PAGE_ETS_TAG) {
+        auto parentNode = AceType::DynamicCast<FrameNode>(parent);
+        if (parentNode) {
+            auto pattern = parentNode->GetPattern<ScrollablePattern>();
+            if (pattern) {
+                scrollableParentInfo_.parentIds.emplace_back(parentNode->GetId());
+                RegisterSelectOverlayParentScrollCallback(parentNode->GetId(), hostId);
+            }
+        }
+        parent = parent->GetParent();
+    }
+    scrollableParentInfo_.hasParent = !scrollableParentInfo_.parentIds.empty();
+    TAG_LOGI(AceLogTag::ACE_WEB, "find scrollable parent %{public}d", scrollableParentInfo_.hasParent);
+}
+
+void WebPattern::StopListenSelectOverlayParentScroll(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto manager = context->GetSelectOverlayManager();
+    CHECK_NULL_VOID(manager);
+    manager->RemoveScrollCallback(host->GetId());
 }
 
 void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
@@ -3086,6 +3198,8 @@ void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
     } else {
         selectInfo.menuInfo.showCopyAll = false;
     }
+
+    StartListenSelectOverlayParentScroll(GetHost());
 }
 
 void WebPattern::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
@@ -3192,14 +3306,14 @@ void WebPattern::UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
     selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
     isQuickMenuMouseTrigger_ = false;
     if (selectInfo.isSingleHandle) {
-        selectInfo.firstHandle.isShow = IsTouchHandleShow(insertTouchHandle);
         selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertTouchHandle);
+        CheckHandles(selectInfo.firstHandle, insertTouchHandle);
         selectInfo.secondHandle.isShow = false;
     } else {
-        selectInfo.firstHandle.isShow = IsTouchHandleShow(beginTouchHandle);
         selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(beginTouchHandle);
-        selectInfo.secondHandle.isShow = IsTouchHandleShow(endTouchHandle);
         selectInfo.secondHandle.paintRect = ComputeTouchHandleRect(endTouchHandle);
+        CheckHandles(selectInfo.firstHandle, beginTouchHandle);
+        CheckHandles(selectInfo.secondHandle, endTouchHandle);
         QuickMenuIsNeedNewAvoid(selectInfo, params, beginTouchHandle, endTouchHandle);
         selectInfo.menuOptionItems = menuOptionParam_;
     }
@@ -3207,17 +3321,23 @@ void WebPattern::UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
     selectInfo.handleReverse = false;
 }
 
-void WebPattern::HideHandleAndQuickMenuIfNecessary(bool hide)
+void WebPattern::HideHandleAndQuickMenuIfNecessary(bool hide, bool isScroll)
 {
     WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle_, startSelectionHandle_, endSelectionHandle_);
-    TAG_LOGI(AceLogTag::ACE_WEB, "HideHandleAndQuickMenuIfNecessary hide:%{public}d, overlayType:%{public}d",
-        hide, overlayType);
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "HideHandleAndQuickMenuIfNecessary hide:%{public}d, overlayType:%{public}d, isScroll:%{public}d",
+        hide, overlayType, isScroll);
     if (overlayType != SELECTION_OVERLAY) {
         return;
     }
     SelectHandleInfo firstInfo;
     SelectHandleInfo secondInfo;
-    selectTemporarilyHidden_ = hide;
+    if (!isScroll) {
+        selectTemporarilyHidden_ = hide;
+        if (selectTemporarilyHiddenByScroll_) {
+            return;
+        }
+    }
     if (hide) {
         if (selectOverlayProxy_) {
             selectOverlayProxy_->ShowOrHiddenMenu(true, true);
@@ -3231,10 +3351,10 @@ void WebPattern::HideHandleAndQuickMenuIfNecessary(bool hide)
         if (!selectOverlayProxy_ || selectOverlayProxy_->IsMenuShow()) {
             return;
         }
-        firstInfo.isShow = IsTouchHandleShow(startSelectionHandle_);
         firstInfo.paintRect = ComputeTouchHandleRect(startSelectionHandle_);
-        secondInfo.isShow = IsTouchHandleShow(endSelectionHandle_);
         secondInfo.paintRect = ComputeTouchHandleRect(endSelectionHandle_);
+        CheckHandles(firstInfo, startSelectionHandle_);
+        CheckHandles(secondInfo, endSelectionHandle_);
         if (firstInfo.isShow || secondInfo.isShow) {
             selectOverlayProxy_->SetIsNewAvoid(false);
         } else if (dropParams_) {
@@ -3252,6 +3372,7 @@ void WebPattern::HideHandleAndQuickMenuIfNecessary(bool hide)
 bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
 {
+    CHECK_NULL_RETURN(params, false);
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertTouchHandle =
         params->GetTouchHandleState(OHOS::NWeb::NWebTouchHandleState::TouchHandleType::INSERT_HANDLE);
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle =
@@ -3266,6 +3387,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
         CloseSelectOverlay();
     }
     selectTemporarilyHidden_ = false;
+    selectTemporarilyHiddenByScroll_ = false;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
@@ -3309,42 +3431,6 @@ void WebPattern::RegisterSelectOverLayOnClose(SelectOverlayInfo& selectInfo)
     };
 }
 
-void WebPattern::DragDropSelectionMenu()
-{
-    WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle_, startSelectionHandle_, endSelectionHandle_);
-    if (overlayType == INVALID_OVERLAY) {
-        TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop event Web pages do not require restoring menu handles");
-        return;
-    }
-    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event Web show menu. isDragEndMenuShow_: %{public}d", isDragEndMenuShow_);
-    if (!isDragEndMenuShow_ || IsImageDrag()) {
-        return;
-    }
-    if (!isVisible_) {
-        TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop selection menu web is invisible");
-        return;
-    }
-    CHECK_NULL_VOID(dropParams_);
-    CHECK_NULL_VOID(quickMenuCallback_);
-    SelectOverlayInfo selectInfo;
-    selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
-    selectInfo.firstHandle.isShow = IsTouchHandleShow(startSelectionHandle_);
-    selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(startSelectionHandle_);
-    selectInfo.secondHandle.isShow = IsTouchHandleShow(endSelectionHandle_);
-    selectInfo.secondHandle.paintRect = ComputeTouchHandleRect(endSelectionHandle_);
-    QuickMenuIsNeedNewAvoid(selectInfo, dropParams_, startSelectionHandle_, endSelectionHandle_);
-    selectInfo.menuInfo.menuIsShow = true;
-    RegisterSelectOverlayCallback(selectInfo, dropParams_, quickMenuCallback_);
-    RegisterSelectOverlayEvent(selectInfo);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (!selectOverlayProxy_ && needRestoreMenuForDrag_) {
-        needRestoreMenuForDrag_ = false;
-        selectOverlayProxy_ =
-            pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
-    }
-}
-
 RectF WebPattern::ComputeClippedSelectionBounds(
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startHandle,
@@ -3352,44 +3438,53 @@ RectF WebPattern::ComputeClippedSelectionBounds(
     bool& isNewAvoid)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
-    if (!pipeline) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "ComputeClippedSelectionBounds pipeline is nullptr");
-        return RectF();
-    }
-    auto offset = GetCoordinatePoint().value_or(OffsetF());
+    CHECK_NULL_RETURN(pipeline, RectF());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RectF());
+
     float selectX = params->GetSelectX();
     float selectY = params->GetSelectY();
     float selectWidth = params->GetSelectWidth();
     float selectHeight = params->GetSelectXHeight();
     float viewPortX = static_cast<float>((startHandle->GetViewPortX() + endHandle->GetViewPortX())) / 2;
     float viewPortY = static_cast<float>((startHandle->GetViewPortY() + endHandle->GetViewPortY())) / 2;
-    auto frameHeight = GetHostFrameSize().value_or(SizeF()).Height();
+    auto offset = GetCoordinatePoint().value_or(OffsetF());
+
+    RectF visibleRect;
+    RectF visibleInnerRect;
+    RectF frameRect;
+    host->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
+    auto visibleTop = visibleInnerRect.Top();
+    auto visibleBottom = visibleInnerRect.Bottom();
+
     isNewAvoid = true;
-    if (LessOrEqual(frameHeight, selectY + viewPortY) || LessOrEqual(selectY + selectHeight, 0)) {
+    if (LessOrEqual(visibleBottom, selectY + viewPortY + offset.GetY()) ||
+        LessOrEqual(selectY + selectHeight + offset.GetY(), visibleTop)) {
         TAG_LOGI(AceLogTag::ACE_WEB, "Selected area not visible, Do not display menu");
         isNewAvoid = false;
         return RectF();
-    } else if (LessOrEqual(selectY, 0) && LessOrEqual(frameHeight, selectY + viewPortY + selectHeight)) {
+    } else if (LessOrEqual(selectY + offset.GetY(), visibleTop) &&
+        LessOrEqual(visibleBottom, selectY + viewPortY + selectHeight + offset.GetY())) {
         TAG_LOGI(AceLogTag::ACE_WEB, "Center menu display");
         return RectF(offset.GetX(), offset.GetY(), drawSize_.Width(), drawSize_.Height());
     }
 
-    float radius = 0.0;
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
-    if (theme) {
-        radius = theme->GetHandleHotZoneRadius().ConvertToPx();
-    }
-    if (LessOrEqual(frameHeight, selectY + viewPortY + startHandle->GetEdgeHeight())) {
+    float radius = theme ? theme->GetHandleHotZoneRadius().ConvertToPx() : 0.0;
+    if (LessOrEqual(visibleBottom, selectY + viewPortY + startHandle->GetEdgeHeight() + offset.GetY())) {
         selectX = startHandle->GetX() + offset.GetX();
         selectY = startHandle->GetY() + offset.GetY() - radius - startHandle->GetEdgeHeight() - SELECT_MENE_HEIGHT;
         selectWidth = SelectHandleInfo::GetDefaultLineWidth().ConvertToPx();
-    } else if (LessOrEqual(selectY + selectHeight - endHandle->GetEdgeHeight(), 0)) {
+    } else if (LessOrEqual(selectY + selectHeight - endHandle->GetEdgeHeight() + offset.GetY(), visibleTop)) {
         selectX = endHandle->GetX() + offset.GetX();
         selectY = endHandle->GetY() + offset.GetY() + radius;
         selectWidth = SelectHandleInfo::GetDefaultLineWidth().ConvertToPx();
     } else {
         selectX = selectX + viewPortX + offset.GetX();
         selectY = selectY + viewPortY + offset.GetY() - SELECT_MENE_HEIGHT - radius;
+        if (selectY < offset.GetY()) {
+            selectY = offset.GetY();
+        }
     }
     TAG_LOGI(AceLogTag::ACE_WEB, "SelectionBounds pos: (%{public}f, %{public}f)", selectX, selectY);
     return RectF(selectX, selectY, selectWidth, SELECT_MENE_HEIGHT);
@@ -3729,22 +3824,22 @@ void WebPattern::UpdateSelectHandleInfo()
     SelectHandleInfo handleInfo;
     if (!needReverse) {
         if (!isCurrentStartHandleDragging_) {
-            handleInfo.isShow = IsTouchHandleShow(startSelectionHandle_);
             handleInfo.paintRect = ComputeTouchHandleRect(startSelectionHandle_);
+            CheckHandles(handleInfo, startSelectionHandle_);
             selectOverlayProxy_->UpdateFirstSelectHandleInfo(handleInfo);
         } else {
-            handleInfo.isShow = IsTouchHandleShow(endSelectionHandle_);
             handleInfo.paintRect = ComputeTouchHandleRect(endSelectionHandle_);
+            CheckHandles(handleInfo, endSelectionHandle_);
             selectOverlayProxy_->UpdateSecondSelectHandleInfo(handleInfo);
         }
     } else {
         if (!isCurrentStartHandleDragging_) {
-            handleInfo.isShow = IsTouchHandleShow(endSelectionHandle_);
             handleInfo.paintRect = ComputeTouchHandleRect(endSelectionHandle_);
+            CheckHandles(handleInfo, endSelectionHandle_);
             selectOverlayProxy_->UpdateFirstSelectHandleInfo(handleInfo);
         } else {
-            handleInfo.isShow = IsTouchHandleShow(startSelectionHandle_);
             handleInfo.paintRect = ComputeTouchHandleRect(startSelectionHandle_);
+            CheckHandles(handleInfo, startSelectionHandle_);
             selectOverlayProxy_->UpdateSecondSelectHandleInfo(handleInfo);
         }
     }
@@ -3783,7 +3878,7 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
     insertHandle_ = insertHandle;
     startSelectionHandle_ = startSelectionHandle;
     endSelectionHandle_ = endSelectionHandle;
-    if (selectTemporarilyHidden_) {
+    if (selectTemporarilyHidden_ || selectTemporarilyHiddenByScroll_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "select menu temporarily hidden");
         return;
     }
@@ -3791,8 +3886,8 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
         if (overlayType == INSERT_OVERLAY) {
             SelectOverlayInfo selectInfo;
             selectInfo.isSingleHandle = true;
-            selectInfo.firstHandle.isShow = IsTouchHandleShow(insertHandle_);
             selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertHandle_);
+            CheckHandles(selectInfo.firstHandle, insertHandle_);
             selectInfo.secondHandle.isShow = false;
             selectInfo.menuInfo.menuDisable = true;
             selectInfo.menuInfo.menuIsShow = false;
@@ -4369,7 +4464,7 @@ void WebPattern::InitSelectPopupMenuViewOption(const std::vector<RefPtr<FrameNod
             hub->SetEnabled(items[optionIndex]->GetIsEnabled());
             auto focusHub = option->GetFocusHub();
             if (focusHub) {
-                hub->SetEnabled(items[optionIndex]->GetIsEnabled());
+                focusHub->SetEnabled(items[optionIndex]->GetIsEnabled());
             }
         }
         auto selectCallback = [callback](int32_t index) {
@@ -4439,15 +4534,18 @@ void WebPattern::UpdateTouchHandleForOverlay(bool fromOverlay)
         if (!fromOverlay) {
             selectOverlayProxy_->ShowOrHiddenMenu(true, true);
         }
-        firstHandleInfo.isShow = IsTouchHandleShow(insertHandle_);
         firstHandleInfo.paintRect = ComputeTouchHandleRect(insertHandle_);
+        CheckHandles(firstHandleInfo, insertHandle_);
         firstHandleInfo.needLayout = true;
         selectOverlayProxy_->UpdateFirstSelectHandleInfo(firstHandleInfo);
     } else {
-        firstHandleInfo.isShow = IsTouchHandleShow(startSelectionHandle_);
+        if (selectTemporarilyHidden_ || selectTemporarilyHiddenByScroll_) {
+            return;
+        }
         firstHandleInfo.paintRect = ComputeTouchHandleRect(startSelectionHandle_);
-        secondHandleInfo.isShow = IsTouchHandleShow(endSelectionHandle_);
         secondHandleInfo.paintRect = ComputeTouchHandleRect(endSelectionHandle_);
+        CheckHandles(firstHandleInfo, startSelectionHandle_);
+        CheckHandles(secondHandleInfo, endSelectionHandle_);
         if (firstHandleInfo.isShow || secondHandleInfo.isShow) {
             selectOverlayProxy_->SetIsNewAvoid(false);
         }
