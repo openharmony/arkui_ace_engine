@@ -16,6 +16,10 @@
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import { DividerModifier, SymbolGlyphModifier } from '@ohos.arkui.modifier';
+import hilog from '@ohos.hilog';
+import window from '@ohos.window';
+import common from '@ohos.app.ability.common';
+import { BusinessError } from '@ohos.base';
 
 export enum ItemState {
   ENABLE = 1,
@@ -23,13 +27,21 @@ export enum ItemState {
   ACTIVATE = 3,
 }
 
+// “更多”栏图标
 const PUBLIC_MORE: Resource = $r('sys.media.ohos_ic_public_more');
 const IMAGE_SIZE: string = '24vp';
 const DEFAULT_TOOLBAR_HEIGHT: number = 56;
 const TOOLBAR_MAX_LENGTH: number = 5;
+const MIN_FONT_SIZE = 1.75;
+const MAX_FONT_SIZE = 3.2;
+const LONG_PRESS_TIME = 500;
+const DIALOG_IMAGE_SIZE = '64vp';
+const MAX_DIALOG = '256vp';
+const MIN_DIALOG = '216vp';
+const TEXT_TOOLBAR_DIALOG = '18.3fp';
 
 interface MenuController {
-  value: string;
+  value: ResourceStr;
   action: () => void;
   enabled?: boolean;
 }
@@ -41,7 +53,7 @@ export interface ToolBarSymbolGlyphOptions {
 
 @Observed
 export class ToolBarOption {
-  public content: string = '';
+  public content: ResourceStr = '';
   public action?: () => void = undefined;
   public icon?: Resource = undefined;
   public state?: ItemState = 1;
@@ -108,6 +120,10 @@ export struct ToolBar {
   @State fontPrimaryColor: ResourceColor = $r('sys.color.font_primary');
   @State fontActivatedPrimaryColor: ResourceColor = $r('sys.color.font_emphasize');
   @State symbolEffect: SymbolEffect = new SymbolEffect();
+  @State fontSize: number = 1;
+  dialogController: CustomDialogController | null = null;
+  isFollowSystem: boolean = false;
+  maxFontSizeScale: number = 3.2;
 
   onWillApplyTheme(theme: Theme) {
     this.iconPrimaryColor = theme.colors.iconPrimary;
@@ -158,6 +174,36 @@ export struct ToolBar {
         .backgroundColor(this.toolBarItemBackground[index])
       }
     })
+    .onTouch((event) => {
+      this.touchEventAction(event, index);
+    })
+    .gesture(
+      LongPressGesture({ repeat: false, duration: LONG_PRESS_TIME })
+        .onAction((event: GestureEvent) => {
+          this.fontSize = this.getFontSizeScale();
+          if (event) {
+            if (this.fontSize >= MIN_FONT_SIZE) {
+              this.dialogController = new CustomDialogController({
+                builder: ToolBarDialog({
+                  cancel: () => {
+                  },
+                  confirm: () => {
+                  },
+                  itemDialog: {
+                    content: this.moreText,
+                    icon: PUBLIC_MORE,
+                  },
+                  fontSize: this.fontSize,
+                }),
+                maskColor: Color.Transparent,
+                isModal: true,
+                customStyle: true,
+              })
+              this.dialogController?.open();
+            }
+          }
+        })
+    )
   }
 
   @Builder TabBuilder(index: number) {
@@ -201,19 +247,6 @@ export struct ToolBar {
     })
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .backgroundColor(this.itemBackground)
-    .onClick(() => {
-      let toolbar = this.toolBarList[index];
-      if (toolbar.state === ItemState.ACTIVATE) {
-        if (this.activateIndex === index) {
-          this.activateIndex = -1;
-        } else {
-          this.activateIndex = index;
-        }
-      }
-      if (!(toolbar.state === ItemState.DISABLE)) {
-        toolbar.action && toolbar.action();
-      }
-    })
     .onHover((isHover: boolean) => {
       if (isHover) {
         this.toolBarItemBackground[index] = (this.toolBarList[index]?.state === ItemState.DISABLE)
@@ -233,9 +266,52 @@ export struct ToolBar {
         .backgroundColor(this.toolBarItemBackground[index])
       }
     })
+    .onTouch((event) => {
+      this.touchEventAction(event, index);
+    })
+    .gesture(
+      LongPressGesture({ repeat: false, duration: LONG_PRESS_TIME })
+        .onAction((event: GestureEvent) => {
+          this.fontSize = this.getFontSizeScale();
+          if (event && (this.toolBarList[index]?.icon || this.toolBarList[index]?.toolBarSymbolOptions?.activated ||
+            this.toolBarList[index]?.toolBarSymbolOptions?.normal)) {
+            if (this.fontSize >= MIN_FONT_SIZE) {
+              this.dialogController = new CustomDialogController({
+                builder: ToolBarDialog({
+                  cancel: () => {
+                  },
+                  confirm: () => {
+                  },
+                  itemDialog: this.toolBarList[index],
+                  fontSize: this.fontSize,
+                  itemSymbolModifier: this.getToolBarSymbolModifier(index),
+                }),
+                maskColor: Color.Transparent,
+                isModal: true,
+                customStyle: true,
+              })
+              this.dialogController?.open();
+            }
+          }
+        })
+    )
+  }
+
+  private getFontSizeScale(): number {
+    let context = this.getUIContext();
+    let fontScaleSystem = (context.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowSystem) {
+      return 1;
+    } else {
+      return Math.min(fontScaleSystem, this.maxFontSizeScale);
+    }
   }
 
   private getToolBarSymbolModifier(index: number): SymbolGlyphModifier | undefined {
+    if ((!this.toolBarList[index]?.toolBarSymbolOptions?.activated) &&
+      (!this.toolBarList[index]?.toolBarSymbolOptions?.normal)) {
+      return undefined;
+    }
     if (this.activateIndex === index && (this.toolBarList[index]?.state === ItemState.ACTIVATE)) {
       return this.toolBarList[index]?.toolBarSymbolOptions?.activated;
     }
@@ -285,6 +361,25 @@ export struct ToolBar {
     return lengthString;
   }
 
+  private touchEventAction(event: TouchEvent, index: number): void {
+    if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+      if (this.fontSize >= MIN_FONT_SIZE) {
+        this.dialogController?.close();
+      }
+      let toolbar = this.toolBarList[index];
+      if (toolbar.state === ItemState.ACTIVATE) {
+        if (this.activateIndex === index) {
+          this.activateIndex = -1;
+        } else {
+          this.activateIndex = index;
+        }
+      }
+      if (!(toolbar.state === ItemState.DISABLE)) {
+        toolbar.action && toolbar.action();
+      }
+    }
+  }
+
   refreshData() {
     this.menuContent = [];
     for (let i = 0; i < this.toolBarList.length; i++) {
@@ -304,6 +399,14 @@ export struct ToolBar {
 
   aboutToAppear() {
     this.refreshData();
+    try {
+      this.isFollowSystem = this.getUIContext()?.isFollowingSystemFontScale();
+      this.maxFontSizeScale = this.getUIContext()?.getMaxFontScale();
+    } catch (err) {
+      let code: number = (err as BusinessError)?.code;
+      let message: string = (err as BusinessError)?.message;
+      hilog.error(0x3900, 'Ace', `Faild to toolBar getMaxFontScale, code: ${code}, message: ${message}`);
+    }
   }
   build() {
     Column() {
@@ -352,5 +455,115 @@ export struct ToolBar {
       .width('100%')
     }
     .attributeModifier(this.toolBarModifier)
+  }
+}
+
+/**
+ * ToolBarDialog
+ *
+ * @since 2024-07-23
+ */
+@CustomDialog
+struct ToolBarDialog {
+  itemDialog: ToolBarOption = {
+    icon: undefined,
+    content: '',
+  };
+  itemSymbolModifier?: SymbolGlyphModifier;
+  mainWindowStage: window.Window | undefined = undefined;
+  controller?: CustomDialogController
+  screenWidth: number = 640;
+  verticalScreenLines: number = 6;
+  horizontalsScreenLines: number = 1;
+  cancel: () => void = () => {
+  }
+  confirm: () => void = () => {
+  }
+  @StorageLink('mainWindow') mainWindow: Promise<window.Window> | undefined = undefined;
+  @Prop fontSize: number = 1;
+  @State maxLines: number = 1;
+  @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
+  @State symbolEffect: SymbolEffect = new SymbolEffect();
+
+  build() {
+    if (this.itemDialog.content) {
+      Column() {
+        if (this.itemDialog.toolBarSymbolOptions?.normal ||
+          this.itemDialog.toolBarSymbolOptions?.activated) {
+          SymbolGlyph()
+            .attributeModifier(this.itemSymbolModifier)
+            .symbolEffect(this.symbolEffect, false)
+            .fontColor([$r('sys.color.icon_primary')])
+            .fontSize(DIALOG_IMAGE_SIZE)
+            .margin({
+              top: $r('sys.float.padding_level24'),
+              bottom: $r('sys.float.padding_level8'),
+            })
+        } else {
+          Image(this.itemDialog.icon)
+            .width(DIALOG_IMAGE_SIZE)
+            .height(DIALOG_IMAGE_SIZE)
+            .margin({
+              top: $r('sys.float.padding_level24'),
+              bottom: $r('sys.float.padding_level8'),
+            })
+            .fillColor($r('sys.color.icon_primary'))
+        }
+        Column() {
+          Text(this.itemDialog.content)
+            .fontSize(TEXT_TOOLBAR_DIALOG)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .maxLines(this.maxLines)
+            .width('100%')
+            .textAlign(TextAlign.Center)
+            .fontColor($r('sys.color.font_primary'))
+        }
+        .width('100%')
+        .padding({
+          left: $r('sys.float.padding_level4'),
+          right: $r('sys.float.padding_level4'),
+          bottom: $r('sys.float.padding_level12'),
+        })
+      }
+      .width(this.fontSize === MAX_FONT_SIZE ? MAX_DIALOG : MIN_DIALOG)
+      .constraintSize({ minHeight: this.fontSize === MAX_FONT_SIZE ? MAX_DIALOG : MIN_DIALOG })
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
+      .borderRadius(($r('sys.float.corner_radius_level10')))
+    } else {
+      Column() {
+        if (this.itemDialog.toolBarSymbolOptions?.normal ||
+          this.itemDialog.toolBarSymbolOptions?.activated) {
+          SymbolGlyph()
+            .attributeModifier(this.itemSymbolModifier)
+            .symbolEffect(this.symbolEffect, false)
+            .fontColor([$r('sys.color.icon_primary')])
+            .fontSize(DIALOG_IMAGE_SIZE)
+        } else {
+          Image(this.itemDialog.icon)
+            .width(DIALOG_IMAGE_SIZE)
+            .height(DIALOG_IMAGE_SIZE)
+            .fillColor($r('sys.color.icon_primary'))
+        }
+      }
+      .width(this.fontSize === MAX_FONT_SIZE ? MAX_DIALOG : MIN_DIALOG)
+      .constraintSize({ minHeight: this.fontSize === MAX_FONT_SIZE ? MAX_DIALOG : MIN_DIALOG })
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
+      .borderRadius(($r('sys.float.corner_radius_level10')))
+      .justifyContent(FlexAlign.Center)
+    }
+  }
+
+  async aboutToAppear(): Promise<void> {
+    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    this.mainWindowStage = context.windowStage.getMainWindowSync();
+    let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
+    let rect = properties.windowRect;
+    if (px2vp(rect.height) > this.screenWidth) {
+      this.maxLines = this.verticalScreenLines;
+    } else {
+      this.maxLines = this.horizontalsScreenLines;
+    }
   }
 }
