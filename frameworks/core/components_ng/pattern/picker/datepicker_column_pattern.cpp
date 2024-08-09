@@ -1134,7 +1134,9 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
         InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true, false);
         dragDelta = dragDelta % static_cast<int>(std::abs(shiftDistance));
 #ifdef SUPPORT_DIGITAL_CROWN
-        VibratorImpl::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1, OHOS::Ace::NG::VIBRATOR_TYPE_ONE);
+#if !defined(PREVIEW)
+        VibratorUtils::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1);
+#endif
 #endif
     }
     // update selected option
@@ -1382,7 +1384,7 @@ void DatePickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
         InnerHandleScroll(LessNotEqual(scrollDelta_, 0.0), true, false);
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == DatePickerScrollDirection::UP ? -1 : 1);
 #ifdef SUPPORT_DIGITAL_CROWN
-        VibratorImpl::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1, OHOS::Ace::NG::VIBRATOR_TYPE_ONE);
+        VibratorUtils::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1);
 #endif
     }
     CreateAnimation(scrollDelta_, 0.0);

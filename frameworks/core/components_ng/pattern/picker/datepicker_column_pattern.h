@@ -32,8 +32,8 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 #ifdef SUPPORT_DIGITAL_CROWN
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/event/crown_event.h"
-#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
 #endif
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 

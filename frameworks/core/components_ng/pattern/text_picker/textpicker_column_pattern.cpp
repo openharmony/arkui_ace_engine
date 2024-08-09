@@ -1534,8 +1534,7 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
             ScrollOption(shiftDistance);
             InnerHandleScroll(dragDelta < 0, true, false);
 #ifdef SUPPORT_DIGITAL_CROWN
-            VibratorImpl::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1,
-                OHOS::Ace::NG::VIBRATOR_TYPE_ONE);
+            VibratorUtils::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH1);
 #endif
         }
         dragDelta = additionalShift;
@@ -1548,7 +1547,7 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     }
 #ifdef SUPPORT_DIGITAL_CROWN
     if (isOverScroll) {
-        VibratorImpl::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH5);
+        VibratorUtils::StartVibraFeedback(OHOS::Ace::NG::WATCHHAPTIC_CROWN_STRENGTH5);
     }
 #endif
 

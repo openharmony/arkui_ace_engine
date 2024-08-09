@@ -19,6 +19,7 @@ namespace OHOS::Ace::NG {
 void VibratorUtils::StartVibraFeedback()
 {
 }
+
 void VibratorUtils::StartVibraFeedback(const std::string& vibratorType)
 {
 }
