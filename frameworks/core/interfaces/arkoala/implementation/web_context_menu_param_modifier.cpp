@@ -16,79 +16,79 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace WebContextMenuParamModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        Ark_Int32 XImpl(WebContextMenuParamPeer* peer)
-        {
-            return 0;
-        }
-        Ark_Int32 YImpl(WebContextMenuParamPeer* peer)
-        {
-            return 0;
-        }
-        void GetLinkUrlImpl(WebContextMenuParamPeer* peer)
-        {
-        }
-        void GetUnfilteredLinkUrlImpl(WebContextMenuParamPeer* peer)
-        {
-        }
-        void GetSourceUrlImpl(WebContextMenuParamPeer* peer)
-        {
-        }
-        Ark_Boolean ExistsImageContentsImpl(WebContextMenuParamPeer* peer)
-        {
-            return 0;
-        }
-        Ark_NativePointer GetMediaTypeImpl(WebContextMenuParamPeer* peer)
-        {
-            return 0;
-        }
-        void GetSelectionTextImpl(WebContextMenuParamPeer* peer)
-        {
-        }
-        Ark_NativePointer GetSourceTypeImpl(WebContextMenuParamPeer* peer)
-        {
-            return 0;
-        }
-        Ark_NativePointer GetInputFieldTypeImpl(WebContextMenuParamPeer* peer)
-        {
-            return 0;
-        }
-        Ark_Boolean IsEditableImpl(WebContextMenuParamPeer* peer)
-        {
-            return 0;
-        }
-        Ark_Int32 GetEditStateFlagsImpl(WebContextMenuParamPeer* peer)
-        {
-            return 0;
-        }
-    } // WebContextMenuParamModifier
-    const GENERATED_ArkUIWebContextMenuParamAccessor* GetWebContextMenuParamAccessor()
-    {
-        static const GENERATED_ArkUIWebContextMenuParamAccessor WebContextMenuParamAccessorImpl {
-            WebContextMenuParamModifier::CtorImpl,
-            WebContextMenuParamModifier::GetFinalizerImpl,
-            WebContextMenuParamModifier::XImpl,
-            WebContextMenuParamModifier::YImpl,
-            WebContextMenuParamModifier::GetLinkUrlImpl,
-            WebContextMenuParamModifier::GetUnfilteredLinkUrlImpl,
-            WebContextMenuParamModifier::GetSourceUrlImpl,
-            WebContextMenuParamModifier::ExistsImageContentsImpl,
-            WebContextMenuParamModifier::GetMediaTypeImpl,
-            WebContextMenuParamModifier::GetSelectionTextImpl,
-            WebContextMenuParamModifier::GetSourceTypeImpl,
-            WebContextMenuParamModifier::GetInputFieldTypeImpl,
-            WebContextMenuParamModifier::IsEditableImpl,
-            WebContextMenuParamModifier::GetEditStateFlagsImpl,
-        };
-        return &WebContextMenuParamAccessorImpl;
-    }
+namespace WebContextMenuParamModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+Ark_Int32 XImpl(WebContextMenuParamPeer* peer)
+{
+    return 0;
+}
+Ark_Int32 YImpl(WebContextMenuParamPeer* peer)
+{
+    return 0;
+}
+void GetLinkUrlImpl(WebContextMenuParamPeer* peer)
+{
+}
+void GetUnfilteredLinkUrlImpl(WebContextMenuParamPeer* peer)
+{
+}
+void GetSourceUrlImpl(WebContextMenuParamPeer* peer)
+{
+}
+Ark_Boolean ExistsImageContentsImpl(WebContextMenuParamPeer* peer)
+{
+    return 0;
+}
+Ark_NativePointer GetMediaTypeImpl(WebContextMenuParamPeer* peer)
+{
+    return 0;
+}
+void GetSelectionTextImpl(WebContextMenuParamPeer* peer)
+{
+}
+Ark_NativePointer GetSourceTypeImpl(WebContextMenuParamPeer* peer)
+{
+    return 0;
+}
+Ark_NativePointer GetInputFieldTypeImpl(WebContextMenuParamPeer* peer)
+{
+    return 0;
+}
+Ark_Boolean IsEditableImpl(WebContextMenuParamPeer* peer)
+{
+    return 0;
+}
+Ark_Int32 GetEditStateFlagsImpl(WebContextMenuParamPeer* peer)
+{
+    return 0;
+}
+} // WebContextMenuParamModifier
+const GENERATED_ArkUIWebContextMenuParamAccessor* GetWebContextMenuParamAccessor()
+{
+    static const GENERATED_ArkUIWebContextMenuParamAccessor WebContextMenuParamAccessorImpl {
+        WebContextMenuParamModifier::CtorImpl,
+        WebContextMenuParamModifier::GetFinalizerImpl,
+        WebContextMenuParamModifier::XImpl,
+        WebContextMenuParamModifier::YImpl,
+        WebContextMenuParamModifier::GetLinkUrlImpl,
+        WebContextMenuParamModifier::GetUnfilteredLinkUrlImpl,
+        WebContextMenuParamModifier::GetSourceUrlImpl,
+        WebContextMenuParamModifier::ExistsImageContentsImpl,
+        WebContextMenuParamModifier::GetMediaTypeImpl,
+        WebContextMenuParamModifier::GetSelectionTextImpl,
+        WebContextMenuParamModifier::GetSourceTypeImpl,
+        WebContextMenuParamModifier::GetInputFieldTypeImpl,
+        WebContextMenuParamModifier::IsEditableImpl,
+        WebContextMenuParamModifier::GetEditStateFlagsImpl,
+    };
+    return &WebContextMenuParamAccessorImpl;
+}
 
 }

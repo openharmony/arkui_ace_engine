@@ -16,27 +16,27 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace CanvasPatternModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void SetTransformImpl(CanvasPatternPeer* peer, const Opt_Matrix2D* transform)
-        {
-        }
-    } // CanvasPatternModifier
-    const GENERATED_ArkUICanvasPatternAccessor* GetCanvasPatternAccessor()
-    {
-        static const GENERATED_ArkUICanvasPatternAccessor CanvasPatternAccessorImpl {
-            CanvasPatternModifier::CtorImpl,
-            CanvasPatternModifier::GetFinalizerImpl,
-            CanvasPatternModifier::SetTransformImpl,
-        };
-        return &CanvasPatternAccessorImpl;
-    }
+namespace CanvasPatternModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void SetTransformImpl(CanvasPatternPeer* peer, const Opt_Matrix2D* transform)
+{
+}
+} // CanvasPatternModifier
+const GENERATED_ArkUICanvasPatternAccessor* GetCanvasPatternAccessor()
+{
+    static const GENERATED_ArkUICanvasPatternAccessor CanvasPatternAccessorImpl {
+        CanvasPatternModifier::CtorImpl,
+        CanvasPatternModifier::GetFinalizerImpl,
+        CanvasPatternModifier::SetTransformImpl,
+    };
+    return &CanvasPatternAccessorImpl;
+}
 
 }

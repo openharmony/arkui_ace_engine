@@ -16,31 +16,31 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace LoadingProgressInterfaceModifier {
-        void _setLoadingProgressOptionsImpl(Ark_NativePointer node)
-        {
-        }
-    } // LoadingProgressInterfaceModifier
-    namespace LoadingProgressAttributeModifier {
-        void ColorImpl(Ark_NativePointer node, const ResourceColor* value)
-        {
-        }
-        void EnableLoadingImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
-        {
-        }
-    } // LoadingProgressAttributeModifier
-    const GENERATED_ArkUILoadingProgressModifier* GetLoadingProgressModifier()
-    {
-        static const GENERATED_ArkUILoadingProgressModifier ArkUILoadingProgressModifierImpl {
-            LoadingProgressInterfaceModifier::_setLoadingProgressOptionsImpl,
-            LoadingProgressAttributeModifier::ColorImpl,
-            LoadingProgressAttributeModifier::EnableLoadingImpl,
-            LoadingProgressAttributeModifier::ContentModifierImpl,
-        };
-        return &ArkUILoadingProgressModifierImpl;
-    }
+namespace LoadingProgressInterfaceModifier {
+void _setLoadingProgressOptionsImpl(Ark_NativePointer node)
+{
+}
+} // LoadingProgressInterfaceModifier
+namespace LoadingProgressAttributeModifier {
+void ColorImpl(Ark_NativePointer node, const ResourceColor* value)
+{
+}
+void EnableLoadingImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
+{
+}
+} // LoadingProgressAttributeModifier
+const GENERATED_ArkUILoadingProgressModifier* GetLoadingProgressModifier()
+{
+    static const GENERATED_ArkUILoadingProgressModifier ArkUILoadingProgressModifierImpl {
+        LoadingProgressInterfaceModifier::_setLoadingProgressOptionsImpl,
+        LoadingProgressAttributeModifier::ColorImpl,
+        LoadingProgressAttributeModifier::EnableLoadingImpl,
+        LoadingProgressAttributeModifier::ContentModifierImpl,
+    };
+    return &ArkUILoadingProgressModifierImpl;
+}
 
 }

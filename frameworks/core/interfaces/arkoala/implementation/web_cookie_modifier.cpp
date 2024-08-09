@@ -16,31 +16,31 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace WebCookieModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void SetCookieImpl(WebCookiePeer* peer)
-        {
-        }
-        void SaveCookieImpl(WebCookiePeer* peer)
-        {
-        }
-    } // WebCookieModifier
-    const GENERATED_ArkUIWebCookieAccessor* GetWebCookieAccessor()
-    {
-        static const GENERATED_ArkUIWebCookieAccessor WebCookieAccessorImpl {
-            WebCookieModifier::CtorImpl,
-            WebCookieModifier::GetFinalizerImpl,
-            WebCookieModifier::SetCookieImpl,
-            WebCookieModifier::SaveCookieImpl,
-        };
-        return &WebCookieAccessorImpl;
-    }
+namespace WebCookieModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void SetCookieImpl(WebCookiePeer* peer)
+{
+}
+void SaveCookieImpl(WebCookiePeer* peer)
+{
+}
+} // WebCookieModifier
+const GENERATED_ArkUIWebCookieAccessor* GetWebCookieAccessor()
+{
+    static const GENERATED_ArkUIWebCookieAccessor WebCookieAccessorImpl {
+        WebCookieModifier::CtorImpl,
+        WebCookieModifier::GetFinalizerImpl,
+        WebCookieModifier::SetCookieImpl,
+        WebCookieModifier::SaveCookieImpl,
+    };
+    return &WebCookieAccessorImpl;
+}
 
 }

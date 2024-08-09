@@ -16,39 +16,39 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace SwiperControllerModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void ShowNextImpl(SwiperControllerPeer* peer)
-        {
-        }
-        void ShowPreviousImpl(SwiperControllerPeer* peer)
-        {
-        }
-        void ChangeIndexImpl(SwiperControllerPeer* peer, const Ark_Number* index, const Opt_Boolean* useAnimation)
-        {
-        }
-        void FinishAnimationImpl(SwiperControllerPeer* peer, const Opt_Function* callback)
-        {
-        }
-    } // SwiperControllerModifier
-    const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()
-    {
-        static const GENERATED_ArkUISwiperControllerAccessor SwiperControllerAccessorImpl {
-            SwiperControllerModifier::CtorImpl,
-            SwiperControllerModifier::GetFinalizerImpl,
-            SwiperControllerModifier::ShowNextImpl,
-            SwiperControllerModifier::ShowPreviousImpl,
-            SwiperControllerModifier::ChangeIndexImpl,
-            SwiperControllerModifier::FinishAnimationImpl,
-        };
-        return &SwiperControllerAccessorImpl;
-    }
+namespace SwiperControllerModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void ShowNextImpl(SwiperControllerPeer* peer)
+{
+}
+void ShowPreviousImpl(SwiperControllerPeer* peer)
+{
+}
+void ChangeIndexImpl(SwiperControllerPeer* peer, const Ark_Number* index, const Opt_Boolean* useAnimation)
+{
+}
+void FinishAnimationImpl(SwiperControllerPeer* peer, const Opt_Function* callback)
+{
+}
+} // SwiperControllerModifier
+const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()
+{
+    static const GENERATED_ArkUISwiperControllerAccessor SwiperControllerAccessorImpl {
+        SwiperControllerModifier::CtorImpl,
+        SwiperControllerModifier::GetFinalizerImpl,
+        SwiperControllerModifier::ShowNextImpl,
+        SwiperControllerModifier::ShowPreviousImpl,
+        SwiperControllerModifier::ChangeIndexImpl,
+        SwiperControllerModifier::FinishAnimationImpl,
+    };
+    return &SwiperControllerAccessorImpl;
+}
 
 }

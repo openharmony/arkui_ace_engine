@@ -16,38 +16,38 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace TextContentControllerBaseModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetCaretOffsetImpl(TextContentControllerBasePeer* peer)
-        {
-            return 0;
-        }
-        Ark_NativePointer GetTextContentRectImpl(TextContentControllerBasePeer* peer)
-        {
-            return 0;
-        }
-        Ark_Int32 GetTextContentLineCountImpl(TextContentControllerBasePeer* peer)
-        {
-            return 0;
-        }
-    } // TextContentControllerBaseModifier
-    const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor()
-    {
-        static const GENERATED_ArkUITextContentControllerBaseAccessor TextContentControllerBaseAccessorImpl {
-            TextContentControllerBaseModifier::CtorImpl,
-            TextContentControllerBaseModifier::GetFinalizerImpl,
-            TextContentControllerBaseModifier::GetCaretOffsetImpl,
-            TextContentControllerBaseModifier::GetTextContentRectImpl,
-            TextContentControllerBaseModifier::GetTextContentLineCountImpl,
-        };
-        return &TextContentControllerBaseAccessorImpl;
-    }
+namespace TextContentControllerBaseModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetCaretOffsetImpl(TextContentControllerBasePeer* peer)
+{
+    return 0;
+}
+Ark_NativePointer GetTextContentRectImpl(TextContentControllerBasePeer* peer)
+{
+    return 0;
+}
+Ark_Int32 GetTextContentLineCountImpl(TextContentControllerBasePeer* peer)
+{
+    return 0;
+}
+} // TextContentControllerBaseModifier
+const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor()
+{
+    static const GENERATED_ArkUITextContentControllerBaseAccessor TextContentControllerBaseAccessorImpl {
+        TextContentControllerBaseModifier::CtorImpl,
+        TextContentControllerBaseModifier::GetFinalizerImpl,
+        TextContentControllerBaseModifier::GetCaretOffsetImpl,
+        TextContentControllerBaseModifier::GetTextContentRectImpl,
+        TextContentControllerBaseModifier::GetTextContentLineCountImpl,
+    };
+    return &TextContentControllerBaseAccessorImpl;
+}
 
 }

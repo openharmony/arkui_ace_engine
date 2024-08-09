@@ -16,51 +16,51 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace TimePickerInterfaceModifier {
-        void _setTimePickerOptionsImpl(Ark_NativePointer node, const Opt_TimePickerOptions* options)
-        {
-        }
-    } // TimePickerInterfaceModifier
-    namespace TimePickerAttributeModifier {
-        void UseMilitaryTimeImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void LoopImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void DisappearTextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value)
-        {
-        }
-        void TextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value)
-        {
-        }
-        void SelectedTextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value)
-        {
-        }
-        void DateTimeOptionsImpl(Ark_NativePointer node, const Ark_CustomObject* value)
-        {
-        }
-        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void EnableHapticFeedbackImpl(Ark_NativePointer node, Ark_Boolean enable)
-        {
-        }
-    } // TimePickerAttributeModifier
-    const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()
-    {
-        static const GENERATED_ArkUITimePickerModifier ArkUITimePickerModifierImpl {
-            TimePickerInterfaceModifier::_setTimePickerOptionsImpl,
-            TimePickerAttributeModifier::UseMilitaryTimeImpl,
-            TimePickerAttributeModifier::LoopImpl,
-            TimePickerAttributeModifier::DisappearTextStyleImpl,
-            TimePickerAttributeModifier::TextStyleImpl,
-            TimePickerAttributeModifier::SelectedTextStyleImpl,
-            TimePickerAttributeModifier::DateTimeOptionsImpl,
-            TimePickerAttributeModifier::OnChangeImpl,
-            TimePickerAttributeModifier::EnableHapticFeedbackImpl,
-        };
-        return &ArkUITimePickerModifierImpl;
-    }
+namespace TimePickerInterfaceModifier {
+void _setTimePickerOptionsImpl(Ark_NativePointer node, const Opt_TimePickerOptions* options)
+{
+}
+} // TimePickerInterfaceModifier
+namespace TimePickerAttributeModifier {
+void UseMilitaryTimeImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void LoopImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void DisappearTextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value)
+{
+}
+void TextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value)
+{
+}
+void SelectedTextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value)
+{
+}
+void DateTimeOptionsImpl(Ark_NativePointer node, const Ark_CustomObject* value)
+{
+}
+void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void EnableHapticFeedbackImpl(Ark_NativePointer node, Ark_Boolean enable)
+{
+}
+} // TimePickerAttributeModifier
+const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()
+{
+    static const GENERATED_ArkUITimePickerModifier ArkUITimePickerModifierImpl {
+        TimePickerInterfaceModifier::_setTimePickerOptionsImpl,
+        TimePickerAttributeModifier::UseMilitaryTimeImpl,
+        TimePickerAttributeModifier::LoopImpl,
+        TimePickerAttributeModifier::DisappearTextStyleImpl,
+        TimePickerAttributeModifier::TextStyleImpl,
+        TimePickerAttributeModifier::SelectedTextStyleImpl,
+        TimePickerAttributeModifier::DateTimeOptionsImpl,
+        TimePickerAttributeModifier::OnChangeImpl,
+        TimePickerAttributeModifier::EnableHapticFeedbackImpl,
+    };
+    return &ArkUITimePickerModifierImpl;
+}
 
 }

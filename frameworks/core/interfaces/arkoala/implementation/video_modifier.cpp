@@ -16,87 +16,87 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace VideoInterfaceModifier {
-        void _setVideoOptionsImpl(Ark_NativePointer node, const Ark_VideoOptions* value)
-        {
-        }
-    } // VideoInterfaceModifier
-    namespace VideoAttributeModifier {
-        void MutedImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void AutoPlayImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void ControlsImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void LoopImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void ObjectFitImpl(Ark_NativePointer node, Ark_Int32 value)
-        {
-        }
-        void OnStartImpl(Ark_NativePointer node, Ark_Function event)
-        {
-        }
-        void OnPauseImpl(Ark_NativePointer node, Ark_Function event)
-        {
-        }
-        void OnFinishImpl(Ark_NativePointer node, Ark_Function event)
-        {
-        }
-        void OnFullscreenChangeImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void OnPreparedImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void OnSeekingImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void OnSeekedImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void OnUpdateImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void OnErrorImpl(Ark_NativePointer node, Ark_Function event)
-        {
-        }
-        void OnStopImpl(Ark_NativePointer node, Ark_Function event)
-        {
-        }
-        void EnableAnalyzerImpl(Ark_NativePointer node, Ark_Boolean enable)
-        {
-        }
-        void AnalyzerConfigImpl(Ark_NativePointer node, const Ark_ImageAnalyzerConfig* config)
-        {
-        }
-    } // VideoAttributeModifier
-    const GENERATED_ArkUIVideoModifier* GetVideoModifier()
-    {
-        static const GENERATED_ArkUIVideoModifier ArkUIVideoModifierImpl {
-            VideoInterfaceModifier::_setVideoOptionsImpl,
-            VideoAttributeModifier::MutedImpl,
-            VideoAttributeModifier::AutoPlayImpl,
-            VideoAttributeModifier::ControlsImpl,
-            VideoAttributeModifier::LoopImpl,
-            VideoAttributeModifier::ObjectFitImpl,
-            VideoAttributeModifier::OnStartImpl,
-            VideoAttributeModifier::OnPauseImpl,
-            VideoAttributeModifier::OnFinishImpl,
-            VideoAttributeModifier::OnFullscreenChangeImpl,
-            VideoAttributeModifier::OnPreparedImpl,
-            VideoAttributeModifier::OnSeekingImpl,
-            VideoAttributeModifier::OnSeekedImpl,
-            VideoAttributeModifier::OnUpdateImpl,
-            VideoAttributeModifier::OnErrorImpl,
-            VideoAttributeModifier::OnStopImpl,
-            VideoAttributeModifier::EnableAnalyzerImpl,
-            VideoAttributeModifier::AnalyzerConfigImpl,
-        };
-        return &ArkUIVideoModifierImpl;
-    }
+namespace VideoInterfaceModifier {
+void _setVideoOptionsImpl(Ark_NativePointer node, const Ark_VideoOptions* value)
+{
+}
+} // VideoInterfaceModifier
+namespace VideoAttributeModifier {
+void MutedImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void AutoPlayImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void ControlsImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void LoopImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void ObjectFitImpl(Ark_NativePointer node, Ark_Int32 value)
+{
+}
+void OnStartImpl(Ark_NativePointer node, Ark_Function event)
+{
+}
+void OnPauseImpl(Ark_NativePointer node, Ark_Function event)
+{
+}
+void OnFinishImpl(Ark_NativePointer node, Ark_Function event)
+{
+}
+void OnFullscreenChangeImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void OnPreparedImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void OnSeekingImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void OnSeekedImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void OnUpdateImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void OnErrorImpl(Ark_NativePointer node, Ark_Function event)
+{
+}
+void OnStopImpl(Ark_NativePointer node, Ark_Function event)
+{
+}
+void EnableAnalyzerImpl(Ark_NativePointer node, Ark_Boolean enable)
+{
+}
+void AnalyzerConfigImpl(Ark_NativePointer node, const Ark_ImageAnalyzerConfig* config)
+{
+}
+} // VideoAttributeModifier
+const GENERATED_ArkUIVideoModifier* GetVideoModifier()
+{
+    static const GENERATED_ArkUIVideoModifier ArkUIVideoModifierImpl {
+        VideoInterfaceModifier::_setVideoOptionsImpl,
+        VideoAttributeModifier::MutedImpl,
+        VideoAttributeModifier::AutoPlayImpl,
+        VideoAttributeModifier::ControlsImpl,
+        VideoAttributeModifier::LoopImpl,
+        VideoAttributeModifier::ObjectFitImpl,
+        VideoAttributeModifier::OnStartImpl,
+        VideoAttributeModifier::OnPauseImpl,
+        VideoAttributeModifier::OnFinishImpl,
+        VideoAttributeModifier::OnFullscreenChangeImpl,
+        VideoAttributeModifier::OnPreparedImpl,
+        VideoAttributeModifier::OnSeekingImpl,
+        VideoAttributeModifier::OnSeekedImpl,
+        VideoAttributeModifier::OnUpdateImpl,
+        VideoAttributeModifier::OnErrorImpl,
+        VideoAttributeModifier::OnStopImpl,
+        VideoAttributeModifier::EnableAnalyzerImpl,
+        VideoAttributeModifier::AnalyzerConfigImpl,
+    };
+    return &ArkUIVideoModifierImpl;
+}
 
 }

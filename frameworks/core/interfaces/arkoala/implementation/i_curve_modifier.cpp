@@ -16,28 +16,28 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace ICurveModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        Ark_Int32 InterpolateImpl(ICurvePeer* peer, const Ark_Number* fraction)
-        {
-            return 0;
-        }
-    } // ICurveModifier
-    const GENERATED_ArkUIICurveAccessor* GetICurveAccessor()
-    {
-        static const GENERATED_ArkUIICurveAccessor ICurveAccessorImpl {
-            ICurveModifier::CtorImpl,
-            ICurveModifier::GetFinalizerImpl,
-            ICurveModifier::InterpolateImpl,
-        };
-        return &ICurveAccessorImpl;
-    }
+namespace ICurveModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+Ark_Int32 InterpolateImpl(ICurvePeer* peer, const Ark_Number* fraction)
+{
+    return 0;
+}
+} // ICurveModifier
+const GENERATED_ArkUIICurveAccessor* GetICurveAccessor()
+{
+    static const GENERATED_ArkUIICurveAccessor ICurveAccessorImpl {
+        ICurveModifier::CtorImpl,
+        ICurveModifier::GetFinalizerImpl,
+        ICurveModifier::InterpolateImpl,
+    };
+    return &ICurveAccessorImpl;
+}
 
 }

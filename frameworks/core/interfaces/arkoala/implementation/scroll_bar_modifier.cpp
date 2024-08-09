@@ -16,17 +16,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace ScrollBarInterfaceModifier {
-        void _setScrollBarOptionsImpl(Ark_NativePointer node, const Ark_ScrollBarOptions* value)
-        {
-        }
-    } // ScrollBarInterfaceModifier
-    const GENERATED_ArkUIScrollBarModifier* GetScrollBarModifier()
-    {
-        static const GENERATED_ArkUIScrollBarModifier ArkUIScrollBarModifierImpl {
-            ScrollBarInterfaceModifier::_setScrollBarOptionsImpl,
-        };
-        return &ArkUIScrollBarModifierImpl;
-    }
+namespace ScrollBarInterfaceModifier {
+void _setScrollBarOptionsImpl(Ark_NativePointer node, const Ark_ScrollBarOptions* value)
+{
+}
+} // ScrollBarInterfaceModifier
+const GENERATED_ArkUIScrollBarModifier* GetScrollBarModifier()
+{
+    static const GENERATED_ArkUIScrollBarModifier ArkUIScrollBarModifierImpl {
+        ScrollBarInterfaceModifier::_setScrollBarOptionsImpl,
+    };
+    return &ArkUIScrollBarModifierImpl;
+}
 
 }

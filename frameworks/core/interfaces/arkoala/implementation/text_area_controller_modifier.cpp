@@ -16,35 +16,35 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace TextAreaControllerModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void CaretPositionImpl(TextAreaControllerPeer* peer, const Ark_Number* value)
-        {
-        }
-        void SetTextSelectionImpl(TextAreaControllerPeer* peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd, const Opt_SelectionOptions* options)
-        {
-        }
-        void StopEditingImpl(TextAreaControllerPeer* peer)
-        {
-        }
-    } // TextAreaControllerModifier
-    const GENERATED_ArkUITextAreaControllerAccessor* GetTextAreaControllerAccessor()
-    {
-        static const GENERATED_ArkUITextAreaControllerAccessor TextAreaControllerAccessorImpl {
-            TextAreaControllerModifier::CtorImpl,
-            TextAreaControllerModifier::GetFinalizerImpl,
-            TextAreaControllerModifier::CaretPositionImpl,
-            TextAreaControllerModifier::SetTextSelectionImpl,
-            TextAreaControllerModifier::StopEditingImpl,
-        };
-        return &TextAreaControllerAccessorImpl;
-    }
+namespace TextAreaControllerModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void CaretPositionImpl(TextAreaControllerPeer* peer, const Ark_Number* value)
+{
+}
+void SetTextSelectionImpl(TextAreaControllerPeer* peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd, const Opt_SelectionOptions* options)
+{
+}
+void StopEditingImpl(TextAreaControllerPeer* peer)
+{
+}
+} // TextAreaControllerModifier
+const GENERATED_ArkUITextAreaControllerAccessor* GetTextAreaControllerAccessor()
+{
+    static const GENERATED_ArkUITextAreaControllerAccessor TextAreaControllerAccessorImpl {
+        TextAreaControllerModifier::CtorImpl,
+        TextAreaControllerModifier::GetFinalizerImpl,
+        TextAreaControllerModifier::CaretPositionImpl,
+        TextAreaControllerModifier::SetTextSelectionImpl,
+        TextAreaControllerModifier::StopEditingImpl,
+    };
+    return &TextAreaControllerAccessorImpl;
+}
 
 }

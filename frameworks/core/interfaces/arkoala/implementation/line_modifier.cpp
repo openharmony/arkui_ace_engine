@@ -16,27 +16,27 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace LineInterfaceModifier {
-        void _setLineOptionsImpl(Ark_NativePointer node, const Opt_Type_LineInterface__setLineOptions_Arg0* value)
-        {
-        }
-    } // LineInterfaceModifier
-    namespace LineAttributeModifier {
-        void StartPointImpl(Ark_NativePointer node, const Array_CustomObject* value)
-        {
-        }
-        void EndPointImpl(Ark_NativePointer node, const Array_CustomObject* value)
-        {
-        }
-    } // LineAttributeModifier
-    const GENERATED_ArkUILineModifier* GetLineModifier()
-    {
-        static const GENERATED_ArkUILineModifier ArkUILineModifierImpl {
-            LineInterfaceModifier::_setLineOptionsImpl,
-            LineAttributeModifier::StartPointImpl,
-            LineAttributeModifier::EndPointImpl,
-        };
-        return &ArkUILineModifierImpl;
-    }
+namespace LineInterfaceModifier {
+void _setLineOptionsImpl(Ark_NativePointer node, const Opt_Type_LineInterface__setLineOptions_Arg0* value)
+{
+}
+} // LineInterfaceModifier
+namespace LineAttributeModifier {
+void StartPointImpl(Ark_NativePointer node, const Array_CustomObject* value)
+{
+}
+void EndPointImpl(Ark_NativePointer node, const Array_CustomObject* value)
+{
+}
+} // LineAttributeModifier
+const GENERATED_ArkUILineModifier* GetLineModifier()
+{
+    static const GENERATED_ArkUILineModifier ArkUILineModifierImpl {
+        LineInterfaceModifier::_setLineOptionsImpl,
+        LineAttributeModifier::StartPointImpl,
+        LineAttributeModifier::EndPointImpl,
+    };
+    return &ArkUILineModifierImpl;
+}
 
 }

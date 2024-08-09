@@ -16,35 +16,35 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace TextTimerControllerModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void StartImpl(TextTimerControllerPeer* peer)
-        {
-        }
-        void PauseImpl(TextTimerControllerPeer* peer)
-        {
-        }
-        void ResetImpl(TextTimerControllerPeer* peer)
-        {
-        }
-    } // TextTimerControllerModifier
-    const GENERATED_ArkUITextTimerControllerAccessor* GetTextTimerControllerAccessor()
-    {
-        static const GENERATED_ArkUITextTimerControllerAccessor TextTimerControllerAccessorImpl {
-            TextTimerControllerModifier::CtorImpl,
-            TextTimerControllerModifier::GetFinalizerImpl,
-            TextTimerControllerModifier::StartImpl,
-            TextTimerControllerModifier::PauseImpl,
-            TextTimerControllerModifier::ResetImpl,
-        };
-        return &TextTimerControllerAccessorImpl;
-    }
+namespace TextTimerControllerModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void StartImpl(TextTimerControllerPeer* peer)
+{
+}
+void PauseImpl(TextTimerControllerPeer* peer)
+{
+}
+void ResetImpl(TextTimerControllerPeer* peer)
+{
+}
+} // TextTimerControllerModifier
+const GENERATED_ArkUITextTimerControllerAccessor* GetTextTimerControllerAccessor()
+{
+    static const GENERATED_ArkUITextTimerControllerAccessor TextTimerControllerAccessorImpl {
+        TextTimerControllerModifier::CtorImpl,
+        TextTimerControllerModifier::GetFinalizerImpl,
+        TextTimerControllerModifier::StartImpl,
+        TextTimerControllerModifier::PauseImpl,
+        TextTimerControllerModifier::ResetImpl,
+    };
+    return &TextTimerControllerAccessorImpl;
+}
 
 }

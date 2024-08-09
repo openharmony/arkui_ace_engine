@@ -16,31 +16,31 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace StepperItemInterfaceModifier {
-        void _setStepperItemOptionsImpl(Ark_NativePointer node)
-        {
-        }
-    } // StepperItemInterfaceModifier
-    namespace StepperItemAttributeModifier {
-        void PrevLabelImpl(Ark_NativePointer node, const Ark_String* value)
-        {
-        }
-        void NextLabelImpl(Ark_NativePointer node, const Ark_String* value)
-        {
-        }
-        void StatusImpl(Ark_NativePointer node, const Opt_ItemState* value)
-        {
-        }
-    } // StepperItemAttributeModifier
-    const GENERATED_ArkUIStepperItemModifier* GetStepperItemModifier()
-    {
-        static const GENERATED_ArkUIStepperItemModifier ArkUIStepperItemModifierImpl {
-            StepperItemInterfaceModifier::_setStepperItemOptionsImpl,
-            StepperItemAttributeModifier::PrevLabelImpl,
-            StepperItemAttributeModifier::NextLabelImpl,
-            StepperItemAttributeModifier::StatusImpl,
-        };
-        return &ArkUIStepperItemModifierImpl;
-    }
+namespace StepperItemInterfaceModifier {
+void _setStepperItemOptionsImpl(Ark_NativePointer node)
+{
+}
+} // StepperItemInterfaceModifier
+namespace StepperItemAttributeModifier {
+void PrevLabelImpl(Ark_NativePointer node, const Ark_String* value)
+{
+}
+void NextLabelImpl(Ark_NativePointer node, const Ark_String* value)
+{
+}
+void StatusImpl(Ark_NativePointer node, const Opt_ItemState* value)
+{
+}
+} // StepperItemAttributeModifier
+const GENERATED_ArkUIStepperItemModifier* GetStepperItemModifier()
+{
+    static const GENERATED_ArkUIStepperItemModifier ArkUIStepperItemModifierImpl {
+        StepperItemInterfaceModifier::_setStepperItemOptionsImpl,
+        StepperItemAttributeModifier::PrevLabelImpl,
+        StepperItemAttributeModifier::NextLabelImpl,
+        StepperItemAttributeModifier::StatusImpl,
+    };
+    return &ArkUIStepperItemModifierImpl;
+}
 
 }

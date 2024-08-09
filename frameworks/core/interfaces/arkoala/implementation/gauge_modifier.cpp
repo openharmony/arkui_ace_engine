@@ -16,59 +16,59 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace GaugeInterfaceModifier {
-        void _setGaugeOptionsImpl(Ark_NativePointer node, const Type_GaugeInterface__setGaugeOptions_Arg0* options)
-        {
-        }
-    } // GaugeInterfaceModifier
-    namespace GaugeAttributeModifier {
-        void ValueImpl(Ark_NativePointer node, const Ark_Number* value)
-        {
-        }
-        void StartAngleImpl(Ark_NativePointer node, const Ark_Number* angle)
-        {
-        }
-        void EndAngleImpl(Ark_NativePointer node, const Ark_Number* angle)
-        {
-        }
-        void ColorsImpl(Ark_NativePointer node, const Type_GaugeAttribute_colors_Arg0* colors)
-        {
-        }
-        void StrokeWidthImpl(Ark_NativePointer node, const Ark_Length* length)
-        {
-        }
-        void DescriptionImpl(Ark_NativePointer node, const CustomBuilder* value)
-        {
-        }
-        void TrackShadowImpl(Ark_NativePointer node, const Ark_GaugeShadowOptions* value)
-        {
-        }
-        void IndicatorImpl(Ark_NativePointer node, const Ark_GaugeIndicatorOptions* value)
-        {
-        }
-        void PrivacySensitiveImpl(Ark_NativePointer node, const Opt_Boolean* isPrivacySensitiveMode)
-        {
-        }
-        void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
-        {
-        }
-    } // GaugeAttributeModifier
-    const GENERATED_ArkUIGaugeModifier* GetGaugeModifier()
-    {
-        static const GENERATED_ArkUIGaugeModifier ArkUIGaugeModifierImpl {
-            GaugeInterfaceModifier::_setGaugeOptionsImpl,
-            GaugeAttributeModifier::ValueImpl,
-            GaugeAttributeModifier::StartAngleImpl,
-            GaugeAttributeModifier::EndAngleImpl,
-            GaugeAttributeModifier::ColorsImpl,
-            GaugeAttributeModifier::StrokeWidthImpl,
-            GaugeAttributeModifier::DescriptionImpl,
-            GaugeAttributeModifier::TrackShadowImpl,
-            GaugeAttributeModifier::IndicatorImpl,
-            GaugeAttributeModifier::PrivacySensitiveImpl,
-            GaugeAttributeModifier::ContentModifierImpl,
-        };
-        return &ArkUIGaugeModifierImpl;
-    }
+namespace GaugeInterfaceModifier {
+void _setGaugeOptionsImpl(Ark_NativePointer node, const Type_GaugeInterface__setGaugeOptions_Arg0* options)
+{
+}
+} // GaugeInterfaceModifier
+namespace GaugeAttributeModifier {
+void ValueImpl(Ark_NativePointer node, const Ark_Number* value)
+{
+}
+void StartAngleImpl(Ark_NativePointer node, const Ark_Number* angle)
+{
+}
+void EndAngleImpl(Ark_NativePointer node, const Ark_Number* angle)
+{
+}
+void ColorsImpl(Ark_NativePointer node, const Type_GaugeAttribute_colors_Arg0* colors)
+{
+}
+void StrokeWidthImpl(Ark_NativePointer node, const Ark_Length* length)
+{
+}
+void DescriptionImpl(Ark_NativePointer node, const CustomBuilder* value)
+{
+}
+void TrackShadowImpl(Ark_NativePointer node, const Ark_GaugeShadowOptions* value)
+{
+}
+void IndicatorImpl(Ark_NativePointer node, const Ark_GaugeIndicatorOptions* value)
+{
+}
+void PrivacySensitiveImpl(Ark_NativePointer node, const Opt_Boolean* isPrivacySensitiveMode)
+{
+}
+void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
+{
+}
+} // GaugeAttributeModifier
+const GENERATED_ArkUIGaugeModifier* GetGaugeModifier()
+{
+    static const GENERATED_ArkUIGaugeModifier ArkUIGaugeModifierImpl {
+        GaugeInterfaceModifier::_setGaugeOptionsImpl,
+        GaugeAttributeModifier::ValueImpl,
+        GaugeAttributeModifier::StartAngleImpl,
+        GaugeAttributeModifier::EndAngleImpl,
+        GaugeAttributeModifier::ColorsImpl,
+        GaugeAttributeModifier::StrokeWidthImpl,
+        GaugeAttributeModifier::DescriptionImpl,
+        GaugeAttributeModifier::TrackShadowImpl,
+        GaugeAttributeModifier::IndicatorImpl,
+        GaugeAttributeModifier::PrivacySensitiveImpl,
+        GaugeAttributeModifier::ContentModifierImpl,
+    };
+    return &ArkUIGaugeModifierImpl;
+}
 
 }

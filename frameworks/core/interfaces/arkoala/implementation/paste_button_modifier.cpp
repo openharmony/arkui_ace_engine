@@ -16,27 +16,27 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace PasteButtonInterfaceModifier {
-        void _setPasteButtonOptions0Impl(Ark_NativePointer node)
-        {
-        }
-        void _setPasteButtonOptions1Impl(Ark_NativePointer node, const Ark_PasteButtonOptions* options)
-        {
-        }
-    } // PasteButtonInterfaceModifier
-    namespace PasteButtonAttributeModifier {
-        void OnClickImpl(Ark_NativePointer node, Ark_Function event)
-        {
-        }
-    } // PasteButtonAttributeModifier
-    const GENERATED_ArkUIPasteButtonModifier* GetPasteButtonModifier()
-    {
-        static const GENERATED_ArkUIPasteButtonModifier ArkUIPasteButtonModifierImpl {
-            PasteButtonInterfaceModifier::_setPasteButtonOptions0Impl,
-            PasteButtonInterfaceModifier::_setPasteButtonOptions1Impl,
-            PasteButtonAttributeModifier::OnClickImpl,
-        };
-        return &ArkUIPasteButtonModifierImpl;
-    }
+namespace PasteButtonInterfaceModifier {
+void _setPasteButtonOptions0Impl(Ark_NativePointer node)
+{
+}
+void _setPasteButtonOptions1Impl(Ark_NativePointer node, const Ark_PasteButtonOptions* options)
+{
+}
+} // PasteButtonInterfaceModifier
+namespace PasteButtonAttributeModifier {
+void OnClickImpl(Ark_NativePointer node, Ark_Function event)
+{
+}
+} // PasteButtonAttributeModifier
+const GENERATED_ArkUIPasteButtonModifier* GetPasteButtonModifier()
+{
+    static const GENERATED_ArkUIPasteButtonModifier ArkUIPasteButtonModifierImpl {
+        PasteButtonInterfaceModifier::_setPasteButtonOptions0Impl,
+        PasteButtonInterfaceModifier::_setPasteButtonOptions1Impl,
+        PasteButtonAttributeModifier::OnClickImpl,
+    };
+    return &ArkUIPasteButtonModifierImpl;
+}
 
 }

@@ -16,123 +16,123 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace RichEditorInterfaceModifier {
-        void _setRichEditorOptions0Impl(Ark_NativePointer node, const Ark_RichEditorOptions* value)
-        {
-        }
-        void _setRichEditorOptions1Impl(Ark_NativePointer node, const Ark_RichEditorStyledStringOptions* options)
-        {
-        }
-    } // RichEditorInterfaceModifier
-    namespace RichEditorAttributeModifier {
-        void OnReadyImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void OnSelectImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void OnSelectionChangeImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void AboutToIMEInputImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void OnIMEInputCompleteImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void AboutToDeleteImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void OnDeleteCompleteImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void CopyOptionsImpl(Ark_NativePointer node, Ark_Int32 value)
-        {
-        }
-        void BindSelectionMenuImpl(Ark_NativePointer node, Ark_Int32 spanType, const CustomBuilder* content, const Type_RichEditorAttribute_bindSelectionMenu_Arg2* responseType, const Opt_SelectionMenuOptions* options)
-        {
-        }
-        void CustomKeyboardImpl(Ark_NativePointer node, const CustomBuilder* value, const Opt_KeyboardOptions* options)
-        {
-        }
-        void OnPasteImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void EnableDataDetectorImpl(Ark_NativePointer node, Ark_Boolean enable)
-        {
-        }
-        void EnablePreviewTextImpl(Ark_NativePointer node, Ark_Boolean enable)
-        {
-        }
-        void DataDetectorConfigImpl(Ark_NativePointer node, const Ark_TextDataDetectorConfig* config)
-        {
-        }
-        void PlaceholderImpl(Ark_NativePointer node, const ResourceStr* value, const Opt_PlaceholderStyle* style)
-        {
-        }
-        void CaretColorImpl(Ark_NativePointer node, const ResourceColor* value)
-        {
-        }
-        void SelectedBackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value)
-        {
-        }
-        void OnEditingChangeImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void EnterKeyTypeImpl(Ark_NativePointer node, Ark_Int32 value)
-        {
-        }
-        void OnSubmitImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void OnWillChangeImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void OnDidChangeImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void OnCutImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void OnCopyImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void EditMenuOptionsImpl(Ark_NativePointer node, const Ark_Materialized* editMenu)
-        {
-        }
-    } // RichEditorAttributeModifier
-    const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
-    {
-        static const GENERATED_ArkUIRichEditorModifier ArkUIRichEditorModifierImpl {
-            RichEditorInterfaceModifier::_setRichEditorOptions0Impl,
-            RichEditorInterfaceModifier::_setRichEditorOptions1Impl,
-            RichEditorAttributeModifier::OnReadyImpl,
-            RichEditorAttributeModifier::OnSelectImpl,
-            RichEditorAttributeModifier::OnSelectionChangeImpl,
-            RichEditorAttributeModifier::AboutToIMEInputImpl,
-            RichEditorAttributeModifier::OnIMEInputCompleteImpl,
-            RichEditorAttributeModifier::AboutToDeleteImpl,
-            RichEditorAttributeModifier::OnDeleteCompleteImpl,
-            RichEditorAttributeModifier::CopyOptionsImpl,
-            RichEditorAttributeModifier::BindSelectionMenuImpl,
-            RichEditorAttributeModifier::CustomKeyboardImpl,
-            RichEditorAttributeModifier::OnPasteImpl,
-            RichEditorAttributeModifier::EnableDataDetectorImpl,
-            RichEditorAttributeModifier::EnablePreviewTextImpl,
-            RichEditorAttributeModifier::DataDetectorConfigImpl,
-            RichEditorAttributeModifier::PlaceholderImpl,
-            RichEditorAttributeModifier::CaretColorImpl,
-            RichEditorAttributeModifier::SelectedBackgroundColorImpl,
-            RichEditorAttributeModifier::OnEditingChangeImpl,
-            RichEditorAttributeModifier::EnterKeyTypeImpl,
-            RichEditorAttributeModifier::OnSubmitImpl,
-            RichEditorAttributeModifier::OnWillChangeImpl,
-            RichEditorAttributeModifier::OnDidChangeImpl,
-            RichEditorAttributeModifier::OnCutImpl,
-            RichEditorAttributeModifier::OnCopyImpl,
-            RichEditorAttributeModifier::EditMenuOptionsImpl,
-        };
-        return &ArkUIRichEditorModifierImpl;
-    }
+namespace RichEditorInterfaceModifier {
+void _setRichEditorOptions0Impl(Ark_NativePointer node, const Ark_RichEditorOptions* value)
+{
+}
+void _setRichEditorOptions1Impl(Ark_NativePointer node, const Ark_RichEditorStyledStringOptions* options)
+{
+}
+} // RichEditorInterfaceModifier
+namespace RichEditorAttributeModifier {
+void OnReadyImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void OnSelectImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void OnSelectionChangeImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void AboutToIMEInputImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void OnIMEInputCompleteImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void AboutToDeleteImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void OnDeleteCompleteImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void CopyOptionsImpl(Ark_NativePointer node, Ark_Int32 value)
+{
+}
+void BindSelectionMenuImpl(Ark_NativePointer node, Ark_Int32 spanType, const CustomBuilder* content, const Type_RichEditorAttribute_bindSelectionMenu_Arg2* responseType, const Opt_SelectionMenuOptions* options)
+{
+}
+void CustomKeyboardImpl(Ark_NativePointer node, const CustomBuilder* value, const Opt_KeyboardOptions* options)
+{
+}
+void OnPasteImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void EnableDataDetectorImpl(Ark_NativePointer node, Ark_Boolean enable)
+{
+}
+void EnablePreviewTextImpl(Ark_NativePointer node, Ark_Boolean enable)
+{
+}
+void DataDetectorConfigImpl(Ark_NativePointer node, const Ark_TextDataDetectorConfig* config)
+{
+}
+void PlaceholderImpl(Ark_NativePointer node, const ResourceStr* value, const Opt_PlaceholderStyle* style)
+{
+}
+void CaretColorImpl(Ark_NativePointer node, const ResourceColor* value)
+{
+}
+void SelectedBackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value)
+{
+}
+void OnEditingChangeImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void EnterKeyTypeImpl(Ark_NativePointer node, Ark_Int32 value)
+{
+}
+void OnSubmitImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void OnWillChangeImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void OnDidChangeImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void OnCutImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void OnCopyImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void EditMenuOptionsImpl(Ark_NativePointer node, const Ark_Materialized* editMenu)
+{
+}
+} // RichEditorAttributeModifier
+const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
+{
+    static const GENERATED_ArkUIRichEditorModifier ArkUIRichEditorModifierImpl {
+        RichEditorInterfaceModifier::_setRichEditorOptions0Impl,
+        RichEditorInterfaceModifier::_setRichEditorOptions1Impl,
+        RichEditorAttributeModifier::OnReadyImpl,
+        RichEditorAttributeModifier::OnSelectImpl,
+        RichEditorAttributeModifier::OnSelectionChangeImpl,
+        RichEditorAttributeModifier::AboutToIMEInputImpl,
+        RichEditorAttributeModifier::OnIMEInputCompleteImpl,
+        RichEditorAttributeModifier::AboutToDeleteImpl,
+        RichEditorAttributeModifier::OnDeleteCompleteImpl,
+        RichEditorAttributeModifier::CopyOptionsImpl,
+        RichEditorAttributeModifier::BindSelectionMenuImpl,
+        RichEditorAttributeModifier::CustomKeyboardImpl,
+        RichEditorAttributeModifier::OnPasteImpl,
+        RichEditorAttributeModifier::EnableDataDetectorImpl,
+        RichEditorAttributeModifier::EnablePreviewTextImpl,
+        RichEditorAttributeModifier::DataDetectorConfigImpl,
+        RichEditorAttributeModifier::PlaceholderImpl,
+        RichEditorAttributeModifier::CaretColorImpl,
+        RichEditorAttributeModifier::SelectedBackgroundColorImpl,
+        RichEditorAttributeModifier::OnEditingChangeImpl,
+        RichEditorAttributeModifier::EnterKeyTypeImpl,
+        RichEditorAttributeModifier::OnSubmitImpl,
+        RichEditorAttributeModifier::OnWillChangeImpl,
+        RichEditorAttributeModifier::OnDidChangeImpl,
+        RichEditorAttributeModifier::OnCutImpl,
+        RichEditorAttributeModifier::OnCopyImpl,
+        RichEditorAttributeModifier::EditMenuOptionsImpl,
+    };
+    return &ArkUIRichEditorModifierImpl;
+}
 
 }

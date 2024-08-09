@@ -16,37 +16,37 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace HttpAuthHandlerModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        Ark_Boolean ConfirmImpl(HttpAuthHandlerPeer* peer, const Ark_String* userName, const Ark_String* password)
-        {
-            return 0;
-        }
-        void CancelImpl(HttpAuthHandlerPeer* peer)
-        {
-        }
-        Ark_Boolean IsHttpAuthInfoSavedImpl(HttpAuthHandlerPeer* peer)
-        {
-            return 0;
-        }
-    } // HttpAuthHandlerModifier
-    const GENERATED_ArkUIHttpAuthHandlerAccessor* GetHttpAuthHandlerAccessor()
-    {
-        static const GENERATED_ArkUIHttpAuthHandlerAccessor HttpAuthHandlerAccessorImpl {
-            HttpAuthHandlerModifier::CtorImpl,
-            HttpAuthHandlerModifier::GetFinalizerImpl,
-            HttpAuthHandlerModifier::ConfirmImpl,
-            HttpAuthHandlerModifier::CancelImpl,
-            HttpAuthHandlerModifier::IsHttpAuthInfoSavedImpl,
-        };
-        return &HttpAuthHandlerAccessorImpl;
-    }
+namespace HttpAuthHandlerModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+Ark_Boolean ConfirmImpl(HttpAuthHandlerPeer* peer, const Ark_String* userName, const Ark_String* password)
+{
+    return 0;
+}
+void CancelImpl(HttpAuthHandlerPeer* peer)
+{
+}
+Ark_Boolean IsHttpAuthInfoSavedImpl(HttpAuthHandlerPeer* peer)
+{
+    return 0;
+}
+} // HttpAuthHandlerModifier
+const GENERATED_ArkUIHttpAuthHandlerAccessor* GetHttpAuthHandlerAccessor()
+{
+    static const GENERATED_ArkUIHttpAuthHandlerAccessor HttpAuthHandlerAccessorImpl {
+        HttpAuthHandlerModifier::CtorImpl,
+        HttpAuthHandlerModifier::GetFinalizerImpl,
+        HttpAuthHandlerModifier::ConfirmImpl,
+        HttpAuthHandlerModifier::CancelImpl,
+        HttpAuthHandlerModifier::IsHttpAuthInfoSavedImpl,
+    };
+    return &HttpAuthHandlerAccessorImpl;
+}
 
 }

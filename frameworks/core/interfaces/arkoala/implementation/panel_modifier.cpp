@@ -16,67 +16,67 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace PanelInterfaceModifier {
-        void _setPanelOptionsImpl(Ark_NativePointer node, Ark_Boolean show)
-        {
-        }
-    } // PanelInterfaceModifier
-    namespace PanelAttributeModifier {
-        void ModeImpl(Ark_NativePointer node, Ark_Int32 value)
-        {
-        }
-        void TypeImpl(Ark_NativePointer node, Ark_Int32 value)
-        {
-        }
-        void DragBarImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void CustomHeightImpl(Ark_NativePointer node, const Type_PanelAttribute_customHeight_Arg0* value)
-        {
-        }
-        void FullHeightImpl(Ark_NativePointer node, const Type_PanelAttribute_fullHeight_Arg0* value)
-        {
-        }
-        void HalfHeightImpl(Ark_NativePointer node, const Type_PanelAttribute_halfHeight_Arg0* value)
-        {
-        }
-        void MiniHeightImpl(Ark_NativePointer node, const Type_PanelAttribute_miniHeight_Arg0* value)
-        {
-        }
-        void ShowImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void BackgroundMaskImpl(Ark_NativePointer node, const ResourceColor* color)
-        {
-        }
-        void ShowCloseIconImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void OnChangeImpl(Ark_NativePointer node, Ark_Function event)
-        {
-        }
-        void OnHeightChangeImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-    } // PanelAttributeModifier
-    const GENERATED_ArkUIPanelModifier* GetPanelModifier()
-    {
-        static const GENERATED_ArkUIPanelModifier ArkUIPanelModifierImpl {
-            PanelInterfaceModifier::_setPanelOptionsImpl,
-            PanelAttributeModifier::ModeImpl,
-            PanelAttributeModifier::TypeImpl,
-            PanelAttributeModifier::DragBarImpl,
-            PanelAttributeModifier::CustomHeightImpl,
-            PanelAttributeModifier::FullHeightImpl,
-            PanelAttributeModifier::HalfHeightImpl,
-            PanelAttributeModifier::MiniHeightImpl,
-            PanelAttributeModifier::ShowImpl,
-            PanelAttributeModifier::BackgroundMaskImpl,
-            PanelAttributeModifier::ShowCloseIconImpl,
-            PanelAttributeModifier::OnChangeImpl,
-            PanelAttributeModifier::OnHeightChangeImpl,
-        };
-        return &ArkUIPanelModifierImpl;
-    }
+namespace PanelInterfaceModifier {
+void _setPanelOptionsImpl(Ark_NativePointer node, Ark_Boolean show)
+{
+}
+} // PanelInterfaceModifier
+namespace PanelAttributeModifier {
+void ModeImpl(Ark_NativePointer node, Ark_Int32 value)
+{
+}
+void TypeImpl(Ark_NativePointer node, Ark_Int32 value)
+{
+}
+void DragBarImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void CustomHeightImpl(Ark_NativePointer node, const Type_PanelAttribute_customHeight_Arg0* value)
+{
+}
+void FullHeightImpl(Ark_NativePointer node, const Type_PanelAttribute_fullHeight_Arg0* value)
+{
+}
+void HalfHeightImpl(Ark_NativePointer node, const Type_PanelAttribute_halfHeight_Arg0* value)
+{
+}
+void MiniHeightImpl(Ark_NativePointer node, const Type_PanelAttribute_miniHeight_Arg0* value)
+{
+}
+void ShowImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void BackgroundMaskImpl(Ark_NativePointer node, const ResourceColor* color)
+{
+}
+void ShowCloseIconImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void OnChangeImpl(Ark_NativePointer node, Ark_Function event)
+{
+}
+void OnHeightChangeImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+} // PanelAttributeModifier
+const GENERATED_ArkUIPanelModifier* GetPanelModifier()
+{
+    static const GENERATED_ArkUIPanelModifier ArkUIPanelModifierImpl {
+        PanelInterfaceModifier::_setPanelOptionsImpl,
+        PanelAttributeModifier::ModeImpl,
+        PanelAttributeModifier::TypeImpl,
+        PanelAttributeModifier::DragBarImpl,
+        PanelAttributeModifier::CustomHeightImpl,
+        PanelAttributeModifier::FullHeightImpl,
+        PanelAttributeModifier::HalfHeightImpl,
+        PanelAttributeModifier::MiniHeightImpl,
+        PanelAttributeModifier::ShowImpl,
+        PanelAttributeModifier::BackgroundMaskImpl,
+        PanelAttributeModifier::ShowCloseIconImpl,
+        PanelAttributeModifier::OnChangeImpl,
+        PanelAttributeModifier::OnHeightChangeImpl,
+    };
+    return &ArkUIPanelModifierImpl;
+}
 
 }

@@ -16,31 +16,31 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace LinearIndicatorInterfaceModifier {
-        void _setLinearIndicatorOptionsImpl(Ark_NativePointer node, const Opt_Number* count, const Opt_LinearIndicatorController* controller)
-        {
-        }
-    } // LinearIndicatorInterfaceModifier
-    namespace LinearIndicatorAttributeModifier {
-        void IndicatorStyleImpl(Ark_NativePointer node, const Opt_LinearIndicatorStyle* style)
-        {
-        }
-        void IndicatorLoopImpl(Ark_NativePointer node, const Opt_Boolean* loop)
-        {
-        }
-        void OnChangeImpl(Ark_NativePointer node, const Opt_Function* callback)
-        {
-        }
-    } // LinearIndicatorAttributeModifier
-    const GENERATED_ArkUILinearIndicatorModifier* GetLinearIndicatorModifier()
-    {
-        static const GENERATED_ArkUILinearIndicatorModifier ArkUILinearIndicatorModifierImpl {
-            LinearIndicatorInterfaceModifier::_setLinearIndicatorOptionsImpl,
-            LinearIndicatorAttributeModifier::IndicatorStyleImpl,
-            LinearIndicatorAttributeModifier::IndicatorLoopImpl,
-            LinearIndicatorAttributeModifier::OnChangeImpl,
-        };
-        return &ArkUILinearIndicatorModifierImpl;
-    }
+namespace LinearIndicatorInterfaceModifier {
+void _setLinearIndicatorOptionsImpl(Ark_NativePointer node, const Opt_Number* count, const Opt_LinearIndicatorController* controller)
+{
+}
+} // LinearIndicatorInterfaceModifier
+namespace LinearIndicatorAttributeModifier {
+void IndicatorStyleImpl(Ark_NativePointer node, const Opt_LinearIndicatorStyle* style)
+{
+}
+void IndicatorLoopImpl(Ark_NativePointer node, const Opt_Boolean* loop)
+{
+}
+void OnChangeImpl(Ark_NativePointer node, const Opt_Function* callback)
+{
+}
+} // LinearIndicatorAttributeModifier
+const GENERATED_ArkUILinearIndicatorModifier* GetLinearIndicatorModifier()
+{
+    static const GENERATED_ArkUILinearIndicatorModifier ArkUILinearIndicatorModifierImpl {
+        LinearIndicatorInterfaceModifier::_setLinearIndicatorOptionsImpl,
+        LinearIndicatorAttributeModifier::IndicatorStyleImpl,
+        LinearIndicatorAttributeModifier::IndicatorLoopImpl,
+        LinearIndicatorAttributeModifier::OnChangeImpl,
+    };
+    return &ArkUILinearIndicatorModifierImpl;
+}
 
 }

@@ -16,63 +16,63 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace TextClockInterfaceModifier {
-        void _setTextClockOptionsImpl(Ark_NativePointer node, const Opt_Type_TextClockInterface__setTextClockOptions_Arg0* options)
-        {
-        }
-    } // TextClockInterfaceModifier
-    namespace TextClockAttributeModifier {
-        void FormatImpl(Ark_NativePointer node, const Ark_String* value)
-        {
-        }
-        void OnDateChangeImpl(Ark_NativePointer node, Ark_Function event)
-        {
-        }
-        void FontColorImpl(Ark_NativePointer node, const ResourceColor* value)
-        {
-        }
-        void FontSizeImpl(Ark_NativePointer node, const Ark_Length* value)
-        {
-        }
-        void FontStyleImpl(Ark_NativePointer node, Ark_Int32 value)
-        {
-        }
-        void FontWeightImpl(Ark_NativePointer node, const Type_TextClockAttribute_fontWeight_Arg0* value)
-        {
-        }
-        void FontFamilyImpl(Ark_NativePointer node, const ResourceStr* value)
-        {
-        }
-        void TextShadowImpl(Ark_NativePointer node, const Type_TextClockAttribute_textShadow_Arg0* value)
-        {
-        }
-        void FontFeatureImpl(Ark_NativePointer node, const Ark_String* value)
-        {
-        }
-        void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
-        {
-        }
-        void DateTimeOptionsImpl(Ark_NativePointer node, const Opt_CustomObject* dateTimeOptions)
-        {
-        }
-    } // TextClockAttributeModifier
-    const GENERATED_ArkUITextClockModifier* GetTextClockModifier()
-    {
-        static const GENERATED_ArkUITextClockModifier ArkUITextClockModifierImpl {
-            TextClockInterfaceModifier::_setTextClockOptionsImpl,
-            TextClockAttributeModifier::FormatImpl,
-            TextClockAttributeModifier::OnDateChangeImpl,
-            TextClockAttributeModifier::FontColorImpl,
-            TextClockAttributeModifier::FontSizeImpl,
-            TextClockAttributeModifier::FontStyleImpl,
-            TextClockAttributeModifier::FontWeightImpl,
-            TextClockAttributeModifier::FontFamilyImpl,
-            TextClockAttributeModifier::TextShadowImpl,
-            TextClockAttributeModifier::FontFeatureImpl,
-            TextClockAttributeModifier::ContentModifierImpl,
-            TextClockAttributeModifier::DateTimeOptionsImpl,
-        };
-        return &ArkUITextClockModifierImpl;
-    }
+namespace TextClockInterfaceModifier {
+void _setTextClockOptionsImpl(Ark_NativePointer node, const Opt_Type_TextClockInterface__setTextClockOptions_Arg0* options)
+{
+}
+} // TextClockInterfaceModifier
+namespace TextClockAttributeModifier {
+void FormatImpl(Ark_NativePointer node, const Ark_String* value)
+{
+}
+void OnDateChangeImpl(Ark_NativePointer node, Ark_Function event)
+{
+}
+void FontColorImpl(Ark_NativePointer node, const ResourceColor* value)
+{
+}
+void FontSizeImpl(Ark_NativePointer node, const Ark_Length* value)
+{
+}
+void FontStyleImpl(Ark_NativePointer node, Ark_Int32 value)
+{
+}
+void FontWeightImpl(Ark_NativePointer node, const Type_TextClockAttribute_fontWeight_Arg0* value)
+{
+}
+void FontFamilyImpl(Ark_NativePointer node, const ResourceStr* value)
+{
+}
+void TextShadowImpl(Ark_NativePointer node, const Type_TextClockAttribute_textShadow_Arg0* value)
+{
+}
+void FontFeatureImpl(Ark_NativePointer node, const Ark_String* value)
+{
+}
+void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
+{
+}
+void DateTimeOptionsImpl(Ark_NativePointer node, const Opt_CustomObject* dateTimeOptions)
+{
+}
+} // TextClockAttributeModifier
+const GENERATED_ArkUITextClockModifier* GetTextClockModifier()
+{
+    static const GENERATED_ArkUITextClockModifier ArkUITextClockModifierImpl {
+        TextClockInterfaceModifier::_setTextClockOptionsImpl,
+        TextClockAttributeModifier::FormatImpl,
+        TextClockAttributeModifier::OnDateChangeImpl,
+        TextClockAttributeModifier::FontColorImpl,
+        TextClockAttributeModifier::FontSizeImpl,
+        TextClockAttributeModifier::FontStyleImpl,
+        TextClockAttributeModifier::FontWeightImpl,
+        TextClockAttributeModifier::FontFamilyImpl,
+        TextClockAttributeModifier::TextShadowImpl,
+        TextClockAttributeModifier::FontFeatureImpl,
+        TextClockAttributeModifier::ContentModifierImpl,
+        TextClockAttributeModifier::DateTimeOptionsImpl,
+    };
+    return &ArkUITextClockModifierImpl;
+}
 
 }

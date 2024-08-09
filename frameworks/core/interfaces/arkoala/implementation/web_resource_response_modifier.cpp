@@ -16,77 +16,77 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace WebResourceResponseModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void GetResponseDataImpl(WebResourceResponsePeer* peer)
-        {
-        }
-        void GetResponseEncodingImpl(WebResourceResponsePeer* peer)
-        {
-        }
-        void GetResponseMimeTypeImpl(WebResourceResponsePeer* peer)
-        {
-        }
-        void GetReasonMessageImpl(WebResourceResponsePeer* peer)
-        {
-        }
-        Ark_NativePointer GetResponseHeaderImpl(WebResourceResponsePeer* peer)
-        {
-            return 0;
-        }
-        Ark_Int32 GetResponseCodeImpl(WebResourceResponsePeer* peer)
-        {
-            return 0;
-        }
-        void SetResponseDataImpl(WebResourceResponsePeer* peer, const Union_String_Number_Resource_ArrayBuffer* data)
-        {
-        }
-        void SetResponseEncodingImpl(WebResourceResponsePeer* peer, const Ark_String* encoding)
-        {
-        }
-        void SetResponseMimeTypeImpl(WebResourceResponsePeer* peer, const Ark_String* mimeType)
-        {
-        }
-        void SetReasonMessageImpl(WebResourceResponsePeer* peer, const Ark_String* reason)
-        {
-        }
-        void SetResponseHeaderImpl(WebResourceResponsePeer* peer, const Array_Header* header)
-        {
-        }
-        void SetResponseCodeImpl(WebResourceResponsePeer* peer, const Ark_Number* code)
-        {
-        }
-        void SetResponseIsReadyImpl(WebResourceResponsePeer* peer, Ark_Boolean IsReady)
-        {
-        }
-    } // WebResourceResponseModifier
-    const GENERATED_ArkUIWebResourceResponseAccessor* GetWebResourceResponseAccessor()
-    {
-        static const GENERATED_ArkUIWebResourceResponseAccessor WebResourceResponseAccessorImpl {
-            WebResourceResponseModifier::CtorImpl,
-            WebResourceResponseModifier::GetFinalizerImpl,
-            WebResourceResponseModifier::GetResponseDataImpl,
-            WebResourceResponseModifier::GetResponseEncodingImpl,
-            WebResourceResponseModifier::GetResponseMimeTypeImpl,
-            WebResourceResponseModifier::GetReasonMessageImpl,
-            WebResourceResponseModifier::GetResponseHeaderImpl,
-            WebResourceResponseModifier::GetResponseCodeImpl,
-            WebResourceResponseModifier::SetResponseDataImpl,
-            WebResourceResponseModifier::SetResponseEncodingImpl,
-            WebResourceResponseModifier::SetResponseMimeTypeImpl,
-            WebResourceResponseModifier::SetReasonMessageImpl,
-            WebResourceResponseModifier::SetResponseHeaderImpl,
-            WebResourceResponseModifier::SetResponseCodeImpl,
-            WebResourceResponseModifier::SetResponseIsReadyImpl,
-        };
-        return &WebResourceResponseAccessorImpl;
-    }
+namespace WebResourceResponseModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void GetResponseDataImpl(WebResourceResponsePeer* peer)
+{
+}
+void GetResponseEncodingImpl(WebResourceResponsePeer* peer)
+{
+}
+void GetResponseMimeTypeImpl(WebResourceResponsePeer* peer)
+{
+}
+void GetReasonMessageImpl(WebResourceResponsePeer* peer)
+{
+}
+Ark_NativePointer GetResponseHeaderImpl(WebResourceResponsePeer* peer)
+{
+    return 0;
+}
+Ark_Int32 GetResponseCodeImpl(WebResourceResponsePeer* peer)
+{
+    return 0;
+}
+void SetResponseDataImpl(WebResourceResponsePeer* peer, const Union_String_Number_Resource_ArrayBuffer* data)
+{
+}
+void SetResponseEncodingImpl(WebResourceResponsePeer* peer, const Ark_String* encoding)
+{
+}
+void SetResponseMimeTypeImpl(WebResourceResponsePeer* peer, const Ark_String* mimeType)
+{
+}
+void SetReasonMessageImpl(WebResourceResponsePeer* peer, const Ark_String* reason)
+{
+}
+void SetResponseHeaderImpl(WebResourceResponsePeer* peer, const Array_Header* header)
+{
+}
+void SetResponseCodeImpl(WebResourceResponsePeer* peer, const Ark_Number* code)
+{
+}
+void SetResponseIsReadyImpl(WebResourceResponsePeer* peer, Ark_Boolean IsReady)
+{
+}
+} // WebResourceResponseModifier
+const GENERATED_ArkUIWebResourceResponseAccessor* GetWebResourceResponseAccessor()
+{
+    static const GENERATED_ArkUIWebResourceResponseAccessor WebResourceResponseAccessorImpl {
+        WebResourceResponseModifier::CtorImpl,
+        WebResourceResponseModifier::GetFinalizerImpl,
+        WebResourceResponseModifier::GetResponseDataImpl,
+        WebResourceResponseModifier::GetResponseEncodingImpl,
+        WebResourceResponseModifier::GetResponseMimeTypeImpl,
+        WebResourceResponseModifier::GetReasonMessageImpl,
+        WebResourceResponseModifier::GetResponseHeaderImpl,
+        WebResourceResponseModifier::GetResponseCodeImpl,
+        WebResourceResponseModifier::SetResponseDataImpl,
+        WebResourceResponseModifier::SetResponseEncodingImpl,
+        WebResourceResponseModifier::SetResponseMimeTypeImpl,
+        WebResourceResponseModifier::SetReasonMessageImpl,
+        WebResourceResponseModifier::SetResponseHeaderImpl,
+        WebResourceResponseModifier::SetResponseCodeImpl,
+        WebResourceResponseModifier::SetResponseIsReadyImpl,
+    };
+    return &WebResourceResponseAccessorImpl;
+}
 
 }

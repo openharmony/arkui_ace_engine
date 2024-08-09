@@ -16,32 +16,32 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace CustomSpanModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer OnMeasureImpl(CustomSpanPeer* peer, const Ark_CustomSpanMeasureInfo* measureInfo)
-        {
-            return 0;
-        }
-        void OnDrawImpl(CustomSpanPeer* peer, const Ark_CustomObject* context, const Ark_CustomSpanDrawInfo* drawInfo)
-        {
-        }
-    } // CustomSpanModifier
-    const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor()
-    {
-        static const GENERATED_ArkUICustomSpanAccessor CustomSpanAccessorImpl {
-            CustomSpanModifier::CtorImpl,
-            CustomSpanModifier::GetFinalizerImpl,
-            CustomSpanModifier::OnMeasureImpl,
-            CustomSpanModifier::OnDrawImpl,
-        };
-        return &CustomSpanAccessorImpl;
-    }
+namespace CustomSpanModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+Ark_NativePointer OnMeasureImpl(CustomSpanPeer* peer, const Ark_CustomSpanMeasureInfo* measureInfo)
+{
+    return 0;
+}
+void OnDrawImpl(CustomSpanPeer* peer, const Ark_CustomObject* context, const Ark_CustomSpanDrawInfo* drawInfo)
+{
+}
+} // CustomSpanModifier
+const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor()
+{
+    static const GENERATED_ArkUICustomSpanAccessor CustomSpanAccessorImpl {
+        CustomSpanModifier::CtorImpl,
+        CustomSpanModifier::GetFinalizerImpl,
+        CustomSpanModifier::OnMeasureImpl,
+        CustomSpanModifier::OnDrawImpl,
+    };
+    return &CustomSpanAccessorImpl;
+}
 
 }

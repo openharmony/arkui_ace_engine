@@ -16,23 +16,23 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace FlexInterfaceModifier {
-        void _setFlexOptionsImpl(Ark_NativePointer node, const Opt_FlexOptions* value)
-        {
-        }
-    } // FlexInterfaceModifier
-    namespace FlexAttributeModifier {
-        void PointLightImpl(Ark_NativePointer node, const Ark_PointLightStyle* value)
-        {
-        }
-    } // FlexAttributeModifier
-    const GENERATED_ArkUIFlexModifier* GetFlexModifier()
-    {
-        static const GENERATED_ArkUIFlexModifier ArkUIFlexModifierImpl {
-            FlexInterfaceModifier::_setFlexOptionsImpl,
-            FlexAttributeModifier::PointLightImpl,
-        };
-        return &ArkUIFlexModifierImpl;
-    }
+namespace FlexInterfaceModifier {
+void _setFlexOptionsImpl(Ark_NativePointer node, const Opt_FlexOptions* value)
+{
+}
+} // FlexInterfaceModifier
+namespace FlexAttributeModifier {
+void PointLightImpl(Ark_NativePointer node, const Ark_PointLightStyle* value)
+{
+}
+} // FlexAttributeModifier
+const GENERATED_ArkUIFlexModifier* GetFlexModifier()
+{
+    static const GENERATED_ArkUIFlexModifier ArkUIFlexModifierImpl {
+        FlexInterfaceModifier::_setFlexOptionsImpl,
+        FlexAttributeModifier::PointLightImpl,
+    };
+    return &ArkUIFlexModifierImpl;
+}
 
 }

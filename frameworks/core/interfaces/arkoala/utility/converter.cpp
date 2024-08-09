@@ -26,8 +26,7 @@ void ParseDimension(const Ark_String &string, Ark_Length *result)
     char *suffixPtr = nullptr;
     float value = std::strtof(string.chars, &suffixPtr);
 
-    if (!suffixPtr || suffixPtr == string.chars)
-    {
+    if (!suffixPtr || suffixPtr == string.chars) {
         // not a numeric value
         result->unit = static_cast<Ark_Int32>(DimensionUnit::NONE);
         return;

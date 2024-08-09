@@ -16,27 +16,27 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace ListItemGroupInterfaceModifier {
-        void _setListItemGroupOptionsImpl(Ark_NativePointer node, const Opt_ListItemGroupOptions* options)
-        {
-        }
-    } // ListItemGroupInterfaceModifier
-    namespace ListItemGroupAttributeModifier {
-        void DividerImpl(Ark_NativePointer node, const Type_ListItemGroupAttribute_divider_Arg0* value)
-        {
-        }
-        void ChildrenMainSizeImpl(Ark_NativePointer node, const Ark_Materialized* value)
-        {
-        }
-    } // ListItemGroupAttributeModifier
-    const GENERATED_ArkUIListItemGroupModifier* GetListItemGroupModifier()
-    {
-        static const GENERATED_ArkUIListItemGroupModifier ArkUIListItemGroupModifierImpl {
-            ListItemGroupInterfaceModifier::_setListItemGroupOptionsImpl,
-            ListItemGroupAttributeModifier::DividerImpl,
-            ListItemGroupAttributeModifier::ChildrenMainSizeImpl,
-        };
-        return &ArkUIListItemGroupModifierImpl;
-    }
+namespace ListItemGroupInterfaceModifier {
+void _setListItemGroupOptionsImpl(Ark_NativePointer node, const Opt_ListItemGroupOptions* options)
+{
+}
+} // ListItemGroupInterfaceModifier
+namespace ListItemGroupAttributeModifier {
+void DividerImpl(Ark_NativePointer node, const Type_ListItemGroupAttribute_divider_Arg0* value)
+{
+}
+void ChildrenMainSizeImpl(Ark_NativePointer node, const Ark_Materialized* value)
+{
+}
+} // ListItemGroupAttributeModifier
+const GENERATED_ArkUIListItemGroupModifier* GetListItemGroupModifier()
+{
+    static const GENERATED_ArkUIListItemGroupModifier ArkUIListItemGroupModifierImpl {
+        ListItemGroupInterfaceModifier::_setListItemGroupOptionsImpl,
+        ListItemGroupAttributeModifier::DividerImpl,
+        ListItemGroupAttributeModifier::ChildrenMainSizeImpl,
+    };
+    return &ArkUIListItemGroupModifierImpl;
+}
 
 }

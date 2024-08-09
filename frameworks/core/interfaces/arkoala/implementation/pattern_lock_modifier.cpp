@@ -16,67 +16,67 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace PatternLockInterfaceModifier {
-        void _setPatternLockOptionsImpl(Ark_NativePointer node, const Opt_PatternLockController* controller)
-        {
-        }
-    } // PatternLockInterfaceModifier
-    namespace PatternLockAttributeModifier {
-        void SideLengthImpl(Ark_NativePointer node, const Ark_Length* value)
-        {
-        }
-        void CircleRadiusImpl(Ark_NativePointer node, const Ark_Length* value)
-        {
-        }
-        void BackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value)
-        {
-        }
-        void RegularColorImpl(Ark_NativePointer node, const ResourceColor* value)
-        {
-        }
-        void SelectedColorImpl(Ark_NativePointer node, const ResourceColor* value)
-        {
-        }
-        void ActiveColorImpl(Ark_NativePointer node, const ResourceColor* value)
-        {
-        }
-        void PathColorImpl(Ark_NativePointer node, const ResourceColor* value)
-        {
-        }
-        void PathStrokeWidthImpl(Ark_NativePointer node, const Type_PatternLockAttribute_pathStrokeWidth_Arg0* value)
-        {
-        }
-        void OnPatternCompleteImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void AutoResetImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void OnDotConnectImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void ActivateCircleStyleImpl(Ark_NativePointer node, const Opt_CircleStyleOptions* options)
-        {
-        }
-    } // PatternLockAttributeModifier
-    const GENERATED_ArkUIPatternLockModifier* GetPatternLockModifier()
-    {
-        static const GENERATED_ArkUIPatternLockModifier ArkUIPatternLockModifierImpl {
-            PatternLockInterfaceModifier::_setPatternLockOptionsImpl,
-            PatternLockAttributeModifier::SideLengthImpl,
-            PatternLockAttributeModifier::CircleRadiusImpl,
-            PatternLockAttributeModifier::BackgroundColorImpl,
-            PatternLockAttributeModifier::RegularColorImpl,
-            PatternLockAttributeModifier::SelectedColorImpl,
-            PatternLockAttributeModifier::ActiveColorImpl,
-            PatternLockAttributeModifier::PathColorImpl,
-            PatternLockAttributeModifier::PathStrokeWidthImpl,
-            PatternLockAttributeModifier::OnPatternCompleteImpl,
-            PatternLockAttributeModifier::AutoResetImpl,
-            PatternLockAttributeModifier::OnDotConnectImpl,
-            PatternLockAttributeModifier::ActivateCircleStyleImpl,
-        };
-        return &ArkUIPatternLockModifierImpl;
-    }
+namespace PatternLockInterfaceModifier {
+void _setPatternLockOptionsImpl(Ark_NativePointer node, const Opt_PatternLockController* controller)
+{
+}
+} // PatternLockInterfaceModifier
+namespace PatternLockAttributeModifier {
+void SideLengthImpl(Ark_NativePointer node, const Ark_Length* value)
+{
+}
+void CircleRadiusImpl(Ark_NativePointer node, const Ark_Length* value)
+{
+}
+void BackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value)
+{
+}
+void RegularColorImpl(Ark_NativePointer node, const ResourceColor* value)
+{
+}
+void SelectedColorImpl(Ark_NativePointer node, const ResourceColor* value)
+{
+}
+void ActiveColorImpl(Ark_NativePointer node, const ResourceColor* value)
+{
+}
+void PathColorImpl(Ark_NativePointer node, const ResourceColor* value)
+{
+}
+void PathStrokeWidthImpl(Ark_NativePointer node, const Type_PatternLockAttribute_pathStrokeWidth_Arg0* value)
+{
+}
+void OnPatternCompleteImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void AutoResetImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void OnDotConnectImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void ActivateCircleStyleImpl(Ark_NativePointer node, const Opt_CircleStyleOptions* options)
+{
+}
+} // PatternLockAttributeModifier
+const GENERATED_ArkUIPatternLockModifier* GetPatternLockModifier()
+{
+    static const GENERATED_ArkUIPatternLockModifier ArkUIPatternLockModifierImpl {
+        PatternLockInterfaceModifier::_setPatternLockOptionsImpl,
+        PatternLockAttributeModifier::SideLengthImpl,
+        PatternLockAttributeModifier::CircleRadiusImpl,
+        PatternLockAttributeModifier::BackgroundColorImpl,
+        PatternLockAttributeModifier::RegularColorImpl,
+        PatternLockAttributeModifier::SelectedColorImpl,
+        PatternLockAttributeModifier::ActiveColorImpl,
+        PatternLockAttributeModifier::PathColorImpl,
+        PatternLockAttributeModifier::PathStrokeWidthImpl,
+        PatternLockAttributeModifier::OnPatternCompleteImpl,
+        PatternLockAttributeModifier::AutoResetImpl,
+        PatternLockAttributeModifier::OnDotConnectImpl,
+        PatternLockAttributeModifier::ActivateCircleStyleImpl,
+    };
+    return &ArkUIPatternLockModifierImpl;
+}
 
 }

@@ -16,47 +16,47 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace Component3DInterfaceModifier {
-        void _setComponent3DOptionsImpl(Ark_NativePointer node, const Opt_SceneOptions* sceneOptions)
-        {
-        }
-    } // Component3DInterfaceModifier
-    namespace Component3DAttributeModifier {
-        void EnvironmentImpl(Ark_NativePointer node, const Ark_Resource* uri)
-        {
-        }
-        void CustomRenderImpl(Ark_NativePointer node, const Ark_Resource* uri, Ark_Boolean selfRenderUpdate)
-        {
-        }
-        void ShaderImpl(Ark_NativePointer node, const Ark_Resource* uri)
-        {
-        }
-        void ShaderImageTextureImpl(Ark_NativePointer node, const Ark_Resource* uri)
-        {
-        }
-        void ShaderInputBufferImpl(Ark_NativePointer node, const Array_Number* buffer)
-        {
-        }
-        void RenderWidthImpl(Ark_NativePointer node, const Ark_Length* value)
-        {
-        }
-        void RenderHeightImpl(Ark_NativePointer node, const Ark_Length* value)
-        {
-        }
-    } // Component3DAttributeModifier
-    const GENERATED_ArkUIComponent3DModifier* GetComponent3DModifier()
-    {
-        static const GENERATED_ArkUIComponent3DModifier ArkUIComponent3DModifierImpl {
-            Component3DInterfaceModifier::_setComponent3DOptionsImpl,
-            Component3DAttributeModifier::EnvironmentImpl,
-            Component3DAttributeModifier::CustomRenderImpl,
-            Component3DAttributeModifier::ShaderImpl,
-            Component3DAttributeModifier::ShaderImageTextureImpl,
-            Component3DAttributeModifier::ShaderInputBufferImpl,
-            Component3DAttributeModifier::RenderWidthImpl,
-            Component3DAttributeModifier::RenderHeightImpl,
-        };
-        return &ArkUIComponent3DModifierImpl;
-    }
+namespace Component3DInterfaceModifier {
+void _setComponent3DOptionsImpl(Ark_NativePointer node, const Opt_SceneOptions* sceneOptions)
+{
+}
+} // Component3DInterfaceModifier
+namespace Component3DAttributeModifier {
+void EnvironmentImpl(Ark_NativePointer node, const Ark_Resource* uri)
+{
+}
+void CustomRenderImpl(Ark_NativePointer node, const Ark_Resource* uri, Ark_Boolean selfRenderUpdate)
+{
+}
+void ShaderImpl(Ark_NativePointer node, const Ark_Resource* uri)
+{
+}
+void ShaderImageTextureImpl(Ark_NativePointer node, const Ark_Resource* uri)
+{
+}
+void ShaderInputBufferImpl(Ark_NativePointer node, const Array_Number* buffer)
+{
+}
+void RenderWidthImpl(Ark_NativePointer node, const Ark_Length* value)
+{
+}
+void RenderHeightImpl(Ark_NativePointer node, const Ark_Length* value)
+{
+}
+} // Component3DAttributeModifier
+const GENERATED_ArkUIComponent3DModifier* GetComponent3DModifier()
+{
+    static const GENERATED_ArkUIComponent3DModifier ArkUIComponent3DModifierImpl {
+        Component3DInterfaceModifier::_setComponent3DOptionsImpl,
+        Component3DAttributeModifier::EnvironmentImpl,
+        Component3DAttributeModifier::CustomRenderImpl,
+        Component3DAttributeModifier::ShaderImpl,
+        Component3DAttributeModifier::ShaderImageTextureImpl,
+        Component3DAttributeModifier::ShaderInputBufferImpl,
+        Component3DAttributeModifier::RenderWidthImpl,
+        Component3DAttributeModifier::RenderHeightImpl,
+    };
+    return &ArkUIComponent3DModifierImpl;
+}
 
 }

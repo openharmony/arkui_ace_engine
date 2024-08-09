@@ -16,27 +16,27 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace SaveButtonInterfaceModifier {
-        void _setSaveButtonOptions0Impl(Ark_NativePointer node)
-        {
-        }
-        void _setSaveButtonOptions1Impl(Ark_NativePointer node, const Ark_SaveButtonOptions* options)
-        {
-        }
-    } // SaveButtonInterfaceModifier
-    namespace SaveButtonAttributeModifier {
-        void OnClickImpl(Ark_NativePointer node, Ark_Function event)
-        {
-        }
-    } // SaveButtonAttributeModifier
-    const GENERATED_ArkUISaveButtonModifier* GetSaveButtonModifier()
-    {
-        static const GENERATED_ArkUISaveButtonModifier ArkUISaveButtonModifierImpl {
-            SaveButtonInterfaceModifier::_setSaveButtonOptions0Impl,
-            SaveButtonInterfaceModifier::_setSaveButtonOptions1Impl,
-            SaveButtonAttributeModifier::OnClickImpl,
-        };
-        return &ArkUISaveButtonModifierImpl;
-    }
+namespace SaveButtonInterfaceModifier {
+void _setSaveButtonOptions0Impl(Ark_NativePointer node)
+{
+}
+void _setSaveButtonOptions1Impl(Ark_NativePointer node, const Ark_SaveButtonOptions* options)
+{
+}
+} // SaveButtonInterfaceModifier
+namespace SaveButtonAttributeModifier {
+void OnClickImpl(Ark_NativePointer node, Ark_Function event)
+{
+}
+} // SaveButtonAttributeModifier
+const GENERATED_ArkUISaveButtonModifier* GetSaveButtonModifier()
+{
+    static const GENERATED_ArkUISaveButtonModifier ArkUISaveButtonModifierImpl {
+        SaveButtonInterfaceModifier::_setSaveButtonOptions0Impl,
+        SaveButtonInterfaceModifier::_setSaveButtonOptions1Impl,
+        SaveButtonAttributeModifier::OnClickImpl,
+    };
+    return &ArkUISaveButtonModifierImpl;
+}
 
 }

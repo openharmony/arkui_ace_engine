@@ -16,56 +16,56 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace GestureRecognizerModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void GetTagImpl(GestureRecognizerPeer* peer)
-        {
-        }
-        Ark_NativePointer GetTypeImpl(GestureRecognizerPeer* peer)
-        {
-            return 0;
-        }
-        Ark_Boolean IsBuiltInImpl(GestureRecognizerPeer* peer)
-        {
-            return 0;
-        }
-        void SetEnabledImpl(GestureRecognizerPeer* peer, Ark_Boolean isEnabled)
-        {
-        }
-        Ark_Boolean IsEnabledImpl(GestureRecognizerPeer* peer)
-        {
-            return 0;
-        }
-        Ark_NativePointer GetStateImpl(GestureRecognizerPeer* peer)
-        {
-            return 0;
-        }
-        Ark_NativePointer GetEventTargetInfoImpl(GestureRecognizerPeer* peer)
-        {
-            return 0;
-        }
-    } // GestureRecognizerModifier
-    const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
-    {
-        static const GENERATED_ArkUIGestureRecognizerAccessor GestureRecognizerAccessorImpl {
-            GestureRecognizerModifier::CtorImpl,
-            GestureRecognizerModifier::GetFinalizerImpl,
-            GestureRecognizerModifier::GetTagImpl,
-            GestureRecognizerModifier::GetTypeImpl,
-            GestureRecognizerModifier::IsBuiltInImpl,
-            GestureRecognizerModifier::SetEnabledImpl,
-            GestureRecognizerModifier::IsEnabledImpl,
-            GestureRecognizerModifier::GetStateImpl,
-            GestureRecognizerModifier::GetEventTargetInfoImpl,
-        };
-        return &GestureRecognizerAccessorImpl;
-    }
+namespace GestureRecognizerModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void GetTagImpl(GestureRecognizerPeer* peer)
+{
+}
+Ark_NativePointer GetTypeImpl(GestureRecognizerPeer* peer)
+{
+    return 0;
+}
+Ark_Boolean IsBuiltInImpl(GestureRecognizerPeer* peer)
+{
+    return 0;
+}
+void SetEnabledImpl(GestureRecognizerPeer* peer, Ark_Boolean isEnabled)
+{
+}
+Ark_Boolean IsEnabledImpl(GestureRecognizerPeer* peer)
+{
+    return 0;
+}
+Ark_NativePointer GetStateImpl(GestureRecognizerPeer* peer)
+{
+    return 0;
+}
+Ark_NativePointer GetEventTargetInfoImpl(GestureRecognizerPeer* peer)
+{
+    return 0;
+}
+} // GestureRecognizerModifier
+const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
+{
+    static const GENERATED_ArkUIGestureRecognizerAccessor GestureRecognizerAccessorImpl {
+        GestureRecognizerModifier::CtorImpl,
+        GestureRecognizerModifier::GetFinalizerImpl,
+        GestureRecognizerModifier::GetTagImpl,
+        GestureRecognizerModifier::GetTypeImpl,
+        GestureRecognizerModifier::IsBuiltInImpl,
+        GestureRecognizerModifier::SetEnabledImpl,
+        GestureRecognizerModifier::IsEnabledImpl,
+        GestureRecognizerModifier::GetStateImpl,
+        GestureRecognizerModifier::GetEventTargetInfoImpl,
+    };
+    return &GestureRecognizerAccessorImpl;
+}
 
 }

@@ -16,43 +16,43 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace CheckboxGroupInterfaceModifier {
-        void _setCheckboxGroupOptionsImpl(Ark_NativePointer node, const Opt_CheckboxGroupOptions* options)
-        {
-        }
-    } // CheckboxGroupInterfaceModifier
-    namespace CheckboxGroupAttributeModifier {
-        void SelectAllImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void SelectedColorImpl(Ark_NativePointer node, const ResourceColor* value)
-        {
-        }
-        void UnselectedColorImpl(Ark_NativePointer node, const ResourceColor* value)
-        {
-        }
-        void MarkImpl(Ark_NativePointer node, const Ark_MarkStyle* value)
-        {
-        }
-        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void CheckboxShapeImpl(Ark_NativePointer node, Ark_Int32 value)
-        {
-        }
-    } // CheckboxGroupAttributeModifier
-    const GENERATED_ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
-    {
-        static const GENERATED_ArkUICheckboxGroupModifier ArkUICheckboxGroupModifierImpl {
-            CheckboxGroupInterfaceModifier::_setCheckboxGroupOptionsImpl,
-            CheckboxGroupAttributeModifier::SelectAllImpl,
-            CheckboxGroupAttributeModifier::SelectedColorImpl,
-            CheckboxGroupAttributeModifier::UnselectedColorImpl,
-            CheckboxGroupAttributeModifier::MarkImpl,
-            CheckboxGroupAttributeModifier::OnChangeImpl,
-            CheckboxGroupAttributeModifier::CheckboxShapeImpl,
-        };
-        return &ArkUICheckboxGroupModifierImpl;
-    }
+namespace CheckboxGroupInterfaceModifier {
+void _setCheckboxGroupOptionsImpl(Ark_NativePointer node, const Opt_CheckboxGroupOptions* options)
+{
+}
+} // CheckboxGroupInterfaceModifier
+namespace CheckboxGroupAttributeModifier {
+void SelectAllImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void SelectedColorImpl(Ark_NativePointer node, const ResourceColor* value)
+{
+}
+void UnselectedColorImpl(Ark_NativePointer node, const ResourceColor* value)
+{
+}
+void MarkImpl(Ark_NativePointer node, const Ark_MarkStyle* value)
+{
+}
+void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void CheckboxShapeImpl(Ark_NativePointer node, Ark_Int32 value)
+{
+}
+} // CheckboxGroupAttributeModifier
+const GENERATED_ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
+{
+    static const GENERATED_ArkUICheckboxGroupModifier ArkUICheckboxGroupModifierImpl {
+        CheckboxGroupInterfaceModifier::_setCheckboxGroupOptionsImpl,
+        CheckboxGroupAttributeModifier::SelectAllImpl,
+        CheckboxGroupAttributeModifier::SelectedColorImpl,
+        CheckboxGroupAttributeModifier::UnselectedColorImpl,
+        CheckboxGroupAttributeModifier::MarkImpl,
+        CheckboxGroupAttributeModifier::OnChangeImpl,
+        CheckboxGroupAttributeModifier::CheckboxShapeImpl,
+    };
+    return &ArkUICheckboxGroupModifierImpl;
+}
 
 }

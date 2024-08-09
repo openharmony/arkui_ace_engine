@@ -16,28 +16,28 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace ContentModifierModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer ApplyContentImpl(ContentModifierPeer* peer)
-        {
-            return 0;
-        }
-    } // ContentModifierModifier
-    const GENERATED_ArkUIContentModifierAccessor* GetContentModifierAccessor()
-    {
-        static const GENERATED_ArkUIContentModifierAccessor ContentModifierAccessorImpl {
-            ContentModifierModifier::CtorImpl,
-            ContentModifierModifier::GetFinalizerImpl,
-            ContentModifierModifier::ApplyContentImpl,
-        };
-        return &ContentModifierAccessorImpl;
-    }
+namespace ContentModifierModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+Ark_NativePointer ApplyContentImpl(ContentModifierPeer* peer)
+{
+    return 0;
+}
+} // ContentModifierModifier
+const GENERATED_ArkUIContentModifierAccessor* GetContentModifierAccessor()
+{
+    static const GENERATED_ArkUIContentModifierAccessor ContentModifierAccessorImpl {
+        ContentModifierModifier::CtorImpl,
+        ContentModifierModifier::GetFinalizerImpl,
+        ContentModifierModifier::ApplyContentImpl,
+    };
+    return &ContentModifierAccessorImpl;
+}
 
 }

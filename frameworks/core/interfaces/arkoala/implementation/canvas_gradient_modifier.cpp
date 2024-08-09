@@ -16,27 +16,27 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace CanvasGradientModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void AddColorStopImpl(CanvasGradientPeer* peer, const Ark_Number* offset, const Ark_String* color)
-        {
-        }
-    } // CanvasGradientModifier
-    const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor()
-    {
-        static const GENERATED_ArkUICanvasGradientAccessor CanvasGradientAccessorImpl {
-            CanvasGradientModifier::CtorImpl,
-            CanvasGradientModifier::GetFinalizerImpl,
-            CanvasGradientModifier::AddColorStopImpl,
-        };
-        return &CanvasGradientAccessorImpl;
-    }
+namespace CanvasGradientModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void AddColorStopImpl(CanvasGradientPeer* peer, const Ark_Number* offset, const Ark_String* color)
+{
+}
+} // CanvasGradientModifier
+const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor()
+{
+    static const GENERATED_ArkUICanvasGradientAccessor CanvasGradientAccessorImpl {
+        CanvasGradientModifier::CtorImpl,
+        CanvasGradientModifier::GetFinalizerImpl,
+        CanvasGradientModifier::AddColorStopImpl,
+    };
+    return &CanvasGradientAccessorImpl;
+}
 
 }

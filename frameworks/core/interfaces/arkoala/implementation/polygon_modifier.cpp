@@ -16,23 +16,23 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace PolygonInterfaceModifier {
-        void _setPolygonOptionsImpl(Ark_NativePointer node, const Opt_Type_PolygonInterface__setPolygonOptions_Arg0* value)
-        {
-        }
-    } // PolygonInterfaceModifier
-    namespace PolygonAttributeModifier {
-        void PointsImpl(Ark_NativePointer node, const Array_CustomObject* value)
-        {
-        }
-    } // PolygonAttributeModifier
-    const GENERATED_ArkUIPolygonModifier* GetPolygonModifier()
-    {
-        static const GENERATED_ArkUIPolygonModifier ArkUIPolygonModifierImpl {
-            PolygonInterfaceModifier::_setPolygonOptionsImpl,
-            PolygonAttributeModifier::PointsImpl,
-        };
-        return &ArkUIPolygonModifierImpl;
-    }
+namespace PolygonInterfaceModifier {
+void _setPolygonOptionsImpl(Ark_NativePointer node, const Opt_Type_PolygonInterface__setPolygonOptions_Arg0* value)
+{
+}
+} // PolygonInterfaceModifier
+namespace PolygonAttributeModifier {
+void PointsImpl(Ark_NativePointer node, const Array_CustomObject* value)
+{
+}
+} // PolygonAttributeModifier
+const GENERATED_ArkUIPolygonModifier* GetPolygonModifier()
+{
+    static const GENERATED_ArkUIPolygonModifier ArkUIPolygonModifierImpl {
+        PolygonInterfaceModifier::_setPolygonOptionsImpl,
+        PolygonAttributeModifier::PointsImpl,
+    };
+    return &ArkUIPolygonModifierImpl;
+}
 
 }

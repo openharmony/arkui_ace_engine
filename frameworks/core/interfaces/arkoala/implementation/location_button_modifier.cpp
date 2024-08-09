@@ -16,27 +16,27 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace LocationButtonInterfaceModifier {
-        void _setLocationButtonOptions0Impl(Ark_NativePointer node)
-        {
-        }
-        void _setLocationButtonOptions1Impl(Ark_NativePointer node, const Ark_LocationButtonOptions* options)
-        {
-        }
-    } // LocationButtonInterfaceModifier
-    namespace LocationButtonAttributeModifier {
-        void OnClickImpl(Ark_NativePointer node, Ark_Function event)
-        {
-        }
-    } // LocationButtonAttributeModifier
-    const GENERATED_ArkUILocationButtonModifier* GetLocationButtonModifier()
-    {
-        static const GENERATED_ArkUILocationButtonModifier ArkUILocationButtonModifierImpl {
-            LocationButtonInterfaceModifier::_setLocationButtonOptions0Impl,
-            LocationButtonInterfaceModifier::_setLocationButtonOptions1Impl,
-            LocationButtonAttributeModifier::OnClickImpl,
-        };
-        return &ArkUILocationButtonModifierImpl;
-    }
+namespace LocationButtonInterfaceModifier {
+void _setLocationButtonOptions0Impl(Ark_NativePointer node)
+{
+}
+void _setLocationButtonOptions1Impl(Ark_NativePointer node, const Ark_LocationButtonOptions* options)
+{
+}
+} // LocationButtonInterfaceModifier
+namespace LocationButtonAttributeModifier {
+void OnClickImpl(Ark_NativePointer node, Ark_Function event)
+{
+}
+} // LocationButtonAttributeModifier
+const GENERATED_ArkUILocationButtonModifier* GetLocationButtonModifier()
+{
+    static const GENERATED_ArkUILocationButtonModifier ArkUILocationButtonModifierImpl {
+        LocationButtonInterfaceModifier::_setLocationButtonOptions0Impl,
+        LocationButtonInterfaceModifier::_setLocationButtonOptions1Impl,
+        LocationButtonAttributeModifier::OnClickImpl,
+    };
+    return &ArkUILocationButtonModifierImpl;
+}
 
 }

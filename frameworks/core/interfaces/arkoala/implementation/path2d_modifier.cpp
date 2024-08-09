@@ -16,27 +16,27 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace Path2DModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void AddPathImpl(Path2DPeer* peer, const Ark_Materialized* path, const Opt_Matrix2D* transform)
-        {
-        }
-    } // Path2DModifier
-    const GENERATED_ArkUIPath2DAccessor* GetPath2DAccessor()
-    {
-        static const GENERATED_ArkUIPath2DAccessor Path2DAccessorImpl {
-            Path2DModifier::CtorImpl,
-            Path2DModifier::GetFinalizerImpl,
-            Path2DModifier::AddPathImpl,
-        };
-        return &Path2DAccessorImpl;
-    }
+namespace Path2DModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void AddPathImpl(Path2DPeer* peer, const Ark_Materialized* path, const Opt_Matrix2D* transform)
+{
+}
+} // Path2DModifier
+const GENERATED_ArkUIPath2DAccessor* GetPath2DAccessor()
+{
+    static const GENERATED_ArkUIPath2DAccessor Path2DAccessorImpl {
+        Path2DModifier::CtorImpl,
+        Path2DModifier::GetFinalizerImpl,
+        Path2DModifier::AddPathImpl,
+    };
+    return &Path2DAccessorImpl;
+}
 
 }

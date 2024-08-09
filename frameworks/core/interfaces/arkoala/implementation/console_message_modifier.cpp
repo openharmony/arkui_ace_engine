@@ -16,41 +16,41 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace ConsoleMessageModifier {
-        Ark_NativePointer CtorImpl(const Ark_String* message, const Ark_String* sourceId, const Ark_Number* lineNumber, Ark_Int32 messageLevel)
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void GetMessageImpl(ConsoleMessagePeer* peer)
-        {
-        }
-        void GetSourceIdImpl(ConsoleMessagePeer* peer)
-        {
-        }
-        Ark_Int32 GetLineNumberImpl(ConsoleMessagePeer* peer)
-        {
-            return 0;
-        }
-        Ark_NativePointer GetMessageLevelImpl(ConsoleMessagePeer* peer)
-        {
-            return 0;
-        }
-    } // ConsoleMessageModifier
-    const GENERATED_ArkUIConsoleMessageAccessor* GetConsoleMessageAccessor()
-    {
-        static const GENERATED_ArkUIConsoleMessageAccessor ConsoleMessageAccessorImpl {
-            ConsoleMessageModifier::CtorImpl,
-            ConsoleMessageModifier::GetFinalizerImpl,
-            ConsoleMessageModifier::GetMessageImpl,
-            ConsoleMessageModifier::GetSourceIdImpl,
-            ConsoleMessageModifier::GetLineNumberImpl,
-            ConsoleMessageModifier::GetMessageLevelImpl,
-        };
-        return &ConsoleMessageAccessorImpl;
-    }
+namespace ConsoleMessageModifier {
+Ark_NativePointer CtorImpl(const Ark_String* message, const Ark_String* sourceId, const Ark_Number* lineNumber, Ark_Int32 messageLevel)
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void GetMessageImpl(ConsoleMessagePeer* peer)
+{
+}
+void GetSourceIdImpl(ConsoleMessagePeer* peer)
+{
+}
+Ark_Int32 GetLineNumberImpl(ConsoleMessagePeer* peer)
+{
+    return 0;
+}
+Ark_NativePointer GetMessageLevelImpl(ConsoleMessagePeer* peer)
+{
+    return 0;
+}
+} // ConsoleMessageModifier
+const GENERATED_ArkUIConsoleMessageAccessor* GetConsoleMessageAccessor()
+{
+    static const GENERATED_ArkUIConsoleMessageAccessor ConsoleMessageAccessorImpl {
+        ConsoleMessageModifier::CtorImpl,
+        ConsoleMessageModifier::GetFinalizerImpl,
+        ConsoleMessageModifier::GetMessageImpl,
+        ConsoleMessageModifier::GetSourceIdImpl,
+        ConsoleMessageModifier::GetLineNumberImpl,
+        ConsoleMessageModifier::GetMessageLevelImpl,
+    };
+    return &ConsoleMessageAccessorImpl;
+}
 
 }

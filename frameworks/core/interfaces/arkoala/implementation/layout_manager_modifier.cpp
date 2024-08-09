@@ -16,38 +16,38 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace LayoutManagerModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        Ark_Int32 GetLineCountImpl(LayoutManagerPeer* peer)
-        {
-            return 0;
-        }
-        Ark_NativePointer GetGlyphPositionAtCoordinateImpl(LayoutManagerPeer* peer, const Ark_Number* x, const Ark_Number* y)
-        {
-            return 0;
-        }
-        Ark_NativePointer GetLineMetricsImpl(LayoutManagerPeer* peer, const Ark_Number* lineNumber)
-        {
-            return 0;
-        }
-    } // LayoutManagerModifier
-    const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor()
-    {
-        static const GENERATED_ArkUILayoutManagerAccessor LayoutManagerAccessorImpl {
-            LayoutManagerModifier::CtorImpl,
-            LayoutManagerModifier::GetFinalizerImpl,
-            LayoutManagerModifier::GetLineCountImpl,
-            LayoutManagerModifier::GetGlyphPositionAtCoordinateImpl,
-            LayoutManagerModifier::GetLineMetricsImpl,
-        };
-        return &LayoutManagerAccessorImpl;
-    }
+namespace LayoutManagerModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+Ark_Int32 GetLineCountImpl(LayoutManagerPeer* peer)
+{
+    return 0;
+}
+Ark_NativePointer GetGlyphPositionAtCoordinateImpl(LayoutManagerPeer* peer, const Ark_Number* x, const Ark_Number* y)
+{
+    return 0;
+}
+Ark_NativePointer GetLineMetricsImpl(LayoutManagerPeer* peer, const Ark_Number* lineNumber)
+{
+    return 0;
+}
+} // LayoutManagerModifier
+const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor()
+{
+    static const GENERATED_ArkUILayoutManagerAccessor LayoutManagerAccessorImpl {
+        LayoutManagerModifier::CtorImpl,
+        LayoutManagerModifier::GetFinalizerImpl,
+        LayoutManagerModifier::GetLineCountImpl,
+        LayoutManagerModifier::GetGlyphPositionAtCoordinateImpl,
+        LayoutManagerModifier::GetLineMetricsImpl,
+    };
+    return &LayoutManagerAccessorImpl;
+}
 
 }

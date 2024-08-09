@@ -16,57 +16,57 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace CommonShapeMethodModifier {
-        void StrokeImpl(Ark_NativePointer node, const ResourceColor* value)
-        {
-        }
-        void FillImpl(Ark_NativePointer node, const ResourceColor* value)
-        {
-        }
-        void StrokeDashOffsetImpl(Ark_NativePointer node, const Type_CommonShapeMethod_strokeDashOffset_Arg0* value)
-        {
-        }
-        void StrokeLineCapImpl(Ark_NativePointer node, Ark_Int32 value)
-        {
-        }
-        void StrokeLineJoinImpl(Ark_NativePointer node, Ark_Int32 value)
-        {
-        }
-        void StrokeMiterLimitImpl(Ark_NativePointer node, const Type_CommonShapeMethod_strokeMiterLimit_Arg0* value)
-        {
-        }
-        void StrokeOpacityImpl(Ark_NativePointer node, const Type_CommonShapeMethod_strokeOpacity_Arg0* value)
-        {
-        }
-        void FillOpacityImpl(Ark_NativePointer node, const Type_CommonShapeMethod_fillOpacity_Arg0* value)
-        {
-        }
-        void StrokeWidthImpl(Ark_NativePointer node, const Ark_Length* value)
-        {
-        }
-        void AntiAliasImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void StrokeDashArrayImpl(Ark_NativePointer node, const Array_CustomObject* value)
-        {
-        }
-    } // CommonShapeMethodModifier
-    const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier()
-    {
-        static const GENERATED_ArkUICommonShapeMethodModifier ArkUICommonShapeMethodModifierImpl {
-            CommonShapeMethodModifier::StrokeImpl,
-            CommonShapeMethodModifier::FillImpl,
-            CommonShapeMethodModifier::StrokeDashOffsetImpl,
-            CommonShapeMethodModifier::StrokeLineCapImpl,
-            CommonShapeMethodModifier::StrokeLineJoinImpl,
-            CommonShapeMethodModifier::StrokeMiterLimitImpl,
-            CommonShapeMethodModifier::StrokeOpacityImpl,
-            CommonShapeMethodModifier::FillOpacityImpl,
-            CommonShapeMethodModifier::StrokeWidthImpl,
-            CommonShapeMethodModifier::AntiAliasImpl,
-            CommonShapeMethodModifier::StrokeDashArrayImpl,
-        };
-        return &ArkUICommonShapeMethodModifierImpl;
-    }
+namespace CommonShapeMethodModifier {
+void StrokeImpl(Ark_NativePointer node, const ResourceColor* value)
+{
+}
+void FillImpl(Ark_NativePointer node, const ResourceColor* value)
+{
+}
+void StrokeDashOffsetImpl(Ark_NativePointer node, const Type_CommonShapeMethod_strokeDashOffset_Arg0* value)
+{
+}
+void StrokeLineCapImpl(Ark_NativePointer node, Ark_Int32 value)
+{
+}
+void StrokeLineJoinImpl(Ark_NativePointer node, Ark_Int32 value)
+{
+}
+void StrokeMiterLimitImpl(Ark_NativePointer node, const Type_CommonShapeMethod_strokeMiterLimit_Arg0* value)
+{
+}
+void StrokeOpacityImpl(Ark_NativePointer node, const Type_CommonShapeMethod_strokeOpacity_Arg0* value)
+{
+}
+void FillOpacityImpl(Ark_NativePointer node, const Type_CommonShapeMethod_fillOpacity_Arg0* value)
+{
+}
+void StrokeWidthImpl(Ark_NativePointer node, const Ark_Length* value)
+{
+}
+void AntiAliasImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void StrokeDashArrayImpl(Ark_NativePointer node, const Array_CustomObject* value)
+{
+}
+} // CommonShapeMethodModifier
+const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier()
+{
+    static const GENERATED_ArkUICommonShapeMethodModifier ArkUICommonShapeMethodModifierImpl {
+        CommonShapeMethodModifier::StrokeImpl,
+        CommonShapeMethodModifier::FillImpl,
+        CommonShapeMethodModifier::StrokeDashOffsetImpl,
+        CommonShapeMethodModifier::StrokeLineCapImpl,
+        CommonShapeMethodModifier::StrokeLineJoinImpl,
+        CommonShapeMethodModifier::StrokeMiterLimitImpl,
+        CommonShapeMethodModifier::StrokeOpacityImpl,
+        CommonShapeMethodModifier::FillOpacityImpl,
+        CommonShapeMethodModifier::StrokeWidthImpl,
+        CommonShapeMethodModifier::AntiAliasImpl,
+        CommonShapeMethodModifier::StrokeDashArrayImpl,
+    };
+    return &ArkUICommonShapeMethodModifierImpl;
+}
 
 }

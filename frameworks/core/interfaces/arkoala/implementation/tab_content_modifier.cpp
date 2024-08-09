@@ -16,35 +16,35 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace TabContentInterfaceModifier {
-        void _setTabContentOptionsImpl(Ark_NativePointer node)
-        {
-        }
-    } // TabContentInterfaceModifier
-    namespace TabContentAttributeModifier {
-        void TabBar0Impl(Ark_NativePointer node, const Type_TabContentAttribute_tabBar_Arg0* value)
-        {
-        }
-        void TabBar1Impl(Ark_NativePointer node, const Type_TabContentAttribute_tabBar1_Arg0* value)
-        {
-        }
-        void OnWillShowImpl(Ark_NativePointer node, Ark_Function event)
-        {
-        }
-        void OnWillHideImpl(Ark_NativePointer node, Ark_Function event)
-        {
-        }
-    } // TabContentAttributeModifier
-    const GENERATED_ArkUITabContentModifier* GetTabContentModifier()
-    {
-        static const GENERATED_ArkUITabContentModifier ArkUITabContentModifierImpl {
-            TabContentInterfaceModifier::_setTabContentOptionsImpl,
-            TabContentAttributeModifier::TabBar0Impl,
-            TabContentAttributeModifier::TabBar1Impl,
-            TabContentAttributeModifier::OnWillShowImpl,
-            TabContentAttributeModifier::OnWillHideImpl,
-        };
-        return &ArkUITabContentModifierImpl;
-    }
+namespace TabContentInterfaceModifier {
+void _setTabContentOptionsImpl(Ark_NativePointer node)
+{
+}
+} // TabContentInterfaceModifier
+namespace TabContentAttributeModifier {
+void TabBar0Impl(Ark_NativePointer node, const Type_TabContentAttribute_tabBar_Arg0* value)
+{
+}
+void TabBar1Impl(Ark_NativePointer node, const Type_TabContentAttribute_tabBar1_Arg0* value)
+{
+}
+void OnWillShowImpl(Ark_NativePointer node, Ark_Function event)
+{
+}
+void OnWillHideImpl(Ark_NativePointer node, Ark_Function event)
+{
+}
+} // TabContentAttributeModifier
+const GENERATED_ArkUITabContentModifier* GetTabContentModifier()
+{
+    static const GENERATED_ArkUITabContentModifier ArkUITabContentModifierImpl {
+        TabContentInterfaceModifier::_setTabContentOptionsImpl,
+        TabContentAttributeModifier::TabBar0Impl,
+        TabContentAttributeModifier::TabBar1Impl,
+        TabContentAttributeModifier::OnWillShowImpl,
+        TabContentAttributeModifier::OnWillHideImpl,
+    };
+    return &ArkUITabContentModifierImpl;
+}
 
 }

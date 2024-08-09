@@ -16,31 +16,31 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace RelativeContainerInterfaceModifier {
-        void _setRelativeContainerOptionsImpl(Ark_NativePointer node)
-        {
-        }
-    } // RelativeContainerInterfaceModifier
-    namespace RelativeContainerAttributeModifier {
-        void GuideLineImpl(Ark_NativePointer node, const Array_GuideLineStyle* value)
-        {
-        }
-        void Barrier0Impl(Ark_NativePointer node, const Array_BarrierStyle* value)
-        {
-        }
-        void Barrier1Impl(Ark_NativePointer node, const Array_LocalizedBarrierStyle* barrierStyle)
-        {
-        }
-    } // RelativeContainerAttributeModifier
-    const GENERATED_ArkUIRelativeContainerModifier* GetRelativeContainerModifier()
-    {
-        static const GENERATED_ArkUIRelativeContainerModifier ArkUIRelativeContainerModifierImpl {
-            RelativeContainerInterfaceModifier::_setRelativeContainerOptionsImpl,
-            RelativeContainerAttributeModifier::GuideLineImpl,
-            RelativeContainerAttributeModifier::Barrier0Impl,
-            RelativeContainerAttributeModifier::Barrier1Impl,
-        };
-        return &ArkUIRelativeContainerModifierImpl;
-    }
+namespace RelativeContainerInterfaceModifier {
+void _setRelativeContainerOptionsImpl(Ark_NativePointer node)
+{
+}
+} // RelativeContainerInterfaceModifier
+namespace RelativeContainerAttributeModifier {
+void GuideLineImpl(Ark_NativePointer node, const Array_GuideLineStyle* value)
+{
+}
+void Barrier0Impl(Ark_NativePointer node, const Array_BarrierStyle* value)
+{
+}
+void Barrier1Impl(Ark_NativePointer node, const Array_LocalizedBarrierStyle* barrierStyle)
+{
+}
+} // RelativeContainerAttributeModifier
+const GENERATED_ArkUIRelativeContainerModifier* GetRelativeContainerModifier()
+{
+    static const GENERATED_ArkUIRelativeContainerModifier ArkUIRelativeContainerModifierImpl {
+        RelativeContainerInterfaceModifier::_setRelativeContainerOptionsImpl,
+        RelativeContainerAttributeModifier::GuideLineImpl,
+        RelativeContainerAttributeModifier::Barrier0Impl,
+        RelativeContainerAttributeModifier::Barrier1Impl,
+    };
+    return &ArkUIRelativeContainerModifierImpl;
+}
 
 }

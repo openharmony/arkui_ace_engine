@@ -16,31 +16,31 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace CalendarControllerModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void BackToTodayImpl(CalendarControllerPeer* peer)
-        {
-        }
-        void GoToImpl(CalendarControllerPeer* peer, const Literal_Number_year_month_day* value)
-        {
-        }
-    } // CalendarControllerModifier
-    const GENERATED_ArkUICalendarControllerAccessor* GetCalendarControllerAccessor()
-    {
-        static const GENERATED_ArkUICalendarControllerAccessor CalendarControllerAccessorImpl {
-            CalendarControllerModifier::CtorImpl,
-            CalendarControllerModifier::GetFinalizerImpl,
-            CalendarControllerModifier::BackToTodayImpl,
-            CalendarControllerModifier::GoToImpl,
-        };
-        return &CalendarControllerAccessorImpl;
-    }
+namespace CalendarControllerModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void BackToTodayImpl(CalendarControllerPeer* peer)
+{
+}
+void GoToImpl(CalendarControllerPeer* peer, const Literal_Number_year_month_day* value)
+{
+}
+} // CalendarControllerModifier
+const GENERATED_ArkUICalendarControllerAccessor* GetCalendarControllerAccessor()
+{
+    static const GENERATED_ArkUICalendarControllerAccessor CalendarControllerAccessorImpl {
+        CalendarControllerModifier::CtorImpl,
+        CalendarControllerModifier::GetFinalizerImpl,
+        CalendarControllerModifier::BackToTodayImpl,
+        CalendarControllerModifier::GoToImpl,
+    };
+    return &CalendarControllerAccessorImpl;
+}
 
 }

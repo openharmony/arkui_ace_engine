@@ -16,47 +16,47 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace WebContextMenuResultModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void CloseContextMenuImpl(WebContextMenuResultPeer* peer)
-        {
-        }
-        void CopyImageImpl(WebContextMenuResultPeer* peer)
-        {
-        }
-        void CopyImpl(WebContextMenuResultPeer* peer)
-        {
-        }
-        void PasteImpl(WebContextMenuResultPeer* peer)
-        {
-        }
-        void CutImpl(WebContextMenuResultPeer* peer)
-        {
-        }
-        void SelectAllImpl(WebContextMenuResultPeer* peer)
-        {
-        }
-    } // WebContextMenuResultModifier
-    const GENERATED_ArkUIWebContextMenuResultAccessor* GetWebContextMenuResultAccessor()
-    {
-        static const GENERATED_ArkUIWebContextMenuResultAccessor WebContextMenuResultAccessorImpl {
-            WebContextMenuResultModifier::CtorImpl,
-            WebContextMenuResultModifier::GetFinalizerImpl,
-            WebContextMenuResultModifier::CloseContextMenuImpl,
-            WebContextMenuResultModifier::CopyImageImpl,
-            WebContextMenuResultModifier::CopyImpl,
-            WebContextMenuResultModifier::PasteImpl,
-            WebContextMenuResultModifier::CutImpl,
-            WebContextMenuResultModifier::SelectAllImpl,
-        };
-        return &WebContextMenuResultAccessorImpl;
-    }
+namespace WebContextMenuResultModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void CloseContextMenuImpl(WebContextMenuResultPeer* peer)
+{
+}
+void CopyImageImpl(WebContextMenuResultPeer* peer)
+{
+}
+void CopyImpl(WebContextMenuResultPeer* peer)
+{
+}
+void PasteImpl(WebContextMenuResultPeer* peer)
+{
+}
+void CutImpl(WebContextMenuResultPeer* peer)
+{
+}
+void SelectAllImpl(WebContextMenuResultPeer* peer)
+{
+}
+} // WebContextMenuResultModifier
+const GENERATED_ArkUIWebContextMenuResultAccessor* GetWebContextMenuResultAccessor()
+{
+    static const GENERATED_ArkUIWebContextMenuResultAccessor WebContextMenuResultAccessorImpl {
+        WebContextMenuResultModifier::CtorImpl,
+        WebContextMenuResultModifier::GetFinalizerImpl,
+        WebContextMenuResultModifier::CloseContextMenuImpl,
+        WebContextMenuResultModifier::CopyImageImpl,
+        WebContextMenuResultModifier::CopyImpl,
+        WebContextMenuResultModifier::PasteImpl,
+        WebContextMenuResultModifier::CutImpl,
+        WebContextMenuResultModifier::SelectAllImpl,
+    };
+    return &WebContextMenuResultAccessorImpl;
+}
 
 }

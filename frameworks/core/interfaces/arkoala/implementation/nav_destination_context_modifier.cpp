@@ -16,43 +16,43 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace NavDestinationContextModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void GetConfigInRouteMapImpl(NavDestinationContextPeer* peer)
-        {
-        }
-        void SetPathInfoImpl(NavDestinationContextPeer* peer, const Ark_NavPathInfo* pathInfo)
-        {
-        }
-        void SetPathStackImpl(NavDestinationContextPeer* peer, const Ark_Materialized* pathStack)
-        {
-        }
-        void GetNavDestinationIdImpl(NavDestinationContextPeer* peer)
-        {
-        }
-        void SetNavDestinationIdImpl(NavDestinationContextPeer* peer, const Ark_String* navDestinationId)
-        {
-        }
-    } // NavDestinationContextModifier
-    const GENERATED_ArkUINavDestinationContextAccessor* GetNavDestinationContextAccessor()
-    {
-        static const GENERATED_ArkUINavDestinationContextAccessor NavDestinationContextAccessorImpl {
-            NavDestinationContextModifier::CtorImpl,
-            NavDestinationContextModifier::GetFinalizerImpl,
-            NavDestinationContextModifier::GetConfigInRouteMapImpl,
-            NavDestinationContextModifier::SetPathInfoImpl,
-            NavDestinationContextModifier::SetPathStackImpl,
-            NavDestinationContextModifier::GetNavDestinationIdImpl,
-            NavDestinationContextModifier::SetNavDestinationIdImpl,
-        };
-        return &NavDestinationContextAccessorImpl;
-    }
+namespace NavDestinationContextModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void GetConfigInRouteMapImpl(NavDestinationContextPeer* peer)
+{
+}
+void SetPathInfoImpl(NavDestinationContextPeer* peer, const Ark_NavPathInfo* pathInfo)
+{
+}
+void SetPathStackImpl(NavDestinationContextPeer* peer, const Ark_Materialized* pathStack)
+{
+}
+void GetNavDestinationIdImpl(NavDestinationContextPeer* peer)
+{
+}
+void SetNavDestinationIdImpl(NavDestinationContextPeer* peer, const Ark_String* navDestinationId)
+{
+}
+} // NavDestinationContextModifier
+const GENERATED_ArkUINavDestinationContextAccessor* GetNavDestinationContextAccessor()
+{
+    static const GENERATED_ArkUINavDestinationContextAccessor NavDestinationContextAccessorImpl {
+        NavDestinationContextModifier::CtorImpl,
+        NavDestinationContextModifier::GetFinalizerImpl,
+        NavDestinationContextModifier::GetConfigInRouteMapImpl,
+        NavDestinationContextModifier::SetPathInfoImpl,
+        NavDestinationContextModifier::SetPathStackImpl,
+        NavDestinationContextModifier::GetNavDestinationIdImpl,
+        NavDestinationContextModifier::SetNavDestinationIdImpl,
+    };
+    return &NavDestinationContextAccessorImpl;
+}
 
 }

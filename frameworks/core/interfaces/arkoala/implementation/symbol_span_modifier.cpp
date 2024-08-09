@@ -16,39 +16,39 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace SymbolSpanInterfaceModifier {
-        void _setSymbolSpanOptionsImpl(Ark_NativePointer node, const Ark_Resource* value)
-        {
-        }
-    } // SymbolSpanInterfaceModifier
-    namespace SymbolSpanAttributeModifier {
-        void FontSizeImpl(Ark_NativePointer node, const Type_SymbolSpanAttribute_fontSize_Arg0* value)
-        {
-        }
-        void FontColorImpl(Ark_NativePointer node, const Array_ResourceColor* value)
-        {
-        }
-        void FontWeightImpl(Ark_NativePointer node, const Type_SymbolSpanAttribute_fontWeight_Arg0* value)
-        {
-        }
-        void EffectStrategyImpl(Ark_NativePointer node, Ark_Int32 value)
-        {
-        }
-        void RenderingStrategyImpl(Ark_NativePointer node, Ark_Int32 value)
-        {
-        }
-    } // SymbolSpanAttributeModifier
-    const GENERATED_ArkUISymbolSpanModifier* GetSymbolSpanModifier()
-    {
-        static const GENERATED_ArkUISymbolSpanModifier ArkUISymbolSpanModifierImpl {
-            SymbolSpanInterfaceModifier::_setSymbolSpanOptionsImpl,
-            SymbolSpanAttributeModifier::FontSizeImpl,
-            SymbolSpanAttributeModifier::FontColorImpl,
-            SymbolSpanAttributeModifier::FontWeightImpl,
-            SymbolSpanAttributeModifier::EffectStrategyImpl,
-            SymbolSpanAttributeModifier::RenderingStrategyImpl,
-        };
-        return &ArkUISymbolSpanModifierImpl;
-    }
+namespace SymbolSpanInterfaceModifier {
+void _setSymbolSpanOptionsImpl(Ark_NativePointer node, const Ark_Resource* value)
+{
+}
+} // SymbolSpanInterfaceModifier
+namespace SymbolSpanAttributeModifier {
+void FontSizeImpl(Ark_NativePointer node, const Type_SymbolSpanAttribute_fontSize_Arg0* value)
+{
+}
+void FontColorImpl(Ark_NativePointer node, const Array_ResourceColor* value)
+{
+}
+void FontWeightImpl(Ark_NativePointer node, const Type_SymbolSpanAttribute_fontWeight_Arg0* value)
+{
+}
+void EffectStrategyImpl(Ark_NativePointer node, Ark_Int32 value)
+{
+}
+void RenderingStrategyImpl(Ark_NativePointer node, Ark_Int32 value)
+{
+}
+} // SymbolSpanAttributeModifier
+const GENERATED_ArkUISymbolSpanModifier* GetSymbolSpanModifier()
+{
+    static const GENERATED_ArkUISymbolSpanModifier ArkUISymbolSpanModifierImpl {
+        SymbolSpanInterfaceModifier::_setSymbolSpanOptionsImpl,
+        SymbolSpanAttributeModifier::FontSizeImpl,
+        SymbolSpanAttributeModifier::FontColorImpl,
+        SymbolSpanAttributeModifier::FontWeightImpl,
+        SymbolSpanAttributeModifier::EffectStrategyImpl,
+        SymbolSpanAttributeModifier::RenderingStrategyImpl,
+    };
+    return &ArkUISymbolSpanModifierImpl;
+}
 
 }

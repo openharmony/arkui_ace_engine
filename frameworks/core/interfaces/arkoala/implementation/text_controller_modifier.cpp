@@ -16,36 +16,36 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace TextControllerModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void CloseSelectionMenuImpl(TextControllerPeer* peer)
-        {
-        }
-        void SetStyledStringImpl(TextControllerPeer* peer, const Ark_Materialized* value)
-        {
-        }
-        Ark_NativePointer GetLayoutManagerImpl(TextControllerPeer* peer)
-        {
-            return 0;
-        }
-    } // TextControllerModifier
-    const GENERATED_ArkUITextControllerAccessor* GetTextControllerAccessor()
-    {
-        static const GENERATED_ArkUITextControllerAccessor TextControllerAccessorImpl {
-            TextControllerModifier::CtorImpl,
-            TextControllerModifier::GetFinalizerImpl,
-            TextControllerModifier::CloseSelectionMenuImpl,
-            TextControllerModifier::SetStyledStringImpl,
-            TextControllerModifier::GetLayoutManagerImpl,
-        };
-        return &TextControllerAccessorImpl;
-    }
+namespace TextControllerModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void CloseSelectionMenuImpl(TextControllerPeer* peer)
+{
+}
+void SetStyledStringImpl(TextControllerPeer* peer, const Ark_Materialized* value)
+{
+}
+Ark_NativePointer GetLayoutManagerImpl(TextControllerPeer* peer)
+{
+    return 0;
+}
+} // TextControllerModifier
+const GENERATED_ArkUITextControllerAccessor* GetTextControllerAccessor()
+{
+    static const GENERATED_ArkUITextControllerAccessor TextControllerAccessorImpl {
+        TextControllerModifier::CtorImpl,
+        TextControllerModifier::GetFinalizerImpl,
+        TextControllerModifier::CloseSelectionMenuImpl,
+        TextControllerModifier::SetStyledStringImpl,
+        TextControllerModifier::GetLayoutManagerImpl,
+    };
+    return &TextControllerAccessorImpl;
+}
 
 }

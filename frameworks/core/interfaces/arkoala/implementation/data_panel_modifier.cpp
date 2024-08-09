@@ -16,43 +16,43 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace DataPanelInterfaceModifier {
-        void _setDataPanelOptionsImpl(Ark_NativePointer node, const Ark_DataPanelOptions* options)
-        {
-        }
-    } // DataPanelInterfaceModifier
-    namespace DataPanelAttributeModifier {
-        void CloseEffectImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void ValueColorsImpl(Ark_NativePointer node, const Array_Union_ResourceColor_LinearGradient* value)
-        {
-        }
-        void TrackBackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value)
-        {
-        }
-        void StrokeWidthImpl(Ark_NativePointer node, const Ark_Length* value)
-        {
-        }
-        void TrackShadowImpl(Ark_NativePointer node, const Ark_DataPanelShadowOptions* value)
-        {
-        }
-        void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
-        {
-        }
-    } // DataPanelAttributeModifier
-    const GENERATED_ArkUIDataPanelModifier* GetDataPanelModifier()
-    {
-        static const GENERATED_ArkUIDataPanelModifier ArkUIDataPanelModifierImpl {
-            DataPanelInterfaceModifier::_setDataPanelOptionsImpl,
-            DataPanelAttributeModifier::CloseEffectImpl,
-            DataPanelAttributeModifier::ValueColorsImpl,
-            DataPanelAttributeModifier::TrackBackgroundColorImpl,
-            DataPanelAttributeModifier::StrokeWidthImpl,
-            DataPanelAttributeModifier::TrackShadowImpl,
-            DataPanelAttributeModifier::ContentModifierImpl,
-        };
-        return &ArkUIDataPanelModifierImpl;
-    }
+namespace DataPanelInterfaceModifier {
+void _setDataPanelOptionsImpl(Ark_NativePointer node, const Ark_DataPanelOptions* options)
+{
+}
+} // DataPanelInterfaceModifier
+namespace DataPanelAttributeModifier {
+void CloseEffectImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void ValueColorsImpl(Ark_NativePointer node, const Array_Union_ResourceColor_LinearGradient* value)
+{
+}
+void TrackBackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value)
+{
+}
+void StrokeWidthImpl(Ark_NativePointer node, const Ark_Length* value)
+{
+}
+void TrackShadowImpl(Ark_NativePointer node, const Ark_DataPanelShadowOptions* value)
+{
+}
+void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
+{
+}
+} // DataPanelAttributeModifier
+const GENERATED_ArkUIDataPanelModifier* GetDataPanelModifier()
+{
+    static const GENERATED_ArkUIDataPanelModifier ArkUIDataPanelModifierImpl {
+        DataPanelInterfaceModifier::_setDataPanelOptionsImpl,
+        DataPanelAttributeModifier::CloseEffectImpl,
+        DataPanelAttributeModifier::ValueColorsImpl,
+        DataPanelAttributeModifier::TrackBackgroundColorImpl,
+        DataPanelAttributeModifier::StrokeWidthImpl,
+        DataPanelAttributeModifier::TrackShadowImpl,
+        DataPanelAttributeModifier::ContentModifierImpl,
+    };
+    return &ArkUIDataPanelModifierImpl;
+}
 
 }

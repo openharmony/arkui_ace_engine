@@ -16,33 +16,33 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace EditMenuOptionsModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer OnCreateMenuImpl(EditMenuOptionsPeer* peer, const Array_TextMenuItem* menuItems)
-        {
-            return 0;
-        }
-        Ark_Boolean OnMenuItemClickImpl(EditMenuOptionsPeer* peer, const Ark_TextMenuItem* menuItem, const Ark_TextRange* range)
-        {
-            return 0;
-        }
-    } // EditMenuOptionsModifier
-    const GENERATED_ArkUIEditMenuOptionsAccessor* GetEditMenuOptionsAccessor()
-    {
-        static const GENERATED_ArkUIEditMenuOptionsAccessor EditMenuOptionsAccessorImpl {
-            EditMenuOptionsModifier::CtorImpl,
-            EditMenuOptionsModifier::GetFinalizerImpl,
-            EditMenuOptionsModifier::OnCreateMenuImpl,
-            EditMenuOptionsModifier::OnMenuItemClickImpl,
-        };
-        return &EditMenuOptionsAccessorImpl;
-    }
+namespace EditMenuOptionsModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+Ark_NativePointer OnCreateMenuImpl(EditMenuOptionsPeer* peer, const Array_TextMenuItem* menuItems)
+{
+    return 0;
+}
+Ark_Boolean OnMenuItemClickImpl(EditMenuOptionsPeer* peer, const Ark_TextMenuItem* menuItem, const Ark_TextRange* range)
+{
+    return 0;
+}
+} // EditMenuOptionsModifier
+const GENERATED_ArkUIEditMenuOptionsAccessor* GetEditMenuOptionsAccessor()
+{
+    static const GENERATED_ArkUIEditMenuOptionsAccessor EditMenuOptionsAccessorImpl {
+        EditMenuOptionsModifier::CtorImpl,
+        EditMenuOptionsModifier::GetFinalizerImpl,
+        EditMenuOptionsModifier::OnCreateMenuImpl,
+        EditMenuOptionsModifier::OnMenuItemClickImpl,
+    };
+    return &EditMenuOptionsAccessorImpl;
+}
 
 }

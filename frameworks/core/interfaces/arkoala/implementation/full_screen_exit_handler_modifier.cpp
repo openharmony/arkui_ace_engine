@@ -16,27 +16,27 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace FullScreenExitHandlerModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void ExitFullScreenImpl(FullScreenExitHandlerPeer* peer)
-        {
-        }
-    } // FullScreenExitHandlerModifier
-    const GENERATED_ArkUIFullScreenExitHandlerAccessor* GetFullScreenExitHandlerAccessor()
-    {
-        static const GENERATED_ArkUIFullScreenExitHandlerAccessor FullScreenExitHandlerAccessorImpl {
-            FullScreenExitHandlerModifier::CtorImpl,
-            FullScreenExitHandlerModifier::GetFinalizerImpl,
-            FullScreenExitHandlerModifier::ExitFullScreenImpl,
-        };
-        return &FullScreenExitHandlerAccessorImpl;
-    }
+namespace FullScreenExitHandlerModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void ExitFullScreenImpl(FullScreenExitHandlerPeer* peer)
+{
+}
+} // FullScreenExitHandlerModifier
+const GENERATED_ArkUIFullScreenExitHandlerAccessor* GetFullScreenExitHandlerAccessor()
+{
+    static const GENERATED_ArkUIFullScreenExitHandlerAccessor FullScreenExitHandlerAccessorImpl {
+        FullScreenExitHandlerModifier::CtorImpl,
+        FullScreenExitHandlerModifier::GetFinalizerImpl,
+        FullScreenExitHandlerModifier::ExitFullScreenImpl,
+    };
+    return &FullScreenExitHandlerAccessorImpl;
+}
 
 }

@@ -16,31 +16,31 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace CanvasInterfaceModifier {
-        void _setCanvasOptions0Impl(Ark_NativePointer node, const Opt_Type_CanvasInterface__setCanvasOptions_Arg0* context)
-        {
-        }
-        void _setCanvasOptions1Impl(Ark_NativePointer node, const Type_CanvasInterface__setCanvasOptions1_Arg0* context, const Ark_ImageAIOptions* imageAIOptions)
-        {
-        }
-    } // CanvasInterfaceModifier
-    namespace CanvasAttributeModifier {
-        void OnReadyImpl(Ark_NativePointer node, Ark_Function event)
-        {
-        }
-        void EnableAnalyzerImpl(Ark_NativePointer node, Ark_Boolean enable)
-        {
-        }
-    } // CanvasAttributeModifier
-    const GENERATED_ArkUICanvasModifier* GetCanvasModifier()
-    {
-        static const GENERATED_ArkUICanvasModifier ArkUICanvasModifierImpl {
-            CanvasInterfaceModifier::_setCanvasOptions0Impl,
-            CanvasInterfaceModifier::_setCanvasOptions1Impl,
-            CanvasAttributeModifier::OnReadyImpl,
-            CanvasAttributeModifier::EnableAnalyzerImpl,
-        };
-        return &ArkUICanvasModifierImpl;
-    }
+namespace CanvasInterfaceModifier {
+void _setCanvasOptions0Impl(Ark_NativePointer node, const Opt_Type_CanvasInterface__setCanvasOptions_Arg0* context)
+{
+}
+void _setCanvasOptions1Impl(Ark_NativePointer node, const Type_CanvasInterface__setCanvasOptions1_Arg0* context, const Ark_ImageAIOptions* imageAIOptions)
+{
+}
+} // CanvasInterfaceModifier
+namespace CanvasAttributeModifier {
+void OnReadyImpl(Ark_NativePointer node, Ark_Function event)
+{
+}
+void EnableAnalyzerImpl(Ark_NativePointer node, Ark_Boolean enable)
+{
+}
+} // CanvasAttributeModifier
+const GENERATED_ArkUICanvasModifier* GetCanvasModifier()
+{
+    static const GENERATED_ArkUICanvasModifier ArkUICanvasModifierImpl {
+        CanvasInterfaceModifier::_setCanvasOptions0Impl,
+        CanvasInterfaceModifier::_setCanvasOptions1Impl,
+        CanvasAttributeModifier::OnReadyImpl,
+        CanvasAttributeModifier::EnableAnalyzerImpl,
+    };
+    return &ArkUICanvasModifierImpl;
+}
 
 }

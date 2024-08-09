@@ -16,43 +16,43 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace ImageSpanInterfaceModifier {
-        void _setImageSpanOptionsImpl(Ark_NativePointer node, const Type_ImageSpanInterface__setImageSpanOptions_Arg0* value)
-        {
-        }
-    } // ImageSpanInterfaceModifier
-    namespace ImageSpanAttributeModifier {
-        void VerticalAlignImpl(Ark_NativePointer node, Ark_Int32 value)
-        {
-        }
-        void ColorFilterImpl(Ark_NativePointer node, const Type_ImageSpanAttribute_colorFilter_Arg0* filter)
-        {
-        }
-        void ObjectFitImpl(Ark_NativePointer node, Ark_Int32 value)
-        {
-        }
-        void OnCompleteImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void OnErrorImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void AltImpl(Ark_NativePointer node, const Ark_CustomObject* value)
-        {
-        }
-    } // ImageSpanAttributeModifier
-    const GENERATED_ArkUIImageSpanModifier* GetImageSpanModifier()
-    {
-        static const GENERATED_ArkUIImageSpanModifier ArkUIImageSpanModifierImpl {
-            ImageSpanInterfaceModifier::_setImageSpanOptionsImpl,
-            ImageSpanAttributeModifier::VerticalAlignImpl,
-            ImageSpanAttributeModifier::ColorFilterImpl,
-            ImageSpanAttributeModifier::ObjectFitImpl,
-            ImageSpanAttributeModifier::OnCompleteImpl,
-            ImageSpanAttributeModifier::OnErrorImpl,
-            ImageSpanAttributeModifier::AltImpl,
-        };
-        return &ArkUIImageSpanModifierImpl;
-    }
+namespace ImageSpanInterfaceModifier {
+void _setImageSpanOptionsImpl(Ark_NativePointer node, const Type_ImageSpanInterface__setImageSpanOptions_Arg0* value)
+{
+}
+} // ImageSpanInterfaceModifier
+namespace ImageSpanAttributeModifier {
+void VerticalAlignImpl(Ark_NativePointer node, Ark_Int32 value)
+{
+}
+void ColorFilterImpl(Ark_NativePointer node, const Type_ImageSpanAttribute_colorFilter_Arg0* filter)
+{
+}
+void ObjectFitImpl(Ark_NativePointer node, Ark_Int32 value)
+{
+}
+void OnCompleteImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void OnErrorImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void AltImpl(Ark_NativePointer node, const Ark_CustomObject* value)
+{
+}
+} // ImageSpanAttributeModifier
+const GENERATED_ArkUIImageSpanModifier* GetImageSpanModifier()
+{
+    static const GENERATED_ArkUIImageSpanModifier ArkUIImageSpanModifierImpl {
+        ImageSpanInterfaceModifier::_setImageSpanOptionsImpl,
+        ImageSpanAttributeModifier::VerticalAlignImpl,
+        ImageSpanAttributeModifier::ColorFilterImpl,
+        ImageSpanAttributeModifier::ObjectFitImpl,
+        ImageSpanAttributeModifier::OnCompleteImpl,
+        ImageSpanAttributeModifier::OnErrorImpl,
+        ImageSpanAttributeModifier::AltImpl,
+    };
+    return &ArkUIImageSpanModifierImpl;
+}
 
 }

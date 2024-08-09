@@ -16,31 +16,31 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace QRCodeInterfaceModifier {
-        void _setQRCodeOptionsImpl(Ark_NativePointer node, const Ark_String* value)
-        {
-        }
-    } // QRCodeInterfaceModifier
-    namespace QRCodeAttributeModifier {
-        void ColorImpl(Ark_NativePointer node, const ResourceColor* value)
-        {
-        }
-        void BackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value)
-        {
-        }
-        void ContentOpacityImpl(Ark_NativePointer node, const Type_QRCodeAttribute_contentOpacity_Arg0* value)
-        {
-        }
-    } // QRCodeAttributeModifier
-    const GENERATED_ArkUIQRCodeModifier* GetQRCodeModifier()
-    {
-        static const GENERATED_ArkUIQRCodeModifier ArkUIQRCodeModifierImpl {
-            QRCodeInterfaceModifier::_setQRCodeOptionsImpl,
-            QRCodeAttributeModifier::ColorImpl,
-            QRCodeAttributeModifier::BackgroundColorImpl,
-            QRCodeAttributeModifier::ContentOpacityImpl,
-        };
-        return &ArkUIQRCodeModifierImpl;
-    }
+namespace QRCodeInterfaceModifier {
+void _setQRCodeOptionsImpl(Ark_NativePointer node, const Ark_String* value)
+{
+}
+} // QRCodeInterfaceModifier
+namespace QRCodeAttributeModifier {
+void ColorImpl(Ark_NativePointer node, const ResourceColor* value)
+{
+}
+void BackgroundColorImpl(Ark_NativePointer node, const ResourceColor* value)
+{
+}
+void ContentOpacityImpl(Ark_NativePointer node, const Type_QRCodeAttribute_contentOpacity_Arg0* value)
+{
+}
+} // QRCodeAttributeModifier
+const GENERATED_ArkUIQRCodeModifier* GetQRCodeModifier()
+{
+    static const GENERATED_ArkUIQRCodeModifier ArkUIQRCodeModifierImpl {
+        QRCodeInterfaceModifier::_setQRCodeOptionsImpl,
+        QRCodeAttributeModifier::ColorImpl,
+        QRCodeAttributeModifier::BackgroundColorImpl,
+        QRCodeAttributeModifier::ContentOpacityImpl,
+    };
+    return &ArkUIQRCodeModifierImpl;
+}
 
 }

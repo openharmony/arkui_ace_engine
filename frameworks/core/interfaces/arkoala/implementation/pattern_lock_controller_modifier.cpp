@@ -16,31 +16,31 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace PatternLockControllerModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void ResetImpl(PatternLockControllerPeer* peer)
-        {
-        }
-        void SetChallengeResultImpl(PatternLockControllerPeer* peer, Ark_Int32 result)
-        {
-        }
-    } // PatternLockControllerModifier
-    const GENERATED_ArkUIPatternLockControllerAccessor* GetPatternLockControllerAccessor()
-    {
-        static const GENERATED_ArkUIPatternLockControllerAccessor PatternLockControllerAccessorImpl {
-            PatternLockControllerModifier::CtorImpl,
-            PatternLockControllerModifier::GetFinalizerImpl,
-            PatternLockControllerModifier::ResetImpl,
-            PatternLockControllerModifier::SetChallengeResultImpl,
-        };
-        return &PatternLockControllerAccessorImpl;
-    }
+namespace PatternLockControllerModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void ResetImpl(PatternLockControllerPeer* peer)
+{
+}
+void SetChallengeResultImpl(PatternLockControllerPeer* peer, Ark_Int32 result)
+{
+}
+} // PatternLockControllerModifier
+const GENERATED_ArkUIPatternLockControllerAccessor* GetPatternLockControllerAccessor()
+{
+    static const GENERATED_ArkUIPatternLockControllerAccessor PatternLockControllerAccessorImpl {
+        PatternLockControllerModifier::CtorImpl,
+        PatternLockControllerModifier::GetFinalizerImpl,
+        PatternLockControllerModifier::ResetImpl,
+        PatternLockControllerModifier::SetChallengeResultImpl,
+    };
+    return &PatternLockControllerAccessorImpl;
+}
 
 }

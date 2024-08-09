@@ -16,35 +16,35 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace JsResultModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void HandleCancelImpl(JsResultPeer* peer)
-        {
-        }
-        void HandleConfirmImpl(JsResultPeer* peer)
-        {
-        }
-        void HandlePromptConfirmImpl(JsResultPeer* peer, const Ark_String* result)
-        {
-        }
-    } // JsResultModifier
-    const GENERATED_ArkUIJsResultAccessor* GetJsResultAccessor()
-    {
-        static const GENERATED_ArkUIJsResultAccessor JsResultAccessorImpl {
-            JsResultModifier::CtorImpl,
-            JsResultModifier::GetFinalizerImpl,
-            JsResultModifier::HandleCancelImpl,
-            JsResultModifier::HandleConfirmImpl,
-            JsResultModifier::HandlePromptConfirmImpl,
-        };
-        return &JsResultAccessorImpl;
-    }
+namespace JsResultModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void HandleCancelImpl(JsResultPeer* peer)
+{
+}
+void HandleConfirmImpl(JsResultPeer* peer)
+{
+}
+void HandlePromptConfirmImpl(JsResultPeer* peer, const Ark_String* result)
+{
+}
+} // JsResultModifier
+const GENERATED_ArkUIJsResultAccessor* GetJsResultAccessor()
+{
+    static const GENERATED_ArkUIJsResultAccessor JsResultAccessorImpl {
+        JsResultModifier::CtorImpl,
+        JsResultModifier::GetFinalizerImpl,
+        JsResultModifier::HandleCancelImpl,
+        JsResultModifier::HandleConfirmImpl,
+        JsResultModifier::HandlePromptConfirmImpl,
+    };
+    return &JsResultAccessorImpl;
+}
 
 }

@@ -16,27 +16,27 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace ImageAnalyzerControllerModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void GetImageAnalyzerSupportTypesImpl(ImageAnalyzerControllerPeer* peer)
-        {
-        }
-    } // ImageAnalyzerControllerModifier
-    const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerControllerAccessor()
-    {
-        static const GENERATED_ArkUIImageAnalyzerControllerAccessor ImageAnalyzerControllerAccessorImpl {
-            ImageAnalyzerControllerModifier::CtorImpl,
-            ImageAnalyzerControllerModifier::GetFinalizerImpl,
-            ImageAnalyzerControllerModifier::GetImageAnalyzerSupportTypesImpl,
-        };
-        return &ImageAnalyzerControllerAccessorImpl;
-    }
+namespace ImageAnalyzerControllerModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void GetImageAnalyzerSupportTypesImpl(ImageAnalyzerControllerPeer* peer)
+{
+}
+} // ImageAnalyzerControllerModifier
+const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerControllerAccessor()
+{
+    static const GENERATED_ArkUIImageAnalyzerControllerAccessor ImageAnalyzerControllerAccessorImpl {
+        ImageAnalyzerControllerModifier::CtorImpl,
+        ImageAnalyzerControllerModifier::GetFinalizerImpl,
+        ImageAnalyzerControllerModifier::GetImageAnalyzerSupportTypesImpl,
+    };
+    return &ImageAnalyzerControllerAccessorImpl;
+}
 
 }

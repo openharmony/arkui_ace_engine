@@ -16,47 +16,47 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace CheckboxInterfaceModifier {
-        void _setCheckboxOptionsImpl(Ark_NativePointer node, const Opt_CheckboxOptions* options)
-        {
-        }
-    } // CheckboxInterfaceModifier
-    namespace CheckboxAttributeModifier {
-        void SelectImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void SelectedColorImpl(Ark_NativePointer node, const ResourceColor* value)
-        {
-        }
-        void ShapeImpl(Ark_NativePointer node, Ark_Int32 value)
-        {
-        }
-        void UnselectedColorImpl(Ark_NativePointer node, const ResourceColor* value)
-        {
-        }
-        void MarkImpl(Ark_NativePointer node, const Ark_MarkStyle* value)
-        {
-        }
-        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
-        {
-        }
-    } // CheckboxAttributeModifier
-    const GENERATED_ArkUICheckboxModifier* GetCheckboxModifier()
-    {
-        static const GENERATED_ArkUICheckboxModifier ArkUICheckboxModifierImpl {
-            CheckboxInterfaceModifier::_setCheckboxOptionsImpl,
-            CheckboxAttributeModifier::SelectImpl,
-            CheckboxAttributeModifier::SelectedColorImpl,
-            CheckboxAttributeModifier::ShapeImpl,
-            CheckboxAttributeModifier::UnselectedColorImpl,
-            CheckboxAttributeModifier::MarkImpl,
-            CheckboxAttributeModifier::OnChangeImpl,
-            CheckboxAttributeModifier::ContentModifierImpl,
-        };
-        return &ArkUICheckboxModifierImpl;
-    }
+namespace CheckboxInterfaceModifier {
+void _setCheckboxOptionsImpl(Ark_NativePointer node, const Opt_CheckboxOptions* options)
+{
+}
+} // CheckboxInterfaceModifier
+namespace CheckboxAttributeModifier {
+void SelectImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void SelectedColorImpl(Ark_NativePointer node, const ResourceColor* value)
+{
+}
+void ShapeImpl(Ark_NativePointer node, Ark_Int32 value)
+{
+}
+void UnselectedColorImpl(Ark_NativePointer node, const ResourceColor* value)
+{
+}
+void MarkImpl(Ark_NativePointer node, const Ark_MarkStyle* value)
+{
+}
+void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
+{
+}
+} // CheckboxAttributeModifier
+const GENERATED_ArkUICheckboxModifier* GetCheckboxModifier()
+{
+    static const GENERATED_ArkUICheckboxModifier ArkUICheckboxModifierImpl {
+        CheckboxInterfaceModifier::_setCheckboxOptionsImpl,
+        CheckboxAttributeModifier::SelectImpl,
+        CheckboxAttributeModifier::SelectedColorImpl,
+        CheckboxAttributeModifier::ShapeImpl,
+        CheckboxAttributeModifier::UnselectedColorImpl,
+        CheckboxAttributeModifier::MarkImpl,
+        CheckboxAttributeModifier::OnChangeImpl,
+        CheckboxAttributeModifier::ContentModifierImpl,
+    };
+    return &ArkUICheckboxModifierImpl;
+}
 
 }

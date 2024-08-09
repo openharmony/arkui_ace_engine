@@ -16,17 +16,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace GridContainerInterfaceModifier {
-        void _setGridContainerOptionsImpl(Ark_NativePointer node, const Opt_GridContainerOptions* value)
-        {
-        }
-    } // GridContainerInterfaceModifier
-    const GENERATED_ArkUIGridContainerModifier* GetGridContainerModifier()
-    {
-        static const GENERATED_ArkUIGridContainerModifier ArkUIGridContainerModifierImpl {
-            GridContainerInterfaceModifier::_setGridContainerOptionsImpl,
-        };
-        return &ArkUIGridContainerModifierImpl;
-    }
+namespace GridContainerInterfaceModifier {
+void _setGridContainerOptionsImpl(Ark_NativePointer node, const Opt_GridContainerOptions* value)
+{
+}
+} // GridContainerInterfaceModifier
+const GENERATED_ArkUIGridContainerModifier* GetGridContainerModifier()
+{
+    static const GENERATED_ArkUIGridContainerModifier ArkUIGridContainerModifierImpl {
+        GridContainerInterfaceModifier::_setGridContainerOptionsImpl,
+    };
+    return &ArkUIGridContainerModifierImpl;
+}
 
 }

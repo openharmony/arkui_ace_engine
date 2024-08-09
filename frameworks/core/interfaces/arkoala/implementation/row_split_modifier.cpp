@@ -16,23 +16,23 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace RowSplitInterfaceModifier {
-        void _setRowSplitOptionsImpl(Ark_NativePointer node)
-        {
-        }
-    } // RowSplitInterfaceModifier
-    namespace RowSplitAttributeModifier {
-        void ResizeableImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-    } // RowSplitAttributeModifier
-    const GENERATED_ArkUIRowSplitModifier* GetRowSplitModifier()
-    {
-        static const GENERATED_ArkUIRowSplitModifier ArkUIRowSplitModifierImpl {
-            RowSplitInterfaceModifier::_setRowSplitOptionsImpl,
-            RowSplitAttributeModifier::ResizeableImpl,
-        };
-        return &ArkUIRowSplitModifierImpl;
-    }
+namespace RowSplitInterfaceModifier {
+void _setRowSplitOptionsImpl(Ark_NativePointer node)
+{
+}
+} // RowSplitInterfaceModifier
+namespace RowSplitAttributeModifier {
+void ResizeableImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+} // RowSplitAttributeModifier
+const GENERATED_ArkUIRowSplitModifier* GetRowSplitModifier()
+{
+    static const GENERATED_ArkUIRowSplitModifier ArkUIRowSplitModifierImpl {
+        RowSplitInterfaceModifier::_setRowSplitOptionsImpl,
+        RowSplitAttributeModifier::ResizeableImpl,
+    };
+    return &ArkUIRowSplitModifierImpl;
+}
 
 }

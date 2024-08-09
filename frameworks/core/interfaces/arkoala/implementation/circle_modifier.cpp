@@ -16,17 +16,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace CircleInterfaceModifier {
-        void _setCircleOptionsImpl(Ark_NativePointer node, const Opt_CircleOptions* value)
-        {
-        }
-    } // CircleInterfaceModifier
-    const GENERATED_ArkUICircleModifier* GetCircleModifier()
-    {
-        static const GENERATED_ArkUICircleModifier ArkUICircleModifierImpl {
-            CircleInterfaceModifier::_setCircleOptionsImpl,
-        };
-        return &ArkUICircleModifierImpl;
-    }
+namespace CircleInterfaceModifier {
+void _setCircleOptionsImpl(Ark_NativePointer node, const Opt_CircleOptions* value)
+{
+}
+} // CircleInterfaceModifier
+const GENERATED_ArkUICircleModifier* GetCircleModifier()
+{
+    static const GENERATED_ArkUICircleModifier ArkUICircleModifierImpl {
+        CircleInterfaceModifier::_setCircleOptionsImpl,
+    };
+    return &ArkUICircleModifierImpl;
+}
 
 }

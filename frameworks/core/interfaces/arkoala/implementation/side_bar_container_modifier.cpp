@@ -16,75 +16,75 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace SideBarContainerInterfaceModifier {
-        void _setSideBarContainerOptionsImpl(Ark_NativePointer node, const Opt_SideBarContainerType* type)
-        {
-        }
-    } // SideBarContainerInterfaceModifier
-    namespace SideBarContainerAttributeModifier {
-        void ShowSideBarImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void ControlButtonImpl(Ark_NativePointer node, const Ark_ButtonStyle* value)
-        {
-        }
-        void ShowControlButtonImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void SideBarWidth0Impl(Ark_NativePointer node, const Ark_Number* value)
-        {
-        }
-        void MinSideBarWidth0Impl(Ark_NativePointer node, const Ark_Number* value)
-        {
-        }
-        void MaxSideBarWidth0Impl(Ark_NativePointer node, const Ark_Number* value)
-        {
-        }
-        void SideBarWidth1Impl(Ark_NativePointer node, const Ark_Length* value)
-        {
-        }
-        void MinSideBarWidth1Impl(Ark_NativePointer node, const Ark_Length* value)
-        {
-        }
-        void MaxSideBarWidth1Impl(Ark_NativePointer node, const Ark_Length* value)
-        {
-        }
-        void AutoHideImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void SideBarPositionImpl(Ark_NativePointer node, Ark_Int32 value)
-        {
-        }
-        void DividerImpl(Ark_NativePointer node, const Type_SideBarContainerAttribute_divider_Arg0* value)
-        {
-        }
-        void MinContentWidthImpl(Ark_NativePointer node, const Ark_Length* value)
-        {
-        }
-    } // SideBarContainerAttributeModifier
-    const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier()
-    {
-        static const GENERATED_ArkUISideBarContainerModifier ArkUISideBarContainerModifierImpl {
-            SideBarContainerInterfaceModifier::_setSideBarContainerOptionsImpl,
-            SideBarContainerAttributeModifier::ShowSideBarImpl,
-            SideBarContainerAttributeModifier::ControlButtonImpl,
-            SideBarContainerAttributeModifier::ShowControlButtonImpl,
-            SideBarContainerAttributeModifier::OnChangeImpl,
-            SideBarContainerAttributeModifier::SideBarWidth0Impl,
-            SideBarContainerAttributeModifier::MinSideBarWidth0Impl,
-            SideBarContainerAttributeModifier::MaxSideBarWidth0Impl,
-            SideBarContainerAttributeModifier::SideBarWidth1Impl,
-            SideBarContainerAttributeModifier::MinSideBarWidth1Impl,
-            SideBarContainerAttributeModifier::MaxSideBarWidth1Impl,
-            SideBarContainerAttributeModifier::AutoHideImpl,
-            SideBarContainerAttributeModifier::SideBarPositionImpl,
-            SideBarContainerAttributeModifier::DividerImpl,
-            SideBarContainerAttributeModifier::MinContentWidthImpl,
-        };
-        return &ArkUISideBarContainerModifierImpl;
-    }
+namespace SideBarContainerInterfaceModifier {
+void _setSideBarContainerOptionsImpl(Ark_NativePointer node, const Opt_SideBarContainerType* type)
+{
+}
+} // SideBarContainerInterfaceModifier
+namespace SideBarContainerAttributeModifier {
+void ShowSideBarImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void ControlButtonImpl(Ark_NativePointer node, const Ark_ButtonStyle* value)
+{
+}
+void ShowControlButtonImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void SideBarWidth0Impl(Ark_NativePointer node, const Ark_Number* value)
+{
+}
+void MinSideBarWidth0Impl(Ark_NativePointer node, const Ark_Number* value)
+{
+}
+void MaxSideBarWidth0Impl(Ark_NativePointer node, const Ark_Number* value)
+{
+}
+void SideBarWidth1Impl(Ark_NativePointer node, const Ark_Length* value)
+{
+}
+void MinSideBarWidth1Impl(Ark_NativePointer node, const Ark_Length* value)
+{
+}
+void MaxSideBarWidth1Impl(Ark_NativePointer node, const Ark_Length* value)
+{
+}
+void AutoHideImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void SideBarPositionImpl(Ark_NativePointer node, Ark_Int32 value)
+{
+}
+void DividerImpl(Ark_NativePointer node, const Type_SideBarContainerAttribute_divider_Arg0* value)
+{
+}
+void MinContentWidthImpl(Ark_NativePointer node, const Ark_Length* value)
+{
+}
+} // SideBarContainerAttributeModifier
+const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier()
+{
+    static const GENERATED_ArkUISideBarContainerModifier ArkUISideBarContainerModifierImpl {
+        SideBarContainerInterfaceModifier::_setSideBarContainerOptionsImpl,
+        SideBarContainerAttributeModifier::ShowSideBarImpl,
+        SideBarContainerAttributeModifier::ControlButtonImpl,
+        SideBarContainerAttributeModifier::ShowControlButtonImpl,
+        SideBarContainerAttributeModifier::OnChangeImpl,
+        SideBarContainerAttributeModifier::SideBarWidth0Impl,
+        SideBarContainerAttributeModifier::MinSideBarWidth0Impl,
+        SideBarContainerAttributeModifier::MaxSideBarWidth0Impl,
+        SideBarContainerAttributeModifier::SideBarWidth1Impl,
+        SideBarContainerAttributeModifier::MinSideBarWidth1Impl,
+        SideBarContainerAttributeModifier::MaxSideBarWidth1Impl,
+        SideBarContainerAttributeModifier::AutoHideImpl,
+        SideBarContainerAttributeModifier::SideBarPositionImpl,
+        SideBarContainerAttributeModifier::DividerImpl,
+        SideBarContainerAttributeModifier::MinContentWidthImpl,
+    };
+    return &ArkUISideBarContainerModifierImpl;
+}
 
 }

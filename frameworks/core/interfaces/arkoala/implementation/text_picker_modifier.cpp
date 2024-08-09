@@ -16,63 +16,63 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace TextPickerInterfaceModifier {
-        void _setTextPickerOptionsImpl(Ark_NativePointer node, const Opt_TextPickerOptions* options)
-        {
-        }
-    } // TextPickerInterfaceModifier
-    namespace TextPickerAttributeModifier {
-        void DefaultPickerItemHeightImpl(Ark_NativePointer node, const Type_TextPickerAttribute_defaultPickerItemHeight_Arg0* value)
-        {
-        }
-        void CanLoopImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void DisappearTextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value)
-        {
-        }
-        void TextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value)
-        {
-        }
-        void SelectedTextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value)
-        {
-        }
-        void OnAcceptImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void OnCancelImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void SelectedIndexImpl(Ark_NativePointer node, const Type_TextPickerAttribute_selectedIndex_Arg0* value)
-        {
-        }
-        void DividerImpl(Ark_NativePointer node, const Type_TextPickerAttribute_divider_Arg0* value)
-        {
-        }
-        void GradientHeightImpl(Ark_NativePointer node, const Ark_Length* value)
-        {
-        }
-    } // TextPickerAttributeModifier
-    const GENERATED_ArkUITextPickerModifier* GetTextPickerModifier()
-    {
-        static const GENERATED_ArkUITextPickerModifier ArkUITextPickerModifierImpl {
-            TextPickerInterfaceModifier::_setTextPickerOptionsImpl,
-            TextPickerAttributeModifier::DefaultPickerItemHeightImpl,
-            TextPickerAttributeModifier::CanLoopImpl,
-            TextPickerAttributeModifier::DisappearTextStyleImpl,
-            TextPickerAttributeModifier::TextStyleImpl,
-            TextPickerAttributeModifier::SelectedTextStyleImpl,
-            TextPickerAttributeModifier::OnAcceptImpl,
-            TextPickerAttributeModifier::OnCancelImpl,
-            TextPickerAttributeModifier::OnChangeImpl,
-            TextPickerAttributeModifier::SelectedIndexImpl,
-            TextPickerAttributeModifier::DividerImpl,
-            TextPickerAttributeModifier::GradientHeightImpl,
-        };
-        return &ArkUITextPickerModifierImpl;
-    }
+namespace TextPickerInterfaceModifier {
+void _setTextPickerOptionsImpl(Ark_NativePointer node, const Opt_TextPickerOptions* options)
+{
+}
+} // TextPickerInterfaceModifier
+namespace TextPickerAttributeModifier {
+void DefaultPickerItemHeightImpl(Ark_NativePointer node, const Type_TextPickerAttribute_defaultPickerItemHeight_Arg0* value)
+{
+}
+void CanLoopImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void DisappearTextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value)
+{
+}
+void TextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value)
+{
+}
+void SelectedTextStyleImpl(Ark_NativePointer node, const Ark_PickerTextStyle* value)
+{
+}
+void OnAcceptImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void OnCancelImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void OnChangeImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void SelectedIndexImpl(Ark_NativePointer node, const Type_TextPickerAttribute_selectedIndex_Arg0* value)
+{
+}
+void DividerImpl(Ark_NativePointer node, const Type_TextPickerAttribute_divider_Arg0* value)
+{
+}
+void GradientHeightImpl(Ark_NativePointer node, const Ark_Length* value)
+{
+}
+} // TextPickerAttributeModifier
+const GENERATED_ArkUITextPickerModifier* GetTextPickerModifier()
+{
+    static const GENERATED_ArkUITextPickerModifier ArkUITextPickerModifierImpl {
+        TextPickerInterfaceModifier::_setTextPickerOptionsImpl,
+        TextPickerAttributeModifier::DefaultPickerItemHeightImpl,
+        TextPickerAttributeModifier::CanLoopImpl,
+        TextPickerAttributeModifier::DisappearTextStyleImpl,
+        TextPickerAttributeModifier::TextStyleImpl,
+        TextPickerAttributeModifier::SelectedTextStyleImpl,
+        TextPickerAttributeModifier::OnAcceptImpl,
+        TextPickerAttributeModifier::OnCancelImpl,
+        TextPickerAttributeModifier::OnChangeImpl,
+        TextPickerAttributeModifier::SelectedIndexImpl,
+        TextPickerAttributeModifier::DividerImpl,
+        TextPickerAttributeModifier::GradientHeightImpl,
+    };
+    return &ArkUITextPickerModifierImpl;
+}
 
 }

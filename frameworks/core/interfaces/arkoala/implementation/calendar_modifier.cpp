@@ -16,71 +16,71 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace CalendarInterfaceModifier {
-        void _setCalendarOptionsImpl(Ark_NativePointer node, const Type_CalendarInterface__setCalendarOptions_Arg0* value)
-        {
-        }
-    } // CalendarInterfaceModifier
-    namespace CalendarAttributeModifier {
-        void ShowLunarImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void ShowHolidayImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void NeedSlideImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void StartOfWeekImpl(Ark_NativePointer node, const Ark_Number* value)
-        {
-        }
-        void OffDaysImpl(Ark_NativePointer node, const Ark_Number* value)
-        {
-        }
-        void DirectionImpl(Ark_NativePointer node, Ark_Int32 value)
-        {
-        }
-        void CurrentDayStyleImpl(Ark_NativePointer node, const Ark_CurrentDayStyle* value)
-        {
-        }
-        void NonCurrentDayStyleImpl(Ark_NativePointer node, const Ark_NonCurrentDayStyle* value)
-        {
-        }
-        void TodayStyleImpl(Ark_NativePointer node, const Ark_TodayStyle* value)
-        {
-        }
-        void WeekStyleImpl(Ark_NativePointer node, const Ark_WeekStyle* value)
-        {
-        }
-        void WorkStateStyleImpl(Ark_NativePointer node, const Ark_WorkStateStyle* value)
-        {
-        }
-        void OnSelectChangeImpl(Ark_NativePointer node, Ark_Function event)
-        {
-        }
-        void OnRequestDataImpl(Ark_NativePointer node, Ark_Function event)
-        {
-        }
-    } // CalendarAttributeModifier
-    const GENERATED_ArkUICalendarModifier* GetCalendarModifier()
-    {
-        static const GENERATED_ArkUICalendarModifier ArkUICalendarModifierImpl {
-            CalendarInterfaceModifier::_setCalendarOptionsImpl,
-            CalendarAttributeModifier::ShowLunarImpl,
-            CalendarAttributeModifier::ShowHolidayImpl,
-            CalendarAttributeModifier::NeedSlideImpl,
-            CalendarAttributeModifier::StartOfWeekImpl,
-            CalendarAttributeModifier::OffDaysImpl,
-            CalendarAttributeModifier::DirectionImpl,
-            CalendarAttributeModifier::CurrentDayStyleImpl,
-            CalendarAttributeModifier::NonCurrentDayStyleImpl,
-            CalendarAttributeModifier::TodayStyleImpl,
-            CalendarAttributeModifier::WeekStyleImpl,
-            CalendarAttributeModifier::WorkStateStyleImpl,
-            CalendarAttributeModifier::OnSelectChangeImpl,
-            CalendarAttributeModifier::OnRequestDataImpl,
-        };
-        return &ArkUICalendarModifierImpl;
-    }
+namespace CalendarInterfaceModifier {
+void _setCalendarOptionsImpl(Ark_NativePointer node, const Type_CalendarInterface__setCalendarOptions_Arg0* value)
+{
+}
+} // CalendarInterfaceModifier
+namespace CalendarAttributeModifier {
+void ShowLunarImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void ShowHolidayImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void NeedSlideImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void StartOfWeekImpl(Ark_NativePointer node, const Ark_Number* value)
+{
+}
+void OffDaysImpl(Ark_NativePointer node, const Ark_Number* value)
+{
+}
+void DirectionImpl(Ark_NativePointer node, Ark_Int32 value)
+{
+}
+void CurrentDayStyleImpl(Ark_NativePointer node, const Ark_CurrentDayStyle* value)
+{
+}
+void NonCurrentDayStyleImpl(Ark_NativePointer node, const Ark_NonCurrentDayStyle* value)
+{
+}
+void TodayStyleImpl(Ark_NativePointer node, const Ark_TodayStyle* value)
+{
+}
+void WeekStyleImpl(Ark_NativePointer node, const Ark_WeekStyle* value)
+{
+}
+void WorkStateStyleImpl(Ark_NativePointer node, const Ark_WorkStateStyle* value)
+{
+}
+void OnSelectChangeImpl(Ark_NativePointer node, Ark_Function event)
+{
+}
+void OnRequestDataImpl(Ark_NativePointer node, Ark_Function event)
+{
+}
+} // CalendarAttributeModifier
+const GENERATED_ArkUICalendarModifier* GetCalendarModifier()
+{
+    static const GENERATED_ArkUICalendarModifier ArkUICalendarModifierImpl {
+        CalendarInterfaceModifier::_setCalendarOptionsImpl,
+        CalendarAttributeModifier::ShowLunarImpl,
+        CalendarAttributeModifier::ShowHolidayImpl,
+        CalendarAttributeModifier::NeedSlideImpl,
+        CalendarAttributeModifier::StartOfWeekImpl,
+        CalendarAttributeModifier::OffDaysImpl,
+        CalendarAttributeModifier::DirectionImpl,
+        CalendarAttributeModifier::CurrentDayStyleImpl,
+        CalendarAttributeModifier::NonCurrentDayStyleImpl,
+        CalendarAttributeModifier::TodayStyleImpl,
+        CalendarAttributeModifier::WeekStyleImpl,
+        CalendarAttributeModifier::WorkStateStyleImpl,
+        CalendarAttributeModifier::OnSelectChangeImpl,
+        CalendarAttributeModifier::OnRequestDataImpl,
+    };
+    return &ArkUICalendarModifierImpl;
+}
 
 }

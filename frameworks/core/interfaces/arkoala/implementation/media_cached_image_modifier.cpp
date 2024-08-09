@@ -16,17 +16,17 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace MediaCachedImageInterfaceModifier {
-        void _setMediaCachedImageOptionsImpl(Ark_NativePointer node, const Type_MediaCachedImageInterface__setMediaCachedImageOptions_Arg0* src)
-        {
-        }
-    } // MediaCachedImageInterfaceModifier
-    const GENERATED_ArkUIMediaCachedImageModifier* GetMediaCachedImageModifier()
-    {
-        static const GENERATED_ArkUIMediaCachedImageModifier ArkUIMediaCachedImageModifierImpl {
-            MediaCachedImageInterfaceModifier::_setMediaCachedImageOptionsImpl,
-        };
-        return &ArkUIMediaCachedImageModifierImpl;
-    }
+namespace MediaCachedImageInterfaceModifier {
+void _setMediaCachedImageOptionsImpl(Ark_NativePointer node, const Type_MediaCachedImageInterface__setMediaCachedImageOptions_Arg0* src)
+{
+}
+} // MediaCachedImageInterfaceModifier
+const GENERATED_ArkUIMediaCachedImageModifier* GetMediaCachedImageModifier()
+{
+    static const GENERATED_ArkUIMediaCachedImageModifier ArkUIMediaCachedImageModifierImpl {
+        MediaCachedImageInterfaceModifier::_setMediaCachedImageOptionsImpl,
+    };
+    return &ArkUIMediaCachedImageModifierImpl;
+}
 
 }

@@ -16,27 +16,27 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace EventResultModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void SetGestureEventResultImpl(EventResultPeer* peer, Ark_Boolean result)
-        {
-        }
-    } // EventResultModifier
-    const GENERATED_ArkUIEventResultAccessor* GetEventResultAccessor()
-    {
-        static const GENERATED_ArkUIEventResultAccessor EventResultAccessorImpl {
-            EventResultModifier::CtorImpl,
-            EventResultModifier::GetFinalizerImpl,
-            EventResultModifier::SetGestureEventResultImpl,
-        };
-        return &EventResultAccessorImpl;
-    }
+namespace EventResultModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void SetGestureEventResultImpl(EventResultPeer* peer, Ark_Boolean result)
+{
+}
+} // EventResultModifier
+const GENERATED_ArkUIEventResultAccessor* GetEventResultAccessor()
+{
+    static const GENERATED_ArkUIEventResultAccessor EventResultAccessorImpl {
+        EventResultModifier::CtorImpl,
+        EventResultModifier::GetFinalizerImpl,
+        EventResultModifier::SetGestureEventResultImpl,
+    };
+    return &EventResultAccessorImpl;
+}
 
 }

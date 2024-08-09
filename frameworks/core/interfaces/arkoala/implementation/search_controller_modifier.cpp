@@ -16,35 +16,35 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace SearchControllerModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void CaretPositionImpl(SearchControllerPeer* peer, const Ark_Number* value)
-        {
-        }
-        void StopEditingImpl(SearchControllerPeer* peer)
-        {
-        }
-        void SetTextSelectionImpl(SearchControllerPeer* peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd, const Opt_SelectionOptions* options)
-        {
-        }
-    } // SearchControllerModifier
-    const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor()
-    {
-        static const GENERATED_ArkUISearchControllerAccessor SearchControllerAccessorImpl {
-            SearchControllerModifier::CtorImpl,
-            SearchControllerModifier::GetFinalizerImpl,
-            SearchControllerModifier::CaretPositionImpl,
-            SearchControllerModifier::StopEditingImpl,
-            SearchControllerModifier::SetTextSelectionImpl,
-        };
-        return &SearchControllerAccessorImpl;
-    }
+namespace SearchControllerModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void CaretPositionImpl(SearchControllerPeer* peer, const Ark_Number* value)
+{
+}
+void StopEditingImpl(SearchControllerPeer* peer)
+{
+}
+void SetTextSelectionImpl(SearchControllerPeer* peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd, const Opt_SelectionOptions* options)
+{
+}
+} // SearchControllerModifier
+const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor()
+{
+    static const GENERATED_ArkUISearchControllerAccessor SearchControllerAccessorImpl {
+        SearchControllerModifier::CtorImpl,
+        SearchControllerModifier::GetFinalizerImpl,
+        SearchControllerModifier::CaretPositionImpl,
+        SearchControllerModifier::StopEditingImpl,
+        SearchControllerModifier::SetTextSelectionImpl,
+    };
+    return &SearchControllerAccessorImpl;
+}
 
 }

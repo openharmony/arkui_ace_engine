@@ -16,69 +16,69 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace RichEditorBaseControllerModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        Ark_Int32 GetCaretOffsetImpl(RichEditorBaseControllerPeer* peer)
-        {
-            return 0;
-        }
-        Ark_Boolean SetCaretOffsetImpl(RichEditorBaseControllerPeer* peer, const Ark_Number* offset)
-        {
-            return 0;
-        }
-        void CloseSelectionMenuImpl(RichEditorBaseControllerPeer* peer)
-        {
-        }
-        Ark_NativePointer GetTypingStyleImpl(RichEditorBaseControllerPeer* peer)
-        {
-            return 0;
-        }
-        void SetTypingStyleImpl(RichEditorBaseControllerPeer* peer, const Ark_RichEditorTextStyle* value)
-        {
-        }
-        void SetSelectionImpl(RichEditorBaseControllerPeer* peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd, const Opt_SelectionOptions* options)
-        {
-        }
-        Ark_Boolean IsEditingImpl(RichEditorBaseControllerPeer* peer)
-        {
-            return 0;
-        }
-        void StopEditingImpl(RichEditorBaseControllerPeer* peer)
-        {
-        }
-        Ark_NativePointer GetLayoutManagerImpl(RichEditorBaseControllerPeer* peer)
-        {
-            return 0;
-        }
-        Ark_NativePointer GetPreviewTextImpl(RichEditorBaseControllerPeer* peer)
-        {
-            return 0;
-        }
-    } // RichEditorBaseControllerModifier
-    const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor()
-    {
-        static const GENERATED_ArkUIRichEditorBaseControllerAccessor RichEditorBaseControllerAccessorImpl {
-            RichEditorBaseControllerModifier::CtorImpl,
-            RichEditorBaseControllerModifier::GetFinalizerImpl,
-            RichEditorBaseControllerModifier::GetCaretOffsetImpl,
-            RichEditorBaseControllerModifier::SetCaretOffsetImpl,
-            RichEditorBaseControllerModifier::CloseSelectionMenuImpl,
-            RichEditorBaseControllerModifier::GetTypingStyleImpl,
-            RichEditorBaseControllerModifier::SetTypingStyleImpl,
-            RichEditorBaseControllerModifier::SetSelectionImpl,
-            RichEditorBaseControllerModifier::IsEditingImpl,
-            RichEditorBaseControllerModifier::StopEditingImpl,
-            RichEditorBaseControllerModifier::GetLayoutManagerImpl,
-            RichEditorBaseControllerModifier::GetPreviewTextImpl,
-        };
-        return &RichEditorBaseControllerAccessorImpl;
-    }
+namespace RichEditorBaseControllerModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+Ark_Int32 GetCaretOffsetImpl(RichEditorBaseControllerPeer* peer)
+{
+    return 0;
+}
+Ark_Boolean SetCaretOffsetImpl(RichEditorBaseControllerPeer* peer, const Ark_Number* offset)
+{
+    return 0;
+}
+void CloseSelectionMenuImpl(RichEditorBaseControllerPeer* peer)
+{
+}
+Ark_NativePointer GetTypingStyleImpl(RichEditorBaseControllerPeer* peer)
+{
+    return 0;
+}
+void SetTypingStyleImpl(RichEditorBaseControllerPeer* peer, const Ark_RichEditorTextStyle* value)
+{
+}
+void SetSelectionImpl(RichEditorBaseControllerPeer* peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd, const Opt_SelectionOptions* options)
+{
+}
+Ark_Boolean IsEditingImpl(RichEditorBaseControllerPeer* peer)
+{
+    return 0;
+}
+void StopEditingImpl(RichEditorBaseControllerPeer* peer)
+{
+}
+Ark_NativePointer GetLayoutManagerImpl(RichEditorBaseControllerPeer* peer)
+{
+    return 0;
+}
+Ark_NativePointer GetPreviewTextImpl(RichEditorBaseControllerPeer* peer)
+{
+    return 0;
+}
+} // RichEditorBaseControllerModifier
+const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor()
+{
+    static const GENERATED_ArkUIRichEditorBaseControllerAccessor RichEditorBaseControllerAccessorImpl {
+        RichEditorBaseControllerModifier::CtorImpl,
+        RichEditorBaseControllerModifier::GetFinalizerImpl,
+        RichEditorBaseControllerModifier::GetCaretOffsetImpl,
+        RichEditorBaseControllerModifier::SetCaretOffsetImpl,
+        RichEditorBaseControllerModifier::CloseSelectionMenuImpl,
+        RichEditorBaseControllerModifier::GetTypingStyleImpl,
+        RichEditorBaseControllerModifier::SetTypingStyleImpl,
+        RichEditorBaseControllerModifier::SetSelectionImpl,
+        RichEditorBaseControllerModifier::IsEditingImpl,
+        RichEditorBaseControllerModifier::StopEditingImpl,
+        RichEditorBaseControllerModifier::GetLayoutManagerImpl,
+        RichEditorBaseControllerModifier::GetPreviewTextImpl,
+    };
+    return &RichEditorBaseControllerAccessorImpl;
+}
 
 }

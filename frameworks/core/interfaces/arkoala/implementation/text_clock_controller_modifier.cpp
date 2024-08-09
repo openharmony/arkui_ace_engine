@@ -16,31 +16,31 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace TextClockControllerModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void StartImpl(TextClockControllerPeer* peer)
-        {
-        }
-        void StopImpl(TextClockControllerPeer* peer)
-        {
-        }
-    } // TextClockControllerModifier
-    const GENERATED_ArkUITextClockControllerAccessor* GetTextClockControllerAccessor()
-    {
-        static const GENERATED_ArkUITextClockControllerAccessor TextClockControllerAccessorImpl {
-            TextClockControllerModifier::CtorImpl,
-            TextClockControllerModifier::GetFinalizerImpl,
-            TextClockControllerModifier::StartImpl,
-            TextClockControllerModifier::StopImpl,
-        };
-        return &TextClockControllerAccessorImpl;
-    }
+namespace TextClockControllerModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void StartImpl(TextClockControllerPeer* peer)
+{
+}
+void StopImpl(TextClockControllerPeer* peer)
+{
+}
+} // TextClockControllerModifier
+const GENERATED_ArkUITextClockControllerAccessor* GetTextClockControllerAccessor()
+{
+    static const GENERATED_ArkUITextClockControllerAccessor TextClockControllerAccessorImpl {
+        TextClockControllerModifier::CtorImpl,
+        TextClockControllerModifier::GetFinalizerImpl,
+        TextClockControllerModifier::StartImpl,
+        TextClockControllerModifier::StopImpl,
+    };
+    return &TextClockControllerAccessorImpl;
+}
 
 }

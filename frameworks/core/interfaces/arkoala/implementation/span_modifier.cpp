@@ -16,63 +16,63 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace SpanInterfaceModifier {
-        void _setSpanOptionsImpl(Ark_NativePointer node, const Type_SpanInterface__setSpanOptions_Arg0* value)
-        {
-        }
-    } // SpanInterfaceModifier
-    namespace SpanAttributeModifier {
-        void FontImpl(Ark_NativePointer node, const Ark_Font* value)
-        {
-        }
-        void FontColorImpl(Ark_NativePointer node, const ResourceColor* value)
-        {
-        }
-        void FontSizeImpl(Ark_NativePointer node, const Type_SpanAttribute_fontSize_Arg0* value)
-        {
-        }
-        void FontStyleImpl(Ark_NativePointer node, Ark_Int32 value)
-        {
-        }
-        void FontWeightImpl(Ark_NativePointer node, const Type_SpanAttribute_fontWeight_Arg0* value)
-        {
-        }
-        void FontFamilyImpl(Ark_NativePointer node, const Type_SpanAttribute_fontFamily_Arg0* value)
-        {
-        }
-        void DecorationImpl(Ark_NativePointer node, const Ark_DecorationStyleInterface* value)
-        {
-        }
-        void LetterSpacingImpl(Ark_NativePointer node, const Type_SpanAttribute_letterSpacing_Arg0* value)
-        {
-        }
-        void TextCaseImpl(Ark_NativePointer node, Ark_Int32 value)
-        {
-        }
-        void LineHeightImpl(Ark_NativePointer node, const Ark_Length* value)
-        {
-        }
-        void TextShadowImpl(Ark_NativePointer node, const Type_SpanAttribute_textShadow_Arg0* value)
-        {
-        }
-    } // SpanAttributeModifier
-    const GENERATED_ArkUISpanModifier* GetSpanModifier()
-    {
-        static const GENERATED_ArkUISpanModifier ArkUISpanModifierImpl {
-            SpanInterfaceModifier::_setSpanOptionsImpl,
-            SpanAttributeModifier::FontImpl,
-            SpanAttributeModifier::FontColorImpl,
-            SpanAttributeModifier::FontSizeImpl,
-            SpanAttributeModifier::FontStyleImpl,
-            SpanAttributeModifier::FontWeightImpl,
-            SpanAttributeModifier::FontFamilyImpl,
-            SpanAttributeModifier::DecorationImpl,
-            SpanAttributeModifier::LetterSpacingImpl,
-            SpanAttributeModifier::TextCaseImpl,
-            SpanAttributeModifier::LineHeightImpl,
-            SpanAttributeModifier::TextShadowImpl,
-        };
-        return &ArkUISpanModifierImpl;
-    }
+namespace SpanInterfaceModifier {
+void _setSpanOptionsImpl(Ark_NativePointer node, const Type_SpanInterface__setSpanOptions_Arg0* value)
+{
+}
+} // SpanInterfaceModifier
+namespace SpanAttributeModifier {
+void FontImpl(Ark_NativePointer node, const Ark_Font* value)
+{
+}
+void FontColorImpl(Ark_NativePointer node, const ResourceColor* value)
+{
+}
+void FontSizeImpl(Ark_NativePointer node, const Type_SpanAttribute_fontSize_Arg0* value)
+{
+}
+void FontStyleImpl(Ark_NativePointer node, Ark_Int32 value)
+{
+}
+void FontWeightImpl(Ark_NativePointer node, const Type_SpanAttribute_fontWeight_Arg0* value)
+{
+}
+void FontFamilyImpl(Ark_NativePointer node, const Type_SpanAttribute_fontFamily_Arg0* value)
+{
+}
+void DecorationImpl(Ark_NativePointer node, const Ark_DecorationStyleInterface* value)
+{
+}
+void LetterSpacingImpl(Ark_NativePointer node, const Type_SpanAttribute_letterSpacing_Arg0* value)
+{
+}
+void TextCaseImpl(Ark_NativePointer node, Ark_Int32 value)
+{
+}
+void LineHeightImpl(Ark_NativePointer node, const Ark_Length* value)
+{
+}
+void TextShadowImpl(Ark_NativePointer node, const Type_SpanAttribute_textShadow_Arg0* value)
+{
+}
+} // SpanAttributeModifier
+const GENERATED_ArkUISpanModifier* GetSpanModifier()
+{
+    static const GENERATED_ArkUISpanModifier ArkUISpanModifierImpl {
+        SpanInterfaceModifier::_setSpanOptionsImpl,
+        SpanAttributeModifier::FontImpl,
+        SpanAttributeModifier::FontColorImpl,
+        SpanAttributeModifier::FontSizeImpl,
+        SpanAttributeModifier::FontStyleImpl,
+        SpanAttributeModifier::FontWeightImpl,
+        SpanAttributeModifier::FontFamilyImpl,
+        SpanAttributeModifier::DecorationImpl,
+        SpanAttributeModifier::LetterSpacingImpl,
+        SpanAttributeModifier::TextCaseImpl,
+        SpanAttributeModifier::LineHeightImpl,
+        SpanAttributeModifier::TextShadowImpl,
+    };
+    return &ArkUISpanModifierImpl;
+}
 
 }

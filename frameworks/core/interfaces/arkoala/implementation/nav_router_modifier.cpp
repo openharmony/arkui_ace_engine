@@ -16,31 +16,31 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace NavRouterInterfaceModifier {
-        void _setNavRouterOptions0Impl(Ark_NativePointer node)
-        {
-        }
-        void _setNavRouterOptions1Impl(Ark_NativePointer node, const Ark_RouteInfo* value)
-        {
-        }
-    } // NavRouterInterfaceModifier
-    namespace NavRouterAttributeModifier {
-        void OnStateChangeImpl(Ark_NativePointer node, Ark_Function callback)
-        {
-        }
-        void ModeImpl(Ark_NativePointer node, Ark_Int32 mode)
-        {
-        }
-    } // NavRouterAttributeModifier
-    const GENERATED_ArkUINavRouterModifier* GetNavRouterModifier()
-    {
-        static const GENERATED_ArkUINavRouterModifier ArkUINavRouterModifierImpl {
-            NavRouterInterfaceModifier::_setNavRouterOptions0Impl,
-            NavRouterInterfaceModifier::_setNavRouterOptions1Impl,
-            NavRouterAttributeModifier::OnStateChangeImpl,
-            NavRouterAttributeModifier::ModeImpl,
-        };
-        return &ArkUINavRouterModifierImpl;
-    }
+namespace NavRouterInterfaceModifier {
+void _setNavRouterOptions0Impl(Ark_NativePointer node)
+{
+}
+void _setNavRouterOptions1Impl(Ark_NativePointer node, const Ark_RouteInfo* value)
+{
+}
+} // NavRouterInterfaceModifier
+namespace NavRouterAttributeModifier {
+void OnStateChangeImpl(Ark_NativePointer node, Ark_Function callback)
+{
+}
+void ModeImpl(Ark_NativePointer node, Ark_Int32 mode)
+{
+}
+} // NavRouterAttributeModifier
+const GENERATED_ArkUINavRouterModifier* GetNavRouterModifier()
+{
+    static const GENERATED_ArkUINavRouterModifier ArkUINavRouterModifierImpl {
+        NavRouterInterfaceModifier::_setNavRouterOptions0Impl,
+        NavRouterInterfaceModifier::_setNavRouterOptions1Impl,
+        NavRouterAttributeModifier::OnStateChangeImpl,
+        NavRouterAttributeModifier::ModeImpl,
+    };
+    return &ArkUINavRouterModifierImpl;
+}
 
 }

@@ -16,39 +16,39 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace ClientAuthenticationHandlerModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void Confirm0Impl(ClientAuthenticationHandlerPeer* peer, const Ark_String* priKeyFile, const Ark_String* certChainFile)
-        {
-        }
-        void Confirm1Impl(ClientAuthenticationHandlerPeer* peer, const Ark_String* authUri)
-        {
-        }
-        void CancelImpl(ClientAuthenticationHandlerPeer* peer)
-        {
-        }
-        void IgnoreImpl(ClientAuthenticationHandlerPeer* peer)
-        {
-        }
-    } // ClientAuthenticationHandlerModifier
-    const GENERATED_ArkUIClientAuthenticationHandlerAccessor* GetClientAuthenticationHandlerAccessor()
-    {
-        static const GENERATED_ArkUIClientAuthenticationHandlerAccessor ClientAuthenticationHandlerAccessorImpl {
-            ClientAuthenticationHandlerModifier::CtorImpl,
-            ClientAuthenticationHandlerModifier::GetFinalizerImpl,
-            ClientAuthenticationHandlerModifier::Confirm0Impl,
-            ClientAuthenticationHandlerModifier::Confirm1Impl,
-            ClientAuthenticationHandlerModifier::CancelImpl,
-            ClientAuthenticationHandlerModifier::IgnoreImpl,
-        };
-        return &ClientAuthenticationHandlerAccessorImpl;
-    }
+namespace ClientAuthenticationHandlerModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void Confirm0Impl(ClientAuthenticationHandlerPeer* peer, const Ark_String* priKeyFile, const Ark_String* certChainFile)
+{
+}
+void Confirm1Impl(ClientAuthenticationHandlerPeer* peer, const Ark_String* authUri)
+{
+}
+void CancelImpl(ClientAuthenticationHandlerPeer* peer)
+{
+}
+void IgnoreImpl(ClientAuthenticationHandlerPeer* peer)
+{
+}
+} // ClientAuthenticationHandlerModifier
+const GENERATED_ArkUIClientAuthenticationHandlerAccessor* GetClientAuthenticationHandlerAccessor()
+{
+    static const GENERATED_ArkUIClientAuthenticationHandlerAccessor ClientAuthenticationHandlerAccessorImpl {
+        ClientAuthenticationHandlerModifier::CtorImpl,
+        ClientAuthenticationHandlerModifier::GetFinalizerImpl,
+        ClientAuthenticationHandlerModifier::Confirm0Impl,
+        ClientAuthenticationHandlerModifier::Confirm1Impl,
+        ClientAuthenticationHandlerModifier::CancelImpl,
+        ClientAuthenticationHandlerModifier::IgnoreImpl,
+    };
+    return &ClientAuthenticationHandlerAccessorImpl;
+}
 
 }

@@ -16,31 +16,31 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace DataResubmissionHandlerModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void ResendImpl(DataResubmissionHandlerPeer* peer)
-        {
-        }
-        void CancelImpl(DataResubmissionHandlerPeer* peer)
-        {
-        }
-    } // DataResubmissionHandlerModifier
-    const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandlerAccessor()
-    {
-        static const GENERATED_ArkUIDataResubmissionHandlerAccessor DataResubmissionHandlerAccessorImpl {
-            DataResubmissionHandlerModifier::CtorImpl,
-            DataResubmissionHandlerModifier::GetFinalizerImpl,
-            DataResubmissionHandlerModifier::ResendImpl,
-            DataResubmissionHandlerModifier::CancelImpl,
-        };
-        return &DataResubmissionHandlerAccessorImpl;
-    }
+namespace DataResubmissionHandlerModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void ResendImpl(DataResubmissionHandlerPeer* peer)
+{
+}
+void CancelImpl(DataResubmissionHandlerPeer* peer)
+{
+}
+} // DataResubmissionHandlerModifier
+const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandlerAccessor()
+{
+    static const GENERATED_ArkUIDataResubmissionHandlerAccessor DataResubmissionHandlerAccessorImpl {
+        DataResubmissionHandlerModifier::CtorImpl,
+        DataResubmissionHandlerModifier::GetFinalizerImpl,
+        DataResubmissionHandlerModifier::ResendImpl,
+        DataResubmissionHandlerModifier::CancelImpl,
+    };
+    return &DataResubmissionHandlerAccessorImpl;
+}
 
 }

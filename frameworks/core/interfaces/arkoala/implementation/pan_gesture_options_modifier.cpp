@@ -16,40 +16,40 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace PanGestureOptionsModifier {
-        Ark_NativePointer CtorImpl(const Opt_Literal_Opt_Number_fingers_distance_Opt_PanDirection_direction* value)
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void SetDirectionImpl(PanGestureOptionsPeer* peer, Ark_Int32 value)
-        {
-        }
-        void SetDistanceImpl(PanGestureOptionsPeer* peer, const Ark_Number* value)
-        {
-        }
-        void SetFingersImpl(PanGestureOptionsPeer* peer, const Ark_Number* value)
-        {
-        }
-        Ark_NativePointer GetDirectionImpl(PanGestureOptionsPeer* peer)
-        {
-            return 0;
-        }
-    } // PanGestureOptionsModifier
-    const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor()
-    {
-        static const GENERATED_ArkUIPanGestureOptionsAccessor PanGestureOptionsAccessorImpl {
-            PanGestureOptionsModifier::CtorImpl,
-            PanGestureOptionsModifier::GetFinalizerImpl,
-            PanGestureOptionsModifier::SetDirectionImpl,
-            PanGestureOptionsModifier::SetDistanceImpl,
-            PanGestureOptionsModifier::SetFingersImpl,
-            PanGestureOptionsModifier::GetDirectionImpl,
-        };
-        return &PanGestureOptionsAccessorImpl;
-    }
+namespace PanGestureOptionsModifier {
+Ark_NativePointer CtorImpl(const Opt_Literal_Opt_Number_fingers_distance_Opt_PanDirection_direction* value)
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void SetDirectionImpl(PanGestureOptionsPeer* peer, Ark_Int32 value)
+{
+}
+void SetDistanceImpl(PanGestureOptionsPeer* peer, const Ark_Number* value)
+{
+}
+void SetFingersImpl(PanGestureOptionsPeer* peer, const Ark_Number* value)
+{
+}
+Ark_NativePointer GetDirectionImpl(PanGestureOptionsPeer* peer)
+{
+    return 0;
+}
+} // PanGestureOptionsModifier
+const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor()
+{
+    static const GENERATED_ArkUIPanGestureOptionsAccessor PanGestureOptionsAccessorImpl {
+        PanGestureOptionsModifier::CtorImpl,
+        PanGestureOptionsModifier::GetFinalizerImpl,
+        PanGestureOptionsModifier::SetDirectionImpl,
+        PanGestureOptionsModifier::SetDistanceImpl,
+        PanGestureOptionsModifier::SetFingersImpl,
+        PanGestureOptionsModifier::GetDirectionImpl,
+    };
+    return &PanGestureOptionsAccessorImpl;
+}
 
 }

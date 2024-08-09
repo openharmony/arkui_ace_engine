@@ -16,51 +16,51 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace WebResourceRequestModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetRequestHeaderImpl(WebResourceRequestPeer* peer)
-        {
-            return 0;
-        }
-        void GetRequestUrlImpl(WebResourceRequestPeer* peer)
-        {
-        }
-        Ark_Boolean IsRequestGestureImpl(WebResourceRequestPeer* peer)
-        {
-            return 0;
-        }
-        Ark_Boolean IsMainFrameImpl(WebResourceRequestPeer* peer)
-        {
-            return 0;
-        }
-        Ark_Boolean IsRedirectImpl(WebResourceRequestPeer* peer)
-        {
-            return 0;
-        }
-        void GetRequestMethodImpl(WebResourceRequestPeer* peer)
-        {
-        }
-    } // WebResourceRequestModifier
-    const GENERATED_ArkUIWebResourceRequestAccessor* GetWebResourceRequestAccessor()
-    {
-        static const GENERATED_ArkUIWebResourceRequestAccessor WebResourceRequestAccessorImpl {
-            WebResourceRequestModifier::CtorImpl,
-            WebResourceRequestModifier::GetFinalizerImpl,
-            WebResourceRequestModifier::GetRequestHeaderImpl,
-            WebResourceRequestModifier::GetRequestUrlImpl,
-            WebResourceRequestModifier::IsRequestGestureImpl,
-            WebResourceRequestModifier::IsMainFrameImpl,
-            WebResourceRequestModifier::IsRedirectImpl,
-            WebResourceRequestModifier::GetRequestMethodImpl,
-        };
-        return &WebResourceRequestAccessorImpl;
-    }
+namespace WebResourceRequestModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetRequestHeaderImpl(WebResourceRequestPeer* peer)
+{
+    return 0;
+}
+void GetRequestUrlImpl(WebResourceRequestPeer* peer)
+{
+}
+Ark_Boolean IsRequestGestureImpl(WebResourceRequestPeer* peer)
+{
+    return 0;
+}
+Ark_Boolean IsMainFrameImpl(WebResourceRequestPeer* peer)
+{
+    return 0;
+}
+Ark_Boolean IsRedirectImpl(WebResourceRequestPeer* peer)
+{
+    return 0;
+}
+void GetRequestMethodImpl(WebResourceRequestPeer* peer)
+{
+}
+} // WebResourceRequestModifier
+const GENERATED_ArkUIWebResourceRequestAccessor* GetWebResourceRequestAccessor()
+{
+    static const GENERATED_ArkUIWebResourceRequestAccessor WebResourceRequestAccessorImpl {
+        WebResourceRequestModifier::CtorImpl,
+        WebResourceRequestModifier::GetFinalizerImpl,
+        WebResourceRequestModifier::GetRequestHeaderImpl,
+        WebResourceRequestModifier::GetRequestUrlImpl,
+        WebResourceRequestModifier::IsRequestGestureImpl,
+        WebResourceRequestModifier::IsMainFrameImpl,
+        WebResourceRequestModifier::IsRedirectImpl,
+        WebResourceRequestModifier::GetRequestMethodImpl,
+    };
+    return &WebResourceRequestAccessorImpl;
+}
 
 }

@@ -16,75 +16,75 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace WaterFlowInterfaceModifier {
-        void _setWaterFlowOptionsImpl(Ark_NativePointer node, const Opt_WaterFlowOptions* options)
-        {
-        }
-    } // WaterFlowInterfaceModifier
-    namespace WaterFlowAttributeModifier {
-        void ColumnsTemplateImpl(Ark_NativePointer node, const Ark_String* value)
-        {
-        }
-        void ItemConstraintSizeImpl(Ark_NativePointer node, const Ark_ConstraintSizeOptions* value)
-        {
-        }
-        void RowsTemplateImpl(Ark_NativePointer node, const Ark_String* value)
-        {
-        }
-        void ColumnsGapImpl(Ark_NativePointer node, const Ark_Length* value)
-        {
-        }
-        void RowsGapImpl(Ark_NativePointer node, const Ark_Length* value)
-        {
-        }
-        void LayoutDirectionImpl(Ark_NativePointer node, Ark_Int32 value)
-        {
-        }
-        void NestedScrollImpl(Ark_NativePointer node, const Ark_NestedScrollOptions* value)
-        {
-        }
-        void EnableScrollInteractionImpl(Ark_NativePointer node, Ark_Boolean value)
-        {
-        }
-        void FrictionImpl(Ark_NativePointer node, const Type_WaterFlowAttribute_friction_Arg0* value)
-        {
-        }
-        void CachedCountImpl(Ark_NativePointer node, const Ark_Number* value)
-        {
-        }
-        void OnReachStartImpl(Ark_NativePointer node, Ark_Function event)
-        {
-        }
-        void OnReachEndImpl(Ark_NativePointer node, Ark_Function event)
-        {
-        }
-        void OnScrollFrameBeginImpl(Ark_NativePointer node, Ark_Function event)
-        {
-        }
-        void OnScrollIndexImpl(Ark_NativePointer node, Ark_Function event)
-        {
-        }
-    } // WaterFlowAttributeModifier
-    const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier()
-    {
-        static const GENERATED_ArkUIWaterFlowModifier ArkUIWaterFlowModifierImpl {
-            WaterFlowInterfaceModifier::_setWaterFlowOptionsImpl,
-            WaterFlowAttributeModifier::ColumnsTemplateImpl,
-            WaterFlowAttributeModifier::ItemConstraintSizeImpl,
-            WaterFlowAttributeModifier::RowsTemplateImpl,
-            WaterFlowAttributeModifier::ColumnsGapImpl,
-            WaterFlowAttributeModifier::RowsGapImpl,
-            WaterFlowAttributeModifier::LayoutDirectionImpl,
-            WaterFlowAttributeModifier::NestedScrollImpl,
-            WaterFlowAttributeModifier::EnableScrollInteractionImpl,
-            WaterFlowAttributeModifier::FrictionImpl,
-            WaterFlowAttributeModifier::CachedCountImpl,
-            WaterFlowAttributeModifier::OnReachStartImpl,
-            WaterFlowAttributeModifier::OnReachEndImpl,
-            WaterFlowAttributeModifier::OnScrollFrameBeginImpl,
-            WaterFlowAttributeModifier::OnScrollIndexImpl,
-        };
-        return &ArkUIWaterFlowModifierImpl;
-    }
+namespace WaterFlowInterfaceModifier {
+void _setWaterFlowOptionsImpl(Ark_NativePointer node, const Opt_WaterFlowOptions* options)
+{
+}
+} // WaterFlowInterfaceModifier
+namespace WaterFlowAttributeModifier {
+void ColumnsTemplateImpl(Ark_NativePointer node, const Ark_String* value)
+{
+}
+void ItemConstraintSizeImpl(Ark_NativePointer node, const Ark_ConstraintSizeOptions* value)
+{
+}
+void RowsTemplateImpl(Ark_NativePointer node, const Ark_String* value)
+{
+}
+void ColumnsGapImpl(Ark_NativePointer node, const Ark_Length* value)
+{
+}
+void RowsGapImpl(Ark_NativePointer node, const Ark_Length* value)
+{
+}
+void LayoutDirectionImpl(Ark_NativePointer node, Ark_Int32 value)
+{
+}
+void NestedScrollImpl(Ark_NativePointer node, const Ark_NestedScrollOptions* value)
+{
+}
+void EnableScrollInteractionImpl(Ark_NativePointer node, Ark_Boolean value)
+{
+}
+void FrictionImpl(Ark_NativePointer node, const Type_WaterFlowAttribute_friction_Arg0* value)
+{
+}
+void CachedCountImpl(Ark_NativePointer node, const Ark_Number* value)
+{
+}
+void OnReachStartImpl(Ark_NativePointer node, Ark_Function event)
+{
+}
+void OnReachEndImpl(Ark_NativePointer node, Ark_Function event)
+{
+}
+void OnScrollFrameBeginImpl(Ark_NativePointer node, Ark_Function event)
+{
+}
+void OnScrollIndexImpl(Ark_NativePointer node, Ark_Function event)
+{
+}
+} // WaterFlowAttributeModifier
+const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier()
+{
+    static const GENERATED_ArkUIWaterFlowModifier ArkUIWaterFlowModifierImpl {
+        WaterFlowInterfaceModifier::_setWaterFlowOptionsImpl,
+        WaterFlowAttributeModifier::ColumnsTemplateImpl,
+        WaterFlowAttributeModifier::ItemConstraintSizeImpl,
+        WaterFlowAttributeModifier::RowsTemplateImpl,
+        WaterFlowAttributeModifier::ColumnsGapImpl,
+        WaterFlowAttributeModifier::RowsGapImpl,
+        WaterFlowAttributeModifier::LayoutDirectionImpl,
+        WaterFlowAttributeModifier::NestedScrollImpl,
+        WaterFlowAttributeModifier::EnableScrollInteractionImpl,
+        WaterFlowAttributeModifier::FrictionImpl,
+        WaterFlowAttributeModifier::CachedCountImpl,
+        WaterFlowAttributeModifier::OnReachStartImpl,
+        WaterFlowAttributeModifier::OnReachEndImpl,
+        WaterFlowAttributeModifier::OnScrollFrameBeginImpl,
+        WaterFlowAttributeModifier::OnScrollIndexImpl,
+    };
+    return &ArkUIWaterFlowModifierImpl;
+}
 
 }

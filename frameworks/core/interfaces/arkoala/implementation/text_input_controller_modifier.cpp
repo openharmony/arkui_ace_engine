@@ -16,35 +16,35 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace TextInputControllerModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void CaretPositionImpl(TextInputControllerPeer* peer, const Ark_Number* value)
-        {
-        }
-        void SetTextSelectionImpl(TextInputControllerPeer* peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd, const Opt_SelectionOptions* options)
-        {
-        }
-        void StopEditingImpl(TextInputControllerPeer* peer)
-        {
-        }
-    } // TextInputControllerModifier
-    const GENERATED_ArkUITextInputControllerAccessor* GetTextInputControllerAccessor()
-    {
-        static const GENERATED_ArkUITextInputControllerAccessor TextInputControllerAccessorImpl {
-            TextInputControllerModifier::CtorImpl,
-            TextInputControllerModifier::GetFinalizerImpl,
-            TextInputControllerModifier::CaretPositionImpl,
-            TextInputControllerModifier::SetTextSelectionImpl,
-            TextInputControllerModifier::StopEditingImpl,
-        };
-        return &TextInputControllerAccessorImpl;
-    }
+namespace TextInputControllerModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void CaretPositionImpl(TextInputControllerPeer* peer, const Ark_Number* value)
+{
+}
+void SetTextSelectionImpl(TextInputControllerPeer* peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd, const Opt_SelectionOptions* options)
+{
+}
+void StopEditingImpl(TextInputControllerPeer* peer)
+{
+}
+} // TextInputControllerModifier
+const GENERATED_ArkUITextInputControllerAccessor* GetTextInputControllerAccessor()
+{
+    static const GENERATED_ArkUITextInputControllerAccessor TextInputControllerAccessorImpl {
+        TextInputControllerModifier::CtorImpl,
+        TextInputControllerModifier::GetFinalizerImpl,
+        TextInputControllerModifier::CaretPositionImpl,
+        TextInputControllerModifier::SetTextSelectionImpl,
+        TextInputControllerModifier::StopEditingImpl,
+    };
+    return &TextInputControllerAccessorImpl;
+}
 
 }

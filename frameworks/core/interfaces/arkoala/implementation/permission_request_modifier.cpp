@@ -16,40 +16,40 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-    namespace PermissionRequestModifier {
-        Ark_NativePointer CtorImpl()
-        {
-            return 0;
-        }
-        Ark_NativePointer GetFinalizerImpl()
-        {
-            return 0;
-        }
-        void DenyImpl(PermissionRequestPeer* peer)
-        {
-        }
-        void GetOriginImpl(PermissionRequestPeer* peer)
-        {
-        }
-        Ark_NativePointer GetAccessibleResourceImpl(PermissionRequestPeer* peer)
-        {
-            return 0;
-        }
-        void GrantImpl(PermissionRequestPeer* peer, const Array_String* resources)
-        {
-        }
-    } // PermissionRequestModifier
-    const GENERATED_ArkUIPermissionRequestAccessor* GetPermissionRequestAccessor()
-    {
-        static const GENERATED_ArkUIPermissionRequestAccessor PermissionRequestAccessorImpl {
-            PermissionRequestModifier::CtorImpl,
-            PermissionRequestModifier::GetFinalizerImpl,
-            PermissionRequestModifier::DenyImpl,
-            PermissionRequestModifier::GetOriginImpl,
-            PermissionRequestModifier::GetAccessibleResourceImpl,
-            PermissionRequestModifier::GrantImpl,
-        };
-        return &PermissionRequestAccessorImpl;
-    }
+namespace PermissionRequestModifier {
+Ark_NativePointer CtorImpl()
+{
+    return 0;
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return 0;
+}
+void DenyImpl(PermissionRequestPeer* peer)
+{
+}
+void GetOriginImpl(PermissionRequestPeer* peer)
+{
+}
+Ark_NativePointer GetAccessibleResourceImpl(PermissionRequestPeer* peer)
+{
+    return 0;
+}
+void GrantImpl(PermissionRequestPeer* peer, const Array_String* resources)
+{
+}
+} // PermissionRequestModifier
+const GENERATED_ArkUIPermissionRequestAccessor* GetPermissionRequestAccessor()
+{
+    static const GENERATED_ArkUIPermissionRequestAccessor PermissionRequestAccessorImpl {
+        PermissionRequestModifier::CtorImpl,
+        PermissionRequestModifier::GetFinalizerImpl,
+        PermissionRequestModifier::DenyImpl,
+        PermissionRequestModifier::GetOriginImpl,
+        PermissionRequestModifier::GetAccessibleResourceImpl,
+        PermissionRequestModifier::GrantImpl,
+    };
+    return &PermissionRequestAccessorImpl;
+}
 
 }
