@@ -7453,27 +7453,29 @@ class ObserveV2 {
     // clear any previously created dependency view model object to elmtId
     // find these view model objects with the reverse map id2targets_
     clearBinding(id) {
-        const targetSet = this.id2targets_[id];
-        let target;
-        if (targetSet && targetSet instanceof Set) {
-            targetSet.forEach((weakTarget) => {
-                var _a, _b;
-                if ((target = weakTarget.deref()) && target instanceof Object) {
-                    const idRefs = target[ObserveV2.ID_REFS];
-                    const symRefs = target[ObserveV2.SYMBOL_REFS];
-                    if (idRefs) {
-                        (_a = idRefs[id]) === null || _a === void 0 ? void 0 : _a.forEach(key => { var _a; return (_a = symRefs === null || symRefs === void 0 ? void 0 : symRefs[key]) === null || _a === void 0 ? void 0 : _a.delete(id); });
-                        delete idRefs[id];
-                    }
-                    else {
-                        for (let key in symRefs) {
-                            (_b = symRefs[key]) === null || _b === void 0 ? void 0 : _b.delete(id);
-                        }
-                        ;
-                    }
+        var _a;
+        // multiple weakRefs might point to the same target - here we get Set of unique targets
+        const targetSet = new Set();
+        (_a = this.id2targets_[id]) === null || _a === void 0 ? void 0 : _a.forEach((weak) => {
+            if (weak.deref() instanceof Object) {
+                targetSet.add(weak.deref());
+            }
+        });
+        targetSet.forEach((target) => {
+            var _a, _b;
+            const idRefs = target[ObserveV2.ID_REFS];
+            const symRefs = target[ObserveV2.SYMBOL_REFS];
+            if (idRefs) {
+                (_a = idRefs[id]) === null || _a === void 0 ? void 0 : _a.forEach(key => { var _a; return (_a = symRefs === null || symRefs === void 0 ? void 0 : symRefs[key]) === null || _a === void 0 ? void 0 : _a.delete(id); });
+                delete idRefs[id];
+            }
+            else {
+                for (let key in symRefs) {
+                    (_b = symRefs[key]) === null || _b === void 0 ? void 0 : _b.delete(id);
                 }
-            });
-        }
+                ;
+            }
+        });
         delete this.id2targets_[id];
         delete this.id2cmp_[id];
         
@@ -10126,8 +10128,18 @@ class __Repeat {
         return this;
     }
     // function to decide which template to use, each template has an id
-    templateId(typeFunc) {
-        this.config.typeGenFunc = typeFunc;
+    templateId(typeGenFunc) {
+        // typeGenFunc wrapper with ttype validation
+        const typeGenFuncSafe = (item, index) => {
+            const itemType = typeGenFunc(item, index);
+            const itemFunc = this.config.itemGenFuncs[itemType];
+            if (typeof itemFunc != 'function') {
+                stateMgmtConsole.applicationError(`Repeat with virtual scroll. Missing Repeat.template for id '${itemType}'`);
+                return '';
+            }
+            return itemType;
+        };
+        this.config.typeGenFunc = typeGenFuncSafe;
         return this;
     }
     // template: id + builder function to render specific type of data item 
@@ -10358,6 +10370,8 @@ class __RepeatVirtualScrollImpl {
         this.repeatItem4Key_ = new Map();
         // RepeatVirtualScrollNode elmtId
         this.repeatElmtId_ = -1;
+        // Last known active range (as sparse array)
+        this.lastActiveRangeData_ = [];
     }
     render(config, isInitialRender) {
         this.arr_ = config.arr;
@@ -10473,7 +10487,6 @@ class __RepeatVirtualScrollImpl {
             return result;
         }; // const onGetKeys4Range 
         const onGetTypes4Range = (from, to) => {
-            var _a;
             if (to > this.totalCount_ || to > this.arr_.length) {
                 stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId: ${this.repeatElmtId_}:  onGetTypes4Range from ${from} to ${to} \
                   with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
@@ -10490,13 +10503,7 @@ class __RepeatVirtualScrollImpl {
             ViewStackProcessor.StartGetAccessRecordingFor(this.repeatElmtId_);
             ObserveV2.getObserve().startRecordDependencies(owningView, this.repeatElmtId_, false);
             for (let i = from; i <= to && i < this.arr_.length; i++) {
-                let ttype = (_a = this.typeGenFunc_(this.arr_[i], i)) !== null && _a !== void 0 ? _a : '';
-                if (!this.itemGenFuncs_[ttype]) {
-                    stateMgmtConsole.applicationError(`Repeat with virtual scroll elmtId: ${this.repeatElmtId_}. Factory function .templateId  returns template id '${ttype}'.` +
-                        (ttype === '') ? 'Missing Repeat.each ' : `missing Repeat.template for id '${ttype}'` + '! Unrecoverable application error!');
-                    // fallback to use .each function and try to continue the app with it.
-                    ttype = '';
-                }
+                let ttype = this.typeGenFunc_(this.arr_[i], i);
                 result.push(ttype);
             } // for
             ObserveV2.getObserve().stopRecordDependencies();
@@ -10504,35 +10511,67 @@ class __RepeatVirtualScrollImpl {
             
             return result;
         }; // const onGetTypes4Range
+        const onSetActiveRange = (from, to) => {
+            
+            // make sparse copy of this.arr_
+            this.lastActiveRangeData_ = new Array(this.arr_.length);
+            for (let i = from; i <= to && i < this.arr_.length; i++) {
+                const item = this.arr_[i];
+                const ttype = this.typeGenFunc_(this.arr_[i], i);
+                this.lastActiveRangeData_[i] = { item, ttype };
+            }
+        };
         
         RepeatVirtualScrollNative.create(this.totalCount_, Object.entries(this.templateOptions_), {
             onCreateNode,
             onUpdateNode,
             onGetKeys4Range,
-            onGetTypes4Range
+            onGetTypes4Range,
+            onSetActiveRange
         });
         RepeatVirtualScrollNative.onMove(this.onMoveHandler_);
         
     }
     reRender() {
         
-        this.purgeKeyCache();
-        RepeatVirtualScrollNative.invalidateKeyCache(this.totalCount_);
-        
-    }
-    initialRenderItem(repeatItem) {
-        var _a, _b;
-        // execute the itemGen function
-        const itemType = (_a = this.typeGenFunc_(repeatItem.item, repeatItem.index)) !== null && _a !== void 0 ? _a : '';
-        const itemFunc = (_b = this.itemGenFuncs_[itemType]) !== null && _b !== void 0 ? _b : this.itemGenFuncs_[''];
-        if (typeof itemFunc === 'function') {
-            itemFunc(repeatItem);
+        if (this.hasVisibleItemsChanged()) {
+            this.purgeKeyCache();
+            RepeatVirtualScrollNative.updateRenderState(this.totalCount_, true);
+            
         }
         else {
-            stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${this.repeatElmtId_}: ` +
-                (itemType === '') ? 'Missing Repeat.each ' : `missing Repeat.template for id '${itemType}'` +
-                '! Unrecoverable application error!');
+            // avoid re-render when data pushed outside visible area
+            RepeatVirtualScrollNative.updateRenderState(this.totalCount_, false);
+            
         }
+    }
+    initialRenderItem(repeatItem) {
+        // execute the itemGen function
+        const itemType = this.typeGenFunc_(repeatItem.item, repeatItem.index);
+        const itemFunc = this.itemGenFuncs_[itemType];
+        itemFunc(repeatItem);
+    }
+    hasVisibleItemsChanged() {
+        var _a, _b;
+        let lastActiveRangeIndex = 0;
+        // has any item or ttype in the active range changed?
+        for (let i in this.lastActiveRangeData_) {
+            const oldItem = (_a = this.lastActiveRangeData_[+i]) === null || _a === void 0 ? void 0 : _a.item;
+            const oldType = (_b = this.lastActiveRangeData_[+i]) === null || _b === void 0 ? void 0 : _b.ttype;
+            const newItem = this.arr_[+i];
+            const newType = this.typeGenFunc_(this.arr_[+i], +i);
+            if (oldItem !== newItem) {
+                
+                return true;
+            }
+            if (oldType !== newType) {
+                
+                return true;
+            }
+            lastActiveRangeIndex = +i;
+        }
+        
+        return false;
     }
     /**
      * maintain: index <-> key mapping

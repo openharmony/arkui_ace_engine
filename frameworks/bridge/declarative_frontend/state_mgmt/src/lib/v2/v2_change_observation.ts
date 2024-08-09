@@ -167,23 +167,27 @@ class ObserveV2 {
   // clear any previously created dependency view model object to elmtId
   // find these view model objects with the reverse map id2targets_
   public clearBinding(id: number): void {
-    const targetSet: Set<WeakRef<Object>> = this.id2targets_[id];
-    let target: Object | undefined;
-    if (targetSet && targetSet instanceof Set) {
-      targetSet.forEach((weakTarget) => {
-        if ((target = weakTarget.deref()) && target instanceof Object) {
-          const idRefs: Object | undefined = target[ObserveV2.ID_REFS];
-          const symRefs: Object = target[ObserveV2.SYMBOL_REFS];
+    // multiple weakRefs might point to the same target - here we get Set of unique targets
+    const targetSet = new Set<Object>();
+    this.id2targets_[id]?.forEach((weak : WeakRef<Object>) => {
+      if (weak.deref() instanceof Object) {
+        targetSet.add(weak.deref())
+      }
+    });
 
-          if (idRefs) {
-            idRefs[id]?.forEach(key => symRefs?.[key]?.delete(id));
-            delete idRefs[id];
-          } else {
-            for (let key in symRefs) { symRefs[key]?.delete(id) };
-          }
-        }
-      });
-    }
+    targetSet.forEach((target) => {
+      const idRefs: Object | undefined = target[ObserveV2.ID_REFS];
+      const symRefs: Object = target[ObserveV2.SYMBOL_REFS];
+
+      if (idRefs) {
+        idRefs[id]?.forEach(key => symRefs?.[key]?.delete(id));
+        delete idRefs[id];
+      } else {
+        for (let key in symRefs) {
+          symRefs[key]?.delete(id);
+        };
+      }
+    });
 
     delete this.id2targets_[id];
     delete this.id2cmp_[id];
