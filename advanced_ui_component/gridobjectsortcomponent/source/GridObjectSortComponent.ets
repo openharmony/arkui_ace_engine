@@ -210,7 +210,8 @@ export struct GridObjectSortComponent {
     if (!this.isFollowingSystemFontScale) {
       return 1;
     }
-    let systemFontScale: number | undefined = (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+    let systemFontScale: number | undefined =
+      (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
     return Math.min(systemFontScale, this.maxAppFontScale, MAX_FONT_SCALE);
   }
 
@@ -430,14 +431,16 @@ export struct GridObjectSortComponent {
   // Display area icon in image_text mode
   imageTextRemoveIcon(select: GridObjectSortComponentItem): Resource {
     const clickRemoveIcon: boolean = this.clickRemoveBtn && this.content.id === select.id;
-    const icon = clickRemoveIcon ? $r("sys.media.ohos_ic_public_add_norm_filled") : $r("sys.media.ohos_ic_public_remove_filled");
+    const icon = clickRemoveIcon ?
+      $r("sys.media.ohos_ic_public_add_norm_filled") : $r("sys.media.ohos_ic_public_remove_filled");
     return icon;
   }
 
   // Adding a Region Icon in image_text Mode
   imageTextAddIcon(select: GridObjectSortComponentItem): Resource {
     const clickAddIcon: boolean = this.clickAddBtn && this.content.id === select.id && this.gridComState;
-    const icon = clickAddIcon ? $r("sys.media.ohos_ic_public_remove_filled") : $r("sys.media.ohos_ic_public_add_norm_filled");
+    const icon = clickAddIcon ?
+      $r("sys.media.ohos_ic_public_remove_filled") : $r("sys.media.ohos_ic_public_add_norm_filled");
     return icon;
   }
   // Displaying and hiding area icons in image_text mode
