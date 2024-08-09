@@ -21,6 +21,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -474,6 +475,8 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout018, TestSize.Level1)
     auto menuBarRow = AceType::DynamicCast<FrameNode>(atom->GetChildAtIndex(1));
     auto menuBar = AceType::DynamicCast<FrameNode>(menuBarRow->GetChildAtIndex(0));
     auto menuButton = AceType::DynamicCast<FrameNode>(menuBar->GetChildAtIndex(0));
+    MockContainer::SetUp();
+    MockContainer::Current()->isUIExtensionWindow_ = true;
     appBar->BindCloseCallback(menuButton);
     auto eventHub = menuButton->GetOrCreateGestureEventHub();
     auto actuator = eventHub->clickEventActuator_;
@@ -482,6 +485,11 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout018, TestSize.Level1)
     for (const auto& callback : Events) {
         (*callback)(info);
     }
+    MockContainer::Current()->isUIExtensionWindow_ = false;
+    for (const auto& callback : Events) {
+        (*callback)(info);
+    }
+    MockContainer::TearDown();
     EXPECT_TRUE(true);
 }
 } // namespace OHOS::Ace::NG
