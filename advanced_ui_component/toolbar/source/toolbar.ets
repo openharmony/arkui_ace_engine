@@ -123,9 +123,9 @@ export struct ToolBar {
   @State fontActivatedPrimaryColor: ResourceColor = $r('sys.color.font_emphasize');
   @State symbolEffect: SymbolEffect = new SymbolEffect();
   @State fontSize: number = 1;
-  @State dialogController: CustomDialogController | null = null;
-  @State isFollowSystem: boolean = false;
-  @State maxFontSizeScale: number = 3.2;
+  dialogController: CustomDialogController | null = null;
+  isFollowSystem: boolean = false;
+  maxFontSizeScale: number = 3.2;
 
   onWillApplyTheme(theme: Theme) {
     this.iconPrimaryColor = theme.colors.iconPrimary;
@@ -424,8 +424,6 @@ export struct ToolBar {
       this.isFollowSystem = this.getUIContext()?.isFollowingSystemFontScale();
       this.maxFontSizeScale = this.getUIContext()?.getMaxFontScale();
     } catch (err) {
-      this.isFollowSystem = false;
-      this.maxFontSizeScale = MAX_FONT_SIZE;
       let code: number = (err as BusinessError)?.code;
       let message: string = (err as BusinessError)?.message;
       hilog.error(0x3900, 'Ace', `Faild to toolBar getMaxFontScale, code: ${code}, message: ${message}`);
