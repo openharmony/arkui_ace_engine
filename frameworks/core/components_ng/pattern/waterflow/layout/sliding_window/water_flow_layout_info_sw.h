@@ -118,12 +118,14 @@ public:
     void Sync(int32_t itemCnt, float mainSize, const std::vector<float>& mainGap);
 
     /**
-     * @brief special function to mark synced after cache item layout
+     * @brief Mark beginning of cache item layout and save current lanes_ state.
+     *
      */
-    void EndCacheUpdate()
-    {
-        synced_ = true;
-    }
+    void BeginCacheUpdate();
+    /**
+     * @brief mark synced and restore lanes_ after cache item layout
+     */
+    void EndCacheUpdate();
 
     /**
      * @brief Calculates distance from the item's top edge to the top of the viewport.
@@ -241,6 +243,8 @@ private:
      */
     bool AdjustLanes(const std::vector<WaterFlowSections::Section>& sections,
         const WaterFlowSections::Section& prevSection, int32_t start, int32_t prevSegIdx);
+
+    std::unique_ptr<decltype(lanes_)> savedLanes_; // temporarily store current lanes_ state in Cache Item operations.
 
     /* cache */
     float startPos_ = 0.0f;

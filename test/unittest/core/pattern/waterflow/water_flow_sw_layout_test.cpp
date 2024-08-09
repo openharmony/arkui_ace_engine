@@ -261,7 +261,7 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 45);
-    EXPECT_EQ(GetChildY(frameNode_, 45), -50.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 46), -50.0f);
     EXPECT_FALSE(child->IsActive());
     EXPECT_FALSE(info_->idxToLane_.count(40));
 

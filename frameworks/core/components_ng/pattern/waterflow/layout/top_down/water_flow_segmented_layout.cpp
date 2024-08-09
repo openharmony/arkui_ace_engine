@@ -104,17 +104,19 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
         }
     }
 
-    bool isReverse = props->IsReverse();
-    for (int32_t i = info_->startIndex_; i <= info_->endIndex_; ++i) {
+    const bool isReverse = props->IsReverse();
+    const int32_t cacheCount = props->GetCachedCountValue(1);
+    const int32_t maxIdx = std::min(info_->endIndex_ + cacheCount, static_cast<int32_t>(info_->itemInfos_.size() - 1));
+    for (int32_t i = std::max(0, info_->startIndex_ - cacheCount); i <= maxIdx; ++i) {
         LayoutItem(i, crossPos[info_->GetSegment(i)][info_->itemInfos_[i].crossIdx], initialOffset, isReverse);
     }
-    auto cachedCount = props->GetCachedCountValue(1);
     wrapper_->SetActiveChildRange(
-        info_->NodeIdx(info_->startIndex_), info_->NodeIdx(info_->endIndex_), cachedCount, cachedCount);
+        info_->NodeIdx(info_->startIndex_), info_->NodeIdx(info_->endIndex_), cacheCount, cacheCount);
 
     // for compatibility
     info_->firstIndex_ = info_->startIndex_;
-    PreloadItems(wrapper_, info_, cachedCount);
+
+    PreloadItems(wrapper_, info_, cacheCount);
 }
 
 namespace {

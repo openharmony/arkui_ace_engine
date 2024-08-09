@@ -200,12 +200,13 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     layoutWrapper->RemoveAllChildInRenderTree();
+    auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    const int32_t cachedCount = layoutProperty->GetCachedCountValue(1);
 
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto childFrameOffset = OffsetF(padding.left.value_or(0.0f), padding.top.value_or(0.0f));
-    auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     layoutInfo_->UpdateStartIndex();
     auto firstIndex = layoutInfo_->endIndex_;
     auto crossSize = size.CrossSize(axis_);
@@ -213,7 +214,8 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto isRtl = (layoutDirection == TextDirection::RTL) && (axis_ == Axis::VERTICAL);
     for (const auto& mainPositions : layoutInfo_->items_[0]) {
         for (const auto& item : mainPositions.second) {
-            if (item.first < layoutInfo_->startIndex_ || item.first > layoutInfo_->endIndex_) {
+            if (item.first < layoutInfo_->startIndex_ - cachedCount ||
+                item.first > layoutInfo_->endIndex_ + cachedCount) {
                 continue;
             }
             auto itemCrossPosition = itemsCrossPosition_.find(mainPositions.first);
@@ -234,7 +236,9 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             } else {
                 currentOffset += OffsetF(mainOffset, crossOffset);
             }
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(item.first));
+            const bool isCache = item.first < layoutInfo_->startIndex_ || item.first > layoutInfo_->endIndex_;
+            auto wrapper =
+                layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(item.first), !isCache, isCache);
             if (!wrapper) {
                 continue;
             }
@@ -255,7 +259,6 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
     layoutInfo_->firstIndex_ = firstIndex;
-    auto cachedCount = layoutProperty->GetCachedCountValue(1);
     layoutWrapper->SetActiveChildRange(layoutInfo_->NodeIdx(layoutInfo_->FirstIdx()),
         layoutInfo_->NodeIdx(layoutInfo_->endIndex_), cachedCount, cachedCount);
     PreloadItems(layoutWrapper, layoutInfo_, cachedCount);
