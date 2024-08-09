@@ -71,12 +71,7 @@ public:
     {
         isCache_ = true;
     }
-    bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx) override
-    {
-        wrapper_ = host;
-        MeasureToTarget(itemIdx);
-        return true;
-    }
+    bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx) override;
     void EndCacheLayout() override
     {
         isCache_ = false;

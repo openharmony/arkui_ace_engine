@@ -34,7 +34,7 @@ public:
      * @brief Measure the cache item and append it to a lane.
      *
      * @param itemIdx index of the cache item to add.
-     * @return true if the item is successfully layout and appended in lane.
+     * @return true if the item is actually created and appended in lane.
      */
     virtual bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx) = 0;
     virtual void EndCacheLayout()

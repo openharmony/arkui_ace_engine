@@ -411,7 +411,7 @@ void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx)
         int32_t seg = info_->GetSegment(i);
         auto position = WaterFlowLayoutUtils::GetItemPosition(info_, i, mainGaps_[seg]);
         float itemHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, i);
-        if (itemHeight < 0.0f) {
+        if (Negative(itemHeight)) {
             auto item = MeasureItem(props, i, position.crossIndex, -1.0f);
             if (item) {
                 itemHeight = GetMeasuredHeight(item, axis_);
@@ -489,5 +489,15 @@ void WaterFlowSegmentedLayout::LayoutItem(int32_t idx, float crossPos, const Off
     if (idx == info_->startIndex_) {
         info_->storedOffset_ = mainOffset;
     }
+}
+
+bool WaterFlowSegmentedLayout::AppendCacheItem(LayoutWrapper* host, int32_t itemIdx)
+{
+    wrapper_ = host;
+    if (itemIdx < static_cast<int32_t>(info_->itemInfos_.size())) {
+        return false;
+    }
+    MeasureToTarget(itemIdx);
+    return true;
 }
 } // namespace OHOS::Ace::NG

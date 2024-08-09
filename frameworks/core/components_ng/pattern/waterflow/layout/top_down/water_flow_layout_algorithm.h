@@ -41,7 +41,7 @@ public:
 
 private:
     FlowItemPosition GetItemPosition(int32_t index);
-    void MeasureToTarget(LayoutWrapper* layoutWrapper, bool isCache);
+    bool MeasureToTarget(LayoutWrapper* layoutWrapper, bool isCache);
     void FillViewport(float mainSize, LayoutWrapper* layoutWrapper);
     void ModifyCurrentOffsetWhenReachEnd(float mainSize, LayoutWrapper* layoutWrapper);
     float ComputeCrossPosition(int32_t crossIndex) const;

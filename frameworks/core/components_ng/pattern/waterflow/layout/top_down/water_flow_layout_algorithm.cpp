@@ -147,11 +147,11 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->SetCacheCount(layoutProperty->GetCachedCountValue(1));
 }
 
-void WaterFlowLayoutAlgorithm::MeasureToTarget(LayoutWrapper* layoutWrapper, bool isCache)
+bool WaterFlowLayoutAlgorithm::MeasureToTarget(LayoutWrapper* layoutWrapper, bool isCache)
 {
     if (layoutInfo_->targetIndex_.value() > layoutInfo_->childrenCount_) {
         layoutInfo_->targetIndex_.reset();
-        return;
+        return false;
     }
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto currentIndex = layoutInfo_->endIndex_;
@@ -164,14 +164,18 @@ void WaterFlowLayoutAlgorithm::MeasureToTarget(LayoutWrapper* layoutWrapper, boo
             layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(currentIndex), !isCache, isCache);
         if (!itemWrapper) {
             layoutInfo_->targetIndex_.reset();
-            break;
+            return false;
         }
         auto itemCrossSize = itemsCrossSize_.find(position.crossIndex);
         if (itemCrossSize == itemsCrossSize_.end()) {
-            break;
+            return false;
         }
         itemWrapper->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
             { itemCrossSize->second, mainSize_, axis_ }, layoutProperty, itemWrapper));
+        if (isCache) {
+            itemWrapper->Layout();
+            itemWrapper->SetActive(false);
+        }
         auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
         auto itemHeight = GetMainAxisSize(itemSize, axis_);
         auto item = layoutInfo_->items_[0][position.crossIndex].find(currentIndex);
@@ -191,6 +195,7 @@ void WaterFlowLayoutAlgorithm::MeasureToTarget(LayoutWrapper* layoutWrapper, boo
         currentIndex++;
         position = GetItemPosition(currentIndex);
     }
+    return true;
 }
 
 void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -410,10 +415,13 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
 
 bool WaterFlowLayoutAlgorithm::AppendCacheItem(LayoutWrapper* host, int32_t itemIdx)
 {
+    if (itemIdx <= layoutInfo_->endIndex_) {
+        return false;
+    }
     auto sub = layoutInfo_->targetIndex_;
     layoutInfo_->targetIndex_ = itemIdx;
-    MeasureToTarget(host, true);
+    bool res = MeasureToTarget(host, true);
     std::swap(sub, layoutInfo_->targetIndex_);
-    return true;
+    return res;
 }
 } // namespace OHOS::Ace::NG
