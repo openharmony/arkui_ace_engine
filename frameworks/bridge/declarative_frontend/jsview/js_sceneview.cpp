@@ -122,7 +122,8 @@ bool SetOhosPath(const std::string& uri, std::string& ohosPath)
         ohosPath = "OhosRawFile://" + ohosPath;
         return true;
     }
-    ohosPath = "OhosRawFile://" + ohosPath;
+    // set default format as system resource
+    ohosPath = "file://" + uri;
     return false;
 }
 
