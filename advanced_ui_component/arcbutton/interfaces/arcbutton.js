@@ -298,17 +298,17 @@ export class ArcButton extends ViewV2 {
         let canvasLeftTopPoint = data.canvasLeftTop;
         canvasLeftTopPoint.x -= Constants.SHADOW_BLUR;
         canvasLeftTopPoint.y -= Constants.DISTANCE_FROM_BORDER;
-        let mLeftTopPointX = this.buttonVp2px(leftTopPoint.x - canvasLeftTopPoint.x);
-        let mLeftTopPointY = this.buttonVp2px(leftTopPoint.y - canvasLeftTopPoint.y);
-        let upperArcCircleR = this.buttonVp2px(Constants.UPPER_ARC_CIRCLE_R);
-        let rightTopPointX = this.buttonVp2px(rightTopPoint.x - canvasLeftTopPoint.x);
-        let rightTopPointY = this.buttonVp2px(rightTopPoint.y - canvasLeftTopPoint.y);
-        let chamferCircleR = this.buttonVp2px(Constants.CHAMFER_CIRCLE_R);
-        let rightBottomPointX = this.buttonVp2px(rightBottomPoint.x - canvasLeftTopPoint.x);
-        let rightBottomPointY = this.buttonVp2px(rightBottomPoint.y - canvasLeftTopPoint.y);
-        let lowerArcCircleR = this.buttonVp2px(Constants.LOWER_ARC_CIRCLE_R);
-        let leftBottomPointX = this.buttonVp2px(leftBottomPoint.x - canvasLeftTopPoint.x);
-        let leftBottomPointY = this.buttonVp2px(leftBottomPoint.y - canvasLeftTopPoint.y);
+        let mLeftTopPointX = this.buttonVp2px(leftTopPoint.x, canvasLeftTopPoint.x);
+        let mLeftTopPointY = this.buttonVp2px(leftTopPoint.y, canvasLeftTopPoint.y);
+        let upperArcCircleR = this.getUIContext().vp2px(Constants.UPPER_ARC_CIRCLE_R);
+        let rightTopPointX = this.buttonVp2px(rightTopPoint.x, canvasLeftTopPoint.x);
+        let rightTopPointY = this.buttonVp2px(rightTopPoint.y, canvasLeftTopPoint.y);
+        let chamferCircleR = this.getUIContext().vp2px(Constants.CHAMFER_CIRCLE_R);
+        let rightBottomPointX = this.buttonVp2px(rightBottomPoint.x, canvasLeftTopPoint.x);
+        let rightBottomPointY = this.buttonVp2px(rightBottomPoint.y, canvasLeftTopPoint.y);
+        let lowerArcCircleR = this.getUIContext().vp2px(Constants.LOWER_ARC_CIRCLE_R);
+        let leftBottomPointX = this.buttonVp2px(leftBottomPoint.x, canvasLeftTopPoint.x);
+        let leftBottomPointY = this.buttonVp2px(leftBottomPoint.y, canvasLeftTopPoint.y);
         let pathStr = `M ${mLeftTopPointX} ${mLeftTopPointY} A ${upperArcCircleR} ${upperArcCircleR}, 0, 0, 0,
        ${rightTopPointX} ${rightTopPointY}` +
             `M ${rightTopPointX} ${rightTopPointY} A ${chamferCircleR} ${chamferCircleR}, 0, 0, 0, ${rightBottomPointX}
@@ -322,8 +322,9 @@ export class ArcButton extends ViewV2 {
         this.path2D = new Path2D(pathStr);
         this.doDraw();
     }
-    buttonVp2px(value) {
-        return this.getUIContext().vp2px(value);
+    buttonVp2px(valueX, valueY) {
+        let num = valueX - valueY;
+        return this.getUIContext().vp2px(num);
     }
     doDraw() {
         if (!this.isReady || this.path2D === undefined) {
