@@ -88,7 +88,7 @@ public:
     RefPtr<UINode> GetChildAtIndex(int32_t index) const;
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     void AttachToMainTree(bool recursive = false);
-    void DetachFromMainTree(bool recursive = false);
+    virtual void DetachFromMainTree(bool recursive = false);
     void UpdateConfigurationUpdate(const ConfigurationChange& configurationChange);
     virtual void OnConfigurationUpdate(const ConfigurationChange& configurationChange) {}
 
