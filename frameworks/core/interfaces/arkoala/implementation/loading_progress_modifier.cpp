@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 
+#include "arkoala_api.h"
 #include "arkoala_api_generated.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LoadingProgressInterfaceModifier {
@@ -25,10 +29,19 @@ namespace LoadingProgressAttributeModifier {
 void ColorImpl(Ark_NativePointer node,
                const ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (auto color = Converter::OptConvert<Color>(*value); color) {
+        LoadingProgressModelNG::SetColor(frameNode, color.value());
+    }
 }
 void EnableLoadingImpl(Ark_NativePointer node,
                        Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    LoadingProgressModelNG::SetEnableLoading(frameNode, Converter::Convert<bool>(value));
 }
 void ContentModifierImpl(Ark_NativePointer node,
                          const Ark_CustomObject* modifier)
