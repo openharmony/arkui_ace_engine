@@ -768,6 +768,7 @@ void RichEditorPattern::OnAttachToFrameNode()
     richEditorInstanceId_ = Container::CurrentIdSafely();
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
+    frameId_ = frameNode->GetId();
     StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode);
 }
 
@@ -1597,6 +1598,11 @@ void RichEditorPattern::SetTypingStyle(std::optional<struct UpdateSpanStyle> typ
     typingStyle_ = typingStyle;
     typingTextStyle_ = textStyle;
     presetParagraph_ = nullptr;
+}
+
+std::optional<struct UpdateSpanStyle> RichEditorPattern::GetTypingStyle()
+{
+    return typingStyle_;
 }
 
 void RichEditorPattern::UpdateFontFeatureTextStyle(
@@ -2774,7 +2780,7 @@ BlurReason RichEditorPattern::GetBlurReason()
 
 void RichEditorPattern::HandleBlurEvent()
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleBlurEvent");
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleBlurEvent/%{public}d", frameId_);
     isLongPress_ = false;
     StopTwinkling();
     auto reason = GetBlurReason();
@@ -2797,7 +2803,7 @@ void RichEditorPattern::HandleBlurEvent()
 
 void RichEditorPattern::HandleFocusEvent()
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent");
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent/%{public}d", frameId_);
     UseHostToUpdateTextFieldManager();
     if (previewLongPress_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "if preview and longpress: keep preview state");
@@ -4107,26 +4113,20 @@ void RichEditorPattern::OnColorConfigurationUpdate()
         if (!spanItem) {
             continue;
         }
-        if (spanItem->useThemeFontColor) {
-            spanNode->UpdateTextColor(themeTextColor);
-        }
-        if (spanItem->useThemeDecorationColor) {
-            spanNode->UpdateTextDecorationColor(themeTextDecorationColor);
-        }
+        IF_TRUE(spanItem->useThemeFontColor, spanNode->UpdateTextColor(themeTextColor));
+        IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColor(themeTextDecorationColor));
         spanNode->UpdateColorByResourceId();
     }
-    if (typingTextStyle_) {
-        typingTextStyle_->UpdateColorByResourceId();
-    }
+    IF_PRESENT(typingTextStyle_, UpdateColorByResourceId());
+    IF_PRESENT(typingStyle_, UpdateColorByResourceId());
+
     auto scrollbarTheme = GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(scrollbarTheme);
     auto scrollBar = GetScrollBar();
     CHECK_NULL_VOID(scrollBar);
     scrollBar->SetForegroundColor(scrollbarTheme->GetForegroundColor());
     scrollBar->SetBackgroundColor(scrollbarTheme->GetBackgroundColor());
-    if (magnifierController_) {
-        magnifierController_->SetColorModeChange(true);
-    }
+    IF_PRESENT(magnifierController_, SetColorModeChange(true));
 }
 
 void RichEditorPattern::UpdateCaretInfoToController()

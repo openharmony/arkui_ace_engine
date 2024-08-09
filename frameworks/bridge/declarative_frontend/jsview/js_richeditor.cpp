@@ -2389,7 +2389,8 @@ void JSRichEditorBaseController::GetTypingStyle(const JSCallbackInfo& info)
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     auto controller = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(controller);
-    auto style = CreateTypingStyleResult(typingStyle_);
+    auto typingStyle = controller->GetTypingStyle();
+    auto style = CreateTypingStyleResult(typingStyle.value_or(UpdateSpanStyle()));
     info.SetReturnValue(JSRef<JSVal>::Cast(style));
 }
 
