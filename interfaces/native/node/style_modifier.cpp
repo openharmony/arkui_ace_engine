@@ -4604,8 +4604,12 @@ void ResetTextInputContentType(ArkUI_NodeHandle node)
 int32_t SetTextInputPasswordRules(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
+    ArkUI_CharPtr itemString = item->string;
+    if (!itemString) {
+        itemString = "";
+    }
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputPasswordRules(
-        node->uiNodeHandle, item->string);
+        node->uiNodeHandle, itemString);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -4685,8 +4689,12 @@ void ResetTextInputCaretOffset(ArkUI_NodeHandle node)
 int32_t SetInputFilter(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
+    ArkUI_CharPtr itemString = item->string;
+    if (!itemString) {
+        itemString = "";
+    }
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputInputFilter(
-        node->uiNodeHandle, item->string);
+        node->uiNodeHandle, itemString);
     return ERROR_CODE_NO_ERROR;
 }
 
