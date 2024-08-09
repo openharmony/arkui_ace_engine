@@ -45,6 +45,7 @@ using ActionSelectImpl = ActionNoParam;
 using ActionClearSelectionImpl = ActionNoParam;
 using ActionMoveTextImpl = std::function<void(int32_t moveUnit, bool forward)>;
 using ActionSetCursorIndexImpl = std::function<void(int32_t index)>;
+using ActionExecSubComponentImpl = std::function<void(int32_t spanId)>;
 using ActionGetCursorIndexImpl = std::function<int32_t(void)>;
 using ActionClickImpl = ActionNoParam;
 using ActionLongClickImpl = ActionNoParam;
@@ -149,6 +150,13 @@ public:
     {
         return false;
     }
+
+    virtual bool HasSubComponent() const
+    {
+        return false;
+    }
+
+    virtual void GetSubComponentInfo(std::vector<SubComponentInfo>& subComponentInfos) const {}
 
     virtual AccessibilityValue GetAccessibilityValue() const
     {
@@ -262,6 +270,20 @@ public:
     {
         if (actionSetCursorIndexImpl_) {
             actionSetCursorIndexImpl_(index);
+            return true;
+        }
+        return false;
+    }
+
+    void SetActionExecSubComponent(const ActionExecSubComponentImpl& actionExecSubComponentImpl)
+    {
+        actionExecSubComponentImpl_ = actionExecSubComponentImpl;
+    }
+
+    bool ActActionExecSubComponent(int32_t spanId)
+    {
+        if (actionExecSubComponentImpl_) {
+            actionExecSubComponentImpl_(spanId);
             return true;
         }
         return false;
@@ -725,6 +747,7 @@ protected:
     ActionSelectImpl actionSelectImpl_;
     ActionClearSelectionImpl actionClearSelectionImpl_;
     ActionSetCursorIndexImpl actionSetCursorIndexImpl_;
+    ActionExecSubComponentImpl actionExecSubComponentImpl_;
     ActionGetCursorIndexImpl actionGetCursorIndexImpl_;
     ActionClickImpl actionClickImpl_;
     ActionLongClickImpl actionLongClickImpl_;
