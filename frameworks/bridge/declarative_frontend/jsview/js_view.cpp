@@ -619,6 +619,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
     auto recycleCustomNode = [weak = AceType::WeakClaim(this)](const RefPtr<NG::CustomNodeBase>& recycleNode) -> void {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
         ContainerScope scope(jsView->GetInstanceId());
         auto name = jsView->GetRecycleCustomNodeName();
         if (name.empty()) {
