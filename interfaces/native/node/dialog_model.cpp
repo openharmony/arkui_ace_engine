@@ -198,6 +198,10 @@ int32_t RegisterOnWillDismissWithUserData(
 
 } // namespace OHOS::Ace::NG::DialogModel
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void OH_ArkUI_DialogDismissEvent_SetShouldBlockDismiss(ArkUI_DialogDismissEvent* event, bool shouldBlockDismiss)
 {
     if (!event) {
@@ -221,3 +225,7 @@ int32_t OH_ArkUI_DialogDismissEvent_GetDismissReason(ArkUI_DialogDismissEvent* e
     }
     return event->reason;
 }
+
+#ifdef __cplusplus
+};
+#endif
