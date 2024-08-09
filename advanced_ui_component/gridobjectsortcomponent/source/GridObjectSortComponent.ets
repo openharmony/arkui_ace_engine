@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,20 +17,34 @@ import vibrator from '@ohos.vibrator';
 import curves from '@ohos.curves';
 
 // import component
-import { ComposeTitleBar } from "@ohos.arkui.advanced.ComposeTitleBar";
-import { EditableTitleBar, EditableLeftIconType } from "@ohos.arkui.advanced.EditableTitleBar";
-import { SubHeader, OperationType } from '@ohos.arkui.advanced.SubHeader';
+import {
+  ComposeTitleBar, LengthMetrics, MeasureText, EditableTitleBar,
+  EditableLeftIconType, SubHeader, OperationType
+} from '@kit.ArkUI';
+import { common, EnvironmentCallback } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
 
 //  declaring Constants
 const COL_IMAGE_TEXT = 3;
 const COL_TEXT = 4;
-const BLOCK_TEXT_HEIGHT = 36;
+const GRID_COL_3 = '1fr 1fr 1fr';
+const GRID_COL_4 = '1fr 1fr 1fr 1fr';
 const ICON_SIZE = 24;
 const IMAGE_DEFAULT = 56;
 const TEXT_PADDING_LEFT_RIGHT = 12;
+const PADDING_EIGHT = 4;
+const GRID_ITEM_HEIGHT_TEXT = 28;
 const MARGIN_EIGHT = 8;
 const ROW_GAP = 16;
 const SUBTITLE_HEIGHT = 56;
+const TEXT_MAX_LINES = 1;
+const MIN_FONT_SCALE = 1;
+const MAX_FONT_SCALE = 2;
+const DEFAULT_TEXT_SIZE = 12;
+const DEFAULT_FONT_SIZE_SCALE = 1;
+const DEFAULT_BLOCK_TEXT_ITEM_SAFE_MARGIN = 8;
+const EDIT_BLOCK_TEXT_ITEM_SAFE_MARGIN = 16;
 // Animation Parameters
 const ENTER_EXIT_ICON_DURATION = 200;
 const COMMON_BEZIER = curves.cubicBezierCurve(0.33, 0, 0.67, 1); // Curve of entering and exiting the editing state
@@ -45,6 +59,7 @@ export interface GridObjectSortComponentItem {
   selected: boolean;
   order: number;
   url?: ResourceStr;
+  visibility?: Visibility;
 }
 
 export interface GridObjectSortComponentOptions {
@@ -93,6 +108,8 @@ export struct GridObjectSortComponent {
   @State copyUnSelected: GridObjectSortComponentItem[] = [];
   // Current data when touched
   @State content: GridObjectSortComponentItem = { id: '', text: '', selected: false, order: 0 };
+  @State dragContent: GridObjectSortComponentItem = { id: '', text: '', selected: false, order: 0 };
+  @State dragContentIndex: number = -1;
   @State hoverId: number | string = '';
   // component state : edit === true   unedited === false
   @State @Watch('onGridComStateChange') gridComState: boolean = false;
@@ -113,6 +130,7 @@ export struct GridObjectSortComponent {
   // whether to start dragging
   @State isStartDrag: boolean = false;
   @State insertIndex: number = -1;
+  @State itemIndex: number = 0;
   @State editGridDataLength: number = -1;
   @State isTouchDown: boolean = false;
   @State addItemMoveX: number = 0;
@@ -127,11 +145,18 @@ export struct GridObjectSortComponent {
   @State arraySelectIsChange: number = 0;
   @State arrayUnSelectIsChange: number = 0;
   @State textItemEditWidth: number = 0;
+  @State textItemEditHeight: number = 0;
   @State imageItemWidth: number = 0;
   @State saveClick: boolean = false;
   @State imageTextAddIconShow: boolean = false;
   @State imageTextRemoveIconShow: boolean = false;
   @State firstIn: boolean = true;
+  @State @Watch('calcAreaInfo') fontSizeScale: number | undefined = 1;
+  @State customColumns: string = '1fr 1fr 1fr 1fr';
+  @State editGridHeight: number = 0;
+  @State addGridHeight: number = 0;
+  @State subTitleHeight: number = 0;
+  private callbackId: number | undefined = undefined;
   // current column, text: 4 column  , image_text: 3 column
   private colNum: number = COL_IMAGE_TEXT;
   private vibrationDone: boolean = false;
@@ -147,6 +172,8 @@ export struct GridObjectSortComponent {
   ];
   onSave?: (select: GridObjectSortComponentItem[], unselect: GridObjectSortComponentItem[]) => void;
   onCancel?: () => void;
+  isFollowingSystemFontScale: boolean = false;
+  maxAppFontScale: number = 1;
 
   // component rendering
   aboutToAppear() {
@@ -157,10 +184,69 @@ export struct GridObjectSortComponent {
     this.copyUnSelected = this.unSelected.slice();
     this.editGridDataLength = this.selected.length;
     this.imageText = this.options.type === GridObjectSortComponentType.IMAGE_TEXT;
-    this.colNum = this.imageText ? COL_IMAGE_TEXT : COL_TEXT;
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxAppFontScale = uiContent.getMaxFontScale();
+      this.fontSizeScale = this.decideFontScale(uiContent);
+    } catch (exception) {
+      let code = (exception as BusinessError).code;
+      let message = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace',
+        `GridObjectSortComponent Faild to init fontsizescale info, code:${code}, message: ${message}`);
+    }
+    try {
+      this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
+    } catch (paramError) {
+      let code = (paramError as BusinessError).code;
+      let message = (paramError as BusinessError).message;
+      hilog.error(0x3900, 'Ace',
+        `GridObjectSortComponent Faild to get environment param error: ${code}, ${message}`);
+    }
+    this.calcGridHeight();
     setTimeout(() => {
       this.firstIn = false;
     }, 500);
+  }
+
+  calcTextItemEditHeight() {
+    let sizeOptions: SizeOptions = MeasureText.measureTextSize({
+      textContent: this.dataList[0]?.text ?? '',
+      fontSize: `${ (LengthMetrics.resource($r('sys.float.ohos_id_text_size_button3'))?.value ??
+        DEFAULT_TEXT_SIZE) * (this.fontSizeScale ?? DEFAULT_FONT_SIZE_SCALE) }vp`,
+      overflow: TextOverflow.Ellipsis,
+      maxLines: TEXT_MAX_LINES
+    });
+    this.textItemEditHeight = this.fontSizeScale === DEFAULT_FONT_SIZE_SCALE ?
+      GRID_ITEM_HEIGHT_TEXT : px2vp(sizeOptions.height as number);
+    this.textItemEditHeight = this.textItemEditHeight + PADDING_EIGHT * 2;
+  }
+
+  private envCallback: EnvironmentCallback = {
+    onConfigurationUpdated: (config) => {
+      let uiContent: UIContext = this.getUIContext();
+      this.fontSizeScale = this.decideFontScale(uiContent);
+    },
+    onMemoryLevel: (level) => {}
+  }
+
+  decideFontScale(uiContent: UIContext): number {
+    if (!this.isFollowingSystemFontScale) {
+      return 1;
+    }
+    let systemFontScale: number | undefined =
+      (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? DEFAULT_FONT_SIZE_SCALE;
+    return Math.min(systemFontScale, this.maxAppFontScale, MAX_FONT_SCALE);
+  }
+
+  private calcColNum() {
+    if (this.imageText || (this.fontSizeScale && this.fontSizeScale > DEFAULT_FONT_SIZE_SCALE)) {
+      this.customColumns = GRID_COL_3;
+      this.colNum = COL_IMAGE_TEXT;
+    } else {
+      this.customColumns = GRID_COL_4;
+      this.colNum = COL_TEXT;
+    }
   }
 
   // component disappear
@@ -174,6 +260,13 @@ export struct GridObjectSortComponent {
     this.menuSwitch = false;
     this.selected = this.copySelected;
     this.unSelected = this.copyUnSelected;
+    if (this.callbackId) {
+      this.getUIContext()
+        .getHostContext()
+      ?.getApplicationContext()
+      ?.off('environment', this.callbackId);
+      this.callbackId = void (0);
+    }
   }
 
   // Array deduplication
@@ -191,7 +284,9 @@ export struct GridObjectSortComponent {
   onGridComStateChange() {
     this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16;
     if (!this.imageText) {
-      this.blockHeight = this.gridComState ? 44 : BLOCK_TEXT_HEIGHT;
+      this.blockHeight = this.gridComState ?
+        this.textItemEditHeight + EDIT_BLOCK_TEXT_ITEM_SAFE_MARGIN :
+        this.textItemEditHeight + DEFAULT_BLOCK_TEXT_ITEM_SAFE_MARGIN;
     }
   }
 
@@ -222,6 +317,7 @@ export struct GridObjectSortComponent {
     this.selected = this.copySelected.slice();
     this.unSelected = this.copyUnSelected.slice();
     this.editGridDataLength = this.selected.length;
+    this.calcGridHeight();
     this.onCancel && this.onCancel();
   }
 
@@ -234,10 +330,14 @@ export struct GridObjectSortComponent {
       this.gridComState = true;
     });
     this.menuSwitch = true;
+    this.calcGridHeight();
   }
 
   // save data
   onSaveEdit() {
+    if (this.isStartDrag) {
+      return;
+    }
     animateTo({
       duration: ENTER_EXIT_ICON_DURATION,
       curve: LONG_TOUCH_SCALE
@@ -256,6 +356,7 @@ export struct GridObjectSortComponent {
       const unSelected = this.getNewData(this.unSelected, false, this.selected.length);
       this.selected = selected;
       this.unSelected = unSelected;
+      this.calcGridHeight();
       this.onSave && this.onSave(selected, unSelected);
     });
     setTimeout(() => {
@@ -273,6 +374,9 @@ export struct GridObjectSortComponent {
     if (targetIndex < 0) {
       targetIndex = this.selected.length - 1;
     }
+    if (this.dragContent.visibility !== Visibility.Hidden) {
+      this.dragContent.visibility = Visibility.Hidden;
+    }
     this.insertIndex = insertIndex;
   }
 
@@ -287,34 +391,29 @@ export struct GridObjectSortComponent {
     let currentIndex = this.selected.findIndex(val => val.id === content.id);
     this.content = content;
     this.selectedIndex = currentIndex;
+    this.calcGridHeight();
     animateTo({ curve: REMOVE_ADD_SPRING, onFinish: () => {
       this.scaleIcon = 1;
       this.selected.splice(currentIndex, 1);
       this.unSelected.unshift(content);
+      this.calcGridHeight();
       this.editGridDataLength = this.editGridDataLength - 1;
       this.editItemMoveX = 0;
       this.editItemMoveY = 0;
       this.arraySelectIsChange = 2;
       this.clickRemoveBtn = false;
     } }, () => {
-      this.editItemMoveX = this.getAddItemGridPosition().x;
-      this.editItemMoveY = this.getAddItemGridPosition().y;
+      let addItemGridPosition = this.getAddItemGridPosition();
+      this.editItemMoveX = addItemGridPosition.x;
+      this.editItemMoveY = addItemGridPosition.y;
     });
-  }
-
-  // get columnsTemplate
-  customColumnsTemplate(): string {
-    let fr: string = '1fr 1fr 1fr 1fr';
-    if (this.imageText) {
-      fr = '1fr 1fr 1fr';
-    }
-    return fr;
   }
 
   getNewData(data: GridObjectSortComponentItem[], state: boolean, startIndex: number): GridObjectSortComponentItem[] {
     return data.map((val, index) => {
       val.selected = state;
       val.order = startIndex + index;
+      val.visibility = Visibility.Visible;
       return val;
     });
   }
@@ -325,11 +424,20 @@ export struct GridObjectSortComponent {
     return blockWidth;
   }
 
+  calcGridHeight() {
+    this.editGridHeight = this.getGridHeight(this.selected, 'edit');
+    this.addGridHeight = this.getGridHeight(this.unSelected);
+  }
 
   // calculated altitude
   getGridHeight(data: GridObjectSortComponentItem[], state?: string): number {
     let height: number = 0;
     let selectLen: number = data.length;
+    data.forEach(item => {
+      if (item.visibility === Visibility.Hidden) {
+        selectLen = selectLen - 1;
+      }
+    });
     let addRow: number = 0;
     let lastColumn: boolean = selectLen % this.colNum === 0;
     if (this.clickAddBtn && lastColumn) {
@@ -348,16 +456,20 @@ export struct GridObjectSortComponent {
     }
     return height;
   }
+
   // Display area icon in image_text mode
   imageTextRemoveIcon(select: GridObjectSortComponentItem): Resource {
     const clickRemoveIcon: boolean = this.clickRemoveBtn && this.content.id === select.id;
-    const icon = clickRemoveIcon ? $r("sys.media.ohos_ic_public_add_norm_filled") : $r("sys.media.ohos_ic_public_remove_filled");
+    const icon = clickRemoveIcon ?
+      $r('sys.media.ohos_ic_public_add_norm_filled') : $r('sys.media.ohos_ic_public_remove_filled');
     return icon;
   }
+
   // Adding a Region Icon in image_text Mode
   imageTextAddIcon(select: GridObjectSortComponentItem): Resource {
     const clickAddIcon: boolean = this.clickAddBtn && this.content.id === select.id && this.gridComState;
-    const icon = clickAddIcon ? $r("sys.media.ohos_ic_public_remove_filled") : $r("sys.media.ohos_ic_public_add_norm_filled");
+    const icon = clickAddIcon ?
+      $r('sys.media.ohos_ic_public_remove_filled') : $r('sys.media.ohos_ic_public_add_norm_filled');
     return icon;
   }
   // Displaying and hiding area icons in image_text mode
@@ -373,14 +485,27 @@ export struct GridObjectSortComponent {
     let y: number = 0;
     const gridCol: number = this.colNum;
     const lastCol: number = Math.trunc(index % gridCol);
-    if (index >= this.insertIndex) {
-      // item  newline
-      if (lastCol === gridCol - 1) {
-        x = x - this.blockWidth * (gridCol - 1);
-        y = y + this.blockHeight;
-      } else {
-        // right move
-        x = x + this.blockWidth;
+    if (index >= this.dragContentIndex) {
+      if (index <= this.insertIndex && index !== this.dragContentIndex) {
+        // item  newline
+        if (lastCol === 0) {
+          x = x + this.blockWidth * (gridCol - 1);
+          y = y - this.blockHeight;
+        } else {
+          // left move
+          x = x - this.blockWidth;
+        }
+      }
+    } else {
+      if (index >= this.insertIndex) {
+        // item  newline
+        if (lastCol === gridCol - 1) {
+          x = x - this.blockWidth * (gridCol - 1);
+          y = y + this.blockHeight;
+        } else {
+          // right move
+          x = x + this.blockWidth;
+        }
       }
     }
     if (!this.isStartDrag) {
@@ -400,15 +525,18 @@ export struct GridObjectSortComponent {
     const bool: boolean = this.imageText;
     let xNew: number = 0;
     if (removeCol === 0) {
-      xNew = bool ? -this.blockWidth * 2 : -this.blockWidth * 3;
+      xNew = bool || (this.fontSizeScale && this.fontSizeScale > 1) ? -this.blockWidth * 2 : -this.blockWidth * 3;
     } else {
       xNew = -this.blockWidth * (removeCol - 1);
     }
-    const subTitleHeight: number = SUBTITLE_HEIGHT;
+    let subTitleHeight: number = SUBTITLE_HEIGHT;
     let yNew: number = 0;
     const removeNumY: number = totalRows - currentLine;
     const minusLine: number = len % col;
     const line: number = minusLine === 1 ? removeNumY : removeNumY + 1;
+    if (this.fontSizeScale && this.fontSizeScale > 1) {
+      subTitleHeight = this.subTitleHeight;
+    }
     yNew = line * this.blockHeight + subTitleHeight;
     return {
       x: xNew,
@@ -449,12 +577,15 @@ export struct GridObjectSortComponent {
     let yNew: number = 0;
     let itemHeight: number = 0;
     let removeRow: number = Math.trunc(removeIndex / this.colNum);
-    const subTitleHeight: number = SUBTITLE_HEIGHT;
+    let subTitleHeight: number = SUBTITLE_HEIGHT;
     const textShowAreaEditItem: boolean = !this.imageText && this.gridComState && removeIndex > 3;
     if (textShowAreaEditItem) {
       itemHeight = (removeRow + 1) * (this.blockHeight - 8) + 8;
     } else {
       itemHeight = (removeRow + 1) * this.blockHeight;
+    }
+    if (this.fontSizeScale && this.fontSizeScale > 1) {
+      subTitleHeight = this.subTitleHeight;
     }
     yNew = itemHeight + subTitleHeight;
     return {
@@ -496,9 +627,10 @@ export struct GridObjectSortComponent {
   getShowAreaItemTranslate(index: number): PositionXY {
     // Position when dragging
     if (this.isStartDrag) {
+      let coodXY = this.getCoodXY(index);
       return {
-        x: this.getCoodXY(index).x,
-        y: this.getCoodXY(index).y
+        x: coodXY.x,
+        y: coodXY.y
       };
     }
 
@@ -512,9 +644,10 @@ export struct GridObjectSortComponent {
 
     // Filling position
     if (!this.isStartDrag && index !== this.selectedIndex && this.clickRemoveBtn) {
+      let coveringGridPosition = this.getCoveringGridPosition(index);
       return {
-        x: this.getCoveringGridPosition(index).x,
-        y: this.getCoveringGridPosition(index).y
+        x: coveringGridPosition.x,
+        y: coveringGridPosition.y
       };
     }
 
@@ -523,27 +656,29 @@ export struct GridObjectSortComponent {
 
   // Add area movement function
   getAddAreaItemTranslate(index: number): PositionXY {
-      // When an item is removed, the added area is moved rightward.
-      if (this.clickRemoveBtn) {
-        return {
-          x: this.getAddItemRightMove(index).x,
-          y: this.getAddItemRightMove(index).y
-        };
-      }
+    // When an item is removed, the added area is moved rightward.
+    if (this.clickRemoveBtn) {
+      let addItemRightMove = this.getAddItemRightMove(index);
+      return {
+        x: addItemRightMove.x,
+        y: addItemRightMove.y
+      };
+    }
 
     // Move the position when adding an item.
     if (!this.clickRemoveBtn && index === this.unSelectedIndex) {
-        return {
-          x: this.addItemMoveX,
-          y: -this.addItemMoveY
-        };
+      return {
+        x: this.addItemMoveX,
+        y: -this.addItemMoveY
+      };
     }
 
     // Filling position when adding
     if (!this.clickRemoveBtn && index !== this.unSelectedIndex && this.clickAddBtn) {
+      let coveringGridPositionBottom = this.getCoveringGridPositionBottom(index);
       return {
-        x: this.getCoveringGridPositionBottom(index).x,
-        y: this.getCoveringGridPositionBottom(index).y
+        x: coveringGridPositionBottom.x,
+        y: coveringGridPositionBottom.y
       };
     }
 
@@ -551,25 +686,26 @@ export struct GridObjectSortComponent {
   }
 
   @Builder
-  PixelMapBuilder() {
+  PixelMapBuilder(url: ResourceStr | undefined, text: ResourceStr) {
     Stack({ alignContent: Alignment.Center }) {
       if (this.imageText) {
         Column() {
-          Image(this.content.url)
+          Image(url)
             .draggable(false)
             .height(this.options.imageSize || IMAGE_DEFAULT)
             .width((this.options.imageSize || IMAGE_DEFAULT))
-          Text(this.content.text)
+          Text(text)
             .textAlign(TextAlign.Center)
             .fontSize($r('sys.float.ohos_id_text_size_button3'))
             .margin({ top: 2 })
-            .maxLines(1)
+            .maxLines(TEXT_MAX_LINES)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
-            .textAlign(TextAlign.Center)
+            .minFontScale(MIN_FONT_SCALE)
+            .maxFontScale(this.fontSizeScale)
 
-          Image($r("sys.media.ohos_ic_public_remove_filled"))
+          Image($r('sys.media.ohos_ic_public_remove_filled'))
             .draggable(false)
-            .fillColor($r("sys.color.ohos_id_color_secondary"))
+            .fillColor($r('sys.color.ohos_id_color_secondary'))
             .width(ICON_SIZE)
             .height(ICON_SIZE)
             .position({
@@ -587,15 +723,17 @@ export struct GridObjectSortComponent {
         .scale({ x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo })
       } else {
         Row() {
-          Text(this.content.text)
+          Text(text)
             .fontColor($r('sys.color.ohos_id_color_text_primary'))
             .fontSize($r('sys.float.ohos_id_text_size_button3'))
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .textAlign(TextAlign.Center)
-            .maxLines(1)
-          Image($r("sys.media.ohos_ic_public_remove_filled"))
+            .maxLines(TEXT_MAX_LINES)
+            .minFontScale(MIN_FONT_SCALE)
+            .maxFontScale(this.fontSizeScale)
+          Image($r('sys.media.ohos_ic_public_remove_filled'))
             .draggable(false)
-            .fillColor($r("sys.color.ohos_id_color_secondary"))
+            .fillColor($r('sys.color.ohos_id_color_secondary'))
             .width(ICON_SIZE)
             .height(ICON_SIZE)
             .position({
@@ -613,7 +751,7 @@ export struct GridObjectSortComponent {
         .justifyContent(FlexAlign.Center)
         .backgroundColor($r('sys.color.ohos_id_color_button_normal'))
         .width(this.textItemEditWidth)
-        .height(28)
+        .height(this.textItemEditHeight)
       }
     }
     .clip(false)
@@ -655,14 +793,19 @@ export struct GridObjectSortComponent {
           .textAlign(TextAlign.Center)
           .fontSize($r('sys.float.ohos_id_text_size_button3'))
           .margin({ top: 2 })
-          .maxLines(1)
+          .maxLines(TEXT_MAX_LINES)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .textAlign(TextAlign.Center)
+          .minFontScale(MIN_FONT_SCALE)
+          .maxFontScale(this.fontSizeScale)
+          .padding({
+            top: PADDING_EIGHT,
+            bottom: PADDING_EIGHT
+          })
 
         Image(this.imageTextAddIcon(select))
           .draggable(false)
-          .visibility(type === "add" ? this.imageTextAddIconVisible(select) : Visibility.Hidden)
-          .fillColor($r("sys.color.ohos_id_color_secondary"))
+          .visibility(type === 'add' ? this.imageTextAddIconVisible(select) : Visibility.Hidden)
+          .fillColor($r('sys.color.ohos_id_color_secondary'))
           .width(ICON_SIZE)
           .height(ICON_SIZE)
           .position({
@@ -681,6 +824,7 @@ export struct GridObjectSortComponent {
             this.unSelectedIndex = index;
             this.arrayUnSelectIsChange = 1;
             this.clickAddBtn = true;
+            this.calcGridHeight();
             animateTo({
               curve: REMOVE_ADD_SPRING,
               onFinish: () => {
@@ -689,6 +833,7 @@ export struct GridObjectSortComponent {
                   this.scaleIcon = 1;
                   this.selected.push(select);
                   this.unSelected.splice(index, 1);
+                  this.calcGridHeight();
                   this.addItemMoveX = 0;
                   this.addItemMoveY = 0;
                   if (!this.gridComState) {
@@ -705,8 +850,8 @@ export struct GridObjectSortComponent {
 
         Image(this.imageTextRemoveIcon(select))
           .draggable(false)
-          .fillColor($r("sys.color.ohos_id_color_secondary"))
-          .visibility(type === "delete" && this.gridComState ? Visibility.Visible : Visibility.Hidden)
+          .fillColor($r('sys.color.ohos_id_color_secondary'))
+          .visibility(type === 'delete' && this.gridComState ? Visibility.Visible : Visibility.Hidden)
           .width(ICON_SIZE)
           .height(ICON_SIZE)
           .position({
@@ -723,7 +868,7 @@ export struct GridObjectSortComponent {
       .borderRadius((this.isTouchDown && select.id === this.content.id) ||
         select.id === this.hoverId ? this.touchBorderRadius : 0)
       .backgroundColor(
-          this.isTouchDown && select.id === this.content.id
+        this.isTouchDown && select.id === this.content.id
           ? this.touchDown : select.id === this.hoverId ? this.hoverBackgroundColor : ''
       )
       .scale(select.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {})
@@ -732,27 +877,24 @@ export struct GridObjectSortComponent {
     .width('100%')
   }
 
-
   // 文本模式拖动排序区域item
   @Builder
   TextBlockBuilder(select: GridObjectSortComponentItem) {
     Stack() {
       Row() {
-
       }
       .borderRadius(50)
       .width(this.clickRemoveBtn && select.id === this.content.id ? this.textItemEditWidth + 8 : this.textItemEditWidth)
       .translate(this.gridComState ? this.clickRemoveBtn &&
-        select.id === this.content.id ? { x: 0 } : { x: -4 } : { x: 0})
+        select.id === this.content.id ? { x: 0 } : { x: -4 } : { x: 0 })
       .height('100%')
       .animation(!this.firstIn ? {
-                                   duration: ENTER_EXIT_ICON_DURATION,
-                                   curve: this.gridComState ? DRAG_SPRING : COMMON_BEZIER
-                                 } : { duration: 0 })
+        duration: ENTER_EXIT_ICON_DURATION,
+        curve: this.gridComState ? DRAG_SPRING : COMMON_BEZIER
+      } : { duration: 0 })
       .backgroundColor($r('sys.color.ohos_id_color_button_normal'))
-
       Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
-        Image($r("sys.media.ohos_ic_public_add"))
+        Image($r('sys.media.ohos_ic_public_add'))
           .width(12)
           .height(12)
           .draggable(false)
@@ -764,17 +906,17 @@ export struct GridObjectSortComponent {
             duration: ENTER_EXIT_ICON_DURATION,
             curve: COMMON_BEZIER
           })
-
         Text(select.text)
           .fontColor($r('sys.color.ohos_id_color_text_primary'))
           .fontSize($r('sys.float.ohos_id_text_size_button3'))
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .textAlign(TextAlign.Center)
-          .maxLines(1)
-          .constraintSize(this.clickRemoveBtn && select.id === this.content.id ? { maxWidth: 26 } : {})
-        Image($r("sys.media.ohos_ic_public_remove_filled"))
+          .maxLines(TEXT_MAX_LINES)
+          .minFontScale(MIN_FONT_SCALE)
+          .maxFontScale(this.fontSizeScale)
+        Image($r('sys.media.ohos_ic_public_remove_filled'))
           .draggable(false)
-          .fillColor($r("sys.color.ohos_id_color_secondary"))
+          .fillColor($r('sys.color.ohos_id_color_secondary'))
           .width(ICON_SIZE)
           .transition({ type: TransitionType.All, scale: { x: 0, y: 0, centerX: '50%' } })
           .scale(select.id === this.content.id ? { x: this.scaleIcon, y: this.scaleIcon } : {})
@@ -795,25 +937,25 @@ export struct GridObjectSortComponent {
         right: TEXT_PADDING_LEFT_RIGHT,
       })
       .backgroundColor(
-          this.isTouchDown && select.id === this.content.id ? this.touchDown
-                                                            : select.id === this.hoverId ? this.hoverBackgroundColor
-                                                                                         : '')
+        this.isTouchDown && select.id === this.content.id ? this.touchDown
+          : select.id === this.hoverId ? this.hoverBackgroundColor
+          : '')
       .width(this.clickRemoveBtn && select.id === this.content.id ? this.textItemEditWidth + 8 : this.textItemEditWidth)
       .translate(this.gridComState ? this.clickRemoveBtn && select.id === this.content.id ? { x: 0 } : { x: -4 } : {
-                                                                                                                     x: 0
-                                                                                                                   })
+        x: 0
+      })
       .height('100%')
       .animation(!this.firstIn ? {
-                                   duration: ENTER_EXIT_ICON_DURATION,
-                                   curve: this.gridComState ? DRAG_SPRING : COMMON_BEZIER
-                                 } : { duration: 0 })
+        duration: ENTER_EXIT_ICON_DURATION,
+        curve: this.gridComState ? DRAG_SPRING : COMMON_BEZIER
+      } : { duration: 0 })
     }
     .scale(select.id === this.content.id ? { x: this.longScaleOnePointTwo, y: this.longScaleOnePointTwo } : {})
     .padding({
       left: MARGIN_EIGHT,
       right: MARGIN_EIGHT
     })
-    .height(28)
+    .height(this.textItemEditHeight)
   }
 
   // 文本模式添加区域item
@@ -821,7 +963,6 @@ export struct GridObjectSortComponent {
   TextBlockAddItemBuilder(select: GridObjectSortComponentItem) {
     Stack() {
       Row() {
-
       }
       .borderRadius(50)
       .height('100%')
@@ -834,7 +975,7 @@ export struct GridObjectSortComponent {
       .backgroundColor($r('sys.color.ohos_id_color_button_normal'))
 
       Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
-        Image($r("sys.media.ohos_ic_public_add"))
+        Image($r('sys.media.ohos_ic_public_add'))
           .draggable(false)
           .fillColor($r('sys.color.ohos_id_color_text_secondary'))
           .width(12)
@@ -851,16 +992,15 @@ export struct GridObjectSortComponent {
           .fontSize($r('sys.float.ohos_id_text_size_button3'))
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .textAlign(TextAlign.Start)
-          .maxLines(1)
-          .constraintSize({
-            maxWidth: 26
-          })
+          .maxLines(TEXT_MAX_LINES)
+          .minFontScale(MIN_FONT_SCALE)
+          .maxFontScale(this.fontSizeScale)
 
         if (this.gridComState && this.addIconShow && select.id === this.content.id) {
-          Image($r("sys.media.ohos_ic_public_remove_filled"))
+          Image($r('sys.media.ohos_ic_public_remove_filled'))
             .draggable(false)
             .transition({ type: TransitionType.All, scale: { x: 0, y: 0 } })
-            .fillColor($r("sys.color.ohos_id_color_secondary"))
+            .fillColor($r('sys.color.ohos_id_color_secondary'))
             .width(ICON_SIZE)
             .translate(this.gridComState ? { x: -MARGIN_EIGHT } : {})
             .position({
@@ -875,7 +1015,7 @@ export struct GridObjectSortComponent {
         right: TEXT_PADDING_LEFT_RIGHT,
       })
       .backgroundColor(this.isTouchDown && select.id === this.content.id ? this.touchDown
-                                                                         : select.id === this.hoverId ? this.hoverBackgroundColor : '')
+        : select.id === this.hoverId ? this.hoverBackgroundColor : '')
       .width(this.addIconShow && select.id === this.content.id ? this.textItemEditWidth : '100%')
       .translate(this.addIconShow && select.id === this.content.id && this.gridComState ? { x: -4 } : { x: 0 })
       .animation({
@@ -889,7 +1029,7 @@ export struct GridObjectSortComponent {
       left: MARGIN_EIGHT,
       right: MARGIN_EIGHT
     })
-    .height(28)
+    .height(this.textItemEditHeight)
   }
 
   @Builder
@@ -899,7 +1039,7 @@ export struct GridObjectSortComponent {
         GridItem() {
           Stack() {
             if (this.imageText) {
-              this.ImageTextBuilder(item, "add");
+              this.ImageTextBuilder(item, 'add');
             } else {
               this.TextBlockAddItemBuilder(item);
             }
@@ -945,12 +1085,14 @@ export struct GridObjectSortComponent {
               this.unSelectedIndex = index;
               this.clickAddBtn = true;
               this.arrayUnSelectIsChange = 1;
+              this.calcGridHeight();
               animateTo({ curve: REMOVE_ADD_SPRING, onFinish: () => {
                 if (!this.selected.some(val => val.id === item.id)) {
                   this.scaleIcon = 1;
                   this.scaleAddIcon = 0;
                   this.selected.push(item);
                   this.unSelected.splice(index, 1);
+                  this.calcGridHeight();
                   this.arrayUnSelectIsChange = 2;
                   this.addItemMoveX = 0;
                   this.addItemMoveY = 0;
@@ -990,6 +1132,7 @@ export struct GridObjectSortComponent {
                     this.longScaleOnePointTwo = 1.05;
                   })
                 }
+                this.calcGridHeight();
               })
               .onActionEnd(() => {
                 this.addAreaLongPressGesture = false;
@@ -1014,13 +1157,13 @@ export struct GridObjectSortComponent {
       duration: ENTER_EXIT_ICON_DURATION,
       curve: this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER,
     })
-    .columnsTemplate(this.customColumnsTemplate())
+    .columnsTemplate(this.customColumns)
     .padding({
       left: ROW_GAP,
       right: ROW_GAP,
     })
     .clip(false)
-    .height(this.getGridHeight(this.unSelected))
+    .height(this.addGridHeight)
   }
 
   @Builder
@@ -1073,6 +1216,7 @@ export struct GridObjectSortComponent {
           .animation({
             curve: this.isStartDrag ? DRAG_SPRING : index === this.selectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING,
           })
+          .visibility(select.visibility)
         }, (item: GridObjectSortComponentItem) => item.id.toString())
       }
       .parallelGesture(
@@ -1110,47 +1254,72 @@ export struct GridObjectSortComponent {
                 }
               }
             }
+            this.calcGridHeight();
           })
       )
       .clip(false)
       .editMode(this.gridComState)
-      .columnsTemplate(this.customColumnsTemplate())
+      .columnsTemplate(this.customColumns)
       .padding({
         left: ROW_GAP,
         right: ROW_GAP
       })
-      .height(this.getGridHeight(this.selected, 'edit'))
+      .height(this.editGridHeight)
       .animation(!this.firstIn ? {
         duration: ENTER_EXIT_ICON_DURATION,
         curve: this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER,
       } : { duration: 0 })
       .onItemDragStart((event: ItemDragInfo, itemIndex: number) => {
+        this.itemIndex = itemIndex;
         this.selectedIndex = -1;
         if (!this.gridComState) {
           return;
         }
         this.isStartDrag = true;
-        this.editGridDataLength = this.selected.length + 1;
-        this.selected.splice(itemIndex, 1);
-        return this.PixelMapBuilder();
+        this.insertIndex = itemIndex;
+        this.dragContent = this.selected[itemIndex];
+        this.dragContentIndex = itemIndex;
+        return this.PixelMapBuilder(this.dragContent?.url, this.dragContent?.text);
       })
       .onItemDrop((event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => {
-        if (!this.gridComState) {
-          return;
-        }
-        this.vibrationDone = false;
-        animateTo({
-          duration: ENTER_EXIT_ICON_DURATION,
-          curve: LONG_TOUCH_SCALE
-        }, () => {
-          this.longScaleOnePointTwo = 1;
-        })
-        this.isStartDrag = false;
-        this.selected.splice(insertIndex === -1 ? itemIndex : insertIndex, 0, this.content);
+        this.insertItem(itemIndex, insertIndex);
       })
       .onItemDragMove((event: ItemDragInfo, itemIndex: number, insertIndex: number) =>
-        this.onDragMoveEvent(event, itemIndex, insertIndex))
+      this.onDragMoveEvent(event, itemIndex, insertIndex))
     }
+  }
+
+  insertItem(itemIndex: number, insertIndex: number) {
+    if (!this.gridComState) {
+      return;
+    }
+    this.vibrationDone = false;
+    animateTo({
+      duration: ENTER_EXIT_ICON_DURATION,
+      curve: LONG_TOUCH_SCALE
+    }, () => {
+      this.longScaleOnePointTwo = 1;
+    })
+    this.isStartDrag = false;
+    if (insertIndex !== -1) {
+      this.selected.splice(itemIndex, 1);
+      this.selected.splice(insertIndex, 0, this.dragContent);
+    }
+    this.dragContent.visibility = Visibility.Visible;
+    this.calcGridHeight();
+  }
+
+  calcAreaInfo() {
+    // 重新获取字体倍数，并重新计算列数
+    this.calcColNum();
+    this.blockWidth = this.getBlockWidth(); // gridItem width
+    this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16;
+    this.imageItemWidth = this.blockWidth - 16; // image Width
+    this.calcTextItemEditHeight();
+    this.blockHeight = this.imageText ? this.imageItemWidth + EDIT_BLOCK_TEXT_ITEM_SAFE_MARGIN : this.gridComState ?
+      this.textItemEditHeight + EDIT_BLOCK_TEXT_ITEM_SAFE_MARGIN :
+      this.textItemEditHeight + DEFAULT_BLOCK_TEXT_ITEM_SAFE_MARGIN;
+    this.calcGridHeight();
   }
 
   build() {
@@ -1182,15 +1351,15 @@ export struct GridObjectSortComponent {
               curve: this.imageText ? REMOVE_ADD_SPRING : COMMON_BEZIER,
             })
             .margin({ bottom: MARGIN_EIGHT })
+            .onAreaChange((oldValue: Area, newValue: Area) => {
+              this.subTitleHeight = Number(newValue.height);
+            })
           this.AddTagBuilder()
         }
         .onAreaChange((oldValue: Area, newValue: Area) => {
           this.areaWidth = Number(newValue.width);
-          this.blockWidth = this.getBlockWidth(); // gridItem width
-          this.textItemEditWidth = this.gridComState ? this.blockWidth - 24 : this.blockWidth - 16;
-          this.imageItemWidth = this.blockWidth - 16; // image Width
-          this.blockHeight = this.imageText ? this.imageItemWidth + 16 : this.gridComState ? 44 : BLOCK_TEXT_HEIGHT;
-        }).width("100%")
+          this.calcAreaInfo();
+        }).width('100%')
       }
     }
     .width('100%')
