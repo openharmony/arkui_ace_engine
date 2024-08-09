@@ -181,6 +181,8 @@ export struct SubHeader {
     end: LengthMetrics.resource($r('sys.float.margin_right')),
   };
   @Provide subHeaderTheme: SubHeaderTheme = new SubHeaderTheme();
+  @State isFollowingSystemFontScale: boolean = false;
+  @State appMaxFontScale: number = 3.2;
   constraintWidth: number = 0;
   paddingLeft: number = 2;
 
@@ -245,9 +247,27 @@ export struct SubHeader {
     })
   }
 
+  updateFontScale(): number {
+    try {
+      let uiContext: UIContext = this.getUIContext();
+      let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+      if(!this.isFollowingSystemFontScale) {
+        return 1;
+      }
+      return Math.min(systemFontScale, this.appMaxFontScale);
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${code}, message: ${message}`);
+      return 1;
+    }
+  }
+
   async aboutToAppear(): Promise<void> {
-    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    this.fontSize = context.config?.fontSizeScale ?? 1;
+    let uiContext: UIContext = this.getUIContext();
+    this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale();
+    this.appMaxFontScale = uiContext.getMaxFontScale();
+    this.fontSize = this.updateFontScale();
     if (this.isSuitableAging()) {
       this.ageing = true;
       this.subHeaderModifier.isAgeing = this.ageing;
@@ -334,7 +354,7 @@ export struct SubHeader {
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
     let result: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
     let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    this.fontSize = context.config?.fontSizeScale ?? 1;
+    this.fontSize = this.updateFontScale();
     if (this.isSuitableAging()) {
       this.ageing = true;
       this.subHeaderModifier.isAgeing = this.ageing;
