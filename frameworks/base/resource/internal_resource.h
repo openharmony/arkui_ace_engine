@@ -97,6 +97,8 @@ public:
         TRANSLATE_C2E_SVG,
         SHARE_SVG,
         SIDE_BAR,
+        SIDE_BAR_OPEN,
+        SIDE_BAR_CLOSE,
         SPINNER,
         INPUT_SEARCH_SVG,
         APP_BAR_BACK_SVG,

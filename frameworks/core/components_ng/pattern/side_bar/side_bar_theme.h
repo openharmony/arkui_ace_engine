@@ -63,6 +63,34 @@ public:
                 = sideBarPattern->GetAttr<std::string>("section_unfocus_effect_enable", "0");
             theme->sideBarUnfocusEffectEnable_ = StringUtils::StringToInt(sideBarUnfocusEffectEnable);
             theme->sideBarUnfocusColor_ = sideBarPattern->GetAttr<Color>("color_panel_bg", Color::TRANSPARENT);
+
+            theme->controlButtonIconColor_ = sideBarPattern->GetAttr<Color>("dialog_icon_primary", Color::TRANSPARENT);
+            theme->controlButtonBackboardColor_ =
+                sideBarPattern->GetAttr<Color>("control_button_back_board_color", Color::TRANSPARENT);
+            theme->controlButtonBackboardColorHover_ =
+                sideBarPattern->GetAttr<Color>("control_button_back_board_color_hover", Color::TRANSPARENT);
+            theme->controlButtonBackboardColorPress_ =
+                sideBarPattern->GetAttr<Color>("control_button_back_board_color_press", Color::TRANSPARENT);
+            theme->controlButtonBackboardStrokeColor_ =
+                sideBarPattern->GetAttr<Color>("control_button_back_board_stroke_color", Color::TRANSPARENT);
+            theme->controlButtonBackboardRadius_ =
+                sideBarPattern->GetAttr<Dimension>("dialog_radius_level10", 20.0_vp);
+            theme->controlButtonMarginLeftSmall_ =
+                sideBarPattern->GetAttr<Dimension>("control_button_margin_left_small", 0.0_vp);
+            theme->controlButtonMarginLeftMiddle_ =
+                sideBarPattern->GetAttr<Dimension>("control_button_margin_left_middle", 0.0_vp);
+            theme->controlButtonMarginLeftLarge_ =
+                sideBarPattern->GetAttr<Dimension>("control_button_margin_left_large", 0.0_vp);
+            theme->breakPointHorizontalSmall_ =
+                sideBarPattern->GetAttr<Dimension>("break_point_horizontal_small", 0.0_vp);
+            theme->breakPointHorizontalMiddle_ =
+                sideBarPattern->GetAttr<Dimension>("break_point_horizontal_middle", 0.0_vp);
+            theme->controlButtonMarginTopSmall_ =
+                sideBarPattern->GetAttr<Dimension>("control_button_margin_top_small", 0.0_vp);
+            theme->controlButtonWidthSmall_ =
+                sideBarPattern->GetAttr<Dimension>("control_button_width_small", 0.0_vp);
+            theme->controlButtonHeightSmall_ =
+                sideBarPattern->GetAttr<Dimension>("control_button_height_small", 0.0_vp);
         }
     };
 
@@ -98,6 +126,76 @@ public:
         return sideBarUnfocusColor_;
     }
 
+    const Color& GetControlButtonIconColor() const
+    {
+        return controlButtonIconColor_;
+    }
+
+    const Color& GetControlButtonBackboardColor() const
+    {
+        return controlButtonBackboardColor_;
+    }
+
+    const Color& GetControlButtonBackboardColorHover() const
+    {
+        return controlButtonBackboardColorHover_;
+    }
+
+    const Color& GetControlButtonBackboardColorPress() const
+    {
+        return controlButtonBackboardColorPress_;
+    }
+
+    const Color& GetControlButtonBackboardStrokeColor() const
+    {
+        return controlButtonBackboardStrokeColor_;
+    }
+
+    const Dimension& GetControlButtonBackboardRadius() const
+    {
+        return controlButtonBackboardRadius_;
+    }
+
+    const Dimension& GetControlButtonMarginLeftSmall() const
+    {
+        return controlButtonMarginLeftSmall_;
+    }
+
+    const Dimension& GetControlButtonMarginLeftMiddle() const
+    {
+        return controlButtonMarginLeftMiddle_;
+    }
+    
+    const Dimension& GetControlButtonMarginLeftLarge() const
+    {
+        return controlButtonMarginLeftLarge_;
+    }
+
+    const Dimension& GetBreakPointHorizontalSmall() const
+    {
+        return breakPointHorizontalSmall_;
+    }
+
+    const Dimension& GetBreakPointHorizontalMiddle() const
+    {
+        return breakPointHorizontalMiddle_;
+    }
+
+    const Dimension& GetControlButtonMarginTopSmall() const
+    {
+        return controlButtonMarginTopSmall_;
+    }
+
+    const Dimension& GetControlButtonWidthSmall() const
+    {
+        return controlButtonWidthSmall_;
+    }
+
+    const Dimension& GetControlButtonHeightSmall() const
+    {
+        return controlButtonHeightSmall_;
+    }
+
 protected:
     SideBarTheme() = default;
 
@@ -108,6 +206,21 @@ private:
     int32_t dividerShadowEnable_ = 0;
     int32_t sideBarUnfocusEffectEnable_ = 0;
     Color sideBarUnfocusColor_ = Color::TRANSPARENT;
+    // version 13
+    Color controlButtonIconColor_ = Color::BLACK;
+    Color controlButtonBackboardColor_ = Color::TRANSPARENT;
+    Color controlButtonBackboardColorHover_ = Color::TRANSPARENT;
+    Color controlButtonBackboardColorPress_ = Color::TRANSPARENT;
+    Color controlButtonBackboardStrokeColor_ = Color::TRANSPARENT;
+    Dimension controlButtonBackboardRadius_ = 0.0_vp;
+    Dimension controlButtonMarginLeftSmall_ = 0.0_vp;
+    Dimension controlButtonMarginLeftMiddle_ = 0.0_vp;
+    Dimension controlButtonMarginLeftLarge_ = 0.0_vp;
+    Dimension breakPointHorizontalSmall_ = 0.0_vp;
+    Dimension breakPointHorizontalMiddle_ = 0.0_vp;
+    Dimension controlButtonMarginTopSmall_ = 0.0_vp;
+    Dimension controlButtonWidthSmall_ = 0.0_vp;
+    Dimension controlButtonHeightSmall_ = 0.0_vp;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SIDE_BAR_SIDE_BAR_THEME_H

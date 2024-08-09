@@ -50,6 +50,7 @@ public:
     void SetDividerEndMargin(const Dimension& endMargin) override;
     void SetOnChangeEvent(std::function<void(const bool)>&& onChangeEvent) override;
     void SetMinContentWidth(const Dimension& minContentWidth) override;
+    void ResetControlButton() override;
     static void SetSideBarWidth(FrameNode* frameNode, const Dimension& sideBarWidth);
     static void SetMinSideBarWidth(FrameNode* frameNode, const Dimension& minSideBarWidth);
     static void SetControlButtonWidth(FrameNode* frameNode, const Dimension& width);

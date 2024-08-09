@@ -24,6 +24,8 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
+#include "core/components_ng/pattern/side_bar/side_bar_theme.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/side_bar_container_model_impl.h"
 
@@ -288,11 +290,7 @@ void JSSideBar::JsControlButton(const JSCallbackInfo& info)
     if (info[0]->IsNull() || info[0]->IsUndefined()) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             // controlButton icon set default style and position when input illegal value
-            SideBarContainerModel::GetInstance()->SetControlButtonWidth(DEFAULT_CONTROL_BUTTON_WIDTH);
-            SideBarContainerModel::GetInstance()->SetControlButtonHeight(DEFAULT_CONTROL_BUTTON_HEIGHT);
-            SideBarContainerModel::GetInstance()->ResetControlButtonLeft();
-            SideBarContainerModel::GetInstance()->SetControlButtonTop(DEFAULT_CONTROL_BUTTON_TOP);
-            SideBarContainerModel::GetInstance()->ResetControlButtonIconInfo();
+            SideBarContainerModel::GetInstance()->ResetControlButton();
         }
         return;
     }
@@ -430,13 +428,25 @@ void JSSideBar::ParseControlButtonNG(JSRef<JSObject> value)
     JSRef<JSVal> left = value->GetProperty("left");
     JSRef<JSVal> top = value->GetProperty("top");
 
-    auto controlButtonWidth = DEFAULT_CONTROL_BUTTON_WIDTH;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sideBarTheme = pipeline->GetTheme<NG::SideBarTheme>();
+    CHECK_NULL_VOID(sideBarTheme);
+    auto defaultControlButtonWidthSmall = sideBarTheme->GetControlButtonWidthSmall();
+    auto defaultControlButtonHeightSmall = sideBarTheme->GetControlButtonHeightSmall();
+    auto controlButtonTopSmall = sideBarTheme->GetControlButtonMarginTopSmall();
+
+    auto controlButtonWidth =
+        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN) ?
+        defaultControlButtonWidthSmall : DEFAULT_CONTROL_BUTTON_WIDTH;
     if (width->IsNumber() && GreatOrEqual(width->ToNumber<double>(), 0.0)) {
         controlButtonWidth = CalcDimension(width->ToNumber<double>(), DimensionUnit::VP);
     }
     SideBarContainerModel::GetInstance()->SetControlButtonWidth(controlButtonWidth);
 
-    auto controlButtonHeight = DEFAULT_CONTROL_BUTTON_HEIGHT;
+    auto controlButtonHeight =
+        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN) ?
+        defaultControlButtonHeightSmall : DEFAULT_CONTROL_BUTTON_HEIGHT;
     if (height->IsNumber() && GreatOrEqual(height->ToNumber<double>(), 0.0)) {
         controlButtonHeight = CalcDimension(height->ToNumber<double>(), DimensionUnit::VP);
     }
@@ -449,7 +459,9 @@ void JSSideBar::ParseControlButtonNG(JSRef<JSObject> value)
         SideBarContainerModel::GetInstance()->ResetControlButtonLeft();
     }
 
-    auto controlButtonTop = DEFAULT_CONTROL_BUTTON_TOP;
+    auto controlButtonTop =
+        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN) ?
+        controlButtonTopSmall : DEFAULT_CONTROL_BUTTON_TOP;
     if (top->IsNumber() && GreatOrEqual(top->ToNumber<double>(), 0.0)) {
         controlButtonTop = CalcDimension(top->ToNumber<double>(), DimensionUnit::VP);
     }

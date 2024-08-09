@@ -388,4 +388,25 @@ void SideBarContainerModelNG::ResetControlButtonIconInfo(FrameNode* frameNode)
     ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
         SideBarContainerLayoutProperty, ControlButtonSwitchingIconInfo, PROPERTY_UPDATE_LAYOUT, frameNode);
 }
+
+void SideBarContainerModelNG::ResetControlButton()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sideBarTheme = pipeline->GetTheme<NG::SideBarTheme>();
+    CHECK_NULL_VOID(sideBarTheme);
+    auto defaultControlButtonWidthSmall = sideBarTheme->GetControlButtonWidthSmall();
+    auto defaultControlButtonHeightSmall = sideBarTheme->GetControlButtonHeightSmall();
+    auto controlButtonTopSmall = sideBarTheme->GetControlButtonMarginTopSmall();
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonWidth, defaultControlButtonWidthSmall);
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonHeight, defaultControlButtonHeightSmall);
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonTop, controlButtonTopSmall);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(SideBarContainerLayoutProperty, ControlButtonLeft, PROPERTY_UPDATE_LAYOUT);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(
+        SideBarContainerLayoutProperty, ControlButtonShowIconInfo, PROPERTY_UPDATE_LAYOUT);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(
+        SideBarContainerLayoutProperty, ControlButtonHiddenIconInfo, PROPERTY_UPDATE_LAYOUT);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(
+        SideBarContainerLayoutProperty, ControlButtonSwitchingIconInfo, PROPERTY_UPDATE_LAYOUT);
+}
 } // namespace OHOS::Ace::NG
