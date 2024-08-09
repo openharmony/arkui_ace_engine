@@ -1775,6 +1775,8 @@ HWTEST_F(MenuTestNg, WidthModifiedBySelectTestNg007, TestSize.Level1)
     menuPattern->SetMenuShow();
     auto rollbackPreviewMode = menuPattern->GetPreviewMode();
     menuPattern->SetPreviewMode(MenuPreviewMode::NONE);
+    menuPattern->type_ = MenuType::SELECT_OVERLAY_EXTENSION_MENU;
+    menuPattern->isExtensionMenuShow_ = false;
     menuPattern->ShowMenuAppearAnimation();
     menuPattern->SetPreviewMode(rollbackPreviewMode);
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
@@ -1863,9 +1865,11 @@ HWTEST_F(MenuTestNg, WidthModifiedBySelectTestNg009, TestSize.Level1)
     EXPECT_FALSE(menuPattern->OnDirtyLayoutWrapperSwap(menuWrapperNode, configDirtySwap));
     menuPattern->SetMenuShow();
     auto rollbackPreviewMode = menuPattern->GetPreviewMode();
+    menuPattern->type_ = MenuType::SELECT_OVERLAY_CUSTOM_MENU;
     menuPattern->ShowMenuAppearAnimation();
     menuPattern->SetPreviewMode(rollbackPreviewMode);
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+    EXPECT_FALSE(menuPattern->isExtensionMenuShow_);
 }
 
 /**
