@@ -1332,11 +1332,11 @@ void SearchPattern::HandleBlurEvent()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (isFocusBgColorSet_ && renderContext->GetBackgroundColor().value_or(focusBgColor_) == focusBgColor_) {
+    if (isFocusBgColorSet_ && (renderContext->GetBackgroundColor().value_or(focusBgColor_) == focusBgColor_)) {
         renderContext->UpdateBackgroundColor(searchNormalColor_);
         isFocusBgColorSet_ = false;
     }
-    if (isFocusIconColorSet_ && GetDefaultIconColor(IMAGE_INDEX) == focusIconColor_) {
+    if (isFocusIconColorSet_ && (GetDefaultIconColor(IMAGE_INDEX) == focusIconColor_)) {
         SetSearchIconColor(normalIconColor_);
         isFocusIconColorSet_ = false;
     }
@@ -1347,11 +1347,12 @@ void SearchPattern::HandleBlurEvent()
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->HandleBlurEvent();
-    if (isFocusTextColorSet_ && textFieldLayoutProperty->GetTextColorValue(focusTextColor_) == focusTextColor_) {
+    if (isFocusTextColorSet_ && (textFieldLayoutProperty->GetTextColorValue(focusTextColor_) == focusTextColor_)) {
         textFieldLayoutProperty->UpdateTextColor(normalTextColor_);
         isFocusTextColorSet_ = false;
     }
-    if (isFocusPlaceholderColorSet_ && textFieldLayoutProperty->GetPlaceholderTextColorValue(focusPlaceholderColor_) == focusPlaceholderColor_) {
+    if (isFocusPlaceholderColorSet_ &&
+        (textFieldLayoutProperty->GetPlaceholderTextColorValue(focusPlaceholderColor_) == focusPlaceholderColor_)) {
         textFieldLayoutProperty->UpdatePlaceholderTextColor(normalPlaceholderColor_);
         isFocusPlaceholderColorSet_ = false;
     }
