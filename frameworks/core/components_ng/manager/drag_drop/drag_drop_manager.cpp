@@ -947,6 +947,7 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
     summaryMap_.clear();
     parentHitNodes_.clear();
     dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
+    pipeline->RequestFrame();
 }
 
 void DragDropManager::RequireSummary()
