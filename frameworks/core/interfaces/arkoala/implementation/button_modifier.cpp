@@ -38,12 +38,12 @@ void _setButtonOptions1Impl(Ark_NativePointer node, const Ark_ButtonOptions* opt
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetType(frameNode,(ArkUI_Int32)Converter::ConvertOrDefault(options->type, ButtonType::CAPSULE));
+    ButtonModelNG::SetType(frameNode, (ArkUI_Int32)Converter::ConvertOrDefault(options->type, ButtonType::CAPSULE));
     ButtonModelNG::SetRole(frameNode, Converter::ConvertOrDefault(options->role, ButtonRole::NORMAL));
     ButtonModelNG::SetStateEffect(frameNode, Converter::ConvertOrDefault(options->stateEffect, true));
     ButtonModelNG::SetControlSize(frameNode, Converter::ConvertOrDefault(options->controlSize, ControlSize::NORMAL));
     ButtonModelNG::SetButtonStyle(frameNode, Converter::ConvertOrDefault(options->buttonStyle,
-                                                                            ButtonStyleMode::EMPHASIZE));
+                                                                         ButtonStyleMode::EMPHASIZE));
 }
 void _setButtonOptions2Impl(Ark_NativePointer node, const ResourceStr* label, const Opt_ButtonOptions* options)
 {
@@ -120,7 +120,7 @@ void FontFamilyImpl(Ark_NativePointer node, const Type_ButtonAttribute_fontFamil
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetFontFamily(frameNode,
-                                    Framework::ConvertStrToFontFamilies(Converter::ConvertOrDefault(*value, "")));
+                                 Framework::ConvertStrToFontFamilies(Converter::ConvertOrDefault(*value, "")));
 }
 void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
 {

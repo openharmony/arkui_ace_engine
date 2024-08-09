@@ -80,7 +80,8 @@ namespace OHOS::Ace::NG {
     using FrameNodeCreator = Ark_NodeHandle(Ark_Int32 nodeId);
 
     namespace Bridge {
-        Ark_NodeHandle CreateNode(GENERATED_Ark_NodeType type, Ark_Int32 id, Ark_Int32 flags) {
+        Ark_NodeHandle CreateNode(GENERATED_Ark_NodeType type, Ark_Int32 id, Ark_Int32 flags)
+        {
             if (id == GENERATED_ARKUI_AUTO_GENERATE_NODE_ID) {
                 id = ElementRegister::GetInstance()->MakeUniqueId();
             }

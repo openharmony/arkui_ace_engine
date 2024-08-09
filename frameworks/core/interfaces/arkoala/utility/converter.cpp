@@ -35,24 +35,15 @@ void ParseDimension(const Ark_String &string, Ark_Length *result)
     result->value = value;
 
     DimensionUnit unit;
-    if (suffixPtr[OFFSET_0] == '\0' || (suffixPtr[OFFSET_0] == 'v' && suffixPtr[OFFSET_1] == 'p'))
-    {
+    if (suffixPtr[OFFSET_0] == '\0' || (suffixPtr[OFFSET_0] == 'v' && suffixPtr[OFFSET_1] == 'p')) {
         unit = DimensionUnit::VP;
-    }
-    else if (suffixPtr[OFFSET_0] == '%')
-    {
+    } else if (suffixPtr[OFFSET_0] == '%') {
         unit = DimensionUnit::PERCENT;
-    }
-    else if (suffixPtr[OFFSET_0] == 'p' && suffixPtr[OFFSET_1] == 'x')
-    {
+    } else if (suffixPtr[OFFSET_0] == 'p' && suffixPtr[OFFSET_1] == 'x') {
         unit = DimensionUnit::PX;
-    }
-    else if (suffixPtr[OFFSET_0] == 'l' && suffixPtr[OFFSET_1] == 'p' && suffixPtr[OFFSET_2] == 'x')
-    {
+    } else if (suffixPtr[OFFSET_0] == 'l' && suffixPtr[OFFSET_1] == 'p' && suffixPtr[OFFSET_2] == 'x') {
         unit = DimensionUnit::LPX;
-    }
-    else if (suffixPtr[OFFSET_0] == 'f' && suffixPtr[OFFSET_1] == 'p')
-    {
+    } else if (suffixPtr[OFFSET_0] == 'f' && suffixPtr[OFFSET_1] == 'p') {
         unit = DimensionUnit::FP;
     } else {
         unit = DimensionUnit::NONE;

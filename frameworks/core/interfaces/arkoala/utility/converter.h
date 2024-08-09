@@ -34,8 +34,7 @@
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/utility/generated/converter_generated.h"
 
-namespace OHOS::Ace::NG::Converter
-{
+namespace OHOS::Ace::NG::Converter {
     template<typename To, typename From>
     To Convert(const From& src) = delete;
 
